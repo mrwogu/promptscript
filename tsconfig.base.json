@@ -1,21 +1,31 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
-    "composite": true,
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "importHelpers": true,
-    "isolatedModules": true,
-    "lib": ["es2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "noEmitOnError": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "strict": true,
-    "target": "es2022",
-    "customConditions": ["@promptscript/source"]
-  }
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@promptscript/*": ["packages/*/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
 }
