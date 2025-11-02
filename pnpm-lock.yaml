@@ -99,6 +99,18 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
 
+  packages/resolver:
+    dependencies:
+      '@promptscript/core':
+        specifier: workspace:*
+        version: link:../core
+      '@promptscript/parser':
+        specifier: workspace:*
+        version: link:../parser
+      '@swc/helpers':
+        specifier: ~0.5.11
+        version: 0.5.18
+
 packages:
 
   '@babel/code-frame@7.28.6':

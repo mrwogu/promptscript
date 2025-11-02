@@ -1,0 +1,24 @@
+@meta {
+  id: "child"
+  version: "1.0.0"
+}
+
+@inherit ./base
+
+@identity {
+  """
+  You are a specialized child assistant.
+  """
+}
+
+@standards {
+  code: {
+    frameworks: [react]
+  }
+}
+
+@context {
+  """
+  This is additional context from the child.
+  """
+}

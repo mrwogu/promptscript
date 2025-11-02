@@ -1,0 +1,10 @@
+@meta {
+  id: "minimal"
+  version: "1.0.0"
+}
+
+@identity {
+  """
+  A minimal PromptScript file.
+  """
+}

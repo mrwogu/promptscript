@@ -1,0 +1,17 @@
+@meta {
+  id: "base"
+  version: "1.0.0"
+}
+
+@identity {
+  """
+  You are a base assistant.
+  """
+}
+
+@standards {
+  code: {
+    style: "clean"
+    frameworks: [typescript]
+  }
+}

@@ -1,0 +1,11 @@
+@meta {
+  id: "imports-missing"
+}
+
+@use ./nonexistent-import
+
+@identity {
+  """
+  This file uses a missing import.
+  """
+}
