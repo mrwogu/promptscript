@@ -1,0 +1,55 @@
+# Full PromptScript example
+@meta {
+  id: "my-project"
+  version: "1.0.0"
+  tags: [frontend, typescript]
+}
+
+@inherit @company/frontend-team
+
+@use @core/guards/compliance
+@use @core/guards/security as sec
+
+@identity {
+  """
+  Multi-line text content.
+  Preserves formatting.
+  """
+}
+
+@context {
+  project: "Checkout"
+  team: "Payments"
+  
+  """
+  Mixed text content.
+  """
+}
+
+@standards {
+  code: {
+    style: "clean"
+    testing: { required: true, coverage: 80 }
+  }
+}
+
+@restrictions {
+  - "Never expose secrets"
+  - "Always validate input"
+}
+
+@shortcuts {
+  "/review": "Review code"
+  "/test": """
+    Write tests using Vitest.
+  """
+}
+
+@params {
+  strictness: range(1..5) = 3
+  format?: enum("json", "text") = "text"
+}
+
+@extend standards.code {
+  frameworks: [react]
+}

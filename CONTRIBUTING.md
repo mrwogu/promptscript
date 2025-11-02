@@ -29,7 +29,7 @@ By participating, you are expected to uphold this code.
 
 ```bash
 # Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/promptscript.git
+git clone https://github.com/mrwogu/promptscript.git
 cd promptscript
 
 # Install dependencies

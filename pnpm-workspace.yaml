@@ -1,4 +1,11 @@
 packages:
-  - "packages/*"
+  - packages/*
 
 autoInstallPeers: true
+
+ignoredBuiltDependencies:
+  - nx
+
+onlyBuiltDependencies:
+  - '@swc/core'
+  - esbuild
