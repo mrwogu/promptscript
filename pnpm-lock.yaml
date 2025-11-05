@@ -111,6 +111,15 @@ importers:
         specifier: ~0.5.11
         version: 0.5.18
 
+  packages/validator:
+    dependencies:
+      '@promptscript/core':
+        specifier: workspace:*
+        version: link:../core
+      '@swc/helpers':
+        specifier: ~0.5.11
+        version: 0.5.18
+
 packages:
 
   '@babel/code-frame@7.28.6':
