@@ -1,22 +1,3 @@
-const baseConfig = require('../../.eslintrc.json');
+const { createBaseConfig } = require('../../eslint.base.config.cjs');
 
-module.exports = [
-  ...baseConfig,
-  {
-    files: ['**/*.json'],
-    rules: {
-      '@nx/dependency-checks': [
-        'error',
-        {
-          ignoredFiles: [
-            '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
-            '{projectRoot}/vite.config.{js,ts,mjs,mts}',
-          ],
-        },
-      ],
-    },
-    languageOptions: {
-      parser: require('jsonc-eslint-parser'),
-    },
-  },
-];
+module.exports = createBaseConfig(__dirname);

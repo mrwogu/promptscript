@@ -5,6 +5,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
+    "@promptscript/core": "0.0.1",
     "@swc/helpers": "~0.5.11",
     "chevrotain": "^11.1.0"
   }

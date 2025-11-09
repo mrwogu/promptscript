@@ -23,7 +23,6 @@ const BaseVisitor = parser.getBaseCstVisitorConstructor();
 /**
  * CST Visitor that transforms Concrete Syntax Tree to AST.
  */
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class PromptScriptVisitor extends BaseVisitor {
   private filename: string = '<unknown>';
 
@@ -415,9 +414,7 @@ class PromptScriptVisitor extends BaseVisitor {
    * enumType → TypeExpression
    */
   enumType(ctx: any): TypeExpression {
-    const options = ctx.StringLiteral.map((token: IToken) =>
-      this.parseStringLiteral(token.image)
-    );
+    const options = ctx.StringLiteral.map((token: IToken) => this.parseStringLiteral(token.image));
 
     return {
       type: 'TypeExpression',

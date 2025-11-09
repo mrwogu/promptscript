@@ -34,6 +34,7 @@ packages/
 ## Code Standards
 
 ### TypeScript
+
 - Strict mode enabled, no `any` types
 - Use `unknown` with type guards instead of `any`
 - Prefer `interface` for object shapes
@@ -42,17 +43,20 @@ packages/
 - Explicit return types on public functions
 
 ### Naming
+
 - Files: `kebab-case.ts`
 - Classes/Interfaces: `PascalCase`
 - Functions/Variables: `camelCase`
 - Constants: `UPPER_SNAKE_CASE`
 
 ### Error Handling
+
 - Use custom error classes extending `PSError`
 - Always include location information
 - Provide actionable error messages
 
 ### Testing
+
 - Test files: `*.spec.ts` next to source
 - Follow AAA pattern (Arrange, Act, Assert)
 - Target >90% coverage for libraries
@@ -89,6 +93,14 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - Example: `feat(parser): add support for multiline strings`
 
+## Configuration Files
+
+### ESLint
+
+- All package ESLint configs must inherit from `eslint.base.config.cjs` in the root
+- Package configs should use `createBaseConfig(__dirname)` from the base config
+- Do not duplicate ESLint rules in package configs - modify the base config instead
+
 ## Don'ts
 
 - Don't use `any` type
@@ -97,3 +109,4 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Don't skip error handling
 - Don't leave TODO without issue reference
 - Don't create new packages manually - always use Nx generators (`nx g @nx/js:lib`)
+- Don't create custom ESLint rules in package configs - extend the base config
