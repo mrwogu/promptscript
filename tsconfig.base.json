@@ -29,7 +29,8 @@
       "@promptscript/parser": ["packages/parser/src/index.ts"],
       "@promptscript/resolver": ["packages/resolver/src/index.ts"],
       "@promptscript/validator": ["packages/validator/src/index.ts"],
-      "@promptscript/compiler": ["packages/compiler/src/index.ts"]
+      "@promptscript/compiler": ["packages/compiler/src/index.ts"],
+      "@promptscript/formatters": ["packages/formatters/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

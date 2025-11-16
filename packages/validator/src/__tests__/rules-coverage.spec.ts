@@ -1,0 +1,388 @@
+import { describe, it, expect } from 'vitest';
+import type { Program, SourceLocation, Block, Value } from '@promptscript/core';
+import { allRules, getRuleById, getRuleByName } from '../rules';
+import { deprecated } from '../rules/deprecated';
+import { validPath, isValidPath } from '../rules/valid-path';
+import { requiredGuards } from '../rules/required-guards';
+import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types';
+
+/**
+ * Create a minimal test AST.
+ */
+function createTestProgram(overrides: Partial<Program> = {}): Program {
+  const defaultLoc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+  return {
+    type: 'Program',
+    loc: defaultLoc,
+    meta: {
+      type: 'MetaBlock',
+      loc: defaultLoc,
+      fields: {
+        id: 'test-project',
+        version: '1.0.0',
+      },
+    },
+    uses: [],
+    blocks: [],
+    extends: [],
+    ...overrides,
+  };
+}
+
+/**
+ * Create a rule context for testing.
+ */
+function createRuleContext(
+  ast: Program,
+  config: ValidatorConfig = {}
+): { ctx: RuleContext; messages: ValidationMessage[] } {
+  const messages: ValidationMessage[] = [];
+  const ctx: RuleContext = {
+    ast,
+    config,
+    report: (msg) => {
+      messages.push({
+        ruleId: 'TEST',
+        ruleName: 'test',
+        severity: 'error',
+        ...msg,
+      });
+    },
+  };
+  return { ctx, messages };
+}
+
+/**
+ * Create a block with text content.
+ */
+function createTextBlock(name: string, text: string, loc?: SourceLocation): Block {
+  const defaultLoc: SourceLocation = loc ?? { file: 'test.prs', line: 1, column: 1 };
+  return {
+    type: 'Block',
+    name,
+    loc: defaultLoc,
+    content: {
+      type: 'TextContent',
+      value: text,
+      loc: defaultLoc,
+    },
+  };
+}
+
+describe('rules/index.ts coverage', () => {
+  describe('allRules', () => {
+    it('should contain all validation rules', () => {
+      expect(allRules).toHaveLength(8);
+      expect(allRules.map((r) => r.id)).toEqual([
+        'PS001',
+        'PS002',
+        'PS003',
+        'PS004',
+        'PS005',
+        'PS006',
+        'PS007',
+        'PS008',
+      ]);
+    });
+  });
+
+  describe('getRuleById', () => {
+    it('should return rule by id', () => {
+      const rule = getRuleById('PS001');
+      expect(rule).toBeDefined();
+      expect(rule?.id).toBe('PS001');
+      expect(rule?.name).toBe('required-meta-id');
+    });
+
+    it('should return undefined for unknown id', () => {
+      const rule = getRuleById('PS999');
+      expect(rule).toBeUndefined();
+    });
+
+    it('should find each rule by its id', () => {
+      for (const expected of allRules) {
+        const found = getRuleById(expected.id);
+        expect(found).toBe(expected);
+      }
+    });
+  });
+
+  describe('getRuleByName', () => {
+    it('should return rule by name', () => {
+      const rule = getRuleByName('required-meta-id');
+      expect(rule).toBeDefined();
+      expect(rule?.id).toBe('PS001');
+    });
+
+    it('should return undefined for unknown name', () => {
+      const rule = getRuleByName('unknown-rule');
+      expect(rule).toBeUndefined();
+    });
+
+    it('should find each rule by its name', () => {
+      for (const expected of allRules) {
+        const found = getRuleByName(expected.name);
+        expect(found).toBe(expected);
+      }
+    });
+  });
+});
+
+describe('deprecated rule (PS007) additional coverage', () => {
+  it('should detect deprecated blocks when configured', () => {
+    // Create AST with a block that would be deprecated
+    const ast = createTestProgram({
+      blocks: [createTextBlock('identity', 'Content')],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    // Currently no deprecated blocks configured, so should pass
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should check meta fields for deprecation', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: {
+          id: 'test',
+          version: '1.0.0',
+          customField: 'value',
+        },
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    // No deprecated fields currently configured
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should handle AST without meta block for deprecation check', () => {
+    const ast = createTestProgram({ meta: undefined });
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should handle meta block without fields', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: undefined as unknown as Record<string, Value>,
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+});
+
+describe('valid-path rule (PS006) additional coverage', () => {
+  describe('isValidPath edge cases', () => {
+    it('should handle complex namespace paths', () => {
+      expect(isValidPath('@org-name/path/to/deeply/nested/file')).toBe(true);
+      expect(isValidPath('@a/b')).toBe(true);
+    });
+
+    it('should reject malformed paths', () => {
+      expect(isValidPath('@/missing-namespace')).toBe(false);
+      expect(isValidPath('@namespace/')).toBe(false);
+      expect(isValidPath('@@double')).toBe(false);
+    });
+  });
+
+  it('should report invalid inherit paths', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      inherit: {
+        type: 'InheritDeclaration',
+        loc,
+        path: {
+          type: 'PathReference',
+          raw: 'invalid-path-no-prefix',
+          namespace: '',
+          segments: ['invalid'],
+          isRelative: false,
+          loc,
+        },
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validPath.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('Invalid path reference');
+  });
+
+  it('should report invalid use paths', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      uses: [
+        {
+          type: 'UseDeclaration',
+          loc,
+          path: {
+            type: 'PathReference',
+            raw: 'bad-path',
+            namespace: '',
+            segments: ['bad'],
+            isRelative: false,
+            loc,
+          },
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validPath.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('Invalid path reference');
+  });
+
+  it('should validate multiple use declarations', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      uses: [
+        {
+          type: 'UseDeclaration',
+          loc,
+          path: {
+            type: 'PathReference',
+            raw: '@valid/path',
+            namespace: 'valid',
+            segments: ['path'],
+            isRelative: false,
+            loc,
+          },
+        },
+        {
+          type: 'UseDeclaration',
+          loc,
+          path: {
+            type: 'PathReference',
+            raw: 'invalid',
+            namespace: '',
+            segments: [],
+            isRelative: false,
+            loc,
+          },
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validPath.validate(ctx);
+    expect(messages).toHaveLength(1);
+  });
+});
+
+describe('required-guards rule (PS004) additional coverage', () => {
+  it('should pass when empty requiredGuards array', () => {
+    const ast = createTestProgram();
+    const { ctx, messages } = createRuleContext(ast, {
+      requiredGuards: [],
+    });
+    requiredGuards.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should extract guards from object content', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'guards',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              '@core/guards/compliance': true,
+              '@core/guards/security': { enabled: true },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast, {
+      requiredGuards: ['@core/guards/compliance'],
+    });
+    requiredGuards.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should report when guards in object dont include required', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'guards',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              '@core/guards/security': true,
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast, {
+      requiredGuards: ['@core/guards/compliance'],
+    });
+    requiredGuards.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('@core/guards/compliance');
+  });
+
+  it('should handle guards block with text content', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'guards',
+          loc,
+          content: {
+            type: 'TextContent',
+            value: 'Some text',
+            loc,
+          },
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast, {
+      requiredGuards: ['@core/guards/compliance'],
+    });
+    requiredGuards.validate(ctx);
+    // Text content doesn't have guards, so it should report
+    expect(messages).toHaveLength(1);
+  });
+
+  it('should check multiple required guards', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'guards',
+          loc,
+          content: {
+            type: 'ArrayContent',
+            elements: ['@core/guards/compliance'],
+            loc,
+          },
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast, {
+      requiredGuards: ['@core/guards/compliance', '@core/guards/security', '@core/guards/privacy'],
+    });
+    requiredGuards.validate(ctx);
+    expect(messages).toHaveLength(2); // Missing security and privacy
+  });
+});

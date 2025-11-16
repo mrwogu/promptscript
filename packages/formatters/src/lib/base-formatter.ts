@@ -1,0 +1,116 @@
+import type { Block, BlockContent, Program, Value } from '@promptscript/core';
+import type { Formatter, FormatterOutput } from './types';
+
+/**
+ * Abstract base formatter with common helper methods.
+ * Extend this class to create new formatter implementations.
+ */
+export abstract class BaseFormatter implements Formatter {
+  abstract readonly name: string;
+  abstract readonly outputPath: string;
+  abstract readonly description: string;
+  abstract format(ast: Program): FormatterOutput;
+
+  /**
+   * Find a block by name, ignoring internal blocks (starting with __).
+   */
+  protected findBlock(ast: Program, name: string): Block | undefined {
+    return ast.blocks.find((b) => b.name === name && !b.name.startsWith('__'));
+  }
+
+  /**
+   * Extract text from block content.
+   */
+  protected extractText(content: BlockContent): string {
+    switch (content.type) {
+      case 'TextContent':
+        return content.value.trim();
+      case 'MixedContent':
+        return content.text?.value.trim() ?? '';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Get a specific property from block content.
+   */
+  protected getProp(content: BlockContent, key: string): Value | undefined {
+    switch (content.type) {
+      case 'ObjectContent':
+        return content.properties[key];
+      case 'MixedContent':
+        return content.properties[key];
+      default:
+        return undefined;
+    }
+  }
+
+  /**
+   * Get all properties from block content.
+   */
+  protected getProps(content: BlockContent): Record<string, Value> {
+    switch (content.type) {
+      case 'ObjectContent':
+        return content.properties;
+      case 'MixedContent':
+        return content.properties;
+      default:
+        return {};
+    }
+  }
+
+  /**
+   * Format an array as comma-separated string.
+   */
+  protected formatArray(arr: unknown[]): string {
+    return arr.map(String).join(', ');
+  }
+
+  /**
+   * Truncate string to max length with ellipsis.
+   */
+  protected truncate(str: string, max: number): string {
+    return str.length > max ? str.substring(0, max - 3) + '...' : str;
+  }
+
+  /**
+   * Get meta field value as string.
+   */
+  protected getMetaField(ast: Program, key: string): string | undefined {
+    const value = ast.meta?.fields?.[key];
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number') return String(value);
+    return undefined;
+  }
+
+  /**
+   * Extract array elements from block content.
+   */
+  protected getArrayElements(content: BlockContent): Value[] {
+    if (content.type === 'ArrayContent') {
+      return content.elements;
+    }
+    return [];
+  }
+
+  /**
+   * Convert value to string representation.
+   */
+  protected valueToString(value: Value): string {
+    if (value === null) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    if (Array.isArray(value)) {
+      return value.map((v) => this.valueToString(v)).join(', ');
+    }
+    if (typeof value === 'object' && 'type' in value) {
+      if (value.type === 'TextContent' && typeof value.value === 'string') {
+        return value.value.trim();
+      }
+    }
+    return '';
+  }
+}

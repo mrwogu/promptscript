@@ -5,12 +5,13 @@
   
   **The language for standardizing AI instructions across your organization.**
 
-  [![CI](https://github.com/promptscript/promptscript/workflows/CI/badge.svg)](https://github.com/promptscript/promptscript/actions)
-  [![npm version](https://badge.fury.io/js/@promptscript%2Fcli.svg)](https://www.npmjs.com/package/@promptscript/cli)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-  [Documentation](https://promptscript.dev) · [Getting Started](#getting-started) · [Examples](docs/examples) · [Contributing](CONTRIBUTING.md)
+[Getting Started](#getting-started) · [Examples](docs/examples) · [Contributing](CONTRIBUTING.md)
+
 </div>
 
 ---
@@ -18,12 +19,13 @@
 ## The Problem
 
 Your organization uses multiple AI tools:
+
 - GitHub Copilot (`copilot-instructions.md`)
 - Claude Code (`CLAUDE.md`)
 - Cursor (`.cursorrules`)
 - And more...
 
-Each tool has its own format. Each team maintains their own instructions. 
+Each tool has its own format. Each team maintains their own instructions.
 Result: **chaos, inconsistency, no governance.**
 
 ## The Solution
@@ -54,7 +56,7 @@ prs compile --all
 
 # Output:
 # ✓ .github/copilot-instructions.md
-# ✓ CLAUDE.md  
+# ✓ CLAUDE.md
 # ✓ .cursorrules
 ```
 
@@ -96,12 +98,12 @@ prs compile --all
 
 ## Packages
 
-| Package | Description | Version |
-|---------|-------------|---------|
-| [@promptscript/cli](packages/cli) | Command-line interface | ![npm](https://img.shields.io/npm/v/@promptscript/cli) |
-| [@promptscript/core](packages/core) | Core types & utilities | ![npm](https://img.shields.io/npm/v/@promptscript/core) |
-| [@promptscript/parser](packages/parser) | PromptScript parser | ![npm](https://img.shields.io/npm/v/@promptscript/parser) |
-| [@promptscript/compiler](packages/compiler) | Compilation pipeline | ![npm](https://img.shields.io/npm/v/@promptscript/compiler) |
+| Package                                     | Description            | Version                                                     |
+| ------------------------------------------- | ---------------------- | ----------------------------------------------------------- |
+| [@promptscript/cli](packages/cli)           | Command-line interface | ![npm](https://img.shields.io/npm/v/@promptscript/cli)      |
+| [@promptscript/core](packages/core)         | Core types & utilities | ![npm](https://img.shields.io/npm/v/@promptscript/core)     |
+| [@promptscript/parser](packages/parser)     | PromptScript parser    | ![npm](https://img.shields.io/npm/v/@promptscript/parser)   |
+| [@promptscript/compiler](packages/compiler) | Compilation pipeline   | ![npm](https://img.shields.io/npm/v/@promptscript/compiler) |
 
 ## Contributing
 
@@ -124,7 +126,7 @@ nx run-many -t build
 
 ## License
 
-MIT © [PromptScript Contributors](https://github.com/promptscript/promptscript/graphs/contributors)
+MIT © [PromptScript Contributors](https://github.com/mrwogu/promptscript/graphs/contributors)
 
 ---
 

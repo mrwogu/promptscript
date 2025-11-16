@@ -1,0 +1,12 @@
+@meta {
+  id: "missing-parent"
+  version: "1.0.0"
+}
+
+@inherit ./does-not-exist
+
+@identity {
+  """
+  This inherits from non-existent file.
+  """
+}

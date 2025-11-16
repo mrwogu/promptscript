@@ -1,0 +1,5 @@
+@meta { id: "use-missing" }
+
+@use ./does-not-exist
+
+@context {}

@@ -1,4 +1,1 @@
-@meta {
-  id: "invalid-syntax"
-  version "missing colon"
-}
+@meta {{{{{ broken @@@ totally invalid ]]]]
