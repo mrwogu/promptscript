@@ -101,6 +101,12 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Package configs should use `createBaseConfig(__dirname)` from the base config
 - Do not duplicate ESLint rules in package configs - modify the base config instead
 
+### Vite/Vitest Config
+
+- Use `__dirname` for the `root` option in both `vite.config.ts` and `vitest.config.mts`
+- Do NOT use `import.meta.dirname` - it causes TypeScript errors with current tsconfig settings
+- Example: `root: __dirname,`
+
 ## Don'ts
 
 - Don't use `any` type
@@ -110,3 +116,4 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Don't leave TODO without issue reference
 - Don't create new packages manually - always use Nx generators (`nx g @nx/js:lib`)
 - Don't create custom ESLint rules in package configs - extend the base config
+- Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname` instead
