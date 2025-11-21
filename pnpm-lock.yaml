@@ -91,9 +91,6 @@ importers:
       '@promptscript/core':
         specifier: workspace:*
         version: link:../core
-      '@promptscript/validator':
-        specifier: workspace:*
-        version: link:../validator
       '@swc/helpers':
         specifier: ~0.5.11
         version: 0.5.18
@@ -115,6 +112,9 @@ importers:
       '@promptscript/core':
         specifier: workspace:*
         version: link:../core
+      '@promptscript/formatters':
+        specifier: workspace:*
+        version: link:../formatters
       '@promptscript/resolver':
         specifier: workspace:*
         version: link:../resolver

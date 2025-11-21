@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { ClaudeFormatter } from './claude';
+import { ClaudeFormatter } from '../formatters/claude';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',

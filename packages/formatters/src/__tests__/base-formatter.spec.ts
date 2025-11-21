@@ -10,8 +10,8 @@ import type {
   TextContent,
   Value,
 } from '@promptscript/core';
-import { BaseFormatter } from './base-formatter';
-import type { FormatterOutput } from './types';
+import { BaseFormatter } from '../base-formatter';
+import type { FormatterOutput } from '../types';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { GitHubFormatter } from './github';
+import { GitHubFormatter } from '../formatters/github';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',

@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { CursorFormatter } from './cursor';
+import { CursorFormatter } from '../formatters/cursor';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',

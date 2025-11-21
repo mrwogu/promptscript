@@ -9,6 +9,81 @@ const tsparser = require('@typescript-eslint/parser');
 const nxPlugin = require('@nx/eslint-plugin');
 
 /**
+ * Module boundary rules enforce the dependency architecture:
+ *
+ * ┌─────────────────────────────────────────────────────────────────┐
+ * │                        PromptScript                             │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │                                                                 │
+ * │  ┌──────────┐    ┌──────────┐    ┌───────────┐    ┌──────────┐  │
+ * │  │  core    │───▶│  parser  │───▶│ resolver  │───▶│validator │  │
+ * │  └──────────┘    └──────────┘    └───────────┘    └──────────┘  │
+ * │       │                                                  │      │
+ * │       │              ┌───────────┐                       │      │
+ * │       └─────────────▶│ compiler  │◀──────────────────────┘      │
+ * │                      └─────┬─────┘                              │
+ * │                            │                                    │
+ * │                      ┌───────────┐                              │
+ * │                      │formatters │                              │
+ * │                      └─────┬─────┘                              │
+ * │                            │                                    │
+ * │                      ┌──────────┐                               │
+ * │                      │   cli    │                               │
+ * │                      └──────────┘                               │
+ * │                                                                 │
+ * └─────────────────────────────────────────────────────────────────┘
+ */
+const moduleBoundaryRules = [
+  // Core has no dependencies - it's the foundation
+  {
+    sourceTag: 'scope:core',
+    onlyDependOnLibsWithTags: [],
+  },
+  // Parser depends only on core
+  {
+    sourceTag: 'scope:parser',
+    onlyDependOnLibsWithTags: ['scope:core'],
+  },
+  // Resolver depends on core and parser
+  {
+    sourceTag: 'scope:resolver',
+    onlyDependOnLibsWithTags: ['scope:core', 'scope:parser'],
+  },
+  // Validator depends only on core
+  {
+    sourceTag: 'scope:validator',
+    onlyDependOnLibsWithTags: ['scope:core'],
+  },
+  // Formatters depends only on core
+  {
+    sourceTag: 'scope:formatters',
+    onlyDependOnLibsWithTags: ['scope:core'],
+  },
+  // Compiler depends on core, resolver, validator, formatters
+  {
+    sourceTag: 'scope:compiler',
+    onlyDependOnLibsWithTags: [
+      'scope:core',
+      'scope:resolver',
+      'scope:validator',
+      'scope:formatters',
+    ],
+  },
+  // CLI (app) can depend on everything
+  {
+    sourceTag: 'type:app',
+    onlyDependOnLibsWithTags: [
+      'scope:core',
+      'scope:parser',
+      'scope:resolver',
+      'scope:validator',
+      'scope:compiler',
+      'scope:formatters',
+    ],
+  },
+];
+
+/**
  * Creates the base ESLint config for a package.
  * @param {string} baseDirectory - The __dirname of the package's eslint.config.cjs
  * @returns {Array} ESLint flat config array
@@ -37,6 +112,14 @@ function createBaseConfig(baseDirectory) {
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            enforceBuildableLibDependency: true,
+            allow: [],
+            depConstraints: moduleBoundaryRules,
+          },
+        ],
       },
     },
     {

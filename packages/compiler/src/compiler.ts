@@ -1,4 +1,5 @@
 import type { PSError } from '@promptscript/core';
+import { FormatterRegistry } from '@promptscript/formatters';
 import { Resolver, type ResolvedAST } from '@promptscript/resolver';
 import { Validator } from '@promptscript/validator';
 import type {
@@ -179,14 +180,15 @@ export class Compiler {
   /**
    * Dynamically load a formatter by name.
    *
-   * Note: This is a placeholder for dynamic imports.
-   * In a real implementation, this would use dynamic imports.
+   * Uses the FormatterRegistry to look up registered formatters.
    */
   private loadFormatterByName(name: string): Formatter {
-    // For now, throw an error for unknown formatters
-    // Formatters should be passed as instances until dynamic import is implemented
+    const formatter = FormatterRegistry.get(name);
+    if (formatter) {
+      return formatter;
+    }
     throw new Error(
-      `Unknown formatter: '${name}'. Please pass a formatter instance instead of a string.`
+      `Unknown formatter: '${name}'. Available formatters: ${FormatterRegistry.list().join(', ')}`
     );
   }
 

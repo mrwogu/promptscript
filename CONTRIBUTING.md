@@ -14,7 +14,7 @@ First off, thank you for considering contributing to PromptScript! 🎉
 
 ## Code of Conduct
 
-This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). 
+This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
 
 ## Getting Started
@@ -49,7 +49,7 @@ promptscript/
 │   ├── resolver/       # Inheritance resolution
 │   ├── validator/      # Validation rules
 │   ├── compiler/       # Compilation pipeline
-│   ├── formatter-*/    # Output formatters
+│   ├── formatters/     # Output formatters (GitHub, Claude, Cursor)
 │   └── cli/            # CLI application
 ├── docs/               # Documentation
 └── examples/           # Example projects
@@ -60,6 +60,7 @@ promptscript/
 ### Creating a Feature
 
 1. Create a branch from `main`:
+
    ```bash
    git checkout -b feat/your-feature-name
    ```
@@ -69,6 +70,7 @@ promptscript/
 3. Write/update tests
 
 4. Run checks:
+
    ```bash
    nx affected -t test
    nx affected -t lint
@@ -128,7 +130,7 @@ export function parseVersion(input: string): SemVer {
 }
 
 // ❌ Bad
-export default function(input) {
+export default function (input) {
   // ...
 }
 ```
@@ -144,14 +146,14 @@ export default function(input) {
 - TSDoc on all public exports
 - Examples in documentation
 
-```typescript
+````typescript
 /**
  * Parses a PromptScript path reference.
- * 
+ *
  * @param path - The path string (e.g., "@core/guards/compliance@1.0.0")
  * @returns Parsed path object
  * @throws {ParseError} If path format is invalid
- * 
+ *
  * @example
  * ```typescript
  * const parsed = parsePath('@core/org');
@@ -161,7 +163,7 @@ export default function(input) {
 export function parsePath(path: string): ParsedPath {
   // ...
 }
-```
+````
 
 ## Testing
 
@@ -185,17 +187,17 @@ nx test parser --watch
 
 - Use Vitest
 - Follow AAA pattern (Arrange, Act, Assert)
-- >90% coverage for library packages
+- > 90% coverage for library packages
 
 ```typescript
 describe('parseVersion', () => {
   it('should parse valid version', () => {
     // Arrange
     const input = '1.2.3';
-    
+
     // Act
     const result = parseVersion(input);
-    
+
     // Assert
     expect(result).toEqual({ major: 1, minor: 2, patch: 3 });
   });

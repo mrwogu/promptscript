@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { FormatterRegistry } from './registry';
-import type { Formatter, FormatterOutput } from './types';
+import { FormatterRegistry } from '../registry';
+import type { Formatter, FormatterOutput } from '../types';
 
 // Mock formatter for testing
 class MockFormatter implements Formatter {

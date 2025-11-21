@@ -25,9 +25,7 @@ packages/
 ├── resolver/          # Inheritance & import resolution
 ├── validator/         # AST validation rules
 ├── compiler/          # Pipeline orchestration
-├── formatter-github/  # GitHub Copilot output
-├── formatter-claude/  # Claude Code output
-├── formatter-cursor/  # Cursor output
+├── formatters/        # Output formatters (GitHub, Claude, Cursor)
 └── cli/               # Command-line interface
 ```
 
@@ -67,23 +65,15 @@ packages/
 ```bash
 # Development
 pnpm install          # Install dependencies
-nx build <pkg>        # Build package
-nx test <pkg>         # Run tests
-nx lint <pkg>         # Lint code
-nx run-many -t test   # Test all packages
-nx graph              # View dependency graph
+pnpm nx build <pkg>        # Build package
+pnpm nx test <pkg>         # Run tests
+pnpm nx lint <pkg>         # Lint code
+pnpm nx run-many -t test   # Test all packages
+pnpm nx graph              # View dependency graph
 
 # Generate new library
 pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPath=@promptscript/<name> --bundler=swc --linter=eslint --unitTestRunner=vitest
 ```
-
-## Working on Tasks
-
-1. Read the relevant prompt from `.github/prompts/`
-2. Follow the implementation order in `MAIN.prompt.md`
-3. Run tests after each component: `nx test <package>`
-4. Verify build works: `nx build <package>`
-5. After each implementation phase, run all tests: `nx run-many -t test`
 
 ## Git Commits
 
@@ -117,3 +107,15 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Don't create new packages manually - always use Nx generators (`nx g @nx/js:lib`)
 - Don't create custom ESLint rules in package configs - extend the base config
 - Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname` instead
+- Don't use ASCII art diagrams - always use Mermaid diagrams instead
+
+## Diagrams
+
+- Always use **Mermaid** syntax for diagrams in documentation
+- Supported diagram types: flowchart, sequence, class, state, ER, gantt, pie, etc.
+- Wrap diagrams in markdown code blocks with `mermaid` language identifier
+- Example:
+  ```mermaid
+  flowchart LR
+    A[Input] --> B[Process] --> C[Output]
+  ```

@@ -10,7 +10,7 @@
       "fallbackCurrentVersionResolver": "disk"
     }
   },
-  "tags": [],
+  "tags": ["scope:cli", "type:app"],
   "targets": {
     "build": {
       "executor": "@nx/js:swc",
