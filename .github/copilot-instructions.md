@@ -1,13 +1,8 @@
-# PromptScript - GitHub Copilot Instructions
-
-> Auto-generated project instructions for AI-assisted development.
-
-## Project
-
+<project>
 PromptScript is a language and toolchain for standardizing AI instructions across enterprise organizations. It compiles `.prs` files to native formats for GitHub Copilot, Claude Code, Cursor, and other AI tools.
+</project>
 
-## Tech Stack
-
+<tech-stack>
 - **Language:** TypeScript 5.x (strict mode)
 - **Runtime:** Node.js 20+
 - **Monorepo:** Nx with pnpm workspaces
@@ -15,9 +10,9 @@ PromptScript is a language and toolchain for standardizing AI instructions acros
 - **CLI:** Commander.js
 - **Testing:** Vitest
 - **Linting:** ESLint + Prettier
+</tech-stack>
 
-## Architecture
-
+<architecture>
 ```
 packages/
 ├── core/              # Types, errors, utilities (zero deps)
@@ -28,40 +23,40 @@ packages/
 ├── formatters/        # Output formatters (GitHub, Claude, Cursor)
 └── cli/               # Command-line interface
 ```
+</architecture>
 
-## Code Standards
+<code-standards>
+  <typescript>
+  - Strict mode enabled, no `any` types
+  - Use `unknown` with type guards instead of `any`
+  - Prefer `interface` for object shapes
+  - Use `type` for unions and intersections
+  - Named exports only (no default exports)
+  - Explicit return types on public functions
+  </typescript>
 
-### TypeScript
+  <naming>
+  - Files: `kebab-case.ts`
+  - Classes/Interfaces: `PascalCase`
+  - Functions/Variables: `camelCase`
+  - Constants: `UPPER_SNAKE_CASE`
+  </naming>
 
-- Strict mode enabled, no `any` types
-- Use `unknown` with type guards instead of `any`
-- Prefer `interface` for object shapes
-- Use `type` for unions and intersections
-- Named exports only (no default exports)
-- Explicit return types on public functions
+  <error-handling>
+  - Use custom error classes extending `PSError`
+  - Always include location information
+  - Provide actionable error messages
+  </error-handling>
 
-### Naming
+  <testing>
+  - Test files: `*.spec.ts` next to source
+  - Follow AAA pattern (Arrange, Act, Assert)
+  - Target >90% coverage for libraries
+  - Use fixtures for parser tests
+  </testing>
+</code-standards>
 
-- Files: `kebab-case.ts`
-- Classes/Interfaces: `PascalCase`
-- Functions/Variables: `camelCase`
-- Constants: `UPPER_SNAKE_CASE`
-
-### Error Handling
-
-- Use custom error classes extending `PSError`
-- Always include location information
-- Provide actionable error messages
-
-### Testing
-
-- Test files: `*.spec.ts` next to source
-- Follow AAA pattern (Arrange, Act, Assert)
-- Target >90% coverage for libraries
-- Use fixtures for parser tests
-
-## Commands
-
+<commands>
 ```bash
 # Development
 pnpm install          # Install dependencies
@@ -72,33 +67,35 @@ pnpm nx run-many -t test   # Test all packages
 pnpm nx graph              # View dependency graph
 
 # Generate new library
+
 pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPath=@promptscript/<name> --bundler=swc --linter=eslint --unitTestRunner=vitest
-```
 
-## Git Commits
+````
+</commands>
 
+<git-commits>
 - Use [Conventional Commits](https://www.conventionalcommits.org/) format
 - Keep commit message subject line max 70 characters
 - Format: `<type>(<scope>): <description>`
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - Example: `feat(parser): add support for multiline strings`
+</git-commits>
 
-## Configuration Files
+<configuration-files>
+  <eslint>
+  - All package ESLint configs must inherit from `eslint.base.config.cjs` in the root
+  - Package configs should use `createBaseConfig(__dirname)` from the base config
+  - Do not duplicate ESLint rules in package configs - modify the base config instead
+  </eslint>
 
-### ESLint
+  <vite-vitest>
+  - Use `__dirname` for the `root` option in both `vite.config.ts` and `vitest.config.mts`
+  - Do NOT use `import.meta.dirname` - it causes TypeScript errors with current tsconfig settings
+  - Example: `root: __dirname,`
+  </vite-vitest>
+</configuration-files>
 
-- All package ESLint configs must inherit from `eslint.base.config.cjs` in the root
-- Package configs should use `createBaseConfig(__dirname)` from the base config
-- Do not duplicate ESLint rules in package configs - modify the base config instead
-
-### Vite/Vitest Config
-
-- Use `__dirname` for the `root` option in both `vite.config.ts` and `vitest.config.mts`
-- Do NOT use `import.meta.dirname` - it causes TypeScript errors with current tsconfig settings
-- Example: `root: __dirname,`
-
-## Don'ts
-
+<donts>
 - Don't use `any` type
 - Don't use default exports
 - Don't commit without tests
@@ -108,9 +105,9 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Don't create custom ESLint rules in package configs - extend the base config
 - Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname` instead
 - Don't use ASCII art diagrams - always use Mermaid diagrams instead
+</donts>
 
-## Diagrams
-
+<diagrams>
 - Always use **Mermaid** syntax for diagrams in documentation
 - Supported diagram types: flowchart, sequence, class, state, ER, gantt, pie, etc.
 - Wrap diagrams in markdown code blocks with `mermaid` language identifier
@@ -118,4 +115,6 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
   ```mermaid
   flowchart LR
     A[Input] --> B[Process] --> C[Output]
-  ```
+````
+
+</diagrams>
