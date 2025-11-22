@@ -60,3 +60,7 @@ temp/
 .github/prompts/setup/*.md
 
 vitest.config.*.timestamp*
+
+# MkDocs
+site/
+.cache/

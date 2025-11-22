@@ -7,6 +7,7 @@
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://mrwogu.github.io/promptscript/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -91,10 +92,10 @@ prs compile --all
 
 ## Documentation
 
-- [📖 Full Documentation](https://promptscript.dev)
-- [🎓 Tutorial](docs/tutorial.md)
-- [📋 Language Reference](docs/reference.md)
-- [🔧 CLI Reference](docs/cli.md)
+- [📖 Full Documentation](https://mrwogu.github.io/promptscript/)
+- [🎓 Tutorial](https://mrwogu.github.io/promptscript/tutorial/)
+- [📋 Language Reference](https://mrwogu.github.io/promptscript/reference/language/)
+- [🔧 CLI Reference](https://mrwogu.github.io/promptscript/reference/cli/)
 
 ## Packages
 
