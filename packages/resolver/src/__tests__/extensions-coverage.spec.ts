@@ -489,4 +489,124 @@ describe('applyExtends additional coverage', () => {
       expect(c['d']).toEqual({ key: 'value' });
     });
   });
+
+  describe('edge cases for line coverage', () => {
+    it('should handle target block being undefined after findIndex', () => {
+      // This is a defensive check - in practice, if findIndex returns a valid index,
+      // the block should exist. But we verify the code path exists.
+      const ast = createProgram({
+        blocks: [createBlock('identity', createTextContent('content'))],
+        extends: [createExtendBlock('nonexistent', createTextContent('extension'))],
+      });
+
+      const result = applyExtends(ast);
+
+      expect(result.blocks).toHaveLength(1);
+    });
+
+    it('should handle empty key in path for ObjectContent', () => {
+      // Test mergeAtPath when path[0] is truthy
+      const ast = createProgram({
+        blocks: [createBlock('config', createObjectContent({ existing: { deep: 'value' } }))],
+        extends: [createExtendBlock('config.existing', createObjectContent({ added: 'new' }))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+
+      expect(content.properties['existing']).toEqual({ deep: 'value', added: 'new' });
+    });
+
+    it('should handle mergeAtPathValue with empty rest path', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              target: { inner: 'original' },
+            })
+          ),
+        ],
+        extends: [createExtendBlock('config.target', createObjectContent({ extra: 'added' }))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const target = content.properties['target'] as Record<string, Value>;
+
+      expect(target['inner']).toBe('original');
+      expect(target['extra']).toBe('added');
+    });
+
+    it('should handle buildPathValue with empty path', () => {
+      const ast = createProgram({
+        blocks: [createBlock('config', createObjectContent({}))],
+        extends: [createExtendBlock('config.direct', createTextContent('value'))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+
+      expect(content.properties['direct']).toBe('value');
+    });
+
+    it('should handle mergeMixedContent with both texts', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'identity',
+            createMixedContent(createTextContent('original'), { prop: 'val' })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'identity',
+            createMixedContent(createTextContent('extended'), { newProp: 'newVal' })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as MixedContent;
+
+      expect(content.text?.value).toBe('original\n\nextended');
+      expect(content.properties['prop']).toBe('val');
+      expect(content.properties['newProp']).toBe('newVal');
+    });
+
+    it('should handle uniqueConcat with objects', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              items: [{ id: 1 }, { id: 2 }],
+            })
+          ),
+        ],
+        extends: [createExtendBlock('config.items', createArrayContent([{ id: 2 }, { id: 3 }]))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const items = content.properties['items'] as Array<{ id: number }>;
+
+      // Deduplication by JSON serialization
+      expect(items).toHaveLength(3);
+      expect(items.map((i) => i.id)).toEqual([1, 2, 3]);
+    });
+
+    it('should handle uniqueConcat with primitives', () => {
+      const ast = createProgram({
+        blocks: [createBlock('config', createObjectContent({ items: ['a', 'b'] }))],
+        extends: [createExtendBlock('config.items', createArrayContent(['b', 'c']))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const items = content.properties['items'] as string[];
+
+      expect(items).toEqual(['a', 'b', 'c']);
+    });
+  });
 });

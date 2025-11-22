@@ -162,6 +162,15 @@ describe('Compiler', () => {
 
       expect(() => new Compiler(options)).toThrow("Unknown formatter: 'unknown'");
     });
+
+    it('should list available formatters in error message when unknown formatter requested', () => {
+      const options: CompilerOptions = {
+        resolver: { registryPath: '/registry' },
+        formatters: ['nonexistent-formatter'],
+      };
+
+      expect(() => new Compiler(options)).toThrow(/Available formatters:/);
+    });
   });
 
   describe('compile - successful compilation', () => {

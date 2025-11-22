@@ -185,3 +185,78 @@ describe('Resolver error paths with failing imports', () => {
     expect(result.ast).toBeNull();
   });
 });
+
+describe('Resolver error paths coverage', () => {
+  describe('loadFile error handling', () => {
+    it('should re-throw non-FileNotFoundError errors', async () => {
+      const resolver = new Resolver({
+        registryPath: resolve(FIXTURES_DIR, 'registry'),
+        localPath: FIXTURES_DIR,
+        cache: true,
+      });
+
+      // Attempting to load a directory should throw an error (not FileNotFoundError)
+      await expect(resolver.resolve(FIXTURES_DIR)).rejects.toThrow();
+    });
+  });
+
+  describe('parseResult error handling', () => {
+    it('should collect parse errors when AST is null', async () => {
+      const resolver = new Resolver({
+        registryPath: resolve(FIXTURES_DIR, 'registry'),
+        localPath: FIXTURES_DIR,
+        cache: true,
+      });
+
+      const result = await resolver.resolve('./invalid-syntax.prs');
+
+      expect(result.ast).toBeNull();
+      expect(result.errors.length).toBeGreaterThan(0);
+      // Errors should have location information from parse errors
+    });
+  });
+
+  describe('resolveInherit error handling', () => {
+    it('should handle failed parent resolution with error message', async () => {
+      const resolver = new Resolver({
+        registryPath: resolve(FIXTURES_DIR, 'registry'),
+        localPath: FIXTURES_DIR,
+        cache: true,
+      });
+
+      // File that inherits from a non-existent parent
+      const result = await resolver.resolve('./missing-parent.prs');
+
+      expect(result.errors.length).toBeGreaterThan(0);
+      // Should have an error about failed parent resolution
+    });
+  });
+
+  describe('resolveImports error handling', () => {
+    it('should handle failed import resolution with error message', async () => {
+      const resolver = new Resolver({
+        registryPath: resolve(FIXTURES_DIR, 'registry'),
+        localPath: FIXTURES_DIR,
+        cache: true,
+      });
+
+      const result = await resolver.resolve('./use-missing.prs');
+
+      expect(result.errors.length).toBeGreaterThan(0);
+      // Should have an error about failed import resolution
+    });
+
+    it('should accumulate errors from imported files', async () => {
+      const resolver = new Resolver({
+        registryPath: resolve(FIXTURES_DIR, 'registry'),
+        localPath: FIXTURES_DIR,
+        cache: true,
+      });
+
+      const result = await resolver.resolve('./use-invalid.prs');
+
+      // Should have accumulated errors from the invalid imported file
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+  });
+});

@@ -105,6 +105,7 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Don't create custom ESLint rules in package configs - extend the base config
 - Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname` instead
 - Don't use ASCII art diagrams - always use Mermaid diagrams instead
+- Don't reference line numbers in test names or comments - lines can change
 </donts>
 
 <diagrams>

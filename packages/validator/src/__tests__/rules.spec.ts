@@ -137,6 +137,14 @@ describe('valid-semver rule (PS003)', () => {
       expect(isValidSemver('invalid')).toBe(false);
       expect(isValidSemver('')).toBe(false);
     });
+
+    it('should reject version starting with prerelease separator', () => {
+      // Tests the case where mainVersion is empty after split
+      expect(isValidSemver('-alpha')).toBe(false);
+      expect(isValidSemver('+build')).toBe(false);
+      expect(isValidSemver('-1.0.0')).toBe(false);
+      expect(isValidSemver('+1.0.0')).toBe(false);
+    });
   });
 
   describe('validSemver rule', () => {

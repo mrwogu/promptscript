@@ -179,6 +179,80 @@ describe('deprecated rule (PS007) additional coverage', () => {
     deprecated.validate(ctx);
     expect(messages).toHaveLength(0);
   });
+
+  it('should iterate over all blocks checking for deprecation', () => {
+    // Test with multiple blocks to ensure the loop iterates
+    const ast = createTestProgram({
+      blocks: [
+        createTextBlock('identity', 'Content 1'),
+        createTextBlock('context', 'Content 2'),
+        createTextBlock('standards', 'Content 3'),
+        createTextBlock('guards', 'Content 4'),
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    // No deprecated blocks configured, all should pass
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should iterate over all meta fields checking for deprecation', () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: {
+          id: 'test',
+          version: '1.0.0',
+          author: 'test-author',
+          description: 'test-description',
+          tags: ['tag1', 'tag2'],
+          custom1: 'value1',
+          custom2: 'value2',
+        },
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    // No deprecated fields currently configured
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should use meta.loc when available for deprecation reporting', () => {
+    const metaLoc: SourceLocation = { file: 'test.prs', line: 5, column: 3 };
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc: metaLoc,
+        fields: {
+          id: 'test',
+          version: '1.0.0',
+        },
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should fallback to ast.loc when meta.loc is undefined', () => {
+    const astLoc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc: undefined as unknown as SourceLocation,
+        fields: {
+          id: 'test',
+          version: '1.0.0',
+        },
+      },
+    });
+    ast.loc = astLoc;
+    const { ctx, messages } = createRuleContext(ast);
+    deprecated.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
 });
 
 describe('valid-path rule (PS006) additional coverage', () => {

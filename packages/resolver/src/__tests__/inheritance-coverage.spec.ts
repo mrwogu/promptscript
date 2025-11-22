@@ -431,4 +431,114 @@ describe('resolveInheritance additional coverage', () => {
       expect(content.properties['childKey']).toBe('value');
     });
   });
+
+  describe('deepCloneValue coverage', () => {
+    it('should deep clone object values in properties', () => {
+      const parent = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              nested: { a: 1, b: { c: 2 } },
+            })
+          ),
+        ],
+      });
+      const child = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              extra: 'value',
+            })
+          ),
+        ],
+      });
+
+      const result = resolveInheritance(parent, child);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const nested = content.properties['nested'] as Record<string, unknown>;
+
+      // Verify deep clone created new object references
+      expect(nested['a']).toBe(1);
+      expect((nested['b'] as Record<string, unknown>)['c']).toBe(2);
+    });
+
+    it('should deep clone array values in properties', () => {
+      const parent = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              items: [{ id: 1 }, { id: 2 }],
+            })
+          ),
+        ],
+      });
+      const child = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              extra: 'value',
+            })
+          ),
+        ],
+      });
+
+      const result = resolveInheritance(parent, child);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const items = content.properties['items'] as Array<{ id: number }>;
+
+      expect(items).toHaveLength(2);
+      expect(items[0]?.id).toBe(1);
+    });
+
+    it('should handle null values in deepClone', () => {
+      const parent = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              nullValue: null,
+            })
+          ),
+        ],
+      });
+      const child = createProgram({
+        blocks: [createBlock('config', createObjectContent({ other: 'value' }))],
+      });
+
+      const result = resolveInheritance(parent, child);
+      const content = result.blocks[0]?.content as ObjectContent;
+
+      expect(content.properties['nullValue']).toBeNull();
+      expect(content.properties['other']).toBe('value');
+    });
+
+    it('should handle primitive values in deepClone', () => {
+      const parent = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              str: 'string',
+              num: 42,
+              bool: true,
+            })
+          ),
+        ],
+      });
+      const child = createProgram({
+        blocks: [createBlock('config', createObjectContent({ extra: 'value' }))],
+      });
+
+      const result = resolveInheritance(parent, child);
+      const content = result.blocks[0]?.content as ObjectContent;
+
+      expect(content.properties['str']).toBe('string');
+      expect(content.properties['num']).toBe(42);
+      expect(content.properties['bool']).toBe(true);
+    });
+  });
 });

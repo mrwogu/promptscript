@@ -44,9 +44,9 @@ describe('FileLoader', () => {
         localPath: FIXTURES_DIR,
       });
 
-      await expect(
-        loader.load(resolve(FIXTURES_DIR, 'nonexistent.prs'))
-      ).rejects.toThrow('File not found');
+      await expect(loader.load(resolve(FIXTURES_DIR, 'nonexistent.prs'))).rejects.toThrow(
+        'File not found'
+      );
     });
   });
 
@@ -57,9 +57,7 @@ describe('FileLoader', () => {
         localPath: '/local',
       });
 
-      expect(loader.toAbsolutePath('/absolute/path.prs')).toBe(
-        '/absolute/path.prs'
-      );
+      expect(loader.toAbsolutePath('/absolute/path.prs')).toBe('/absolute/path.prs');
     });
 
     it('should resolve registry paths', () => {
@@ -68,9 +66,7 @@ describe('FileLoader', () => {
         localPath: '/local',
       });
 
-      expect(loader.toAbsolutePath('@company/frontend')).toBe(
-        '/registry/@company/frontend.prs'
-      );
+      expect(loader.toAbsolutePath('@company/frontend')).toBe('/registry/@company/frontend.prs');
     });
 
     it('should resolve versioned registry paths', () => {
@@ -129,9 +125,7 @@ describe('FileLoader', () => {
         loc: { file: '<test>', line: 1, column: 1 },
       };
 
-      expect(loader.resolveRef(ref, '/project/parent.prs')).toBe(
-        '/project/child.prs'
-      );
+      expect(loader.resolveRef(ref, '/project/parent.prs')).toBe('/project/child.prs');
     });
 
     it('should resolve absolute paths', () => {
@@ -149,9 +143,7 @@ describe('FileLoader', () => {
         loc: { file: '<test>', line: 1, column: 1 },
       };
 
-      expect(loader.resolveRef(ref, '/project/child.prs')).toBe(
-        '/registry/@company/base.prs'
-      );
+      expect(loader.resolveRef(ref, '/project/child.prs')).toBe('/registry/@company/base.prs');
     });
 
     it('should resolve nested relative paths', () => {
@@ -169,9 +161,30 @@ describe('FileLoader', () => {
       };
 
       // Node's path.resolve normalizes the path
-      expect(loader.resolveRef(ref, '/project/src/main.prs')).toBe(
-        '/project/shared/utils.prs'
-      );
+      expect(loader.resolveRef(ref, '/project/src/main.prs')).toBe('/project/shared/utils.prs');
+    });
+  });
+
+  describe('load error handling', () => {
+    it('should re-throw non-ENOENT errors', async () => {
+      const loader = new FileLoader({
+        registryPath: REGISTRY_DIR,
+        localPath: FIXTURES_DIR,
+      });
+
+      // Try to load a directory instead of a file - causes EISDIR error
+      await expect(loader.load(FIXTURES_DIR)).rejects.toThrow();
+    });
+
+    it('should throw FileNotFoundError for ENOENT', async () => {
+      const loader = new FileLoader({
+        registryPath: REGISTRY_DIR,
+        localPath: FIXTURES_DIR,
+      });
+
+      await expect(
+        loader.load(resolve(FIXTURES_DIR, 'definitely-does-not-exist.prs'))
+      ).rejects.toThrow('File not found');
     });
   });
 });
