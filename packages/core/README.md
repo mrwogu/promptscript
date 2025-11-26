@@ -49,7 +49,7 @@ const merged = deepMerge(parent, child);
 
 ## API Reference
 
-See [API Documentation](https://promptscript.dev/api/core).
+See [API Documentation](https://mrwogu.github.io/promptscript/api/core/).
 
 ## License
 

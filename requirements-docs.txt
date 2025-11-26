@@ -2,3 +2,5 @@ mkdocs-material>=9.5
 mkdocs-minify-plugin>=0.8
 mkdocs-git-revision-date-localized-plugin>=1.2
 mkdocs-git-committers-plugin-2>=2.3
+pillow>=10.0
+cairosvg>=2.7
