@@ -16,19 +16,19 @@ flowchart TB
         sec["@core/security<br/>Security policies"]
         comp["@core/compliance<br/>Compliance rules"]
     end
-    
+
     subgraph Teams["Team Registries"]
         fe["@frontend/base"]
         be["@backend/base"]
         mobile["@mobile/base"]
     end
-    
+
     subgraph Projects["Projects"]
         p1["web-app"]
         p2["api-service"]
         p3["mobile-app"]
     end
-    
+
     org --> fe
     org --> be
     org --> mobile
@@ -38,7 +38,7 @@ flowchart TB
     comp --> fe
     comp --> be
     comp --> mobile
-    
+
     fe --> p1
     be --> p2
     mobile --> p3
@@ -86,7 +86,7 @@ promptscript-registry/
 @identity {
   """
   You are an AI assistant at ACME Corporation.
-  
+
   Core values:
   - Quality over speed
   - Security first
@@ -101,7 +101,7 @@ promptscript-registry/
     documentation: required
     testing: required
   }
-  
+
   git: {
     conventionalCommits: true
     branchNaming: "feature|bugfix|hotfix/TICKET-description"
@@ -170,7 +170,7 @@ promptscript-registry/
 @knowledge {
   """
   ## Security Resources
-  
+
   - Security guidelines: https://wiki.acme.com/security
   - Vulnerability reporting: security@acme.com
   - Security review checklist: https://wiki.acme.com/security-checklist
@@ -196,7 +196,7 @@ promptscript-registry/
 @identity {
   """
   You are a frontend development expert.
-  
+
   Expertise:
   - React and TypeScript
   - Modern CSS and design systems
@@ -208,16 +208,16 @@ promptscript-registry/
 @context {
   """
   ## Tech Stack
-  
+
   - Framework: React 18+
   - Language: TypeScript 5+
   - Build: Vite
   - Styling: TailwindCSS
   - Testing: Vitest + Testing Library
   - State: React Query + Zustand
-  
+
   ## Architecture
-  
+
   - Component-driven development
   - Feature-based folder structure
   - Shared design system (@acme/ui)
@@ -232,12 +232,12 @@ promptscript-registry/
       props: "TypeScript interfaces"
     }
   }
-  
+
   accessibility: {
     wcag: "2.1 AA"
     testing: required
   }
-  
+
   performance: {
     bundleSize: "monitored"
     coreWebVitals: "tracked"
@@ -268,7 +268,7 @@ promptscript-registry/
 @identity {
   """
   You are a backend development expert.
-  
+
   Expertise:
   - Node.js and TypeScript
   - RESTful and GraphQL APIs
@@ -280,16 +280,16 @@ promptscript-registry/
 @context {
   """
   ## Tech Stack
-  
+
   - Runtime: Node.js 20+
   - Language: TypeScript 5+
   - Framework: NestJS
   - Database: PostgreSQL + Redis
   - ORM: Prisma
   - Testing: Jest
-  
+
   ## Architecture
-  
+
   - Clean architecture
   - Domain-driven design
   - Event-driven microservices
@@ -302,7 +302,7 @@ promptscript-registry/
     documentation: "OpenAPI 3.0"
     authentication: "JWT + OAuth2"
   }
-  
+
   database: {
     migrations: required
     indexing: "reviewed"
@@ -323,7 +323,7 @@ promptscript-registry/
 ### Project Configuration
 
 ```promptscript
-# promptscript/project.prs
+# .promptscript/project.prs
 @meta {
   id: "customer-portal"
   version: "1.0.0"
@@ -334,20 +334,20 @@ promptscript-registry/
 @context {
   project: "Customer Portal"
   repository: "github.com/acme/customer-portal"
-  
+
   """
   ## Project Overview
-  
+
   Self-service portal for ACME customers.
-  
+
   Features:
   - Account management
   - Order history
   - Support tickets
   - Billing information
-  
+
   ## Key Integrations
-  
+
   - Auth: Okta SSO
   - Payments: Stripe
   - Analytics: Mixpanel
@@ -357,15 +357,15 @@ promptscript-registry/
 @knowledge {
   """
   ## API Endpoints
-  
+
   Base URL: https://api.acme.com/v1
-  
+
   - GET /customers/:id - Get customer
   - GET /orders - List orders
   - POST /tickets - Create support ticket
-  
+
   ## Design System
-  
+
   Use @acme/ui components:
   - Button, Input, Select
   - Card, Modal, Drawer
@@ -379,7 +379,7 @@ promptscript-registry/
 ```yaml
 # promptscript.config.yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 registry:
   url: https://github.com/acme/promptscript-registry
@@ -412,11 +412,11 @@ name: PromptScript CI
 on:
   push:
     paths:
-      - 'promptscript/**'
+      - '.promptscript/**'
       - 'promptscript.config.yaml'
   pull_request:
     paths:
-      - 'promptscript/**'
+      - '.promptscript/**'
       - 'promptscript.config.yaml'
 
 jobs:
@@ -424,19 +424,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
-      
+
       - name: Validate
         run: prs validate --strict
         env:
           GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
-      
+
       - name: Check compiled files
         run: |
           prs compile --all
@@ -464,18 +464,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
-      
+
       - name: Validate all files
         run: |
           find . -name "*.prs" -exec prs validate {} \;
-      
+
       - name: Check for breaking changes
         if: github.event_name == 'pull_request'
         run: |
@@ -503,10 +503,10 @@ Follow semantic versioning for registry files:
 
 ### Access Control
 
-| Role | Permissions |
-|------|-------------|
-| Admin | Full registry access |
-| Team Lead | Team namespace write |
+| Role      | Permissions            |
+| --------- | ---------------------- |
+| Admin     | Full registry access   |
+| Team Lead | Team namespace write   |
 | Developer | Read-only, PR creation |
 
 ## Monitoring and Analytics
@@ -519,8 +519,8 @@ Track adoption across projects:
 # In each project's config
 analytics:
   enabled: true
-  projectId: "customer-portal"
-  team: "frontend"
+  projectId: 'customer-portal'
+  team: 'frontend'
 ```
 
 ### Quality Metrics
@@ -558,16 +558,16 @@ Monitor:
 ## Best Practices
 
 !!! tip "Registry Organization"
-    Keep the registry organized with clear namespaces and documentation.
+Keep the registry organized with clear namespaces and documentation.
 
 !!! tip "Version Pinning"
-    Pin versions in production projects to avoid unexpected changes.
+Pin versions in production projects to avoid unexpected changes.
 
 !!! tip "Change Communication"
-    Notify teams before making registry changes.
+Notify teams before making registry changes.
 
 !!! warning "Security Review"
-    Review security-related changes carefully before merging.
+Review security-related changes carefully before merging.
 
 !!! warning "Breaking Changes"
-    Use major version bumps and provide migration guides for breaking changes.
+Use major version bumps and provide migration guides for breaking changes.

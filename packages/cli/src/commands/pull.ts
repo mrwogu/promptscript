@@ -49,8 +49,8 @@ export async function pullCommand(options: PullOptions): Promise<void> {
     // Read the source file
     const content = await readFile(sourcePath, 'utf-8');
 
-    // Destination in local promptscript folder
-    const destPath = resolve('./promptscript/.inherited', inheritPath);
+    // Destination in local .promptscript folder
+    const destPath = resolve('./.promptscript/.inherited', inheritPath);
 
     // Check if destination exists and force flag
     if (existsSync(destPath) && !options.force) {

@@ -19,17 +19,17 @@ flowchart LR
         C[".cursorrules"]
         D["Custom docs"]
     end
-    
+
     subgraph PS["PromptScript"]
         E["project.prs"]
     end
-    
+
     subgraph Output["Generated"]
         F[".github/copilot-instructions.md"]
         G["CLAUDE.md"]
         H[".cursorrules"]
     end
-    
+
     A --> E
     B --> E
     C --> E
@@ -58,15 +58,15 @@ cat AI_INSTRUCTIONS.md
 
 Map your content to PromptScript blocks:
 
-| Content Type | PromptScript Block |
-|--------------|-------------------|
-| Identity/persona | `@identity` |
-| Project context | `@context` |
-| Coding standards | `@standards` |
-| Don'ts/restrictions | `@restrictions` |
-| Custom commands | `@shortcuts` |
-| Reference docs | `@knowledge` |
-| Configuration | `@params` |
+| Content Type        | PromptScript Block |
+| ------------------- | ------------------ |
+| Identity/persona    | `@identity`        |
+| Project context     | `@context`         |
+| Coding standards    | `@standards`       |
+| Don'ts/restrictions | `@restrictions`    |
+| Custom commands     | `@shortcuts`       |
+| Reference docs      | `@knowledge`       |
+| Configuration       | `@params`          |
 
 ### Example Analysis
 
@@ -78,20 +78,24 @@ Map your content to PromptScript blocks:
 You are a senior developer working on the checkout service.
 
 ## Tech Stack
+
 - Node.js 20
 - TypeScript
 - PostgreSQL
 
 ## Standards
+
 - Use functional programming
 - Write tests for all code
 - Document public APIs
 
 ## Don'ts
+
 - Never commit secrets
 - Don't use var
 
 ## Commands
+
 /test - Run tests
 /lint - Run linter
 ```
@@ -115,7 +119,7 @@ prs init
 ### Create Base Structure
 
 ```promptscript
-# promptscript/project.prs
+# .promptscript/project.prs
 @meta {
   id: "checkout-service"
   version: "1.0.0"
@@ -152,6 +156,7 @@ Focus on clean, maintainable code.
 
 ```markdown
 ## Tech Stack
+
 - Node.js 20
 - TypeScript
 - PostgreSQL
@@ -168,7 +173,7 @@ Focus on clean, maintainable code.
     database: "PostgreSQL"
     cache: "Redis"
   }
-  
+
   """
   The checkout service handles payment processing
   and order management for the e-commerce platform.
@@ -182,6 +187,7 @@ Focus on clean, maintainable code.
 
 ```markdown
 ## Coding Standards
+
 - Use functional programming patterns
 - Write tests for all code (80% coverage)
 - Document public APIs with JSDoc
@@ -215,6 +221,7 @@ Focus on clean, maintainable code.
 
 ```markdown
 ## Don'ts
+
 - Never commit secrets or credentials
 - Don't use `var`, use `const` or `let`
 - Never bypass code review
@@ -236,6 +243,7 @@ Focus on clean, maintainable code.
 
 ```markdown
 ## Commands
+
 - /test - Run the test suite
 - /lint - Run ESLint
 - /build - Build for production
@@ -259,10 +267,12 @@ Focus on clean, maintainable code.
 ## API Reference
 
 ### Authentication
+
 - POST /auth/login
 - POST /auth/logout
 
 ### Orders
+
 - GET /orders
 - POST /orders
 ```
@@ -273,11 +283,11 @@ Focus on clean, maintainable code.
 @knowledge {
   """
   ## API Reference
-  
+
   ### Authentication
   - POST /auth/login
   - POST /auth/logout
-  
+
   ### Orders
   - GET /orders - List orders
   - POST /orders - Create order
@@ -297,26 +307,31 @@ Focus on clean, maintainable code.
 You are a senior developer working on the checkout service.
 
 ## Tech Stack
+
 - Node.js 20
 - TypeScript
 - PostgreSQL
 
 ## Standards
+
 - Use functional programming
 - Write tests (80% coverage)
 - Document public APIs
 
 ## Don'ts
+
 - Never commit secrets
 - Don't use var
 
 ## Commands
+
 /test - Run tests
 /lint - Run linter
 
 ## API Reference
 
 ### Orders
+
 - GET /orders
 - POST /orders
 ```
@@ -367,7 +382,7 @@ You are a senior developer working on the checkout service.
 @knowledge {
   """
   ## API Reference
-  
+
   ### Orders
   - GET /orders - List orders
   - POST /orders - Create order
@@ -382,7 +397,7 @@ You are a senior developer working on the checkout service.
 ```yaml
 # promptscript.config.yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 targets:
   github:
@@ -430,7 +445,7 @@ git rm --cached .github/copilot-instructions.md CLAUDE.md .cursorrules
 ### Commit Migration
 
 ```bash
-git add promptscript/ promptscript.config.yaml
+git add .promptscript/ promptscript.config.yaml
 git add .github/copilot-instructions.md CLAUDE.md .cursorrules
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```

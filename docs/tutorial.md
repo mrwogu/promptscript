@@ -48,7 +48,7 @@ Create `registry/@acme/org.prs`:
     documentation: required
     testing: required
   }
-  
+
   security: {
     inputValidation: required
     secretsHandling: "never hardcode"
@@ -119,7 +119,7 @@ Create `registry/@acme/frontend-team.prs`:
 
 Now create a project-specific configuration.
 
-Create `promptscript/project.prs` in your project:
+Create `.promptscript/project.prs` in your project:
 
 ```promptscript
 @meta {
@@ -133,7 +133,7 @@ Create `promptscript/project.prs` in your project:
 @context {
   project: "Checkout Application"
   description: "E-commerce checkout flow"
-  
+
   """
   This is the checkout application for ACME's e-commerce platform.
   Key features:
@@ -152,7 +152,7 @@ Create `promptscript/project.prs` in your project:
       e2e: required
     }
   }
-  
+
   accessibility: {
     wcag: "2.1 AA"
     required: true
@@ -168,13 +168,13 @@ Create `promptscript/project.prs` in your project:
 @knowledge {
   """
   ## API Endpoints
-  
+
   - POST /api/checkout/create - Create checkout session
   - PUT /api/checkout/:id - Update checkout
   - POST /api/checkout/:id/complete - Complete purchase
-  
+
   ## Key Components
-  
+
   - CheckoutWizard - Main wizard container
   - AddressForm - Shipping/billing address
   - PaymentForm - Stripe Elements integration
@@ -189,7 +189,7 @@ Create `promptscript.config.yaml`:
 
 ```yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 registry:
   path: ./registry
@@ -198,11 +198,11 @@ targets:
   github:
     enabled: true
     output: .github/copilot-instructions.md
-  
+
   claude:
     enabled: true
     output: CLAUDE.md
-  
+
   cursor:
     enabled: true
     output: .cursorrules
@@ -239,24 +239,24 @@ The inheritance chain creates a layered configuration:
 flowchart TD
     A["@acme/org<br/>Organization base"] --> B["@acme/frontend-team<br/>Team specifics"]
     B --> C["checkout-app<br/>Project specifics"]
-    
+
     subgraph "Final Output"
         D["Merged Configuration"]
     end
-    
+
     C --> D
 ```
 
 **How merging works:**
 
-| Block Type | Merge Behavior |
-|------------|----------------|
-| `@identity` | Concatenates text |
-| `@context` | Concatenates text, merges properties |
-| `@standards` | Deep merges objects |
-| `@restrictions` | Concatenates arrays |
-| `@shortcuts` | Merges, child overrides parent |
-| `@knowledge` | Concatenates text |
+| Block Type      | Merge Behavior                       |
+| --------------- | ------------------------------------ |
+| `@identity`     | Concatenates text                    |
+| `@context`      | Concatenates text, merges properties |
+| `@standards`    | Deep merges objects                  |
+| `@restrictions` | Concatenates arrays                  |
+| `@shortcuts`    | Merges, child overrides parent       |
+| `@knowledge`    | Concatenates text                    |
 
 ## Step 6: Add to CI/CD
 
@@ -273,17 +273,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
-      
+
       - name: Validate
         run: prs validate --strict
-      
+
       - name: Check compiled files are up to date
         run: |
           prs compile --all

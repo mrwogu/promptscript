@@ -9,7 +9,7 @@
   --md-accent-fg-color: #2563eb; /* blue - gradient middle */
 }
 
-[data-md-color-scheme="slate"] {
+[data-md-color-scheme='slate'] {
   /* Dark mode - use logo dark backgrounds */
   --md-default-bg-color: #0b1220; /* logo background */
   --md-default-bg-color--light: #0f1b33; /* logo secondary */
@@ -41,6 +41,31 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Hide permanent link in hero to keep h1 centered */
+.md-typeset .hero h1 .headerlink {
+  display: none;
+}
+
+/* Hero buttons - stack on mobile */
+.md-typeset .hero .md-button {
+  display: inline-block;
+  margin: 0.25rem;
+}
+
+@media screen and (max-width: 480px) {
+  .md-typeset .hero h1 {
+    font-size: 2rem;
+  }
+
+  .md-typeset .hero .md-button {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
 }
 
 /* Feature grid */

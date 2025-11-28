@@ -14,6 +14,7 @@ Real-world PromptScript configuration examples.
 The simplest possible PromptScript configuration.
 
 [Minimal Example →](minimal.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -21,6 +22,7 @@ The simplest possible PromptScript configuration.
 Multi-project setup with shared team configuration.
 
 [Team Setup →](team-setup.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -28,6 +30,7 @@ Multi-project setup with shared team configuration.
 Full enterprise deployment with governance.
 
 [Enterprise Example →](enterprise.md)
+
 </div>
 
 </div>
@@ -116,7 +119,7 @@ Full enterprise deployment with governance.
     documentation: "OpenAPI 3.0"
     authentication: "JWT"
   }
-  
+
   database: {
     migrations: required
     transactions: "for multi-step operations"
@@ -143,7 +146,7 @@ Full enterprise deployment with governance.
 ```yaml
 # promptscript.config.yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 targets:
   github:
@@ -155,9 +158,9 @@ targets:
 ```yaml
 # promptscript.config.yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
   include:
-    - "promptscript/**/*.prs"
+    - '.promptscript/**/*.prs'
 
 registry:
   path: ./registry

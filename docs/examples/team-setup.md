@@ -15,12 +15,12 @@ workspace/
 │   └── @team/
 │       └── frontend.prs          # Shared team config
 ├── project-a/
-│   ├── promptscript/
+│   ├── .promptscript/
 │   │   └── project.prs
 │   ├── promptscript.config.yaml
 │   └── ...
 ├── project-b/
-│   ├── promptscript/
+│   ├── .promptscript/
 │   │   └── project.prs
 │   ├── promptscript.config.yaml
 │   └── ...
@@ -49,15 +49,15 @@ workspace/
 @context {
   """
   ## Tech Stack
-  
+
   - React 18 with TypeScript
   - Vite for development and building
   - TailwindCSS for styling
   - React Query for server state
   - Vitest + Testing Library for tests
-  
+
   ## Architecture
-  
+
   - Feature-based folder structure
   - Shared component library (@company/ui)
   - API client generation from OpenAPI specs
@@ -71,13 +71,13 @@ workspace/
     components: "functional with hooks"
     stateManagement: "React Query for server, Zustand for client"
   }
-  
+
   testing: {
     framework: "Vitest"
     coverage: 80
     patterns: ["unit", "integration"]
   }
-  
+
   accessibility: {
     wcag: "2.1 AA"
     testing: "required"
@@ -101,7 +101,7 @@ workspace/
 
 ## Project Configurations
 
-### project-a/promptscript/project.prs
+### project-a/.promptscript/project.prs
 
 ```promptscript
 @meta {
@@ -114,15 +114,15 @@ workspace/
 @context {
   project: "Customer Dashboard"
   repository: "github.com/company/customer-dashboard"
-  
+
   """
   ## About
-  
+
   Self-service dashboard for customers to manage their accounts,
   view orders, and track shipments.
-  
+
   ## Key Features
-  
+
   - Account settings and preferences
   - Order history and tracking
   - Support ticket management
@@ -133,17 +133,17 @@ workspace/
 @knowledge {
   """
   ## API Endpoints
-  
+
   Base URL: https://api.company.com/v1
-  
+
   ### Account
   - GET /account - Get account details
   - PUT /account - Update account
-  
+
   ### Orders
   - GET /orders - List orders
   - GET /orders/:id - Get order details
-  
+
   ### Support
   - GET /tickets - List tickets
   - POST /tickets - Create ticket
@@ -160,7 +160,7 @@ workspace/
 
 ```yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 registry:
   path: ../registry
@@ -180,7 +180,7 @@ validation:
   strict: true
 ```
 
-### project-b/promptscript/project.prs
+### project-b/.promptscript/project.prs
 
 ```promptscript
 @meta {
@@ -193,15 +193,15 @@ validation:
 @context {
   project: "Admin Portal"
   repository: "github.com/company/admin-portal"
-  
+
   """
   ## About
-  
+
   Internal admin portal for managing customers, orders,
   and system configuration.
-  
+
   ## Key Features
-  
+
   - Customer management
   - Order processing
   - System configuration
@@ -232,7 +232,7 @@ validation:
 
 ```yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 registry:
   path: ../registry
@@ -253,11 +253,11 @@ flowchart TD
     A["@team/frontend<br/>Team base configuration"] --> B["customer-dashboard<br/>Project A"]
     A --> C["admin-portal<br/>Project B"]
     A --> D["marketing-site<br/>Project C"]
-    
+
     subgraph "Inherited"
         E["Identity<br/>Standards<br/>Restrictions<br/>Shortcuts"]
     end
-    
+
     A --- E
 ```
 
@@ -307,7 +307,7 @@ name: PromptScript CI
 on:
   push:
     paths:
-      - 'promptscript/**'
+      - '.promptscript/**'
       - 'promptscript.config.yaml'
 
 jobs:
@@ -315,23 +315,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Checkout registry
         uses: actions/checkout@v4
         with:
           repository: company/promptscript-registry
           path: registry
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
-      
+
       - name: Validate
         run: prs validate --strict
-      
+
       - name: Check compiled files
         run: |
           prs compile --all

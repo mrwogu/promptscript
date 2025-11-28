@@ -84,13 +84,13 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
     const compiler = new Compiler({
       resolver: {
         registryPath: config.registry?.path ?? './registry',
-        localPath: './promptscript',
+        localPath: './.promptscript',
       },
       validator: config.validation,
       formatters: targets,
     });
 
-    const entryPath = resolve('./promptscript/project.prs');
+    const entryPath = resolve('./.promptscript/project.prs');
 
     if (!existsSync(entryPath)) {
       spinner.fail('Entry file not found');
@@ -119,7 +119,7 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
     if (options.watch) {
       ConsoleOutput.newline();
       ConsoleOutput.info('Watching for changes... (Ctrl+C to stop)');
-      watchForChanges('./promptscript', () => compileCommand({ ...options, watch: false }));
+      watchForChanges('./.promptscript', () => compileCommand({ ...options, watch: false }));
     }
   } catch (error) {
     spinner.fail('Error');

@@ -11,7 +11,7 @@ The simplest possible PromptScript setup for a single project.
 
 ```
 my-project/
-├── promptscript/
+├── .promptscript/
 │   └── project.prs
 ├── promptscript.config.yaml
 ├── .github/
@@ -21,7 +21,7 @@ my-project/
 
 ## Files
 
-### promptscript/project.prs
+### .promptscript/project.prs
 
 ```promptscript
 @meta {
@@ -60,7 +60,7 @@ my-project/
 
 ```yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 targets:
   github:
@@ -129,17 +129,17 @@ To also generate for Claude and Cursor:
 ```yaml
 # promptscript.config.yaml
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 targets:
   github:
     enabled: true
     output: .github/copilot-instructions.md
-  
+
   claude:
     enabled: true
     output: CLAUDE.md
-  
+
   cursor:
     enabled: true
     output: .cursorrules

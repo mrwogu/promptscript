@@ -19,7 +19,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
     }
 
     // Create directories
-    await mkdir('promptscript', { recursive: true });
+    await mkdir('.promptscript', { recursive: true });
 
     // Create config
     const config = generateConfig(options);
@@ -27,16 +27,16 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
     // Create project.prs
     const projectPs = generateProjectPs(options);
-    await writeFile('promptscript/project.prs', projectPs, 'utf-8');
+    await writeFile('.promptscript/project.prs', projectPs, 'utf-8');
 
     spinner.succeed('PromptScript initialized');
     ConsoleOutput.newline();
     console.log('Created:');
     ConsoleOutput.success('promptscript.config.yaml');
-    ConsoleOutput.success('promptscript/project.prs');
+    ConsoleOutput.success('.promptscript/project.prs');
     ConsoleOutput.newline();
     console.log('Next steps:');
-    ConsoleOutput.muted('1. Edit promptscript/project.prs');
+    ConsoleOutput.muted('1. Edit .promptscript/project.prs');
     ConsoleOutput.muted('2. Run: prs compile --all');
   } catch (error) {
     spinner.fail('Initialization failed');

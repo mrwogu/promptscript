@@ -45,11 +45,11 @@ prs init
 This creates:
 
 - `promptscript.config.yaml` - Configuration file
-- `promptscript/project.prs` - Your instructions file
+- `.promptscript/project.prs` - Your instructions file
 
 ### 2. Edit Instructions
 
-Open `promptscript/project.prs` and customize:
+Open `.promptscript/project.prs` and customize:
 
 ```promptscript
 @meta {
@@ -110,7 +110,7 @@ After initialization, your project will have:
 
 ```
 your-project/
-├── promptscript/
+├── .promptscript/
 │   └── project.prs          # Your instructions
 ├── promptscript.config.yaml  # Configuration
 ├── .github/
@@ -126,18 +126,18 @@ The `promptscript.config.yaml` file controls compilation:
 ```yaml
 # Input settings
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 # Output targets
 targets:
   github:
     enabled: true
     output: .github/copilot-instructions.md
-  
+
   claude:
     enabled: true
     output: CLAUDE.md
-  
+
   cursor:
     enabled: true
     output: .cursorrules

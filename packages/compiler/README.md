@@ -38,7 +38,7 @@ const myFormatter: Formatter = {
 const compiler = new Compiler({
   resolver: {
     registryPath: './registry',
-    localPath: './promptscript',
+    localPath: './.promptscript',
   },
   validator: {
     requiredGuards: ['@core/guards/compliance'],

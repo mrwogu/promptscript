@@ -95,6 +95,14 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
   </vite-vitest>
 </configuration-files>
 
+<documentation-verification>
+- **Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior
+- **After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed
+- Ensure code examples in documentation remain accurate after modifications
+- If adding new features, add corresponding documentation in `docs/`
+- If changing existing behavior, update affected documentation sections
+</documentation-verification>
+
 <donts>
 - Don't use `any` type
 - Don't use default exports
@@ -106,6 +114,7 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname` instead
 - Don't use ASCII art diagrams - always use Mermaid diagrams instead
 - Don't reference line numbers in test names or comments - lines can change
+- Don't make code changes without verifying documentation consistency
 </donts>
 
 <diagrams>

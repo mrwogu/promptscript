@@ -69,6 +69,7 @@ prs compile --all
 - 🛡️ **Guards** - Compliance rules, blocked patterns
 - 🔌 **Extensible** - Add custom formatters
 - 🏢 **Enterprise Ready** - Audit trails, governance
+- 🚀 **Future-Proof** - Formatter updates automatically adapt your prompts to new AI features and models (like agent skills, tool use, etc.)
 
 ## Getting Started
 
@@ -84,7 +85,7 @@ npm install -g @promptscript/cli
 # Initialize in your project
 prs init
 
-# Edit promptscript/project.prs
+# Edit .promptscript/project.prs
 
 # Compile to all formats
 prs compile --all

@@ -25,7 +25,7 @@ Options:
 Creates:
 
 - `promptscript.config.yaml` - Configuration file
-- `promptscript/project.prs` - Main project file
+- `.promptscript/project.prs` - Main project file
 
 ### Compile
 
@@ -121,7 +121,7 @@ Stats: 234ms (resolve: 45ms, validate: 8ms, format: 181ms)
 ✖ Compilation failed
 
   ✗ @meta.id is required
-    at promptscript/project.prs:1:1
+    at .promptscript/project.prs:1:1
     suggestion: Add id: "your-id" to @meta
 ```
 

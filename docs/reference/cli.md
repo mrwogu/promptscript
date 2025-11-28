@@ -31,12 +31,12 @@ Complete reference for the PromptScript command-line interface.
 
 These options are available for all commands:
 
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Display help information |
-| `-V, --version` | Display version number |
-| `--verbose` | Enable verbose output |
-| `--quiet` | Suppress non-error output |
+| Option          | Description               |
+| --------------- | ------------------------- |
+| `-h, --help`    | Display help information  |
+| `-V, --version` | Display version number    |
+| `--verbose`     | Enable verbose output     |
+| `--quiet`       | Suppress non-error output |
 
 ## Commands
 
@@ -50,11 +50,11 @@ prs init [options]
 
 **Options:**
 
-| Option | Description |
-|--------|-------------|
-| `-t, --team <team>` | Team namespace for organization |
-| `--template <template>` | Project template to use |
-| `-f, --force` | Overwrite existing files |
+| Option                  | Description                     |
+| ----------------------- | ------------------------------- |
+| `-t, --team <team>`     | Team namespace for organization |
+| `--template <template>` | Project template to use         |
+| `-f, --force`           | Overwrite existing files        |
 
 **Examples:**
 
@@ -75,7 +75,7 @@ prs init --force
 **Created Files:**
 
 - `promptscript.config.yaml` - Configuration file
-- `promptscript/project.prs` - Main instructions file
+- `.promptscript/project.prs` - Main instructions file
 
 ---
 
@@ -89,14 +89,14 @@ prs compile [options]
 
 **Options:**
 
-| Option | Description |
-|--------|-------------|
-| `-t, --target <target>` | Compile to specific target |
-| `-a, --all` | Compile to all configured targets |
-| `-w, --watch` | Watch mode for continuous compilation |
-| `-o, --output <dir>` | Override output directory |
-| `--dry-run` | Preview changes without writing |
-| `-c, --config <path>` | Path to config file |
+| Option                  | Description                           |
+| ----------------------- | ------------------------------------- |
+| `-t, --target <target>` | Compile to specific target            |
+| `-a, --all`             | Compile to all configured targets     |
+| `-w, --watch`           | Watch mode for continuous compilation |
+| `-o, --output <dir>`    | Override output directory             |
+| `--dry-run`             | Preview changes without writing       |
+| `-c, --config <path>`   | Path to config file                   |
 
 **Examples:**
 
@@ -121,11 +121,11 @@ prs compile --all --config ./custom.config.yaml
 
 **Available Targets:**
 
-| Target | Output File | Description |
-|--------|-------------|-------------|
+| Target   | Output File                       | Description    |
+| -------- | --------------------------------- | -------------- |
 | `github` | `.github/copilot-instructions.md` | GitHub Copilot |
-| `claude` | `CLAUDE.md` | Claude Code |
-| `cursor` | `.cursorrules` | Cursor |
+| `claude` | `CLAUDE.md`                       | Claude Code    |
+| `cursor` | `.cursorrules`                    | Cursor         |
 
 ---
 
@@ -139,10 +139,10 @@ prs validate [options] [files...]
 
 **Options:**
 
-| Option | Description |
-|--------|-------------|
-| `--strict` | Treat warnings as errors |
-| `--fix` | Auto-fix fixable issues |
+| Option              | Description                |
+| ------------------- | -------------------------- |
+| `--strict`          | Treat warnings as errors   |
+| `--fix`             | Auto-fix fixable issues    |
 | `--format <format>` | Output format (text, json) |
 
 **Examples:**
@@ -158,7 +158,7 @@ prs validate --strict
 prs validate --fix
 
 # Validate specific files
-prs validate promptscript/project.prs
+prs validate .promptscript/project.prs
 
 # JSON output for CI
 prs validate --format json
@@ -166,11 +166,11 @@ prs validate --format json
 
 **Exit Codes:**
 
-| Code | Meaning |
-|------|---------|
-| 0 | Validation passed |
-| 1 | Validation errors found |
-| 2 | Validation warnings found (with --strict) |
+| Code | Meaning                                   |
+| ---- | ----------------------------------------- |
+| 0    | Validation passed                         |
+| 1    | Validation errors found                   |
+| 2    | Validation warnings found (with --strict) |
 
 ---
 
@@ -184,12 +184,12 @@ prs diff [options]
 
 **Options:**
 
-| Option | Description |
-|--------|-------------|
+| Option                  | Description                   |
+| ----------------------- | ----------------------------- |
 | `-t, --target <target>` | Show diff for specific target |
-| `-a, --all` | Show diff for all targets |
-| `--color` | Force colored output |
-| `--no-color` | Disable colored output |
+| `-a, --all`             | Show diff for all targets     |
+| `--color`               | Force colored output          |
+| `--no-color`            | Disable colored output        |
 
 **Examples:**
 
@@ -213,10 +213,10 @@ prs pull [options]
 
 **Options:**
 
-| Option | Description |
-|--------|-------------|
-| `-f, --force` | Force overwrite local changes |
-| `--dry-run` | Preview changes without pulling |
+| Option        | Description                     |
+| ------------- | ------------------------------- |
+| `-f, --force` | Force overwrite local changes   |
+| `--dry-run`   | Preview changes without pulling |
 
 **Examples:**
 
@@ -243,8 +243,8 @@ prs check [options]
 
 **Options:**
 
-| Option | Description |
-|--------|-------------|
+| Option  | Description           |
+| ------- | --------------------- |
 | `--fix` | Attempt to fix issues |
 
 **Examples:**
@@ -266,7 +266,7 @@ The CLI uses `promptscript.config.yaml` by default. Override with `--config`:
 ```yaml
 # Input settings
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 # Registry configuration
 registry:
@@ -279,11 +279,11 @@ targets:
   github:
     enabled: true
     output: .github/copilot-instructions.md
-  
+
   claude:
     enabled: true
     output: CLAUDE.md
-  
+
   cursor:
     enabled: true
     output: .cursorrules
@@ -296,28 +296,28 @@ validation:
 # Watch settings
 watch:
   include:
-    - "promptscript/**/*.prs"
+    - '.promptscript/**/*.prs'
   exclude:
-    - "**/node_modules/**"
+    - '**/node_modules/**'
 ```
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `PROMPTSCRIPT_CONFIG` | Path to config file |
-| `PROMPTSCRIPT_REGISTRY` | Registry path or URL |
-| `PROMPTSCRIPT_VERBOSE` | Enable verbose output |
-| `NO_COLOR` | Disable colored output |
+| Variable                | Description            |
+| ----------------------- | ---------------------- |
+| `PROMPTSCRIPT_CONFIG`   | Path to config file    |
+| `PROMPTSCRIPT_REGISTRY` | Registry path or URL   |
+| `PROMPTSCRIPT_VERBOSE`  | Enable verbose output  |
+| `NO_COLOR`              | Disable colored output |
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | Error occurred |
-| 2 | Warning (with --strict) |
-| 130 | Interrupted (Ctrl+C) |
+| Code | Meaning                 |
+| ---- | ----------------------- |
+| 0    | Success                 |
+| 1    | Error occurred          |
+| 2    | Warning (with --strict) |
+| 130  | Interrupted (Ctrl+C)    |
 
 ## Shell Completion
 

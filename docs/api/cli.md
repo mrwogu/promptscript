@@ -1,6 +1,6 @@
 ---
 title: CLI API
-description: "@promptscript/cli package API reference"
+description: '@promptscript/cli package API reference'
 ---
 
 # @promptscript/cli
@@ -26,7 +26,7 @@ await run(['compile', '--all']);
 // Use individual commands
 await commands.compile({
   all: true,
-  target: 'github'
+  target: 'github',
 });
 ```
 
@@ -43,7 +43,7 @@ await init({
   path: process.cwd(),
   team: 'frontend',
   template: 'default',
-  force: false
+  force: false,
 });
 ```
 
@@ -53,13 +53,13 @@ await init({
 interface InitOptions {
   /** Target directory */
   path?: string;
-  
+
   /** Team namespace */
   team?: string;
-  
+
   /** Project template */
   template?: 'default' | 'minimal' | 'enterprise';
-  
+
   /** Overwrite existing files */
   force?: boolean;
 }
@@ -73,11 +73,11 @@ Compile PromptScript files.
 import { compile } from '@promptscript/cli';
 
 const result = await compile({
-  entry: './promptscript/project.prs',
+  entry: './.promptscript/project.prs',
   target: 'github',
   output: '.github/copilot-instructions.md',
   watch: false,
-  dryRun: false
+  dryRun: false,
 });
 ```
 
@@ -87,22 +87,22 @@ const result = await compile({
 interface CompileCommandOptions {
   /** Entry file */
   entry?: string;
-  
+
   /** Target format */
   target?: string;
-  
+
   /** Compile all targets */
   all?: boolean;
-  
+
   /** Output path */
   output?: string;
-  
+
   /** Watch mode */
   watch?: boolean;
-  
+
   /** Preview without writing */
   dryRun?: boolean;
-  
+
   /** Config file path */
   config?: string;
 }
@@ -116,10 +116,10 @@ Validate PromptScript files.
 import { validate } from '@promptscript/cli';
 
 const result = await validate({
-  files: ['./promptscript/project.prs'],
+  files: ['./.promptscript/project.prs'],
   strict: true,
   fix: false,
-  format: 'text'
+  format: 'text',
 });
 
 console.log('Valid:', result.valid);
@@ -133,13 +133,13 @@ console.log('Warnings:', result.warnings.length);
 interface ValidateCommandOptions {
   /** Files to validate */
   files?: string[];
-  
+
   /** Strict mode */
   strict?: boolean;
-  
+
   /** Auto-fix issues */
   fix?: boolean;
-  
+
   /** Output format */
   format?: 'text' | 'json';
 }
@@ -155,7 +155,7 @@ import { diff } from '@promptscript/cli';
 const result = await diff({
   target: 'github',
   all: false,
-  color: true
+  color: true,
 });
 
 console.log(result.diff);
@@ -167,10 +167,10 @@ console.log(result.diff);
 interface DiffCommandOptions {
   /** Target to diff */
   target?: string;
-  
+
   /** Diff all targets */
   all?: boolean;
-  
+
   /** Enable color output */
   color?: boolean;
 }
@@ -199,9 +199,9 @@ const config = await resolveConfig({
   configPath: './custom.config.yaml',
   overrides: {
     targets: {
-      github: { enabled: true }
-    }
-  }
+      github: { enabled: true },
+    },
+  },
 });
 ```
 
@@ -214,7 +214,7 @@ interface Config {
     include?: string[];
     exclude?: string[];
   };
-  
+
   registry?: {
     path?: string;
     url?: string;
@@ -222,7 +222,7 @@ interface Config {
       token?: string;
     };
   };
-  
+
   targets: {
     [name: string]: {
       enabled: boolean;
@@ -230,12 +230,12 @@ interface Config {
       options?: Record<string, unknown>;
     };
   };
-  
+
   validation?: {
     strict?: boolean;
     rules?: Record<string, string>;
   };
-  
+
   watch?: {
     include?: string[];
     exclude?: string[];
@@ -256,7 +256,7 @@ import { createOutput } from '@promptscript/cli';
 const output = createOutput({
   color: true,
   verbose: false,
-  quiet: false
+  quiet: false,
 });
 
 output.info('Processing...');
@@ -274,7 +274,7 @@ import { createProgress } from '@promptscript/cli';
 
 const progress = createProgress({
   total: 10,
-  label: 'Compiling'
+  label: 'Compiling',
 });
 
 for (let i = 0; i < 10; i++) {
@@ -310,29 +310,27 @@ import { definePlugin } from '@promptscript/cli';
 
 const myPlugin = definePlugin({
   name: 'my-plugin',
-  
+
   // Add new commands
   commands: {
     'my-command': {
       description: 'My custom command',
-      options: [
-        { name: '--flag', description: 'A flag' }
-      ],
+      options: [{ name: '--flag', description: 'A flag' }],
       action: async (options) => {
         console.log('Running my command');
-      }
-    }
+      },
+    },
   },
-  
+
   // Hook into existing commands
   hooks: {
-    'beforeCompile': async (context) => {
+    beforeCompile: async (context) => {
       console.log('Before compile');
     },
-    'afterCompile': async (context, result) => {
+    afterCompile: async (context, result) => {
       console.log('After compile');
-    }
-  }
+    },
+  },
 });
 
 export default myPlugin;
@@ -352,16 +350,16 @@ plugins:
 
 ### Plugin Hooks
 
-| Hook | Description |
-|------|-------------|
-| `beforeInit` | Before initialization |
-| `afterInit` | After initialization |
-| `beforeCompile` | Before compilation |
-| `afterCompile` | After compilation |
-| `beforeValidate` | Before validation |
-| `afterValidate` | After validation |
-| `beforeWatch` | Before watch starts |
-| `onChange` | On file change (watch mode) |
+| Hook             | Description                 |
+| ---------------- | --------------------------- |
+| `beforeInit`     | Before initialization       |
+| `afterInit`      | After initialization        |
+| `beforeCompile`  | Before compilation          |
+| `afterCompile`   | After compilation           |
+| `beforeValidate` | Before validation           |
+| `afterValidate`  | After validation            |
+| `beforeWatch`    | Before watch starts         |
+| `onChange`       | On file change (watch mode) |
 
 ## Error Handling
 
@@ -382,13 +380,13 @@ try {
 
 ### Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | General error |
-| 2 | Validation error (with --strict) |
-| 3 | Configuration error |
-| 130 | Interrupted (Ctrl+C) |
+| Code | Meaning                          |
+| ---- | -------------------------------- |
+| 0    | Success                          |
+| 1    | General error                    |
+| 2    | Validation error (with --strict) |
+| 3    | Configuration error              |
+| 130  | Interrupted (Ctrl+C)             |
 
 ## Testing
 
@@ -403,12 +401,12 @@ describe('compile command', () => {
       cwd: '/test/project',
       files: {
         'promptscript/project.prs': '...',
-        'promptscript.config.yaml': '...'
-      }
+        'promptscript.config.yaml': '...',
+      },
     });
-    
+
     const result = await cli.run(['compile', '--all']);
-    
+
     expect(result.exitCode).toBe(0);
     expect(result.files['.github/copilot-instructions.md']).toBeDefined();
   });
@@ -422,11 +420,11 @@ import { mockConfig, mockRegistry } from '@promptscript/cli/testing';
 
 const config = mockConfig({
   targets: {
-    github: { enabled: true }
-  }
+    github: { enabled: true },
+  },
 });
 
 const registry = mockRegistry({
-  '@company/base': '...'
+  '@company/base': '...',
 });
 ```

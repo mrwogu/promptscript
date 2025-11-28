@@ -58,13 +58,13 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
     const compiler = new Compiler({
       resolver: {
         registryPath: config.registry?.path ?? './registry',
-        localPath: './promptscript',
+        localPath: './.promptscript',
       },
       validator: config.validation,
       formatters: [], // No formatters needed for validation only
     });
 
-    const entryPath = resolve('./promptscript/project.prs');
+    const entryPath = resolve('./.promptscript/project.prs');
 
     if (!existsSync(entryPath)) {
       spinner.fail('Entry file not found');

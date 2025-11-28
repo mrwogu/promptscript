@@ -70,7 +70,7 @@ describe('commands/init', () => {
 
       await initCommand({});
 
-      expect(mkdir).toHaveBeenCalledWith('promptscript', { recursive: true });
+      expect(mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
       expect(writeFile).toHaveBeenCalledTimes(2);
       expect(writeFile).toHaveBeenCalledWith(
         'promptscript.config.yaml',
@@ -78,7 +78,7 @@ describe('commands/init', () => {
         'utf-8'
       );
       expect(writeFile).toHaveBeenCalledWith(
-        'promptscript/project.prs',
+        '.promptscript/project.prs',
         expect.stringContaining('@meta'),
         'utf-8'
       );
@@ -112,7 +112,7 @@ describe('commands/init', () => {
         'utf-8'
       );
       expect(writeFile).toHaveBeenCalledWith(
-        'promptscript/project.prs',
+        '.promptscript/project.prs',
         expect.stringContaining('id: "project"'),
         'utf-8'
       );

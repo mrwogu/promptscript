@@ -39,6 +39,11 @@ Comprehensive validation with actionable error messages and auto-fix suggestions
 Native support for GitHub Copilot, Claude Code, Cursor, and more.
 </div>
 
+<div class="feature-card" markdown>
+### :material-rocket-launch: Future-Proof
+Formatter updates automatically adapt your prompts to new AI features and models—agent skills, tool use, and more—without changing your `.prs` files.
+</div>
+
 </div>
 
 ## Quick Example
@@ -120,22 +125,22 @@ flowchart TB
     subgraph Foundation
         core["@promptscript/core<br/>Types, errors, utilities"]
     end
-    
+
     subgraph Pipeline
         parser["@promptscript/parser<br/>Chevrotain-based parser"]
         resolver["@promptscript/resolver<br/>Inheritance & imports"]
         validator["@promptscript/validator<br/>Validation rules"]
     end
-    
+
     subgraph Output
         formatters["@promptscript/formatters<br/>GitHub, Claude, Cursor"]
         compiler["@promptscript/compiler<br/>Pipeline orchestration"]
     end
-    
+
     subgraph Interface
         cli["@promptscript/cli<br/>Command-line interface"]
     end
-    
+
     core --> parser
     core --> validator
     core --> formatters
