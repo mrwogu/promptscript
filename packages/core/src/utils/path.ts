@@ -1,3 +1,4 @@
+import { join } from 'path';
 import type { PathReference, SourceLocation } from '../types';
 
 /**
@@ -31,9 +32,11 @@ export interface ParsedPath {
  * ```
  */
 export function parsePath(path: string): ParsedPath {
-  // Relative path
-  if (path.startsWith('./') || path.startsWith('../')) {
-    const segments = path.split('/').filter(Boolean);
+  // Relative path (handle both Unix and Windows separators)
+  if (path.startsWith('./') || path.startsWith('../') || path.startsWith('.\\') || path.startsWith('..\\')) {
+    // Normalize to forward slashes for parsing, then split
+    const normalizedPath = path.replace(/\\/g, '/');
+    const segments = normalizedPath.split('/').filter(Boolean);
     // Remove leading . or ..
     if (segments[0] === '.' || segments[0] === '..') {
       segments.shift();
@@ -77,7 +80,7 @@ export function isAbsolutePath(path: string): boolean {
  * Check if a path is relative.
  */
 export function isRelativePath(path: string): boolean {
-  return path.startsWith('./') || path.startsWith('../');
+  return path.startsWith('./') || path.startsWith('../') || path.startsWith('.\\') || path.startsWith('..\\');
 }
 
 /**
@@ -98,11 +101,11 @@ export function resolvePath(
 
   if (parsed.isRelative) {
     const base = options.basePath ?? process.cwd();
-    return `${base}/${parsed.segments.join('/')}.prs`;
+    return join(base, ...parsed.segments) + '.prs';
   }
 
   // Absolute path - resolve from registry
-  return `${options.registryPath}/@${parsed.namespace}/${parsed.segments.join('/')}.prs`;
+  return join(options.registryPath, `@${parsed.namespace}`, ...parsed.segments) + '.prs';
 }
 
 /**
