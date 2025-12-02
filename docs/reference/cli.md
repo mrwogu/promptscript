@@ -50,31 +50,54 @@ prs init [options]
 
 **Options:**
 
-| Option                  | Description                     |
-| ----------------------- | ------------------------------- |
-| `-t, --team <team>`     | Team namespace for organization |
-| `--template <template>` | Project template to use         |
-| `-f, --force`           | Overwrite existing files        |
+| Option                   | Description                                          |
+| ------------------------ | ---------------------------------------------------- |
+| `-n, --name <name>`      | Project name (auto-detected from package.json, etc.) |
+| `-t, --team <team>`      | Team namespace for organization                      |
+| `--inherit <path>`       | Inheritance path (e.g., `@company/team`)             |
+| `--registry <path>`      | Registry path for shared configurations              |
+| `--targets <targets...>` | Target AI tools (github, claude, cursor)             |
+| `-i, --interactive`      | Force interactive mode with prompts                  |
+| `-y, --yes`              | Skip prompts, use defaults                           |
+| `--template <template>`  | Project template to use                              |
 
 **Examples:**
 
 ```bash
-# Basic initialization
+# Interactive initialization (default)
 prs init
 
-# Initialize for a specific team
-prs init --team frontend
+# Quick initialization with defaults
+prs init -y
+
+# Initialize with custom project name
+prs init --name my-project
+
+# Initialize for a specific team with inheritance
+prs init --team frontend --inherit @frontend/team
+
+# Initialize with specific targets only
+prs init --targets github claude
+
+# Full non-interactive setup
+prs init -n my-project --inherit @company/team --targets github claude cursor
 
 # Use a template
 prs init --template react-app
-
-# Force overwrite
-prs init --force
 ```
+
+**Auto-detection:**
+
+The `init` command automatically detects:
+
+- **Project name** from `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod`
+- **Languages** (TypeScript, Python, Rust, Go, etc.)
+- **Frameworks** (React, Next.js, Django, FastAPI, etc.)
+- **Existing AI tools** (GitHub Copilot, Claude, Cursor configurations)
 
 **Created Files:**
 
-- `promptscript.config.yaml` - Configuration file
+- `promptscript.yaml` - Configuration file
 - `.promptscript/project.prs` - Main instructions file
 
 ---
@@ -261,7 +284,7 @@ prs check --fix
 
 ## Configuration File
 
-The CLI uses `promptscript.config.yaml` by default. Override with `--config`:
+The CLI uses `promptscript.yaml` by default. Override with `--config`:
 
 ```yaml
 # Input settings

@@ -5,14 +5,14 @@ description: PromptScript configuration file reference
 
 # Configuration
 
-Complete reference for `promptscript.config.yaml`.
+Complete reference for `promptscript.yaml`.
 
 ## File Location
 
 The CLI looks for configuration in this order:
 
 1. `--config` command line option
-2. `promptscript.config.yaml` in current directory
+2. `promptscript.yaml` in current directory
 3. `promptscript.config.yml` in current directory
 4. `.promptscriptrc.yaml` in current directory
 

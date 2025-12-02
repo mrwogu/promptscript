@@ -185,7 +185,7 @@ Load configuration from file.
 ```typescript
 import { loadConfig } from '@promptscript/cli';
 
-const config = await loadConfig('./promptscript.config.yaml');
+const config = await loadConfig('./promptscript.yaml');
 ```
 
 ### resolveConfig
@@ -338,7 +338,7 @@ export default myPlugin;
 
 ### Using Plugins
 
-In `promptscript.config.yaml`:
+In `promptscript.yaml`:
 
 ```yaml
 plugins:
@@ -401,7 +401,7 @@ describe('compile command', () => {
       cwd: '/test/project',
       files: {
         'promptscript/project.prs': '...',
-        'promptscript.config.yaml': '...',
+        'promptscript.yaml': '...',
       },
     });
 

@@ -395,7 +395,7 @@ You are a senior developer working on the checkout service.
 ### Update Configuration
 
 ```yaml
-# promptscript.config.yaml
+# promptscript.yaml
 input:
   entry: .promptscript/project.prs
 
@@ -445,7 +445,7 @@ git rm --cached .github/copilot-instructions.md CLAUDE.md .cursorrules
 ### Commit Migration
 
 ```bash
-git add .promptscript/ promptscript.config.yaml
+git add .promptscript/ promptscript.yaml
 git add .github/copilot-instructions.md CLAUDE.md .cursorrules
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```

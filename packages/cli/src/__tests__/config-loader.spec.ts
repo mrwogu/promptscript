@@ -22,8 +22,8 @@ describe('config/loader', () => {
 
   describe('CONFIG_FILES', () => {
     it('should export expected config file names', () => {
-      expect(CONFIG_FILES).toContain('promptscript.config.yaml');
-      expect(CONFIG_FILES).toContain('promptscript.config.yml');
+      expect(CONFIG_FILES).toContain('promptscript.yaml');
+      expect(CONFIG_FILES).toContain('promptscript.yml');
       expect(CONFIG_FILES).toContain('.promptscriptrc.yaml');
       expect(CONFIG_FILES).toContain('.promptscriptrc.yml');
     });
@@ -32,12 +32,12 @@ describe('config/loader', () => {
   describe('findConfigFile', () => {
     it('should return first matching config file', () => {
       vi.mocked(existsSync)
-        .mockReturnValueOnce(false) // promptscript.config.yaml
-        .mockReturnValueOnce(true); // promptscript.config.yml
+        .mockReturnValueOnce(false) // promptscript.yaml
+        .mockReturnValueOnce(true); // promptscript.yml
 
       const result = findConfigFile();
 
-      expect(result).toBe('promptscript.config.yml');
+      expect(result).toBe('promptscript.yml');
       expect(existsSync).toHaveBeenCalledTimes(2);
     });
 
@@ -55,7 +55,7 @@ describe('config/loader', () => {
 
       const result = findConfigFile();
 
-      expect(result).toBe('promptscript.config.yaml');
+      expect(result).toBe('promptscript.yaml');
       expect(existsSync).toHaveBeenCalledTimes(1);
     });
   });

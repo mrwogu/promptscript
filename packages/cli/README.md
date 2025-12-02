@@ -18,13 +18,21 @@ pnpm add -g @promptscript/cli
 prs init [options]
 
 Options:
-  -t, --team <team>       Team namespace
-  --template <template>   Project template
+  -n, --name <name>        Project name (auto-detected)
+  -t, --team <team>        Team namespace
+  --inherit <path>         Inheritance path (e.g., @company/team)
+  --registry <path>        Registry path
+  --targets <targets...>   Target AI tools (github, claude, cursor)
+  -i, --interactive        Force interactive mode
+  -y, --yes                Skip prompts, use defaults
+  --template <template>    Project template
 ```
+
+**Auto-detection:** Project name, languages, frameworks, and existing AI tool configurations.
 
 Creates:
 
-- `promptscript.config.yaml` - Configuration file
+- `promptscript.yaml` - Configuration file
 - `.promptscript/project.prs` - Main project file
 
 ### Compile
@@ -70,7 +78,7 @@ Options:
 
 ## Configuration
 
-Create a `promptscript.config.yaml` file:
+Create a `promptscript.yaml` file:
 
 ```yaml
 version: '1'

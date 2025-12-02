@@ -57,6 +57,35 @@ promptscript/
 
 ## Development Workflow
 
+### Running CLI Locally
+
+During development, you can run the CLI without building:
+
+```bash
+# Using pnpm script (recommended)
+pnpm prs --help
+pnpm prs init
+pnpm prs compile --all
+
+# Or directly with node
+node -r @swc-node/register packages/cli/src/cli.ts --help
+```
+
+This uses `@swc-node/register` to transpile TypeScript on-the-fly, so changes are reflected immediately without rebuilding.
+
+### Initializing PromptScript in the Repository
+
+To use PromptScript in this repository itself:
+
+```bash
+pnpm prs init
+```
+
+This creates:
+
+- `promptscript.config.yaml` - project configuration
+- `.promptscript/project.prs` - AI instructions file
+
 ### Creating a Feature
 
 1. Create a branch from `main`:
@@ -183,6 +212,15 @@ nx test parser --coverage
 nx test parser --watch
 ```
 
+### Testing CLI End-to-End
+
+```bash
+# Run CLI in development mode
+pnpm prs init
+pnpm prs validate
+pnpm prs compile --dry-run
+```
+
 ### Writing Tests
 
 - Use Vitest
@@ -214,6 +252,39 @@ describe('parseVersion', () => {
 - Add JSDoc comments to public APIs
 - Include examples for complex functionality
 - Update CHANGELOG.md following Keep a Changelog format
+
+## Publishing (Maintainers Only)
+
+### Testing Publish Locally
+
+Before publishing, you can test the build output:
+
+```bash
+# Build all packages
+pnpm nx run-many -t build
+
+# Check what would be published
+cd dist/packages/cli
+pnpm pack --dry-run
+```
+
+### Release Process
+
+Releases are automated via GitHub Actions using Nx Release:
+
+```bash
+# Create a release (locally)
+pnpm nx release --skip-publish
+
+# Push the release commit and tags
+git push && git push --tags
+```
+
+The CI pipeline will automatically publish to npm when tags are pushed.
+
+### Workspace Dependencies
+
+Internal dependencies use `workspace:^` protocol which pnpm automatically converts to actual version numbers (e.g., `^0.1.0`) during publish.
 
 ## Questions?
 

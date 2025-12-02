@@ -1,5 +1,5 @@
 /**
- * PromptScript configuration file (promptscript.config.yaml).
+ * PromptScript configuration file (promptscript.yaml).
  */
 export interface PromptScriptConfig {
   /** Config version */
@@ -36,15 +36,9 @@ export interface PromptScriptConfig {
 }
 
 /**
- * Supported output targets.
+ * Supported output targets.q
  */
-export type TargetName =
-  | 'github'
-  | 'claude'
-  | 'cursor'
-  | 'gemini'
-  | 'jetbrains'
-  | string;
+export type TargetName = 'github' | 'claude' | 'cursor' | 'gemini' | 'jetbrains' | string;
 
 /**
  * Default output paths for each target.

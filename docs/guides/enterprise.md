@@ -377,7 +377,7 @@ promptscript-registry/
 ### Project Config File
 
 ```yaml
-# promptscript.config.yaml
+# promptscript.yaml
 input:
   entry: .promptscript/project.prs
 
@@ -413,11 +413,11 @@ on:
   push:
     paths:
       - '.promptscript/**'
-      - 'promptscript.config.yaml'
+      - 'promptscript.yaml'
   pull_request:
     paths:
       - '.promptscript/**'
-      - 'promptscript.config.yaml'
+      - 'promptscript.yaml'
 
 jobs:
   validate:

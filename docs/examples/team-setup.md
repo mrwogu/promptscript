@@ -17,12 +17,12 @@ workspace/
 ├── project-a/
 │   ├── .promptscript/
 │   │   └── project.prs
-│   ├── promptscript.config.yaml
+│   ├── promptscript.yaml
 │   └── ...
 ├── project-b/
 │   ├── .promptscript/
 │   │   └── project.prs
-│   ├── promptscript.config.yaml
+│   ├── promptscript.yaml
 │   └── ...
 └── project-c/
     └── ...
@@ -156,7 +156,7 @@ workspace/
 }
 ```
 
-### project-a/promptscript.config.yaml
+### project-a/promptscript.yaml
 
 ```yaml
 input:
@@ -228,7 +228,7 @@ validation:
 }
 ```
 
-### project-b/promptscript.config.yaml
+### project-b/promptscript.yaml
 
 ```yaml
 input:
@@ -308,7 +308,7 @@ on:
   push:
     paths:
       - '.promptscript/**'
-      - 'promptscript.config.yaml'
+      - 'promptscript.yaml'
 
 jobs:
   validate:

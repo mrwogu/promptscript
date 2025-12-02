@@ -13,7 +13,7 @@ The simplest possible PromptScript setup for a single project.
 my-project/
 ├── .promptscript/
 │   └── project.prs
-├── promptscript.config.yaml
+├── promptscript.yaml
 ├── .github/
 │   └── copilot-instructions.md  # Generated
 └── ...
@@ -56,7 +56,7 @@ my-project/
 }
 ```
 
-### promptscript.config.yaml
+### promptscript.yaml
 
 ```yaml
 input:
@@ -127,7 +127,7 @@ This is a TypeScript project using modern best practices.
 To also generate for Claude and Cursor:
 
 ```yaml
-# promptscript.config.yaml
+# promptscript.yaml
 input:
   entry: .promptscript/project.prs
 

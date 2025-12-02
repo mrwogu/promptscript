@@ -36,6 +36,13 @@ export const ConsoleOutput = {
   },
 
   /**
+   * Print a warning message (alias for warning).
+   */
+  warn(message: string): void {
+    console.log(chalk.yellow(`  ⚠ ${message}`));
+  },
+
+  /**
    * Print an info message.
    */
   info(message: string): void {

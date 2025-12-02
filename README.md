@@ -27,6 +27,15 @@ Your organization uses multiple AI tools:
 - And more...
 
 Each tool has its own format. Each team maintains their own instructions.
+
+As your organization scales to dozens or hundreds of projects, the problem compounds:
+
+- **No single source of truth** – Every project has different AI instructions
+- **No sharing mechanism** – Common patterns are copy-pasted and drift apart
+- **No inheritance** – Teams can't extend organization-wide standards
+- **No synchronization** – Updating guidelines means touching every repo manually
+- **No governance** – No way to enforce compliance or audit what's deployed
+
 Result: **chaos, inconsistency, no governance.**
 
 ## The Solution

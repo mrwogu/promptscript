@@ -1,0 +1,18 @@
+version: '1'
+
+project:
+  id: 'promptscript'
+
+# inherit: "@company/team"
+
+registry:
+  path: './registry'
+
+targets:
+  - github
+  - claude
+  - cursor
+
+validation:
+  rules:
+    empty-block: warn

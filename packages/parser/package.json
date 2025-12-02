@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@promptscript/core": "workspace:*",
+    "@promptscript/core": "workspace:^",
     "@swc/helpers": "~0.5.11",
     "chevrotain": "^11.1.0"
   }

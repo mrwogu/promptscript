@@ -6,6 +6,18 @@ export interface InitOptions {
   team?: string;
   /** Project template to use */
   template?: string;
+  /** Project name (overrides auto-detection) */
+  name?: string;
+  /** Inheritance path (e.g., @company/team) */
+  inherit?: string;
+  /** Registry path or URL */
+  registry?: string;
+  /** Target AI tools (github, claude, cursor) */
+  targets?: string[];
+  /** Interactive mode (prompts for all options) */
+  interactive?: boolean;
+  /** Skip prompts, use defaults */
+  yes?: boolean;
 }
 
 /**

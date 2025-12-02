@@ -46,6 +46,18 @@ Formatter updates automatically adapt your prompts to new AI features and models
 
 </div>
 
+## The Problem at Scale
+
+As organizations grow to dozens or hundreds of projects, AI instruction management becomes chaotic:
+
+- **No single source of truth** – Every project maintains different AI instructions
+- **No sharing mechanism** – Common patterns are copy-pasted across repos and drift apart over time
+- **No inheritance** – Teams can't build upon organization-wide standards
+- **No synchronization** – Updating guidelines means manually touching every repository
+- **No governance** – No way to enforce compliance or audit what's actually deployed
+
+PromptScript solves this by providing a **centralized, hierarchical system** where instructions can be shared, inherited, extended, and synchronized across your entire organization.
+
 ## Quick Example
 
 === "PromptScript (.prs)"

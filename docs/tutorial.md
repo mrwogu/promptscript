@@ -185,7 +185,7 @@ Create `.promptscript/project.prs` in your project:
 
 ## Step 4: Configure the Project
 
-Create `promptscript.config.yaml`:
+Create `promptscript.yaml`:
 
 ```yaml
 input:

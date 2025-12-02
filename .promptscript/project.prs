@@ -1,0 +1,37 @@
+# Project Configuration
+# Edit this file to customize AI instructions for your project
+
+@meta {
+  id: "promptscript"
+  version: "1.0.0"
+}
+
+# @inherit @company/team
+
+@identity {
+  """
+  You are working on this project.
+  
+  [Describe your project here]
+  """
+}
+
+@context {
+  # project: "Project Name"
+  # languages: [typescript]
+}
+
+@standards {
+  code: {
+    # Add your coding standards here
+  }
+}
+
+@restrictions {
+  - "Follow security best practices"
+}
+
+@shortcuts {
+  "/review": "Review this code for quality and best practices"
+  "/test": "Write comprehensive unit tests"
+}

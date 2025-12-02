@@ -16,34 +16,34 @@ flowchart TB
         sec["@acme/security<br/>Security policies"]
         comp["@acme/compliance<br/>Compliance rules"]
     end
-    
+
     subgraph Teams["Team Registries"]
         fe["@acme/frontend"]
         be["@acme/backend"]
         mobile["@acme/mobile"]
         data["@acme/data"]
     end
-    
+
     subgraph Projects["100+ Projects"]
         p1["web-app"]
         p2["api-gateway"]
         p3["mobile-app"]
         p4["data-pipeline"]
     end
-    
+
     org --> fe
     org --> be
     org --> mobile
     org --> data
-    
+
     sec --> fe
     sec --> be
     sec --> mobile
     sec --> data
-    
+
     comp --> fe
     comp --> be
-    
+
     fe --> p1
     be --> p2
     mobile --> p3
@@ -95,16 +95,16 @@ acme-promptscript-registry/
 @identity {
   """
   You are an AI coding assistant at ACME Corporation.
-  
+
   ## Core Values
-  
+
   - **Quality First**: Write production-ready code
   - **Security Always**: Security is not optional
   - **User Focus**: Consider the end user
   - **Team Player**: Write code others can maintain
-  
+
   ## Standards
-  
+
   Follow ACME Engineering Standards v3.0
   (https://wiki.acme.com/engineering-standards)
   """
@@ -125,13 +125,13 @@ acme-promptscript-registry/
       coverage: 80
     }
   }
-  
+
   git: {
     conventionalCommits: true
     branchNaming: "type/TICKET-description"
     signedCommits: required
   }
-  
+
   deployment: {
     environments: ["dev", "staging", "prod"]
     approvals: {
@@ -183,13 +183,13 @@ acme-promptscript-registry/
       refreshToken: true
     }
   }
-  
+
   authorization: {
     model: "RBAC with ABAC extensions"
     principle: "least privilege"
     audit: required
   }
-  
+
   dataProtection: {
     encryption: {
       atRest: "AES-256"
@@ -200,7 +200,7 @@ acme-promptscript-registry/
       retention: "per data classification"
     }
   }
-  
+
   dependencies: {
     scanning: "daily"
     vulnerabilities: {
@@ -209,7 +209,7 @@ acme-promptscript-registry/
       medium: "fix within 30 days"
     }
   }
-  
+
   secrets: {
     storage: "HashiCorp Vault"
     rotation: "90 days"
@@ -233,14 +233,14 @@ acme-promptscript-registry/
 @knowledge {
   """
   ## Security Resources
-  
+
   - Security Guidelines: https://wiki.acme.com/security
   - Incident Response: https://wiki.acme.com/incident-response
   - Security Training: https://learn.acme.com/security
   - Bug Bounty: https://hackerone.com/acme
-  
+
   ## Contacts
-  
+
   - Security Team: security@acme.com
   - Incident Hotline: +1-800-SEC-ACME
   - Slack: #security-help
@@ -286,7 +286,7 @@ acme-promptscript-registry/
       tested: true
     }
   }
-  
+
   gdpr: {
     dataMinimization: true
     purposeLimitation: true
@@ -295,7 +295,7 @@ acme-promptscript-registry/
     dataPortability: required
     breachNotification: "72 hours"
   }
-  
+
   pci: {
     applicable: "payment services only"
     cardDataStorage: "never store full PAN"
@@ -314,20 +314,20 @@ acme-promptscript-registry/
 @knowledge {
   """
   ## Compliance Resources
-  
+
   - Compliance Portal: https://compliance.acme.com
   - Data Classification: https://wiki.acme.com/data-classification
   - Privacy Policy: https://acme.com/privacy
-  
+
   ## Data Classification
-  
+
   - **Public**: Marketing materials, public docs
   - **Internal**: Internal communications, non-sensitive
   - **Confidential**: Business data, customer info
   - **Restricted**: PII, financial data, credentials
-  
+
   ## Regional Requirements
-  
+
   - EU: GDPR compliance required
   - California: CCPA compliance required
   - Healthcare: HIPAA where applicable
@@ -351,9 +351,9 @@ acme-promptscript-registry/
 @identity {
   """
   You are a frontend developer at ACME.
-  
+
   ## Expertise
-  
+
   - Modern JavaScript/TypeScript
   - React ecosystem
   - Web performance optimization
@@ -365,7 +365,7 @@ acme-promptscript-registry/
 @context {
   """
   ## Frontend Platform Stack
-  
+
   - **Framework**: React 18
   - **Language**: TypeScript 5
   - **Build**: Vite 5
@@ -373,16 +373,16 @@ acme-promptscript-registry/
   - **State**: React Query + Zustand
   - **Testing**: Vitest + Testing Library + Playwright
   - **Components**: @acme/ui (shared design system)
-  
+
   ## Architecture
-  
+
   - Feature-based folder structure
   - Micro-frontends for large apps
   - Module federation for sharing
   - API client generation from OpenAPI
-  
+
   ## Key Resources
-  
+
   - Design System: https://design.acme.com
   - Component Library: https://ui.acme.com
   - Frontend Wiki: https://wiki.acme.com/frontend
@@ -406,7 +406,7 @@ acme-promptscript-registry/
       designTokens: "@acme/design-tokens"
     }
   }
-  
+
   performance: {
     bundleSize: {
       initial: "< 200KB gzipped"
@@ -418,7 +418,7 @@ acme-promptscript-registry/
       cls: "< 0.1"
     }
   }
-  
+
   accessibility: {
     standard: "WCAG 2.1 AA"
     testing: {
@@ -432,7 +432,7 @@ acme-promptscript-registry/
       "focus management"
     ]
   }
-  
+
   testing: {
     unit: {
       framework: "Vitest"
@@ -466,18 +466,18 @@ acme-promptscript-registry/
     - Storybook story
     - Accessibility considerations
   """
-  
+
   "/hook": "Create a custom React hook with tests"
-  
+
   "/test": """
     Write tests using:
     - Vitest for unit tests
     - Testing Library for integration
     - Proper mocking patterns
   """
-  
+
   "/a11y": "Review for accessibility issues"
-  
+
   "/perf": "Review for performance issues"
 }
 ```
@@ -501,22 +501,22 @@ acme-promptscript-registry/
   team: "Commerce"
   productOwner: "Jane Smith"
   techLead: "John Doe"
-  
+
   """
   ## Overview
-  
+
   Multi-step checkout flow for ACME e-commerce platform.
   Handles cart review, shipping, payment, and confirmation.
-  
+
   ## Key Integrations
-  
+
   - Payment: Stripe Elements
   - Shipping: ShipEngine API
   - Tax: Avalara
   - Analytics: Segment + Mixpanel
-  
+
   ## Architecture
-  
+
   - Micro-frontend (Module Federation)
   - Shared shell: @acme/commerce-shell
   - Feature flags: LaunchDarkly
@@ -534,26 +534,26 @@ acme-promptscript-registry/
 @knowledge {
   """
   ## API Endpoints
-  
+
   ### Cart Service (cart.acme.com)
   - GET /cart - Get current cart
   - PUT /cart/items/:id - Update item
   - DELETE /cart/items/:id - Remove item
-  
+
   ### Checkout Service (checkout.acme.com)
   - POST /checkout/start - Initialize checkout
   - PUT /checkout/:id/shipping - Set shipping
   - PUT /checkout/:id/payment - Process payment
   - POST /checkout/:id/complete - Complete order
-  
+
   ## Feature Flags
-  
+
   - checkout-apple-pay: Apple Pay integration
   - checkout-express: One-click checkout
   - checkout-affirm: Affirm financing
-  
+
   ## Error Codes
-  
+
   - CART_EMPTY: Cart has no items
   - SHIPPING_UNAVAILABLE: Cannot ship to address
   - PAYMENT_DECLINED: Payment failed
@@ -572,7 +572,7 @@ acme-promptscript-registry/
 ### Project Config
 
 ```yaml
-# checkout-app/promptscript.config.yaml
+# checkout-app/promptscript.yaml
 input:
   entry: promptscript/project.prs
 
@@ -626,16 +626,19 @@ watch:
 ## PromptScript Registry Change
 
 ### Type
+
 - [ ] Organization policy update
 - [ ] Team configuration update
 - [ ] New fragment
 - [ ] Bug fix
 
 ### Breaking Change?
+
 - [ ] Yes - includes migration guide
 - [ ] No
 
 ### Checklist
+
 - [ ] Updated version in @meta
 - [ ] Added CHANGELOG entry
 - [ ] Tested with sample project
@@ -660,21 +663,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
-      
+
       - name: Validate all files
         run: |
           for file in $(find . -name "*.prs"); do
             echo "Validating $file..."
             prs validate "$file" --strict
           done
-      
+
       - name: Check for circular dependencies
         run: ./scripts/check-circular-deps.sh
 
@@ -686,15 +689,15 @@ jobs:
         project: [sample-frontend, sample-backend, sample-mobile]
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/checkout@v4
         with:
           repository: acme/${{ matrix.project }}
           path: test-project
-      
+
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
-      
+
       - name: Compile test project
         working-directory: test-project
         run: prs compile --all
@@ -712,30 +715,30 @@ on:
   push:
     paths:
       - 'promptscript/**'
-      - 'promptscript.config.yaml'
+      - 'promptscript.yaml'
   pull_request:
     paths:
       - 'promptscript/**'
-      - 'promptscript.config.yaml'
+      - 'promptscript.yaml'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
-      
+
       - name: Validate
         run: prs validate --strict
         env:
           GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
-      
+
       - name: Ensure compiled files are up to date
         run: |
           prs compile --all
@@ -758,14 +761,14 @@ Track across the organization:
 # metrics-config.yaml
 metrics:
   - name: projects_with_promptscript
-    query: count(repos with promptscript.config.yaml)
-  
+    query: count(repos with promptscript.yaml)
+
   - name: registry_update_frequency
     query: commits per week to registry
-  
+
   - name: validation_error_rate
     query: CI failures due to promptscript validation
-  
+
   - name: average_inheritance_depth
     query: avg(@inherit chain length)
 ```
@@ -773,25 +776,25 @@ metrics:
 ## Best Practices Summary
 
 !!! tip "Organization Base"
-    Keep `@acme/base` focused on universal policies that apply everywhere.
+Keep `@acme/base` focused on universal policies that apply everywhere.
 
 !!! tip "Security Integration"
-    Always `@use @acme/security` in team bases, never skip security.
+Always `@use @acme/security` in team bases, never skip security.
 
 !!! tip "Version Management"
-    Tag registry releases and pin versions in production projects.
+Tag registry releases and pin versions in production projects.
 
 !!! warning "Breaking Changes"
-    Major version bumps require migration guides and team notification.
+Major version bumps require migration guides and team notification.
 
 !!! warning "Review Process"
-    All registry changes need appropriate CODEOWNER approval.
+All registry changes need appropriate CODEOWNER approval.
 
 ## Rollout Timeline
 
-| Phase | Duration | Goals |
-|-------|----------|-------|
-| Pilot | 4 weeks | 3 teams, feedback collection |
-| Team Rollout | 8 weeks | All teams onboarded |
-| Mandatory | Ongoing | Required for new projects |
+| Phase          | Duration | Goals                          |
+| -------------- | -------- | ------------------------------ |
+| Pilot          | 4 weeks  | 3 teams, feedback collection   |
+| Team Rollout   | 8 weeks  | All teams onboarded            |
+| Mandatory      | Ongoing  | Required for new projects      |
 | Full Migration | 6 months | All existing projects migrated |

@@ -7,8 +7,8 @@ import type { PromptScriptConfig } from '@promptscript/core';
  * List of config file names to search for.
  */
 export const CONFIG_FILES = [
-  'promptscript.config.yaml',
-  'promptscript.config.yml',
+  'promptscript.yaml',
+  'promptscript.yml',
   '.promptscriptrc.yaml',
   '.promptscriptrc.yml',
 ];

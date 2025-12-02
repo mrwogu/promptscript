@@ -6,6 +6,6 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@swc/helpers": "~0.5.11",
-    "@promptscript/core": "workspace:*"
+    "@promptscript/core": "workspace:^"
   }
 }

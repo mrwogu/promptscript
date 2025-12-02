@@ -44,7 +44,7 @@ prs init
 
 This creates:
 
-- `promptscript.config.yaml` - Configuration file
+- `promptscript.yaml` - Configuration file
 - `.promptscript/project.prs` - Your instructions file
 
 ### 2. Edit Instructions
@@ -112,7 +112,7 @@ After initialization, your project will have:
 your-project/
 ├── .promptscript/
 │   └── project.prs          # Your instructions
-├── promptscript.config.yaml  # Configuration
+├── promptscript.yaml  # Configuration
 ├── .github/
 │   └── copilot-instructions.md  # Generated
 ├── CLAUDE.md                    # Generated
@@ -121,7 +121,7 @@ your-project/
 
 ## Configuration
 
-The `promptscript.config.yaml` file controls compilation:
+The `promptscript.yaml` file controls compilation:
 
 ```yaml
 # Input settings

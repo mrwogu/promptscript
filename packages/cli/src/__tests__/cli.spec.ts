@@ -60,7 +60,8 @@ describe('cli', () => {
       expect(mockDescription).toHaveBeenCalledWith(
         'PromptScript CLI - Standardize AI instructions'
       );
-      expect(mockVersion).toHaveBeenCalledWith('0.1.0');
+      // Version is dynamically read from package.json
+      expect(mockVersion).toHaveBeenCalledWith(expect.stringMatching(/^\d+\.\d+\.\d+/));
     });
 
     it('should register init command', async () => {

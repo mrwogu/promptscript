@@ -8,6 +8,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -27,6 +30,7 @@ jobs:
       - run: pnpm nx run-many -t build
 
       - name: Publish to npm
-        run: pnpm nx run-many -t publish --args="--access public"
+        run: pnpm nx release publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

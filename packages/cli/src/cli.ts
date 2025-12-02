@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { getPackageVersion } from '@promptscript/core';
 import { initCommand } from './commands/init';
 import { compileCommand } from './commands/compile';
 import { validateCommand } from './commands/validate';
@@ -8,12 +9,21 @@ import { diffCommand } from './commands/diff';
 
 const program = new Command();
 
-program.name('prs').description('PromptScript CLI - Standardize AI instructions').version('0.1.0');
+program
+  .name('prs')
+  .description('PromptScript CLI - Standardize AI instructions')
+  .version(getPackageVersion(__dirname));
 
 program
   .command('init')
   .description('Initialize PromptScript in current directory')
+  .option('-n, --name <name>', 'Project name (auto-detected from package.json, etc.)')
   .option('-t, --team <team>', 'Team namespace')
+  .option('--inherit <path>', 'Inheritance path (e.g., @company/team)')
+  .option('--registry <path>', 'Registry path')
+  .option('--targets <targets...>', 'Target AI tools (github, claude, cursor)')
+  .option('-i, --interactive', 'Force interactive mode')
+  .option('-y, --yes', 'Skip prompts, use defaults')
   .option('--template <template>', 'Project template')
   .action(initCommand);
 

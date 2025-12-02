@@ -11,7 +11,8 @@
     "format:check": "nx format:check",
     "typecheck": "pnpm nx run-many -t typecheck",
     "docs:serve": "mkdocs serve",
-    "docs:build": "mkdocs build --strict"
+    "docs:build": "mkdocs build --strict",
+    "prs": "node -r @swc-node/register packages/cli/src/cli.ts"
   },
   "private": true,
   "devDependencies": {

@@ -48,7 +48,8 @@
   },
   "release": {
     "version": {
-      "preVersionCommand": "pnpm dlx nx run-many -t build"
+      "preVersionCommand": "pnpm dlx nx run-many -t build",
+      "updateDependents": "auto"
     }
   }
 }

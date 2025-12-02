@@ -144,7 +144,7 @@ Full enterprise deployment with governance.
 ### Basic Config
 
 ```yaml
-# promptscript.config.yaml
+# promptscript.yaml
 input:
   entry: .promptscript/project.prs
 
@@ -156,7 +156,7 @@ targets:
 ### Full Config
 
 ```yaml
-# promptscript.config.yaml
+# promptscript.yaml
 input:
   entry: .promptscript/project.prs
   include:

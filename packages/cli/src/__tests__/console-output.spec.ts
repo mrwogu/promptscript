@@ -66,6 +66,16 @@ describe('output/console', () => {
     });
   });
 
+  describe('ConsoleOutput.warn', () => {
+    it('should print warn message in yellow (alias for warning)', () => {
+      ConsoleOutput.warn('Warn message');
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[yellow]'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('⚠'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Warn message'));
+    });
+  });
+
   describe('ConsoleOutput.info', () => {
     it('should print info message in blue', () => {
       ConsoleOutput.info('Info message');
