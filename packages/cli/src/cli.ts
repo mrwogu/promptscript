@@ -24,6 +24,7 @@ program
   .option('--targets <targets...>', 'Target AI tools (github, claude, cursor)')
   .option('-i, --interactive', 'Force interactive mode')
   .option('-y, --yes', 'Skip prompts, use defaults')
+  .option('-f, --force', 'Force reinitialize even if already initialized')
   .option('--template <template>', 'Project template')
   .action(initCommand);
 

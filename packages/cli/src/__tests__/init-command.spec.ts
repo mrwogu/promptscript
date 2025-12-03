@@ -78,6 +78,20 @@ describe('commands/init', () => {
       expect(writeFile).not.toHaveBeenCalled();
     });
 
+    it('should reinitialize when --force is used', async () => {
+      vi.mocked(existsSync).mockImplementation((path) => path === 'promptscript.yaml');
+
+      await initCommand({ yes: true, force: true });
+
+      expect(mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
+      expect(writeFile).toHaveBeenCalledTimes(2);
+      expect(writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('version: "1"'),
+        'utf-8'
+      );
+    });
+
     it('should create config and project files with --yes flag', async () => {
       vi.mocked(existsSync).mockReturnValue(false);
 

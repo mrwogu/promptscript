@@ -25,6 +25,7 @@ Options:
   --targets <targets...>   Target AI tools (github, claude, cursor)
   -i, --interactive        Force interactive mode
   -y, --yes                Skip prompts, use defaults
+  -f, --force              Force reinitialize even if already initialized
   --template <template>    Project template
 ```
 

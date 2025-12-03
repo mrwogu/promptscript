@@ -10,15 +10,16 @@
 
 @identity {
   """
-  You are working on this project.
+  You are working on the promptscript project.
   
   [Describe your project here]
   """
 }
 
 @context {
-  # project: "Project Name"
-  # languages: [typescript]
+  project: "promptscript"
+  languages: [typescript]
+  # frameworks: []
 }
 
 @standards {

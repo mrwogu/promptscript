@@ -1,17 +1,11 @@
-version: '1'
+version: "1"
 
 project:
-  id: 'promptscript'
-
-# inherit: "@company/team"
-
-registry:
-  path: './registry'
+  id: "promptscript"
 
 targets:
   - github
   - claude
-  - cursor
 
 validation:
   rules:

@@ -29,9 +29,9 @@ interface ResolvedConfig {
  */
 export async function initCommand(options: InitOptions): Promise<void> {
   // Check if already initialized
-  if (existsSync('promptscript.yaml')) {
+  if (existsSync('promptscript.yaml') && !options.force) {
     ConsoleOutput.warn('PromptScript already initialized');
-    ConsoleOutput.muted('Use --force to reinitialize (not implemented yet)');
+    ConsoleOutput.muted('Use --force to reinitialize');
     return;
   }
 

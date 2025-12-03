@@ -103,6 +103,16 @@ pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPa
 - If changing existing behavior, update affected documentation sections
 </documentation-verification>
 
+<post-work-verification>
+After completing any code changes, run the following commands to ensure code quality:
+```bash
+pnpm run format         # Format code with Prettier
+pnpm run lint           # Check for linting errors
+pnpm run build          # Build all packages
+pnpm run test           # Run all tests
+```
+</post-work-verification>
+
 <donts>
 - Don't use `any` type
 - Don't use default exports

@@ -18,6 +18,8 @@ export interface InitOptions {
   interactive?: boolean;
   /** Skip prompts, use defaults */
   yes?: boolean;
+  /** Force reinitialize even if already initialized */
+  force?: boolean;
 }
 
 /**
