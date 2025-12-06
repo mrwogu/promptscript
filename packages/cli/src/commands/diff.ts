@@ -6,22 +6,28 @@ import type { PromptScriptConfig } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader';
 import { createSpinner, ConsoleOutput } from '../output/console';
+import { createPager, Pager } from '../output/pager';
 import { Compiler } from '@promptscript/compiler';
 import chalk from 'chalk';
 
 /**
  * Show preview of a new file's content.
  */
-function printNewFilePreview(content: string): void {
+function printNewFilePreview(
+  content: string,
+  showFull: boolean,
+  pager: Pager
+): void {
   const lines = content.split('\n');
-  const preview = lines.slice(0, 10);
+  const maxLines = showFull ? lines.length : 10;
+  const preview = lines.slice(0, maxLines);
 
   for (const line of preview) {
-    console.log(chalk.green(`  + ${line}`));
+    pager.write(chalk.green(`  + ${line}`));
   }
 
-  if (lines.length > 10) {
-    console.log(chalk.gray(`  ... (${lines.length - 10} more lines)`));
+  if (!showFull && lines.length > 10) {
+    pager.write(chalk.gray(`  ... (${lines.length - 10} more lines)`));
   }
 }
 
@@ -31,17 +37,19 @@ function printNewFilePreview(content: string): void {
 async function compareOutput(
   name: string,
   output: FormatterOutput,
-  config: PromptScriptConfig
+  config: PromptScriptConfig,
+  showFull: boolean,
+  pager: Pager
 ): Promise<boolean> {
   const outputPath = resolve(config.output?.[name] ?? output.path);
   const newContent = output.content;
 
   if (!existsSync(outputPath)) {
     // File doesn't exist - would be created
-    console.log(chalk.green(`+ ${outputPath} (new file)`));
-    ConsoleOutput.newline();
-    printNewFilePreview(newContent);
-    ConsoleOutput.newline();
+    pager.write(chalk.green(`+ ${outputPath} (new file)`));
+    pager.write('');
+    printNewFilePreview(newContent, showFull, pager);
+    pager.write('');
     return true;
   }
 
@@ -49,17 +57,17 @@ async function compareOutput(
   const existingContent = await readFile(outputPath, 'utf-8');
 
   if (existingContent === newContent) {
-    console.log(chalk.gray(`  ${outputPath} (no changes)`));
+    pager.write(chalk.gray(`  ${outputPath} (no changes)`));
     return false;
   }
 
-  console.log(chalk.yellow(`~ ${outputPath} (modified)`));
-  ConsoleOutput.newline();
+  pager.write(chalk.yellow(`~ ${outputPath} (modified)`));
+  pager.write('');
 
   const existingLines = existingContent.split('\n');
   const newLines = newContent.split('\n');
-  printSimpleDiff(existingLines, newLines);
-  ConsoleOutput.newline();
+  printSimpleDiff(existingLines, newLines, showFull, pager);
+  pager.write('');
 
   return true;
 }
@@ -111,19 +119,31 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     ConsoleOutput.newline();
 
     let hasDiff = false;
+    const showFull = options.full ?? false;
+    const usePager = options.noPager !== true;
+    const pager = createPager(usePager);
 
     // Compare outputs with existing files
     for (const [name, output] of result.outputs) {
-      const hasChanges = await compareOutput(name, output, config);
+      const hasChanges = await compareOutput(
+        name,
+        output,
+        config,
+        showFull,
+        pager
+      );
       if (hasChanges) {
         hasDiff = true;
       }
     }
 
     if (!hasDiff) {
-      ConsoleOutput.newline();
-      ConsoleOutput.success('All files are up to date');
+      pager.write('');
+      pager.write(chalk.green('  ✓ All files are up to date'));
     }
+
+    // Flush output through pager
+    await pager.flush();
   } catch (error) {
     spinner.fail('Error');
     ConsoleOutput.error((error as Error).message);
@@ -135,10 +155,15 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
  * Print a simple diff between two sets of lines.
  * This is a basic implementation - could be enhanced with a proper diff algorithm.
  */
-function printSimpleDiff(existingLines: string[], newLines: string[]): void {
+function printSimpleDiff(
+  existingLines: string[],
+  newLines: string[],
+  showFull: boolean,
+  pager: Pager
+): void {
   const maxLines = Math.max(existingLines.length, newLines.length);
   let changesShown = 0;
-  const maxChangesToShow = 20;
+  const maxChangesToShow = showFull ? Infinity : 20;
 
   for (let i = 0; i < maxLines && changesShown < maxChangesToShow; i++) {
     const existingLine = existingLines[i];
@@ -151,21 +176,21 @@ function printSimpleDiff(existingLines: string[], newLines: string[]): void {
 
     if (existingLine !== undefined && newLine === undefined) {
       // Line was removed
-      console.log(chalk.red(`  - ${existingLine}`));
+      pager.write(chalk.red(`  - ${existingLine}`));
       changesShown++;
     } else if (existingLine === undefined && newLine !== undefined) {
       // Line was added
-      console.log(chalk.green(`  + ${newLine}`));
+      pager.write(chalk.green(`  + ${newLine}`));
       changesShown++;
     } else if (existingLine !== newLine) {
       // Line was modified
-      console.log(chalk.red(`  - ${existingLine}`));
-      console.log(chalk.green(`  + ${newLine}`));
+      pager.write(chalk.red(`  - ${existingLine}`));
+      pager.write(chalk.green(`  + ${newLine}`));
       changesShown += 2;
     }
   }
 
-  if (changesShown >= maxChangesToShow) {
-    console.log(chalk.gray(`  ... (more changes not shown)`));
+  if (!showFull && changesShown >= maxChangesToShow) {
+    pager.write(chalk.gray(`  ... (more changes not shown)`));
   }
 }

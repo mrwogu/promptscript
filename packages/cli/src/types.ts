@@ -62,4 +62,8 @@ export interface PullOptions {
 export interface DiffOptions {
   /** Specific target to diff */
   target?: string;
+  /** Show full diff without truncation */
+  full?: boolean;
+  /** Disable pager (like git --no-pager) */
+  noPager?: boolean;
 }

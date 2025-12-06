@@ -75,7 +75,11 @@ prs diff [options]
 
 Options:
   -t, --target <target>   Specific target to diff
+  --full                  Show full diff without truncation
+  --no-pager              Disable pager output
 ```
+
+By default, diff output is shown through a pager (`less`) for easy scrolling. Use `--no-pager` to disable this behavior. You can customize the pager via the `PAGER` environment variable.
 
 ## Configuration
 

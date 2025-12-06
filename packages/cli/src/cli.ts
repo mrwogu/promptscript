@@ -55,6 +55,8 @@ program
   .command('diff')
   .description('Show diff for compiled output')
   .option('-t, --target <target>', 'Specific target')
+  .option('--full', 'Show full diff without truncation')
+  .option('--no-pager', 'Disable pager output')
   .action(diffCommand);
 
 /**
