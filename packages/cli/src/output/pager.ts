@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import { spawn, type ChildProcess } from 'child_process';
 
 /**
  * Check if stdout is an interactive terminal (TTY).
@@ -12,7 +12,7 @@ export function isTTY(): boolean {
  * Respects PAGER environment variable like git does.
  */
 export function getPagerCommand(): string {
-  return process.env.PAGER ?? 'less';
+  return process.env['PAGER'] ?? 'less';
 }
 
 /**
@@ -66,16 +66,22 @@ export class Pager {
         args.push('-R');
       }
 
-      const pager = spawn(cmd, args, {
+      if (!cmd) {
+        console.log(content);
+        resolve();
+        return;
+      }
+
+      const pager: ChildProcess = spawn(cmd, args, {
         stdio: ['pipe', 'inherit', 'inherit'],
         env: {
           ...process.env,
           // Ensure less handles colors properly
-          LESS: process.env.LESS ?? '-R',
+          LESS: process.env['LESS'] ?? '-R',
         },
       });
 
-      pager.on('error', (_err) => {
+      pager.on('error', (_err: Error) => {
         // If pager fails (e.g., not installed), fall back to direct output
         console.log(content);
         resolve();
@@ -86,8 +92,13 @@ export class Pager {
       });
 
       // Write content to pager's stdin
-      pager.stdin.write(content);
-      pager.stdin.end();
+      if (pager.stdin) {
+        pager.stdin.write(content);
+        pager.stdin.end();
+      } else {
+        console.log(content);
+        resolve();
+      }
     });
   }
 }

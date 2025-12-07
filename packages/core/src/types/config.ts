@@ -1,3 +1,31 @@
+import type { ConventionName, OutputConvention } from './convention';
+
+/**
+ * Configuration for a single target.
+ */
+export interface TargetConfig {
+  /**
+   * Whether this target is enabled.
+   * @default true
+   */
+  enabled?: boolean;
+
+  /**
+   * Custom output path for this target.
+   */
+  output?: string;
+
+  /**
+   * Output convention ('xml', 'markdown', or custom name).
+   */
+  convention?: ConventionName;
+}
+
+/**
+ * Target can be a simple string name or a full configuration object.
+ */
+export type TargetEntry = TargetName | { [key in TargetName]?: TargetConfig };
+
 /**
  * PromptScript configuration file (promptscript.yaml).
  */
@@ -22,11 +50,24 @@ export interface PromptScriptConfig {
     url?: string;
   };
 
-  /** Output targets */
-  targets: TargetName[];
+  /**
+   * Output targets.
+   *
+   * Can be simple names or objects with configuration:
+   * @example
+   * targets:
+   *   - github
+   *   - claude:
+   *       convention: markdown
+   *       output: custom/CLAUDE.md
+   */
+  targets: TargetEntry[];
 
-  /** Custom output paths */
-  output?: Partial<Record<TargetName, string>>;
+  /**
+   * Custom convention definitions.
+   * Register custom conventions that can be referenced by name in targets.
+   */
+  customConventions?: Record<string, OutputConvention>;
 
   /** Validation settings */
   validation?: {

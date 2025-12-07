@@ -1,39 +1,70 @@
 import type { Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter';
-import type { FormatterOutput } from '../types';
+import type { ConventionRenderer } from '../convention-renderer';
+import type { FormatOptions, FormatterOutput } from '../types';
 
 /**
  * Formatter for GitHub Copilot instructions.
  * Outputs: `.github/copilot-instructions.md`
+ *
+ * Supports output conventions:
+ * - 'xml': Uses XML-style tags (<project>, <tech-stack>, etc.)
+ * - 'markdown': Uses Markdown headers (## Project, ## Tech Stack, etc.)
  */
 export class GitHubFormatter extends BaseFormatter {
   readonly name = 'github';
   readonly outputPath = '.github/copilot-instructions.md';
   readonly description = 'GitHub Copilot instructions (Markdown)';
+  readonly defaultConvention = 'markdown';
 
-  format(ast: Program): FormatterOutput {
+  format(ast: Program, options?: FormatOptions): FormatterOutput {
+    const renderer = this.createRenderer(options);
     const sections: string[] = [];
 
-    sections.push(this.header(ast));
+    // Add header for markdown convention
+    if (renderer.getConvention().name === 'markdown') {
+      sections.push(this.header(ast));
+    }
 
-    const context = this.context(ast);
-    if (context) sections.push(context);
+    const project = this.project(ast, renderer);
+    if (project) sections.push(project);
 
-    const techStack = this.techStack(ast);
+    const techStack = this.techStack(ast, renderer);
     if (techStack) sections.push(techStack);
 
-    const standards = this.standards(ast);
-    if (standards) sections.push(standards);
+    const architecture = this.architecture(ast, renderer);
+    if (architecture) sections.push(architecture);
 
-    const restrictions = this.restrictions(ast);
-    if (restrictions) sections.push(restrictions);
+    const codeStandards = this.codeStandards(ast, renderer);
+    if (codeStandards) sections.push(codeStandards);
 
-    const commands = this.commands(ast);
+    const commands = this.commands(ast, renderer);
     if (commands) sections.push(commands);
 
+    const gitCommits = this.gitCommits(ast, renderer);
+    if (gitCommits) sections.push(gitCommits);
+
+    const configFiles = this.configFiles(ast, renderer);
+    if (configFiles) sections.push(configFiles);
+
+    const documentation = this.documentation(ast, renderer);
+    if (documentation) sections.push(documentation);
+
+    const postWork = this.postWork(ast, renderer);
+    if (postWork) sections.push(postWork);
+
+    const restrictions = this.restrictions(ast, renderer);
+    if (restrictions) sections.push(restrictions);
+
+    const diagrams = this.diagrams(ast, renderer);
+    if (diagrams) sections.push(diagrams);
+
+    const knowledge = this.knowledge(ast, renderer);
+    if (knowledge) sections.push(knowledge);
+
     return {
-      path: this.outputPath,
-      content: sections.join('\n\n---\n\n'),
+      path: this.getOutputPath(options),
+      content: sections.join('\n\n'),
     };
   }
 
@@ -50,163 +81,385 @@ export class GitHubFormatter extends BaseFormatter {
 > **Do not edit manually**`;
   }
 
-  private context(ast: Program): string | null {
+  private project(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
+    if (!identity) return null;
+
+    const content = this.extractText(identity.content);
+    return renderer.renderSection('project', content);
+  }
+
+  private techStack(ast: Program, renderer: ConventionRenderer): string | null {
     const context = this.findBlock(ast, 'context');
+    if (!context) return null;
 
-    if (!identity && !context) return null;
+    const props = this.getProps(context.content);
+    const items: string[] = [];
 
-    let content = '## Context\n\n';
-
-    if (identity) {
-      content += this.extractText(identity.content) + '\n\n';
+    const languages = props['languages'];
+    if (languages) {
+      const arr = Array.isArray(languages) ? languages : [languages];
+      items.push(`**Language:** ${this.formatTechItem(arr)}`);
     }
 
-    if (context) {
-      const text = this.extractText(context.content);
-      if (text) {
-        content += text;
-      } else {
-        // Format context as properties
-        const props = this.getProps(context.content);
-        for (const [key, value] of Object.entries(props)) {
-          content += `**${this.capitalize(key)}:** ${this.valueToString(value)}\n`;
-        }
+    const runtime = props['runtime'];
+    if (runtime) {
+      items.push(`**Runtime:** ${this.valueToString(runtime)}`);
+    }
+
+    const monorepo = props['monorepo'];
+    if (monorepo && typeof monorepo === 'object' && !Array.isArray(monorepo)) {
+      const mr = monorepo as Record<string, Value>;
+      const tool = mr['tool'];
+      const pm = mr['packageManager'];
+      if (tool && pm) {
+        items.push(
+          `**Monorepo:** ${this.valueToString(tool)} with ${this.valueToString(pm)} workspaces`
+        );
       }
     }
 
-    return content.trim();
+    if (items.length === 0) return null;
+
+    const content = renderer.renderList(items);
+    return renderer.renderSection('tech-stack', content);
   }
 
-  private techStack(ast: Program): string | null {
+  private architecture(ast: Program, renderer: ConventionRenderer): string | null {
+    const context = this.findBlock(ast, 'context');
+    if (!context) return null;
+
+    const text = this.extractText(context.content);
+    const archRegex = /## Architecture[\s\S]*?```[\s\S]*?```/;
+    const archMatch = archRegex.exec(text);
+    if (!archMatch) return null;
+
+    // Extract just the code block content
+    const content = archMatch[0].replace('## Architecture', '').trim();
+    return renderer.renderSection('architecture', content);
+  }
+
+  private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
     const standards = this.findBlock(ast, 'standards');
     if (!standards) return null;
 
-    const code = this.getProp(standards.content, 'code');
-    if (!code || typeof code !== 'object' || Array.isArray(code)) return null;
+    const props = this.getProps(standards.content);
+    const subsections: string[] = [];
 
-    const codeObj = code as Record<string, Value>;
-    const parts = ['## Tech Stack\n'];
+    this.addStandardsSubsection(
+      subsections,
+      renderer,
+      props['typescript'],
+      'typescript',
+      this.formatStandardsObject.bind(this)
+    );
+    this.addStandardsSubsection(
+      subsections,
+      renderer,
+      props['naming'],
+      'naming',
+      this.formatNamingStandards.bind(this)
+    );
+    this.addStandardsSubsection(
+      subsections,
+      renderer,
+      props['errors'],
+      'error-handling',
+      this.formatErrorStandards.bind(this)
+    );
+    this.addStandardsSubsection(
+      subsections,
+      renderer,
+      props['testing'],
+      'testing',
+      this.formatTestingStandards.bind(this)
+    );
 
-    const languages = codeObj['languages'];
-    if (languages) {
-      const arr = Array.isArray(languages) ? languages : [languages];
-      parts.push(`- **Languages:** ${this.formatArray(arr)}`);
-    }
+    if (subsections.length === 0) return null;
 
-    const frameworks = codeObj['frameworks'];
-    if (frameworks) {
-      const arr = Array.isArray(frameworks) ? frameworks : [frameworks];
-      parts.push(`- **Frameworks:** ${this.formatArray(arr)}`);
-    }
-
-    const testing = codeObj['testing'];
-    if (testing) {
-      const arr = Array.isArray(testing) ? testing : [testing];
-      parts.push(`- **Testing:** ${this.formatArray(arr)}`);
-    }
-
-    return parts.length > 1 ? parts.join('\n') : null;
+    return renderer.renderSection('code-standards', subsections.join('\n'));
   }
 
-  private standards(ast: Program): string | null {
-    const block = this.findBlock(ast, 'standards');
-    if (!block) return null;
+  private addStandardsSubsection(
+    subsections: string[],
+    renderer: ConventionRenderer,
+    value: Value | undefined,
+    name: string,
+    formatter: (obj: Record<string, Value>) => string[]
+  ): void {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return;
 
-    const props = this.getProps(block.content);
-    if (Object.keys(props).length === 0) return null;
-
-    let content = '## Code Standards\n\n';
-
-    const codeContent = this.formatCodeStandards(props['code']);
-    if (codeContent) content += codeContent;
-
-    const testingContent = this.formatTestingStandards(props['testing']);
-    if (testingContent) content += testingContent;
-
-    return content.trim();
+    const items = formatter(value as Record<string, Value>);
+    if (items.length > 0) {
+      subsections.push(renderer.renderSection(name, renderer.renderList(items), 2));
+    }
   }
 
-  private formatCodeStandards(code: Value | undefined): string {
-    if (!code || typeof code !== 'object' || Array.isArray(code)) return '';
+  private commands(ast: Program, renderer: ConventionRenderer): string | null {
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
 
-    const codeObj = code as Record<string, Value>;
-    let content = '';
+    const text = this.extractText(knowledge.content);
+    const commandsRegex = /## Development Commands[\s\S]*?```[\s\S]*?```/;
+    const commandsMatch = commandsRegex.exec(text);
+    if (!commandsMatch) return null;
 
-    content += this.formatListSection('Style', codeObj['style']);
-    content += this.formatListSection('Patterns', codeObj['patterns']);
-
-    return content;
+    const content = commandsMatch[0].replace('## Development Commands', '').trim();
+    return renderer.renderSection('commands', content);
   }
 
-  private formatListSection(title: string, items: Value | undefined): string {
-    if (!items) return '';
+  private gitCommits(ast: Program, renderer: ConventionRenderer): string | null {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return null;
 
-    let content = `### ${title}\n`;
-    const itemsArray = Array.isArray(items) ? items : [items];
+    const props = this.getProps(standards.content);
+    const git = props['git'];
+    if (!git || typeof git !== 'object' || Array.isArray(git)) return null;
 
-    for (const item of itemsArray) {
-      content += `- ${this.valueToString(item)}\n`;
+    const gitObj = git as Record<string, Value>;
+    const items: string[] = [];
+
+    const format = gitObj['format'];
+    if (format) {
+      items.push(
+        `Use [${this.valueToString(format)}](https://www.conventionalcommits.org/) format`
+      );
     }
 
-    return content + '\n';
+    const maxLen = gitObj['maxSubjectLength'];
+    if (maxLen) {
+      items.push(`Keep commit message subject line max ${this.valueToString(maxLen)} characters`);
+    }
+
+    items.push('Format: `<type>(<scope>): <description>`');
+
+    const types = gitObj['types'];
+    if (types && Array.isArray(types)) {
+      items.push(`Types: \`${types.map(String).join('`, `')}\``);
+    }
+
+    const example = gitObj['example'];
+    if (example) {
+      items.push(`Example: \`${this.valueToString(example)}\``);
+    }
+
+    if (items.length === 0) return null;
+
+    return renderer.renderSection('git-commits', renderer.renderList(items));
   }
 
-  private formatTestingStandards(testing: Value | undefined): string {
-    if (!testing || typeof testing !== 'object' || Array.isArray(testing)) {
-      return '';
+  private configFiles(ast: Program, renderer: ConventionRenderer): string | null {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return null;
+
+    const props = this.getProps(standards.content);
+    const config = props['config'];
+    if (!config || typeof config !== 'object' || Array.isArray(config)) return null;
+
+    const configObj = config as Record<string, Value>;
+    const subsections: string[] = [];
+
+    const eslint = configObj['eslint'];
+    if (eslint) {
+      const items = [
+        'All package ESLint configs must inherit from `eslint.base.config.cjs` in the root',
+        'Package configs should use `createBaseConfig(__dirname)` from the base config',
+        'Do not duplicate ESLint rules in package configs - modify the base config instead',
+      ];
+      subsections.push(renderer.renderSection('eslint', renderer.renderList(items), 2));
     }
 
-    const testObj = testing as Record<string, Value>;
-    let content = '### Testing\n';
-
-    const required = testObj['required'];
-    if (required !== undefined) {
-      content += `- Required: ${required ? 'Yes' : 'No'}\n`;
+    const vite = configObj['viteRoot'];
+    if (vite) {
+      const items = [
+        'Use `__dirname` for the `root` option in both `vite.config.ts` and `vitest.config.mts`',
+        'Do NOT use `import.meta.dirname` - it causes TypeScript errors with current tsconfig settings',
+        'Example: `root: __dirname,`',
+      ];
+      subsections.push(renderer.renderSection('vite-vitest', renderer.renderList(items), 2));
     }
 
-    const coverage = testObj['coverage'];
-    if (coverage !== undefined) {
-      content += `- Minimum coverage: ${coverage}%\n`;
-    }
+    if (subsections.length === 0) return null;
 
-    return content + '\n';
+    return renderer.renderSection('configuration-files', subsections.join('\n'));
   }
 
-  private restrictions(ast: Program): string | null {
+  private documentation(ast: Program, renderer: ConventionRenderer): string | null {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return null;
+
+    const props = this.getProps(standards.content);
+    const docs = props['documentation'];
+    if (!docs || typeof docs !== 'object' || Array.isArray(docs)) return null;
+
+    const docsObj = docs as Record<string, Value>;
+    const items: string[] = [];
+
+    if (docsObj['verifyBefore']) {
+      items.push(
+        '**Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior'
+      );
+    }
+    if (docsObj['verifyAfter']) {
+      items.push(
+        '**After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed'
+      );
+    }
+    if (docsObj['codeExamples']) {
+      items.push('Ensure code examples in documentation remain accurate after modifications');
+    }
+    items.push('If adding new features, add corresponding documentation in `docs/`');
+    items.push('If changing existing behavior, update affected documentation sections');
+
+    if (items.length === 0) return null;
+
+    return renderer.renderSection('documentation-verification', renderer.renderList(items));
+  }
+
+  private postWork(ast: Program, renderer: ConventionRenderer): string | null {
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
+
+    const text = this.extractText(knowledge.content);
+    const postRegex = /## Post-Work Verification[\s\S]*?```[\s\S]*?```/;
+    const postMatch = postRegex.exec(text);
+    if (!postMatch) return null;
+
+    const intro =
+      'After completing any code changes, run the following commands to ensure code quality:';
+    const content = postMatch[0].replace('## Post-Work Verification', '').trim();
+    return renderer.renderSection('post-work-verification', `${intro}\n${content}`);
+  }
+
+  private restrictions(ast: Program, renderer: ConventionRenderer): string | null {
     const block = this.findBlock(ast, 'restrictions');
     if (!block) return null;
 
+    let items: string[] = [];
+
     if (block.content.type === 'ArrayContent') {
-      let content = '## Restrictions\n\n';
-      for (const item of block.content.elements) {
-        content += `- ${this.valueToString(item)}\n`;
-      }
-      return content.trim();
+      items = block.content.elements.map((item) =>
+        this.formatRestriction(this.valueToString(item))
+      );
+    } else if (block.content.type === 'TextContent') {
+      items = block.content.value
+        .trim()
+        .split('\n')
+        .filter((line) => line.trim())
+        .map((line) => this.formatRestriction(line.trim()));
     }
 
-    if (block.content.type === 'TextContent') {
-      return `## Restrictions\n\n${block.content.value.trim()}`;
+    if (items.length === 0) return null;
+
+    return renderer.renderSection('donts', renderer.renderList(items));
+  }
+
+  private diagrams(ast: Program, renderer: ConventionRenderer): string | null {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return null;
+
+    const props = this.getProps(standards.content);
+    const diag = props['diagrams'];
+    if (!diag || typeof diag !== 'object' || Array.isArray(diag)) return null;
+
+    const diagObj = diag as Record<string, Value>;
+    const items: string[] = [];
+
+    const format = diagObj['format'];
+    if (format) {
+      items.push(
+        `Always use **${this.valueToString(format)}** syntax for diagrams in documentation`
+      );
     }
 
+    const types = diagObj['types'];
+    if (types && Array.isArray(types)) {
+      items.push(`Supported diagram types: ${types.map(String).join(', ')}, etc.`);
+    }
+
+    items.push('Wrap diagrams in markdown code blocks with `mermaid` language identifier');
+    items.push(
+      'Example:\n  ```mermaid\n  flowchart LR\n    A[Input] --> B[Process] --> C[Output]\n````'
+    );
+
+    if (items.length === 0) return null;
+
+    return renderer.renderSection('diagrams', renderer.renderList(items));
+  }
+
+  private knowledge(_ast: Program, _renderer: ConventionRenderer): string | null {
+    // Knowledge is distributed to other sections in this formatter
     return null;
   }
 
-  private commands(ast: Program): string | null {
-    const block = this.findBlock(ast, 'shortcuts');
-    if (!block) return null;
+  // Helper methods
 
-    const props = this.getProps(block.content);
-    if (Object.keys(props).length === 0) return null;
+  private formatTechItem(arr: Value[]): string {
+    return arr.map(String).join(', ');
+  }
 
-    let content = '## Commands\n\n| Command | Description |\n|---------|-------------|\n';
+  private formatStandardsObject(obj: Record<string, Value>): string[] {
+    const items: string[] = [];
 
-    for (const [cmd, desc] of Object.entries(props)) {
-      const description = this.truncate(this.valueToString(desc), 60);
-      content += `| \`${cmd}\` | ${description} |\n`;
-    }
+    if (obj['strictMode']) items.push('Strict mode enabled, no `any` types');
+    if (obj['useUnknown']) items.push(`Use \`unknown\` ${this.valueToString(obj['useUnknown'])}`);
+    if (obj['interfaces'])
+      items.push(`Prefer \`interface\` ${this.valueToString(obj['interfaces'])}`);
+    if (obj['types']) items.push(`Use \`type\` ${this.valueToString(obj['types'])}`);
+    if (obj['exports']) items.push(`${this.capitalize(this.valueToString(obj['exports']))}`);
+    if (obj['returnTypes'])
+      items.push(`Explicit return types ${this.valueToString(obj['returnTypes'])}`);
 
-    return content.trim();
+    return items;
+  }
+
+  private formatNamingStandards(obj: Record<string, Value>): string[] {
+    const items: string[] = [];
+
+    if (obj['files']) items.push(`Files: \`${this.valueToString(obj['files'])}\``);
+    if (obj['classes']) items.push(`Classes/Interfaces: \`${this.valueToString(obj['classes'])}\``);
+    if (obj['functions'])
+      items.push(`Functions/Variables: \`${this.valueToString(obj['functions'])}\``);
+    if (obj['constants']) items.push(`Constants: \`${this.valueToString(obj['constants'])}\``);
+
+    return items;
+  }
+
+  private formatErrorStandards(obj: Record<string, Value>): string[] {
+    const items: string[] = [];
+
+    if (obj['customClasses'])
+      items.push(
+        `Use custom error classes extending \`${this.valueToString(obj['customClasses'])}\``
+      );
+    if (obj['locationInfo']) items.push('Always include location information');
+    if (obj['messages'])
+      items.push(`Provide ${this.valueToString(obj['messages'])} error messages`);
+
+    return items;
+  }
+
+  private formatTestingStandards(obj: Record<string, Value>): string[] {
+    const items: string[] = [];
+
+    if (obj['filePattern']) items.push(`Test files: \`${this.valueToString(obj['filePattern'])}\``);
+    if (obj['pattern']) items.push(`Follow ${this.valueToString(obj['pattern'])} pattern`);
+    if (obj['coverage'])
+      items.push(`Target >${this.valueToString(obj['coverage'])}% coverage for libraries`);
+    if (obj['fixtures']) items.push(`Use fixtures ${this.valueToString(obj['fixtures'])}`);
+
+    return items;
+  }
+
+  private formatRestriction(text: string): string {
+    // Convert "Never X" to "Don't X"
+    const formatted = text
+      .replace(/^-\s*/, '')
+      .replace(/^"/, '')
+      .replace(/"$/, '')
+      .replace(/^Never\s+/i, "Don't ");
+
+    return formatted;
   }
 
   private capitalize(str: string): string {

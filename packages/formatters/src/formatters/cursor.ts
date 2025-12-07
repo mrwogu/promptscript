@@ -1,6 +1,6 @@
 import type { Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter';
-import type { FormatterOutput } from '../types';
+import type { FormatOptions, FormatterOutput } from '../types';
 
 /**
  * Formatter for Cursor rules.
@@ -10,8 +10,9 @@ export class CursorFormatter extends BaseFormatter {
   readonly name = 'cursor';
   readonly outputPath = '.cursorrules';
   readonly description = 'Cursor rules (plain text)';
+  readonly defaultConvention = 'markdown';
 
-  format(ast: Program): FormatterOutput {
+  format(ast: Program, options?: FormatOptions): FormatterOutput {
     const lines: string[] = [];
 
     const intro = this.intro(ast);
@@ -30,7 +31,7 @@ export class CursorFormatter extends BaseFormatter {
     if (never) lines.push(never);
 
     return {
-      path: this.outputPath,
+      path: this.getOutputPath(options),
       content: lines.join('\n\n'),
     };
   }
@@ -74,18 +75,18 @@ export class CursorFormatter extends BaseFormatter {
     const codeObj = code as Record<string, Value>;
     const items: string[] = [];
 
-    this.collectTechItems(items, codeObj['languages']);
-    this.collectTechItems(items, codeObj['frameworks']);
-    this.collectTechItems(items, codeObj['testing']);
+    this.collectValueItems(items, codeObj['languages']);
+    this.collectValueItems(items, codeObj['frameworks']);
+    this.collectValueItems(items, codeObj['testing']);
 
     return items.length > 0 ? `Tech stack: ${items.join(', ')}` : null;
   }
 
-  private collectTechItems(items: string[], value: Value | undefined): void {
+  private collectValueItems(items: string[], value: Value | undefined): void {
     if (!value) return;
     const arr = Array.isArray(value) ? value : [value];
     for (const item of arr) {
-      items.push(String(item));
+      items.push(this.valueToString(item));
     }
   }
 
@@ -99,21 +100,13 @@ export class CursorFormatter extends BaseFormatter {
     const codeObj = code as Record<string, Value>;
     const items: string[] = [];
 
-    this.collectStyleItems(items, codeObj['style']);
-    this.collectStyleItems(items, codeObj['patterns']);
+    this.collectValueItems(items, codeObj['style']);
+    this.collectValueItems(items, codeObj['patterns']);
 
     if (items.length === 0) return null;
 
     const formattedItems = items.map((i) => '- ' + i).join('\n');
     return `Code style:\n${formattedItems}`;
-  }
-
-  private collectStyleItems(items: string[], value: Value | undefined): void {
-    if (!value) return;
-    const arr = Array.isArray(value) ? value : [value];
-    for (const item of arr) {
-      items.push(this.valueToString(item));
-    }
   }
 
   private commands(ast: Program): string | null {

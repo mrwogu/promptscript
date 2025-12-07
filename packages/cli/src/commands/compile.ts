@@ -2,11 +2,29 @@ import { resolve, dirname } from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync, watch } from 'fs';
 import type { CompileOptions } from '../types';
-import type { PromptScriptConfig } from '@promptscript/core';
+import type { PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader';
 import { createSpinner, ConsoleOutput } from '../output/console';
 import { Compiler } from '@promptscript/compiler';
+
+/**
+ * Parse target entries into compiler format.
+ */
+function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
+  return targets.map((entry) => {
+    if (typeof entry === 'string') {
+      return { name: entry };
+    }
+    // Object format: { github: { convention: 'xml' } }
+    const entries = Object.entries(entry);
+    if (entries.length === 0) {
+      throw new Error('Empty target configuration');
+    }
+    const [name, config] = entries[0] as [string, TargetConfig | undefined];
+    return { name, config };
+  });
+}
 
 /**
  * Print compilation errors to console.
@@ -26,12 +44,10 @@ function printErrors(errors: CompileResult['errors']): void {
 async function writeOutputs(
   outputs: Map<string, FormatterOutput>,
   options: CompileOptions,
-  config: PromptScriptConfig
+  _config: PromptScriptConfig
 ): Promise<void> {
-  for (const [name, output] of outputs) {
-    const outputPath = options.output
-      ? resolve(options.output, output.path)
-      : resolve(config.output?.[name] ?? output.path);
+  for (const output of outputs.values()) {
+    const outputPath = options.output ? resolve(options.output, output.path) : resolve(output.path);
 
     if (options.dryRun) {
       ConsoleOutput.dryRun(`Would write: ${outputPath}`);
@@ -79,7 +95,7 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
     const config = await loadConfig();
     spinner.text = 'Compiling...';
 
-    const targets = options.target ? [options.target] : config.targets;
+    const targets = options.target ? [{ name: options.target }] : parseTargets(config.targets);
 
     const compiler = new Compiler({
       resolver: {
@@ -88,6 +104,7 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
       },
       validator: config.validation,
       formatters: targets,
+      customConventions: config.customConventions,
     });
 
     const entryPath = resolve('./.promptscript/project.prs');

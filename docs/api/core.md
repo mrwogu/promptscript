@@ -1,6 +1,6 @@
 ---
 title: Core API
-description: "@promptscript/core package API reference"
+description: '@promptscript/core package API reference'
 ---
 
 # @promptscript/core
@@ -199,7 +199,7 @@ interface SourceLocation {
 }
 
 interface Position {
-  line: number;   // 1-based
+  line: number; // 1-based
   column: number; // 0-based
   offset: number; // Character offset
 }
@@ -211,9 +211,9 @@ Reference to another file:
 
 ```typescript
 interface PathReference {
-  namespace?: string;    // e.g., "company"
-  segments: string[];    // e.g., ["team", "frontend"]
-  version?: string;      // e.g., "1.0.0"
+  namespace?: string; // e.g., "company"
+  segments: string[]; // e.g., ["team", "frontend"]
+  version?: string; // e.g., "1.0.0"
   isRelative: boolean;
 }
 ```
@@ -230,6 +230,59 @@ interface Diagnostic {
   location: SourceLocation;
   suggestions?: string[];
 }
+```
+
+### OutputConvention
+
+Defines how sections are rendered in output:
+
+````typescript
+interface OutputConvention {
+  name: string;
+  section: SectionRenderer;
+  list: ListRenderer;
+  codeBlock: CodeBlockRenderer;
+  root?: RootRenderer;
+}
+
+interface SectionRenderer {
+  prefix: string; // e.g., "<" for XML, "## " for Markdown
+  suffix: string; // e.g., ">" for XML, "" for Markdown
+  contentPrefix: string;
+  contentSuffix: string;
+}
+
+interface ListRenderer {
+  itemPrefix: string; // e.g., "- "
+  itemSuffix: string;
+  listPrefix: string;
+  listSuffix: string;
+}
+
+interface CodeBlockRenderer {
+  prefix: string; // e.g., "```"
+  suffix: string;
+  languageSupport: boolean;
+}
+
+interface RootRenderer {
+  prefix: string;
+  suffix: string;
+}
+````
+
+**Built-in Conventions:**
+
+| Name       | Description                             |
+| ---------- | --------------------------------------- |
+| `xml`      | XML tags (`<section>content</section>`) |
+| `markdown` | Markdown headers (`## Section`)         |
+
+```typescript
+import { XML_CONVENTION, MARKDOWN_CONVENTION, getBuiltInConvention } from '@promptscript/core';
+
+// Get by name
+const conv = getBuiltInConvention('xml');
 ```
 
 ## Errors
@@ -263,7 +316,7 @@ Validation error:
 ```typescript
 class ValidationError extends PSError {
   diagnostics: Diagnostic[];
-  
+
   constructor(diagnostics: Diagnostic[]);
 }
 ```
@@ -275,7 +328,7 @@ Import/inheritance resolution error:
 ```typescript
 class ResolutionError extends PSError {
   path: PathReference;
-  
+
   constructor(message: string, path: PathReference);
 }
 ```
@@ -331,10 +384,7 @@ function deepMerge<T>(target: T, source: Partial<T>): T;
 ```typescript
 import { deepMerge } from '@promptscript/core';
 
-const result = deepMerge(
-  { a: { b: 1, c: 2 } },
-  { a: { b: 3 } }
-);
+const result = deepMerge({ a: { b: 1, c: 2 } }, { a: { b: 3 } });
 // { a: { b: 3, c: 2 } }
 ```
 
@@ -381,11 +431,5 @@ const BLOCK_TYPES = [
 ### Reserved Words
 
 ```typescript
-const RESERVED_WORDS = [
-  'true',
-  'false',
-  'null',
-  'range',
-  'enum',
-] as const;
+const RESERVED_WORDS = ['true', 'false', 'null', 'range', 'enum'] as const;
 ```

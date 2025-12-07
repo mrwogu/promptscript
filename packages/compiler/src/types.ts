@@ -1,4 +1,4 @@
-import type { Program } from '@promptscript/core';
+import type { OutputConvention, Program } from '@promptscript/core';
 import type { ResolverOptions } from '@promptscript/resolver';
 import type { ValidatorConfig, ValidationMessage } from '@promptscript/validator';
 
@@ -13,6 +13,16 @@ export interface FormatterOutput {
 }
 
 /**
+ * Options for formatting.
+ */
+export interface FormatOptions {
+  /** Output convention to use */
+  convention?: OutputConvention | string;
+  /** Custom output path */
+  outputPath?: string;
+}
+
+/**
  * Interface for formatters that convert AST to target format.
  */
 export interface Formatter {
@@ -20,14 +30,28 @@ export interface Formatter {
   readonly name: string;
   /** Output path pattern */
   readonly outputPath: string;
+  /** Default convention for this formatter */
+  readonly defaultConvention: string;
   /** Format the AST to target format */
-  format(ast: Program): FormatterOutput;
+  format(ast: Program, options?: FormatOptions): FormatterOutput;
 }
 
 /**
  * Formatter class constructor type.
  */
 export type FormatterConstructor = new () => Formatter;
+
+/**
+ * Configuration for a single target.
+ */
+export interface TargetConfig {
+  /** Whether this target is enabled */
+  enabled?: boolean;
+  /** Custom output path */
+  output?: string;
+  /** Output convention ('xml', 'markdown', or custom name) */
+  convention?: string;
+}
 
 /**
  * Options for the compiler.
@@ -37,8 +61,10 @@ export interface CompilerOptions {
   resolver: ResolverOptions;
   /** Validator configuration */
   validator?: ValidatorConfig;
-  /** Formatters to use (names or instances) */
-  formatters: (Formatter | string)[];
+  /** Formatters to use (names, instances, or configs) */
+  formatters: (Formatter | string | { name: string; config?: TargetConfig })[];
+  /** Custom convention definitions */
+  customConventions?: Record<string, OutputConvention>;
 }
 
 /**

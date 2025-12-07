@@ -1,5 +1,6 @@
 import type { Block, BlockContent, Program, Value } from '@promptscript/core';
-import type { Formatter, FormatterOutput } from './types';
+import { ConventionRenderer } from './convention-renderer';
+import type { FormatOptions, Formatter, FormatterOutput } from './types';
 
 /**
  * Abstract base formatter with common helper methods.
@@ -9,7 +10,24 @@ export abstract class BaseFormatter implements Formatter {
   abstract readonly name: string;
   abstract readonly outputPath: string;
   abstract readonly description: string;
-  abstract format(ast: Program): FormatterOutput;
+  abstract readonly defaultConvention: string;
+  abstract format(ast: Program, options?: FormatOptions): FormatterOutput;
+
+  /**
+   * Create a convention renderer for this formatter.
+   * Uses the provided convention from options or falls back to the default.
+   */
+  protected createRenderer(options?: FormatOptions): ConventionRenderer {
+    const convention = options?.convention ?? this.defaultConvention;
+    return new ConventionRenderer(convention);
+  }
+
+  /**
+   * Get the output path, respecting options override.
+   */
+  protected getOutputPath(options?: FormatOptions): string {
+    return options?.outputPath ?? this.outputPath;
+  }
 
   /**
    * Find a block by name, ignoring internal blocks (starting with __).

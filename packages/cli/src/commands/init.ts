@@ -245,26 +245,26 @@ function formatTargetName(target: AIToolTarget): string {
  * Generate the config file content.
  */
 function generateConfig(config: ResolvedConfig): string {
-  const lines: string[] = ['version: "1"', '', 'project:', `  id: "${config.projectId}"`];
+  const lines: string[] = ["version: '1'", '', 'project:', `  id: '${config.projectId}'`];
 
   if (config.team) {
-    lines.push(`  team: "${config.team}"`);
+    lines.push(`  team: '${config.team}'`);
   }
 
   lines.push('');
 
   if (config.inherit) {
-    lines.push(`inherit: "${config.inherit}"`);
+    lines.push(`inherit: '${config.inherit}'`);
   } else {
-    lines.push('# inherit: "@company/team"');
+    lines.push("# inherit: '@company/team'");
   }
 
   lines.push('');
 
   if (config.registry) {
-    lines.push('registry:', `  path: "${config.registry}"`);
+    lines.push('registry:', `  path: '${config.registry}'`);
   } else {
-    lines.push('# registry:', '#   path: "./registry"');
+    lines.push('# registry:', "#   path: './registry'");
   }
 
   lines.push('', 'targets:');

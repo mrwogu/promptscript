@@ -10,4 +10,6 @@ export type {
   Formatter,
   FormatterOutput,
   FormatterConstructor,
+  FormatOptions,
+  TargetConfig,
 } from './types';

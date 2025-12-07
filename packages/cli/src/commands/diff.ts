@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import type { DiffOptions } from '../types';
-import type { PromptScriptConfig } from '@promptscript/core';
+import type { PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader';
 import { createSpinner, ConsoleOutput } from '../output/console';
@@ -11,13 +11,27 @@ import { Compiler } from '@promptscript/compiler';
 import chalk from 'chalk';
 
 /**
+ * Parse target entries into compiler format.
+ */
+function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
+  return targets.map((entry) => {
+    if (typeof entry === 'string') {
+      return { name: entry };
+    }
+    // Object format: { github: { convention: 'xml' } }
+    const entries = Object.entries(entry);
+    if (entries.length === 0) {
+      throw new Error('Empty target configuration');
+    }
+    const [name, config] = entries[0] as [string, TargetConfig | undefined];
+    return { name, config };
+  });
+}
+
+/**
  * Show preview of a new file's content.
  */
-function printNewFilePreview(
-  content: string,
-  showFull: boolean,
-  pager: Pager
-): void {
+function printNewFilePreview(content: string, showFull: boolean, pager: Pager): void {
   const lines = content.split('\n');
   const maxLines = showFull ? lines.length : 10;
   const preview = lines.slice(0, maxLines);
@@ -35,13 +49,13 @@ function printNewFilePreview(
  * Compare a single output file with existing content.
  */
 async function compareOutput(
-  name: string,
+  _name: string,
   output: FormatterOutput,
-  config: PromptScriptConfig,
+  _config: PromptScriptConfig,
   showFull: boolean,
   pager: Pager
 ): Promise<boolean> {
-  const outputPath = resolve(config.output?.[name] ?? output.path);
+  const outputPath = resolve(output.path);
   const newContent = output.content;
 
   if (!existsSync(outputPath)) {
@@ -82,7 +96,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const config = await loadConfig();
     spinner.text = 'Compiling...';
 
-    const targets = options.target ? [options.target] : config.targets;
+    const targets = options.target ? [{ name: options.target }] : parseTargets(config.targets);
 
     const compiler = new Compiler({
       resolver: {
@@ -91,6 +105,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       },
       validator: config.validation,
       formatters: targets,
+      customConventions: config.customConventions,
     });
 
     const entryPath = resolve('./.promptscript/project.prs');
@@ -125,13 +140,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
 
     // Compare outputs with existing files
     for (const [name, output] of result.outputs) {
-      const hasChanges = await compareOutput(
-        name,
-        output,
-        config,
-        showFull,
-        pager
-      );
+      const hasChanges = await compareOutput(name, output, config, showFull, pager);
       if (hasChanges) {
         hasDiff = true;
       }

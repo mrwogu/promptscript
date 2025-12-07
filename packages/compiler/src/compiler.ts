@@ -10,7 +10,16 @@ import type {
   Formatter,
   FormatterOutput,
   FormatterConstructor,
+  TargetConfig,
 } from './types';
+
+/**
+ * Internal representation of a loaded formatter with its config.
+ */
+interface LoadedFormatter {
+  formatter: Formatter;
+  config?: TargetConfig;
+}
 
 /**
  * Compiler that orchestrates the PromptScript compilation pipeline.
@@ -39,12 +48,12 @@ import type {
 export class Compiler {
   private readonly resolver: Resolver;
   private readonly validator: Validator;
-  private readonly formatters: Formatter[];
+  private readonly loadedFormatters: LoadedFormatter[];
 
   constructor(private readonly options: CompilerOptions) {
     this.resolver = new Resolver(options.resolver);
     this.validator = new Validator(options.validator);
-    this.formatters = this.loadFormatters(options.formatters);
+    this.loadedFormatters = this.loadFormatters(options.formatters);
   }
 
   /**
@@ -119,9 +128,10 @@ export class Compiler {
     const outputs = new Map<string, FormatterOutput>();
     const formatErrors: CompileError[] = [];
 
-    for (const formatter of this.formatters) {
+    for (const { formatter, config } of this.loadedFormatters) {
       try {
-        const output = formatter.format(resolved.ast);
+        const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
+        const output = formatter.format(resolved.ast, formatOptions);
         outputs.set(formatter.name, output);
       } catch (err) {
         formatErrors.push({
@@ -158,22 +168,64 @@ export class Compiler {
    * Get the configured formatters.
    */
   getFormatters(): readonly Formatter[] {
-    return this.formatters;
+    return this.loadedFormatters.map((lf) => lf.formatter);
+  }
+
+  /**
+   * Get format options for a specific target.
+   */
+  private getFormatOptionsForTarget(
+    _targetName: string,
+    config?: TargetConfig
+  ): import('./types').FormatOptions {
+    const customConventions = this.options.customConventions;
+
+    if (!config?.convention) {
+      return {};
+    }
+
+    const conventionName = config.convention;
+
+    // Check if it's a custom convention
+    if (customConventions?.[conventionName]) {
+      return {
+        convention: customConventions[conventionName],
+        outputPath: config.output,
+      };
+    }
+
+    return {
+      convention: conventionName,
+      outputPath: config.output,
+    };
   }
 
   /**
    * Load and instantiate formatters from options.
    */
-  private loadFormatters(formatters: (Formatter | string)[]): Formatter[] {
+  private loadFormatters(formatters: CompilerOptions['formatters']): LoadedFormatter[] {
     return formatters.map((f) => {
+      // String name
       if (typeof f === 'string') {
-        return this.loadFormatterByName(f);
+        return { formatter: this.loadFormatterByName(f) };
       }
-      // Check if it's a constructor (function) or instance
+
+      // Check if it's a constructor (function)
       if (typeof f === 'function') {
-        return new (f as unknown as FormatterConstructor)();
+        return { formatter: new (f as unknown as FormatterConstructor)() };
       }
-      return f;
+
+      // Object with name and config (not a Formatter instance)
+      if ('name' in f && typeof f.name === 'string' && !('format' in f)) {
+        const configObj = f as { name: string; config?: TargetConfig };
+        return {
+          formatter: this.loadFormatterByName(configObj.name),
+          config: configObj.config,
+        };
+      }
+
+      // Already a Formatter instance
+      return { formatter: f as Formatter };
     });
   }
 

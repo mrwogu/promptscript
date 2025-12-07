@@ -1,6 +1,6 @@
 ---
 title: Formatters API
-description: "@promptscript/formatters package API reference"
+description: '@promptscript/formatters package API reference'
 ---
 
 # @promptscript/formatters
@@ -20,18 +20,15 @@ npm install @promptscript/formatters
 Format a resolved program to a target format.
 
 ```typescript
-function format(
-  program: ResolvedProgram,
-  options: FormatOptions
-): string;
+function format(program: ResolvedProgram, options: FormatOptions): string;
 ```
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `program` | `ResolvedProgram` | Resolved AST |
-| `options` | `FormatOptions` | Formatting options |
+| Parameter | Type              | Description        |
+| --------- | ----------------- | ------------------ |
+| `program` | `ResolvedProgram` | Resolved AST       |
+| `options` | `FormatOptions`   | Formatting options |
 
 **Returns:** `string` - Formatted output
 
@@ -77,15 +74,21 @@ function registerFormatter(name: string, formatter: Formatter): void;
 interface FormatOptions {
   /** Target format */
   target: 'github' | 'claude' | 'cursor' | string;
-  
+
   /** Include header comment */
   header?: boolean | string;
-  
+
   /** Include timestamp */
   timestamp?: boolean;
-  
+
   /** Target-specific options */
   targetOptions?: Record<string, unknown>;
+
+  /** Output convention ('xml' | 'markdown' | custom) */
+  convention?: string;
+
+  /** Output file path */
+  outputPath?: string;
 }
 ```
 
@@ -101,17 +104,18 @@ import { format } from '@promptscript/formatters';
 const output = format(resolved, {
   target: 'github',
   targetOptions: {
-    headerLevel: 2,           // Starting header level
-    includeComments: true,    // Include source comments
-    sectionOrder: [           // Section ordering
+    headerLevel: 2, // Starting header level
+    includeComments: true, // Include source comments
+    sectionOrder: [
+      // Section ordering
       'identity',
       'context',
       'standards',
       'restrictions',
       'shortcuts',
-      'knowledge'
-    ]
-  }
+      'knowledge',
+    ],
+  },
 });
 ```
 
@@ -143,9 +147,9 @@ Outputs `CLAUDE.md` format.
 const output = format(resolved, {
   target: 'claude',
   targetOptions: {
-    format: 'detailed',       // 'minimal' | 'detailed'
-    includeMetadata: false,   // Include @meta info
-  }
+    format: 'detailed', // 'minimal' | 'detailed'
+    includeMetadata: false, // Include @meta info
+  },
 });
 ```
 
@@ -175,9 +179,9 @@ Outputs `.cursorrules` format.
 const output = format(resolved, {
   target: 'cursor',
   targetOptions: {
-    compact: true,            // Minimize whitespace
-    maxLength: 10000,         // Max output length
-  }
+    compact: true, // Minimize whitespace
+    maxLength: 10000, // Max output length
+  },
 });
 ```
 
@@ -195,6 +199,122 @@ Commands:
 /test - Write comprehensive tests
 ```
 
+## Output Conventions
+
+Output conventions control how sections are rendered in the output. Built-in conventions include `xml` and `markdown`.
+
+### Built-in Conventions
+
+| Convention | Default For            | Section Format                         | List Format    |
+| ---------- | ---------------------- | -------------------------------------- | -------------- |
+| `markdown` | GitHub, Claude, Cursor | `## Section Name`                      | Markdown lists |
+| `xml`      | (optional)             | `<section-name>content</section-name>` | Markdown lists |
+
+### Using Conventions
+
+```typescript
+import { format } from '@promptscript/formatters';
+
+// Use Markdown convention (default for all targets)
+const mdOutput = format(resolved, {
+  target: 'github',
+  convention: 'markdown',
+});
+
+// Use XML convention
+const xmlOutput = format(resolved, {
+  target: 'github',
+  convention: 'xml',
+});
+```
+
+### XML Convention Output
+
+```xml
+<project>
+PromptScript is a language for AI instructions.
+</project>
+
+<tech-stack>
+- TypeScript 5.x
+- Node.js 20+
+</tech-stack>
+
+<standards>
+- Use strict mode
+- No any types
+</standards>
+```
+
+### Markdown Convention Output
+
+```markdown
+## Project
+
+PromptScript is a language for AI instructions.
+
+## Tech Stack
+
+- TypeScript 5.x
+- Node.js 20+
+
+## Standards
+
+- Use strict mode
+- No any types
+```
+
+### ConventionRenderer
+
+The `ConventionRenderer` class provides utilities for rendering content according to a convention:
+
+```typescript
+import { createConventionRenderer } from '@promptscript/formatters';
+
+const renderer = createConventionRenderer('xml');
+
+// Render a section
+const section = renderer.renderSection('standards', '- Use TypeScript');
+
+// Render a list
+const list = renderer.renderList(['Item 1', 'Item 2']);
+
+// Render a code block
+const code = renderer.renderCodeBlock('const x = 1;', 'typescript');
+
+// Wrap content in root element (for XML)
+const wrapped = renderer.wrapRoot(content);
+```
+
+### Custom Conventions
+
+Define custom conventions in your configuration:
+
+````yaml
+# promptscript.yaml
+customConventions:
+  my-convention:
+    name: 'my-convention'
+    section:
+      prefix: '=== '
+      suffix: ' ==='
+      contentPrefix: ''
+      contentSuffix: "\n"
+    list:
+      itemPrefix: '* '
+      itemSuffix: ''
+      listPrefix: ''
+      listSuffix: ''
+    codeBlock:
+      prefix: '```'
+      suffix: '```'
+      languageSupport: true
+
+targets:
+  - github:
+      convention: my-convention
+````
+
 ## Custom Formatters
 
 ### Formatter Interface
@@ -203,16 +323,19 @@ Commands:
 interface Formatter {
   /** Formatter name */
   name: string;
-  
+
   /** File extension */
   extension: string;
-  
+
   /** Default output path */
   defaultOutput: string;
-  
+
+  /** Default output convention */
+  defaultConvention: 'xml' | 'markdown';
+
   /** Format the program */
   format(program: ResolvedProgram, options?: Record<string, unknown>): string;
-  
+
   /** Validate options */
   validateOptions?(options: Record<string, unknown>): void;
 }
@@ -227,27 +350,27 @@ const xmlFormatter = createFormatter({
   name: 'xml',
   extension: '.xml',
   defaultOutput: 'ai-instructions.xml',
-  
+
   format(program, options) {
     let xml = '<?xml version="1.0"?>\n<instructions>\n';
-    
+
     // Format identity
     if (program.blocks.identity) {
       xml += `  <identity>${escapeXml(program.blocks.identity.content)}</identity>\n`;
     }
-    
+
     // Format standards
     if (program.blocks.standards) {
       xml += '  <standards>\n';
       xml += formatObject(program.blocks.standards.properties);
       xml += '  </standards>\n';
     }
-    
+
     // ... more blocks
-    
+
     xml += '</instructions>';
     return xml;
-  }
+  },
 });
 
 registerFormatter('xml', xmlFormatter);
@@ -273,7 +396,7 @@ import { formatText } from '@promptscript/formatters';
 const formatted = formatText(textContent, {
   trimLines: true,
   maxLineLength: 80,
-  preserveNewlines: true
+  preserveNewlines: true,
 });
 ```
 
@@ -285,9 +408,9 @@ Format object to readable output:
 import { formatObject } from '@promptscript/formatters';
 
 const formatted = formatObject(obj, {
-  style: 'yaml',      // 'yaml' | 'json' | 'markdown-list'
+  style: 'yaml', // 'yaml' | 'json' | 'markdown-list'
   indent: 2,
-  maxDepth: 5
+  maxDepth: 5,
 });
 ```
 
@@ -299,8 +422,8 @@ Format shortcuts block:
 import { formatShortcuts } from '@promptscript/formatters';
 
 const formatted = formatShortcuts(shortcuts, {
-  style: 'list',      // 'list' | 'table' | 'inline'
-  separator: ' - '
+  style: 'list', // 'list' | 'table' | 'inline'
+  separator: ' - ',
 });
 ```
 
@@ -335,7 +458,7 @@ const customFormatter = createTemplateFormatter({
 - \`{{name}}\` - {{description}}
 {{/each}}
 {{/shortcuts}}
-`
+`,
 });
 ```
 
@@ -364,8 +487,8 @@ const result = validateOutput(output, {
   rules: {
     maxLength: 50000,
     requiredSections: ['identity'],
-    forbiddenPatterns: [/TODO/i]
-  }
+    forbiddenPatterns: [/TODO/i],
+  },
 });
 
 if (!result.valid) {
@@ -382,7 +505,7 @@ import { generateDiff } from '@promptscript/formatters';
 
 const diff = generateDiff(oldOutput, newOutput, {
   color: true,
-  context: 3
+  context: 3,
 });
 
 console.log(diff);
@@ -393,7 +516,7 @@ console.log(diff);
 Formatter performance:
 
 | Target | 1KB Program | 10KB Program |
-|--------|-------------|--------------|
-| github | < 1ms | ~2ms |
-| claude | < 1ms | ~2ms |
-| cursor | < 1ms | ~1ms |
+| ------ | ----------- | ------------ |
+| github | < 1ms       | ~2ms         |
+| claude | < 1ms       | ~2ms         |
+| cursor | < 1ms       | ~1ms         |

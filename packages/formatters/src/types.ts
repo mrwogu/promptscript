@@ -1,4 +1,4 @@
-import type { Program } from '@promptscript/core';
+import type { OutputConvention, Program } from '@promptscript/core';
 
 /**
  * Output from a formatter.
@@ -11,6 +11,22 @@ export interface FormatterOutput {
 }
 
 /**
+ * Options for formatting.
+ */
+export interface FormatOptions {
+  /**
+   * Output convention to use.
+   * Can be a built-in convention name ('xml', 'markdown') or a custom OutputConvention.
+   */
+  convention?: OutputConvention | string;
+
+  /**
+   * Custom output path (overrides default).
+   */
+  outputPath?: string;
+}
+
+/**
  * Common interface for all formatters.
  */
 export interface Formatter {
@@ -20,8 +36,10 @@ export interface Formatter {
   readonly outputPath: string;
   /** Human-readable description */
   readonly description: string;
+  /** Default convention for this formatter */
+  readonly defaultConvention: string;
   /** Transform AST to tool-specific format */
-  format(ast: Program): FormatterOutput;
+  format(ast: Program, options?: FormatOptions): FormatterOutput;
 }
 
 /**

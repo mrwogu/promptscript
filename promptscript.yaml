@@ -1,11 +1,13 @@
-version: "1"
+version: '1'
 
 project:
-  id: "promptscript"
+  id: 'promptscript'
 
 targets:
-  - github
-  - claude
+  - github:
+      convention: markdown
+  - claude:
+      convention: markdown
 
 validation:
   rules:

@@ -5,7 +5,7 @@
   
   **The language for standardizing AI instructions across your organization.**
 
-  🐕 *This project uses PromptScript to manage its own AI instructions!*
+🐕 _This project uses PromptScript to manage its own AI instructions!_
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
@@ -42,6 +42,8 @@ Result: **chaos, inconsistency, no governance.**
 
 ## The Solution
 
+Check also our [.promptscript/project.prs](.promptscript/project.prs) file.
+
 ```promptscript
 # One file to rule them all
 @meta { id: "my-project", version: "1.0.0" }
@@ -58,6 +60,27 @@ Result: **chaos, inconsistency, no governance.**
 @shortcuts {
   "/review": "Review code for security and performance"
   "/test": "Write comprehensive unit tests"
+}
+
+@standards {
+  typescript: {
+    strictMode: true
+    noAny: true
+    useUnknown: "with type guards instead of any"
+    interfaces: "for object shapes"
+    types: "for unions and intersections"
+    exports: "named only, no default exports"
+    returnTypes: "explicit on public functions"
+  }
+
+  naming: {
+    files: "kebab-case.ts"
+    classes: "PascalCase"
+    interfaces: "PascalCase"
+    functions: "camelCase"
+    variables: "camelCase"
+    constants: "UPPER_SNAKE_CASE"
+  }
 }
 ```
 
@@ -117,6 +140,30 @@ prs compile --all
 | [@promptscript/core](packages/core)         | Core types & utilities | ![npm](https://img.shields.io/npm/v/@promptscript/core)     |
 | [@promptscript/parser](packages/parser)     | PromptScript parser    | ![npm](https://img.shields.io/npm/v/@promptscript/parser)   |
 | [@promptscript/compiler](packages/compiler) | Compilation pipeline   | ![npm](https://img.shields.io/npm/v/@promptscript/compiler) |
+
+## Roadmap
+
+🎯 **Current Focus: Migration & Adoption**
+
+- [ ] **Migrate existing AI instructions to PromptScript** - Convert `.github/copilot-instructions.md`, `CLAUDE.md`, `.cursorrules` files to unified `.prs` format
+- [ ] **`prs migrate` command** - Automatic conversion of existing instruction files to PromptScript
+
+🤔 **Under Consideration** _(Looking for contributors & sponsors!)_
+
+- [ ] **Remote registry** - Share and publish PromptScript packages (`@company/frontend-standards`)
+- [ ] **VS Code extension** - Syntax highlighting, autocomplete, inline validation
+- [ ] **GitHub Action** - CI/CD integration for automatic compilation and drift detection
+- [ ] **Web playground** - Try PromptScript in the browser without installation
+- [ ] **AI-assisted authoring** - Generate PromptScript from natural language descriptions
+- [ ] **Multi-language support** - Localized instructions for international teams
+- [ ] **Analytics dashboard** - Track instruction usage and effectiveness across organization
+- [ ] **Diff & sync tools** - Detect drift between source `.prs` and compiled outputs
+- [ ] **Template marketplace** - Community-contributed templates for common stacks (React, Django, Rails, etc.)
+- [ ] **Formatter plugins** - Support for Windsurf, Aider, Continue, and other emerging AI tools
+- [ ] **Secret management** - Safe handling of API keys and sensitive configuration
+- [ ] **Conditional compilation** - Environment-specific instructions (dev/staging/prod)
+
+🙌 **Want to help?** We're actively looking for contributors and sponsors to bring these features to life! [Open an issue](https://github.com/mrwogu/promptscript/issues/new), [start a discussion](https://github.com/mrwogu/promptscript/discussions), or reach out if you'd like to collaborate.
 
 ## Contributing
 

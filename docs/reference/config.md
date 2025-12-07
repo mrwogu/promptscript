@@ -200,15 +200,92 @@ targets:
 
 **Available Targets:**
 
-| Target   | Default Output                    | Description    |
-| -------- | --------------------------------- | -------------- |
-| `github` | `.github/copilot-instructions.md` | GitHub Copilot |
-| `claude` | `CLAUDE.md`                       | Claude Code    |
-| `cursor` | `.cursorrules`                    | Cursor         |
+| Target   | Default Output                    | Default Convention | Description    |
+| -------- | --------------------------------- | ------------------ | -------------- |
+| `github` | `.github/copilot-instructions.md` | `markdown`         | GitHub Copilot |
+| `claude` | `CLAUDE.md`                       | `markdown`         | Claude Code    |
+| `cursor` | `.cursorrules`                    | `markdown`         | Cursor         |
+
+**Target Configuration:**
+
+Targets can be specified as simple names or with configuration:
+
+```yaml
+targets:
+  # Simple format (uses defaults)
+  - github
+  - claude
+
+  # With configuration
+  - github:
+      convention: xml
+      output: custom/path/instructions.md
+  - claude:
+      convention: markdown
+```
 
 **Target Options:**
 
-Each target supports specific options. See [Formatters API](../api/formatters.md) for details.
+| Field        | Type    | Default     | Description                             |
+| ------------ | ------- | ----------- | --------------------------------------- |
+| `enabled`    | boolean | `true`      | Whether target is enabled               |
+| `output`     | string  | (see above) | Custom output path                      |
+| `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown') |
+
+See [Formatters API](../api/formatters.md) for more details.
+
+**Built-in Conventions:**
+
+| Convention | Section Format                         | Description               |
+| ---------- | -------------------------------------- | ------------------------- |
+| `markdown` | `## Section Name`                      | Markdown headers          |
+| `xml`      | `<section-name>content</section-name>` | XML tags wrapping content |
+
+### customConventions
+
+Define custom output conventions for specialized formatting needs.
+
+```yaml
+customConventions:
+  my-format:
+    name: my-format
+    section:
+      prefix: '### '
+      suffix: ''
+      contentPrefix: "\n"
+      contentSuffix: "\n\n"
+    list:
+      itemPrefix: '→ '
+      itemSuffix: ''
+      listPrefix: ''
+      listSuffix: "\n"
+    codeBlock:
+      prefix: '~~~'
+      suffix: '~~~'
+      languageSupport: true
+
+# Use custom convention in target
+targets:
+  - github:
+      convention: my-format
+```
+
+**Custom Convention Structure:**
+
+| Field                       | Type    | Description                            |
+| --------------------------- | ------- | -------------------------------------- |
+| `name`                      | string  | Convention identifier                  |
+| `section.prefix`            | string  | Text before section name               |
+| `section.suffix`            | string  | Text after section name                |
+| `section.contentPrefix`     | string  | Text before section content            |
+| `section.contentSuffix`     | string  | Text after section content             |
+| `list.itemPrefix`           | string  | Text before each list item             |
+| `list.itemSuffix`           | string  | Text after each list item              |
+| `list.listPrefix`           | string  | Text before the list                   |
+| `list.listSuffix`           | string  | Text after the list                    |
+| `codeBlock.prefix`          | string  | Code block start marker                |
+| `codeBlock.suffix`          | string  | Code block end marker                  |
+| `codeBlock.languageSupport` | boolean | Whether to include language identifier |
 
 ### validation
 

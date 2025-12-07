@@ -7,6 +7,13 @@ export { BaseFormatter } from './base-formatter';
 // Registry
 export { FormatterRegistry } from './registry';
 
+// Convention renderer
+export {
+  ConventionRenderer,
+  createConventionRenderer,
+  conventionRenderers,
+} from './convention-renderer';
+
 // Built-in formatters
 export { GitHubFormatter, ClaudeFormatter, CursorFormatter } from './formatters';
 

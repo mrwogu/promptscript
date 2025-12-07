@@ -87,7 +87,7 @@ describe('commands/init', () => {
       expect(writeFile).toHaveBeenCalledTimes(2);
       expect(writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining('version: "1"'),
+        expect.stringContaining("version: '1'"),
         'utf-8'
       );
     });
@@ -101,7 +101,7 @@ describe('commands/init', () => {
       expect(writeFile).toHaveBeenCalledTimes(2);
       expect(writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining('version: "1"'),
+        expect.stringContaining("version: '1'"),
         'utf-8'
       );
       expect(writeFile).toHaveBeenCalledWith(
@@ -118,7 +118,7 @@ describe('commands/init', () => {
 
       expect(writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining('id: "custom-project"'),
+        expect.stringContaining("id: 'custom-project'"),
         'utf-8'
       );
     });
@@ -147,7 +147,7 @@ describe('commands/init', () => {
 
       expect(writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining('inherit: "@company/team"'),
+        expect.stringContaining("inherit: '@company/team'"),
         'utf-8'
       );
     });

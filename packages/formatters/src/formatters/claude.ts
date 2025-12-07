@@ -1,6 +1,6 @@
 import type { Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter';
-import type { FormatterOutput } from '../types';
+import type { FormatOptions, FormatterOutput } from '../types';
 
 /**
  * Formatter for Claude Code instructions.
@@ -10,8 +10,9 @@ export class ClaudeFormatter extends BaseFormatter {
   readonly name = 'claude';
   readonly outputPath = 'CLAUDE.md';
   readonly description = 'Claude Code instructions (concise Markdown)';
+  readonly defaultConvention = 'markdown';
 
-  format(ast: Program): FormatterOutput {
+  format(ast: Program, options?: FormatOptions): FormatterOutput {
     const sections: string[] = [];
 
     sections.push('# CLAUDE.md\n');
@@ -32,7 +33,7 @@ export class ClaudeFormatter extends BaseFormatter {
     if (donts) sections.push(donts);
 
     return {
-      path: this.outputPath,
+      path: this.getOutputPath(options),
       content: sections.join('\n'),
     };
   }

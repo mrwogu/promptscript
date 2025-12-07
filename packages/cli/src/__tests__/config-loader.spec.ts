@@ -72,7 +72,7 @@ describe('config/loader', () => {
     it('should parse valid YAML config', async () => {
       vi.mocked(existsSync).mockReturnValueOnce(true);
       vi.mocked(readFile).mockResolvedValueOnce(`
-version: "1"
+version: '1'
 project:
   id: "test-project"
   team: "frontend"
