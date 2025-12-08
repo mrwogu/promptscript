@@ -57,7 +57,7 @@ interface MetaBlock {
   type: 'MetaBlock';
   properties: {
     id: string;
-    version: string;
+    syntax: string;
     org?: string;
     team?: string;
     tags?: string[];

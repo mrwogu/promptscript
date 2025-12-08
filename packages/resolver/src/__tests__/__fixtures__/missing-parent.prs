@@ -1,6 +1,6 @@
 @meta {
   id: "missing-parent"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit ./does-not-exist

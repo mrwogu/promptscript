@@ -7,6 +7,7 @@ class MockFormatter implements Formatter {
   readonly name = 'coverage-mock';
   readonly outputPath = 'coverage-mock.txt';
   readonly description = 'Coverage mock formatter';
+  readonly defaultConvention = 'markdown';
 
   format(): FormatterOutput {
     return { path: this.outputPath, content: 'coverage content' };

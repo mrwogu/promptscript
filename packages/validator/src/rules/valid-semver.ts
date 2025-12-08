@@ -39,33 +39,33 @@ export function isValidSemver(version: string): boolean {
 }
 
 /**
- * PS003: Version must be valid semver
+ * PS003: Syntax version must be valid semver
  */
 export const validSemver: ValidationRule = {
   id: 'PS003',
   name: 'valid-semver',
-  description: 'Version must be valid semantic version',
+  description: 'Syntax version must be valid semantic version',
   defaultSeverity: 'error',
   validate: (ctx) => {
     const meta = ctx.ast.meta;
-    if (!meta?.fields?.['version']) {
-      // PS002 will report the missing version
+    if (!meta?.fields?.['syntax']) {
+      // PS002 will report the missing syntax
       return;
     }
 
-    const version = meta.fields['version'];
-    if (typeof version !== 'string') {
+    const syntax = meta.fields['syntax'];
+    if (typeof syntax !== 'string') {
       ctx.report({
-        message: '@meta.version must be a string',
+        message: '@meta.syntax must be a string',
         location: meta.loc ?? ctx.ast.loc,
-        suggestion: 'Use a string value like version: "1.0.0"',
+        suggestion: 'Use a string value like syntax: "1.0.0"',
       });
       return;
     }
 
-    if (!isValidSemver(version)) {
+    if (!isValidSemver(syntax)) {
       ctx.report({
-        message: `Invalid semantic version: "${version}"`,
+        message: `Invalid semantic version: "${syntax}"`,
         location: meta.loc ?? ctx.ast.loc,
         suggestion:
           'Use semantic versioning format: MAJOR.MINOR.PATCH (e.g., "1.0.0", "2.1.0-beta.1")',

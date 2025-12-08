@@ -50,12 +50,10 @@ describe('Resolver', () => {
 
       // Check meta merged
       expect(result.ast?.meta?.fields?.['id']).toBe('child');
-      expect(result.ast?.meta?.fields?.['version']).toBe('1.0.0');
+      expect(result.ast?.meta?.fields?.['syntax']).toBe('1.0.0');
 
       // Check blocks merged
-      const identityBlock = result.ast?.blocks.find(
-        (b) => b.name === 'identity'
-      );
+      const identityBlock = result.ast?.blocks.find((b) => b.name === 'identity');
       expect(identityBlock).toBeDefined();
 
       // Identity should have merged text (parent + child)
@@ -66,15 +64,11 @@ describe('Resolver', () => {
       }
 
       // Standards should be merged
-      const standardsBlock = result.ast?.blocks.find(
-        (b) => b.name === 'standards'
-      );
+      const standardsBlock = result.ast?.blocks.find((b) => b.name === 'standards');
       expect(standardsBlock).toBeDefined();
 
       // Context should come from child only
-      const contextBlock = result.ast?.blocks.find(
-        (b) => b.name === 'context'
-      );
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
       expect(contextBlock).toBeDefined();
     });
 
@@ -86,9 +80,7 @@ describe('Resolver', () => {
       expect(result.sources).toHaveLength(3);
 
       // Should have content from all three levels
-      const identityBlock = result.ast?.blocks.find(
-        (b) => b.name === 'identity'
-      );
+      const identityBlock = result.ast?.blocks.find((b) => b.name === 'identity');
       const identityContent = identityBlock?.content;
 
       if (identityContent?.type === 'TextContent') {
@@ -106,9 +98,7 @@ describe('Resolver', () => {
       expect(result.sources).toHaveLength(2);
 
       // Import markers should be removed after resolution
-      const hasImportMarker = result.ast?.blocks.some((b) =>
-        b.name.startsWith('__import__')
-      );
+      const hasImportMarker = result.ast?.blocks.some((b) => b.name.startsWith('__import__'));
       expect(hasImportMarker).toBe(false);
     });
 
@@ -119,9 +109,7 @@ describe('Resolver', () => {
       expect(result.errors).toHaveLength(0);
 
       // Identity should be extended
-      const identityBlock = result.ast?.blocks.find(
-        (b) => b.name === 'identity'
-      );
+      const identityBlock = result.ast?.blocks.find((b) => b.name === 'identity');
       const identityContent = identityBlock?.content;
 
       if (identityContent?.type === 'TextContent') {
@@ -130,9 +118,7 @@ describe('Resolver', () => {
       }
 
       // Standards.code should be extended with frameworks
-      const standardsBlock = result.ast?.blocks.find(
-        (b) => b.name === 'standards'
-      );
+      const standardsBlock = result.ast?.blocks.find((b) => b.name === 'standards');
       const standardsContent = standardsBlock?.content;
 
       if (standardsContent?.type === 'ObjectContent') {
@@ -146,9 +132,7 @@ describe('Resolver', () => {
     });
 
     it('should detect circular dependencies', async () => {
-      await expect(resolver.resolve('./circular-a.prs')).rejects.toThrow(
-        CircularDependencyError
-      );
+      await expect(resolver.resolve('./circular-a.prs')).rejects.toThrow(CircularDependencyError);
     });
 
     it('should handle missing files gracefully', async () => {
@@ -222,9 +206,11 @@ describe('Resolver', () => {
 
       expect(result.errors.length).toBeGreaterThan(0);
       // Check that error contains info about resolution failure
-      expect(result.errors.some((e) => 
-        e.message.includes('File not found') || e.message.includes('resolve')
-      )).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.message.includes('File not found') || e.message.includes('resolve')
+        )
+      ).toBe(true);
     });
 
     it('should handle missing import file', async () => {
@@ -232,9 +218,11 @@ describe('Resolver', () => {
 
       expect(result.errors.length).toBeGreaterThan(0);
       // Check that error contains info about resolution failure
-      expect(result.errors.some((e) => 
-        e.message.includes('File not found') || e.message.includes('resolve')
-      )).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.message.includes('File not found') || e.message.includes('resolve')
+        )
+      ).toBe(true);
     });
   });
 });

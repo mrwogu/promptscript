@@ -1,6 +1,6 @@
 @meta {
   id: "child"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit ./base

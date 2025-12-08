@@ -30,12 +30,12 @@ export const requiredMetaId: ValidationRule = {
 };
 
 /**
- * PS002: @meta.version is required
+ * PS002: @meta.syntax is required
  */
-export const requiredMetaVersion: ValidationRule = {
+export const requiredMetaSyntax: ValidationRule = {
   id: 'PS002',
-  name: 'required-meta-version',
-  description: '@meta.version is required',
+  name: 'required-meta-syntax',
+  description: '@meta.syntax is required',
   defaultSeverity: 'error',
   validate: (ctx) => {
     const meta = ctx.ast.meta;
@@ -44,11 +44,11 @@ export const requiredMetaVersion: ValidationRule = {
       return;
     }
 
-    if (!meta.fields?.['version']) {
+    if (!meta.fields?.['syntax']) {
       ctx.report({
-        message: '@meta block must include "version" field',
+        message: '@meta block must include "syntax" field',
         location: meta.loc ?? ctx.ast.loc,
-        suggestion: 'Add version: "1.0.0" to @meta',
+        suggestion: 'Add syntax: "1.0.0" to @meta',
       });
     }
   },

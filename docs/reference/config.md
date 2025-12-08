@@ -16,9 +16,36 @@ The CLI looks for configuration in this order:
 3. `promptscript.config.yml` in current directory
 4. `.promptscriptrc.yaml` in current directory
 
+## Schema Version
+
+The configuration file requires a `version` field at the root level:
+
+```yaml
+version: '1'
+
+project:
+  id: 'my-project'
+# ...
+```
+
+This version refers to the **configuration schema version**, not the PromptScript language version. It allows the CLI to handle different configuration formats as the tooling evolves.
+
+!!! note "version vs syntax"
+Don't confuse `version` in `promptscript.yaml` with `syntax` in `.prs` files:
+
+    | File | Field | Purpose |
+    |------|-------|---------|
+    | `promptscript.yaml` | `version: '1'` | Configuration schema version |
+    | `project.prs` | `syntax: "1.0.0"` | PromptScript language syntax version |
+
+    The `syntax` field in `.prs` files uses full semver and indicates which version of the PromptScript language grammar the file uses. See [Language Reference](language.md#meta-block-required) for details.
+
 ## Full Configuration
 
 ```yaml
+# Schema version (required)
+version: '1'
+
 # ===================
 # Input Configuration
 # ===================
@@ -97,7 +124,7 @@ validation:
 
   # Custom rules
   rules:
-    require-version: error
+    require-syntax: error
     require-identity: warning
     max-shortcuts: 20
 
@@ -297,7 +324,7 @@ validation:
   ignoreWarnings:
     - 'unused-shortcut'
   rules:
-    require-version: error
+    require-syntax: error
 ```
 
 | Field            | Type     | Default | Description             |

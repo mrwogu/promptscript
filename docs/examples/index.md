@@ -42,7 +42,7 @@ Full enterprise deployment with governance.
 ```promptscript
 @meta {
   id: "my-project"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {
@@ -61,7 +61,7 @@ Full enterprise deployment with governance.
 ```promptscript
 @meta {
   id: "react-app"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {
@@ -97,7 +97,7 @@ Full enterprise deployment with governance.
 ```promptscript
 @meta {
   id: "api-service"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {

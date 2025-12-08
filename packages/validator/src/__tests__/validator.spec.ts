@@ -15,7 +15,7 @@ function createTestProgram(overrides: Partial<Program> = {}): Program {
       loc: defaultLoc,
       fields: {
         id: 'test-project',
-        version: '1.0.0',
+        syntax: '1.0.0',
       },
     },
     uses: [],
@@ -65,14 +65,14 @@ describe('Validator', () => {
     it('should detect missing @meta.id', () => {
       const validator = new Validator();
       const ast = createTestProgram();
-      ast.meta!.fields = { version: '1.0.0' };
+      ast.meta!.fields = { syntax: '1.0.0' };
       const result = validator.validate(ast);
 
       expect(result.valid).toBe(false);
       expect(result.errors.some((e) => e.ruleId === 'PS001')).toBe(true);
     });
 
-    it('should detect missing @meta.version', () => {
+    it('should detect missing @meta.syntax', () => {
       const validator = new Validator();
       const ast = createTestProgram();
       ast.meta!.fields = { id: 'test' };
@@ -85,7 +85,7 @@ describe('Validator', () => {
     it('should detect invalid semver', () => {
       const validator = new Validator();
       const ast = createTestProgram();
-      ast.meta!.fields = { id: 'test', version: 'invalid' };
+      ast.meta!.fields = { id: 'test', syntax: 'invalid' };
       const result = validator.validate(ast);
 
       expect(result.valid).toBe(false);
@@ -96,7 +96,7 @@ describe('Validator', () => {
       const validator = new Validator({
         rules: {
           'required-meta-id': 'off',
-          'required-meta-version': 'off',
+          'required-meta-syntax': 'off',
         },
       });
       const ast = createTestProgram({ meta: undefined });
@@ -113,7 +113,7 @@ describe('Validator', () => {
         },
       });
       const ast = createTestProgram();
-      ast.meta!.fields = { version: '1.0.0' };
+      ast.meta!.fields = { syntax: '1.0.0' };
       const result = validator.validate(ast);
 
       expect(result.valid).toBe(true); // No errors, only warnings

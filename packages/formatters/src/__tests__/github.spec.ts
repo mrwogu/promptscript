@@ -250,7 +250,7 @@ describe('GitHubFormatter', () => {
         ...createMinimalProgram(),
         meta: {
           type: 'MetaBlock',
-          fields: { id: 'my-project', version: '1.0.0' },
+          fields: { id: 'my-project', syntax: '1.0.0' },
           loc: createLoc(),
         },
       };
@@ -258,7 +258,7 @@ describe('GitHubFormatter', () => {
       const result = formatter.format(ast, { convention: 'markdown' });
       expect(result.path).toBe('.github/copilot-instructions.md');
       expect(result.content).toContain('# GitHub Copilot Instructions');
-      expect(result.content).toContain('Source: my-project@1.0.0');
+      expect(result.content).toContain('Source: my-project (syntax 1.0.0)');
       expect(result.content).toContain('Generated: 2024-01-01T00:00:00.000Z');
       expect(result.content).toContain('**Do not edit manually**');
     });
@@ -266,7 +266,7 @@ describe('GitHubFormatter', () => {
     it('should handle missing meta with defaults', () => {
       const ast = createMinimalProgram();
       const result = formatter.format(ast, { convention: 'markdown' });
-      expect(result.content).toContain('Source: unknown@0.0.0');
+      expect(result.content).toContain('Source: unknown (syntax 0.0.0)');
     });
 
     it('should generate project section with ## header', () => {

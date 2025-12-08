@@ -122,7 +122,7 @@ prs init
 # .promptscript/project.prs
 @meta {
   id: "checkout-service"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 # Content will be added in next steps
@@ -341,7 +341,7 @@ You are a senior developer working on the checkout service.
 ```promptscript
 @meta {
   id: "checkout-service"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {
@@ -459,7 +459,7 @@ If you have different instructions in different files:
 ```promptscript
 @meta {
   id: "my-project"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 # From copilot-instructions.md
@@ -490,7 +490,7 @@ If you have similar instructions across projects, extract to registry:
 # registry/@company/base.prs
 @meta {
   id: "@company/base"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @standards {

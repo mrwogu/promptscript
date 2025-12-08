@@ -1,6 +1,6 @@
 @meta {
   id: "with-use"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @use ./guards as grd

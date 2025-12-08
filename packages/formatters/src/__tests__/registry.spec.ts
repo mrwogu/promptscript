@@ -10,6 +10,7 @@ class MockFormatter implements Formatter {
   readonly name = 'mock';
   readonly outputPath = 'mock.txt';
   readonly description = 'Mock formatter for testing';
+  readonly defaultConvention = 'markdown';
 
   format(): FormatterOutput {
     return { path: this.outputPath, content: 'mock content' };

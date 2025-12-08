@@ -109,6 +109,7 @@ After completing any code changes, run the following commands to ensure code qua
 pnpm run format         # Format code with Prettier
 pnpm run lint           # Check for linting errors
 pnpm run build          # Build all packages
+pnpm run typecheck      # Verify TypeScript types
 pnpm run test           # Run all tests
 ```
 </post-work-verification>

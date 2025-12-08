@@ -37,8 +37,8 @@ Every PromptScript file must have a `@meta` block defining metadata:
 ```promptscript
 @meta {
   id: "project-id"           # Required: Unique identifier
-  version: "1.0.0"           # Required: Semantic version
-  
+  syntax: "1.0.0"            # Required: PromptScript syntax version (semver)
+
   # Optional fields
   org: "Company Name"
   team: "Frontend"
@@ -46,13 +46,13 @@ Every PromptScript file must have a `@meta` block defining metadata:
 }
 ```
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `id` | Yes | Unique identifier (string) |
-| `version` | Yes | Semantic version (string) |
-| `org` | No | Organization name |
-| `team` | No | Team name |
-| `tags` | No | Array of tags |
+| Field    | Required | Description                          |
+| -------- | -------- | ------------------------------------ |
+| `id`     | Yes      | Unique identifier (string)           |
+| `syntax` | Yes      | PromptScript syntax version (semver) |
+| `org`    | No       | Organization name                    |
+| `team`   | No       | Team name                            |
+| `tags`   | No       | Array of tags                        |
 
 ## @inherit Declaration
 
@@ -70,7 +70,7 @@ Single inheritance from another PromptScript file:
 ```
 
 !!! note "Single Inheritance"
-    Each file can only have one `@inherit` declaration. Use `@use` for composition.
+Each file can only have one `@inherit` declaration. Use `@use` for composition.
 
 ## @use Declaration
 
@@ -115,7 +115,7 @@ Project context and environment:
   project: "Checkout Service"
   team: "Payments"
   environment: production
-  
+
   """
   Additional context as text.
   This service handles payment processing for the e-commerce platform.
@@ -140,13 +140,13 @@ Coding standards and conventions:
       framework: "vitest"
     }
   }
-  
+
   naming: {
     components: "PascalCase"
     functions: "camelCase"
     constants: "UPPER_SNAKE_CASE"
   }
-  
+
   documentation: {
     required: true
     format: "JSDoc"
@@ -178,14 +178,14 @@ Custom commands for quick actions:
 ```promptscript
 @shortcuts {
   "/review": "Review code for quality and best practices"
-  
+
   "/test": """
     Write unit tests using:
     - Vitest as the test runner
     - Testing Library for DOM testing
     - MSW for API mocking
   """
-  
+
   "/refactor": "Suggest refactoring improvements for cleaner code"
 }
 ```
@@ -204,11 +204,11 @@ Configurable parameters:
 }
 ```
 
-| Syntax | Description |
-|--------|-------------|
-| `name: type` | Required parameter |
+| Syntax        | Description        |
+| ------------- | ------------------ |
+| `name: type`  | Required parameter |
 | `name?: type` | Optional parameter |
-| `= value` | Default value |
+| `= value`     | Default value      |
 
 ### @guards
 
@@ -218,7 +218,7 @@ Runtime validation rules:
 @guards {
   maxFileSize: 1000
   allowedLanguages: [typescript, javascript, css]
-  
+
   """
   Additional guard rules as text.
   """
@@ -233,17 +233,17 @@ Reference documentation and knowledge:
 @knowledge {
   """
   ## API Reference
-  
+
   ### Authentication
   - POST /api/auth/login - User login
   - POST /api/auth/logout - User logout
-  
+
   ### Users
   - GET /api/users - List users
   - GET /api/users/:id - Get user by ID
-  
+
   ## Architecture Notes
-  
+
   The service follows a clean architecture pattern with:
   - Controllers for HTTP handling
   - Services for business logic
@@ -280,12 +280,12 @@ Modify inherited or existing blocks:
 
 ### Primitive Types
 
-| Type | Examples |
-|------|----------|
-| String | `"hello"`, `'world'` |
-| Number | `42`, `3.14`, `-10` |
-| Boolean | `true`, `false` |
-| Null | `null` |
+| Type    | Examples             |
+| ------- | -------------------- |
+| String  | `"hello"`, `'world'` |
+| Number  | `42`, `3.14`, `-10`  |
+| Boolean | `true`, `false`      |
+| Null    | `null`               |
 
 ### Identifiers
 
@@ -359,7 +359,7 @@ Single-line comments with `#`:
 # This is a comment
 @meta {
   id: "project"  # Inline comment
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 ```
 
@@ -367,12 +367,12 @@ Single-line comments with `#`:
 
 Path syntax for imports and inheritance:
 
-| Format | Example | Description |
-|--------|---------|-------------|
-| Namespaced | `@company/team` | Registry namespace |
-| Versioned | `@company/team@1.0.0` | With version |
-| Relative | `./parent` | Relative path |
-| Nested | `@company/guards/security` | Nested path |
+| Format     | Example                    | Description        |
+| ---------- | -------------------------- | ------------------ |
+| Namespaced | `@company/team`            | Registry namespace |
+| Versioned  | `@company/team@1.0.0`      | With version       |
+| Relative   | `./parent`                 | Relative path      |
+| Nested     | `@company/guards/security` | Nested path        |
 
 ## Reserved Words
 
@@ -384,7 +384,7 @@ The following are reserved and cannot be used as identifiers:
 
 ## File Extensions
 
-| Extension | Description |
-|-----------|-------------|
-| `.prs` | PromptScript source file |
+| Extension       | Description                       |
+| --------------- | --------------------------------- |
+| `.prs`          | PromptScript source file          |
 | `.promptscript` | Alternative extension (supported) |

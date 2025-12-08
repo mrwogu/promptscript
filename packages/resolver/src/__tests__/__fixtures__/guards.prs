@@ -1,6 +1,6 @@
 @meta {
   id: "guards-module"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @guards {

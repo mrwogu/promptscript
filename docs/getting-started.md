@@ -54,7 +54,7 @@ Open `.promptscript/project.prs` and customize:
 ```promptscript
 @meta {
   id: "my-project"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {

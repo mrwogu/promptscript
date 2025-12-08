@@ -24,6 +24,7 @@ class TestFormatter extends BaseFormatter {
   readonly name = 'test';
   readonly outputPath = 'test.md';
   readonly description = 'Test formatter';
+  readonly defaultConvention = 'markdown';
 
   format(): FormatterOutput {
     return { path: this.outputPath, content: '' };
@@ -321,7 +322,7 @@ describe('BaseFormatter', () => {
         type: 'Program',
         meta: {
           type: 'MetaBlock',
-          fields: { version: 1 },
+          fields: { syntax: 1 },
           loc: createLoc(),
         },
         uses: [],
@@ -330,7 +331,7 @@ describe('BaseFormatter', () => {
         loc: createLoc(),
       };
 
-      expect(formatter.testGetMetaField(ast, 'version')).toBe('1');
+      expect(formatter.testGetMetaField(ast, 'syntax')).toBe('1');
     });
 
     it('should return undefined for missing field', () => {

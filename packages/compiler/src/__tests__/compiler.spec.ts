@@ -51,6 +51,7 @@ function createMockFormatter(name: string, outputPath: string = `./${name}/outpu
   return {
     name,
     outputPath,
+    defaultConvention: 'markdown',
     format: vi.fn((ast: Program) => ({
       path: outputPath,
       content: `# ${name} output\nID: ${ast.meta?.fields?.['id']}`,
@@ -65,6 +66,7 @@ function createFailingFormatter(name: string, error: string): Formatter {
   return {
     name,
     outputPath: `./${name}/output.md`,
+    defaultConvention: 'markdown',
     format: vi.fn(() => {
       throw new Error(error);
     }),
@@ -139,6 +141,7 @@ describe('Compiler', () => {
       class TestFormatter implements Formatter {
         readonly name = 'test-class';
         readonly outputPath = './test/output.md';
+        readonly defaultConvention = 'markdown';
         format(ast: Program) {
           return { path: this.outputPath, content: `ID: ${ast.meta?.fields?.['id']}` };
         }

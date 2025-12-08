@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { requiredMetaId, requiredMetaVersion } from '../rules/required-meta';
+import { requiredMetaId, requiredMetaSyntax } from '../rules/required-meta';
 import { validSemver, isValidSemver } from '../rules/valid-semver';
 import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types';
 
@@ -17,7 +17,7 @@ function createTestProgram(overrides: Partial<Program> = {}): Program {
       loc: defaultLoc,
       fields: {
         id: 'test-project',
-        version: '1.0.0',
+        syntax: '1.0.0',
       },
     },
     uses: [],
@@ -75,7 +75,7 @@ describe('required-meta rules', () => {
 
     it('should report when id field is missing', () => {
       const ast = createTestProgram();
-      ast.meta!.fields = { version: '1.0.0' };
+      ast.meta!.fields = { syntax: '1.0.0' };
       const { ctx, messages } = createRuleContext(ast);
       requiredMetaId.validate(ctx);
       expect(messages).toHaveLength(1);
@@ -83,34 +83,34 @@ describe('required-meta rules', () => {
     });
   });
 
-  describe('requiredMetaVersion (PS002)', () => {
+  describe('requiredMetaSyntax (PS002)', () => {
     it('should have correct metadata', () => {
-      expect(requiredMetaVersion.id).toBe('PS002');
-      expect(requiredMetaVersion.name).toBe('required-meta-version');
-      expect(requiredMetaVersion.defaultSeverity).toBe('error');
+      expect(requiredMetaSyntax.id).toBe('PS002');
+      expect(requiredMetaSyntax.name).toBe('required-meta-syntax');
+      expect(requiredMetaSyntax.defaultSeverity).toBe('error');
     });
 
-    it('should pass when version is present', () => {
+    it('should pass when syntax is present', () => {
       const ast = createTestProgram();
       const { ctx, messages } = createRuleContext(ast);
-      requiredMetaVersion.validate(ctx);
+      requiredMetaSyntax.validate(ctx);
       expect(messages).toHaveLength(0);
     });
 
     it('should not report when @meta block is missing (PS001 handles that)', () => {
       const ast = createTestProgram({ meta: undefined });
       const { ctx, messages } = createRuleContext(ast);
-      requiredMetaVersion.validate(ctx);
+      requiredMetaSyntax.validate(ctx);
       expect(messages).toHaveLength(0);
     });
 
-    it('should report when version field is missing', () => {
+    it('should report when syntax field is missing', () => {
       const ast = createTestProgram();
       ast.meta!.fields = { id: 'test' };
       const { ctx, messages } = createRuleContext(ast);
-      requiredMetaVersion.validate(ctx);
+      requiredMetaSyntax.validate(ctx);
       expect(messages).toHaveLength(1);
-      expect(messages[0]!.message).toContain('"version" field');
+      expect(messages[0]!.message).toContain('"syntax" field');
     });
   });
 });
@@ -163,23 +163,23 @@ describe('valid-semver rule (PS003)', () => {
 
     it('should report invalid semver', () => {
       const ast = createTestProgram();
-      ast.meta!.fields = { id: 'test', version: 'not-a-version' };
+      ast.meta!.fields = { id: 'test', syntax: 'not-a-version' };
       const { ctx, messages } = createRuleContext(ast);
       validSemver.validate(ctx);
       expect(messages).toHaveLength(1);
       expect(messages[0]!.message).toContain('Invalid semantic version');
     });
 
-    it('should report non-string version', () => {
+    it('should report non-string syntax', () => {
       const ast = createTestProgram();
-      ast.meta!.fields = { id: 'test', version: 123 };
+      ast.meta!.fields = { id: 'test', syntax: 123 };
       const { ctx, messages } = createRuleContext(ast);
       validSemver.validate(ctx);
       expect(messages).toHaveLength(1);
       expect(messages[0]!.message).toContain('must be a string');
     });
 
-    it('should not report when version is missing (PS002 handles that)', () => {
+    it('should not report when syntax is missing (PS002 handles that)', () => {
       const ast = createTestProgram();
       ast.meta!.fields = { id: 'test' };
       const { ctx, messages } = createRuleContext(ast);

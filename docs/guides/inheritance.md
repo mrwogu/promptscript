@@ -27,7 +27,7 @@ Use `@inherit` to extend another PromptScript file:
 ```promptscript
 @meta {
   id: "my-project"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit @company/frontend-team
@@ -209,7 +209,7 @@ Use `@use` to import fragments without full inheritance:
 ```promptscript
 @meta {
   id: "my-project"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit @company/frontend
@@ -227,7 +227,7 @@ Create reusable fragments:
 # @fragments/testing.prs
 @meta {
   id: "@fragments/testing"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @standards {
@@ -254,7 +254,7 @@ Organization base should include only universal standards:
 # @company/base.prs
 @meta {
   id: "@company/base"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {
@@ -276,7 +276,7 @@ Organization base should include only universal standards:
 # @company/frontend.prs
 @meta {
   id: "@company/frontend"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit @company/base
@@ -300,14 +300,14 @@ Organization base should include only universal standards:
 # project.prs
 @meta {
   id: "checkout-app"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit @company/frontend
 
 @context {
   project: "Checkout Application"
-  
+
   """
   E-commerce checkout flow with Stripe integration.
   """
@@ -341,10 +341,10 @@ flowchart TD
     A["@company/base"] --> B["@company/web"]
     A --> C["@company/mobile"]
     A --> D["@company/backend"]
-    
+
     B --> E["@company/web-react"]
     B --> F["@company/web-vue"]
-    
+
     C --> G["@company/mobile-ios"]
     C --> H["@company/mobile-android"]
 ```

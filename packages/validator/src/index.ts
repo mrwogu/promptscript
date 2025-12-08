@@ -17,7 +17,7 @@ export {
   getRuleById,
   getRuleByName,
   requiredMetaId,
-  requiredMetaVersion,
+  requiredMetaSyntax,
   validSemver,
   isValidSemver,
   requiredGuards,

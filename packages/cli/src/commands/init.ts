@@ -1,6 +1,7 @@
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { input, confirm, checkbox } from '@inquirer/prompts';
+import { getPackageVersion } from '@promptscript/core';
 import type { InitOptions } from '../types';
 import { createSpinner, ConsoleOutput } from '../output/console';
 import { detectProject, type ProjectInfo } from '../utils/project-detector';
@@ -293,12 +294,15 @@ function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): st
       ? `  frameworks: [${projectInfo.frameworks.join(', ')}]`
       : '  # frameworks: []';
 
+  // Get PromptScript version for syntax field
+  const syntaxVersion = getPackageVersion(__dirname);
+
   return `# Project Configuration
 # Edit this file to customize AI instructions for your project
 
 @meta {
   id: "${config.projectId}"
-  version: "1.0.0"
+  syntax: "${syntaxVersion}"
 }
 
 ${inheritLine}

@@ -21,7 +21,7 @@ describe('parse', () => {
       expect(result.ast?.type).toBe('Program');
       expect(result.ast?.meta).toBeDefined();
       expect(result.ast?.meta?.fields['id']).toBe('test-project');
-      expect(result.ast?.meta?.fields['version']).toBe('1.0.0');
+      expect(result.ast?.meta?.fields['syntax']).toBe('1.0.0');
     });
   });
 
@@ -39,7 +39,7 @@ describe('parse', () => {
       const result = parse(source);
 
       expect(result.ast?.meta?.fields['id']).toBe('my-project');
-      expect(result.ast?.meta?.fields['version']).toBe('1.0.0');
+      expect(result.ast?.meta?.fields['syntax']).toBe('1.0.0');
       expect(result.ast?.meta?.fields['tags']).toEqual(['frontend', 'typescript']);
     });
 
@@ -89,14 +89,14 @@ describe('parse', () => {
       const source = `
         @meta {
           id: "test"
-          version: "1.0.0"
+          syntax: "1.0.0"
         }
       `;
       const result = parse(source);
 
       expect(result.errors).toHaveLength(0);
       expect(result.ast?.meta?.fields['id']).toBe('test');
-      expect(result.ast?.meta?.fields['version']).toBe('1.0.0');
+      expect(result.ast?.meta?.fields['syntax']).toBe('1.0.0');
     });
 
     it('should parse arrays in meta', () => {
@@ -108,11 +108,7 @@ describe('parse', () => {
       const result = parse(source);
 
       expect(result.errors).toHaveLength(0);
-      expect(result.ast?.meta?.fields['tags']).toEqual([
-        'frontend',
-        'backend',
-        'api',
-      ]);
+      expect(result.ast?.meta?.fields['tags']).toEqual(['frontend', 'backend', 'api']);
     });
   });
 
@@ -145,9 +141,7 @@ describe('parse', () => {
       const result = parse(source);
 
       expect(result.errors).toHaveLength(0);
-      const restrictions = result.ast?.blocks.find(
-        (b) => b.name === 'restrictions'
-      );
+      const restrictions = result.ast?.blocks.find((b) => b.name === 'restrictions');
       expect(restrictions).toBeDefined();
       expect(restrictions?.content.type).toBe('ObjectContent');
       if (restrictions?.content.type === 'ObjectContent') {
@@ -270,10 +264,7 @@ describe('parse', () => {
       const standards = result.ast?.blocks.find((b) => b.name === 'standards');
       expect(standards?.content.type).toBe('ObjectContent');
       if (standards?.content.type === 'ObjectContent') {
-        const code = standards.content.properties['code'] as Record<
-          string,
-          unknown
-        >;
+        const code = standards.content.properties['code'] as Record<string, unknown>;
         expect(code['style']).toBe('clean');
         const testing = code['testing'] as Record<string, unknown>;
         expect(testing['required']).toBe(true);

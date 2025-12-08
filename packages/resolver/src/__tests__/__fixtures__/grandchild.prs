@@ -1,6 +1,6 @@
 @meta {
   id: "grandchild"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit ./child

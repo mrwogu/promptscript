@@ -79,7 +79,7 @@ promptscript-registry/
 # @org/base.prs
 @meta {
   id: "@org/base"
-  version: "1.0.0"
+  syntax: "1.0.0"
   org: "ACME Corporation"
 }
 
@@ -128,7 +128,7 @@ promptscript-registry/
 # @org/security.prs
 @meta {
   id: "@org/security"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {
@@ -186,7 +186,7 @@ promptscript-registry/
 # @teams/frontend.prs
 @meta {
   id: "@teams/frontend"
-  version: "1.0.0"
+  syntax: "1.0.0"
   team: "Frontend"
 }
 
@@ -258,7 +258,7 @@ promptscript-registry/
 # @teams/backend.prs
 @meta {
   id: "@teams/backend"
-  version: "1.0.0"
+  syntax: "1.0.0"
   team: "Backend"
 }
 
@@ -326,7 +326,7 @@ promptscript-registry/
 # .promptscript/project.prs
 @meta {
   id: "customer-portal"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit @teams/frontend

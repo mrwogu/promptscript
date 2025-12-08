@@ -65,7 +65,7 @@ PromptScript solves this by providing a **centralized, hierarchical system** whe
     ```promptscript
     @meta {
       id: "my-project"
-      version: "1.0.0"
+      syntax: "1.0.0"
     }
 
     @identity {

@@ -1,6 +1,6 @@
 ---
 title: Parser API
-description: "@promptscript/parser package API reference"
+description: '@promptscript/parser package API reference'
 ---
 
 # @promptscript/parser
@@ -25,9 +25,9 @@ function parse(source: string, options?: ParseOptions): Program;
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `source` | `string` | PromptScript source code |
+| Parameter | Type           | Description              |
+| --------- | -------------- | ------------------------ |
+| `source`  | `string`       | PromptScript source code |
 | `options` | `ParseOptions` | Optional parsing options |
 
 **Returns:** `Program` - The parsed AST
@@ -42,7 +42,7 @@ import { parse } from '@promptscript/parser';
 const source = `
 @meta {
   id: "my-project"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @identity {
@@ -80,10 +80,10 @@ const ast = await parseFile('./project.prs');
 interface ParseOptions {
   /** Source file path for error messages */
   source?: string;
-  
+
   /** Enable recovery mode for partial parsing */
   recovery?: boolean;
-  
+
   /** Custom error reporter */
   onError?: (error: ParseError) => void;
 }
@@ -131,18 +131,18 @@ const Tokens = {
   AtInherit: /@inherit/,
   AtUse: /@use/,
   AtExtend: /@extend/,
-  
+
   // Literals
   StringLiteral: /"[^"]*"|'[^']*'/,
   NumberLiteral: /-?\d+(\.\d+)?/,
   True: /true/,
   False: /false/,
   Null: /null/,
-  
+
   // Type expressions
   Range: /range/,
   Enum: /enum/,
-  
+
   // Punctuation
   LBrace: /{/,
   RBrace: /}/,
@@ -155,7 +155,7 @@ const Tokens = {
   Dash: /-/,
   DotDot: /\.\./,
   At: /@/,
-  
+
   // Special
   TripleQuote: /"""/,
   Identifier: /[a-zA-Z_][a-zA-Z0-9_-]*/,
@@ -196,7 +196,7 @@ const ast = parse(source, {
   recovery: true,
   onError: (error) => {
     console.warn('Parse error:', error.message);
-  }
+  },
 });
 // Returns partial AST even with errors
 ```
@@ -216,7 +216,7 @@ visit(ast, {
   },
   StringValue: (node) => {
     console.log('Found string:', node.value);
-  }
+  },
 });
 ```
 
@@ -230,8 +230,8 @@ import { transform } from '@promptscript/parser';
 const newAst = transform(ast, {
   StringValue: (node) => ({
     ...node,
-    value: node.value.toUpperCase()
-  })
+    value: node.value.toUpperCase(),
+  }),
 });
 ```
 
@@ -275,7 +275,7 @@ The parser is optimized for speed:
 Typical performance:
 
 | File Size | Parse Time |
-|-----------|------------|
-| 1 KB | ~1 ms |
-| 10 KB | ~5 ms |
-| 100 KB | ~30 ms |
+| --------- | ---------- |
+| 1 KB      | ~1 ms      |
+| 10 KB     | ~5 ms      |
+| 100 KB    | ~30 ms     |

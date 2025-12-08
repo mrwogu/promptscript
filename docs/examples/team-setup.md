@@ -35,7 +35,7 @@ workspace/
 ```promptscript
 @meta {
   id: "@team/frontend"
-  version: "1.0.0"
+  syntax: "1.0.0"
   team: "Frontend"
 }
 
@@ -106,7 +106,7 @@ workspace/
 ```promptscript
 @meta {
   id: "customer-dashboard"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit @team/frontend
@@ -185,7 +185,7 @@ validation:
 ```promptscript
 @meta {
   id: "admin-portal"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 @inherit @team/frontend

@@ -6,6 +6,7 @@ import {
   getAllTargets,
   getSuggestedTargets,
   formatDetectionResults,
+  type AIToolsDetection,
 } from '../utils/ai-tools-detector';
 
 vi.mock('fs', () => ({
@@ -56,7 +57,7 @@ describe('utils/ai-tools-detector', () => {
 
     it('should detect .claude directory with content', async () => {
       vi.mocked(existsSync).mockImplementation((path) => path === '.claude');
-      vi.mocked(readdir).mockResolvedValue(['settings.json'] as unknown as string[]);
+      vi.mocked(readdir).mockResolvedValue(['settings.json'] as never);
 
       const result = await detectAITools();
 
@@ -101,8 +102,8 @@ describe('utils/ai-tools-detector', () => {
 
   describe('getSuggestedTargets', () => {
     it('should return detected targets when some exist', () => {
-      const detection = {
-        detected: ['github', 'claude'] as const,
+      const detection: AIToolsDetection = {
+        detected: ['github', 'claude'],
         details: { github: [], claude: [], cursor: [] },
       };
 
@@ -112,8 +113,8 @@ describe('utils/ai-tools-detector', () => {
     });
 
     it('should return all targets when none detected', () => {
-      const detection = {
-        detected: [] as const,
+      const detection: AIToolsDetection = {
+        detected: [],
         details: { github: [], claude: [], cursor: [] },
       };
 
@@ -125,8 +126,8 @@ describe('utils/ai-tools-detector', () => {
 
   describe('formatDetectionResults', () => {
     it('should format detected tools', () => {
-      const detection = {
-        detected: ['github'] as const,
+      const detection: AIToolsDetection = {
+        detected: ['github'],
         details: {
           github: ['.github/copilot-instructions.md'],
           claude: [],
@@ -141,8 +142,8 @@ describe('utils/ai-tools-detector', () => {
     });
 
     it('should show message when no tools detected', () => {
-      const detection = {
-        detected: [] as const,
+      const detection: AIToolsDetection = {
+        detected: [],
         details: { github: [], claude: [], cursor: [] },
       };
 

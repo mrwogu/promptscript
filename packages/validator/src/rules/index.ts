@@ -1,7 +1,7 @@
 import type { ValidationRule } from '../types';
 
 // Import all rules
-import { requiredMetaId, requiredMetaVersion } from './required-meta';
+import { requiredMetaId, requiredMetaSyntax } from './required-meta';
 import { validSemver } from './valid-semver';
 import { requiredGuards } from './required-guards';
 import { blockedPatterns } from './blocked-patterns';
@@ -10,7 +10,7 @@ import { deprecated } from './deprecated';
 import { emptyBlock } from './empty-block';
 
 // Re-export all rules
-export { requiredMetaId, requiredMetaVersion } from './required-meta';
+export { requiredMetaId, requiredMetaSyntax } from './required-meta';
 export { validSemver, isValidSemver } from './valid-semver';
 export { requiredGuards } from './required-guards';
 export { blockedPatterns } from './blocked-patterns';
@@ -24,7 +24,7 @@ export { emptyBlock } from './empty-block';
 export const allRules: ValidationRule[] = [
   // Required meta rules (PS001, PS002)
   requiredMetaId,
-  requiredMetaVersion,
+  requiredMetaSyntax,
   // Semver validation (PS003)
   validSemver,
   // Required guards (PS004)

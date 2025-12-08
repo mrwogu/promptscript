@@ -88,7 +88,7 @@ acme-promptscript-registry/
 ```promptscript
 @meta {
   id: "@acme/base"
-  version: "2.0.0"
+  syntax: "2.0.0"
   org: "ACME Corporation"
 }
 
@@ -161,7 +161,7 @@ acme-promptscript-registry/
 ```promptscript
 @meta {
   id: "@acme/security"
-  version: "1.5.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -259,7 +259,7 @@ acme-promptscript-registry/
 ```promptscript
 @meta {
   id: "@acme/compliance"
-  version: "1.2.0"
+  syntax: "1.2.0"
 }
 
 @identity {
@@ -340,7 +340,7 @@ acme-promptscript-registry/
 ```promptscript
 @meta {
   id: "@frontend/base"
-  version: "3.0.0"
+  syntax: "3.0.0"
   team: "Frontend Platform"
 }
 
@@ -490,7 +490,7 @@ acme-promptscript-registry/
 # checkout-app/promptscript/project.prs
 @meta {
   id: "checkout-app"
-  version: "2.1.0"
+  syntax: "2.1.0"
 }
 
 @inherit @frontend/base

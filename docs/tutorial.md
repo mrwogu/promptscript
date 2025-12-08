@@ -31,7 +31,7 @@ Create `registry/@acme/org.prs`:
 ```promptscript
 @meta {
   id: "@acme/org"
-  version: "1.0.0"
+  syntax: "1.0.0"
   org: "ACME Corporation"
 }
 
@@ -76,7 +76,7 @@ Create `registry/@acme/frontend-team.prs`:
 ```promptscript
 @meta {
   id: "@acme/frontend-team"
-  version: "1.0.0"
+  syntax: "1.0.0"
   team: "Frontend"
 }
 
@@ -124,7 +124,7 @@ Create `.promptscript/project.prs` in your project:
 ```promptscript
 @meta {
   id: "checkout-app"
-  version: "1.0.0"
+  syntax: "1.0.0"
 }
 
 # Inherit from frontend team (which inherits from org)
