@@ -118,12 +118,11 @@
   diagrams: {
     format: "Mermaid"
     types: [flowchart, sequence, class, state, ER, gantt, pie]
-    """
-    Example:
-    ```mermaid
-    flowchart LR
-      A[Input] --> B[Process] --> C[Output]
-    ```
+    example: """
+      ```mermaid
+      flowchart LR
+        A[Input] --> B[Process] --> C[Output]
+      ```
     """
   }
   

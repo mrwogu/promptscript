@@ -14,6 +14,16 @@ export {
   conventionRenderers,
 } from './convention-renderer';
 
+// Section registry for parity testing
+export {
+  KNOWN_SECTIONS,
+  extractSectionsFromOutput,
+  findMissingSections,
+  getExpectedSections,
+  normalizeSectionName,
+} from './section-registry';
+export type { SectionInfo } from './section-registry';
+
 // Built-in formatters
 export { GitHubFormatter, ClaudeFormatter, CursorFormatter } from './formatters';
 

@@ -1,0 +1,344 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Formatter Snapshot Tests > ClaudeFormatter > should generate expected output for reference AST 1`] = `
+"# CLAUDE.md
+
+## Project
+You are an expert TypeScript developer working on PromptScript - a language
+and toolchain for standardizing AI instructions across enterprise organizations.
+PromptScript compiles \`.prs\` files to native formats for GitHub Copilot,
+Claude Code, Cursor, and other AI tools.
+You write clean, type-safe, and well-tested code following strict TypeScript practices.
+
+## Tech Stack
+typescript, Node.js 20+, Nx + pnpm
+
+## Architecture
+
+The project is organized as a monorepo with these packages:
+
+\`\`\`mermaid
+flowchart TB
+  subgraph packages
+    core[core - Types, errors, utilities]
+    parser[parser - Chevrotain-based parser]
+    resolver[resolver - Inheritance & import resolution]
+    validator[validator - AST validation rules]
+    compiler[compiler - Pipeline orchestration]
+    formatters[formatters - Output formatters]
+    cli[cli - Command-line interface]
+  end
+  
+  cli --> compiler
+  compiler --> parser
+  compiler --> resolver
+  compiler --> validator
+  compiler --> formatters
+  parser --> core
+  resolver --> core
+  validator --> core
+  formatters --> core
+\`\`\`
+
+## Code Style
+- Strict TypeScript, no \`any\`
+- Named exports only
+- Files: kebab-case.ts
+- Testing: vitest, >90% coverage
+
+## Git Commits
+- Format: Conventional Commits
+- Types: feat, fix, docs, style, refactor, test, chore
+- Example: \`feat(parser): add support for multiline strings\`
+
+## Config Files
+- ESLint: inherit from eslint.base.config.cjs
+- Vite root: __dirname (not import.meta.dirname)
+
+## Commands
+\`\`\`
+/review    - Review code for quality, type safety, an
+/test      - Write unit tests using:
+/build     - Run verification commands:
+/newpkg    - Generate new package with Nx: pnpm nx g 
+\`\`\`
+
+## Development Commands
+
+\`\`\`bash
+pnpm install              # Install dependencies
+pnpm nx build <pkg>       # Build package
+pnpm nx test <pkg>        # Run tests
+pnpm nx lint <pkg>        # Lint code
+pnpm nx run-many -t test  # Test all packages
+pnpm nx graph             # View dependency graph
+\`\`\`
+
+## Post-Work Verification
+
+After completing code changes, always run:
+\`\`\`bash
+pnpm run format     # Format code with Prettier
+pnpm run lint       # Check for linting errors
+pnpm run build      # Build all packages
+pnpm run typecheck  # Verify TypeScript types
+pnpm run test       # Run all tests
+\`\`\`
+
+## Documentation
+- Review docs before changes
+- Update docs after changes
+- Keep code examples accurate
+
+## Diagrams
+- Use Mermaid for diagrams
+- Types: flowchart, sequence, class, state, ER, gantt, pie
+
+## Don'ts
+- Don't use \`any\` type - use \`unknown\` with type guards
+- Don't use default exports - only named exports
+- Don't commit without tests
+- Don't skip error handling
+- Don't leave TODO without issue reference
+- Don't create packages manually - use Nx generators
+- Don't create custom ESLint rules in package configs
+- Don't use \`import.meta.dirname\` in vite/vitest configs
+- Don't use ASCII art diagrams - always use Mermaid
+"
+`;
+
+exports[`Formatter Snapshot Tests > CursorFormatter > should generate expected output for reference AST 1`] = `
+"You are working on PromptScript at PromptScript.
+
+Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
+
+## Architecture
+
+The project is organized as a monorepo with these packages:
+
+\`\`\`mermaid
+flowchart TB
+  subgraph packages
+    core[core - Types, errors, utilities]
+    parser[parser - Chevrotain-based parser]
+    resolver[resolver - Inheritance & import resolution]
+    validator[validator - AST validation rules]
+    compiler[compiler - Pipeline orchestration]
+    formatters[formatters - Output formatters]
+    cli[cli - Command-line interface]
+  end
+  
+  cli --> compiler
+  compiler --> parser
+  compiler --> resolver
+  compiler --> validator
+  compiler --> formatters
+  parser --> core
+  resolver --> core
+  validator --> core
+  formatters --> core
+\`\`\`
+
+## Key Libraries
+
+- Parser: Chevrotain
+- CLI: Commander.js
+- Testing: Vitest
+- Linting: ESLint + Prettier
+
+Code style:
+- useUnknown: with type guards instead of any
+- interfaces: for object shapes
+- types: for unions and intersections
+- exports: named only, no default exports
+- returnTypes: explicit on public functions
+- files: kebab-case.ts
+- classes: PascalCase
+- interfaces: PascalCase
+- functions: camelCase
+- variables: camelCase
+- constants: UPPER_SNAKE_CASE
+- customClasses: extend PSError
+- messages: actionable
+- filePattern: *.spec.ts next to source
+- pattern: AAA (Arrange, Act, Assert)
+- fixtures: for parser tests
+- framework: vitest
+
+Git Commits:
+- format: Conventional Commits
+- reference: https://www.conventionalcommits.org/
+- maxSubjectLength: 70
+- types: feat, fix, docs, style, refactor, test, chore
+- example: feat(parser): add support for multiline strings
+
+Config:
+- eslint: inherit from eslint.base.config.cjs
+- viteRoot: __dirname (not import.meta.dirname)
+
+Commands:
+/review - Review code for quality, type safety, and best practices
+/test - Write unit tests using:
+/build - Run verification commands:
+/newpkg - Generate new package with Nx: pnpm nx g @nx/js:lib <name> --directory=packages/<name>
+
+Documentation:
+- review README.md and docs/ before changes
+- update docs if behavior changes
+- keep accurate
+
+Diagrams:
+- Use Mermaid
+- Types: flowchart, sequence, class, state, ER, gantt, pie
+
+Never:
+- Never use \`any\` type - use \`unknown\` with type guards
+- Never use default exports - only named exports
+- Never commit without tests
+- Never skip error handling
+- Never leave TODO without issue reference
+- Never create packages manually - use Nx generators
+- Never create custom ESLint rules in package configs
+- Never use \`import.meta.dirname\` in vite/vitest configs
+- Never use ASCII art diagrams - always use Mermaid
+"
+`;
+
+exports[`Formatter Snapshot Tests > GitHubFormatter > should generate expected output for reference AST 1`] = `
+"# GitHub Copilot Instructions
+
+> Auto-generated by PromptScript
+> Source: promptscript (syntax 1.0.0)
+> Generated: 2024-01-01T00:00:00.000Z
+>
+> **Do not edit manually**
+
+## project
+You are an expert TypeScript developer working on PromptScript - a language 
+and toolchain for standardizing AI instructions across enterprise organizations.
+
+PromptScript compiles \`.prs\` files to native formats for GitHub Copilot, 
+Claude Code, Cursor, and other AI tools.
+
+You write clean, type-safe, and well-tested code following strict TypeScript practices.
+
+## tech-stack
+- **Language:** typescript
+- **Runtime:** Node.js 20+
+- **Monorepo:** Nx with pnpm workspaces
+
+## architecture
+The project is organized as a monorepo with these packages:
+
+\`\`\`mermaid
+flowchart TB
+  subgraph packages
+    core[core - Types, errors, utilities]
+    parser[parser - Chevrotain-based parser]
+    resolver[resolver - Inheritance & import resolution]
+    validator[validator - AST validation rules]
+    compiler[compiler - Pipeline orchestration]
+    formatters[formatters - Output formatters]
+    cli[cli - Command-line interface]
+  end
+  
+  cli --> compiler
+  compiler --> parser
+  compiler --> resolver
+  compiler --> validator
+  compiler --> formatters
+  parser --> core
+  resolver --> core
+  validator --> core
+  formatters --> core
+\`\`\`
+
+## code-standards
+### typescript
+- Strict mode enabled, no \`any\` types
+- Use \`unknown\` with type guards instead of any
+- Prefer \`interface\` for object shapes
+- Use \`type\` for unions and intersections
+- Named only, no default exports
+- Explicit return types explicit on public functions
+### naming
+- Files: \`kebab-case.ts\`
+- Classes/Interfaces: \`PascalCase\`
+- Functions/Variables: \`camelCase\`
+- Constants: \`UPPER_SNAKE_CASE\`
+### error-handling
+- Use custom error classes extending \`extend PSError\`
+- Always include location information
+- Provide actionable error messages
+### testing
+- Test files: \`*.spec.ts next to source\`
+- Follow AAA (Arrange, Act, Assert) pattern
+- Target >90% coverage for libraries
+- Use fixtures for parser tests
+
+## commands
+\`\`\`bash
+pnpm install              # Install dependencies
+pnpm nx build <pkg>       # Build package
+pnpm nx test <pkg>        # Run tests
+pnpm nx lint <pkg>        # Lint code
+pnpm nx run-many -t test  # Test all packages
+pnpm nx graph             # View dependency graph
+\`\`\`
+
+## git-commits
+- Use [Conventional Commits](https://www.conventionalcommits.org/) format
+- Keep commit message subject line max 70 characters
+- Format: \`<type>(<scope>): <description>\`
+- Types: \`feat\`, \`fix\`, \`docs\`, \`style\`, \`refactor\`, \`test\`, \`chore\`
+- Example: \`feat(parser): add support for multiline strings\`
+
+## configuration-files
+### eslint
+- All package ESLint configs must inherit from \`eslint.base.config.cjs\` in the root
+- Package configs should use \`createBaseConfig(__dirname)\` from the base config
+- Do not duplicate ESLint rules in package configs - modify the base config instead
+### vite-vitest
+- Use \`__dirname\` for the \`root\` option in both \`vite.config.ts\` and \`vitest.config.mts\`
+- Do NOT use \`import.meta.dirname\` - it causes TypeScript errors with current tsconfig settings
+- Example: \`root: __dirname,\`
+
+## documentation-verification
+- **Before** making code changes, review \`README.md\` and relevant files in \`docs/\` to understand documented behavior
+- **After** making code changes, verify consistency with \`README.md\` and \`docs/\` - update documentation if needed
+- Ensure code examples in documentation remain accurate after modifications
+- If adding new features, add corresponding documentation in \`docs/\`
+- If changing existing behavior, update affected documentation sections
+
+## post-work-verification
+After completing any code changes, run the following commands to ensure code quality:
+After completing code changes, always run:
+\`\`\`bash
+pnpm run format     # Format code with Prettier
+pnpm run lint       # Check for linting errors
+pnpm run build      # Build all packages
+pnpm run typecheck  # Verify TypeScript types
+pnpm run test       # Run all tests
+\`\`\`
+
+## donts
+- Don't use \`any\` type - use \`unknown\` with type guards
+- Don't use default exports - only named exports
+- Don't commit without tests
+- Don't skip error handling
+- Don't leave TODO without issue reference
+- Don't create packages manually - use Nx generators
+- Don't create custom ESLint rules in package configs
+- Don't use \`import.meta.dirname\` in vite/vitest configs
+- Don't use ASCII art diagrams - always use Mermaid
+
+## diagrams
+- Always use **Mermaid** syntax for diagrams in documentation
+- Supported diagram types: flowchart, sequence, class, state, ER, gantt, pie, etc.
+- Wrap diagrams in markdown code blocks with \`mermaid\` language identifier
+- Example:
+  \`\`\`mermaid
+  flowchart LR
+    A[Input] --> B[Process] --> C[Output]
+  \`\`\`"
+`;

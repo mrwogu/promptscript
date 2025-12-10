@@ -28,6 +28,8 @@ export interface InitOptions {
 export interface CompileOptions {
   /** Specific target to compile (github, claude, cursor) */
   target?: string;
+  /** Output format (github, claude, cursor) - alias for target */
+  format?: string;
   /** Compile all configured targets */
   all?: boolean;
   /** Watch mode for continuous compilation */

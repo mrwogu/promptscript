@@ -379,7 +379,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     items.push('Wrap diagrams in markdown code blocks with `mermaid` language identifier');
     items.push(
-      'Example:\n  ```mermaid\n  flowchart LR\n    A[Input] --> B[Process] --> C[Output]\n````'
+      'Example:\n  ```mermaid\n  flowchart LR\n    A[Input] --> B[Process] --> C[Output]\n  ```'
     );
 
     if (items.length === 0) return null;

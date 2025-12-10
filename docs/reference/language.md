@@ -388,3 +388,64 @@ The following are reserved and cannot be used as identifiers:
 | --------------- | --------------------------------- |
 | `.prs`          | PromptScript source file          |
 | `.promptscript` | Alternative extension (supported) |
+
+## Known Issues & Gotchas
+
+### Multiline Strings in Objects
+
+Multiline strings (`"""..."""``) cannot be used as "loose" content inside an object with curly braces. They must always be assigned to a key.
+
+**❌ Invalid:**
+
+````promptscript
+@standards {
+  diagrams: {
+    format: "Mermaid"
+    types: [flowchart, sequence]
+    """
+    Example:
+    ```mermaid
+    flowchart LR
+      A[Input] --> B[Process] --> C[Output]
+    ```
+    """
+  }
+}
+````
+
+This will cause a parse error:
+
+```
+Expecting token of type --> RBrace <-- but found --> '"""...
+```
+
+**✅ Valid - assign to a key:**
+
+````promptscript
+@standards {
+  diagrams: {
+    format: "Mermaid"
+    types: [flowchart, sequence]
+    example: """
+      ```mermaid
+      flowchart LR
+        A[Input] --> B[Process] --> C[Output]
+      ```
+    """
+  }
+}
+````
+
+**✅ Valid - use at block level:**
+
+```promptscript
+@knowledge {
+  """
+  Multiline content works directly in blocks
+  without needing a key assignment.
+  """
+}
+```
+
+!!! tip "Rule of Thumb"
+Inside `{ }` braces, everything needs a key. Multiline strings without keys only work directly inside blocks like `@identity { ... }` or `@knowledge { ... }`.

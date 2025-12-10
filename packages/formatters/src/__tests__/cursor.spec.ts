@@ -146,9 +146,13 @@ describe('CursorFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                code: {
-                  style: ['Functional React components', 'Custom hooks for business logic'],
-                  patterns: ['Named exports only', 'No class components'],
+                typescript: {
+                  style: 'Functional React components',
+                  hooks: 'Custom hooks for business logic',
+                },
+                naming: {
+                  exports: 'Named exports only',
+                  components: 'No class components',
                 },
               },
               loc: createLoc(),
@@ -160,10 +164,10 @@ describe('CursorFormatter', () => {
 
       const result = formatter.format(ast);
       expect(result.content).toContain('Code style:');
-      expect(result.content).toContain('- Functional React components');
-      expect(result.content).toContain('- Custom hooks for business logic');
-      expect(result.content).toContain('- Named exports only');
-      expect(result.content).toContain('- No class components');
+      expect(result.content).toContain('- style: Functional React components');
+      expect(result.content).toContain('- hooks: Custom hooks for business logic');
+      expect(result.content).toContain('- exports: Named exports only');
+      expect(result.content).toContain('- components: No class components');
     });
 
     it('should generate commands section', () => {

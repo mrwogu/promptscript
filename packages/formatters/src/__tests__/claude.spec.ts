@@ -57,7 +57,8 @@ describe('ClaudeFormatter', () => {
       const result = formatter.format(ast);
       expect(result.content).toContain('## Project');
       expect(result.content).toContain('Checkout microservice for e-commerce platform.');
-      expect(result.content).not.toContain('More details here.');
+      // Full identity text is now included for completeness
+      expect(result.content).toContain('More details here.');
     });
 
     it('should generate tech stack as comma-separated list', () => {

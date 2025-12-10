@@ -95,7 +95,9 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
     const config = await loadConfig();
     spinner.text = 'Compiling...';
 
-    const targets = options.target ? [{ name: options.target }] : parseTargets(config.targets);
+    // --format is an alias for --target
+    const selectedTarget = options.target ?? options.format;
+    const targets = selectedTarget ? [{ name: selectedTarget }] : parseTargets(config.targets);
 
     const compiler = new Compiler({
       resolver: {

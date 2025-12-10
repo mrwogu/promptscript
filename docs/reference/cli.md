@@ -115,6 +115,7 @@ prs compile [options]
 | Option                  | Description                           |
 | ----------------------- | ------------------------------------- |
 | `-t, --target <target>` | Compile to specific target            |
+| `-f, --format <format>` | Output format (alias for `--target`)  |
 | `-a, --all`             | Compile to all configured targets     |
 | `-w, --watch`           | Watch mode for continuous compilation |
 | `-o, --output <dir>`    | Override output directory             |
@@ -131,6 +132,10 @@ prs compile --all
 prs compile --target github
 prs compile --target claude
 prs compile --target cursor
+
+# Using --format (alias for --target)
+prs compile --format github
+prs compile -f claude
 
 # Watch mode
 prs compile --watch --all

@@ -1,10 +1,12 @@
-import type { Program, Value } from '@promptscript/core';
+import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter';
 import type { FormatOptions, FormatterOutput } from '../types';
 
 /**
  * Formatter for Cursor rules.
  * Outputs: `.cursorrules` (plain text, NOT markdown)
+ *
+ * Cursor format is concise plain text without markdown headers.
  */
 export class CursorFormatter extends BaseFormatter {
   readonly name = 'cursor';
@@ -13,100 +15,337 @@ export class CursorFormatter extends BaseFormatter {
   readonly defaultConvention = 'markdown';
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
-    const lines: string[] = [];
+    const sections: string[] = [];
 
     const intro = this.intro(ast);
-    if (intro) lines.push(intro);
+    if (intro) sections.push(intro);
 
     const techStack = this.techStack(ast);
-    if (techStack) lines.push(techStack);
+    if (techStack) sections.push(techStack);
+
+    const architecture = this.architecture(ast);
+    if (architecture) sections.push(architecture);
 
     const codeStyle = this.codeStyle(ast);
-    if (codeStyle) lines.push(codeStyle);
+    if (codeStyle) sections.push(codeStyle);
+
+    const gitCommits = this.gitCommits(ast);
+    if (gitCommits) sections.push(gitCommits);
+
+    const configFiles = this.configFiles(ast);
+    if (configFiles) sections.push(configFiles);
 
     const commands = this.commands(ast);
-    if (commands) lines.push(commands);
+    if (commands) sections.push(commands);
+
+    const devCommands = this.devCommands(ast);
+    if (devCommands) sections.push(devCommands);
+
+    const postWork = this.postWork(ast);
+    if (postWork) sections.push(postWork);
+
+    const documentation = this.documentation(ast);
+    if (documentation) sections.push(documentation);
+
+    const diagrams = this.diagrams(ast);
+    if (diagrams) sections.push(diagrams);
 
     const never = this.never(ast);
-    if (never) lines.push(never);
+    if (never) sections.push(never);
 
     return {
       path: this.getOutputPath(options),
-      content: lines.join('\n\n'),
+      content: sections.join('\n\n') + '\n',
     };
   }
 
   private intro(ast: Program): string {
-    const identity = this.findBlock(ast, 'identity');
-    const context = this.findBlock(ast, 'context');
+    const projectInfo = this.extractProjectInfo(ast);
 
-    let project = 'the project';
+    // If project text starts with "You are", use it directly
+    if (projectInfo.text.toLowerCase().startsWith('you are')) {
+      return projectInfo.text;
+    }
+
+    const orgSuffix = projectInfo.org ? ` at ${projectInfo.org}` : '';
+    return `You are working on ${projectInfo.text}${orgSuffix}.`;
+  }
+
+  private extractProjectInfo(ast: Program): { text: string; org: string | null } {
+    const org = this.getMetaField(ast, 'org') ?? null;
+
+    // Try context.project first (new structure)
+    const context = this.findBlock(ast, 'context');
     if (context) {
-      const projectProp = this.getProp(context.content, 'project');
-      if (projectProp) {
-        project = this.valueToString(projectProp);
+      const projectText = this.getProp(context.content, 'project');
+      if (projectText && typeof projectText === 'string') {
+        return { text: projectText.trim(), org };
       }
     }
 
-    if (!project || project === 'the project') {
-      if (identity) {
-        const text = this.extractText(identity.content);
-        const lines = text.split('\n');
-        const firstLine = (lines[0] ?? '').trim();
-        if (firstLine) {
-          project = firstLine;
+    // Fall back to identity block
+    const identity = this.findBlock(ast, 'identity');
+    if (identity) {
+      const text = this.extractText(identity.content);
+      const firstLine = text.split('\n')[0]?.trim();
+      if (firstLine) {
+        return { text: firstLine, org };
+      }
+    }
+
+    return { text: 'the project', org };
+  }
+
+  private techStack(ast: Program): string | null {
+    const items = this.extractTechStackItems(ast);
+    return items.length > 0 ? `Tech stack: ${items.join(', ')}` : null;
+  }
+
+  private extractTechStackItems(ast: Program): string[] {
+    const items: string[] = [];
+    const context = this.findBlock(ast, 'context');
+
+    if (context) {
+      this.extractTechFromContext(context.content, items);
+    }
+
+    // Fall back to standards.code structure
+    if (items.length === 0) {
+      this.extractTechFromStandards(ast, items);
+    }
+
+    return items;
+  }
+
+  private extractTechFromContext(content: Block['content'], items: string[]): void {
+    // Try tech-stack key first
+    const tech = this.getProp(content, 'tech-stack');
+    if (tech) items.push(...this.extractListItems(tech));
+
+    // Also check individual fields
+    const languages = this.getProp(content, 'languages');
+    if (languages) this.collectValueItems(items, languages);
+
+    const runtime = this.getProp(content, 'runtime');
+    if (runtime) items.push(this.valueToString(runtime));
+
+    const monorepo = this.getProp(content, 'monorepo');
+    if (monorepo && typeof monorepo === 'object' && !Array.isArray(monorepo)) {
+      const mono = monorepo as Record<string, Value>;
+      if (mono['tool']) items.push(`${this.valueToString(mono['tool'])}`);
+      if (mono['packageManager'])
+        items.push(`${this.valueToString(mono['packageManager'])} workspaces`);
+    }
+  }
+
+  private extractTechFromStandards(ast: Program, items: string[]): void {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return;
+
+    const code = this.getProp(standards.content, 'code');
+    if (code && typeof code === 'object' && !Array.isArray(code)) {
+      const codeObj = code as Record<string, Value>;
+      this.collectValueItems(items, codeObj['languages']);
+      this.collectValueItems(items, codeObj['frameworks']);
+      this.collectValueItems(items, codeObj['testing']);
+    }
+  }
+
+  private architecture(ast: Program): string | null {
+    const context = this.findBlock(ast, 'context');
+    if (!context) return null;
+
+    // First try explicit architecture property
+    const arch = this.getProp(context.content, 'architecture');
+    if (arch) {
+      const text = typeof arch === 'string' ? arch : this.valueToString(arch);
+      if (text.trim()) return `Architecture:\n${text.trim()}`;
+    }
+
+    // Fall back to extracting text which may contain architecture info
+    const text = this.extractText(context.content);
+    if (text?.includes('Architecture')) {
+      return text.trim();
+    }
+
+    return null;
+  }
+
+  private codeStyle(ast: Program): string | null {
+    const items = this.extractCodeStyleItems(ast);
+    if (items.length === 0) return null;
+    return `Code style:\n${items.map((i) => '- ' + i).join('\n')}`;
+  }
+
+  private extractCodeStyleItems(ast: Program): string[] {
+    // Only extract code-related standards (not git, config, diagrams, documentation)
+    const codeKeys = ['typescript', 'naming', 'errors', 'testing'];
+
+    // Try context.standards first (new structure)
+    const context = this.findBlock(ast, 'context');
+    if (context) {
+      const standards = this.getProp(context.content, 'standards');
+      if (standards && typeof standards === 'object' && !Array.isArray(standards)) {
+        const filtered = this.filterByKeys(standards as Record<string, Value>, codeKeys);
+        if (Object.keys(filtered).length > 0) {
+          return this.extractNestedRules(filtered);
         }
       }
     }
 
-    const org = this.getMetaField(ast, 'org');
-    const orgSuffix = org ? ` at ${org}` : '';
+    // Try @standards block directly
+    const standardsBlock = this.findBlock(ast, 'standards');
+    if (standardsBlock) {
+      const props = this.getProps(standardsBlock.content);
+      const filtered = this.filterByKeys(props, codeKeys);
+      if (Object.keys(filtered).length > 0) {
+        return this.extractNestedRules(filtered);
+      }
+    }
 
-    return `You are working on ${project}${orgSuffix}.`;
+    return [];
   }
 
-  private techStack(ast: Program): string | null {
-    const standards = this.findBlock(ast, 'standards');
-    if (!standards) return null;
+  private filterByKeys(obj: Record<string, Value>, keys: string[]): Record<string, Value> {
+    const result: Record<string, Value> = {};
+    for (const key of keys) {
+      if (obj[key] !== undefined) {
+        result[key] = obj[key];
+      }
+    }
+    return result;
+  }
 
-    const code = this.getProp(standards.content, 'code');
-    if (!code || typeof code !== 'object' || Array.isArray(code)) return null;
-
-    const codeObj = code as Record<string, Value>;
+  private extractNestedRules(obj: Record<string, Value>): string[] {
     const items: string[] = [];
-
-    this.collectValueItems(items, codeObj['languages']);
-    this.collectValueItems(items, codeObj['frameworks']);
-    this.collectValueItems(items, codeObj['testing']);
-
-    return items.length > 0 ? `Tech stack: ${items.join(', ')}` : null;
+    for (const rules of Object.values(obj)) {
+      this.flattenRules(rules, items);
+    }
+    return items;
   }
 
-  private collectValueItems(items: string[], value: Value | undefined): void {
-    if (!value) return;
-    const arr = Array.isArray(value) ? value : [value];
-    for (const item of arr) {
-      items.push(this.valueToString(item));
+  private flattenRules(rules: Value, items: string[]): void {
+    if (Array.isArray(rules)) {
+      this.extractStringArray(rules, items);
+      return;
+    }
+
+    if (rules && typeof rules === 'object') {
+      this.extractFromObject(rules as Record<string, Value>, items);
+      return;
+    }
+
+    if (typeof rules === 'string') {
+      items.push(rules);
     }
   }
 
-  private codeStyle(ast: Program): string | null {
-    const standards = this.findBlock(ast, 'standards');
-    if (!standards) return null;
+  private extractStringArray(arr: Value[], items: string[]): void {
+    for (const item of arr) {
+      if (typeof item === 'string') items.push(item);
+    }
+  }
 
-    const code = this.getProp(standards.content, 'code');
-    if (!code || typeof code !== 'object' || Array.isArray(code)) return null;
+  private extractFromObject(obj: Record<string, Value>, items: string[]): void {
+    for (const [key, rule] of Object.entries(obj)) {
+      if (Array.isArray(rule)) {
+        this.extractStringArray(rule, items);
+      } else if (typeof rule === 'string') {
+        items.push(`${key}: ${rule}`);
+      }
+      // Skip booleans, numbers, nested objects
+    }
+  }
 
-    const codeObj = code as Record<string, Value>;
+  private gitCommits(ast: Program): string | null {
+    // Try @standards.git first
+    const standardsBlock = this.findBlock(ast, 'standards');
+    if (standardsBlock) {
+      const git = this.getProp(standardsBlock.content, 'git');
+      if (git && typeof git === 'object' && !Array.isArray(git)) {
+        const items = this.extractGitItems(git as Record<string, Value>);
+        if (items.length > 0) {
+          return `Git Commits:\n${items.map((i) => '- ' + i).join('\n')}`;
+        }
+      }
+    }
+
+    // Fall back to context.git-commits
+    const context = this.findBlock(ast, 'context');
+    if (context) {
+      const commits = this.getProp(context.content, 'git-commits');
+      if (commits && typeof commits === 'object' && !Array.isArray(commits)) {
+        const items = this.extractGitItems(commits as Record<string, Value>);
+        if (items.length > 0) {
+          return `Git Commits:\n${items.map((i) => '- ' + i).join('\n')}`;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private extractGitItems(obj: Record<string, Value>): string[] {
     const items: string[] = [];
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === 'types' && Array.isArray(value)) {
+        const types = value.map((v) => this.valueToString(v)).join(', ');
+        items.push(`types: ${types}`);
+      } else if (typeof value === 'string') {
+        items.push(`${key}: ${value}`);
+      } else if (typeof value === 'number') {
+        items.push(`${key}: ${value}`);
+      }
+    }
+    return items;
+  }
 
-    this.collectValueItems(items, codeObj['style']);
-    this.collectValueItems(items, codeObj['patterns']);
-
+  private configFiles(ast: Program): string | null {
+    const items = this.extractConfigItems(ast);
     if (items.length === 0) return null;
+    return `Config:\n${items.map((i) => '- ' + i).join('\n')}`;
+  }
 
-    const formattedItems = items.map((i) => '- ' + i).join('\n');
-    return `Code style:\n${formattedItems}`;
+  private extractConfigItems(ast: Program): string[] {
+    // Try @standards.config first
+    const standardsBlock = this.findBlock(ast, 'standards');
+    if (standardsBlock) {
+      const config = this.getProp(standardsBlock.content, 'config');
+      const items = this.extractConfigFromObject(config);
+      if (items.length > 0) return items;
+    }
+
+    // Fall back to context.configuration-files
+    const context = this.findBlock(ast, 'context');
+    if (context) {
+      const config = this.getProp(context.content, 'configuration-files');
+      return this.extractConfigFromObjectWithList(config);
+    }
+
+    return [];
+  }
+
+  private extractConfigFromObject(config: Value | undefined): string[] {
+    if (!config || typeof config !== 'object' || Array.isArray(config)) return [];
+    const items: string[] = [];
+    for (const [key, value] of Object.entries(config as Record<string, Value>)) {
+      if (typeof value === 'string') {
+        items.push(`${key}: ${value}`);
+      }
+    }
+    return items;
+  }
+
+  private extractConfigFromObjectWithList(config: Value | undefined): string[] {
+    if (!config || typeof config !== 'object' || Array.isArray(config)) return [];
+    const items: string[] = [];
+    for (const [key, value] of Object.entries(config as Record<string, Value>)) {
+      const valueItems = this.extractListItems(value);
+      if (valueItems.length > 0) {
+        items.push(`${key}: ${valueItems.join('; ')}`);
+      }
+    }
+    return items;
   }
 
   private commands(ast: Program): string | null {
@@ -116,41 +355,170 @@ export class CursorFormatter extends BaseFormatter {
     const props = this.getProps(block.content);
     if (Object.keys(props).length === 0) return null;
 
-    let content = 'Commands:\n';
-
+    const lines: string[] = [];
     for (const [cmd, desc] of Object.entries(props)) {
-      const lines = this.valueToString(desc).split('\n');
-      const shortDesc = lines[0] ?? '';
-      content += `${cmd} - ${shortDesc}\n`;
+      const shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
+      lines.push(`${cmd} - ${shortDesc}`);
     }
 
-    return content.trim();
+    return lines.length > 0 ? `Commands:\n${lines.join('\n')}` : null;
+  }
+
+  private devCommands(ast: Program): string | null {
+    const context = this.findBlock(ast, 'context');
+    if (!context) return null;
+
+    const cmds = this.getProp(context.content, 'commands');
+    if (!cmds) return null;
+
+    const text = typeof cmds === 'string' ? cmds : this.valueToString(cmds);
+    if (!text.trim()) return null;
+
+    return `Development Commands:\n${text.trim()}`;
+  }
+
+  private postWork(ast: Program): string | null {
+    const context = this.findBlock(ast, 'context');
+    if (!context) return null;
+
+    const post = this.getProp(context.content, 'post-work-verification');
+    if (!post) return null;
+
+    const text = typeof post === 'string' ? post : this.valueToString(post);
+    if (!text.trim()) return null;
+
+    return `Post-Work Verification:\n${text.trim()}`;
+  }
+
+  private documentation(ast: Program): string | null {
+    const items = this.extractDocItems(ast);
+    if (items.length === 0) return null;
+    return `Documentation:\n${items.map((i) => '- ' + i).join('\n')}`;
+  }
+
+  private extractDocItems(ast: Program): string[] {
+    // Try @standards.documentation first
+    const standardsBlock = this.findBlock(ast, 'standards');
+    if (standardsBlock) {
+      const docs = this.getProp(standardsBlock.content, 'documentation');
+      const items = this.extractStringValuesFromObject(docs);
+      if (items.length > 0) return items;
+    }
+
+    // Fall back to context.documentation-verification
+    const context = this.findBlock(ast, 'context');
+    if (context) {
+      const docs = this.getProp(context.content, 'documentation-verification');
+      if (docs) return this.extractListItems(docs);
+    }
+
+    return [];
+  }
+
+  private extractStringValuesFromObject(obj: Value | undefined): string[] {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return [];
+    const items: string[] = [];
+    for (const value of Object.values(obj as Record<string, Value>)) {
+      if (typeof value === 'string') items.push(value);
+    }
+    return items;
+  }
+
+  private diagrams(ast: Program): string | null {
+    const items = this.extractDiagramItems(ast);
+    if (items.length === 0) return null;
+    return `Diagrams:\n${items.map((i) => '- ' + i).join('\n')}`;
+  }
+
+  private extractDiagramItems(ast: Program): string[] {
+    // Try @standards.diagrams first
+    const standardsBlock = this.findBlock(ast, 'standards');
+    if (standardsBlock) {
+      const diag = this.getProp(standardsBlock.content, 'diagrams');
+      const items = this.parseDiagramObject(diag, 'format');
+      if (items.length > 0) return items;
+    }
+
+    // Fall back to context.diagrams
+    const context = this.findBlock(ast, 'context');
+    if (context) {
+      const diag = this.getProp(context.content, 'diagrams');
+      return this.parseDiagramObject(diag, 'tool');
+    }
+
+    return [];
+  }
+
+  private parseDiagramObject(diag: Value | undefined, formatKey: string): string[] {
+    if (!diag || typeof diag !== 'object' || Array.isArray(diag)) return [];
+    const diagObj = diag as Record<string, Value>;
+    const items: string[] = [];
+    if (diagObj[formatKey]) items.push(`Use ${this.valueToString(diagObj[formatKey])}`);
+    if (diagObj['types'] && Array.isArray(diagObj['types'])) {
+      items.push(`Types: ${diagObj['types'].map((t) => this.valueToString(t)).join(', ')}`);
+    }
+    return items;
   }
 
   private never(ast: Program): string | null {
     const block = this.findBlock(ast, 'restrictions');
     if (!block) return null;
 
-    let content = 'Never:\n';
+    const items = this.extractNeverItems(block.content);
+    if (items.length === 0) return null;
 
-    if (block.content.type === 'ArrayContent') {
-      for (const item of block.content.elements) {
-        content += `- ${this.valueToString(item)}\n`;
-      }
-      return content.trim();
+    return `Never:\n${items.map((i) => '- ' + i).join('\n')}`;
+  }
+
+  private extractNeverItems(content: Block['content']): string[] {
+    if (content.type === 'ArrayContent') {
+      return content.elements.map((item: Value) => this.valueToString(item));
     }
 
-    if (block.content.type === 'TextContent') {
-      const lines = block.content.value.trim().split('\n');
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed) {
-          content += trimmed.startsWith('-') ? trimmed + '\n' : '- ' + trimmed + '\n';
-        }
-      }
-      return content.trim();
+    if (content.type === 'TextContent') {
+      return content.value
+        .trim()
+        .split('\n')
+        .map((line: string) => line.trim().replace(/^-\s*/, ''))
+        .filter((line: string) => line.length > 0);
     }
 
-    return null;
+    if (content.type === 'ObjectContent') {
+      const itemsArray = this.getProp(content, 'items');
+      if (Array.isArray(itemsArray)) {
+        return itemsArray.map((item: unknown) => this.valueToString(item as Value));
+      }
+    }
+
+    return [];
+  }
+
+  private extractListItems(value: Value): string[] {
+    if (Array.isArray(value)) {
+      return value.map((v) => this.valueToString(v));
+    }
+    if (typeof value === 'object' && value !== null) {
+      const obj = value as Record<string, Value>;
+      const items: string[] = [];
+      for (const [key, val] of Object.entries(obj)) {
+        items.push(`${key}: ${this.valueToString(val)}`);
+      }
+      return items;
+    }
+    if (typeof value === 'string') {
+      return value
+        .split('\n')
+        .map((l) => l.trim().replace(/^-\s*/, ''))
+        .filter((l) => l.length > 0);
+    }
+    return [this.valueToString(value)];
+  }
+
+  private collectValueItems(items: string[], value: Value | undefined): void {
+    if (!value) return;
+    const arr = Array.isArray(value) ? value : [value];
+    for (const item of arr) {
+      items.push(this.valueToString(item));
+    }
   }
 }

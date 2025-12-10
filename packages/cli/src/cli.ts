@@ -31,7 +31,8 @@ program
 program
   .command('compile')
   .description('Compile PromptScript to target formats')
-  .option('-t, --target <target>', 'Specific target')
+  .option('-t, --target <target>', 'Specific target (github, claude, cursor)')
+  .option('-f, --format <format>', 'Output format (alias for --target)')
   .option('-a, --all', 'All configured targets', true)
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
