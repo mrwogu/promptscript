@@ -173,30 +173,67 @@ Testing: required
 
 ### Cursor Formatter
 
-Outputs `.cursorrules` format.
+Outputs Cursor rules in modern MDC format (`.cursor/rules/project.mdc`) or legacy format (`.cursorrules`).
+
+**Supported Versions:**
+
+| Version  | Output Path                 | Cursor Version | Status     |
+| -------- | --------------------------- | -------------- | ---------- |
+| `modern` | `.cursor/rules/project.mdc` | 0.45+          | Default    |
+| `legacy` | `.cursorrules`              | < 0.45         | Deprecated |
 
 ```typescript
+// Modern format (default, for Cursor 0.45+)
 const output = format(resolved, {
   target: 'cursor',
-  targetOptions: {
-    compact: true, // Minimize whitespace
-    maxLength: 10000, // Max output length
-  },
+});
+
+// Legacy format (for older Cursor versions)
+const legacyOutput = format(resolved, {
+  target: 'cursor',
+  version: 'legacy',
 });
 ```
 
-**Output Example:**
+**YAML Configuration:**
+
+```yaml
+targets:
+  # Modern format (default)
+  - cursor
+
+  # Legacy format for older Cursor installations
+  - cursor:
+      version: legacy
+      output: .cursorrules
+```
+
+**Modern Output Example (MDC with frontmatter):**
+
+```markdown
+---
+description: 'Project rules for MyApp'
+alwaysApply: true
+---
+
+You are working on MyApp.
+
+Tech stack: TypeScript, React
+
+## Architecture
+
+...
+```
+
+**Legacy Output Example (plain text):**
 
 ```text
-You are an expert TypeScript developer.
+You are working on MyApp.
 
-Standards:
-- Code style: functional
-- Testing: required
+Tech stack: TypeScript, React
 
-Commands:
-/review - Review code for quality
-/test - Write comprehensive tests
+Architecture:
+...
 ```
 
 ## Output Conventions
@@ -205,10 +242,13 @@ Output conventions control how sections are rendered in the output. Built-in con
 
 ### Built-in Conventions
 
-| Convention | Default For            | Section Format                         | List Format    |
+| Convention | Supported By           | Section Format                         | List Format    |
 | ---------- | ---------------------- | -------------------------------------- | -------------- |
 | `markdown` | GitHub, Claude, Cursor | `## Section Name`                      | Markdown lists |
-| `xml`      | (optional)             | `<section-name>content</section-name>` | Markdown lists |
+| `xml`      | GitHub, Claude         | `<section-name>content</section-name>` | Markdown lists |
+
+!!! warning "Cursor Convention Support"
+The Cursor formatter only supports `markdown` convention. Using `xml` convention with Cursor will throw an error.
 
 ### Using Conventions
 
@@ -221,7 +261,7 @@ const mdOutput = format(resolved, {
   convention: 'markdown',
 });
 
-// Use XML convention
+// Use XML convention (GitHub and Claude only)
 const xmlOutput = format(resolved, {
   target: 'github',
   convention: 'xml',

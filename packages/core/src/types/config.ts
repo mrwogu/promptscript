@@ -19,6 +19,13 @@ export interface TargetConfig {
    * Output convention ('xml', 'markdown', or custom name).
    */
   convention?: ConventionName;
+
+  /**
+   * Target version or format variant.
+   * Use 'legacy' for deprecated formats (e.g., Cursor's .cursorrules).
+   * @example 'legacy' | '1.0' | '2.0'
+   */
+  version?: string;
 }
 
 /**
@@ -87,7 +94,7 @@ export type TargetName = 'github' | 'claude' | 'cursor' | 'gemini' | 'jetbrains'
 export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   github: '.github/copilot-instructions.md',
   claude: 'CLAUDE.md',
-  cursor: '.cursorrules',
+  cursor: '.cursor/rules/project.mdc',
   gemini: '.gemini/config.md',
   jetbrains: '.junie/guidelines.md',
 };

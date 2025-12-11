@@ -1,3 +1,8 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
 You are working on PromptScript at PromptScript.
 
 Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces

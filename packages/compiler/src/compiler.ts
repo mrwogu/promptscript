@@ -39,8 +39,8 @@ interface LoadedFormatter {
  *
  * const result = await compiler.compile('./project.prs');
  * if (result.success) {
- *   for (const [name, output] of result.outputs) {
- *     console.log(`Generated: ${output.path}`);
+ *   for (const [outputPath, output] of result.outputs) {
+ *     console.log(`Generated: ${outputPath}`);
  *   }
  * }
  * ```
@@ -132,7 +132,9 @@ export class Compiler {
       try {
         const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
         const output = formatter.format(resolved.ast, formatOptions);
-        outputs.set(formatter.name, output);
+        // Use output path as key to support multiple targets with same formatter
+        // (e.g., cursor modern + cursor legacy)
+        outputs.set(output.path, output);
       } catch (err) {
         formatErrors.push({
           name: 'FormatterError',
@@ -180,24 +182,24 @@ export class Compiler {
   ): import('./types').FormatOptions {
     const customConventions = this.options.customConventions;
 
-    if (!config?.convention) {
+    if (!config?.convention && !config?.version && !config?.output) {
       return {};
     }
 
-    const conventionName = config.convention;
+    const conventionName = config?.convention;
+    const options: import('./types').FormatOptions = {
+      outputPath: config?.output,
+      version: config?.version,
+    };
 
     // Check if it's a custom convention
-    if (customConventions?.[conventionName]) {
-      return {
-        convention: customConventions[conventionName],
-        outputPath: config.output,
-      };
+    if (conventionName && customConventions?.[conventionName]) {
+      options.convention = customConventions[conventionName];
+    } else if (conventionName) {
+      options.convention = conventionName;
     }
 
-    return {
-      convention: conventionName,
-      outputPath: config.output,
-    };
+    return options;
   }
 
   /**

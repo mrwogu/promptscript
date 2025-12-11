@@ -50,8 +50,8 @@ const compiler = new Compiler({
 const result = await compiler.compile('./project.prs');
 
 if (result.success) {
-  for (const [name, output] of result.outputs) {
-    console.log(`✓ ${name}: ${output.path}`);
+  for (const [outputPath, output] of result.outputs) {
+    console.log(`✓ ${outputPath}`);
   }
   console.log(`\nStats: ${result.stats.totalTime}ms`);
 } else {

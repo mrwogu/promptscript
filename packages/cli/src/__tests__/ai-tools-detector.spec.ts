@@ -46,13 +46,13 @@ describe('utils/ai-tools-detector', () => {
     });
 
     it('should detect Cursor configuration', async () => {
-      vi.mocked(existsSync).mockImplementation((path) => path === '.cursorrules');
+      vi.mocked(existsSync).mockImplementation((path) => path === '.cursor/rules/project.mdc');
       vi.mocked(readdir).mockResolvedValue([]);
 
       const result = await detectAITools();
 
       expect(result.detected).toContain('cursor');
-      expect(result.details.cursor).toContain('.cursorrules');
+      expect(result.details.cursor).toContain('.cursor/rules/project.mdc');
     });
 
     it('should detect .claude directory with content', async () => {
@@ -70,7 +70,7 @@ describe('utils/ai-tools-detector', () => {
         (path) =>
           path === '.github/copilot-instructions.md' ||
           path === 'CLAUDE.md' ||
-          path === '.cursorrules'
+          path === '.cursor/rules/project.mdc'
       );
       vi.mocked(readdir).mockResolvedValue([]);
 

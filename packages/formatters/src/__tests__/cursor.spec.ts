@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { CursorFormatter } from '../formatters/cursor';
+import { CursorFormatter, CURSOR_VERSIONS } from '../formatters/cursor';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -25,15 +25,43 @@ describe('CursorFormatter', () => {
 
   it('should have correct name, outputPath and description', () => {
     expect(formatter.name).toBe('cursor');
-    expect(formatter.outputPath).toBe('.cursorrules');
-    expect(formatter.description).toBe('Cursor rules (plain text)');
+    expect(formatter.outputPath).toBe('.cursor/rules/project.mdc');
+    expect(formatter.description).toBe('Cursor rules (MDC with frontmatter)');
+  });
+
+  describe('convention validation', () => {
+    it('should throw error when using xml convention', () => {
+      const ast = createMinimalProgram();
+      expect(() => formatter.format(ast, { convention: 'xml' })).toThrow(
+        "Cursor formatter does not support 'xml' convention. Only 'markdown' convention is supported for Cursor targets."
+      );
+    });
+
+    it('should throw error when using custom convention', () => {
+      const ast = createMinimalProgram();
+      expect(() => formatter.format(ast, { convention: 'custom' })).toThrow(
+        "Cursor formatter does not support 'custom' convention. Only 'markdown' convention is supported for Cursor targets."
+      );
+    });
+
+    it('should work with markdown convention', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast, { convention: 'markdown' });
+      expect(result.path).toBe('.cursor/rules/project.mdc');
+    });
+
+    it('should work without convention (defaults to markdown)', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.path).toBe('.cursor/rules/project.mdc');
+    });
   });
 
   describe('format', () => {
     it('should generate intro with default project', () => {
       const ast = createMinimalProgram();
       const result = formatter.format(ast);
-      expect(result.path).toBe('.cursorrules');
+      expect(result.path).toBe('.cursor/rules/project.mdc');
       expect(result.content).toContain('You are working on the project.');
     });
 
@@ -283,7 +311,8 @@ describe('CursorFormatter', () => {
       const result = formatter.format(ast);
       expect(result.content).toContain('\n\n');
       expect(result.content).not.toContain('##');
-      expect(result.content).not.toContain('---');
+      // Frontmatter uses --- but content shouldn't have additional horizontal rules
+      expect(result.content).toMatch(/^---\ndescription:/);
     });
 
     it('should skip empty sections', () => {
@@ -356,6 +385,77 @@ describe('CursorFormatter', () => {
 
       const result = formatter.format(ast);
       expect(result.content).not.toContain('Never:');
+    });
+  });
+
+  describe('version support', () => {
+    it('should expose supported versions', () => {
+      const versions = CursorFormatter.getSupportedVersions();
+      expect(versions.modern).toBeDefined();
+      expect(versions.legacy).toBeDefined();
+      expect(versions.modern.outputPath).toBe('.cursor/rules/project.mdc');
+      expect(versions.legacy.outputPath).toBe('.cursorrules');
+    });
+
+    it('should have version metadata', () => {
+      expect(CURSOR_VERSIONS.modern.cursorVersion).toBe('0.45+');
+      expect(CURSOR_VERSIONS.legacy.deprecated).toBe(true);
+    });
+
+    describe('modern format (default)', () => {
+      it('should generate MDC with frontmatter', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast);
+
+        expect(result.path).toBe('.cursor/rules/project.mdc');
+        expect(result.content).toMatch(/^---\n/);
+        expect(result.content).toContain('alwaysApply: true');
+        expect(result.content).toContain('---\n\n');
+      });
+
+      it('should use modern format when version is undefined', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, {});
+
+        expect(result.path).toBe('.cursor/rules/project.mdc');
+        expect(result.content).toMatch(/^---\n/);
+      });
+
+      it('should use modern format when version is "modern"', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'modern' });
+
+        expect(result.path).toBe('.cursor/rules/project.mdc');
+        expect(result.content).toMatch(/^---\n/);
+      });
+    });
+
+    describe('legacy format', () => {
+      it('should generate plain text without frontmatter', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'legacy' });
+
+        expect(result.path).toBe('.cursorrules');
+        expect(result.content).not.toMatch(/^---\n/);
+        expect(result.content).not.toContain('alwaysApply');
+      });
+
+      it('should start with intro text', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'legacy' });
+
+        expect(result.content).toMatch(/^You are working on/);
+      });
+
+      it('should allow custom output path in legacy mode', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, {
+          version: 'legacy',
+          outputPath: 'custom/.cursorrules',
+        });
+
+        expect(result.path).toBe('custom/.cursorrules');
+      });
     });
   });
 });

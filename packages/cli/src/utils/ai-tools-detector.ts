@@ -38,8 +38,8 @@ const AI_TOOL_PATTERNS: AIToolPattern[] = [
   },
   {
     target: 'cursor',
-    files: ['.cursorrules', '.cursor/rules.md'],
-    directories: ['.cursor'],
+    files: ['.cursor/rules/project.mdc', '.cursorrules', '.cursor/rules.md'],
+    directories: ['.cursor', '.cursor/rules'],
   },
 ];
 

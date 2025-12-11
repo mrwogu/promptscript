@@ -24,6 +24,13 @@ export interface FormatOptions {
    * Custom output path (overrides default).
    */
   outputPath?: string;
+
+  /**
+   * Target version or format variant.
+   * Use 'legacy' for deprecated formats (e.g., Cursor's .cursorrules).
+   * @example 'legacy' | '1.0' | '2.0'
+   */
+  version?: string;
 }
 
 /**

@@ -21,6 +21,7 @@ function createReferenceAST(): Program {
     extends: [],
     loc: createLoc(),
     meta: {
+      type: 'MetaBlock',
       fields: {
         id: 'promptscript',
         syntax: '1.0.0',
@@ -293,7 +294,7 @@ describe('Formatter Snapshot Tests', () => {
       const ast = createReferenceAST();
       const result = formatter.format(ast);
 
-      expect(result.path).toBe('.cursorrules');
+      expect(result.path).toBe('.cursor/rules/project.mdc');
       expect(result.content).toMatchSnapshot();
     });
   });

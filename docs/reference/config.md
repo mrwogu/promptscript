@@ -106,7 +106,7 @@ targets:
   # Cursor
   cursor:
     enabled: true
-    output: .cursorrules
+    output: .cursor/rules/project.mdc
 
     options:
       compact: true
@@ -227,11 +227,11 @@ targets:
 
 **Available Targets:**
 
-| Target   | Default Output                    | Default Convention | Description    |
-| -------- | --------------------------------- | ------------------ | -------------- |
-| `github` | `.github/copilot-instructions.md` | `markdown`         | GitHub Copilot |
-| `claude` | `CLAUDE.md`                       | `markdown`         | Claude Code    |
-| `cursor` | `.cursorrules`                    | `markdown`         | Cursor         |
+| Target   | Default Output                    | Default Convention | Supported Versions    |
+| -------- | --------------------------------- | ------------------ | --------------------- |
+| `github` | `.github/copilot-instructions.md` | `markdown`         | GitHub Copilot (all)  |
+| `claude` | `CLAUDE.md`                       | `markdown`         | Claude Code (all)     |
+| `cursor` | `.cursor/rules/project.mdc`       | `markdown`         | Cursor 0.45+ / legacy |
 
 **Target Configuration:**
 
@@ -249,15 +249,20 @@ targets:
       output: custom/path/instructions.md
   - claude:
       convention: markdown
+
+  # With version for format variants
+  - cursor:
+      version: legacy # Use .cursorrules for Cursor < 0.45
 ```
 
 **Target Options:**
 
-| Field        | Type    | Default     | Description                             |
-| ------------ | ------- | ----------- | --------------------------------------- |
-| `enabled`    | boolean | `true`      | Whether target is enabled               |
-| `output`     | string  | (see above) | Custom output path                      |
-| `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown') |
+| Field        | Type    | Default     | Description                              |
+| ------------ | ------- | ----------- | ---------------------------------------- |
+| `enabled`    | boolean | `true`      | Whether target is enabled                |
+| `output`     | string  | (see above) | Custom output path                       |
+| `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown')  |
+| `version`    | string  | (default)   | Format version ('legacy' for deprecated) |
 
 See [Formatters API](../api/formatters.md) for more details.
 

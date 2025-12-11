@@ -4,10 +4,8 @@ project:
   id: 'promptscript'
 
 targets:
-  - github:
-      convention: markdown
-  - claude:
-      convention: markdown
+  - github
+  - claude
   - cursor
 
 validation:

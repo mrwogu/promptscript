@@ -3,20 +3,133 @@ import { BaseFormatter } from '../base-formatter';
 import type { FormatOptions, FormatterOutput } from '../types';
 
 /**
+ * Supported Cursor format versions.
+ */
+export type CursorVersion = 'modern' | 'legacy';
+
+/**
+ * Cursor formatter version information.
+ */
+export const CURSOR_VERSIONS = {
+  modern: {
+    name: 'modern',
+    description: 'MDC format with YAML frontmatter (.cursor/rules/project.mdc)',
+    outputPath: '.cursor/rules/project.mdc',
+    cursorVersion: '0.45+',
+    introduced: '2024-12',
+  },
+  legacy: {
+    name: 'legacy',
+    description: 'Plain text format (.cursorrules) - DEPRECATED',
+    outputPath: '.cursorrules',
+    cursorVersion: '< 0.45',
+    deprecated: true,
+    deprecatedSince: '2024-12',
+  },
+} as const;
+
+/**
  * Formatter for Cursor rules.
- * Outputs: `.cursorrules` (plain text, NOT markdown)
  *
- * Cursor format is concise plain text without markdown headers.
+ * Supports two versions:
+ * - **modern** (default): `.cursor/rules/project.mdc` with YAML frontmatter
+ * - **legacy**: `.cursorrules` plain text (deprecated)
+ *
+ * @example
+ * ```yaml
+ * # Modern format (default)
+ * targets:
+ *   - cursor
+ *
+ * # Legacy format for older Cursor versions
+ * targets:
+ *   - cursor:
+ *       version: legacy
+ * ```
+ *
+ * @see https://cursor.com/docs/context/rules
  */
 export class CursorFormatter extends BaseFormatter {
   readonly name = 'cursor';
-  readonly outputPath = '.cursorrules';
-  readonly description = 'Cursor rules (plain text)';
+  readonly outputPath = CURSOR_VERSIONS.modern.outputPath;
+  readonly description = 'Cursor rules (MDC with frontmatter)';
   readonly defaultConvention = 'markdown';
 
+  /**
+   * Get supported versions for this formatter.
+   */
+  static getSupportedVersions(): typeof CURSOR_VERSIONS {
+    return CURSOR_VERSIONS;
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
+    // Validate convention - Cursor only supports markdown
+    const convention = options?.convention ?? this.defaultConvention;
+    if (convention !== 'markdown') {
+      const conventionName = typeof convention === 'string' ? convention : 'custom';
+      throw new Error(
+        `Cursor formatter does not support '${conventionName}' convention. ` +
+          `Only 'markdown' convention is supported for Cursor targets.`
+      );
+    }
+
+    const version = this.resolveVersion(options?.version);
+
+    if (version === 'legacy') {
+      return this.formatLegacy(ast, options);
+    }
+
+    return this.formatModern(ast, options);
+  }
+
+  /**
+   * Resolve version string to CursorVersion.
+   */
+  private resolveVersion(version?: string): CursorVersion {
+    if (version === 'legacy') {
+      return 'legacy';
+    }
+    return 'modern';
+  }
+
+  /**
+   * Format for modern Cursor (0.45+) with MDC frontmatter.
+   */
+  private formatModern(ast: Program, options?: FormatOptions): FormatterOutput {
     const sections: string[] = [];
 
+    // Add YAML frontmatter
+    const frontmatter = this.frontmatter(ast);
+    sections.push(frontmatter);
+
+    this.addCommonSections(ast, sections);
+
+    return {
+      path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
+      content: sections.join('\n\n') + '\n',
+    };
+  }
+
+  /**
+   * Format for legacy Cursor (< 0.45) with plain .cursorrules.
+   * @deprecated Use modern format for Cursor 0.45+
+   */
+  private formatLegacy(ast: Program, options?: FormatOptions): FormatterOutput {
+    const sections: string[] = [];
+
+    // No frontmatter for legacy format
+    this.addCommonSections(ast, sections);
+
+    return {
+      path: options?.outputPath ?? CURSOR_VERSIONS.legacy.outputPath,
+      content: sections.join('\n\n') + '\n',
+    };
+  }
+
+  /**
+   * Add common sections shared between modern and legacy formats.
+   */
+  private addCommonSections(ast: Program, sections: string[]): void {
     const intro = this.intro(ast);
     if (intro) sections.push(intro);
 
@@ -52,11 +165,6 @@ export class CursorFormatter extends BaseFormatter {
 
     const never = this.never(ast);
     if (never) sections.push(never);
-
-    return {
-      path: this.getOutputPath(options),
-      content: sections.join('\n\n') + '\n',
-    };
   }
 
   private intro(ast: Program): string {
@@ -69,6 +177,40 @@ export class CursorFormatter extends BaseFormatter {
 
     const orgSuffix = projectInfo.org ? ` at ${projectInfo.org}` : '';
     return `You are working on ${projectInfo.text}${orgSuffix}.`;
+  }
+
+  /**
+   * Generate YAML frontmatter for Cursor MDC format.
+   * @see https://cursor.com/docs/context/rules
+   */
+  private frontmatter(ast: Program): string {
+    const description = this.extractProjectDescription(ast);
+    const lines = ['---', `description: "${description}"`, 'alwaysApply: true', '---'];
+    return lines.join('\n');
+  }
+
+  private extractProjectDescription(ast: Program): string {
+    // Try to get project name from meta
+    const name = this.getMetaField(ast, 'name');
+    if (name) {
+      return `Project rules for ${name}`;
+    }
+
+    // Try to extract from context.project
+    const context = this.findBlock(ast, 'context');
+    if (context) {
+      const projectText = this.getProp(context.content, 'project');
+      if (projectText && typeof projectText === 'string') {
+        // Extract project name from description (first noun/name)
+        const regex = /working on\s+(\w+)/i;
+        const match = regex.exec(projectText);
+        if (match) {
+          return `Project rules for ${match[1]}`;
+        }
+      }
+    }
+
+    return 'Project-specific rules';
   }
 
   private extractProjectInfo(ast: Program): { text: string; org: string | null } {

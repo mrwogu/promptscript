@@ -92,7 +92,7 @@ Output:
 ```
 ✓ Compiled to .github/copilot-instructions.md (GitHub Copilot)
 ✓ Compiled to CLAUDE.md (Claude Code)
-✓ Compiled to .cursorrules (Cursor)
+✓ Compiled to .cursor/rules/project.mdc (Cursor)
 ```
 
 ### 4. Commit
@@ -100,7 +100,7 @@ Output:
 Add the generated files to version control:
 
 ```bash
-git add .github/copilot-instructions.md CLAUDE.md .cursorrules
+git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
 git commit -m "Add AI instructions"
 ```
 
@@ -116,7 +116,7 @@ your-project/
 ├── .github/
 │   └── copilot-instructions.md  # Generated
 ├── CLAUDE.md                    # Generated
-└── .cursorrules                 # Generated
+└── .cursor/rules/project.mdc       # Generated
 ```
 
 ## Configuration
@@ -140,12 +140,29 @@ targets:
 
   cursor:
     enabled: true
-    output: .cursorrules
+    output: .cursor/rules/project.mdc
+    # Use version: legacy for Cursor < 0.45
 
 # Optional: Registry for inheritance
 registry:
   path: ./registry
   # Or remote: https://github.com/your-org/promptscript-registry
+```
+
+### Version Support
+
+PromptScript supports multiple format versions for tools that have evolved their configuration format:
+
+| Tool   | Version  | Output Path                 | When to Use            |
+| ------ | -------- | --------------------------- | ---------------------- |
+| Cursor | (modern) | `.cursor/rules/project.mdc` | Cursor 0.45+ (default) |
+| Cursor | legacy   | `.cursorrules`              | Older Cursor versions  |
+
+```yaml
+# For older Cursor versions
+targets:
+  - cursor:
+      version: legacy
 ```
 
 ## What's Next?

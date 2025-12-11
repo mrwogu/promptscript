@@ -142,7 +142,7 @@ describe('FormatterRegistry', () => {
       const formatter = FormatterRegistry.get('cursor');
       expect(formatter).toBeDefined();
       expect(formatter?.name).toBe('cursor');
-      expect(formatter?.outputPath).toBe('.cursorrules');
+      expect(formatter?.outputPath).toBe('.cursor/rules/project.mdc');
     });
   });
 });

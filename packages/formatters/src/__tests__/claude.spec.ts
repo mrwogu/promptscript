@@ -29,6 +29,72 @@ describe('ClaudeFormatter', () => {
     expect(formatter.description).toBe('Claude Code instructions (concise Markdown)');
   });
 
+  describe('convention support', () => {
+    it('should support markdown convention (default)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'Test project',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { convention: 'markdown' });
+      expect(result.content).toContain('## Project');
+    });
+
+    it('should support xml convention', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'Test project',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { convention: 'xml' });
+      // XML convention transforms names to kebab-case
+      expect(result.content).toContain('<project>');
+      expect(result.content).toContain('</project>');
+      // XML convention should not include markdown header
+      expect(result.content.startsWith('# CLAUDE.md')).toBe(false);
+    });
+
+    it('should default to markdown when no convention specified', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'Test project',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## Project');
+    });
+  });
+
   describe('format', () => {
     it('should always start with CLAUDE.md header', () => {
       const ast = createMinimalProgram();

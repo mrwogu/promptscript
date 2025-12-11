@@ -105,7 +105,7 @@ targets:
 output:
   github: '.github/copilot-instructions.md'
   claude: 'CLAUDE.md'
-  cursor: '.cursorrules'
+  cursor: '.cursor/rules/project.mdc'
 
 validation:
   requiredGuards:
@@ -123,7 +123,7 @@ validation:
 
   ✓ .github/copilot-instructions.md
   ✓ CLAUDE.md
-  ✓ .cursorrules
+  ✓ .cursor/rules/project.mdc
 
 Stats: 234ms (resolve: 45ms, validate: 8ms, format: 181ms)
 ```

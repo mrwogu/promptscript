@@ -590,7 +590,7 @@ targets:
     output: CLAUDE.md
   cursor:
     enabled: true
-    output: .cursorrules
+    output: .cursor/rules/project.mdc
 
 validation:
   strict: true

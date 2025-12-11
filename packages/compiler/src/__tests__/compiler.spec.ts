@@ -194,9 +194,9 @@ describe('Compiler', () => {
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.outputs.size).toBe(1);
-      expect(result.outputs.has('github')).toBe(true);
+      expect(result.outputs.has('./github/output.md')).toBe(true);
 
-      const output = result.outputs.get('github');
+      const output = result.outputs.get('./github/output.md');
       expect(output).toBeDefined();
       expect(output?.content).toContain('github output');
       expect(output?.content).toContain('test-project');
@@ -220,9 +220,9 @@ describe('Compiler', () => {
 
       expect(result.success).toBe(true);
       expect(result.outputs.size).toBe(3);
-      expect(result.outputs.has('github')).toBe(true);
-      expect(result.outputs.has('claude')).toBe(true);
-      expect(result.outputs.has('cursor')).toBe(true);
+      expect(result.outputs.has('./github/output.md')).toBe(true);
+      expect(result.outputs.has('./claude/output.md')).toBe(true);
+      expect(result.outputs.has('./cursor/output.md')).toBe(true);
     });
 
     it('should pass warnings from validation', async () => {
@@ -486,7 +486,7 @@ describe('Compiler', () => {
 
       expect(result.success).toBe(false);
       expect(result.outputs.size).toBe(1);
-      expect(result.outputs.has('success')).toBe(true);
+      expect(result.outputs.has('./success/output.md')).toBe(true);
       expect(result.errors).toHaveLength(1);
     });
   });

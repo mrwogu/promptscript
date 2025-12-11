@@ -25,7 +25,7 @@ Your organization uses multiple AI tools:
 
 - GitHub Copilot (`copilot-instructions.md`)
 - Claude Code (`CLAUDE.md`)
-- Cursor (`.cursorrules`)
+- Cursor (`.cursor/rules/project.mdc`)
 - And more...
 
 Each tool has its own format. Each team maintains their own instructions.
@@ -92,7 +92,7 @@ prs compile --all
 # Output:
 # ✓ .github/copilot-instructions.md
 # ✓ CLAUDE.md
-# ✓ .cursorrules
+# ✓ .cursor/rules/project.mdc
 ```
 
 ## Features
@@ -104,6 +104,39 @@ prs compile --all
 - 🔌 **Extensible** - Add custom formatters
 - 🏢 **Enterprise Ready** - Audit trails, governance
 - 🚀 **Future-Proof** - Formatter updates automatically adapt your prompts to new AI features and models (like agent skills, tool use, etc.)
+
+## Supported AI Tools
+
+### ✅ Currently Supported
+
+| Tool           | Output Format                     | Status | Conventions       |
+| -------------- | --------------------------------- | ------ | ----------------- |
+| GitHub Copilot | `.github/copilot-instructions.md` | ✓      | Markdown, XML     |
+| Claude Code    | `CLAUDE.md`                       | ✓      | Markdown, XML     |
+| Cursor         | `.cursor/rules/project.mdc`       | ✓      | Markdown only     |
+| Cursor         | `.cursorrules`                    | ✓      | Markdown (legacy) |
+
+**Output Conventions:**
+
+- **Markdown** (default): `## Section Name` headers - human-readable and tool-friendly
+- **XML** (GitHub & Claude): `<section-name>content</section-name>` - structured format for programmatic processing
+
+**Using legacy Cursor format:**
+
+```yaml
+# promptscript.yaml
+targets:
+  - cursor:
+      version: legacy # For Cursor < 0.45
+```
+
+### 🚀 Planned Support
+
+- [ ] **Windsurf** (`.windsurfrules`)
+- [ ] **Aider** (`.aider.conf.json`)
+- [ ] **Continue** (`.continue/config.json`)
+- [ ] **Cline** (`.cline/cline_rules`)
+- [ ] **Custom formatters** - Define your own output formats
 
 ## Getting Started
 
@@ -145,7 +178,7 @@ prs compile --all
 
 🎯 **Current Focus: Migration & Adoption**
 
-- [ ] **Migrate existing AI instructions to PromptScript** - Convert `.github/copilot-instructions.md`, `CLAUDE.md`, `.cursorrules` files to unified `.prs` format
+- [ ] **Migrate existing AI instructions to PromptScript** - Convert `.github/copilot-instructions.md`, `CLAUDE.md`, `.cursor/rules/*.mdc` files to unified `.prs` format
 - [ ] **`prs migrate` command** - Automatic conversion of existing instruction files to PromptScript
 
 🤔 **Under Consideration** _(Looking for contributors & sponsors!)_

@@ -1,5 +1,5 @@
 // Types
-export type { Formatter, FormatterFactory, FormatterOutput } from './types';
+export type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types';
 
 // Base class
 export { BaseFormatter } from './base-formatter';
@@ -26,6 +26,10 @@ export type { SectionInfo } from './section-registry';
 
 // Built-in formatters
 export { GitHubFormatter, ClaudeFormatter, CursorFormatter } from './formatters';
+
+// Cursor version support
+export { CURSOR_VERSIONS } from './formatters/cursor';
+export type { CursorVersion } from './formatters/cursor';
 
 // Register built-in formatters
 import { FormatterRegistry } from './registry';

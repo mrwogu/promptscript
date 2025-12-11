@@ -20,6 +20,12 @@ export interface FormatOptions {
   convention?: OutputConvention | string;
   /** Custom output path */
   outputPath?: string;
+  /**
+   * Target version or format variant.
+   * Use 'legacy' for deprecated formats.
+   * @example 'legacy' | '1.0' | '2.0'
+   */
+  version?: string;
 }
 
 /**
@@ -51,6 +57,12 @@ export interface TargetConfig {
   output?: string;
   /** Output convention ('xml', 'markdown', or custom name) */
   convention?: string;
+  /**
+   * Target version or format variant.
+   * Use 'legacy' for deprecated formats.
+   * @example 'legacy' | '1.0' | '2.0'
+   */
+  version?: string;
 }
 
 /**

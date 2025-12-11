@@ -27,6 +27,7 @@ function createComprehensiveAST(): Program {
     extends: [],
     loc: createLoc(),
     meta: {
+      type: 'MetaBlock',
       fields: {
         id: 'test-project',
         syntax: '1.0.0',
