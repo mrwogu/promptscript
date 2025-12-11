@@ -36,7 +36,7 @@ Comprehensive validation with actionable error messages and auto-fix suggestions
 
 <div class="feature-card" markdown>
 ### :material-target: Multi-Target Output
-Native support for GitHub Copilot, Claude Code, Cursor, and more.
+Native support for GitHub Copilot, Claude Code, Cursor, Google Antigravity, and more.
 </div>
 
 <div class="feature-card" markdown>
@@ -145,7 +145,7 @@ flowchart TB
     end
 
     subgraph Output
-        formatters["@promptscript/formatters<br/>GitHub, Claude, Cursor"]
+        formatters["@promptscript/formatters<br/>GitHub, Claude, Cursor, Antigravity"]
         compiler["@promptscript/compiler<br/>Pipeline orchestration"]
     end
 

@@ -25,18 +25,29 @@ export {
 export type { SectionInfo } from './section-registry';
 
 // Built-in formatters
-export { GitHubFormatter, ClaudeFormatter, CursorFormatter } from './formatters';
+export {
+  GitHubFormatter,
+  ClaudeFormatter,
+  CursorFormatter,
+  AntigravityFormatter,
+} from './formatters';
 
 // Cursor version support
 export { CURSOR_VERSIONS } from './formatters/cursor';
 export type { CursorVersion } from './formatters/cursor';
+
+// Antigravity version support
+export { ANTIGRAVITY_VERSIONS } from './formatters/antigravity';
+export type { AntigravityVersion, ActivationType } from './formatters/antigravity';
 
 // Register built-in formatters
 import { FormatterRegistry } from './registry';
 import { GitHubFormatter } from './formatters/github';
 import { ClaudeFormatter } from './formatters/claude';
 import { CursorFormatter } from './formatters/cursor';
+import { AntigravityFormatter } from './formatters/antigravity';
 
 FormatterRegistry.register('github', () => new GitHubFormatter());
 FormatterRegistry.register('claude', () => new ClaudeFormatter());
 FormatterRegistry.register('cursor', () => new CursorFormatter());
+FormatterRegistry.register('antigravity', () => new AntigravityFormatter());

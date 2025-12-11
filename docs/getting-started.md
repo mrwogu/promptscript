@@ -93,6 +93,7 @@ Output:
 ✓ Compiled to .github/copilot-instructions.md (GitHub Copilot)
 ✓ Compiled to CLAUDE.md (Claude Code)
 ✓ Compiled to .cursor/rules/project.mdc (Cursor)
+✓ Compiled to .agent/rules/project.md (Google Antigravity)
 ```
 
 ### 4. Commit
@@ -100,7 +101,7 @@ Output:
 Add the generated files to version control:
 
 ```bash
-git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
+git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc .agent/rules/project.md
 git commit -m "Add AI instructions"
 ```
 
@@ -111,12 +112,13 @@ After initialization, your project will have:
 ```
 your-project/
 ├── .promptscript/
-│   └── project.prs          # Your instructions
-├── promptscript.yaml  # Configuration
+│   └── project.prs              # Your instructions
+├── promptscript.yaml            # Configuration
 ├── .github/
 │   └── copilot-instructions.md  # Generated
 ├── CLAUDE.md                    # Generated
-└── .cursor/rules/project.mdc       # Generated
+├── .cursor/rules/project.mdc    # Generated
+└── .agent/rules/project.md      # Generated
 ```
 
 ## Configuration
@@ -143,6 +145,11 @@ targets:
     output: .cursor/rules/project.mdc
     # Use version: legacy for Cursor < 0.45
 
+  antigravity:
+    enabled: true
+    output: .agent/rules/project.md
+    # Use version: frontmatter for YAML frontmatter with activation types
+
 # Optional: Registry for inheritance
 registry:
   path: ./registry
@@ -153,16 +160,22 @@ registry:
 
 PromptScript supports multiple format versions for tools that have evolved their configuration format:
 
-| Tool   | Version  | Output Path                 | When to Use            |
-| ------ | -------- | --------------------------- | ---------------------- |
-| Cursor | (modern) | `.cursor/rules/project.mdc` | Cursor 0.45+ (default) |
-| Cursor | legacy   | `.cursorrules`              | Older Cursor versions  |
+| Tool        | Version     | Output Path                 | When to Use              |
+| ----------- | ----------- | --------------------------- | ------------------------ |
+| Cursor      | (modern)    | `.cursor/rules/project.mdc` | Cursor 0.45+ (default)   |
+| Cursor      | legacy      | `.cursorrules`              | Older Cursor versions    |
+| Antigravity | simple      | `.agent/rules/project.md`   | Plain Markdown (default) |
+| Antigravity | frontmatter | `.agent/rules/project.md`   | With activation types    |
 
 ```yaml
 # For older Cursor versions
 targets:
   - cursor:
       version: legacy
+
+  # For Antigravity with activation types
+  - antigravity:
+      version: frontmatter
 ```
 
 ## What's Next?

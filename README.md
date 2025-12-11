@@ -93,12 +93,13 @@ prs compile --all
 # ✓ .github/copilot-instructions.md
 # ✓ CLAUDE.md
 # ✓ .cursor/rules/project.mdc
+# ✓ .agent/rules/project.md
 ```
 
 ## Features
 
 - 🔗 **Inheritance** - Organization → Team → Project hierarchy
-- 📦 **Single Source** - One `.prs` file, multiple outputs
+- 📦 **Unified Source** - Multiple `.prs` files with inheritance, single compilation to all outputs
 - ✅ **Validation** - Type-safe, versioned configurations
 - 🛡️ **Guards** - Compliance rules, blocked patterns
 - 🔌 **Extensible** - Add custom formatters
@@ -109,25 +110,28 @@ prs compile --all
 
 ### ✅ Currently Supported
 
-| Tool           | Output Format                     | Status | Conventions       |
-| -------------- | --------------------------------- | ------ | ----------------- |
-| GitHub Copilot | `.github/copilot-instructions.md` | ✓      | Markdown, XML     |
-| Claude Code    | `CLAUDE.md`                       | ✓      | Markdown, XML     |
-| Cursor         | `.cursor/rules/project.mdc`       | ✓      | Markdown only     |
-| Cursor         | `.cursorrules`                    | ✓      | Markdown (legacy) |
+| Tool               | Output Format                     | Status | Conventions       |
+| ------------------ | --------------------------------- | ------ | ----------------- |
+| GitHub Copilot     | `.github/copilot-instructions.md` | ✓      | Markdown, XML     |
+| Claude Code        | `CLAUDE.md`                       | ✓      | Markdown, XML     |
+| Cursor             | `.cursor/rules/project.mdc`       | ✓      | Markdown only     |
+| Cursor (legacy)    | `.cursorrules`                    | ✓      | Markdown (legacy) |
+| Google Antigravity | `.agent/rules/project.md`         | ✓      | Markdown only     |
 
 **Output Conventions:**
 
 - **Markdown** (default): `## Section Name` headers - human-readable and tool-friendly
 - **XML** (GitHub & Claude): `<section-name>content</section-name>` - structured format for programmatic processing
 
-**Using legacy Cursor format:**
+**Version-specific formats:**
 
 ```yaml
 # promptscript.yaml
 targets:
   - cursor:
       version: legacy # For Cursor < 0.45
+  - antigravity:
+      version: frontmatter # With YAML frontmatter for activation types
 ```
 
 ### 🚀 Planned Support

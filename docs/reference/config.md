@@ -227,11 +227,12 @@ targets:
 
 **Available Targets:**
 
-| Target   | Default Output                    | Default Convention | Supported Versions    |
-| -------- | --------------------------------- | ------------------ | --------------------- |
-| `github` | `.github/copilot-instructions.md` | `markdown`         | GitHub Copilot (all)  |
-| `claude` | `CLAUDE.md`                       | `markdown`         | Claude Code (all)     |
-| `cursor` | `.cursor/rules/project.mdc`       | `markdown`         | Cursor 0.45+ / legacy |
+| Target        | Default Output                    | Default Convention | Supported Versions    |
+| ------------- | --------------------------------- | ------------------ | --------------------- |
+| `github`      | `.github/copilot-instructions.md` | `markdown`         | GitHub Copilot (all)  |
+| `claude`      | `CLAUDE.md`                       | `markdown`         | Claude Code (all)     |
+| `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | Cursor 0.45+ / legacy |
+| `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter  |
 
 **Target Configuration:**
 
@@ -242,6 +243,7 @@ targets:
   # Simple format (uses defaults)
   - github
   - claude
+  - antigravity
 
   # With configuration
   - github:
@@ -253,6 +255,8 @@ targets:
   # With version for format variants
   - cursor:
       version: legacy # Use .cursorrules for Cursor < 0.45
+  - antigravity:
+      version: frontmatter # Use YAML frontmatter with activation types
 ```
 
 **Target Options:**
@@ -465,5 +469,7 @@ targets:
   claude:
     enabled: true
   cursor:
+    enabled: true
+  antigravity:
     enabled: true
 ```

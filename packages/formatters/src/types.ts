@@ -8,6 +8,8 @@ export interface FormatterOutput {
   path: string;
   /** Formatted content */
   content: string;
+  /** Additional files to generate (e.g., workflows) */
+  additionalFiles?: FormatterOutput[];
 }
 
 /**

@@ -9,6 +9,7 @@ This package provides formatters that transform PromptScript AST into native con
 - **GitHub Copilot** - `.github/copilot-instructions.md`
 - **Claude Code** - `CLAUDE.md`
 - **Cursor** - `.cursor/rules/*.mdc`
+- **Google Antigravity** - `.agent/rules/project.md`
 
 ## Installation
 
@@ -24,6 +25,7 @@ import {
   GitHubFormatter,
   ClaudeFormatter,
   CursorFormatter,
+  AntigravityFormatter,
 } from '@promptscript/formatters';
 
 // Using the registry (formatters are auto-registered)
@@ -34,6 +36,7 @@ const output = githubFormatter.format(ast);
 const github = new GitHubFormatter();
 const claude = new ClaudeFormatter();
 const cursor = new CursorFormatter();
+const antigravity = new AntigravityFormatter();
 ```
 
 ## Available Formatters
@@ -49,6 +52,37 @@ Generates `CLAUDE.md` for Claude Code.
 ### CursorFormatter
 
 Generates `.cursor/rules/*.mdc` files for Cursor IDE.
+
+### AntigravityFormatter
+
+Generates `.agent/rules/project.md` for Google Gemini/Antigravity.
+
+**Supported versions:**
+
+| Version       | Description                        |
+| ------------- | ---------------------------------- |
+| `simple`      | Plain Markdown without frontmatter |
+| `frontmatter` | Markdown with YAML frontmatter     |
+
+**Activation types** (frontmatter version):
+
+- `always` - Rule always applied (default)
+- `manual` - Activated via @mention
+- `model` - Model decides when to apply
+- `glob` - Applied to matching files
+
+**Character limit:** 12,000 characters per file.
+
+**Workflow support:** Shortcuts with `steps` generate separate workflow files in `.agent/workflows/`.
+
+```typescript
+// Simple format (default)
+const formatter = new AntigravityFormatter();
+const output = formatter.format(ast);
+
+// Frontmatter format with activation types
+const outputWithFrontmatter = formatter.format(ast, { version: 'frontmatter' });
+```
 
 ## Custom Formatters
 
