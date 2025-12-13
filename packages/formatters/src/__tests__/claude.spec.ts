@@ -1,6 +1,6 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { ClaudeFormatter } from '../formatters/claude';
+import { ClaudeFormatter, CLAUDE_VERSIONS } from '../formatters/claude';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -383,6 +383,180 @@ describe('ClaudeFormatter', () => {
       expect(result.content).toContain("- Don't use any type");
       expect(result.content).toContain("- Don't skip tests");
       expect(result.content).toContain("- Don't commit secrets");
+    });
+  });
+
+  describe('version support', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should export CLAUDE_VERSIONS', () => {
+      expect(CLAUDE_VERSIONS).toBeDefined();
+      expect(CLAUDE_VERSIONS.simple).toBeDefined();
+      expect(CLAUDE_VERSIONS.multifile).toBeDefined();
+      expect(CLAUDE_VERSIONS.full).toBeDefined();
+    });
+
+    it('should have static getSupportedVersions method', () => {
+      expect(ClaudeFormatter.getSupportedVersions).toBeDefined();
+      expect(ClaudeFormatter.getSupportedVersions()).toBe(CLAUDE_VERSIONS);
+    });
+
+    it('should use simple mode by default', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.additionalFiles).toBeUndefined();
+    });
+
+    it('should generate rule files in multifile mode with guards', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts', '**/*.tsx'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                typescript: { strictMode: true },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles?.length).toBeGreaterThan(0);
+      const codeStyleRule = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/rules/code-style.md')
+      );
+      expect(codeStyleRule).toBeDefined();
+      expect(codeStyleRule?.content).toContain('paths:');
+    });
+
+    it('should generate skill files in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commit: {
+                  description: 'Create git commits',
+                  context: 'fork',
+                  agent: 'general-purpose',
+                  content: 'Instructions for commit skill...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      expect(result.additionalFiles).toBeDefined();
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).toContain('name: "commit"');
+      expect(skillFile?.content).toContain('description: "Create git commits"');
+      expect(skillFile?.content).toContain('context: fork');
+      expect(skillFile?.content).toContain('agent: general-purpose');
+    });
+
+    it('should generate CLAUDE.local.md in full mode with @local block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'local',
+            content: {
+              type: 'TextContent',
+              value: 'Private instructions for local development.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      expect(result.additionalFiles).toBeDefined();
+      const localFile = result.additionalFiles?.find((f) => f.path === 'CLAUDE.local.md');
+      expect(localFile).toBeDefined();
+      expect(localFile?.content).toContain('# CLAUDE.local.md');
+      expect(localFile?.content).toContain('Private instructions');
+      expect(localFile?.content).toContain('Private instructions for local development.');
+    });
+
+    it('should not generate local file when @local block is missing', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const localFile = result.additionalFiles?.find((f) => f.path === 'CLAUDE.local.md');
+      expect(localFile).toBeUndefined();
     });
   });
 });

@@ -404,7 +404,8 @@ describe('Tool Feature Queries', () => {
 
   it('toolSupportsFeature should correctly check support', () => {
     expect(toolSupportsFeature('cursor', 'yaml-frontmatter')).toBe(true);
-    expect(toolSupportsFeature('github', 'yaml-frontmatter')).toBe(false);
+    // GitHub supports yaml-frontmatter in .instructions.md and SKILL.md files
+    expect(toolSupportsFeature('github', 'yaml-frontmatter')).toBe(true);
     expect(toolSupportsFeature('antigravity', 'workflows')).toBe(true);
     expect(toolSupportsFeature('github', 'workflows')).toBe(false);
   });

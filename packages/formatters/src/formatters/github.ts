@@ -1,15 +1,94 @@
-import type { Program, Value } from '@promptscript/core';
+import type { Block, GithubVersion, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter';
 import type { ConventionRenderer } from '../convention-renderer';
 import type { FormatOptions, FormatterOutput } from '../types';
 
 /**
+ * GitHub formatter version information.
+ */
+export const GITHUB_VERSIONS = {
+  simple: {
+    name: 'simple',
+    description: 'Single file output (.github/copilot-instructions.md)',
+    outputPath: '.github/copilot-instructions.md',
+  },
+  multifile: {
+    name: 'multifile',
+    description: 'Main + path-specific instructions (.github/instructions/) + prompts',
+    outputPath: '.github/copilot-instructions.md',
+  },
+  full: {
+    name: 'full',
+    description: 'Multifile + skills (.github/skills/) + AGENTS.md',
+    outputPath: '.github/copilot-instructions.md',
+  },
+} as const;
+
+/**
+ * Configuration for a path-specific instruction file.
+ */
+interface InstructionConfig {
+  /** File name (without extension) */
+  name: string;
+  /** Glob patterns this instruction applies to */
+  applyTo: string[];
+  /** Optional agent exclusion */
+  excludeAgent?: string;
+  /** Description for the instruction */
+  description: string;
+  /** Content of the instruction */
+  content: string;
+}
+
+/**
+ * Configuration for a prompt file.
+ */
+interface PromptConfig {
+  /** Prompt name */
+  name: string;
+  /** Description */
+  description: string;
+  /** Whether to run in agent mode */
+  mode?: 'agent';
+  /** Allowed tools in agent mode */
+  tools?: string[];
+  /** Prompt content */
+  content: string;
+}
+
+/**
+ * Configuration for a skill.
+ */
+interface SkillConfig {
+  /** Skill name */
+  name: string;
+  /** Description */
+  description: string;
+  /** Whether to disable model invocation */
+  disableModelInvocation?: boolean;
+  /** Skill content/instructions */
+  content: string;
+}
+
+/**
  * Formatter for GitHub Copilot instructions.
- * Outputs: `.github/copilot-instructions.md`
  *
- * Supports output conventions:
- * - 'xml': Uses XML-style tags (<project>, <tech-stack>, etc.)
- * - 'markdown': Uses Markdown headers (## Project, ## Tech Stack, etc.)
+ * Supports three versions:
+ * - **simple** (default): Single `.github/copilot-instructions.md` file
+ * - **multifile**: Main + `.github/instructions/*.instructions.md` + `.github/prompts/*.prompt.md`
+ * - **full**: Multifile + `.github/skills/<name>/SKILL.md` + `AGENTS.md`
+ *
+ * @example
+ * ```yaml
+ * targets:
+ *   - github  # uses simple mode
+ *   - github:
+ *       version: multifile
+ *   - github:
+ *       version: full
+ * ```
+ *
+ * @see https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
  */
 export class GitHubFormatter extends BaseFormatter {
   readonly name = 'github';
@@ -17,15 +96,506 @@ export class GitHubFormatter extends BaseFormatter {
   readonly description = 'GitHub Copilot instructions (Markdown)';
   readonly defaultConvention = 'markdown';
 
+  /**
+   * Get supported versions for this formatter.
+   */
+  static getSupportedVersions(): typeof GITHUB_VERSIONS {
+    return GITHUB_VERSIONS;
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
+    const version = this.resolveVersion(options?.version);
+
+    if (version === 'full') {
+      return this.formatFull(ast, options);
+    }
+
+    if (version === 'multifile') {
+      return this.formatMultifile(ast, options);
+    }
+
+    return this.formatSimple(ast, options);
+  }
+
+  /**
+   * Resolve version string to GithubVersion.
+   */
+  private resolveVersion(version?: string): GithubVersion {
+    if (version === 'multifile') return 'multifile';
+    if (version === 'full') return 'full';
+    return 'simple';
+  }
+
+  // ============================================================
+  // Simple Mode (single file)
+  // ============================================================
+
+  private formatSimple(ast: Program, options?: FormatOptions): FormatterOutput {
     const renderer = this.createRenderer(options);
     const sections: string[] = [];
 
-    // Add header for markdown convention
     if (renderer.getConvention().name === 'markdown') {
       sections.push(this.header(ast));
     }
 
+    this.addCommonSections(ast, renderer, sections);
+
+    return {
+      path: this.getOutputPath(options),
+      content: sections.join('\n\n'),
+    };
+  }
+
+  // ============================================================
+  // Multifile Mode
+  // ============================================================
+
+  private formatMultifile(ast: Program, options?: FormatOptions): FormatterOutput {
+    const renderer = this.createRenderer(options);
+    const additionalFiles: FormatterOutput[] = [];
+
+    // Generate path-specific instruction files
+    const instructions = this.extractInstructions(ast);
+    for (const instruction of instructions) {
+      additionalFiles.push(this.generateInstructionFile(instruction));
+    }
+
+    // Generate prompt files
+    const prompts = this.extractPrompts(ast);
+    for (const prompt of prompts) {
+      additionalFiles.push(this.generatePromptFile(prompt));
+    }
+
+    // Main file content
+    const sections: string[] = [];
+    if (renderer.getConvention().name === 'markdown') {
+      sections.push(this.header(ast));
+    }
+    this.addCommonSections(ast, renderer, sections);
+
+    return {
+      path: this.getOutputPath(options),
+      content: sections.join('\n\n'),
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  // ============================================================
+  // Full Mode
+  // ============================================================
+
+  private formatFull(ast: Program, options?: FormatOptions): FormatterOutput {
+    const renderer = this.createRenderer(options);
+    const additionalFiles: FormatterOutput[] = [];
+
+    // Generate path-specific instruction files
+    const instructions = this.extractInstructions(ast);
+    for (const instruction of instructions) {
+      additionalFiles.push(this.generateInstructionFile(instruction));
+    }
+
+    // Generate prompt files
+    const prompts = this.extractPrompts(ast);
+    for (const prompt of prompts) {
+      additionalFiles.push(this.generatePromptFile(prompt));
+    }
+
+    // Generate skill files
+    const skills = this.extractSkills(ast);
+    for (const skill of skills) {
+      additionalFiles.push(this.generateSkillFile(skill));
+    }
+
+    // Generate AGENTS.md
+    const agentsFile = this.generateAgentsFile(ast);
+    if (agentsFile) {
+      additionalFiles.push(agentsFile);
+    }
+
+    // Main file content
+    const sections: string[] = [];
+    if (renderer.getConvention().name === 'markdown') {
+      sections.push(this.header(ast));
+    }
+    this.addCommonSections(ast, renderer, sections);
+
+    return {
+      path: this.getOutputPath(options),
+      content: sections.join('\n\n'),
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  // ============================================================
+  // Instruction File Generation
+  // ============================================================
+
+  /**
+   * Extract instruction configurations from @guards block.
+   */
+  private extractInstructions(ast: Program): InstructionConfig[] {
+    const guards = this.findBlock(ast, 'guards');
+    if (!guards) return [];
+
+    const instructions: InstructionConfig[] = [];
+    const props = this.getProps(guards.content);
+
+    // Handle globs property (array of patterns)
+    const globPatterns = props['globs'];
+    if (Array.isArray(globPatterns)) {
+      // Group patterns by category
+      const tsPatterns = globPatterns.filter(
+        (p) => typeof p === 'string' && (p.includes('.ts') || p.includes('.tsx'))
+      );
+      const testPatterns = globPatterns.filter(
+        (p) =>
+          typeof p === 'string' &&
+          (p.includes('test') || p.includes('spec') || p.includes('__tests__'))
+      );
+
+      if (tsPatterns.length > 0) {
+        instructions.push({
+          name: 'typescript',
+          applyTo: tsPatterns as string[],
+          description: 'TypeScript-specific coding rules',
+          content: this.getTypeScriptInstructionContent(ast),
+        });
+      }
+
+      if (testPatterns.length > 0) {
+        instructions.push({
+          name: 'testing',
+          applyTo: testPatterns as string[],
+          description: 'Testing-specific rules and patterns',
+          content: this.getTestingInstructionContent(ast),
+        });
+      }
+    }
+
+    // Handle named instruction blocks within guards
+    for (const [key, value] of Object.entries(props)) {
+      if (key === 'globs') continue;
+
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        const applyTo = obj['applyTo'];
+        const excludeAgent = obj['excludeAgent'];
+        const description = obj['description'];
+        const content = obj['content'];
+
+        if (applyTo && Array.isArray(applyTo)) {
+          instructions.push({
+            name: key,
+            applyTo: applyTo.map((p) => this.valueToString(p)),
+            excludeAgent: excludeAgent ? this.valueToString(excludeAgent) : undefined,
+            description: description ? this.valueToString(description) : `${key} rules`,
+            content: content ? this.valueToString(content) : '',
+          });
+        }
+      }
+    }
+
+    return instructions;
+  }
+
+  /**
+   * Generate a .github/instructions/*.instructions.md file.
+   */
+  private generateInstructionFile(config: InstructionConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    lines.push(`applyTo:`);
+    for (const pattern of config.applyTo) {
+      lines.push(`  - "${pattern}"`);
+    }
+    if (config.excludeAgent) {
+      lines.push(`excludeAgent: "${config.excludeAgent}"`);
+    }
+    lines.push('---');
+    lines.push('');
+    lines.push(`# ${config.description}`);
+    lines.push('');
+    if (config.content) {
+      lines.push(config.content);
+    }
+
+    return {
+      path: `.github/instructions/${config.name}.instructions.md`,
+      content: lines.join('\n'),
+    };
+  }
+
+  /**
+   * Get TypeScript instruction content from AST.
+   */
+  private getTypeScriptInstructionContent(ast: Program): string {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return '';
+
+    const props = this.getProps(standards.content);
+    const items: string[] = [];
+
+    // TypeScript standards
+    const ts = props['typescript'];
+    if (ts && typeof ts === 'object' && !Array.isArray(ts)) {
+      const tsObj = ts as Record<string, Value>;
+      if (tsObj['strictMode']) items.push('- Use strict TypeScript, avoid `any` types');
+      if (tsObj['useUnknown'])
+        items.push(`- Use \`unknown\` ${this.valueToString(tsObj['useUnknown'])}`);
+      if (tsObj['exports'])
+        items.push(`- ${this.capitalize(this.valueToString(tsObj['exports']))}`);
+      if (tsObj['returnTypes'])
+        items.push(`- Explicit return types ${this.valueToString(tsObj['returnTypes'])}`);
+    }
+
+    // Naming standards
+    const naming = props['naming'];
+    if (naming && typeof naming === 'object' && !Array.isArray(naming)) {
+      const n = naming as Record<string, Value>;
+      if (n['files']) items.push(`- Files: \`${this.valueToString(n['files'])}\``);
+      if (n['classes']) items.push(`- Classes/Interfaces: \`${this.valueToString(n['classes'])}\``);
+      if (n['functions'])
+        items.push(`- Functions/Variables: \`${this.valueToString(n['functions'])}\``);
+    }
+
+    return items.join('\n');
+  }
+
+  /**
+   * Get testing instruction content from AST.
+   */
+  private getTestingInstructionContent(ast: Program): string {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return '';
+
+    const props = this.getProps(standards.content);
+    const items: string[] = [];
+
+    const testing = props['testing'];
+    if (testing && typeof testing === 'object' && !Array.isArray(testing)) {
+      const t = testing as Record<string, Value>;
+      if (t['filePattern']) items.push(`- Test files: \`${this.valueToString(t['filePattern'])}\``);
+      if (t['pattern']) items.push(`- Follow ${this.valueToString(t['pattern'])} pattern`);
+      if (t['coverage'])
+        items.push(`- Target >${this.valueToString(t['coverage'])}% coverage for libraries`);
+      if (t['fixtures']) items.push(`- Use fixtures ${this.valueToString(t['fixtures'])}`);
+    }
+
+    return items.length > 0 ? items.join('\n') : 'Follow project testing conventions.';
+  }
+
+  // ============================================================
+  // Prompt File Generation
+  // ============================================================
+
+  /**
+   * Extract prompt configurations from @shortcuts block.
+   */
+  private extractPrompts(ast: Program): PromptConfig[] {
+    const shortcuts = this.findBlock(ast, 'shortcuts');
+    if (!shortcuts) return [];
+
+    const prompts: PromptConfig[] = [];
+    const props = this.getProps(shortcuts.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+
+        // Check if this shortcut should be a prompt file
+        if (obj['prompt'] === true || obj['type'] === 'prompt') {
+          prompts.push({
+            name,
+            description: obj['description'] ? this.valueToString(obj['description']) : name,
+            mode: obj['mode'] === 'agent' ? 'agent' : undefined,
+            tools:
+              obj['tools'] && Array.isArray(obj['tools'])
+                ? obj['tools'].map((t) => this.valueToString(t))
+                : undefined,
+            content: obj['content'] ? this.valueToString(obj['content']) : '',
+          });
+        }
+      }
+    }
+
+    return prompts;
+  }
+
+  /**
+   * Generate a .github/prompts/*.prompt.md file.
+   */
+  private generatePromptFile(config: PromptConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    lines.push(`description: "${config.description}"`);
+    if (config.mode === 'agent') {
+      lines.push('mode: agent');
+      if (config.tools && config.tools.length > 0) {
+        lines.push('tools:');
+        for (const tool of config.tools) {
+          lines.push(`  - ${tool}`);
+        }
+      }
+    }
+    lines.push('---');
+    lines.push('');
+    if (config.content) {
+      lines.push(config.content);
+    }
+
+    return {
+      path: `.github/prompts/${config.name}.prompt.md`,
+      content: lines.join('\n'),
+    };
+  }
+
+  // ============================================================
+  // Skill File Generation
+  // ============================================================
+
+  /**
+   * Extract skill configurations from @skills block.
+   */
+  private extractSkills(ast: Program): SkillConfig[] {
+    const skillsBlock = this.findBlock(ast, 'skills');
+    if (!skillsBlock) return [];
+
+    const skills: SkillConfig[] = [];
+    const props = this.getProps(skillsBlock.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        skills.push({
+          name,
+          description: obj['description'] ? this.valueToString(obj['description']) : name,
+          disableModelInvocation: obj['disableModelInvocation'] === true,
+          content: obj['content'] ? this.valueToString(obj['content']) : '',
+        });
+      }
+    }
+
+    return skills;
+  }
+
+  /**
+   * Generate a .github/skills/<name>/SKILL.md file.
+   */
+  private generateSkillFile(config: SkillConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    lines.push(`name: "${config.name}"`);
+    lines.push(`description: "${config.description}"`);
+    if (config.disableModelInvocation) {
+      lines.push('disable-model-invocation: true');
+    }
+    lines.push('---');
+    lines.push('');
+    if (config.content) {
+      lines.push(config.content);
+    }
+
+    return {
+      path: `.github/skills/${config.name}/SKILL.md`,
+      content: lines.join('\n'),
+    };
+  }
+
+  // ============================================================
+  // AGENTS.md Generation
+  // ============================================================
+
+  /**
+   * Generate AGENTS.md file with agent-specific instructions.
+   */
+  private generateAgentsFile(ast: Program): FormatterOutput | null {
+    const identity = this.findBlock(ast, 'identity');
+    if (!identity) return null;
+
+    const lines: string[] = [];
+    lines.push('# Agent Instructions');
+    lines.push('');
+    lines.push('> Auto-generated by PromptScript');
+    lines.push('');
+
+    // Add identity content
+    const identityText = this.extractText(identity.content);
+    if (identityText) {
+      lines.push('## Identity');
+      lines.push('');
+      lines.push(identityText);
+      lines.push('');
+    }
+
+    // Add context if available
+    const context = this.findBlock(ast, 'context');
+    if (context) {
+      const contextText = this.extractText(context.content);
+      if (contextText) {
+        lines.push('## Context');
+        lines.push('');
+        lines.push(contextText);
+        lines.push('');
+      }
+    }
+
+    // Add restrictions if available
+    const restrictions = this.findBlock(ast, 'restrictions');
+    if (restrictions) {
+      const items = this.extractRestrictionItems(restrictions.content);
+      if (items.length > 0) {
+        lines.push('## Restrictions');
+        lines.push('');
+        for (const item of items) {
+          lines.push(`- ${item}`);
+        }
+        lines.push('');
+      }
+    }
+
+    return {
+      path: 'AGENTS.md',
+      content: lines.join('\n'),
+    };
+  }
+
+  /**
+   * Extract restriction items from block content.
+   */
+  private extractRestrictionItems(content: Block['content']): string[] {
+    if (content.type === 'ArrayContent') {
+      return content.elements.map((item) => this.valueToString(item));
+    }
+
+    if (content.type === 'TextContent') {
+      return content.value
+        .trim()
+        .split('\n')
+        .map((line) => line.trim().replace(/^-\s*/, ''))
+        .filter((line) => line.length > 0);
+    }
+
+    if (content.type === 'ObjectContent') {
+      const itemsArray = this.getProp(content, 'items');
+      if (Array.isArray(itemsArray)) {
+        return itemsArray.map((item: unknown) => this.valueToString(item as Value));
+      }
+    }
+
+    return [];
+  }
+
+  // ============================================================
+  // Common Section Methods
+  // ============================================================
+
+  private addCommonSections(ast: Program, renderer: ConventionRenderer, sections: string[]): void {
     const project = this.project(ast, renderer);
     if (project) sections.push(project);
 
@@ -61,11 +631,6 @@ export class GitHubFormatter extends BaseFormatter {
 
     const knowledge = this.knowledge(ast, renderer);
     if (knowledge) sections.push(knowledge);
-
-    return {
-      path: this.getOutputPath(options),
-      content: sections.join('\n\n'),
-    };
   }
 
   private header(ast: Program): string {
@@ -134,7 +699,6 @@ export class GitHubFormatter extends BaseFormatter {
     const archMatch = archRegex.exec(text);
     if (!archMatch) return null;
 
-    // Extract just the code block content
     const content = archMatch[0].replace('## Architecture', '').trim();
     return renderer.renderSection('architecture', content);
   }
@@ -452,7 +1016,6 @@ export class GitHubFormatter extends BaseFormatter {
   }
 
   private formatRestriction(text: string): string {
-    // Convert "Never X" to "Don't X"
     const formatted = text
       .replace(/^-\s*/, '')
       .replace(/^"/, '')

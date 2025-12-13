@@ -327,6 +327,127 @@ describe('parse', () => {
       expect(result.ast?.meta?.loc.column).toBe(1);
     });
   });
+
+  describe('skills block', () => {
+    it('should parse skills block with nested skill definitions', () => {
+      const source = `
+        @skills {
+          commit: {
+            description: "Create git commits"
+            disableModelInvocation: true
+            content: "Instructions for commit skill..."
+          }
+          review: {
+            description: "Review code changes"
+            userInvocable: true
+          }
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const skills = result.ast?.blocks.find((b) => b.name === 'skills');
+      expect(skills).toBeDefined();
+      expect(skills?.content.type).toBe('ObjectContent');
+      if (skills?.content.type === 'ObjectContent') {
+        const commit = skills.content.properties['commit'] as Record<string, unknown>;
+        expect(commit['description']).toBe('Create git commits');
+        expect(commit['disableModelInvocation']).toBe(true);
+        expect(commit['content']).toBe('Instructions for commit skill...');
+
+        const review = skills.content.properties['review'] as Record<string, unknown>;
+        expect(review['description']).toBe('Review code changes');
+        expect(review['userInvocable']).toBe(true);
+      }
+    });
+
+    it('should parse skills block with arrays', () => {
+      const source = `
+        @skills {
+          deploy: {
+            description: "Deploy the application"
+            allowedTools: ["Bash", "Read", "Write"]
+            context: "fork"
+            agent: "general-purpose"
+          }
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const skills = result.ast?.blocks.find((b) => b.name === 'skills');
+      expect(skills?.content.type).toBe('ObjectContent');
+      if (skills?.content.type === 'ObjectContent') {
+        const deploy = skills.content.properties['deploy'] as Record<string, unknown>;
+        expect(deploy['allowedTools']).toEqual(['Bash', 'Read', 'Write']);
+        expect(deploy['context']).toBe('fork');
+        expect(deploy['agent']).toBe('general-purpose');
+      }
+    });
+  });
+
+  describe('local block', () => {
+    it('should parse local block with text content', () => {
+      const source = `
+        @local {
+          """
+          Private instructions for local development.
+          This content is not committed to git.
+          """
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const local = result.ast?.blocks.find((b) => b.name === 'local');
+      expect(local).toBeDefined();
+      expect(local?.content.type).toBe('TextContent');
+      if (local?.content.type === 'TextContent') {
+        expect(local.content.value).toContain('Private instructions');
+        expect(local.content.value).toContain('not committed to git');
+      }
+    });
+
+    it('should parse local block with object content', () => {
+      const source = `
+        @local {
+          apiKey: "dev-secret-key"
+          debugMode: true
+          customPaths: ["/tmp/dev", "/var/local"]
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const local = result.ast?.blocks.find((b) => b.name === 'local');
+      expect(local?.content.type).toBe('ObjectContent');
+      if (local?.content.type === 'ObjectContent') {
+        expect(local.content.properties['apiKey']).toBe('dev-secret-key');
+        expect(local.content.properties['debugMode']).toBe(true);
+        expect(local.content.properties['customPaths']).toEqual(['/tmp/dev', '/var/local']);
+      }
+    });
+
+    it('should parse local block with mixed content', () => {
+      const source = `
+        @local {
+          """
+          Local development notes.
+          """
+          envFile: ".env.local"
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const local = result.ast?.blocks.find((b) => b.name === 'local');
+      expect(local?.content.type).toBe('MixedContent');
+      if (local?.content.type === 'MixedContent') {
+        expect(local.content.text?.value).toContain('Local development notes');
+        expect(local.content.properties['envFile']).toBe('.env.local');
+      }
+    });
+  });
 });
 
 describe('parseOrThrow', () => {

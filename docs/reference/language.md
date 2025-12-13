@@ -212,18 +212,111 @@ Configurable parameters:
 
 ### @guards
 
-Runtime validation rules:
+Runtime validation rules and file targeting:
 
 ```promptscript
 @guards {
   maxFileSize: 1000
   allowedLanguages: [typescript, javascript, css]
 
+  # Glob patterns for file-specific rules (used by multifile formatters)
+  globs: ["**/*.ts", "**/*.tsx"]
+
   """
   Additional guard rules as text.
   """
 }
 ```
+
+The `globs` property is used by multifile formatters (GitHub, Claude, Cursor) to generate path-specific instruction files.
+
+### @skills
+
+Define reusable skills that AI assistants can invoke:
+
+```promptscript
+@skills {
+  commit: {
+    description: "Create git commits"
+    disableModelInvocation: true
+    context: "fork"
+    agent: "general-purpose"
+    allowedTools: ["Bash", "Read", "Write"]
+    content: """
+      When creating commits:
+      1. Use conventional commit format
+      2. Include Co-Authored-By trailer
+      3. Never amend existing commits
+    """
+  }
+
+  review: {
+    description: "Review code changes"
+    userInvocable: true
+    content: """
+      Perform thorough code review checking:
+      - Type safety
+      - Error handling
+      - Security vulnerabilities
+    """
+  }
+
+  deploy: {
+    description: "Deploy the application"
+    steps: ["Build", "Test", "Deploy to staging", "Deploy to production"]
+  }
+}
+```
+
+| Property                 | Type     | Description                              |
+| ------------------------ | -------- | ---------------------------------------- |
+| `description`            | string   | Human-readable description               |
+| `content`                | string   | Detailed skill instructions              |
+| `disableModelInvocation` | boolean  | Prevent model from auto-invoking skill   |
+| `userInvocable`          | boolean  | Allow user to manually invoke skill      |
+| `context`                | string   | Context mode: `"fork"` or `"inherit"`    |
+| `agent`                  | string   | Agent type: `"general-purpose"`, etc.    |
+| `allowedTools`           | string[] | Tools the skill can use                  |
+| `steps`                  | string[] | Workflow steps (generates workflow file) |
+
+Skills are output differently based on the formatter:
+
+- **GitHub**: `.github/skills/<name>/SKILL.md` (version: full)
+- **Claude**: `.claude/skills/<name>/SKILL.md` (version: full)
+
+### @local
+
+Private instructions not committed to version control:
+
+```promptscript
+@local {
+  """
+  Private development notes and local configuration.
+  This content is not committed to git.
+
+  Local environment setup:
+  - API keys are in .env.local
+  - Use staging backend at localhost:8080
+  """
+}
+```
+
+Or with key-value properties:
+
+```promptscript
+@local {
+  apiEndpoint: "http://localhost:8080"
+  debugMode: true
+  customPaths: ["/tmp/dev", "/var/local"]
+
+  """
+  Additional local notes...
+  """
+}
+```
+
+!!! note "@local Output"
+The `@local` block generates `CLAUDE.local.md` when using the Claude formatter with `version: full`. This file should be added to `.gitignore`.
 
 ### @knowledge
 

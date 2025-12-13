@@ -72,6 +72,12 @@ export {
   AntigravityFormatter,
 } from './formatters';
 
+// GitHub version support
+export { GITHUB_VERSIONS } from './formatters/github';
+
+// Claude version support
+export { CLAUDE_VERSIONS } from './formatters/claude';
+
 // Cursor version support
 export { CURSOR_VERSIONS } from './formatters/cursor';
 export type { CursorVersion } from './formatters/cursor';

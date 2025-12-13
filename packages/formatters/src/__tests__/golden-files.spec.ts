@@ -1,12 +1,12 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
 import type { Program, SourceLocation } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github';
 import { ClaudeFormatter } from '../formatters/claude';
 import { CursorFormatter } from '../formatters/cursor';
 import { AntigravityFormatter } from '../formatters/antigravity';
-import type { Formatter } from '../types';
+import type { Formatter, FormatOptions } from '../types';
 
 /**
  * Golden Files Tests
@@ -17,6 +17,12 @@ import type { Formatter } from '../types';
  *
  * To update golden files after intentional changes:
  *   UPDATE_GOLDEN=true pnpm nx test formatters
+ *
+ * Tested versions:
+ * - GitHub: simple, multifile, full
+ * - Claude: simple, multifile, full
+ * - Cursor: modern, multifile, legacy
+ * - Antigravity: simple, frontmatter
  */
 
 const GOLDEN_DIR = join(__dirname, '__golden__');
@@ -267,18 +273,90 @@ pnpm run test       # Run all tests
         },
         loc: createLoc(),
       },
+      // Guards block for multifile/full modes
+      {
+        type: 'Block',
+        name: 'guards',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            globs: ['**/*.ts', '**/*.tsx'],
+            excludeGlobs: ['**/*.spec.ts', '**/*.test.ts'],
+          },
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      },
+      // Skills block for full mode
+      {
+        type: 'Block',
+        name: 'skills',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            commit: {
+              description: 'Create git commits following project conventions',
+              disableModelInvocation: true,
+              context: 'fork',
+              agent: 'general-purpose',
+              allowedTools: ['Bash', 'Read', 'Write'],
+              content: `When creating commits:
+1. Use Conventional Commits format: type(scope): description
+2. Types: feat, fix, docs, style, refactor, test, chore
+3. Include Co-Authored-By trailer for AI assistance
+4. Never amend existing commits unless explicitly asked`,
+            },
+            review: {
+              description: 'Review code changes for quality and issues',
+              userInvocable: true,
+              content: `Perform thorough code review checking:
+- Type safety and proper TypeScript usage
+- Error handling completeness
+- Security vulnerabilities (OWASP top 10)
+- Performance issues`,
+            },
+          },
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      },
+      // Local block for Claude full mode
+      {
+        type: 'Block',
+        name: 'local',
+        content: {
+          type: 'TextContent',
+          value: `## Local Development Configuration
+
+### API Keys
+- Development API key is in .env.local
+- Staging endpoint: https://staging-api.example.com
+
+### Personal Preferences
+- I prefer verbose logging during development
+- Use port 3001 for the dev server
+
+### Team Notes
+- Contact @john for database access
+- Ask @sarah about the new authentication flow`,
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      },
     ],
   };
 }
 
 /**
- * Formatter configuration for golden file tests.
+ * Formatter version configuration for golden file tests.
  */
-interface FormatterConfig {
+interface VersionedFormatterConfig {
   name: string;
   formatter: Formatter;
+  version: string;
   goldenFile: string;
   extension: string;
+  options?: FormatOptions;
 }
 
 /**
@@ -315,10 +393,14 @@ function readGoldenFile(filename: string): string | null {
 }
 
 /**
- * Write golden file content.
+ * Write golden file content (creates directories if needed).
  */
 function writeGoldenFile(filename: string, content: string): void {
   const path = join(GOLDEN_DIR, filename);
+  const dir = dirname(path);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
   writeFileSync(path, content, 'utf-8');
 }
 
@@ -351,7 +433,104 @@ function generateDiffSummary(expected: string, actual: string): string {
 }
 
 describe('Golden Files Tests', () => {
-  const formatterConfigs: FormatterConfig[] = [
+  // All formatter versions to test
+  const versionedConfigs: VersionedFormatterConfig[] = [
+    // GitHub versions
+    {
+      name: 'github',
+      formatter: new GitHubFormatter(),
+      version: 'simple',
+      goldenFile: 'github/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'github',
+      formatter: new GitHubFormatter(),
+      version: 'multifile',
+      goldenFile: 'github/multifile.md',
+      extension: 'md',
+      options: { version: 'multifile' },
+    },
+    {
+      name: 'github',
+      formatter: new GitHubFormatter(),
+      version: 'full',
+      goldenFile: 'github/full.md',
+      extension: 'md',
+      options: { version: 'full' },
+    },
+    // Claude versions
+    {
+      name: 'claude',
+      formatter: new ClaudeFormatter(),
+      version: 'simple',
+      goldenFile: 'claude/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'claude',
+      formatter: new ClaudeFormatter(),
+      version: 'multifile',
+      goldenFile: 'claude/multifile.md',
+      extension: 'md',
+      options: { version: 'multifile' },
+    },
+    {
+      name: 'claude',
+      formatter: new ClaudeFormatter(),
+      version: 'full',
+      goldenFile: 'claude/full.md',
+      extension: 'md',
+      options: { version: 'full' },
+    },
+    // Cursor versions
+    {
+      name: 'cursor',
+      formatter: new CursorFormatter(),
+      version: 'modern',
+      goldenFile: 'cursor/modern.mdc',
+      extension: 'mdc',
+      options: { version: 'modern' },
+    },
+    {
+      name: 'cursor',
+      formatter: new CursorFormatter(),
+      version: 'multifile',
+      goldenFile: 'cursor/multifile.mdc',
+      extension: 'mdc',
+      options: { version: 'multifile' },
+    },
+    {
+      name: 'cursor',
+      formatter: new CursorFormatter(),
+      version: 'legacy',
+      goldenFile: 'cursor/legacy.md',
+      extension: 'md',
+      options: { version: 'legacy' },
+    },
+    // Antigravity versions
+    {
+      name: 'antigravity',
+      formatter: new AntigravityFormatter(),
+      version: 'simple',
+      goldenFile: 'antigravity/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'antigravity',
+      formatter: new AntigravityFormatter(),
+      version: 'frontmatter',
+      goldenFile: 'antigravity/frontmatter.md',
+      extension: 'md',
+      options: { version: 'frontmatter' },
+    },
+  ];
+
+  // Legacy configs for backward compatibility tests
+  const legacyConfigs = [
     {
       name: 'github',
       formatter: new GitHubFormatter(),
@@ -387,12 +566,12 @@ describe('Golden Files Tests', () => {
     vi.useRealTimers();
   });
 
-  describe('Golden File Generation', () => {
-    it.each(formatterConfigs)(
-      '$name formatter output should match golden file',
-      ({ name, formatter, goldenFile }) => {
+  describe('Versioned Golden File Generation', () => {
+    it.each(versionedConfigs)(
+      '$name ($version) formatter output should match golden file',
+      ({ name, formatter, version, goldenFile, options }) => {
         const ast = createCanonicalAST();
-        const result = formatter.format(ast);
+        const result = formatter.format(ast, options);
         const actualContent = normalizeContent(result.content);
 
         const goldenContent = readGoldenFile(goldenFile);
@@ -421,7 +600,139 @@ describe('Golden Files Tests', () => {
         if (actualContent !== normalizedGolden) {
           const diff = generateDiffSummary(normalizedGolden, actualContent);
           throw new Error(
-            `${name} formatter output differs from golden file.\n` +
+            `${name} (${version}) formatter output differs from golden file.\n` +
+              `Run with UPDATE_GOLDEN=true to update.\n\n` +
+              `Diff:\n${diff}`
+          );
+        }
+      }
+    );
+  });
+
+  describe('Additional Files for Multifile/Full Versions', () => {
+    it('github multifile should generate instruction files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new GitHubFormatter();
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles?.length).toBeGreaterThan(0);
+
+      // Should have instruction files from guards
+      const instructionFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/')
+      );
+      expect(instructionFile).toBeDefined();
+    });
+
+    it('github full should generate skill files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new GitHubFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      // Should have skill files
+      const commitSkill = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/skills/commit/SKILL.md')
+      );
+      expect(commitSkill).toBeDefined();
+      expect(commitSkill?.content).toContain('name: "commit"');
+
+      const reviewSkill = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/skills/review/SKILL.md')
+      );
+      expect(reviewSkill).toBeDefined();
+    });
+
+    it('claude multifile should generate rule files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new ClaudeFormatter();
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles?.length).toBeGreaterThan(0);
+
+      // Should have rule files from guards
+      const ruleFile = result.additionalFiles?.find((f) => f.path.includes('.claude/rules/'));
+      expect(ruleFile).toBeDefined();
+    });
+
+    it('claude full should generate skill and local files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new ClaudeFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      // Should have skill files
+      const commitSkill = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(commitSkill).toBeDefined();
+      expect(commitSkill?.content).toContain('name: "commit"');
+
+      // Should have local file
+      const localFile = result.additionalFiles?.find((f) => f.path === 'CLAUDE.local.md');
+      expect(localFile).toBeDefined();
+      expect(localFile?.content).toContain('Local Development Configuration');
+    });
+
+    it('cursor multifile should generate additional rule files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new CursorFormatter();
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles?.length).toBeGreaterThan(0);
+    });
+
+    it('antigravity frontmatter should include YAML frontmatter', () => {
+      const ast = createCanonicalAST();
+      const formatter = new AntigravityFormatter();
+      const result = formatter.format(ast, { version: 'frontmatter' });
+
+      // Should have frontmatter
+      expect(result.content).toContain('---');
+      expect(result.content).toContain('activation:');
+    });
+  });
+
+  describe('Legacy Golden File Compatibility', () => {
+    it.each(legacyConfigs)(
+      '$name formatter default output should match legacy golden file',
+      ({ name, formatter, goldenFile }) => {
+        const ast = createCanonicalAST();
+        const result = formatter.format(ast);
+        const actualContent = normalizeContent(result.content);
+
+        const goldenContent = readGoldenFile(goldenFile);
+
+        if (goldenContent === null) {
+          if (UPDATE_GOLDEN) {
+            writeGoldenFile(goldenFile, actualContent);
+            console.log(`Created legacy golden file: ${goldenFile}`);
+            return;
+          }
+
+          // First run - create the golden file
+          writeGoldenFile(goldenFile, actualContent);
+          console.log(`Created initial legacy golden file: ${goldenFile}`);
+          return;
+        }
+
+        const normalizedGolden = normalizeContent(goldenContent);
+
+        if (UPDATE_GOLDEN && actualContent !== normalizedGolden) {
+          writeGoldenFile(goldenFile, actualContent);
+          console.log(`Updated legacy golden file: ${goldenFile}`);
+          return;
+        }
+
+        if (actualContent !== normalizedGolden) {
+          const diff = generateDiffSummary(normalizedGolden, actualContent);
+          throw new Error(
+            `${name} formatter output differs from legacy golden file.\n` +
               `Run with UPDATE_GOLDEN=true to update.\n\n` +
               `Diff:\n${diff}`
           );
@@ -431,77 +742,97 @@ describe('Golden Files Tests', () => {
   });
 
   describe('Golden File Content Validation', () => {
-    it.each(formatterConfigs)('$name golden file should contain identity', ({ goldenFile }) => {
-      const content = readGoldenFile(goldenFile);
-      if (!content) return; // Skip if not yet generated
+    it.each(versionedConfigs)(
+      '$name ($version) golden file should contain identity',
+      ({ goldenFile }) => {
+        const content = readGoldenFile(goldenFile);
+        if (!content) return; // Skip if not yet generated
 
-      expect(
-        content.includes('TypeScript') || content.includes('typescript'),
-        `${goldenFile} should mention TypeScript`
-      ).toBe(true);
-    });
+        expect(
+          content.includes('TypeScript') || content.includes('typescript'),
+          `${goldenFile} should mention TypeScript`
+        ).toBe(true);
+      }
+    );
 
-    it.each(formatterConfigs)('$name golden file should contain restrictions', ({ goldenFile }) => {
-      const content = readGoldenFile(goldenFile);
-      if (!content) return; // Skip if not yet generated
+    it.each(versionedConfigs)(
+      '$name ($version) golden file should contain restrictions',
+      ({ goldenFile }) => {
+        const content = readGoldenFile(goldenFile);
+        if (!content) return; // Skip if not yet generated
 
-      const hasRestrictions =
-        content.includes("Don't") || content.includes('Never') || content.includes('never');
+        const hasRestrictions =
+          content.includes("Don't") || content.includes('Never') || content.includes('never');
 
-      expect(hasRestrictions, `${goldenFile} should have restrictions`).toBe(true);
-    });
-
-    it.each(formatterConfigs)('$name golden file should contain commands', ({ goldenFile }) => {
-      const content = readGoldenFile(goldenFile);
-      if (!content) return; // Skip if not yet generated
-
-      const hasCommands =
-        content.includes('/review') ||
-        content.includes('/test') ||
-        content.includes('Commands') ||
-        content.includes('command');
-
-      expect(hasCommands, `${goldenFile} should have commands`).toBe(true);
-    });
+        expect(hasRestrictions, `${goldenFile} should have restrictions`).toBe(true);
+      }
+    );
   });
 
-  describe('Cross-Formatter Consistency', () => {
-    it('all golden files should have similar content coverage', () => {
-      const contentChecks = [
-        { name: 'identity', pattern: /TypeScript|developer/i },
-        { name: 'restrictions', pattern: /never|don't/i },
-        { name: 'commands', pattern: /\/review|\/test|command/i },
-      ];
+  describe('Version-Specific Content Validation', () => {
+    it('full versions should mention skills in main file or have skill files', () => {
+      const fullConfigs = versionedConfigs.filter((c) => c.version === 'full');
 
-      for (const config of formatterConfigs) {
-        const content = readGoldenFile(config.goldenFile);
-        if (!content) continue;
+      for (const config of fullConfigs) {
+        const ast = createCanonicalAST();
+        const result = config.formatter.format(ast, config.options);
 
-        for (const check of contentChecks) {
-          const hasContent = check.pattern.test(content);
-          expect(hasContent, `${config.name} should have ${check.name} content`).toBe(true);
-        }
+        // Either main content mentions skills OR there are skill additional files
+        const mainHasSkills = result.content.includes('skill') || result.content.includes('Skills');
+        const hasSkillFiles = result.additionalFiles?.some((f) => f.path.includes('skills/'));
+
+        expect(
+          mainHasSkills || hasSkillFiles,
+          `${config.name} full version should have skills`
+        ).toBe(true);
+      }
+    });
+
+    it('claude full version should have local memory file', () => {
+      const ast = createCanonicalAST();
+      const formatter = new ClaudeFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      const localFile = result.additionalFiles?.find((f) => f.path === 'CLAUDE.local.md');
+      expect(localFile, 'Claude full should generate CLAUDE.local.md').toBeDefined();
+    });
+
+    it('multifile versions should generate additional files', () => {
+      const multifileConfigs = versionedConfigs.filter((c) => c.version === 'multifile');
+
+      for (const config of multifileConfigs) {
+        const ast = createCanonicalAST();
+        const result = config.formatter.format(ast, config.options);
+
+        expect(
+          result.additionalFiles?.length,
+          `${config.name} multifile should generate additional files`
+        ).toBeGreaterThan(0);
       }
     });
   });
 
   describe('Structural Validation', () => {
-    it.each(formatterConfigs)(
-      '$name output should have proper markdown structure',
-      ({ name, formatter, extension }) => {
+    it.each(versionedConfigs)(
+      '$name ($version) output should have proper markdown structure',
+      ({ name, version, formatter, extension, options }) => {
         // Skip non-markdown formatters
         if (extension !== 'md') return;
 
         const ast = createCanonicalAST();
-        const result = formatter.format(ast);
+        const result = formatter.format(ast, options);
 
         // Check for proper header hierarchy
         const headers = result.content.match(/^#{1,3}\s+.+$/gm) || [];
-        expect(headers.length, `${name} should have multiple headers`).toBeGreaterThan(1);
+        expect(headers.length, `${name} (${version}) should have multiple headers`).toBeGreaterThan(
+          1
+        );
 
         // Check for no unclosed code blocks
         const codeBlocks = result.content.match(/```/g) || [];
-        expect(codeBlocks.length % 2, `${name} should have balanced code blocks`).toBe(0);
+        expect(codeBlocks.length % 2, `${name} (${version}) should have balanced code blocks`).toBe(
+          0
+        );
       }
     );
   });

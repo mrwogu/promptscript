@@ -1,6 +1,22 @@
 import type { ConventionName, OutputConvention } from './convention';
 
 /**
+ * GitHub Copilot output format versions.
+ * - `simple`: Single file output (.github/copilot-instructions.md)
+ * - `multifile`: Main + path-specific instructions + prompts
+ * - `full`: Multifile + skills + AGENTS.md
+ */
+export type GithubVersion = 'simple' | 'multifile' | 'full';
+
+/**
+ * Claude Code output format versions.
+ * - `simple`: Single file output (CLAUDE.md)
+ * - `multifile`: Main + modular rules (.claude/rules/*.md)
+ * - `full`: Multifile + skills + local memory
+ */
+export type ClaudeVersion = 'simple' | 'multifile' | 'full';
+
+/**
  * Configuration for a single target.
  */
 export interface TargetConfig {

@@ -131,9 +131,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     description: 'Split rules into multiple files by concern',
     category: 'file-structure',
     tools: {
-      github: 'not-supported',
+      github: 'supported', // .github/instructions/*.instructions.md (multifile mode)
       cursor: 'supported',
-      claude: 'not-supported',
+      claude: 'supported', // .claude/rules/*.md (multifile mode)
       antigravity: 'supported',
     },
     testStrategy: 'Check additionalFiles in FormatterOutput',
@@ -171,9 +171,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     description: 'YAML metadata block at start of file',
     category: 'metadata',
     tools: {
-      github: 'not-supported',
+      github: 'supported', // In .instructions.md and SKILL.md files
       cursor: 'supported',
-      claude: 'not-supported',
+      claude: 'supported', // In .claude/rules/*.md and skills
       antigravity: 'supported',
     },
     testStrategy: 'Check for --- delimited YAML block',
@@ -196,9 +196,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     description: 'File glob patterns in frontmatter',
     category: 'metadata',
     tools: {
-      github: 'not-supported',
+      github: 'supported', // applyTo in .instructions.md
       cursor: 'supported',
-      claude: 'not-supported',
+      claude: 'supported', // paths in .claude/rules/*.md
       antigravity: 'supported',
     },
   },
@@ -222,9 +222,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     description: 'Apply rules to files matching glob patterns',
     category: 'targeting',
     tools: {
-      github: 'not-supported',
+      github: 'supported', // applyTo in .instructions.md (multifile mode)
       cursor: 'supported',
-      claude: 'not-supported',
+      claude: 'supported', // paths in .claude/rules/*.md (multifile mode)
       antigravity: 'supported',
     },
     testStrategy: 'Check globs field in frontmatter',
@@ -330,6 +330,84 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       claude: 'not-supported',
       antigravity: 'not-supported',
     },
+  },
+  {
+    id: 'path-specific-rules',
+    name: 'Path-Specific Rules',
+    description: 'Rules with glob patterns targeting specific file paths',
+    category: 'advanced',
+    tools: {
+      github: 'supported', // .github/instructions/*.instructions.md with applyTo
+      cursor: 'supported', // globs in frontmatter
+      claude: 'supported', // .claude/rules/*.md with paths frontmatter
+      antigravity: 'supported',
+    },
+    testStrategy: 'Check for path-specific files with glob patterns in frontmatter',
+  },
+  {
+    id: 'prompt-files',
+    name: 'Prompt Files',
+    description: 'Reusable prompt templates for IDE integration',
+    category: 'advanced',
+    tools: {
+      github: 'supported', // .github/prompts/*.prompt.md
+      cursor: 'not-supported',
+      claude: 'not-supported',
+      antigravity: 'not-supported',
+    },
+    testStrategy: 'Check for .github/prompts/*.prompt.md files',
+  },
+  {
+    id: 'skills',
+    name: 'Skills',
+    description: 'Reusable skill definitions for AI agents',
+    category: 'advanced',
+    tools: {
+      github: 'supported', // .github/skills/<name>/SKILL.md
+      cursor: 'not-supported',
+      claude: 'supported', // .claude/skills/<name>/SKILL.md
+      antigravity: 'not-supported',
+    },
+    testStrategy: 'Check for skills directory with SKILL.md files',
+  },
+  {
+    id: 'agent-instructions',
+    name: 'Agent Instructions',
+    description: 'Special instructions for AI agents (AGENTS.md)',
+    category: 'advanced',
+    tools: {
+      github: 'supported', // AGENTS.md
+      cursor: 'not-supported',
+      claude: 'not-supported',
+      antigravity: 'not-supported',
+    },
+    testStrategy: 'Check for AGENTS.md file',
+  },
+  {
+    id: 'local-memory',
+    name: 'Local Memory',
+    description: 'Private instructions not committed to git',
+    category: 'advanced',
+    tools: {
+      github: 'not-supported',
+      cursor: 'not-supported',
+      claude: 'supported', // CLAUDE.local.md
+      antigravity: 'not-supported',
+    },
+    testStrategy: 'Check for CLAUDE.local.md file',
+  },
+  {
+    id: 'nested-memory',
+    name: 'Nested Memory',
+    description: 'Instructions for specific subdirectories',
+    category: 'advanced',
+    tools: {
+      github: 'not-supported',
+      cursor: 'supported', // nested .cursor/rules
+      claude: 'supported', // <subdir>/CLAUDE.md
+      antigravity: 'supported', // nested .agent files
+    },
+    testStrategy: 'Check for nested instruction files',
   },
 ];
 

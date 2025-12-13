@@ -33,6 +33,14 @@ Full enterprise deployment with governance.
 
 </div>
 
+<div class="feature-card" markdown>
+### :material-robot: Skills & Local
+Advanced AI skills and private local memory.
+
+[Skills & Local →](skills-and-local.md)
+
+</div>
+
 </div>
 
 ## Quick Examples
@@ -188,3 +196,4 @@ watch:
 - [Minimal](minimal.md) - Single file, basic setup
 - [Team Setup](team-setup.md) - Shared configuration across projects
 - [Enterprise](enterprise.md) - Organization-wide deployment
+- [Skills & Local](skills-and-local.md) - Advanced AI skills and private instructions

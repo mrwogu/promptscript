@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { GitHubFormatter } from '../formatters/github';
+import { GitHubFormatter, GITHUB_VERSIONS } from '../formatters/github';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -319,6 +319,135 @@ describe('GitHubFormatter', () => {
       const ast = createMinimalProgram();
       const result = formatter.format(ast, { outputPath: 'custom/path.md' });
       expect(result.path).toBe('custom/path.md');
+    });
+  });
+
+  describe('version support', () => {
+    it('should export GITHUB_VERSIONS', () => {
+      expect(GITHUB_VERSIONS).toBeDefined();
+      expect(GITHUB_VERSIONS.simple).toBeDefined();
+      expect(GITHUB_VERSIONS.multifile).toBeDefined();
+      expect(GITHUB_VERSIONS.full).toBeDefined();
+    });
+
+    it('should have static getSupportedVersions method', () => {
+      expect(GitHubFormatter.getSupportedVersions).toBeDefined();
+      expect(GitHubFormatter.getSupportedVersions()).toBe(GITHUB_VERSIONS);
+    });
+
+    it('should use simple mode by default', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.additionalFiles).toBeUndefined();
+    });
+
+    it('should generate instruction files in multifile mode with guards', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts', '**/*.tsx'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                typescript: { strictMode: true },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles?.length).toBeGreaterThan(0);
+      const tsInstructions = result.additionalFiles?.find((f) =>
+        f.path.includes('typescript.instructions.md')
+      );
+      expect(tsInstructions).toBeDefined();
+      expect(tsInstructions?.content).toContain('applyTo:');
+    });
+
+    it('should generate AGENTS.md in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      expect(result.additionalFiles).toBeDefined();
+      const agentsFile = result.additionalFiles?.find((f) => f.path === 'AGENTS.md');
+      expect(agentsFile).toBeDefined();
+      expect(agentsFile?.content).toContain('# Agent Instructions');
+    });
+
+    it('should generate skill files in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commit: {
+                  description: 'Create git commits',
+                  disableModelInvocation: true,
+                  content: 'Instructions for commit skill...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      expect(result.additionalFiles).toBeDefined();
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/skills/commit/SKILL.md')
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).toContain('name: "commit"');
+      expect(skillFile?.content).toContain('description: "Create git commits"');
+      expect(skillFile?.content).toContain('disable-model-invocation: true');
     });
   });
 });

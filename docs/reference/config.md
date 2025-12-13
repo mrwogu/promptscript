@@ -227,12 +227,12 @@ targets:
 
 **Available Targets:**
 
-| Target        | Default Output                    | Default Convention | Supported Versions    |
-| ------------- | --------------------------------- | ------------------ | --------------------- |
-| `github`      | `.github/copilot-instructions.md` | `markdown`         | GitHub Copilot (all)  |
-| `claude`      | `CLAUDE.md`                       | `markdown`         | Claude Code (all)     |
-| `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | Cursor 0.45+ / legacy |
-| `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter  |
+| Target        | Default Output                    | Default Convention | Supported Versions          |
+| ------------- | --------------------------------- | ------------------ | --------------------------- |
+| `github`      | `.github/copilot-instructions.md` | `markdown`         | simple / multifile / full   |
+| `claude`      | `CLAUDE.md`                       | `markdown`         | simple / multifile / full   |
+| `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy |
+| `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter        |
 
 **Target Configuration:**
 
@@ -257,7 +257,39 @@ targets:
       version: legacy # Use .cursorrules for Cursor < 0.45
   - antigravity:
       version: frontmatter # Use YAML frontmatter with activation types
+
+  # GitHub Copilot versions
+  - github:
+      version: simple # Single file (default)
+  - github:
+      version: multifile # Main + path-specific instructions + prompts
+  - github:
+      version: full # Multifile + skills + AGENTS.md
+
+  # Claude Code versions
+  - claude:
+      version: simple # Single CLAUDE.md (default)
+  - claude:
+      version: multifile # Main + modular rules in .claude/rules/
+  - claude:
+      version: full # Multifile + skills + CLAUDE.local.md
 ```
+
+**GitHub Copilot Versions:**
+
+| Version     | Output Files                                                                    |
+| ----------- | ------------------------------------------------------------------------------- |
+| `simple`    | `.github/copilot-instructions.md` (single file)                                 |
+| `multifile` | Main + `.github/instructions/*.instructions.md` + `.github/prompts/*.prompt.md` |
+| `full`      | Multifile + `.github/skills/<name>/SKILL.md` + `AGENTS.md`                      |
+
+**Claude Code Versions:**
+
+| Version     | Output Files                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| `simple`    | `CLAUDE.md` (single file)                                                                         |
+| `multifile` | Main + `.claude/rules/*.md` with path-specific rules (from `@guards.globs`)                       |
+| `full`      | Multifile + `.claude/skills/<name>/SKILL.md` (from `@skills`) + `CLAUDE.local.md` (from `@local`) |
 
 **Target Options:**
 

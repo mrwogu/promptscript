@@ -1,0 +1,102 @@
+# Example file demonstrating @skills and @local blocks
+# This file showcases the advanced features for AI tool skills and private instructions
+
+@meta {
+  id: "skills-and-local-example"
+  syntax: "1.0.0"
+  name: "Skills and Local Memory Example"
+  description: "Demonstrates @skills and @local blocks"
+}
+
+@identity {
+  """
+  You are an expert TypeScript developer working on a modern web application.
+  You write clean, maintainable, and well-tested code.
+  """
+}
+
+@context {
+  languages: [typescript, javascript]
+  runtime: "Node.js 20+"
+  framework: "React 18"
+}
+
+@standards {
+  typescript: {
+    strictMode: true
+    exports: "named only"
+  }
+
+  testing: {
+    framework: "vitest"
+    coverage: 90
+  }
+
+  git: {
+    format: "Conventional Commits"
+    types: [feat, fix, docs, style, refactor, test, chore]
+  }
+}
+
+@guards {
+  globs: ["**/*.ts", "**/*.tsx", "**/*.spec.ts"]
+}
+
+@restrictions {
+  - "Never use any type"
+  - "Never skip tests"
+  - "Never commit secrets"
+}
+
+@shortcuts {
+  "/review": "Review code for quality"
+  "/test": "Write unit tests"
+}
+
+# Skills block - defines reusable AI capabilities
+
+@skills {
+  commit: {
+    description: "Create git commits following project conventions"
+    disableModelInvocation: true
+    context: "fork"
+    agent: "general-purpose"
+    allowedTools: ["Bash", "Read", "Write"]
+    content: """
+      When creating commits:
+      1. Use Conventional Commits format
+      2. Include Co-Authored-By trailer
+      3. Never amend existing commits
+    """
+  }
+
+  review: {
+    description: "Review code changes for quality and issues"
+    userInvocable: true
+    content: """
+      Perform thorough code review checking:
+      - Type safety
+      - Error handling
+      - Security vulnerabilities
+    """
+  }
+
+  deploy: {
+    description: "Deploy the application"
+    steps: ["Build", "Test", "Deploy to staging", "Deploy to production"]
+  }
+}
+
+# Local block - private instructions not committed to git
+
+@local {
+  """
+  Private development notes and local configuration.
+  This content is not committed to git.
+
+  Local environment setup:
+  - API keys are in .env.local
+  - Use staging backend at localhost:8080
+  - Contact @john for database access
+  """
+}

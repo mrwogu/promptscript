@@ -130,6 +130,8 @@ export type BlockName =
   | 'shortcuts'
   | 'guards'
   | 'params'
+  | 'skills'
+  | 'local'
   | string; // Allow custom blocks
 
 /**
@@ -183,11 +185,7 @@ export interface ExtendBlock extends BaseNode {
 /**
  * Union of all possible block content types.
  */
-export type BlockContent =
-  | TextContent
-  | ObjectContent
-  | ArrayContent
-  | MixedContent;
+export type BlockContent = TextContent | ObjectContent | ArrayContent | MixedContent;
 
 /**
  * Pure text content (triple-quoted strings).

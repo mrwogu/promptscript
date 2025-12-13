@@ -96,6 +96,97 @@ prs compile --all
 # ✓ .agent/rules/project.md
 ```
 
+## Advanced Features
+
+### Skills - Reusable AI Capabilities
+
+Define reusable workflows that AI assistants can invoke:
+
+```promptscript
+@skills {
+  commit: {
+    description: "Create git commits following project conventions"
+    disableModelInvocation: true
+    context: "fork"
+    agent: "general-purpose"
+    allowedTools: ["Bash", "Read", "Write"]
+    content: """
+      When creating commits:
+      1. Use Conventional Commits format: type(scope): description
+      2. Types: feat, fix, docs, style, refactor, test, chore
+      3. Include Co-Authored-By trailer for AI assistance
+      4. Never amend existing commits unless explicitly asked
+    """
+  }
+
+  review: {
+    description: "Review code changes for quality and issues"
+    userInvocable: true
+    content: """
+      Perform thorough code review checking:
+      - Type safety and proper TypeScript usage
+      - Error handling completeness
+      - Security vulnerabilities (OWASP top 10)
+      - Performance issues
+    """
+  }
+
+  deploy: {
+    description: "Deploy the application"
+    steps: ["Build", "Test", "Deploy to staging", "Deploy to production"]
+  }
+}
+```
+
+With `version: full`, skills compile to:
+
+- **GitHub**: `.github/skills/<name>/SKILL.md` with YAML frontmatter
+- **Claude**: `.claude/skills/<name>/SKILL.md` with frontmatter
+
+### Local Memory - Private Instructions
+
+Store private development notes not committed to git:
+
+```promptscript
+@local {
+  """
+  ## Local Development Configuration
+
+  ### API Keys
+  - Development API key is in .env.local
+  - Staging endpoint: https://staging-api.example.com
+
+  ### Personal Preferences
+  - I prefer verbose logging during development
+  - Use port 3001 for the dev server
+
+  ### Team Notes
+  - Contact @john for database access
+  - Ask @sarah about the new authentication flow
+  """
+}
+```
+
+With `version: full` for Claude, this compiles to `CLAUDE.local.md` (add to `.gitignore`).
+
+### Path-Specific Guards
+
+Apply rules to specific file patterns:
+
+```promptscript
+@guards {
+  globs: ["**/*.ts", "**/*.tsx"]
+  excludeGlobs: ["**/*.test.ts", "**/*.spec.ts"]
+}
+```
+
+With `version: multifile` or `full`, guards compile to:
+
+- **GitHub**: `.github/instructions/*.instructions.md` with `applyTo` frontmatter
+- **Claude**: `.claude/rules/*.md` with `paths` frontmatter
+
+See [Skills & Local Example](docs/examples/skills-and-local.md) for a complete configuration.
+
 ## Features
 
 - 🔗 **Inheritance** - Organization → Team → Project hierarchy
@@ -105,6 +196,8 @@ prs compile --all
 - 🔌 **Extensible** - Add custom formatters
 - 🏢 **Enterprise Ready** - Audit trails, governance
 - 🚀 **Future-Proof** - Formatter updates automatically adapt your prompts to new AI features and models (like agent skills, tool use, etc.)
+- 🧙 **Smart Init** - Auto-detects AI tools and project type during `prs init`
+- 📝 **Output Conventions** - Choose Markdown or XML format per target
 
 ## Supported AI Tools
 
@@ -128,11 +221,23 @@ prs compile --all
 ```yaml
 # promptscript.yaml
 targets:
-  - cursor:
-      version: legacy # For Cursor < 0.45
-  - antigravity:
-      version: frontmatter # With YAML frontmatter for activation types
+  - github # Uses 'simple' (default)
+  - github: { version: full } # Or: simple | multifile | full
+  - claude: { version: multifile } # Or: simple | multifile | full
+  - cursor: { version: legacy } # Or: modern | multifile | legacy
+  - antigravity: { version: frontmatter } # Or: simple | frontmatter
 ```
+
+**Available versions:**
+
+| Target        | Versions                        | Default  |
+| ------------- | ------------------------------- | -------- |
+| `github`      | `simple`, `multifile`, `full`   | `simple` |
+| `claude`      | `simple`, `multifile`, `full`   | `simple` |
+| `cursor`      | `modern`, `multifile`, `legacy` | `modern` |
+| `antigravity` | `simple`, `frontmatter`         | `simple` |
+
+See [Configuration Reference](https://mrwogu.github.io/promptscript/reference/config/) for details on what each version generates.
 
 ### 🚀 Planned Support
 
@@ -141,6 +246,29 @@ targets:
 - [ ] **Continue** (`.continue/config.json`)
 - [ ] **Cline** (`.cline/cline_rules`)
 - [ ] **Custom formatters** - Define your own output formats
+
+### 📊 Feature Matrix
+
+| Feature                | GitHub | Cursor | Claude | Antigravity |
+| ---------------------- | :----: | :----: | :----: | :---------: |
+| Markdown Output        |   ✅   |   ✅   |   ✅   |     ✅      |
+| MDC Format             |   ❌   |   ✅   |   ❌   |     ❌      |
+| Code Blocks            |   ✅   |   ✅   |   ✅   |     ✅      |
+| Mermaid Diagrams       |   ✅   |   ✅   |   ✅   |     ✅      |
+| Multiple Rule Files    |   ✅   |   ✅   |   ✅   |     ✅      |
+| YAML Frontmatter       |   ✅   |   ✅   |   ✅   |     ✅      |
+| Glob Pattern Targeting |   ✅   |   ✅   |   ✅   |     ✅      |
+| Activation Types       |   ❌   |   ✅   |   ❌   |     ✅      |
+| Context File Inclusion |   ❌   |   ✅   |   ❌   |     ❌      |
+| Skills                 |   ✅   |   ❌   |   ✅   |     ❌      |
+| Prompt Files           |   ✅   |   ❌   |   ❌   |     ❌      |
+| Agent Instructions     |   ✅   |   ❌   |   🔜   |     ❌      |
+| Local Memory           |   ❌   |   ❌   |   ✅   |     ❌      |
+| Nested Memory          |   ❌   |   ✅   |   ✅   |     ✅      |
+| Workflow Files         |   ❌   |   ❌   |   ❌   |     ✅      |
+
+> **Note:** Claude Code supports `.claude/agents/` for agent definitions - this feature is planned 🔜 but not yet implemented.        
+See [Roadmap](#roadmap).
 
 ## Getting Started
 
@@ -168,6 +296,7 @@ prs compile --all
 - [🎓 Tutorial](https://mrwogu.github.io/promptscript/tutorial/)
 - [📋 Language Reference](https://mrwogu.github.io/promptscript/reference/language/)
 - [🔧 CLI Reference](https://mrwogu.github.io/promptscript/reference/cli/)
+- [🤖 Skills & Local Example](https://mrwogu.github.io/promptscript/examples/skills-and-local/)
 
 ## Packages
 
@@ -182,6 +311,7 @@ prs compile --all
 
 🎯 **Current Focus: Migration & Adoption**
 
+- [ ] **Claude agents support** - Generate `.claude/agents/` files for Claude Code agent definitions
 - [ ] **Migrate existing AI instructions to PromptScript** - Convert `.github/copilot-instructions.md`, `CLAUDE.md`, `.cursor/rules/*.mdc` files to unified `.prs` format
 - [ ] **`prs migrate` command** - Automatic conversion of existing instruction files to PromptScript
 

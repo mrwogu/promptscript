@@ -1,18 +1,82 @@
-import type { Block, Program, Value } from '@promptscript/core';
+import type { Block, ClaudeVersion, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter';
 import type { ConventionRenderer } from '../convention-renderer';
 import type { FormatOptions, FormatterOutput } from '../types';
 
 /**
+ * Claude formatter version information.
+ */
+export const CLAUDE_VERSIONS = {
+  simple: {
+    name: 'simple',
+    description: 'Single file output (CLAUDE.md)',
+    outputPath: 'CLAUDE.md',
+  },
+  multifile: {
+    name: 'multifile',
+    description: 'Main + modular rules (.claude/rules/*.md)',
+    outputPath: 'CLAUDE.md',
+  },
+  full: {
+    name: 'full',
+    description: 'Multifile + skills (.claude/skills/) + local memory',
+    outputPath: 'CLAUDE.md',
+  },
+} as const;
+
+/**
+ * Configuration for a rule file.
+ */
+interface RuleConfig {
+  /** Rule file name (without extension) */
+  name: string;
+  /** Glob patterns this rule applies to */
+  paths: string[];
+  /** Description for the rule */
+  description: string;
+  /** Rule content */
+  content: string;
+}
+
+/**
+ * Configuration for a Claude skill.
+ */
+interface ClaudeSkillConfig {
+  /** Skill name */
+  name: string;
+  /** Description */
+  description: string;
+  /** Context forking mode */
+  context?: 'fork' | 'inherit';
+  /** Agent type */
+  agent?: string;
+  /** Allowed tools */
+  allowedTools?: string[];
+  /** Whether user can invoke this skill */
+  userInvocable?: boolean;
+  /** Skill content/instructions */
+  content: string;
+}
+
+/**
  * Formatter for Claude Code instructions.
- * Outputs: `CLAUDE.md`
  *
- * Claude CLAUDE.md format aims to be comprehensive while remaining readable.
- * It includes all sections that GitHub Copilot formatter generates.
+ * Supports three versions:
+ * - **simple** (default): Single `CLAUDE.md` file
+ * - **multifile**: Main + `.claude/rules/*.md` with path-specific rules
+ * - **full**: Multifile + `.claude/skills/<name>/SKILL.md` + `CLAUDE.local.md`
  *
- * Supports output conventions:
- * - 'xml': Uses XML-style tags (<project>, <tech-stack>, etc.)
- * - 'markdown': Uses Markdown headers (## Project, ## Tech Stack, etc.)
+ * @example
+ * ```yaml
+ * targets:
+ *   - claude  # uses simple mode
+ *   - claude:
+ *       version: multifile
+ *   - claude:
+ *       version: full
+ * ```
+ *
+ * @see https://claude.com/docs/code/memory
  */
 export class ClaudeFormatter extends BaseFormatter {
   readonly name = 'claude';
@@ -20,38 +84,386 @@ export class ClaudeFormatter extends BaseFormatter {
   readonly description = 'Claude Code instructions (concise Markdown)';
   readonly defaultConvention = 'markdown';
 
+  /**
+   * Get supported versions for this formatter.
+   */
+  static getSupportedVersions(): typeof CLAUDE_VERSIONS {
+    return CLAUDE_VERSIONS;
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
+    const version = this.resolveVersion(options?.version);
+
+    if (version === 'full') {
+      return this.formatFull(ast, options);
+    }
+
+    if (version === 'multifile') {
+      return this.formatMultifile(ast, options);
+    }
+
+    return this.formatSimple(ast, options);
+  }
+
+  /**
+   * Resolve version string to ClaudeVersion.
+   */
+  private resolveVersion(version?: string): ClaudeVersion {
+    if (version === 'multifile') return 'multifile';
+    if (version === 'full') return 'full';
+    return 'simple';
+  }
+
+  // ============================================================
+  // Simple Mode (single file)
+  // ============================================================
+
+  private formatSimple(ast: Program, options?: FormatOptions): FormatterOutput {
     const renderer = this.createRenderer(options);
     const sections: string[] = [];
 
-    // Add header for markdown convention
     if (renderer.getConvention().name === 'markdown') {
       sections.push('# CLAUDE.md\n');
     }
 
-    // Core sections
-    this.addSection(sections, this.project(ast, renderer));
-    this.addSection(sections, this.techStack(ast, renderer));
-    this.addSection(sections, this.architecture(ast, renderer));
-
-    // Standards sections
-    this.addSection(sections, this.codeStandards(ast, renderer));
-    this.addSection(sections, this.gitCommits(ast, renderer));
-    this.addSection(sections, this.configFiles(ast, renderer));
-
-    // Commands and workflow
-    this.addSection(sections, this.commands(ast, renderer));
-    this.addSection(sections, this.postWork(ast, renderer));
-
-    // Guidelines
-    this.addSection(sections, this.documentation(ast, renderer));
-    this.addSection(sections, this.diagrams(ast, renderer));
-    this.addSection(sections, this.donts(ast, renderer));
+    this.addCommonSections(ast, renderer, sections);
 
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
     };
+  }
+
+  // ============================================================
+  // Multifile Mode
+  // ============================================================
+
+  private formatMultifile(ast: Program, options?: FormatOptions): FormatterOutput {
+    const renderer = this.createRenderer(options);
+    const additionalFiles: FormatterOutput[] = [];
+
+    // Generate rule files based on @guards
+    const rules = this.extractRules(ast);
+    for (const rule of rules) {
+      additionalFiles.push(this.generateRuleFile(rule));
+    }
+
+    // Main file content
+    const sections: string[] = [];
+    if (renderer.getConvention().name === 'markdown') {
+      sections.push('# CLAUDE.md\n');
+    }
+    this.addCommonSections(ast, renderer, sections);
+
+    return {
+      path: this.getOutputPath(options),
+      content: sections.join('\n'),
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  // ============================================================
+  // Full Mode
+  // ============================================================
+
+  private formatFull(ast: Program, options?: FormatOptions): FormatterOutput {
+    const renderer = this.createRenderer(options);
+    const additionalFiles: FormatterOutput[] = [];
+
+    // Generate rule files based on @guards
+    const rules = this.extractRules(ast);
+    for (const rule of rules) {
+      additionalFiles.push(this.generateRuleFile(rule));
+    }
+
+    // Generate skill files
+    const skills = this.extractSkills(ast);
+    for (const skill of skills) {
+      additionalFiles.push(this.generateSkillFile(skill));
+    }
+
+    // Generate CLAUDE.local.md
+    const localFile = this.generateLocalFile(ast);
+    if (localFile) {
+      additionalFiles.push(localFile);
+    }
+
+    // Main file content
+    const sections: string[] = [];
+    if (renderer.getConvention().name === 'markdown') {
+      sections.push('# CLAUDE.md\n');
+    }
+    this.addCommonSections(ast, renderer, sections);
+
+    return {
+      path: this.getOutputPath(options),
+      content: sections.join('\n'),
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  // ============================================================
+  // Rule File Generation
+  // ============================================================
+
+  /**
+   * Extract rule configurations from @guards block.
+   */
+  private extractRules(ast: Program): RuleConfig[] {
+    const guards = this.findBlock(ast, 'guards');
+    if (!guards) return [];
+
+    const rules: RuleConfig[] = [];
+    const props = this.getProps(guards.content);
+
+    // Handle globs property (array of patterns)
+    const globPatterns = props['globs'];
+    if (Array.isArray(globPatterns)) {
+      // Group patterns by category
+      const tsPatterns = globPatterns.filter(
+        (p) => typeof p === 'string' && (p.includes('.ts') || p.includes('.tsx'))
+      );
+      const testPatterns = globPatterns.filter(
+        (p) =>
+          typeof p === 'string' &&
+          (p.includes('test') || p.includes('spec') || p.includes('__tests__'))
+      );
+
+      if (tsPatterns.length > 0) {
+        rules.push({
+          name: 'code-style',
+          paths: tsPatterns as string[],
+          description: 'TypeScript code style rules',
+          content: this.getCodeStyleRuleContent(ast),
+        });
+      }
+
+      if (testPatterns.length > 0) {
+        rules.push({
+          name: 'testing',
+          paths: testPatterns as string[],
+          description: 'Testing rules and patterns',
+          content: this.getTestingRuleContent(ast),
+        });
+      }
+    }
+
+    // Handle named rule blocks within guards
+    for (const [key, value] of Object.entries(props)) {
+      if (key === 'globs') continue;
+
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        const paths = obj['paths'] ?? obj['applyTo'];
+        const description = obj['description'];
+        const content = obj['content'];
+
+        if (paths && Array.isArray(paths)) {
+          rules.push({
+            name: key,
+            paths: paths.map((p) => this.valueToString(p)),
+            description: description ? this.valueToString(description) : `${key} rules`,
+            content: content ? this.valueToString(content) : '',
+          });
+        }
+      }
+    }
+
+    return rules;
+  }
+
+  /**
+   * Generate a .claude/rules/*.md file.
+   */
+  private generateRuleFile(config: RuleConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter with paths
+    lines.push('---');
+    lines.push(`description: "${config.description}"`);
+    lines.push(`paths:`);
+    for (const pattern of config.paths) {
+      lines.push(`  - "${pattern}"`);
+    }
+    lines.push('---');
+    lines.push('');
+    lines.push(`# ${config.description}`);
+    lines.push('');
+    if (config.content) {
+      lines.push(config.content);
+    }
+
+    return {
+      path: `.claude/rules/${config.name}.md`,
+      content: lines.join('\n'),
+    };
+  }
+
+  /**
+   * Get code style rule content from AST.
+   */
+  private getCodeStyleRuleContent(ast: Program): string {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return '';
+
+    const props = this.getProps(standards.content);
+    const items: string[] = [];
+
+    // TypeScript standards
+    const ts = props['typescript'];
+    if (ts && typeof ts === 'object' && !Array.isArray(ts)) {
+      const tsObj = ts as Record<string, Value>;
+      if (tsObj['strictMode']) items.push('- Strict TypeScript, no `any` types');
+      if (tsObj['exports']) items.push('- Named exports only');
+    }
+
+    // Naming standards
+    const naming = props['naming'];
+    if (naming && typeof naming === 'object' && !Array.isArray(naming)) {
+      const n = naming as Record<string, Value>;
+      if (n['files']) items.push(`- Files: ${this.valueToString(n['files'])}`);
+    }
+
+    return items.join('\n');
+  }
+
+  /**
+   * Get testing rule content from AST.
+   */
+  private getTestingRuleContent(ast: Program): string {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return '';
+
+    const props = this.getProps(standards.content);
+    const items: string[] = [];
+
+    const testing = props['testing'];
+    if (testing && typeof testing === 'object' && !Array.isArray(testing)) {
+      const t = testing as Record<string, Value>;
+      if (t['framework']) items.push(`- Use ${this.valueToString(t['framework'])} for testing`);
+      if (t['coverage']) items.push(`- Target >${this.valueToString(t['coverage'])}% coverage`);
+      if (t['pattern']) items.push(`- Follow ${this.valueToString(t['pattern'])} pattern`);
+    }
+
+    return items.length > 0 ? items.join('\n') : 'Follow project testing conventions.';
+  }
+
+  // ============================================================
+  // Skill File Generation
+  // ============================================================
+
+  /**
+   * Extract skill configurations from @skills block.
+   */
+  private extractSkills(ast: Program): ClaudeSkillConfig[] {
+    const skillsBlock = this.findBlock(ast, 'skills');
+    if (!skillsBlock) return [];
+
+    const skills: ClaudeSkillConfig[] = [];
+    const props = this.getProps(skillsBlock.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        skills.push({
+          name,
+          description: obj['description'] ? this.valueToString(obj['description']) : name,
+          context:
+            obj['context'] === 'fork' || obj['context'] === 'inherit' ? obj['context'] : undefined,
+          agent: obj['agent'] ? this.valueToString(obj['agent']) : undefined,
+          allowedTools:
+            obj['allowedTools'] && Array.isArray(obj['allowedTools'])
+              ? obj['allowedTools'].map((t) => this.valueToString(t))
+              : undefined,
+          userInvocable: obj['userInvocable'] === true,
+          content: obj['content'] ? this.valueToString(obj['content']) : '',
+        });
+      }
+    }
+
+    return skills;
+  }
+
+  /**
+   * Generate a .claude/skills/<name>/SKILL.md file.
+   */
+  private generateSkillFile(config: ClaudeSkillConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    lines.push(`name: "${config.name}"`);
+    lines.push(`description: "${config.description}"`);
+    if (config.context) {
+      lines.push(`context: ${config.context}`);
+    }
+    if (config.agent) {
+      lines.push(`agent: ${config.agent}`);
+    }
+    if (config.allowedTools && config.allowedTools.length > 0) {
+      lines.push('allowed-tools:');
+      for (const tool of config.allowedTools) {
+        lines.push(`  - ${tool}`);
+      }
+    }
+    if (config.userInvocable) {
+      lines.push('user-invocable: true');
+    }
+    lines.push('---');
+    lines.push('');
+    if (config.content) {
+      lines.push(config.content);
+    }
+
+    return {
+      path: `.claude/skills/${config.name}/SKILL.md`,
+      content: lines.join('\n'),
+    };
+  }
+
+  // ============================================================
+  // Local Memory File Generation
+  // ============================================================
+
+  /**
+   * Generate CLAUDE.local.md from @local block.
+   */
+  private generateLocalFile(ast: Program): FormatterOutput | null {
+    const localBlock = this.findBlock(ast, 'local');
+    if (!localBlock) return null;
+
+    const content = this.extractText(localBlock.content);
+    if (!content) return null;
+
+    const lines: string[] = [];
+    lines.push('# CLAUDE.local.md');
+    lines.push('');
+    lines.push('> Private instructions (not committed to git)');
+    lines.push('');
+    lines.push(content);
+
+    return {
+      path: 'CLAUDE.local.md',
+      content: lines.join('\n'),
+    };
+  }
+
+  // ============================================================
+  // Common Section Methods
+  // ============================================================
+
+  private addCommonSections(ast: Program, renderer: ConventionRenderer, sections: string[]): void {
+    this.addSection(sections, this.project(ast, renderer));
+    this.addSection(sections, this.techStack(ast, renderer));
+    this.addSection(sections, this.architecture(ast, renderer));
+    this.addSection(sections, this.codeStandards(ast, renderer));
+    this.addSection(sections, this.gitCommits(ast, renderer));
+    this.addSection(sections, this.configFiles(ast, renderer));
+    this.addSection(sections, this.commands(ast, renderer));
+    this.addSection(sections, this.postWork(ast, renderer));
+    this.addSection(sections, this.documentation(ast, renderer));
+    this.addSection(sections, this.diagrams(ast, renderer));
+    this.addSection(sections, this.donts(ast, renderer));
   }
 
   private addSection(sections: string[], content: string | null): void {
@@ -63,7 +475,6 @@ export class ClaudeFormatter extends BaseFormatter {
     if (!identity) return null;
 
     const text = this.extractText(identity.content);
-    // Include full identity for completeness
     const cleanText = text
       .split('\n')
       .map((line) => line.trim())
@@ -143,7 +554,6 @@ export class ClaudeFormatter extends BaseFormatter {
     const archMatch = /## Architecture[\s\S]*?```[\s\S]*?```/.exec(text);
     if (!archMatch) return null;
 
-    // Extract just the content without the markdown header
     const content = archMatch[0].replace('## Architecture', '').trim();
     return renderer.renderSection('Architecture', content) + '\n';
   }
@@ -350,7 +760,6 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     if (content.type === 'ObjectContent') {
-      // Parser converts dash-lists to ObjectContent with 'items' property
       const itemsArray = this.getProp(content, 'items');
       if (Array.isArray(itemsArray)) {
         return itemsArray.map((item: unknown) => transform(this.valueToString(item as Value)));
