@@ -44,6 +44,26 @@ export type {
   ParityReport,
 } from './parity-matrix';
 
+// Feature Coverage Matrix for tool capabilities
+export {
+  FEATURE_MATRIX,
+  getToolFeatures,
+  getPlannedFeatures,
+  getFeaturesByCategory,
+  toolSupportsFeature,
+  getFeatureCoverage,
+  getToolComparison,
+  identifyFeatureGaps,
+  generateFeatureMatrixReport,
+} from './feature-matrix';
+export type {
+  ToolName,
+  FeatureStatus,
+  FeatureSpec,
+  FeatureCategory,
+  FeatureCoverageSummary,
+} from './feature-matrix';
+
 // Built-in formatters
 export {
   GitHubFormatter,

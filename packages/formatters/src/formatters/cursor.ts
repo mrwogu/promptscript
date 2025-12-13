@@ -5,7 +5,7 @@ import type { FormatOptions, FormatterOutput } from '../types';
 /**
  * Supported Cursor format versions.
  */
-export type CursorVersion = 'modern' | 'legacy';
+export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'frontmatter';
 
 /**
  * Cursor formatter version information.
@@ -14,6 +14,20 @@ export const CURSOR_VERSIONS = {
   modern: {
     name: 'modern',
     description: 'MDC format with YAML frontmatter (.cursor/rules/project.mdc)',
+    outputPath: '.cursor/rules/project.mdc',
+    cursorVersion: '0.45+',
+    introduced: '2024-12',
+  },
+  frontmatter: {
+    name: 'frontmatter',
+    description: 'Alias for modern format (MDC with YAML frontmatter)',
+    outputPath: '.cursor/rules/project.mdc',
+    cursorVersion: '0.45+',
+    introduced: '2024-12',
+  },
+  multifile: {
+    name: 'multifile',
+    description: 'Multiple MDC files with glob-based targeting',
     outputPath: '.cursor/rules/project.mdc',
     cursorVersion: '0.45+',
     introduced: '2024-12',
@@ -27,6 +41,18 @@ export const CURSOR_VERSIONS = {
     deprecatedSince: '2024-12',
   },
 } as const;
+
+/**
+ * Configuration for glob-based rule files.
+ */
+interface GlobConfig {
+  /** Name used for the output file */
+  name: string;
+  /** Glob patterns to match */
+  patterns: string[];
+  /** Description for frontmatter */
+  description: string;
+}
 
 /**
  * Formatter for Cursor rules.
@@ -79,6 +105,10 @@ export class CursorFormatter extends BaseFormatter {
       return this.formatLegacy(ast, options);
     }
 
+    if (version === 'multifile') {
+      return this.formatMultifile(ast, options);
+    }
+
     return this.formatModern(ast, options);
   }
 
@@ -88,6 +118,12 @@ export class CursorFormatter extends BaseFormatter {
   private resolveVersion(version?: string): CursorVersion {
     if (version === 'legacy') {
       return 'legacy';
+    }
+    if (version === 'multifile') {
+      return 'multifile';
+    }
+    if (version === 'frontmatter') {
+      return 'modern';
     }
     return 'modern';
   }
@@ -122,6 +158,206 @@ export class CursorFormatter extends BaseFormatter {
 
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.legacy.outputPath,
+      content: sections.join('\n\n') + '\n',
+    };
+  }
+
+  /**
+   * Format for multifile Cursor with glob-based targeting.
+   * Generates separate .mdc files for different glob patterns.
+   */
+  private formatMultifile(ast: Program, options?: FormatOptions): FormatterOutput {
+    const additionalFiles: FormatterOutput[] = [];
+
+    // Extract globs from @guards block
+    const globs = this.extractGlobs(ast);
+
+    // Generate glob-specific rule files
+    for (const globConfig of globs) {
+      const globFile = this.generateGlobFile(ast, globConfig);
+      if (globFile) {
+        additionalFiles.push(globFile);
+      }
+    }
+
+    // Generate shortcuts/commands file if shortcuts exist
+    const shortcutsFile = this.generateShortcutsFile(ast);
+    if (shortcutsFile) {
+      additionalFiles.push(shortcutsFile);
+    }
+
+    // Main file with alwaysApply: true for core rules
+    const mainSections: string[] = [];
+    mainSections.push(this.frontmatter(ast));
+    mainSections.push(this.intro(ast));
+
+    const techStack = this.techStack(ast);
+    if (techStack) mainSections.push(techStack);
+
+    const architecture = this.architecture(ast);
+    if (architecture) mainSections.push(architecture);
+
+    const codeStyle = this.codeStyle(ast);
+    if (codeStyle) mainSections.push(codeStyle);
+
+    const gitCommits = this.gitCommits(ast);
+    if (gitCommits) mainSections.push(gitCommits);
+
+    const configFiles = this.configFiles(ast);
+    if (configFiles) mainSections.push(configFiles);
+
+    const postWork = this.postWork(ast);
+    if (postWork) mainSections.push(postWork);
+
+    const documentation = this.documentation(ast);
+    if (documentation) mainSections.push(documentation);
+
+    const diagrams = this.diagrams(ast);
+    if (diagrams) mainSections.push(diagrams);
+
+    const never = this.never(ast);
+    if (never) mainSections.push(never);
+
+    return {
+      path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
+      content: mainSections.join('\n\n') + '\n',
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  /**
+   * Extract glob patterns from @guards block.
+   */
+  private extractGlobs(ast: Program): GlobConfig[] {
+    const guards = this.findBlock(ast, 'guards');
+    if (!guards) return [];
+
+    const globs: GlobConfig[] = [];
+    const props = this.getProps(guards.content);
+
+    // Handle globs property (array of patterns)
+    const globPatterns = props['globs'];
+    if (Array.isArray(globPatterns)) {
+      // Group patterns by category
+      const tsPatterns = globPatterns.filter(
+        (p) => typeof p === 'string' && (p.includes('.ts') || p.includes('.tsx'))
+      );
+      const testPatterns = globPatterns.filter(
+        (p) =>
+          typeof p === 'string' &&
+          (p.includes('test') || p.includes('spec') || p.includes('__tests__'))
+      );
+      const otherPatterns = globPatterns.filter(
+        (p) => typeof p === 'string' && !tsPatterns.includes(p) && !testPatterns.includes(p)
+      );
+
+      if (tsPatterns.length > 0) {
+        globs.push({
+          name: 'typescript',
+          patterns: tsPatterns as string[],
+          description: 'TypeScript-specific rules',
+        });
+      }
+
+      if (testPatterns.length > 0) {
+        globs.push({
+          name: 'testing',
+          patterns: testPatterns as string[],
+          description: 'Testing-specific rules',
+        });
+      }
+
+      if (otherPatterns.length > 0) {
+        globs.push({
+          name: 'files',
+          patterns: otherPatterns as string[],
+          description: 'File-specific rules',
+        });
+      }
+    }
+
+    return globs;
+  }
+
+  /**
+   * Generate a glob-specific rule file.
+   */
+  private generateGlobFile(ast: Program, config: GlobConfig): FormatterOutput | null {
+    const sections: string[] = [];
+
+    // Frontmatter with globs
+    const fm = [
+      '---',
+      `description: "${config.description}"`,
+      `globs:`,
+      ...config.patterns.map((p) => `  - "${p}"`),
+      '---',
+    ];
+    sections.push(fm.join('\n'));
+
+    // Add relevant content based on file type
+    if (config.name === 'typescript') {
+      const codeStyle = this.codeStyle(ast);
+      if (codeStyle) sections.push(codeStyle);
+    }
+
+    if (config.name === 'testing') {
+      sections.push('## Testing Guidelines');
+      sections.push('Follow project testing conventions and patterns.');
+    }
+
+    // Only return if we have content beyond frontmatter
+    if (sections.length <= 1) return null;
+
+    return {
+      path: `.cursor/rules/${config.name}.mdc`,
+      content: sections.join('\n\n') + '\n',
+    };
+  }
+
+  /**
+   * Generate shortcuts/commands file for manual activation.
+   */
+  private generateShortcutsFile(ast: Program): FormatterOutput | null {
+    const block = this.findBlock(ast, 'shortcuts');
+    if (!block) return null;
+
+    const props = this.getProps(block.content);
+    if (Object.keys(props).length === 0) return null;
+
+    const sections: string[] = [];
+
+    // Frontmatter for manual activation (via @mention)
+    sections.push(
+      ['---', 'description: "Project shortcuts and commands"', 'alwaysApply: false', '---'].join(
+        '\n'
+      )
+    );
+
+    const lines: string[] = ['## Commands'];
+    for (const [cmd, desc] of Object.entries(props)) {
+      const descStr = this.valueToString(desc);
+      if (typeof desc === 'object' && !Array.isArray(desc)) {
+        // Complex shortcut with steps
+        const descObj = desc as Record<string, Value>;
+        lines.push(`\n### ${cmd}`);
+        if (descObj['description']) {
+          lines.push(this.valueToString(descObj['description']));
+        }
+        if (Array.isArray(descObj['steps'])) {
+          lines.push('\n**Steps:**');
+          descObj['steps'].forEach((step, i) => {
+            lines.push(`${i + 1}. ${this.valueToString(step)}`);
+          });
+        }
+      } else {
+        lines.push(`- **${cmd}**: ${descStr.split('\n')[0]}`);
+      }
+    }
+    sections.push(lines.join('\n'));
+
+    return {
+      path: '.cursor/rules/shortcuts.mdc',
       content: sections.join('\n\n') + '\n',
     };
   }

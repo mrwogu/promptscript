@@ -177,15 +177,23 @@ Outputs Cursor rules in modern MDC format (`.cursor/rules/project.mdc`) or legac
 
 **Supported Versions:**
 
-| Version  | Output Path                 | Cursor Version | Status     |
-| -------- | --------------------------- | -------------- | ---------- |
-| `modern` | `.cursor/rules/project.mdc` | 0.45+          | Default    |
-| `legacy` | `.cursorrules`              | < 0.45         | Deprecated |
+| Version       | Output Path                 | Cursor Version | Description                              |
+| ------------- | --------------------------- | -------------- | ---------------------------------------- |
+| `modern`      | `.cursor/rules/project.mdc` | 0.45+          | Single file with frontmatter (default)   |
+| `frontmatter` | `.cursor/rules/project.mdc` | 0.45+          | Alias for modern                         |
+| `multifile`   | `.cursor/rules/*.mdc`       | 0.45+          | Multiple files with glob-based targeting |
+| `legacy`      | `.cursorrules`              | < 0.45         | Deprecated                               |
 
 ```typescript
 // Modern format (default, for Cursor 0.45+)
 const output = format(resolved, {
   target: 'cursor',
+});
+
+// Multi-file format with glob-based targeting
+const multiOutput = format(resolved, {
+  target: 'cursor',
+  version: 'multifile',
 });
 
 // Legacy format (for older Cursor versions)
@@ -201,6 +209,10 @@ const legacyOutput = format(resolved, {
 targets:
   # Modern format (default)
   - cursor
+
+  # Multi-file format with glob targeting
+  - cursor:
+      version: multifile
 
   # Legacy format for older Cursor installations
   - cursor:
@@ -223,6 +235,46 @@ Tech stack: TypeScript, React
 ## Architecture
 
 ...
+```
+
+**Multi-file Output Example:**
+
+When using `multifile` version, the formatter generates:
+
+1. **Main file** (`.cursor/rules/project.mdc`) with `alwaysApply: true` for core rules
+2. **Glob-specific files** for TypeScript, testing, etc. based on `@guards` block patterns
+3. **Shortcuts file** (`.cursor/rules/shortcuts.mdc`) with `alwaysApply: false` for manual activation
+
+```markdown
+## <!-- .cursor/rules/typescript.mdc -->
+
+description: "TypeScript-specific rules"
+globs:
+
+- "\*.ts"
+- "\*.tsx"
+
+---
+
+Code style:
+
+- strict: Enable strict mode
+  ...
+```
+
+```markdown
+## <!-- .cursor/rules/shortcuts.mdc -->
+
+description: "Project shortcuts and commands"
+alwaysApply: false
+
+---
+
+## Commands
+
+- **/test**: Run tests
+- **/deploy**: Deploy workflow
+  ...
 ```
 
 **Legacy Output Example (plain text):**
@@ -656,12 +708,77 @@ const diff = generateDiff(oldOutput, newOutput, {
 console.log(diff);
 ```
 
+## Feature Coverage Matrix
+
+The Feature Coverage Matrix tracks which features each AI tool supports and which features our formatters implement. This helps identify gaps and ensures consistent functionality across formatters.
+
+### Using the Matrix
+
+```typescript
+import {
+  FEATURE_MATRIX,
+  getToolFeatures,
+  getFeatureCoverage,
+  toolSupportsFeature,
+  generateFeatureMatrixReport,
+} from '@promptscript/formatters';
+
+// Get all supported features for a tool
+const cursorFeatures = getToolFeatures('cursor');
+
+// Check if a specific feature is supported
+const hasGlobs = toolSupportsFeature('cursor', 'glob-patterns'); // true
+const hasGlobsGithub = toolSupportsFeature('github', 'glob-patterns'); // false
+
+// Get coverage summary
+const coverage = getFeatureCoverage('cursor');
+console.log(`${coverage.coveragePercent}% features supported`);
+
+// Generate markdown report
+const report = generateFeatureMatrixReport();
+```
+
+### Feature Categories
+
+| Category         | Description                          |
+| ---------------- | ------------------------------------ |
+| `output-format`  | Markdown, MDC, code blocks, diagrams |
+| `file-structure` | Single/multi-file, workflows         |
+| `metadata`       | Frontmatter, descriptions            |
+| `targeting`      | Globs, activation types              |
+| `content`        | Character limits, section splitting  |
+| `advanced`       | Context inclusion, @-mentions        |
+
+### Feature Status Values
+
+| Status          | Description                         |
+| --------------- | ----------------------------------- |
+| `supported`     | Tool supports, formatter implements |
+| `not-supported` | Tool doesn't support                |
+| `planned`       | Tool supports, not yet implemented  |
+| `partial`       | Partially implemented               |
+
+### Current Feature Coverage
+
+| Feature          | GitHub | Cursor | Claude | Antigravity |
+| ---------------- | ------ | ------ | ------ | ----------- |
+| Markdown Output  | Yes    | Yes    | Yes    | Yes         |
+| YAML Frontmatter | No     | Yes    | No     | Yes         |
+| Multi-file Rules | No     | Yes    | No     | Yes         |
+| Glob Patterns    | No     | Yes    | No     | Yes         |
+| Workflows        | No     | No     | No     | Yes         |
+| Mermaid Diagrams | Yes    | Yes    | Yes    | Yes         |
+| Character Limit  | No     | No     | No     | Yes (12k)   |
+
+For the complete matrix, use `generateFeatureMatrixReport()` or see the [Feature Coverage Tests](../testing/feature-coverage.md).
+
 ## Performance
 
 Formatter performance:
 
-| Target | 1KB Program | 10KB Program |
-| ------ | ----------- | ------------ |
-| github | < 1ms       | ~2ms         |
-| claude | < 1ms       | ~2ms         |
-| cursor | < 1ms       | ~1ms         |
+| Target      | 1KB Program | 10KB Program |
+| ----------- | ----------- | ------------ |
+| github      | < 1ms       | ~2ms         |
+| claude      | < 1ms       | ~2ms         |
+| cursor      | < 1ms       | ~1ms         |
+| antigravity | < 1ms       | ~2ms         |

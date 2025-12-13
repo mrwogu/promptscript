@@ -53,6 +53,28 @@ Generates `CLAUDE.md` for Claude Code.
 
 Generates `.cursor/rules/*.mdc` files for Cursor IDE.
 
+**Supported versions:**
+
+| Version       | Description                              |
+| ------------- | ---------------------------------------- |
+| `modern`      | Single file with frontmatter (default)   |
+| `frontmatter` | Alias for modern                         |
+| `multifile`   | Multiple files with glob-based targeting |
+| `legacy`      | Plain text `.cursorrules` (deprecated)   |
+
+```typescript
+// Modern format (default)
+const formatter = new CursorFormatter();
+const output = formatter.format(ast);
+
+// Multi-file format with glob targeting
+const multiOutput = formatter.format(ast, { version: 'multifile' });
+// Returns: additionalFiles for typescript.mdc, testing.mdc, shortcuts.mdc
+
+// Legacy format
+const legacyOutput = formatter.format(ast, { version: 'legacy' });
+```
+
 ### AntigravityFormatter
 
 Generates `.agent/rules/project.md` for Google Gemini/Antigravity.
@@ -107,14 +129,72 @@ export class MyFormatter extends BaseFormatter {
 }
 ```
 
-## Building
+## Feature Coverage Matrix
 
-```bash
-nx build formatters
+Track which features each AI tool supports:
+
+```typescript
+import {
+  FEATURE_MATRIX,
+  getToolFeatures,
+  toolSupportsFeature,
+  getFeatureCoverage,
+  generateFeatureMatrixReport,
+} from '@promptscript/formatters';
+
+// Check feature support
+if (toolSupportsFeature('cursor', 'yaml-frontmatter')) {
+  // Generate with frontmatter
+}
+
+// Get coverage summary
+const coverage = getFeatureCoverage('cursor');
+console.log(`${coverage.coveragePercent}% features supported`);
+
+// Generate markdown report
+const report = generateFeatureMatrixReport();
 ```
 
 ## Testing
 
+The package includes comprehensive testing mechanisms:
+
+### Parity Matrix
+
+Ensures consistent output across all formatters:
+
+```typescript
+import { PARITY_MATRIX, getRequiredSections } from '@promptscript/formatters';
+
+const sections = getRequiredSections('github');
+```
+
+### Golden Files
+
+Reference-based testing that compares output against known-good files:
+
 ```bash
+# Run tests
 nx test formatters
+
+# Update golden files after intentional changes
+UPDATE_GOLDEN=true nx test formatters
+```
+
+### Running Tests
+
+```bash
+# All tests
+nx test formatters
+
+# Specific test suites
+nx test formatters --testNamePattern="Parity"
+nx test formatters --testNamePattern="Golden Files"
+nx test formatters --testNamePattern="Feature Coverage"
+```
+
+## Building
+
+```bash
+nx build formatters
 ```

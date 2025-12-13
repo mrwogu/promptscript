@@ -18,7 +18,7 @@ theme:
 
   palette:
     # Light mode
-    - media: "(prefers-color-scheme: light)"
+    - media: '(prefers-color-scheme: light)'
       scheme: default
       primary: deep purple
       accent: purple
@@ -26,7 +26,7 @@ theme:
         icon: material/brightness-7
         name: Switch to dark mode
     # Dark mode
-    - media: "(prefers-color-scheme: dark)"
+    - media: '(prefers-color-scheme: dark)'
       scheme: slate
       primary: deep purple
       accent: purple
@@ -184,4 +184,8 @@ nav:
       - Minimal: examples/minimal.md
       - Team Setup: examples/team-setup.md
       - Enterprise: examples/enterprise.md
+  - Testing:
+      - testing/index.md
+      - Parity Testing: testing/parity-testing.md
+      - Feature Coverage: testing/feature-coverage.md
   - Changelog: changelog.md

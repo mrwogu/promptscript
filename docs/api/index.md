@@ -14,22 +14,22 @@ flowchart TB
     subgraph Foundation
         core["@promptscript/core<br/>Types, errors, utilities"]
     end
-    
+
     subgraph Pipeline
         parser["@promptscript/parser<br/>Chevrotain-based parser"]
         resolver["@promptscript/resolver<br/>Inheritance & imports"]
         validator["@promptscript/validator<br/>Validation rules"]
     end
-    
+
     subgraph Output
-        formatters["@promptscript/formatters<br/>GitHub, Claude, Cursor"]
+        formatters["@promptscript/formatters<br/>GitHub, Claude, Cursor, Antigravity"]
         compiler["@promptscript/compiler<br/>Pipeline orchestration"]
     end
-    
+
     subgraph Interface
         cli["@promptscript/cli<br/>Command-line interface"]
     end
-    
+
     core --> parser
     core --> validator
     core --> formatters
@@ -51,6 +51,7 @@ flowchart TB
 Core types, errors, and utilities shared across all packages.
 
 [Core API →](core.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -58,6 +59,7 @@ Core types, errors, and utilities shared across all packages.
 Chevrotain-based parser for PromptScript syntax.
 
 [Parser API →](parser.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -65,6 +67,7 @@ Chevrotain-based parser for PromptScript syntax.
 Resolves inheritance and imports.
 
 [Resolver API →](resolver.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -72,6 +75,7 @@ Resolves inheritance and imports.
 Validates PromptScript AST for correctness.
 
 [Validator API →](validator.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -79,6 +83,7 @@ Validates PromptScript AST for correctness.
 Orchestrates the compilation pipeline.
 
 [Compiler API →](compiler.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -86,6 +91,7 @@ Orchestrates the compilation pipeline.
 Output formatters for various AI tools.
 
 [Formatters API →](formatters.md)
+
 </div>
 
 <div class="feature-card" markdown>
@@ -93,6 +99,7 @@ Output formatters for various AI tools.
 Command-line interface.
 
 [CLI API →](cli.md)
+
 </div>
 
 </div>

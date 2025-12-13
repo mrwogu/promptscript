@@ -457,5 +457,149 @@ describe('CursorFormatter', () => {
         expect(result.path).toBe('custom/.cursorrules');
       });
     });
+
+    describe('multifile format', () => {
+      it('should generate main file with alwaysApply', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.path).toBe('.cursor/rules/project.mdc');
+        expect(result.content).toContain('alwaysApply: true');
+      });
+
+      it('should extract TypeScript globs and generate separate file', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  globs: ['*.ts', '*.tsx'],
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+            {
+              type: 'Block',
+              name: 'standards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  typescript: {
+                    strict: 'Enable strict mode',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.additionalFiles).toBeDefined();
+        expect(result.additionalFiles?.length).toBeGreaterThan(0);
+
+        const tsFile = result.additionalFiles?.find((f) => f.path.includes('typescript.mdc'));
+        expect(tsFile).toBeDefined();
+        expect(tsFile?.content).toContain('globs:');
+        expect(tsFile?.content).toContain('*.ts');
+        expect(tsFile?.content).toContain('*.tsx');
+        expect(tsFile?.content).toContain('TypeScript-specific rules');
+      });
+
+      it('should extract testing globs and generate separate file', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  globs: ['**/*.spec.ts', '**/__tests__/**'],
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.additionalFiles).toBeDefined();
+
+        const testFile = result.additionalFiles?.find((f) => f.path.includes('testing.mdc'));
+        expect(testFile).toBeDefined();
+        expect(testFile?.content).toContain('globs:');
+        expect(testFile?.content).toContain('Testing-specific rules');
+      });
+
+      it('should generate shortcuts file for manual activation', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'shortcuts',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  '/test': 'Run tests',
+                  '/deploy': {
+                    description: 'Deploy workflow',
+                    steps: ['Build', 'Test', 'Deploy'],
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.additionalFiles).toBeDefined();
+
+        const shortcutsFile = result.additionalFiles?.find((f) => f.path.includes('shortcuts.mdc'));
+        expect(shortcutsFile).toBeDefined();
+        expect(shortcutsFile?.content).toContain('alwaysApply: false');
+        expect(shortcutsFile?.content).toContain('## Commands');
+        expect(shortcutsFile?.content).toContain('/test');
+        expect(shortcutsFile?.content).toContain('/deploy');
+        expect(shortcutsFile?.content).toContain('**Steps:**');
+        expect(shortcutsFile?.content).toContain('1. Build');
+      });
+
+      it('should not generate additional files when no guards or shortcuts', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.additionalFiles).toBeUndefined();
+      });
+
+      it('should treat frontmatter version as modern', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'frontmatter' });
+
+        expect(result.path).toBe('.cursor/rules/project.mdc');
+        expect(result.content).toContain('alwaysApply: true');
+        expect(result.additionalFiles).toBeUndefined();
+      });
+
+      it('should have multifile version in CURSOR_VERSIONS', () => {
+        expect(CURSOR_VERSIONS.multifile).toBeDefined();
+        expect(CURSOR_VERSIONS.multifile.name).toBe('multifile');
+        expect(CURSOR_VERSIONS.frontmatter).toBeDefined();
+      });
+    });
   });
 });
