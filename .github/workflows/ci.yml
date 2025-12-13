@@ -49,6 +49,16 @@ jobs:
       - name: Test
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t test --coverage
 
+      - name: Golden Files Drift Check
+        if: matrix.node-version == '25.x'
+        run: |
+          pnpm nx test formatters --testNamePattern="Golden Files"
+          if [ -n "$(git status --porcelain packages/formatters/src/__tests__/__golden__)" ]; then
+            echo "::error::Golden files are out of date. Run 'UPDATE_GOLDEN=true pnpm nx test formatters' locally and commit the changes."
+            git diff packages/formatters/src/__tests__/__golden__
+            exit 1
+          fi
+
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 

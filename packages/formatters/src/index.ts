@@ -24,6 +24,26 @@ export {
 } from './section-registry';
 export type { SectionInfo } from './section-registry';
 
+// Parity Matrix for formatter consistency testing
+export {
+  PARITY_MATRIX,
+  EXTRACTION_RULES,
+  getRequiredSections,
+  getOptionalSections,
+  getAllSections,
+  matchesSectionHeader,
+  validateSectionContent,
+  getSourceBlocks,
+  analyzeFormatterOutput,
+} from './parity-matrix';
+export type {
+  FormatterName,
+  SourceBlockConfig,
+  SectionSpec,
+  ExtractionRule,
+  ParityReport,
+} from './parity-matrix';
+
 // Built-in formatters
 export {
   GitHubFormatter,
