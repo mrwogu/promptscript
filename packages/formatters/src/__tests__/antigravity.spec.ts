@@ -1041,6 +1041,57 @@ flowchart TB
       expect(result.content).toContain('## Architecture');
       expect(result.content).toContain('Layered architecture');
     });
+
+    it('should extract architecture from context.architecture property with string value', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                architecture: 'Clean Architecture with domain-driven design',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## Architecture');
+      expect(result.content).toContain('Clean Architecture with domain-driven design');
+    });
+  });
+
+  describe('restrictions edge cases', () => {
+    it('should return empty list when restrictions has ObjectContent without items', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                severity: 'high',
+                category: 'security',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // Should not crash and restrictions section should not appear
+      expect(result.content).not.toContain("## Don'ts");
+    });
   });
 
   describe('output convention support', () => {

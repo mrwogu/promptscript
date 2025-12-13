@@ -10,6 +10,11 @@ import {
   getToolFeatures,
   getFeatureCoverage,
   toolSupportsFeature,
+  getPlannedFeatures,
+  getFeaturesByCategory,
+  getToolComparison,
+  identifyFeatureGaps,
+  generateFeatureMatrixReport,
   type ToolName,
 } from '../feature-matrix';
 
@@ -402,5 +407,111 @@ describe('Tool Feature Queries', () => {
     expect(toolSupportsFeature('github', 'yaml-frontmatter')).toBe(false);
     expect(toolSupportsFeature('antigravity', 'workflows')).toBe(true);
     expect(toolSupportsFeature('github', 'workflows')).toBe(false);
+  });
+
+  it('toolSupportsFeature should return false for non-existent feature', () => {
+    expect(toolSupportsFeature('cursor', 'non-existent-feature')).toBe(false);
+    expect(toolSupportsFeature('github', 'fake-feature-id')).toBe(false);
+  });
+});
+
+describe('Additional Feature Matrix Functions', () => {
+  it('getPlannedFeatures should return features with planned status', () => {
+    // Currently no features are planned, but function should work
+    const planned = getPlannedFeatures('github');
+    expect(Array.isArray(planned)).toBe(true);
+    // All returned features should have 'planned' status for the tool
+    planned.forEach((f) => {
+      expect(f.tools.github).toBe('planned');
+    });
+  });
+
+  it('getFeaturesByCategory should filter by category', () => {
+    const outputFeatures = getFeaturesByCategory('output-format');
+    expect(outputFeatures.length).toBeGreaterThan(0);
+    expect(outputFeatures.every((f) => f.category === 'output-format')).toBe(true);
+
+    const metadataFeatures = getFeaturesByCategory('metadata');
+    expect(metadataFeatures.length).toBeGreaterThan(0);
+    expect(metadataFeatures.every((f) => f.category === 'metadata')).toBe(true);
+
+    const targetingFeatures = getFeaturesByCategory('targeting');
+    expect(targetingFeatures.length).toBeGreaterThan(0);
+
+    const contentFeatures = getFeaturesByCategory('content');
+    expect(contentFeatures.length).toBeGreaterThan(0);
+
+    const advancedFeatures = getFeaturesByCategory('advanced');
+    expect(advancedFeatures.length).toBeGreaterThan(0);
+
+    const fileStructureFeatures = getFeaturesByCategory('file-structure');
+    expect(fileStructureFeatures.length).toBeGreaterThan(0);
+  });
+
+  it('getToolComparison should return comparison matrix', () => {
+    const comparison = getToolComparison();
+
+    expect(typeof comparison).toBe('object');
+    expect(Object.keys(comparison).length).toBe(FEATURE_MATRIX.length);
+
+    // Check structure of comparison
+    for (const [featureId, tools] of Object.entries(comparison)) {
+      expect(tools.github).toBeDefined();
+      expect(tools.cursor).toBeDefined();
+      expect(tools.claude).toBeDefined();
+      expect(tools.antigravity).toBeDefined();
+
+      // Find the feature and verify match
+      const feature = FEATURE_MATRIX.find((f) => f.id === featureId);
+      expect(feature).toBeDefined();
+      expect(tools).toEqual(feature!.tools);
+    }
+  });
+
+  it('identifyFeatureGaps should return planned features', () => {
+    const gaps = identifyFeatureGaps('github');
+    expect(Array.isArray(gaps)).toBe(true);
+    // All returned features should have 'planned' status
+    gaps.forEach((f) => {
+      expect(f.tools.github).toBe('planned');
+    });
+  });
+
+  it('generateFeatureMatrixReport should generate valid markdown', () => {
+    const report = generateFeatureMatrixReport();
+
+    expect(typeof report).toBe('string');
+    expect(report.length).toBeGreaterThan(100);
+
+    // Should have header
+    expect(report).toContain('# Feature Coverage Matrix');
+
+    // Should have table headers
+    expect(report).toContain('| Feature | GitHub | Cursor | Claude | Antigravity |');
+
+    // Should have legend
+    expect(report).toContain('**Legend:**');
+    expect(report).toContain('✅ Supported');
+    expect(report).toContain('❌ Not Supported');
+
+    // Should contain some feature names
+    expect(report).toContain('Markdown Output');
+    expect(report).toContain('YAML Frontmatter');
+
+    // Should have emojis for different statuses
+    expect(report).toContain('✅'); // supported
+    expect(report).toContain('❌'); // not-supported
+  });
+
+  it('generateFeatureMatrixReport should include partial status emoji', () => {
+    const report = generateFeatureMatrixReport();
+    // Check for partial status in legend
+    expect(report).toContain('⚠️ Partial');
+  });
+
+  it('generateFeatureMatrixReport should include planned status emoji', () => {
+    const report = generateFeatureMatrixReport();
+    // Check for planned status in legend
+    expect(report).toContain('📋 Planned');
   });
 });

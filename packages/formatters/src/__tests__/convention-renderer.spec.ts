@@ -303,4 +303,42 @@ describe('Custom conventions', () => {
     expect(result).toContain('<techStack>');
     expect(result).toContain('</techStack>');
   });
+
+  it('should support repeat helper in templates', () => {
+    const customConvention = {
+      name: 'custom',
+      section: {
+        start: '{{#repeat level}}#{{/repeat}} {{name}}',
+        end: '',
+      },
+    };
+    const renderer = new ConventionRenderer(customConvention);
+
+    // Level 1 should have 1 hash
+    const result1 = renderer.renderSection('Project', 'content', 1);
+    expect(result1).toBe('# Project\ncontent');
+
+    // Level 2 should have 2 hashes
+    const result2 = renderer.renderSection('Section', 'content', 2);
+    expect(result2).toBe('## Section\ncontent');
+
+    // Level 3 should have 3 hashes
+    const result3 = renderer.renderSection('Subsection', 'content', 3);
+    expect(result3).toBe('### Subsection\ncontent');
+  });
+
+  it('should handle non-XML convention with indent (fallback path)', () => {
+    const customConvention = {
+      name: 'indented-non-xml',
+      section: {
+        start: '> {{name}}',
+        end: '',
+        indent: '  ',
+      },
+    };
+    const renderer = new ConventionRenderer(customConvention);
+    const result = renderer.renderSection('Quote', 'content', 1);
+    // Should return content as-is since it's not XML convention
+    expect(result).toBe('> Quote\ncontent');
+  });
 });

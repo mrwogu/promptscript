@@ -357,5 +357,32 @@ describe('ClaudeFormatter', () => {
       const result = formatter.format(ast);
       expect(result.content).not.toContain("## Don'ts");
     });
+
+    it('should extract donts items from ObjectContent with items array', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                items: ['Never use any type', 'Never skip tests', 'Never commit secrets'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain("## Don'ts");
+      // Claude formatter transforms "Never" to "Don't"
+      expect(result.content).toContain("- Don't use any type");
+      expect(result.content).toContain("- Don't skip tests");
+      expect(result.content).toContain("- Don't commit secrets");
+    });
   });
 });

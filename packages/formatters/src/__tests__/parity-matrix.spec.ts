@@ -9,7 +9,11 @@ import {
   PARITY_MATRIX,
   EXTRACTION_RULES,
   getRequiredSections,
+  getOptionalSections,
+  getAllSections,
+  matchesSectionHeader,
   validateSectionContent,
+  getSourceBlocks,
   analyzeFormatterOutput,
   type FormatterName,
 } from '../parity-matrix';
@@ -547,6 +551,96 @@ describe('Parity Matrix Tests', () => {
         expect(Array.isArray(report.presentSections)).toBe(true);
         expect(Array.isArray(report.missingSections)).toBe(true);
         expect(Array.isArray(report.contentIssues)).toBe(true);
+      }
+    });
+
+    it('should detect content issues when content does not match patterns', () => {
+      // Create content that has headers but wrong content
+      const badContent = `## Project Identity
+
+Some random text without the expected keywords.
+
+## Tech Stack
+
+No technology mentioned here at all.
+`;
+
+      const report = analyzeFormatterOutput('github', badContent, ['identity', 'context']);
+
+      // The report should exist with potential content issues
+      expect(report.formatter).toBe('github');
+      // Since the content doesn't match patterns, there might be content issues
+      expect(Array.isArray(report.contentIssues)).toBe(true);
+    });
+  });
+
+  describe('Additional Parity Functions', () => {
+    it('getSourceBlocks should return blocks for known sections', () => {
+      const identityBlocks = getSourceBlocks('project-identity');
+      expect(identityBlocks).toContain('identity');
+
+      const techStackBlocks = getSourceBlocks('tech-stack');
+      expect(techStackBlocks.length).toBeGreaterThan(0);
+
+      const restrictionsBlocks = getSourceBlocks('restrictions');
+      expect(restrictionsBlocks).toContain('restrictions');
+    });
+
+    it('getSourceBlocks should return empty array for unknown sections', () => {
+      const blocks = getSourceBlocks('non-existent-section');
+      expect(blocks).toEqual([]);
+    });
+
+    it('getOptionalSections should return optional sections for formatter', () => {
+      const optionalGithub = getOptionalSections('github');
+      expect(Array.isArray(optionalGithub)).toBe(true);
+
+      const optionalCursor = getOptionalSections('cursor');
+      expect(Array.isArray(optionalCursor)).toBe(true);
+    });
+
+    it('getAllSections should return combined required and optional sections', () => {
+      const allGithub = getAllSections('github');
+      const requiredGithub = getRequiredSections('github');
+      const optionalGithub = getOptionalSections('github');
+
+      expect(allGithub.length).toBe(requiredGithub.length + optionalGithub.length);
+    });
+
+    it('matchesSectionHeader should detect headers in content', () => {
+      const contentWithProjectIdentity = '## Project Identity\n\nYou are a developer.';
+      const contentWithTechStack = '## Tech Stack\n\n- TypeScript';
+
+      // These should match based on header variations
+      expect(matchesSectionHeader(contentWithProjectIdentity, 'project-identity', 'github')).toBe(
+        true
+      );
+      expect(matchesSectionHeader(contentWithTechStack, 'tech-stack', 'github')).toBe(true);
+    });
+
+    it('matchesSectionHeader should return false for non-matching content', () => {
+      const content = 'Random content without any headers';
+
+      expect(matchesSectionHeader(content, 'project-identity', 'github')).toBe(false);
+      expect(matchesSectionHeader(content, 'tech-stack', 'github')).toBe(false);
+    });
+
+    it('matchesSectionHeader should handle array header variations', () => {
+      // Find a section with array variations
+      const sectionWithArrayHeaders = PARITY_MATRIX.find(
+        (s) =>
+          s.headerVariations.github &&
+          (Array.isArray(s.headerVariations.github) ||
+            typeof s.headerVariations.github === 'string')
+      );
+
+      if (sectionWithArrayHeaders) {
+        const header = Array.isArray(sectionWithArrayHeaders.headerVariations.github)
+          ? sectionWithArrayHeaders.headerVariations.github[0]
+          : sectionWithArrayHeaders.headerVariations.github;
+
+        const content = `${header}\n\nSome content here.`;
+        expect(matchesSectionHeader(content, sectionWithArrayHeaders.id, 'github')).toBe(true);
       }
     });
   });

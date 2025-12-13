@@ -386,6 +386,142 @@ describe('CursorFormatter', () => {
       const result = formatter.format(ast);
       expect(result.content).not.toContain('Never:');
     });
+
+    it('should extract never items from ObjectContent with items array', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                items: ['Never use any type', 'Never skip tests', 'Never commit secrets'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Never:');
+      expect(result.content).toContain('- Never use any type');
+      expect(result.content).toContain('- Never skip tests');
+      expect(result.content).toContain('- Never commit secrets');
+    });
+
+    it('should handle configuration-files with object values (extractListItems object path)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'configuration-files': {
+                  eslint: { extends: 'strict', rules: 'custom' },
+                  prettier: { tabWidth: 2, semi: true },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Config:');
+      expect(result.content).toContain('eslint: extends: strict; rules: custom');
+      expect(result.content).toContain('prettier: tabWidth: 2; semi: true');
+    });
+
+    it('should handle configuration-files with string values (extractListItems string path)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'configuration-files': {
+                  readme: 'Project documentation\nSetup instructions\n- Important notes',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Config:');
+      expect(result.content).toContain(
+        'readme: Project documentation; Setup instructions; Important notes'
+      );
+    });
+
+    it('should handle configuration-files with numeric values (extractListItems fallback path)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'configuration-files': {
+                  port: 3000,
+                  timeout: 5000,
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Config:');
+      expect(result.content).toContain('port: 3000');
+      expect(result.content).toContain('timeout: 5000');
+    });
+
+    it('should handle configuration-files with array values (extractListItems array path)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'configuration-files': {
+                  dependencies: ['typescript', 'vitest', 'eslint'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Config:');
+      expect(result.content).toContain('dependencies: typescript; vitest; eslint');
+    });
   });
 
   describe('version support', () => {
