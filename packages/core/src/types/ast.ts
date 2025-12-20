@@ -46,7 +46,7 @@ export interface Program extends BaseNode {
  * ```promptscript
  * @meta {
  *   id: "my-project"
- *   version: "1.0.0"
+ *   syntax: "1.0.0"
  * }
  * ```
  */

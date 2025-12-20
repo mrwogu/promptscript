@@ -16,7 +16,7 @@ Benefits of using subagents:
 ## Complete Example
 
 ```promptscript
-@meta { id: "my-project", version: "1.0.0" }
+@meta { id: "my-project", syntax: "1.0.0" }
 
 @identity {
   """

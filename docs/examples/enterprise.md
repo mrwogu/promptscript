@@ -88,7 +88,7 @@ acme-promptscript-registry/
 ```promptscript
 @meta {
   id: "@acme/base"
-  syntax: "2.0.0"
+  syntax: "1.0.0"
   org: "ACME Corporation"
 }
 
@@ -161,7 +161,7 @@ acme-promptscript-registry/
 ```promptscript
 @meta {
   id: "@acme/security"
-  syntax: "1.5.0"
+  syntax: "1.0.0"
 }
 
 @identity {

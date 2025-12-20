@@ -64,68 +64,209 @@ PromptScript solves this by providing a **centralized, hierarchical system** whe
 
     ```promptscript
     @meta {
-      id: "my-project"
+      id: "ecommerce-api"
       syntax: "1.0.0"
     }
 
+    @inherit @company/backend-standards
+
     @identity {
       """
-      You are an expert TypeScript developer.
-      Focus on clean, maintainable code.
+      You are a senior backend engineer specializing in
+      high-performance e-commerce APIs.
       """
     }
 
-    @standards {
-      code: {
-        style: "functional"
-        testing: required
+    @tech-stack {
+      language: "TypeScript"
+      runtime: "Node.js 22"
+      framework: "Fastify"
+      database: "PostgreSQL + Redis"
+    }
+
+    @restrictions {
+      - "Never expose internal IDs in public APIs"
+      - "Always validate request payloads"
+    }
+
+    @skills {
+      deploy: {
+        description: "Deploy service to production"
+        allowedTools: ["Bash", "Read"]
+        content: """
+          1. Run tests: pnpm test
+          2. Build: pnpm build
+          3. Deploy: kubectl apply -f k8s/
+        """
       }
     }
 
-    @shortcuts {
-      "/review": "Review code for quality issues"
-      "/test": "Write comprehensive tests"
+    @agents {
+      db-optimizer: {
+        description: "Analyze and optimize SQL queries"
+        tools: ["Read", "Bash", "Grep"]
+        model: "sonnet"
+        content: """
+          You are a database performance expert.
+          Analyze queries for N+1 problems, missing
+          indexes, and optimization opportunities.
+        """
+      }
     }
     ```
 
-=== "Output: GitHub Copilot"
+=== "GitHub Copilot"
 
     ```markdown
-    # AI Instructions
+    <!-- .github/copilot-instructions.md -->
 
-    ## Identity
+    ## project
+    You are a senior backend engineer specializing in
+    high-performance e-commerce APIs.
 
-    You are an expert TypeScript developer.
-    Focus on clean, maintainable code.
+    ## tech-stack
+    - **Language:** TypeScript
+    - **Runtime:** Node.js 22
+    - **Framework:** Fastify
+    - **Database:** PostgreSQL + Redis
 
-    ## Standards
-
-    - Code style: functional
-    - Testing: required
-
-    ## Commands
-
-    - `/review` - Review code for quality issues
-    - `/test` - Write comprehensive tests
+    ## donts
+    - Don't expose internal IDs in public APIs
+    - Always validate request payloads
     ```
 
-=== "Output: Claude Code"
+    ```markdown
+    <!-- .github/skills/deploy/SKILL.md -->
+    ---
+    name: "deploy"
+    description: "Deploy service to production"
+    ---
+
+    1. Run tests: pnpm test
+    2. Build: pnpm build
+    3. Deploy: kubectl apply -f k8s/
+    ```
 
     ```markdown
+    <!-- .github/agents/db-optimizer.md -->
+    ---
+    name: db-optimizer
+    description: Analyze and optimize SQL queries
+    tools: [Read, Bash, Grep]
+    model: gpt-4o
+    ---
+
+    You are a database performance expert.
+    Analyze queries for N+1 problems...
+    ```
+
+=== "Claude Code"
+
+    ```markdown
+    <!-- CLAUDE.md -->
+
     # CLAUDE.md
 
-    You are an expert TypeScript developer.
-    Focus on clean, maintainable code.
+    You are a senior backend engineer specializing in
+    high-performance e-commerce APIs.
 
-    ## Standards
+    ## Tech Stack
 
-    Code style: functional
-    Testing: required
+    | Technology | Value |
+    |------------|-------|
+    | Language | TypeScript |
+    | Runtime | Node.js 22 |
+    | Framework | Fastify |
+    | Database | PostgreSQL + Redis |
 
-    ## Shortcuts
+    ## Restrictions
 
-    /review - Review code for quality issues
-    /test - Write comprehensive tests
+    - Never expose internal IDs in public APIs
+    - Always validate request payloads
+    ```
+
+    ```markdown
+    <!-- .claude/skills/deploy/SKILL.md -->
+    ---
+    name: "deploy"
+    description: "Deploy service to production"
+    allowed-tools:
+      - Bash
+      - Read
+    ---
+
+    1. Run tests: pnpm test
+    2. Build: pnpm build
+    3. Deploy: kubectl apply -f k8s/
+    ```
+
+    ```markdown
+    <!-- .claude/agents/db-optimizer.md -->
+    ---
+    name: db-optimizer
+    description: Analyze and optimize SQL queries
+    tools: Read, Bash, Grep
+    model: sonnet
+    ---
+
+    You are a database performance expert.
+    Analyze queries for N+1 problems...
+    ```
+
+=== "Cursor"
+
+    ```yaml
+    # .cursor/rules/project.mdc
+    ---
+    description: E-commerce API development rules
+    globs: ["**/*.ts"]
+    alwaysApply: true
+    ---
+
+    # E-commerce API Rules
+
+    Senior backend engineer for high-performance
+    e-commerce APIs.
+
+    ## Stack
+    TypeScript • Node.js 22 • Fastify • PostgreSQL
+
+    ## Critical Rules
+    ⛔ Never expose internal IDs in public APIs
+    ⛔ Always validate request payloads
+
+    ## Deploy Workflow
+    1. `pnpm test` → Run tests
+    2. `pnpm build` → Build service
+    3. `kubectl apply` → Deploy to k8s
+    ```
+
+    !!! note "Cursor Limitations"
+        Cursor doesn't support agents or skills natively.
+        All instructions are inlined into .mdc rules.
+
+=== "Antigravity"
+
+    ```markdown
+    <!-- .agent/rules/project.md -->
+    ---
+    trigger: always
+    description: E-commerce API coding rules
+    ---
+
+    # E-commerce API Assistant
+
+    Backend engineer for high-performance e-commerce APIs.
+
+    ## Technology
+    TypeScript on Node.js 22 with Fastify and PostgreSQL.
+
+    ## Forbidden Actions
+    1. Exposing internal IDs in APIs
+    2. Skipping request validation
+
+    ## Deploy Procedure
+    Run tests → Build → Deploy to Kubernetes
     ```
 
 ## Architecture

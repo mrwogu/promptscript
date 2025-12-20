@@ -20,10 +20,11 @@ pnpm add @promptscript/parser
 import { parse, parseOrThrow } from '@promptscript/parser';
 
 // Parse with error handling
-const result = parse(`
+const result = parse(
+  `
   @meta {
     id: "my-project"
-    version: "1.0.0"
+    syntax: "1.0.0"
   }
 
   @identity {
@@ -31,7 +32,9 @@ const result = parse(`
     You are a helpful assistant.
     """
   }
-`, { filename: 'example.prs' });
+`,
+  { filename: 'example.prs' }
+);
 
 if (result.errors.length === 0) {
   console.log(result.ast);
@@ -69,6 +72,7 @@ Parse PromptScript source code into an AST.
 - `options.tolerant`: Continue parsing even on errors (default: `false`)
 
 Returns `ParseResult` with:
+
 - `ast`: The parsed `Program` AST or `null`
 - `errors`: Array of `ParseError` objects
 
@@ -91,7 +95,7 @@ Tokenize source code without parsing.
 # Comment
 @meta {
   id: "my-project"
-  version: "1.0.0"
+  syntax: "1.0.0"
   tags: [frontend, typescript]
 }
 

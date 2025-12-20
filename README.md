@@ -46,7 +46,7 @@ Check also our [.promptscript/project.prs](.promptscript/project.prs) file.
 
 ```promptscript
 # One file to rule them all
-@meta { id: "my-project", version: "1.0.0" }
+@meta { id: "my-project", syntax: "1.0.0" }
 
 @inherit @company/frontend-team
 
@@ -95,6 +95,106 @@ prs compile
 # ✓ .cursor/rules/project.mdc
 # ✓ .agent/rules/project.md
 ```
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🎯 Write Once, Deploy Everywhere
+
+Single `.prs` source compiles to **GitHub Copilot**, **Claude Code**, **Cursor**, and **Antigravity** - each in its native format with platform-specific optimizations.
+
+</td>
+<td width="50%">
+
+### 🏗️ Enterprise-Grade Inheritance
+
+Build hierarchies: **Organization → Team → Project**. Extend, override, and compose instructions at any level with full type safety.
+
+</td>
+</tr>
+<tr>
+<td>
+
+### 🧙 Smart Project Detection
+
+`prs init` auto-detects your tech stack (React, Node, Python...) and existing AI tools, generating tailored configurations instantly.
+
+</td>
+<td>
+
+### 🛡️ Built-in Validation
+
+Type-safe configurations with semantic validation. Catch errors before they reach your AI tools.
+
+</td>
+</tr>
+<tr>
+<td>
+
+### ⚡ Skills & Workflows
+
+Define reusable AI capabilities with fine-grained tool permissions. Skills compile to platform-native formats (GitHub Skills, Claude Skills).
+
+</td>
+<td>
+
+### 🤖 Multi-Agent Support
+
+Configure specialized AI subagents for code review, debugging, deployment - each with custom tools and models.
+
+</td>
+</tr>
+<tr>
+<td>
+
+### 🔒 Local Memory
+
+Private instructions in `@local` blocks - development notes, API keys references, personal preferences. Never committed to git.
+
+</td>
+<td>
+
+### 📂 Path-Specific Rules
+
+Apply different rules to different file patterns with `@guards`. Generate multi-file instruction sets for complex projects.
+
+</td>
+</tr>
+<tr>
+<td>
+
+### 📝 Flexible Output Formats
+
+Choose **Markdown** (human-readable) or **XML** (structured) output per target. Support for MDC, YAML frontmatter, and more.
+
+</td>
+<td>
+
+### 🚀 Future-Proof
+
+Formatter updates automatically adapt your prompts to new AI features. Write once, benefit from every platform improvement.
+
+</td>
+</tr>
+</table>
+
+## One Source, Many Outputs
+
+Write once, compile to native formats for GitHub Copilot, Claude Code, Cursor, Antigravity and more:
+
+| Tool               | Output                            | Features                       |
+| ------------------ | --------------------------------- | ------------------------------ |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | + skills, agents               |
+| **Claude Code**    | `CLAUDE.md`                       | + skills, agents, local memory |
+| **Cursor**         | `.cursor/rules/project.mdc`       | MDC format with frontmatter    |
+| **Antigravity**    | `.agent/rules/project.md`         | Workflows support              |
+
+Each formatter understands platform-specific conventions and generates optimized output.
+
+👉 **[See full example with all outputs →](https://mrwogu.github.io/promptscript/#quick-example)**
 
 ## Advanced Features
 
@@ -186,18 +286,6 @@ With `version: multifile` or `full`, guards compile to:
 - **Claude**: `.claude/rules/*.md` with `paths` frontmatter
 
 See [Skills & Local Example](docs/examples/skills-and-local.md) for a complete configuration.
-
-## Features
-
-- 🔗 **Inheritance** - Organization → Team → Project hierarchy
-- 📦 **Unified Source** - Multiple `.prs` files with inheritance, single compilation to all outputs
-- ✅ **Validation** - Type-safe, versioned configurations
-- 🛡️ **Guards** - Compliance rules, blocked patterns
-- 🔌 **Extensible** - Add custom formatters
-- 🏢 **Enterprise Ready** - Audit trails, governance
-- 🚀 **Future-Proof** - Formatter updates automatically adapt your prompts to new AI features and models (like agent skills, tool use, etc.)
-- 🧙 **Smart Init** - Auto-detects AI tools and project type during `prs init`
-- 📝 **Output Conventions** - Choose Markdown or XML format per target
 
 ## Supported AI Tools
 
@@ -308,13 +396,70 @@ prs compile
 
 🎯 **Current Focus: Migration & Adoption**
 
-- [x] **Custom agents support** - Generate `.github/agents/` and `.claude/agents/` files for GitHub Copilot and Claude Code ✅
-- [ ] **Claude agents hooks** - Support for `PreToolUse`, `PostToolUse`, and `Stop` lifecycle hooks
-- [ ] **Migrate existing AI instructions to PromptScript** - Convert `.github/copilot-instructions.md`, `CLAUDE.md`, `.cursor/rules/*.mdc` files to unified `.prs` format
 - [ ] **`prs migrate` command** - Automatic conversion of existing instruction files to PromptScript
+
+🚧 **Documented but Not Yet Implemented** _(CLI features documented in reference, pending implementation)_
+
+- [ ] **`prs init --template`** - Project templates for quick initialization (e.g., `--template react-app`)
+- [ ] **`prs check` command** - Check configuration and dependencies health
+- [ ] **`prs completion` command** - Shell completion for Bash, Zsh, Fish
+- [ ] **`prs validate --fix`** - Auto-fix fixable validation issues
+- [ ] **`prs validate --format`** - Output format selection (text, json)
+- [ ] **`prs pull --dry-run`** - Preview changes without pulling
+- [ ] **`prs diff --all`** - Show diff for all targets at once
+- [ ] **`prs diff --color/--no-color`** - Control colored output in diff
+- [ ] **`prs compile --config`** - Path to custom config file
+- [ ] **Global `--verbose` flag** - Enable verbose output for debugging
+- [ ] **Global `--quiet` flag** - Suppress non-error output
+- [ ] **Environment variables** - `PROMPTSCRIPT_CONFIG`, `PROMPTSCRIPT_REGISTRY`, `PROMPTSCRIPT_VERBOSE`, `NO_COLOR`
+
+📚 **API Documentation vs Implementation Gaps** _(APIs documented in docs/api/ but not implemented)_
+
+- [ ] **`@promptscript/core`**
+  - [ ] `formatPath()` - Format PathReference back to string
+  - [ ] `formatDiagnostic()` - Format a diagnostic for display
+  - [ ] `createLocation()` - Create a source location
+  - [ ] `BLOCK_TYPES` constant - Array of all block type names
+  - [ ] `RESERVED_WORDS` constant - Array of reserved words
+- [ ] **`@promptscript/parser`**
+  - [ ] `parseFile()` - Parse a PromptScript file from disk
+  - [ ] `recovery` option in ParseOptions - Enable recovery mode for partial parsing
+- [ ] **`@promptscript/validator`**
+  - [ ] `validate()` standalone function - Currently only `Validator.validate()` method exists
+  - [ ] `removeRule()` method - Remove a validation rule by name
+  - [ ] `formatDiagnostic()` / `formatDiagnostics()` - Format diagnostics for display
+  - [ ] `disableRules` option - Array of rules to disable
+  - [ ] `customRules` option - Pass custom rules in ValidateOptions
+- [ ] **`@promptscript/resolver`**
+  - [ ] `resolve()` standalone function - Currently only `Resolver.resolve()` method exists
+  - [ ] `createFileSystemRegistry()` - Create a filesystem-based registry
+  - [ ] `createHttpRegistry()` - Create an HTTP-based registry
+  - [ ] `createCompositeRegistry()` - Combine multiple registries
+  - [ ] `Registry` interface with `exists()` and `list()` methods
+- [ ] **`@promptscript/compiler`**
+  - [ ] `compile()` standalone function - Currently only `Compiler.compile()` method exists
+  - [ ] `compileFile()` - Compile from file path directly
+  - [ ] `compileAll()` - Compile to all targets at once
+  - [ ] `watch()` method - Watch mode in Compiler class
+- [ ] **`@promptscript/formatters`**
+  - [ ] `format()` standalone function - Currently use `formatter.format()` method
+  - [ ] `getFormatter()` standalone function - Use `FormatterRegistry.get()` instead
+  - [ ] `registerFormatter()` standalone function - Use `FormatterRegistry.register()` instead
+
+⚙️ **Configuration Gaps** _(Options in docs/reference/config.md not in PromptScriptConfig type)_
+
+- [ ] **`input` section** - `entry`, `include`, `exclude` fields not in config type (CLI hardcodes `.promptscript/project.prs`)
+- [ ] **`registry.cache`** - Cache settings (`enabled`, `ttl`)
+- [ ] **`registry.auth`** - Authentication for private registries
+- [ ] **`watch` section** - Watch mode config (`include`, `exclude`, `debounce`, `clearScreen`)
+- [ ] **`output` section** - Output settings (`baseDir`, `header`, `overwrite`)
+- [ ] **`plugins` section** - Plugin system support
+- [ ] **`extends`** - Configuration file inheritance
+- [ ] **Environment variable interpolation** - `${VAR}` and `${VAR:-default}` syntax
 
 🤔 **Under Consideration** _(Looking for contributors & sponsors!)_
 
+- [ ] **Claude agents hooks** - Support for `PreToolUse`, `PostToolUse`, and `Stop` lifecycle hooks
 - [ ] **Remote registry** - Share and publish PromptScript packages (`@company/frontend-standards`)
 - [ ] **VS Code extension** - Syntax highlighting, autocomplete, inline validation
 - [ ] **GitHub Action** - CI/CD integration for automatic compilation and drift detection

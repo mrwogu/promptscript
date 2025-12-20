@@ -76,15 +76,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `prs validate` - Validate files
 - `prs diff` - Show output diff
 - `prs pull` - Pull registry updates
-- `prs check` - Check configuration
-- Shell completion for Bash, Zsh, Fish
 
 ### Configuration
 
 - `promptscript.yaml` configuration file
-- Input, registry, targets, validation, watch, output sections
-- Environment variable support
-- Plugin system
+- Registry and targets configuration
+- Validation rules configuration
 
 ### Documentation
 
