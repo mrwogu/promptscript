@@ -418,7 +418,7 @@ validation:
 
 ```bash
 # Generate new files
-prs compile --all --dry-run
+prs compile --dry-run
 
 # Review changes
 prs diff --all
@@ -537,7 +537,7 @@ Some content may be specific to certain tools:
 After migration, verify:
 
 - [ ] `prs validate` passes without errors
-- [ ] `prs compile --all` generates all targets
+- [ ] `prs compile` generates all targets
 - [ ] Generated files match expected content
 - [ ] No duplicate or conflicting instructions
 - [ ] All custom commands work in each tool

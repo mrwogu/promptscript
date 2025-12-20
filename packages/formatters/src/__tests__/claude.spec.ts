@@ -558,5 +558,376 @@ describe('ClaudeFormatter', () => {
       const localFile = result.additionalFiles?.find((f) => f.path === 'CLAUDE.local.md');
       expect(localFile).toBeUndefined();
     });
+
+    describe('agent file generation', () => {
+      it('should generate agent files in full mode with @agents block', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'identity',
+              content: {
+                type: 'TextContent',
+                value: 'You are a helpful assistant.',
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'code-reviewer': {
+                    description: 'Reviews code for quality and best practices',
+                    tools: ['Read', 'Grep', 'Glob', 'Bash'],
+                    model: 'sonnet',
+                    content: 'You are a senior code reviewer.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        expect(result.additionalFiles).toBeDefined();
+        const agentFile = result.additionalFiles?.find((f) =>
+          f.path.includes('.claude/agents/code-reviewer.md')
+        );
+        expect(agentFile).toBeDefined();
+        expect(agentFile?.content).toContain('name: code-reviewer');
+        expect(agentFile?.content).toContain(
+          'description: Reviews code for quality and best practices'
+        );
+        expect(agentFile?.content).toContain('tools: Read, Grep, Glob, Bash');
+        expect(agentFile?.content).toContain('model: sonnet');
+        expect(agentFile?.content).toContain('You are a senior code reviewer.');
+      });
+
+      it('should generate agent with all supported fields', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'db-reader': {
+                    description: 'Execute read-only database queries',
+                    tools: ['Bash', 'Read'],
+                    disallowedTools: ['Write', 'Edit'],
+                    model: 'haiku',
+                    permissionMode: 'dontAsk',
+                    skills: ['sql-patterns', 'data-analysis'],
+                    content: 'You are a database analyst with read-only access.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find((f) =>
+          f.path.includes('.claude/agents/db-reader.md')
+        );
+        expect(agentFile).toBeDefined();
+        expect(agentFile?.content).toContain('name: db-reader');
+        expect(agentFile?.content).toContain('tools: Bash, Read');
+        expect(agentFile?.content).toContain('disallowedTools: Write, Edit');
+        expect(agentFile?.content).toContain('model: haiku');
+        expect(agentFile?.content).toContain('permissionMode: dontAsk');
+        expect(agentFile?.content).toContain('skills:');
+        expect(agentFile?.content).toContain('  - sql-patterns');
+        expect(agentFile?.content).toContain('  - data-analysis');
+      });
+
+      it('should generate multiple agent files', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'code-reviewer': {
+                    description: 'Reviews code',
+                    content: 'Review code carefully.',
+                  },
+                  debugger: {
+                    description: 'Debug issues',
+                    tools: ['Read', 'Edit', 'Bash'],
+                    content: 'You are an expert debugger.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        expect(result.additionalFiles).toBeDefined();
+
+        const reviewerFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/code-reviewer.md'
+        );
+        const debuggerFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/debugger.md'
+        );
+
+        expect(reviewerFile).toBeDefined();
+        expect(debuggerFile).toBeDefined();
+        expect(debuggerFile?.content).toContain('tools: Read, Edit, Bash');
+      });
+
+      it('should generate minimal agent with only required fields', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'simple-agent': {
+                    description: 'A simple agent',
+                    content: 'Do simple tasks.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/simple-agent.md'
+        );
+        expect(agentFile).toBeDefined();
+        expect(agentFile?.content).toContain('name: simple-agent');
+        expect(agentFile?.content).toContain('description: A simple agent');
+        expect(agentFile?.content).not.toContain('tools:');
+        expect(agentFile?.content).not.toContain('model:');
+        expect(agentFile?.content).not.toContain('permissionMode:');
+        expect(agentFile?.content).toContain('Do simple tasks.');
+      });
+
+      it('should not generate agent files in simple mode', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'my-agent': {
+                    description: 'An agent',
+                    content: 'Agent content.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'simple' });
+        expect(result.additionalFiles).toBeUndefined();
+      });
+
+      it('should not generate agent files in multifile mode', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'my-agent': {
+                    description: 'An agent',
+                    content: 'Agent content.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+        const agentFile = result.additionalFiles?.find((f) => f.path.includes('.claude/agents/'));
+        expect(agentFile).toBeUndefined();
+      });
+
+      it('should skip agents without description', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'invalid-agent': {
+                    content: 'No description provided.',
+                  },
+                  'valid-agent': {
+                    description: 'Has description',
+                    content: 'Agent content.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const invalidAgent = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/invalid-agent.md'
+        );
+        const validAgent = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/valid-agent.md'
+        );
+
+        expect(invalidAgent).toBeUndefined();
+        expect(validAgent).toBeDefined();
+      });
+
+      it('should validate model values', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'test-agent': {
+                    description: 'Test agent',
+                    model: 'invalid-model',
+                    content: 'Test content.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/test-agent.md'
+        );
+        expect(agentFile).toBeDefined();
+        // Invalid model should be omitted
+        expect(agentFile?.content).not.toContain('model:');
+      });
+
+      it('should validate permissionMode values', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'agent-1': {
+                    description: 'Valid permission',
+                    permissionMode: 'acceptEdits',
+                    content: 'Content.',
+                  },
+                  'agent-2': {
+                    description: 'Invalid permission',
+                    permissionMode: 'invalid-mode',
+                    content: 'Content.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agent1 = result.additionalFiles?.find((f) => f.path === '.claude/agents/agent-1.md');
+        const agent2 = result.additionalFiles?.find((f) => f.path === '.claude/agents/agent-2.md');
+
+        expect(agent1?.content).toContain('permissionMode: acceptEdits');
+        expect(agent2?.content).not.toContain('permissionMode:');
+      });
+
+      it('should support all valid model types', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'sonnet-agent': { description: 'Sonnet', model: 'sonnet', content: 'c' },
+                  'opus-agent': { description: 'Opus', model: 'opus', content: 'c' },
+                  'haiku-agent': { description: 'Haiku', model: 'haiku', content: 'c' },
+                  'inherit-agent': { description: 'Inherit', model: 'inherit', content: 'c' },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+
+        const sonnetAgent = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/sonnet-agent.md'
+        );
+        const opusAgent = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/opus-agent.md'
+        );
+        const haikuAgent = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/haiku-agent.md'
+        );
+        const inheritAgent = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/inherit-agent.md'
+        );
+
+        expect(sonnetAgent?.content).toContain('model: sonnet');
+        expect(opusAgent?.content).toContain('model: opus');
+        expect(haikuAgent?.content).toContain('model: haiku');
+        expect(inheritAgent?.content).toContain('model: inherit');
+      });
+    });
   });
 });

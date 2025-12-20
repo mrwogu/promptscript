@@ -49,7 +49,7 @@ promptscript/
 │   ├── resolver/       # Inheritance resolution
 │   ├── validator/      # Validation rules
 │   ├── compiler/       # Compilation pipeline
-│   ├── formatters/     # Output formatters (GitHub, Claude, Cursor)
+│   ├── formatters/     # Output formatters (GitHub, Claude, Cursor, etc.)
 │   └── cli/            # CLI application
 ├── docs/               # Documentation
 └── examples/           # Example projects
@@ -65,7 +65,7 @@ During development, you can run the CLI without building:
 # Using pnpm script (recommended)
 pnpm prs --help
 pnpm prs init
-pnpm prs compile --all
+pnpm prs compile
 
 # Or directly with node
 node -r @swc-node/register packages/cli/src/cli.ts --help

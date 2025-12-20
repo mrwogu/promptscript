@@ -449,5 +449,212 @@ describe('GitHubFormatter', () => {
       expect(skillFile?.content).toContain('description: "Create git commits"');
       expect(skillFile?.content).toContain('disable-model-invocation: true');
     });
+
+    it('should generate custom agent files in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'code-reviewer': {
+                  description: 'Code review specialist',
+                  tools: ['read_file', 'grep_search'],
+                  content: 'You specialize in code reviews.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      expect(result.additionalFiles).toBeDefined();
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/code-reviewer.md')
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile?.content).toContain('name: code-reviewer');
+      expect(agentFile?.content).toContain('description: Code review specialist');
+      expect(agentFile?.content).toContain('tools:');
+      expect(agentFile?.content).toContain('- read_file');
+      expect(agentFile?.content).toContain('You specialize in code reviews.');
+    });
+
+    it('should generate agent file with minimal config', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                helper: {
+                  description: 'A helpful agent',
+                  content: 'You are a helpful agent.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/helper.md')
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile?.content).toContain('name: helper');
+      expect(agentFile?.content).toContain('You are a helpful agent.');
+      // Should not have tools if not provided
+      expect(agentFile?.content).not.toContain('tools:');
+    });
+
+    it('should generate agent file with model selection', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'smart-agent': {
+                  description: 'Agent using a specific model',
+                  model: 'gpt-4o',
+                  content: 'You are a smart agent.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/smart-agent.md')
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile?.content).toContain('name: smart-agent');
+      expect(agentFile?.content).toContain('model: gpt-4o');
+    });
+
+    it('should handle multiple agents', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Code reviewer',
+                  content: 'Review code.',
+                },
+                debugger: {
+                  description: 'Debug specialist',
+                  content: 'Debug issues.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const reviewerFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/reviewer.md')
+      );
+      const debuggerFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/debugger.md')
+      );
+      expect(reviewerFile).toBeDefined();
+      expect(debuggerFile).toBeDefined();
+    });
+
+    it('should not generate agents in standard mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                helper: {
+                  content: 'You are a helpful agent.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'standard' });
+      const agentFile = result.additionalFiles?.find((f) => f.path.includes('.github/agents/'));
+      expect(agentFile).toBeUndefined();
+    });
+
+    it('should parse tools from comma-separated string', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                helper: {
+                  description: 'Helper agent with tools',
+                  tools: ['read_file', 'write_file', 'run_terminal'],
+                  content: 'Agent with tools.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/helper.md')
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile?.content).toContain('- read_file');
+      expect(agentFile?.content).toContain('- write_file');
+      expect(agentFile?.content).toContain('- run_terminal');
+    });
   });
 });

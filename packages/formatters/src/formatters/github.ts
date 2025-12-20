@@ -19,7 +19,7 @@ export const GITHUB_VERSIONS = {
   },
   full: {
     name: 'full',
-    description: 'Multifile + skills (.github/skills/) + AGENTS.md',
+    description: 'Multifile + skills (.github/skills/) + agents (.github/agents/) + AGENTS.md',
     outputPath: '.github/copilot-instructions.md',
   },
 } as const;
@@ -67,6 +67,24 @@ interface SkillConfig {
   /** Whether to disable model invocation */
   disableModelInvocation?: boolean;
   /** Skill content/instructions */
+  content: string;
+}
+
+/**
+ * Configuration for a GitHub Copilot custom agent.
+ *
+ * @see https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents
+ */
+interface GitHubAgentConfig {
+  /** Agent name (used for filename) */
+  name: string;
+  /** Description of what the agent does */
+  description: string;
+  /** Tools the agent can use */
+  tools?: string[];
+  /** AI model to use (e.g., 'gpt-4o', 'claude-3.5-sonnet') */
+  model?: string;
+  /** System prompt content */
   content: string;
 }
 
@@ -204,6 +222,12 @@ export class GitHubFormatter extends BaseFormatter {
     const skills = this.extractSkills(ast);
     for (const skill of skills) {
       additionalFiles.push(this.generateSkillFile(skill));
+    }
+
+    // Generate custom agent files (.github/agents/)
+    const customAgents = this.extractCustomAgents(ast);
+    for (const agent of customAgents) {
+      additionalFiles.push(this.generateCustomAgentFile(agent));
     }
 
     // Generate AGENTS.md
@@ -589,6 +613,87 @@ export class GitHubFormatter extends BaseFormatter {
     }
 
     return [];
+  }
+
+  // ============================================================
+  // Custom Agent File Generation (.github/agents/)
+  // ============================================================
+
+  /**
+   * Extract custom agent configurations from @agents block.
+   *
+   * @see https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents
+   */
+  private extractCustomAgents(ast: Program): GitHubAgentConfig[] {
+    const agentsBlock = this.findBlock(ast, 'agents');
+    if (!agentsBlock) return [];
+
+    const agents: GitHubAgentConfig[] = [];
+    const props = this.getProps(agentsBlock.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        const description = obj['description'] ? this.valueToString(obj['description']) : '';
+        if (!description) continue; // description is required
+
+        agents.push({
+          name,
+          description,
+          tools: this.parseToolsArray(obj['tools']),
+          model: obj['model'] ? this.valueToString(obj['model']) : undefined,
+          content: obj['content'] ? this.valueToString(obj['content']) : '',
+        });
+      }
+    }
+
+    return agents;
+  }
+
+  /**
+   * Parse tools array from a Value.
+   */
+  private parseToolsArray(value: Value | undefined): string[] | undefined {
+    if (!value || !Array.isArray(value)) return undefined;
+    const arr = value.map((v) => this.valueToString(v)).filter((s) => s.length > 0);
+    return arr.length > 0 ? arr : undefined;
+  }
+
+  /**
+   * Generate a .github/agents/<name>.md file.
+   *
+   * @see https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents
+   */
+  private generateCustomAgentFile(config: GitHubAgentConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    lines.push(`name: ${config.name}`);
+    lines.push(`description: ${config.description}`);
+
+    if (config.tools && config.tools.length > 0) {
+      lines.push('tools:');
+      for (const tool of config.tools) {
+        lines.push(`  - ${tool}`);
+      }
+    }
+
+    if (config.model) {
+      lines.push(`model: ${config.model}`);
+    }
+
+    lines.push('---');
+    lines.push('');
+
+    if (config.content) {
+      lines.push(config.content);
+    }
+
+    return {
+      path: `.github/agents/${config.name}.md`,
+      content: lines.join('\n'),
+    };
   }
 
   // ============================================================

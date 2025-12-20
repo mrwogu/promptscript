@@ -84,7 +84,7 @@ Open `.promptscript/project.prs` and customize:
 Generate output files for all configured targets:
 
 ```bash
-prs compile --all
+prs compile
 ```
 
 Output:

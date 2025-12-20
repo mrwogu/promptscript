@@ -125,8 +125,8 @@ prs compile [options]
 **Examples:**
 
 ```bash
-# Compile all targets
-prs compile --all
+# Compile all targets (default)
+prs compile
 
 # Compile specific target
 prs compile --target github
@@ -138,13 +138,13 @@ prs compile --format github
 prs compile -f claude
 
 # Watch mode
-prs compile --watch --all
+prs compile --watch
 
 # Preview changes
-prs compile --all --dry-run
+prs compile --dry-run
 
 # Custom config
-prs compile --all --config ./custom.config.yaml
+prs compile --config ./custom.config.yaml
 ```
 
 **Available Targets:**
@@ -403,5 +403,5 @@ Check your `.prs` file syntax. Use `prs validate` for detailed errors.
 Enable verbose output for debugging:
 
 ```bash
-PROMPTSCRIPT_VERBOSE=1 prs compile --all
+PROMPTSCRIPT_VERBOSE=1 prs compile
 ```

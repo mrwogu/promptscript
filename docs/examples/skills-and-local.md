@@ -175,6 +175,51 @@ my-project/
 }
 
 # ============================================================
+# Agents - Specialized AI Subagents (GitHub Copilot & Claude Code)
+# ============================================================
+
+@agents {
+  code-reviewer: {
+    description: "Expert code reviewer. Use proactively after code changes."
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    skills: ["review"]
+    content: """
+      You are a senior code reviewer ensuring high standards of code quality.
+
+      When invoked:
+      1. Run git diff to see recent changes
+      2. Focus on modified files
+      3. Begin review immediately using the preloaded review skill
+
+      Provide feedback organized by priority:
+      - Critical issues (must fix)
+      - Warnings (should fix)
+      - Suggestions (consider improving)
+    """
+  }
+
+  debugger: {
+    description: "Debugging specialist for errors and test failures."
+    tools: ["Read", "Edit", "Bash", "Grep", "Glob"]
+    model: "inherit"
+    permissionMode: "acceptEdits"
+    content: """
+      You are an expert debugger specializing in root cause analysis.
+
+      When invoked:
+      1. Capture error message and stack trace
+      2. Identify reproduction steps
+      3. Isolate the failure location
+      4. Implement minimal fix
+      5. Verify solution works
+
+      Focus on fixing the underlying issue, not the symptoms.
+    """
+  }
+}
+
+# ============================================================
 # Local Memory - Private Instructions (not committed to git)
 # ============================================================
 
@@ -211,12 +256,12 @@ input:
   entry: .promptscript/project.prs
 
 targets:
-  # GitHub Copilot with full features (skills + agents)
+  # GitHub Copilot with full features (skills + custom agents)
   - github:
       version: full
       convention: markdown
 
-  # Claude Code with full features (skills + local memory)
+  # Claude Code with full features (skills + agents + local memory)
   - claude:
       version: full
       convention: markdown
@@ -243,6 +288,8 @@ With `version: full`, the formatter generates:
 **`.github/instructions/typescript.instructions.md`** (path-specific rules)
 **`.github/skills/commit/SKILL.md`** (commit skill)
 **`.github/skills/review/SKILL.md`** (review skill)
+**`.github/agents/code-reviewer.md`** (code reviewer agent)
+**`.github/agents/debugger.md`** (debugger agent)
 **`AGENTS.md`** (agent instructions)
 
 Example skill file:
@@ -271,7 +318,32 @@ With `version: full`, the formatter generates:
 **`.claude/rules/code-style.md`** (path-specific rules)
 **`.claude/skills/commit/SKILL.md`** (commit skill)
 **`.claude/skills/review/SKILL.md`** (review skill)
+**`.claude/agents/code-reviewer.md`** (code reviewer subagent)
+**`.claude/agents/debugger.md`** (debugger subagent)
 **`CLAUDE.local.md`** (private instructions)
+
+Example agent file:
+
+```markdown
+## <!-- .claude/agents/code-reviewer.md -->
+
+name: code-reviewer
+description: Expert code reviewer. Use proactively after code changes.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+skills:
+
+- review
+
+---
+
+You are a senior code reviewer ensuring high standards of code quality.
+
+When invoked:
+
+1. Run git diff to see recent changes
+   ...
+```
 
 Example local file:
 

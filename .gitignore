@@ -56,9 +56,6 @@ temp/
 /libpeerconnection.log
 /typings
 
-# GitHub prompts
-.github/prompts/setup/*.md
-
 vitest.config.*.timestamp*
 
 # MkDocs

@@ -41,6 +41,14 @@ Advanced AI skills and private local memory.
 
 </div>
 
+<div class="feature-card" markdown>
+### :material-robot-outline: Claude Agents
+Define specialized AI subagents for Claude Code.
+
+[Agents Example →](agents.md)
+
+</div>
+
 </div>
 
 ## Quick Examples

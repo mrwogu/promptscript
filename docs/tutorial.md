@@ -216,13 +216,13 @@ validation:
 Compile all targets:
 
 ```bash
-prs compile --all
+prs compile
 ```
 
 Preview without writing files:
 
 ```bash
-prs compile --all --dry-run
+prs compile --dry-run
 ```
 
 Validate your configuration:
@@ -286,7 +286,7 @@ jobs:
 
       - name: Check compiled files are up to date
         run: |
-          prs compile --all
+          prs compile
           git diff --exit-code
 ```
 

@@ -343,6 +343,49 @@ pnpm run test       # Run all tests
         },
         loc: createLoc(),
       },
+      // Agents block for Claude full mode
+      {
+        type: 'Block',
+        name: 'agents',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            'code-reviewer': {
+              description: 'Reviews code for quality and best practices',
+              tools: ['Read', 'Grep', 'Glob', 'Bash'],
+              model: 'sonnet',
+              content: `You are a senior code reviewer ensuring high standards of code quality.
+
+When invoked:
+1. Run git diff to see recent changes
+2. Focus on modified files
+3. Begin review immediately
+
+Review checklist:
+- Code is clear and readable
+- Functions and variables are well-named
+- No duplicated code
+- Proper error handling`,
+            },
+            debugger: {
+              description: 'Debugging specialist for errors and test failures',
+              tools: ['Read', 'Edit', 'Bash', 'Grep', 'Glob'],
+              model: 'inherit',
+              permissionMode: 'acceptEdits',
+              content: `You are an expert debugger specializing in root cause analysis.
+
+When invoked:
+1. Capture error message and stack trace
+2. Identify reproduction steps
+3. Isolate the failure location
+4. Implement minimal fix
+5. Verify solution works`,
+            },
+          },
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      },
     ],
   };
 }
@@ -645,6 +688,30 @@ describe('Golden Files Tests', () => {
       expect(reviewSkill).toBeDefined();
     });
 
+    it('github full should generate custom agent files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new GitHubFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      // Should have custom agent files
+      const codeReviewerAgent = result.additionalFiles?.find(
+        (f) => f.path === '.github/agents/code-reviewer.md'
+      );
+      expect(codeReviewerAgent).toBeDefined();
+      expect(codeReviewerAgent?.content).toContain('name: code-reviewer');
+      expect(codeReviewerAgent?.content).toContain(
+        'description: Reviews code for quality and best practices'
+      );
+      expect(codeReviewerAgent?.content).toContain('tools:');
+
+      const debuggerAgent = result.additionalFiles?.find(
+        (f) => f.path === '.github/agents/debugger.md'
+      );
+      expect(debuggerAgent).toBeDefined();
+    });
+
     it('claude multifile should generate rule files', () => {
       const ast = createCanonicalAST();
       const formatter = new ClaudeFormatter();
@@ -676,6 +743,33 @@ describe('Golden Files Tests', () => {
       const localFile = result.additionalFiles?.find((f) => f.path === 'CLAUDE.local.md');
       expect(localFile).toBeDefined();
       expect(localFile?.content).toContain('Local Development Configuration');
+    });
+
+    it('claude full should generate agent files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new ClaudeFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      // Should have agent files
+      const codeReviewerAgent = result.additionalFiles?.find(
+        (f) => f.path === '.claude/agents/code-reviewer.md'
+      );
+      expect(codeReviewerAgent).toBeDefined();
+      expect(codeReviewerAgent?.content).toContain('name: code-reviewer');
+      expect(codeReviewerAgent?.content).toContain(
+        'description: Reviews code for quality and best practices'
+      );
+      expect(codeReviewerAgent?.content).toContain('tools: Read, Grep, Glob, Bash');
+      expect(codeReviewerAgent?.content).toContain('model: sonnet');
+
+      const debuggerAgent = result.additionalFiles?.find(
+        (f) => f.path === '.claude/agents/debugger.md'
+      );
+      expect(debuggerAgent).toBeDefined();
+      expect(debuggerAgent?.content).toContain('model: inherit');
+      expect(debuggerAgent?.content).toContain('permissionMode: acceptEdits');
     });
 
     it('cursor multifile should generate additional rule files', () => {

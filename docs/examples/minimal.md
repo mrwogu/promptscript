@@ -83,7 +83,7 @@ prs init
 Generate the output file:
 
 ```bash
-prs compile --all
+prs compile
 ```
 
 ### Validate
@@ -148,7 +148,7 @@ targets:
 Then:
 
 ```bash
-prs compile --all
+prs compile
 ```
 
 ## Next Steps

@@ -439,9 +439,9 @@ jobs:
 
       - name: Check compiled files
         run: |
-          prs compile --all
+          prs compile
           git diff --exit-code || {
-            echo "::error::Compiled files are out of date. Run 'prs compile --all' and commit."
+            echo "::error::Compiled files are out of date. Run 'prs compile' and commit."
             exit 1
           }
         env:

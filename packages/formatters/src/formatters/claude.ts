@@ -19,7 +19,7 @@ export const CLAUDE_VERSIONS = {
   },
   full: {
     name: 'full',
-    description: 'Multifile + skills (.claude/skills/) + local memory',
+    description: 'Multifile + skills (.claude/skills/) + agents (.claude/agents/) + local memory',
     outputPath: 'CLAUDE.md',
   },
 } as const;
@@ -55,6 +55,45 @@ interface ClaudeSkillConfig {
   /** Whether user can invoke this skill */
   userInvocable?: boolean;
   /** Skill content/instructions */
+  content: string;
+}
+
+/**
+ * Valid model values for Claude agents.
+ */
+type ClaudeAgentModel = 'sonnet' | 'opus' | 'haiku' | 'inherit';
+
+/**
+ * Valid permission modes for Claude agents.
+ */
+type ClaudeAgentPermissionMode =
+  | 'default'
+  | 'acceptEdits'
+  | 'dontAsk'
+  | 'bypassPermissions'
+  | 'plan';
+
+/**
+ * Configuration for a Claude subagent.
+ *
+ * @see https://code.claude.com/docs/en/sub-agents
+ */
+interface ClaudeAgentConfig {
+  /** Agent name (lowercase, hyphens) - required */
+  name: string;
+  /** When Claude should delegate to this subagent - required */
+  description: string;
+  /** Tools the subagent can use (inherits all if omitted) */
+  tools?: string[];
+  /** Tools to deny (removed from inherited or specified list) */
+  disallowedTools?: string[];
+  /** Model to use: sonnet, opus, haiku, or inherit (defaults to sonnet) */
+  model?: ClaudeAgentModel;
+  /** Permission mode for the subagent */
+  permissionMode?: ClaudeAgentPermissionMode;
+  /** Skills to preload into the subagent's context at startup */
+  skills?: string[];
+  /** System prompt content */
   content: string;
 }
 
@@ -180,6 +219,12 @@ export class ClaudeFormatter extends BaseFormatter {
     const skills = this.extractSkills(ast);
     for (const skill of skills) {
       additionalFiles.push(this.generateSkillFile(skill));
+    }
+
+    // Generate agent files
+    const agents = this.extractAgents(ast);
+    for (const agent of agents) {
+      additionalFiles.push(this.generateAgentFile(agent));
     }
 
     // Generate CLAUDE.local.md
@@ -417,6 +462,138 @@ export class ClaudeFormatter extends BaseFormatter {
 
     return {
       path: `.claude/skills/${config.name}/SKILL.md`,
+      content: lines.join('\n'),
+    };
+  }
+
+  // ============================================================
+  // Agent File Generation
+  // ============================================================
+
+  /**
+   * Extract agent configurations from @agents block.
+   */
+  private extractAgents(ast: Program): ClaudeAgentConfig[] {
+    const agentsBlock = this.findBlock(ast, 'agents');
+    if (!agentsBlock) return [];
+
+    const agents: ClaudeAgentConfig[] = [];
+    const props = this.getProps(agentsBlock.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        const agent = this.parseAgentConfig(name, obj);
+        if (agent) {
+          agents.push(agent);
+        }
+      }
+    }
+
+    return agents;
+  }
+
+  /**
+   * Parse a single agent configuration from object properties.
+   */
+  private parseAgentConfig(name: string, obj: Record<string, Value>): ClaudeAgentConfig | null {
+    const description = obj['description'] ? this.valueToString(obj['description']) : '';
+    if (!description) return null; // description is required
+
+    return {
+      name,
+      description,
+      tools: this.parseStringArray(obj['tools']),
+      disallowedTools: this.parseStringArray(obj['disallowedTools']),
+      model: this.parseAgentModel(obj['model']),
+      permissionMode: this.parsePermissionMode(obj['permissionMode']),
+      skills: this.parseStringArray(obj['skills']),
+      content: obj['content'] ? this.valueToString(obj['content']) : '',
+    };
+  }
+
+  /**
+   * Parse an array of strings from a Value.
+   */
+  private parseStringArray(value: Value | undefined): string[] | undefined {
+    if (!value || !Array.isArray(value)) return undefined;
+    const arr = value.map((v) => this.valueToString(v)).filter((s) => s.length > 0);
+    return arr.length > 0 ? arr : undefined;
+  }
+
+  /**
+   * Parse model value, validating it's a known model.
+   */
+  private parseAgentModel(value: Value | undefined): ClaudeAgentModel | undefined {
+    if (!value) return undefined;
+    const str = this.valueToString(value);
+    const validModels: ClaudeAgentModel[] = ['sonnet', 'opus', 'haiku', 'inherit'];
+    return validModels.includes(str as ClaudeAgentModel) ? (str as ClaudeAgentModel) : undefined;
+  }
+
+  /**
+   * Parse permission mode value.
+   */
+  private parsePermissionMode(value: Value | undefined): ClaudeAgentPermissionMode | undefined {
+    if (!value) return undefined;
+    const str = this.valueToString(value);
+    const validModes: ClaudeAgentPermissionMode[] = [
+      'default',
+      'acceptEdits',
+      'dontAsk',
+      'bypassPermissions',
+      'plan',
+    ];
+    return validModes.includes(str as ClaudeAgentPermissionMode)
+      ? (str as ClaudeAgentPermissionMode)
+      : undefined;
+  }
+
+  /**
+   * Generate a .claude/agents/<name>.md file.
+   *
+   * @see https://code.claude.com/docs/en/sub-agents
+   */
+  private generateAgentFile(config: ClaudeAgentConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    lines.push(`name: ${config.name}`);
+    lines.push(`description: ${config.description}`);
+
+    if (config.tools && config.tools.length > 0) {
+      lines.push(`tools: ${config.tools.join(', ')}`);
+    }
+
+    if (config.disallowedTools && config.disallowedTools.length > 0) {
+      lines.push(`disallowedTools: ${config.disallowedTools.join(', ')}`);
+    }
+
+    if (config.model) {
+      lines.push(`model: ${config.model}`);
+    }
+
+    if (config.permissionMode) {
+      lines.push(`permissionMode: ${config.permissionMode}`);
+    }
+
+    if (config.skills && config.skills.length > 0) {
+      lines.push('skills:');
+      for (const skill of config.skills) {
+        lines.push(`  - ${skill}`);
+      }
+    }
+
+    lines.push('---');
+    lines.push('');
+
+    if (config.content) {
+      lines.push(config.content);
+    }
+
+    return {
+      path: `.claude/agents/${config.name}.md`,
       content: lines.join('\n'),
     };
   }

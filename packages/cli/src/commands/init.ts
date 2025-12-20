@@ -75,7 +75,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
     ConsoleOutput.newline();
     console.log('Next steps:');
     ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
-    ConsoleOutput.muted('2. Run: prs compile --all');
+    ConsoleOutput.muted('2. Run: prs compile');
   } catch (error) {
     if ((error as Error).name === 'ExitPromptError') {
       // User cancelled with Ctrl+C

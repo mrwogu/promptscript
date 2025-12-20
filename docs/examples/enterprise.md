@@ -700,7 +700,7 @@ jobs:
 
       - name: Compile test project
         working-directory: test-project
-        run: prs compile --all
+        run: prs compile
         env:
           PROMPTSCRIPT_REGISTRY: ${{ github.workspace }}
 ```
@@ -741,10 +741,10 @@ jobs:
 
       - name: Ensure compiled files are up to date
         run: |
-          prs compile --all
+          prs compile
           if ! git diff --exit-code; then
             echo "::error::Generated files are out of date"
-            echo "Run 'prs compile --all' and commit the changes"
+            echo "Run 'prs compile' and commit the changes"
             exit 1
           fi
         env:

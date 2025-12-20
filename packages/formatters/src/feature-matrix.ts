@@ -373,15 +373,16 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
   {
     id: 'agent-instructions',
     name: 'Agent Instructions',
-    description: 'Special instructions for AI agents (AGENTS.md)',
+    description:
+      'Special instructions for AI agents (AGENTS.md, .github/agents/, or .claude/agents/)',
     category: 'advanced',
     tools: {
-      github: 'supported', // AGENTS.md
+      github: 'supported', // AGENTS.md + .github/agents/<name>.md
       cursor: 'not-supported',
-      claude: 'not-supported',
+      claude: 'supported', // .claude/agents/<name>.md
       antigravity: 'not-supported',
     },
-    testStrategy: 'Check for AGENTS.md file',
+    testStrategy: 'Check for AGENTS.md, .github/agents/ or .claude/agents/ files',
   },
   {
     id: 'local-memory',

@@ -268,8 +268,8 @@ flowchart TD
 From each project directory:
 
 ```bash
-cd project-a && prs compile --all
-cd ../project-b && prs compile --all
+cd project-a && prs compile
+cd ../project-b && prs compile
 ```
 
 Or use a script:
@@ -278,7 +278,7 @@ Or use a script:
 #!/bin/bash
 for dir in project-*/; do
   echo "Compiling $dir..."
-  (cd "$dir" && prs compile --all)
+  (cd "$dir" && prs compile)
 done
 ```
 
@@ -334,7 +334,7 @@ jobs:
 
       - name: Check compiled files
         run: |
-          prs compile --all
+          prs compile
           git diff --exit-code
 ```
 

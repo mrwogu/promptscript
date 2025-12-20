@@ -87,7 +87,7 @@ Check also our [.promptscript/project.prs](.promptscript/project.prs) file.
 Then compile:
 
 ```bash
-prs compile --all
+prs compile
 
 # Output:
 # ✓ .github/copilot-instructions.md
@@ -262,13 +262,10 @@ See [Configuration Reference](https://mrwogu.github.io/promptscript/reference/co
 | Context File Inclusion |   ❌   |   ✅   |   ❌   |     ❌      |
 | Skills                 |   ✅   |   ❌   |   ✅   |     ❌      |
 | Prompt Files           |   ✅   |   ❌   |   ❌   |     ❌      |
-| Agent Instructions     |   ✅   |   ❌   |   🔜   |     ❌      |
+| Agent Instructions     |   ✅   |   ❌   |   ✅   |     ❌      |
 | Local Memory           |   ❌   |   ❌   |   ✅   |     ❌      |
 | Nested Memory          |   ❌   |   ✅   |   ✅   |     ✅      |
 | Workflow Files         |   ❌   |   ❌   |   ❌   |     ✅      |
-
-> **Note:** Claude Code supports `.claude/agents/` for agent definitions - this feature is planned 🔜 but not yet implemented.        
-See [Roadmap](#roadmap).
 
 ## Getting Started
 
@@ -287,7 +284,7 @@ prs init
 # Edit .promptscript/project.prs
 
 # Compile to all formats
-prs compile --all
+prs compile
 ```
 
 ## Documentation
@@ -311,7 +308,8 @@ prs compile --all
 
 🎯 **Current Focus: Migration & Adoption**
 
-- [ ] **Claude agents support** - Generate `.claude/agents/` files for Claude Code agent definitions
+- [x] **Custom agents support** - Generate `.github/agents/` and `.claude/agents/` files for GitHub Copilot and Claude Code ✅
+- [ ] **Claude agents hooks** - Support for `PreToolUse`, `PostToolUse`, and `Stop` lifecycle hooks
 - [ ] **Migrate existing AI instructions to PromptScript** - Convert `.github/copilot-instructions.md`, `CLAUDE.md`, `.cursor/rules/*.mdc` files to unified `.prs` format
 - [ ] **`prs migrate` command** - Automatic conversion of existing instruction files to PromptScript
 

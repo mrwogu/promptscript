@@ -284,6 +284,64 @@ Skills are output differently based on the formatter:
 - **GitHub**: `.github/skills/<name>/SKILL.md` (version: full)
 - **Claude**: `.claude/skills/<name>/SKILL.md` (version: full)
 
+### @agents
+
+Define specialized AI subagents for GitHub Copilot and Claude Code:
+
+```promptscript
+@agents {
+  code-reviewer: {
+    description: "Reviews code for quality and best practices"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    content: """
+      You are a senior code reviewer ensuring high standards.
+
+      When invoked:
+      1. Run git diff to see recent changes
+      2. Focus on modified files
+      3. Begin review immediately
+
+      Review checklist:
+      - Code is clear and readable
+      - Functions and variables are well-named
+      - No duplicated code
+      - Proper error handling
+    """
+  }
+
+  debugger: {
+    description: "Debugging specialist for errors and test failures"
+    tools: ["Read", "Edit", "Bash", "Grep", "Glob"]
+    disallowedTools: ["Write"]
+    model: "inherit"
+    permissionMode: "acceptEdits"
+    skills: ["error-handling", "testing-patterns"]
+    content: """
+      You are an expert debugger specializing in root cause analysis.
+    """
+  }
+}
+```
+
+| Property          | Type     | Required | Description                                                                    |
+| ----------------- | -------- | -------- | ------------------------------------------------------------------------------ |
+| `description`     | string   | Yes      | When the agent should be invoked                                               |
+| `content`         | string   | Yes      | System prompt for the subagent                                                 |
+| `tools`           | string[] | No       | Allowed tools (inherits all if omitted)                                        |
+| `model`           | string   | No       | AI model to use (platform-specific values)                                     |
+| `disallowedTools` | string[] | No       | Tools to deny (Claude only)                                                    |
+| `permissionMode`  | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude only) |
+| `skills`          | string[] | No       | Skills to preload into subagent context (Claude only)                          |
+
+Agents output by platform:
+
+- **GitHub**: `.github/agents/<name>.md` (version: full) - supports `name`, `description`, `tools`, `model`
+- **Claude**: `.claude/agents/<name>.md` (version: full) - supports all properties
+
+!!! note "Hooks Support"
+Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are planned but not yet implemented. See [Roadmap](../../README.md#roadmap).
+
 ### @local
 
 Private instructions not committed to version control:
