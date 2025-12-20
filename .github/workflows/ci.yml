@@ -59,6 +59,16 @@ jobs:
             exit 1
           fi
 
+      - name: Schema Drift Check
+        if: matrix.node-version == '25.x'
+        run: |
+          pnpm schema:generate
+          if [ -n "$(git status --porcelain schema/)" ]; then
+            echo "::error::JSON Schema is out of sync with TypeScript types. Run 'pnpm schema:generate' locally and commit the changes."
+            git diff schema/
+            exit 1
+          fi
+
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 

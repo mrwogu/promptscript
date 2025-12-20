@@ -1,6 +1,14 @@
 {
   "name": "@promptscript/compiler",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrwogu/promptscript.git",
+    "directory": "packages/compiler"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "commonjs",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",

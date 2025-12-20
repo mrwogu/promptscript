@@ -10,6 +10,8 @@
     "format": "nx format:write",
     "format:check": "nx format:check",
     "typecheck": "pnpm nx run-many -t typecheck",
+    "schema:generate": "ts-node --esm scripts/generate-schema.mts",
+    "schema:check": "./scripts/check-schema.sh",
     "docs:serve": "mkdocs serve",
     "docs:build": "mkdocs build --strict",
     "prs": "node -r @swc-node/register packages/cli/src/cli.ts"
@@ -36,6 +38,8 @@
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "22.3.3",
     "prettier": "~3.6.2",
+    "ts-json-schema-generator": "^2.4.0",
+    "ts-node": "^10.9.2",
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
     "verdaccio": "^6.0.5",

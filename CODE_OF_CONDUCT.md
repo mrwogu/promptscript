@@ -30,8 +30,8 @@ Examples of unacceptable behavior:
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-conduct@promptscript.dev.
+reported to the community leaders responsible for enforcement by
+[opening a discussion](https://github.com/mrwogu/promptscript/discussions) in the project.
 
 ## Attribution
 

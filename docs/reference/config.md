@@ -441,14 +441,26 @@ Extended configurations are deep-merged.
 
 ## Schema Validation
 
-The configuration file is validated against a JSON schema. Enable editor support:
+The configuration file is validated against a JSON schema. Enable editor support by adding the schema reference at the top of your `promptscript.yaml`:
 
 ```yaml
-# yaml-language-server: $schema=https://promptscript.dev/schema/config.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mrwogu/promptscript/main/schema/config.json
 
 input:
   entry: .promptscript/project.prs
 ```
+
+This provides:
+
+- **Autocomplete** - suggestions for all configuration options
+- **Validation** - errors for invalid fields or values
+- **Documentation** - hover tooltips with field descriptions
+
+!!! tip "Schema is the source of truth"
+    The JSON schema is automatically generated from TypeScript types in `@promptscript/core`. 
+    When in doubt about configuration options, the schema reflects the current implementation.
+
+    Schema URL: [`schema/config.json`](https://raw.githubusercontent.com/mrwogu/promptscript/main/schema/config.json)
 
 ## Examples
 

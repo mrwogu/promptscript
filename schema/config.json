@@ -1,0 +1,272 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/mrwogu/promptscript/main/schema/config.json",
+  "title": "PromptScript Configuration",
+  "description": "PromptScript configuration file (promptscript.yaml).",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1",
+      "description": "Config version"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "Project identification"
+    },
+    "inherit": {
+      "type": "string",
+      "description": "Inheritance path"
+    },
+    "registry": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Local path to registry"
+        },
+        "url": {
+          "type": "string",
+          "description": "Remote URL"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Registry configuration"
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TargetEntry"
+      },
+      "description": "Output targets.\n\nCan be simple names or objects with configuration:",
+      "example": "targets:\n  - github\n  - claude:\n      convention: markdown\n      output: custom/CLAUDE.md"
+    },
+    "customConventions": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/OutputConvention"
+      },
+      "description": "Custom convention definitions. Register custom conventions that can be referenced by name in targets."
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "requiredGuards": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rules": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "off"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Validation settings"
+    }
+  },
+  "required": [
+    "version",
+    "project",
+    "registry",
+    "targets"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "TargetEntry": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/TargetName"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "github": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "claude": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "cursor": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "gemini": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "jetbrains": {
+              "$ref": "#/definitions/TargetConfig"
+            }
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/TargetConfig"
+          }
+        }
+      ],
+      "description": "Target can be a simple string name or a full configuration object."
+    },
+    "TargetName": {
+      "type": "string",
+      "description": "Supported output targets.q"
+    },
+    "TargetConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this target is enabled.",
+          "default": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Custom output path for this target."
+        },
+        "convention": {
+          "$ref": "#/definitions/ConventionName",
+          "description": "Output convention ('xml', 'markdown', or custom name)."
+        },
+        "version": {
+          "type": "string",
+          "description": "Target version or format variant. Use 'legacy' for deprecated formats (e.g., Cursor's .cursorrules).",
+          "example": "'legacy' | '1.0' | '2.0'"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for a single target."
+    },
+    "ConventionName": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/BuiltInConventionName"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "description": "Convention name (built-in or custom)."
+    },
+    "BuiltInConventionName": {
+      "type": "string",
+      "enum": [
+        "xml",
+        "markdown"
+      ],
+      "description": "Built-in convention names."
+    },
+    "OutputConvention": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/ConventionName",
+          "description": "Convention identifier."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description."
+        },
+        "section": {
+          "$ref": "#/definitions/SectionRenderer",
+          "description": "Section rendering configuration."
+        },
+        "subsection": {
+          "$ref": "#/definitions/SectionRenderer",
+          "description": "Subsection rendering (defaults to section config if not specified)."
+        },
+        "listStyle": {
+          "type": "string",
+          "enum": [
+            "dash",
+            "asterisk",
+            "bullet",
+            "numbered"
+          ],
+          "description": "How to render lists.",
+          "default": "'dash' (- item)"
+        },
+        "codeBlockDelimiter": {
+          "type": "string",
+          "description": "Code block delimiter.",
+          "default": "```"
+        },
+        "rootWrapper": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string"
+            },
+            "end": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false,
+          "description": "Whether to wrap content in a root element."
+        }
+      },
+      "required": [
+        "name",
+        "section"
+      ],
+      "additionalProperties": false,
+      "description": "Output convention definition."
+    },
+    "SectionRenderer": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "description": "Template for section start. Variables: {{name}}, {{level}}, {{content}}",
+          "example": "Markdown: \"{{#repeat level}}#{{/repeat}} {{name}}\""
+        },
+        "end": {
+          "type": "string",
+          "description": "Template for section end (optional, for paired tags). Variables: {{name}}",
+          "example": "Markdown: \"\" (empty - no closing tag)"
+        },
+        "nameTransform": {
+          "type": "string",
+          "enum": [
+            "kebab-case",
+            "camelCase",
+            "PascalCase",
+            "none"
+          ],
+          "description": "Whether to convert section names.",
+          "default": "kebab-case"
+        },
+        "indent": {
+          "type": "string",
+          "description": "Indentation per level.",
+          "default": "'  ' (2 spaces)"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "additionalProperties": false,
+      "description": "Section rendering configuration."
+    }
+  }
+}

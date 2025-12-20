@@ -188,4 +188,4 @@ nav:
       - testing/index.md
       - Parity Testing: testing/parity-testing.md
       - Feature Coverage: testing/feature-coverage.md
-  - Changelog: changelog.md
+  - Changelog: https://github.com/mrwogu/promptscript/releases
