@@ -6,6 +6,7 @@ import {
   resolvePath,
   createPathReference,
   getFileName,
+  formatPath,
 } from '../utils/path';
 
 describe('parsePath', () => {
@@ -181,5 +182,48 @@ describe('getFileName', () => {
 
   it('should return single segment', () => {
     expect(getFileName('@core/guards')).toBe('guards');
+  });
+});
+
+describe('formatPath', () => {
+  it('should format absolute path without version', () => {
+    const result = formatPath({
+      namespace: 'core',
+      segments: ['guards', 'compliance'],
+      isRelative: false,
+    });
+    expect(result).toBe('@core/guards/compliance');
+  });
+
+  it('should format absolute path with version', () => {
+    const result = formatPath({
+      namespace: 'core',
+      segments: ['guards'],
+      version: '1.0.0',
+      isRelative: false,
+    });
+    expect(result).toBe('@core/guards@1.0.0');
+  });
+
+  it('should format relative path', () => {
+    const result = formatPath({
+      segments: ['local', 'file'],
+      isRelative: true,
+    });
+    expect(result).toBe('./local/file');
+  });
+
+  it('should round-trip with parsePath for absolute paths', () => {
+    const original = '@core/guards/compliance@1.0.0';
+    const parsed = parsePath(original);
+    const formatted = formatPath(parsed);
+    expect(formatted).toBe(original);
+  });
+
+  it('should round-trip with parsePath for relative paths', () => {
+    const original = './local/file';
+    const parsed = parsePath(original);
+    const formatted = formatPath(parsed);
+    expect(formatted).toBe(original);
   });
 });

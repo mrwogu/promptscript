@@ -33,7 +33,12 @@ export interface ParsedPath {
  */
 export function parsePath(path: string): ParsedPath {
   // Relative path (handle both Unix and Windows separators)
-  if (path.startsWith('./') || path.startsWith('../') || path.startsWith('.\\') || path.startsWith('..\\')) {
+  if (
+    path.startsWith('./') ||
+    path.startsWith('../') ||
+    path.startsWith('.\\') ||
+    path.startsWith('..\\')
+  ) {
     // Normalize to forward slashes for parsing, then split
     const normalizedPath = path.replace(/\\/g, '/');
     const segments = normalizedPath.split('/').filter(Boolean);
@@ -50,9 +55,7 @@ export function parsePath(path: string): ParsedPath {
   }
 
   // Absolute path: @namespace/path@version
-  const match = path.match(
-    /^@([a-zA-Z_][a-zA-Z0-9_-]*)\/(.+?)(?:@(\d+\.\d+\.\d+))?$/
-  );
+  const match = path.match(/^@([a-zA-Z_][a-zA-Z0-9_-]*)\/(.+?)(?:@(\d+\.\d+\.\d+))?$/);
 
   if (!match) {
     throw new Error(`Invalid path format: ${path}`);
@@ -80,7 +83,12 @@ export function isAbsolutePath(path: string): boolean {
  * Check if a path is relative.
  */
 export function isRelativePath(path: string): boolean {
-  return path.startsWith('./') || path.startsWith('../') || path.startsWith('.\\') || path.startsWith('..\\');
+  return (
+    path.startsWith('./') ||
+    path.startsWith('../') ||
+    path.startsWith('.\\') ||
+    path.startsWith('..\\')
+  );
 }
 
 /**
@@ -111,10 +119,7 @@ export function resolvePath(
 /**
  * Create a PathReference AST node from a path string.
  */
-export function createPathReference(
-  path: string,
-  loc: SourceLocation
-): PathReference {
+export function createPathReference(path: string, loc: SourceLocation): PathReference {
   const parsed = parsePath(path);
 
   return {
@@ -134,4 +139,33 @@ export function createPathReference(
 export function getFileName(path: string): string {
   const parsed = parsePath(path);
   return parsed.segments[parsed.segments.length - 1] ?? '';
+}
+
+/**
+ * Format a PathReference back to its string representation.
+ *
+ * @param ref - PathReference to format
+ * @returns Formatted path string
+ *
+ * @example
+ * ```typescript
+ * formatPath({ namespace: 'core', segments: ['guards', 'compliance'], version: '1.0.0', isRelative: false })
+ * // '@core/guards/compliance@1.0.0'
+ *
+ * formatPath({ segments: ['local', 'file'], isRelative: true })
+ * // './local/file'
+ * ```
+ */
+export function formatPath(ref: PathReference | ParsedPath): string {
+  if (ref.isRelative) {
+    return './' + ref.segments.join('/');
+  }
+
+  let result = `@${ref.namespace}/${ref.segments.join('/')}`;
+
+  if (ref.version) {
+    result += `@${ref.version}`;
+  }
+
+  return result;
 }
