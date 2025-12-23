@@ -1,5 +1,5 @@
 // Main parse functions
-export { parse, parseOrThrow } from './parse';
+export { parse, parseOrThrow, parseFile, parseFileOrThrow } from './parse';
 export type { ParseOptions, ParseResult } from './parse';
 
 // Lexer components

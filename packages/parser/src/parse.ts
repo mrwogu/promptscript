@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { PSLexer } from './lexer/lexer';
 import { parser } from './grammar/parser';
 import { visitor } from './grammar/visitor';
@@ -10,8 +11,16 @@ import { ParseError } from '@promptscript/core';
 export interface ParseOptions {
   /** Filename for error reporting. Defaults to '<unknown>'. */
   filename?: string;
-  /** Continue parsing even when errors are encountered. Defaults to false. */
+  /**
+   * Continue parsing even when errors are encountered. Defaults to false.
+   * Alias: `recovery`
+   */
   tolerant?: boolean;
+  /**
+   * Enable recovery mode for partial parsing. Alias for `tolerant`.
+   * When true, the parser will attempt to continue after errors.
+   */
+  recovery?: boolean;
 }
 
 /**
@@ -52,7 +61,8 @@ export interface ParseResult {
  * ```
  */
 export function parse(source: string, options: ParseOptions = {}): ParseResult {
-  const { filename = '<unknown>', tolerant = false } = options;
+  const { filename = '<unknown>', tolerant = false, recovery = false } = options;
+  const isRecoveryMode = tolerant || recovery;
   const errors: ParseError[] = [];
 
   // Lexing phase
@@ -68,7 +78,7 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     );
   }
 
-  if (errors.length > 0 && !tolerant) {
+  if (errors.length > 0 && !isRecoveryMode) {
     return { ast: null, errors };
   }
 
@@ -86,7 +96,7 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     );
   }
 
-  if (errors.length > 0 && !tolerant) {
+  if (errors.length > 0 && !isRecoveryMode) {
     return { ast: null, errors };
   }
 
@@ -134,6 +144,83 @@ export function parseOrThrow(source: string, options?: ParseOptions): Program {
     }
     throw new ParseError('Unknown parsing error', {
       file: options?.filename ?? '<unknown>',
+      line: 1,
+      column: 1,
+    });
+  }
+
+  return result.ast;
+}
+
+/**
+ * Parse a PromptScript file from disk.
+ *
+ * @param filePath - Path to the .prs file
+ * @param options - Parsing options (filename defaults to filePath)
+ * @returns ParseResult with AST and any errors
+ *
+ * @example
+ * ```typescript
+ * const result = parseFile('./project.prs');
+ *
+ * if (result.errors.length === 0) {
+ *   console.log(result.ast);
+ * }
+ * ```
+ */
+export function parseFile(
+  filePath: string,
+  options: Omit<ParseOptions, 'filename'> = {}
+): ParseResult {
+  try {
+    const source = readFileSync(filePath, 'utf-8');
+    return parse(source, { ...options, filename: filePath });
+  } catch (err) {
+    const error = err as NodeJS.ErrnoException;
+    return {
+      ast: null,
+      errors: [
+        new ParseError(`Failed to read file: ${error.message}`, {
+          file: filePath,
+          line: 1,
+          column: 1,
+        }),
+      ],
+    };
+  }
+}
+
+/**
+ * Parse a PromptScript file from disk, throwing on error.
+ *
+ * @param filePath - Path to the .prs file
+ * @param options - Parsing options
+ * @returns The parsed Program AST
+ * @throws {ParseError} If reading or parsing fails
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const ast = parseFileOrThrow('./project.prs');
+ *   console.log(ast.meta?.fields.id);
+ * } catch (error) {
+ *   console.error('Failed:', error);
+ * }
+ * ```
+ */
+export function parseFileOrThrow(
+  filePath: string,
+  options: Omit<ParseOptions, 'filename'> = {}
+): Program {
+  const result = parseFile(filePath, options);
+
+  if (!result.ast || result.errors.length > 0) {
+    const firstError = result.errors[0];
+    if (firstError) {
+      throw firstError;
+    }
+    throw new ParseError('Unknown error reading/parsing file', {
+      file: filePath,
       line: 1,
       column: 1,
     });
