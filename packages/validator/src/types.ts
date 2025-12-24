@@ -77,4 +77,21 @@ export interface ValidatorConfig {
   requiredGuards?: string[];
   /** Patterns to block in content (strings are converted to RegExp) */
   blockedPatterns?: (string | RegExp)[];
+  /** Array of rule names to disable */
+  disableRules?: string[];
+  /** Custom validation rules to add */
+  customRules?: ValidationRule[];
+}
+
+/**
+ * Options for standalone validate function.
+ */
+export interface ValidateOptions extends ValidatorConfig {
+  /** Reuse an existing validator instance */
+  validator?: Validator;
+}
+
+// Forward declare to avoid circular dependency
+interface Validator {
+  validate(ast: Program): ValidationResult;
 }

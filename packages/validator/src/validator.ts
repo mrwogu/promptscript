@@ -34,6 +34,7 @@ import { allRules } from './rules';
 export class Validator {
   private rules: ValidationRule[];
   private config: ValidatorConfig;
+  private disabledRules: Set<string>;
 
   /**
    * Create a new validator instance.
@@ -42,7 +43,15 @@ export class Validator {
    */
   constructor(config: ValidatorConfig = {}) {
     this.config = config;
-    this.rules = allRules;
+    this.rules = [...allRules];
+    this.disabledRules = new Set(config.disableRules ?? []);
+
+    // Add custom rules if provided
+    if (config.customRules) {
+      for (const rule of config.customRules) {
+        this.rules.push(rule);
+      }
+    }
   }
 
   /**
@@ -55,6 +64,11 @@ export class Validator {
     const messages: ValidationMessage[] = [];
 
     for (const rule of this.rules) {
+      // Skip if rule is disabled via disableRules
+      if (this.disabledRules.has(rule.name) || this.disabledRules.has(rule.id)) {
+        continue;
+      }
+
       // Determine the severity for this rule
       const configuredSeverity = this.config.rules?.[rule.name];
       const severity: Severity | 'off' = configuredSeverity ?? rule.defaultSeverity;
@@ -103,6 +117,23 @@ export class Validator {
    */
   addRule(rule: ValidationRule): void {
     this.rules.push(rule);
+  }
+
+  /**
+   * Remove a validation rule by name or id.
+   *
+   * @param ruleNameOrId - The rule name or id to remove
+   * @returns True if the rule was found and removed
+   */
+  removeRule(ruleNameOrId: string): boolean {
+    const index = this.rules.findIndex(
+      (r) => r.name === ruleNameOrId || r.id === ruleNameOrId
+    );
+    if (index !== -1) {
+      this.rules.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 
   /**
