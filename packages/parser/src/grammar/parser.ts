@@ -154,10 +154,7 @@ export class PromptScriptParser extends CstParser {
    *   : (Identifier | StringLiteral) '?'? ':' value ('=' value)?
    */
   private field = this.RULE('field', () => {
-    this.OR([
-      { ALT: () => this.CONSUME(Identifier) },
-      { ALT: () => this.CONSUME(StringLiteral) },
-    ]);
+    this.OR([{ ALT: () => this.CONSUME(Identifier) }, { ALT: () => this.CONSUME(StringLiteral) }]);
     this.OPTION(() => this.CONSUME(Question));
     this.CONSUME(Colon);
     this.SUBRULE(this.value);

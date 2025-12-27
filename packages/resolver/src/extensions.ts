@@ -48,9 +48,7 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
   let deepPath = pathParts.slice(1);
 
   // Check for aliased import reference
-  const importMarker = blocks.find(
-    (b) => b.name === `${IMPORT_MARKER_PREFIX}${rootName}`
-  );
+  const importMarker = blocks.find((b) => b.name === `${IMPORT_MARKER_PREFIX}${rootName}`);
   if (importMarker && pathParts.length > 1) {
     // This is alias.blockName - find the imported block
     targetName = `${IMPORT_MARKER_PREFIX}${rootName}.${pathParts[1]}`;
@@ -76,11 +74,7 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
 /**
  * Merge extension content into a block.
  */
-function mergeExtension(
-  block: Block,
-  path: string[],
-  ext: ExtendBlock
-): Block {
+function mergeExtension(block: Block, path: string[], ext: ExtendBlock): Block {
   if (path.length === 0) {
     // Direct merge at block level
     return {
@@ -189,11 +183,7 @@ function mergeAtPath(
 /**
  * Merge at path within a Value.
  */
-function mergeAtPathValue(
-  value: Value,
-  path: string[],
-  extContent: BlockContent
-): Value {
+function mergeAtPathValue(value: Value, path: string[], extContent: BlockContent): Value {
   if (path.length === 0) {
     return mergeValue(value, extContent);
   }
@@ -318,10 +308,7 @@ function mergeValue(existing: Value | undefined, extContent: BlockContent): Valu
 /**
  * Merge two BlockContent objects - handles same types.
  */
-function mergeSameTypeContent(
-  target: BlockContent,
-  ext: BlockContent
-): BlockContent {
+function mergeSameTypeContent(target: BlockContent, ext: BlockContent): BlockContent {
   switch (ext.type) {
     case 'TextContent':
       return {
@@ -331,10 +318,7 @@ function mergeSameTypeContent(
     case 'ObjectContent':
       return {
         ...ext,
-        properties: deepMerge(
-          (target as ObjectContent).properties,
-          ext.properties
-        ),
+        properties: deepMerge((target as ObjectContent).properties, ext.properties),
       } as ObjectContent;
     case 'ArrayContent':
       return {
@@ -349,17 +333,14 @@ function mergeSameTypeContent(
 /**
  * Merge two MixedContent objects.
  */
-function mergeMixedContent(
-  target: MixedContent,
-  ext: MixedContent
-): MixedContent {
+function mergeMixedContent(target: MixedContent, ext: MixedContent): MixedContent {
   const mergedText =
     target.text && ext.text
       ? {
           ...ext.text,
           value: `${target.text.value}\n\n${ext.text.value}`,
         }
-      : ext.text ?? target.text;
+      : (ext.text ?? target.text);
 
   return {
     ...ext,
@@ -401,9 +382,7 @@ function mergeContent(target: BlockContent, ext: BlockContent): BlockContent {
     const mixed = target as MixedContent;
     return {
       ...mixed,
-      text: mixed.text
-        ? { ...ext, value: `${mixed.text.value}\n\n${ext.value}` }
-        : ext,
+      text: mixed.text ? { ...ext, value: `${mixed.text.value}\n\n${ext.value}` } : ext,
     };
   }
 
@@ -428,10 +407,7 @@ function uniqueConcat(parent: Value[], child: Value[]): Value[] {
   const result: Value[] = [];
 
   for (const item of [...parent, ...child]) {
-    const key =
-      typeof item === 'object' && item !== null
-        ? JSON.stringify(item)
-        : String(item);
+    const key = typeof item === 'object' && item !== null ? JSON.stringify(item) : String(item);
     if (!seen.has(key)) {
       seen.add(key);
       result.push(deepClone(item as Record<string, unknown>) as Value);

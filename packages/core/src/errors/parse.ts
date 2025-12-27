@@ -5,11 +5,7 @@ import { PSError, ErrorCode } from './base';
  * Error during parsing phase.
  */
 export class ParseError extends PSError {
-  constructor(
-    message: string,
-    location?: SourceLocation,
-    code: ErrorCode = ErrorCode.PARSE_ERROR
-  ) {
+  constructor(message: string, location?: SourceLocation, code: ErrorCode = ErrorCode.PARSE_ERROR) {
     super(message, code, { location });
     this.name = 'ParseError';
   }
@@ -25,14 +21,8 @@ export class UnexpectedTokenError extends ParseError {
   readonly expected?: string[];
 
   constructor(token: string, location: SourceLocation, expected?: string[]) {
-    const expectedStr = expected?.length
-      ? `, expected: ${expected.join(' | ')}`
-      : '';
-    super(
-      `Unexpected token '${token}'${expectedStr}`,
-      location,
-      ErrorCode.UNEXPECTED_TOKEN
-    );
+    const expectedStr = expected?.length ? `, expected: ${expected.join(' | ')}` : '';
+    super(`Unexpected token '${token}'${expectedStr}`, location, ErrorCode.UNEXPECTED_TOKEN);
     this.name = 'UnexpectedTokenError';
     this.token = token;
     this.expected = expected;

@@ -1,9 +1,4 @@
-import type {
-  Program,
-  UseDeclaration,
-  Block,
-  ObjectContent,
-} from '@promptscript/core';
+import type { Program, UseDeclaration, Block, ObjectContent } from '@promptscript/core';
 
 /**
  * Import marker block prefix for storing imported content.
@@ -18,11 +13,7 @@ export const IMPORT_MARKER_PREFIX = '__import__';
  * @param source - Source program AST (imported content)
  * @returns Updated program with import marker
  */
-export function resolveUses(
-  target: Program,
-  use: UseDeclaration,
-  source: Program
-): Program {
+export function resolveUses(target: Program, use: UseDeclaration, source: Program): Program {
   const alias = use.alias ?? extractId(source) ?? 'import';
   const markerName = `${IMPORT_MARKER_PREFIX}${alias}`;
 

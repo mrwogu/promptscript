@@ -23,10 +23,7 @@ const createProgram = (overrides: Partial<Program> = {}): Program => ({
   ...overrides,
 });
 
-const createBlock = (
-  name: string,
-  content: Block['content']
-): Block => ({
+const createBlock = (name: string, content: Block['content']): Block => ({
   type: 'Block',
   name,
   content,
@@ -39,9 +36,7 @@ const createTextContent = (value: string): TextContent => ({
   loc: createLoc(),
 });
 
-const createObjectContent = (
-  properties: Record<string, Value>
-): ObjectContent => ({
+const createObjectContent = (properties: Record<string, Value>): ObjectContent => ({
   type: 'ObjectContent',
   properties,
   loc: createLoc(),
@@ -63,10 +58,7 @@ const createMixedContent = (
   loc: createLoc(),
 });
 
-const createExtendBlock = (
-  targetPath: string,
-  content: ExtendBlock['content']
-): ExtendBlock => ({
+const createExtendBlock = (targetPath: string, content: ExtendBlock['content']): ExtendBlock => ({
   type: 'ExtendBlock',
   targetPath,
   content,
@@ -78,9 +70,7 @@ describe('applyExtends', () => {
     it('should extend TextContent block', () => {
       const ast = createProgram({
         blocks: [createBlock('identity', createTextContent('original'))],
-        extends: [
-          createExtendBlock('identity', createTextContent('extended')),
-        ],
+        extends: [createExtendBlock('identity', createTextContent('extended'))],
       });
 
       const result = applyExtends(ast);
@@ -91,14 +81,9 @@ describe('applyExtends', () => {
 
     it('should extend ObjectContent block', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock('standards', createObjectContent({ style: 'clean' })),
-        ],
+        blocks: [createBlock('standards', createObjectContent({ style: 'clean' }))],
         extends: [
-          createExtendBlock(
-            'standards',
-            createObjectContent({ lint: true, style: 'strict' })
-          ),
+          createExtendBlock('standards', createObjectContent({ lint: true, style: 'strict' })),
         ],
       });
 
@@ -135,12 +120,7 @@ describe('applyExtends', () => {
             })
           ),
         ],
-        extends: [
-          createExtendBlock(
-            'standards.code',
-            createObjectContent({ lint: true })
-          ),
-        ],
+        extends: [createExtendBlock('standards.code', createObjectContent({ lint: true }))],
       });
 
       const result = applyExtends(ast);
@@ -156,12 +136,7 @@ describe('applyExtends', () => {
     it('should create nested path if not exists', () => {
       const ast = createProgram({
         blocks: [createBlock('standards', createObjectContent({}))],
-        extends: [
-          createExtendBlock(
-            'standards.code',
-            createObjectContent({ style: 'clean' })
-          ),
-        ],
+        extends: [createExtendBlock('standards.code', createObjectContent({ style: 'clean' }))],
       });
 
       const result = applyExtends(ast);
@@ -180,12 +155,7 @@ describe('applyExtends', () => {
             })
           ),
         ],
-        extends: [
-          createExtendBlock(
-            'config.a.b',
-            createObjectContent({ d: 'new' })
-          ),
-        ],
+        extends: [createExtendBlock('config.a.b', createObjectContent({ d: 'new' }))],
       });
 
       const result = applyExtends(ast);
@@ -227,12 +197,8 @@ describe('applyExtends', () => {
 
       const result = applyExtends(ast);
 
-      expect((result.blocks[0]?.content as TextContent).value).toBe(
-        'id\n\n+ id'
-      );
-      expect((result.blocks[1]?.content as TextContent).value).toBe(
-        'ctx\n\n+ ctx'
-      );
+      expect((result.blocks[0]?.content as TextContent).value).toBe('id\n\n+ id');
+      expect((result.blocks[1]?.content as TextContent).value).toBe('ctx\n\n+ ctx');
     });
   });
 
@@ -242,10 +208,7 @@ describe('applyExtends', () => {
         blocks: [
           createBlock('identity', createTextContent('main')),
           createBlock(`${IMPORT_MARKER_PREFIX}sec`, createObjectContent({})),
-          createBlock(
-            `${IMPORT_MARKER_PREFIX}sec.guards`,
-            createTextContent('guard')
-          ),
+          createBlock(`${IMPORT_MARKER_PREFIX}sec.guards`, createTextContent('guard')),
         ],
         extends: [],
       });
@@ -261,9 +224,7 @@ describe('applyExtends', () => {
     it('should ignore extension for non-existent target', () => {
       const ast = createProgram({
         blocks: [createBlock('identity', createTextContent('original'))],
-        extends: [
-          createExtendBlock('nonexistent', createTextContent('extended')),
-        ],
+        extends: [createExtendBlock('nonexistent', createTextContent('extended'))],
       });
 
       const result = applyExtends(ast);
@@ -276,9 +237,7 @@ describe('applyExtends', () => {
   describe('mixed content type extension', () => {
     it('should create MixedContent when extending Object with Text', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock('block', createObjectContent({ key: 'value' })),
-        ],
+        blocks: [createBlock('block', createObjectContent({ key: 'value' }))],
         extends: [createExtendBlock('block', createTextContent('text'))],
       });
 
@@ -291,9 +250,7 @@ describe('applyExtends', () => {
     it('should create MixedContent when extending Text with Object', () => {
       const ast = createProgram({
         blocks: [createBlock('block', createTextContent('text'))],
-        extends: [
-          createExtendBlock('block', createObjectContent({ key: 'value' })),
-        ],
+        extends: [createExtendBlock('block', createObjectContent({ key: 'value' }))],
       });
 
       const result = applyExtends(ast);
@@ -320,10 +277,7 @@ describe('applyExtends', () => {
     it('should extend MixedContent with TextContent', () => {
       const ast = createProgram({
         blocks: [
-          createBlock(
-            'block',
-            createMixedContent(createTextContent('original'), { key: 'value' })
-          ),
+          createBlock('block', createMixedContent(createTextContent('original'), { key: 'value' })),
         ],
         extends: [createExtendBlock('block', createTextContent('extended'))],
       });
@@ -338,14 +292,9 @@ describe('applyExtends', () => {
     it('should extend MixedContent with ObjectContent', () => {
       const ast = createProgram({
         blocks: [
-          createBlock(
-            'block',
-            createMixedContent(createTextContent('text'), { key1: 'value1' })
-          ),
+          createBlock('block', createMixedContent(createTextContent('text'), { key1: 'value1' })),
         ],
-        extends: [
-          createExtendBlock('block', createObjectContent({ key2: 'value2' })),
-        ],
+        extends: [createExtendBlock('block', createObjectContent({ key2: 'value2' }))],
       });
 
       const result = applyExtends(ast);
@@ -356,12 +305,7 @@ describe('applyExtends', () => {
 
     it('should extend MixedContent without text with TextContent', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock(
-            'block',
-            createMixedContent(undefined, { key: 'value' })
-          ),
-        ],
+        blocks: [createBlock('block', createMixedContent(undefined, { key: 'value' }))],
         extends: [createExtendBlock('block', createTextContent('new text'))],
       });
 
@@ -373,17 +317,9 @@ describe('applyExtends', () => {
 
     it('should extend MixedContent with MixedContent', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock(
-            'block',
-            createMixedContent(createTextContent('text1'), { a: '1' })
-          ),
-        ],
+        blocks: [createBlock('block', createMixedContent(createTextContent('text1'), { a: '1' }))],
         extends: [
-          createExtendBlock(
-            'block',
-            createMixedContent(createTextContent('text2'), { b: '2' })
-          ),
+          createExtendBlock('block', createMixedContent(createTextContent('text2'), { b: '2' })),
         ],
       });
 
@@ -406,12 +342,7 @@ describe('applyExtends', () => {
             })
           ),
         ],
-        extends: [
-          createExtendBlock(
-            'config.settings',
-            createObjectContent({ debug: true })
-          ),
-        ],
+        extends: [createExtendBlock('config.settings', createObjectContent({ debug: true }))],
       });
 
       const result = applyExtends(ast);
@@ -425,18 +356,8 @@ describe('applyExtends', () => {
 
     it('should create nested path in MixedContent if not exists', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock(
-            'config',
-            createMixedContent(createTextContent('desc'), {})
-          ),
-        ],
-        extends: [
-          createExtendBlock(
-            'config.newProp',
-            createObjectContent({ value: 'test' })
-          ),
-        ],
+        blocks: [createBlock('config', createMixedContent(createTextContent('desc'), {}))],
+        extends: [createExtendBlock('config.newProp', createObjectContent({ value: 'test' }))],
       });
 
       const result = applyExtends(ast);
@@ -451,17 +372,9 @@ describe('applyExtends', () => {
       const ast = createProgram({
         blocks: [
           createBlock(`${IMPORT_MARKER_PREFIX}sec`, createObjectContent({})),
-          createBlock(
-            `${IMPORT_MARKER_PREFIX}sec.guards`,
-            createObjectContent({ level: 'low' })
-          ),
+          createBlock(`${IMPORT_MARKER_PREFIX}sec.guards`, createObjectContent({ level: 'low' })),
         ],
-        extends: [
-          createExtendBlock(
-            'sec.guards',
-            createObjectContent({ level: 'high' })
-          ),
-        ],
+        extends: [createExtendBlock('sec.guards', createObjectContent({ level: 'high' }))],
       });
 
       const result = applyExtends(ast);
@@ -475,12 +388,7 @@ describe('applyExtends', () => {
     it('should return unchanged when trying to navigate into TextContent', () => {
       const ast = createProgram({
         blocks: [createBlock('block', createTextContent('text'))],
-        extends: [
-          createExtendBlock(
-            'block.nested',
-            createObjectContent({ key: 'value' })
-          ),
-        ],
+        extends: [createExtendBlock('block.nested', createObjectContent({ key: 'value' }))],
       });
 
       const result = applyExtends(ast);
@@ -493,12 +401,7 @@ describe('applyExtends', () => {
     it('should return unchanged when trying to navigate into ArrayContent', () => {
       const ast = createProgram({
         blocks: [createBlock('block', createArrayContent(['a', 'b']))],
-        extends: [
-          createExtendBlock(
-            'block.nested',
-            createObjectContent({ key: 'value' })
-          ),
-        ],
+        extends: [createExtendBlock('block.nested', createObjectContent({ key: 'value' }))],
       });
 
       const result = applyExtends(ast);
@@ -512,15 +415,8 @@ describe('applyExtends', () => {
   describe('value merging', () => {
     it('should merge arrays when extending nested array', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock(
-            'config',
-            createObjectContent({ items: ['a', 'b'] })
-          ),
-        ],
-        extends: [
-          createExtendBlock('config.items', createArrayContent(['b', 'c'])),
-        ],
+        blocks: [createBlock('config', createObjectContent({ items: ['a', 'b'] }))],
+        extends: [createExtendBlock('config.items', createArrayContent(['b', 'c']))],
       });
 
       const result = applyExtends(ast);
@@ -539,9 +435,7 @@ describe('applyExtends', () => {
             })
           ),
         ],
-        extends: [
-          createExtendBlock('config.desc', createTextContent('extended')),
-        ],
+        extends: [createExtendBlock('config.desc', createTextContent('extended'))],
       });
 
       const result = applyExtends(ast);
@@ -553,12 +447,8 @@ describe('applyExtends', () => {
 
     it('should handle primitive value replacement', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock('config', createObjectContent({ value: 'old' })),
-        ],
-        extends: [
-          createExtendBlock('config.value', createTextContent('new')),
-        ],
+        blocks: [createBlock('config', createObjectContent({ value: 'old' }))],
+        extends: [createExtendBlock('config.value', createTextContent('new'))],
       });
 
       const result = applyExtends(ast);
@@ -572,12 +462,7 @@ describe('applyExtends', () => {
     it('should build deeply nested path when extending non-existent path', () => {
       const ast = createProgram({
         blocks: [createBlock('config', createObjectContent({}))],
-        extends: [
-          createExtendBlock(
-            'config.a.b.c',
-            createObjectContent({ value: 'deep' })
-          ),
-        ],
+        extends: [createExtendBlock('config.a.b.c', createObjectContent({ value: 'deep' }))],
       });
 
       const result = applyExtends(ast);
@@ -591,9 +476,7 @@ describe('applyExtends', () => {
     it('should handle extracting array value from ArrayContent', () => {
       const ast = createProgram({
         blocks: [createBlock('config', createObjectContent({}))],
-        extends: [
-          createExtendBlock('config.items', createArrayContent(['x', 'y'])),
-        ],
+        extends: [createExtendBlock('config.items', createArrayContent(['x', 'y']))],
       });
 
       const result = applyExtends(ast);
@@ -606,10 +489,7 @@ describe('applyExtends', () => {
       const ast = createProgram({
         blocks: [createBlock('config', createObjectContent({}))],
         extends: [
-          createExtendBlock(
-            'config.mixed',
-            createMixedContent(undefined, { prop: 'value' })
-          ),
+          createExtendBlock('config.mixed', createMixedContent(undefined, { prop: 'value' })),
         ],
       });
 
@@ -623,15 +503,8 @@ describe('applyExtends', () => {
   describe('navigating into non-object values', () => {
     it('should build path when trying to navigate into primitive', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock('config', createObjectContent({ value: 'primitive' })),
-        ],
-        extends: [
-          createExtendBlock(
-            'config.value.nested',
-            createObjectContent({ key: 'val' })
-          ),
-        ],
+        blocks: [createBlock('config', createObjectContent({ value: 'primitive' }))],
+        extends: [createExtendBlock('config.value.nested', createObjectContent({ key: 'val' }))],
       });
 
       const result = applyExtends(ast);
@@ -643,15 +516,8 @@ describe('applyExtends', () => {
 
     it('should build path when trying to navigate into array', () => {
       const ast = createProgram({
-        blocks: [
-          createBlock('config', createObjectContent({ arr: [1, 2, 3] })),
-        ],
-        extends: [
-          createExtendBlock(
-            'config.arr.nested',
-            createObjectContent({ key: 'val' })
-          ),
-        ],
+        blocks: [createBlock('config', createObjectContent({ arr: [1, 2, 3] }))],
+        extends: [createExtendBlock('config.arr.nested', createObjectContent({ key: 'val' }))],
       });
 
       const result = applyExtends(ast);

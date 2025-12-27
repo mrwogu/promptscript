@@ -21,10 +21,7 @@ const createProgram = (overrides: Partial<Program> = {}): Program => ({
   ...overrides,
 });
 
-const createBlock = (
-  name: string,
-  content: Block['content']
-): Block => ({
+const createBlock = (name: string, content: Block['content']): Block => ({
   type: 'Block',
   name,
   content,
@@ -37,9 +34,7 @@ const createTextContent = (value: string): TextContent => ({
   loc: createLoc(),
 });
 
-const createObjectContent = (
-  properties: Record<string, Value>
-): ObjectContent => ({
+const createObjectContent = (properties: Record<string, Value>): ObjectContent => ({
   type: 'ObjectContent',
   properties,
   loc: createLoc(),
@@ -242,11 +237,7 @@ describe('resolveInheritance', () => {
       const result = resolveInheritance(parent, child);
       const content = result.blocks[0]?.content as ObjectContent;
 
-      expect(content.properties['frameworks']).toEqual([
-        'react',
-        'vue',
-        'angular',
-      ]);
+      expect(content.properties['frameworks']).toEqual(['react', 'vue', 'angular']);
     });
   });
 
@@ -306,9 +297,7 @@ describe('resolveInheritance', () => {
       });
 
       const child = createProgram({
-        blocks: [
-          createBlock('block', createObjectContent({ key: 'value' })),
-        ],
+        blocks: [createBlock('block', createObjectContent({ key: 'value' }))],
       });
 
       const result = resolveInheritance(parent, child);
@@ -379,9 +368,7 @@ describe('resolveInheritance', () => {
       });
 
       const child = createProgram({
-        blocks: [
-          createBlock('block', createObjectContent({ b: '2' })),
-        ],
+        blocks: [createBlock('block', createObjectContent({ b: '2' }))],
       });
 
       const result = resolveInheritance(parent, child);

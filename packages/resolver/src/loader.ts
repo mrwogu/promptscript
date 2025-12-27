@@ -62,9 +62,7 @@ export class FileLoader {
 
     // Registry path: @namespace/path[@version]
     if (path.startsWith('@')) {
-      const match = path.match(
-        /^@([a-zA-Z_][a-zA-Z0-9_-]*)\/(.+?)(?:@[\d.]+)?$/
-      );
+      const match = path.match(/^@([a-zA-Z_][a-zA-Z0-9_-]*)\/(.+?)(?:@[\d.]+)?$/);
       if (match && match[1] && match[2]) {
         const namespace = match[1];
         const segments = match[2];

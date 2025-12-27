@@ -126,9 +126,7 @@ export class Validator {
    * @returns True if the rule was found and removed
    */
   removeRule(ruleNameOrId: string): boolean {
-    const index = this.rules.findIndex(
-      (r) => r.name === ruleNameOrId || r.id === ruleNameOrId
-    );
+    const index = this.rules.findIndex((r) => r.name === ruleNameOrId || r.id === ruleNameOrId);
     if (index !== -1) {
       this.rules.splice(index, 1);
       return true;

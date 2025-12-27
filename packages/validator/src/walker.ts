@@ -103,11 +103,7 @@ function walkObjectProperties(
 /**
  * Walk array elements looking for text content.
  */
-function walkArrayElements(
-  elements: Value[],
-  loc: SourceLocation,
-  callback: TextCallback
-): void {
+function walkArrayElements(elements: Value[], loc: SourceLocation, callback: TextCallback): void {
   for (const element of elements) {
     walkValue(element, loc, callback);
   }
@@ -148,8 +144,7 @@ export function hasContent(content: BlockContent): boolean {
       return content.elements.length > 0;
     case 'MixedContent':
       return (
-        (content.text?.value?.trim().length ?? 0) > 0 ||
-        Object.keys(content.properties).length > 0
+        (content.text?.value?.trim().length ?? 0) > 0 || Object.keys(content.properties).length > 0
       );
   }
 }

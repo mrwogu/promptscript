@@ -1,10 +1,6 @@
 import { parse } from '@promptscript/parser';
 import type { Program } from '@promptscript/core';
-import {
-  ResolveError,
-  CircularDependencyError,
-  FileNotFoundError,
-} from '@promptscript/core';
+import { ResolveError, CircularDependencyError, FileNotFoundError } from '@promptscript/core';
 import { FileLoader, type LoaderOptions } from './loader';
 import { resolveInheritance } from './inheritance';
 import { resolveUses } from './imports';
@@ -192,9 +188,7 @@ export class Resolver {
       if (err instanceof CircularDependencyError) {
         throw err;
       }
-      errors.push(
-        new ResolveError(`Failed to resolve parent: ${(err as Error).message}`)
-      );
+      errors.push(new ResolveError(`Failed to resolve parent: ${(err as Error).message}`));
     }
 
     return ast;
@@ -226,9 +220,7 @@ export class Resolver {
         if (err instanceof CircularDependencyError) {
           throw err;
         }
-        errors.push(
-          new ResolveError(`Failed to resolve import: ${(err as Error).message}`)
-        );
+        errors.push(new ResolveError(`Failed to resolve import: ${(err as Error).message}`));
       }
     }
 

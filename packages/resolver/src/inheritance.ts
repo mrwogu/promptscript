@@ -34,7 +34,7 @@ export function resolveInheritance(parent: Program, child: Program): Program {
             ...child.meta,
             fields: deepMerge(parent.meta.fields, child.meta.fields),
           }
-        : child.meta ?? parent.meta,
+        : (child.meta ?? parent.meta),
     blocks: mergeBlocks(parent.blocks, child.blocks),
     inherit: undefined,
     uses: child.uses,
@@ -84,10 +84,7 @@ function mergeBlock(parent: Block, child: Block): Block {
 /**
  * Merge block content based on content types.
  */
-function mergeBlockContent(
-  parent: BlockContent,
-  child: BlockContent
-): BlockContent {
+function mergeBlockContent(parent: BlockContent, child: BlockContent): BlockContent {
   // Same type - merge based on type
   if (parent.type === child.type) {
     switch (child.type) {
@@ -106,9 +103,7 @@ function mergeBlockContent(
   if (parent.type === 'MixedContent' && child.type === 'TextContent') {
     return {
       ...parent,
-      text: parent.text
-        ? mergeTextContent(parent.text, child)
-        : deepClone(child),
+      text: parent.text ? mergeTextContent(parent.text, child) : deepClone(child),
     };
   }
 
@@ -151,10 +146,7 @@ function mergeTextContent(parent: TextContent, child: TextContent): TextContent 
 /**
  * Merge ObjectContent by deep merging properties.
  */
-function mergeObjectContent(
-  parent: ObjectContent,
-  child: ObjectContent
-): ObjectContent {
+function mergeObjectContent(parent: ObjectContent, child: ObjectContent): ObjectContent {
   return {
     ...child,
     properties: mergeProperties(parent.properties, child.properties),
@@ -199,10 +191,7 @@ function mergeProperties(
 /**
  * Merge ArrayContent by unique concatenation.
  */
-function mergeArrayContent(
-  parent: ArrayContent,
-  child: ArrayContent
-): ArrayContent {
+function mergeArrayContent(parent: ArrayContent, child: ArrayContent): ArrayContent {
   return {
     ...child,
     elements: uniqueConcat(parent.elements, child.elements),
@@ -212,16 +201,13 @@ function mergeArrayContent(
 /**
  * Merge MixedContent by merging both text and properties.
  */
-function mergeMixedContent(
-  parent: MixedContent,
-  child: MixedContent
-): MixedContent {
+function mergeMixedContent(parent: MixedContent, child: MixedContent): MixedContent {
   return {
     ...child,
     text:
       parent.text && child.text
         ? mergeTextContent(parent.text, child.text)
-        : child.text ?? parent.text,
+        : (child.text ?? parent.text),
     properties: mergeProperties(parent.properties, child.properties),
   };
 }
@@ -234,10 +220,7 @@ function uniqueConcat(parent: Value[], child: Value[]): Value[] {
   const result: Value[] = [];
 
   for (const item of [...parent, ...child]) {
-    const key =
-      typeof item === 'object' && item !== null
-        ? JSON.stringify(item)
-        : String(item);
+    const key = typeof item === 'object' && item !== null ? JSON.stringify(item) : String(item);
     if (!seen.has(key)) {
       seen.add(key);
       result.push(deepCloneValue(item));

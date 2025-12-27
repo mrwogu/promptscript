@@ -48,9 +48,7 @@ describe('PSError', () => {
       const error = new PSError('Test error', ErrorCode.PARSE_ERROR, {
         location: mockLocation,
       });
-      expect(error.format()).toBe(
-        'PSError [PS1000]: Test error\n  at test.prs:10:5'
-      );
+      expect(error.format()).toBe('PSError [PS1000]: Test error\n  at test.prs:10:5');
     });
   });
 
@@ -78,11 +76,7 @@ describe('ParseError', () => {
   });
 
   it('should allow custom error code', () => {
-    const error = new ParseError(
-      'Invalid path',
-      mockLocation,
-      ErrorCode.INVALID_PATH
-    );
+    const error = new ParseError('Invalid path', mockLocation, ErrorCode.INVALID_PATH);
     expect(error.code).toBe(ErrorCode.INVALID_PATH);
   });
 });
@@ -96,14 +90,9 @@ describe('UnexpectedTokenError', () => {
   });
 
   it('should include expected tokens', () => {
-    const error = new UnexpectedTokenError('foo', mockLocation, [
-      '@identity',
-      '@context',
-    ]);
+    const error = new UnexpectedTokenError('foo', mockLocation, ['@identity', '@context']);
     expect(error.expected).toEqual(['@identity', '@context']);
-    expect(error.message).toBe(
-      "Unexpected token 'foo', expected: @identity | @context"
-    );
+    expect(error.message).toBe("Unexpected token 'foo', expected: @identity | @context");
   });
 });
 
@@ -132,9 +121,7 @@ describe('CircularDependencyError', () => {
     expect(error.name).toBe('CircularDependencyError');
     expect(error.code).toBe(ErrorCode.CIRCULAR_DEPENDENCY);
     expect(error.chain).toEqual(chain);
-    expect(error.message).toBe(
-      'Circular dependency detected: a.prs → b.prs → c.prs → a.prs'
-    );
+    expect(error.message).toBe('Circular dependency detected: a.prs → b.prs → c.prs → a.prs');
   });
 });
 

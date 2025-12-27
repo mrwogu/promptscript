@@ -21,9 +21,7 @@ export type CompareResult = -1 | 0 | 1;
  * @throws {Error} If version format is invalid
  */
 export function parseVersion(version: string): SemVer {
-  const match = version.match(
-    /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?$/
-  );
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?$/);
 
   if (!match) {
     throw new Error(`Invalid semantic version: ${version}`);
@@ -72,10 +70,7 @@ function compareNumbers(a: number, b: number): CompareResult {
 /**
  * Compare prerelease strings.
  */
-function comparePrerelease(
-  a: string | undefined,
-  b: string | undefined
-): CompareResult {
+function comparePrerelease(a: string | undefined, b: string | undefined): CompareResult {
   if (a && !b) return -1;
   if (!a && b) return 1;
   if (a && b) {
@@ -111,10 +106,7 @@ export function formatVersion(version: SemVer): string {
 /**
  * Increment a version.
  */
-export function incrementVersion(
-  version: string,
-  type: 'major' | 'minor' | 'patch'
-): string {
+export function incrementVersion(version: string, type: 'major' | 'minor' | 'patch'): string {
   const v = parseVersion(version);
 
   switch (type) {

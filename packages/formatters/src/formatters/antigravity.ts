@@ -720,7 +720,9 @@ ${items.map((i) => '- ' + i).join('\n')}`;
 
     const format = diagObj['format'];
     if (format) {
-      items.push(`Always use **${this.valueToString(format)}** syntax for diagrams in documentation`);
+      items.push(
+        `Always use **${this.valueToString(format)}** syntax for diagrams in documentation`
+      );
     }
 
     const types = diagObj['types'];

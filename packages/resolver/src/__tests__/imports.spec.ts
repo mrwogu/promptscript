@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type {
-  Program,
-  Block,
-  TextContent,
-  ObjectContent,
-  Value,
-} from '@promptscript/core';
+import type { Program, Block, TextContent, ObjectContent, Value } from '@promptscript/core';
 import {
   resolveUses,
   isImportMarker,
@@ -25,10 +19,7 @@ const createProgram = (overrides: Partial<Program> = {}): Program => ({
   ...overrides,
 });
 
-const createBlock = (
-  name: string,
-  content: Block['content']
-): Block => ({
+const createBlock = (name: string, content: Block['content']): Block => ({
   type: 'Block',
   name,
   content,
@@ -41,9 +32,7 @@ const createTextContent = (value: string): TextContent => ({
   loc: createLoc(),
 });
 
-const createObjectContent = (
-  properties: Record<string, Value>
-): ObjectContent => ({
+const createObjectContent = (properties: Record<string, Value>): ObjectContent => ({
   type: 'ObjectContent',
   properties,
   loc: createLoc(),
@@ -75,9 +64,7 @@ describe('imports', () => {
           fields: { id: 'guards-module' },
           loc: createLoc(),
         },
-        blocks: [
-          createBlock('guards', createObjectContent({ level: 'high' })),
-        ],
+        blocks: [createBlock('guards', createObjectContent({ level: 'high' }))],
       });
 
       const result = resolveUses(target, use, source);
@@ -115,9 +102,7 @@ describe('imports', () => {
 
       const result = resolveUses(target, use, source);
 
-      expect(result.blocks[0]?.name).toBe(
-        `${IMPORT_MARKER_PREFIX}guards-module`
-      );
+      expect(result.blocks[0]?.name).toBe(`${IMPORT_MARKER_PREFIX}guards-module`);
     });
 
     it('should use "import" as fallback alias', () => {
@@ -203,12 +188,8 @@ describe('imports', () => {
 
   describe('getOriginalBlockName', () => {
     it('should extract original block name from aliased import', () => {
-      expect(getOriginalBlockName(`${IMPORT_MARKER_PREFIX}sec.rules`)).toBe(
-        'rules'
-      );
-      expect(getOriginalBlockName(`${IMPORT_MARKER_PREFIX}g.guards`)).toBe(
-        'guards'
-      );
+      expect(getOriginalBlockName(`${IMPORT_MARKER_PREFIX}sec.rules`)).toBe('rules');
+      expect(getOriginalBlockName(`${IMPORT_MARKER_PREFIX}g.guards`)).toBe('guards');
     });
 
     it('should return undefined for marker-only names', () => {

@@ -60,11 +60,7 @@ export function deepMerge<T extends Record<string, unknown>>(
 /**
  * Merge a single value based on its type.
  */
-function mergeValue(
-  parentVal: unknown,
-  childVal: unknown,
-  opts: MergeOptions
-): unknown {
+function mergeValue(parentVal: unknown, childVal: unknown, opts: MergeOptions): unknown {
   // Null explicitly overwrites
   if (childVal === null) {
     return null;
@@ -72,20 +68,12 @@ function mergeValue(
 
   // Arrays
   if (Array.isArray(childVal)) {
-    return mergeArrays(
-      Array.isArray(parentVal) ? parentVal : [],
-      childVal,
-      opts.arrayStrategy
-    );
+    return mergeArrays(Array.isArray(parentVal) ? parentVal : [], childVal, opts.arrayStrategy);
   }
 
   // TextContent special handling
   if (isTextContent(childVal)) {
-    return mergeTextContent(
-      isTextContent(parentVal) ? parentVal : undefined,
-      childVal,
-      opts
-    );
+    return mergeTextContent(isTextContent(parentVal) ? parentVal : undefined, childVal, opts);
   }
 
   // Objects (recursive merge)
