@@ -1,5 +1,5 @@
 // Compiler
-export { Compiler, createCompiler } from './compiler';
+export { Compiler, createCompiler, compile } from './compiler';
 
 // Types
 export type {
@@ -13,3 +13,6 @@ export type {
   FormatOptions,
   TargetConfig,
 } from './types';
+
+// Export CompileOptions type
+export type { CompileOptions } from './compiler';

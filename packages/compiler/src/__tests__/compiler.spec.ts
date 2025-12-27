@@ -19,7 +19,7 @@ vi.mock('@promptscript/validator', () => ({
 }));
 
 // Import after mocks are set up
-import { Compiler, createCompiler } from '../compiler';
+import { Compiler, createCompiler, compile } from '../compiler';
 
 /**
  * Create a minimal valid AST for testing.
@@ -507,5 +507,67 @@ describe('Compiler', () => {
       expect(formatters[0]).toBe(formatter1);
       expect(formatters[1]).toBe(formatter2);
     });
+  });
+});
+
+describe('compile (standalone)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should compile with default options', async () => {
+    const ast = createTestProgram();
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const result = await compile('./test.prs');
+
+    expect(result.success).toBe(true);
+    expect(mockResolve).toHaveBeenCalledWith('./test.prs');
+    expect(mockValidate).toHaveBeenCalled();
+  });
+
+  it('should accept custom formatters', async () => {
+    const ast = createTestProgram();
+    const customFormatter = createMockFormatter('custom');
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const result = await compile('./test.prs', {
+      formatters: [customFormatter],
+    });
+
+    expect(result.success).toBe(true);
+    expect(customFormatter.format).toHaveBeenCalled();
+    expect(result.outputs.has('./custom/output.md')).toBe(true);
+  });
+
+  it('should accept resolver options', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const result = await compile('./test.prs', {
+      resolver: { registryPath: '/custom/registry' },
+      formatters: [formatter],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should return errors on failure', async () => {
+    mockResolve.mockRejectedValue(new Error('File not found'));
+
+    const result = await compile('./missing.prs', {
+      formatters: [createMockFormatter('test')],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.message).toContain('File not found');
   });
 });

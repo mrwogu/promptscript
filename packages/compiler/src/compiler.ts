@@ -1,7 +1,7 @@
 import type { PSError } from '@promptscript/core';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { Resolver, type ResolvedAST } from '@promptscript/resolver';
-import { Validator } from '@promptscript/validator';
+import { Validator, type ValidatorConfig } from '@promptscript/validator';
 import type {
   CompilerOptions,
   CompileResult,
@@ -296,4 +296,89 @@ export class Compiler {
  */
 export function createCompiler(options: CompilerOptions): Compiler {
   return new Compiler(options);
+}
+
+/**
+ * Options for the standalone compile function.
+ */
+export interface CompileOptions {
+  /**
+   * Resolver options for resolving imports and inheritance.
+   * If not provided, defaults to current working directory.
+   */
+  resolver?: {
+    /** Base path for registry lookups (@namespace/...). Defaults to cwd. */
+    registryPath?: string;
+    /** Base path for local/relative file resolution. Defaults to cwd. */
+    localPath?: string;
+    /** Whether to cache resolved ASTs. Defaults to true. */
+    cache?: boolean;
+  };
+  /**
+   * Validator configuration.
+   */
+  validator?: ValidatorConfig;
+  /**
+   * Formatters to use. If not specified, all built-in formatters are used.
+   */
+  formatters?: CompilerOptions['formatters'];
+  /**
+   * Custom conventions for formatters.
+   */
+  customConventions?: CompilerOptions['customConventions'];
+}
+
+/**
+ * Compile a PromptScript file using default or specified options.
+ *
+ * This is a convenience function that creates a Compiler instance
+ * and runs the compilation pipeline. For repeated compilations,
+ * consider creating a Compiler instance directly for better performance.
+ *
+ * @param entryPath - Path to the entry PromptScript file
+ * @param options - Optional compilation options
+ * @returns Compilation result with outputs, errors, and stats
+ *
+ * @example
+ * ```typescript
+ * import { compile } from '@promptscript/compiler';
+ *
+ * // Simple usage with defaults
+ * const result = await compile('./project.prs');
+ *
+ * // With custom options
+ * const result = await compile('./project.prs', {
+ *   formatters: ['github', 'claude'],
+ *   resolver: { registryPath: './registry' },
+ * });
+ *
+ * if (result.success) {
+ *   for (const [path, output] of result.outputs) {
+ *     console.log(`Generated: ${path}`);
+ *   }
+ * }
+ * ```
+ */
+export async function compile(
+  entryPath: string,
+  options: CompileOptions = {}
+): Promise<CompileResult> {
+  // Get default formatters from registry if not specified
+  const formatters: CompilerOptions['formatters'] = options.formatters ?? FormatterRegistry.list();
+
+  // Build resolver options with sensible defaults
+  const resolverOptions = {
+    registryPath: options.resolver?.registryPath ?? process.cwd(),
+    localPath: options.resolver?.localPath,
+    cache: options.resolver?.cache,
+  };
+
+  const compiler = new Compiler({
+    resolver: resolverOptions,
+    validator: options.validator,
+    formatters,
+    customConventions: options.customConventions,
+  });
+
+  return compiler.compile(entryPath);
 }
