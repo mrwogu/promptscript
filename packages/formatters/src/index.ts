@@ -7,6 +7,17 @@ export { BaseFormatter } from './base-formatter';
 // Registry
 export { FormatterRegistry } from './registry';
 
+// Standalone functions
+export {
+  format,
+  getFormatter,
+  registerFormatter,
+  hasFormatter,
+  listFormatters,
+  unregisterFormatter,
+} from './standalone';
+export type { StandaloneFormatOptions } from './standalone';
+
 // Convention renderer
 export {
   ConventionRenderer,
