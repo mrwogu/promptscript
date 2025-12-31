@@ -38,6 +38,8 @@ export interface CompileOptions {
   output?: string;
   /** Preview changes without writing files */
   dryRun?: boolean;
+  /** Registry path or URL (overrides config) */
+  registry?: string;
 }
 
 /**

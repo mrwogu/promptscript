@@ -37,6 +37,7 @@ program
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
   .option('--dry-run', 'Preview changes')
+  .option('--registry <path>', 'Registry path (overrides config)')
   .action(compileCommand);
 
 program

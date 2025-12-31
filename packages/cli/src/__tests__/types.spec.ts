@@ -39,12 +39,19 @@ describe('types', () => {
         watch: true,
         output: './dist',
         dryRun: true,
+        registry: './my-registry',
       };
       expect(options.target).toBe('github');
       expect(options.all).toBe(true);
       expect(options.watch).toBe(true);
       expect(options.output).toBe('./dist');
       expect(options.dryRun).toBe(true);
+      expect(options.registry).toBe('./my-registry');
+    });
+
+    it('should allow registry option alone', () => {
+      const options: CompileOptions = { registry: '/path/to/registry' };
+      expect(options.registry).toBe('/path/to/registry');
     });
   });
 

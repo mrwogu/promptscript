@@ -1,6 +1,7 @@
 import { resolve, dirname } from 'path';
 import { writeFile, mkdir } from 'fs/promises';
-import { existsSync, watch } from 'fs';
+import { existsSync } from 'fs';
+import chokidar from 'chokidar';
 import type { CompileOptions } from '../types';
 import type { PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
@@ -99,9 +100,12 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
     const selectedTarget = options.target ?? options.format;
     const targets = selectedTarget ? [{ name: selectedTarget }] : parseTargets(config.targets);
 
+    // Use --registry flag if provided, otherwise fall back to config
+    const registryPath = options.registry ?? config.registry?.path ?? './registry';
+
     const compiler = new Compiler({
       resolver: {
-        registryPath: config.registry?.path ?? './registry',
+        registryPath,
         localPath: './.promptscript',
       },
       validator: config.validation,
@@ -148,14 +152,25 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
 }
 
 /**
- * Watch directory for changes and trigger recompilation.
+ * Watch directory for changes using chokidar and trigger recompilation.
+ *
+ * Uses chokidar for better cross-platform support and reliability compared
+ * to native fs.watch.
  */
 function watchForChanges(dir: string, callback: () => void): void {
   let debounceTimer: NodeJS.Timeout | null = null;
+  const debounceMs = 100;
 
-  watch(dir, { recursive: true }, (_eventType, filename) => {
-    if (!filename?.endsWith('.prs')) return;
+  const watcher = chokidar.watch(`${dir}/**/*.prs`, {
+    persistent: true,
+    ignoreInitial: true,
+    awaitWriteFinish: {
+      stabilityThreshold: 50,
+      pollInterval: 10,
+    },
+  });
 
+  watcher.on('change', (filename) => {
     // Debounce rapid changes
     if (debounceTimer) {
       clearTimeout(debounceTimer);
@@ -165,6 +180,20 @@ function watchForChanges(dir: string, callback: () => void): void {
       ConsoleOutput.newline();
       ConsoleOutput.info(`File changed: ${filename}`);
       callback();
-    }, 100);
+    }, debounceMs);
+  });
+
+  watcher.on('add', (filename) => {
+    ConsoleOutput.info(`File added: ${filename}`);
+    callback();
+  });
+
+  watcher.on('unlink', (filename) => {
+    ConsoleOutput.info(`File removed: ${filename}`);
+  });
+
+  watcher.on('error', (error: unknown) => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    ConsoleOutput.error(`Watcher error: ${errorMessage}`);
   });
 }

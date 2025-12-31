@@ -22,8 +22,11 @@
     "@promptscript/core": "workspace:^",
     "@swc/helpers": "~0.5.11",
     "chalk": "^5.6.2",
+    "chokidar": "^5.0.0",
     "commander": "^14.0.2",
     "ora": "^9.0.0",
     "yaml": "^2.8.2"
+  },
+  "devDependencies": {
   }
 }
