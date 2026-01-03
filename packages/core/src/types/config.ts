@@ -56,6 +56,13 @@ export interface PromptScriptConfig {
   /** Config version */
   version: '1';
 
+  /**
+   * Extend another configuration file.
+   * Paths are resolved relative to the current config file.
+   * @example extends: '../base-config.yaml'
+   */
+  extends?: string;
+
   /** Project identification */
   project: {
     id: string;
@@ -65,12 +72,69 @@ export interface PromptScriptConfig {
   /** Inheritance path */
   inherit?: string;
 
+  /**
+   * Input file configuration.
+   * Controls which PromptScript files to compile.
+   */
+  input?: {
+    /** Entry file path (defaults to '.promptscript/project.prs') */
+    entry?: string;
+    /** Glob patterns for additional files to include */
+    include?: string[];
+    /** Glob patterns for files to exclude */
+    exclude?: string[];
+  };
+
   /** Registry configuration */
   registry: {
     /** Local path to registry */
     path?: string;
     /** Remote URL */
     url?: string;
+    /** Cache settings */
+    cache?: {
+      /** Whether caching is enabled */
+      enabled?: boolean;
+      /** Cache TTL in milliseconds */
+      ttl?: number;
+    };
+    /** Authentication for private registries */
+    auth?: {
+      /** Authentication type */
+      type: 'bearer' | 'basic';
+      /** Token for bearer auth, or "username:password" for basic auth */
+      token?: string;
+      /** Environment variable containing the token (alternative to token) */
+      tokenEnvVar?: string;
+    };
+  };
+
+  /**
+   * Watch mode configuration.
+   * Settings for `prs compile --watch`.
+   */
+  watch?: {
+    /** Glob patterns for files to watch (defaults to '**\/*.prs') */
+    include?: string[];
+    /** Glob patterns for files to ignore */
+    exclude?: string[];
+    /** Debounce time in milliseconds before recompiling */
+    debounce?: number;
+    /** Clear screen before each recompilation */
+    clearScreen?: boolean;
+  };
+
+  /**
+   * Output configuration.
+   * Global output settings applied to all targets.
+   */
+  output?: {
+    /** Base directory for all output files */
+    baseDir?: string;
+    /** Custom header to prepend to generated files */
+    header?: string;
+    /** Whether to overwrite existing files without warning */
+    overwrite?: boolean;
   };
 
   /**
