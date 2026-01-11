@@ -1,6 +1,6 @@
 ---
 title: Compiler API
-description: "@promptscript/compiler package API reference"
+description: '@promptscript/compiler package API reference'
 ---
 
 # @promptscript/compiler
@@ -15,23 +15,20 @@ npm install @promptscript/compiler
 
 ## Functions
 
-### compile
+### compile (Standalone)
 
-Compile PromptScript source to target format.
+Compile PromptScript source to target format without creating a compiler instance.
 
 ```typescript
-function compile(
-  source: string,
-  options: CompileOptions
-): Promise<CompileResult>;
+function compile(source: string, options?: CompileOptions): Promise<CompileResult>;
 ```
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `source` | `string` | PromptScript source code |
-| `options` | `CompileOptions` | Compilation options |
+| Parameter | Type             | Description              |
+| --------- | ---------------- | ------------------------ |
+| `source`  | `string`         | PromptScript source code |
+| `options` | `CompileOptions` | Compilation options      |
 
 **Returns:** `Promise<CompileResult>` - Compilation result
 
@@ -40,34 +37,35 @@ function compile(
 ```typescript
 import { compile } from '@promptscript/compiler';
 
+// Compile to multiple targets at once
 const result = await compile(source, {
-  target: 'github',
-  registry: './registry'
+  targets: ['github', 'claude', 'cursor'],
+  registryPath: './registry',
 });
 
-console.log(result.output);
+if (result.success) {
+  for (const [path, output] of result.outputs) {
+    console.log(`✓ ${path}`);
+  }
+}
 ```
 
-### compileFile
-
-Compile a PromptScript file.
+**CompileOptions (Standalone):**
 
 ```typescript
-function compileFile(
-  filePath: string,
-  options: CompileOptions
-): Promise<CompileResult>;
-```
+interface CompileOptions {
+  /** Target formatters (e.g., 'github', 'claude', 'cursor') */
+  targets?: string[];
 
-**Example:**
+  /** Path to registry directory */
+  registryPath?: string;
 
-```typescript
-import { compileFile } from '@promptscript/compiler';
+  /** Path to local .promptscript directory */
+  localPath?: string;
 
-const result = await compileFile('./project.prs', {
-  target: 'github',
-  output: '.github/copilot-instructions.md'
-});
+  /** Validation configuration */
+  validator?: ValidatorConfig;
+}
 ```
 
 ### createCompiler
@@ -78,26 +76,33 @@ Create a compiler instance for repeated use.
 function createCompiler(options: CompilerOptions): Compiler;
 
 interface Compiler {
-  compile(source: string): Promise<CompileResult>;
-  compileFile(filePath: string): Promise<CompileResult>;
-  compileAll(filePath: string): Promise<CompileResult[]>;
-  watch(filePath: string, callback: WatchCallback): void;
+  compile(entryPath: string): Promise<CompileResult>;
+  getFormatters(): readonly Formatter[];
 }
 ```
 
 **Example:**
 
 ```typescript
-import { createCompiler } from '@promptscript/compiler';
+import { Compiler } from '@promptscript/compiler';
 
-const compiler = createCompiler({
-  registry: './registry',
-  targets: ['github', 'claude', 'cursor'],
-  validation: { strict: true }
+const compiler = new Compiler({
+  resolver: {
+    registryPath: './registry',
+    localPath: './.promptscript',
+  },
+  validator: {
+    requiredGuards: ['@core/guards/compliance'],
+  },
+  formatters: ['github', 'claude', 'cursor'],
 });
 
-// Compile to all targets
-const results = await compiler.compileAll('./project.prs');
+// Compile
+const result = await compiler.compile('./project.prs');
+
+for (const [path, output] of result.outputs) {
+  console.log(`✓ ${path}`);
+}
 
 for (const result of results) {
   console.log(`${result.target}: ${result.outputPath}`);
@@ -112,22 +117,22 @@ for (const result of results) {
 interface CompileOptions {
   /** Target format */
   target: 'github' | 'claude' | 'cursor' | string;
-  
+
   /** Registry path or URL */
   registry?: string;
-  
+
   /** Output file path */
   output?: string;
-  
+
   /** Validation options */
   validation?: {
     strict?: boolean;
     rules?: Record<string, RuleSeverity>;
   };
-  
+
   /** Formatter options */
   formatter?: FormatterOptions;
-  
+
   /** Base path for relative imports */
   basePath?: string;
 }
@@ -139,19 +144,19 @@ interface CompileOptions {
 interface CompilerOptions {
   /** Registry path or URL */
   registry?: string;
-  
+
   /** Target formats */
   targets?: string[];
-  
+
   /** Target-specific options */
   targetOptions?: Record<string, FormatterOptions>;
-  
+
   /** Validation options */
   validation?: ValidateOptions;
-  
+
   /** Enable caching */
   cache?: boolean;
-  
+
   /** Watch mode options */
   watch?: WatchOptions;
 }
@@ -165,19 +170,19 @@ interface CompilerOptions {
 interface CompileResult {
   /** Target format */
   target: string;
-  
+
   /** Compiled output */
   output: string;
-  
+
   /** Output file path (if specified) */
   outputPath?: string;
-  
+
   /** Source file path */
   sourcePath: string;
-  
+
   /** Validation diagnostics */
   diagnostics: Diagnostic[];
-  
+
   /** Compilation metadata */
   metadata: {
     parseTime: number;
@@ -195,10 +200,10 @@ interface CompileResult {
 interface CompileAllResult {
   /** Results for each target */
   results: CompileResult[];
-  
+
   /** Overall success */
   success: boolean;
-  
+
   /** Combined diagnostics */
   diagnostics: Diagnostic[];
 }
@@ -238,8 +243,8 @@ const pipeline = createPipeline({
   resolver: customResolver,
   validator: customValidator,
   formatters: {
-    custom: customFormatter
-  }
+    custom: customFormatter,
+  },
 });
 
 const result = await pipeline.compile(source, { target: 'custom' });
@@ -252,7 +257,7 @@ const result = await pipeline.compile(source, { target: 'custom' });
 ```typescript
 const compiler = createCompiler({
   registry: './registry',
-  targets: ['github']
+  targets: ['github'],
 });
 
 compiler.watch('./project.prs', (event) => {
@@ -270,13 +275,13 @@ compiler.watch('./project.prs', (event) => {
 interface WatchOptions {
   /** Debounce delay (ms) */
   debounce?: number;
-  
+
   /** Files to watch */
   include?: string[];
-  
+
   /** Files to ignore */
   ignore?: string[];
-  
+
   /** Clear console on rebuild */
   clearScreen?: boolean;
 }
@@ -317,8 +322,8 @@ try {
 const result = await compile(source, options);
 
 if (result.diagnostics.length > 0) {
-  const errors = result.diagnostics.filter(d => d.severity === 'error');
-  
+  const errors = result.diagnostics.filter((d) => d.severity === 'error');
+
   if (errors.length > 0) {
     console.error('Compilation failed with errors');
     for (const error of errors) {
@@ -334,7 +339,7 @@ The compiler supports caching for performance:
 
 ```typescript
 const compiler = createCompiler({
-  cache: true
+  cache: true,
 });
 
 // First compilation - full pipeline
@@ -356,7 +361,7 @@ import { createIncrementalCompiler } from '@promptscript/compiler';
 
 const compiler = createIncrementalCompiler({
   registry: './registry',
-  targets: ['github']
+  targets: ['github'],
 });
 
 // Initial compilation
@@ -385,7 +390,7 @@ const resolved = await resolve(ast, { registry });
 
 // Step 3: Validate
 const diagnostics = validate(resolved);
-if (diagnostics.some(d => d.severity === 'error')) {
+if (diagnostics.some((d) => d.severity === 'error')) {
   throw new Error('Validation failed');
 }
 
@@ -405,7 +410,7 @@ const compiler = createCompiler({
       const result = await next();
       console.log('After compilation');
       return result;
-    }
-  ]
+    },
+  ],
 });
 ```

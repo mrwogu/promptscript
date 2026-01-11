@@ -63,6 +63,24 @@ if (result.success) {
 
 ## API
 
+### Standalone Function
+
+```typescript
+import { compile } from '@promptscript/compiler';
+
+// Quick compile without creating an instance
+const result = await compile(source, {
+  targets: ['github', 'claude'],
+  registryPath: './registry',
+});
+
+if (result.success) {
+  for (const [path, output] of result.outputs) {
+    console.log(`✓ ${path}`);
+  }
+}
+```
+
 ### `Compiler`
 
 Main class for compilation.
@@ -82,6 +100,21 @@ interface CompilerOptions {
   resolver: ResolverOptions;
   validator?: ValidatorConfig;
   formatters: (Formatter | string)[];
+}
+```
+
+### `CompileOptions` (for standalone function)
+
+```typescript
+interface CompileOptions {
+  /** Target formatters (e.g., 'github', 'claude', 'cursor') */
+  targets?: string[];
+  /** Path to registry directory */
+  registryPath?: string;
+  /** Path to local .promptscript directory */
+  localPath?: string;
+  /** Validation configuration */
+  validator?: ValidatorConfig;
 }
 ```
 

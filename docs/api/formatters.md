@@ -13,40 +13,49 @@ Output formatters for various AI tools.
 npm install @promptscript/formatters
 ```
 
-## Functions
+## Standalone Functions
 
 ### format
 
 Format a resolved program to a target format.
 
 ```typescript
-function format(program: ResolvedProgram, options: FormatOptions): string;
+function format(program: Program, options?: StandaloneFormatOptions): FormatterOutput;
 ```
 
 **Parameters:**
 
-| Parameter | Type              | Description        |
-| --------- | ----------------- | ------------------ |
-| `program` | `ResolvedProgram` | Resolved AST       |
-| `options` | `FormatOptions`   | Formatting options |
+| Parameter | Type                      | Description        |
+| --------- | ------------------------- | ------------------ |
+| `program` | `Program`                 | Resolved AST       |
+| `options` | `StandaloneFormatOptions` | Formatting options |
 
-**Returns:** `string` - Formatted output
+**Returns:** `FormatterOutput` - Formatted output
 
 **Example:**
 
 ```typescript
 import { format } from '@promptscript/formatters';
 
-const markdown = format(resolved, { target: 'github' });
-console.log(markdown);
+// Use default formatter (GitHub)
+const output = format(resolved);
+
+// Specify formatter by name
+const claudeOutput = format(resolved, { formatter: 'claude' });
+
+// Use custom options
+const cursorOutput = format(resolved, {
+  formatter: 'cursor',
+  version: 'legacy',
+});
 ```
 
 ### getFormatter
 
-Get a specific formatter.
+Get a specific formatter instance.
 
 ```typescript
-function getFormatter(target: string): Formatter;
+function getFormatter(name: string): Formatter | undefined;
 ```
 
 **Example:**
@@ -55,7 +64,9 @@ function getFormatter(target: string): Formatter;
 import { getFormatter } from '@promptscript/formatters';
 
 const githubFormatter = getFormatter('github');
-const output = githubFormatter.format(resolved);
+if (githubFormatter) {
+  const output = githubFormatter.format(resolved);
+}
 ```
 
 ### registerFormatter
@@ -66,29 +77,32 @@ Register a custom formatter.
 function registerFormatter(name: string, formatter: Formatter): void;
 ```
 
-## Options
-
-### FormatOptions
+### hasFormatter / listFormatters / unregisterFormatter
 
 ```typescript
-interface FormatOptions {
-  /** Target format */
-  target: 'github' | 'claude' | 'cursor' | string;
+import { hasFormatter, listFormatters, unregisterFormatter } from '@promptscript/formatters';
 
-  /** Include header comment */
-  header?: boolean | string;
+// Check if formatter exists
+if (hasFormatter('custom')) {
+  // ...
+}
 
-  /** Include timestamp */
-  timestamp?: boolean;
+// List all available formatters
+const names = listFormatters();
+// ['github', 'claude', 'cursor', 'antigravity']
 
-  /** Target-specific options */
-  targetOptions?: Record<string, unknown>;
+// Unregister a formatter
+unregisterFormatter('custom');
+```
 
-  /** Output convention ('xml' | 'markdown' | custom) */
-  convention?: string;
+## Options
 
-  /** Output file path */
-  outputPath?: string;
+### StandaloneFormatOptions
+
+```typescript
+interface StandaloneFormatOptions extends FormatOptions {
+  /** Formatter to use (name, instance, or factory) */
+  formatter?: string | Formatter | FormatterFactory;
 }
 ```
 

@@ -106,12 +106,51 @@ const output = formatter.format(ast);
 const outputWithFrontmatter = formatter.format(ast, { version: 'frontmatter' });
 ```
 
+## Standalone Functions
+
+Convenience functions for one-off formatting:
+
+```typescript
+import {
+  format,
+  getFormatter,
+  registerFormatter,
+  hasFormatter,
+  listFormatters,
+  unregisterFormatter,
+} from '@promptscript/formatters';
+
+// Format with default (GitHub)
+const output = format(ast);
+
+// Format with specific formatter
+const claudeOutput = format(ast, { formatter: 'claude' });
+
+// Get a formatter instance
+const formatter = getFormatter('cursor');
+
+// Check if formatter exists
+if (hasFormatter('custom')) {
+  // ...
+}
+
+// List available formatters
+const names = listFormatters();
+// ['github', 'claude', 'cursor', 'antigravity']
+
+// Register a custom formatter
+registerFormatter('custom', myFormatter);
+
+// Unregister a formatter
+unregisterFormatter('custom');
+```
+
 ## Custom Formatters
 
 Extend `BaseFormatter` to create custom formatters:
 
 ```typescript
-import { BaseFormatter, type FormatterOutput } from '@promptscript/formatters';
+import { BaseFormatter, type FormatterOutput, registerFormatter } from '@promptscript/formatters';
 import type { PromptScriptAST } from '@promptscript/core';
 
 export class MyFormatter extends BaseFormatter {
@@ -127,6 +166,9 @@ export class MyFormatter extends BaseFormatter {
     };
   }
 }
+
+// Register for use with standalone functions
+registerFormatter('my-formatter', new MyFormatter());
 ```
 
 ## Feature Coverage Matrix

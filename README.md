@@ -413,53 +413,15 @@ prs compile
 - [ ] **Global `--quiet` flag** - Suppress non-error output
 - [ ] **Environment variables** - `PROMPTSCRIPT_CONFIG`, `PROMPTSCRIPT_REGISTRY`, `PROMPTSCRIPT_VERBOSE`, `NO_COLOR`
 
-✅ **Recently Implemented CLI Features:**
-
-- [x] **`prs compile --registry <path>`** - Override registry path from command line
-- [x] **Watch mode with chokidar** - Reliable cross-platform file watching with debounce
-
 📚 **API Documentation vs Implementation Gaps** _(APIs documented in docs/api/ but not implemented)_
 
-- [x] **`@promptscript/core`** ✅ **Implemented**
-  - [x] `formatPath()` - Format PathReference back to string
-  - [x] `formatDiagnostic()` - Format a diagnostic for display
-  - [x] `createLocation()` - Create a source location
-  - [x] `BLOCK_TYPES` constant - Array of all block type names
-  - [x] `RESERVED_WORDS` constant - Array of reserved words
-- [x] **`@promptscript/parser`** ✅ **Implemented**
-  - [x] `parseFile()` - Parse a PromptScript file from disk
-  - [x] `recovery` option in ParseOptions - Enable recovery mode for partial parsing
-- [x] **`@promptscript/validator`** ✅ **Implemented**
-  - [x] `validate()` standalone function - Currently only `Validator.validate()` method exists
-  - [x] `removeRule()` method - Remove a validation rule by name
-  - [x] `formatValidationMessage()` / `formatValidationResult()` - Format validation results for display
-  - [x] `disableRules` option - Array of rules to disable
-  - [x] `customRules` option - Pass custom rules in ValidateOptions
-- [x] **`@promptscript/resolver`** ✅ **Implemented**
-  - [x] `resolve()` standalone function - Convenience wrapper for Resolver
-  - [x] `createFileSystemRegistry()` - Create a filesystem-based registry
-  - [x] `createHttpRegistry()` - Create an HTTP-based registry with cache/auth/retry
-  - [x] `createCompositeRegistry()` - Combine multiple registries
-  - [x] `Registry` interface with `fetch()`, `exists()` and `list()` methods
 - [x] **`@promptscript/compiler`** ✅ **Implemented**
-  - [x] `compile()` standalone function - Compile with sensible defaults
   - [ ] `compileFile()` - Compile from file path directly
   - [ ] `compileAll()` - Compile to all targets at once
   - [ ] `watch()` method - Watch mode in Compiler class
-- [x] **`@promptscript/formatters`** ✅ **Implemented**
-  - [x] `format()` standalone function - Format AST with specified or default formatter
-  - [x] `getFormatter()` standalone function - Get formatter by name with error
-  - [x] `registerFormatter()` standalone function - Register custom formatters
-  - [x] `hasFormatter()` / `listFormatters()` / `unregisterFormatter()` - Additional utilities
 
 ⚙️ **Configuration Gaps** _(Options in docs/reference/config.md not in PromptScriptConfig type)_
 
-- [x] **`input` section** ✅ - `entry`, `include`, `exclude` fields added to config type
-- [x] **`registry.cache`** ✅ - Cache settings (`enabled`, `ttl`)
-- [x] **`registry.auth`** ✅ - Authentication for private registries
-- [x] **`watch` section** ✅ - Watch mode config (`include`, `exclude`, `debounce`, `clearScreen`)
-- [x] **`output` section** ✅ - Output settings (`baseDir`, `header`, `overwrite`)
-- [x] **`extends`** ✅ - Configuration file inheritance field
 - [ ] **`plugins` section** - Plugin system support
 - [ ] **Environment variable interpolation** - `${VAR}` and `${VAR:-default}` syntax
 

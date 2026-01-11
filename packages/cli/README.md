@@ -44,10 +44,13 @@ prs compile [options]
 Options:
   -t, --target <target>   Specific target (github, claude, cursor)
   -a, --all               All configured targets (default)
-  -w, --watch             Watch mode for continuous compilation
+  -w, --watch             Watch mode for continuous compilation (uses chokidar)
   -o, --output <dir>      Output directory
   --dry-run               Preview changes without writing files
+  --registry <path>       Path or URL to registry
 ```
+
+**Watch Mode:** Uses [chokidar](https://github.com/paulmillr/chokidar) for reliable file watching across all platforms. Automatically recompiles when `.prs` files change.
 
 ### Validate
 
@@ -96,16 +99,35 @@ inherit: '@frontend/team'
 
 registry:
   path: './registry'
+  cache: true # Enable HTTP registry caching
+  auth: # Authentication for HTTP registry
+    type: bearer
+    token: ${REGISTRY_TOKEN} # Environment variable interpolation
+
+input:
+  entry: '.promptscript/project.prs'
+  include:
+    - '.promptscript/**/*.prs'
+  exclude:
+    - '**/*.local.prs'
+
+output:
+  dir: '.' # Output base directory
+  clean: false # Clean output before compile
+  targets:
+    github: '.github/copilot-instructions.md'
+    claude: 'CLAUDE.md'
+    cursor: '.cursor/rules/project.mdc'
+
+watch:
+  debounce: 300 # Debounce time in ms
+  ignored:
+    - '**/node_modules/**'
 
 targets:
   - github
   - claude
   - cursor
-
-output:
-  github: '.github/copilot-instructions.md'
-  claude: 'CLAUDE.md'
-  cursor: '.cursor/rules/project.mdc'
 
 validation:
   requiredGuards:
@@ -126,6 +148,18 @@ validation:
   ✓ .cursor/rules/project.mdc
 
 Stats: 234ms (resolve: 45ms, validate: 8ms, format: 181ms)
+```
+
+### Watch Mode
+
+```
+👀 Watching for changes...
+
+[12:34:56] File changed: .promptscript/project.prs
+✔ Compilation successful (156ms)
+
+  ✓ .github/copilot-instructions.md
+  ✓ CLAUDE.md
 ```
 
 ### Error

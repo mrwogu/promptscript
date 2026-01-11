@@ -192,13 +192,52 @@ try {
 Enable recovery mode to get partial results:
 
 ```typescript
-const ast = parse(source, {
-  recovery: true,
-  onError: (error) => {
-    console.warn('Parse error:', error.message);
-  },
+const result = parse(source, {
+  recovery: true, // alias for 'tolerant'
 });
+
+// Or use tolerant directly
+const result2 = parse(source, { tolerant: true });
+
 // Returns partial AST even with errors
+if (result.ast) {
+  console.log('Partial AST available');
+}
+console.log('Errors:', result.errors);
+```
+
+## File-based Parsing
+
+### parseFile
+
+Parse a PromptScript file directly from disk:
+
+```typescript
+import { parseFile, parseFileOrThrow } from '@promptscript/parser';
+
+// Async parse with error handling
+const result = await parseFile('./project.prs');
+if (result.errors.length === 0) {
+  console.log(result.ast);
+} else {
+  console.error('Parse errors:', result.errors);
+}
+
+// Throw on error
+try {
+  const ast = await parseFileOrThrow('./project.prs');
+} catch (error) {
+  console.error('Parse failed:', error.message);
+}
+```
+
+**Options:**
+
+```typescript
+interface ParseFileOptions extends ParseOptions {
+  /** Override filename for error reporting */
+  filename?: string;
+}
 ```
 
 ## AST Utilities

@@ -368,7 +368,16 @@ parsePath('./parent');
 Format a PathReference back to string:
 
 ```typescript
-function formatPath(ref: PathReference): string;
+function formatPath(ref: PathReference | ParsedPath): string;
+```
+
+**Example:**
+
+```typescript
+import { formatPath, parsePath } from '@promptscript/core';
+
+const ref = parsePath('@company/team/frontend@1.0.0');
+formatPath(ref); // '@company/team/frontend@1.0.0'
 ```
 
 ### deepMerge
@@ -388,12 +397,26 @@ const result = deepMerge({ a: { b: 1, c: 2 } }, { a: { b: 3 } });
 // { a: { b: 3, c: 2 } }
 ```
 
-### formatDiagnostic
+### Diagnostic Formatting
 
-Format a diagnostic for display:
+Format diagnostics for terminal output with optional ANSI colors:
 
 ```typescript
-function formatDiagnostic(diagnostic: Diagnostic): string;
+import { formatDiagnostic, formatDiagnostics, createLocation } from '@promptscript/core';
+
+// Format single diagnostic
+const output = formatDiagnostic(
+  {
+    message: 'Missing required field: id',
+    severity: 'error',
+    location: createLocation('project.prs', 5, 3),
+    code: 'E001',
+  },
+  { color: true }
+);
+
+// Format multiple diagnostics
+const all = formatDiagnostics(diagnostics, { color: true });
 ```
 
 ### createLocation
@@ -401,13 +424,7 @@ function formatDiagnostic(diagnostic: Diagnostic): string;
 Create a source location:
 
 ```typescript
-function createLocation(
-  startLine: number,
-  startColumn: number,
-  endLine: number,
-  endColumn: number,
-  source?: string
-): SourceLocation;
+function createLocation(file: string, line: number, column: number): SourceLocation;
 ```
 
 ## Constants
@@ -415,21 +432,52 @@ function createLocation(
 ### Block Types
 
 ```typescript
+import { BLOCK_TYPES, isBlockType } from '@promptscript/core';
+
+// All known block type names
 const BLOCK_TYPES = [
-  'meta',
   'identity',
   'context',
   'standards',
   'restrictions',
-  'shortcuts',
-  'params',
-  'guards',
   'knowledge',
+  'shortcuts',
+  'guards',
+  'params',
+  'skills',
+  'local',
+  'agents',
+  'workflows',
+  'prompts',
 ] as const;
+
+// Type guard
+if (isBlockType('identity')) {
+  // Valid block type
+}
 ```
 
 ### Reserved Words
 
 ```typescript
-const RESERVED_WORDS = ['true', 'false', 'null', 'range', 'enum'] as const;
+import { RESERVED_WORDS, isReservedWord } from '@promptscript/core';
+
+const RESERVED_WORDS = [
+  'meta',
+  'inherit',
+  'use',
+  'extend',
+  ...BLOCK_TYPES,
+  'true',
+  'false',
+  'null',
+  'range',
+  'enum',
+  'as',
+] as const;
+
+// Type guard
+if (isReservedWord('meta')) {
+  // Reserved word
+}
 ```

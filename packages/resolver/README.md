@@ -9,7 +9,7 @@ The resolver handles `@inherit`, `@use`, and `@extend` directives to produce a f
 ## Features
 
 - **@inherit**: Single inheritance with deep merge
-- **@use**: Import declarations for reusable fragments  
+- **@use**: Import declarations for reusable fragments
 - **@extend**: Block modifications with deep path support
 - **Circular dependency detection**: Prevents infinite loops
 - **Caching**: Optional caching of resolved ASTs
@@ -79,6 +79,62 @@ if (result.ast) {
 - Support dot paths for nested access
 
 ## API
+
+### Standalone Function
+
+```typescript
+import { resolve, createFileSystemRegistry } from '@promptscript/resolver';
+
+// Quick resolution without creating an instance
+const registry = createFileSystemRegistry('./registry');
+const resolved = await resolve(ast, { registry });
+```
+
+### Registry Types
+
+Three registry implementations are available:
+
+#### FileSystemRegistry
+
+```typescript
+import { createFileSystemRegistry } from '@promptscript/resolver';
+
+const registry = createFileSystemRegistry('./registry', {
+  extension: '.prs',
+});
+```
+
+#### HttpRegistry
+
+```typescript
+import { createHttpRegistry } from '@promptscript/resolver';
+
+const registry = createHttpRegistry('https://registry.example.com', {
+  cache: true,
+  cacheTtl: 3600, // seconds
+  timeout: 5000, // ms
+  retries: 3,
+  auth: {
+    type: 'bearer',
+    token: process.env.REGISTRY_TOKEN,
+  },
+});
+```
+
+#### CompositeRegistry
+
+```typescript
+import {
+  createCompositeRegistry,
+  createFileSystemRegistry,
+  createHttpRegistry,
+} from '@promptscript/resolver';
+
+const composite = createCompositeRegistry([
+  createFileSystemRegistry('./local'), // Check local first
+  createHttpRegistry('https://registry.example.com'), // Then remote
+]);
+```
 
 ### Resolver
 

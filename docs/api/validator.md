@@ -243,11 +243,37 @@ interface RuleContext {
 ### Using Custom Rules
 
 ```typescript
-import { validate } from '@promptscript/validator';
+import { validate, Validator } from '@promptscript/validator';
 
+// Via standalone function
 const diagnostics = validate(ast, {
   customRules: [noTodoComments, otherRule],
 });
+
+// Via Validator instance
+const validator = new Validator({
+  customRules: [noTodoComments],
+});
+validator.addRule(otherRule);
+
+// Remove a rule
+validator.removeRule('no-todo-comments');
+```
+
+### Formatting Validation Output
+
+```typescript
+import { formatValidationMessage, formatValidationResult } from '@promptscript/validator';
+
+// Format single message with color and rule ID
+const formatted = formatValidationMessage(error, {
+  color: true,
+  showRuleId: true,
+});
+// "error[PS001]: Missing required field 'id' at project.prs:5:3"
+
+// Format entire validation result
+const output = formatValidationResult(result, { color: true });
 ```
 
 ### Rule Sets
@@ -309,6 +335,20 @@ const hasErrors = diagnostics.some((d) => d.severity === 'error');
 ```typescript
 const diagnostics = validate(ast, {
   disableRules: ['PS022', 'PS023'],
+});
+```
+
+### Using ValidatorConfig
+
+```typescript
+const validator = new Validator({
+  requiredGuards: ['@core/guards/compliance'],
+  rules: {
+    'empty-block': 'warning',
+    deprecated: 'off',
+  },
+  disableRules: ['PS022'],
+  customRules: [myCustomRule],
 });
 ```
 

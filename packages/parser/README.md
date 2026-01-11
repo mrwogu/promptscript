@@ -83,6 +83,32 @@ Parse source code and throw on error.
 - Returns the parsed `Program` AST
 - Throws `ParseError` on failure
 
+### `parseFile(filePath, options?)`
+
+Parse a PromptScript file from disk.
+
+```typescript
+import { parseFile, parseFileOrThrow } from '@promptscript/parser';
+
+// Async parse with error handling
+const result = await parseFile('./project.prs');
+if (result.errors.length === 0) {
+  console.log(result.ast);
+}
+
+// Throw on error
+const ast = await parseFileOrThrow('./project.prs');
+```
+
+- `filePath`: Path to the `.prs` file
+- `options.filename`: Override filename for error reporting
+- `options.recovery`: Continue parsing even on errors (alias for `tolerant`)
+
+Returns `ParseResult` with:
+
+- `ast`: The parsed `Program` AST or `null`
+- `errors`: Array of `ParseError` objects
+
 ### `tokenize(source)`
 
 Tokenize source code without parsing.
