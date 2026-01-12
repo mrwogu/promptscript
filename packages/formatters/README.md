@@ -1,6 +1,29 @@
 # @promptscript/formatters
 
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - the language for standardizing AI instructions across your organization.
+
 Output formatters for PromptScript - generates configuration files for various AI tools.
+
+## 🏗️ Ecosystem
+
+```
+                         @promptscript/cli
+                                │
+                         @promptscript/compiler
+                                │
+       ┌────────────┬───────────┼───────────┬────────────┐
+       ▼            ▼           ▼           ▼            ▼
+    /parser    /resolver   /validator  ╔════════════╗
+       │            │           │      ║/formatters ║
+       │            │           │      ║     ⭐     ║
+       │            │           │      ╚═════╤══════╝
+       └────────────┴───────────┴────────────┘
+                        │
+                        ▼
+                @promptscript/core
+```
+
+See [all packages](https://github.com/mrwogu/promptscript#packages) in the PromptScript monorepo.
 
 ## Overview
 

@@ -1,6 +1,30 @@
 # @promptscript/compiler
 
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - the language for standardizing AI instructions across your organization.
+
 Pipeline orchestration for PromptScript compilation.
+
+## 🏗️ Ecosystem
+
+```
+                         @promptscript/cli
+                                │
+                    ╔═══════════════════════╗
+                    ║ @promptscript/compiler║
+                    ║          ⭐           ║
+                    ╚═══════════╤═══════════╝
+                                │
+       ┌────────────┬───────────┼───────────┬────────────┐
+       ▼            ▼           ▼           ▼            ▼
+    /parser    /resolver   /validator   /formatters
+       │            │           │           │
+       └────────────┴───────────┴───────────┘
+                        │
+                        ▼
+                @promptscript/core
+```
+
+See [all packages](https://github.com/mrwogu/promptscript#packages) in the PromptScript monorepo.
 
 ## Overview
 

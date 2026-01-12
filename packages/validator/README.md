@@ -1,6 +1,28 @@
 # @promptscript/validator
 
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - the language for standardizing AI instructions across your organization.
+
 AST validation rules for PromptScript files.
+
+## 🏗️ Ecosystem
+
+```
+                         @promptscript/cli
+                                │
+                         @promptscript/compiler
+                                │
+       ┌────────────┬───────────┼───────────┬────────────┐
+       ▼            ▼           ▼           ▼            ▼
+    /parser    /resolver  ╔═══════════╗  /formatters
+       │            │     ║/validator ║       │
+       │            │     ║    ⭐     ║       │
+       │            │     ╚═════╤═════╝       │
+       └────────────┴───────────┼─────────────┘
+                                ▼
+                        @promptscript/core
+```
+
+See [all packages](https://github.com/mrwogu/promptscript#packages) in the PromptScript monorepo.
 
 ## Installation
 

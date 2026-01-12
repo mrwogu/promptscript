@@ -1,6 +1,28 @@
 # @promptscript/resolver
 
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - the language for standardizing AI instructions across your organization.
+
 Inheritance and import resolution for PromptScript files.
+
+## 🏗️ Ecosystem
+
+```
+                         @promptscript/cli
+                                │
+                         @promptscript/compiler
+                                │
+       ┌────────────┬───────────┼───────────┬────────────┐
+       ▼            ▼           ▼           ▼            ▼
+    /parser   ╔══════════╗  /validator   /formatters
+       │      ║/resolver ║       │           │
+       │      ║    ⭐    ║       │           │
+       │      ╚════╤═════╝       │           │
+       └───────────┼─────────────┴───────────┘
+                   ▼
+           @promptscript/core
+```
+
+See [all packages](https://github.com/mrwogu/promptscript#packages) in the PromptScript monorepo.
 
 ## Overview
 

@@ -1,6 +1,26 @@
 # @promptscript/parser
 
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - the language for standardizing AI instructions across your organization.
+
 Chevrotain-based parser for PromptScript language.
+
+## 🏗️ Ecosystem
+
+```
+                         @promptscript/cli
+                                │
+                         @promptscript/compiler
+                                │
+       ┌────────────┬───────────┼───────────┬────────────┐
+       ▼            ▼           ▼           ▼            ▼
+  ╔═════════╗  /resolver   /validator   /formatters
+  ║ /parser ║       │           │           │
+  ║   ⭐    ║       └───────────┼───────────┘
+  ╚════╤════╝                   │
+       └────────────────────────┴──► @promptscript/core
+```
+
+See [all packages](https://github.com/mrwogu/promptscript#packages) in the PromptScript monorepo.
 
 ## Overview
 
