@@ -33,15 +33,15 @@ This package is the foundation of the PromptScript toolchain:
                 ╚════════════════════╝
 ```
 
-| Package | Description |
-|---------|-------------|
-| [@promptscript/cli](https://www.npmjs.com/package/@promptscript/cli) | Command-line interface |
-| [@promptscript/compiler](https://www.npmjs.com/package/@promptscript/compiler) | Compilation pipeline |
-| [@promptscript/parser](https://www.npmjs.com/package/@promptscript/parser) | Chevrotain-based parser |
-| [@promptscript/resolver](https://www.npmjs.com/package/@promptscript/resolver) | Inheritance & imports |
-| [@promptscript/validator](https://www.npmjs.com/package/@promptscript/validator) | AST validation rules |
-| [@promptscript/formatters](https://www.npmjs.com/package/@promptscript/formatters) | Output formatters |
-| **@promptscript/core** | **Types, errors, utilities** |
+| Package                                                                            | Description                  |
+| ---------------------------------------------------------------------------------- | ---------------------------- |
+| [@promptscript/cli](https://www.npmjs.com/package/@promptscript/cli)               | Command-line interface       |
+| [@promptscript/compiler](https://www.npmjs.com/package/@promptscript/compiler)     | Compilation pipeline         |
+| [@promptscript/parser](https://www.npmjs.com/package/@promptscript/parser)         | Chevrotain-based parser      |
+| [@promptscript/resolver](https://www.npmjs.com/package/@promptscript/resolver)     | Inheritance & imports        |
+| [@promptscript/validator](https://www.npmjs.com/package/@promptscript/validator)   | AST validation rules         |
+| [@promptscript/formatters](https://www.npmjs.com/package/@promptscript/formatters) | Output formatters            |
+| **@promptscript/core**                                                             | **Types, errors, utilities** |
 
 ## Installation
 

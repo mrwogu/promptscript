@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types';
+import { FormatterRegistry } from '@promptscript/formatters';
 
 // Create mock classes before importing Compiler
 const mockResolve = vi.fn();
@@ -173,6 +174,88 @@ describe('Compiler', () => {
       };
 
       expect(() => new Compiler(options)).toThrow(/Available formatters:/);
+    });
+
+    it('should load formatter with name and config object', () => {
+      // First register a mock formatter
+      const mockFormatter = createMockFormatter('github');
+      vi.spyOn(FormatterRegistry, 'get').mockReturnValue(mockFormatter);
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [{ name: 'github', config: { version: 'multifile' } }],
+      });
+
+      const formatters = compiler.getFormatters();
+      expect(formatters).toHaveLength(1);
+      expect(formatters[0]?.name).toBe('github');
+
+      vi.restoreAllMocks();
+    });
+
+    it('should use custom conventions when provided', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('github');
+      vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const customConvention = {
+        name: 'custom',
+        section: { prefix: '[[', suffix: ']]', contentPrefix: '', contentSuffix: '' },
+        list: { itemPrefix: '* ', itemSuffix: '', listPrefix: '', listSuffix: '' },
+        codeBlock: { prefix: '```', suffix: '```', languageSupport: true },
+      };
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [{ name: 'github', config: { convention: 'myconv' } }],
+        customConventions: { myconv: customConvention },
+      });
+
+      const result = await compiler.compile('./test.prs');
+      expect(result.success).toBe(true);
+
+      vi.restoreAllMocks();
+    });
+
+    it('should use standard convention name when not a custom one', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('github');
+      vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [{ name: 'github', config: { convention: 'markdown' } }],
+      });
+
+      const result = await compiler.compile('./test.prs');
+      expect(result.success).toBe(true);
+
+      vi.restoreAllMocks();
+    });
+
+    it('should handle formatter config with output path', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('github');
+      vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [{ name: 'github', config: { output: './custom/path.md' } }],
+      });
+
+      const result = await compiler.compile('./test.prs');
+      expect(result.success).toBe(true);
+
+      vi.restoreAllMocks();
     });
   });
 
