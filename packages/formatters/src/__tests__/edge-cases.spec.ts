@@ -1,0 +1,477 @@
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import type { Program, SourceLocation } from '@promptscript/core';
+import { GitHubFormatter } from '../formatters/github';
+import { ClaudeFormatter } from '../formatters/claude';
+import { CursorFormatter } from '../formatters/cursor';
+import { AntigravityFormatter } from '../formatters/antigravity';
+
+const createLoc = (): SourceLocation => ({
+  file: 'test.prs',
+  line: 1,
+  column: 1,
+});
+
+const createMinimalProgram = (): Program => ({
+  type: 'Program',
+  uses: [],
+  blocks: [],
+  extends: [],
+  loc: createLoc(),
+});
+
+describe('GitHubFormatter Edge Cases', () => {
+  let formatter: GitHubFormatter;
+
+  beforeEach(() => {
+    formatter = new GitHubFormatter();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('extractRestrictionItems with ObjectContent', () => {
+    it('should extract items from ObjectContent with items array', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                items: ['No secrets', 'Validate input', 'Use types'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## donts');
+      expect(result.content).toContain('No secrets');
+    });
+  });
+
+  describe('prompt file generation', () => {
+    it('should generate prompt files with agent mode and tools', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  prompt: true,
+                  description: 'Deploy application',
+                  mode: 'agent',
+                  tools: ['run_terminal', 'read_file'],
+                  content: 'Deploy the app to production.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/deploy.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      expect(promptFile?.content).toContain('description: "Deploy application"');
+      expect(promptFile?.content).toContain('mode: agent');
+      expect(promptFile?.content).toContain('- run_terminal');
+      expect(promptFile?.content).toContain('- read_file');
+      expect(promptFile?.content).toContain('Deploy the app to production.');
+    });
+
+    it('should generate prompt file with type: prompt', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  type: 'prompt',
+                  description: 'Code review',
+                  content: 'Review the code changes.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/review.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      expect(promptFile?.content).toContain('description: "Code review"');
+    });
+  });
+
+  describe('testing rule content from standards', () => {
+    it('should extract all testing properties', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  filePattern: '*.spec.ts',
+                  pattern: 'AAA',
+                  coverage: 90,
+                  fixtures: 'for parser tests',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Test files: `*.spec.ts`');
+      expect(result.content).toContain('Follow AAA pattern');
+      expect(result.content).toContain('Target >90% coverage');
+      expect(result.content).toContain('Use fixtures for parser tests');
+    });
+  });
+});
+
+describe('ClaudeFormatter Edge Cases', () => {
+  let formatter: ClaudeFormatter;
+
+  beforeEach(() => {
+    formatter = new ClaudeFormatter();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('guards with named rules', () => {
+    it('should extract named rules with paths from guards block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                typescript: {
+                  paths: ['**/*.ts', '**/*.tsx'],
+                  description: 'TypeScript rules',
+                  content: 'Use strict TypeScript.',
+                },
+                testing: {
+                  applyTo: ['**/*.spec.ts'],
+                  description: 'Test rules',
+                  content: 'Follow AAA pattern.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      expect(result.additionalFiles).toBeDefined();
+
+      const tsFile = result.additionalFiles?.find((f) => f.path.includes('typescript'));
+      expect(tsFile).toBeDefined();
+      expect(tsFile?.content).toContain('TypeScript rules');
+    });
+  });
+
+  describe('testing rule content', () => {
+    it('should extract testing properties with framework', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  framework: 'vitest',
+                  coverage: 80,
+                  pattern: 'AAA',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('vitest');
+      expect(result.content).toContain('80');
+    });
+  });
+});
+
+describe('CursorFormatter Edge Cases', () => {
+  let formatter: CursorFormatter;
+
+  beforeEach(() => {
+    formatter = new CursorFormatter();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('devCommands', () => {
+    it('should extract commands from context block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commands: 'pnpm install\npnpm build\npnpm test',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('pnpm install');
+      expect(result.content).toContain('pnpm build');
+      expect(result.content).toContain('pnpm test');
+    });
+
+    it('should handle commands as object value', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commands: {
+                  build: 'npm run build',
+                  test: 'npm test',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // Should stringify the object
+      expect(result.content).toBeDefined();
+    });
+  });
+
+  describe('postWork', () => {
+    it('should extract post-work-verification from context block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'post-work-verification': 'Run tests\nCheck linting\nVerify build',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Run tests');
+      expect(result.content).toContain('Check linting');
+      expect(result.content).toContain('Verify build');
+    });
+
+    it('should handle empty post-work-verification', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'post-work-verification': '   ',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // Empty string should not produce post-work section
+      expect(result.content).not.toContain('Post-Work Verification:\n   ');
+    });
+  });
+});
+
+describe('AntigravityFormatter Edge Cases', () => {
+  let formatter: AntigravityFormatter;
+
+  beforeEach(() => {
+    formatter = new AntigravityFormatter();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('tech stack', () => {
+    it('should extract monorepo with tool only', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                monorepo: {
+                  tool: 'nx',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('**Monorepo:** nx');
+    });
+
+    it('should extract monorepo with tool and packageManager', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                monorepo: {
+                  tool: 'nx',
+                  packageManager: 'pnpm',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('**Monorepo:** nx with pnpm workspaces');
+    });
+
+    it('should extract frameworks as array', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                frameworks: ['react', 'express', 'jest'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('**Frameworks:** react, express, jest');
+    });
+
+    it('should handle single framework', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                frameworks: 'react',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('**Frameworks:** react');
+    });
+  });
+});

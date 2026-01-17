@@ -1016,6 +1016,13 @@ export class GitHubFormatter extends BaseFormatter {
         .split('\n')
         .filter((line) => line.trim())
         .map((line) => this.formatRestriction(line.trim()));
+    } else if (block.content.type === 'ObjectContent') {
+      const itemsArray = this.getProp(block.content, 'items');
+      if (Array.isArray(itemsArray)) {
+        items = itemsArray.map((item: unknown) =>
+          this.formatRestriction(this.valueToString(item as Value))
+        );
+      }
     }
 
     if (items.length === 0) return null;
