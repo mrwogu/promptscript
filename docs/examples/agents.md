@@ -184,71 +184,69 @@ Benefits of using subagents:
 
 ## Compiled Output
 
-### GitHub Copilot Output
+With `version: full`, agents are generated as separate files:
 
-With `version: full`, the GitHub formatter generates `.github/agents/<name>.md` files:
+=== "GitHub Copilot"
 
-#### `.github/agents/code-reviewer.md`
+    `.github/agents/code-reviewer.md`
 
-```markdown
----
-name: code-reviewer
-description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
-model: gpt-4o
----
+    ```markdown
+    ---
+    name: code-reviewer
+    description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
+    tools:
+      - Read
+      - Grep
+      - Glob
+      - Bash
+    model: gpt-4o
+    ---
 
-You are a senior code reviewer ensuring high standards of code quality and security.
+    You are a senior code reviewer ensuring high standards of code quality and security.
 
-When invoked:
+    When invoked:
 
-1. Run git diff to see recent changes
-   ...
-```
+    1. Run git diff to see recent changes
+       ...
+    ```
 
-!!! note "GitHub vs Claude"
-GitHub Copilot custom agents support `name`, `description`, `tools`, and `model`. Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` are ignored for GitHub output.
+    !!! note "GitHub vs Claude"
+        GitHub Copilot custom agents support `name`, `description`, `tools`, and `model`. Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` are ignored for GitHub output.
 
-### Claude Code Output
+=== "Claude Code"
 
-With `version: full`, the Claude formatter generates `.claude/agents/<name>.md` files:
+    `.claude/agents/code-reviewer.md`
 
-### `.claude/agents/code-reviewer.md`
+    ```markdown
+    ---
+    name: code-reviewer
+    description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
+    tools: Read, Grep, Glob, Bash
+    model: sonnet
+    ---
 
-```markdown
----
-name: code-reviewer
-description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
-tools: Read, Grep, Glob, Bash
-model: sonnet
----
+    You are a senior code reviewer ensuring high standards of code quality and security.
 
-You are a senior code reviewer ensuring high standards of code quality and security.
+    When invoked:
 
-When invoked:
+    1. Run git diff to see recent changes
+       ...
+    ```
 
-1. Run git diff to see recent changes
-   ...
-```
+    `.claude/agents/db-reader.md`
 
-### `.claude/agents/db-reader.md`
+    ```markdown
+    ---
+    name: db-reader
+    description: Execute read-only database queries. Use when analyzing data or generating reports.
+    tools: Bash, Read
+    disallowedTools: Write, Edit
+    model: haiku
+    permissionMode: dontAsk
+    ---
 
-```markdown
----
-name: db-reader
-description: Execute read-only database queries. Use when analyzing data or generating reports.
-tools: Bash, Read
-disallowedTools: Write, Edit
-model: haiku
-permissionMode: dontAsk
----
-
-You are a database analyst with read-only access...
-```
+    You are a database analyst with read-only access...
+    ```
 
 ## Using with Skills (Claude only)
 

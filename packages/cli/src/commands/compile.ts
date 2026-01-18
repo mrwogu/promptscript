@@ -11,20 +11,23 @@ import { Compiler } from '@promptscript/compiler';
 
 /**
  * Parse target entries into compiler format.
+ * Filters out targets with enabled: false.
  */
 function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
-  return targets.map((entry) => {
-    if (typeof entry === 'string') {
-      return { name: entry };
-    }
-    // Object format: { github: { convention: 'xml' } }
-    const entries = Object.entries(entry);
-    if (entries.length === 0) {
-      throw new Error('Empty target configuration');
-    }
-    const [name, config] = entries[0] as [string, TargetConfig | undefined];
-    return { name, config };
-  });
+  return targets
+    .map((entry) => {
+      if (typeof entry === 'string') {
+        return { name: entry };
+      }
+      // Object format: { github: { convention: 'xml' } }
+      const entries = Object.entries(entry);
+      if (entries.length === 0) {
+        throw new Error('Empty target configuration');
+      }
+      const [name, config] = entries[0] as [string, TargetConfig | undefined];
+      return { name, config };
+    })
+    .filter((target) => target.config?.enabled !== false);
 }
 
 /**

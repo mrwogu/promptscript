@@ -14,20 +14,15 @@ Learn best practices and patterns for using PromptScript effectively.
 Build scalable instruction hierarchies with inheritance patterns.
 
 [Inheritance Guide →](inheritance.md)
+
 </div>
 
 <div class="feature-card" markdown>
-### :material-office-building: Enterprise Setup
-Deploy PromptScript across your organization.
+### :material-file-multiple: Multi-File Organization
+Organize your PromptScript files for complex projects.
 
-[Enterprise Setup →](enterprise.md)
+[Multi-File Guide →](multi-file.md)
+
 </div>
 
 <div class="feature-card" markdown>
-### :material-swap-horizontal: Migration
-Migrate existing AI instructions to PromptScript.
-
-[Migration Guide →](migration.md)
-</div>
-
-</div>

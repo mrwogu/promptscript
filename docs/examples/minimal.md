@@ -96,31 +96,89 @@ prs validate
 
 ## Generated Output
 
-### .github/copilot-instructions.md
+=== "GitHub Copilot"
 
-```markdown
-# AI Instructions
+    `.github/copilot-instructions.md`
 
-## Identity
+    ```markdown
+    # AI Instructions
 
-You are a helpful coding assistant for this project.
-Focus on clean, readable code.
+    ## Identity
 
-## Context
+    You are a helpful coding assistant for this project.
+    Focus on clean, readable code.
 
-This is a TypeScript project using modern best practices.
+    ## Context
 
-## Standards
+    This is a TypeScript project using modern best practices.
 
-- Code style: functional
-- Documentation: JSDoc for public APIs
+    ## Standards
 
-## Shortcuts
+    - Code style: functional
+    - Documentation: JSDoc for public APIs
 
-- `/help` - Show what you can help with
-- `/review` - Review code for quality issues
-- `/test` - Write unit tests
-```
+    ## Shortcuts
+
+    - `/help` - Show what you can help with
+    - `/review` - Review code for quality issues
+    - `/test` - Write unit tests
+    ```
+
+=== "Claude Code"
+
+    `CLAUDE.md`
+
+    ```markdown
+    # AI Instructions
+
+    ## Identity
+
+    You are a helpful coding assistant for this project.
+    Focus on clean, readable code.
+
+    ## Context
+
+    This is a TypeScript project using modern best practices.
+
+    ## Standards
+
+    - Code style: functional
+    - Documentation: JSDoc for public APIs
+
+    ## Shortcuts
+
+    - `/help` - Show what you can help with
+    - `/review` - Review code for quality issues
+    - `/test` - Write unit tests
+    ```
+
+=== "Cursor"
+
+    `.cursorrules`
+
+    ```text
+    # AI Instructions
+
+    ## Identity
+
+    You are a helpful coding assistant for this project.
+    Focus on clean, readable code.
+
+    ## Context
+
+    This is a TypeScript project using modern best practices.
+
+    ## Standards
+
+    - Code style: functional
+    - Documentation: JSDoc for public APIs
+
+    ## Shortcuts
+
+    - /help - Show what you can help with
+    - /review - Review code for quality issues
+    - /test - Write unit tests
+    ```
 
 ## Adding More Targets
 

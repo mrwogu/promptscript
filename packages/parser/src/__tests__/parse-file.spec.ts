@@ -63,6 +63,33 @@ describe('parseFile', () => {
     expect(result.errors).toHaveLength(0);
     expect(result.ast).not.toBeNull();
   });
+
+  it('should parse @agents and @knowledge blocks', () => {
+    const filePath = join(fixturesDir, 'agents-and-knowledge.prs');
+    const result = parseFile(filePath);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
+
+    // Verify @agents block was parsed
+    const agentsBlock = result.ast?.blocks.find((b) => b.name === 'agents');
+    expect(agentsBlock).toBeDefined();
+    expect(agentsBlock?.content.type).toBe('ObjectContent');
+    if (agentsBlock?.content.type === 'ObjectContent') {
+      expect(agentsBlock.content.properties).toHaveProperty('code-reviewer');
+      expect(agentsBlock.content.properties).toHaveProperty('debugger');
+      expect(agentsBlock.content.properties).toHaveProperty('security-auditor');
+    }
+
+    // Verify @knowledge block was parsed
+    const knowledgeBlock = result.ast?.blocks.find((b) => b.name === 'knowledge');
+    expect(knowledgeBlock).toBeDefined();
+    expect(knowledgeBlock?.content.type).toBe('TextContent');
+    if (knowledgeBlock?.content.type === 'TextContent') {
+      expect(knowledgeBlock.content.value).toContain('API Reference');
+      expect(knowledgeBlock.content.value).toContain('Authentication');
+    }
+  });
 });
 
 describe('parseFileOrThrow', () => {

@@ -1,0 +1,89 @@
+# Parser fixture for @agents and @knowledge blocks
+@meta {
+  id: "agents-knowledge-test"
+  syntax: "1.0.0"
+}
+
+@agents {
+  code-reviewer: {
+    description: "Reviews code for quality and best practices"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    content: """
+      You are a senior code reviewer ensuring high standards.
+
+      When invoked:
+      1. Run git diff to see recent changes
+      2. Focus on modified files
+      3. Begin review immediately
+
+      Review checklist:
+      - Code is clear and readable
+      - Functions and variables are well-named
+      - No duplicated code
+      - Proper error handling
+    """
+  }
+
+  debugger: {
+    description: "Debugging specialist for errors and test failures"
+    tools: ["Read", "Edit", "Bash", "Grep", "Glob"]
+    disallowedTools: ["Write"]
+    model: "inherit"
+    permissionMode: "acceptEdits"
+    skills: ["error-handling", "testing-patterns"]
+    content: """
+      You are an expert debugger specializing in root cause analysis.
+      
+      Your approach:
+      1. Reproduce the issue
+      2. Identify root cause
+      3. Propose minimal fix
+    """
+  }
+
+  security-auditor: {
+    description: "Security vulnerability scanner"
+    tools: ["Read", "Grep"]
+    model: "opus"
+    content: """
+      Scan code for security vulnerabilities.
+      Check OWASP top 10.
+    """
+  }
+}
+
+@knowledge {
+  """
+  ## API Reference
+
+  ### Authentication
+  - POST /auth/login - User login
+  - POST /auth/logout - User logout
+  - POST /auth/refresh - Refresh access token
+
+  ### Users
+  - GET /api/users - List users (paginated)
+  - GET /api/users/:id - Get user by ID
+  - POST /api/users - Create new user
+  - PUT /api/users/:id - Update user
+  - DELETE /api/users/:id - Delete user
+
+  ## Architecture Notes
+
+  The service follows a clean architecture pattern:
+  - Controllers: HTTP request handling
+  - Services: Business logic
+  - Repositories: Data access layer
+
+  ## Database Schema
+
+  ```sql
+  CREATE TABLE users (
+    id UUID PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+  ```
+  """
+}

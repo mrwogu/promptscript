@@ -281,8 +281,44 @@ Define reusable skills that AI assistants can invoke:
 
 Skills are output differently based on the formatter:
 
-- **GitHub**: `.github/skills/<name>/SKILL.md` (version: full)
-- **Claude**: `.claude/skills/<name>/SKILL.md` (version: full)
+=== "GitHub Output"
+
+    `.github/skills/<name>/SKILL.md` (version: full)
+
+    ```markdown
+    ---
+    name: commit
+    description: Create git commits
+    ---
+
+    When creating commits:
+    1. Use conventional commit format
+    2. Include Co-Authored-By trailer
+    3. Never amend existing commits
+    ```
+
+=== "Claude Output"
+
+    `.claude/skills/<name>/SKILL.md` (version: full)
+
+    ```markdown
+    ---
+    name: commit
+    description: Create git commits
+    disableModelInvocation: true
+    context: fork
+    agent: general-purpose
+    allowedTools:
+      - Bash
+      - Read
+      - Write
+    ---
+
+    When creating commits:
+    1. Use conventional commit format
+    2. Include Co-Authored-By trailer
+    3. Never amend existing commits
+    ```
 
 ### @agents
 
@@ -336,8 +372,57 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 
 Agents output by platform:
 
-- **GitHub**: `.github/agents/<name>.md` (version: full) - supports `name`, `description`, `tools`, `model`
-- **Claude**: `.claude/agents/<name>.md` (version: full) - supports all properties
+=== "GitHub Output"
+
+    `.github/agents/<name>.md` (version: full)
+
+    Supports: `name`, `description`, `tools`, `model`
+
+    ```markdown
+    ---
+    name: code-reviewer
+    description: Reviews code for quality and best practices
+    tools:
+      - Read
+      - Grep
+      - Glob
+      - Bash
+    model: sonnet
+    ---
+
+    You are a senior code reviewer ensuring high standards.
+
+    When invoked:
+    1. Run git diff to see recent changes
+    2. Focus on modified files
+    3. Begin review immediately
+    ```
+
+=== "Claude Output"
+
+    `.claude/agents/<name>.md` (version: full)
+
+    Supports all properties including `disallowedTools`, `permissionMode`, `skills`
+
+    ```markdown
+    ---
+    name: code-reviewer
+    description: Reviews code for quality and best practices
+    tools:
+      - Read
+      - Grep
+      - Glob
+      - Bash
+    model: sonnet
+    ---
+
+    You are a senior code reviewer ensuring high standards.
+
+    When invoked:
+    1. Run git diff to see recent changes
+    2. Focus on modified files
+    3. Begin review immediately
+    ```
 
 !!! note "Hooks Support"
 Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are planned but not yet implemented. See [Roadmap](../../README.md#roadmap).

@@ -280,87 +280,82 @@ CLAUDE.local.md
 
 ## Generated Output
 
-### GitHub Copilot Output
+With `version: full`, formatters generate separate files for skills, agents, and local memory:
 
-With `version: full`, the formatter generates:
+=== "GitHub Copilot"
 
-**`.github/copilot-instructions.md`** (main file)
-**`.github/instructions/typescript.instructions.md`** (path-specific rules)
-**`.github/skills/commit/SKILL.md`** (commit skill)
-**`.github/skills/review/SKILL.md`** (review skill)
-**`.github/agents/code-reviewer.md`** (code reviewer agent)
-**`.github/agents/debugger.md`** (debugger agent)
-**`AGENTS.md`** (agent instructions)
+    Generated files:
 
-Example skill file:
+    - `.github/copilot-instructions.md` (main file)
+    - `.github/instructions/typescript.instructions.md` (path-specific rules)
+    - `.github/skills/commit/SKILL.md` (commit skill)
+    - `.github/skills/review/SKILL.md` (review skill)
+    - `.github/agents/code-reviewer.md` (code reviewer agent)
+    - `.github/agents/debugger.md` (debugger agent)
+    - `AGENTS.md` (agent instructions)
 
-```markdown
-## <!-- .github/skills/commit/SKILL.md -->
+    Example skill file (`.github/skills/commit/SKILL.md`):
 
-name: "commit"
-description: "Create git commits following project conventions"
-disable-model-invocation: true
+    ```markdown
+    ---
+    name: "commit"
+    description: "Create git commits following project conventions"
+    disable-model-invocation: true
+    ---
 
----
+    When creating commits:
 
-When creating commits:
+    1. Use Conventional Commits format: type(scope): description
+    2. Types: feat, fix, docs, style, refactor, test, chore
+       ...
+    ```
 
-1. Use Conventional Commits format: type(scope): description
-2. Types: feat, fix, docs, style, refactor, test, chore
-   ...
-```
+=== "Claude Code"
 
-### Claude Code Output
+    Generated files:
 
-With `version: full`, the formatter generates:
+    - `CLAUDE.md` (main file)
+    - `.claude/rules/code-style.md` (path-specific rules)
+    - `.claude/skills/commit/SKILL.md` (commit skill)
+    - `.claude/skills/review/SKILL.md` (review skill)
+    - `.claude/agents/code-reviewer.md` (code reviewer subagent)
+    - `.claude/agents/debugger.md` (debugger subagent)
+    - `CLAUDE.local.md` (private instructions)
 
-**`CLAUDE.md`** (main file)
-**`.claude/rules/code-style.md`** (path-specific rules)
-**`.claude/skills/commit/SKILL.md`** (commit skill)
-**`.claude/skills/review/SKILL.md`** (review skill)
-**`.claude/agents/code-reviewer.md`** (code reviewer subagent)
-**`.claude/agents/debugger.md`** (debugger subagent)
-**`CLAUDE.local.md`** (private instructions)
+    Example agent file (`.claude/agents/code-reviewer.md`):
 
-Example agent file:
+    ```markdown
+    ---
+    name: code-reviewer
+    description: Expert code reviewer. Use proactively after code changes.
+    tools: Read, Grep, Glob, Bash
+    model: sonnet
+    skills:
+      - review
+    ---
 
-```markdown
-## <!-- .claude/agents/code-reviewer.md -->
+    You are a senior code reviewer ensuring high standards of code quality.
 
-name: code-reviewer
-description: Expert code reviewer. Use proactively after code changes.
-tools: Read, Grep, Glob, Bash
-model: sonnet
-skills:
+    When invoked:
 
-- review
+    1. Run git diff to see recent changes
+       ...
+    ```
 
----
+    Example local file (`CLAUDE.local.md`):
 
-You are a senior code reviewer ensuring high standards of code quality.
+    ```markdown
+    # CLAUDE.local.md
 
-When invoked:
+    > Private instructions (not committed to git)
 
-1. Run git diff to see recent changes
-   ...
-```
+    ## Local Development Configuration
 
-Example local file:
+    ### API Keys
 
-```markdown
-<!-- CLAUDE.local.md -->
-
-# CLAUDE.local.md
-
-> Private instructions (not committed to git)
-
-## Local Development Configuration
-
-### API Keys
-
-- Development API key is in .env.local
-  ...
-```
+    - Development API key is in .env.local
+      ...
+    ```
 
 ## Skill Properties Reference
 

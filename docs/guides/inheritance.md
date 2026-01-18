@@ -62,96 +62,138 @@ Different blocks merge differently during inheritance:
 
 `@identity`, `@knowledge`, and text content in other blocks concatenate:
 
-```promptscript
-# Parent
-@identity {
-  """
-  You are a helpful assistant.
-  """
-}
+=== "Source"
 
-# Child
-@inherit ./parent
+    ```promptscript
+    # Parent
+    @identity {
+      """
+      You are a helpful assistant.
+      """
+    }
 
-@identity {
-  """
-  You specialize in React development.
-  """
-}
+    # Child
+    @inherit ./parent
 
-# Result: Both texts concatenated
-```
+    @identity {
+      """
+      You specialize in React development.
+      """
+    }
+    ```
+
+=== "Merged Output"
+
+    ```markdown
+    ## Identity
+
+    You are a helpful assistant.
+
+    You specialize in React development.
+    ```
 
 ### Objects (Deep Merge)
 
 `@standards` and object properties deep merge:
 
-```promptscript
-# Parent
-@standards {
-  code: {
-    style: "clean"
-    testing: required
-  }
-}
+=== "Source"
 
-# Child
-@inherit ./parent
-
-@standards {
-  code: {
-    frameworks: [react]  # Added
-    testing: {           # Overrides primitive with object
-      required: true
-      coverage: 80
+    ```promptscript
+    # Parent
+    @standards {
+      code: {
+        style: "clean"
+        testing: required
+      }
     }
-  }
-}
 
-# Result: Deep merged object
-```
+    # Child
+    @inherit ./parent
+
+    @standards {
+      code: {
+        frameworks: [react]  # Added
+        testing: {           # Overrides primitive with object
+          required: true
+          coverage: 80
+        }
+      }
+    }
+    ```
+
+=== "Merged Output"
+
+    ```yaml
+    code:
+      style: "clean"         # From parent
+      frameworks: [react]    # From child
+      testing:               # Child object replaces parent primitive
+        required: true
+        coverage: 80
+    ```
 
 ### Arrays (Concatenate)
 
 `@restrictions` and array values concatenate:
 
-```promptscript
-# Parent
-@restrictions {
-  - "Never expose secrets"
-}
+=== "Source"
 
-# Child
-@inherit ./parent
+    ```promptscript
+    # Parent
+    @restrictions {
+      - "Never expose secrets"
+    }
 
-@restrictions {
-  - "Always use TypeScript"
-}
+    # Child
+    @inherit ./parent
 
-# Result: Both restrictions included
-```
+    @restrictions {
+      - "Always use TypeScript"
+    }
+    ```
+
+=== "Merged Output"
+
+    ```markdown
+    ## Restrictions
+
+    - Never expose secrets
+    - Always use TypeScript
+    ```
 
 ### Shortcuts (Override)
 
 `@shortcuts` entries override by key:
 
-```promptscript
-# Parent
-@shortcuts {
-  "/test": "Write unit tests"
-  "/docs": "Generate documentation"
-}
+=== "Source"
 
-# Child
-@inherit ./parent
+    ```promptscript
+    # Parent
+    @shortcuts {
+      "/test": "Write unit tests"
+      "/docs": "Generate documentation"
+    }
 
-@shortcuts {
-  "/test": "Write tests with Vitest"  # Overrides
-  "/lint": "Run ESLint"               # Added
-}
+    # Child
+    @inherit ./parent
 
-# Result: /test overridden, /docs inherited, /lint added
-```
+    @shortcuts {
+      "/test": "Write tests with Vitest"  # Overrides
+      "/lint": "Run ESLint"               # Added
+    }
+    ```
+
+=== "Merged Output"
+
+    ```markdown
+    ## Shortcuts
+
+    | Command | Description |
+    |---------|-------------|
+    | /test | Write tests with Vitest |
+    | /docs | Generate documentation |
+    | /lint | Run ESLint |
+    ```
 
 ## Using @extend
 

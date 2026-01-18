@@ -509,29 +509,6 @@ Follow semantic versioning for registry files:
 | Team Lead | Team namespace write   |
 | Developer | Read-only, PR creation |
 
-## Monitoring and Analytics
-
-### Usage Tracking
-
-Track adoption across projects:
-
-```yaml
-# In each project's config
-analytics:
-  enabled: true
-  projectId: 'customer-portal'
-  team: 'frontend'
-```
-
-### Quality Metrics
-
-Monitor:
-
-- Registry update frequency
-- Project adoption rate
-- Validation error trends
-- Inheritance depth
-
 ## Rollout Strategy
 
 ### Phase 1: Pilot (2-4 weeks)

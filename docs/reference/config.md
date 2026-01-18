@@ -292,6 +292,18 @@ targets:
 | `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown')  |
 | `version`    | string  | (default)   | Format version ('legacy' for deprecated) |
 
+!!! tip "Disabling Targets"
+Setting `enabled: false` skips the target during compilation.
+This is equivalent to removing the target from the list.
+
+    ```yaml
+    targets:
+      - github               # Will compile
+      - claude:
+          enabled: false     # Will NOT compile (skipped)
+      - cursor               # Will compile
+    ```
+
 See [Formatters API](../api/formatters.md) for more details.
 
 **Built-in Conventions:**

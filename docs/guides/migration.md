@@ -132,263 +132,263 @@ prs init
 
 ### Identity Block
 
-**Before (Markdown):**
+=== "Before (Markdown)"
 
-```markdown
-You are a senior developer working on the checkout service.
-Focus on clean, maintainable code.
-```
+    ```markdown
+    You are a senior developer working on the checkout service.
+    Focus on clean, maintainable code.
+    ```
 
-**After (PromptScript):**
+=== "After (PromptScript)"
 
-```promptscript
-@identity {
-  """
-  You are a senior developer working on the checkout service.
-  Focus on clean, maintainable code.
-  """
-}
-```
+    ```promptscript
+    @identity {
+      """
+      You are a senior developer working on the checkout service.
+      Focus on clean, maintainable code.
+      """
+    }
+    ```
 
 ### Context Block
 
-**Before (Markdown):**
+=== "Before (Markdown)"
 
-```markdown
-## Tech Stack
+    ```markdown
+    ## Tech Stack
 
-- Node.js 20
-- TypeScript
-- PostgreSQL
-- Redis for caching
-```
+    - Node.js 20
+    - TypeScript
+    - PostgreSQL
+    - Redis for caching
+    ```
 
-**After (PromptScript):**
+=== "After (PromptScript)"
 
-```promptscript
-@context {
-  stack: {
-    runtime: "Node.js 20"
-    language: "TypeScript"
-    database: "PostgreSQL"
-    cache: "Redis"
-  }
+    ```promptscript
+    @context {
+      stack: {
+        runtime: "Node.js 20"
+        language: "TypeScript"
+        database: "PostgreSQL"
+        cache: "Redis"
+      }
 
-  """
-  The checkout service handles payment processing
-  and order management for the e-commerce platform.
-  """
-}
-```
+      """
+      The checkout service handles payment processing
+      and order management for the e-commerce platform.
+      """
+    }
+    ```
 
 ### Standards Block
 
-**Before (Markdown):**
+=== "Before (Markdown)"
 
-```markdown
-## Coding Standards
+    ```markdown
+    ## Coding Standards
 
-- Use functional programming patterns
-- Write tests for all code (80% coverage)
-- Document public APIs with JSDoc
-- Use ESLint and Prettier
-```
+    - Use functional programming patterns
+    - Write tests for all code (80% coverage)
+    - Document public APIs with JSDoc
+    - Use ESLint and Prettier
+    ```
 
-**After (PromptScript):**
+=== "After (PromptScript)"
 
-```promptscript
-@standards {
-  code: {
-    style: "functional"
-    testing: {
-      required: true
-      coverage: 80
+    ```promptscript
+    @standards {
+      code: {
+        style: "functional"
+        testing: {
+          required: true
+          coverage: 80
+        }
+        documentation: {
+          publicApi: "JSDoc"
+        }
+        linting: {
+          eslint: true
+          prettier: true
+        }
+      }
     }
-    documentation: {
-      publicApi: "JSDoc"
-    }
-    linting: {
-      eslint: true
-      prettier: true
-    }
-  }
-}
-```
+    ```
 
 ### Restrictions Block
 
-**Before (Markdown):**
+=== "Before (Markdown)"
 
-```markdown
-## Don'ts
+    ```markdown
+    ## Don'ts
 
-- Never commit secrets or credentials
-- Don't use `var`, use `const` or `let`
-- Never bypass code review
-```
+    - Never commit secrets or credentials
+    - Don't use `var`, use `const` or `let`
+    - Never bypass code review
+    ```
 
-**After (PromptScript):**
+=== "After (PromptScript)"
 
-```promptscript
-@restrictions {
-  - "Never commit secrets or credentials"
-  - "Don't use var, use const or let"
-  - "Never bypass code review"
-}
-```
+    ```promptscript
+    @restrictions {
+      - "Never commit secrets or credentials"
+      - "Don't use var, use const or let"
+      - "Never bypass code review"
+    }
+    ```
 
 ### Shortcuts Block
 
-**Before (Markdown):**
+=== "Before (Markdown)"
 
-```markdown
-## Commands
+    ```markdown
+    ## Commands
 
-- /test - Run the test suite
-- /lint - Run ESLint
-- /build - Build for production
-```
+    - /test - Run the test suite
+    - /lint - Run ESLint
+    - /build - Build for production
+    ```
 
-**After (PromptScript):**
+=== "After (PromptScript)"
 
-```promptscript
-@shortcuts {
-  "/test": "Run the test suite with coverage"
-  "/lint": "Run ESLint and fix issues"
-  "/build": "Build for production deployment"
-}
-```
+    ```promptscript
+    @shortcuts {
+      "/test": "Run the test suite with coverage"
+      "/lint": "Run ESLint and fix issues"
+      "/build": "Build for production deployment"
+    }
+    ```
 
 ### Knowledge Block
 
-**Before (Markdown):**
+=== "Before (Markdown)"
 
-```markdown
-## API Reference
+    ```markdown
+    ## API Reference
 
-### Authentication
+    ### Authentication
 
-- POST /auth/login
-- POST /auth/logout
+    - POST /auth/login
+    - POST /auth/logout
 
-### Orders
+    ### Orders
 
-- GET /orders
-- POST /orders
-```
+    - GET /orders
+    - POST /orders
+    ```
 
-**After (PromptScript):**
+=== "After (PromptScript)"
 
-```promptscript
-@knowledge {
-  """
-  ## API Reference
+    ```promptscript
+    @knowledge {
+      """
+      ## API Reference
 
-  ### Authentication
-  - POST /auth/login
-  - POST /auth/logout
+      ### Authentication
+      - POST /auth/login
+      - POST /auth/logout
 
-  ### Orders
-  - GET /orders - List orders
-  - POST /orders - Create order
-  """
-}
-```
+      ### Orders
+      - GET /orders - List orders
+      - POST /orders - Create order
+      """
+    }
+    ```
 
 ## Step 4: Complete Migration
 
 ### Full Example
 
-**Before (CLAUDE.md):**
+=== "Before (CLAUDE.md)"
 
-```markdown
-# Checkout Service
+    ```markdown
+    # Checkout Service
 
-You are a senior developer working on the checkout service.
+    You are a senior developer working on the checkout service.
 
-## Tech Stack
+    ## Tech Stack
 
-- Node.js 20
-- TypeScript
-- PostgreSQL
+    - Node.js 20
+    - TypeScript
+    - PostgreSQL
 
-## Standards
+    ## Standards
 
-- Use functional programming
-- Write tests (80% coverage)
-- Document public APIs
+    - Use functional programming
+    - Write tests (80% coverage)
+    - Document public APIs
 
-## Don'ts
+    ## Don'ts
 
-- Never commit secrets
-- Don't use var
+    - Never commit secrets
+    - Don't use var
 
-## Commands
+    ## Commands
 
-/test - Run tests
-/lint - Run linter
+    /test - Run tests
+    /lint - Run linter
 
-## API Reference
+    ## API Reference
 
-### Orders
+    ### Orders
 
-- GET /orders
-- POST /orders
-```
+    - GET /orders
+    - POST /orders
+    ```
 
-**After (project.prs):**
+=== "After (project.prs)"
 
-```promptscript
-@meta {
-  id: "checkout-service"
-  syntax: "1.0.0"
-}
-
-@identity {
-  """
-  You are a senior developer working on the checkout service.
-  """
-}
-
-@context {
-  stack: {
-    runtime: "Node.js 20"
-    language: "TypeScript"
-    database: "PostgreSQL"
-  }
-}
-
-@standards {
-  code: {
-    style: "functional"
-    testing: {
-      required: true
-      coverage: 80
+    ```promptscript
+    @meta {
+      id: "checkout-service"
+      syntax: "1.0.0"
     }
-    documentation: "JSDoc for public APIs"
-  }
-}
 
-@restrictions {
-  - "Never commit secrets"
-  - "Don't use var"
-}
+    @identity {
+      """
+      You are a senior developer working on the checkout service.
+      """
+    }
 
-@shortcuts {
-  "/test": "Run the test suite"
-  "/lint": "Run ESLint"
-}
+    @context {
+      stack: {
+        runtime: "Node.js 20"
+        language: "TypeScript"
+        database: "PostgreSQL"
+      }
+    }
 
-@knowledge {
-  """
-  ## API Reference
+    @standards {
+      code: {
+        style: "functional"
+        testing: {
+          required: true
+          coverage: 80
+        }
+        documentation: "JSDoc for public APIs"
+      }
+    }
 
-  ### Orders
-  - GET /orders - List orders
-  - POST /orders - Create order
-  """
-}
-```
+    @restrictions {
+      - "Never commit secrets"
+      - "Don't use var"
+    }
+
+    @shortcuts {
+      "/test": "Run the test suite"
+      "/lint": "Run ESLint"
+    }
+
+    @knowledge {
+      """
+      ## API Reference
+
+      ### Orders
+      - GET /orders - List orders
+      - POST /orders - Create order
+      """
+    }
+    ```
 
 ## Step 5: Configure and Compile
 
@@ -532,6 +532,202 @@ Some content may be specific to certain tools:
 }
 ```
 
+## Advanced Block Migration
+
+### @skills Block
+
+Skills define reusable capabilities for AI agents:
+
+=== "Before (CLAUDE.md)"
+
+    ```markdown
+    ## Skills
+
+    ### Code Review
+
+    When reviewing code:
+
+    1. Check for type safety
+    2. Verify error handling
+    3. Ensure tests exist
+
+    ### Deployment
+
+    Steps to deploy:
+
+    1. Build the project
+    2. Run tests
+    3. Deploy to staging
+    ```
+
+=== "After (PromptScript)"
+
+    ```promptscript
+    @skills {
+      code-review: {
+        description: "Review code for quality and best practices"
+        content: """
+          When reviewing code:
+          1. Check for type safety
+          2. Verify error handling
+          3. Ensure tests exist
+        """
+      }
+
+      deployment: {
+        description: "Deploy the application"
+        steps: ["Build the project", "Run tests", "Deploy to staging"]
+      }
+    }
+    ```
+
+### @agents Block
+
+Define specialized AI subagents:
+
+=== "Before (AGENTS.md)"
+
+    ```markdown
+    # Code Reviewer
+
+    Reviews code for quality.
+
+    Tools: Read, Grep, Bash
+    Model: claude-sonnet
+
+    Instructions:
+    Review code checking for type safety and error handling.
+    ```
+
+=== "After (PromptScript)"
+
+    ```promptscript
+    @agents {
+      code-reviewer: {
+        description: "Reviews code for quality and best practices"
+        tools: ["Read", "Grep", "Bash"]
+        model: "sonnet"
+        content: """
+          Review code checking for:
+          - Type safety
+          - Error handling
+          - Test coverage
+        """
+      }
+    }
+    ```
+
+### @local Block
+
+Private instructions not committed to version control:
+
+=== "Before (CLAUDE.local.md)"
+
+    ```markdown
+    # Local Development
+
+    - API endpoint: http://localhost:8080
+    - Debug mode enabled
+    - Use staging database
+    ```
+
+=== "After (PromptScript)"
+
+    ```promptscript
+    @local {
+      apiEndpoint: "http://localhost:8080"
+      debugMode: true
+
+      """
+      Local development notes:
+      - Use staging database for testing
+      - Mock external services
+      """
+    }
+    ```
+
+### @guards Block with Globs
+
+File-specific rules using glob patterns:
+
+=== "Before (.github/instructions/)"
+
+    ```markdown
+    ---
+    applyTo: src/components/**/*.tsx
+    ---
+
+    # Component Guidelines
+
+    Use functional components with TypeScript.
+    ```
+
+=== "After (PromptScript)"
+
+    ```promptscript
+    @guards {
+      globs: ["src/components/**/*.tsx"]
+
+      """
+      Component Guidelines:
+      - Use functional components
+      - Include TypeScript types
+      - Add unit tests
+      """
+    }
+    ```
+
+### @params Block
+
+Configurable parameters with types:
+
+=== "Before (Markdown)"
+
+    ```markdown
+    ## Configuration
+
+    - Verbosity: 1-5 (default: 3)
+    - Output format: json | text | markdown
+    - Strict mode: on/off
+    ```
+
+=== "After (PromptScript)"
+
+    ```promptscript
+    @params {
+      verbosity: range(1..5) = 3
+      format?: enum("json", "text", "markdown") = "text"
+      strict: boolean = false
+    }
+    ```
+
+### @extend Block
+
+Modify inherited blocks at specific paths:
+
+```promptscript
+@inherit @company/base
+
+# Add to existing identity
+@extend identity {
+  """
+  Additional expertise in React development.
+  """
+}
+
+# Modify nested standards
+@extend standards.code.testing {
+  framework: "vitest"
+  coverage: 90
+}
+
+# Add to restrictions array
+@extend restrictions {
+  - "Use functional components only"
+  - "No class-based components"
+}
+```
+
 ## Validation Checklist
 
 After migration, verify:
@@ -551,7 +747,7 @@ After migration, verify:
 Error: @meta block is required
 ```
 
-Add required `@meta` block with `id` and `version`.
+Add required `@meta` block with `id` and `syntax`.
 
 ### Invalid Syntax
 
@@ -564,6 +760,32 @@ Check PromptScript syntax, especially:
 - Colons after property names
 - Proper string quoting
 - Array/object brackets
+
+### Multiline Strings in Objects
+
+Multiline strings cannot be loose inside objects:
+
+```promptscript
+# ❌ Invalid
+@standards {
+  code: {
+    style: "clean"
+    """
+    Additional notes...
+    """
+  }
+}
+
+# ✅ Valid - assign to a key
+@standards {
+  code: {
+    style: "clean"
+    notes: """
+      Additional notes...
+    """
+  }
+}
+```
 
 ### Content Loss
 
@@ -578,5 +800,6 @@ If compiled output is missing content:
 After migration:
 
 1. [Set up inheritance](inheritance.md) if you have multiple projects
-2. [Configure CI/CD](enterprise.md#cicd-integration) for validation
-3. Train team on PromptScript workflow
+2. [Organize multi-file setup](multi-file.md) for complex projects
+3. [Configure CI/CD](enterprise.md#cicd-integration) for validation
+4. Train team on PromptScript workflow

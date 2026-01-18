@@ -410,7 +410,7 @@ prs compile
 - [ ] **GitHub Action** - CI/CD integration for automatic compilation and drift detection
 - [ ] **AI-assisted authoring** - Generate PromptScript from natural language descriptions
 - [ ] **Multi-language support** - Localized instructions for international teams
-- [ ] **Analytics dashboard** - Track instruction usage and effectiveness across organization
+- [ ] **Analytics & metrics dashboard** - Track instruction usage, adoption rates, and validation trends across organization
 - [ ] **Template marketplace** - Community-contributed templates for common stacks (React, Django, Rails, etc.)
 - [ ] **Secret management** - Safe handling of API keys and sensitive configuration
 - [ ] **Conditional compilation** - Environment-specific instructions (dev/staging/prod)
