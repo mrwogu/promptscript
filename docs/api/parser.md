@@ -86,8 +86,39 @@ interface ParseOptions {
 
   /** Custom error reporter */
   onError?: (error: ParseError) => void;
+
+  /** Enable environment variable interpolation in strings */
+  interpolateEnv?: boolean;
 }
 ```
+
+### Environment Variable Interpolation
+
+When `interpolateEnv` is enabled, strings can contain environment variable references:
+
+```typescript
+const ast = parse(source, { interpolateEnv: true });
+```
+
+**Supported Syntax:**
+
+| Syntax            | Description                                   |
+| ----------------- | --------------------------------------------- |
+| `${VAR}`          | Substitutes variable value (empty if not set) |
+| `${VAR:-default}` | Substitutes variable or default value         |
+
+**Example:**
+
+```promptscript
+@context {
+  api-key: "${API_KEY}"
+  environment: "${ENV:-development}"
+}
+```
+
+!!! warning "Missing Variables"
+If a variable is not set and no default is provided, an empty string is used
+and a warning is logged to the console.
 
 ## Lexer
 

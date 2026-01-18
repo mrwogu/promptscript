@@ -50,7 +50,6 @@ Options:
   -i, --interactive        Force interactive mode
   -y, --yes                Skip prompts, use defaults
   -f, --force              Force reinitialize even if already initialized
-  --template <template>    Project template
 ```
 
 **Auto-detection:** Project name, languages, frameworks, and existing AI tool configurations.
@@ -83,7 +82,7 @@ prs validate [options]
 
 Options:
   --strict                Treat warnings as errors
-  --fix                   Auto-fix issues (future)
+  --format <format>       Output format (text, json)
 ```
 
 ### Pull Updates

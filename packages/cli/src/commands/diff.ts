@@ -11,6 +11,19 @@ import { Compiler } from '@promptscript/compiler';
 import chalk from 'chalk';
 
 /**
+ * Configure chalk color level based on options.
+ */
+function configureColors(options: DiffOptions): void {
+  // --no-color takes precedence, then --color, then environment
+  if (options.color === false) {
+    chalk.level = 0;
+  } else if (options.color === true) {
+    chalk.level = 3; // Full color support
+  }
+  // Otherwise use chalk's auto-detection (respects NO_COLOR env var)
+}
+
+/**
  * Parse target entries into compiler format.
  */
 function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetConfig }[] {
@@ -90,12 +103,16 @@ async function compareOutput(
  * Show diff between current output files and what would be generated.
  */
 export async function diffCommand(options: DiffOptions): Promise<void> {
+  // Configure colors first
+  configureColors(options);
+
   const spinner = createSpinner('Loading configuration...').start();
 
   try {
     const config = await loadConfig();
     spinner.text = 'Compiling...';
 
+    // --all is the default behavior when no target is specified
     const targets = options.target ? [{ name: options.target }] : parseTargets(config.targets);
 
     const compiler = new Compiler({

@@ -12,6 +12,9 @@ export type {
   FormatterConstructor,
   FormatOptions,
   TargetConfig,
+  WatchCallback,
+  WatchOptions,
+  Watcher,
 } from './types';
 
 // Export CompileOptions type

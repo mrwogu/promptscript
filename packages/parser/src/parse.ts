@@ -21,6 +21,12 @@ export interface ParseOptions {
    * When true, the parser will attempt to continue after errors.
    */
   recovery?: boolean;
+  /**
+   * Enable environment variable interpolation. Defaults to false.
+   * When true, ${VAR} and ${VAR:-default} syntax will be replaced with
+   * actual environment variable values.
+   */
+  interpolateEnv?: boolean;
 }
 
 /**
@@ -61,7 +67,12 @@ export interface ParseResult {
  * ```
  */
 export function parse(source: string, options: ParseOptions = {}): ParseResult {
-  const { filename = '<unknown>', tolerant = false, recovery = false } = options;
+  const {
+    filename = '<unknown>',
+    tolerant = false,
+    recovery = false,
+    interpolateEnv = false,
+  } = options;
   const isRecoveryMode = tolerant || recovery;
   const errors: ParseError[] = [];
 
@@ -102,6 +113,8 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
 
   // AST transformation phase
   try {
+    // Configure visitor with interpolation setting
+    visitor.setInterpolateEnv(interpolateEnv);
     const ast = visitor.visit(cst, filename) as Program;
     return { ast, errors };
   } catch (err) {

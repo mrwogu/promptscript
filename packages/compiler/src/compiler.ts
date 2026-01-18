@@ -11,6 +11,8 @@ import type {
   FormatterOutput,
   FormatterConstructor,
   TargetConfig,
+  WatchOptions,
+  Watcher,
 } from './types';
 
 /**
@@ -171,6 +173,131 @@ export class Compiler {
    */
   getFormatters(): readonly Formatter[] {
     return this.loadedFormatters.map((lf) => lf.formatter);
+  }
+
+  /**
+   * Compile a PromptScript file from a file path.
+   * This is an alias for compile() for consistency with the documented API.
+   *
+   * @param filePath - Path to the PromptScript file
+   * @returns Compilation result
+   */
+  async compileFile(filePath: string): Promise<CompileResult> {
+    return this.compile(filePath);
+  }
+
+  /**
+   * Compile to all registered formatters.
+   * Useful when you want to ensure all formatters are used regardless of config.
+   *
+   * @param entryPath - Path to the entry file
+   * @returns Compilation result with all formatter outputs
+   */
+  async compileAll(entryPath: string): Promise<CompileResult> {
+    // Get all registered formatters
+    const allFormatters = FormatterRegistry.list();
+
+    // Create a new compiler with all formatters
+    const compiler = new Compiler({
+      ...this.options,
+      formatters: allFormatters,
+    });
+
+    return compiler.compile(entryPath);
+  }
+
+  /**
+   * Watch for file changes and recompile automatically.
+   *
+   * @param entryPath - Path to the entry file to compile
+   * @param options - Watch options
+   * @returns Watcher handle to control the watch process
+   *
+   * @example
+   * ```typescript
+   * const watcher = await compiler.watch('./project.prs', {
+   *   onCompile: (result) => {
+   *     if (result.success) {
+   *       console.log('Compiled successfully');
+   *     }
+   *   },
+   * });
+   *
+   * // Later, stop watching
+   * await watcher.close();
+   * ```
+   */
+  async watch(entryPath: string, options: WatchOptions = {}): Promise<Watcher> {
+    // Dynamic import of chokidar to avoid bundling issues
+    const { default: chokidar } = await import('chokidar');
+    const { dirname, resolve } = await import('path');
+
+    const baseDir = dirname(resolve(entryPath));
+    const includePatterns = options.include ?? ['**/*.prs'];
+    const excludePatterns = options.exclude ?? ['**/node_modules/**'];
+    const debounceMs = options.debounce ?? 300;
+
+    // Build watch patterns
+    const watchPatterns = includePatterns.map((p) => resolve(baseDir, p));
+
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingChanges: string[] = [];
+
+    const handleChange = async (changedFiles: string[]): Promise<void> => {
+      try {
+        const result = await this.compile(entryPath);
+        options.onCompile?.(result, changedFiles);
+      } catch (error) {
+        options.onError?.(error as Error);
+      }
+    };
+
+    const watcher = chokidar.watch(watchPatterns, {
+      ignored: excludePatterns,
+      persistent: true,
+      ignoreInitial: true,
+    });
+
+    watcher.on('change', (path: string) => {
+      pendingChanges.push(path);
+
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      debounceTimer = setTimeout(() => {
+        const files = [...pendingChanges];
+        pendingChanges = [];
+        handleChange(files);
+      }, debounceMs);
+    });
+
+    watcher.on('add', (path: string) => {
+      pendingChanges.push(path);
+
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      debounceTimer = setTimeout(() => {
+        const files = [...pendingChanges];
+        pendingChanges = [];
+        handleChange(files);
+      }, debounceMs);
+    });
+
+    watcher.on('error', (error: unknown) => {
+      options.onError?.(error instanceof Error ? error : new Error(String(error)));
+    });
+
+    return {
+      close: async () => {
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
+        await watcher.close();
+      },
+    };
   }
 
   /**

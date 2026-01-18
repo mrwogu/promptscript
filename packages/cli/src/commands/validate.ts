@@ -7,6 +7,27 @@ import { createSpinner, ConsoleOutput } from '../output/console';
 import { Compiler } from '@promptscript/compiler';
 
 /**
+ * JSON output structure for validation results.
+ */
+interface ValidationJsonOutput {
+  success: boolean;
+  errors: Array<{
+    message: string;
+    location?: { file?: string; line?: number; column?: number };
+  }>;
+  warnings: Array<{
+    ruleId: string;
+    message: string;
+    suggestion?: string;
+    location?: { file?: string; line?: number; column?: number };
+  }>;
+  summary: {
+    errorCount: number;
+    warningCount: number;
+  };
+}
+
+/**
  * Print validation errors.
  */
 function printValidationErrors(errors: CompileResult['errors']): void {
@@ -46,14 +67,89 @@ function printValidationWarnings(warnings: CompileResult['warnings'], strict: bo
 }
 
 /**
+ * Handle entry file not found error.
+ */
+function handleEntryNotFound(
+  entryPath: string,
+  isJsonFormat: boolean,
+  spinner: ReturnType<typeof createSpinner>
+): never {
+  if (isJsonFormat) {
+    outputJsonResult({
+      success: false,
+      errors: [{ message: `File not found: ${entryPath}` }],
+      warnings: [],
+      summary: { errorCount: 1, warningCount: 0 },
+    });
+  } else {
+    spinner.fail('Entry file not found');
+    ConsoleOutput.error(`File not found: ${entryPath}`);
+    ConsoleOutput.muted('Run: prs init');
+  }
+  process.exit(1);
+}
+
+/**
+ * Output validation results in text format.
+ */
+function outputTextResult(
+  result: CompileResult,
+  failed: boolean,
+  strict: boolean,
+  spinner: ReturnType<typeof createSpinner>
+): void {
+  if (failed) {
+    spinner.fail('Validation failed');
+  } else {
+    spinner.succeed('Validation successful');
+  }
+
+  ConsoleOutput.newline();
+
+  printValidationErrors(result.errors);
+  printValidationWarnings(result.warnings, strict);
+
+  // Summary
+  if (result.errors.length === 0 && result.warnings.length === 0) {
+    ConsoleOutput.success('No issues found');
+  }
+}
+
+/**
+ * Convert compile result to JSON output format.
+ */
+function toJsonOutput(result: CompileResult, success: boolean): ValidationJsonOutput {
+  return {
+    success,
+    errors: result.errors.map((e) => ({
+      message: e.message,
+      location: e.location,
+    })),
+    warnings: result.warnings.map((w) => ({
+      ruleId: w.ruleId,
+      message: w.message,
+      suggestion: w.suggestion,
+      location: w.location,
+    })),
+    summary: {
+      errorCount: result.errors.length,
+      warningCount: result.warnings.length,
+    },
+  };
+}
+
+/**
  * Validate PromptScript files without generating output.
  */
 export async function validateCommand(options: ValidateOptions): Promise<void> {
-  const spinner = createSpinner('Loading configuration...').start();
+  const isJsonFormat = options.format === 'json';
+  const spinner = isJsonFormat
+    ? createSpinner('').stop()
+    : createSpinner('Loading configuration...').start();
 
   try {
     const config = await loadConfig();
-    spinner.text = 'Validating...';
+    if (!isJsonFormat) spinner.text = 'Validating...';
 
     const compiler = new Compiler({
       resolver: {
@@ -67,42 +163,55 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
     const entryPath = resolve('./.promptscript/project.prs');
 
     if (!existsSync(entryPath)) {
-      spinner.fail('Entry file not found');
-      ConsoleOutput.error(`File not found: ${entryPath}`);
-      ConsoleOutput.muted('Run: prs init');
-      process.exit(1);
+      handleEntryNotFound(entryPath, isJsonFormat, spinner);
     }
 
     const result = await compiler.compile(entryPath);
 
-    // Check if we have errors
     const hasErrors = result.errors.length > 0;
     const hasWarnings = result.warnings.length > 0;
     const treatWarningsAsErrors = options.strict === true && hasWarnings;
     const failed = hasErrors || treatWarningsAsErrors;
 
-    if (failed) {
-      spinner.fail('Validation failed');
+    if (isJsonFormat) {
+      outputJsonResult(toJsonOutput(result, !failed));
     } else {
-      spinner.succeed('Validation successful');
-    }
-
-    ConsoleOutput.newline();
-
-    printValidationErrors(result.errors);
-    printValidationWarnings(result.warnings, options.strict === true);
-
-    // Summary
-    if (!hasErrors && !hasWarnings) {
-      ConsoleOutput.success('No issues found');
+      outputTextResult(result, failed, options.strict === true, spinner);
     }
 
     if (failed) {
       process.exit(1);
     }
   } catch (error) {
-    spinner.fail('Error');
-    ConsoleOutput.error((error as Error).message);
-    process.exit(1);
+    handleValidationError(error as Error, isJsonFormat, spinner);
   }
+}
+
+/**
+ * Handle validation errors.
+ */
+function handleValidationError(
+  error: Error,
+  isJsonFormat: boolean,
+  spinner: ReturnType<typeof createSpinner>
+): never {
+  if (isJsonFormat) {
+    outputJsonResult({
+      success: false,
+      errors: [{ message: error.message }],
+      warnings: [],
+      summary: { errorCount: 1, warningCount: 0 },
+    });
+  } else {
+    spinner.fail('Error');
+    ConsoleOutput.error(error.message);
+  }
+  process.exit(1);
+}
+
+/**
+ * Output validation result as JSON.
+ */
+function outputJsonResult(result: ValidationJsonOutput): void {
+  console.log(JSON.stringify(result, null, 2));
 }

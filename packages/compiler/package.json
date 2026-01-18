@@ -17,6 +17,7 @@
     "@promptscript/core": "workspace:^",
     "@promptscript/formatters": "workspace:^",
     "@promptscript/resolver": "workspace:^",
-    "@promptscript/validator": "workspace:^"
+    "@promptscript/validator": "workspace:^",
+    "chokidar": "^5.0.0"
   }
 }

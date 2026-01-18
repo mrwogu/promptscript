@@ -600,3 +600,51 @@ Expecting token of type --> RBrace <-- but found --> '"""...
 
 !!! tip "Rule of Thumb"
 Inside `{ }` braces, everything needs a key. Multiline strings without keys only work directly inside blocks like `@identity { ... }` or `@knowledge { ... }`.
+
+## Environment Variable Interpolation
+
+String values can reference environment variables for dynamic configuration:
+
+```promptscript
+@context {
+  api-endpoint: "${API_ENDPOINT}"
+  environment: "${NODE_ENV:-development}"
+}
+```
+
+### Syntax
+
+| Pattern           | Description                         |
+| ----------------- | ----------------------------------- |
+| `${VAR}`          | Substitute with variable value      |
+| `${VAR:-default}` | Substitute with variable or default |
+
+### Examples
+
+```promptscript
+@meta {
+  id: "project-${PROJECT_NAME:-default}"
+  syntax: "1.0.0"
+}
+
+@context {
+  """
+  Running in ${NODE_ENV:-development} mode.
+  API Key: ${API_KEY}
+  """
+}
+```
+
+!!! warning "Missing Variables"
+If a variable is not set and no default is provided:
+
+    - An empty string is substituted
+    - A warning is logged to the console
+
+    This follows Linux shell behavior for unset variables.
+
+!!! tip "Best Practices"
+
+    1. **Always provide defaults** for non-sensitive values
+    2. **Never commit secrets** - use environment variables for API keys
+    3. **Document required variables** in your project README

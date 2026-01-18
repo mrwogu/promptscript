@@ -36,6 +36,8 @@ export interface Formatter {
   readonly name: string;
   /** Output path pattern */
   readonly outputPath: string;
+  /** Human-readable description */
+  readonly description: string;
   /** Default convention for this formatter */
   readonly defaultConvention: string;
   /** Format the AST to target format */
@@ -127,4 +129,33 @@ export interface CompileResult {
   warnings: ValidationMessage[];
   /** Compilation statistics */
   stats: CompileStats;
+}
+
+/**
+ * Callback invoked when watch mode detects changes and recompiles.
+ */
+export type WatchCallback = (result: CompileResult, changedFiles: string[]) => void;
+
+/**
+ * Options for watch mode.
+ */
+export interface WatchOptions {
+  /** Glob patterns to include. Defaults to all .prs files. */
+  include?: string[];
+  /** Glob patterns to exclude. Defaults to node_modules. */
+  exclude?: string[];
+  /** Debounce delay in milliseconds. Defaults to 300. */
+  debounce?: number;
+  /** Callback invoked on each recompilation */
+  onCompile?: WatchCallback;
+  /** Callback invoked on errors */
+  onError?: (error: Error) => void;
+}
+
+/**
+ * Handle returned by watch() to control the watcher.
+ */
+export interface Watcher {
+  /** Stop watching and clean up */
+  close(): Promise<void>;
 }

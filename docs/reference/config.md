@@ -162,14 +162,6 @@ output:
 
   # Overwrite existing files
   overwrite: true
-
-# ====================
-# Plugin Configuration
-# ====================
-plugins:
-  - name: '@promptscript/plugin-custom'
-    options:
-      key: value
 ```
 
 ## Configuration Sections
@@ -457,8 +449,8 @@ This provides:
 - **Documentation** - hover tooltips with field descriptions
 
 !!! tip "Schema is the source of truth"
-    The JSON schema is automatically generated from TypeScript types in `@promptscript/core`. 
-    When in doubt about configuration options, the schema reflects the current implementation.
+The JSON schema is automatically generated from TypeScript types in `@promptscript/core`.
+When in doubt about configuration options, the schema reflects the current implementation.
 
     Schema URL: [`schema/config.json`](https://raw.githubusercontent.com/mrwogu/promptscript/main/schema/config.json)
 

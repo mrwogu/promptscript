@@ -27,6 +27,7 @@ const mockName = vi.fn().mockReturnThis();
 const mockDescription = vi.fn().mockReturnThis();
 const mockVersion = vi.fn().mockReturnThis();
 const mockOption = vi.fn().mockReturnThis();
+const mockHook = vi.fn().mockReturnThis();
 const mockAction = vi.fn().mockReturnThis();
 const mockParse = vi.fn();
 
@@ -44,6 +45,8 @@ vi.mock('commander', () => {
       name = mockName;
       description = mockDescription;
       version = mockVersion;
+      option = mockOption;
+      hook = mockHook;
       command = mockCommand;
       parse = mockParse;
     },

@@ -52,11 +52,15 @@ function createMockFormatter(name: string, outputPath: string = `./${name}/outpu
   return {
     name,
     outputPath,
+    description: `Mock ${name} formatter for testing`,
     defaultConvention: 'markdown',
-    format: vi.fn((ast: Program) => ({
-      path: outputPath,
-      content: `# ${name} output\nID: ${ast.meta?.fields?.['id']}`,
-    })),
+    format: vi.fn((ast: Program) => {
+      const id = ast.meta?.fields?.['id'] as string | undefined;
+      return {
+        path: outputPath,
+        content: `# ${name} output\nID: ${id ?? 'unknown'}`,
+      };
+    }),
   };
 }
 
@@ -67,6 +71,7 @@ function createFailingFormatter(name: string, error: string): Formatter {
   return {
     name,
     outputPath: `./${name}/output.md`,
+    description: `Mock failing ${name} formatter`,
     defaultConvention: 'markdown',
     format: vi.fn(() => {
       throw new Error(error);
@@ -142,15 +147,17 @@ describe('Compiler', () => {
       class TestFormatter implements Formatter {
         readonly name = 'test-class';
         readonly outputPath = './test/output.md';
+        readonly description = 'Test formatter class';
         readonly defaultConvention = 'markdown';
         format(ast: Program) {
-          return { path: this.outputPath, content: `ID: ${ast.meta?.fields?.['id']}` };
+          const id = ast.meta?.fields?.['id'] as string | undefined;
+          return { path: this.outputPath, content: `ID: ${id ?? 'unknown'}` };
         }
       }
 
       const compiler = new Compiler({
         resolver: { registryPath: '/registry' },
-        formatters: [TestFormatter as any],
+        formatters: [TestFormatter as unknown as Formatter],
       });
 
       const formatters = compiler.getFormatters();
@@ -203,9 +210,9 @@ describe('Compiler', () => {
 
       const customConvention = {
         name: 'custom',
-        section: { prefix: '[[', suffix: ']]', contentPrefix: '', contentSuffix: '' },
-        list: { itemPrefix: '* ', itemSuffix: '', listPrefix: '', listSuffix: '' },
-        codeBlock: { prefix: '```', suffix: '```', languageSupport: true },
+        section: { start: '[[{{name}}]]', end: '[[/{{name}}]]' },
+        listStyle: 'asterisk' as const,
+        codeBlockDelimiter: '```',
       };
 
       const compiler = new Compiler({
@@ -652,5 +659,188 @@ describe('compile (standalone)', () => {
     expect(result.success).toBe(false);
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]?.message).toContain('File not found');
+  });
+});
+
+describe('Compiler.compileFile', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should compile a file (alias for compile)', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const result = await compiler.compileFile('./test.prs');
+
+    expect(result.success).toBe(true);
+    expect(mockResolve).toHaveBeenCalledWith('./test.prs');
+
+    vi.restoreAllMocks();
+  });
+});
+
+describe('Compiler.compileAll', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should compile with all registered formatters', async () => {
+    const ast = createTestProgram();
+    const formatter1 = createMockFormatter('github');
+    const formatter2 = createMockFormatter('claude');
+
+    vi.spyOn(FormatterRegistry, 'list').mockReturnValue(['github', 'claude']);
+    vi.spyOn(FormatterRegistry, 'get').mockImplementation((name: string) => {
+      if (name === 'github') return formatter1;
+      if (name === 'claude') return formatter2;
+      return undefined;
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['github'],
+    });
+
+    const result = await compiler.compileAll('./test.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.size).toBe(2);
+
+    vi.restoreAllMocks();
+  });
+});
+
+describe('Compiler.watch', () => {
+  let mockWatcher: {
+    on: ReturnType<typeof vi.fn>;
+    close: ReturnType<typeof vi.fn>;
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockWatcher = {
+      on: vi.fn().mockReturnThis(),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+  });
+
+  it('should create a file watcher', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    // Mock chokidar
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockReturnValue(mockWatcher),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const watcher = await compiler.watch('./test.prs');
+
+    expect(mockWatcher.on).toHaveBeenCalled();
+    expect(typeof watcher.close).toBe('function');
+
+    await watcher.close();
+    expect(mockWatcher.close).toHaveBeenCalled();
+
+    vi.restoreAllMocks();
+  });
+
+  it('should call onCompile callback when files change', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    const onCompile = vi.fn();
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    let changeHandler: ((path: string) => void) | undefined;
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockReturnValue({
+          on: vi.fn().mockImplementation((event: string, handler: (path: string) => void) => {
+            if (event === 'change') {
+              changeHandler = handler;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+        }),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const watcher = await compiler.watch('./test.prs', {
+      onCompile,
+      debounce: 10,
+    });
+
+    // Simulate file change
+    if (changeHandler) {
+      changeHandler('./test.prs');
+    }
+
+    // Wait for debounce
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    await watcher.close();
+
+    vi.restoreAllMocks();
+  });
+
+  it('should respect exclude patterns', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const watchMock = vi.fn().mockReturnValue(mockWatcher);
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: watchMock,
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const watcher = await compiler.watch('./test.prs', {
+      exclude: ['**/dist/**'],
+    });
+
+    await watcher.close();
+
+    vi.restoreAllMocks();
   });
 });

@@ -12,17 +12,11 @@ describe('types', () => {
     it('should allow empty options', () => {
       const options: InitOptions = {};
       expect(options.team).toBeUndefined();
-      expect(options.template).toBeUndefined();
     });
 
     it('should allow team option', () => {
       const options: InitOptions = { team: 'frontend' };
       expect(options.team).toBe('frontend');
-    });
-
-    it('should allow template option', () => {
-      const options: InitOptions = { template: 'basic' };
-      expect(options.template).toBe('basic');
     });
   });
 
@@ -64,11 +58,6 @@ describe('types', () => {
     it('should allow strict option', () => {
       const options: ValidateOptions = { strict: true };
       expect(options.strict).toBe(true);
-    });
-
-    it('should allow fix option', () => {
-      const options: ValidateOptions = { fix: true };
-      expect(options.fix).toBe(true);
     });
   });
 

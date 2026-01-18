@@ -53,9 +53,21 @@ export async function pullCommand(options: PullOptions): Promise<void> {
     const destPath = resolve('./.promptscript/.inherited', inheritPath);
 
     // Check if destination exists and force flag
-    if (existsSync(destPath) && !options.force) {
+    if (existsSync(destPath) && !options.force && !options.dryRun) {
       spinner.warn('File already exists (use --force to overwrite)');
       ConsoleOutput.muted(destPath);
+      return;
+    }
+
+    // Dry run mode - just show what would happen
+    if (options.dryRun) {
+      spinner.succeed('Dry run completed');
+      ConsoleOutput.newline();
+      ConsoleOutput.dryRun(`Would copy: ${sourcePath}`);
+      ConsoleOutput.dryRun(`       to: ${destPath}`);
+      if (existsSync(destPath)) {
+        ConsoleOutput.dryRun('(would overwrite existing file)');
+      }
       return;
     }
 

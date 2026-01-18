@@ -59,7 +59,6 @@ prs init [options]
 | `--targets <targets...>` | Target AI tools (github, claude, cursor)             |
 | `-i, --interactive`      | Force interactive mode with prompts                  |
 | `-y, --yes`              | Skip prompts, use defaults                           |
-| `--template <template>`  | Project template to use                              |
 
 **Examples:**
 
@@ -81,9 +80,6 @@ prs init --targets github claude
 
 # Full non-interactive setup
 prs init -n my-project --inherit @company/team --targets github claude cursor
-
-# Use a template
-prs init --template react-app
 ```
 
 **Auto-detection:**
@@ -170,7 +166,6 @@ prs validate [options] [files...]
 | Option              | Description                |
 | ------------------- | -------------------------- |
 | `--strict`          | Treat warnings as errors   |
-| `--fix`             | Auto-fix fixable issues    |
 | `--format <format>` | Output format (text, json) |
 
 **Examples:**
@@ -181,9 +176,6 @@ prs validate
 
 # Validate with strict mode
 prs validate --strict
-
-# Auto-fix issues
-prs validate --fix
 
 # Validate specific files
 prs validate .promptscript/project.prs
@@ -346,29 +338,6 @@ watch:
 | 1    | Error occurred          |
 | 2    | Warning (with --strict) |
 | 130  | Interrupted (Ctrl+C)    |
-
-## Shell Completion
-
-### Bash
-
-```bash
-# Add to ~/.bashrc
-eval "$(prs completion bash)"
-```
-
-### Zsh
-
-```bash
-# Add to ~/.zshrc
-eval "$(prs completion zsh)"
-```
-
-### Fish
-
-```bash
-# Add to ~/.config/fish/config.fish
-prs completion fish | source
-```
 
 ## Troubleshooting
 

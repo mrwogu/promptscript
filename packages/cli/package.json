@@ -27,5 +27,7 @@
     "ora": "^9.0.0",
     "yaml": "^2.8.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "memfs": "^4.56.4"
+  }
 }

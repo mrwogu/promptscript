@@ -6,13 +6,33 @@ import { compileCommand } from './commands/compile';
 import { validateCommand } from './commands/validate';
 import { pullCommand } from './commands/pull';
 import { diffCommand } from './commands/diff';
+import { checkCommand } from './commands/check';
+import { setContext, LogLevel } from './output/console';
 
 const program = new Command();
 
 program
   .name('prs')
   .description('PromptScript CLI - Standardize AI instructions')
-  .version(getPackageVersion(__dirname));
+  .version(getPackageVersion(__dirname))
+  .option('--verbose', 'Enable verbose output')
+  .option('--quiet', 'Suppress non-error output')
+  .hook('preAction', (thisCommand) => {
+    const opts = thisCommand.opts();
+    // Set global context based on flags
+    if (opts['quiet']) {
+      setContext({ logLevel: LogLevel.Quiet });
+    } else if (opts['verbose']) {
+      setContext({ logLevel: LogLevel.Verbose });
+    }
+    // Also check environment variables
+    if (
+      process.env['PROMPTSCRIPT_VERBOSE'] === '1' ||
+      process.env['PROMPTSCRIPT_VERBOSE'] === 'true'
+    ) {
+      setContext({ logLevel: LogLevel.Verbose });
+    }
+  });
 
 program
   .command('init')
@@ -25,7 +45,6 @@ program
   .option('-i, --interactive', 'Force interactive mode')
   .option('-y, --yes', 'Skip prompts, use defaults')
   .option('-f, --force', 'Force reinitialize even if already initialized')
-  .option('--template <template>', 'Project template')
   .action(initCommand);
 
 program
@@ -38,28 +57,39 @@ program
   .option('-o, --output <dir>', 'Output directory')
   .option('--dry-run', 'Preview changes')
   .option('--registry <path>', 'Registry path (overrides config)')
+  .option('-c, --config <path>', 'Path to custom config file')
   .action(compileCommand);
 
 program
   .command('validate')
   .description('Validate PromptScript files')
   .option('--strict', 'Treat warnings as errors')
-  .option('--fix', 'Auto-fix issues')
+  .option('--format <format>', 'Output format (text, json)', 'text')
   .action(validateCommand);
 
 program
   .command('pull')
   .description('Pull updates from registry')
   .option('-f, --force', 'Force overwrite')
+  .option('--dry-run', 'Preview changes without pulling')
   .action(pullCommand);
 
 program
   .command('diff')
   .description('Show diff for compiled output')
   .option('-t, --target <target>', 'Specific target')
+  .option('-a, --all', 'Show diff for all targets at once')
   .option('--full', 'Show full diff without truncation')
   .option('--no-pager', 'Disable pager output')
+  .option('--color', 'Force colored output')
+  .option('--no-color', 'Disable colored output')
   .action(diffCommand);
+
+program
+  .command('check')
+  .description('Check configuration and dependencies health')
+  .option('--fix', 'Attempt to fix issues')
+  .action(checkCommand);
 
 /**
  * Run the CLI.

@@ -93,7 +93,7 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
   const spinner = createSpinner('Loading configuration...').start();
 
   try {
-    const config = await loadConfig();
+    const config = await loadConfig(options.config);
     spinner.text = 'Compiling...';
 
     // --format is an alias for --target

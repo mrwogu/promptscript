@@ -398,46 +398,20 @@ prs compile
 
 - [ ] **`prs migrate` command** - Automatic conversion of existing instruction files to PromptScript
 
-🚧 **Documented but Not Yet Implemented** _(CLI features documented in reference, pending implementation)_
-
-- [ ] **`prs init --template`** - Project templates for quick initialization (e.g., `--template react-app`)
-- [ ] **`prs check` command** - Check configuration and dependencies health
-- [ ] **`prs completion` command** - Shell completion for Bash, Zsh, Fish
-- [ ] **`prs validate --fix`** - Auto-fix fixable validation issues
-- [ ] **`prs validate --format`** - Output format selection (text, json)
-- [ ] **`prs pull --dry-run`** - Preview changes without pulling
-- [ ] **`prs diff --all`** - Show diff for all targets at once
-- [ ] **`prs diff --color/--no-color`** - Control colored output in diff
-- [ ] **`prs compile --config`** - Path to custom config file
-- [ ] **Global `--verbose` flag** - Enable verbose output for debugging
-- [ ] **Global `--quiet` flag** - Suppress non-error output
-- [ ] **Environment variables** - `PROMPTSCRIPT_CONFIG`, `PROMPTSCRIPT_REGISTRY`, `PROMPTSCRIPT_VERBOSE`, `NO_COLOR`
-
-📚 **API Documentation vs Implementation Gaps** _(APIs documented in docs/api/ but not implemented)_
-
-- [x] **`@promptscript/compiler`** ✅ **Implemented**
-  - [ ] `compileFile()` - Compile from file path directly
-  - [ ] `compileAll()` - Compile to all targets at once
-  - [ ] `watch()` method - Watch mode in Compiler class
-
-⚙️ **Configuration Gaps** _(Options in docs/reference/config.md not in PromptScriptConfig type)_
-
-- [ ] **`plugins` section** - Plugin system support
-- [ ] **Environment variable interpolation** - `${VAR}` and `${VAR:-default}` syntax
-
 🤔 **Under Consideration** _(Looking for contributors & sponsors!)_
 
+- [ ] **Public registry hosting** - Hosted registry service for sharing PromptScript packages (`@company/frontend-standards`)
+- [ ] **Web playground** - Try PromptScript in the browser without installation
+- [ ] **`prs validate --fix`** - Auto-fix fixable validation issues
+- [ ] **Plugin system** - Extensible plugin architecture for custom formatters and validators
+- [ ] **Project templates** - `prs init --template` for quick initialization (e.g., `react-app`, `node-api`)
 - [ ] **Claude agents hooks** - Support for `PreToolUse`, `PostToolUse`, and `Stop` lifecycle hooks
-- [ ] **Remote registry** - Share and publish PromptScript packages (`@company/frontend-standards`)
 - [ ] **VS Code extension** - Syntax highlighting, autocomplete, inline validation
 - [ ] **GitHub Action** - CI/CD integration for automatic compilation and drift detection
-- [ ] **Web playground** - Try PromptScript in the browser without installation
 - [ ] **AI-assisted authoring** - Generate PromptScript from natural language descriptions
 - [ ] **Multi-language support** - Localized instructions for international teams
 - [ ] **Analytics dashboard** - Track instruction usage and effectiveness across organization
-- [ ] **Diff & sync tools** - Detect drift between source `.prs` and compiled outputs
 - [ ] **Template marketplace** - Community-contributed templates for common stacks (React, Django, Rails, etc.)
-- [ ] **Formatter plugins** - Support for Windsurf, Aider, Continue, and other emerging AI tools
 - [ ] **Secret management** - Safe handling of API keys and sensitive configuration
 - [ ] **Conditional compilation** - Environment-specific instructions (dev/staging/prod)
 

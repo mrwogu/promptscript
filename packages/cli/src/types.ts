@@ -4,8 +4,6 @@
 export interface InitOptions {
   /** Team namespace */
   team?: string;
-  /** Project template to use */
-  template?: string;
   /** Project name (overrides auto-detection) */
   name?: string;
   /** Inheritance path (e.g., @company/team) */
@@ -40,6 +38,8 @@ export interface CompileOptions {
   dryRun?: boolean;
   /** Registry path or URL (overrides config) */
   registry?: string;
+  /** Path to custom config file */
+  config?: string;
 }
 
 /**
@@ -48,8 +48,8 @@ export interface CompileOptions {
 export interface ValidateOptions {
   /** Treat warnings as errors */
   strict?: boolean;
-  /** Auto-fix issues (future) */
-  fix?: boolean;
+  /** Output format (text, json) */
+  format?: 'text' | 'json';
 }
 
 /**
@@ -58,6 +58,8 @@ export interface ValidateOptions {
 export interface PullOptions {
   /** Force overwrite local files */
   force?: boolean;
+  /** Preview changes without pulling */
+  dryRun?: boolean;
 }
 
 /**
@@ -66,8 +68,20 @@ export interface PullOptions {
 export interface DiffOptions {
   /** Specific target to diff */
   target?: string;
+  /** Show diff for all targets at once */
+  all?: boolean;
   /** Show full diff without truncation */
   full?: boolean;
   /** Disable pager (like git --no-pager) */
   noPager?: boolean;
+  /** Force colored output */
+  color?: boolean;
+}
+
+/**
+ * Options for the check command.
+ */
+export interface CheckOptions {
+  /** Attempt to fix issues automatically */
+  fix?: boolean;
 }

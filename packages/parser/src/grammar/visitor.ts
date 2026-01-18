@@ -25,6 +25,7 @@ const BaseVisitor = parser.getBaseCstVisitorConstructor();
  */
 class PromptScriptVisitor extends BaseVisitor {
   private filename: string = '<unknown>';
+  private interpolateEnv: boolean = false;
 
   constructor() {
     super();
@@ -36,6 +37,13 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   setFilename(filename: string): void {
     this.filename = filename;
+  }
+
+  /**
+   * Enable or disable environment variable interpolation.
+   */
+  setInterpolateEnv(enabled: boolean): void {
+    this.interpolateEnv = enabled;
   }
 
   /**
@@ -206,7 +214,13 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   private buildTextContent(token: IToken): TextContent {
     const raw = token.image;
-    const value = raw.slice(3, -3).trim();
+    let value = raw.slice(3, -3).trim();
+
+    // Interpolate environment variables if enabled
+    if (this.interpolateEnv) {
+      value = this.interpolateEnvVars(value);
+    }
+
     return {
       type: 'TextContent',
       value,
@@ -326,7 +340,13 @@ class PromptScriptVisitor extends BaseVisitor {
     if (ctx.TextBlock) {
       const token = ctx.TextBlock[0];
       const raw = token.image;
-      const value = raw.slice(3, -3).trim();
+      let value = raw.slice(3, -3).trim();
+
+      // Interpolate environment variables if enabled
+      if (this.interpolateEnv) {
+        value = this.interpolateEnvVars(value);
+      }
+
       return {
         type: 'TextContent',
         value,
@@ -457,13 +477,47 @@ class PromptScriptVisitor extends BaseVisitor {
     // Remove quotes
     const inner = raw.slice(1, -1);
     // Handle escape sequences
-    return inner
+    let result = inner
       .replace(/\\n/g, '\n')
       .replace(/\\t/g, '\t')
       .replace(/\\r/g, '\r')
       .replace(/\\"/g, '"')
       .replace(/\\'/g, "'")
       .replace(/\\\\/g, '\\');
+
+    // Interpolate environment variables if enabled
+    if (this.interpolateEnv) {
+      result = this.interpolateEnvVars(result);
+    }
+
+    return result;
+  }
+
+  /**
+   * Interpolate environment variables in a string.
+   * Supports ${VAR} and ${VAR:-default} syntax.
+   * For missing variables without default: warns and returns empty string.
+   */
+  private interpolateEnvVars(text: string): string {
+    // Match ${VAR} or ${VAR:-default}
+    // VAR must start with letter or underscore, followed by word characters
+    const envVarPattern = /\$\{([A-Za-z_]\w*)(?::-([^}]*))?\}/g;
+
+    return text.replace(envVarPattern, (_match, varName: string, defaultValue?: string) => {
+      const envValue = process.env[varName];
+
+      if (envValue !== undefined) {
+        return envValue;
+      }
+
+      if (defaultValue !== undefined) {
+        return defaultValue;
+      }
+
+      // Warn and return empty string (like Linux behavior)
+      console.warn(`Warning: Environment variable '${varName}' is not set, using empty string`);
+      return '';
+    });
   }
 
   /**

@@ -109,6 +109,80 @@ for (const result of results) {
 }
 ```
 
+### Compiler Methods
+
+#### compile
+
+Compile a PromptScript file to all configured formatters.
+
+```typescript
+async compile(entryPath: string): Promise<CompileResult>;
+```
+
+#### compileFile
+
+Alias for `compile()` for API consistency.
+
+```typescript
+async compileFile(filePath: string): Promise<CompileResult>;
+```
+
+#### compileAll
+
+Compile to all registered formatters, regardless of configuration.
+
+```typescript
+async compileAll(entryPath: string): Promise<CompileResult>;
+```
+
+**Example:**
+
+```typescript
+// Compile to ALL available formatters (github, claude, cursor, etc.)
+const result = await compiler.compileAll('./project.prs');
+```
+
+#### watch
+
+Watch for file changes and recompile automatically.
+
+```typescript
+async watch(entryPath: string, options?: WatchOptions): Promise<Watcher>;
+
+interface Watcher {
+  close(): Promise<void>;
+}
+```
+
+**Example:**
+
+```typescript
+const watcher = await compiler.watch('./project.prs', {
+  include: ['**/*.prs'],
+  exclude: ['**/node_modules/**'],
+  debounce: 300,
+  onCompile: (result, changedFiles) => {
+    if (result.success) {
+      console.log('Compiled successfully');
+    }
+  },
+  onError: (error) => {
+    console.error('Compilation error:', error);
+  },
+});
+
+// Later, stop watching
+await watcher.close();
+```
+
+#### getFormatters
+
+Get the list of configured formatters.
+
+```typescript
+getFormatters(): readonly Formatter[];
+```
+
 ## Options
 
 ### CompileOptions
