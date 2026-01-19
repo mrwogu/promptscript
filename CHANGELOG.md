@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - UNRELEADED
+## [Unreleased]
 
-🎉 **Initial Release** - A language for standardizing AI instructions across organizations.
+### Added
 
-### Language
+🎉 **PromptScript Language Implementation** - A language for standardizing AI instructions across organizations.
+
+#### Language Features
 
 - **PromptScript Syntax 1.0.0** - Initial language specification for `.prs` files
 - **@meta block** - Metadata with `id` and `syntax` fields, optional `org`, `team`, `tags`
@@ -30,72 +32,146 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Value types:** Strings, numbers, booleans, null, arrays, objects, multi-line text (`"""`)
 - **Type expressions:** `range(min..max)`, `enum("a", "b", "c")`
 
-### Packages
+#### Formatters
+
+- **GitHub Copilot** - `simple`, `multifile`, `full` versions with agents support (`.github/copilot-instructions.md`, `.github/agents/`, `.github/skills/`)
+- **Claude Code** - `simple`, `multifile`, `full` versions with local memory support (`CLAUDE.md`, `.claude/agents/`, `.claude/skills/`, `CLAUDE.local.md`)
+- **Cursor** - `modern`, `multifile`, `legacy` versions (`.cursor/rules/project.mdc`, `.cursorrules`)
+- **Google Antigravity** - `simple`, `frontmatter` versions (`.agent/rules/project.md`)
+- Output conventions: `markdown` (default) and `xml`
+- Path-specific rule generation with glob patterns
+
+#### Core APIs
+
+- `@promptscript/core` - AST types, error classes, utility functions
+- `@promptscript/parser` - PromptScript parser with recovery support (`parseFile()` API)
+- `@promptscript/resolver` - Resolution for `@inherit`, `@use`, `@extend` with registry support
+- `@promptscript/validator` - Semantic validation with custom rule support
+- `@promptscript/compiler` - Compilation pipeline with watch mode
+- `@promptscript/formatters` - Multiple formatter implementations with standalone functions
+
+#### CLI Features
+
+- `prs init` - Project initialization with auto-detection
+  - Tech stack detection (TypeScript, JavaScript, Python, Rust, Go, Java, Ruby, PHP, C#)
+  - Framework detection (React, Vue, Angular, Next.js, Django, FastAPI, Express, NestJS, etc.)
+  - Existing AI tools detection (GitHub Copilot, Claude Code, Cursor)
+  - Interactive configuration wizard
+- `prs compile` - Multi-file compilation with watch mode and dry-run support
+- `prs validate` - File validation with detailed error reporting
+- `prs diff` - Show compilation diff
+- `prs pull` - Registry updates
+
+#### Configuration
+
+- `promptscript.yaml` - Project configuration
+- Registry configuration with authentication support
+- Target configuration for multiple AI platforms
+- Validation rules configuration
+
+#### Documentation
+
+- Complete language reference
+- API documentation for all 6 packages
+- CLI reference guide
+- Getting started guide and tutorial
+- Multiple examples (minimal, enterprise, skills & local, team setup)
+- Package READMEs with ecosystem diagrams
+
+#### Infrastructure
+
+- Nx monorepo with pnpm workspaces
+- TypeScript strict mode with 100% type coverage
+- Comprehensive test suite (Vitest)
+- ESLint and Prettier
+- MkDocs documentation site with tabbed layouts
+- GitHub Actions CI/CD pipeline
+- Code coverage tracking
+
+### Packages (Detailed)
 
 #### @promptscript/core
 
 - AST types and interfaces
 - Error classes (`PSError`, `ParseError`, `ResolveError`, `ValidationError`)
 - Utility functions for version comparison, paths, AST operations
+- Config types: `input`, `watch`, `output`, `registry` with auth support
+- Utility exports: `formatPath()`, `diagnostics`, constants
 
 #### @promptscript/parser
 
 - Chevrotain-based lexer and parser
 - CST to AST transformation
 - `parse()` and `parseOrThrow()` API
+- `parseFile()` function with recovery option
+- Error recovery for better diagnostics
 
 #### @promptscript/resolver
 
 - `@inherit`, `@use`, `@extend` resolution
 - File loader with registry support
+- `RegistryInterface` for custom registry implementations
+- Standalone `resolve()` function for programmatic use
 
 #### @promptscript/validator
 
 - Required fields validation
 - Semantic version format checking
 - Custom rule support
+- Standalone `validate()` function
+- `removeRule()` API for dynamic rule management
+- `formatters` export for formatting validation results
 
 #### @promptscript/compiler
 
 - Resolve → Validate → Format pipeline
-- Watch mode and dry-run support
+- Watch mode with chokidar for file monitoring
+- Dry-run support
+- Standalone `compile()` function
 
 #### @promptscript/formatters
 
-- **GitHub Copilot** - `simple`, `multifile`, `full` versions
+- **GitHub Copilot** - `simple`, `multifile`, `full` versions with agents support
 - **Claude Code** - `simple`, `multifile`, `full` versions
 - **Cursor** - `modern`, `multifile`, `legacy` versions
 - **Antigravity** - `simple`, `frontmatter` versions
 - Output conventions: `markdown` or `xml`
 - Base formatter class for custom implementations
+- Standalone `format()` functions for each formatter
 
 #### @promptscript/cli
 
 - `prs init` - Initialize project with auto-detection
-- `prs compile` - Compile to target formats
+  - Tech stack detection (TypeScript, JavaScript, Python, Rust, Go, Java, Ruby, PHP, C#)
+  - Framework detection (React, Vue, Angular, Next.js, Django, FastAPI, etc.)
+  - Existing AI tools detection (GitHub, Claude, Cursor)
+- `prs compile` - Compile to target formats with watch mode support
 - `prs validate` - Validate files
 - `prs diff` - Show output diff
-- `prs pull` - Pull registry updates
+- `prs pull` - Pull registry updates with `--registry` flag
 
 ### Configuration
 
 - `promptscript.yaml` configuration file
-- Registry and targets configuration
+- Registry and targets configuration with authentication
 - Validation rules configuration
+- Support for multiple output formats per target
 
 ### Documentation
 
-- Language reference
+- Complete language reference
 - CLI and configuration reference
 - Getting started guide and tutorial
-- API documentation for all packages
+- API documentation for all 6 packages
+- Multiple examples and best practices
 
 ### Infrastructure
 
 - Nx monorepo with pnpm workspaces
 - TypeScript strict mode
-- Vitest, ESLint, Prettier
-- MkDocs documentation site
-- GitHub Actions CI/CD
+- Comprehensive test suite with Vitest
+- ESLint and Prettier for code quality
+- MkDocs documentation site with tabbed layouts
+- GitHub Actions CI/CD pipeline
 
-[1.0.0]: https://github.com/mrwogu/promptscript/releases/tag/v1.0.0
+[Unreleased]: https://github.com/mrwogu/promptscript/compare/v0.0.0...HEAD
