@@ -1,0 +1,12 @@
+@meta {
+  id: "with-imports"
+  version: "1.0.0"
+}
+
+@use ./guards as sec
+
+@identity {
+  """
+  You are an assistant with imported guards.
+  """
+}

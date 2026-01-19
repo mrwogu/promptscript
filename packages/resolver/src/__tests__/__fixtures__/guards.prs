@@ -1,0 +1,11 @@
+@meta {
+  id: "guards-module"
+  version: "1.0.0"
+}
+
+@guards {
+  security: {
+    level: "high"
+    checks: [xss, csrf]
+  }
+}

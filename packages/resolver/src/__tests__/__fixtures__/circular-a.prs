@@ -1,0 +1,11 @@
+@meta {
+  id: "circular-a"
+}
+
+@inherit ./circular-b
+
+@identity {
+  """
+  This is circular A.
+  """
+}

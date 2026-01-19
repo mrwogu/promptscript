@@ -1,0 +1,12 @@
+@meta {
+  id: "grandchild"
+  version: "1.0.0"
+}
+
+@inherit ./child
+
+@identity {
+  """
+  You are the grandchild assistant.
+  """
+}

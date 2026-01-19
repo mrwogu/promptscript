@@ -1,0 +1,4 @@
+@meta {
+  id: "invalid-syntax"
+  version "missing colon"
+}

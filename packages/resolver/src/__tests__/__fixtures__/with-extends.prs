@@ -1,0 +1,26 @@
+@meta {
+  id: "with-extends"
+  version: "1.0.0"
+}
+
+@identity {
+  """
+  Base identity text.
+  """
+}
+
+@standards {
+  code: {
+    style: "clean"
+  }
+}
+
+@extend identity {
+  """
+  Extended identity text.
+  """
+}
+
+@extend standards.code {
+  frameworks: [react, vue]
+}
