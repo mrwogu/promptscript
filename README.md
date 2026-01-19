@@ -1,109 +1,133 @@
-# Promptscript
+<div align="center">
+  <img src="docs/assets/logo.svg" alt="PromptScript Logo" width="200" />
+  
+  # PromptScript
+  
+  **The language for standardizing AI instructions across your organization.**
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+  [![CI](https://github.com/promptscript/promptscript/workflows/CI/badge.svg)](https://github.com/promptscript/promptscript/actions)
+  [![npm version](https://badge.fury.io/js/@promptscript%2Fcli.svg)](https://www.npmjs.com/package/@promptscript/cli)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+  [Documentation](https://promptscript.dev) · [Getting Started](#getting-started) · [Examples](docs/examples) · [Contributing](CONTRIBUTING.md)
+</div>
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+---
 
-## Generate a library
+## The Problem
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+Your organization uses multiple AI tools:
+- GitHub Copilot (`copilot-instructions.md`)
+- Claude Code (`CLAUDE.md`)
+- Cursor (`.cursorrules`)
+- And more...
+
+Each tool has its own format. Each team maintains their own instructions. 
+Result: **chaos, inconsistency, no governance.**
+
+## The Solution
+
+```promptscript
+# One file to rule them all
+@meta { id: "my-project", version: "1.0.0" }
+
+@inherit @company/frontend-team
+
+@identity {
+  """
+  You are working on the checkout microservice.
+  Tech stack: TypeScript, React, Node.js
+  """
+}
+
+@shortcuts {
+  "/review": "Review code for security and performance"
+  "/test": "Write comprehensive unit tests"
+}
 ```
 
-## Run tasks
+Then compile:
 
-To build the library use:
+```bash
+prs compile --all
 
-```sh
-npx nx build pkg1
+# Output:
+# ✓ .github/copilot-instructions.md
+# ✓ CLAUDE.md  
+# ✓ .cursorrules
 ```
 
-To run any task with Nx use:
+## Features
 
-```sh
-npx nx <target> <project-name>
+- 🔗 **Inheritance** - Organization → Team → Project hierarchy
+- 📦 **Single Source** - One `.prs` file, multiple outputs
+- ✅ **Validation** - Type-safe, versioned configurations
+- 🛡️ **Guards** - Compliance rules, blocked patterns
+- 🔌 **Extensible** - Add custom formatters
+- 🏢 **Enterprise Ready** - Audit trails, governance
+
+## Getting Started
+
+### Installation
+
+```bash
+npm install -g @promptscript/cli
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Quick Start
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Initialize in your project
+prs init
 
-## Versioning and releasing
+# Edit promptscript/project.prs
 
-To version and release the library use
-
-```
-npx nx release
-```
-
-Pass `--dry-run` to see what would happen without actually releasing the library.
-
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+# Compile to all formats
+prs compile --all
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+## Documentation
 
-```sh
-npx nx sync:check
+- [📖 Full Documentation](https://promptscript.dev)
+- [🎓 Tutorial](docs/tutorial.md)
+- [📋 Language Reference](docs/reference.md)
+- [🔧 CLI Reference](docs/cli.md)
+
+## Packages
+
+| Package | Description | Version |
+|---------|-------------|---------|
+| [@promptscript/cli](packages/cli) | Command-line interface | ![npm](https://img.shields.io/npm/v/@promptscript/cli) |
+| [@promptscript/core](packages/core) | Core types & utilities | ![npm](https://img.shields.io/npm/v/@promptscript/core) |
+| [@promptscript/parser](packages/parser) | PromptScript parser | ![npm](https://img.shields.io/npm/v/@promptscript/parser) |
+| [@promptscript/compiler](packages/compiler) | Compilation pipeline | ![npm](https://img.shields.io/npm/v/@promptscript/compiler) |
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
+
+```bash
+# Clone the repo
+git clone https://github.com/promptscript/promptscript.git
+cd promptscript
+
+# Install dependencies
+pnpm install
+
+# Run tests
+nx run-many -t test
+
+# Build all packages
+nx run-many -t build
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+## License
 
-## Set up CI!
+MIT © [PromptScript Contributors](https://github.com/promptscript/promptscript/graphs/contributors)
 
-### Step 1
+---
 
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+<div align="center">
+  <sub>Built with ❤️ for the AI-assisted development community</sub>
+</div>
