@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "workspaces": {
+    "packages/*": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.spec.ts", "src/**/*.test.ts"]
+    }
+  },
+  "ignoreDependencies": [
+    "@swc/cli",
+    "@swc/core",
+    "@swc/helpers",
+    "@swc-node/register",
+    "tslib"
+  ],
+  "ignoreExportsUsedInFile": true
+}
