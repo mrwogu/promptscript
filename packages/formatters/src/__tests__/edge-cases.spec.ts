@@ -160,6 +160,154 @@ describe('GitHubFormatter Edge Cases', () => {
       expect(result.content).toContain('Use fixtures for parser tests');
     });
   });
+
+  describe('getTestingInstructionContent for multifile version', () => {
+    it('should generate testing instruction content with all fields using globs', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  filePattern: '*.spec.ts',
+                  pattern: 'AAA',
+                  coverage: '90',
+                  fixtures: 'for parser tests',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.spec.ts', '**/*.test.ts'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const testInstructionFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/testing.instructions.md')
+      );
+      expect(testInstructionFile).toBeDefined();
+      expect(testInstructionFile?.content).toContain('Test files:');
+      expect(testInstructionFile?.content).toContain('pattern');
+      expect(testInstructionFile?.content).toContain('coverage');
+      expect(testInstructionFile?.content).toContain('fixtures');
+    });
+
+    it('should return default message when no testing standards', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.spec.ts'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const testInstructionFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/testing.instructions.md')
+      );
+      expect(testInstructionFile).toBeDefined();
+      // When no testing standards exist, the content is empty but file is still generated
+      expect(testInstructionFile?.content).toContain('Testing-specific rules and patterns');
+    });
+  });
+
+  describe('getTypeScriptInstructionContent for multifile version', () => {
+    it('should generate TypeScript instruction content with all naming fields using globs', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                naming: {
+                  files: 'kebab-case',
+                  classes: 'PascalCase',
+                  functions: 'camelCase',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts', '**/*.tsx'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const tsInstructionFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/typescript.instructions.md')
+      );
+      expect(tsInstructionFile).toBeDefined();
+      expect(tsInstructionFile?.content).toContain('Files:');
+      expect(tsInstructionFile?.content).toContain('Classes/Interfaces:');
+      expect(tsInstructionFile?.content).toContain('Functions/Variables:');
+    });
+  });
+
+  describe('extractRestrictionItems with empty ObjectContent', () => {
+    it('should return empty array when content has no items', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ObjectContent',
+              properties: {},
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // Should not crash and should handle gracefully
+      expect(result.content).toBeDefined();
+    });
+  });
 });
 
 describe('ClaudeFormatter Edge Cases', () => {

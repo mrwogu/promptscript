@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { parse, parseOrThrow } from '../parse';
 import { ParseError } from '@promptscript/core';
 
@@ -600,6 +600,201 @@ describe('visitor coverage - edge cases', () => {
 
       expect(result.errors).toHaveLength(0);
       expect(result.ast?.loc.file).toBe('<unknown>');
+    });
+  });
+
+  describe('setInterpolateEnv coverage', () => {
+    it('should interpolate environment variables when enabled', () => {
+      process.env['TEST_INTERP_VAR'] = 'interpolated-value';
+      const source = `
+        @meta { id: "test" }
+        @config {
+          value: "\${TEST_INTERP_VAR}"
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      expect(configBlock).toBeDefined();
+      const props = configBlock?.content;
+      if (props?.type === 'ObjectContent') {
+        expect(props.properties['value']).toBe('interpolated-value');
+      }
+      delete process.env['TEST_INTERP_VAR'];
+    });
+
+    it('should use default value for missing env var', () => {
+      delete process.env['MISSING_ENV_VAR_TEST'];
+      const source = `
+        @meta { id: "test" }
+        @config {
+          value: "\${MISSING_ENV_VAR_TEST:-default-value}"
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe('default-value');
+      }
+    });
+
+    it('should warn and use empty string for missing env var without default', () => {
+      delete process.env['MISSING_NO_DEFAULT_VAR'];
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const source = `
+        @meta { id: "test" }
+        @config {
+          value: "\${MISSING_NO_DEFAULT_VAR}"
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Warning: Environment variable 'MISSING_NO_DEFAULT_VAR' is not set, using empty string"
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should not interpolate when disabled', () => {
+      process.env['TEST_NO_INTERP'] = 'should-not-appear';
+      const source = `
+        @meta { id: "test" }
+        @config {
+          value: "\${TEST_NO_INTERP}"
+        }
+      `;
+      const result = parse(source, { interpolateEnv: false });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe('${TEST_NO_INTERP}');
+      }
+      delete process.env['TEST_NO_INTERP'];
+    });
+
+    it('should interpolate env vars in text blocks', () => {
+      process.env['TEXT_BLOCK_VAR'] = 'text-value';
+      const source = `
+        @meta { id: "test" }
+        @identity {
+          """
+          Hello \${TEXT_BLOCK_VAR}!
+          """
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const identity = result.ast?.blocks.find((b) => b.name === 'identity');
+      if (identity?.content?.type === 'TextContent') {
+        expect(identity.content.value).toContain('text-value');
+      }
+      delete process.env['TEXT_BLOCK_VAR'];
+    });
+  });
+
+  describe('type expressions', () => {
+    it('should parse range type expressions', () => {
+      const source = `
+        @meta { id: "test" }
+        @config {
+          temperature: range(0..10)
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        const temp = configBlock.content.properties['temperature'];
+        expect(temp).toBeDefined();
+        if (typeof temp === 'object' && temp !== null && 'type' in temp) {
+          expect(temp.type).toBe('TypeExpression');
+        }
+      }
+    });
+
+    it('should parse enum type expressions', () => {
+      const source = `
+        @meta { id: "test" }
+        @config {
+          style: enum("brief", "detailed", "expert")
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        const style = configBlock.content.properties['style'];
+        expect(style).toBeDefined();
+        if (typeof style === 'object' && style !== null && 'type' in style) {
+          expect(style.type).toBe('TypeExpression');
+        }
+      }
+    });
+  });
+
+  describe('relative path parsing', () => {
+    it('should parse parent relative paths correctly', () => {
+      const source = `
+        @meta { id: "test" }
+        @use ../sibling/file
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.uses).toHaveLength(1);
+      expect(result.ast?.uses[0]?.path.isRelative).toBe(true);
+      expect(result.ast?.uses[0]?.path.raw).toBe('../sibling/file');
+    });
+
+    it('should parse current directory paths', () => {
+      const source = `
+        @meta { id: "test" }
+        @use ./local
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.uses[0]?.path.isRelative).toBe(true);
+    });
+
+    it('should parse relative path with multiple segments', () => {
+      const source = `
+        @meta { id: "test" }
+        @use ../parent/child/file
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.uses[0]?.path.isRelative).toBe(true);
+      expect(result.ast?.uses[0]?.path.segments.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('complex value types', () => {
+    it('should parse identifier values', () => {
+      const source = `
+        @meta { id: "test" }
+        @config {
+          mode: production
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['mode']).toBe('production');
+      }
     });
   });
 });

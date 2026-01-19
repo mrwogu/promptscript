@@ -843,4 +843,134 @@ describe('Compiler.watch', () => {
 
     vi.restoreAllMocks();
   });
+
+  it('should handle add events from watcher', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('test');
+    const onCompile = vi.fn();
+
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    let addHandler: ((path: string) => void) | undefined;
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockReturnValue({
+          on: vi.fn().mockImplementation((event: string, handler: (path: string) => void) => {
+            if (event === 'add') {
+              addHandler = handler;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+        }),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const watcher = await compiler.watch('./test.prs', {
+      onCompile,
+      debounce: 10,
+    });
+
+    // Simulate file add
+    if (addHandler) {
+      addHandler('./new-file.prs');
+    }
+
+    // Wait for debounce
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    await watcher.close();
+
+    vi.restoreAllMocks();
+  });
+
+  it('should call onError callback for watcher error events', async () => {
+    const onError = vi.fn();
+
+    let errorHandler: ((error: Error) => void) | undefined;
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockReturnValue({
+          on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+            if (event === 'error') {
+              errorHandler = handler as (error: Error) => void;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+        }),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [],
+    });
+
+    const watcher = await compiler.watch('./test.prs', {
+      onError,
+    });
+
+    // Simulate watcher error
+    if (errorHandler) {
+      errorHandler(new Error('Watch error'));
+    }
+
+    expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Watch error' }));
+
+    await watcher.close();
+
+    vi.restoreAllMocks();
+  });
+
+  it('should handle non-Error objects in watcher error events', async () => {
+    const onError = vi.fn();
+
+    let errorHandler: ((error: unknown) => void) | undefined;
+
+    vi.doMock('chokidar', () => ({
+      default: {
+        watch: vi.fn().mockReturnValue({
+          on: vi.fn().mockImplementation((event: string, handler: unknown) => {
+            if (event === 'error') {
+              errorHandler = handler as (error: unknown) => void;
+            }
+            return mockWatcher;
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+        }),
+      },
+    }));
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [],
+    });
+
+    const watcher = await compiler.watch('./test.prs', {
+      onError,
+    });
+
+    // Simulate watcher error with non-Error object
+    if (errorHandler) {
+      errorHandler('String error');
+    }
+
+    expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'String error' }));
+
+    await watcher.close();
+
+    vi.restoreAllMocks();
+  });
 });
