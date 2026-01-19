@@ -1,0 +1,10 @@
+{
+  "name": "@promptscript/core",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "dependencies": {
+    "@swc/helpers": "~0.5.11"
+  }
+}

@@ -70,7 +70,7 @@ nx run-many -t test   # Test all packages
 nx graph              # View dependency graph
 
 # Generate new library
-nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPath=@promptscript/<name>
+pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPath=@promptscript/<name> --bundler=swc --linter=eslint --unitTestRunner=vitest
 ```
 
 ## Working on Tasks

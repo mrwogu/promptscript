@@ -1,0 +1,4 @@
+@meta {
+  id: "test-project"
+  version: "1.0.0"
+}

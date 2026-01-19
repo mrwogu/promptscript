@@ -58,3 +58,5 @@ temp/
 
 # GitHub prompts
 .github/prompts/setup/*.md
+
+vitest.config.*.timestamp*
