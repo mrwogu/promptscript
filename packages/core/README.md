@@ -1,6 +1,6 @@
 # @promptscript/core
 
-> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - the language for standardizing AI instructions across your organization.
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - The Infrastructure-as-Code for AI Context.
 
 Core types, errors, and utilities for the PromptScript toolchain.
 
@@ -8,29 +8,18 @@ Core types, errors, and utilities for the PromptScript toolchain.
 
 This package is the foundation of the PromptScript toolchain:
 
-```
-                    ┌─────────────────┐
-                    │  @promptscript  │
-                    │      /cli       │
-                    └────────┬────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  @promptscript  │
-                    │    /compiler    │
-                    └────────┬────────┘
-                             │
-        ┌────────────┬───────┴───────┬────────────┐
-        ▼            ▼               ▼            ▼
-   ┌─────────┐ ┌──────────┐ ┌───────────┐ ┌────────────┐
-   │ /parser │ │/resolver │ │/validator │ │/formatters │
-   └────┬────┘ └────┬─────┘ └─────┬─────┘ └─────┬──────┘
-        │           │             │             │
-        └───────────┴──────┬──────┴─────────────┘
-                           ▼
-                ╔════════════════════╗
-                ║  @promptscript     ║
-                ║      /core  ⭐     ║
-                ╚════════════════════╝
+```text
+@promptscript/cli
+│
+└─► @promptscript/compiler
+    │
+    ├─► @promptscript/parser ────┐
+    ├─► @promptscript/resolver ──┤
+    ├─► @promptscript/validator ─┤
+    └─► @promptscript/formatters ┘
+             │
+             ▼
+    @promptscript/core  ⭐
 ```
 
 | Package                                                                            | Description                  |

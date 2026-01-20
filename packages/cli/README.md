@@ -1,27 +1,23 @@
 # @promptscript/cli
 
-> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - the language for standardizing AI instructions across your organization.
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - The Infrastructure-as-Code for AI Context.
 
-Command-line interface for PromptScript - standardize AI instructions across enterprise organizations.
+Command-line interface for PromptScript. Compile, validate, and manage AI instructions at enterprise scale.
 
 ## 🏗️ Ecosystem
 
-```
-                    ╔═════════════════════╗
-                    ║  @promptscript/cli  ║
-                    ║         ⭐          ║
-                    ╚══════════╤══════════╝
-                               │
-                       @promptscript/compiler
-                               │
-       ┌───────────┬───────────┼───────────┬────────────┐
-       ▼           ▼           ▼           ▼            ▼
-    /parser   /resolver   /validator   /formatters
-       │           │           │           │
-       └───────────┴───────────┴───────────┘
-                       │
-                       ▼
-               @promptscript/core
+```text
+@promptscript/cli  ⭐
+│
+└─► @promptscript/compiler
+    │
+    ├─► @promptscript/parser ────┐
+    ├─► @promptscript/resolver ──┤
+    ├─► @promptscript/validator ─┤
+    └─► @promptscript/formatters ┘
+             │
+             ▼
+    @promptscript/core
 ```
 
 See [all packages](https://github.com/mrwogu/promptscript#packages) in the PromptScript monorepo.
