@@ -61,3 +61,6 @@ vitest.config.*.timestamp*
 # MkDocs
 site/
 .cache/
+
+# Generated API docs (regenerated in CI)
+docs/api-reference/

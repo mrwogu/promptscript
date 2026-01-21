@@ -392,5 +392,5 @@ With `version: full`, formatters generate separate files for skills, agents, and
 
 - [Language Reference: @skills](../reference/language.md#skills)
 - [Language Reference: @local](../reference/language.md#local)
-- [Formatters API: GitHub](../api/formatters.md#github-copilot-formatter)
-- [Formatters API: Claude](../api/formatters.md#claude-code-formatter)
+- [Formatters API: GitHub](../api-reference/formatters/src/classes/GitHubFormatter.md)
+- [Formatters API: Claude](../api-reference/formatters/src/classes/ClaudeFormatter.md)

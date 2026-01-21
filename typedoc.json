@@ -1,0 +1,42 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["packages/*/src/index.ts"],
+  "out": "docs/api-reference",
+  "plugin": ["typedoc-plugin-markdown"],
+  "entryPointStrategy": "resolve",
+  "name": "PromptScript API",
+  "readme": "none",
+  "hideBreadcrumbs": true,
+  "cleanOutputDir": true,
+  "exclude": ["**/node_modules/**"],
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "githubPages": true,
+  "blockTags": [
+    "@guards",
+    "@shortcuts",
+    "@skills",
+    "@agents",
+    "@local",
+    "@context",
+    "@standards",
+    "@knowledge",
+    "@restrictions",
+    "@inherit",
+    "@use",
+    "@extend",
+    "@see",
+    "@example",
+    "@param",
+    "@deprecated",
+    "@returns",
+    "@throws",
+    "@default"
+  ],
+  "externalSymbolLinkMappings": {
+    "@chevrotain/types": {
+      "BaseParser.ACTION": "https://chevrotain.io/docs/guide/internals.html#grammar-recording",
+      "EOF": "https://chevrotain.io/docs/features/token_categories.html#eof"
+    }
+  }
+}

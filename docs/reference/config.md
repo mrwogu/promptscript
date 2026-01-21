@@ -304,7 +304,7 @@ This is equivalent to removing the target from the list.
       - cursor               # Will compile
     ```
 
-See [Formatters API](../api/formatters.md) for more details.
+See [Formatters API](../api-reference/formatters/src/README.md) for more details.
 
 **Built-in Conventions:**
 

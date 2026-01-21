@@ -1,25 +1,23 @@
 name: Deploy Documentation
 
 on:
-  # Deploy on pushes to main
   push:
     branches: [main]
-    paths:
-      - "docs/**"
-      - "mkdocs.yml"
-      - "requirements-docs.txt"
-      - ".github/workflows/docs.yml"
+    tags:
+      - 'v*'
 
-  # Allow manual trigger
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (e.g., dev, v1.0.0, or latest)'
+        required: false
+        default: 'dev'
 
-# Permissions for GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
-# Prevent concurrent deployments
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -30,36 +28,85 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          fetch-depth: 0 # Required for git-revision-date plugin
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 25
+          cache: 'pnpm'
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Generate API documentation
+        run: pnpm docs:generate
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-          cache: "pip"
+          python-version: '3.12'
+          cache: 'pip'
           cache-dependency-path: requirements-docs.txt
 
-      - name: Install dependencies
+      - name: Install MkDocs dependencies
         run: pip install -r requirements-docs.txt
 
       - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages --depth=1 || true
 
-      - name: Build documentation
-        run: mkdocs build --strict
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "alias=" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "alias=latest" >> $GITHUB_OUTPUT
+          else
+            echo "version=dev" >> $GITHUB_OUTPUT
+            echo "alias=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy documentation
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ALIAS="${{ steps.version.outputs.alias }}"
+
+          if [[ -n "$ALIAS" ]]; then
+            mike deploy --push --update-aliases "$VERSION" "$ALIAS"
+            mike set-default --push latest
+          else
+            mike deploy --push "$VERSION"
+          fi
         env:
           MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.MKDOCS_GIT_COMMITTERS_APIKEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-content
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: gh-pages-content
 
   deploy:
     needs: build

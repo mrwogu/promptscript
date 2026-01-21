@@ -6,10 +6,8 @@ repo_url: https://github.com/mrwogu/promptscript
 repo_name: mrwogu/promptscript
 edit_uri: edit/main/docs/
 
-# Copyright
 copyright: Copyright &copy; 2026 PromptScript Contributors
 
-# Theme configuration
 theme:
   name: material
   language: en
@@ -75,21 +73,12 @@ theme:
     edit: material/pencil
     view: material/eye
 
-# Plugins
 plugins:
   - search:
       separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - minify:
       minify_html: true
-  - git-revision-date-localized:
-      enable_creation_date: true
-      type: timeago
-      fallback_to_build_date: true
-  - git-committers:
-      repository: mrwogu/promptscript
-      branch: main
 
-# Markdown extensions
 markdown_extensions:
   # Python Markdown
   - abbr
@@ -103,7 +92,6 @@ markdown_extensions:
       permalink: true
       toc_depth: 3
 
-  # PyMdown Extensions
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.betterem:
@@ -139,8 +127,11 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
-# Extra configuration
 extra:
+  version:
+    provider: mike
+    default: latest
+    alias: true
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/mrwogu/promptscript
@@ -154,7 +145,6 @@ extra_javascript:
   - https://unpkg.com/mermaid@10/dist/mermaid.min.js
   - assets/javascript/mermaid-init.js
 
-# Page navigation
 nav:
   - Home: index.md
   - Getting Started:
@@ -167,19 +157,20 @@ nav:
       - Configuration: reference/config.md
   - Guides:
       - guides/index.md
+      - CI/CD Integration: guides/ci.md
       - Inheritance: guides/inheritance.md
       - Multi-File Organization: guides/multi-file.md
       - Enterprise Setup: guides/enterprise.md
       - Migration: guides/migration.md
   - API:
-      - api/index.md
-      - Core: api/core.md
-      - Parser: api/parser.md
-      - Resolver: api/resolver.md
-      - Validator: api/validator.md
-      - Compiler: api/compiler.md
-      - Formatters: api/formatters.md
-      - CLI: api/cli.md
+      - api-reference/README.md
+      - Core: api-reference/core/src/README.md
+      - Parser: api-reference/parser/src/README.md
+      - Resolver: api-reference/resolver/src/README.md
+      - Validator: api-reference/validator/src/README.md
+      - Compiler: api-reference/compiler/src/README.md
+      - Formatters: api-reference/formatters/src/README.md
+      - CLI: api-reference/cli/src/README.md
   - Examples:
       - examples/index.md
       - Minimal: examples/minimal.md
