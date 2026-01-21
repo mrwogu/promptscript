@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation, Block, Value } from '@promptscript/core';
-import { allRules, getRuleById, getRuleByName } from '../rules';
-import { deprecated } from '../rules/deprecated';
-import { validPath, isValidPath } from '../rules/valid-path';
-import { requiredGuards } from '../rules/required-guards';
-import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types';
+import { allRules, getRuleById, getRuleByName } from '../rules/index.js';
+import { deprecated } from '../rules/deprecated.js';
+import { validPath, isValidPath } from '../rules/valid-path.js';
+import { requiredGuards } from '../rules/required-guards.js';
+import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types.js';
 
 /**
  * Create a minimal test AST.

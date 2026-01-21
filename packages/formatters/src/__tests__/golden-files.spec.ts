@@ -1,12 +1,16 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { GitHubFormatter } from '../formatters/github';
-import { ClaudeFormatter } from '../formatters/claude';
-import { CursorFormatter } from '../formatters/cursor';
-import { AntigravityFormatter } from '../formatters/antigravity';
-import type { Formatter, FormatOptions } from '../types';
+import { GitHubFormatter } from '../formatters/github.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+import { ClaudeFormatter } from '../formatters/claude.js';
+import { CursorFormatter } from '../formatters/cursor.js';
+import { AntigravityFormatter } from '../formatters/antigravity.js';
+import type { Formatter, FormatOptions } from '../types.js';
 
 /**
  * Golden Files Tests

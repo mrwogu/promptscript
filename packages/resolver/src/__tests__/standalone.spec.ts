@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 import { tmpdir } from 'os';
-import { resolve, createResolver } from '../index';
+import { resolve, createResolver } from '../index.js';
 
 describe('standalone resolve function', () => {
   let tempDir: string;

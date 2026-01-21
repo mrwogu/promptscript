@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { GitHubFormatter } from '../formatters/github';
-import { ClaudeFormatter } from '../formatters/claude';
-import { CursorFormatter } from '../formatters/cursor';
-import { AntigravityFormatter } from '../formatters/antigravity';
+import { GitHubFormatter } from '../formatters/github.js';
+import { ClaudeFormatter } from '../formatters/claude.js';
+import { CursorFormatter } from '../formatters/cursor.js';
+import { AntigravityFormatter } from '../formatters/antigravity.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',

@@ -1,4 +1,4 @@
-import type { SourceLocation } from '../types/source';
+import type { SourceLocation } from '../types/source.js';
 
 /**
  * Error codes for PromptScript errors.

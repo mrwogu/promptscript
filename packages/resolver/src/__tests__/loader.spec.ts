@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { resolve } from 'path';
-import { FileLoader } from '../loader';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { FileLoader } from '../loader.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const FIXTURES_DIR = resolve(__dirname, '__fixtures__');
 const REGISTRY_DIR = resolve(__dirname, '__fixtures__/registry');

@@ -1,5 +1,4 @@
-import { existsSync } from 'fs';
-import { readdir } from 'fs/promises';
+import { type CliServices, createDefaultServices } from '../services.js';
 
 /**
  * Supported AI tool targets.
@@ -46,10 +45,10 @@ const AI_TOOL_PATTERNS: AIToolPattern[] = [
 /**
  * Check if a directory exists and is not empty.
  */
-async function directoryHasContent(dir: string): Promise<boolean> {
-  if (!existsSync(dir)) return false;
+async function directoryHasContent(dir: string, services: CliServices): Promise<boolean> {
+  if (!services.fs.existsSync(dir)) return false;
   try {
-    const entries = await readdir(dir);
+    const entries = await services.fs.readdir(dir);
     return entries.length > 0;
   } catch {
     return false;
@@ -59,7 +58,9 @@ async function directoryHasContent(dir: string): Promise<boolean> {
 /**
  * Detect existing AI tool configurations.
  */
-export async function detectAITools(): Promise<AIToolsDetection> {
+export async function detectAITools(
+  services: CliServices = createDefaultServices()
+): Promise<AIToolsDetection> {
   const detected: AIToolTarget[] = [];
   const details: Record<AIToolTarget, string[]> = {
     github: [],
@@ -72,14 +73,14 @@ export async function detectAITools(): Promise<AIToolsDetection> {
 
     // Check specific files
     for (const file of pattern.files) {
-      if (existsSync(file)) {
+      if (services.fs.existsSync(file)) {
         foundFiles.push(file);
       }
     }
 
     // Check directories
     for (const dir of pattern.directories) {
-      if (await directoryHasContent(dir)) {
+      if (await directoryHasContent(dir, services)) {
         foundFiles.push(`${dir}/`);
       }
     }

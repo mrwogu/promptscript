@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { CheckOptions } from '../types';
+import type { CheckOptions } from '../types.js';
 
 // Mock ora
 vi.mock('ora', () => ({
@@ -63,7 +63,7 @@ describe('commands/check', () => {
     it('should fail when no config file exists', async () => {
       mockFindConfigFile.mockReturnValue(null);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBe(1);
@@ -78,7 +78,7 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockReturnValue(true);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBeUndefined();
@@ -92,7 +92,7 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockReturnValue(true);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       // Warnings set exitCode to 0 (not failure)
@@ -108,7 +108,7 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockReturnValue(false);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBe(1);
@@ -123,7 +123,7 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockReturnValue(true);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       // Warnings set exitCode to 0 (not failure)
@@ -140,7 +140,7 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockReturnValue(true);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBeUndefined();
@@ -164,7 +164,7 @@ describe('commands/check', () => {
         return false;
       });
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       // Registry warning doesn't fail - exitCode should be 0 or undefined
@@ -181,7 +181,7 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockReturnValue(true);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBeUndefined();
@@ -197,7 +197,7 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockReturnValue(true);
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBeUndefined();
@@ -207,7 +207,7 @@ describe('commands/check', () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockRejectedValue(new Error('Invalid YAML'));
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBe(1);
@@ -223,7 +223,7 @@ describe('commands/check', () => {
         return path.includes('.promptscript/project.prs');
       });
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBeUndefined();
@@ -234,7 +234,7 @@ describe('commands/check', () => {
         throw new Error('Unexpected error');
       });
 
-      const { checkCommand } = await import('../commands/check');
+      const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);
 
       expect(process.exitCode).toBe(1);

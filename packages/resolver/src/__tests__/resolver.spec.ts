@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { CircularDependencyError } from '@promptscript/core';
-import { Resolver, createResolver } from '../resolver';
+import { Resolver, createResolver } from '../resolver.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const FIXTURES_DIR = resolve(__dirname, '__fixtures__');
 

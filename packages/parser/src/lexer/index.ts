@@ -1,2 +1,2 @@
-export * from './tokens';
-export * from './lexer';
+export * from './tokens.js';
+export * from './lexer.js';

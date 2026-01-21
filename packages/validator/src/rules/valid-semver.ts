@@ -1,4 +1,4 @@
-import type { ValidationRule } from '../types';
+import type { ValidationRule } from '../types.js';
 
 /**
  * Check if a string is a valid semantic version.

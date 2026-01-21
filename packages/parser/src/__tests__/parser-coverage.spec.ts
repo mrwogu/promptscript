@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parse, parseOrThrow } from '../parse';
+import { parse, parseOrThrow } from '../parse.js';
 import { ParseError } from '@promptscript/core';
 
 describe('parse coverage - error paths', () => {

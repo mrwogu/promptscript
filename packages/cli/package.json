@@ -9,8 +9,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "type": "commonjs",
-  "main": "./src/index.js",
+  "type": "module",
+  "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "bin": {
     "prs": "./bin/prs.js",

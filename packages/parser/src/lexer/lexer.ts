@@ -1,5 +1,5 @@
 import { Lexer, ILexingResult } from 'chevrotain';
-import { allTokens } from './tokens';
+import { allTokens } from './tokens.js';
 
 /**
  * PromptScript Lexer instance.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tokenize } from '../lexer';
+import { tokenize } from '../lexer/index.js';
 import {
   Meta,
   Inherit,
@@ -31,7 +31,7 @@ import {
   Identifier,
   PathReference,
   RelativePath,
-} from '../lexer/tokens';
+} from '../lexer/tokens.js';
 
 describe('PSLexer', () => {
   describe('basic tokenization', () => {

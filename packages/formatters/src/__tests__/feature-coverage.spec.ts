@@ -1,10 +1,10 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { GitHubFormatter } from '../formatters/github';
-import { ClaudeFormatter } from '../formatters/claude';
-import { CursorFormatter } from '../formatters/cursor';
-import { AntigravityFormatter } from '../formatters/antigravity';
-import type { Formatter } from '../types';
+import { GitHubFormatter } from '../formatters/github.js';
+import { ClaudeFormatter } from '../formatters/claude.js';
+import { CursorFormatter } from '../formatters/cursor.js';
+import { AntigravityFormatter } from '../formatters/antigravity.js';
+import type { Formatter } from '../types.js';
 import {
   FEATURE_MATRIX,
   getToolFeatures,
@@ -16,7 +16,7 @@ import {
   identifyFeatureGaps,
   generateFeatureMatrixReport,
   type ToolName,
-} from '../feature-matrix';
+} from '../feature-matrix.js';
 
 /**
  * Feature Coverage Tests

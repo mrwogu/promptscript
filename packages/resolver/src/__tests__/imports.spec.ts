@@ -6,7 +6,7 @@ import {
   getImportAlias,
   getOriginalBlockName,
   IMPORT_MARKER_PREFIX,
-} from '../imports';
+} from '../imports.js';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
 

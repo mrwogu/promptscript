@@ -7,7 +7,7 @@ import {
   XML_CONVENTION,
   type OutputConvention,
   type SectionRenderer,
-} from '../types/convention';
+} from '../types/convention.js';
 
 describe('convention types', () => {
   describe('XML_CONVENTION', () => {

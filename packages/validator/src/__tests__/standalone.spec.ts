@@ -9,7 +9,7 @@ import {
   formatDiagnostic,
   formatDiagnostics,
   type ValidationMessage,
-} from '../index';
+} from '../index.js';
 
 /**
  * Create a minimal valid AST for testing.

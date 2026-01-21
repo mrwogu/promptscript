@@ -6,7 +6,7 @@ import {
   formatVersion,
   incrementVersion,
   type SemVer,
-} from '../utils/version';
+} from '../utils/version.js';
 
 describe('parseVersion', () => {
   it('should parse simple version', () => {

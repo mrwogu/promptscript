@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { deepMerge, isTextContent, isPlainObject, deepClone } from '../utils/merge';
-import type { TextContent } from '../types';
+import { deepMerge, isTextContent, isPlainObject, deepClone } from '../utils/merge.js';
+import type { TextContent } from '../types/index.js';
 
 describe('deepMerge coverage', () => {
   describe('array deduplication edge cases', () => {

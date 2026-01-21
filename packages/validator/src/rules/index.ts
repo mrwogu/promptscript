@@ -1,22 +1,22 @@
-import type { ValidationRule } from '../types';
+import type { ValidationRule } from '../types.js';
 
 // Import all rules
-import { requiredMetaId, requiredMetaSyntax } from './required-meta';
-import { validSemver } from './valid-semver';
-import { requiredGuards } from './required-guards';
-import { blockedPatterns } from './blocked-patterns';
-import { validPath } from './valid-path';
-import { deprecated } from './deprecated';
-import { emptyBlock } from './empty-block';
+import { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
+import { validSemver } from './valid-semver.js';
+import { requiredGuards } from './required-guards.js';
+import { blockedPatterns } from './blocked-patterns.js';
+import { validPath } from './valid-path.js';
+import { deprecated } from './deprecated.js';
+import { emptyBlock } from './empty-block.js';
 
 // Re-export all rules
-export { requiredMetaId, requiredMetaSyntax } from './required-meta';
-export { validSemver, isValidSemver } from './valid-semver';
-export { requiredGuards } from './required-guards';
-export { blockedPatterns } from './blocked-patterns';
-export { validPath, isValidPath } from './valid-path';
-export { deprecated } from './deprecated';
-export { emptyBlock } from './empty-block';
+export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
+export { validSemver, isValidSemver } from './valid-semver.js';
+export { requiredGuards } from './required-guards.js';
+export { blockedPatterns } from './blocked-patterns.js';
+export { validPath, isValidPath } from './valid-path.js';
+export { deprecated } from './deprecated.js';
+export { emptyBlock } from './empty-block.js';
 
 /**
  * All validation rules in the order they should be executed.

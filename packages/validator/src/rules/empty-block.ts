@@ -1,5 +1,5 @@
-import type { ValidationRule } from '../types';
-import { walkBlocks, hasContent } from '../walker';
+import type { ValidationRule } from '../types.js';
+import { walkBlocks, hasContent } from '../walker.js';
 
 /**
  * PS008: Block has no content

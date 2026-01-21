@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { PromptScriptConfig, TargetEntry, TargetConfig } from '../types/config';
+import type { PromptScriptConfig, TargetEntry, TargetConfig } from '../types/config.js';
 
 describe('PromptScriptConfig', () => {
   describe('base config', () => {

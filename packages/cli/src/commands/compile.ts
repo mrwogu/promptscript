@@ -2,11 +2,11 @@ import { resolve, dirname } from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import chokidar from 'chokidar';
-import type { CompileOptions } from '../types';
+import type { CompileOptions } from '../types.js';
 import type { PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
-import { loadConfig } from '../config/loader';
-import { createSpinner, ConsoleOutput } from '../output/console';
+import { loadConfig } from '../config/loader.js';
+import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 
 /**

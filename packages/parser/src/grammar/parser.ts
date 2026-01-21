@@ -31,7 +31,7 @@ import {
   NumberLiteral,
   TextBlock,
   Identifier,
-} from '../lexer/tokens';
+} from '../lexer/tokens.js';
 
 /**
  * PromptScript CST Parser.

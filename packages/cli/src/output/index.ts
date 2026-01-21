@@ -1,2 +1,2 @@
-export { ConsoleOutput, createSpinner } from './console';
-export { Pager, createPager, isTTY, getPagerCommand } from './pager';
+export { ConsoleOutput, createSpinner } from './console.js';
+export { Pager, createPager, isTTY, getPagerCommand } from './pager.js';

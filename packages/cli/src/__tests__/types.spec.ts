@@ -5,7 +5,7 @@ import type {
   ValidateOptions,
   PullOptions,
   DiffOptions,
-} from '../types';
+} from '../types.js';
 
 describe('types', () => {
   describe('InitOptions', () => {

@@ -1,4 +1,4 @@
-import type { SourceLocation } from './source';
+import type { SourceLocation } from './source.js';
 
 // ============================================================
 // Base Types

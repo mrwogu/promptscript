@@ -1,4 +1,4 @@
-import type { ValidationRule } from '../types';
+import type { ValidationRule } from '../types.js';
 
 /**
  * PS004: Required guards must be present

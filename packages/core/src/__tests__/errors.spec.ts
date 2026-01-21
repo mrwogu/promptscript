@@ -8,8 +8,8 @@ import {
   FileNotFoundError,
   CircularDependencyError,
   ValidationError,
-} from '../errors';
-import type { SourceLocation } from '../types';
+} from '../errors/index.js';
+import type { SourceLocation } from '../types/index.js';
 
 const mockLocation: SourceLocation = {
   file: 'test.prs',

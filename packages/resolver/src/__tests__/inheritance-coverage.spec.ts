@@ -8,7 +8,7 @@ import type {
   MixedContent,
   Value,
 } from '@promptscript/core';
-import { resolveInheritance } from '../inheritance';
+import { resolveInheritance } from '../inheritance.js';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
 

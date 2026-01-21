@@ -1,6 +1,6 @@
 import type { Block, Program, Value } from '@promptscript/core';
-import { BaseFormatter } from '../base-formatter';
-import type { FormatOptions, FormatterOutput } from '../types';
+import { BaseFormatter } from '../base-formatter.js';
+import type { FormatOptions, FormatterOutput } from '../types.js';
 
 /**
  * Supported Cursor format versions.

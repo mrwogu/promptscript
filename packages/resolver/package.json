@@ -2,8 +2,8 @@
   "name": "@promptscript/resolver",
   "version": "0.0.1",
   "private": true,
-  "type": "commonjs",
-  "main": "./src/index.js",
+  "type": "module",
+  "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "dependencies": {
     "@swc/helpers": "~0.5.11",

@@ -1,8 +1,8 @@
 import { existsSync } from 'fs';
 import { resolve } from 'path';
-import type { CheckOptions } from '../types';
-import { findConfigFile, loadConfig, CONFIG_FILES } from '../config/loader';
-import { createSpinner, ConsoleOutput, isVerbose } from '../output/console';
+import type { CheckOptions } from '../types.js';
+import { findConfigFile, loadConfig, CONFIG_FILES } from '../config/loader.js';
+import { createSpinner, ConsoleOutput, isVerbose } from '../output/console.js';
 
 /**
  * Check result for a single item.

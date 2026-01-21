@@ -7,7 +7,7 @@ import {
   createPathReference,
   getFileName,
   formatPath,
-} from '../utils/path';
+} from '../utils/path.js';
 
 describe('parsePath', () => {
   describe('absolute paths', () => {

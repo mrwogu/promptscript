@@ -4,7 +4,7 @@ import {
   formatDiagnostics,
   createLocation,
   type Diagnostic,
-} from '../utils/diagnostic';
+} from '../utils/diagnostic.js';
 
 describe('createLocation', () => {
   it('should create a basic location', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { AntigravityFormatter, ANTIGRAVITY_VERSIONS } from '../formatters/antigravity';
+import { AntigravityFormatter, ANTIGRAVITY_VERSIONS } from '../formatters/antigravity.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',

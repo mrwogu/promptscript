@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { join } from 'node:path';
-import { parse, parseFile, parseFileOrThrow } from '../parse';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parse, parseFile, parseFileOrThrow } from '../parse.js';
 import { ParseError } from '@promptscript/core';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const fixturesDir = join(__dirname, '__fixtures__');
 
 describe('parse with recovery option', () => {

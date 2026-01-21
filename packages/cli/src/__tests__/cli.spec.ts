@@ -56,7 +56,7 @@ vi.mock('commander', () => {
 describe('cli', () => {
   describe('run', () => {
     it('should create CLI with expected configuration', async () => {
-      const { run } = await import('../cli');
+      const { run } = await import('../cli.js');
       run(['node', 'prs', '--help']);
 
       expect(mockName).toHaveBeenCalledWith('prs');
@@ -68,42 +68,42 @@ describe('cli', () => {
     });
 
     it('should register init command', async () => {
-      const { run } = await import('../cli');
+      const { run } = await import('../cli.js');
       run(['node', 'prs', 'init']);
 
       expect(mockCommand).toHaveBeenCalledWith('init');
     });
 
     it('should register compile command', async () => {
-      const { run } = await import('../cli');
+      const { run } = await import('../cli.js');
       run(['node', 'prs', 'compile']);
 
       expect(mockCommand).toHaveBeenCalledWith('compile');
     });
 
     it('should register validate command', async () => {
-      const { run } = await import('../cli');
+      const { run } = await import('../cli.js');
       run(['node', 'prs', 'validate']);
 
       expect(mockCommand).toHaveBeenCalledWith('validate');
     });
 
     it('should register pull command', async () => {
-      const { run } = await import('../cli');
+      const { run } = await import('../cli.js');
       run(['node', 'prs', 'pull']);
 
       expect(mockCommand).toHaveBeenCalledWith('pull');
     });
 
     it('should register diff command', async () => {
-      const { run } = await import('../cli');
+      const { run } = await import('../cli.js');
       run(['node', 'prs', 'diff']);
 
       expect(mockCommand).toHaveBeenCalledWith('diff');
     });
 
     it('should call parse with provided args', async () => {
-      const { run } = await import('../cli');
+      const { run } = await import('../cli.js');
       run(['node', 'prs', 'init', '--team', 'frontend']);
 
       expect(mockParse).toHaveBeenCalledWith(['node', 'prs', 'init', '--team', 'frontend']);

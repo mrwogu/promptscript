@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
-import { loadConfig, findConfigFile, CONFIG_FILES } from '../config/loader';
+import { loadConfig, findConfigFile, CONFIG_FILES } from '../config/loader.js';
 
 // Mock fs modules
 vi.mock('fs', () => ({

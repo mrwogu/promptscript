@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import type { Formatter, CompilerOptions } from '../types';
+import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
 
 // Create mock classes before importing Compiler
@@ -20,7 +20,7 @@ vi.mock('@promptscript/validator', () => ({
 }));
 
 // Import after mocks are set up
-import { Compiler, createCompiler, compile } from '../compiler';
+import { Compiler, createCompiler, compile } from '../compiler.js';
 
 /**
  * Create a minimal valid AST for testing.

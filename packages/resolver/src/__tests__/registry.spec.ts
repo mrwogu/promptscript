@@ -7,7 +7,7 @@ import {
   createFileSystemRegistry,
   createHttpRegistry,
   createCompositeRegistry,
-} from '../registry';
+} from '../registry.js';
 import { FileNotFoundError } from '@promptscript/core';
 
 describe('FileSystemRegistry', () => {

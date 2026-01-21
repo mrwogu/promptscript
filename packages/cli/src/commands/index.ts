@@ -1,5 +1,5 @@
-export { initCommand } from './init';
-export { compileCommand } from './compile';
-export { validateCommand } from './validate';
-export { pullCommand } from './pull';
-export { diffCommand } from './diff';
+export { initCommand } from './init.js';
+export { compileCommand } from './compile.js';
+export { validateCommand } from './validate.js';
+export { pullCommand } from './pull.js';
+export { diffCommand } from './diff.js';

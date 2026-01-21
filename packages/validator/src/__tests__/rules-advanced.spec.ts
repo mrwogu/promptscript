@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation, Block } from '@promptscript/core';
-import { blockedPatterns } from '../rules/blocked-patterns';
-import { emptyBlock } from '../rules/empty-block';
-import { requiredGuards } from '../rules/required-guards';
-import { validPath, isValidPath } from '../rules/valid-path';
-import { deprecated } from '../rules/deprecated';
-import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types';
+import { blockedPatterns } from '../rules/blocked-patterns.js';
+import { emptyBlock } from '../rules/empty-block.js';
+import { requiredGuards } from '../rules/required-guards.js';
+import { validPath, isValidPath } from '../rules/valid-path.js';
+import { deprecated } from '../rules/deprecated.js';
+import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types.js';
 
 /**
  * Create a minimal test AST.

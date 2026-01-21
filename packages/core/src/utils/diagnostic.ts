@@ -1,4 +1,4 @@
-import type { SourceLocation } from '../types';
+import type { SourceLocation } from '../types/index.js';
 
 /**
  * Severity level for diagnostics.

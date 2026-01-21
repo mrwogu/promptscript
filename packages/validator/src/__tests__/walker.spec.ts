@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { walkText, walkBlocks, walkUses, hasContent } from '../walker';
+import { walkText, walkBlocks, walkUses, hasContent } from '../walker.js';
 
 /**
  * Create a minimal test AST.

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { requiredMetaId, requiredMetaSyntax } from '../rules/required-meta';
-import { validSemver, isValidSemver } from '../rules/valid-semver';
-import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types';
+import { requiredMetaId, requiredMetaSyntax } from '../rules/required-meta.js';
+import { validSemver, isValidSemver } from '../rules/valid-semver.js';
+import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types.js';
 
 /**
  * Create a minimal test AST.

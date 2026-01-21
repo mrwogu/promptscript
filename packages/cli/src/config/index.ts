@@ -1,1 +1,1 @@
-export { loadConfig, findConfigFile, CONFIG_FILES } from './loader';
+export { loadConfig, findConfigFile, CONFIG_FILES } from './loader.js';

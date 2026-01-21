@@ -1,5 +1,5 @@
-import type { SourceLocation } from '../types/source';
-import { PSError, ErrorCode } from './base';
+import type { SourceLocation } from '../types/source.js';
+import { PSError, ErrorCode } from './base.js';
 
 /**
  * Severity level for validation issues.

@@ -9,8 +9,8 @@ import type {
   MixedContent,
   Value,
 } from '@promptscript/core';
-import { applyExtends } from '../extensions';
-import { IMPORT_MARKER_PREFIX } from '../imports';
+import { applyExtends } from '../extensions.js';
+import { IMPORT_MARKER_PREFIX } from '../imports.js';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
 

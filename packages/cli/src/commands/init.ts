@@ -1,17 +1,21 @@
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import { input, confirm, checkbox } from '@inquirer/prompts';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { getPackageVersion } from '@promptscript/core';
-import type { InitOptions } from '../types';
-import { createSpinner, ConsoleOutput } from '../output/console';
-import { detectProject, type ProjectInfo } from '../utils/project-detector';
+import { type CliServices, createDefaultServices } from '../services.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+import type { InitOptions } from '../types.js';
+import { createSpinner, ConsoleOutput } from '../output/console.js';
+import { detectProject, type ProjectInfo } from '../utils/project-detector.js';
 import {
   detectAITools,
   getAllTargets,
   getSuggestedTargets,
   formatDetectionResults,
   type AIToolTarget,
-} from '../utils/ai-tools-detector';
+} from '../utils/ai-tools-detector.js';
 
 /**
  * Resolved configuration after prompts or CLI args.
@@ -28,9 +32,13 @@ interface ResolvedConfig {
  * Initialize PromptScript in the current directory.
  * Creates configuration file and initial project structure.
  */
-export async function initCommand(options: InitOptions): Promise<void> {
+export async function initCommand(
+  options: InitOptions,
+  services: CliServices = createDefaultServices()
+): Promise<void> {
+  const { fs } = services;
   // Check if already initialized
-  if (existsSync('promptscript.yaml') && !options.force) {
+  if (fs.existsSync('promptscript.yaml') && !options.force) {
     ConsoleOutput.warn('PromptScript already initialized');
     ConsoleOutput.muted('Use --force to reinitialize');
     return;
@@ -38,22 +46,22 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
   try {
     // Detect project info and AI tools
-    const projectInfo = await detectProject();
-    const aiToolsDetection = await detectAITools();
+    const projectInfo = await detectProject(services);
+    const aiToolsDetection = await detectAITools(services);
 
     // Resolve configuration (interactive or from CLI args)
-    const config = await resolveConfig(options, projectInfo, aiToolsDetection);
+    const config = await resolveConfig(options, projectInfo, aiToolsDetection, services);
 
     // Create files
     const spinner = createSpinner('Creating PromptScript configuration...').start();
 
-    await mkdir('.promptscript', { recursive: true });
+    await fs.mkdir('.promptscript', { recursive: true });
 
     const configContent = generateConfig(config);
-    await writeFile('promptscript.yaml', configContent, 'utf-8');
+    await fs.writeFile('promptscript.yaml', configContent, 'utf-8');
 
     const projectPsContent = generateProjectPs(config, projectInfo);
-    await writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
+    await fs.writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
 
     spinner.succeed('PromptScript initialized');
 
@@ -94,7 +102,8 @@ export async function initCommand(options: InitOptions): Promise<void> {
 async function resolveConfig(
   options: InitOptions,
   projectInfo: ProjectInfo,
-  aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>
+  aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>,
+  services: CliServices
 ): Promise<ResolvedConfig> {
   // If --yes flag, use all defaults
   if (options.yes) {
@@ -119,7 +128,7 @@ async function resolveConfig(
   }
 
   // Interactive mode
-  return await runInteractivePrompts(options, projectInfo, aiToolsDetection);
+  return await runInteractivePrompts(options, projectInfo, aiToolsDetection, services);
 }
 
 /**
@@ -128,8 +137,10 @@ async function resolveConfig(
 async function runInteractivePrompts(
   options: InitOptions,
   projectInfo: ProjectInfo,
-  aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>
+  aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>,
+  services: CliServices
 ): Promise<ResolvedConfig> {
+  const { prompts } = services;
   ConsoleOutput.newline();
   console.log('🚀 PromptScript Setup');
   ConsoleOutput.newline();
@@ -153,20 +164,20 @@ async function runInteractivePrompts(
   ConsoleOutput.newline();
 
   // 1. Project name
-  const projectId = await input({
+  const projectId = await prompts.input({
     message: 'Project name:',
     default: options.name ?? projectInfo.name,
   });
 
   // 2. Inheritance
-  const wantsInherit = await confirm({
+  const wantsInherit = await prompts.confirm({
     message: 'Do you want to inherit from a parent configuration?',
     default: false,
   });
 
   let inherit: string | undefined;
   if (wantsInherit) {
-    inherit = await input({
+    inherit = await prompts.input({
       message: 'Inheritance path (e.g., @company/team):',
       default: options.inherit ?? '@company/team',
       validate: (value) => {
@@ -179,14 +190,14 @@ async function runInteractivePrompts(
   }
 
   // 3. Registry
-  const wantsRegistry = await confirm({
+  const wantsRegistry = await prompts.confirm({
     message: 'Do you want to configure a registry?',
     default: true,
   });
 
   let registry: string | undefined;
   if (wantsRegistry) {
-    registry = await input({
+    registry = await prompts.input({
       message: 'Registry path:',
       default: options.registry ?? './registry',
     });
@@ -196,7 +207,7 @@ async function runInteractivePrompts(
   const suggestedTargets = getSuggestedTargets(aiToolsDetection);
   const allTargets = getAllTargets();
 
-  const targets = await checkbox({
+  const targets = await prompts.checkbox({
     message: 'Select target AI tools:',
     choices: allTargets.map((target) => ({
       name: formatTargetName(target),
@@ -215,7 +226,7 @@ async function runInteractivePrompts(
   let team: string | undefined = options.team;
   if (inherit && !team) {
     // Extract team from inherit path: @company/team -> company
-    const match = inherit.match(/^@([^/]+)/);
+    const match = /^@([^/]+)/.exec(inherit);
     if (match) {
       team = match[1];
     }
@@ -226,7 +237,7 @@ async function runInteractivePrompts(
     team,
     inherit,
     registry,
-    targets: targets as AIToolTarget[],
+    targets,
   };
 }
 

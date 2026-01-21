@@ -5,7 +5,7 @@ import {
   isValidVersion,
   formatVersion,
   incrementVersion,
-} from '../utils/version';
+} from '../utils/version.js';
 
 describe('version coverage', () => {
   describe('parseVersion edge cases', () => {

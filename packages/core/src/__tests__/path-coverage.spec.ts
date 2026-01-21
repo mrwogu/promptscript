@@ -6,7 +6,7 @@ import {
   resolvePath,
   createPathReference,
   getFileName,
-} from '../utils/path';
+} from '../utils/path.js';
 
 describe('path coverage', () => {
   describe('parsePath edge cases', () => {

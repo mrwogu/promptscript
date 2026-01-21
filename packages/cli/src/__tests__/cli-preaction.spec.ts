@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { setContext, getContext, LogLevel } from '../output/console';
+import { setContext, getContext, LogLevel } from '../output/console.js';
 
 interface CliOptions {
   quiet?: boolean;

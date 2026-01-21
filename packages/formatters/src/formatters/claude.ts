@@ -1,7 +1,7 @@
 import type { Block, ClaudeVersion, Program, Value } from '@promptscript/core';
-import { BaseFormatter } from '../base-formatter';
-import type { ConventionRenderer } from '../convention-renderer';
-import type { FormatOptions, FormatterOutput } from '../types';
+import { BaseFormatter } from '../base-formatter.js';
+import type { ConventionRenderer } from '../convention-renderer.js';
+import type { FormatOptions, FormatterOutput } from '../types.js';
 
 /**
  * Claude formatter version information.

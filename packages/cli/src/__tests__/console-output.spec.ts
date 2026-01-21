@@ -7,7 +7,7 @@ import {
   isVerbose,
   isQuiet,
   LogLevel,
-} from '../output/console';
+} from '../output/console.js';
 
 // Mock ora
 vi.mock('ora', () => ({

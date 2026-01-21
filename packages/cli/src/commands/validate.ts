@@ -1,9 +1,9 @@
 import { resolve } from 'path';
 import { existsSync } from 'fs';
-import type { ValidateOptions } from '../types';
+import type { ValidateOptions } from '../types.js';
 import type { CompileResult } from '@promptscript/compiler';
-import { loadConfig } from '../config/loader';
-import { createSpinner, ConsoleOutput } from '../output/console';
+import { loadConfig } from '../config/loader.js';
+import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 
 /**

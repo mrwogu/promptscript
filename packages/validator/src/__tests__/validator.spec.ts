@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { Validator, createValidator } from '../validator';
+import { Validator, createValidator } from '../validator.js';
 
 /**
  * Create a minimal valid AST for testing.

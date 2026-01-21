@@ -1,4 +1,4 @@
-import type { TextContent } from '../types';
+import type { TextContent } from '../types/index.js';
 
 /**
  * Options for deep merge behavior.

@@ -1,5 +1,5 @@
-import type { ValidationRule } from '../types';
-import { walkText } from '../walker';
+import type { ValidationRule } from '../types.js';
+import { walkText } from '../walker.js';
 
 /**
  * Default blocked patterns that indicate prompt injection attempts.

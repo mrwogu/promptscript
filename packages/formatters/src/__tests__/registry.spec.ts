@@ -1,9 +1,9 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { FormatterRegistry } from '../registry';
-import type { Formatter, FormatterOutput } from '../types';
+import { FormatterRegistry } from '../registry.js';
+import type { Formatter, FormatterOutput } from '../types.js';
 
 // Import the main module to trigger auto-registration of built-in formatters
-import '../index';
+import '../index.js';
 
 // Mock formatter for testing
 class MockFormatter implements Formatter {

@@ -1,14 +1,14 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { GitHubFormatter } from '../formatters/github';
-import { ClaudeFormatter } from '../formatters/claude';
-import { CursorFormatter } from '../formatters/cursor';
+import { GitHubFormatter } from '../formatters/github.js';
+import { ClaudeFormatter } from '../formatters/claude.js';
+import { CursorFormatter } from '../formatters/cursor.js';
 import {
   extractSectionsFromOutput,
   normalizeSectionName,
   KNOWN_SECTIONS,
-} from '../section-registry';
-import type { Formatter } from '../types';
+} from '../section-registry.js';
+import type { Formatter } from '../types.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',

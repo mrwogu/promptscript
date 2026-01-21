@@ -1,5 +1,5 @@
-import type { ValidationRule } from '../types';
-import { walkUses } from '../walker';
+import type { ValidationRule } from '../types.js';
+import { walkUses } from '../walker.js';
 
 // Pattern to validate path references
 const VALID_PATH_PATTERNS = {

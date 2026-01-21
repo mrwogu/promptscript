@@ -5,8 +5,8 @@ import {
   isPlainObject,
   deepClone,
   DEFAULT_MERGE_OPTIONS,
-} from '../utils/merge';
-import type { TextContent } from '../types';
+} from '../utils/merge.js';
+import type { TextContent } from '../types/index.js';
 
 describe('deepMerge', () => {
   describe('primitive values', () => {

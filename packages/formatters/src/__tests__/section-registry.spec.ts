@@ -5,7 +5,7 @@ import {
   extractSectionsFromOutput,
   findMissingSections,
   normalizeSectionName,
-} from '../section-registry';
+} from '../section-registry.js';
 
 describe('Section Registry', () => {
   describe('KNOWN_SECTIONS', () => {

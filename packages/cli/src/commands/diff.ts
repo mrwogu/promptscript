@@ -1,12 +1,12 @@
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
-import type { DiffOptions } from '../types';
+import type { DiffOptions } from '../types.js';
 import type { PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
-import { loadConfig } from '../config/loader';
-import { createSpinner, ConsoleOutput } from '../output/console';
-import { createPager, Pager } from '../output/pager';
+import { loadConfig } from '../config/loader.js';
+import { createSpinner, ConsoleOutput } from '../output/console.js';
+import { createPager, Pager } from '../output/pager.js';
 import { Compiler } from '@promptscript/compiler';
 import chalk from 'chalk';
 

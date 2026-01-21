@@ -1,9 +1,9 @@
 import { mkdir, writeFile, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { resolve, dirname } from 'path';
-import type { PullOptions } from '../types';
-import { loadConfig } from '../config/loader';
-import { createSpinner, ConsoleOutput } from '../output/console';
+import type { PullOptions } from '../types.js';
+import { loadConfig } from '../config/loader.js';
+import { createSpinner, ConsoleOutput } from '../output/console.js';
 
 /**
  * Pull updates from registry.

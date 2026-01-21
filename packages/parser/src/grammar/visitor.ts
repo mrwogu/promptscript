@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CstNode, IToken } from 'chevrotain';
-import { parser } from './parser';
+import { parser } from './parser.js';
 import type {
   Program,
   MetaBlock,

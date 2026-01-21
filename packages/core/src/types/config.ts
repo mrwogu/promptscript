@@ -1,4 +1,4 @@
-import type { ConventionName, OutputConvention } from './convention';
+import type { ConventionName, OutputConvention } from './convention.js';
 
 /**
  * GitHub Copilot output format versions.

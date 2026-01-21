@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BLOCK_TYPES, RESERVED_WORDS, isReservedWord, isBlockType } from '../types/constants';
+import { BLOCK_TYPES, RESERVED_WORDS, isReservedWord, isBlockType } from '../types/constants.js';
 
 describe('BLOCK_TYPES', () => {
   it('should contain all known block types', () => {

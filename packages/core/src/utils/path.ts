@@ -1,5 +1,5 @@
 import { join } from 'path';
-import type { PathReference, SourceLocation } from '../types';
+import type { PathReference, SourceLocation } from '../types/index.js';
 
 /**
  * Parsed path components.

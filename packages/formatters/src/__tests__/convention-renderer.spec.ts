@@ -10,7 +10,7 @@ import {
   ConventionRenderer,
   createConventionRenderer,
   conventionRenderers,
-} from '../convention-renderer';
+} from '../convention-renderer.js';
 
 describe('OutputConvention types', () => {
   describe('XML_CONVENTION', () => {
