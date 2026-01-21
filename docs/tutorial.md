@@ -1,20 +1,21 @@
 ---
 title: Tutorial
-description: Step-by-step tutorial for PromptScript
+description: Step-by-step tutorial for deploying PromptScript infrastructure
 ---
 
-# Tutorial
+# Tutorial: Building Enterprise AI Infrastructure
 
-This tutorial walks you through building a complete PromptScript setup for a team.
+In this tutorial, you will simulate a "PromptOps" deployment for a software team.
+You won't just write a prompt—you will build a **hierarchical context system** that scales.
 
-## Overview
+## Learning Objectives
 
 By the end of this tutorial, you'll have:
 
-- An organization-level base configuration
-- A team-specific configuration with inheritance
-- A project configuration that inherits from both
-- Compiled output for multiple AI tools
+- **Organization Registry:** A shared "base" configuration (`@acme/org`).
+- **Team Inheritance:** A team layer that extends the base (`@acme/frontend`).
+- **Project Implementation:** A specific project that inherits from both.
+- **Native compilation:** Output for GitHub Copilot, Claude, and Cursor.
 
 ## Prerequisites
 

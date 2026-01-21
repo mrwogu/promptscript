@@ -425,7 +425,7 @@ Agents output by platform:
     ```
 
 !!! note "Hooks Support"
-Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are planned but not yet implemented. See [Roadmap](../../README.md#roadmap).
+Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are planned but not yet implemented. See [Roadmap](https://github.com/mrwogu/promptscript#roadmap).
 
 ### @local
 

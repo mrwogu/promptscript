@@ -13,7 +13,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Getting Started](#getting-started) · [Enterprise Benefits](#why-promptscript) · [Contributing](CONTRIBUTING.md)
+[Getting Started](#-getting-started) · [Why PromptScript?](#-why-promptscript) · [Contributing](CONTRIBUTING.md)
 
 </div>
 

@@ -300,7 +300,7 @@ targets:
 
 ## Future: Hooks Support
 
-Claude Code supports lifecycle hooks for subagents (`PreToolUse`, `PostToolUse`, `Stop`). This feature is planned but not yet implemented in PromptScript. See the [Roadmap](../../README.md#roadmap) for updates.
+Claude Code supports lifecycle hooks for subagents (`PreToolUse`, `PostToolUse`, `Stop`). This feature is planned but not yet implemented in PromptScript. See the [Roadmap](https://github.com/mrwogu/promptscript#roadmap) for updates.
 
 ## See Also
 

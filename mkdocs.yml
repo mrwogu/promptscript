@@ -1,6 +1,6 @@
 site_name: PromptScript
 site_url: https://mrwogu.github.io/promptscript/
-site_description: A language for standardizing AI instructions across enterprise organizations
+site_description: The Infrastructure-as-Code for AI Context
 site_author: PromptScript Team
 repo_url: https://github.com/mrwogu/promptscript
 repo_name: mrwogu/promptscript
@@ -185,6 +185,8 @@ nav:
       - Minimal: examples/minimal.md
       - Team Setup: examples/team-setup.md
       - Enterprise: examples/enterprise.md
+      - Skills & Local: examples/skills-and-local.md
+      - Claude Agents: examples/agents.md
   - Testing:
       - testing/index.md
       - Parity Testing: testing/parity-testing.md

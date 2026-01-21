@@ -1,13 +1,15 @@
 ---
 title: Getting Started
-description: Quick start guide for PromptScript
+description: Quick start guide for PromptScript - The Infrastructure-as-Code for AI Context
 ---
 
 # Getting Started
 
-Get up and running with PromptScript in minutes.
+Start treating your AI instructions as managed infrastructure.
 
 ## Installation
+
+Install the CLI toolchain to compile, validate, and manage your PromptScript files.
 
 === "npm"
 
@@ -33,21 +35,23 @@ Verify installation:
 prs --version
 ```
 
-## Quick Start
+## Quick Start: From Zero to PromptOps
 
-### 1. Initialize Project
+### 1. Initialize Your Repository
+
+Run the init command at the root of your project (where `package.json` or equivalent resides).
+PromptScript will auto-detect your tech stack (TypeScript, Python, etc.) to generate relevant initial prompts.
 
 ```bash
-cd your-project
 prs init
 ```
 
-This creates:
+This creates the scaffolding for your AI infrastructure:
 
-- `promptscript.yaml` - Configuration file
-- `.promptscript/project.prs` - Your instructions file
+- `promptscript.yaml` - **Compiler Configuration** (targets, input paths)
+- `.promptscript/project.prs` - **Source of Truth** (your rules, identity, and skills)
 
-### 2. Edit Instructions
+### 2. Define Your Policy
 
 Open `.promptscript/project.prs` and customize:
 
@@ -79,30 +83,26 @@ Open `.promptscript/project.prs` and customize:
 }
 ```
 
-### 3. Compile
+### 3. Compile to Native Formats
 
-Generate output files for all configured targets:
+Transform your universal `.prs` definition into platform-specific optimization formats.
 
 ```bash
 prs compile
 ```
 
-Output:
+By default, this generates:
+- `.github/copilot-instructions.md` (for GitHub Copilot)
+- `CLAUDE.md` (for Claude Code)
+- `.cursor/rules/project.mdc` (for Cursor)
 
-```
-✓ Compiled to .github/copilot-instructions.md (GitHub Copilot)
-✓ Compiled to CLAUDE.md (Claude Code)
-✓ Compiled to .cursor/rules/project.mdc (Cursor)
-✓ Compiled to .agent/rules/project.md (Google Antigravity)
-```
+### 4. Commit to Git
 
-### 4. Commit
-
-Add the generated files to version control:
+Commit your configuration and the generated files. Your AI context is now version-controlled infrastructure.
 
 ```bash
-git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc .agent/rules/project.md
-git commit -m "Add AI instructions"
+git add .
+git commit -m "chore: initialize promptscript infrastructure"
 ```
 
 ## Project Structure

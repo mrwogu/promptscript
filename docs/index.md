@@ -1,6 +1,6 @@
 ---
 title: PromptScript
-description: A language for standardizing AI instructions across enterprise organizations
+description: The Infrastructure-as-Code for AI Context
 hide:
   - navigation
   - toc
@@ -10,7 +10,9 @@ hide:
 
 # PromptScript
 
-**A language for standardizing AI instructions across enterprise organizations**
+**The Infrastructure-as-Code for AI Context**
+
+_Standardize, Audit, and Deploy AI Instructions across your entire Engineering Organization._
 
 [:material-rocket-launch: Get Started](getting-started.md){ .md-button .md-button--primary }
 [:material-github: View on GitHub](https://github.com/mrwogu/promptscript){ .md-button }
@@ -20,301 +22,108 @@ hide:
 <div class="feature-grid" markdown>
 
 <div class="feature-card" markdown>
-### :material-code-braces: Single Source of Truth
-Write AI instructions once in `.prs` files, compile to all target formats automatically.
+### :material-gavel: Enterprise Governance
+Enforce non-negotiable standards globally. Define policies once, apply them everywhere (e.g., "No `any` in TS", "Use parameterized SQL Queries").
 </div>
 
 <div class="feature-card" markdown>
-### :material-family-tree: Inheritance System
-Build hierarchical instruction sets with org → team → project inheritance.
+### :material-lock-off: Vendor Independence
+Don't lock your organization's intellectual property into one tool. Write logic in PromptScript, deploy to GitHub Copilot, Claude, or Cursor.
 </div>
 
 <div class="feature-card" markdown>
-### :material-format-list-checks: Validation
-Comprehensive validation with actionable error messages and auto-fix suggestions.
+### :material-file-tree: Hierarchical Inheritance
+Structure instructions like code. Inherit from `@company/backend-security` or `@team/checkout-service`.
 </div>
 
 <div class="feature-card" markdown>
-### :material-target: Multi-Target Output
-Native support for GitHub Copilot, Claude Code, Cursor, Google Antigravity, and more.
-</div>
-
-<div class="feature-card" markdown>
-### :material-rocket-launch: Future-Proof
-Formatter updates automatically adapt your prompts to new AI features and models—agent skills, tool use, and more—without changing your `.prs` files.
+### :material-refresh: Managed Lifecyle
+Update a central policy and propagate changes to 100+ repositories automatically. No more manual copy-pasting.
 </div>
 
 </div>
 
-## The Problem at Scale
+## The Business Problem: "Prompt Drift"
 
-As organizations grow to dozens or hundreds of projects, AI instruction management becomes chaotic:
+Modern engineering organizations face a critical challenge: **AI Context Fragmentation**.
 
-- **No single source of truth** – Every project maintains different AI instructions
-- **No sharing mechanism** – Common patterns are copy-pasted across repos and drift apart over time
-- **No inheritance** – Teams can't build upon organization-wide standards
-- **No synchronization** – Updating guidelines means manually touching every repository
-- **No governance** – No way to enforce compliance or audit what's actually deployed
+As you scale to 50+ repositories and deploy multiple AI tools (GitHub Copilot, Claude, Cursor), maintaining coherent AI instructions becomes impossible manually.
 
-PromptScript solves this by providing a **centralized, hierarchical system** where instructions can be shared, inherited, extended, and synchronized across your entire organization.
+- **The Scale Problem:** Updating a security policy across 100 microservices takes weeks of manual PRs.
+- **The Model Volatility:** New models (e.g., Claude 3.7 vs 3.5) require different prompting strategies.
+- **The Governance Void:** Developers use local, unvetted instructions. Junior devs miss critical security context.
+
+Result: **Inconsistent code quality, security risks, and operational chaos.**
+
+## The Solution: PromptOps
+
+**PromptScript turns AI context into managed infrastructure.** It treats your prompts as code—compiled, validated, and deployed.
+
+```mermaid
+flowchart LR
+    Central["Organization Standards<br/>(.prs files)"] --> Compiler
+    Compiler -->|Output 1| Copilot["GitHub Copilot<br/>(XML/Markdown)"]
+    Compiler -->|Output 2| Claude["Claude Code<br/>(Markdown/Frontmatter)"]
+    Compiler -->|Output 3| Cursor["Cursor Rules<br/>(.mdc)"]
+    Compiler -->|Audit| CI["CI/CD Compliance"]
+```
 
 ## Quick Example
 
 === "PromptScript (.prs)"
 
     ```promptscript
-    @meta {
-      id: "ecommerce-api"
-      syntax: "1.0.0"
-    }
+    @meta { id: "checkout-service", syntax: "1.0.0" }
 
-    @inherit @company/backend-standards
+    // Inherit approved company standards
+    @inherit @company/backend-security
+    @inherit @company/typescript-standards
 
+    // Project-specific identity
     @identity {
       """
-      You are a senior backend engineer specializing in
-      high-performance e-commerce APIs.
+      You are an expert Backend Engineer working on the Checkout Service.
+      This service handles payments and utilizes a hexagonal architecture.
       """
     }
 
-    @tech-stack {
-      language: "TypeScript"
-      runtime: "Node.js 22"
-      framework: "Fastify"
-      database: "PostgreSQL + Redis"
+    @standards {
+      typescript: {
+        strictMode: true
+        noAny: true
+      }
     }
 
-    @restrictions {
-      - "Never expose internal IDs in public APIs"
-      - "Always validate request payloads"
-    }
-
+    // Define reusable tools/skills
     @skills {
-      deploy: {
-        description: "Deploy service to production"
-        allowedTools: ["Bash", "Read"]
-        content: """
-          1. Run tests: pnpm test
-          2. Build: pnpm build
-          3. Deploy: kubectl apply -f k8s/
-        """
-      }
-    }
-
-    @agents {
-      db-optimizer: {
-        description: "Analyze and optimize SQL queries"
-        tools: ["Read", "Bash", "Grep"]
-        model: "sonnet"
-        content: """
-          You are a database performance expert.
-          Analyze queries for N+1 problems, missing
-          indexes, and optimization opportunities.
-        """
+      review: {
+        description: "Security-focused code review"
+        content: "Check for: IDOR, SQL Injection, and PII leaks."
       }
     }
     ```
 
-=== "GitHub Copilot"
+=== "Outputs"
 
+    **GitHub Copilot** (`.github/copilot-instructions.md`)
+    ```xml
+    <context>
+      You are an expert Backend Engineer working on the Checkout Service...
+    </context>
+    <rules>
+       ...inherited security rules...
+    </rules>
+    ```
+
+    **Claude Code** (`CLAUDE.md`)
     ```markdown
-    <!-- .github/copilot-instructions.md -->
+    # Identity
+    You are an expert Backend Engineer...
 
-    ## project
-    You are a senior backend engineer specializing in
-    high-performance e-commerce APIs.
-
-    ## tech-stack
-    - **Language:** TypeScript
-    - **Runtime:** Node.js 22
-    - **Framework:** Fastify
-    - **Database:** PostgreSQL + Redis
-
-    ## donts
-    - Don't expose internal IDs in public APIs
-    - Always validate request payloads
+    # Security Rules
+    ...
     ```
 
-    ```markdown
-    <!-- .github/skills/deploy/SKILL.md -->
-    ---
-    name: "deploy"
-    description: "Deploy service to production"
-    ---
+## Ready to standardize?
 
-    1. Run tests: pnpm test
-    2. Build: pnpm build
-    3. Deploy: kubectl apply -f k8s/
-    ```
-
-    ```markdown
-    <!-- .github/agents/db-optimizer.md -->
-    ---
-    name: db-optimizer
-    description: Analyze and optimize SQL queries
-    tools: [Read, Bash, Grep]
-    model: gpt-4o
-    ---
-
-    You are a database performance expert.
-    Analyze queries for N+1 problems...
-    ```
-
-=== "Claude Code"
-
-    ```markdown
-    <!-- CLAUDE.md -->
-
-    # CLAUDE.md
-
-    You are a senior backend engineer specializing in
-    high-performance e-commerce APIs.
-
-    ## Tech Stack
-
-    | Technology | Value |
-    |------------|-------|
-    | Language | TypeScript |
-    | Runtime | Node.js 22 |
-    | Framework | Fastify |
-    | Database | PostgreSQL + Redis |
-
-    ## Restrictions
-
-    - Never expose internal IDs in public APIs
-    - Always validate request payloads
-    ```
-
-    ```markdown
-    <!-- .claude/skills/deploy/SKILL.md -->
-    ---
-    name: "deploy"
-    description: "Deploy service to production"
-    allowed-tools:
-      - Bash
-      - Read
-    ---
-
-    1. Run tests: pnpm test
-    2. Build: pnpm build
-    3. Deploy: kubectl apply -f k8s/
-    ```
-
-    ```markdown
-    <!-- .claude/agents/db-optimizer.md -->
-    ---
-    name: db-optimizer
-    description: Analyze and optimize SQL queries
-    tools: Read, Bash, Grep
-    model: sonnet
-    ---
-
-    You are a database performance expert.
-    Analyze queries for N+1 problems...
-    ```
-
-=== "Cursor"
-
-    ```yaml
-    # .cursor/rules/project.mdc
-    ---
-    description: E-commerce API development rules
-    globs: ["**/*.ts"]
-    alwaysApply: true
-    ---
-
-    # E-commerce API Rules
-
-    Senior backend engineer for high-performance
-    e-commerce APIs.
-
-    ## Stack
-    TypeScript • Node.js 22 • Fastify • PostgreSQL
-
-    ## Critical Rules
-    ⛔ Never expose internal IDs in public APIs
-    ⛔ Always validate request payloads
-
-    ## Deploy Workflow
-    1. `pnpm test` → Run tests
-    2. `pnpm build` → Build service
-    3. `kubectl apply` → Deploy to k8s
-    ```
-
-    !!! note "Cursor Limitations"
-        Cursor doesn't support agents or skills natively.
-        All instructions are inlined into .mdc rules.
-
-=== "Antigravity"
-
-    ```markdown
-    <!-- .agent/rules/project.md -->
-    ---
-    trigger: always
-    description: E-commerce API coding rules
-    ---
-
-    # E-commerce API Assistant
-
-    Backend engineer for high-performance e-commerce APIs.
-
-    ## Technology
-    TypeScript on Node.js 22 with Fastify and PostgreSQL.
-
-    ## Forbidden Actions
-    1. Exposing internal IDs in APIs
-    2. Skipping request validation
-
-    ## Deploy Procedure
-    Run tests → Build → Deploy to Kubernetes
-    ```
-
-## Architecture
-
-PromptScript is organized as a modular monorepo:
-
-```mermaid
-flowchart TB
-    subgraph Foundation
-        core["@promptscript/core<br/>Types, errors, utilities"]
-    end
-
-    subgraph Pipeline
-        parser["@promptscript/parser<br/>Chevrotain-based parser"]
-        resolver["@promptscript/resolver<br/>Inheritance & imports"]
-        validator["@promptscript/validator<br/>Validation rules"]
-    end
-
-    subgraph Output
-        formatters["@promptscript/formatters<br/>GitHub, Claude, Cursor, Antigravity"]
-        compiler["@promptscript/compiler<br/>Pipeline orchestration"]
-    end
-
-    subgraph Interface
-        cli["@promptscript/cli<br/>Command-line interface"]
-    end
-
-    core --> parser
-    core --> validator
-    core --> formatters
-    parser --> resolver
-    core --> resolver
-    resolver --> compiler
-    validator --> compiler
-    formatters --> compiler
-    compiler --> cli
-    core --> cli
-```
-
-## Installation
-
-```bash
-npm install -g @promptscript/cli
-```
-
-## Next Steps
-
-- **[Getting Started](getting-started.md)** - Quick setup guide
-- **[Tutorial](tutorial.md)** - Complete walkthrough
-- **[Language Reference](reference/language.md)** - Full syntax documentation
-- **[Examples](examples/index.md)** - Real-world configurations
+[Get Started with PromptScript](getting-started.md){ .md-button .md-button--primary .md-button--large }
