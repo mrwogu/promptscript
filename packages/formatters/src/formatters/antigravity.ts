@@ -425,10 +425,9 @@ ${items.join('\n')}`;
     if (context) {
       const text = this.extractText(context.content);
       // Look for architecture section in text content
-      const archRegex = /## Architecture[\s\S]*?```[\s\S]*?```/;
-      const archMatch = archRegex.exec(text);
+      const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
       if (archMatch) {
-        const content = archMatch[0].replace('## Architecture', '').trim();
+        const content = archMatch.replace('## Architecture', '').trim();
         return `## Architecture
 
 ${content}`;
@@ -636,11 +635,10 @@ ${lines.join('\n')}`;
     if (!knowledge) return null;
 
     const text = this.extractText(knowledge.content);
-    const commandsRegex = /## Development Commands[\s\S]*?```[\s\S]*?```/;
-    const commandsMatch = commandsRegex.exec(text);
+    const commandsMatch = this.extractSectionWithCodeBlock(text, '## Development Commands');
     if (!commandsMatch) return null;
 
-    const content = commandsMatch[0].replace('## Development Commands', '').trim();
+    const content = commandsMatch.replace('## Development Commands', '').trim();
     return `## Development Commands
 
 ${content}`;
@@ -654,13 +652,12 @@ ${content}`;
     if (!knowledge) return null;
 
     const text = this.extractText(knowledge.content);
-    const postRegex = /## Post-Work Verification[\s\S]*?```[\s\S]*?```/;
-    const postMatch = postRegex.exec(text);
+    const postMatch = this.extractSectionWithCodeBlock(text, '## Post-Work Verification');
     if (!postMatch) return null;
 
     const intro =
       'After completing any code changes, run the following commands to ensure code quality:';
-    const content = postMatch[0].replace('## Post-Work Verification', '').trim();
+    const content = postMatch.replace('## Post-Work Verification', '').trim();
     return `## Post-Work Verification
 
 ${intro}

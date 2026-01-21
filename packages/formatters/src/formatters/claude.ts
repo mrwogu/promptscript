@@ -728,10 +728,10 @@ export class ClaudeFormatter extends BaseFormatter {
     if (!context) return null;
 
     const text = this.extractText(context.content);
-    const archMatch = /## Architecture[\s\S]*?```[\s\S]*?```/.exec(text);
+    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
     if (!archMatch) return null;
 
-    const content = archMatch[0].replace('## Architecture', '').trim();
+    const content = archMatch.replace('## Architecture', '').trim();
     return renderer.renderSection('Architecture', content) + '\n';
   }
 
@@ -849,9 +849,9 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (knowledge) {
       const text = this.extractText(knowledge.content);
-      const match = /## Development Commands[\s\S]*?```[\s\S]*?```/.exec(text);
+      const match = this.extractSectionWithCodeBlock(text, '## Development Commands');
       if (match) {
-        const devCmds = match[0].replace('## Development Commands', '').trim();
+        const devCmds = match.replace('## Development Commands', '').trim();
         content += '\n\n' + devCmds;
       }
     }
@@ -864,10 +864,10 @@ export class ClaudeFormatter extends BaseFormatter {
     if (!knowledge) return null;
 
     const text = this.extractText(knowledge.content);
-    const match = /## Post-Work Verification[\s\S]*?```[\s\S]*?```/.exec(text);
+    const match = this.extractSectionWithCodeBlock(text, '## Post-Work Verification');
     if (!match) return null;
 
-    const content = match[0].replace('## Post-Work Verification', '').trim();
+    const content = match.replace('## Post-Work Verification', '').trim();
     return renderer.renderSection('Post-Work Verification', content) + '\n';
   }
 

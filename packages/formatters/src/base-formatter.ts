@@ -131,4 +131,28 @@ export abstract class BaseFormatter implements Formatter {
     }
     return '';
   }
+
+  /**
+   * Safe extraction of a section that contains a header + content + code block + content
+   * Avoids ReDoS by using string search instead of backtracking regex.
+   * Matches pattern: Header ... ``` ... ```
+   */
+  protected extractSectionWithCodeBlock(text: string, header: string): string | null {
+    const headerIndex = text.indexOf(header);
+    if (headerIndex === -1) return null;
+
+    // Start searching after the header
+    const offset = headerIndex + header.length;
+
+    const startCodeBlock = text.indexOf('```', offset);
+    if (startCodeBlock === -1) return null;
+
+    const endCodeBlock = text.indexOf('```', startCodeBlock + 3);
+    if (endCodeBlock === -1) return null;
+
+    // Include the closing backticks (length 3)
+    const endPos = endCodeBlock + 3;
+
+    return text.substring(headerIndex, endPos);
+  }
 }
