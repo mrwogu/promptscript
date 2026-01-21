@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha.0] - 2026-01-22
+
 ### Added
 
 🎉 **PromptScript Language Implementation** - A language for standardizing AI instructions across organizations.
@@ -181,5 +183,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeDoc for automated API documentation
 - MkDocs documentation site with versioning (mike)
 - GitHub Actions CI/CD pipeline
-
-[Unreleased]: https://github.com/mrwogu/promptscript/compare/v0.0.0...HEAD

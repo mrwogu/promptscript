@@ -50,13 +50,11 @@
     "projects": ["cli"],
     "changelog": {
       "projectChangelogs": false,
-      "workspaceChangelog": {
-        "file": "CHANGELOG.md",
-        "createRelease": "github"
-      }
+      "workspaceChangelog": false
     },
     "git": {
       "commit": true,
+      "commitMessage": "chore(release): {version}",
       "tag": true,
       "push": true
     }

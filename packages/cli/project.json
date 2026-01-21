@@ -5,9 +5,12 @@
   "projectType": "library",
   "release": {
     "version": {
-      "manifestRootsToUpdate": ["dist/{projectRoot}"],
-      "currentVersionResolver": "git-tag",
-      "fallbackCurrentVersionResolver": "disk"
+      "generator": "@nx/js:release-version",
+      "generatorOptions": {
+        "packageRoot": "{projectRoot}",
+        "currentVersionResolver": "git-tag",
+        "fallbackCurrentVersionResolver": "disk"
+      }
     }
   },
   "tags": ["scope:cli", "type:app"],
@@ -18,9 +21,10 @@
       "options": {
         "commands": [
           "nx run cli:bundle",
-          "mv dist/packages/cli/package.publish.json dist/packages/cli/package.json"
+          "node -e \"const pkg = require('./packages/cli/package.json'); const pub = require('./packages/cli/package.publish.json'); pub.version = pkg.version; require('fs').writeFileSync('./dist/packages/cli/package.json', JSON.stringify(pub, null, 2));\""
         ],
-        "parallel": false
+        "parallel": false,
+        "cwd": "{workspaceRoot}"
       },
       "dependsOn": ["^build"]
     },

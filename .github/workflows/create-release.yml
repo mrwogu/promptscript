@@ -7,6 +7,11 @@ on:
         description: 'Version to release (e.g., 1.0.0, 1.0.0-alpha.1)'
         required: true
         type: string
+      first_release:
+        description: 'Is this the first release?'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   create-release:
@@ -40,8 +45,14 @@ jobs:
       - name: Create Release
         env:
           RELEASE_VERSION: ${{ inputs.version }}
+          FIRST_RELEASE: ${{ inputs.first_release }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm nx release "$RELEASE_VERSION"
+        run: |
+          if [ "$FIRST_RELEASE" = "true" ]; then
+            pnpm nx release "$RELEASE_VERSION" --first-release
+          else
+            pnpm nx release "$RELEASE_VERSION"
+          fi
 
       - name: Build CLI
         run: pnpm nx build cli --skip-nx-cache
