@@ -53,6 +53,14 @@
       "options": {
         "packageRoot": "dist/{projectRoot}"
       }
+    },
+    "analyze-bundle": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "test -n \"$CODECOV_TOKEN\" && npx @codecov/bundle-analyzer dist/packages/cli --bundle-name=promptscript-cli --upload-token=$CODECOV_TOKEN || echo 'Skipping bundle analysis (CODECOV_TOKEN not set)'",
+        "cwd": "{workspaceRoot}"
+      },
+      "dependsOn": ["build"]
     }
   }
 }

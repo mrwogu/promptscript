@@ -72,6 +72,12 @@ jobs:
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 
+      - name: Analyze CLI bundle
+        if: matrix.node-version == '25.x'
+        run: pnpm nx run cli:analyze-bundle
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Find unused code (Knip)
         run: npx knip -W 'packages/*'
         if: matrix.node-version == '25.x'

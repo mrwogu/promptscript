@@ -27,6 +27,7 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
+    "@codecov/bundle-analyzer": "^1.9.1",
     "memfs": "^4.56.4"
   }
 }
