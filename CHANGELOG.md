@@ -82,9 +82,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nx monorepo with pnpm workspaces
 - TypeScript strict mode with 100% type coverage
+- Pure ESM packages with NodeNext module resolution
 - Comprehensive test suite (Vitest)
 - ESLint and Prettier
-- MkDocs documentation site with tabbed layouts
+- Husky pre-commit hooks (format, lint, schema validation)
+- TypeDoc for automated API documentation
+- MkDocs documentation site with versioning support (mike)
 - GitHub Actions CI/CD pipeline
 - Code coverage tracking
 
@@ -169,9 +172,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nx monorepo with pnpm workspaces
 - TypeScript strict mode
+- Pure ESM packages with NodeNext module resolution
 - Comprehensive test suite with Vitest
 - ESLint and Prettier for code quality
-- MkDocs documentation site with tabbed layouts
+- Husky pre-commit hooks
+- TypeDoc for automated API documentation
+- MkDocs documentation site with versioning (mike)
 - GitHub Actions CI/CD pipeline
 
 [Unreleased]: https://github.com/mrwogu/promptscript/compare/v0.0.0...HEAD
