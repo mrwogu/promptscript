@@ -306,7 +306,7 @@ function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): st
       : '  # frameworks: []';
 
   // Get PromptScript version for syntax field
-  const syntaxVersion = getPackageVersion(__dirname);
+  const syntaxVersion = getPackageVersion(__dirname, './package.json');
 
   return `# Project Configuration
 # Edit this file to customize AI instructions for your project

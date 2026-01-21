@@ -20,7 +20,7 @@ const program = new Command();
 program
   .name('prs')
   .description('PromptScript CLI - Standardize AI instructions')
-  .version(getPackageVersion(__dirname))
+  .version(getPackageVersion(__dirname, './package.json'))
   .option('--verbose', 'Enable verbose output')
   .option('--quiet', 'Suppress non-error output')
   .hook('preAction', (thisCommand) => {

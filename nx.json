@@ -47,6 +47,18 @@
     }
   },
   "release": {
-    "projects": ["cli"]
+    "projects": ["cli"],
+    "changelog": {
+      "projectChangelogs": false,
+      "workspaceChangelog": {
+        "file": "CHANGELOG.md",
+        "createRelease": "github"
+      }
+    },
+    "git": {
+      "commit": true,
+      "tag": true,
+      "push": true
+    }
   }
 }

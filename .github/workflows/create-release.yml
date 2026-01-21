@@ -1,22 +1,29 @@
-name: Release
+name: Create Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0, 1.0.0-alpha.1)'
+        required: true
+        type: string
 
 jobs:
-  release:
-    # Skip if tag was created by create-release workflow (it publishes directly)
-    if: github.actor != 'github-actions[bot]'
+  create-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - uses: pnpm/action-setup@v4
         with:
@@ -29,6 +36,12 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Create Release
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm nx release "$RELEASE_VERSION"
 
       - name: Build CLI
         run: pnpm nx build cli --skip-nx-cache
