@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parse, parseOrThrow } from '../parse.js';
+import { parse, parseOrThrow, parseFile, parseFileOrThrow } from '../parse.js';
 import { ParseError } from '@promptscript/core';
+import { visitor } from '../grammar/visitor.js';
 
 describe('parse coverage - error paths', () => {
   describe('tolerant mode', () => {
@@ -796,5 +797,147 @@ describe('visitor coverage - edge cases', () => {
         expect(configBlock.content.properties['mode']).toBe('production');
       }
     });
+  });
+
+  describe('empty array coverage', () => {
+    it('should parse empty arrays correctly', () => {
+      const source = `
+        @meta { id: "test" }
+        @config {
+          items: []
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['items']).toEqual([]);
+      }
+    });
+
+    it('should parse empty array as meta field', () => {
+      const source = `
+        @meta {
+          id: "test"
+          tags: []
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.meta?.fields?.['tags']).toEqual([]);
+    });
+  });
+
+  describe('visitor setFilename direct coverage', () => {
+    it('should set filename via setFilename method', () => {
+      visitor.setFilename('direct-set-file.prs');
+      const source = '@meta { id: "test" }';
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      // Reset to avoid affecting other tests
+      visitor.setFilename('<unknown>');
+    });
+  });
+
+  describe('TextBlock as value with interpolation', () => {
+    it('should interpolate env vars in TextBlock used as field value', () => {
+      process.env['VALUE_TEXT_BLOCK_VAR'] = 'interpolated-in-value';
+      const source = `
+        @meta { id: "test" }
+        @config {
+          description: """
+          Content with \${VALUE_TEXT_BLOCK_VAR} inside
+          """
+        }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        const desc = configBlock.content.properties['description'];
+        if (
+          typeof desc === 'object' &&
+          desc !== null &&
+          'type' in desc &&
+          desc.type === 'TextContent'
+        ) {
+          expect(desc.value).toContain('interpolated-in-value');
+        }
+      }
+      delete process.env['VALUE_TEXT_BLOCK_VAR'];
+    });
+  });
+});
+
+describe('parseFile coverage', () => {
+  it('should handle file not found error', () => {
+    const result = parseFile('/nonexistent/path/to/file.prs');
+
+    expect(result.ast).toBeNull();
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors[0]?.message).toContain('Failed to read file');
+  });
+});
+
+describe('visitor edge cases coverage', () => {
+  describe('empty meta block', () => {
+    it('should handle meta block with no fields', () => {
+      // Meta block without any fields - covers ctx.field being falsy
+      const source = `
+        @meta {}
+        @identity {
+          """
+          Content
+          """
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.meta?.fields).toEqual({});
+    });
+  });
+
+  describe('empty nested objects', () => {
+    it('should handle empty nested object - covers object ctx.field being falsy', () => {
+      const source = `
+        @meta { id: "test" }
+        @config {
+          nested: {}
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['nested']).toEqual({});
+      }
+    });
+  });
+
+  describe('program without filename parameter', () => {
+    it('should use default filename when program called without filename', () => {
+      // The visitor.program is called internally by parse()
+      // When filename is undefined/null, the if(filename) branch is not taken
+      const source = '@meta { id: "test" }';
+
+      // Parse without filename option to not set filename in visitor
+      visitor.setFilename('<unknown>');
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.loc.file).toBe('<unknown>');
+    });
+  });
+});
+
+describe('parseFileOrThrow coverage', () => {
+  it('should throw when file does not exist', () => {
+    expect(() => parseFileOrThrow('/nonexistent/path/to/file.prs')).toThrow(ParseError);
   });
 });

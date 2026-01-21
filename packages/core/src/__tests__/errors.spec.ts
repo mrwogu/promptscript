@@ -159,6 +159,16 @@ describe('ValidationError', () => {
       expect(formatted).toContain('test.prs:10:5');
       expect(formatted).toContain('suggestion: Add the required field');
     });
+
+    it('should format without suggestion', () => {
+      const error = new ValidationError('Missing field', 'required-field', {
+        location: mockLocation,
+      });
+      const formatted = error.format();
+      expect(formatted).toContain('Missing field');
+      expect(formatted).toContain('test.prs:10:5');
+      expect(formatted).not.toContain('suggestion:');
+    });
   });
 });
 

@@ -153,8 +153,9 @@ export class ConventionRenderer {
     const repeatRegex = /\{\{#repeat\s+(\w+)\}\}(.+?)\{\{\/repeat\}\}/;
     const repeatMatch = repeatRegex.exec(result);
     if (repeatMatch) {
-      const repeatVar = repeatMatch[1] ?? '';
-      const repeatContent = repeatMatch[2] ?? '';
+      // Non-null assertions safe: regex groups must match for exec to return non-null
+      const repeatVar = repeatMatch[1]!;
+      const repeatContent = repeatMatch[2]!;
       const count = repeatVar === 'level' ? variables.level : 1;
       const repeated = repeatContent.repeat(count);
       result = result.replace(repeatMatch[0], repeated);

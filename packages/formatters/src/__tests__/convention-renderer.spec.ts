@@ -341,4 +341,44 @@ describe('Custom conventions', () => {
     // Should return content as-is since it's not XML convention
     expect(result).toBe('> Quote\ncontent');
   });
+
+  it('should handle PascalCase with trailing delimiter', () => {
+    const customConvention = {
+      name: 'custom',
+      section: {
+        start: '<{{name}}>',
+        end: '</{{name}}>',
+        nameTransform: 'PascalCase' as const,
+      },
+    };
+    const renderer = new ConventionRenderer(customConvention);
+    // Input with trailing underscore - should become just "Test"
+    const result = renderer.renderSection('test_', 'content');
+    expect(result).toContain('<Test>');
+  });
+
+  it('should handle camelCase with trailing delimiter', () => {
+    const customConvention = {
+      name: 'custom',
+      section: {
+        start: '<{{name}}>',
+        end: '</{{name}}>',
+        nameTransform: 'camelCase' as const,
+      },
+    };
+    const renderer = new ConventionRenderer(customConvention);
+    // Input with trailing hyphen - should become just "test"
+    const result = renderer.renderSection('test-', 'content');
+    expect(result).toContain('<test>');
+  });
+
+  it('should handle XML indentation with empty lines', () => {
+    const renderer = new ConventionRenderer('xml');
+    const contentWithEmptyLines = 'line1\n\nline2';
+    const result = renderer.renderSection('section', contentWithEmptyLines, 1);
+    // Empty lines should not get indented
+    expect(result).toContain('  line1');
+    expect(result).toContain('  line2');
+    expect(result).toMatch(/line1\n\n/); // Empty line preserved without indent
+  });
 });

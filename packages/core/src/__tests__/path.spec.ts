@@ -88,6 +88,26 @@ describe('parsePath', () => {
         isRelative: true,
       });
     });
+
+    it('should parse Windows-style relative path with backslash', () => {
+      const result = parsePath('.\\local\\file');
+      expect(result).toEqual({
+        namespace: undefined,
+        segments: ['local', 'file'],
+        version: undefined,
+        isRelative: true,
+      });
+    });
+
+    it('should parse Windows-style parent relative path with backslash', () => {
+      const result = parsePath('..\\parent\\file');
+      expect(result).toEqual({
+        namespace: undefined,
+        segments: ['parent', 'file'],
+        version: undefined,
+        isRelative: true,
+      });
+    });
   });
 });
 
@@ -111,6 +131,11 @@ describe('isRelativePath', () => {
   it('should return true for relative paths', () => {
     expect(isRelativePath('./local')).toBe(true);
     expect(isRelativePath('../parent')).toBe(true);
+  });
+
+  it('should return true for Windows-style relative paths', () => {
+    expect(isRelativePath('.\\local')).toBe(true);
+    expect(isRelativePath('..\\parent')).toBe(true);
   });
 
   it('should return false for absolute paths', () => {

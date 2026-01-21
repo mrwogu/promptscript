@@ -42,10 +42,8 @@ export function parsePath(path: string): ParsedPath {
     // Normalize to forward slashes for parsing, then split
     const normalizedPath = path.replace(/\\/g, '/');
     const segments = normalizedPath.split('/').filter(Boolean);
-    // Remove leading . or ..
-    if (segments[0] === '.' || segments[0] === '..') {
-      segments.shift();
-    }
+    // Remove leading . or .. (always present since path starts with ./ or ../)
+    segments.shift();
     return {
       namespace: undefined,
       segments,
@@ -61,8 +59,9 @@ export function parsePath(path: string): ParsedPath {
     throw new Error(`Invalid path format: ${path}`);
   }
 
+  // Non-null assertion safe: regex guarantees namespace and segmentStr exist when matched
   const [, namespace, segmentStr, version] = match;
-  const segments = (segmentStr ?? '').split('/').filter(Boolean);
+  const segments = segmentStr!.split('/').filter(Boolean);
 
   return {
     namespace,

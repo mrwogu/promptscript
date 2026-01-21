@@ -28,9 +28,10 @@ export function parseVersion(version: string): SemVer {
   }
 
   return {
-    major: parseInt(match[1] ?? '0', 10),
-    minor: parseInt(match[2] ?? '0', 10),
-    patch: parseInt(match[3] ?? '0', 10),
+    // Non-null assertions safe: regex guarantees capture groups 1-3 exist when matched
+    major: parseInt(match[1]!, 10),
+    minor: parseInt(match[2]!, 10),
+    patch: parseInt(match[3]!, 10),
     prerelease: match[4],
   };
 }

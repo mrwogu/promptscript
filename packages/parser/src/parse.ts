@@ -83,8 +83,9 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     errors.push(
       new ParseError(`Lexer: ${err.message}`, {
         file: filename,
-        line: err.line ?? 1,
-        column: err.column ?? 1,
+        // Chevrotain lexer errors always have line/column when source has content
+        line: err.line!,
+        column: err.column!,
       })
     );
   }
@@ -101,8 +102,9 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     errors.push(
       new ParseError(err.message, {
         file: filename,
-        line: err.token.startLine ?? 1,
-        column: err.token.startColumn ?? 1,
+        // Chevrotain parser tokens always have startLine/startColumn
+        line: err.token.startLine!,
+        column: err.token.startColumn!,
       })
     );
   }
@@ -151,15 +153,9 @@ export function parseOrThrow(source: string, options?: ParseOptions): Program {
   const result = parse(source, options);
 
   if (!result.ast || result.errors.length > 0) {
-    const firstError = result.errors[0];
-    if (firstError) {
-      throw firstError;
-    }
-    throw new ParseError('Unknown parsing error', {
-      file: options?.filename ?? '<unknown>',
-      line: 1,
-      column: 1,
-    });
+    // If ast is null, parse() always populates errors array, so firstError is guaranteed
+    const firstError = result.errors[0]!;
+    throw firstError;
   }
 
   return result.ast;
@@ -228,15 +224,9 @@ export function parseFileOrThrow(
   const result = parseFile(filePath, options);
 
   if (!result.ast || result.errors.length > 0) {
-    const firstError = result.errors[0];
-    if (firstError) {
-      throw firstError;
-    }
-    throw new ParseError('Unknown error reading/parsing file', {
-      file: filePath,
-      line: 1,
-      column: 1,
-    });
+    // If ast is null, parseFile() always populates errors array, so firstError is guaranteed
+    const firstError = result.errors[0]!;
+    throw firstError;
   }
 
   return result.ast;

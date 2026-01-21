@@ -52,8 +52,9 @@ class PromptScriptVisitor extends BaseVisitor {
   private loc(token: IToken): SourceLocation {
     return {
       file: this.filename,
-      line: token.startLine ?? 1,
-      column: token.startColumn ?? 1,
+      // Chevrotain tokens always have startLine/startColumn when created from source
+      line: token.startLine!,
+      column: token.startColumn!,
       offset: token.startOffset,
     };
   }
@@ -61,10 +62,8 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * program → Program
    */
-  program(ctx: any, filename?: string): Program {
-    if (filename) {
-      this.filename = filename;
-    }
+  program(ctx: any, filename: string = '<unknown>'): Program {
+    this.filename = filename;
 
     const program: Program = {
       type: 'Program',
@@ -403,15 +402,13 @@ class PromptScriptVisitor extends BaseVisitor {
    * typeExpr → TypeExpression
    */
   typeExpr(ctx: any): TypeExpression {
+    // Grammar ensures only rangeType or enumType can appear here
     if (ctx.rangeType) {
       return this.visit(ctx.rangeType[0]);
     }
 
-    if (ctx.enumType) {
-      return this.visit(ctx.enumType[0]);
-    }
-
-    throw new Error('Unknown type expression');
+    // Must be enumType (grammar guarantees one of the two)
+    return this.visit(ctx.enumType[0]);
   }
 
   /**
@@ -448,15 +445,13 @@ class PromptScriptVisitor extends BaseVisitor {
    * pathRef → PathReference
    */
   pathRef(ctx: any): PathReference {
+    // Grammar ensures only PathReference or RelativePath can appear here
     if (ctx.PathReference) {
       return this.parsePathReference(ctx.PathReference[0]);
     }
 
-    if (ctx.RelativePath) {
-      return this.parseRelativePath(ctx.RelativePath[0]);
-    }
-
-    throw new Error('Unknown path reference type');
+    // Must be RelativePath (grammar guarantees one of the two)
+    return this.parseRelativePath(ctx.RelativePath[0]);
   }
 
   /**

@@ -66,6 +66,10 @@ class TestFormatter extends BaseFormatter {
   public testValueToString(value: Value): string {
     return this.valueToString(value);
   }
+
+  public testExtractSectionWithCodeBlock(text: string, header: string): string | null {
+    return this.extractSectionWithCodeBlock(text, header);
+  }
 }
 
 describe('BaseFormatter', () => {
@@ -429,6 +433,32 @@ describe('BaseFormatter', () => {
     it('should return empty for objects without type property', () => {
       const plainObject = { key: 'value' };
       expect(formatter.testValueToString(plainObject as unknown as Value)).toBe('');
+    });
+  });
+
+  describe('extractSectionWithCodeBlock', () => {
+    it('should extract section with header and code block', () => {
+      const text = '## Header\n\nSome content\n\n```js\ncode here\n```\n\nMore content';
+      const result = formatter.testExtractSectionWithCodeBlock(text, '## Header');
+      expect(result).toBe('## Header\n\nSome content\n\n```js\ncode here\n```');
+    });
+
+    it('should return null when header not found', () => {
+      const text = '## Other\n\n```js\ncode\n```';
+      const result = formatter.testExtractSectionWithCodeBlock(text, '## Header');
+      expect(result).toBeNull();
+    });
+
+    it('should return null when no opening code block found', () => {
+      const text = '## Header\n\nJust text without code block';
+      const result = formatter.testExtractSectionWithCodeBlock(text, '## Header');
+      expect(result).toBeNull();
+    });
+
+    it('should return null when no closing code block found', () => {
+      const text = '## Header\n\n```js\nunclosed code block';
+      const result = formatter.testExtractSectionWithCodeBlock(text, '## Header');
+      expect(result).toBeNull();
     });
   });
 });
