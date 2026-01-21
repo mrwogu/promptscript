@@ -152,14 +152,13 @@ Write once, compile to native formats for the industry's leading AI tools.
     git commit -m "chore: setup PromptScript infrastructure"
     ```
 
-## 📦 Monorepo Packages
+## 📦 Installation
 
-| Package                                     | Description                   | Version                                                     |
-| :------------------------------------------ | :---------------------------- | :---------------------------------------------------------- |
-| [@promptscript/cli](packages/cli)           | Command-line compiler & tools | ![npm](https://img.shields.io/npm/v/@promptscript/cli)      |
-| [@promptscript/core](packages/core)         | Runtime types & utilities     | ![npm](https://img.shields.io/npm/v/@promptscript/core)     |
-| [@promptscript/parser](packages/parser)     | Language parser (Chevrotain)  | ![npm](https://img.shields.io/npm/v/@promptscript/parser)   |
-| [@promptscript/compiler](packages/compiler) | Optimization pipeline         | ![npm](https://img.shields.io/npm/v/@promptscript/compiler) |
+```bash
+npm install -g @promptscript/cli
+```
+
+The CLI bundles all required functionality. Internal packages (core, parser, compiler, etc.) are not published separately.
 
 ## 🗺️ Roadmap
 

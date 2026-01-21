@@ -4,23 +4,23 @@
 
 Command-line interface for PromptScript. Compile, validate, and manage AI instructions at enterprise scale.
 
-## 🏗️ Ecosystem
+## 🏗️ Architecture
+
+The CLI bundles all internal packages into a single distributable:
 
 ```text
-@promptscript/cli  ⭐
+@promptscript/cli (published)
 │
-└─► @promptscript/compiler
-    │
-    ├─► @promptscript/parser ────┐
-    ├─► @promptscript/resolver ──┤
-    ├─► @promptscript/validator ─┤
-    └─► @promptscript/formatters ┘
-             │
-             ▼
-    @promptscript/core
+└─► bundles:
+    ├─► compiler
+    │   ├─► parser
+    │   ├─► resolver
+    │   ├─► validator
+    │   └─► formatters
+    └─► core
 ```
 
-See [all packages](https://github.com/mrwogu/promptscript#packages) in the PromptScript monorepo.
+See the [PromptScript monorepo](https://github.com/mrwogu/promptscript) for development details.
 
 ## Installation
 

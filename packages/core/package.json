@@ -1,13 +1,11 @@
 {
   "name": "@promptscript/core",
   "version": "0.0.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/mrwogu/promptscript.git",
     "directory": "packages/core"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "type": "module",
   "main": "./src/index.ts",

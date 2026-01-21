@@ -47,10 +47,6 @@
     }
   },
   "release": {
-    "projects": ["cli", "core", "parser", "compiler"],
-    "version": {
-      "preVersionCommand": "pnpm dlx nx run-many -t build",
-      "updateDependents": "auto"
-    }
+    "projects": ["cli"]
   }
 }

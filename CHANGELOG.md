@@ -41,14 +41,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Output conventions: `markdown` (default) and `xml`
 - Path-specific rule generation with glob patterns
 
-#### Core APIs
+#### Internal Packages (bundled into CLI)
 
-- `@promptscript/core` - AST types, error classes, utility functions
-- `@promptscript/parser` - PromptScript parser with recovery support (`parseFile()` API)
-- `@promptscript/resolver` - Resolution for `@inherit`, `@use`, `@extend` with registry support
-- `@promptscript/validator` - Semantic validation with custom rule support
-- `@promptscript/compiler` - Compilation pipeline with watch mode
-- `@promptscript/formatters` - Multiple formatter implementations with standalone functions
+- `core` - AST types, error classes, utility functions
+- `parser` - PromptScript parser with recovery support
+- `resolver` - Resolution for `@inherit`, `@use`, `@extend` with registry support
+- `validator` - Semantic validation with custom rule support
+- `compiler` - Compilation pipeline with watch mode
+- `formatters` - Multiple formatter implementations
 
 #### CLI Features
 
@@ -91,9 +91,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD pipeline
 - Code coverage tracking
 
-### Packages (Detailed)
+### Internal Architecture
 
-#### @promptscript/core
+> All packages below are internal and bundled into `@promptscript/cli`. They are not published separately.
+
+#### core
 
 - AST types and interfaces
 - Error classes (`PSError`, `ParseError`, `ResolveError`, `ValidationError`)
@@ -101,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Config types: `input`, `watch`, `output`, `registry` with auth support
 - Utility exports: `formatPath()`, `diagnostics`, constants
 
-#### @promptscript/parser
+#### parser
 
 - Chevrotain-based lexer and parser
 - CST to AST transformation
@@ -109,14 +111,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `parseFile()` function with recovery option
 - Error recovery for better diagnostics
 
-#### @promptscript/resolver
+#### resolver
 
 - `@inherit`, `@use`, `@extend` resolution
 - File loader with registry support
 - `RegistryInterface` for custom registry implementations
 - Standalone `resolve()` function for programmatic use
 
-#### @promptscript/validator
+#### validator
 
 - Required fields validation
 - Semantic version format checking
@@ -125,14 +127,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `removeRule()` API for dynamic rule management
 - `formatters` export for formatting validation results
 
-#### @promptscript/compiler
+#### compiler
 
 - Resolve → Validate → Format pipeline
 - Watch mode with chokidar for file monitoring
 - Dry-run support
 - Standalone `compile()` function
 
-#### @promptscript/formatters
+#### formatters
 
 - **GitHub Copilot** - `simple`, `multifile`, `full` versions with agents support
 - **Claude Code** - `simple`, `multifile`, `full` versions
@@ -142,7 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Base formatter class for custom implementations
 - Standalone `format()` functions for each formatter
 
-#### @promptscript/cli
+#### cli (published)
 
 - `prs init` - Initialize project with auto-detection
   - Tech stack detection (TypeScript, JavaScript, Python, Rust, Go, Java, Ruby, PHP, C#)
