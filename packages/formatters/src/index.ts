@@ -1,11 +1,20 @@
+/**
+ * Output formatters for PromptScript.
+ *
+ * Generates configuration files for various AI tools (e.g., JSON, YAML, etc.)
+ * from the compiled PromptScript AST.
+ *
+ * @packageDocumentation
+ */
+
 // Types
-export type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types';
+export type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types.js';
 
 // Base class
-export { BaseFormatter } from './base-formatter';
+export { BaseFormatter } from './base-formatter.js';
 
 // Registry
-export { FormatterRegistry } from './registry';
+export { FormatterRegistry } from './registry.js';
 
 // Standalone functions
 export {
@@ -15,15 +24,15 @@ export {
   hasFormatter,
   listFormatters,
   unregisterFormatter,
-} from './standalone';
-export type { StandaloneFormatOptions } from './standalone';
+} from './standalone.js';
+export type { StandaloneFormatOptions } from './standalone.js';
 
 // Convention renderer
 export {
   ConventionRenderer,
   createConventionRenderer,
   conventionRenderers,
-} from './convention-renderer';
+} from './convention-renderer.js';
 
 // Section registry for parity testing
 export {
@@ -32,8 +41,8 @@ export {
   findMissingSections,
   getExpectedSections,
   normalizeSectionName,
-} from './section-registry';
-export type { SectionInfo } from './section-registry';
+} from './section-registry.js';
+export type { SectionInfo } from './section-registry.js';
 
 // Parity Matrix for formatter consistency testing
 export {
@@ -46,14 +55,14 @@ export {
   validateSectionContent,
   getSourceBlocks,
   analyzeFormatterOutput,
-} from './parity-matrix';
+} from './parity-matrix.js';
 export type {
   FormatterName,
   SourceBlockConfig,
   SectionSpec,
   ExtractionRule,
   ParityReport,
-} from './parity-matrix';
+} from './parity-matrix.js';
 
 // Feature Coverage Matrix for tool capabilities
 export {
@@ -66,14 +75,14 @@ export {
   getToolComparison,
   identifyFeatureGaps,
   generateFeatureMatrixReport,
-} from './feature-matrix';
+} from './feature-matrix.js';
 export type {
   ToolName,
   FeatureStatus,
   FeatureSpec,
   FeatureCategory,
   FeatureCoverageSummary,
-} from './feature-matrix';
+} from './feature-matrix.js';
 
 // Built-in formatters
 export {
@@ -81,28 +90,28 @@ export {
   ClaudeFormatter,
   CursorFormatter,
   AntigravityFormatter,
-} from './formatters';
+} from './formatters/index.js';
 
 // GitHub version support
-export { GITHUB_VERSIONS } from './formatters/github';
+export { GITHUB_VERSIONS } from './formatters/github.js';
 
 // Claude version support
-export { CLAUDE_VERSIONS } from './formatters/claude';
+export { CLAUDE_VERSIONS } from './formatters/claude.js';
 
 // Cursor version support
-export { CURSOR_VERSIONS } from './formatters/cursor';
-export type { CursorVersion } from './formatters/cursor';
+export { CURSOR_VERSIONS } from './formatters/cursor.js';
+export type { CursorVersion } from './formatters/cursor.js';
 
 // Antigravity version support
-export { ANTIGRAVITY_VERSIONS } from './formatters/antigravity';
-export type { AntigravityVersion, ActivationType } from './formatters/antigravity';
+export { ANTIGRAVITY_VERSIONS } from './formatters/antigravity.js';
+export type { AntigravityVersion, ActivationType } from './formatters/antigravity.js';
 
 // Register built-in formatters
-import { FormatterRegistry } from './registry';
-import { GitHubFormatter } from './formatters/github';
-import { ClaudeFormatter } from './formatters/claude';
-import { CursorFormatter } from './formatters/cursor';
-import { AntigravityFormatter } from './formatters/antigravity';
+import { FormatterRegistry } from './registry.js';
+import { GitHubFormatter } from './formatters/github.js';
+import { ClaudeFormatter } from './formatters/claude.js';
+import { CursorFormatter } from './formatters/cursor.js';
+import { AntigravityFormatter } from './formatters/antigravity.js';
 
 FormatterRegistry.register('github', () => new GitHubFormatter());
 FormatterRegistry.register('claude', () => new ClaudeFormatter());

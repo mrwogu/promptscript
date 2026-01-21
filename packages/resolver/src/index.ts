@@ -1,10 +1,19 @@
+/**
+ * Inheritance and import resolution for PromptScript files.
+ *
+ * Handles file loading, dependency resolution, and merging of inherited properties
+ * to produce a fully resolved AST.
+ *
+ * @packageDocumentation
+ */
+
 // Main resolver
-export { Resolver, createResolver } from './resolver';
-export type { ResolverOptions, ResolvedAST } from './resolver';
+export { Resolver, createResolver } from './resolver.js';
+export type { ResolverOptions, ResolvedAST } from './resolver.js';
 
 // File loader
-export { FileLoader } from './loader';
-export type { LoaderOptions } from './loader';
+export { FileLoader } from './loader.js';
+export type { LoaderOptions } from './loader.js';
 
 // Registry implementations
 export {
@@ -18,10 +27,10 @@ export {
   type FileSystemRegistryOptions,
   type HttpRegistryOptions,
   type CompositeRegistryOptions,
-} from './registry';
+} from './registry.js';
 
 // Inheritance resolution
-export { resolveInheritance } from './inheritance';
+export { resolveInheritance } from './inheritance.js';
 
 // Import resolution
 export {
@@ -30,14 +39,14 @@ export {
   getImportAlias,
   getOriginalBlockName,
   IMPORT_MARKER_PREFIX,
-} from './imports';
+} from './imports.js';
 
 // Extension resolution
-export { applyExtends } from './extensions';
+export { applyExtends } from './extensions.js';
 
 // Standalone resolve function
-import type { ResolvedAST, ResolverOptions } from './resolver';
-import { createResolver } from './resolver';
+import type { ResolvedAST, ResolverOptions } from './resolver.js';
+import { createResolver } from './resolver.js';
 
 /**
  * Options for standalone resolve function.

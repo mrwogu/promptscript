@@ -1,6 +1,6 @@
 import type { Block, BlockContent, Program, Value } from '@promptscript/core';
-import { ConventionRenderer } from './convention-renderer';
-import type { FormatOptions, Formatter, FormatterOutput } from './types';
+import { ConventionRenderer } from './convention-renderer.js';
+import type { FormatOptions, Formatter, FormatterOutput } from './types.js';
 
 /**
  * Abstract base formatter with common helper methods.

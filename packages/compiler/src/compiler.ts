@@ -13,7 +13,7 @@ import type {
   TargetConfig,
   WatchOptions,
   Watcher,
-} from './types';
+} from './types.js';
 
 /**
  * Internal representation of a loaded formatter with its config.
@@ -306,7 +306,7 @@ export class Compiler {
   private getFormatOptionsForTarget(
     _targetName: string,
     config?: TargetConfig
-  ): import('./types').FormatOptions {
+  ): import('./types.js').FormatOptions {
     const customConventions = this.options.customConventions;
 
     if (!config?.convention && !config?.version && !config?.output) {
@@ -314,7 +314,7 @@ export class Compiler {
     }
 
     const conventionName = config?.convention;
-    const options: import('./types').FormatOptions = {
+    const options: import('./types.js').FormatOptions = {
       outputPath: config?.output,
       version: config?.version,
     };

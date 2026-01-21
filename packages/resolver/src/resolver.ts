@@ -1,10 +1,10 @@
 import { parse } from '@promptscript/parser';
 import type { Program } from '@promptscript/core';
 import { ResolveError, CircularDependencyError, FileNotFoundError } from '@promptscript/core';
-import { FileLoader, type LoaderOptions } from './loader';
-import { resolveInheritance } from './inheritance';
-import { resolveUses } from './imports';
-import { applyExtends } from './extensions';
+import { FileLoader, type LoaderOptions } from './loader.js';
+import { resolveInheritance } from './inheritance.js';
+import { resolveUses } from './imports.js';
+import { applyExtends } from './extensions.js';
 
 /**
  * Options for the resolver.

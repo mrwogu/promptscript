@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { getPackageVersion } from '@promptscript/core';
-import { initCommand } from './commands/init';
-import { compileCommand } from './commands/compile';
-import { validateCommand } from './commands/validate';
-import { pullCommand } from './commands/pull';
-import { diffCommand } from './commands/diff';
-import { checkCommand } from './commands/check';
-import { setContext, LogLevel } from './output/console';
+import { initCommand } from './commands/init.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+import { compileCommand } from './commands/compile.js';
+import { validateCommand } from './commands/validate.js';
+import { pullCommand } from './commands/pull.js';
+import { diffCommand } from './commands/diff.js';
+import { checkCommand } from './commands/check.js';
+import { setContext, LogLevel } from './output/console.js';
 
 const program = new Command();
 
@@ -45,7 +51,7 @@ program
   .option('-i, --interactive', 'Force interactive mode')
   .option('-y, --yes', 'Skip prompts, use defaults')
   .option('-f, --force', 'Force reinitialize even if already initialized')
-  .action(initCommand);
+  .action((opts) => initCommand(opts));
 
 program
   .command('compile')

@@ -1,4 +1,4 @@
-import type { ValidationMessage, ValidationResult, Severity } from './types';
+import type { ValidationMessage, ValidationResult, Severity } from './types.js';
 
 /**
  * Options for formatting validation messages.

@@ -6,8 +6,8 @@ import type {
   ValidationMessage,
   Severity,
   RuleContext,
-} from './types';
-import { allRules } from './rules';
+} from './types.js';
+import { allRules } from './rules/index.js';
 
 /**
  * AST validator for PromptScript files.

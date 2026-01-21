@@ -10,7 +10,7 @@ import type {
   Value,
 } from '@promptscript/core';
 import { deepMerge, deepClone, isTextContent } from '@promptscript/core';
-import { IMPORT_MARKER_PREFIX } from './imports';
+import { IMPORT_MARKER_PREFIX } from './imports.js';
 
 /**
  * Apply all @extend blocks to resolve extensions.

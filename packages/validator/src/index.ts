@@ -1,9 +1,18 @@
+/**
+ * AST validation rules for PromptScript files.
+ *
+ * Ensures correctness of the PromptScript code by checking for semantic errors,
+ * required fields, and other constraints.
+ *
+ * @packageDocumentation
+ */
+
 import type { Program } from '@promptscript/core';
-import type { ValidateOptions, ValidationResult } from './types';
-import { createValidator } from './validator';
+import type { ValidateOptions, ValidationResult } from './types.js';
+import { createValidator } from './validator.js';
 
 // Validator
-export { Validator, createValidator } from './validator';
+export { Validator, createValidator } from './validator.js';
 
 // Types
 export type {
@@ -14,7 +23,7 @@ export type {
   ValidationRule,
   ValidatorConfig,
   ValidateOptions,
-} from './types';
+} from './types.js';
 
 // Rules
 export {
@@ -31,10 +40,10 @@ export {
   isValidPath,
   deprecated,
   emptyBlock,
-} from './rules';
+} from './rules/index.js';
 
 // Walker utilities
-export { walkText, walkBlocks, walkUses, hasContent } from './walker';
+export { walkText, walkBlocks, walkUses, hasContent } from './walker.js';
 
 // Formatting utilities
 export {
@@ -44,7 +53,7 @@ export {
   formatDiagnostic,
   formatDiagnostics,
   type FormatValidationOptions,
-} from './format';
+} from './format.js';
 
 /**
  * Validate an AST with a standalone function.

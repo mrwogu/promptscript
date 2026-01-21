@@ -1,6 +1,6 @@
 import type { Program } from '@promptscript/core';
-import { FormatterRegistry } from './registry';
-import type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types';
+import { FormatterRegistry } from './registry.js';
+import type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types.js';
 
 /**
  * Options for the standalone format function.

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
-import { PSLexer } from './lexer/lexer';
-import { parser } from './grammar/parser';
-import { visitor } from './grammar/visitor';
+import { PSLexer } from './lexer/lexer.js';
+import { parser } from './grammar/parser.js';
+import { visitor } from './grammar/visitor.js';
 import type { Program } from '@promptscript/core';
 import { ParseError } from '@promptscript/core';
 

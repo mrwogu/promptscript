@@ -1,5 +1,14 @@
+/**
+ * Pipeline orchestration for PromptScript compilation.
+ *
+ * This package coordinates the parsing, resolving, validating, and formatting
+ * steps to transform PromptScript into usable artifacts.
+ *
+ * @packageDocumentation
+ */
+
 // Compiler
-export { Compiler, createCompiler, compile } from './compiler';
+export { Compiler, createCompiler, compile } from './compiler.js';
 
 // Types
 export type {
@@ -15,7 +24,7 @@ export type {
   WatchCallback,
   WatchOptions,
   Watcher,
-} from './types';
+} from './types.js';
 
 // Export CompileOptions type
-export type { CompileOptions } from './compiler';
+export type { CompileOptions } from './compiler.js';

@@ -1,4 +1,4 @@
-import type { Formatter, FormatterFactory } from './types';
+import type { Formatter, FormatterFactory } from './types.js';
 
 /**
  * Registry for formatter implementations.
