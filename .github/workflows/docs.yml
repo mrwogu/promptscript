@@ -49,6 +49,11 @@ jobs:
       - name: Generate API documentation
         run: pnpm docs:generate
 
+      - name: Copy schema to docs
+        run: |
+          mkdir -p docs/schema
+          cp schema/config.json docs/schema/config.json
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:

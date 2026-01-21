@@ -119,7 +119,7 @@ if (isReservedWord('meta')) {
 
 ## API Reference
 
-See [API Documentation](https://mrwogu.github.io/promptscript/api/core/).
+See [API Documentation](https://getpromptscript.dev/latest/api-reference/core/src/README/).
 
 ## License
 

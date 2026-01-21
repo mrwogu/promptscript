@@ -1,0 +1,260 @@
+# PromptScript Roadmap
+
+> **Vision:** Make PromptScript the industry standard for AI context management—the Terraform of prompts.
+
+## 🎯 Current Focus
+
+### Web Playground (Now)
+
+**Goal:** Try PromptScript without installing anything.
+
+- [ ] **WASM-compiled parser/compiler**
+- [ ] **Interactive browser editor**
+  - Monaco editor integration
+  - Live preview of all output formats
+  - Share via URL
+- [ ] **Example gallery**
+
+---
+
+## 🔜 Next Up — Foundation & Ecosystem
+
+### 1. Platform Support Expansion
+
+**Goal:** Support all major AI coding assistants.
+
+| Tool               | Status     | Output Format                     | Priority |
+| ------------------ | ---------- | --------------------------------- | -------- |
+| GitHub Copilot     | ✅ Done    | `.github/copilot-instructions.md` | —        |
+| Claude Code        | ✅ Done    | `CLAUDE.md`                       | —        |
+| Cursor             | ✅ Done    | `.cursor/rules/*.mdc`             | —        |
+| Google Antigravity | ✅ Done    | `.agent/rules/*.md`               | —        |
+| **Windsurf**       | ⬜ Planned | `.windsurfrules`                  | High     |
+| **Aider**          | ⬜ Planned | `.aider.conf.yml`                 | High     |
+| **Continue**       | ⬜ Planned | `.continue/config.json`           | Medium   |
+| **Cline**          | ⬜ Planned | `.cline/cline_rules`              | Medium   |
+| **Zed**            | ⬜ Planned | `.zed/assistant.json`             | Medium   |
+| **JetBrains AI**   | ⬜ Planned | `.idea/ai-assistant.xml`          | Low      |
+
+### 2. CI/CD Integration
+
+**Goal:** Make it effortless to integrate PromptScript into existing workflows.
+
+- [ ] **GitHub Action (`promptscript/action`)**
+  - Reusable action for `prs validate` and `prs check`
+  - Support version selection via inputs
+  - Auto-comment on PRs with drift detection results
+  - **Usage:** `uses: promptscript/action@v1`
+
+- [ ] **Pre-commit hook**
+  - Auto-format and validate `.prs` files on commit
+  - Regenerate outputs if source changed
+
+- [ ] **GitLab CI template**
+- [ ] **Azure DevOps task**
+
+### 3. Developer Experience
+
+**Goal:** Improve internal development velocity and quality safeguards.
+
+- [ ] **Watch mode improvements**
+  - Incremental compilation (only changed files)
+  - Live reload in editors
+
+- [ ] **Better error messages**
+  - Actionable suggestions for common errors
+  - Links to documentation
+
+- [ ] **CLI enhancements**
+  - `prs migrate` — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
+  - `prs doctor` — Diagnose common configuration issues
+  - `prs upgrade` — Update syntax version with automatic migrations
+
+---
+
+## 🔮 Future — IDE Integration & Registry
+
+### 4. Language Server Protocol (LSP)
+
+**Goal:** World-class editing experience in any editor.
+
+- [ ] **`@promptscript/language-server` package**
+  - Real-time diagnostics (errors, warnings)
+  - Autocomplete for directives, sections, inherited values
+  - Jump-to-definition for `@inherit` and `@use` references
+  - Hover documentation
+  - Code actions (quick fixes)
+  - Rename refactoring
+
+### 5. VS Code Extension
+
+**Goal:** First-class support for the most popular editor.
+
+- [ ] **Syntax highlighting** for `.prs` files
+- [ ] **Snippets** for common patterns
+- [ ] **LSP integration** (bundled language server)
+- [ ] **Preview pane** — See compiled output side-by-side
+- [ ] **Command palette** — Compile, validate, migrate from VS Code
+- [ ] **Outline view** — Navigate sections easily
+
+### 6. Public Registry
+
+**Goal:** Enable sharing and reusing rule sets across organizations.
+
+- [ ] **Registry service** (`registry.getpromptscript.dev`)
+  - Publish packages: `prs publish @myorg/typescript-standards`
+  - Scoped packages: `@company/*`
+  - Versioning with semver
+  - README display and documentation
+
+- [ ] **CLI integration**
+  - `prs login` / `prs logout`
+  - `prs publish` / `prs unpublish`
+  - `prs search <query>`
+  - `prs info @scope/package`
+
+- [ ] **Curated starter packs**
+  - `@promptscript/typescript-strict`
+  - `@promptscript/security-basics`
+  - `@promptscript/python-best-practices`
+  - `@promptscript/react-patterns`
+
+---
+
+## 🏢 Future — Enterprise & Security
+
+### 7. Enterprise Features
+
+**Goal:** Make PromptScript production-ready for large organizations.
+
+- [ ] **Remote registry support**
+  - Self-hosted registry (Docker image)
+  - Private package hosting
+  - Authentication via OIDC/SAML
+
+- [ ] **Policy enforcement**
+  - Required sections in all projects
+  - Forbidden patterns (regex blacklist)
+  - Mandatory inheritance from approved bases
+  - Compliance templates (SOC2, HIPAA, PCI-DSS)
+
+- [ ] **Audit logging**
+  - Track who changed what and when
+  - Git-native audit trail
+  - Export to SIEM systems
+
+### 8. Security & Compliance
+
+**Goal:** Ensure prompts don't introduce security risks.
+
+- [ ] **`prs audit` command**
+  - Scan for secrets in prompts
+  - Check for injection vulnerabilities
+  - Validate against security policies
+
+- [ ] **Signed packages**
+  - GPG signing for published packages
+  - Verification on install
+  - Trust chain for enterprise registries
+
+- [ ] **SBOM generation**
+  - Track dependencies in prompt inheritance
+  - Export as CycloneDX/SPDX
+
+### 9. Analytics & Insights
+
+**Goal:** Understand how prompts are being used.
+
+- [ ] **Usage metrics**
+  - Compilation frequency
+  - Most used inherited packages
+  - Error patterns
+
+- [ ] **Drift detection dashboard**
+  - Track when compiled outputs get stale
+  - Alert on configuration changes
+
+- [ ] **A/B testing framework**
+  - Compare prompt effectiveness
+  - Track developer satisfaction metrics
+
+---
+
+## 🌐 Future — Ecosystem & Community
+
+### 10. Plugin System
+
+**Goal:** Make PromptScript extensible.
+
+- [ ] **Plugin API**
+  - Custom formatters
+  - Custom validators
+  - Custom resolvers
+
+- [ ] **Plugin registry**
+  - `prs plugin install @community/windsurf-formatter`
+
+- [ ] **Hooks system**
+  - Pre-compile, post-compile, pre-validate
+
+### 11. AI-Specific Features
+
+**Goal:** Optimize prompts for different models.
+
+- [ ] **Model-specific optimizations**
+  - Auto-adjust for GPT-4 vs Claude vs Gemini
+  - Token budget warnings
+  - Context window management
+
+- [ ] **Prompt testing framework**
+  - Define test cases for prompts
+  - Run against multiple models
+  - Score effectiveness
+
+- [ ] **Model version targeting**
+  - Different outputs for Claude 3.5 vs 4
+  - Feature flags per model version
+
+### 12. Documentation & Community
+
+**Goal:** Build a thriving community.
+
+- [ ] **Interactive tutorials**
+- [ ] **Video walkthroughs**
+- [ ] **Migration guides** for each tool
+- [ ] **Enterprise case studies**
+- [ ] **Discord community**
+- [ ] **Contribution bounty program**
+
+---
+
+## 🤔 Under Consideration
+
+_These features are being evaluated based on community interest. Vote with 👍 on GitHub issues!_
+
+- [ ] **Multi-language support** — Prompts in different human languages
+- [ ] **Real-time collaboration** — Google Docs-style editing
+- [ ] **GitHub App** — Auto-create PRs when standards change
+- [ ] **Slack/Teams integration** — Notifications and approvals
+- [ ] **JetBrains plugin** — Full IDE integration
+- [ ] **Neovim plugin** — LSP + Treesitter support
+- [ ] **AI-powered migration** — Use LLMs to convert legacy prompts
+- [ ] **Prompt linting rules** — ESLint-style configurable rules
+- [ ] **Template inheritance** — Mustache/Handlebars in prompts
+- [ ] **Conditional compilation** — `@if env.production` blocks
+- [ ] **Monorepo support** — Per-package configurations with shared base
+- [ ] **Import from URL** — `@inherit https://example.com/rules.prs`
+
+---
+
+## 📣 How to Contribute
+
+We're actively looking for contributors and sponsors! Here's how you can help:
+
+1. **Add a formatter** — Pick a tool from the "Planned" list and implement it
+2. **Write documentation** — Tutorials, guides, examples
+3. **Test and report** — Try PromptScript and file issues
+4. **Spread the word** — Blog posts, talks, social media
+5. **Sponsor development** — [GitHub Sponsors](https://github.com/sponsors/mrwogu)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.

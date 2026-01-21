@@ -2,7 +2,7 @@
   "name": "@promptscript/source",
   "version": "0.0.0",
   "license": "MIT",
-  "homepage": "https://mrwogu.github.io/promptscript/",
+  "homepage": "https://getpromptscript.dev/",
   "scripts": {
     "build": "nx run-many -t build",
     "lint": "nx run-many -t lint",
