@@ -14,7 +14,9 @@
     "schema:check": "./scripts/check-schema.sh",
     "docs:serve": "mkdocs serve",
     "docs:build": "mkdocs build --strict",
-    "prs": "node -r @swc-node/register packages/cli/src/cli.ts"
+    "docs:generate": "typedoc",
+    "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
+    "prepare": "husky"
   },
   "private": true,
   "devDependencies": {
@@ -35,12 +37,15 @@
     "@vitest/coverage-v8": "^4.0.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "22.3.3",
     "prettier": "~3.6.2",
     "ts-json-schema-generator": "^2.4.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.3.0",
+    "typedoc": "^0.28.16",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "~5.9.2",
     "verdaccio": "^6.0.5",
     "vite": "^7.0.0",
