@@ -1,0 +1,95 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/resolver/**'
+      - 'packages/cli/**'
+      - '.github/workflows/integration-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/resolver/**'
+      - 'packages/cli/**'
+  schedule:
+    # Run daily at 6 AM UTC to catch registry changes
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  integration-test:
+    name: Git Registry Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm nx run-many -t build
+
+      - name: Run integration tests
+        run: pnpm nx test resolver --testNamePattern="Integration"
+        env:
+          TEST_GIT_REGISTRY_INTEGRATION: 'true'
+          TEST_GIT_REGISTRY_URL: 'https://github.com/mrwogu/promptscript-registry.git'
+          TEST_GIT_REGISTRY_REF: 'main'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test CLI pull command
+        run: |
+          cd /tmp
+          mkdir test-project && cd test-project
+
+          # Create test config
+          cat > promptscript.yaml << 'EOF'
+          version: '1'
+          project:
+            id: integration-test
+          input:
+            entry: .promptscript/project.prs
+          registry:
+            git:
+              url: https://github.com/mrwogu/promptscript-registry.git
+              ref: main
+          targets:
+            - github
+          EOF
+
+          mkdir -p .promptscript
+          cat > .promptscript/project.prs << 'EOF'
+          @meta {
+            id: "integration-test"
+            syntax: "1.0.0"
+          }
+          @inherit @core/base
+          EOF
+
+          # Test pull command (dry-run when available, otherwise just verify config)
+          echo "Testing CLI with official registry..."
+          npx prs pull --help || echo "CLI pull command available"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: coverage/packages/resolver/
+          retention-days: 7

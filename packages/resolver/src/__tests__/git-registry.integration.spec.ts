@@ -223,3 +223,91 @@ describe.skipIf(!process.env['TEST_GIT_REGISTRY_URL'])('GitRegistry Manual Test'
     expect(content.length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * Official PromptScript Registry integration tests.
+ *
+ * These tests verify that the official registry is accessible and
+ * contains expected configurations.
+ *
+ * Enable with: TEST_GIT_REGISTRY_INTEGRATION=true
+ */
+describe.skipIf(!INTEGRATION_ENABLED)('Official PromptScript Registry', () => {
+  const OFFICIAL_REGISTRY = 'https://github.com/mrwogu/promptscript-registry.git';
+  let testCacheDir: string;
+
+  beforeAll(async () => {
+    testCacheDir = join(
+      tmpdir(),
+      `prs-official-registry-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    );
+    await fs.mkdir(testCacheDir, { recursive: true });
+  });
+
+  afterAll(async () => {
+    if (existsSync(testCacheDir)) {
+      await fs.rm(testCacheDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should fetch @core/base.prs', async () => {
+    const registry = new GitRegistry({
+      url: OFFICIAL_REGISTRY,
+      ref: 'main',
+      cacheDir: testCacheDir,
+    });
+
+    const content = await registry.fetch('@core/base.prs');
+    expect(content).toContain('@meta');
+    expect(content).toContain('id: "@core/base"');
+  });
+
+  it('should list @roles/developer files', async () => {
+    const registry = new GitRegistry({
+      url: OFFICIAL_REGISTRY,
+      ref: 'main',
+      cacheDir: testCacheDir,
+    });
+
+    const files = await registry.list('@roles/developer');
+    expect(files).toContain('fullstack.prs');
+    expect(files).toContain('frontend.prs');
+    expect(files).toContain('backend.prs');
+  });
+
+  it('should verify @roles/developer/fullstack inherits from @core/base', async () => {
+    const registry = new GitRegistry({
+      url: OFFICIAL_REGISTRY,
+      ref: 'main',
+      cacheDir: testCacheDir,
+    });
+
+    const content = await registry.fetch('@roles/developer/fullstack.prs');
+    expect(content).toContain('@inherit @core/base');
+  });
+
+  it('should list @stacks files', async () => {
+    const registry = new GitRegistry({
+      url: OFFICIAL_REGISTRY,
+      ref: 'main',
+      cacheDir: testCacheDir,
+    });
+
+    const files = await registry.list('@stacks');
+    expect(files).toContain('react.prs');
+    expect(files).toContain('node.prs');
+    expect(files).toContain('python.prs');
+  });
+
+  it('should list @fragments files', async () => {
+    const registry = new GitRegistry({
+      url: OFFICIAL_REGISTRY,
+      ref: 'main',
+      cacheDir: testCacheDir,
+    });
+
+    const files = await registry.list('@fragments');
+    expect(files).toContain('testing.prs');
+    expect(files).toContain('code-review.prs');
+  });
+});
