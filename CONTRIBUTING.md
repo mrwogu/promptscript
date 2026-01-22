@@ -255,6 +255,35 @@ describe('parseVersion', () => {
 
 ## Publishing (Maintainers Only)
 
+Releases are managed via [release-please](https://github.com/googleapis/release-please).
+
+### Release Process
+
+1. **Run the workflow**: Go to Actions → "Release Please" → Run workflow
+2. **Review the PR**: release-please creates/updates a PR with changelog and version bump
+3. **Merge the PR**: This triggers the publish to npm
+
+### Stable Release
+
+By default, release-please creates stable versions based on conventional commits:
+
+- `feat:` → minor bump (0.1.0 → 0.2.0)
+- `fix:` → patch bump (0.1.0 → 0.1.1)
+- `feat!:` or `BREAKING CHANGE:` → major bump (0.1.0 → 1.0.0)
+
+### Prerelease (alpha/beta)
+
+To create a prerelease version, add a commit with `Release-As` footer:
+
+```bash
+git commit --allow-empty -m "chore: prepare alpha release
+
+Release-As: 1.1.0-alpha.0"
+git push
+```
+
+Then run the workflow - the PR will have the specified prerelease version.
+
 ### Testing Publish Locally
 
 Before publishing, you can test the build output:
@@ -268,23 +297,12 @@ cd dist/packages/cli
 pnpm pack --dry-run
 ```
 
-### Release Process
+### npm Tags
 
-Releases are automated via GitHub Actions using Nx Release:
+- **Stable releases** (1.0.0) → published as `latest`
+- **Prereleases** (1.0.0-alpha.0) → published as `next`
 
-```bash
-# Create a release (locally)
-pnpm nx release --skip-publish
-
-# Push the release commit and tags
-git push && git push --tags
-```
-
-The CI pipeline will automatically publish to npm when tags are pushed.
-
-### Workspace Dependencies
-
-Internal dependencies use `workspace:^` protocol which pnpm automatically converts to actual version numbers (e.g., `^0.1.0`) during publish.
+Install prerelease: `npm install @promptscript/cli@next`
 
 ## Questions?
 

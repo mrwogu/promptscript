@@ -3,15 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/cli/src",
   "projectType": "library",
-  "release": {
-    "version": {
-      "generator": "@nx/js:release-version",
-      "generatorOptions": {
-        "packageRoot": "{projectRoot}",
-        "currentVersionResolver": "disk"
-      }
-    }
-  },
   "tags": ["scope:cli", "type:app"],
   "targets": {
     "build": {

@@ -25,7 +25,9 @@
           "type": "string"
         }
       },
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "additionalProperties": false,
       "description": "Project identification"
     },
@@ -89,7 +91,10 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["bearer", "basic"],
+              "enum": [
+                "bearer",
+                "basic"
+              ],
               "description": "Authentication type"
             },
             "token": {
@@ -101,7 +106,9 @@
               "description": "Environment variable containing the token (alternative to token)"
             }
           },
-          "required": ["type"],
+          "required": [
+            "type"
+          ],
           "additionalProperties": false,
           "description": "Authentication for private registries"
         }
@@ -185,7 +192,11 @@
           "type": "object",
           "additionalProperties": {
             "type": "string",
-            "enum": ["error", "warning", "off"]
+            "enum": [
+              "error",
+              "warning",
+              "off"
+            ]
           }
         }
       },
@@ -193,7 +204,12 @@
       "description": "Validation settings"
     }
   },
-  "required": ["version", "project", "registry", "targets"],
+  "required": [
+    "version",
+    "project",
+    "registry",
+    "targets"
+  ],
   "additionalProperties": false,
   "definitions": {
     "TargetEntry": {
@@ -269,7 +285,10 @@
     },
     "BuiltInConventionName": {
       "type": "string",
-      "enum": ["xml", "markdown"],
+      "enum": [
+        "xml",
+        "markdown"
+      ],
       "description": "Built-in convention names."
     },
     "OutputConvention": {
@@ -293,7 +312,12 @@
         },
         "listStyle": {
           "type": "string",
-          "enum": ["dash", "asterisk", "bullet", "numbered"],
+          "enum": [
+            "dash",
+            "asterisk",
+            "bullet",
+            "numbered"
+          ],
           "description": "How to render lists.",
           "default": "'dash' (- item)"
         },
@@ -312,12 +336,18 @@
               "type": "string"
             }
           },
-          "required": ["start", "end"],
+          "required": [
+            "start",
+            "end"
+          ],
           "additionalProperties": false,
           "description": "Whether to wrap content in a root element."
         }
       },
-      "required": ["name", "section"],
+      "required": [
+        "name",
+        "section"
+      ],
       "additionalProperties": false,
       "description": "Output convention definition."
     },
@@ -336,7 +366,12 @@
         },
         "nameTransform": {
           "type": "string",
-          "enum": ["kebab-case", "camelCase", "PascalCase", "none"],
+          "enum": [
+            "kebab-case",
+            "camelCase",
+            "PascalCase",
+            "none"
+          ],
           "description": "Whether to convert section names.",
           "default": "kebab-case"
         },
@@ -346,7 +381,9 @@
           "default": "'  ' (2 spaces)"
         }
       },
-      "required": ["start"],
+      "required": [
+        "start"
+      ],
       "additionalProperties": false,
       "description": "Section rendering configuration."
     }

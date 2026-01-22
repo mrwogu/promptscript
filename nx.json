@@ -47,6 +47,13 @@
     }
   },
   "release": {
-    "projects": ["cli"]
+    "projects": ["cli"],
+    "version": {
+      "generator": "@nx/js:release-version",
+      "generatorOptions": {
+        "packageRoot": "{projectRoot}",
+        "currentVersionResolver": "disk"
+      }
+    }
   }
 }
