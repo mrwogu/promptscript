@@ -1,0 +1,68 @@
+@meta {
+  id: "promptscript/commands"
+  syntax: "1.0.0"
+  description: "Shortcuts and development knowledge"
+}
+
+@shortcuts {
+  "/review": "Review code for quality, type safety, and best practices"
+
+  "/test": """
+    Write unit tests using:
+    - Vitest as the test runner
+    - AAA pattern (Arrange, Act, Assert)
+    - Fixtures for parser tests
+    - Target >90% coverage
+  """
+
+  "/build": """
+    Run verification commands:
+    - pnpm run format (Prettier)
+    - pnpm run lint (ESLint)
+    - pnpm run build (all packages)
+    - pnpm run typecheck (TypeScript)
+    - pnpm run test (all tests)
+  """
+
+  "/newpkg": """
+    Generate new package with Nx:
+    pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPath=@promptscript/<name> --bundler=swc --linter=eslint --unitTestRunner=vitest
+  """
+}
+
+@knowledge {
+  """
+  ## Development Commands
+
+  ```bash
+  pnpm install              # Install dependencies
+  pnpm nx build <pkg>       # Build package
+  pnpm nx test <pkg>        # Run tests
+  pnpm nx lint <pkg>        # Lint code
+  pnpm nx run-many -t test  # Test all packages
+  pnpm nx graph             # View dependency graph
+  ```
+
+  ## Post-Work Verification
+
+  After completing code changes, always run:
+  ```bash
+  pnpm run format     # Format code with Prettier
+  pnpm run lint       # Check for linting errors
+  pnpm run build      # Build all packages
+  pnpm run typecheck  # Verify TypeScript types
+  pnpm run test       # Run all tests
+  ```
+
+  ## Configuration Notes
+
+  ### ESLint
+  - All package configs inherit from `eslint.base.config.cjs`
+  - Use `createBaseConfig(__dirname)` from base config
+  - Modify base config instead of duplicating rules
+
+  ### Vite/Vitest
+  - Use `__dirname` for root option
+  - Do NOT use `import.meta.dirname` (causes TS errors)
+  """
+}
