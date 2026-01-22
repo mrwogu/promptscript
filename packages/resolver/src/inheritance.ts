@@ -135,11 +135,31 @@ function mergeBlockContent(parent: BlockContent, child: BlockContent): BlockCont
 
 /**
  * Merge TextContent by concatenating values (parent + separator + child).
+ * Deduplicates identical content and removes redundant substrings.
  */
 function mergeTextContent(parent: TextContent, child: TextContent): TextContent {
+  const parentVal = parent.value.trim();
+  const childVal = child.value.trim();
+
+  // If identical, return just one
+  if (parentVal === childVal) {
+    return { ...child, value: childVal };
+  }
+
+  // If child already contains parent, return child only
+  if (childVal.includes(parentVal)) {
+    return { ...child, value: childVal };
+  }
+
+  // If parent already contains child, return parent only
+  if (parentVal.includes(childVal)) {
+    return { ...child, value: parentVal };
+  }
+
+  // Otherwise concatenate
   return {
     ...child,
-    value: `${parent.value}\n\n${child.value}`,
+    value: `${parentVal}\n\n${childVal}`,
   };
 }
 
@@ -171,8 +191,8 @@ function mergeProperties(
       // Unique concat for arrays
       result[key] = uniqueConcat(parentVal, childVal);
     } else if (isTextContent(childVal) && isTextContent(parentVal)) {
-      // Concat text content
-      result[key] = mergeTextContent(parentVal, childVal);
+      // Child wins for TextContent properties (local overrides inherited)
+      result[key] = deepCloneValue(childVal);
     } else if (isPlainObject(childVal) && isPlainObject(parentVal)) {
       // Deep merge objects
       result[key] = mergeProperties(

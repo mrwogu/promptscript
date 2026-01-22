@@ -40,7 +40,36 @@ const createObjectContent = (properties: Record<string, Value>): ObjectContent =
 
 describe('imports', () => {
   describe('resolveUses', () => {
-    it('should add import marker block', () => {
+    it('should merge blocks from source into target', () => {
+      const target = createProgram({
+        blocks: [createBlock('identity', createTextContent('main'))],
+      });
+
+      const use = {
+        type: 'UseDeclaration' as const,
+        path: {
+          type: 'PathReference' as const,
+          raw: './guards',
+          segments: ['guards'],
+          isRelative: true,
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      };
+
+      const source = createProgram({
+        blocks: [createBlock('guards', createObjectContent({ level: 'high' }))],
+      });
+
+      const result = resolveUses(target, use, source);
+
+      // Should have original block + merged block (no markers without alias)
+      expect(result.blocks).toHaveLength(2);
+      expect(result.blocks[0]?.name).toBe('identity');
+      expect(result.blocks[1]?.name).toBe('guards');
+    });
+
+    it('should add aliased blocks when alias is provided', () => {
       const target = createProgram({
         blocks: [createBlock('identity', createTextContent('main'))],
       });
@@ -69,15 +98,18 @@ describe('imports', () => {
 
       const result = resolveUses(target, use, source);
 
-      // Should have original block + marker + aliased block
-      expect(result.blocks).toHaveLength(3);
+      // Should have: original + merged + marker + aliased
+      expect(result.blocks).toHaveLength(4);
       expect(result.blocks[0]?.name).toBe('identity');
-      expect(result.blocks[1]?.name).toBe(`${IMPORT_MARKER_PREFIX}sec`);
-      expect(result.blocks[2]?.name).toBe(`${IMPORT_MARKER_PREFIX}sec.guards`);
+      expect(result.blocks[1]?.name).toBe('guards');
+      expect(result.blocks[2]?.name).toBe(`${IMPORT_MARKER_PREFIX}sec`);
+      expect(result.blocks[3]?.name).toBe(`${IMPORT_MARKER_PREFIX}sec.guards`);
     });
 
-    it('should use source id as alias if no alias provided', () => {
-      const target = createProgram();
+    it('should merge same-name blocks with target winning on conflict', () => {
+      const target = createProgram({
+        blocks: [createBlock('rules', createTextContent('target rules'))],
+      });
 
       const use = {
         type: 'UseDeclaration' as const,
@@ -92,28 +124,37 @@ describe('imports', () => {
       };
 
       const source = createProgram({
-        meta: {
-          type: 'MetaBlock',
-          fields: { id: 'guards-module' },
-          loc: createLoc(),
-        },
-        blocks: [],
+        blocks: [createBlock('rules', createTextContent('source rules'))],
       });
 
       const result = resolveUses(target, use, source);
 
-      expect(result.blocks[0]?.name).toBe(`${IMPORT_MARKER_PREFIX}guards-module`);
+      // Should have merged block with concatenated text (source + target)
+      expect(result.blocks).toHaveLength(1);
+      expect(result.blocks[0]?.name).toBe('rules');
+      const content = result.blocks[0]?.content as TextContent;
+      expect(content.value).toBe('source rules\n\ntarget rules');
     });
 
-    it('should use "import" as fallback alias', () => {
-      const target = createProgram();
+    it('should override string properties in ObjectContent (source wins)', () => {
+      const target = createProgram({
+        blocks: [
+          createBlock(
+            'shortcuts',
+            createObjectContent({
+              '/test': 'target value',
+              '/other': 'only in target',
+            })
+          ),
+        ],
+      });
 
       const use = {
         type: 'UseDeclaration' as const,
         path: {
           type: 'PathReference' as const,
-          raw: './no-meta',
-          segments: ['no-meta'],
+          raw: './commands',
+          segments: ['commands'],
           isRelative: true,
           loc: createLoc(),
         },
@@ -121,15 +162,86 @@ describe('imports', () => {
       };
 
       const source = createProgram({
-        blocks: [],
+        blocks: [
+          createBlock(
+            'shortcuts',
+            createObjectContent({
+              '/test': 'source value',
+              '/new': 'only in source',
+            })
+          ),
+        ],
       });
 
       const result = resolveUses(target, use, source);
 
-      expect(result.blocks[0]?.name).toBe(`${IMPORT_MARKER_PREFIX}import`);
+      // Source (import) should override target for string properties
+      expect(result.blocks).toHaveLength(1);
+      const content = result.blocks[0]?.content as ObjectContent;
+      expect(content.properties['/test']).toBe('source value'); // source wins
+      expect(content.properties['/other']).toBe('only in target'); // only in target
+      expect(content.properties['/new']).toBe('only in source'); // only in source
     });
 
-    it('should store source info in marker', () => {
+    it('should deduplicate identical text content', () => {
+      const target = createProgram({
+        blocks: [createBlock('identity', createTextContent('Same content'))],
+      });
+
+      const use = {
+        type: 'UseDeclaration' as const,
+        path: {
+          type: 'PathReference' as const,
+          raw: './base',
+          segments: ['base'],
+          isRelative: true,
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      };
+
+      const source = createProgram({
+        blocks: [createBlock('identity', createTextContent('Same content'))],
+      });
+
+      const result = resolveUses(target, use, source);
+
+      // Should deduplicate identical content
+      expect(result.blocks).toHaveLength(1);
+      const content = result.blocks[0]?.content as TextContent;
+      expect(content.value).toBe('Same content');
+    });
+
+    it('should deduplicate when target contains source', () => {
+      const target = createProgram({
+        blocks: [createBlock('identity', createTextContent('Full text with more details'))],
+      });
+
+      const use = {
+        type: 'UseDeclaration' as const,
+        path: {
+          type: 'PathReference' as const,
+          raw: './base',
+          segments: ['base'],
+          isRelative: true,
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      };
+
+      const source = createProgram({
+        blocks: [createBlock('identity', createTextContent('Full text'))],
+      });
+
+      const result = resolveUses(target, use, source);
+
+      // Should return target only since it contains source
+      expect(result.blocks).toHaveLength(1);
+      const content = result.blocks[0]?.content as TextContent;
+      expect(content.value).toBe('Full text with more details');
+    });
+
+    it('should store source info in marker when alias provided', () => {
       const target = createProgram();
 
       const use = {
@@ -151,7 +263,13 @@ describe('imports', () => {
       });
 
       const result = resolveUses(target, use, source);
-      const marker = result.blocks[0];
+
+      // Merged block + marker + aliased block
+      expect(result.blocks).toHaveLength(3);
+      expect(result.blocks[0]?.name).toBe('rules');
+
+      const marker = result.blocks[1];
+      expect(marker?.name).toBe(`${IMPORT_MARKER_PREFIX}g`);
       const content = marker?.content as ObjectContent;
 
       expect(content.properties['__source']).toBe('@company/guards');

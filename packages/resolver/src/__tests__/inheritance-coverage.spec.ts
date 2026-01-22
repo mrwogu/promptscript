@@ -248,7 +248,7 @@ describe('resolveInheritance additional coverage', () => {
       expect(content.properties['items']).toEqual(['a', 'b', 'c', 'd']);
     });
 
-    it('should merge TextContent values in properties', () => {
+    it('should override TextContent values in properties (child wins)', () => {
       const parent = createProgram({
         blocks: [
           createBlock(
@@ -274,8 +274,8 @@ describe('resolveInheritance additional coverage', () => {
       const content = result.blocks[0]?.content as ObjectContent;
       const desc = content.properties['desc'] as TextContent;
 
-      expect(desc.value).toContain('parent desc');
-      expect(desc.value).toContain('child desc');
+      // Child value should completely override parent value
+      expect(desc.value).toBe('child desc');
     });
 
     it('should deep merge nested objects in properties', () => {
