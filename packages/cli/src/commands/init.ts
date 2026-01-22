@@ -192,7 +192,7 @@ async function runInteractivePrompts(
   // 3. Registry
   const wantsRegistry = await prompts.confirm({
     message: 'Do you want to configure a registry?',
-    default: true,
+    default: false,
   });
 
   let registry: string | undefined;
