@@ -3,6 +3,11 @@ version: '1'
 project:
   id: 'promptscript'
 
+registry:
+  git:
+    url: https://github.com/mrwogu/promptscript-registry.git
+    ref: v0.1.0
+
 targets:
   - github
   - claude

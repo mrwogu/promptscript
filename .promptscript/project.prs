@@ -8,6 +8,11 @@
   tags: [typescript, monorepo, nx, parser, compiler]
 }
 
+@use @core/quality
+@use @fragments/testing
+@use @fragments/git-conventions
+@use @fragments/code-review
+
 @identity {
   """
   You are an expert TypeScript developer working on PromptScript - a language 

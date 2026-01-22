@@ -157,6 +157,7 @@ nav:
       - Configuration: reference/config.md
   - Guides:
       - guides/index.md
+      - Official Registry: guides/registry.md
       - CI/CD Integration: guides/ci.md
       - Inheritance: guides/inheritance.md
       - Multi-File Organization: guides/multi-file.md
