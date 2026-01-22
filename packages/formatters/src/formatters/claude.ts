@@ -652,11 +652,18 @@ export class ClaudeFormatter extends BaseFormatter {
     if (!identity) return null;
 
     const text = this.extractText(identity.content);
+    // Preserve paragraph breaks while trimming lines
     const cleanText = text
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line)
-      .join('\n');
+      .split(/\n{2,}/) // Split on paragraph breaks
+      .map((para) =>
+        para
+          .split('\n')
+          .map((line) => line.trim())
+          .filter((line) => line)
+          .join('\n')
+      )
+      .filter((para) => para)
+      .join('\n\n'); // Rejoin with single blank line
 
     return renderer.renderSection('Project', cleanText) + '\n';
   }
@@ -838,7 +845,7 @@ export class ClaudeFormatter extends BaseFormatter {
     if (shortcuts) {
       const props = this.getProps(shortcuts.content);
       for (const [cmd, desc] of Object.entries(props)) {
-        const shortDesc = this.valueToString(desc).split('\n')[0]?.substring(0, 40) ?? '';
+        const shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
         commandLines.push(`${cmd.padEnd(10)} - ${shortDesc}`);
       }
     }

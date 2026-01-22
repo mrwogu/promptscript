@@ -187,7 +187,7 @@ describe('ClaudeFormatter', () => {
       expect(result.content).toContain('Generate docs');
     });
 
-    it('should truncate long command descriptions', () => {
+    it('should show full command descriptions (first line only)', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -197,7 +197,7 @@ describe('ClaudeFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                '/cmd': 'This is a very long description that should be truncated at 40 characters',
+                '/cmd': 'This is a very long description that is shown in full',
               },
               loc: createLoc(),
             },
@@ -208,8 +208,8 @@ describe('ClaudeFormatter', () => {
 
       const result = formatter.format(ast);
       expect(result.content).toContain('/cmd');
-      expect(result.content).toContain('This is a very long description that sho');
-      expect(result.content).not.toContain('truncated at 40 characters');
+      // Full first line is shown (no truncation)
+      expect(result.content).toContain('This is a very long description that is shown in full');
     });
 
     it('should generate code style section', () => {

@@ -6,8 +6,10 @@ exports[`Formatter Snapshot Tests > ClaudeFormatter > should generate expected o
 ## Project
 You are an expert TypeScript developer working on PromptScript - a language
 and toolchain for standardizing AI instructions across enterprise organizations.
+
 PromptScript compiles \`.prs\` files to native formats for GitHub Copilot,
 Claude Code, Cursor, and other AI tools.
+
 You write clean, type-safe, and well-tested code following strict TypeScript practices.
 
 ## Tech Stack
@@ -56,10 +58,10 @@ flowchart TB
 
 ## Commands
 \`\`\`
-/review    - Review code for quality, type safety, an
+/review    - Review code for quality, type safety, and best practices
 /test      - Write unit tests using:
 /build     - Run verification commands:
-/newpkg    - Generate new package with Nx: pnpm nx g 
+/newpkg    - Generate new package with Nx: pnpm nx g @nx/js:lib <name> --directory=packages/<name>
 \`\`\`
 
 \`\`\`bash
