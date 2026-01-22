@@ -41,6 +41,21 @@ Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
   - Testing: Vitest
   - Linting: ESLint + Prettier
 
+## Backend Best Practices
+  - Design APIs with clear contracts
+  - Implement proper error handling
+  - Use connection pooling for databases
+  - Apply rate limiting and throttling
+  - Log appropriately for debugging
+
+## Project Structure
+  - src/controllers/ - Request handlers
+  - src/services/ - Business logic
+  - src/repositories/ - Data access
+  - src/middleware/ - Express middleware
+  - src/utils/ - Utility functions
+  - src/types/ - TypeScript definitions
+
 Code style:
 - useUnknown: with type guards instead of any
 - interfaces: for object shapes
@@ -76,6 +91,17 @@ Commands:
 /test - Write unit tests using:
 /build - Run verification commands:
 /newpkg - Generate new package with Nx:
+/quality - Review code for quality improvements
+/refactor - Suggest refactoring opportunities
+/security-review - Review code for security vulnerabilities
+/threat-model - Analyze potential security threats
+/api - Design or implement an API endpoint
+/query - Write or optimize database queries
+/auth - Implement authentication/authorization
+/scale - Suggest scalability improvements
+/endpoint - Create an API endpoint
+/service - Create a service class
+/middleware - Create Express middleware
 
 Documentation:
 - review README.md and docs/ before changes
@@ -98,3 +124,26 @@ Never:
 - Never use ASCII art diagrams - always use Mermaid
 - Never reference line numbers in test names or comments
 - Never make code changes without verifying documentation consistency
+- Never commit directly to main/master
+- Never force push to shared branches
+- Never commit secrets or credentials
+- Never create commits with unrelated changes
+- Never test implementation details
+- Never write tests that depend on execution order
+- Never share mutable state between tests
+- Never ignore flaky tests
+- Never sacrifice readability for micro-optimizations
+- Never leave dead code or commented-out blocks
+- Never use magic numbers without named constants
+- Never ignore compiler/linter warnings without justification
+- Never generate code with known vulnerabilities
+- Never expose secrets, credentials, or API keys
+- Never disable security features without explicit user consent
+- Never trust user input without validation
+- Never use deprecated or insecure cryptographic functions
+- Never generate harmful, illegal, or unethical content
+- Never pretend to have capabilities you don't have
+- Always clarify when unsure rather than guessing
+- Never expose internal errors to clients
+- Never store passwords in plain text
+- Never trust client-side data without validation

@@ -8,7 +8,25 @@
   tags: [typescript, monorepo, nx, parser, compiler]
 }
 
-@inherit ./local
+# === INHERITANCE ===
+# Main configuration chain (includes @core/base)
+@inherit @stacks/node
+
+# === REGISTRY MIXINS ===
+# Security and quality standards from registry
+@use @core/security
+@use @core/quality
+@use @fragments/testing
+@use @fragments/git-conventions
+
+# === LOCAL CONFIGURATION ===
+# Project-specific settings (modular)
+@use ./context
+@use ./standards
+@use ./restrictions
+@use ./commands
+
+# === IDENTITY ===
 
 @identity {
   """
