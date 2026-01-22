@@ -161,7 +161,7 @@ Benefits of using subagents:
 
 ### Model Options
 
-**GitHub Copilot:** Any model available in your GitHub Copilot subscription (e.g., `gpt-4o`, `claude-3.5-sonnet`, `o1-mini`).
+**GitHub Copilot:** Any model available in your GitHub Copilot subscription (e.g., `gpt-4o`, `claude-sonnet-4`, `o1-mini`).
 
 **Claude Code:**
 

@@ -26,7 +26,7 @@ Modern engineering organizations face a critical challenge: **AI Context Fragmen
 As you scale to 50+ repositories and deploy multiple AI tools (GitHub Copilot, Claude, Cursor), maintaining coherent AI instructions becomes impossible manually.
 
 - **The Scale Problem:** Updating a security policy across 100 microservices takes weeks of manual PRs.
-- **The Model Volatility:** New models (e.g., Claude 3.7 vs 3.5) require different prompting strategies. You shouldn't have to rewrite 1000 instruction files when a model upgrades.
+- **The Model Volatility:** New models (e.g., Claude Sonnet 4 vs 3.5) require different prompting strategies. You shouldn't have to rewrite 1000 instruction files when a model upgrades.
 - **The Governance Void:** Developers use local, unvetted instructions. Junior devs miss critical security context. There is no audit trail for what constraints your AI is operating under.
 
 Result: **Inconsistent code quality, security risks, and operational chaos.**

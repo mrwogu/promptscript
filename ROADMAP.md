@@ -212,7 +212,7 @@
   - Score effectiveness
 
 - [ ] **Model version targeting**
-  - Different outputs for Claude 3.5 vs 4
+  - Different outputs for Claude Sonnet 3.5 vs Sonnet 4
   - Feature flags per model version
 
 ### 12. Documentation & Community
