@@ -25,7 +25,7 @@ flowchart TB
 <div class="feature-grid" markdown>
 
 <div class="feature-card" markdown>
-### Parity Testing
+### :material-scale-balance: Parity Testing
 Ensures consistent output across all formatters using specification-based and reference-based testing.
 
 [Parity Testing →](parity-testing.md)
@@ -33,7 +33,7 @@ Ensures consistent output across all formatters using specification-based and re
 </div>
 
 <div class="feature-card" markdown>
-### Feature Coverage
+### :material-checkbox-marked-outline: Feature Coverage
 Tracks which features each AI tool supports and which our formatters implement.
 
 [Feature Coverage →](feature-coverage.md)

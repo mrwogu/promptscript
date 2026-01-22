@@ -26,3 +26,27 @@ Organize your PromptScript files for complex projects.
 </div>
 
 <div class="feature-card" markdown>
+### :material-cog-sync: CI/CD Integration
+Validate and test PromptScript files in your CI pipeline.
+
+[CI/CD Guide →](ci.md)
+
+</div>
+
+<div class="feature-card" markdown>
+### :material-domain: Enterprise Setup
+Deploy PromptScript across your organization.
+
+[Enterprise Guide →](enterprise.md)
+
+</div>
+
+<div class="feature-card" markdown>
+### :material-swap-horizontal: Migration
+Migrate existing AI instructions to PromptScript.
+
+[Migration Guide →](migration.md)
+
+</div>
+
+</div>
