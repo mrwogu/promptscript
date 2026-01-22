@@ -241,41 +241,84 @@ Different configurations for different environments:
 
 ## Using @use for Composition
 
+The `@use` directive imports and merges content from other files - like CSS imports or mixins.
+
 ### Basic Import
 
 ```promptscript
-# Import fragment from same directory
+# Import fragment - blocks are merged into your file
 @use ./fragments/security
 
 # Import from registry
 @use @company/standards/testing
 
-# Import with alias (for namespacing)
+# Import with alias - for @extend access
 @use @core/guards/security as sec
 ```
 
 ### How @use Merges Content
 
-When you `@use` a file, its blocks are merged into the current file:
+When you `@use` a file, all blocks from the source are merged into your file:
 
-| Block Type      | Merge Behavior                         |
-| --------------- | -------------------------------------- |
-| `@identity`     | Content concatenated                   |
-| `@context`      | Objects deep merged, text concatenated |
-| `@standards`    | Deep merge of objects                  |
-| `@restrictions` | Array concatenated                     |
-| `@shortcuts`    | Merged by key (later overrides)        |
-| `@knowledge`    | Content concatenated                   |
-| `@skills`       | Merged by skill name                   |
+| Content Type   | Merge Behavior                                                 |
+| -------------- | -------------------------------------------------------------- |
+| Text content   | Concatenated (source + target), identical content deduplicated |
+| Object content | Deep merged (target wins on key conflicts)                     |
+| Array content  | Unique concatenation (preserves order, dedupes)                |
+| Mixed content  | Text concatenated, properties deep merged                      |
+
+**Example:**
+
+```promptscript
+# security.prs
+@restrictions {
+  - "Never expose API keys"
+}
+
+# project.prs
+@use ./security
+
+@restrictions {
+  - "Follow OWASP guidelines"
+}
+
+# Result: @restrictions contains both items
+```
+
+### Alias for Selective Extension
+
+When you need to modify imported content rather than just merge it, use an alias:
+
+```promptscript
+@use @core/typescript as ts
+
+# Extend specific imported blocks
+@extend ts.standards {
+  testing: { coverage: 95 }
+}
+```
+
+Without alias, blocks are simply merged. With alias, you get both:
+
+- Blocks merged into your file
+- Prefixed blocks available for `@extend` access
 
 ### Import Order Matters
 
-Later imports override earlier ones for same-key content:
+Imports are processed in order. For same-name blocks, content is merged:
 
 ```promptscript
-@use ./fragments/base-shortcuts     # /test -> "Run unit tests"
-@use ./fragments/advanced-shortcuts # /test -> "Run full test suite"
-# Result: /test -> "Run full test suite"
+@use ./fragments/base         # @shortcuts has /test -> "Run unit tests"
+@use ./fragments/advanced     # @shortcuts has /test -> "Run full suite"
+# Result: /test -> "Run unit tests\n\nRun full suite" (concatenated)
+```
+
+For object properties, later imports override:
+
+```promptscript
+@use ./base     # @standards.coverage = 80
+@use ./strict   # @standards.coverage = 95
+# Result: coverage = 95 (target wins)
 ```
 
 ## Registry vs Local Fragments

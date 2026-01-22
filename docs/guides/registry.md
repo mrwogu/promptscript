@@ -151,7 +151,7 @@ Tech stacks inherit from roles and add framework specifics:
 
 ### Import Fragments
 
-Add specific capabilities without full inheritance:
+Use `@use` to merge fragment blocks directly into your file:
 
 ```promptscript
 @meta {
@@ -160,8 +160,8 @@ Add specific capabilities without full inheritance:
 }
 
 @inherit @core/base
-@use @fragments/testing
-@use @fragments/code-review
+@use @fragments/testing        # Merges testing standards
+@use @fragments/code-review    # Merges code review guidelines
 
 @identity {
   """
@@ -169,6 +169,8 @@ Add specific capabilities without full inheritance:
   """
 }
 ```
+
+Fragments are merged into your file - their `@standards`, `@restrictions`, etc. become part of your configuration.
 
 ### Combine Multiple Sources
 

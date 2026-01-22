@@ -246,7 +246,7 @@ The `@extend` block modifies specific paths:
 
 ## Composition with @use
 
-Use `@use` to import fragments without full inheritance:
+Use `@use` to import and merge fragments (like mixins):
 
 ```promptscript
 @meta {
@@ -256,10 +256,23 @@ Use `@use` to import fragments without full inheritance:
 
 @inherit @company/frontend
 
-# Import additional fragments
+# Import fragments - blocks are merged into your file
 @use @core/security
-@use @fragments/testing as tests
+@use @core/compliance
+@use @fragments/testing
+
+# With alias - also available for @extend
+@use @fragments/api-standards as api
 ```
+
+### How @use Differs from @inherit
+
+| Feature         | `@inherit`                     | `@use`              |
+| --------------- | ------------------------------ | ------------------- |
+| Quantity        | Single parent only             | Multiple fragments  |
+| Purpose         | Full configuration inheritance | Modular composition |
+| Block merging   | All blocks merged              | All blocks merged   |
+| @extend support | Always available               | Only with alias     |
 
 ### Fragment Files
 
@@ -285,6 +298,8 @@ Create reusable fragments:
   "/coverage": "Check test coverage"
 }
 ```
+
+When imported with `@use @fragments/testing`, these blocks are merged directly into your file.
 
 ## Best Practices
 

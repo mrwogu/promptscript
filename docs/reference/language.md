@@ -74,20 +74,63 @@ Each file can only have one `@inherit` declaration. Use `@use` for composition.
 
 ## @use Declaration
 
-Import fragments for composition:
+Import and merge fragments for composition (like mixins):
 
 ```promptscript
-# Import from registry
+# Import from registry - blocks are merged into current file
 @use @core/guards/compliance
 
-# Import with alias
+# Import with alias - blocks merged AND available for @extend
 @use @core/guards/security as sec
 
 # Import relative
 @use ./fragments/logging
+
+# Multiple imports - all merged in order
+@use @core/standards/typescript
+@use @core/restrictions/security
+@use ./local-config
 ```
 
-Imported blocks are merged into the current file's blocks.
+### Merge Behavior
+
+When you use `@use`, all blocks from the imported file are merged into your file:
+
+- **TextContent**: Concatenated (source + target), with automatic deduplication of identical content
+- **ObjectContent**: Deep merged (target wins on key conflicts)
+- **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
+
+```promptscript
+# Source: @core/guards/security
+@restrictions {
+  - "Never expose secrets"
+}
+
+# Target: ./project.prs
+@use @core/guards/security
+
+@restrictions {
+  - "Follow OWASP guidelines"
+}
+
+# Result after merge:
+# @restrictions contains both items (source first, then target)
+```
+
+### Alias for @extend Access
+
+When you provide an alias, imported blocks are also stored with a prefix for use with `@extend`:
+
+```promptscript
+@use @core/typescript as ts
+
+# Now you can extend imported blocks
+@extend ts.standards {
+  testing: { coverage: 90 }
+}
+```
+
+!!! tip "When to Use Alias" - **Without alias**: Simple include/mixin behavior - blocks are merged directly - **With alias**: When you need to selectively extend specific imported blocks
 
 ## Content Blocks
 
