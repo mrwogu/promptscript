@@ -1,6 +1,25 @@
 {
   "name": "@promptscript/compiler",
   "version": "0.0.1",
+  "description": "Compilation pipeline orchestration for PromptScript",
+  "keywords": [
+    "cli",
+    "enterprise",
+    "typescript",
+    "devtools",
+    "infrastructure-as-code",
+    "cursor",
+    "developer-experience",
+    "governance",
+    "claude",
+    "ai-tools",
+    "github-copilot",
+    "llm",
+    "prompt-engineering",
+    "promptscript",
+    "antigravity",
+    "promptops"
+  ],
   "private": true,
   "repository": {
     "type": "git",

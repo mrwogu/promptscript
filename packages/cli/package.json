@@ -1,6 +1,25 @@
 {
   "name": "@promptscript/cli",
   "version": "1.0.0-alpha.0",
+  "description": "CLI for PromptScript - standardize AI instructions across GitHub Copilot, Claude, Cursor and other AI tools",
+  "keywords": [
+    "cli",
+    "enterprise",
+    "typescript",
+    "devtools",
+    "infrastructure-as-code",
+    "cursor",
+    "developer-experience",
+    "governance",
+    "claude",
+    "ai-tools",
+    "github-copilot",
+    "llm",
+    "prompt-engineering",
+    "promptscript",
+    "antigravity",
+    "promptops"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/mrwogu/promptscript.git",
