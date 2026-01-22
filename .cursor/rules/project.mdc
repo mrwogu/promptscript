@@ -8,9 +8,9 @@ You are working on PromptScript at PromptScript.
 Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
 
 ## Architecture
-  
+
   The project is organized as a monorepo with these packages:
-  
+
   ```mermaid
   flowchart TB
     subgraph packages
@@ -22,7 +22,7 @@ Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
       formatters[formatters - Output formatters]
       cli[cli - Command-line interface]
     end
-    
+
     cli --> compiler
     compiler --> parser
     compiler --> resolver
@@ -33,9 +33,9 @@ Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
     validator --> core
     formatters --> core
   ```
-  
+
   ## Key Libraries
-  
+
   - Parser: Chevrotain
   - CLI: Commander.js
   - Testing: Vitest

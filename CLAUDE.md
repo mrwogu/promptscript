@@ -12,7 +12,7 @@ typescript, Node.js 20+, Nx + pnpm
 
 ## Architecture
 The project is organized as a monorepo with these packages:
-  
+
   ```mermaid
   flowchart TB
     subgraph packages
@@ -24,7 +24,7 @@ The project is organized as a monorepo with these packages:
       formatters[formatters - Output formatters]
       cli[cli - Command-line interface]
     end
-    
+
     cli --> compiler
     compiler --> parser
     compiler --> resolver

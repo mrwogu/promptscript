@@ -14,7 +14,7 @@ Add the registry to your `promptscript.yaml`:
 registry:
   git:
     url: https://github.com/mrwogu/promptscript-registry.git
-    ref: v0.1.0  # Pin to specific version
+    ref: v0.1.0 # Pin to specific version
 ```
 
 ### 2. Inherit Configurations
@@ -43,11 +43,11 @@ prs compile  # Generate output
 
 Universal foundations that all other configurations build upon.
 
-| File | Description |
-|------|-------------|
-| `@core/base` | Universal AI assistant foundation |
-| `@core/security` | Security best practices |
-| `@core/quality` | Code quality standards |
+| File             | Description                       |
+| ---------------- | --------------------------------- |
+| `@core/base`     | Universal AI assistant foundation |
+| `@core/security` | Security best practices           |
+| `@core/quality`  | Code quality standards            |
 
 ### Roles (`@roles/`)
 
@@ -55,66 +55,66 @@ Pre-configured AI personas optimized for specific tasks.
 
 #### Developer Roles
 
-| File | Description |
-|------|-------------|
-| `@roles/developer/fullstack` | Full-stack developer |
-| `@roles/developer/frontend` | Frontend specialist |
-| `@roles/developer/backend` | Backend specialist |
-| `@roles/developer/devops` | DevOps engineer |
-| `@roles/developer/dba` | Database administrator |
-| `@roles/developer/senior` | Senior developer with architectural focus |
-| `@roles/developer/qa` | Quality assurance specialist |
+| File                         | Description                               |
+| ---------------------------- | ----------------------------------------- |
+| `@roles/developer/fullstack` | Full-stack developer                      |
+| `@roles/developer/frontend`  | Frontend specialist                       |
+| `@roles/developer/backend`   | Backend specialist                        |
+| `@roles/developer/devops`    | DevOps engineer                           |
+| `@roles/developer/dba`       | Database administrator                    |
+| `@roles/developer/senior`    | Senior developer with architectural focus |
+| `@roles/developer/qa`        | Quality assurance specialist              |
 
 #### Creative Roles
 
-| File | Description |
-|------|-------------|
-| `@roles/creative/writer` | Creative writer |
+| File                          | Description           |
+| ----------------------------- | --------------------- |
+| `@roles/creative/writer`      | Creative writer       |
 | `@roles/creative/storyteller` | Narrative storyteller |
-| `@roles/creative/copywriter` | Marketing copywriter |
+| `@roles/creative/copywriter`  | Marketing copywriter  |
 
 #### Professional Roles
 
-| File | Description |
-|------|-------------|
-| `@roles/professional/consultant` | Business consultant |
-| `@roles/professional/coach` | Professional coach |
-| `@roles/professional/analyst` | Data/business analyst |
-| `@roles/professional/tech-writer` | Technical writer |
+| File                              | Description           |
+| --------------------------------- | --------------------- |
+| `@roles/professional/consultant`  | Business consultant   |
+| `@roles/professional/coach`       | Professional coach    |
+| `@roles/professional/analyst`     | Data/business analyst |
+| `@roles/professional/tech-writer` | Technical writer      |
 
 #### Specialist Roles
 
-| File | Description |
-|------|-------------|
-| `@roles/specialist/teacher` | Educational instructor |
-| `@roles/specialist/translator` | Language translator |
-| `@roles/specialist/reviewer` | Content reviewer |
-| `@roles/specialist/terminal` | Linux terminal emulator |
+| File                           | Description             |
+| ------------------------------ | ----------------------- |
+| `@roles/specialist/teacher`    | Educational instructor  |
+| `@roles/specialist/translator` | Language translator     |
+| `@roles/specialist/reviewer`   | Content reviewer        |
+| `@roles/specialist/terminal`   | Linux terminal emulator |
 
 ### Tech Stacks (`@stacks/`)
 
 Framework and language-specific configurations with best practices.
 
-| File | Description |
-|------|-------------|
-| `@stacks/react` | React + TypeScript |
-| `@stacks/vue` | Vue 3 + TypeScript |
-| `@stacks/node` | Node.js backend |
+| File             | Description        |
+| ---------------- | ------------------ |
+| `@stacks/react`  | React + TypeScript |
+| `@stacks/vue`    | Vue 3 + TypeScript |
+| `@stacks/node`   | Node.js backend    |
 | `@stacks/python` | Python development |
-| `@stacks/rust` | Rust development |
-| `@stacks/go` | Go development |
+| `@stacks/rust`   | Rust development   |
+| `@stacks/go`     | Go development     |
 
 ### Fragments (`@fragments/`)
 
 Reusable configuration blocks that can be imported with `@use`.
 
-| File | Description |
-|------|-------------|
-| `@fragments/testing` | Testing standards and patterns |
-| `@fragments/documentation` | Documentation guidelines |
-| `@fragments/git-conventions` | Git workflow conventions |
-| `@fragments/code-review` | Code review guidelines |
-| `@fragments/accessibility` | Web accessibility (WCAG) |
+| File                         | Description                    |
+| ---------------------------- | ------------------------------ |
+| `@fragments/testing`         | Testing standards and patterns |
+| `@fragments/documentation`   | Documentation guidelines       |
+| `@fragments/git-conventions` | Git workflow conventions       |
+| `@fragments/code-review`     | Code review guidelines         |
+| `@fragments/accessibility`   | Web accessibility (WCAG)       |
 
 ## Usage Patterns
 
@@ -197,7 +197,7 @@ Always pin to a specific version for stability:
 registry:
   git:
     url: https://github.com/mrwogu/promptscript-registry.git
-    ref: v0.1.0  # Recommended: pin to version tag
+    ref: v0.1.0 # Recommended: pin to version tag
 ```
 
 Available refs:

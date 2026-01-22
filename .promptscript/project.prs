@@ -8,16 +8,7 @@
   tags: [typescript, monorepo, nx, parser, compiler]
 }
 
-# Registry imports
-@use @core/quality
-@use @fragments/testing
-@use @fragments/git-conventions
-@use @fragments/code-review
-
-# Local imports
-@use ./context
-@use ./standards
-@use ./commands
+@inherit ./local
 
 @identity {
   """
