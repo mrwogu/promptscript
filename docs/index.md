@@ -75,53 +75,218 @@ flowchart LR
     ```promptscript
     @meta { id: "checkout-service", syntax: "1.0.0" }
 
-    // Inherit approved company standards
-    @inherit @company/backend-security
-    @inherit @company/typescript-standards
+    // Inherit company standards (shows composition)
+    @inherit @company/backend-standards
 
-    // Project-specific identity
     @identity {
       """
       You are an expert Backend Engineer working on the Checkout Service.
-      This service handles payments and utilizes a hexagonal architecture.
+      This service handles payments using hexagonal architecture.
       """
     }
 
     @standards {
-      typescript: {
-        strictMode: true
-        noAny: true
-      }
+      typescript: { strictMode: true, noAny: true }
+      testing: { framework: "vitest", coverage: 90 }
     }
 
-    // Define reusable tools/skills
+    @restrictions {
+      - "Never expose API keys in code"
+      - "Never skip input validation"
+    }
+
+    @shortcuts {
+      "/review": "Security-focused code review"
+      "/test": "Write unit tests with Vitest"
+    }
+
     @skills {
-      review: {
-        description: "Security-focused code review"
-        content: "Check for: IDOR, SQL Injection, and PII leaks."
+      security-audit: {
+        description: "Audit code for vulnerabilities"
+        content: "Check for: SQL injection, XSS, IDOR, PII leaks."
       }
     }
     ```
 
-=== "Outputs"
+=== "GitHub Copilot"
 
-    **GitHub Copilot** (`.github/copilot-instructions.md`)
-    ```xml
-    <context>
-      You are an expert Backend Engineer working on the Checkout Service...
-    </context>
-    <rules>
-       ...inherited security rules...
-    </rules>
+    **Generated file tree:**
+    ```
+    .github/
+    ├── copilot-instructions.md
+    ├── prompts/
+    │   ├── review.prompt.md
+    │   └── test.prompt.md
+    └── copilot-skills/
+        └── security-audit.md
     ```
 
-    **Claude Code** (`CLAUDE.md`)
-    ```markdown
-    # Identity
-    You are an expert Backend Engineer...
+    ---
 
-    # Security Rules
-    ...
+    **`.github/copilot-instructions.md`**
+    ```markdown
+    # GitHub Copilot Instructions
+
+    > Auto-generated from checkout-service.prs
+
+    ## Project
+    You are an expert Backend Engineer working on the Checkout Service.
+    This service handles payments using hexagonal architecture.
+
+    ## Code Standards
+    - TypeScript: strict mode, no `any` types
+    - Testing: vitest, 90% coverage
+
+    ## Restrictions
+    - Never expose API keys in code
+    - Never skip input validation
+
+    <!-- Inherited from @company/backend-standards -->
+    ```
+
+    **`.github/prompts/review.prompt.md`**
+    ```markdown
+    ---
+    mode: agent
+    description: Security-focused code review
+    ---
+
+    Perform a security-focused code review on the selected code.
+    Check for: SQL injection, XSS, IDOR, PII leaks.
+    ```
+
+    **`.github/prompts/test.prompt.md`**
+    ```markdown
+    ---
+    mode: agent
+    description: Write unit tests with Vitest
+    ---
+
+    Write comprehensive unit tests for the selected code using Vitest.
+    Target coverage: 90%.
+    ```
+
+    **`.github/copilot-skills/security-audit.md`**
+    ```markdown
+    ---
+    name: security-audit
+    description: Audit code for vulnerabilities
+    ---
+
+    # Security Audit Skill
+
+    Check for: SQL injection, XSS, IDOR, PII leaks.
+    ```
+
+=== "Claude Code"
+
+    **Generated file tree:**
+    ```
+    CLAUDE.md
+    .claude/
+    └── skills/
+        ├── review.md
+        ├── test.md
+        └── security-audit.md
+    ```
+
+    ---
+
+    **`CLAUDE.md`**
+    ```markdown
+    # CLAUDE.md
+
+    ## Project
+    You are an expert Backend Engineer working on the Checkout Service.
+    This service handles payments using hexagonal architecture.
+
+    ## Code Style
+    - Strict TypeScript, no `any`
+    - Testing: vitest, >90% coverage
+
+    ## Don'ts
+    - Don't expose API keys in code
+    - Don't skip input validation
+
+    ## Commands
+    /review - Security-focused code review
+    /test - Write unit tests with Vitest
+    ```
+
+    **`.claude/skills/review.md`**
+    ```markdown
+    ---
+    name: review
+    description: Security-focused code review
+    ---
+
+    Perform a security-focused code review.
+    Check for: SQL injection, XSS, IDOR, PII leaks.
+    ```
+
+    **`.claude/skills/test.md`**
+    ```markdown
+    ---
+    name: test
+    description: Write unit tests with Vitest
+    ---
+
+    Write comprehensive unit tests using Vitest.
+    Target coverage: 90%.
+    ```
+
+    **`.claude/skills/security-audit.md`**
+    ```markdown
+    ---
+    name: security-audit
+    description: Audit code for vulnerabilities
+    ---
+
+    Check for: SQL injection, XSS, IDOR, PII leaks.
+    ```
+
+=== "Cursor"
+
+    **Generated file tree:**
+    ```
+    .cursor/
+    └── rules/
+        ├── checkout-service.mdc
+        └── security-audit.mdc
+    ```
+
+    ---
+
+    **`.cursor/rules/checkout-service.mdc`**
+    ```markdown
+    ---
+    description: Checkout Service standards
+    globs: ["src/**/*.ts"]
+    alwaysApply: true
+    ---
+
+    You are working on the Checkout Service.
+    This service handles payments using hexagonal architecture.
+
+    ## Code Style
+    - TypeScript: strict mode, no `any`
+    - Testing: vitest, 90% coverage
+
+    ## Never
+    - Expose API keys in code
+    - Skip input validation
+    ```
+
+    **`.cursor/rules/security-audit.mdc`**
+    ```markdown
+    ---
+    description: Security audit skill
+    globs: ["src/**/*.ts"]
+    ---
+
+    # Security Audit
+
+    Check for: SQL injection, XSS, IDOR, PII leaks.
     ```
 
 ## Ready to standardize?

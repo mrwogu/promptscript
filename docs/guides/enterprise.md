@@ -382,9 +382,15 @@ input:
   entry: .promptscript/project.prs
 
 registry:
-  url: https://github.com/acme/promptscript-registry
-  auth:
-    token: ${GITHUB_TOKEN}
+  git:
+    url: https://github.com/acme/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000
 
 targets:
   github:
@@ -400,6 +406,22 @@ targets:
 validation:
   strict: true
 ```
+
+!!! tip "Version Pinning with Git Tags"
+For production stability, pin to specific versions using Git tags:
+
+    ```yaml
+    registry:
+      git:
+        url: https://github.com/acme/promptscript-registry.git
+        ref: v1.2.0  # Pin to specific release
+    ```
+
+    Or pin individual imports in your `.prs` files:
+
+    ```
+    @inherit @teams/frontend@v2.0.0
+    ```
 
 ## CI/CD Integration
 
@@ -487,11 +509,25 @@ jobs:
 
 ### Versioning Strategy
 
-Follow semantic versioning for registry files:
+Follow semantic versioning for registry files using Git tags:
 
-- **Major** (1.0.0 → 2.0.0): Breaking changes to block structure
-- **Minor** (1.0.0 → 1.1.0): New features, non-breaking additions
-- **Patch** (1.0.0 → 1.0.1): Bug fixes, documentation updates
+- **Major** (v1.0.0 → v2.0.0): Breaking changes to block structure
+- **Minor** (v1.0.0 → v1.1.0): New features, non-breaking additions
+- **Patch** (v1.0.0 → v1.0.1): Bug fixes, documentation updates
+
+Create releases with Git tags:
+
+```bash
+# Create release tag
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+
+# Projects can then pin to this version
+# In promptscript.yaml:
+#   registry.git.ref: v1.0.0
+# Or in .prs files:
+#   @inherit @org/base@v1.0.0
+```
 
 ### Change Management
 

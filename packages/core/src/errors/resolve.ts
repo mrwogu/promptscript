@@ -46,3 +46,51 @@ export class CircularDependencyError extends ResolveError {
     this.chain = chain;
   }
 }
+
+/**
+ * Git clone operation failed.
+ */
+export class GitCloneError extends ResolveError {
+  /** Git repository URL */
+  readonly url: string;
+
+  constructor(message: string, url: string, location?: SourceLocation, cause?: Error) {
+    super(message, location, ErrorCode.GIT_CLONE_ERROR);
+    this.name = 'GitCloneError';
+    this.url = url;
+    if (cause) {
+      (this as { cause?: Error }).cause = cause;
+    }
+  }
+}
+
+/**
+ * Git authentication failed.
+ */
+export class GitAuthError extends ResolveError {
+  /** Git repository URL */
+  readonly url: string;
+
+  constructor(message: string, url: string, location?: SourceLocation) {
+    super(message, location, ErrorCode.GIT_AUTH_ERROR);
+    this.name = 'GitAuthError';
+    this.url = url;
+  }
+}
+
+/**
+ * Git ref (branch/tag/commit) not found.
+ */
+export class GitRefNotFoundError extends ResolveError {
+  /** Git ref that was not found */
+  readonly ref: string;
+  /** Git repository URL */
+  readonly url: string;
+
+  constructor(ref: string, url: string, location?: SourceLocation) {
+    super(`Git ref not found: ${ref} in ${url}`, location, ErrorCode.GIT_REF_NOT_FOUND);
+    this.name = 'GitRefNotFoundError';
+    this.ref = ref;
+    this.url = url;
+  }
+}

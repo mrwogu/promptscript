@@ -69,7 +69,65 @@
         },
         "url": {
           "type": "string",
-          "description": "Remote URL"
+          "description": "Remote URL (HTTP registry)"
+        },
+        "git": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "Git repository URL (HTTPS or SSH)"
+            },
+            "ref": {
+              "type": "string",
+              "description": "Git ref to checkout (branch, tag, or commit hash).",
+              "default": "main"
+            },
+            "path": {
+              "type": "string",
+              "description": "Subdirectory within the repository to use as registry root.",
+              "examples": [
+                "registry/"
+              ],
+              "example": "registry/"
+            },
+            "auth": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "token",
+                    "ssh"
+                  ],
+                  "description": "Authentication type.\n- 'token': Use a personal access token (PAT)\n- 'ssh': Use SSH key authentication"
+                },
+                "token": {
+                  "type": "string",
+                  "description": "Personal access token (for token auth)"
+                },
+                "tokenEnvVar": {
+                  "type": "string",
+                  "description": "Environment variable containing the token"
+                },
+                "sshKeyPath": {
+                  "type": "string",
+                  "description": "Path to SSH key (for SSH auth).",
+                  "default": "~/.ssh/id_rsa"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false,
+              "description": "Authentication options for private repositories"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false,
+          "description": "Git repository configuration. When specified, the registry will be cloned from a Git repository."
         },
         "cache": {
           "type": "object",
@@ -110,7 +168,7 @@
             "type"
           ],
           "additionalProperties": false,
-          "description": "Authentication for private registries"
+          "description": "Authentication for HTTP registries"
         }
       },
       "additionalProperties": false,

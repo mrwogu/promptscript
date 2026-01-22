@@ -225,7 +225,7 @@ prs diff --target github
 
 ### prs pull
 
-Pull updates from registry.
+Pull updates from registry. Supports local, HTTP, and Git registries.
 
 ```bash
 prs pull [options]
@@ -233,10 +233,14 @@ prs pull [options]
 
 **Options:**
 
-| Option        | Description                     |
-| ------------- | ------------------------------- |
-| `-f, --force` | Force overwrite local changes   |
-| `--dry-run`   | Preview changes without pulling |
+| Option                | Description                                |
+| --------------------- | ------------------------------------------ |
+| `-f, --force`         | Force overwrite local changes              |
+| `--dry-run`           | Preview changes without pulling            |
+| `-b, --branch <name>` | Git branch to pull from (overrides config) |
+| `--tag <name>`        | Git tag to pull from                       |
+| `--commit <hash>`     | Git commit to pull from                    |
+| `--refresh`           | Force re-clone, ignore cache               |
 
 **Examples:**
 
@@ -249,7 +253,23 @@ prs pull --force
 
 # Preview changes
 prs pull --dry-run
+
+# Pull from specific Git branch
+prs pull --branch develop
+
+# Pull from specific Git tag
+prs pull --tag v1.0.0
+
+# Pull from specific commit
+prs pull --commit abc123
+
+# Force fresh clone (ignore cache)
+prs pull --refresh
 ```
+
+!!! note "Git Registry Options"
+The `--branch`, `--tag`, `--commit`, and `--refresh` options only apply to Git registries.
+For local or HTTP registries, these options are ignored.
 
 ---
 

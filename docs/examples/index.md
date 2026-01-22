@@ -49,6 +49,14 @@ Define specialized AI subagents for Claude Code.
 
 </div>
 
+<div class="feature-card" markdown>
+### :material-git: Git Registry
+Use Git repositories as shared registries with version control.
+
+[Git Registry →](git-registry.md)
+
+</div>
+
 </div>
 
 ## Quick Examples
@@ -169,7 +177,7 @@ targets:
     enabled: true
 ```
 
-### Full Config
+### Full Config (Local Registry)
 
 ```yaml
 # promptscript.yaml
@@ -199,9 +207,37 @@ watch:
   debounce: 300
 ```
 
+### Full Config (Git Registry)
+
+```yaml
+# promptscript.yaml
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://github.com/your-org/promptscript-registry.git
+    ref: v1.0.0
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000
+
+targets:
+  - github
+  - claude
+  - cursor
+
+validation:
+  strict: true
+```
+
 ## Browse All Examples
 
 - [Minimal](minimal.md) - Single file, basic setup
 - [Team Setup](team-setup.md) - Shared configuration across projects
 - [Enterprise](enterprise.md) - Organization-wide deployment
 - [Skills & Local](skills-and-local.md) - Advanced AI skills and private instructions
+- [Git Registry](git-registry.md) - Version-controlled shared registries

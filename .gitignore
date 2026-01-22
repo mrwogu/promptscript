@@ -55,6 +55,7 @@ temp/
 /connect.lock
 /libpeerconnection.log
 /typings
+.claude/plans
 
 vitest.config.*.timestamp*
 

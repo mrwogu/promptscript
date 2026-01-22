@@ -69,17 +69,27 @@ registry:
   # Local registry path
   path: ./registry
 
-  # Or remote registry URL
-  # url: https://github.com/org/promptscript-registry
+  # Or remote HTTP registry URL
+  # url: https://registry.example.com/promptscript
 
-  # Authentication for private registries
+  # Or Git repository (recommended for teams)
+  # git:
+  #   url: https://github.com/org/promptscript-registry.git
+  #   ref: main                    # branch, tag, or commit
+  #   path: registry/              # subdirectory in repo
+  #   auth:
+  #     type: token                # or "ssh"
+  #     tokenEnvVar: GITHUB_TOKEN  # env var with PAT
+
+  # Authentication for HTTP registries
   # auth:
-  #   token: ${REGISTRY_TOKEN}
+  #   type: bearer
+  #   tokenEnvVar: REGISTRY_TOKEN
 
   # Cache settings
   cache:
     enabled: true
-    ttl: 3600 # seconds
+    ttl: 3600000 # milliseconds (1 hour)
 
 # =====================
 # Target Configuration
@@ -187,22 +197,70 @@ input:
 
 ### registry
 
-Configures the inheritance registry.
+Configures the inheritance registry. PromptScript supports three registry types:
+
+1. **Local filesystem** - for development or monorepos
+2. **HTTP/HTTPS** - for simple remote registries
+3. **Git repository** - recommended for teams (supports versioning via tags)
+
+#### Local Registry
 
 ```yaml
 registry:
   path: ./registry
-  cache:
-    enabled: true
-    ttl: 3600
 ```
 
-| Field           | Type    | Default | Description          |
-| --------------- | ------- | ------- | -------------------- |
-| `path`          | string  | -       | Local registry path  |
-| `url`           | string  | -       | Remote registry URL  |
-| `cache.enabled` | boolean | `true`  | Enable caching       |
-| `cache.ttl`     | number  | `3600`  | Cache TTL in seconds |
+#### HTTP Registry
+
+```yaml
+registry:
+  url: https://registry.example.com/promptscript
+  auth:
+    type: bearer
+    tokenEnvVar: REGISTRY_TOKEN
+```
+
+#### Git Registry
+
+```yaml
+registry:
+  git:
+    url: https://github.com/org/promptscript-registry.git
+    ref: main
+    path: registry/
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000
+```
+
+**Registry Fields:**
+
+| Field                  | Type    | Default   | Description                    |
+| ---------------------- | ------- | --------- | ------------------------------ |
+| `path`                 | string  | -         | Local registry path            |
+| `url`                  | string  | -         | HTTP registry URL              |
+| `git.url`              | string  | -         | Git repository URL             |
+| `git.ref`              | string  | `main`    | Branch, tag, or commit         |
+| `git.path`             | string  | -         | Subdirectory within the repo   |
+| `git.auth.type`        | string  | -         | Auth type: `token` or `ssh`    |
+| `git.auth.token`       | string  | -         | Personal access token (direct) |
+| `git.auth.tokenEnvVar` | string  | -         | Env var containing the token   |
+| `git.auth.sshKeyPath`  | string  | -         | Path to SSH key (for SSH auth) |
+| `cache.enabled`        | boolean | `true`    | Enable caching                 |
+| `cache.ttl`            | number  | `3600000` | Cache TTL in milliseconds      |
+
+!!! tip "Version-tagged imports"
+With Git registry, you can pin imports to specific versions using Git tags:
+
+    ```
+    @inherit @company/base@v1.0.0
+    @use @company/security@v2.1.0 as sec
+    ```
+
+    This checkouts the specified tag before fetching the file.
 
 ### targets
 
@@ -504,9 +562,15 @@ input:
   entry: .promptscript/project.prs
 
 registry:
-  url: https://github.com/org/registry
-  auth:
-    token: ${GITHUB_TOKEN}
+  git:
+    url: https://github.com/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000
 
 validation:
   strict: true
@@ -520,4 +584,16 @@ targets:
     enabled: true
   antigravity:
     enabled: true
+```
+
+### Private Git Registry with SSH
+
+```yaml
+registry:
+  git:
+    url: git@github.com:org/private-registry.git
+    ref: v1.0.0 # Pin to specific version
+    auth:
+      type: ssh
+      sshKeyPath: ~/.ssh/id_ed25519
 ```

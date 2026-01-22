@@ -89,8 +89,44 @@ export interface PromptScriptConfig {
   registry: {
     /** Local path to registry */
     path?: string;
-    /** Remote URL */
+    /** Remote URL (HTTP registry) */
     url?: string;
+    /**
+     * Git repository configuration.
+     * When specified, the registry will be cloned from a Git repository.
+     */
+    git?: {
+      /** Git repository URL (HTTPS or SSH) */
+      url: string;
+      /**
+       * Git ref to checkout (branch, tag, or commit hash).
+       * @default 'main'
+       */
+      ref?: string;
+      /**
+       * Subdirectory within the repository to use as registry root.
+       * @example 'registry/'
+       */
+      path?: string;
+      /** Authentication options for private repositories */
+      auth?: {
+        /**
+         * Authentication type.
+         * - 'token': Use a personal access token (PAT)
+         * - 'ssh': Use SSH key authentication
+         */
+        type: 'token' | 'ssh';
+        /** Personal access token (for token auth) */
+        token?: string;
+        /** Environment variable containing the token */
+        tokenEnvVar?: string;
+        /**
+         * Path to SSH key (for SSH auth).
+         * @default '~/.ssh/id_rsa'
+         */
+        sshKeyPath?: string;
+      };
+    };
     /** Cache settings */
     cache?: {
       /** Whether caching is enabled */
@@ -98,7 +134,7 @@ export interface PromptScriptConfig {
       /** Cache TTL in milliseconds */
       ttl?: number;
     };
-    /** Authentication for private registries */
+    /** Authentication for HTTP registries */
     auth?: {
       /** Authentication type */
       type: 'bearer' | 'basic';

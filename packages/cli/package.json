@@ -39,6 +39,7 @@
     "@inquirer/prompts": "^8.2.0",
     "@promptscript/compiler": "workspace:^",
     "@promptscript/core": "workspace:^",
+    "@promptscript/resolver": "workspace:^",
     "chalk": "^5.6.2",
     "chokidar": "^5.0.0",
     "commander": "^14.0.2",

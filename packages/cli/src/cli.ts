@@ -78,6 +78,10 @@ program
   .description('Pull updates from registry')
   .option('-f, --force', 'Force overwrite')
   .option('--dry-run', 'Preview changes without pulling')
+  .option('-b, --branch <name>', 'Git branch to pull from')
+  .option('--tag <name>', 'Git tag to pull from')
+  .option('--commit <hash>', 'Git commit to pull from')
+  .option('--refresh', 'Force re-fetch from remote (ignore cache)')
   .action(pullCommand);
 
 program

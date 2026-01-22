@@ -29,6 +29,40 @@ export {
   type CompositeRegistryOptions,
 } from './registry.js';
 
+// Git registry
+export {
+  GitRegistry,
+  createGitRegistry,
+  GitCloneError,
+  GitAuthError,
+  GitRefNotFoundError,
+  type GitRegistryOptions,
+  type GitAuthOptions,
+} from './git-registry.js';
+
+// Git utilities
+export {
+  isGitUrl,
+  parseGitUrl,
+  normalizeGitUrl,
+  buildAuthenticatedUrl,
+  getCacheKey,
+  parseVersionedPath,
+  isKnownGitHost,
+  getWebUrl,
+  type ParsedGitUrl,
+  type ParsedVersionedPath,
+} from './git-url-utils.js';
+
+// Git cache manager
+export {
+  GitCacheManager,
+  createGitCacheManager,
+  type GitCacheManagerOptions,
+  type CacheMetadata,
+  type CacheEntry,
+} from './git-cache-manager.js';
+
 // Inheritance resolution
 export { resolveInheritance } from './inheritance.js';
 

@@ -71,6 +71,24 @@ describe('types', () => {
       const options: PullOptions = { force: true };
       expect(options.force).toBe(true);
     });
+
+    it('should allow Git-specific options', () => {
+      const options: PullOptions = {
+        branch: 'develop',
+        tag: 'v1.0.0',
+        commit: 'abc123',
+        refresh: true,
+      };
+      expect(options.branch).toBe('develop');
+      expect(options.tag).toBe('v1.0.0');
+      expect(options.commit).toBe('abc123');
+      expect(options.refresh).toBe(true);
+    });
+
+    it('should allow dryRun option', () => {
+      const options: PullOptions = { dryRun: true };
+      expect(options.dryRun).toBe(true);
+    });
   });
 
   describe('DiffOptions', () => {

@@ -60,6 +60,14 @@ export interface PullOptions {
   force?: boolean;
   /** Preview changes without pulling */
   dryRun?: boolean;
+  /** Git branch to pull from */
+  branch?: string;
+  /** Git tag to pull from */
+  tag?: string;
+  /** Git commit hash to pull from */
+  commit?: string;
+  /** Force refresh/re-fetch from remote registry */
+  refresh?: boolean;
 }
 
 /**
