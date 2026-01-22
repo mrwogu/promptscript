@@ -1,0 +1,29 @@
+{
+  "plansDirectory": ".claude/plans",
+  "env": {
+    "DISABLE_TELEMETRY": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "enabledPlugins": {
+    "feature-dev@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins"
+      }
+    }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); used=$(echo \"$input\" | jq -r '.context_window.used_percentage // empty'); max_tokens=$(echo \"$input\" | jq -r '.context_window.context_window_size // 0'); branch=$(git -C $(pwd) branch --show-current 2>/dev/null || echo 'no-git'); if [ -n \"$used\" ]; then used_k=$(echo \"$used $max_tokens\" | awk '{printf \"%.0f\", $1 * $2 / 100000}'); max_k=$((max_tokens / 1000)); printf \"%s | Context: %.1f%% [%dk/%dk] | %s\" \"$model\" \"$used\" \"$used_k\" \"$max_k\" \"$branch\"; else printf \"%s | %s\" \"$model\" \"$branch\"; fi"
+  }
+}

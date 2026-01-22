@@ -8,8 +8,7 @@
       "generator": "@nx/js:release-version",
       "generatorOptions": {
         "packageRoot": "{projectRoot}",
-        "currentVersionResolver": "git-tag",
-        "fallbackCurrentVersionResolver": "disk"
+        "currentVersionResolver": "disk"
       }
     }
   },

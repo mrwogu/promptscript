@@ -47,16 +47,6 @@
     }
   },
   "release": {
-    "projects": ["cli"],
-    "changelog": {
-      "projectChangelogs": false,
-      "workspaceChangelog": false
-    },
-    "git": {
-      "commit": true,
-      "commitMessage": "chore(release): {version}",
-      "tag": true,
-      "push": true
-    }
+    "projects": ["cli"]
   }
 }
