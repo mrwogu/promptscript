@@ -287,10 +287,10 @@
             "cursor": {
               "$ref": "#/definitions/TargetConfig"
             },
-            "gemini": {
+            "jetbrains": {
               "$ref": "#/definitions/TargetConfig"
             },
-            "jetbrains": {
+            "antigravity": {
               "$ref": "#/definitions/TargetConfig"
             }
           },
@@ -303,7 +303,7 @@
     },
     "TargetName": {
       "type": "string",
-      "description": "Supported output targets.q"
+      "description": "Supported output targets."
     },
     "TargetConfig": {
       "type": "object",

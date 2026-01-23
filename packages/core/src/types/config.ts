@@ -200,9 +200,15 @@ export interface PromptScriptConfig {
 }
 
 /**
- * Supported output targets.q
+ * Supported output targets.
  */
-export type TargetName = 'github' | 'claude' | 'cursor' | 'gemini' | 'jetbrains' | string;
+export type TargetName =
+  | 'github'
+  | 'claude'
+  | 'cursor'
+  | 'jetbrains'
+  | 'antigravity'
+  | string;
 
 /**
  * Default output paths for each target.
@@ -211,6 +217,6 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   github: '.github/copilot-instructions.md',
   claude: 'CLAUDE.md',
   cursor: '.cursor/rules/project.mdc',
-  gemini: '.gemini/config.md',
   jetbrains: '.junie/guidelines.md',
+  antigravity: '.junie/guidelines.md',
 };
