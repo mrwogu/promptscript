@@ -2,14 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "node",
   "packages": {
-    ".": {
+    "packages/cli": {
       "package-name": "@promptscript/cli",
-      "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
-      "extra-files": [
-        "packages/cli/package.json"
-      ]
+      "prerelease-type": "alpha"
     }
   },
   "changelog-sections": [
