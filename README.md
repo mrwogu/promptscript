@@ -43,7 +43,7 @@ flowchart LR
     Compiler --> Copilot["GitHub Copilot"]
     Compiler --> Claude["Claude Code"]
     Compiler --> Cursor["Cursor"]
-    Compiler --> JetBrains["JetBrains AI"]
+    Compiler --> Antigravity["Antigravity"]
     Compiler -->|Audit| CI["CI/CD"]
 ```
 

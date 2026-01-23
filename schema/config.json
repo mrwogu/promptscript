@@ -287,9 +287,6 @@
             "cursor": {
               "$ref": "#/definitions/TargetConfig"
             },
-            "jetbrains": {
-              "$ref": "#/definitions/TargetConfig"
-            },
             "antigravity": {
               "$ref": "#/definitions/TargetConfig"
             }

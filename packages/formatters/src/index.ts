@@ -117,4 +117,3 @@ FormatterRegistry.register('github', () => new GitHubFormatter());
 FormatterRegistry.register('claude', () => new ClaudeFormatter());
 FormatterRegistry.register('cursor', () => new CursorFormatter());
 FormatterRegistry.register('antigravity', () => new AntigravityFormatter());
-FormatterRegistry.register('jetbrains', () => new AntigravityFormatter()); // Alias for antigravity
