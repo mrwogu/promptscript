@@ -928,22 +928,14 @@ export class GitHubFormatter extends BaseFormatter {
 
     const eslint = configObj['eslint'];
     if (eslint) {
-      const items = [
-        'All package ESLint configs must inherit from `eslint.base.config.cjs` in the root',
-        'Package configs should use `createBaseConfig(__dirname)` from the base config',
-        'Do not duplicate ESLint rules in package configs - modify the base config instead',
-      ];
-      subsections.push(renderer.renderSection('eslint', renderer.renderList(items), 2));
+      const value = this.valueToString(eslint);
+      subsections.push(renderer.renderSection('eslint', `ESLint: ${value}`, 2));
     }
 
     const vite = configObj['viteRoot'];
     if (vite) {
-      const items = [
-        'Use `__dirname` for the `root` option in both `vite.config.ts` and `vitest.config.mts`',
-        'Do NOT use `import.meta.dirname` - it causes TypeScript errors with current tsconfig settings',
-        'Example: `root: __dirname,`',
-      ];
-      subsections.push(renderer.renderSection('vite-vitest', renderer.renderList(items), 2));
+      const value = this.valueToString(vite);
+      subsections.push(renderer.renderSection('vite-vitest', `Vite root: ${value}`, 2));
     }
 
     if (subsections.length === 0) return null;

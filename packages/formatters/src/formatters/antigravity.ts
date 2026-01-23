@@ -574,22 +574,14 @@ ${items.map((i) => '- ' + i).join('\n')}`;
 
     const eslint = configObj['eslint'];
     if (eslint) {
-      const items = [
-        'All package ESLint configs must inherit from `eslint.base.config.cjs` in the root',
-        'Package configs should use `createBaseConfig(__dirname)` from the base config',
-        'Do not duplicate ESLint rules in package configs - modify the base config instead',
-      ];
-      subsections.push(`### ESLint\n\n${items.map((i) => '- ' + i).join('\n')}`);
+      const value = this.valueToString(eslint);
+      subsections.push(`### ESLint\n\n- ESLint: ${value}`);
     }
 
     const vite = configObj['viteRoot'];
     if (vite) {
-      const items = [
-        'Use `__dirname` for the `root` option in both `vite.config.ts` and `vitest.config.mts`',
-        'Do NOT use `import.meta.dirname` - it causes TypeScript errors with current tsconfig settings',
-        'Example: `root: __dirname,`',
-      ];
-      subsections.push(`### Vite/Vitest\n\n${items.map((i) => '- ' + i).join('\n')}`);
+      const value = this.valueToString(vite);
+      subsections.push(`### Vite/Vitest\n\n- Vite root: ${value}`);
     }
 
     if (subsections.length === 0) return null;
