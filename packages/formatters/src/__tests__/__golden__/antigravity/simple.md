@@ -97,15 +97,11 @@ flowchart TB
 
 ### ESLint
 
-- All package ESLint configs must inherit from `eslint.base.config.cjs` in the root
-- Package configs should use `createBaseConfig(__dirname)` from the base config
-- Do not duplicate ESLint rules in package configs - modify the base config instead
+- ESLint: inherit from eslint.base.config.cjs
 
 ### Vite/Vitest
 
-- Use `__dirname` for the `root` option in both `vite.config.ts` and `vitest.config.mts`
-- Do NOT use `import.meta.dirname` - it causes TypeScript errors with current tsconfig settings
-- Example: `root: __dirname,`
+- Vite root: __dirname (not import.meta.dirname)
 
 ## Commands
 
