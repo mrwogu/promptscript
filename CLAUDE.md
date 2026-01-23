@@ -102,6 +102,10 @@ flowchart TB
 /test      - Write unit tests using:
 /build     - Run verification commands:
 /newpkg    - Generate new package with Nx:
+/test-unit - Write unit tests following AAA pattern with proper isolation
+/test-integration - Write integration tests for component boundaries
+/test-e2e  - Write end-to-end tests for critical user journeys
+/test-coverage - Analyze test coverage and suggest improvements
 /quality   - Review code for quality improvements
 /refactor  - Suggest refactoring opportunities
 /security-review - Review code for security vulnerabilities
