@@ -71,10 +71,4 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-        run: |
-          VERSION=$(node -p "require('./dist/packages/cli/package.json').version")
-          if [[ "$VERSION" == *"-"* ]]; then
-            pnpm nx release publish --tag next
-          else
-            pnpm nx release publish
-          fi
+        run: pnpm nx release publish
