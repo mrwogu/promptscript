@@ -466,9 +466,7 @@ describe('imports', () => {
         });
 
         const source = createProgram({
-          blocks: [
-            createBlock('standards', createMixedContent({ code: 'source', extra: 'val' })),
-          ],
+          blocks: [createBlock('standards', createMixedContent({ code: 'source', extra: 'val' }))],
         });
 
         const result = resolveUses(target, createUseDeclaration('./source'), source);
@@ -849,7 +847,7 @@ describe('imports', () => {
 
       const content = result.blocks[0]?.content as ObjectContent;
       // Modify original - cloned should be unaffected
-      (original.level1.level2 as Record<string, string>).value = 'modified';
+      (original.level1.level2 as Record<string, string>)['value'] = 'modified';
       const level1 = content.properties['level1'] as Record<string, unknown>;
       const level2 = level1['level2'] as Record<string, string>;
       expect(level2['value']).toBe('deep');
