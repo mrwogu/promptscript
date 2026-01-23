@@ -6,3 +6,7 @@
 
 # MkDocs
 /site
+
+# Test golden files - must match exact formatter output
+**/__golden__/**
+**/__snapshots__/**
