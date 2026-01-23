@@ -44,8 +44,6 @@ flowchart LR
     Compiler --> Claude["Claude Code"]
     Compiler --> Cursor["Cursor"]
     Compiler --> JetBrains["JetBrains AI"]
-    Compiler --> Gemini["Gemini"]
-    Compiler --> Other["...and more"]
     Compiler -->|Audit| CI["CI/CD"]
 ```
 
