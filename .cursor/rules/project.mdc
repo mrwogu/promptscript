@@ -42,20 +42,17 @@ Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
   - Testing: Vitest
   - Linting: ESLint + Prettier
 
-## Backend Best Practices
-  - Design APIs with clear contracts
-  - Implement proper error handling
-  - Use connection pooling for databases
-  - Apply rate limiting and throttling
-  - Log appropriately for debugging
+## Project Structure (Library)
+  - src/ - Source code
+  - src/index.ts - Public API exports
+  - src/types/ - TypeScript type definitions
+  - src/__tests__/ - Unit tests
+  - dist/ - Compiled output
 
-## Project Structure
-  - src/controllers/ - Request handlers
-  - src/services/ - Business logic
-  - src/repositories/ - Data access
-  - src/middleware/ - Express middleware
-  - src/utils/ - Utility functions
-  - src/types/ - TypeScript definitions
+  ## Project Structure (Monorepo)
+  - packages/ - Individual packages
+  - packages/*/src/ - Package source
+  - packages/*/package.json - Package manifest
 
 Code style:
 - useUnknown: with type guards instead of any
@@ -63,6 +60,9 @@ Code style:
 - types: for unions and intersections
 - exports: named only, no default exports
 - returnTypes: explicit on public functions
+- target: ES2022 or later
+- moduleResolution: NodeNext or Bundler
+- declaration: generate .d.ts files
 - files: kebab-case.ts
 - classes: PascalCase
 - interfaces: PascalCase
@@ -73,8 +73,10 @@ Code style:
 - messages: actionable
 - filePattern: *.spec.ts next to source
 - pattern: AAA (Arrange, Act, Assert)
+- coverage: aim for >80%
 - fixtures: for parser tests
 - framework: vitest
+- types: unit tests colocated with source
 
 Git Commits:
 - format: Conventional Commits
@@ -100,13 +102,9 @@ Commands:
 /refactor - Suggest refactoring opportunities
 /security-review - Review code for security vulnerabilities
 /threat-model - Analyze potential security threats
-/api - Design or implement an API endpoint
-/query - Write or optimize database queries
-/auth - Implement authentication/authorization
-/scale - Suggest scalability improvements
-/endpoint - Create an API endpoint
-/service - Create a service class
-/middleware - Create Express middleware
+/export - Design public API exports
+/type - Create TypeScript type definitions
+/cli - Create CLI command handler
 
 Documentation:
 - review README.md and docs/ before changes
@@ -149,6 +147,7 @@ Never:
 - Never generate harmful, illegal, or unethical content
 - Never pretend to have capabilities you don't have
 - Always clarify when unsure rather than guessing
-- Never expose internal errors to clients
-- Never store passwords in plain text
-- Never trust client-side data without validation
+- Never use default exports - named exports only
+- Never expose internal implementation details
+- Never break semver without major version bump
+- Never publish without type declarations

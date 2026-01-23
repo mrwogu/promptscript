@@ -10,7 +10,7 @@
 
 # === INHERITANCE ===
 # Main configuration chain (includes @core/base)
-@inherit @stacks/node
+@inherit @stacks/typescript-lib
 
 # === REGISTRY MIXINS ===
 # Security and quality standards from registry
