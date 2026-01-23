@@ -1,7 +1,7 @@
 {
   "name": "@promptscript/cli",
   "version": "0.0.1",
-  "description": "CLI for PromptScript - The Infrastructure-as-Code for AI Context",
+  "description": "CLI for PromptScript - standardize AI instructions across GitHub Copilot, Claude, Cursor and other AI tools",
   "repository": {
     "type": "git",
     "url": "https://github.com/mrwogu/promptscript.git",
@@ -27,6 +27,23 @@
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["promptscript", "ai", "cli", "copilot", "claude", "cursor"],
+  "keywords": [
+    "cli",
+    "enterprise",
+    "typescript",
+    "devtools",
+    "infrastructure-as-code",
+    "cursor",
+    "developer-experience",
+    "governance",
+    "claude",
+    "ai-tools",
+    "github-copilot",
+    "llm",
+    "prompt-engineering",
+    "promptscript",
+    "antigravity",
+    "promptops"
+  ],
   "license": "MIT"
 }
