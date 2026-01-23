@@ -40,10 +40,13 @@ It treats your prompts as code—compiled, validated, and deployed.
 ```mermaid
 flowchart LR
     Central["Organization Standards<br/>(.prs files)"] --> Compiler
-    Compiler -->|Output 1| Copilot["GitHub Copilot<br/>(XML/Markdown)"]
-    Compiler -->|Output 2| Claude["Claude Code<br/>(Markdown/Frontmatter)"]
-    Compiler -->|Output 3| Cursor["Cursor Rules<br/>(.mdc)"]
-    Compiler -->|Audit| CI["CI/CD Compliance"]
+    Compiler --> Copilot["GitHub Copilot"]
+    Compiler --> Claude["Claude Code"]
+    Compiler --> Cursor["Cursor"]
+    Compiler --> JetBrains["JetBrains AI"]
+    Compiler --> Gemini["Gemini"]
+    Compiler --> Other["...and more"]
+    Compiler -->|Audit| CI["CI/CD"]
 ```
 
 ## ✨ Why PromptScript?
