@@ -267,12 +267,57 @@ Use `@use` to import and merge fragments (like mixins):
 
 ### How @use Differs from @inherit
 
-| Feature         | `@inherit`                     | `@use`              |
-| --------------- | ------------------------------ | ------------------- |
-| Quantity        | Single parent only             | Multiple fragments  |
-| Purpose         | Full configuration inheritance | Modular composition |
-| Block merging   | All blocks merged              | All blocks merged   |
-| @extend support | Always available               | Only with alias     |
+| Feature              | `@inherit`                                    | `@use`                                        |
+| -------------------- | --------------------------------------------- | --------------------------------------------- |
+| **Quantity**         | Single parent only                            | Multiple allowed                              |
+| **Semantics**        | "IS-A" (this project IS a TypeScript library) | "HAS-A" (this project HAS security standards) |
+| **Purpose**          | Define fundamental project type               | Add optional capabilities                     |
+| **Merge precedence** | Child overrides parent                        | Later @use overrides earlier                  |
+| **@extend support**  | Always available                              | Only with alias                               |
+
+### When to Use Which
+
+**Use `@inherit` for:**
+
+- Defining your project's fundamental type (library, backend, frontend)
+- Building organizational hierarchies (base → team → project)
+- When you want a single, clear inheritance chain
+
+```promptscript
+# This project IS a TypeScript library
+@inherit @stacks/typescript-lib
+```
+
+**Use `@use` for:**
+
+- Adding optional capabilities (security, testing, quality)
+- Mixing in reusable fragments
+- When you need multiple imports
+
+```promptscript
+# This project HAS these capabilities
+@use @core/security
+@use @core/quality
+@use @fragments/testing
+```
+
+### Merge Precedence
+
+When the same property exists in multiple sources:
+
+```
+@inherit @stacks/typescript-lib    # Base values
+@use @core/security                # Overrides @inherit for same keys
+@use @core/quality                 # Overrides earlier @use for same keys
+@standards { ... }                 # Local values override everything
+```
+
+**Rule:** Later sources override earlier sources for the same keys.
+
+```mermaid
+flowchart LR
+    A["@inherit<br/>(base)"] --> B["@use #1"] --> C["@use #2"] --> D["Local<br/>(wins)"]
+```
 
 ### Fragment Files
 
