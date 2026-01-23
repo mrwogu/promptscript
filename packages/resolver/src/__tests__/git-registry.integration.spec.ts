@@ -20,9 +20,9 @@ import { GitRegistry, GitRefNotFoundError } from '../git-registry.js';
 const INTEGRATION_ENABLED = process.env['TEST_GIT_REGISTRY_INTEGRATION'] === 'true';
 const GITHUB_TOKEN = process.env['TEST_GIT_REGISTRY_TOKEN'];
 
-// Public repo for testing - uses a well-known, stable public repo
-const PUBLIC_REPO_URL = 'https://github.com/octocat/Hello-World.git';
-const PUBLIC_REPO_BRANCH = 'master';
+// Public repo for testing - uses the official PromptScript registry
+const PUBLIC_REPO_URL = 'https://github.com/mrwogu/promptscript-registry.git';
+const PUBLIC_REPO_BRANCH = 'main';
 
 describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
   let testCacheDir: string;
@@ -49,8 +49,8 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
         cacheDir: testCacheDir,
       });
 
-      // README exists in Hello-World repo
-      const exists = await registry.exists('README');
+      // @core/base.prs exists in promptscript-registry
+      const exists = await registry.exists('@core/base');
       expect(exists).toBe(true);
     });
 
@@ -61,9 +61,9 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
         cacheDir: testCacheDir,
       });
 
-      const files = await registry.list('');
+      const files = await registry.list('@core');
       expect(files.length).toBeGreaterThan(0);
-      expect(files.some((f) => f === 'README' || f === 'README.md')).toBe(true);
+      expect(files.some((f) => f === 'base.prs')).toBe(true);
     });
 
     it('should get commit hash', async () => {
@@ -84,7 +84,8 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
         cacheDir: join(testCacheDir, 'nonexistent-branch'),
       });
 
-      await expect(registry.exists('README')).rejects.toThrow(GitRefNotFoundError);
+      // Use fetch() since exists() catches all errors and returns false
+      await expect(registry.fetch('@core/base')).rejects.toThrow(GitRefNotFoundError);
     });
 
     it('should use cache on second access', async () => {
@@ -98,12 +99,12 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
 
       // First access - should clone
       const startTime = Date.now();
-      await registry.exists('README');
+      await registry.exists('@core/base');
       const firstAccessTime = Date.now() - startTime;
 
       // Second access - should use cache (much faster)
       const startTime2 = Date.now();
-      await registry.exists('README');
+      await registry.exists('@core/base');
       const secondAccessTime = Date.now() - startTime2;
 
       // Cache access should be significantly faster
@@ -119,14 +120,15 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
       });
 
       // First access
-      await registry.exists('README');
+      const existsBefore = await registry.exists('@core/base');
+      expect(existsBefore).toBe(true);
 
       // Refresh should re-clone
       await registry.refresh();
 
       // Should still work after refresh
-      const exists = await registry.exists('README');
-      expect(exists).toBe(true);
+      const existsAfter = await registry.exists('@core/base');
+      expect(existsAfter).toBe(true);
     });
   });
 
@@ -146,7 +148,7 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
         },
       });
 
-      const exists = await registry.exists('README');
+      const exists = await registry.exists('@core/base');
       expect(exists).toBe(true);
     });
   });

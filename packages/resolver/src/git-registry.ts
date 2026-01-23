@@ -427,10 +427,12 @@ export class GitRegistry implements Registry {
 
   /**
    * Resolve a file path within the repository.
+   *
+   * Note: The @ prefix is preserved as it's part of the directory name
+   * (e.g., @core/base.prs lives in a directory literally named "@core")
    */
   private resolveFilePath(repoPath: string, relativePath: string): string {
-    // Remove leading @ from path if present
-    let cleanPath = relativePath.startsWith('@') ? relativePath.slice(1) : relativePath;
+    let cleanPath = relativePath;
 
     // Add .prs extension if not present and path doesn't end with /
     if (!cleanPath.endsWith('.prs') && !cleanPath.endsWith('/')) {
@@ -447,17 +449,17 @@ export class GitRegistry implements Registry {
 
   /**
    * Resolve a directory path within the repository.
+   *
+   * Note: The @ prefix is preserved as it's part of the directory name
+   * (e.g., @core lives in a directory literally named "@core")
    */
   private resolveDirectoryPath(repoPath: string, relativePath: string): string {
-    // Remove leading @ from path if present
-    const cleanPath = relativePath.startsWith('@') ? relativePath.slice(1) : relativePath;
-
     // Build full path with optional subPath
     if (this.subPath) {
-      return join(repoPath, this.subPath, cleanPath);
+      return join(repoPath, this.subPath, relativePath);
     }
 
-    return join(repoPath, cleanPath);
+    return join(repoPath, relativePath);
   }
 
   /**
@@ -482,6 +484,7 @@ export class GitRegistry implements Registry {
     const message = error.message.toLowerCase();
     return (
       message.includes('could not find remote branch') ||
+      message.includes("couldn't find remote ref") ||
       message.includes('pathspec') ||
       message.includes('did not match any') ||
       message.includes('not found in upstream')

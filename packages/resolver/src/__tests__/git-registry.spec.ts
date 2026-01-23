@@ -52,14 +52,15 @@ describe('GitRegistry', () => {
     await fs.mkdir(testRepoDir, { recursive: true });
 
     // Mock clone to create directory structure
+    // Note: Registry directories are named with @ prefix (e.g., @company, @core)
     mockGit.clone.mockImplementation(async (_url: string, targetPath: string) => {
       await fs.mkdir(targetPath, { recursive: true });
       // Create a mock .git directory
       await fs.mkdir(join(targetPath, '.git'), { recursive: true });
-      // Create some mock files
-      await fs.mkdir(join(targetPath, 'company'), { recursive: true });
-      await fs.writeFile(join(targetPath, 'company', 'base.prs'), '@meta\nname = "base"');
-      await fs.writeFile(join(targetPath, 'company', 'security.prs'), '@meta\nname = "security"');
+      // Create some mock files with @ prefix matching real registry structure
+      await fs.mkdir(join(targetPath, '@company'), { recursive: true });
+      await fs.writeFile(join(targetPath, '@company', 'base.prs'), '@meta\nname = "base"');
+      await fs.writeFile(join(targetPath, '@company', 'security.prs'), '@meta\nname = "security"');
     });
   });
 
@@ -141,9 +142,9 @@ describe('GitRegistry', () => {
       mockGit.clone.mockImplementation(async (_url: string, targetPath: string) => {
         await fs.mkdir(targetPath, { recursive: true });
         await fs.mkdir(join(targetPath, '.git'), { recursive: true });
-        await fs.mkdir(join(targetPath, 'registry', 'company'), { recursive: true });
+        await fs.mkdir(join(targetPath, 'registry', '@company'), { recursive: true });
         await fs.writeFile(
-          join(targetPath, 'registry', 'company', 'base.prs'),
+          join(targetPath, 'registry', '@company', 'base.prs'),
           '@meta\nname = "base-in-subpath"'
         );
       });
@@ -379,8 +380,8 @@ describe('GitRegistry', () => {
         .mockImplementationOnce(async (_url: string, targetPath: string) => {
           await fs.mkdir(targetPath, { recursive: true });
           await fs.mkdir(join(targetPath, '.git'), { recursive: true });
-          await fs.mkdir(join(targetPath, 'company'), { recursive: true });
-          await fs.writeFile(join(targetPath, 'company', 'base.prs'), '@meta\nname = "base"');
+          await fs.mkdir(join(targetPath, '@company'), { recursive: true });
+          await fs.writeFile(join(targetPath, '@company', 'base.prs'), '@meta\nname = "base"');
         });
 
       const registry = new GitRegistry({
