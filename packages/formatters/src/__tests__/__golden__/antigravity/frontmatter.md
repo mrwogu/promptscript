@@ -108,7 +108,7 @@ flowchart TB
 
 ### Vite/Vitest
 
-- Vite root: __dirname (not import.meta.dirname)
+- Vite root: \_\_dirname (not import.meta.dirname)
 
 ## Commands
 
@@ -141,6 +141,7 @@ pnpm nx graph             # View dependency graph
 
 After completing any code changes, run the following commands to ensure code quality:
 After completing code changes, always run:
+
 ```bash
 pnpm run format     # Format code with Prettier
 pnpm run lint       # Check for linting errors
