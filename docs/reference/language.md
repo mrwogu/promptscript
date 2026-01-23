@@ -566,6 +566,72 @@ Modify inherited or existing blocks:
 | Boolean | `true`, `false`      |
 | Null    | `null`               |
 
+### Strings
+
+PromptScript supports two string syntaxes:
+
+#### Single-line Strings
+
+Use double or single quotes for short, single-line values:
+
+```promptscript
+@shortcuts {
+  "/review": "Review code for quality and best practices"
+  "/help": 'Show available commands'
+}
+```
+
+#### Multi-line Strings
+
+Use triple quotes (`"""`) for content that spans multiple lines:
+
+```promptscript
+@shortcuts {
+  "/test": """
+    Write unit tests using:
+    - Vitest as the test runner
+    - AAA pattern (Arrange, Act, Assert)
+    - Target >90% coverage
+  """
+}
+```
+
+Multi-line strings:
+
+- Preserve line breaks and formatting
+- Are ideal for lists, instructions, and documentation
+- Can be used anywhere a string is expected
+
+!!! tip "When to Use Which"
+
+    | Content Type | Recommended Syntax |
+    | ------------ | ------------------ |
+    | Short description (1 line) | `"..."` or `'...'` |
+    | Multiple lines, lists, steps | `"""..."""` |
+    | Code examples, documentation | `"""..."""` |
+
+    Both forms are semantically equivalent - choose based on readability.
+
+#### Example: Mixed Usage
+
+```promptscript
+@shortcuts {
+  # Single-line - simple description
+  "/review": "Review code for quality and best practices"
+
+  # Multi-line - detailed instructions
+  "/deploy": """
+    Deploy to production:
+    1. Run tests: pnpm test
+    2. Build: pnpm build
+    3. Deploy: pnpm deploy:prod
+  """
+
+  # Single-line - short command
+  "/format": "Run prettier on all files"
+}
+```
+
 ### Identifiers
 
 Bare words are treated as strings:
@@ -593,20 +659,6 @@ code: {
     required: true
     coverage: 80
   }
-}
-```
-
-### Multi-line Text
-
-Triple-quoted strings for multi-line content:
-
-```promptscript
-@identity {
-  """
-  This is a multi-line
-  text block that preserves
-  line breaks and indentation.
-  """
 }
 ```
 
