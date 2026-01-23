@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha.1](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.1...v1.0.0-alpha.1) (2026-01-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* All packages now use ES Modules. Consumers must use ESM imports.
+* All packages now use ES Modules. Consumers must use ESM imports.
+
+### chore
+
+* prepare alpha.1 release ([01bb952](https://github.com/mrwogu/promptscript/commit/01bb952a967566c0dcd61b80eec2119c06966167))
+
+
+### refactor
+
+* migrate to pure ESM ([72d0333](https://github.com/mrwogu/promptscript/commit/72d0333580c688c617831885c13a270619817d5b))
+* migrate to pure ESM ([8a59387](https://github.com/mrwogu/promptscript/commit/8a59387d6f81ee9db33c46db8e737fe52e705c2e))
+
+
+### Features
+
+* cli ([d6cfb7c](https://github.com/mrwogu/promptscript/commit/d6cfb7c5ee7262fcfb63f3ee79333fadfb39ee34))
+* **cli/diff:** support pager ([c5133f7](https://github.com/mrwogu/promptscript/commit/c5133f7a58f0f03323c8fa925387178e823d9415))
+* **cli:** add Antigravity to AI tool detection ([809d055](https://github.com/mrwogu/promptscript/commit/809d055d9b9308059306c6dd8d5893ecdfe8f3b5))
+* **cli:** add chokidar watch mode and --registry flag ([afe30a9](https://github.com/mrwogu/promptscript/commit/afe30a93171ae2f08ea3d022b30a1356deca0627))
+* **cli:** add Codecov bundle analysis ([b93568f](https://github.com/mrwogu/promptscript/commit/b93568f81835dd62517ff5f290687dd5ef9cb4da))
+* **cli:** force init ([5275c14](https://github.com/mrwogu/promptscript/commit/5275c14b9559f16cbc1b4aecf2f8edcf520e51ff))
+* **core:** config schema ([2692b4d](https://github.com/mrwogu/promptscript/commit/2692b4d51e1fb20c4df35b5ce6b8264369910bcb))
+* **formatters:** copilot agents support ([886f6fc](https://github.com/mrwogu/promptscript/commit/886f6fca9d0a7cd276997a31e62618ef0153322f))
+* interactive cli init ([3f77d28](https://github.com/mrwogu/promptscript/commit/3f77d28c1f7644cb9c0620ab4b9f94c01d1ea243))
+* **resolver:** add Git registry support for remote configuration sharing ([555e488](https://github.com/mrwogu/promptscript/commit/555e4883c26b45661965d5994cbaf7f43b928d26))
+* support conventions ([3ccea55](https://github.com/mrwogu/promptscript/commit/3ccea55eb92e3374a2613bbf975c7b4cae80fcf5))
+
+
+### Bug Fixes
+
+* **cli:** change registry configuration default to No ([0927050](https://github.com/mrwogu/promptscript/commit/0927050523df7a659ea5eff47c11ae11dba976a6))
+
 ## [1.0.0-alpha.1](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.0...v1.0.0-alpha.1) (2026-01-23)
 
 
