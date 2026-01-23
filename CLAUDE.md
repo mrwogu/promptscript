@@ -67,10 +67,11 @@ flowchart TB
   end
 
   cli --> compiler
-  compiler --> parser
+  cli --> resolver
   compiler --> resolver
   compiler --> validator
   compiler --> formatters
+  resolver --> parser
   parser --> core
   resolver --> core
   validator --> core
