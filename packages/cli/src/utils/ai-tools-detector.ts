@@ -3,7 +3,7 @@ import { type CliServices, createDefaultServices } from '../services.js';
 /**
  * Supported AI tool targets.
  */
-export type AIToolTarget = 'github' | 'claude' | 'cursor';
+export type AIToolTarget = 'github' | 'claude' | 'cursor' | 'antigravity';
 
 /**
  * AI tool detection result.
@@ -40,6 +40,11 @@ const AI_TOOL_PATTERNS: AIToolPattern[] = [
     files: ['.cursor/rules/project.mdc', '.cursorrules', '.cursor/rules.md'],
     directories: ['.cursor', '.cursor/rules'],
   },
+  {
+    target: 'antigravity',
+    files: ['.agent/rules/project.md'],
+    directories: ['.agent', '.agent/rules'],
+  },
 ];
 
 /**
@@ -66,6 +71,7 @@ export async function detectAITools(
     github: [],
     claude: [],
     cursor: [],
+    antigravity: [],
   };
 
   for (const pattern of AI_TOOL_PATTERNS) {
@@ -98,7 +104,7 @@ export async function detectAITools(
  * Get all available targets.
  */
 export function getAllTargets(): AIToolTarget[] {
-  return ['github', 'claude', 'cursor'];
+  return ['github', 'claude', 'cursor', 'antigravity'];
 }
 
 /**

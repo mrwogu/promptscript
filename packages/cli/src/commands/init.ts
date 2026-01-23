@@ -249,6 +249,7 @@ function formatTargetName(target: AIToolTarget): string {
     github: 'GitHub Copilot',
     claude: 'Claude (Anthropic)',
     cursor: 'Cursor',
+    antigravity: 'Antigravity (Google)',
   };
   return names[target] ?? target;
 }

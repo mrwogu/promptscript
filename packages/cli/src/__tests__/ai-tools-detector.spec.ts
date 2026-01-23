@@ -98,7 +98,7 @@ describe('utils/ai-tools-detector', () => {
     it('should return all available targets', () => {
       const targets = getAllTargets();
 
-      expect(targets).toEqual(['github', 'claude', 'cursor']);
+      expect(targets).toEqual(['github', 'claude', 'cursor', 'antigravity']);
     });
   });
 
@@ -106,7 +106,7 @@ describe('utils/ai-tools-detector', () => {
     it('should return detected targets when some exist', () => {
       const detection: AIToolsDetection = {
         detected: ['github', 'claude'],
-        details: { github: [], claude: [], cursor: [] },
+        details: { github: [], claude: [], cursor: [], antigravity: [] },
       };
 
       const suggested = getSuggestedTargets(detection);
@@ -117,12 +117,12 @@ describe('utils/ai-tools-detector', () => {
     it('should return all targets when none detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: { github: [], claude: [], cursor: [] },
+        details: { github: [], claude: [], cursor: [], antigravity: [] },
       };
 
       const suggested = getSuggestedTargets(detection);
 
-      expect(suggested).toEqual(['github', 'claude', 'cursor']);
+      expect(suggested).toEqual(['github', 'claude', 'cursor', 'antigravity']);
     });
   });
 
@@ -134,6 +134,7 @@ describe('utils/ai-tools-detector', () => {
           github: ['.github/copilot-instructions.md'],
           claude: [],
           cursor: [],
+          antigravity: [],
         },
       };
 
@@ -146,12 +147,29 @@ describe('utils/ai-tools-detector', () => {
     it('should show message when no tools detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: { github: [], claude: [], cursor: [] },
+        details: { github: [], claude: [], cursor: [], antigravity: [] },
       };
 
       const lines = formatDetectionResults(detection);
 
       expect(lines).toContain('No existing AI tool configurations detected.');
+    });
+
+    it('should detect Antigravity configuration', async () => {
+      const detection: AIToolsDetection = {
+        detected: ['antigravity'],
+        details: {
+          github: [],
+          claude: [],
+          cursor: [],
+          antigravity: ['.agent/rules/project.md'],
+        },
+      };
+
+      const lines = formatDetectionResults(detection);
+
+      expect(lines).toContain('Detected AI tool configurations:');
+      expect(lines.some((l) => l.includes('antigravity'))).toBe(true);
     });
   });
 });
