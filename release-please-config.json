@@ -2,11 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "node",
   "packages": {
-    "packages/cli": {
+    ".": {
       "package-name": "@promptscript/cli",
-      "changelog-path": "../../CHANGELOG.md",
+      "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true
+      "bump-patch-for-minor-pre-major": true,
+      "extra-files": [
+        "packages/cli/package.json"
+      ]
     }
   },
   "changelog-sections": [
@@ -22,7 +25,7 @@
     { "type": "build", "section": "Build System", "hidden": true },
     { "type": "ci", "section": "Continuous Integration", "hidden": true }
   ],
-  "pull-request-title-pattern": "chore(release): ${version}",
+  "pull-request-title-pattern": "chore${scope}: release ${version}",
   "include-component-in-tag": false,
   "include-v-in-tag": true
 }
