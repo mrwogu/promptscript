@@ -10,3 +10,9 @@
 # Test golden files - must match exact formatter output
 **/__golden__/**
 **/__snapshots__/**
+
+# PromptScript generated files - managed by prs compile
+CLAUDE.md
+.github/copilot-instructions.md
+.cursor/rules/
+.agent/rules/
