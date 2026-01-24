@@ -67,7 +67,7 @@ The project is organized as a monorepo with these packages:
 - Strict TypeScript, no `any`
 - Named exports only
 - Files: kebab-case.ts
-- Testing: vitest, >aim for >80%% coverage
+- Testing: vitest, >90% coverage
 
 ## Git Commits
 - Format: Conventional Commits
@@ -81,20 +81,20 @@ The project is organized as a monorepo with these packages:
 ## Commands
 ```
 /review    - Review code for quality, type safety, and best practices
-/test      - Write unit tests using:
-/test-unit - Write unit tests following:
-/test-integration - Write integration tests for component boundaries:
-/test-coverage - Analyze test coverage and suggest improvements:
-/build     - Run verification commands:
-/newpkg    - Generate new package with Nx:
-/quality   - Review code for quality improvements:
-/refactor  - Suggest refactoring opportunities:
-/security-review - Review code for security vulnerabilities:
-/cli       - Create CLI command handler:
-/test-e2e  - Write end-to-end tests for critical user journeys
-/threat-model - Analyze potential security threats
-/export    - Design public API exports
-/type      - Create TypeScript type definitions
+/test      - 
+/test-unit - 
+/test-integration - 
+/test-coverage - 
+/test-e2e  - 
+/build     - 
+/newpkg    - 
+/quality   - 
+/refactor  - 
+/security-review - 
+/threat-model - 
+/cli       - 
+/export    - 
+/type      - 
 ```
 
 ```bash

@@ -7,9 +7,18 @@ registry:
   path: ../promptscript-registry
 
 targets:
-  - github
-  - claude
+  # GitHub Copilot - multifile generates .github/prompts/*.prompt.md
+  - github:
+      version: multifile
+
+  # Claude Code - multifile generates .claude/rules/*.md
+  - claude:
+      version: multifile
+
+  # Cursor - modern generates .cursor/commands/*.md for multi-line shortcuts
   - cursor
+
+  # Antigravity
   - antigravity
 
 validation:

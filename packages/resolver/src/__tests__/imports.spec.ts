@@ -753,7 +753,7 @@ describe('imports', () => {
       expect(testVal.value).toBe('source text');
     });
 
-    it('should handle type mismatch where target wins', () => {
+    it('should handle type mismatch where source wins', () => {
       const target = createProgram({
         blocks: [
           createBlock(
@@ -779,8 +779,9 @@ describe('imports', () => {
       const result = resolveUses(target, createUseDeclaration('./source'), source);
 
       const content = result.blocks[0]?.content as ObjectContent;
-      // Target wins on type mismatch
-      expect(content.properties['value']).toBe(42);
+      // Source (import) wins on type mismatch - allows imports to override
+      // inherited values with different types (e.g., string to object)
+      expect(content.properties['value']).toBe('string');
     });
 
     it('should preserve null values', () => {

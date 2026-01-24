@@ -272,6 +272,74 @@ Write unit tests using:
 !!! tip "Using Cursor Commands"
 Type `/` in Cursor chat to see available commands, then select to execute.
 
+#### GitHub Copilot Prompts
+
+To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the object syntax with `prompt: true`:
+
+```promptscript
+@shortcuts {
+  # Simple string → documentation only (appears in Commands section)
+  "/review": "Review code for quality"
+
+  # Object with prompt: true → generates .github/prompts/test.prompt.md
+  "/test": {
+    prompt: true
+    description: "Write unit tests"
+    content: """
+      Write unit tests using:
+      - Vitest as the test runner
+      - AAA pattern (Arrange, Act, Assert)
+    """
+  }
+
+  # Agent mode prompt with tools
+  "/deploy": {
+    prompt: true
+    description: "Deploy to production"
+    mode: agent
+    tools: [run_terminal, read_file]
+    content: """
+      Deploy the application to production:
+      1. Run tests
+      2. Build the project
+      3. Deploy to staging
+      4. Run smoke tests
+      5. Deploy to production
+    """
+  }
+}
+```
+
+| Property      | Type     | Required | Description                              |
+| ------------- | -------- | -------- | ---------------------------------------- |
+| `prompt`      | boolean  | Yes      | Must be `true` to generate a prompt file |
+| `description` | string   | Yes      | Shown in prompt picker UI                |
+| `content`     | string   | Yes      | The prompt instructions                  |
+| `mode`        | string   | No       | Set to `"agent"` for agentic prompts     |
+| `tools`       | string[] | No       | Tools available in agent mode            |
+
+!!! note "Output Mode Required"
+Prompt files are only generated when using `version: multifile` or `version: full` in your target configuration:
+
+    ```yaml
+    targets:
+      - github:
+          version: multifile  # Enables .github/prompts/*.prompt.md
+    ```
+
+**Generated file** (`.github/prompts/test.prompt.md`):
+
+```markdown
+---
+description: 'Write unit tests'
+---
+
+Write unit tests using:
+
+- Vitest as the test runner
+- AAA pattern (Arrange, Act, Assert)
+```
+
 ### @params
 
 Configurable parameters:

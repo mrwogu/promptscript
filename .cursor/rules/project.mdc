@@ -73,7 +73,6 @@ Code style:
 - messages: actionable
 - filePattern: *.spec.ts next to source
 - pattern: AAA (Arrange, Act, Assert)
-- coverage: aim for >80%
 - fixtures: for parser tests
 - framework: vitest
 - types: unit tests colocated with source
@@ -91,20 +90,20 @@ Config:
 
 Commands:
 /review - Review code for quality, type safety, and best practices
-/test - Write unit tests using:
-/test-unit - Write unit tests following:
-/test-integration - Write integration tests for component boundaries:
-/test-coverage - Analyze test coverage and suggest improvements:
-/build - Run verification commands:
-/newpkg - Generate new package with Nx:
-/quality - Review code for quality improvements:
-/refactor - Suggest refactoring opportunities:
-/security-review - Review code for security vulnerabilities:
-/cli - Create CLI command handler:
-/test-e2e - Write end-to-end tests for critical user journeys
-/threat-model - Analyze potential security threats
-/export - Design public API exports
-/type - Create TypeScript type definitions
+/test - 
+/test-unit - 
+/test-integration - 
+/test-coverage - 
+/test-e2e - 
+/build - 
+/newpkg - 
+/quality - 
+/refactor - 
+/security-review - 
+/threat-model - 
+/cli - 
+/export - 
+/type - 
 
 Development Commands:
 ```bash

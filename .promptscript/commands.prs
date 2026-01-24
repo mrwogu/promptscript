@@ -1,92 +1,185 @@
 # Shortcuts and development knowledge
 
 @shortcuts {
-  # Single-line shortcuts (documentation only)
+  # === Documentation-only shortcuts (simple strings) ===
+  # These appear in the Commands section of generated files
+
   "/review": "Review code for quality, type safety, and best practices"
 
-  # Multi-line shortcuts (become .cursor/commands/*.md)
-  "/test": """
-    Write unit tests using:
-    - Vitest as the test runner
-    - AAA pattern (Arrange, Act, Assert)
-    - Fixtures for parser tests
-    - Target >90% coverage
-  """
+  # === Prompt shortcuts (with prompt: true) ===
+  # These generate .github/prompts/*.prompt.md files (GitHub Copilot)
+  # AND .cursor/commands/*.md files (Cursor 1.6+)
 
-  "/test-unit": """
-    Write unit tests following:
-    - AAA pattern (Arrange, Act, Assert)
-    - Proper test isolation with mocks
-    - Descriptive test names
-    - Edge cases and error conditions
-    - No testing of implementation details
-  """
+  "/test": {
+    prompt: true
+    description: "Write unit tests using Vitest"
+    content: """
+      Write unit tests using:
+      - Vitest as the test runner
+      - AAA pattern (Arrange, Act, Assert)
+      - Fixtures for parser tests
+      - Target >90% coverage
+    """
+  }
 
-  "/test-integration": """
-    Write integration tests for component boundaries:
-    - Test real interactions between modules
-    - Use minimal mocking (only external services)
-    - Verify data flow across layers
-    - Test error propagation
-  """
+  "/test-unit": {
+    prompt: true
+    description: "Write unit tests following best practices"
+    content: """
+      Write unit tests following:
+      - AAA pattern (Arrange, Act, Assert)
+      - Proper test isolation with mocks
+      - Descriptive test names
+      - Edge cases and error conditions
+      - No testing of implementation details
+    """
+  }
 
-  "/test-coverage": """
-    Analyze test coverage and suggest improvements:
-    1. Run: pnpm nx test <pkg> --coverage
-    2. Identify uncovered branches and functions
-    3. Prioritize critical paths
-    4. Suggest specific test cases to add
-  """
+  "/test-integration": {
+    prompt: true
+    description: "Write integration tests for component boundaries"
+    content: """
+      Write integration tests for component boundaries:
+      - Test real interactions between modules
+      - Use minimal mocking (only external services)
+      - Verify data flow across layers
+      - Test error propagation
+    """
+  }
 
-  "/build": """
-    Run verification commands:
-    - pnpm run format (Prettier)
-    - pnpm run lint (ESLint)
-    - pnpm run build (all packages)
-    - pnpm run typecheck (TypeScript)
-    - pnpm run test (all tests)
-  """
+  "/test-coverage": {
+    prompt: true
+    description: "Analyze test coverage and suggest improvements"
+    content: """
+      Analyze test coverage and suggest improvements:
+      1. Run: pnpm nx test <pkg> --coverage
+      2. Identify uncovered branches and functions
+      3. Prioritize critical paths
+      4. Suggest specific test cases to add
+    """
+  }
 
-  "/newpkg": """
-    Generate new package with Nx:
-    pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPath=@promptscript/<name> --bundler=swc --linter=eslint --unitTestRunner=vitest
-  """
+  "/test-e2e": {
+    prompt: true
+    description: "Write end-to-end tests for critical user journeys"
+    content: """
+      Write end-to-end tests for critical user journeys:
+      - Focus on happy paths and error states
+      - Test real CLI invocations
+      - Verify file system outputs
+      - Check error messages and exit codes
+    """
+  }
 
-  "/quality": """
-    Review code for quality improvements:
-    - Check for code duplication
-    - Identify complex functions to simplify
-    - Look for magic numbers/strings
-    - Verify error handling completeness
-    - Check for proper TypeScript usage
-  """
+  "/build": {
+    prompt: true
+    description: "Run verification commands"
+    content: """
+      Run verification commands:
+      - pnpm run format (Prettier)
+      - pnpm run lint (ESLint)
+      - pnpm run build (all packages)
+      - pnpm run typecheck (TypeScript)
+      - pnpm run test (all tests)
+    """
+  }
 
-  "/refactor": """
-    Suggest refactoring opportunities:
-    - Extract reusable functions
-    - Simplify conditional logic
-    - Improve naming clarity
-    - Reduce coupling between modules
-    - Apply SOLID principles where appropriate
-  """
+  "/newpkg": {
+    prompt: true
+    description: "Generate new package with Nx"
+    content: """
+      Generate new package with Nx:
+      pnpm nx g @nx/js:lib <name> --directory=packages/<name> --publishable --importPath=@promptscript/<name> --bundler=swc --linter=eslint --unitTestRunner=vitest
+    """
+  }
 
-  "/security-review": """
-    Review code for security vulnerabilities:
-    - Input validation and sanitization
-    - Path traversal risks
-    - Command injection possibilities
-    - Sensitive data exposure
-    - OWASP Top 10 considerations
-  """
+  "/quality": {
+    prompt: true
+    description: "Review code for quality improvements"
+    content: """
+      Review code for quality improvements:
+      - Check for code duplication
+      - Identify complex functions to simplify
+      - Look for magic numbers/strings
+      - Verify error handling completeness
+      - Check for proper TypeScript usage
+    """
+  }
 
-  "/cli": """
-    Create CLI command handler:
-    - Use commander.js patterns from existing commands
-    - Add proper option parsing
-    - Include help text and examples
-    - Handle errors gracefully with actionable messages
-    - Add to packages/cli/src/commands/
-  """
+  "/refactor": {
+    prompt: true
+    description: "Suggest refactoring opportunities"
+    content: """
+      Suggest refactoring opportunities:
+      - Extract reusable functions
+      - Simplify conditional logic
+      - Improve naming clarity
+      - Reduce coupling between modules
+      - Apply SOLID principles where appropriate
+    """
+  }
+
+  "/security-review": {
+    prompt: true
+    description: "Review code for security vulnerabilities"
+    content: """
+      Review code for security vulnerabilities:
+      - Input validation and sanitization
+      - Path traversal risks
+      - Command injection possibilities
+      - Sensitive data exposure
+      - OWASP Top 10 considerations
+    """
+  }
+
+  "/threat-model": {
+    prompt: true
+    description: "Analyze potential security threats"
+    content: """
+      Analyze potential security threats:
+      - Identify trust boundaries
+      - Map data flows and entry points
+      - Enumerate potential attack vectors
+      - Suggest mitigations for STRIDE threats
+    """
+  }
+
+  "/cli": {
+    prompt: true
+    description: "Create CLI command handler"
+    content: """
+      Create CLI command handler:
+      - Use commander.js patterns from existing commands
+      - Add proper option parsing
+      - Include help text and examples
+      - Handle errors gracefully with actionable messages
+      - Add to packages/cli/src/commands/
+    """
+  }
+
+  "/export": {
+    prompt: true
+    description: "Design public API exports"
+    content: """
+      Design public API exports:
+      - Only export what users need
+      - Use named exports, never default
+      - Keep internal implementation private
+      - Document breaking changes
+    """
+  }
+
+  "/type": {
+    prompt: true
+    description: "Create TypeScript type definitions"
+    content: """
+      Create TypeScript type definitions:
+      - Prefer interfaces for objects
+      - Use strict types, avoid any
+      - Add JSDoc comments
+      - Export from index.ts
+    """
+  }
 }
 
 @knowledge {

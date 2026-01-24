@@ -232,12 +232,11 @@ function mergeProperties(
         sourceVal as Record<string, Value>,
         targetVal as Record<string, Value>
       );
-    } else if (typeof sourceVal === typeof targetVal) {
-      // Source (import) wins for same-type primitives (strings, numbers, etc.)
-      // sourceVal is already in result from spread, so no action needed
     } else {
-      // Target wins for type mismatch only
-      result[key] = deepCloneValue(targetVal);
+      // Source (import) wins for same-type primitives and type mismatches.
+      // This allows imported files to override inherited/accumulated values,
+      // including changing a string shortcut to an object with prompt: true.
+      // sourceVal is already in result from spread, so no action needed
     }
   }
 

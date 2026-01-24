@@ -77,9 +77,26 @@ Open `.promptscript/project.prs` and customize:
 }
 
 @shortcuts {
+  # Simple string → documentation only
   "/review": "Review code for quality and best practices"
-  "/test": "Write unit tests using Vitest and Testing Library"
-  "/refactor": "Suggest refactoring improvements"
+
+  # Object with prompt: true → generates prompt files
+  "/test": {
+    prompt: true
+    description: "Write unit tests"
+    content: """
+      Write unit tests using:
+      - Vitest as the test runner
+      - Testing Library for components
+      - AAA pattern (Arrange, Act, Assert)
+    """
+  }
+
+  "/refactor": {
+    prompt: true
+    description: "Suggest refactoring improvements"
+    content: "Analyze the code and suggest refactoring improvements for better maintainability."
+  }
 }
 ```
 
@@ -92,6 +109,7 @@ prs compile
 ```
 
 By default, this generates:
+
 - `.github/copilot-instructions.md` (for GitHub Copilot)
 - `CLAUDE.md` (for Claude Code)
 - `.cursor/rules/project.mdc` (for Cursor)
@@ -112,13 +130,20 @@ After initialization, your project will have:
 ```
 your-project/
 ├── .promptscript/
-│   └── project.prs              # Your instructions
-├── promptscript.yaml            # Configuration
+│   └── project.prs                    # Your instructions
+├── promptscript.yaml                  # Configuration
 ├── .github/
-│   └── copilot-instructions.md  # Generated
-├── CLAUDE.md                    # Generated
-├── .cursor/rules/project.mdc    # Generated
-└── .agent/rules/project.md      # Generated
+│   ├── copilot-instructions.md        # Generated (main file)
+│   └── prompts/                       # Generated (multifile mode)
+│       ├── test.prompt.md
+│       └── refactor.prompt.md
+├── CLAUDE.md                          # Generated
+├── .cursor/
+│   ├── rules/project.mdc              # Generated
+│   └── commands/                      # Generated (Cursor 1.6+)
+│       ├── test.md
+│       └── refactor.md
+└── .agent/rules/project.md            # Generated
 ```
 
 ## Configuration
@@ -126,35 +151,36 @@ your-project/
 The `promptscript.yaml` file controls compilation:
 
 ```yaml
+version: '1'
+
 # Input settings
 input:
   entry: .promptscript/project.prs
 
 # Output targets
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
+  # GitHub Copilot - multifile generates .github/prompts/*.prompt.md
+  - github:
+      version: multifile
 
-  claude:
-    enabled: true
-    output: CLAUDE.md
+  # Claude Code
+  - claude
 
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-    # Use version: legacy for Cursor < 0.45
+  # Cursor - modern generates .cursor/commands/*.md
+  - cursor
 
-  antigravity:
-    enabled: true
-    output: .agent/rules/project.md
-    # Use version: frontmatter for YAML frontmatter with activation types
+  # Antigravity
+  - antigravity
 
 # Optional: Registry for inheritance
 registry:
   path: ./registry
   # Or remote: https://github.com/your-org/promptscript-registry
 ```
+
+!!! tip "Output Versions"
+Use `version: multifile` or `version: full` to generate separate prompt/command files.
+Without it, shortcuts with `prompt: true` will only appear in the main file.
 
 ### Version Support
 
