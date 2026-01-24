@@ -495,8 +495,8 @@ describe('ClaudeFormatter', () => {
         f.path.includes('.claude/skills/commit/SKILL.md')
       );
       expect(skillFile).toBeDefined();
-      expect(skillFile?.content).toContain('name: "commit"');
-      expect(skillFile?.content).toContain('description: "Create git commits"');
+      expect(skillFile?.content).toContain("name: 'commit'");
+      expect(skillFile?.content).toContain("description: 'Create git commits'");
       expect(skillFile?.content).toContain('context: fork');
       expect(skillFile?.content).toContain('agent: general-purpose');
     });

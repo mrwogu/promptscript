@@ -435,10 +435,12 @@ export class ClaudeFormatter extends BaseFormatter {
   private generateSkillFile(config: ClaudeSkillConfig): FormatterOutput {
     const lines: string[] = [];
 
-    // YAML frontmatter
+    // YAML frontmatter (use quotes compatible with Prettier)
     lines.push('---');
-    lines.push(`name: "${config.name}"`);
-    lines.push(`description: "${config.description}"`);
+    lines.push(`name: '${config.name}'`);
+    // Use double quotes if description contains apostrophe, single quotes otherwise
+    const descQuote = config.description.includes("'") ? '"' : "'";
+    lines.push(`description: ${descQuote}${config.description}${descQuote}`);
     if (config.context) {
       lines.push(`context: ${config.context}`);
     }
@@ -457,7 +459,9 @@ export class ClaudeFormatter extends BaseFormatter {
     lines.push('---');
     lines.push('');
     if (config.content) {
-      lines.push(config.content);
+      // Normalize content for Prettier: trim trailing whitespace from table cells
+      const normalizedContent = this.normalizeMarkdownForPrettier(config.content);
+      lines.push(normalizedContent);
     }
 
     return {

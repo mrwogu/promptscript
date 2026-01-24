@@ -155,4 +155,84 @@ export abstract class BaseFormatter implements Formatter {
 
     return text.substring(headerIndex, endPos);
   }
+
+  /**
+   * Normalize markdown content to match Prettier formatting.
+   * - Trims trailing whitespace from lines
+   * - Normalizes markdown table formatting
+   */
+  protected normalizeMarkdownForPrettier(content: string): string {
+    const lines = content.split('\n');
+    const result: string[] = [];
+    let inTable = false;
+    let tableLines: string[] = [];
+
+    for (const line of lines) {
+      const trimmedLine = line.trimEnd();
+
+      // Detect table rows (lines starting with |)
+      if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+        inTable = true;
+        tableLines.push(trimmedLine);
+      } else {
+        // If we were in a table, format and flush it
+        if (inTable && tableLines.length > 0) {
+          result.push(...this.formatMarkdownTable(tableLines));
+          tableLines = [];
+          inTable = false;
+        }
+        result.push(trimmedLine);
+      }
+    }
+
+    // Handle table at end of content
+    if (tableLines.length > 0) {
+      result.push(...this.formatMarkdownTable(tableLines));
+    }
+
+    return result.join('\n');
+  }
+
+  /**
+   * Format a markdown table to match Prettier output.
+   * Prettier removes trailing whitespace from cells.
+   */
+  private formatMarkdownTable(tableLines: string[]): string[] {
+    if (tableLines.length === 0) return [];
+
+    // Parse table into cells
+    const rows = tableLines.map((line) =>
+      line
+        .split('|')
+        .slice(1, -1) // Remove empty first/last from split
+        .map((cell) => cell.trim())
+    );
+
+    // Calculate column widths (minimum width for content)
+    const colCount = rows[0]?.length ?? 0;
+    const colWidths: number[] = new Array(colCount).fill(0);
+
+    for (const row of rows) {
+      for (let i = 0; i < row.length; i++) {
+        const cell = row[i] ?? '';
+        // For separator row, use 3 as minimum (---)
+        const width = cell.match(/^-+$/) ? 3 : cell.length;
+        colWidths[i] = Math.max(colWidths[i] ?? 0, width);
+      }
+    }
+
+    // Rebuild table with proper formatting
+    return rows.map((row) => {
+      const cells = row.map((cell, colIndex) => {
+        const width = colWidths[colIndex] ?? 0;
+        // Separator row uses dashes
+        if (cell.match(/^-+$/)) {
+          return '-'.repeat(width);
+        }
+        // Pad cell content
+        return cell.padEnd(width);
+      });
+      return '| ' + cells.join(' | ') + ' |';
+    });
+  }
 }

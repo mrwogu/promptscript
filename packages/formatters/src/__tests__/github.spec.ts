@@ -445,8 +445,8 @@ describe('GitHubFormatter', () => {
         f.path.includes('.github/skills/commit/SKILL.md')
       );
       expect(skillFile).toBeDefined();
-      expect(skillFile?.content).toContain('name: "commit"');
-      expect(skillFile?.content).toContain('description: "Create git commits"');
+      expect(skillFile?.content).toContain("name: 'commit'");
+      expect(skillFile?.content).toContain("description: 'Create git commits'");
       expect(skillFile?.content).toContain('disable-model-invocation: true');
     });
 
