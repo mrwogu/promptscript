@@ -1,6 +1,6 @@
 ---
 name: 'testing-code'
-description: 'Writes comprehensive tests following best practices and AAA pattern. Use when'
+description: 'Writes comprehensive tests following AAA pattern. Use for unit and integration tests.'
 ---
 
 # Testing Code
