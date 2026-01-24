@@ -53,7 +53,7 @@ flowchart LR
 
 Enforce non-negotiable standards globally. Define policies once, apply them everywhere.
 
-- _Example:_ "All TypeScript code must us `unknown` instead of `any`."
+- _Example:_ "All TypeScript code must use `unknown` instead of `any`."
 - _Example:_ "All SQL queries must use parameterized inputs."
 
 ### 2. Vendor Independence

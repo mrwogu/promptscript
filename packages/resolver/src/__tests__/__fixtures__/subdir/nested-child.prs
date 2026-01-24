@@ -1,0 +1,14 @@
+# Test fixture for parent-relative path inheritance
+@meta {
+  id: "nested-child"
+  syntax: "1.0.0"
+}
+
+# This tests the ../ relative path feature
+@inherit ../base
+
+@identity {
+  """
+  You are a nested child assistant inheriting from parent directory.
+  """
+}

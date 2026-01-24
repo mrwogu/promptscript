@@ -94,6 +94,24 @@ describe('Resolver', () => {
       }
     });
 
+    it('should resolve parent-relative path (../) inheritance', async () => {
+      const result = await resolver.resolve('./subdir/nested-child.prs');
+
+      expect(result.ast).not.toBeNull();
+      expect(result.errors).toHaveLength(0);
+      expect(result.sources).toHaveLength(2);
+
+      // Should inherit from base.prs in parent directory
+      const identityBlock = result.ast?.blocks.find((b) => b.name === 'identity');
+      const identityContent = identityBlock?.content;
+
+      if (identityContent?.type === 'TextContent') {
+        // Should have content from both base and nested-child
+        expect(identityContent.value).toContain('base assistant');
+        expect(identityContent.value).toContain('nested child assistant');
+      }
+    });
+
     it('should resolve file with @use imports', async () => {
       const result = await resolver.resolve('./with-imports.prs');
 

@@ -37,7 +37,7 @@ Structure instructions like code. Inherit from `@company/backend-security` or `@
 </div>
 
 <div class="feature-card" markdown>
-### :material-refresh: Managed Lifecyle
+### :material-refresh: Managed Lifecycle
 Update a central policy and propagate changes to 100+ repositories automatically. No more manual copy-pasting.
 </div>
 
@@ -50,8 +50,8 @@ Modern engineering organizations face a critical challenge: **AI Context Fragmen
 As you scale to 50+ repositories and deploy multiple AI tools (GitHub Copilot, Claude, Cursor), maintaining coherent AI instructions becomes impossible manually.
 
 - **The Scale Problem:** Updating a security policy across 100 microservices takes weeks of manual PRs.
-- **The Model Volatility:** New models (e.g., Claude Sonnet 4 vs 3.5) require different prompting strategies.
-- **The Governance Void:** Developers use local, unvetted instructions. Junior devs miss critical security context.
+- **The Model Volatility:** New models (e.g., Claude Sonnet 4 vs 3.5) require different prompting strategies. You shouldn't have to rewrite 1000 instruction files when a model upgrades.
+- **The Governance Void:** Developers use local, unvetted instructions. Junior devs miss critical security context. There is no audit trail for what constraints your AI is operating under.
 
 Result: **Inconsistent code quality, security risks, and operational chaos.**
 
@@ -62,10 +62,11 @@ Result: **Inconsistent code quality, security risks, and operational chaos.**
 ```mermaid
 flowchart LR
     Central["Organization Standards<br/>(.prs files)"] --> Compiler
-    Compiler -->|Output 1| Copilot["GitHub Copilot<br/>(XML/Markdown)"]
-    Compiler -->|Output 2| Claude["Claude Code<br/>(Markdown/Frontmatter)"]
-    Compiler -->|Output 3| Cursor["Cursor Rules<br/>(.mdc)"]
-    Compiler -->|Audit| CI["CI/CD Compliance"]
+    Compiler --> Copilot["GitHub Copilot"]
+    Compiler --> Claude["Claude Code"]
+    Compiler --> Cursor["Cursor"]
+    Compiler --> Antigravity["Antigravity"]
+    Compiler -->|Audit| CI["CI/CD"]
 ```
 
 ## Quick Example

@@ -1,0 +1,437 @@
+# =========================================================================
+# Comprehensive PromptScript Language Coverage Test
+# This file tests EVERY language element and syntax variation
+# =========================================================================
+
+# Single-line comment
+# Another comment with special chars: @#$%^&*()!
+
+@meta {
+  # Comment inside block
+  id: "comprehensive-test"
+  syntax: "1.0.0"
+  name: "Comprehensive Language Test"
+  description: "Tests all PromptScript syntax elements"
+
+  # String literals
+  doubleQuoted: "double quoted string"
+  singleQuoted: 'single quoted string'
+  escapedChars: "escaped: \" \\ \n \t \r"
+  unicode: "Unicode: café naïve 日本語 🎉"
+  emptyString: ""
+
+  # Number literals
+  integer: 42
+  negative: -10
+  decimal: 3.14
+  negativeDecimal: -2.5
+  zero: 0
+
+  # Boolean literals
+  enabled: true
+  disabled: false
+
+  # Null literal
+  optional: null
+
+  # Array literals
+  tags: [frontend, backend, api]
+  numbers: [1, 2, 3, -4, 5.5]
+  mixed: ["string", 42, true, null]
+  nested: [[1, 2], [3, 4]]
+  emptyArray: []
+
+  # Identifier variations
+  simple: value
+  with-dashes: "dashed-identifier"
+  _underscored: "_private"
+  camelCase: camelCaseValue
+  UPPER_CASE: CONSTANT_VALUE
+}
+
+# Absolute path inheritance
+@inherit @company/org/team-config
+
+# Multiple use declarations with different path types
+@use @core/guards/compliance
+@use @core/guards/security as sec
+@use @core/lib@2.0.0
+@use @company/shared/utils@1.0.0 as utils
+
+# Relative path declarations (commented for syntax demo - would need actual files)
+# @inherit ./parent
+# @use ../sibling/config as sibling
+
+# =========================================================================
+# TEXT CONTENT BLOCK
+# =========================================================================
+
+@identity {
+  """
+  You are a comprehensive test assistant.
+
+  This text block contains:
+  - Multiple lines
+  - Special characters: @#$%^&*()
+  - Unicode: café naïve 日本語 🎉
+  - Code-like content: `const x = 42;`
+  - Markdown: **bold** _italic_ [link](url)
+
+  Empty lines above and below this paragraph.
+
+  """
+}
+
+# =========================================================================
+# MIXED CONTENT BLOCK (text + properties)
+# =========================================================================
+
+@context {
+  project: "Comprehensive Test"
+  version: "1.0.0"
+
+  """
+  Additional context as text content.
+  This demonstrates mixed content with both
+  text and object properties.
+  """
+
+  environment: {
+    node: "20+"
+    os: "linux"
+    arch: "x64"
+  }
+}
+
+# =========================================================================
+# OBJECT CONTENT WITH DEEP NESTING
+# =========================================================================
+
+@standards {
+  # Level 1
+  code: {
+    # Level 2
+    style: {
+      # Level 3
+      indentation: {
+        # Level 4
+        type: "spaces"
+        size: 2
+        enabled: true
+        exceptions: null
+      }
+      maxLineLength: 100
+      trailingComma: true
+    }
+    testing: {
+      required: true
+      coverage: 90
+      patterns: ["*.spec.ts", "*.test.ts"]
+    }
+  }
+
+  naming: {
+    files: "kebab-case.ts"
+    classes: "PascalCase"
+    interfaces: "PascalCase (prefix I optional)"
+    functions: "camelCase"
+    variables: "camelCase"
+    constants: "UPPER_SNAKE_CASE"
+    private: "_underscorePrefix"
+  }
+
+  # Object with all value types
+  allTypes: {
+    string: "text"
+    number: 42
+    decimal: 3.14
+    negative: -10
+    boolTrue: true
+    boolFalse: false
+    nullValue: null
+    array: [1, 2, 3]
+    nested: { inner: "value" }
+  }
+
+  # Empty object
+  emptyConfig: {}
+}
+
+# =========================================================================
+# ARRAY/LIST CONTENT BLOCK
+# =========================================================================
+
+@restrictions {
+  - "Never use any type"
+  - "Never skip error handling"
+  - "Never commit secrets"
+  - 'Single quoted restriction'
+}
+
+# =========================================================================
+# SHORTCUTS WITH VARIOUS CONTENT TYPES
+# =========================================================================
+
+@shortcuts {
+  # Single-line shortcut
+  "/review": "Review code for quality"
+
+  # Multi-line shortcut with text block
+  "/test": """
+    Write unit tests using:
+    - Vitest framework
+    - AAA pattern (Arrange, Act, Assert)
+    - Target >90% coverage
+  """
+
+  # Shortcut with special characters
+  "/search": "Search for: @query in *.ts files"
+
+  # Single-quoted shortcut
+  '/build': 'Build the project'
+}
+
+# =========================================================================
+# PARAMS WITH TYPE EXPRESSIONS
+# =========================================================================
+
+@params {
+  # Range type with default
+  strictness: range(1..10) = 5
+
+  # Enum type with default
+  format: enum("json", "xml", "text") = "json"
+
+  # Optional parameter with range
+  verbosity?: range(0..3) = 1
+
+  # Optional parameter with enum
+  mode?: enum("development", "production") = "development"
+
+  # Range with decimal bounds
+  threshold: range(0.0..1.0) = 0.5
+
+  # Range with negative bounds
+  offset: range(-100..100) = 0
+
+  # Simple optional without type
+  debug?: true
+}
+
+# =========================================================================
+# GUARDS BLOCK
+# =========================================================================
+
+@guards {
+  globs: ["**/*.ts", "**/*.tsx", "**/*.js"]
+  excludeGlobs: ["**/*.spec.ts", "**/*.test.ts", "**/node_modules/**"]
+  priority: 1
+  enabled: true
+}
+
+# =========================================================================
+# KNOWLEDGE BLOCK WITH RICH TEXT
+# =========================================================================
+
+@knowledge {
+  """
+  ## API Reference
+
+  ### Endpoints
+
+  | Method | Path | Description |
+  |--------|------|-------------|
+  | GET | /api/users | List users |
+  | POST | /api/users | Create user |
+
+  ### Code Examples
+
+  ```typescript
+  const response = await fetch('/api/users');
+  const users = await response.json();
+  ```
+
+  ### Special Characters Test
+
+  - Quotes: "double" and 'single'
+  - Backticks: `code`
+  - Angle brackets: <tag>
+  - Ampersand: &amp;
+  - At symbol: @user
+  - Hash: #section
+  """
+}
+
+# =========================================================================
+# SKILLS BLOCK WITH ALL CONFIGURATIONS
+# =========================================================================
+
+@skills {
+  commit: {
+    description: "Create git commits"
+    disableModelInvocation: true
+    context: "fork"
+    agent: "general-purpose"
+    allowedTools: ["Bash", "Read", "Write", "Edit"]
+    content: """
+      When creating commits:
+      1. Use Conventional Commits format
+      2. Include scope when relevant
+      3. Keep subject under 70 chars
+    """
+  }
+
+  review: {
+    description: "Review code changes"
+    userInvocable: true
+    allowedTools: []
+    content: """
+      Perform thorough code review.
+    """
+  }
+
+  deploy: {
+    description: "Deploy application"
+    steps: ["Build", "Test", "Deploy"]
+    timeout: 300
+    retries: 3
+    enabled: false
+  }
+}
+
+# =========================================================================
+# LOCAL BLOCK (PRIVATE CONFIGURATION)
+# =========================================================================
+
+@local {
+  """
+  ## Private Development Notes
+
+  API key location: .env.local
+  Staging URL: https://staging.example.com
+
+  Team contacts:
+  - @john for database
+  - @sarah for auth
+  """
+
+  apiEndpoint: "https://localhost:8080"
+  debugMode: true
+  logLevel: 3
+}
+
+# =========================================================================
+# AGENTS BLOCK (CLAUDE-SPECIFIC)
+# =========================================================================
+
+@agents {
+  code-reviewer: {
+    description: "Reviews code for quality"
+    tools: ["Read", "Grep", "Glob"]
+    model: "sonnet"
+    permissionMode: "default"
+    content: """
+      You are a senior code reviewer.
+      Focus on: type safety, error handling, security.
+    """
+  }
+
+  debugger: {
+    description: "Debug errors and failures"
+    tools: ["Read", "Edit", "Bash", "Grep"]
+    disallowedTools: ["Write"]
+    model: "inherit"
+    permissionMode: "acceptEdits"
+    skills: ["error-handling", "testing"]
+    content: """
+      Root cause analysis specialist.
+    """
+  }
+
+  security-auditor: {
+    description: "Security vulnerability scanner"
+    tools: ["Read", "Grep"]
+    model: "opus"
+    content: """
+      Check OWASP top 10.
+    """
+  }
+}
+
+# =========================================================================
+# CUSTOM BLOCK (ARBITRARY NAME)
+# =========================================================================
+
+@custom-block {
+  """
+  Custom blocks with arbitrary names are allowed.
+  This tests the custom block name feature.
+  """
+
+  customProperty: "value"
+  enabled: true
+}
+
+@_privateBlock {
+  note: "Block name starting with underscore"
+}
+
+@CamelCaseBlock {
+  note: "PascalCase block name"
+}
+
+# =========================================================================
+# EXTEND BLOCKS
+# =========================================================================
+
+@extend standards.code {
+  frameworks: [react, vue, angular]
+  bundler: "vite"
+}
+
+@extend standards.code.style {
+  semicolons: false
+  quotes: "single"
+}
+
+@extend context {
+  """
+  Extended context with additional text.
+  """
+
+  additionalInfo: "More context"
+}
+
+# =========================================================================
+# EDGE CASES
+# =========================================================================
+
+@edge-cases {
+  # Very long string
+  longString: "This is a very long string that spans multiple characters and tests the handling of longer content in the parser. It should be handled correctly without any issues."
+
+  # String with only special characters
+  specialOnly: "!@#$%^&*()_+-=[]{}|;':\",./<>?"
+
+  # Deeply nested array
+  deepArray: [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
+
+  # Object with numeric-like keys (as strings)
+  numericKeys: {
+    one: 1
+    two: 2
+    three: 3
+  }
+
+  # Array with single element
+  singleElement: [42]
+
+  # Object with single property
+  singleProp: { only: "value" }
+
+  # Boolean expressions in different contexts
+  flags: [true, false, true]
+  config: { a: true, b: false }
+}
+
+# Final comment at end of file

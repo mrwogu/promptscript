@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { resolve, dirname, isAbsolute, join } from 'path';
+import { resolve, dirname, isAbsolute } from 'path';
 import type { PathReference } from '@promptscript/core';
 import { FileNotFoundError } from '@promptscript/core';
 
@@ -86,8 +86,9 @@ export class FileLoader {
   resolveRef(ref: PathReference, fromFile: string): string {
     if (ref.isRelative) {
       const dir = dirname(fromFile);
-      const fileName = join(...ref.segments) + '.prs';
-      return resolve(dir, fileName);
+      // Use the raw path which preserves .. and . components
+      const rawPath = ref.raw.endsWith('.prs') ? ref.raw : `${ref.raw}.prs`;
+      return resolve(dir, rawPath);
     }
     return this.toAbsolutePath(ref.raw);
   }
