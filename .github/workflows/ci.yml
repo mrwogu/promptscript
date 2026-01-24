@@ -110,7 +110,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x, 24.x, 25.x]
+        node-version: ['22', '24', '25']
 
     steps:
       - name: Download CLI artifact
