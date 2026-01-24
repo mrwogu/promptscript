@@ -93,6 +93,50 @@ jobs:
           report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Upload CLI artifact
+        if: matrix.node-version == '25.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-dist
+          path: dist/packages/cli
+          retention-days: 1
+
+  cli-smoke-test:
+    name: CLI Smoke Test (Node ${{ matrix.node-version }})
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: node:${{ matrix.node-version }}-slim
+
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x, 25.x]
+
+    steps:
+      - name: Download CLI artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cli-dist
+          path: cli-package
+
+      - name: Install CLI from artifact
+        run: npm install -g ./cli-package
+
+      - name: Smoke test - version
+        run: prs --version
+
+      - name: Smoke test - help
+        run: prs --help
+
+      - name: Smoke test - init and compile
+        run: |
+          mkdir -p /tmp/test-project
+          cd /tmp/test-project
+          prs init --name smoke-test --target github
+          prs validate
+          prs compile --dry-run
+          test -f .github/copilot-instructions.md
+
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
