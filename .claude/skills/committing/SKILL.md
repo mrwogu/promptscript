@@ -1,6 +1,6 @@
 ---
-name: "committing"
-description: "Creates well-structured git commits following conventional commit format. Use when committing changes, preparing commits, or when asked to commit code."
+name: 'committing'
+description: 'Creates well-structured git commits following conventional commit format. Use when committing changes, preparing commits, or when asked to commit code.'
 ---
 
 # Git Committing
@@ -17,16 +17,16 @@ description: "Creates well-structured git commits following conventional commit 
 
 ## Types
 
-| Type       | Description                          |
-| ---------- | ------------------------------------ |
-| `feat`     | New feature                          |
-| `fix`      | Bug fix                              |
-| `docs`     | Documentation only                   |
-| `style`    | Formatting, no code change           |
-| `refactor` | Code change without fix/feature      |
-| `perf`     | Performance improvement              |
-| `test`     | Adding or fixing tests               |
-| `chore`    | Build, CI, tooling changes           |
+| Type       | Description                     |
+| ---------- | ------------------------------- |
+| `feat`     | New feature                     |
+| `fix`      | Bug fix                         |
+| `docs`     | Documentation only              |
+| `style`    | Formatting, no code change      |
+| `refactor` | Code change without fix/feature |
+| `perf`     | Performance improvement         |
+| `test`     | Adding or fixing tests          |
+| `chore`    | Build, CI, tooling changes      |
 
 ## Rules
 
@@ -42,6 +42,7 @@ description: "Creates well-structured git commits following conventional commit 
 3. Check recent commits with `git log --oneline -5` for style consistency
 4. Stage specific files (avoid `git add -A`)
 5. Write commit message using HEREDOC:
+
    ```bash
    git commit -m "$(cat <<'EOF'
    type(scope): subject
@@ -50,6 +51,7 @@ description: "Creates well-structured git commits following conventional commit 
    EOF
    )"
    ```
+
 6. Verify with `git status`
 
 ## Safety

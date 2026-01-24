@@ -1,6 +1,6 @@
 ---
-name: "performance-optimizing"
-description: "Identifies and fixes performance bottlenecks. Use when optimizing code performance, fixing slow operations, or when asked to improve speed."
+name: 'performance-optimizing'
+description: 'Identifies and fixes performance bottlenecks. Use when optimizing code performance, fixing slow operations, or when asked to improve speed.'
 ---
 
 # Performance Optimizing
@@ -38,19 +38,19 @@ const usersWithPosts = await db.users.findAll({
 
 ### Memory
 
-| Problem       | Solution                          |
-| ------------- | --------------------------------- |
-| Memory leaks  | Clear references, use WeakMap     |
-| Large objects | Stream processing, pagination     |
-| Duplicated data | Normalize, use references       |
+| Problem         | Solution                      |
+| --------------- | ----------------------------- |
+| Memory leaks    | Clear references, use WeakMap |
+| Large objects   | Stream processing, pagination |
+| Duplicated data | Normalize, use references     |
 
 ### CPU
 
-| Problem            | Solution                       |
-| ------------------ | ------------------------------ |
-| Blocking operations| Use async/workers              |
-| Redundant computation | Memoization, caching       |
-| Inefficient algorithms | Better data structures     |
+| Problem                | Solution               |
+| ---------------------- | ---------------------- |
+| Blocking operations    | Use async/workers      |
+| Redundant computation  | Memoization, caching   |
+| Inefficient algorithms | Better data structures |
 
 ```typescript
 // Bad - O(n) lookup on every iteration
@@ -67,11 +67,11 @@ for (const item of items) {
 
 ### Network
 
-| Problem           | Solution                        |
-| ----------------- | ------------------------------- |
-| Too many requests | Batching, HTTP/2                |
-| Large payloads    | Compression, pagination         |
-| No caching        | HTTP caching, CDN               |
+| Problem           | Solution                |
+| ----------------- | ----------------------- |
+| Too many requests | Batching, HTTP/2        |
+| Large payloads    | Compression, pagination |
+| No caching        | HTTP caching, CDN       |
 
 ## Quick Wins
 

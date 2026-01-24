@@ -1,6 +1,6 @@
 ---
-name: "pull-requesting"
-description: "Creates well-structured pull requests with clear descriptions. Use when creating PRs, preparing changes for review, or when asked to open a pull request."
+name: 'pull-requesting'
+description: 'Creates well-structured pull requests with clear descriptions. Use when creating PRs, preparing changes for review, or when asked to open a pull request.'
 ---
 
 # Pull Requesting
@@ -32,6 +32,7 @@ Brief description of what this PR does (1-3 sentences).
 ## Workflow
 
 1. **Check branch status**
+
    ```bash
    git status
    git log main..HEAD --oneline
@@ -39,11 +40,13 @@ Brief description of what this PR does (1-3 sentences).
    ```
 
 2. **Review all commits** (not just the latest)
+
    ```bash
    git log main..HEAD
    ```
 
 3. **Create PR**
+
    ```bash
    gh pr create --title "type(scope): description" --body "$(cat <<'EOF'
    ## Summary
@@ -63,21 +66,25 @@ Brief description of what this PR does (1-3 sentences).
 ## Best Practices
 
 ### Size
+
 - **Small PRs**: Easier to review, faster to merge
 - **Single concern**: One feature or fix per PR
 - **< 400 lines**: Ideal for thorough review
 
 ### Title
+
 - Use conventional commit format: `type(scope): description`
 - Be specific: "fix(auth): handle expired tokens" not "fix bug"
 
 ### Description
+
 - Explain **why**, not just **what**
 - Link related issues
 - Include testing instructions
 - Add screenshots for UI changes
 
 ### Before Submitting
+
 - [ ] All tests pass
 - [ ] No merge conflicts
 - [ ] Self-reviewed the diff

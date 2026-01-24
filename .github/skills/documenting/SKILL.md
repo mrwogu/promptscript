@@ -1,18 +1,18 @@
 ---
-name: "documenting"
-description: "Creates clear, maintainable documentation for code and APIs. Use when writing README files, API docs, code comments, or when asked to document code."
+name: 'documenting'
+description: 'Creates clear, maintainable documentation for code and APIs. Use when writing README files, API docs, code comments, or when asked to document code.'
 ---
 
 # Documenting
 
 ## Documentation Types
 
-| Type        | Audience          | Content                           |
-| ----------- | ----------------- | --------------------------------- |
-| README      | New users         | Quick start, installation, usage  |
-| API docs    | Developers        | Endpoints, parameters, responses  |
-| Code docs   | Contributors      | Architecture, patterns, decisions |
-| Comments    | Code readers      | Why, not what                     |
+| Type      | Audience     | Content                           |
+| --------- | ------------ | --------------------------------- |
+| README    | New users    | Quick start, installation, usage  |
+| API docs  | Developers   | Endpoints, parameters, responses  |
+| Code docs | Contributors | Architecture, patterns, decisions |
+| Comments  | Code readers | Why, not what                     |
 
 ## README Structure
 

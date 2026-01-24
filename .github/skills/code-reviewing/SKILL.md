@@ -1,6 +1,6 @@
 ---
-name: "code-reviewing"
-description: "Reviews code for bugs, security issues, and quality improvements. Use when reviewing pull requests, checking code quality, or when asked to review changes."
+name: 'code-reviewing'
+description: 'Reviews code for bugs, security issues, and quality improvements. Use when reviewing pull requests, checking code quality, or when asked to review changes.'
 ---
 
 # Code Reviewing
@@ -8,6 +8,7 @@ description: "Reviews code for bugs, security issues, and quality improvements. 
 ## Review Checklist
 
 ### Correctness
+
 - [ ] Logic errors and edge cases
 - [ ] Null/undefined handling
 - [ ] Off-by-one errors
@@ -15,6 +16,7 @@ description: "Reviews code for bugs, security issues, and quality improvements. 
 - [ ] Error handling completeness
 
 ### Security
+
 - [ ] Input validation and sanitization
 - [ ] SQL/command injection risks
 - [ ] XSS vulnerabilities
@@ -22,6 +24,7 @@ description: "Reviews code for bugs, security issues, and quality improvements. 
 - [ ] Authentication/authorization checks
 
 ### Quality
+
 - [ ] Code readability and clarity
 - [ ] Function size and complexity
 - [ ] Naming conventions
@@ -29,6 +32,7 @@ description: "Reviews code for bugs, security issues, and quality improvements. 
 - [ ] SOLID principles where applicable
 
 ### Performance
+
 - [ ] Unnecessary computations
 - [ ] N+1 query patterns
 - [ ] Memory leaks
@@ -38,7 +42,7 @@ description: "Reviews code for bugs, security issues, and quality improvements. 
 
 Use this structure for each issue:
 
-```markdown
+````markdown
 **[SEVERITY]** Brief description
 
 Location: `file:line`
@@ -50,6 +54,8 @@ Suggestion: How to fix it
 ```code
 // Suggested fix
 ```
+````
+
 ```
 
 Severity levels:
@@ -65,3 +71,4 @@ Severity levels:
 3. **Suggest fixes**: Offer concrete solutions
 4. **Prioritize**: Focus on critical issues first
 5. **Be constructive**: Phrase feedback helpfully
+```

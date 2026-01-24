@@ -1,6 +1,6 @@
 ---
-name: "testing-code"
-description: "Writes comprehensive tests following best practices and AAA pattern. Use when writing unit tests, integration tests, or when asked to add test coverage."
+name: 'testing-code'
+description: 'Writes comprehensive tests following best practices and AAA pattern. Use when writing unit tests, integration tests, or when asked to add test coverage.'
 ---
 
 # Testing Code
@@ -29,24 +29,24 @@ Use descriptive names that explain behavior:
 
 ```typescript
 // Good - describes behavior and condition
-'should throw NotFoundError when user does not exist'
-'returns empty array for invalid input'
-'calculates total with tax when region is EU'
+'should throw NotFoundError when user does not exist';
+'returns empty array for invalid input';
+'calculates total with tax when region is EU';
 
 // Bad - vague or implementation-focused
-'test getUser'
-'works correctly'
-'handles edge case'
+'test getUser';
+'works correctly';
+'handles edge case';
 ```
 
 ## Test Doubles
 
-| Type  | Purpose                        | When to Use                    |
-| ----- | ------------------------------ | ------------------------------ |
-| Stub  | Returns predetermined data     | Isolate from dependencies      |
-| Mock  | Verifies interactions          | Test side effects              |
-| Spy   | Records calls for verification | Observe without replacing      |
-| Fake  | Working implementation         | Complex integrations           |
+| Type | Purpose                        | When to Use               |
+| ---- | ------------------------------ | ------------------------- |
+| Stub | Returns predetermined data     | Isolate from dependencies |
+| Mock | Verifies interactions          | Test side effects         |
+| Spy  | Records calls for verification | Observe without replacing |
+| Fake | Working implementation         | Complex integrations      |
 
 ## Test Structure
 

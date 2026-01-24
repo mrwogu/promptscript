@@ -1,5 +1,5 @@
 ---
-name: "debugging"
+name: 'debugging'
 description: "Systematically debugs issues using scientific method. Use when investigating bugs, fixing errors, or when something isn't working as expected."
 ---
 
@@ -19,6 +19,7 @@ description: "Systematically debugs issues using scientific method. Use when inv
 
 ```markdown
 Reproduction checklist:
+
 - [ ] Can reproduce consistently
 - [ ] Identified minimal steps to trigger
 - [ ] Documented exact error message
@@ -28,6 +29,7 @@ Reproduction checklist:
 ### Step 2: Isolate
 
 Narrow down the problem:
+
 - Binary search through code changes
 - Comment out sections to find culprit
 - Test with minimal input/config
@@ -58,6 +60,7 @@ grep -r "errorPattern" src/
 
 ```markdown
 Verification checklist:
+
 - [ ] Original issue is fixed
 - [ ] Test added to prevent regression
 - [ ] No new issues introduced
@@ -66,13 +69,13 @@ Verification checklist:
 
 ## Common Patterns
 
-| Symptom                  | Check First                        |
-| ------------------------ | ---------------------------------- |
-| "Works on my machine"    | Environment differences, versions  |
-| Intermittent failures    | Race conditions, timing, caching   |
-| Null/undefined errors    | Data flow, initialization order    |
-| Performance degradation  | N+1 queries, memory leaks, loops   |
-| Silent failures          | Error handling, logging gaps       |
+| Symptom                 | Check First                       |
+| ----------------------- | --------------------------------- |
+| "Works on my machine"   | Environment differences, versions |
+| Intermittent failures   | Race conditions, timing, caching  |
+| Null/undefined errors   | Data flow, initialization order   |
+| Performance degradation | N+1 queries, memory leaks, loops  |
+| Silent failures         | Error handling, logging gaps      |
 
 ## Anti-Patterns
 

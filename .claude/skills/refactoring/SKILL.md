@@ -1,6 +1,6 @@
 ---
-name: "refactoring"
-description: "Improves code structure without changing behavior. Use when cleaning up code, reducing complexity, or when asked to refactor."
+name: 'refactoring'
+description: 'Improves code structure without changing behavior. Use when cleaning up code, reducing complexity, or when asked to refactor.'
 ---
 
 # Refactoring
@@ -21,6 +21,7 @@ description: "Improves code structure without changing behavior. Use when cleani
 ### Extract Function
 
 Before:
+
 ```typescript
 function processOrder(order: Order) {
   // 20 lines of validation
@@ -30,6 +31,7 @@ function processOrder(order: Order) {
 ```
 
 After:
+
 ```typescript
 function processOrder(order: Order) {
   validateOrder(order);
@@ -41,6 +43,7 @@ function processOrder(order: Order) {
 ### Replace Conditionals with Polymorphism
 
 Before:
+
 ```typescript
 function getPrice(type: string) {
   if (type === 'regular') return basePrice;
@@ -50,6 +53,7 @@ function getPrice(type: string) {
 ```
 
 After:
+
 ```typescript
 interface PricingStrategy {
   getPrice(basePrice: number): number;
@@ -65,11 +69,13 @@ const strategies: Record<string, PricingStrategy> = {
 ### Simplify Conditionals
 
 Before:
+
 ```typescript
 if (user && user.isActive && user.subscription && user.subscription.isValid) {
 ```
 
 After:
+
 ```typescript
 function hasValidSubscription(user: User): boolean {
   return user?.isActive && user?.subscription?.isValid;
@@ -80,14 +86,14 @@ if (hasValidSubscription(user)) {
 
 ## Code Smells to Address
 
-| Smell              | Refactoring                      |
-| ------------------ | -------------------------------- |
-| Long function      | Extract function                 |
-| Duplicate code     | Extract and reuse                |
-| Long parameter list| Introduce parameter object       |
-| Feature envy       | Move method to appropriate class |
-| Primitive obsession| Replace with value object        |
-| Switch statements  | Replace with polymorphism        |
+| Smell               | Refactoring                      |
+| ------------------- | -------------------------------- |
+| Long function       | Extract function                 |
+| Duplicate code      | Extract and reuse                |
+| Long parameter list | Introduce parameter object       |
+| Feature envy        | Move method to appropriate class |
+| Primitive obsession | Replace with value object        |
+| Switch statements   | Replace with polymorphism        |
 
 ## When NOT to Refactor
 
