@@ -1,6 +1,6 @@
 ---
 name: "debugging"
-description: "Systematically debugs issues using scientific method"
+description: "Systematically debugs issues using scientific method. Use when investigating bugs, fixing errors, or when something isn't working as expected."
 ---
 
 # Debugging

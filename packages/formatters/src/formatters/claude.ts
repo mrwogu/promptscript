@@ -462,7 +462,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     return {
       path: `.claude/skills/${config.name}/SKILL.md`,
-      content: lines.join('\n'),
+      content: lines.join('\n') + '\n',
     };
   }
 

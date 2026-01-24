@@ -527,7 +527,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     return {
       path: `.github/skills/${config.name}/SKILL.md`,
-      content: lines.join('\n'),
+      content: lines.join('\n') + '\n',
     };
   }
 

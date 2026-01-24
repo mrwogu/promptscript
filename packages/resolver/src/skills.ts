@@ -44,17 +44,22 @@ function parseSkillMd(content: string): ParsedSkillMd {
     // Parse frontmatter
     const frontmatterLines = lines.slice(frontmatterStart + 1, frontmatterEnd);
     for (const line of frontmatterLines) {
-      const nameMatch = line.match(/^name:\s*["']?([^"'\n]+)["']?\s*$/);
+      // Match name: value (with or without quotes)
+      const nameMatch = line.match(/^name:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
       if (nameMatch) {
-        name = nameMatch[1];
+        name = (nameMatch[1] ?? nameMatch[2] ?? nameMatch[3])?.trim();
       }
-      const descMatch = line.match(/^description:\s*["']?([^"'\n]+)["']?\s*$/);
+      // Match description: value (with or without quotes)
+      const descMatch = line.match(/^description:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
       if (descMatch) {
-        description = descMatch[1];
+        description = (descMatch[1] ?? descMatch[2] ?? descMatch[3])?.trim();
       }
     }
     // Content is everything after frontmatter
-    bodyContent = lines.slice(frontmatterEnd + 1).join('\n').trim();
+    bodyContent = lines
+      .slice(frontmatterEnd + 1)
+      .join('\n')
+      .trim();
   } else {
     // No frontmatter, entire content is body
     bodyContent = content.trim();
@@ -145,9 +150,12 @@ export async function resolveNativeSkills(
         }
 
         // Use native description if not already set or if native is more complete
-        if (parsed.description && (!skillObj['description'] ||
+        if (
+          parsed.description &&
+          (!skillObj['description'] ||
             (typeof skillObj['description'] === 'string' &&
-             parsed.description.length > (skillObj['description'] as string).length))) {
+              parsed.description.length > (skillObj['description'] as string).length))
+        ) {
           updatedSkill['description'] = parsed.description;
         }
 
