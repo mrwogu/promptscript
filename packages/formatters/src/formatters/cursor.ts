@@ -13,21 +13,22 @@ export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'frontmatter';
 export const CURSOR_VERSIONS = {
   modern: {
     name: 'modern',
-    description: 'MDC format with YAML frontmatter (.cursor/rules/project.mdc)',
+    description:
+      'MDC format with YAML frontmatter (.cursor/rules/project.mdc) + slash commands (.cursor/commands/)',
     outputPath: '.cursor/rules/project.mdc',
     cursorVersion: '0.45+',
     introduced: '2024-12',
   },
   frontmatter: {
     name: 'frontmatter',
-    description: 'Alias for modern format (MDC with YAML frontmatter)',
+    description: 'Alias for modern format (MDC with YAML frontmatter + slash commands)',
     outputPath: '.cursor/rules/project.mdc',
     cursorVersion: '0.45+',
     introduced: '2024-12',
   },
   multifile: {
     name: 'multifile',
-    description: 'Multiple MDC files with glob-based targeting',
+    description: 'Multiple MDC files with glob-based targeting + slash commands',
     outputPath: '.cursor/rules/project.mdc',
     cursorVersion: '0.45+',
     introduced: '2024-12',
@@ -55,11 +56,32 @@ interface GlobConfig {
 }
 
 /**
- * Formatter for Cursor rules.
+ * Formatter for Cursor rules and commands.
  *
- * Supports two versions:
+ * Supports three versions:
  * - **modern** (default): `.cursor/rules/project.mdc` with YAML frontmatter
- * - **legacy**: `.cursorrules` plain text (deprecated)
+ *   + `.cursor/commands/*.md` for multi-line shortcuts
+ * - **multifile**: Multiple MDC files with glob-based targeting + commands
+ * - **legacy**: `.cursorrules` plain text (deprecated, no commands)
+ *
+ * ## Slash Commands (Cursor 1.6+)
+ *
+ * Multi-line `@shortcuts` are automatically converted to executable
+ * slash commands in `.cursor/commands/`:
+ *
+ * ```promptscript
+ * @shortcuts {
+ *   // Single-line → stays in rules as documentation
+ *   "/review": "Review code quality"
+ *
+ *   // Multi-line → becomes .cursor/commands/test.md
+ *   "/test": \"""
+ *     Write unit tests using:
+ *     - Vitest as the test runner
+ *     - AAA pattern
+ *   \"""
+ * }
+ * ```
  *
  * @example
  * ```yaml
@@ -74,6 +96,7 @@ interface GlobConfig {
  * ```
  *
  * @see https://cursor.com/docs/context/rules
+ * @see https://cursor.com/changelog/1-6
  */
 export class CursorFormatter extends BaseFormatter {
   readonly name = 'cursor';
@@ -140,9 +163,13 @@ export class CursorFormatter extends BaseFormatter {
 
     this.addCommonSections(ast, sections);
 
+    // Generate command files for multi-line shortcuts
+    const commandFiles = this.generateCommandFiles(ast);
+
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
       content: sections.join('\n\n') + '\n',
+      additionalFiles: commandFiles.length > 0 ? commandFiles : undefined,
     };
   }
 
@@ -185,6 +212,10 @@ export class CursorFormatter extends BaseFormatter {
     if (shortcutsFile) {
       additionalFiles.push(shortcutsFile);
     }
+
+    // Generate command files for multi-line shortcuts
+    const commandFiles = this.generateCommandFiles(ast);
+    additionalFiles.push(...commandFiles);
 
     // Main file with alwaysApply: true for core rules
     const mainSections: string[] = [];
@@ -360,6 +391,41 @@ export class CursorFormatter extends BaseFormatter {
       path: '.cursor/rules/shortcuts.mdc',
       content: sections.join('\n\n') + '\n',
     };
+  }
+
+  /**
+   * Generate command files for multi-line shortcuts.
+   *
+   * Shortcuts with multi-line content (containing newlines) are converted
+   * to individual `.cursor/commands/*.md` files that can be invoked as
+   * slash commands in Cursor 1.6+.
+   *
+   * Single-line shortcuts remain as documentation in the rules file.
+   *
+   * @see https://cursor.com/changelog/1-6
+   */
+  private generateCommandFiles(ast: Program): FormatterOutput[] {
+    const block = this.findBlock(ast, 'shortcuts');
+    if (!block) return [];
+
+    const props = this.getProps(block.content);
+    const commands: FormatterOutput[] = [];
+
+    for (const [name, value] of Object.entries(props)) {
+      const content = this.valueToString(value);
+
+      // Only multi-line content becomes a command file
+      if (content.includes('\n')) {
+        // Remove leading slash from command name
+        const fileName = name.replace(/^\//, '');
+        commands.push({
+          path: `.cursor/commands/${fileName}.md`,
+          content: content.trim(),
+        });
+      }
+    }
+
+    return commands;
   }
 
   /**

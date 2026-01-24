@@ -137,6 +137,13 @@ export class Compiler {
         // Use output path as key to support multiple targets with same formatter
         // (e.g., cursor modern + cursor legacy)
         outputs.set(output.path, output);
+
+        // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
+        if (output.additionalFiles) {
+          for (const additionalFile of output.additionalFiles) {
+            outputs.set(additionalFile.path, additionalFile);
+          }
+        }
       } catch (err) {
         formatErrors.push({
           name: 'FormatterError',

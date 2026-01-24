@@ -785,6 +785,61 @@ describe('Golden Files Tests', () => {
       expect(result.additionalFiles?.length).toBeGreaterThan(0);
     });
 
+    it('cursor modern should generate command files for multi-line shortcuts', () => {
+      const ast = createCanonicalAST();
+      const formatter = new CursorFormatter();
+      const result = formatter.format(ast, { version: 'modern' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      // Multi-line shortcuts should become command files
+      const testCommand = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/commands/test.md'
+      );
+      expect(testCommand).toBeDefined();
+      expect(testCommand?.content).toContain('Vitest');
+      expect(testCommand?.content).toContain('AAA pattern');
+
+      const buildCommand = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/commands/build.md'
+      );
+      expect(buildCommand).toBeDefined();
+      expect(buildCommand?.content).toContain('pnpm run format');
+
+      // Single-line shortcut should NOT become a command file
+      const reviewCommand = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/commands/review.md'
+      );
+      expect(reviewCommand).toBeUndefined();
+    });
+
+    it('cursor multifile should generate command files for multi-line shortcuts', () => {
+      const ast = createCanonicalAST();
+      const formatter = new CursorFormatter();
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      // Should have command files
+      const commandFiles = result.additionalFiles?.filter((f) =>
+        f.path.startsWith('.cursor/commands/')
+      );
+      expect(commandFiles?.length).toBeGreaterThan(0);
+
+      // Verify test command content
+      const testCommand = commandFiles?.find((f) => f.path === '.cursor/commands/test.md');
+      expect(testCommand).toBeDefined();
+    });
+
+    it('cursor legacy should NOT generate command files', () => {
+      const ast = createCanonicalAST();
+      const formatter = new CursorFormatter();
+      const result = formatter.format(ast, { version: 'legacy' });
+
+      // Legacy format doesn't support commands directory
+      expect(result.additionalFiles).toBeUndefined();
+    });
+
     it('antigravity frontmatter should include YAML frontmatter', () => {
       const ast = createCanonicalAST();
       const formatter = new AntigravityFormatter();

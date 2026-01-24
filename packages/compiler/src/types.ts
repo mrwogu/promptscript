@@ -10,6 +10,8 @@ export interface FormatterOutput {
   path: string;
   /** Formatted content */
   content: string;
+  /** Additional files to generate (e.g., .cursor/commands/, .github/prompts/) */
+  additionalFiles?: FormatterOutput[];
 }
 
 /**

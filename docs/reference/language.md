@@ -235,6 +235,43 @@ Custom commands for quick actions:
 
 Shortcuts from child files override parent shortcuts with the same name.
 
+#### Cursor Slash Commands (1.6+)
+
+Multi-line shortcuts are automatically converted to executable slash commands:
+
+| Shortcut Type | Output Location              | Behavior                                    |
+| ------------- | ---------------------------- | ------------------------------------------- |
+| Single-line   | `.cursor/rules/project.mdc`  | Listed as documentation in Commands section |
+| Multi-line    | `.cursor/commands/<name>.md` | Executable via `/name` in Cursor chat       |
+
+**Example:**
+
+```promptscript
+@shortcuts {
+  # Single-line → documentation only
+  "/review": "Review code quality"
+
+  # Multi-line → .cursor/commands/test.md
+  "/test": """
+    Write unit tests using:
+    - Vitest as the test runner
+    - AAA pattern (Arrange, Act, Assert)
+  """
+}
+```
+
+Generates `.cursor/commands/test.md`:
+
+```markdown
+Write unit tests using:
+
+- Vitest as the test runner
+- AAA pattern (Arrange, Act, Assert)
+```
+
+!!! tip "Using Cursor Commands"
+Type `/` in Cursor chat to see available commands, then select to execute.
+
 ### @params
 
 Configurable parameters:

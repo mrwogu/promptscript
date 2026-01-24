@@ -738,4 +738,238 @@ describe('CursorFormatter', () => {
       });
     });
   });
+
+  describe('slash commands (.cursor/commands/)', () => {
+    it('should generate command files for multi-line shortcuts in modern format', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/test': 'Write unit tests using:\n- Vitest\n- AAA pattern',
+                '/review': 'Review code quality',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles?.length).toBe(1);
+
+      const testCommand = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/commands/test.md'
+      );
+      expect(testCommand).toBeDefined();
+      expect(testCommand?.content).toBe('Write unit tests using:\n- Vitest\n- AAA pattern');
+    });
+
+    it('should not generate command files for single-line shortcuts', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/review': 'Review code quality',
+                '/build': 'Build the project',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.additionalFiles).toBeUndefined();
+    });
+
+    it('should generate multiple command files for multiple multi-line shortcuts', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/test': 'Write tests:\n- Unit tests\n- Integration tests',
+                '/deploy': 'Deploy steps:\n1. Build\n2. Test\n3. Deploy',
+                '/review': 'Single line review',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles?.length).toBe(2);
+
+      const testCommand = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/commands/test.md'
+      );
+      const deployCommand = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/commands/deploy.md'
+      );
+
+      expect(testCommand).toBeDefined();
+      expect(deployCommand).toBeDefined();
+      expect(testCommand?.content).toContain('Unit tests');
+      expect(deployCommand?.content).toContain('Build');
+    });
+
+    it('should remove leading slash from command file names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/my-command': 'Line 1\nLine 2',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.additionalFiles).toBeDefined();
+      const command = result.additionalFiles?.[0];
+      expect(command?.path).toBe('.cursor/commands/my-command.md');
+      expect(command?.path).not.toContain('//');
+    });
+
+    it('should trim whitespace from command content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/test': '  \n  Write tests:\n  - Test 1\n  ',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.additionalFiles).toBeDefined();
+      const command = result.additionalFiles?.[0];
+      expect(command?.content).not.toMatch(/^\s/);
+      expect(command?.content).not.toMatch(/\s$/);
+    });
+
+    it('should generate command files in multifile format', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/test': 'Multi-line\ncommand',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.additionalFiles).toBeDefined();
+      const commandFile = result.additionalFiles?.find((f) =>
+        f.path.startsWith('.cursor/commands/')
+      );
+      expect(commandFile).toBeDefined();
+      expect(commandFile?.path).toBe('.cursor/commands/test.md');
+    });
+
+    it('should not generate command files in legacy format', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/test': 'Multi-line\ncommand',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'legacy' });
+
+      expect(result.additionalFiles).toBeUndefined();
+    });
+
+    it('should include single-line shortcuts in Commands section of rules', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/review': 'Review code quality',
+                '/test': 'Multi-line\ntest command',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      // Single-line should be in main content
+      expect(result.content).toContain('Commands:');
+      expect(result.content).toContain('/review - Review code quality');
+      // Multi-line first line should also appear in Commands section
+      expect(result.content).toContain('/test - Multi-line');
+    });
+  });
 });

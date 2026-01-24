@@ -284,6 +284,18 @@ targets:
 | `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy |
 | `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter        |
 
+**Cursor Versions:**
+
+| Version     | Output Files                                                                                        |
+| ----------- | --------------------------------------------------------------------------------------------------- |
+| `modern`    | `.cursor/rules/project.mdc` + `.cursor/commands/*.md` for multi-line shortcuts                      |
+| `multifile` | Main + `.cursor/rules/*.mdc` (glob-based) + `.cursor/rules/shortcuts.mdc` + `.cursor/commands/*.md` |
+| `legacy`    | `.cursorrules` (deprecated, no slash commands)                                                      |
+
+!!! tip "Cursor Slash Commands"
+Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`.
+Type `/` in Cursor chat (1.6+) to invoke them. See [Language Reference](language.md#cursor-slash-commands-16).
+
 **Target Configuration:**
 
 Targets can be specified as simple names or with configuration:

@@ -315,6 +315,47 @@ describe('Compiler', () => {
       expect(result.outputs.has('./cursor/output.md')).toBe(true);
     });
 
+    it('should include additionalFiles in outputs', async () => {
+      const ast = createTestProgram();
+
+      // Create a formatter that returns additionalFiles
+      const formatterWithAdditionalFiles: Formatter = {
+        name: 'cursor',
+        outputPath: '.cursor/rules/project.mdc',
+        description: 'Formatter with additional files',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({
+          path: '.cursor/rules/project.mdc',
+          content: '# Main file',
+          additionalFiles: [
+            { path: '.cursor/commands/test.md', content: 'Test command content' },
+            { path: '.cursor/commands/build.md', content: 'Build command content' },
+          ],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatterWithAdditionalFiles],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      // Should have main file + 2 additional files = 3 outputs
+      expect(result.outputs.size).toBe(3);
+      expect(result.outputs.has('.cursor/rules/project.mdc')).toBe(true);
+      expect(result.outputs.has('.cursor/commands/test.md')).toBe(true);
+      expect(result.outputs.has('.cursor/commands/build.md')).toBe(true);
+
+      // Verify additional file content
+      const testCommand = result.outputs.get('.cursor/commands/test.md');
+      expect(testCommand?.content).toBe('Test command content');
+    });
+
     it('should pass warnings from validation', async () => {
       const ast = createTestProgram();
       const formatter = createMockFormatter('test');

@@ -358,6 +358,26 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     testStrategy: 'Check for .github/prompts/*.prompt.md files',
   },
   {
+    id: 'slash-commands',
+    name: 'Slash Commands',
+    description: 'Executable slash commands invokable via / in chat',
+    category: 'advanced',
+    tools: {
+      github: 'supported', // .github/prompts/*.prompt.md (shortcut with prompt: true)
+      cursor: 'supported', // .cursor/commands/*.md (multi-line @shortcuts)
+      claude: 'supported', // .claude/skills/<name>/SKILL.md (via @skills block)
+      antigravity: 'supported', // .agent/workflows/*.yaml (via @shortcuts with steps)
+    },
+    testStrategy:
+      'Check for .cursor/commands/*.md, .github/prompts/*.prompt.md, .claude/skills/*/SKILL.md, or .agent/workflows/*.yaml',
+    docsUrl: {
+      github: 'https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files',
+      cursor: 'https://cursor.com/changelog/1-6',
+      claude: 'https://code.claude.com/docs/en/skills',
+      antigravity: 'https://atamel.dev/posts/2025/11-25_customize_antigravity_rules_workflows/',
+    },
+  },
+  {
     id: 'skills',
     name: 'Skills',
     description: 'Reusable skill definitions for AI agents',
