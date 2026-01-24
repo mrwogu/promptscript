@@ -1,0 +1,72 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Git tag to publish (e.g., v1.0.0-alpha.2)'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine ref
+        id: ref
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          GH_REF: ${{ github.ref }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "ref=$INPUT_TAG" >> $GITHUB_OUTPUT
+            echo "version=${INPUT_TAG#v}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=$GH_REF" >> $GITHUB_OUTPUT
+            echo "version=${GH_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.ref.outputs.ref }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '25.x'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Determine npm tag
+        id: npm-tag
+        env:
+          VERSION: ${{ steps.ref.outputs.version }}
+        run: |
+          if [[ "$VERSION" == *"-alpha"* ]] || [[ "$VERSION" == *"-beta"* ]] || [[ "$VERSION" == *"-rc"* ]]; then
+            echo "tag=next" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+          NPM_TAG: ${{ steps.npm-tag.outputs.tag }}
+        run: pnpm nx release publish --tag "$NPM_TAG"

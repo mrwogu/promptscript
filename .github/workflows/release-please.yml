@@ -43,32 +43,5 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: sync root changelog"
           git push
 
-  publish:
-    needs: [release-please, sync-changelog]
-    if: ${{ needs.release-please.outputs.release_created }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '25.x'
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Build CLI
-        run: pnpm nx build cli --skip-nx-cache
-
-      - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
-        run: pnpm nx release publish
+  # Note: Publishing is handled by .github/workflows/publish.yml
+  # which triggers on tag push (created by release-please above)
