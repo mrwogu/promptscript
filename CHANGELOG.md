@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha.2](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2026-01-24)
+
+
+### chore
+
+* prepare alpha.2 release ([449fbcc](https://github.com/mrwogu/promptscript/commit/449fbccc119d34ab2a674cbfcd8cc4cc3012d108))
+
+
+### Bug Fixes
+
+* **cli:** resolve ESM dynamic require error for simple-git ([748a401](https://github.com/mrwogu/promptscript/commit/748a401377b5b58dff1935b94543f65f11f5360c))
+* **formatters:** read devCommands and postWork from [@knowledge](https://github.com/knowledge) block ([83a2727](https://github.com/mrwogu/promptscript/commit/83a272707bf3550142ae440f1a595657bb5704e9))
+* sync package.publish.json keywords and description ([ae7481f](https://github.com/mrwogu/promptscript/commit/ae7481fe64639420ba38fc98ea1349bca17cb91d))
+
 ## [1.0.0-alpha.1](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.1...v1.0.0-alpha.1) (2026-01-23)
 
 
