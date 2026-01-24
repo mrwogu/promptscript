@@ -119,22 +119,25 @@ jobs:
           name: cli-dist
           path: cli-package
 
-      - name: Install CLI from artifact
-        run: npm install -g ./cli-package
+      - name: Install dependencies
+        working-directory: cli-package
+        run: npm install
 
       - name: Smoke test - version
-        run: prs --version
+        working-directory: cli-package
+        run: node bin/prs.js --version
 
       - name: Smoke test - help
-        run: prs --help
+        working-directory: cli-package
+        run: node bin/prs.js --help
 
       - name: Smoke test - init and compile
         run: |
           mkdir -p /tmp/test-project
           cd /tmp/test-project
-          prs init --name smoke-test --target github
-          prs validate
-          prs compile --dry-run
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name smoke-test --target github
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile --dry-run
           test -f .github/copilot-instructions.md
 
   codeql:
