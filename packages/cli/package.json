@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/cli",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "CLI for PromptScript - standardize AI instructions across GitHub Copilot, Claude, Cursor and other AI tools",
   "keywords": [
     "cli",
