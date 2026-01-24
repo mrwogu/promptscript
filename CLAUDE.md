@@ -104,6 +104,7 @@ The project is organized as a monorepo with these packages:
   pnpm nx lint <pkg>        # Lint code
   pnpm nx run-many -t test  # Test all packages
   pnpm nx graph             # View dependency graph
+  pnpm prs compile          # Compile .prs files (uses local dev version)
   ```
 
 ## Post-Work Verification
@@ -122,7 +123,7 @@ After completing code changes, always run:
 - Keep code examples accurate
 
 ## Diagrams
-- Use Mermaid for diagrams
+- Use Mermaid (exception: packages/*/README.md must use ASCII art because npm does not render Mermaid) for diagrams
 - Types: flowchart, sequence, class, state, ER, gantt, pie
 
 ## Don'ts
@@ -134,7 +135,6 @@ After completing code changes, always run:
 - Don't create packages manually - use Nx generators (nx g @nx/js:lib)
 - Don't create custom ESLint rules in package configs - extend base config
 - Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname`
-- Don't use ASCII art diagrams - always use Mermaid
 - Don't reference line numbers in test names or comments
 - Don't make code changes without verifying documentation consistency
 - Don't commit directly to main/master

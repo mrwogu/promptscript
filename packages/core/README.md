@@ -10,17 +10,19 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 
 ## Architecture
 
-```text
-@promptscript/cli (published)
-│
-└─► bundles all internal packages:
-    ├─► compiler
-    │   ├─► parser
-    │   ├─► resolver
-    │   ├─► validator
-    │   └─► formatters
-    └─► core ⭐
 ```
+@promptscript/cli
+│
+├─► compiler
+│   ├─► resolver ─┬─► parser ──► core ⭐
+│   │             └────────────► core ⭐
+│   ├─► validator ─────────────► core ⭐
+│   └─► formatters ────────────► core ⭐
+│
+└─► resolver (direct dependency)
+```
+
+The `core` package is a foundational dependency used by `parser`, `resolver`, `validator`, and `formatters`.
 
 ## Usage (internal)
 

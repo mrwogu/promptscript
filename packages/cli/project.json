@@ -39,7 +39,15 @@
         "format": ["esm"],
         "minify": false,
         "thirdParty": true,
-        "external": ["commander", "@inquirer/prompts", "ora", "chalk", "chokidar", "yaml", "simple-git"],
+        "external": [
+          "commander",
+          "@inquirer/prompts",
+          "ora",
+          "chalk",
+          "chokidar",
+          "yaml",
+          "simple-git"
+        ],
         "generatePackageJson": false
       }
     },

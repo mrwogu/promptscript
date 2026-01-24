@@ -406,18 +406,22 @@ describe('CursorFormatter Edge Cases', () => {
   });
 
   describe('devCommands', () => {
-    it('should extract commands from context block', () => {
+    it('should extract commands from knowledge block', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
           {
             type: 'Block',
-            name: 'context',
+            name: 'knowledge',
             content: {
-              type: 'ObjectContent',
-              properties: {
-                commands: 'pnpm install\npnpm build\npnpm test',
-              },
+              type: 'TextContent',
+              value: `## Development Commands
+
+\`\`\`bash
+pnpm install
+pnpm build
+pnpm test
+\`\`\``,
               loc: createLoc(),
             },
             loc: createLoc(),
@@ -431,47 +435,34 @@ describe('CursorFormatter Edge Cases', () => {
       expect(result.content).toContain('pnpm test');
     });
 
-    it('should handle commands as object value', () => {
+    it('should return null when no knowledge block', () => {
       const ast: Program = {
         ...createMinimalProgram(),
-        blocks: [
-          {
-            type: 'Block',
-            name: 'context',
-            content: {
-              type: 'ObjectContent',
-              properties: {
-                commands: {
-                  build: 'npm run build',
-                  test: 'npm test',
-                },
-              },
-              loc: createLoc(),
-            },
-            loc: createLoc(),
-          },
-        ],
+        blocks: [],
       };
 
       const result = formatter.format(ast);
-      // Should stringify the object
-      expect(result.content).toBeDefined();
+      expect(result.content).not.toContain('Development Commands');
     });
   });
 
   describe('postWork', () => {
-    it('should extract post-work-verification from context block', () => {
+    it('should extract post-work-verification from knowledge block', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
           {
             type: 'Block',
-            name: 'context',
+            name: 'knowledge',
             content: {
-              type: 'ObjectContent',
-              properties: {
-                'post-work-verification': 'Run tests\nCheck linting\nVerify build',
-              },
+              type: 'TextContent',
+              value: `## Post-Work Verification
+
+\`\`\`bash
+Run tests
+Check linting
+Verify build
+\`\`\``,
               loc: createLoc(),
             },
             loc: createLoc(),
@@ -485,28 +476,14 @@ describe('CursorFormatter Edge Cases', () => {
       expect(result.content).toContain('Verify build');
     });
 
-    it('should handle empty post-work-verification', () => {
+    it('should return null when no knowledge block', () => {
       const ast: Program = {
         ...createMinimalProgram(),
-        blocks: [
-          {
-            type: 'Block',
-            name: 'context',
-            content: {
-              type: 'ObjectContent',
-              properties: {
-                'post-work-verification': '   ',
-              },
-              loc: createLoc(),
-            },
-            loc: createLoc(),
-          },
-        ],
+        blocks: [],
       };
 
       const result = formatter.format(ast);
-      // Empty string should not produce post-work section
-      expect(result.content).not.toContain('Post-Work Verification:\n   ');
+      expect(result.content).not.toContain('Post-Work Verification');
     });
   });
 });

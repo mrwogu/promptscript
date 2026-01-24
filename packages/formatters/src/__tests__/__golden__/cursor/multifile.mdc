@@ -71,6 +71,16 @@ Config:
 - eslint: inherit from eslint.base.config.cjs
 - viteRoot: __dirname (not import.meta.dirname)
 
+Post-Work Verification:
+After completing code changes, always run:
+```bash
+pnpm run format     # Format code with Prettier
+pnpm run lint       # Check for linting errors
+pnpm run build      # Build all packages
+pnpm run typecheck  # Verify TypeScript types
+pnpm run test       # Run all tests
+```
+
 Documentation:
 - keep accurate
 

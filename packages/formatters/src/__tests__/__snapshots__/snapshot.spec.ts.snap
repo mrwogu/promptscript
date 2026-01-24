@@ -185,6 +185,26 @@ Commands:
 /build - Run verification commands:
 /newpkg - Generate new package with Nx: pnpm nx g @nx/js:lib <name> --directory=packages/<name>
 
+Development Commands:
+\`\`\`bash
+pnpm install              # Install dependencies
+pnpm nx build <pkg>       # Build package
+pnpm nx test <pkg>        # Run tests
+pnpm nx lint <pkg>        # Lint code
+pnpm nx run-many -t test  # Test all packages
+pnpm nx graph             # View dependency graph
+\`\`\`
+
+Post-Work Verification:
+After completing code changes, always run:
+\`\`\`bash
+pnpm run format     # Format code with Prettier
+pnpm run lint       # Check for linting errors
+pnpm run build      # Build all packages
+pnpm run typecheck  # Verify TypeScript types
+pnpm run test       # Run all tests
+\`\`\`
+
 Documentation:
 - review README.md and docs/ before changes
 - update docs if behavior changes

@@ -37,6 +37,7 @@
   pnpm nx lint <pkg>        # Lint code
   pnpm nx run-many -t test  # Test all packages
   pnpm nx graph             # View dependency graph
+  pnpm prs compile          # Compile .prs files (uses local dev version)
   ```
 
   ## Post-Work Verification

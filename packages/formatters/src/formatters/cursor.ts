@@ -743,29 +743,27 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   private devCommands(ast: Program): string | null {
-    const context = this.findBlock(ast, 'context');
-    if (!context) return null;
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
 
-    const cmds = this.getProp(context.content, 'commands');
-    if (!cmds) return null;
+    const text = this.extractText(knowledge.content);
+    const match = this.extractSectionWithCodeBlock(text, '## Development Commands');
+    if (!match) return null;
 
-    const text = typeof cmds === 'string' ? cmds : this.valueToString(cmds);
-    if (!text.trim()) return null;
-
-    return `Development Commands:\n${text.trim()}`;
+    const content = match.replace('## Development Commands', '').trim();
+    return `Development Commands:\n${content}`;
   }
 
   private postWork(ast: Program): string | null {
-    const context = this.findBlock(ast, 'context');
-    if (!context) return null;
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
 
-    const post = this.getProp(context.content, 'post-work-verification');
-    if (!post) return null;
+    const text = this.extractText(knowledge.content);
+    const match = this.extractSectionWithCodeBlock(text, '## Post-Work Verification');
+    if (!match) return null;
 
-    const text = typeof post === 'string' ? post : this.valueToString(post);
-    if (!text.trim()) return null;
-
-    return `Post-Work Verification:\n${text.trim()}`;
+    const content = match.replace('## Post-Work Verification', '').trim();
+    return `Post-Work Verification:\n${content}`;
   }
 
   private documentation(ast: Program): string | null {

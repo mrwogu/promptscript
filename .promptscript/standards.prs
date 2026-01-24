@@ -48,7 +48,7 @@
   }
 
   diagrams: {
-    format: "Mermaid"
+    format: "Mermaid (exception: packages/*/README.md must use ASCII art because npm does not render Mermaid)"
     types: [flowchart, sequence, class, state, ER, gantt, pie]
     example: """
       ```mermaid

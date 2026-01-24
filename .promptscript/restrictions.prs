@@ -9,7 +9,6 @@
   - "Never create packages manually - use Nx generators (nx g @nx/js:lib)"
   - "Never create custom ESLint rules in package configs - extend base config"
   - "Never use `import.meta.dirname` in vite/vitest configs - use `__dirname`"
-  - "Never use ASCII art diagrams - always use Mermaid"
   - "Never reference line numbers in test names or comments"
   - "Never make code changes without verifying documentation consistency"
 }

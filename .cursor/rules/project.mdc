@@ -106,13 +106,34 @@ Commands:
 /type - Create TypeScript type definitions
 /cli - Create CLI command handler
 
+Development Commands:
+```bash
+  pnpm install              # Install dependencies
+  pnpm nx build <pkg>       # Build package
+  pnpm nx test <pkg>        # Run tests
+  pnpm nx lint <pkg>        # Lint code
+  pnpm nx run-many -t test  # Test all packages
+  pnpm nx graph             # View dependency graph
+  pnpm prs compile          # Compile .prs files (uses local dev version)
+  ```
+
+Post-Work Verification:
+After completing code changes, always run:
+  ```bash
+  pnpm run format     # Format code with Prettier
+  pnpm run lint       # Check for linting errors
+  pnpm run build      # Build all packages
+  pnpm run typecheck  # Verify TypeScript types
+  pnpm run test       # Run all tests
+  ```
+
 Documentation:
 - review README.md and docs/ before changes
 - update docs if behavior changes
 - keep accurate
 
 Diagrams:
-- Use Mermaid
+- Use Mermaid (exception: packages/*/README.md must use ASCII art because npm does not render Mermaid)
 - Types: flowchart, sequence, class, state, ER, gantt, pie
 
 Never:
@@ -124,7 +145,6 @@ Never:
 - Never create packages manually - use Nx generators (nx g @nx/js:lib)
 - Never create custom ESLint rules in package configs - extend base config
 - Never use `import.meta.dirname` in vite/vitest configs - use `__dirname`
-- Never use ASCII art diagrams - always use Mermaid
 - Never reference line numbers in test names or comments
 - Never make code changes without verifying documentation consistency
 - Never commit directly to main/master
