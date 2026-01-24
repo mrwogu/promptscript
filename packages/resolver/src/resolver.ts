@@ -5,6 +5,7 @@ import { FileLoader, type LoaderOptions } from './loader.js';
 import { resolveInheritance } from './inheritance.js';
 import { resolveUses } from './imports.js';
 import { applyExtends } from './extensions.js';
+import { resolveNativeSkills } from './skills.js';
 
 /**
  * Options for the resolver.
@@ -118,6 +119,9 @@ export class Resolver {
 
     // Apply extensions
     ast = applyExtends(ast);
+
+    // Resolve native skill files (replace @skills content with SKILL.md files if available)
+    ast = await resolveNativeSkills(ast, this.loader.getRegistryPath(), absPath);
 
     return {
       ast,

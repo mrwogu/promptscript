@@ -18,6 +18,7 @@
 @use @core/quality
 @use @fragments/testing
 @use @fragments/git-conventions
+@use @skills/base
 
 # === LOCAL CONFIGURATION ===
 # Project-specific settings (modular)

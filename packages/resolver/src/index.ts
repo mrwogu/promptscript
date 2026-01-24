@@ -78,6 +78,9 @@ export {
 // Extension resolution
 export { applyExtends } from './extensions.js';
 
+// Skill resolution
+export { resolveNativeSkills } from './skills.js';
+
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';
 import { createResolver } from './resolver.js';

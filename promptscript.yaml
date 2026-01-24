@@ -7,13 +7,13 @@ registry:
   path: ../promptscript-registry
 
 targets:
-  # GitHub Copilot - multifile generates .github/prompts/*.prompt.md
+  # GitHub Copilot - full generates prompts + skills + agents
   - github:
-      version: multifile
+      version: full
 
-  # Claude Code - multifile generates .claude/rules/*.md
+  # Claude Code - full generates rules + skills + agents
   - claude:
-      version: multifile
+      version: full
 
   # Cursor - modern generates .cursor/commands/*.md for multi-line shortcuts
   - cursor
