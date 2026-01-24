@@ -145,11 +145,12 @@ prs compile --config ./custom.config.yaml
 
 **Available Targets:**
 
-| Target   | Output File                       | Description    |
-| -------- | --------------------------------- | -------------- |
-| `github` | `.github/copilot-instructions.md` | GitHub Copilot |
-| `claude` | `CLAUDE.md`                       | Claude Code    |
-| `cursor` | `.cursorrules`                    | Cursor         |
+| Target        | Output File                       | Description        |
+| ------------- | --------------------------------- | ------------------ |
+| `github`      | `.github/copilot-instructions.md` | GitHub Copilot     |
+| `claude`      | `CLAUDE.md`                       | Claude Code        |
+| `cursor`      | `.cursor/rules/project.mdc`       | Cursor (modern)    |
+| `antigravity` | `.agent/rules/project.md`         | Google Antigravity |
 
 ---
 
@@ -326,7 +327,11 @@ targets:
 
   cursor:
     enabled: true
-    output: .cursorrules
+    output: .cursor/rules/project.mdc
+
+  antigravity:
+    enabled: true
+    output: .agent/rules/project.md
 
 # Validation settings
 validation:

@@ -14,6 +14,7 @@
 # PromptScript generated files - managed by prs compile
 CLAUDE.md
 .github/copilot-instructions.md
-.cursor/rules/
-.agent/rules/
+.github/prompts/
+.cursor/
+.agent/
 CHANGELOG.md
