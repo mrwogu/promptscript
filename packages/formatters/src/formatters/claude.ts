@@ -598,7 +598,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     return {
       path: `.claude/agents/${config.name}.md`,
-      content: lines.join('\n'),
+      content: lines.join('\n') + '\n',
     };
   }
 

@@ -696,7 +696,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     return {
       path: `.github/agents/${config.name}.md`,
-      content: lines.join('\n'),
+      content: lines.join('\n') + '\n',
     };
   }
 
