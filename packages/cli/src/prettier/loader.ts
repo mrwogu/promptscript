@@ -120,7 +120,7 @@ export async function loadPrettierConfig(
  * @returns Resolved Prettier options
  */
 export async function resolvePrettierOptions(
-  config?: PromptScriptConfig,
+  config?: Partial<PromptScriptConfig>,
   basePath: string = process.cwd()
 ): Promise<PrettierMarkdownOptions> {
   const formatting = config?.formatting;
