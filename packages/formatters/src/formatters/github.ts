@@ -160,7 +160,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     return {
       path: this.getOutputPath(options),
-      content: sections.join('\n\n'),
+      content: sections.join('\n\n') + '\n',
     };
   }
 
@@ -193,7 +193,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     return {
       path: this.getOutputPath(options),
-      content: sections.join('\n\n'),
+      content: sections.join('\n\n') + '\n',
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
     };
   }
@@ -245,7 +245,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     return {
       path: this.getOutputPath(options),
-      content: sections.join('\n\n'),
+      content: sections.join('\n\n') + '\n',
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
     };
   }
@@ -761,7 +761,8 @@ export class GitHubFormatter extends BaseFormatter {
     if (!identity) return null;
 
     const content = this.extractText(identity.content);
-    return renderer.renderSection('project', content);
+    // Apply stripAllIndent to normalize merged identity content for Prettier compatibility
+    return renderer.renderSection('project', this.stripAllIndent(content));
   }
 
   private techStack(ast: Program, renderer: ConventionRenderer): string | null {
@@ -809,7 +810,8 @@ export class GitHubFormatter extends BaseFormatter {
     if (!archMatch) return null;
 
     const content = archMatch.replace('## Architecture', '').trim();
-    return renderer.renderSection('architecture', content);
+    // Apply stripAllIndent to normalize content for Prettier compatibility
+    return renderer.renderSection('architecture', this.stripAllIndent(content));
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
@@ -850,7 +852,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (subsections.length === 0) return null;
 
-    return renderer.renderSection('code-standards', subsections.join('\n'));
+    return renderer.renderSection('code-standards', subsections.join('\n\n'));
   }
 
   private addStandardsSubsection(
@@ -877,7 +879,8 @@ export class GitHubFormatter extends BaseFormatter {
     if (!commandsMatch) return null;
 
     const content = commandsMatch.replace('## Development Commands', '').trim();
-    return renderer.renderSection('commands', content);
+    // Apply stripAllIndent to normalize content for Prettier compatibility
+    return renderer.renderSection('commands', this.stripAllIndent(content));
   }
 
   private gitCommits(ast: Program, renderer: ConventionRenderer): string | null {
@@ -945,7 +948,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (subsections.length === 0) return null;
 
-    return renderer.renderSection('configuration-files', subsections.join('\n'));
+    return renderer.renderSection('configuration-files', subsections.join('\n\n'));
   }
 
   private documentation(ast: Program, renderer: ConventionRenderer): string | null {
@@ -991,7 +994,11 @@ export class GitHubFormatter extends BaseFormatter {
     const intro =
       'After completing any code changes, run the following commands to ensure code quality:';
     const content = postMatch.replace('## Post-Work Verification', '').trim();
-    return renderer.renderSection('post-work-verification', `${intro}\n${content}`);
+    // Apply stripAllIndent to normalize content for Prettier compatibility
+    return renderer.renderSection(
+      'post-work-verification',
+      `${intro}\n${this.stripAllIndent(content)}`
+    );
   }
 
   private restrictions(ast: Program, renderer: ConventionRenderer): string | null {

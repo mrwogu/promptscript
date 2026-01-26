@@ -261,6 +261,13 @@ export abstract class BaseFormatter implements Formatter {
 
       // Track code blocks
       if (trimmedEnd.trimStart().startsWith('```')) {
+        // Add blank line before code block if previous line was non-empty
+        if (!inCodeBlock) {
+          const prevLine = result.length > 0 ? result[result.length - 1] : '';
+          if (prevLine && prevLine.trim()) {
+            result.push('');
+          }
+        }
         inCodeBlock = !inCodeBlock;
         // Strip indent from code block markers too
         result.push(trimmedEnd.trimStart());
@@ -276,8 +283,10 @@ export abstract class BaseFormatter implements Formatter {
       // Outside code blocks, strip all leading whitespace
       let stripped = trimmedEnd.trimStart();
 
-      // Escape markdown special characters in paths
-      stripped = stripped.replace(/__([^_]+)__/g, '\\_\\_$1\\_\\_');
+      // Escape markdown special characters for Prettier compatibility
+      // Escape __ to \_\_ (to avoid emphasis parsing)
+      stripped = stripped.replace(/__/g, '\\_\\_');
+      // Escape /* to /\* (to avoid glob patterns being interpreted)
       stripped = stripped.replace(/\/\*/g, '/\\*');
 
       // Add blank line before list item if previous line was non-empty and not a list

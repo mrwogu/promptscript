@@ -47,16 +47,26 @@ export class ConventionRenderer {
       ? this.applyTemplate(renderer.end, { name: transformedName, level })
       : '';
 
-    const trimmedContent = content.trim();
+    let trimmedContent = content.trim();
     if (!trimmedContent) {
       // Empty section - just opening and closing tags on same line or header only
       return end ? `${start}\n${end}` : start;
+    }
+
+    // For markdown, escape special characters for Prettier compatibility
+    if (this.convention.name === 'markdown') {
+      trimmedContent = this.escapeMarkdownSpecialChars(trimmedContent);
     }
 
     const indentedContent = this.indentContent(trimmedContent, renderer, level);
 
     if (end) {
       return `${start}\n${indentedContent}\n${end}`;
+    }
+
+    // For markdown, add blank line after header for Prettier compatibility
+    if (this.convention.name === 'markdown') {
+      return `${start}\n\n${indentedContent}`;
     }
     return `${start}\n${indentedContent}`;
   }
@@ -162,6 +172,15 @@ export class ConventionRenderer {
     }
 
     return result;
+  }
+
+  /**
+   * Escape markdown special characters for Prettier compatibility.
+   * - Escapes __ to \_\_ (to avoid emphasis)
+   * - Escapes /* to /\* (to avoid glob patterns being interpreted)
+   */
+  private escapeMarkdownSpecialChars(content: string): string {
+    return content.replace(/__/g, '\\_\\_').replace(/\/\*/g, '/\\*');
   }
 
   private indentContent(content: string, renderer: SectionRenderer, level: number): string {

@@ -132,19 +132,19 @@ describe('ConventionRenderer', () => {
     describe('with Markdown convention', () => {
       const renderer = new ConventionRenderer('markdown');
 
-      it('should render section with Markdown header', () => {
+      it('should render section with Markdown header and blank line for Prettier', () => {
         const result = renderer.renderSection('Project', 'Hello world');
-        expect(result).toBe('## Project\nHello world');
+        expect(result).toBe('## Project\n\nHello world');
       });
 
       it('should not convert names', () => {
         const result = renderer.renderSection('Tech Stack', 'content');
-        expect(result).toBe('## Tech Stack\ncontent');
+        expect(result).toBe('## Tech Stack\n\ncontent');
       });
 
-      it('should render subsection with H3', () => {
+      it('should render subsection with H3 and blank line for Prettier', () => {
         const result = renderer.renderSection('TypeScript', 'rules', 2);
-        expect(result).toBe('### TypeScript\nrules');
+        expect(result).toBe('### TypeScript\n\nrules');
       });
     });
   });

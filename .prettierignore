@@ -12,9 +12,4 @@
 **/__snapshots__/**
 
 # PromptScript generated files - managed by prs compile
-CLAUDE.md
-.github/copilot-instructions.md
-.github/prompts/
-.cursor/
-.agent/
 CHANGELOG.md

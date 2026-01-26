@@ -7,6 +7,7 @@
 > **Do not edit manually**
 
 ## project
+
 You are an expert TypeScript developer working on PromptScript - a language
 and toolchain for standardizing AI instructions across enterprise organizations.
 
@@ -16,11 +17,13 @@ Claude Code, Cursor, and other AI tools.
 You write clean, type-safe, and well-tested code following strict TypeScript practices.
 
 ## tech-stack
+
 - **Language:** typescript
 - **Runtime:** Node.js 20+
 - **Monorepo:** Nx with pnpm workspaces
 
 ## architecture
+
 The project is organized as a monorepo with these packages:
 
 ```mermaid
@@ -47,29 +50,38 @@ flowchart TB
 ```
 
 ## code-standards
+
 ### typescript
+
 - Strict mode enabled, no `any` types
 - Use `unknown` with type guards instead of any
 - Prefer `interface` for object shapes
 - Use `type` for unions and intersections
 - Named only, no default exports
 - Explicit return types explicit on public functions
+
 ### naming
+
 - Files: `kebab-case.ts`
 - Classes/Interfaces: `PascalCase`
 - Functions/Variables: `camelCase`
 - Constants: `UPPER_SNAKE_CASE`
+
 ### error-handling
+
 - Use custom error classes extending `extend PSError`
 - Always include location information
 - Provide actionable error messages
+
 ### testing
+
 - Test files: `*.spec.ts next to source`
 - Follow AAA (Arrange, Act, Assert) pattern
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
 
 ## commands
+
 ```bash
 pnpm install              # Install dependencies
 pnpm nx build <pkg>       # Build package
@@ -80,6 +92,7 @@ pnpm nx graph             # View dependency graph
 ```
 
 ## git-commits
+
 - Use [Conventional Commits](https://www.conventionalcommits.org/) format
 - Keep commit message subject line max 70 characters
 - Format: `<type>(<scope>): <description>`
@@ -87,12 +100,17 @@ pnpm nx graph             # View dependency graph
 - Example: `feat(parser): add support for multiline strings`
 
 ## configuration-files
+
 ### eslint
+
 ESLint: inherit from eslint.base.config.cjs
+
 ### vite-vitest
-Vite root: __dirname (not import.meta.dirname)
+
+Vite root: \_\_dirname (not import.meta.dirname)
 
 ## documentation-verification
+
 - **Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior
 - **After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed
 - Ensure code examples in documentation remain accurate after modifications
@@ -100,8 +118,10 @@ Vite root: __dirname (not import.meta.dirname)
 - If changing existing behavior, update affected documentation sections
 
 ## post-work-verification
+
 After completing any code changes, run the following commands to ensure code quality:
 After completing code changes, always run:
+
 ```bash
 pnpm run format     # Format code with Prettier
 pnpm run lint       # Check for linting errors
@@ -111,6 +131,7 @@ pnpm run test       # Run all tests
 ```
 
 ## donts
+
 - Don't use `any` type - use `unknown` with type guards
 - Don't use default exports - only named exports
 - Don't commit without tests
@@ -118,12 +139,13 @@ pnpm run test       # Run all tests
 - Don't leave TODO without issue reference
 - Don't create packages manually - use Nx generators (nx g @nx/js:lib)
 - Don't create custom ESLint rules in package configs - extend base config
-- Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname`
+- Don't use `import.meta.dirname` in vite/vitest configs - use `\_\_dirname`
 - Don't use ASCII art diagrams - always use Mermaid
 - Don't reference line numbers in test names or comments
 - Don't make code changes without verifying documentation consistency
 
 ## diagrams
+
 - Always use **Mermaid** syntax for diagrams in documentation
 - Supported diagram types: flowchart, sequence, class, state, ER, gantt, pie, etc.
 - Wrap diagrams in markdown code blocks with `mermaid` language identifier

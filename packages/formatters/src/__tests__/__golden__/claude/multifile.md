@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 ## Project
+
 You are an expert TypeScript developer working on PromptScript - a language
 and toolchain for standardizing AI instructions across enterprise organizations.
 
@@ -10,9 +11,11 @@ Claude Code, Cursor, and other AI tools.
 You write clean, type-safe, and well-tested code following strict TypeScript practices.
 
 ## Tech Stack
+
 typescript, Node.js 20+, Nx + pnpm
 
 ## Architecture
+
 The project is organized as a monorepo with these packages:
 
 ```mermaid
@@ -39,21 +42,25 @@ flowchart TB
 ```
 
 ## Code Style
+
 - Strict TypeScript, no `any`
 - Named exports only
 - Files: kebab-case.ts
 - Testing: vitest, >90% coverage
 
 ## Git Commits
+
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
 - Example: `feat(parser): add support for multiline strings`
 
 ## Config Files
+
 - ESLint: inherit from eslint.base.config.cjs
-- Vite root: __dirname (not import.meta.dirname)
+- Vite root: \_\_dirname (not import.meta.dirname)
 
 ## Commands
+
 ```
 /review    - Review code for quality, type safety, and best practices
 /test      - Write unit tests using:
@@ -71,6 +78,7 @@ pnpm nx graph             # View dependency graph
 ```
 
 ## Post-Work Verification
+
 After completing code changes, always run:
 ```bash
 pnpm run format     # Format code with Prettier
@@ -81,15 +89,18 @@ pnpm run test       # Run all tests
 ```
 
 ## Documentation
+
 - Review docs before changes
 - Update docs after changes
 - Keep code examples accurate
 
 ## Diagrams
+
 - Use Mermaid for diagrams
 - Types: flowchart, sequence, class, state, ER, gantt, pie
 
 ## Don'ts
+
 - Don't use `any` type - use `unknown` with type guards
 - Don't use default exports - only named exports
 - Don't commit without tests
@@ -97,7 +108,7 @@ pnpm run test       # Run all tests
 - Don't leave TODO without issue reference
 - Don't create packages manually - use Nx generators (nx g @nx/js:lib)
 - Don't create custom ESLint rules in package configs - extend base config
-- Don't use `import.meta.dirname` in vite/vitest configs - use `__dirname`
+- Don't use `import.meta.dirname` in vite/vitest configs - use `\_\_dirname`
 - Don't use ASCII art diagrams - always use Mermaid
 - Don't reference line numbers in test names or comments
 - Don't make code changes without verifying documentation consistency

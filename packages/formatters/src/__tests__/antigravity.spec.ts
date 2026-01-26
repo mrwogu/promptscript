@@ -252,7 +252,8 @@ describe('AntigravityFormatter', () => {
       expect(result.content).toContain('### ESLint');
       expect(result.content).toContain('eslint.base.config.cjs');
       expect(result.content).toContain('### Vite/Vitest');
-      expect(result.content).toContain('__dirname');
+      // __dirname is escaped to \_\_dirname for Prettier compatibility
+      expect(result.content).toContain('\\_\\_dirname');
     });
 
     it('should include testing standards from standards', () => {

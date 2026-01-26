@@ -135,7 +135,7 @@ export class AntigravityFormatter extends BaseFormatter {
     const restrictions = this.restrictions(ast, renderer);
     if (restrictions) sections.push(restrictions);
 
-    const content = sections.join('\n\n');
+    const content = sections.join('\n\n') + '\n';
 
     // Validate character limit
     this.validateContentLength(content);
@@ -359,9 +359,10 @@ export class AntigravityFormatter extends BaseFormatter {
     const content = this.extractText(identity.content);
     if (!content) return null;
 
+    // Apply stripAllIndent to normalize merged identity content for Prettier compatibility
     return `## Project Identity
 
-${content}`;
+${this.stripAllIndent(content)}`;
   }
 
   /**
@@ -428,9 +429,10 @@ ${items.join('\n')}`;
       const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
       if (archMatch) {
         const content = archMatch.replace('## Architecture', '').trim();
+        // Apply stripAllIndent to normalize content for Prettier compatibility
         return `## Architecture
 
-${content}`;
+${this.stripAllIndent(content)}`;
       }
 
       // Also try explicit architecture property
@@ -441,7 +443,7 @@ ${content}`;
         if (archText.trim()) {
           return `## Architecture
 
-${archText.trim()}`;
+${this.stripAllIndent(archText.trim())}`;
         }
       }
     }
@@ -453,7 +455,7 @@ ${archText.trim()}`;
       if (content) {
         return `## Architecture
 
-${content}`;
+${this.stripAllIndent(content)}`;
       }
     }
 
@@ -580,7 +582,8 @@ ${items.map((i) => '- ' + i).join('\n')}`;
 
     const vite = configObj['viteRoot'];
     if (vite) {
-      const value = this.valueToString(vite);
+      // Escape markdown special characters for Prettier compatibility
+      const value = this.valueToString(vite).replace(/__/g, '\\_\\_').replace(/\/\*/g, '/\\*');
       subsections.push(`### Vite/Vitest\n\n- Vite root: ${value}`);
     }
 
@@ -608,7 +611,12 @@ ${subsections.join('\n\n')}`;
       if (this.isWorkflow(value)) continue;
 
       const valueStr = this.valueToString(value);
-      lines.push(`- **${key}**: ${valueStr}`);
+      // Avoid trailing space when value is empty
+      if (valueStr) {
+        lines.push(`- **${key}**: ${valueStr}`);
+      } else {
+        lines.push(`- **${key}**:`);
+      }
     }
 
     // Only return if there are non-workflow commands
@@ -631,9 +639,10 @@ ${lines.join('\n')}`;
     if (!commandsMatch) return null;
 
     const content = commandsMatch.replace('## Development Commands', '').trim();
+    // Apply stripAllIndent to normalize content for Prettier compatibility
     return `## Development Commands
 
-${content}`;
+${this.stripAllIndent(content)}`;
   }
 
   /**
@@ -650,10 +659,11 @@ ${content}`;
     const intro =
       'After completing any code changes, run the following commands to ensure code quality:';
     const content = postMatch.replace('## Post-Work Verification', '').trim();
+    // Apply stripAllIndent to normalize content for Prettier compatibility
     return `## Post-Work Verification
 
 ${intro}
-${content}`;
+${this.stripAllIndent(content)}`;
   }
 
   /**
@@ -709,9 +719,11 @@ ${items.map((i) => '- ' + i).join('\n')}`;
 
     const format = diagObj['format'];
     if (format) {
-      items.push(
-        `Always use **${this.valueToString(format)}** syntax for diagrams in documentation`
-      );
+      // Escape markdown special characters for Prettier compatibility
+      const formatValue = this.valueToString(format)
+        .replace(/__/g, '\\_\\_')
+        .replace(/\/\*/g, '/\\*');
+      items.push(`Always use **${formatValue}** syntax for diagrams in documentation`);
     }
 
     const types = diagObj['types'];
