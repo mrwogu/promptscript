@@ -315,16 +315,15 @@ export class Compiler {
     config?: TargetConfig
   ): import('./types.js').FormatOptions {
     const customConventions = this.options.customConventions;
+    const prettierOptions = this.options.prettier;
 
-    if (!config?.convention && !config?.version && !config?.output) {
-      return {};
-    }
-
-    const conventionName = config?.convention;
     const options: import('./types.js').FormatOptions = {
       outputPath: config?.output,
       version: config?.version,
+      prettier: prettierOptions,
     };
+
+    const conventionName = config?.convention;
 
     // Check if it's a custom convention
     if (conventionName && customConventions?.[conventionName]) {
@@ -460,6 +459,10 @@ export interface CompileOptions {
    * Custom conventions for formatters.
    */
   customConventions?: CompilerOptions['customConventions'];
+  /**
+   * Prettier formatting options for markdown output.
+   */
+  prettier?: CompilerOptions['prettier'];
 }
 
 /**
@@ -512,6 +515,7 @@ export async function compile(
     validator: options.validator,
     formatters,
     customConventions: options.customConventions,
+    prettier: options.prettier,
   });
 
   return compiler.compile(entryPath);

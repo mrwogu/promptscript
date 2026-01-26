@@ -16,6 +16,7 @@ import {
   formatDetectionResults,
   type AIToolTarget,
 } from '../utils/ai-tools-detector.js';
+import { findPrettierConfig } from '../prettier/loader.js';
 
 /**
  * Resolved configuration after prompts or CLI args.
@@ -26,6 +27,8 @@ interface ResolvedConfig {
   inherit?: string;
   registry?: string;
   targets: AIToolTarget[];
+  /** Path to detected Prettier config, or null if not found */
+  prettierConfigPath: string | null;
 }
 
 /**
@@ -49,8 +52,17 @@ export async function initCommand(
     const projectInfo = await detectProject(services);
     const aiToolsDetection = await detectAITools(services);
 
+    // Detect Prettier configuration
+    const prettierConfigPath = findPrettierConfig(process.cwd());
+
     // Resolve configuration (interactive or from CLI args)
-    const config = await resolveConfig(options, projectInfo, aiToolsDetection, services);
+    const config = await resolveConfig(
+      options,
+      projectInfo,
+      aiToolsDetection,
+      prettierConfigPath,
+      services
+    );
 
     // Create files
     const spinner = createSpinner('Creating PromptScript configuration...').start();
@@ -80,6 +92,17 @@ export async function initCommand(
     if (config.registry) {
       ConsoleOutput.muted(`  Registry: ${config.registry}`);
     }
+
+    // Show Prettier detection status
+    ConsoleOutput.newline();
+    if (config.prettierConfigPath) {
+      ConsoleOutput.info(`Prettier config detected: ${config.prettierConfigPath}`);
+      ConsoleOutput.muted('  Output formatting will respect your Prettier settings');
+    } else {
+      ConsoleOutput.muted('No Prettier config found');
+      ConsoleOutput.muted('  Default formatting options added to config (tabWidth: 2)');
+    }
+
     ConsoleOutput.newline();
     console.log('Next steps:');
     ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
@@ -103,6 +126,7 @@ async function resolveConfig(
   options: InitOptions,
   projectInfo: ProjectInfo,
   aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>,
+  prettierConfigPath: string | null,
   services: CliServices
 ): Promise<ResolvedConfig> {
   // If --yes flag, use all defaults
@@ -113,6 +137,7 @@ async function resolveConfig(
       inherit: options.inherit,
       registry: options.registry ?? './registry',
       targets: (options.targets as AIToolTarget[]) ?? getSuggestedTargets(aiToolsDetection),
+      prettierConfigPath,
     };
   }
 
@@ -124,11 +149,18 @@ async function resolveConfig(
       inherit: options.inherit,
       registry: options.registry,
       targets: options.targets as AIToolTarget[],
+      prettierConfigPath,
     };
   }
 
   // Interactive mode
-  return await runInteractivePrompts(options, projectInfo, aiToolsDetection, services);
+  return await runInteractivePrompts(
+    options,
+    projectInfo,
+    aiToolsDetection,
+    prettierConfigPath,
+    services
+  );
 }
 
 /**
@@ -138,6 +170,7 @@ async function runInteractivePrompts(
   options: InitOptions,
   projectInfo: ProjectInfo,
   aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>,
+  prettierConfigPath: string | null,
   services: CliServices
 ): Promise<ResolvedConfig> {
   const { prompts } = services;
@@ -160,6 +193,11 @@ async function runInteractivePrompts(
   const detectionLines = formatDetectionResults(aiToolsDetection);
   for (const line of detectionLines) {
     ConsoleOutput.muted(line);
+  }
+
+  // Show Prettier detection
+  if (prettierConfigPath) {
+    ConsoleOutput.muted(`Prettier: ${prettierConfigPath}`);
   }
   ConsoleOutput.newline();
 
@@ -238,6 +276,7 @@ async function runInteractivePrompts(
     inherit,
     registry,
     targets,
+    prettierConfigPath,
   };
 }
 
@@ -285,7 +324,23 @@ function generateConfig(config: ResolvedConfig): string {
     lines.push(`  - ${target}`);
   }
 
-  lines.push('', 'validation:', '  rules:', '    empty-block: warn', '');
+  lines.push('', 'validation:', '  rules:', '    empty-block: warn');
+
+  // Add formatting configuration
+  lines.push('');
+  if (config.prettierConfigPath) {
+    // Prettier config detected - enable auto-detection
+    lines.push('formatting:', '  prettier: true  # Auto-detected from project');
+  } else {
+    // No Prettier config - add default options
+    lines.push(
+      'formatting:',
+      '  tabWidth: 2',
+      "  proseWrap: preserve  # 'always' | 'never' | 'preserve'"
+    );
+  }
+
+  lines.push('');
 
   return lines.join('\n');
 }

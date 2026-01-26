@@ -1,4 +1,11 @@
-import type { Block, BlockContent, Program, Value } from '@promptscript/core';
+import type {
+  Block,
+  BlockContent,
+  PrettierMarkdownOptions,
+  Program,
+  Value,
+} from '@promptscript/core';
+import { DEFAULT_PRETTIER_OPTIONS } from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
 import type { FormatOptions, Formatter, FormatterOutput } from './types.js';
 
@@ -19,7 +26,20 @@ export abstract class BaseFormatter implements Formatter {
    */
   protected createRenderer(options?: FormatOptions): ConventionRenderer {
     const convention = options?.convention ?? this.defaultConvention;
-    return new ConventionRenderer(convention);
+    return new ConventionRenderer({
+      convention,
+      prettier: options?.prettier,
+    });
+  }
+
+  /**
+   * Get resolved Prettier options, merging provided options with defaults.
+   */
+  protected getPrettierOptions(options?: FormatOptions): Required<PrettierMarkdownOptions> {
+    return {
+      ...DEFAULT_PRETTIER_OPTIONS,
+      ...options?.prettier,
+    };
   }
 
   /**

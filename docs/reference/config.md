@@ -172,6 +172,21 @@ output:
 
   # Overwrite existing files
   overwrite: true
+
+# =========================
+# Formatting Configuration
+# =========================
+formatting:
+  # Auto-detect .prettierrc in project
+  prettier: true
+
+  # Or specify explicit path to .prettierrc
+  # prettier: "./config/.prettierrc"
+
+  # Or specify options directly
+  # proseWrap: always    # 'always' | 'never' | 'preserve'
+  # tabWidth: 4          # Number of spaces per indent
+  # printWidth: 100      # Max line width for prose wrapping
 ```
 
 ## Configuration Sections
@@ -466,6 +481,72 @@ watch:
 | `exclude`     | string[] | `[]`           | Patterns to ignore  |
 | `debounce`    | number   | `300`          | Debounce delay (ms) |
 | `clearScreen` | boolean  | `true`         | Clear on rebuild    |
+
+### formatting
+
+Configures output formatting to match your project's Prettier configuration.
+
+```yaml
+formatting:
+  # Option 1: Auto-detect .prettierrc in project
+  prettier: true
+
+  # Option 2: Explicit path to Prettier config
+  prettier: "./config/.prettierrc"
+
+  # Option 3: Inline options (overrides .prettierrc)
+  proseWrap: always
+  tabWidth: 4
+  printWidth: 100
+```
+
+**Prettier Detection:**
+
+When `prettier: true`, PromptScript searches for Prettier configuration files in this order:
+
+1. `.prettierrc`
+2. `.prettierrc.json`
+3. `.prettierrc.yaml`
+4. `.prettierrc.yml`
+
+**Configuration Fields:**
+
+| Field        | Type                                    | Default      | Description                          |
+| ------------ | --------------------------------------- | ------------ | ------------------------------------ |
+| `prettier`   | boolean \| string \| object             | -            | Enable auto-detect, path, or options |
+| `proseWrap`  | `'always'` \| `'never'` \| `'preserve'` | `'preserve'` | How to wrap prose in markdown        |
+| `tabWidth`   | number                                  | `2`          | Number of spaces per indentation     |
+| `printWidth` | number                                  | `80`         | Maximum line width for wrapping      |
+
+**ProseWrap Options:**
+
+| Value        | Description                                 |
+| ------------ | ------------------------------------------- |
+| `'always'`   | Wrap prose at `printWidth`                  |
+| `'never'`    | Do not wrap prose (single long lines)       |
+| `'preserve'` | Preserve original line wrapping from source |
+
+!!! tip "Option Priority"
+Explicit options (`proseWrap`, `tabWidth`, `printWidth`) override values from `.prettierrc`.
+This allows you to use your project's Prettier config as a base while customizing specific options.
+
+**Example: Match Project Prettier Config**
+
+If your project already has a `.prettierrc`:
+
+```yaml
+formatting:
+  prettier: true
+```
+
+**Example: Custom Formatting Without Prettier File**
+
+```yaml
+formatting:
+  tabWidth: 4
+  proseWrap: always
+  printWidth: 100
+```
 
 ## Environment Variables
 

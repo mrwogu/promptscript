@@ -1,4 +1,4 @@
-import type { OutputConvention, Program } from '@promptscript/core';
+import type { OutputConvention, PrettierMarkdownOptions, Program } from '@promptscript/core';
 import type { ResolverOptions } from '@promptscript/resolver';
 import type { ValidatorConfig, ValidationMessage } from '@promptscript/validator';
 
@@ -28,6 +28,10 @@ export interface FormatOptions {
    * @example 'legacy' | '1.0' | '2.0'
    */
   version?: string;
+  /**
+   * Prettier formatting options for markdown output.
+   */
+  prettier?: PrettierMarkdownOptions;
 }
 
 /**
@@ -81,6 +85,8 @@ export interface CompilerOptions {
   formatters: (Formatter | string | { name: string; config?: TargetConfig })[];
   /** Custom convention definitions */
   customConventions?: Record<string, OutputConvention>;
+  /** Prettier formatting options for markdown output */
+  prettier?: PrettierMarkdownOptions;
 }
 
 /**

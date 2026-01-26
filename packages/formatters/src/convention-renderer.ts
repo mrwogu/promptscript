@@ -1,13 +1,54 @@
-import type { OutputConvention, SectionRenderer } from '@promptscript/core';
-import { BUILT_IN_CONVENTIONS, isBuiltInConvention, XML_CONVENTION } from '@promptscript/core';
+import type {
+  OutputConvention,
+  PrettierMarkdownOptions,
+  SectionRenderer,
+} from '@promptscript/core';
+import {
+  BUILT_IN_CONVENTIONS,
+  DEFAULT_PRETTIER_OPTIONS,
+  isBuiltInConvention,
+  XML_CONVENTION,
+} from '@promptscript/core';
+
+/**
+ * Options for creating a ConventionRenderer.
+ */
+export interface ConventionRendererOptions {
+  /**
+   * Output convention to use.
+   */
+  convention?: OutputConvention | string;
+  /**
+   * Prettier formatting options.
+   */
+  prettier?: PrettierMarkdownOptions;
+}
 
 /**
  * Convention renderer for applying output conventions to formatted content.
  */
 export class ConventionRenderer {
   private convention: OutputConvention;
+  private prettierOptions: Required<PrettierMarkdownOptions>;
 
-  constructor(convention: OutputConvention | string = 'xml') {
+  constructor(conventionOrOptions: OutputConvention | string | ConventionRendererOptions = 'xml') {
+    let convention: OutputConvention | string;
+    let prettier: PrettierMarkdownOptions | undefined;
+
+    // Handle backwards-compatible signature
+    // ConventionRendererOptions has optional 'convention' and 'prettier' fields
+    // OutputConvention has required 'name' field but not 'convention' or 'prettier'
+    if (
+      typeof conventionOrOptions === 'object' &&
+      ('convention' in conventionOrOptions || 'prettier' in conventionOrOptions)
+    ) {
+      const opts = conventionOrOptions as ConventionRendererOptions;
+      convention = opts.convention ?? 'xml';
+      prettier = opts.prettier;
+    } else {
+      convention = conventionOrOptions as OutputConvention | string;
+    }
+
     if (typeof convention === 'string') {
       if (isBuiltInConvention(convention)) {
         this.convention = BUILT_IN_CONVENTIONS[convention];
@@ -19,6 +60,19 @@ export class ConventionRenderer {
     } else {
       this.convention = convention;
     }
+
+    // Merge prettier options with defaults
+    this.prettierOptions = {
+      ...DEFAULT_PRETTIER_OPTIONS,
+      ...prettier,
+    };
+  }
+
+  /**
+   * Get the current Prettier options.
+   */
+  getPrettierOptions(): Required<PrettierMarkdownOptions> {
+    return this.prettierOptions;
   }
 
   /**
@@ -190,8 +244,10 @@ export class ConventionRenderer {
     }
 
     // For XML convention, indent content inside tags
+    // Use tabWidth from prettier options if available
     if (this.convention.name === 'xml') {
-      const baseIndent = indent.repeat(level);
+      const indentStr = ' '.repeat(this.prettierOptions.tabWidth);
+      const baseIndent = indentStr.repeat(level);
       return content
         .split('\n')
         .map((line) => (line.trim() ? `${baseIndent}${line}` : line))

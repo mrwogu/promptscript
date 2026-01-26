@@ -6,6 +6,7 @@ import type { CompileOptions } from '../types.js';
 import type { PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader.js';
+import { resolvePrettierOptions } from '../prettier/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 
@@ -106,6 +107,9 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
     // Use --registry flag if provided, otherwise fall back to config
     const registryPath = options.registry ?? config.registry?.path ?? './registry';
 
+    // Resolve Prettier options from config
+    const prettierOptions = await resolvePrettierOptions(config, process.cwd());
+
     const compiler = new Compiler({
       resolver: {
         registryPath,
@@ -114,6 +118,7 @@ export async function compileCommand(options: CompileOptions): Promise<void> {
       validator: config.validation,
       formatters: targets,
       customConventions: config.customConventions,
+      prettier: prettierOptions,
     });
 
     const entryPath = resolve('./.promptscript/project.prs');

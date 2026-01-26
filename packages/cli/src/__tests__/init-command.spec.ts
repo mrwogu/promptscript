@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { initCommand } from '../commands/init.js';
 import { type CliServices } from '../services.js';
 
+// Mock prettier/loader
+const mockFindPrettierConfig = vi.fn();
+vi.mock('../prettier/loader.js', () => ({
+  findPrettierConfig: () => mockFindPrettierConfig(),
+}));
+
 // Mock ora
 vi.mock('ora', () => ({
   default: vi.fn().mockReturnValue({
@@ -51,6 +57,8 @@ describe('commands/init', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    // Default: no Prettier config found
+    mockFindPrettierConfig.mockReturnValue(null);
 
     mockFs = {
       existsSync: vi.fn().mockReturnValue(false),
@@ -405,6 +413,73 @@ describe('commands/init', () => {
         '.promptscript/project.prs',
         expect.stringContaining('# frameworks:'),
         'utf-8'
+      );
+    });
+  });
+
+  describe('Prettier detection', () => {
+    it('should add formatting: prettier: true when Prettier config is detected', async () => {
+      mockFindPrettierConfig.mockReturnValue('/mock/project/.prettierrc');
+
+      await initCommand({ yes: true }, mockServices);
+
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('formatting:'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('prettier: true'),
+        'utf-8'
+      );
+    });
+
+    it('should add default formatting options when no Prettier config found', async () => {
+      mockFindPrettierConfig.mockReturnValue(null);
+
+      await initCommand({ yes: true }, mockServices);
+
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('formatting:'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('tabWidth: 2'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('proseWrap: preserve'),
+        'utf-8'
+      );
+    });
+
+    it('should include Auto-detected comment when Prettier config found', async () => {
+      mockFindPrettierConfig.mockReturnValue('/mock/project/.prettierrc.json');
+
+      await initCommand({ yes: true }, mockServices);
+
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('# Auto-detected from project'),
+        'utf-8'
+      );
+    });
+
+    it('should show Prettier detection in interactive mode', async () => {
+      mockFindPrettierConfig.mockReturnValue('/mock/project/.prettierrc');
+      mockPrompts.input.mockResolvedValue('test-project');
+      mockPrompts.confirm.mockResolvedValue(false);
+      mockPrompts.checkbox.mockResolvedValue(['github']);
+
+      await initCommand({}, mockServices);
+
+      // Should show Prettier detection info during interactive prompts
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Prettier: /mock/project/.prettierrc')
       );
     });
   });

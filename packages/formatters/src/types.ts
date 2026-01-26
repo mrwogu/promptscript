@@ -1,4 +1,4 @@
-import type { OutputConvention, Program } from '@promptscript/core';
+import type { OutputConvention, PrettierMarkdownOptions, Program } from '@promptscript/core';
 
 /**
  * Output from a formatter.
@@ -33,6 +33,11 @@ export interface FormatOptions {
    * @example 'legacy' | '1.0' | '2.0'
    */
   version?: string;
+
+  /**
+   * Prettier formatting options for markdown output.
+   */
+  prettier?: PrettierMarkdownOptions;
 }
 
 /**

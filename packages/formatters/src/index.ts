@@ -33,6 +33,7 @@ export {
   createConventionRenderer,
   conventionRenderers,
 } from './convention-renderer.js';
+export type { ConventionRendererOptions } from './convention-renderer.js';
 
 // Section registry for parity testing
 export {

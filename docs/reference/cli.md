@@ -90,10 +90,24 @@ The `init` command automatically detects:
 - **Languages** (TypeScript, Python, Rust, Go, etc.)
 - **Frameworks** (React, Next.js, Django, FastAPI, etc.)
 - **Existing AI tools** (GitHub Copilot, Claude, Cursor configurations)
+- **Prettier configuration** (`.prettierrc`, `.prettierrc.json`, `.prettierrc.yaml`, `.prettierrc.yml`)
+
+**Prettier Integration:**
+
+If a Prettier configuration file is detected:
+
+- Displays: `Prettier config detected: .prettierrc`
+- Adds `formatting: { prettier: true }` to enable auto-detection during compilation
+- Output formatting will respect your project's Prettier settings (tabWidth, proseWrap, printWidth)
+
+If no Prettier configuration is found:
+
+- Displays: `No Prettier config found`
+- Adds default formatting options: `formatting: { tabWidth: 2, proseWrap: preserve }`
 
 **Created Files:**
 
-- `promptscript.yaml` - Configuration file
+- `promptscript.yaml` - Configuration file (includes formatting settings)
 - `.promptscript/project.prs` - Main instructions file
 
 ---

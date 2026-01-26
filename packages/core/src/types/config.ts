@@ -1,4 +1,44 @@
 import type { ConventionName, OutputConvention } from './convention.js';
+import type { PrettierMarkdownOptions } from './prettier.js';
+
+/**
+ * Formatting configuration for output files.
+ * Controls how generated markdown is formatted.
+ */
+export interface FormattingConfig {
+  /**
+   * Enable Prettier formatting.
+   * - `true`: Auto-detect .prettierrc in project
+   * - `string`: Path to Prettier config file
+   * - `PrettierMarkdownOptions`: Explicit options
+   * @example
+   * formatting:
+   *   prettier: true  # Auto-detect
+   *
+   * formatting:
+   *   prettier: "./config/.prettierrc"  # Explicit path
+   *
+   * formatting:
+   *   proseWrap: always
+   *   tabWidth: 4
+   */
+  prettier?: boolean | string | PrettierMarkdownOptions;
+
+  /**
+   * Explicit proseWrap setting (shorthand for prettier.proseWrap).
+   */
+  proseWrap?: PrettierMarkdownOptions['proseWrap'];
+
+  /**
+   * Explicit tabWidth setting (shorthand for prettier.tabWidth).
+   */
+  tabWidth?: PrettierMarkdownOptions['tabWidth'];
+
+  /**
+   * Explicit printWidth setting (shorthand for prettier.printWidth).
+   */
+  printWidth?: PrettierMarkdownOptions['printWidth'];
+}
 
 /**
  * GitHub Copilot output format versions.
@@ -172,6 +212,19 @@ export interface PromptScriptConfig {
     /** Whether to overwrite existing files without warning */
     overwrite?: boolean;
   };
+
+  /**
+   * Formatting configuration.
+   * Controls how generated markdown files are formatted.
+   * @example
+   * formatting:
+   *   prettier: true  # Auto-detect .prettierrc
+   *
+   * formatting:
+   *   tabWidth: 4
+   *   proseWrap: always
+   */
+  formatting?: FormattingConfig;
 
   /**
    * Output targets.
