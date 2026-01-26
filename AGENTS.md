@@ -46,27 +46,27 @@ You write clean, type-safe, and well-tested code following strict TypeScript pra
 The project is organized as a monorepo with these packages:
 
 ```mermaid
-flowchart TB
-  subgraph packages
-    core[core - Types, errors, utilities]
-    parser[parser - Chevrotain-based parser]
-    resolver[resolver - Inheritance & import resolution]
-    validator[validator - AST validation rules]
-    compiler[compiler - Pipeline orchestration]
-    formatters[formatters - Output formatters]
-    cli[cli - Command-line interface]
-  end
+  flowchart TB
+    subgraph packages
+      core[core - Types, errors, utilities]
+      parser[parser - Chevrotain-based parser]
+      resolver[resolver - Inheritance & import resolution]
+      validator[validator - AST validation rules]
+      compiler[compiler - Pipeline orchestration]
+      formatters[formatters - Output formatters]
+      cli[cli - Command-line interface]
+    end
 
-  cli --> compiler
-  cli --> resolver
-  compiler --> resolver
-  compiler --> validator
-  compiler --> formatters
-  resolver --> parser
-  parser --> core
-  resolver --> core
-  validator --> core
-  formatters --> core
+    cli --> compiler
+    cli --> resolver
+    compiler --> resolver
+    compiler --> validator
+    compiler --> formatters
+    resolver --> parser
+    parser --> core
+    resolver --> core
+    validator --> core
+    formatters --> core
 ```
 
 ## Key Libraries
@@ -81,7 +81,7 @@ flowchart TB
 - src/ - Source code
 - src/index.ts - Public API exports
 - src/types/ - TypeScript type definitions
-- src/**tests**/ - Unit tests
+- src/\_\_tests\_\_/ - Unit tests
 - dist/ - Compiled output
 
 ## Project Structure (Monorepo)

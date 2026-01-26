@@ -553,11 +553,12 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('');
 
     // Add identity content
+    // Use stripAllIndent for AGENTS.md since identity content comes from merged sources with inconsistent indentation
     const identityText = this.extractText(identity.content);
     if (identityText) {
       lines.push('## Identity');
       lines.push('');
-      lines.push(identityText);
+      lines.push(this.stripAllIndent(identityText));
       lines.push('');
     }
 
@@ -568,7 +569,7 @@ export class GitHubFormatter extends BaseFormatter {
       if (contextText) {
         lines.push('## Context');
         lines.push('');
-        lines.push(contextText);
+        lines.push(this.stripAllIndent(contextText));
         lines.push('');
       }
     }
@@ -583,13 +584,13 @@ export class GitHubFormatter extends BaseFormatter {
         for (const item of items) {
           lines.push(`- ${item}`);
         }
-        lines.push('');
+        // No trailing empty line - we add '\n' at the end
       }
     }
 
     return {
       path: 'AGENTS.md',
-      content: lines.join('\n'),
+      content: lines.join('\n') + '\n',
     };
   }
 

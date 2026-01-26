@@ -158,22 +158,67 @@ export abstract class BaseFormatter implements Formatter {
 
   /**
    * Normalize markdown content to match Prettier formatting.
+   * - Strips common leading indentation from lines
    * - Trims trailing whitespace from lines
    * - Normalizes markdown table formatting
+   * - Adds blank lines before lists when preceded by text
+   * - Escapes markdown special characters in paths
    */
   protected normalizeMarkdownForPrettier(content: string): string {
     const lines = content.split('\n');
+
+    // Find common leading indentation (minimum non-empty, non-code-block line indent)
+    let minIndent = Infinity;
+    let inCodeBlock = false;
+    for (const line of lines) {
+      const trimmed = line.trimEnd();
+      if (trimmed.startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+        continue;
+      }
+      if (inCodeBlock) continue;
+      if (trimmed.length === 0) continue;
+      const match = line.match(/^(\s*)/);
+      const leadingSpaces = match?.[1]?.length ?? 0;
+      minIndent = Math.min(minIndent, leadingSpaces);
+    }
+    if (minIndent === Infinity) minIndent = 0;
+
+    // Process lines
     const result: string[] = [];
     let inTable = false;
     let tableLines: string[] = [];
+    inCodeBlock = false;
 
     for (const line of lines) {
       const trimmedLine = line.trimEnd();
 
+      // Track code blocks
+      if (trimmedLine.trimStart().startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+      }
+
+      // Strip common indentation from all lines
+      const unindentedLine = minIndent > 0 ? trimmedLine.slice(minIndent) : trimmedLine;
+
+      // Inside code blocks, just use unindented line
+      if (inCodeBlock || unindentedLine.startsWith('```')) {
+        result.push(unindentedLine);
+        continue;
+      }
+
+      let processedLine = unindentedLine;
+
+      // Escape markdown special characters in path-like content (outside code blocks)
+      // __name__ → \_\_name\_\_ (prevents bold)
+      processedLine = processedLine.replace(/__([^_]+)__/g, '\\_\\_$1\\_\\_');
+      // path/*/file → path/\*/file (prevents italic/list)
+      processedLine = processedLine.replace(/\/\*/g, '/\\*');
+
       // Detect table rows (lines starting with |)
-      if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+      if (processedLine.trimStart().startsWith('|') && processedLine.trimEnd().endsWith('|')) {
         inTable = true;
-        tableLines.push(trimmedLine);
+        tableLines.push(processedLine.trim());
       } else {
         // If we were in a table, format and flush it
         if (inTable && tableLines.length > 0) {
@@ -181,13 +226,67 @@ export abstract class BaseFormatter implements Formatter {
           tableLines = [];
           inTable = false;
         }
-        result.push(trimmedLine);
+
+        // Add blank line before list item if previous line was non-empty text (not a list item or blank)
+        const prevLine = result.length > 0 ? result[result.length - 1] : '';
+        const isListItem = processedLine.trimStart().startsWith('- ');
+        if (isListItem && prevLine && !prevLine.trimStart().startsWith('- ')) {
+          result.push('');
+        }
+
+        result.push(processedLine);
       }
     }
 
     // Handle table at end of content
     if (tableLines.length > 0) {
       result.push(...this.formatMarkdownTable(tableLines));
+    }
+
+    return result.join('\n');
+  }
+
+  /**
+   * Strip all leading indentation from markdown content.
+   * Used for AGENTS.md where content from multiple sources has inconsistent indentation.
+   * Preserves indentation inside code blocks.
+   */
+  protected stripAllIndent(content: string): string {
+    const lines = content.split('\n');
+    const result: string[] = [];
+    let inCodeBlock = false;
+
+    for (const line of lines) {
+      const trimmedEnd = line.trimEnd();
+
+      // Track code blocks
+      if (trimmedEnd.trimStart().startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+        // Strip indent from code block markers too
+        result.push(trimmedEnd.trimStart());
+        continue;
+      }
+
+      // Inside code blocks, preserve relative indentation
+      if (inCodeBlock) {
+        result.push(trimmedEnd);
+        continue;
+      }
+
+      // Outside code blocks, strip all leading whitespace
+      let stripped = trimmedEnd.trimStart();
+
+      // Escape markdown special characters in paths
+      stripped = stripped.replace(/__([^_]+)__/g, '\\_\\_$1\\_\\_');
+      stripped = stripped.replace(/\/\*/g, '/\\*');
+
+      // Add blank line before list item if previous line was non-empty and not a list
+      const prevLine = result.length > 0 ? result[result.length - 1] : '';
+      if (stripped.startsWith('- ') && prevLine && !prevLine.startsWith('- ')) {
+        result.push('');
+      }
+
+      result.push(stripped);
     }
 
     return result.join('\n');
