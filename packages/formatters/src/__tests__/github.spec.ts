@@ -491,8 +491,8 @@ describe('GitHubFormatter', () => {
       expect(agentFile).toBeDefined();
       expect(agentFile?.content).toContain('name: code-reviewer');
       expect(agentFile?.content).toContain('description: Code review specialist');
-      expect(agentFile?.content).toContain('tools:');
-      expect(agentFile?.content).toContain('- read_file');
+      // Tools should be in inline YAML array format with GitHub Copilot canonical names
+      expect(agentFile?.content).toContain("tools: ['read_file', 'grep_search']");
       expect(agentFile?.content).toContain('You specialize in code reviews.');
     });
 
@@ -558,7 +558,147 @@ describe('GitHubFormatter', () => {
       );
       expect(agentFile).toBeDefined();
       expect(agentFile?.content).toContain('name: smart-agent');
-      expect(agentFile?.content).toContain('model: gpt-4o');
+      // gpt-4o should be mapped to GPT-4o
+      expect(agentFile?.content).toContain('model: GPT-4o');
+    });
+
+    it('should map Claude Code model names to GitHub Copilot format', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Code reviewer with sonnet model',
+                  model: 'sonnet',
+                  content: 'Reviews code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/reviewer.md')
+      );
+      expect(agentFile).toBeDefined();
+      // 'sonnet' should be mapped to 'Claude Sonnet 4.5' (latest version)
+      expect(agentFile?.content).toContain('model: Claude Sonnet 4.5');
+    });
+
+    it('should omit model property when set to inherit', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                helper: {
+                  description: 'Helper with inherited model',
+                  model: 'inherit',
+                  content: 'Helps with tasks.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/helper.md')
+      );
+      expect(agentFile).toBeDefined();
+      // 'inherit' should result in no model property
+      expect(agentFile?.content).not.toContain('model:');
+    });
+
+    it('should map all Claude model aliases correctly', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'opus-agent': {
+                  description: 'Agent with opus model',
+                  model: 'opus',
+                  content: 'Uses opus.',
+                },
+                'haiku-agent': {
+                  description: 'Agent with haiku model',
+                  model: 'haiku',
+                  content: 'Uses haiku.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const opusAgent = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/opus-agent.md')
+      );
+      expect(opusAgent).toBeDefined();
+      expect(opusAgent?.content).toContain('model: Claude Opus 4.5');
+
+      const haikuAgent = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/haiku-agent.md')
+      );
+      expect(haikuAgent).toBeDefined();
+      expect(haikuAgent?.content).toContain('model: Claude Haiku 4.5');
+    });
+
+    it('should pass through unknown model names as-is', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                custom: {
+                  description: 'Agent with custom model',
+                  model: 'Gemini 2.5 Pro',
+                  content: 'Uses custom model.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/custom.md')
+      );
+      expect(agentFile).toBeDefined();
+      // Unknown model names should pass through unchanged
+      expect(agentFile?.content).toContain('model: Gemini 2.5 Pro');
     });
 
     it('should handle multiple agents', () => {
@@ -652,9 +792,137 @@ describe('GitHubFormatter', () => {
         f.path.includes('.github/agents/helper.md')
       );
       expect(agentFile).toBeDefined();
-      expect(agentFile?.content).toContain('- read_file');
-      expect(agentFile?.content).toContain('- write_file');
-      expect(agentFile?.content).toContain('- run_terminal');
+      // Tools should be in inline YAML array format
+      expect(agentFile?.content).toContain("tools: ['read_file', 'write_file', 'run_terminal']");
+    });
+
+    it('should map Claude Code tool names to GitHub Copilot canonical names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Code reviewer with Claude Code tools',
+                  tools: ['Read', 'Grep', 'Glob', 'Bash'],
+                  content: 'Reviews code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/reviewer.md')
+      );
+      expect(agentFile).toBeDefined();
+      // Claude Code tools should be mapped: Read->read, Grep+Glob->search (deduplicated), Bash->execute
+      expect(agentFile?.content).toContain("tools: ['read', 'search', 'execute']");
+    });
+
+    it('should deduplicate tools that map to the same GitHub Copilot tool', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                searcher: {
+                  description: 'Agent with duplicate search tools',
+                  tools: ['Grep', 'Glob', 'Grep'], // Both map to 'search'
+                  content: 'Searches code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/searcher.md')
+      );
+      expect(agentFile).toBeDefined();
+      // Should only have 'search' once, not duplicated
+      expect(agentFile?.content).toContain("tools: ['search']");
+      expect(agentFile?.content).not.toContain("['search', 'search']");
+    });
+
+    it('should map all supported Claude Code tools correctly', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'full-agent': {
+                  description: 'Agent with all tool types',
+                  tools: ['Read', 'Edit', 'Write', 'WebFetch', 'WebSearch', 'Task', 'TodoWrite'],
+                  content: 'Full featured agent.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/full-agent.md')
+      );
+      expect(agentFile).toBeDefined();
+      // Edit and Write both map to 'edit', WebFetch and WebSearch both map to 'web'
+      expect(agentFile?.content).toContain("tools: ['read', 'edit', 'web', 'agent', 'todo']");
+    });
+
+    it('should lowercase unknown tools that are not in the mapping', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                custom: {
+                  description: 'Agent with custom tools',
+                  tools: ['CustomTool', 'AnotherTool', 'read'], // Custom + already lowercase
+                  content: 'Custom agent.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/custom.md')
+      );
+      expect(agentFile).toBeDefined();
+      // Unknown tools should be lowercased
+      expect(agentFile?.content).toContain("tools: ['customtool', 'anothertool', 'read']");
     });
   });
 });

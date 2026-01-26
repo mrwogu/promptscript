@@ -194,12 +194,8 @@ With `version: full`, agents are generated as separate files:
     ---
     name: code-reviewer
     description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
-    tools:
-      - Read
-      - Grep
-      - Glob
-      - Bash
-    model: gpt-4o
+    tools: ['read', 'search', 'execute']
+    model: Claude Sonnet 4.5
     ---
 
     You are a senior code reviewer ensuring high standards of code quality and security.
@@ -210,8 +206,32 @@ With `version: full`, agents are generated as separate files:
        ...
     ```
 
-    !!! note "GitHub vs Claude"
-        GitHub Copilot custom agents support `name`, `description`, `tools`, and `model`. Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` are ignored for GitHub output.
+    !!! note "GitHub Copilot Mappings"
+        PromptScript automatically maps tool and model names to GitHub Copilot's format:
+
+        **Tools:**
+
+        | PromptScript | GitHub Copilot |
+        |--------------|----------------|
+        | `Read` | `read` |
+        | `Grep`, `Glob` | `search` |
+        | `Bash` | `execute` |
+        | `Edit`, `Write` | `edit` |
+        | `WebFetch`, `WebSearch` | `web` |
+        | `Task` | `agent` |
+        | `TodoWrite` | `todo` |
+
+        **Models:**
+
+        | PromptScript | GitHub Copilot |
+        |--------------|----------------|
+        | `sonnet` | `Claude Sonnet 4.5` |
+        | `opus` | `Claude Opus 4.5` |
+        | `haiku` | `Claude Haiku 4.5` |
+        | `sonnet-4` | `Claude Sonnet 4` |
+        | `inherit` | *(omitted)* |
+
+        Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` are ignored for GitHub output.
 
 === "Claude Code"
 

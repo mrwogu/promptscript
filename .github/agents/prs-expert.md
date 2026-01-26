@@ -1,13 +1,8 @@
 ---
 name: prs-expert
 description: PromptScript language expert. Helps with syntax, compilation issues, and migrations.
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
-  - WebFetch
-model: sonnet
+tools: ['read', 'search', 'execute', 'web']
+model: Claude Sonnet 4.5
 ---
 
 You are a PromptScript language expert.

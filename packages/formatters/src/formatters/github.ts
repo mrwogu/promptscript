@@ -89,6 +89,66 @@ interface GitHubAgentConfig {
 }
 
 /**
+ * Mapping from PromptScript/Claude Code tool names to GitHub Copilot canonical tool names.
+ *
+ * GitHub Copilot uses specific tool names that differ from Claude Code aliases.
+ * @see https://docs.github.com/en/copilot/reference/custom-agents-configuration
+ */
+const TOOL_NAME_MAPPING: Record<string, string> = {
+  // Read tools
+  Read: 'read',
+  NotebookRead: 'read',
+  // Edit tools
+  Edit: 'edit',
+  MultiEdit: 'edit',
+  Write: 'edit',
+  NotebookEdit: 'edit',
+  // Search tools
+  Grep: 'search',
+  Glob: 'search',
+  // Execute tools
+  Bash: 'execute',
+  // Web tools
+  WebFetch: 'web',
+  WebSearch: 'web',
+  // Agent tools
+  Task: 'agent',
+  // Todo tools
+  TodoWrite: 'todo',
+  TodoRead: 'todo',
+};
+
+/**
+ * Mapping from PromptScript/Claude Code model names to GitHub Copilot model names.
+ *
+ * GitHub Copilot uses full model names (e.g., "Claude Sonnet 4") while Claude Code
+ * uses short aliases (e.g., "sonnet").
+ *
+ * @see https://code.visualstudio.com/docs/copilot/customization/custom-agents
+ */
+const MODEL_NAME_MAPPING: Record<string, string> = {
+  // Claude models - default aliases map to latest versions (4.5)
+  sonnet: 'Claude Sonnet 4.5',
+  opus: 'Claude Opus 4.5',
+  haiku: 'Claude Haiku 4.5',
+  // Explicit version mappings
+  'sonnet-4': 'Claude Sonnet 4',
+  'sonnet-4.5': 'Claude Sonnet 4.5',
+  'opus-4': 'Claude Opus 4',
+  'opus-4.5': 'Claude Opus 4.5',
+  'haiku-4': 'Claude Haiku 4',
+  'haiku-4.5': 'Claude Haiku 4.5',
+  // OpenAI models (pass through if already in correct format)
+  'gpt-4o': 'GPT-4o',
+  'gpt-4.1': 'GPT-4.1',
+  'gpt-5': 'GPT-5',
+  'gpt-5-mini': 'GPT-5 mini',
+  // Special values
+  inherit: '', // Empty string means omit the model property
+  auto: 'Auto',
+};
+
+/**
  * Formatter for GitHub Copilot instructions.
  *
  * Supports three versions:
@@ -459,10 +519,12 @@ export class GitHubFormatter extends BaseFormatter {
     if (config.mode === 'agent') {
       lines.push('mode: agent');
       if (config.tools && config.tools.length > 0) {
-        lines.push('tools:');
-        for (const tool of config.tools) {
-          lines.push(`  - ${tool}`);
-        }
+        // Map tool names and use inline YAML array format
+        const mappedTools = config.tools
+          .map((tool) => TOOL_NAME_MAPPING[tool] ?? tool.toLowerCase())
+          .filter((t, i, arr) => arr.indexOf(t) === i); // deduplicate
+        const toolsArray = mappedTools.map((t) => `'${t}'`).join(', ');
+        lines.push(`tools: [${toolsArray}]`);
       }
     }
     lines.push('---');
@@ -656,12 +718,40 @@ export class GitHubFormatter extends BaseFormatter {
   }
 
   /**
-   * Parse tools array from a Value.
+   * Parse tools array from a Value and map to GitHub Copilot canonical names.
+   *
+   * @see https://docs.github.com/en/copilot/reference/custom-agents-configuration
    */
   private parseToolsArray(value: Value | undefined): string[] | undefined {
     if (!value || !Array.isArray(value)) return undefined;
-    const arr = value.map((v) => this.valueToString(v)).filter((s) => s.length > 0);
-    return arr.length > 0 ? arr : undefined;
+
+    const mapped = value
+      .map((v) => this.valueToString(v))
+      .filter((s) => s.length > 0)
+      .map((tool) => TOOL_NAME_MAPPING[tool] ?? tool.toLowerCase());
+
+    // Deduplicate (e.g., Grep and Glob both map to 'search')
+    const unique = [...new Set(mapped)];
+
+    return unique.length > 0 ? unique : undefined;
+  }
+
+  /**
+   * Map a model name from PromptScript/Claude Code format to GitHub Copilot format.
+   *
+   * @returns The mapped model name, or undefined if the model should be omitted (e.g., "inherit")
+   */
+  private mapModelName(model: string | undefined): string | undefined {
+    if (!model) return undefined;
+
+    const mapped = MODEL_NAME_MAPPING[model.toLowerCase()];
+
+    // If mapped to empty string, omit the model property
+    if (mapped === '') return undefined;
+
+    // If we have a mapping, use it; otherwise pass through as-is
+    // (allows users to specify GitHub Copilot model names directly)
+    return mapped ?? model;
   }
 
   /**
@@ -678,14 +768,15 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push(`description: ${config.description}`);
 
     if (config.tools && config.tools.length > 0) {
-      lines.push('tools:');
-      for (const tool of config.tools) {
-        lines.push(`  - ${tool}`);
-      }
+      // Use inline YAML array format as per GitHub Copilot spec
+      const toolsArray = config.tools.map((t) => `'${t}'`).join(', ');
+      lines.push(`tools: [${toolsArray}]`);
     }
 
-    if (config.model) {
-      lines.push(`model: ${config.model}`);
+    // Map model name to GitHub Copilot format
+    const mappedModel = this.mapModelName(config.model);
+    if (mappedModel) {
+      lines.push(`model: ${mappedModel}`);
     }
 
     lines.push('---');

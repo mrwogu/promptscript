@@ -1,13 +1,8 @@
 ---
 name: debugger
 description: Debugs errors, test failures, and unexpected behavior. Knows PromptScript architecture.
-tools:
-  - Read
-  - Edit
-  - Bash
-  - Grep
-  - Glob
-model: sonnet
+tools: ['read', 'edit', 'execute', 'search']
+model: Claude Sonnet 4.5
 ---
 
 You are a debugging specialist for PromptScript.

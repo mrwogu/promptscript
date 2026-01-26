@@ -708,7 +708,10 @@ describe('Golden Files Tests', () => {
       expect(codeReviewerAgent?.content).toContain(
         'description: Reviews code for quality and best practices'
       );
-      expect(codeReviewerAgent?.content).toContain('tools:');
+      // Tools should be in inline YAML array format with GitHub Copilot canonical names
+      expect(codeReviewerAgent?.content).toContain("tools: ['read', 'search', 'execute']");
+      // Model should be mapped from 'sonnet' to 'Claude Sonnet 4.5' (latest version)
+      expect(codeReviewerAgent?.content).toContain('model: Claude Sonnet 4.5');
 
       const debuggerAgent = result.additionalFiles?.find(
         (f) => f.path === '.github/agents/debugger.md'

@@ -1,12 +1,8 @@
 ---
 name: code-reviewer
 description: Reviews code for quality, security, and project conventions. Use after completing features or before commits.
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
-model: sonnet
+tools: ['read', 'search', 'execute']
+model: Claude Sonnet 4.5
 ---
 
 You are a senior code reviewer for the PromptScript project.

@@ -91,8 +91,8 @@ describe('GitHubFormatter Edge Cases', () => {
       expect(promptFile).toBeDefined();
       expect(promptFile?.content).toContain('description: "Deploy application"');
       expect(promptFile?.content).toContain('mode: agent');
-      expect(promptFile?.content).toContain('- run_terminal');
-      expect(promptFile?.content).toContain('- read_file');
+      // Tools should be in inline YAML array format with mapped names
+      expect(promptFile?.content).toContain("tools: ['run_terminal', 'read_file']");
       expect(promptFile?.content).toContain('Deploy the app to production.');
     });
 
@@ -125,6 +125,40 @@ describe('GitHubFormatter Edge Cases', () => {
       );
       expect(promptFile).toBeDefined();
       expect(promptFile?.content).toContain('description: "Code review"');
+    });
+
+    it('should map Claude Code tool names in agent mode prompts', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                debug: {
+                  prompt: true,
+                  description: 'Debug issues',
+                  mode: 'agent',
+                  tools: ['Read', 'Grep', 'Bash', 'Edit'],
+                  content: 'Debug the issue.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/debug.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      // Claude Code tools should be mapped to GitHub Copilot canonical names
+      expect(promptFile?.content).toContain("tools: ['read', 'search', 'execute', 'edit']");
     });
   });
 

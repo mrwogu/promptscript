@@ -526,16 +526,17 @@ Agents output by platform:
 
     Supports: `name`, `description`, `tools`, `model`
 
+    Tool and model names are automatically mapped to GitHub Copilot's format:
+
+    - Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
+    - Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
+
     ```markdown
     ---
     name: code-reviewer
     description: Reviews code for quality and best practices
-    tools:
-      - Read
-      - Grep
-      - Glob
-      - Bash
-    model: sonnet
+    tools: ['read', 'search', 'execute']
+    model: Claude Sonnet 4.5
     ---
 
     You are a senior code reviewer ensuring high standards.
@@ -556,11 +557,7 @@ Agents output by platform:
     ---
     name: code-reviewer
     description: Reviews code for quality and best practices
-    tools:
-      - Read
-      - Grep
-      - Glob
-      - Bash
+    tools: Read, Grep, Glob, Bash
     model: sonnet
     ---
 
