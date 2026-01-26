@@ -15,6 +15,7 @@ export interface PromptSystem {
   input: typeof prompts.input;
   confirm: typeof prompts.confirm;
   checkbox: typeof prompts.checkbox;
+  select: typeof prompts.select;
 }
 
 export interface CliServices {
@@ -36,6 +37,7 @@ export const defaultPrompts: PromptSystem = {
   input: prompts.input,
   confirm: prompts.confirm,
   checkbox: prompts.checkbox,
+  select: prompts.select,
 };
 
 export const createDefaultServices = (): CliServices => ({

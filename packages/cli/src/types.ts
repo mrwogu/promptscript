@@ -40,6 +40,8 @@ export interface CompileOptions {
   registry?: string;
   /** Path to custom config file */
   config?: string;
+  /** Force overwrite existing files without prompts */
+  force?: boolean;
 }
 
 /**

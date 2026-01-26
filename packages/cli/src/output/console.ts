@@ -113,6 +113,14 @@ export const ConsoleOutput = {
   },
 
   /**
+   * Print a skipped file message.
+   */
+  skipped(message: string): void {
+    if (isQuiet()) return;
+    console.log(chalk.yellow(`  ⊘ ${message}`));
+  },
+
+  /**
    * Print an info message.
    */
   info(message: string): void {

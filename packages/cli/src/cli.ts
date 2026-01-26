@@ -64,6 +64,7 @@ program
   .option('--dry-run', 'Preview changes')
   .option('--registry <path>', 'Registry path (overrides config)')
   .option('-c, --config <path>', 'Path to custom config file')
+  .option('--force', 'Force overwrite existing files without prompts')
   .action(compileCommand);
 
 program

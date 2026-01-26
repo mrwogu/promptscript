@@ -22,6 +22,7 @@ describe('initCommand', () => {
       input: vi.fn(),
       confirm: vi.fn(),
       checkbox: vi.fn(),
+      select: vi.fn(),
     };
 
     mockServices = {
