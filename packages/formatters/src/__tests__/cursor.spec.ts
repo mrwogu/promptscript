@@ -198,6 +198,34 @@ describe('CursorFormatter', () => {
       expect(result.content).toContain('- components: No class components');
     });
 
+    it('should generate code style section from array-based standards', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                typescript: ['Use strict mode', 'Prefer const over let'],
+                naming: ['Use camelCase for variables', 'Use PascalCase for types'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Code style:');
+      expect(result.content).toContain('- Use strict mode');
+      expect(result.content).toContain('- Prefer const over let');
+      expect(result.content).toContain('- Use camelCase for variables');
+      expect(result.content).toContain('- Use PascalCase for types');
+    });
+
     it('should generate commands section', () => {
       const ast: Program = {
         ...createMinimalProgram(),
