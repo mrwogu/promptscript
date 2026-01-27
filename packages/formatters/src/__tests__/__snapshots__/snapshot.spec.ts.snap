@@ -32,7 +32,7 @@ flowchart TB
     formatters[formatters - Output formatters]
     cli[cli - Command-line interface]
   end
-  
+
   cli --> compiler
   compiler --> parser
   compiler --> resolver
@@ -83,6 +83,7 @@ pnpm nx graph             # View dependency graph
 ## Post-Work Verification
 
 After completing code changes, always run:
+
 \`\`\`bash
 pnpm run format     # Format code with Prettier
 pnpm run lint       # Check for linting errors

@@ -31,13 +31,13 @@ Claude Code:
 Cursor:
 
 - .cursorrules
-- .cursor/rules/*.md
-- .cursor/rules/*.mdc
+- .cursor/rules/\*.md
+- .cursor/rules/\*.mdc
 
 GitHub Copilot:
 
 - .github/copilot-instructions.md
-- .github/instructions/*.md
+- .github/instructions/\*.md
 
 Other:
 

@@ -73,6 +73,7 @@ pnpm nx graph             # View dependency graph
 ## Post-Work Verification
 
 After completing code changes, always run:
+
 ```bash
 pnpm run format     # Format code with Prettier
 pnpm run lint       # Check for linting errors

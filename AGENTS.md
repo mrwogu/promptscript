@@ -87,8 +87,8 @@ The project is organized as a monorepo with these packages:
 ## Project Structure (Monorepo)
 
 - packages/ - Individual packages
-- packages/*/src/ - Package source
-- packages/*/package.json - Package manifest
+- packages/\*/src/ - Package source
+- packages/\*/package.json - Package manifest
 
 ## Restrictions
 

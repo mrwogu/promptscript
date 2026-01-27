@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-01-27T21:55:57.838Z - do not edit -->
+<!-- PromptScript 2026-01-27T22:30:30.708Z - do not edit -->
 
 ## project
 
@@ -198,7 +198,7 @@ After completing code changes, always run:
 
 ## diagrams
 
-- Always use **Mermaid (exception: packages/*/README.md must use ASCII art because npm does not render Mermaid)** syntax for diagrams in documentation
+- Always use **Mermaid (exception: packages/\*/README.md must use ASCII art because npm does not render Mermaid)** syntax for diagrams in documentation
 - Supported diagram types: flowchart, sequence, class, state, ER, gantt, pie, etc.
 - Wrap diagrams in markdown code blocks with `mermaid` language identifier
 - Example:
