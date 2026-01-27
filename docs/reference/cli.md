@@ -31,12 +31,13 @@ Complete reference for the PromptScript command-line interface.
 
 These options are available for all commands:
 
-| Option          | Description               |
-| --------------- | ------------------------- |
-| `-h, --help`    | Display help information  |
-| `-V, --version` | Display version number    |
-| `--verbose`     | Enable verbose output     |
-| `--quiet`       | Suppress non-error output |
+| Option          | Description                            |
+| --------------- | -------------------------------------- |
+| `-h, --help`    | Display help information               |
+| `-V, --version` | Display version number                 |
+| `--verbose`     | Enable verbose output                  |
+| `--debug`       | Enable debug output (includes verbose) |
+| `--quiet`       | Suppress non-error output              |
 
 ## Commands
 
@@ -122,15 +123,17 @@ prs compile [options]
 
 **Options:**
 
-| Option                  | Description                           |
-| ----------------------- | ------------------------------------- |
-| `-t, --target <target>` | Compile to specific target            |
-| `-f, --format <format>` | Output format (alias for `--target`)  |
-| `-a, --all`             | Compile to all configured targets     |
-| `-w, --watch`           | Watch mode for continuous compilation |
-| `-o, --output <dir>`    | Override output directory             |
-| `--dry-run`             | Preview changes without writing       |
-| `-c, --config <path>`   | Path to config file                   |
+| Option                  | Description                               |
+| ----------------------- | ----------------------------------------- |
+| `-t, --target <target>` | Compile to specific target                |
+| `-f, --format <format>` | Output format (alias for `--target`)      |
+| `-a, --all`             | Compile to all configured targets         |
+| `-w, --watch`           | Watch mode for continuous compilation     |
+| `-o, --output <dir>`    | Override output directory                 |
+| `--dry-run`             | Preview changes without writing           |
+| `-c, --config <path>`   | Path to config file                       |
+| `--verbose`             | Show detailed compilation progress        |
+| `--debug`               | Show debug information (includes verbose) |
 
 **Examples:**
 
@@ -155,6 +158,12 @@ prs compile --dry-run
 
 # Custom config
 prs compile --config ./custom.config.yaml
+
+# Verbose output (shows pipeline stages, files, timing)
+prs compile --verbose
+
+# Debug output (includes AST details, cache info, validation rules)
+prs compile --debug
 ```
 
 **Available Targets:**
@@ -362,12 +371,13 @@ watch:
 
 ## Environment Variables
 
-| Variable                | Description            |
-| ----------------------- | ---------------------- |
-| `PROMPTSCRIPT_CONFIG`   | Path to config file    |
-| `PROMPTSCRIPT_REGISTRY` | Registry path or URL   |
-| `PROMPTSCRIPT_VERBOSE`  | Enable verbose output  |
-| `NO_COLOR`              | Disable colored output |
+| Variable                | Description                           |
+| ----------------------- | ------------------------------------- |
+| `PROMPTSCRIPT_CONFIG`   | Path to config file                   |
+| `PROMPTSCRIPT_REGISTRY` | Registry path or URL                  |
+| `PROMPTSCRIPT_VERBOSE`  | Enable verbose output (`1` or `true`) |
+| `PROMPTSCRIPT_DEBUG`    | Enable debug output (`1` or `true`)   |
+| `NO_COLOR`              | Disable colored output                |
 
 ## Exit Codes
 
@@ -408,8 +418,32 @@ Check your `.prs` file syntax. Use `prs validate` for detailed errors.
 
 ### Debug Mode
 
-Enable verbose output for debugging:
+Enable verbose output to see compilation progress:
 
 ```bash
+prs compile --verbose
+# or
 PROMPTSCRIPT_VERBOSE=1 prs compile
 ```
+
+For maximum detail (AST info, cache hits, validation rules), use debug mode:
+
+```bash
+prs compile --debug
+# or
+PROMPTSCRIPT_DEBUG=1 prs compile
+```
+
+**Verbose output shows:**
+
+- Pipeline stages (Resolve, Validate, Format)
+- Files being parsed and resolved
+- Import and inheritance resolution paths
+- Per-stage timing
+
+**Debug output additionally shows:**
+
+- AST node counts
+- Cache hits and stores
+- Individual validation rules being executed
+- Formatter conventions used
