@@ -6,6 +6,7 @@ import {
   getContext,
   isVerbose,
   isQuiet,
+  isDebug,
   LogLevel,
 } from '../output/console.js';
 
@@ -106,6 +107,28 @@ describe('output/console', () => {
     });
   });
 
+  describe('isDebug', () => {
+    it('should return true when log level is debug', () => {
+      setContext({ logLevel: LogLevel.Debug });
+      expect(isDebug()).toBe(true);
+    });
+
+    it('should return false when log level is normal', () => {
+      setContext({ logLevel: LogLevel.Normal });
+      expect(isDebug()).toBe(false);
+    });
+
+    it('should return false when log level is verbose', () => {
+      setContext({ logLevel: LogLevel.Verbose });
+      expect(isDebug()).toBe(false);
+    });
+
+    it('should return false when log level is quiet', () => {
+      setContext({ logLevel: LogLevel.Quiet });
+      expect(isDebug()).toBe(false);
+    });
+  });
+
   describe('ConsoleOutput.success', () => {
     it('should print success message in green', () => {
       ConsoleOutput.success('Test message');
@@ -170,6 +193,12 @@ describe('output/console', () => {
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('⚠'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Warn message'));
     });
+
+    it('should not print in quiet mode', () => {
+      setContext({ logLevel: LogLevel.Quiet });
+      ConsoleOutput.warn('Warn message');
+      expect(consoleSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('ConsoleOutput.info', () => {
@@ -184,6 +213,38 @@ describe('output/console', () => {
     it('should not print in quiet mode', () => {
       setContext({ logLevel: LogLevel.Quiet });
       ConsoleOutput.info('Info message');
+      expect(consoleSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ConsoleOutput.skipped', () => {
+    it('should print skipped message in yellow', () => {
+      ConsoleOutput.skipped('Skipped file');
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[yellow]'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('⊘'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Skipped file'));
+    });
+
+    it('should not print in quiet mode', () => {
+      setContext({ logLevel: LogLevel.Quiet });
+      ConsoleOutput.skipped('Skipped file');
+      expect(consoleSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ConsoleOutput.unchanged', () => {
+    it('should print unchanged message in gray', () => {
+      ConsoleOutput.unchanged('Unchanged file');
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[gray]'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('○'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Unchanged file'));
+    });
+
+    it('should not print in quiet mode', () => {
+      setContext({ logLevel: LogLevel.Quiet });
+      ConsoleOutput.unchanged('Unchanged file');
       expect(consoleSpy).not.toHaveBeenCalled();
     });
   });
