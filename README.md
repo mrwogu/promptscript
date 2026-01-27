@@ -38,13 +38,47 @@ Result: **Inconsistent code quality, security risks, and operational chaos.**
 It treats your prompts as code—compiled, validated, and deployed.
 
 ```mermaid
-flowchart LR
-    Central["Organization Standards<br/>(.prs files)"] --> Compiler
+flowchart TB
+    subgraph org["🏢 Organization Registry"]
+        direction TB
+        OrgSec["@company/security<br/>(CISO approved)"]
+        OrgTS["@company/typescript<br/>(Platform team)"]
+        OrgJava["@company/java<br/>(Platform team)"]
+    end
+
+    subgraph teams["👥 Team Standards"]
+        direction TB
+        Backend["@backend/standards"]
+        Frontend["@frontend/standards"]
+        Data["@data/standards"]
+    end
+
+    subgraph projects["📦 Project Repos (100+)"]
+        direction TB
+        P1["checkout-service/.prs"]
+        P2["user-api/.prs"]
+        P3["dashboard/.prs"]
+        Pn["...more repos"]
+    end
+
+    OrgSec --> Backend & Frontend & Data
+    OrgTS --> Backend & Frontend
+    OrgJava --> Data
+
+    Backend --> P1 & P2
+    Frontend --> P3
+    Data --> Pn
+
+    subgraph compile["⚙️ prs compile"]
+        Compiler
+    end
+
+    P1 & P2 & P3 --> Compiler
+
     Compiler --> Copilot["GitHub Copilot"]
     Compiler --> Claude["Claude Code"]
     Compiler --> Cursor["Cursor"]
-    Compiler --> Antigravity["Antigravity"]
-    Compiler -->|Audit| CI["CI/CD"]
+    Compiler --> CI["CI/CD Audit"]
 ```
 
 ## ✨ Why PromptScript?

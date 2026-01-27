@@ -30,6 +30,7 @@ coverage/
 !.vscode/extensions.json
 *.swp
 *.swo
+*.code-workspace
 
 # OS
 .DS_Store
