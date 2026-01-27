@@ -286,6 +286,22 @@ describe('share utilities', () => {
       expect(merged.targets.github.enabled).toBe(true);
       expect(merged.formatting.tabWidth).toBe(2);
     });
+
+    it('should include non-default version in target settings', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        targets: {
+          ...defaultConfig.targets,
+          github: { enabled: true, version: 'simple' },
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.targets?.github?.version).toBe('simple');
+      expect(decoded?.config?.targets?.github?.enabled).toBeUndefined();
+    });
   });
 
   describe('URL utilities', () => {

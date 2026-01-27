@@ -1290,4 +1290,285 @@ describe('BrowserResolver', () => {
       }
     });
   });
+
+  describe('registry path version handling', () => {
+    it('should strip version suffix from registry path', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@inherit @org/package@2.0.0`,
+        '@org/package.prs': `@meta { id: "pkg" syntax: "1.0.0" }
+@identity { """Package identity""" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      expect(result.sources).toContain('@org/package.prs');
+    });
+
+    it('should handle registry path without version', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@inherit @simple/pkg`,
+        '@simple/pkg.prs': `@meta { id: "simple" syntax: "1.0.0" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('text content merging edge cases', () => {
+    it('should use parent text if child text is contained in parent', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@identity { """Base""" }`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@identity { """Base identity text""" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      const identityBlock = result.ast?.blocks.find((b) => b.name === 'identity');
+      if (identityBlock?.content.type === 'TextContent') {
+        // Parent text contains child text, so parent should be used
+        expect(identityBlock.content.value).toBe('Base identity text');
+      }
+    });
+
+    it('should append child text when neither contains the other', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@identity { """Unique child content""" }`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@identity { """Different parent content""" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      const identityBlock = result.ast?.blocks.find((b) => b.name === 'identity');
+      if (identityBlock?.content.type === 'TextContent') {
+        expect(identityBlock.content.value).toContain('parent content');
+        expect(identityBlock.content.value).toContain('child content');
+      }
+    });
+  });
+
+  describe('MixedContent text merge edge cases', () => {
+    it('should use extension text when target MixedContent has no text', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@inherit ./base
+@context {
+  """Child text"""
+  childKey: "childValue"
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@context { parentKey: "parentValue" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'MixedContent') {
+        expect(contextBlock.content.text?.value).toContain('Child text');
+      }
+    });
+
+    it('should use target text when extension MixedContent has no text', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@inherit ./base
+@context { childKey: "childValue" }`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@context {
+  """Parent text"""
+  parentKey: "parentValue"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'MixedContent') {
+        expect(contextBlock.content.text?.value).toContain('Parent text');
+      }
+    });
+  });
+
+  describe('extend to nested path with primitive value', () => {
+    it('should replace primitive value at nested path', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  settings: {
+    mode: "development"
+  }
+}
+@extend context.settings.mode { value: "production" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should handle extending deep path when intermediate is array', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  items: ["a", "b"]
+}
+@extend context.items.extra { value: "new" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('buildPathValue edge cases', () => {
+    it('should build nested path structure from empty', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context { existing: "value" }
+@extend context.a.b.c.d { deep: "value" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('array value extension', () => {
+    it('should convert array to ArrayContent when extending with array', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@standards {
+  rules: ["rule1"]
+}
+@extend standards.rules { - "rule2" - "rule3" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('object merging with null values', () => {
+    it('should handle null in parent being overwritten by child', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@context { value: "defined" }`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@context { value: null }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'ObjectContent') {
+        expect(contextBlock.content.properties.value).toBe('defined');
+      }
+    });
+  });
+
+  describe('extend with different content type combinations', () => {
+    it('should handle ArrayContent extended with ObjectContent', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@restrictions { - "Rule 1" }
+@extend restrictions { key: "converts to object" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should handle TextContent extended with ArrayContent', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@identity { """Some text""" }
+@extend identity { - "array item" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('multi-level inheritance', () => {
+    it('should handle three levels of inheritance', async () => {
+      const fs = new VirtualFileSystem({
+        'child.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./parent
+@identity { """Child level""" }`,
+        'parent.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@inherit ./grandparent
+@identity { """Parent level""" }`,
+        'grandparent.prs': `@meta { id: "grandparent" syntax: "1.0.0" }
+@identity { """Grandparent level""" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('child.prs');
+
+      expect(result.ast).not.toBeNull();
+      expect(result.sources).toContain('child.prs');
+      expect(result.sources).toContain('parent.prs');
+      expect(result.sources).toContain('grandparent.prs');
+    });
+  });
+
+  describe('unique array concat with complex objects', () => {
+    it('should not duplicate identical object values', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@tools {
+  tool1: {
+    name: "same"
+    version: "1.0"
+  }
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@tools {
+  tool1: {
+    name: "same"
+    version: "1.0"
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
 });

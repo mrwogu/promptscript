@@ -602,6 +602,38 @@ describe('createBrowserCompiler', () => {
     const result = await compiler.compile('project.prs');
     expect(result.success).toBe(true);
   });
+
+  it('should accept formatter constructor function', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a formatter constructor function
+    const FormatterClass = function (this: Formatter) {
+      this.name = 'constructor-test';
+      this.outputPath = 'constructor.md';
+      this.description = 'Constructor test formatter';
+      this.defaultConvention = 'markdown';
+      this.format = () => ({
+        path: 'constructor.md',
+        content: '# From Constructor',
+      });
+    } as unknown as new () => Formatter;
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [FormatterClass],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('constructor.md')).toBe(true);
+    expect(result.outputs.get('constructor.md')?.content).toBe('# From Constructor');
+  });
 });
 
 describe('getBundledRegistryFiles', () => {
