@@ -111,6 +111,9 @@ jobs:
           ref: gh-pages
           path: gh-pages-content
 
+      - name: Copy 404.html to root
+        run: cp docs/404.html gh-pages-content/404.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
