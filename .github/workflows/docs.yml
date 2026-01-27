@@ -58,7 +58,7 @@ jobs:
           cp schema/config.json docs/schema/config.json
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -112,7 +112,7 @@ jobs:
           path: gh-pages-content
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: gh-pages-content
 
