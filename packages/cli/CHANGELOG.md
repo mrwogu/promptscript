@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-alpha.4](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.4...v1.1.0-alpha.4) (2026-01-27)
+
+
+### Features
+
+* **cli:** add AI-assisted migration skill and CLI integration ([53e9cca](https://github.com/mrwogu/promptscript/commit/53e9cca8669a30e787cbc2aa7679bb63f7896fce))
+* **cli:** add verbose and debug logging throughout compilation pipeline ([36bd63a](https://github.com/mrwogu/promptscript/commit/36bd63a2fa1dde1acbfd0794bb174f645ef71335))
+
+
+### Bug Fixes
+
+* **cli:** add migrationCandidates to test mocks ([d8fe117](https://github.com/mrwogu/promptscript/commit/d8fe117ff5523bb5b1c15996e00d8c24548c7b8f))
+* **cli:** extend marker detection from 10 to 20 lines ([229e9bc](https://github.com/mrwogu/promptscript/commit/229e9bc5bf4d0441c9674e6483a5125347b6f0b8))
+
 ## [1.0.0-alpha.4](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2026-01-27)
 
 
