@@ -192,273 +192,313 @@ targets:
 </span><span id=__span-17-9><a id=__codelineno-17-9 name=__codelineno-17-9 href=#__codelineno-17-9></a>  Additional guard rules as text.
 </span><span id=__span-17-10><a id=__codelineno-17-10 name=__codelineno-17-10 href=#__codelineno-17-10></a>  &quot;&quot;&quot;
 </span><span id=__span-17-11><a id=__codelineno-17-11 name=__codelineno-17-11 href=#__codelineno-17-11></a>}
-</span></code></pre></div> <p>The <code>globs</code> property is used by multifile formatters (GitHub, Claude, Cursor) to generate path-specific instruction files.</p> <h3 id=skills><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/skills title="GitHub User: skills">@skills</a><a class=headerlink href=#skills title="Permanent link">&para;</a></h3> <p>Define reusable skills that AI assistants can invoke:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-18-1><a id=__codelineno-18-1 name=__codelineno-18-1 href=#__codelineno-18-1></a>@skills {
-</span><span id=__span-18-2><a id=__codelineno-18-2 name=__codelineno-18-2 href=#__codelineno-18-2></a>  commit: {
-</span><span id=__span-18-3><a id=__codelineno-18-3 name=__codelineno-18-3 href=#__codelineno-18-3></a>    description: &quot;Create git commits&quot;
-</span><span id=__span-18-4><a id=__codelineno-18-4 name=__codelineno-18-4 href=#__codelineno-18-4></a>    disableModelInvocation: true
-</span><span id=__span-18-5><a id=__codelineno-18-5 name=__codelineno-18-5 href=#__codelineno-18-5></a>    context: &quot;fork&quot;
-</span><span id=__span-18-6><a id=__codelineno-18-6 name=__codelineno-18-6 href=#__codelineno-18-6></a>    agent: &quot;general-purpose&quot;
-</span><span id=__span-18-7><a id=__codelineno-18-7 name=__codelineno-18-7 href=#__codelineno-18-7></a>    allowedTools: [&quot;Bash&quot;, &quot;Read&quot;, &quot;Write&quot;]
-</span><span id=__span-18-8><a id=__codelineno-18-8 name=__codelineno-18-8 href=#__codelineno-18-8></a>    content: &quot;&quot;&quot;
-</span><span id=__span-18-9><a id=__codelineno-18-9 name=__codelineno-18-9 href=#__codelineno-18-9></a>      When creating commits:
-</span><span id=__span-18-10><a id=__codelineno-18-10 name=__codelineno-18-10 href=#__codelineno-18-10></a>      1. Use conventional commit format
-</span><span id=__span-18-11><a id=__codelineno-18-11 name=__codelineno-18-11 href=#__codelineno-18-11></a>      2. Include Co-Authored-By trailer
-</span><span id=__span-18-12><a id=__codelineno-18-12 name=__codelineno-18-12 href=#__codelineno-18-12></a>      3. Never amend existing commits
-</span><span id=__span-18-13><a id=__codelineno-18-13 name=__codelineno-18-13 href=#__codelineno-18-13></a>    &quot;&quot;&quot;
-</span><span id=__span-18-14><a id=__codelineno-18-14 name=__codelineno-18-14 href=#__codelineno-18-14></a>  }
-</span><span id=__span-18-15><a id=__codelineno-18-15 name=__codelineno-18-15 href=#__codelineno-18-15></a>
-</span><span id=__span-18-16><a id=__codelineno-18-16 name=__codelineno-18-16 href=#__codelineno-18-16></a>  review: {
-</span><span id=__span-18-17><a id=__codelineno-18-17 name=__codelineno-18-17 href=#__codelineno-18-17></a>    description: &quot;Review code changes&quot;
-</span><span id=__span-18-18><a id=__codelineno-18-18 name=__codelineno-18-18 href=#__codelineno-18-18></a>    userInvocable: true
-</span><span id=__span-18-19><a id=__codelineno-18-19 name=__codelineno-18-19 href=#__codelineno-18-19></a>    content: &quot;&quot;&quot;
-</span><span id=__span-18-20><a id=__codelineno-18-20 name=__codelineno-18-20 href=#__codelineno-18-20></a>      Perform thorough code review checking:
-</span><span id=__span-18-21><a id=__codelineno-18-21 name=__codelineno-18-21 href=#__codelineno-18-21></a>      - Type safety
-</span><span id=__span-18-22><a id=__codelineno-18-22 name=__codelineno-18-22 href=#__codelineno-18-22></a>      - Error handling
-</span><span id=__span-18-23><a id=__codelineno-18-23 name=__codelineno-18-23 href=#__codelineno-18-23></a>      - Security vulnerabilities
-</span><span id=__span-18-24><a id=__codelineno-18-24 name=__codelineno-18-24 href=#__codelineno-18-24></a>    &quot;&quot;&quot;
-</span><span id=__span-18-25><a id=__codelineno-18-25 name=__codelineno-18-25 href=#__codelineno-18-25></a>  }
-</span><span id=__span-18-26><a id=__codelineno-18-26 name=__codelineno-18-26 href=#__codelineno-18-26></a>
-</span><span id=__span-18-27><a id=__codelineno-18-27 name=__codelineno-18-27 href=#__codelineno-18-27></a>  deploy: {
-</span><span id=__span-18-28><a id=__codelineno-18-28 name=__codelineno-18-28 href=#__codelineno-18-28></a>    description: &quot;Deploy the application&quot;
-</span><span id=__span-18-29><a id=__codelineno-18-29 name=__codelineno-18-29 href=#__codelineno-18-29></a>    steps: [&quot;Build&quot;, &quot;Test&quot;, &quot;Deploy to staging&quot;, &quot;Deploy to production&quot;]
-</span><span id=__span-18-30><a id=__codelineno-18-30 name=__codelineno-18-30 href=#__codelineno-18-30></a>  }
-</span><span id=__span-18-31><a id=__codelineno-18-31 name=__codelineno-18-31 href=#__codelineno-18-31></a>}
-</span></code></pre></div> <table> <thead> <tr> <th>Property</th> <th>Type</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>description</code></td> <td>string</td> <td>Human-readable description</td> </tr> <tr> <td><code>content</code></td> <td>string</td> <td>Detailed skill instructions</td> </tr> <tr> <td><code>disableModelInvocation</code></td> <td>boolean</td> <td>Prevent model from auto-invoking skill</td> </tr> <tr> <td><code>userInvocable</code></td> <td>boolean</td> <td>Allow user to manually invoke skill</td> </tr> <tr> <td><code>context</code></td> <td>string</td> <td>Context mode: <code>"fork"</code> or <code>"inherit"</code></td> </tr> <tr> <td><code>agent</code></td> <td>string</td> <td>Agent type: <code>"general-purpose"</code>, etc.</td> </tr> <tr> <td><code>allowedTools</code></td> <td>string[]</td> <td>Tools the skill can use</td> </tr> <tr> <td><code>steps</code></td> <td>string[]</td> <td>Workflow steps (generates workflow file)</td> </tr> </tbody> </table> <p>Skills are output differently based on the formatter:</p> <div class="tabbed-set tabbed-alternate" data-tabs=1:2><input checked=checked id=__tabbed_1_1 name=__tabbed_1 type=radio><input id=__tabbed_1_2 name=__tabbed_1 type=radio><div class=tabbed-labels><label for=__tabbed_1_1>GitHub Output</label><label for=__tabbed_1_2>Claude Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <p><code>.github/skills/&lt;name&gt;/SKILL.md</code> (version: full)</p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-19-1><a id=__codelineno-19-1 name=__codelineno-19-1 href=#__codelineno-19-1></a>---
-</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a>name: commit
-</span><span id=__span-19-3><a id=__codelineno-19-3 name=__codelineno-19-3 href=#__codelineno-19-3></a><span class=gu>description: Create git commits</span>
-</span><span id=__span-19-4><a id=__codelineno-19-4 name=__codelineno-19-4 href=#__codelineno-19-4></a><span class=gu>---</span>
-</span><span id=__span-19-5><a id=__codelineno-19-5 name=__codelineno-19-5 href=#__codelineno-19-5></a>
-</span><span id=__span-19-6><a id=__codelineno-19-6 name=__codelineno-19-6 href=#__codelineno-19-6></a>When creating commits:
-</span><span id=__span-19-7><a id=__codelineno-19-7 name=__codelineno-19-7 href=#__codelineno-19-7></a><span class=k>1.</span> Use conventional commit format
-</span><span id=__span-19-8><a id=__codelineno-19-8 name=__codelineno-19-8 href=#__codelineno-19-8></a><span class=k>2.</span> Include Co-Authored-By trailer
-</span><span id=__span-19-9><a id=__codelineno-19-9 name=__codelineno-19-9 href=#__codelineno-19-9></a><span class=k>3.</span> Never amend existing commits
-</span></code></pre></div> </div> <div class=tabbed-block> <p><code>.claude/skills/&lt;name&gt;/SKILL.md</code> (version: full)</p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-20-1><a id=__codelineno-20-1 name=__codelineno-20-1 href=#__codelineno-20-1></a>---
-</span><span id=__span-20-2><a id=__codelineno-20-2 name=__codelineno-20-2 href=#__codelineno-20-2></a>name: commit
-</span><span id=__span-20-3><a id=__codelineno-20-3 name=__codelineno-20-3 href=#__codelineno-20-3></a>description: Create git commits
-</span><span id=__span-20-4><a id=__codelineno-20-4 name=__codelineno-20-4 href=#__codelineno-20-4></a>disableModelInvocation: true
-</span><span id=__span-20-5><a id=__codelineno-20-5 name=__codelineno-20-5 href=#__codelineno-20-5></a>context: fork
-</span><span id=__span-20-6><a id=__codelineno-20-6 name=__codelineno-20-6 href=#__codelineno-20-6></a>agent: general-purpose
-</span><span id=__span-20-7><a id=__codelineno-20-7 name=__codelineno-20-7 href=#__codelineno-20-7></a>allowedTools:
-</span><span id=__span-20-8><a id=__codelineno-20-8 name=__codelineno-20-8 href=#__codelineno-20-8></a><span class=w>  </span><span class=k>-</span><span class=w> </span>Bash
-</span><span id=__span-20-9><a id=__codelineno-20-9 name=__codelineno-20-9 href=#__codelineno-20-9></a><span class=w>  </span><span class=k>-</span><span class=w> </span>Read
-</span><span id=__span-20-10><a id=__codelineno-20-10 name=__codelineno-20-10 href=#__codelineno-20-10></a><span class=gu>  - Write</span>
-</span><span id=__span-20-11><a id=__codelineno-20-11 name=__codelineno-20-11 href=#__codelineno-20-11></a><span class=gu>---</span>
-</span><span id=__span-20-12><a id=__codelineno-20-12 name=__codelineno-20-12 href=#__codelineno-20-12></a>
-</span><span id=__span-20-13><a id=__codelineno-20-13 name=__codelineno-20-13 href=#__codelineno-20-13></a>When creating commits:
-</span><span id=__span-20-14><a id=__codelineno-20-14 name=__codelineno-20-14 href=#__codelineno-20-14></a><span class=k>1.</span> Use conventional commit format
-</span><span id=__span-20-15><a id=__codelineno-20-15 name=__codelineno-20-15 href=#__codelineno-20-15></a><span class=k>2.</span> Include Co-Authored-By trailer
-</span><span id=__span-20-16><a id=__codelineno-20-16 name=__codelineno-20-16 href=#__codelineno-20-16></a><span class=k>3.</span> Never amend existing commits
-</span></code></pre></div> </div> </div> </div> <h3 id=agents><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/agents title="GitHub User: agents">@agents</a><a class=headerlink href=#agents title="Permanent link">&para;</a></h3> <p>Define specialized AI subagents for GitHub Copilot and Claude Code:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-21-1><a id=__codelineno-21-1 name=__codelineno-21-1 href=#__codelineno-21-1></a>@agents {
-</span><span id=__span-21-2><a id=__codelineno-21-2 name=__codelineno-21-2 href=#__codelineno-21-2></a>  code-reviewer: {
-</span><span id=__span-21-3><a id=__codelineno-21-3 name=__codelineno-21-3 href=#__codelineno-21-3></a>    description: &quot;Reviews code for quality and best practices&quot;
-</span><span id=__span-21-4><a id=__codelineno-21-4 name=__codelineno-21-4 href=#__codelineno-21-4></a>    tools: [&quot;Read&quot;, &quot;Grep&quot;, &quot;Glob&quot;, &quot;Bash&quot;]
-</span><span id=__span-21-5><a id=__codelineno-21-5 name=__codelineno-21-5 href=#__codelineno-21-5></a>    model: &quot;sonnet&quot;
-</span><span id=__span-21-6><a id=__codelineno-21-6 name=__codelineno-21-6 href=#__codelineno-21-6></a>    content: &quot;&quot;&quot;
-</span><span id=__span-21-7><a id=__codelineno-21-7 name=__codelineno-21-7 href=#__codelineno-21-7></a>      You are a senior code reviewer ensuring high standards.
-</span><span id=__span-21-8><a id=__codelineno-21-8 name=__codelineno-21-8 href=#__codelineno-21-8></a>
-</span><span id=__span-21-9><a id=__codelineno-21-9 name=__codelineno-21-9 href=#__codelineno-21-9></a>      When invoked:
-</span><span id=__span-21-10><a id=__codelineno-21-10 name=__codelineno-21-10 href=#__codelineno-21-10></a>      1. Run git diff to see recent changes
-</span><span id=__span-21-11><a id=__codelineno-21-11 name=__codelineno-21-11 href=#__codelineno-21-11></a>      2. Focus on modified files
-</span><span id=__span-21-12><a id=__codelineno-21-12 name=__codelineno-21-12 href=#__codelineno-21-12></a>      3. Begin review immediately
-</span><span id=__span-21-13><a id=__codelineno-21-13 name=__codelineno-21-13 href=#__codelineno-21-13></a>
-</span><span id=__span-21-14><a id=__codelineno-21-14 name=__codelineno-21-14 href=#__codelineno-21-14></a>      Review checklist:
-</span><span id=__span-21-15><a id=__codelineno-21-15 name=__codelineno-21-15 href=#__codelineno-21-15></a>      - Code is clear and readable
-</span><span id=__span-21-16><a id=__codelineno-21-16 name=__codelineno-21-16 href=#__codelineno-21-16></a>      - Functions and variables are well-named
-</span><span id=__span-21-17><a id=__codelineno-21-17 name=__codelineno-21-17 href=#__codelineno-21-17></a>      - No duplicated code
-</span><span id=__span-21-18><a id=__codelineno-21-18 name=__codelineno-21-18 href=#__codelineno-21-18></a>      - Proper error handling
-</span><span id=__span-21-19><a id=__codelineno-21-19 name=__codelineno-21-19 href=#__codelineno-21-19></a>    &quot;&quot;&quot;
-</span><span id=__span-21-20><a id=__codelineno-21-20 name=__codelineno-21-20 href=#__codelineno-21-20></a>  }
-</span><span id=__span-21-21><a id=__codelineno-21-21 name=__codelineno-21-21 href=#__codelineno-21-21></a>
-</span><span id=__span-21-22><a id=__codelineno-21-22 name=__codelineno-21-22 href=#__codelineno-21-22></a>  debugger: {
-</span><span id=__span-21-23><a id=__codelineno-21-23 name=__codelineno-21-23 href=#__codelineno-21-23></a>    description: &quot;Debugging specialist for errors and test failures&quot;
-</span><span id=__span-21-24><a id=__codelineno-21-24 name=__codelineno-21-24 href=#__codelineno-21-24></a>    tools: [&quot;Read&quot;, &quot;Edit&quot;, &quot;Bash&quot;, &quot;Grep&quot;, &quot;Glob&quot;]
-</span><span id=__span-21-25><a id=__codelineno-21-25 name=__codelineno-21-25 href=#__codelineno-21-25></a>    disallowedTools: [&quot;Write&quot;]
-</span><span id=__span-21-26><a id=__codelineno-21-26 name=__codelineno-21-26 href=#__codelineno-21-26></a>    model: &quot;inherit&quot;
-</span><span id=__span-21-27><a id=__codelineno-21-27 name=__codelineno-21-27 href=#__codelineno-21-27></a>    permissionMode: &quot;acceptEdits&quot;
-</span><span id=__span-21-28><a id=__codelineno-21-28 name=__codelineno-21-28 href=#__codelineno-21-28></a>    skills: [&quot;error-handling&quot;, &quot;testing-patterns&quot;]
-</span><span id=__span-21-29><a id=__codelineno-21-29 name=__codelineno-21-29 href=#__codelineno-21-29></a>    content: &quot;&quot;&quot;
-</span><span id=__span-21-30><a id=__codelineno-21-30 name=__codelineno-21-30 href=#__codelineno-21-30></a>      You are an expert debugger specializing in root cause analysis.
-</span><span id=__span-21-31><a id=__codelineno-21-31 name=__codelineno-21-31 href=#__codelineno-21-31></a>    &quot;&quot;&quot;
-</span><span id=__span-21-32><a id=__codelineno-21-32 name=__codelineno-21-32 href=#__codelineno-21-32></a>  }
-</span><span id=__span-21-33><a id=__codelineno-21-33 name=__codelineno-21-33 href=#__codelineno-21-33></a>}
-</span></code></pre></div> <table> <thead> <tr> <th>Property</th> <th>Type</th> <th>Required</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>description</code></td> <td>string</td> <td>Yes</td> <td>When the agent should be invoked</td> </tr> <tr> <td><code>content</code></td> <td>string</td> <td>Yes</td> <td>System prompt for the subagent</td> </tr> <tr> <td><code>tools</code></td> <td>string[]</td> <td>No</td> <td>Allowed tools (inherits all if omitted)</td> </tr> <tr> <td><code>model</code></td> <td>string</td> <td>No</td> <td>AI model to use (platform-specific values)</td> </tr> <tr> <td><code>disallowedTools</code></td> <td>string[]</td> <td>No</td> <td>Tools to deny (Claude only)</td> </tr> <tr> <td><code>permissionMode</code></td> <td>string</td> <td>No</td> <td><code>default</code>, <code>acceptEdits</code>, <code>dontAsk</code>, <code>bypassPermissions</code>, <code>plan</code> (Claude only)</td> </tr> <tr> <td><code>skills</code></td> <td>string[]</td> <td>No</td> <td>Skills to preload into subagent context (Claude only)</td> </tr> </tbody> </table> <p>Agents output by platform:</p> <div class="tabbed-set tabbed-alternate" data-tabs=2:2><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>GitHub Output</label><label for=__tabbed_2_2>Claude Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <p><code>.github/agents/&lt;name&gt;.md</code> (version: full)</p> <p>Supports: <code>name</code>, <code>description</code>, <code>tools</code>, <code>model</code></p> <p>Tool and model names are automatically mapped to GitHub Copilot's format:</p> <ul> <li>Tools: <code>Read</code> → <code>read</code>, <code>Grep</code>/<code>Glob</code> → <code>search</code>, <code>Bash</code> → <code>execute</code></li> <li>Models: <code>sonnet</code> → <code>Claude Sonnet 4.5</code>, <code>opus</code> → <code>Claude Opus 4.5</code>, <code>haiku</code> → <code>Claude Haiku 4.5</code></li> </ul> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-22-1><a id=__codelineno-22-1 name=__codelineno-22-1 href=#__codelineno-22-1></a>---
-</span><span id=__span-22-2><a id=__codelineno-22-2 name=__codelineno-22-2 href=#__codelineno-22-2></a>name: code-reviewer
-</span><span id=__span-22-3><a id=__codelineno-22-3 name=__codelineno-22-3 href=#__codelineno-22-3></a>description: Reviews code for quality and best practices
-</span><span id=__span-22-4><a id=__codelineno-22-4 name=__codelineno-22-4 href=#__codelineno-22-4></a>tools: [&#39;read&#39;, &#39;search&#39;, &#39;execute&#39;]
-</span><span id=__span-22-5><a id=__codelineno-22-5 name=__codelineno-22-5 href=#__codelineno-22-5></a><span class=gu>model: Claude Sonnet 4.5</span>
-</span><span id=__span-22-6><a id=__codelineno-22-6 name=__codelineno-22-6 href=#__codelineno-22-6></a><span class=gu>---</span>
-</span><span id=__span-22-7><a id=__codelineno-22-7 name=__codelineno-22-7 href=#__codelineno-22-7></a>
-</span><span id=__span-22-8><a id=__codelineno-22-8 name=__codelineno-22-8 href=#__codelineno-22-8></a>You are a senior code reviewer ensuring high standards.
-</span><span id=__span-22-9><a id=__codelineno-22-9 name=__codelineno-22-9 href=#__codelineno-22-9></a>
-</span><span id=__span-22-10><a id=__codelineno-22-10 name=__codelineno-22-10 href=#__codelineno-22-10></a>When invoked:
-</span><span id=__span-22-11><a id=__codelineno-22-11 name=__codelineno-22-11 href=#__codelineno-22-11></a><span class=k>1.</span> Run git diff to see recent changes
-</span><span id=__span-22-12><a id=__codelineno-22-12 name=__codelineno-22-12 href=#__codelineno-22-12></a><span class=k>2.</span> Focus on modified files
-</span><span id=__span-22-13><a id=__codelineno-22-13 name=__codelineno-22-13 href=#__codelineno-22-13></a><span class=k>3.</span> Begin review immediately
-</span></code></pre></div> </div> <div class=tabbed-block> <p><code>.claude/agents/&lt;name&gt;.md</code> (version: full)</p> <p>Supports all properties including <code>disallowedTools</code>, <code>permissionMode</code>, <code>skills</code></p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-23-1><a id=__codelineno-23-1 name=__codelineno-23-1 href=#__codelineno-23-1></a>---
-</span><span id=__span-23-2><a id=__codelineno-23-2 name=__codelineno-23-2 href=#__codelineno-23-2></a>name: code-reviewer
-</span><span id=__span-23-3><a id=__codelineno-23-3 name=__codelineno-23-3 href=#__codelineno-23-3></a>description: Reviews code for quality and best practices
-</span><span id=__span-23-4><a id=__codelineno-23-4 name=__codelineno-23-4 href=#__codelineno-23-4></a>tools: Read, Grep, Glob, Bash
-</span><span id=__span-23-5><a id=__codelineno-23-5 name=__codelineno-23-5 href=#__codelineno-23-5></a><span class=gu>model: sonnet</span>
-</span><span id=__span-23-6><a id=__codelineno-23-6 name=__codelineno-23-6 href=#__codelineno-23-6></a><span class=gu>---</span>
-</span><span id=__span-23-7><a id=__codelineno-23-7 name=__codelineno-23-7 href=#__codelineno-23-7></a>
-</span><span id=__span-23-8><a id=__codelineno-23-8 name=__codelineno-23-8 href=#__codelineno-23-8></a>You are a senior code reviewer ensuring high standards.
-</span><span id=__span-23-9><a id=__codelineno-23-9 name=__codelineno-23-9 href=#__codelineno-23-9></a>
-</span><span id=__span-23-10><a id=__codelineno-23-10 name=__codelineno-23-10 href=#__codelineno-23-10></a>When invoked:
-</span><span id=__span-23-11><a id=__codelineno-23-11 name=__codelineno-23-11 href=#__codelineno-23-11></a><span class=k>1.</span> Run git diff to see recent changes
-</span><span id=__span-23-12><a id=__codelineno-23-12 name=__codelineno-23-12 href=#__codelineno-23-12></a><span class=k>2.</span> Focus on modified files
-</span><span id=__span-23-13><a id=__codelineno-23-13 name=__codelineno-23-13 href=#__codelineno-23-13></a><span class=k>3.</span> Begin review immediately
-</span></code></pre></div> </div> </div> </div> <div class="admonition note"> <p class=admonition-title>Hooks Support</p> </div> <p>Claude Code agent hooks (<code>PreToolUse</code>, <code>PostToolUse</code>, <code>Stop</code>) are planned but not yet implemented. See <a href=https://github.com/mrwogu/promptscript#roadmap>Roadmap</a>.</p> <h3 id=local><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/local title="GitHub User: local">@local</a><a class=headerlink href=#local title="Permanent link">&para;</a></h3> <p>Private instructions not committed to version control:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-24-1><a id=__codelineno-24-1 name=__codelineno-24-1 href=#__codelineno-24-1></a>@local {
-</span><span id=__span-24-2><a id=__codelineno-24-2 name=__codelineno-24-2 href=#__codelineno-24-2></a>  &quot;&quot;&quot;
-</span><span id=__span-24-3><a id=__codelineno-24-3 name=__codelineno-24-3 href=#__codelineno-24-3></a>  Private development notes and local configuration.
-</span><span id=__span-24-4><a id=__codelineno-24-4 name=__codelineno-24-4 href=#__codelineno-24-4></a>  This content is not committed to git.
-</span><span id=__span-24-5><a id=__codelineno-24-5 name=__codelineno-24-5 href=#__codelineno-24-5></a>
-</span><span id=__span-24-6><a id=__codelineno-24-6 name=__codelineno-24-6 href=#__codelineno-24-6></a>  Local environment setup:
-</span><span id=__span-24-7><a id=__codelineno-24-7 name=__codelineno-24-7 href=#__codelineno-24-7></a>  - API keys are in .env.local
-</span><span id=__span-24-8><a id=__codelineno-24-8 name=__codelineno-24-8 href=#__codelineno-24-8></a>  - Use staging backend at localhost:8080
-</span><span id=__span-24-9><a id=__codelineno-24-9 name=__codelineno-24-9 href=#__codelineno-24-9></a>  &quot;&quot;&quot;
-</span><span id=__span-24-10><a id=__codelineno-24-10 name=__codelineno-24-10 href=#__codelineno-24-10></a>}
-</span></code></pre></div> <p>Or with key-value properties:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-25-1><a id=__codelineno-25-1 name=__codelineno-25-1 href=#__codelineno-25-1></a>@local {
-</span><span id=__span-25-2><a id=__codelineno-25-2 name=__codelineno-25-2 href=#__codelineno-25-2></a>  apiEndpoint: &quot;http://localhost:8080&quot;
-</span><span id=__span-25-3><a id=__codelineno-25-3 name=__codelineno-25-3 href=#__codelineno-25-3></a>  debugMode: true
-</span><span id=__span-25-4><a id=__codelineno-25-4 name=__codelineno-25-4 href=#__codelineno-25-4></a>  customPaths: [&quot;/tmp/dev&quot;, &quot;/var/local&quot;]
-</span><span id=__span-25-5><a id=__codelineno-25-5 name=__codelineno-25-5 href=#__codelineno-25-5></a>
-</span><span id=__span-25-6><a id=__codelineno-25-6 name=__codelineno-25-6 href=#__codelineno-25-6></a>  &quot;&quot;&quot;
-</span><span id=__span-25-7><a id=__codelineno-25-7 name=__codelineno-25-7 href=#__codelineno-25-7></a>  Additional local notes...
-</span><span id=__span-25-8><a id=__codelineno-25-8 name=__codelineno-25-8 href=#__codelineno-25-8></a>  &quot;&quot;&quot;
-</span><span id=__span-25-9><a id=__codelineno-25-9 name=__codelineno-25-9 href=#__codelineno-25-9></a>}
-</span></code></pre></div> <div class="admonition note"> <p class=admonition-title><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/local title="GitHub User: local">@local</a> Output</p> </div> <p>The <code>@local</code> block generates <code>CLAUDE.local.md</code> when using the Claude formatter with <code>version: full</code>. This file should be added to <code>.gitignore</code>.</p> <h3 id=knowledge><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/knowledge title="GitHub User: knowledge">@knowledge</a><a class=headerlink href=#knowledge title="Permanent link">&para;</a></h3> <p>Reference documentation and knowledge:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-26-1><a id=__codelineno-26-1 name=__codelineno-26-1 href=#__codelineno-26-1></a>@knowledge {
-</span><span id=__span-26-2><a id=__codelineno-26-2 name=__codelineno-26-2 href=#__codelineno-26-2></a>  &quot;&quot;&quot;
-</span><span id=__span-26-3><a id=__codelineno-26-3 name=__codelineno-26-3 href=#__codelineno-26-3></a>  ## API Reference
-</span><span id=__span-26-4><a id=__codelineno-26-4 name=__codelineno-26-4 href=#__codelineno-26-4></a>
-</span><span id=__span-26-5><a id=__codelineno-26-5 name=__codelineno-26-5 href=#__codelineno-26-5></a>  ### Authentication
-</span><span id=__span-26-6><a id=__codelineno-26-6 name=__codelineno-26-6 href=#__codelineno-26-6></a>  - POST /api/auth/login - User login
-</span><span id=__span-26-7><a id=__codelineno-26-7 name=__codelineno-26-7 href=#__codelineno-26-7></a>  - POST /api/auth/logout - User logout
-</span><span id=__span-26-8><a id=__codelineno-26-8 name=__codelineno-26-8 href=#__codelineno-26-8></a>
-</span><span id=__span-26-9><a id=__codelineno-26-9 name=__codelineno-26-9 href=#__codelineno-26-9></a>  ### Users
-</span><span id=__span-26-10><a id=__codelineno-26-10 name=__codelineno-26-10 href=#__codelineno-26-10></a>  - GET /api/users - List users
-</span><span id=__span-26-11><a id=__codelineno-26-11 name=__codelineno-26-11 href=#__codelineno-26-11></a>  - GET /api/users/:id - Get user by ID
-</span><span id=__span-26-12><a id=__codelineno-26-12 name=__codelineno-26-12 href=#__codelineno-26-12></a>
-</span><span id=__span-26-13><a id=__codelineno-26-13 name=__codelineno-26-13 href=#__codelineno-26-13></a>  ## Architecture Notes
-</span><span id=__span-26-14><a id=__codelineno-26-14 name=__codelineno-26-14 href=#__codelineno-26-14></a>
-</span><span id=__span-26-15><a id=__codelineno-26-15 name=__codelineno-26-15 href=#__codelineno-26-15></a>  The service follows a clean architecture pattern with:
-</span><span id=__span-26-16><a id=__codelineno-26-16 name=__codelineno-26-16 href=#__codelineno-26-16></a>  - Controllers for HTTP handling
-</span><span id=__span-26-17><a id=__codelineno-26-17 name=__codelineno-26-17 href=#__codelineno-26-17></a>  - Services for business logic
-</span><span id=__span-26-18><a id=__codelineno-26-18 name=__codelineno-26-18 href=#__codelineno-26-18></a>  - Repositories for data access
-</span><span id=__span-26-19><a id=__codelineno-26-19 name=__codelineno-26-19 href=#__codelineno-26-19></a>  &quot;&quot;&quot;
-</span><span id=__span-26-20><a id=__codelineno-26-20 name=__codelineno-26-20 href=#__codelineno-26-20></a>}
-</span></code></pre></div> <h2 id=extend-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/extend title="GitHub User: extend">@extend</a> Block<a class=headerlink href=#extend-block title="Permanent link">&para;</a></h2> <p>Modify inherited or existing blocks:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-27-1><a id=__codelineno-27-1 name=__codelineno-27-1 href=#__codelineno-27-1></a># Extend a top-level block
-</span><span id=__span-27-2><a id=__codelineno-27-2 name=__codelineno-27-2 href=#__codelineno-27-2></a>@extend identity {
-</span><span id=__span-27-3><a id=__codelineno-27-3 name=__codelineno-27-3 href=#__codelineno-27-3></a>  &quot;&quot;&quot;
-</span><span id=__span-27-4><a id=__codelineno-27-4 name=__codelineno-27-4 href=#__codelineno-27-4></a>  Additional identity information.
-</span><span id=__span-27-5><a id=__codelineno-27-5 name=__codelineno-27-5 href=#__codelineno-27-5></a>  &quot;&quot;&quot;
-</span><span id=__span-27-6><a id=__codelineno-27-6 name=__codelineno-27-6 href=#__codelineno-27-6></a>}
+</span></code></pre></div> <p>The <code>globs</code> property is used by multifile formatters (GitHub, Claude, Cursor) to generate path-specific instruction files.</p> <h4 id=github-copilot-applyto-integration>GitHub Copilot <code>applyTo</code> Integration<a class=headerlink href=#github-copilot-applyto-integration title="Permanent link">&para;</a></h4> <p>When using <code>version: multifile</code> or <code>version: full</code> for GitHub Copilot, the <code>globs</code> patterns generate separate instruction files with <code>applyTo</code> frontmatter:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-18-1><a id=__codelineno-18-1 name=__codelineno-18-1 href=#__codelineno-18-1></a>@guards {
+</span><span id=__span-18-2><a id=__codelineno-18-2 name=__codelineno-18-2 href=#__codelineno-18-2></a>  globs: [&quot;**/*.ts&quot;, &quot;**/*.tsx&quot;, &quot;**/*.spec.ts&quot;, &quot;**/*.test.ts&quot;]
+</span><span id=__span-18-3><a id=__codelineno-18-3 name=__codelineno-18-3 href=#__codelineno-18-3></a>}
+</span><span id=__span-18-4><a id=__codelineno-18-4 name=__codelineno-18-4 href=#__codelineno-18-4></a>
+</span><span id=__span-18-5><a id=__codelineno-18-5 name=__codelineno-18-5 href=#__codelineno-18-5></a>@standards {
+</span><span id=__span-18-6><a id=__codelineno-18-6 name=__codelineno-18-6 href=#__codelineno-18-6></a>  typescript: [
+</span><span id=__span-18-7><a id=__codelineno-18-7 name=__codelineno-18-7 href=#__codelineno-18-7></a>    &quot;Use strict TypeScript with no any types&quot;
+</span><span id=__span-18-8><a id=__codelineno-18-8 name=__codelineno-18-8 href=#__codelineno-18-8></a>    &quot;Prefer interfaces over type aliases&quot;
+</span><span id=__span-18-9><a id=__codelineno-18-9 name=__codelineno-18-9 href=#__codelineno-18-9></a>  ]
+</span><span id=__span-18-10><a id=__codelineno-18-10 name=__codelineno-18-10 href=#__codelineno-18-10></a>
+</span><span id=__span-18-11><a id=__codelineno-18-11 name=__codelineno-18-11 href=#__codelineno-18-11></a>  testing: [
+</span><span id=__span-18-12><a id=__codelineno-18-12 name=__codelineno-18-12 href=#__codelineno-18-12></a>    &quot;Use Vitest for unit tests&quot;
+</span><span id=__span-18-13><a id=__codelineno-18-13 name=__codelineno-18-13 href=#__codelineno-18-13></a>    &quot;Follow AAA pattern (Arrange, Act, Assert)&quot;
+</span><span id=__span-18-14><a id=__codelineno-18-14 name=__codelineno-18-14 href=#__codelineno-18-14></a>  ]
+</span><span id=__span-18-15><a id=__codelineno-18-15 name=__codelineno-18-15 href=#__codelineno-18-15></a>}
+</span></code></pre></div> <p>This generates:</p> <p><strong><code>.github/instructions/typescript.instructions.md</code>:</strong></p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-19-1><a id=__codelineno-19-1 name=__codelineno-19-1 href=#__codelineno-19-1></a>---
+</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a>applyTo:
+</span><span id=__span-19-3><a id=__codelineno-19-3 name=__codelineno-19-3 href=#__codelineno-19-3></a><span class=w>  </span><span class=k>-</span><span class=w> </span>&#39;**/*.ts&#39;
+</span><span id=__span-19-4><a id=__codelineno-19-4 name=__codelineno-19-4 href=#__codelineno-19-4></a><span class=gu>  - &#39;**/*.tsx&#39;</span>
+</span><span id=__span-19-5><a id=__codelineno-19-5 name=__codelineno-19-5 href=#__codelineno-19-5></a><span class=gu>---</span>
+</span><span id=__span-19-6><a id=__codelineno-19-6 name=__codelineno-19-6 href=#__codelineno-19-6></a>
+</span><span id=__span-19-7><a id=__codelineno-19-7 name=__codelineno-19-7 href=#__codelineno-19-7></a><span class=gh># TypeScript Standards</span>
+</span><span id=__span-19-8><a id=__codelineno-19-8 name=__codelineno-19-8 href=#__codelineno-19-8></a>
+</span><span id=__span-19-9><a id=__codelineno-19-9 name=__codelineno-19-9 href=#__codelineno-19-9></a><span class=k>-</span><span class=w> </span>Use strict TypeScript with no any types
+</span><span id=__span-19-10><a id=__codelineno-19-10 name=__codelineno-19-10 href=#__codelineno-19-10></a><span class=k>-</span><span class=w> </span>Prefer interfaces over type aliases
+</span></code></pre></div> <p><strong><code>.github/instructions/testing.instructions.md</code>:</strong></p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-20-1><a id=__codelineno-20-1 name=__codelineno-20-1 href=#__codelineno-20-1></a>---
+</span><span id=__span-20-2><a id=__codelineno-20-2 name=__codelineno-20-2 href=#__codelineno-20-2></a>applyTo:
+</span><span id=__span-20-3><a id=__codelineno-20-3 name=__codelineno-20-3 href=#__codelineno-20-3></a><span class=w>  </span><span class=k>-</span><span class=w> </span>&#39;**/*.spec.ts&#39;
+</span><span id=__span-20-4><a id=__codelineno-20-4 name=__codelineno-20-4 href=#__codelineno-20-4></a><span class=gu>  - &#39;**/*.test.ts&#39;</span>
+</span><span id=__span-20-5><a id=__codelineno-20-5 name=__codelineno-20-5 href=#__codelineno-20-5></a><span class=gu>---</span>
+</span><span id=__span-20-6><a id=__codelineno-20-6 name=__codelineno-20-6 href=#__codelineno-20-6></a>
+</span><span id=__span-20-7><a id=__codelineno-20-7 name=__codelineno-20-7 href=#__codelineno-20-7></a><span class=gh># Testing Standards</span>
+</span><span id=__span-20-8><a id=__codelineno-20-8 name=__codelineno-20-8 href=#__codelineno-20-8></a>
+</span><span id=__span-20-9><a id=__codelineno-20-9 name=__codelineno-20-9 href=#__codelineno-20-9></a><span class=k>-</span><span class=w> </span>Use Vitest for unit tests
+</span><span id=__span-20-10><a id=__codelineno-20-10 name=__codelineno-20-10 href=#__codelineno-20-10></a><span class=k>-</span><span class=w> </span>Follow AAA pattern (Arrange, Act, Assert)
+</span></code></pre></div> <div class="admonition note"> <p class=admonition-title>Version Required</p> </div> <p>Path-specific instruction files are only generated with <code>version: multifile</code> or <code>version: full</code>:</p> <div class="language-text highlight"><pre><span></span><code>```yaml
+targets:
+  - github:
+      version: multifile
+```
+</code></pre></div> <h3 id=skills><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/skills title="GitHub User: skills">@skills</a><a class=headerlink href=#skills title="Permanent link">&para;</a></h3> <p>Define reusable skills that AI assistants can invoke:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-22-1><a id=__codelineno-22-1 name=__codelineno-22-1 href=#__codelineno-22-1></a>@skills {
+</span><span id=__span-22-2><a id=__codelineno-22-2 name=__codelineno-22-2 href=#__codelineno-22-2></a>  commit: {
+</span><span id=__span-22-3><a id=__codelineno-22-3 name=__codelineno-22-3 href=#__codelineno-22-3></a>    description: &quot;Create git commits&quot;
+</span><span id=__span-22-4><a id=__codelineno-22-4 name=__codelineno-22-4 href=#__codelineno-22-4></a>    disableModelInvocation: true
+</span><span id=__span-22-5><a id=__codelineno-22-5 name=__codelineno-22-5 href=#__codelineno-22-5></a>    context: &quot;fork&quot;
+</span><span id=__span-22-6><a id=__codelineno-22-6 name=__codelineno-22-6 href=#__codelineno-22-6></a>    agent: &quot;general-purpose&quot;
+</span><span id=__span-22-7><a id=__codelineno-22-7 name=__codelineno-22-7 href=#__codelineno-22-7></a>    allowedTools: [&quot;Bash&quot;, &quot;Read&quot;, &quot;Write&quot;]
+</span><span id=__span-22-8><a id=__codelineno-22-8 name=__codelineno-22-8 href=#__codelineno-22-8></a>    content: &quot;&quot;&quot;
+</span><span id=__span-22-9><a id=__codelineno-22-9 name=__codelineno-22-9 href=#__codelineno-22-9></a>      When creating commits:
+</span><span id=__span-22-10><a id=__codelineno-22-10 name=__codelineno-22-10 href=#__codelineno-22-10></a>      1. Use conventional commit format
+</span><span id=__span-22-11><a id=__codelineno-22-11 name=__codelineno-22-11 href=#__codelineno-22-11></a>      2. Include Co-Authored-By trailer
+</span><span id=__span-22-12><a id=__codelineno-22-12 name=__codelineno-22-12 href=#__codelineno-22-12></a>      3. Never amend existing commits
+</span><span id=__span-22-13><a id=__codelineno-22-13 name=__codelineno-22-13 href=#__codelineno-22-13></a>    &quot;&quot;&quot;
+</span><span id=__span-22-14><a id=__codelineno-22-14 name=__codelineno-22-14 href=#__codelineno-22-14></a>  }
+</span><span id=__span-22-15><a id=__codelineno-22-15 name=__codelineno-22-15 href=#__codelineno-22-15></a>
+</span><span id=__span-22-16><a id=__codelineno-22-16 name=__codelineno-22-16 href=#__codelineno-22-16></a>  review: {
+</span><span id=__span-22-17><a id=__codelineno-22-17 name=__codelineno-22-17 href=#__codelineno-22-17></a>    description: &quot;Review code changes&quot;
+</span><span id=__span-22-18><a id=__codelineno-22-18 name=__codelineno-22-18 href=#__codelineno-22-18></a>    userInvocable: true
+</span><span id=__span-22-19><a id=__codelineno-22-19 name=__codelineno-22-19 href=#__codelineno-22-19></a>    content: &quot;&quot;&quot;
+</span><span id=__span-22-20><a id=__codelineno-22-20 name=__codelineno-22-20 href=#__codelineno-22-20></a>      Perform thorough code review checking:
+</span><span id=__span-22-21><a id=__codelineno-22-21 name=__codelineno-22-21 href=#__codelineno-22-21></a>      - Type safety
+</span><span id=__span-22-22><a id=__codelineno-22-22 name=__codelineno-22-22 href=#__codelineno-22-22></a>      - Error handling
+</span><span id=__span-22-23><a id=__codelineno-22-23 name=__codelineno-22-23 href=#__codelineno-22-23></a>      - Security vulnerabilities
+</span><span id=__span-22-24><a id=__codelineno-22-24 name=__codelineno-22-24 href=#__codelineno-22-24></a>    &quot;&quot;&quot;
+</span><span id=__span-22-25><a id=__codelineno-22-25 name=__codelineno-22-25 href=#__codelineno-22-25></a>  }
+</span><span id=__span-22-26><a id=__codelineno-22-26 name=__codelineno-22-26 href=#__codelineno-22-26></a>
+</span><span id=__span-22-27><a id=__codelineno-22-27 name=__codelineno-22-27 href=#__codelineno-22-27></a>  deploy: {
+</span><span id=__span-22-28><a id=__codelineno-22-28 name=__codelineno-22-28 href=#__codelineno-22-28></a>    description: &quot;Deploy the application&quot;
+</span><span id=__span-22-29><a id=__codelineno-22-29 name=__codelineno-22-29 href=#__codelineno-22-29></a>    steps: [&quot;Build&quot;, &quot;Test&quot;, &quot;Deploy to staging&quot;, &quot;Deploy to production&quot;]
+</span><span id=__span-22-30><a id=__codelineno-22-30 name=__codelineno-22-30 href=#__codelineno-22-30></a>  }
+</span><span id=__span-22-31><a id=__codelineno-22-31 name=__codelineno-22-31 href=#__codelineno-22-31></a>}
+</span></code></pre></div> <table> <thead> <tr> <th>Property</th> <th>Type</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>description</code></td> <td>string</td> <td>Human-readable description</td> </tr> <tr> <td><code>content</code></td> <td>string</td> <td>Detailed skill instructions</td> </tr> <tr> <td><code>disableModelInvocation</code></td> <td>boolean</td> <td>Prevent model from auto-invoking skill</td> </tr> <tr> <td><code>userInvocable</code></td> <td>boolean</td> <td>Allow user to manually invoke skill</td> </tr> <tr> <td><code>context</code></td> <td>string</td> <td>Context mode: <code>"fork"</code> or <code>"inherit"</code></td> </tr> <tr> <td><code>agent</code></td> <td>string</td> <td>Agent type: <code>"general-purpose"</code>, etc.</td> </tr> <tr> <td><code>allowedTools</code></td> <td>string[]</td> <td>Tools the skill can use</td> </tr> <tr> <td><code>steps</code></td> <td>string[]</td> <td>Workflow steps (generates workflow file)</td> </tr> </tbody> </table> <p>Skills are output differently based on the formatter:</p> <div class="tabbed-set tabbed-alternate" data-tabs=1:2><input checked=checked id=__tabbed_1_1 name=__tabbed_1 type=radio><input id=__tabbed_1_2 name=__tabbed_1 type=radio><div class=tabbed-labels><label for=__tabbed_1_1>GitHub Output</label><label for=__tabbed_1_2>Claude Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <p><code>.github/skills/&lt;name&gt;/SKILL.md</code> (version: full)</p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-23-1><a id=__codelineno-23-1 name=__codelineno-23-1 href=#__codelineno-23-1></a>---
+</span><span id=__span-23-2><a id=__codelineno-23-2 name=__codelineno-23-2 href=#__codelineno-23-2></a>name: commit
+</span><span id=__span-23-3><a id=__codelineno-23-3 name=__codelineno-23-3 href=#__codelineno-23-3></a><span class=gu>description: Create git commits</span>
+</span><span id=__span-23-4><a id=__codelineno-23-4 name=__codelineno-23-4 href=#__codelineno-23-4></a><span class=gu>---</span>
+</span><span id=__span-23-5><a id=__codelineno-23-5 name=__codelineno-23-5 href=#__codelineno-23-5></a>
+</span><span id=__span-23-6><a id=__codelineno-23-6 name=__codelineno-23-6 href=#__codelineno-23-6></a>When creating commits:
+</span><span id=__span-23-7><a id=__codelineno-23-7 name=__codelineno-23-7 href=#__codelineno-23-7></a><span class=k>1.</span> Use conventional commit format
+</span><span id=__span-23-8><a id=__codelineno-23-8 name=__codelineno-23-8 href=#__codelineno-23-8></a><span class=k>2.</span> Include Co-Authored-By trailer
+</span><span id=__span-23-9><a id=__codelineno-23-9 name=__codelineno-23-9 href=#__codelineno-23-9></a><span class=k>3.</span> Never amend existing commits
+</span></code></pre></div> </div> <div class=tabbed-block> <p><code>.claude/skills/&lt;name&gt;/SKILL.md</code> (version: full)</p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-24-1><a id=__codelineno-24-1 name=__codelineno-24-1 href=#__codelineno-24-1></a>---
+</span><span id=__span-24-2><a id=__codelineno-24-2 name=__codelineno-24-2 href=#__codelineno-24-2></a>name: commit
+</span><span id=__span-24-3><a id=__codelineno-24-3 name=__codelineno-24-3 href=#__codelineno-24-3></a>description: Create git commits
+</span><span id=__span-24-4><a id=__codelineno-24-4 name=__codelineno-24-4 href=#__codelineno-24-4></a>disableModelInvocation: true
+</span><span id=__span-24-5><a id=__codelineno-24-5 name=__codelineno-24-5 href=#__codelineno-24-5></a>context: fork
+</span><span id=__span-24-6><a id=__codelineno-24-6 name=__codelineno-24-6 href=#__codelineno-24-6></a>agent: general-purpose
+</span><span id=__span-24-7><a id=__codelineno-24-7 name=__codelineno-24-7 href=#__codelineno-24-7></a>allowedTools:
+</span><span id=__span-24-8><a id=__codelineno-24-8 name=__codelineno-24-8 href=#__codelineno-24-8></a><span class=w>  </span><span class=k>-</span><span class=w> </span>Bash
+</span><span id=__span-24-9><a id=__codelineno-24-9 name=__codelineno-24-9 href=#__codelineno-24-9></a><span class=w>  </span><span class=k>-</span><span class=w> </span>Read
+</span><span id=__span-24-10><a id=__codelineno-24-10 name=__codelineno-24-10 href=#__codelineno-24-10></a><span class=gu>  - Write</span>
+</span><span id=__span-24-11><a id=__codelineno-24-11 name=__codelineno-24-11 href=#__codelineno-24-11></a><span class=gu>---</span>
+</span><span id=__span-24-12><a id=__codelineno-24-12 name=__codelineno-24-12 href=#__codelineno-24-12></a>
+</span><span id=__span-24-13><a id=__codelineno-24-13 name=__codelineno-24-13 href=#__codelineno-24-13></a>When creating commits:
+</span><span id=__span-24-14><a id=__codelineno-24-14 name=__codelineno-24-14 href=#__codelineno-24-14></a><span class=k>1.</span> Use conventional commit format
+</span><span id=__span-24-15><a id=__codelineno-24-15 name=__codelineno-24-15 href=#__codelineno-24-15></a><span class=k>2.</span> Include Co-Authored-By trailer
+</span><span id=__span-24-16><a id=__codelineno-24-16 name=__codelineno-24-16 href=#__codelineno-24-16></a><span class=k>3.</span> Never amend existing commits
+</span></code></pre></div> </div> </div> </div> <h3 id=agents><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/agents title="GitHub User: agents">@agents</a><a class=headerlink href=#agents title="Permanent link">&para;</a></h3> <p>Define specialized AI subagents for GitHub Copilot and Claude Code:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-25-1><a id=__codelineno-25-1 name=__codelineno-25-1 href=#__codelineno-25-1></a>@agents {
+</span><span id=__span-25-2><a id=__codelineno-25-2 name=__codelineno-25-2 href=#__codelineno-25-2></a>  code-reviewer: {
+</span><span id=__span-25-3><a id=__codelineno-25-3 name=__codelineno-25-3 href=#__codelineno-25-3></a>    description: &quot;Reviews code for quality and best practices&quot;
+</span><span id=__span-25-4><a id=__codelineno-25-4 name=__codelineno-25-4 href=#__codelineno-25-4></a>    tools: [&quot;Read&quot;, &quot;Grep&quot;, &quot;Glob&quot;, &quot;Bash&quot;]
+</span><span id=__span-25-5><a id=__codelineno-25-5 name=__codelineno-25-5 href=#__codelineno-25-5></a>    model: &quot;sonnet&quot;
+</span><span id=__span-25-6><a id=__codelineno-25-6 name=__codelineno-25-6 href=#__codelineno-25-6></a>    content: &quot;&quot;&quot;
+</span><span id=__span-25-7><a id=__codelineno-25-7 name=__codelineno-25-7 href=#__codelineno-25-7></a>      You are a senior code reviewer ensuring high standards.
+</span><span id=__span-25-8><a id=__codelineno-25-8 name=__codelineno-25-8 href=#__codelineno-25-8></a>
+</span><span id=__span-25-9><a id=__codelineno-25-9 name=__codelineno-25-9 href=#__codelineno-25-9></a>      When invoked:
+</span><span id=__span-25-10><a id=__codelineno-25-10 name=__codelineno-25-10 href=#__codelineno-25-10></a>      1. Run git diff to see recent changes
+</span><span id=__span-25-11><a id=__codelineno-25-11 name=__codelineno-25-11 href=#__codelineno-25-11></a>      2. Focus on modified files
+</span><span id=__span-25-12><a id=__codelineno-25-12 name=__codelineno-25-12 href=#__codelineno-25-12></a>      3. Begin review immediately
+</span><span id=__span-25-13><a id=__codelineno-25-13 name=__codelineno-25-13 href=#__codelineno-25-13></a>
+</span><span id=__span-25-14><a id=__codelineno-25-14 name=__codelineno-25-14 href=#__codelineno-25-14></a>      Review checklist:
+</span><span id=__span-25-15><a id=__codelineno-25-15 name=__codelineno-25-15 href=#__codelineno-25-15></a>      - Code is clear and readable
+</span><span id=__span-25-16><a id=__codelineno-25-16 name=__codelineno-25-16 href=#__codelineno-25-16></a>      - Functions and variables are well-named
+</span><span id=__span-25-17><a id=__codelineno-25-17 name=__codelineno-25-17 href=#__codelineno-25-17></a>      - No duplicated code
+</span><span id=__span-25-18><a id=__codelineno-25-18 name=__codelineno-25-18 href=#__codelineno-25-18></a>      - Proper error handling
+</span><span id=__span-25-19><a id=__codelineno-25-19 name=__codelineno-25-19 href=#__codelineno-25-19></a>    &quot;&quot;&quot;
+</span><span id=__span-25-20><a id=__codelineno-25-20 name=__codelineno-25-20 href=#__codelineno-25-20></a>  }
+</span><span id=__span-25-21><a id=__codelineno-25-21 name=__codelineno-25-21 href=#__codelineno-25-21></a>
+</span><span id=__span-25-22><a id=__codelineno-25-22 name=__codelineno-25-22 href=#__codelineno-25-22></a>  debugger: {
+</span><span id=__span-25-23><a id=__codelineno-25-23 name=__codelineno-25-23 href=#__codelineno-25-23></a>    description: &quot;Debugging specialist for errors and test failures&quot;
+</span><span id=__span-25-24><a id=__codelineno-25-24 name=__codelineno-25-24 href=#__codelineno-25-24></a>    tools: [&quot;Read&quot;, &quot;Edit&quot;, &quot;Bash&quot;, &quot;Grep&quot;, &quot;Glob&quot;]
+</span><span id=__span-25-25><a id=__codelineno-25-25 name=__codelineno-25-25 href=#__codelineno-25-25></a>    disallowedTools: [&quot;Write&quot;]
+</span><span id=__span-25-26><a id=__codelineno-25-26 name=__codelineno-25-26 href=#__codelineno-25-26></a>    model: &quot;inherit&quot;
+</span><span id=__span-25-27><a id=__codelineno-25-27 name=__codelineno-25-27 href=#__codelineno-25-27></a>    permissionMode: &quot;acceptEdits&quot;
+</span><span id=__span-25-28><a id=__codelineno-25-28 name=__codelineno-25-28 href=#__codelineno-25-28></a>    skills: [&quot;error-handling&quot;, &quot;testing-patterns&quot;]
+</span><span id=__span-25-29><a id=__codelineno-25-29 name=__codelineno-25-29 href=#__codelineno-25-29></a>    content: &quot;&quot;&quot;
+</span><span id=__span-25-30><a id=__codelineno-25-30 name=__codelineno-25-30 href=#__codelineno-25-30></a>      You are an expert debugger specializing in root cause analysis.
+</span><span id=__span-25-31><a id=__codelineno-25-31 name=__codelineno-25-31 href=#__codelineno-25-31></a>    &quot;&quot;&quot;
+</span><span id=__span-25-32><a id=__codelineno-25-32 name=__codelineno-25-32 href=#__codelineno-25-32></a>  }
+</span><span id=__span-25-33><a id=__codelineno-25-33 name=__codelineno-25-33 href=#__codelineno-25-33></a>}
+</span></code></pre></div> <table> <thead> <tr> <th>Property</th> <th>Type</th> <th>Required</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>description</code></td> <td>string</td> <td>Yes</td> <td>When the agent should be invoked</td> </tr> <tr> <td><code>content</code></td> <td>string</td> <td>Yes</td> <td>System prompt for the subagent</td> </tr> <tr> <td><code>tools</code></td> <td>string[]</td> <td>No</td> <td>Allowed tools (inherits all if omitted)</td> </tr> <tr> <td><code>model</code></td> <td>string</td> <td>No</td> <td>AI model to use (platform-specific values)</td> </tr> <tr> <td><code>disallowedTools</code></td> <td>string[]</td> <td>No</td> <td>Tools to deny (Claude only)</td> </tr> <tr> <td><code>permissionMode</code></td> <td>string</td> <td>No</td> <td><code>default</code>, <code>acceptEdits</code>, <code>dontAsk</code>, <code>bypassPermissions</code>, <code>plan</code> (Claude only)</td> </tr> <tr> <td><code>skills</code></td> <td>string[]</td> <td>No</td> <td>Skills to preload into subagent context (Claude only)</td> </tr> </tbody> </table> <p>Agents output by platform:</p> <div class="tabbed-set tabbed-alternate" data-tabs=2:2><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>GitHub Output</label><label for=__tabbed_2_2>Claude Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <p><code>.github/agents/&lt;name&gt;.md</code> (version: full)</p> <p>Supports: <code>name</code>, <code>description</code>, <code>tools</code>, <code>model</code></p> <p>Tool and model names are automatically mapped to GitHub Copilot's format:</p> <ul> <li>Tools: <code>Read</code> → <code>read</code>, <code>Grep</code>/<code>Glob</code> → <code>search</code>, <code>Bash</code> → <code>execute</code></li> <li>Models: <code>sonnet</code> → <code>Claude Sonnet 4.5</code>, <code>opus</code> → <code>Claude Opus 4.5</code>, <code>haiku</code> → <code>Claude Haiku 4.5</code></li> </ul> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-26-1><a id=__codelineno-26-1 name=__codelineno-26-1 href=#__codelineno-26-1></a>---
+</span><span id=__span-26-2><a id=__codelineno-26-2 name=__codelineno-26-2 href=#__codelineno-26-2></a>name: code-reviewer
+</span><span id=__span-26-3><a id=__codelineno-26-3 name=__codelineno-26-3 href=#__codelineno-26-3></a>description: Reviews code for quality and best practices
+</span><span id=__span-26-4><a id=__codelineno-26-4 name=__codelineno-26-4 href=#__codelineno-26-4></a>tools: [&#39;read&#39;, &#39;search&#39;, &#39;execute&#39;]
+</span><span id=__span-26-5><a id=__codelineno-26-5 name=__codelineno-26-5 href=#__codelineno-26-5></a><span class=gu>model: Claude Sonnet 4.5</span>
+</span><span id=__span-26-6><a id=__codelineno-26-6 name=__codelineno-26-6 href=#__codelineno-26-6></a><span class=gu>---</span>
+</span><span id=__span-26-7><a id=__codelineno-26-7 name=__codelineno-26-7 href=#__codelineno-26-7></a>
+</span><span id=__span-26-8><a id=__codelineno-26-8 name=__codelineno-26-8 href=#__codelineno-26-8></a>You are a senior code reviewer ensuring high standards.
+</span><span id=__span-26-9><a id=__codelineno-26-9 name=__codelineno-26-9 href=#__codelineno-26-9></a>
+</span><span id=__span-26-10><a id=__codelineno-26-10 name=__codelineno-26-10 href=#__codelineno-26-10></a>When invoked:
+</span><span id=__span-26-11><a id=__codelineno-26-11 name=__codelineno-26-11 href=#__codelineno-26-11></a><span class=k>1.</span> Run git diff to see recent changes
+</span><span id=__span-26-12><a id=__codelineno-26-12 name=__codelineno-26-12 href=#__codelineno-26-12></a><span class=k>2.</span> Focus on modified files
+</span><span id=__span-26-13><a id=__codelineno-26-13 name=__codelineno-26-13 href=#__codelineno-26-13></a><span class=k>3.</span> Begin review immediately
+</span></code></pre></div> </div> <div class=tabbed-block> <p><code>.claude/agents/&lt;name&gt;.md</code> (version: full)</p> <p>Supports all properties including <code>disallowedTools</code>, <code>permissionMode</code>, <code>skills</code></p> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-27-1><a id=__codelineno-27-1 name=__codelineno-27-1 href=#__codelineno-27-1></a>---
+</span><span id=__span-27-2><a id=__codelineno-27-2 name=__codelineno-27-2 href=#__codelineno-27-2></a>name: code-reviewer
+</span><span id=__span-27-3><a id=__codelineno-27-3 name=__codelineno-27-3 href=#__codelineno-27-3></a>description: Reviews code for quality and best practices
+</span><span id=__span-27-4><a id=__codelineno-27-4 name=__codelineno-27-4 href=#__codelineno-27-4></a>tools: Read, Grep, Glob, Bash
+</span><span id=__span-27-5><a id=__codelineno-27-5 name=__codelineno-27-5 href=#__codelineno-27-5></a><span class=gu>model: sonnet</span>
+</span><span id=__span-27-6><a id=__codelineno-27-6 name=__codelineno-27-6 href=#__codelineno-27-6></a><span class=gu>---</span>
 </span><span id=__span-27-7><a id=__codelineno-27-7 name=__codelineno-27-7 href=#__codelineno-27-7></a>
-</span><span id=__span-27-8><a id=__codelineno-27-8 name=__codelineno-27-8 href=#__codelineno-27-8></a># Extend a nested path
-</span><span id=__span-27-9><a id=__codelineno-27-9 name=__codelineno-27-9 href=#__codelineno-27-9></a>@extend standards.code {
-</span><span id=__span-27-10><a id=__codelineno-27-10 name=__codelineno-27-10 href=#__codelineno-27-10></a>  frameworks: [react, vue]
-</span><span id=__span-27-11><a id=__codelineno-27-11 name=__codelineno-27-11 href=#__codelineno-27-11></a>}
-</span><span id=__span-27-12><a id=__codelineno-27-12 name=__codelineno-27-12 href=#__codelineno-27-12></a>
-</span><span id=__span-27-13><a id=__codelineno-27-13 name=__codelineno-27-13 href=#__codelineno-27-13></a># Extend multiple levels deep
-</span><span id=__span-27-14><a id=__codelineno-27-14 name=__codelineno-27-14 href=#__codelineno-27-14></a>@extend standards.code.testing {
-</span><span id=__span-27-15><a id=__codelineno-27-15 name=__codelineno-27-15 href=#__codelineno-27-15></a>  e2e: true
-</span><span id=__span-27-16><a id=__codelineno-27-16 name=__codelineno-27-16 href=#__codelineno-27-16></a>  coverage: 90
-</span><span id=__span-27-17><a id=__codelineno-27-17 name=__codelineno-27-17 href=#__codelineno-27-17></a>}
-</span></code></pre></div> <h2 id=values>Values<a class=headerlink href=#values title="Permanent link">&para;</a></h2> <h3 id=primitive-types>Primitive Types<a class=headerlink href=#primitive-types title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Type</th> <th>Examples</th> </tr> </thead> <tbody> <tr> <td>String</td> <td><code>"hello"</code>, <code>'world'</code></td> </tr> <tr> <td>Number</td> <td><code>42</code>, <code>3.14</code>, <code>-10</code></td> </tr> <tr> <td>Boolean</td> <td><code>true</code>, <code>false</code></td> </tr> <tr> <td>Null</td> <td><code>null</code></td> </tr> </tbody> </table> <h3 id=strings>Strings<a class=headerlink href=#strings title="Permanent link">&para;</a></h3> <p>PromptScript supports two string syntaxes:</p> <h4 id=single-line-strings>Single-line Strings<a class=headerlink href=#single-line-strings title="Permanent link">&para;</a></h4> <p>Use double or single quotes for short, single-line values:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-28-1><a id=__codelineno-28-1 name=__codelineno-28-1 href=#__codelineno-28-1></a>@shortcuts {
-</span><span id=__span-28-2><a id=__codelineno-28-2 name=__codelineno-28-2 href=#__codelineno-28-2></a>  &quot;/review&quot;: &quot;Review code for quality and best practices&quot;
-</span><span id=__span-28-3><a id=__codelineno-28-3 name=__codelineno-28-3 href=#__codelineno-28-3></a>  &quot;/help&quot;: &#39;Show available commands&#39;
-</span><span id=__span-28-4><a id=__codelineno-28-4 name=__codelineno-28-4 href=#__codelineno-28-4></a>}
-</span></code></pre></div> <h4 id=multi-line-strings>Multi-line Strings<a class=headerlink href=#multi-line-strings title="Permanent link">&para;</a></h4> <p>Use triple quotes (<code>"""</code>) for content that spans multiple lines:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-29-1><a id=__codelineno-29-1 name=__codelineno-29-1 href=#__codelineno-29-1></a>@shortcuts {
-</span><span id=__span-29-2><a id=__codelineno-29-2 name=__codelineno-29-2 href=#__codelineno-29-2></a>  &quot;/test&quot;: &quot;&quot;&quot;
-</span><span id=__span-29-3><a id=__codelineno-29-3 name=__codelineno-29-3 href=#__codelineno-29-3></a>    Write unit tests using:
-</span><span id=__span-29-4><a id=__codelineno-29-4 name=__codelineno-29-4 href=#__codelineno-29-4></a>    - Vitest as the test runner
-</span><span id=__span-29-5><a id=__codelineno-29-5 name=__codelineno-29-5 href=#__codelineno-29-5></a>    - AAA pattern (Arrange, Act, Assert)
-</span><span id=__span-29-6><a id=__codelineno-29-6 name=__codelineno-29-6 href=#__codelineno-29-6></a>    - Target &gt;90% coverage
-</span><span id=__span-29-7><a id=__codelineno-29-7 name=__codelineno-29-7 href=#__codelineno-29-7></a>  &quot;&quot;&quot;
-</span><span id=__span-29-8><a id=__codelineno-29-8 name=__codelineno-29-8 href=#__codelineno-29-8></a>}
-</span></code></pre></div> <p>Multi-line strings:</p> <ul> <li>Preserve line breaks and formatting</li> <li>Are ideal for lists, instructions, and documentation</li> <li>Can be used anywhere a string is expected</li> </ul> <div class="admonition tip"> <p class=admonition-title>When to Use Which</p> <table> <thead> <tr> <th>Content Type</th> <th>Recommended Syntax</th> </tr> </thead> <tbody> <tr> <td>Short description (1 line)</td> <td><code>"..."</code> or <code>'...'</code></td> </tr> <tr> <td>Multiple lines, lists, steps</td> <td><code>"""..."""</code></td> </tr> <tr> <td>Code examples, documentation</td> <td><code>"""..."""</code></td> </tr> </tbody> </table> <p>Both forms are semantically equivalent - choose based on readability.</p> </div> <h4 id=example-mixed-usage>Example: Mixed Usage<a class=headerlink href=#example-mixed-usage title="Permanent link">&para;</a></h4> <div class="language-text highlight"><pre><span></span><code><span id=__span-30-1><a id=__codelineno-30-1 name=__codelineno-30-1 href=#__codelineno-30-1></a>@shortcuts {
-</span><span id=__span-30-2><a id=__codelineno-30-2 name=__codelineno-30-2 href=#__codelineno-30-2></a>  # Single-line - simple description
-</span><span id=__span-30-3><a id=__codelineno-30-3 name=__codelineno-30-3 href=#__codelineno-30-3></a>  &quot;/review&quot;: &quot;Review code for quality and best practices&quot;
+</span><span id=__span-27-8><a id=__codelineno-27-8 name=__codelineno-27-8 href=#__codelineno-27-8></a>You are a senior code reviewer ensuring high standards.
+</span><span id=__span-27-9><a id=__codelineno-27-9 name=__codelineno-27-9 href=#__codelineno-27-9></a>
+</span><span id=__span-27-10><a id=__codelineno-27-10 name=__codelineno-27-10 href=#__codelineno-27-10></a>When invoked:
+</span><span id=__span-27-11><a id=__codelineno-27-11 name=__codelineno-27-11 href=#__codelineno-27-11></a><span class=k>1.</span> Run git diff to see recent changes
+</span><span id=__span-27-12><a id=__codelineno-27-12 name=__codelineno-27-12 href=#__codelineno-27-12></a><span class=k>2.</span> Focus on modified files
+</span><span id=__span-27-13><a id=__codelineno-27-13 name=__codelineno-27-13 href=#__codelineno-27-13></a><span class=k>3.</span> Begin review immediately
+</span></code></pre></div> </div> </div> </div> <div class="admonition note"> <p class=admonition-title>Hooks Support</p> </div> <p>Claude Code agent hooks (<code>PreToolUse</code>, <code>PostToolUse</code>, <code>Stop</code>) are planned but not yet implemented. See <a href=https://github.com/mrwogu/promptscript#roadmap>Roadmap</a>.</p> <h3 id=local><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/local title="GitHub User: local">@local</a><a class=headerlink href=#local title="Permanent link">&para;</a></h3> <p>Private instructions not committed to version control:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-28-1><a id=__codelineno-28-1 name=__codelineno-28-1 href=#__codelineno-28-1></a>@local {
+</span><span id=__span-28-2><a id=__codelineno-28-2 name=__codelineno-28-2 href=#__codelineno-28-2></a>  &quot;&quot;&quot;
+</span><span id=__span-28-3><a id=__codelineno-28-3 name=__codelineno-28-3 href=#__codelineno-28-3></a>  Private development notes and local configuration.
+</span><span id=__span-28-4><a id=__codelineno-28-4 name=__codelineno-28-4 href=#__codelineno-28-4></a>  This content is not committed to git.
+</span><span id=__span-28-5><a id=__codelineno-28-5 name=__codelineno-28-5 href=#__codelineno-28-5></a>
+</span><span id=__span-28-6><a id=__codelineno-28-6 name=__codelineno-28-6 href=#__codelineno-28-6></a>  Local environment setup:
+</span><span id=__span-28-7><a id=__codelineno-28-7 name=__codelineno-28-7 href=#__codelineno-28-7></a>  - API keys are in .env.local
+</span><span id=__span-28-8><a id=__codelineno-28-8 name=__codelineno-28-8 href=#__codelineno-28-8></a>  - Use staging backend at localhost:8080
+</span><span id=__span-28-9><a id=__codelineno-28-9 name=__codelineno-28-9 href=#__codelineno-28-9></a>  &quot;&quot;&quot;
+</span><span id=__span-28-10><a id=__codelineno-28-10 name=__codelineno-28-10 href=#__codelineno-28-10></a>}
+</span></code></pre></div> <p>Or with key-value properties:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-29-1><a id=__codelineno-29-1 name=__codelineno-29-1 href=#__codelineno-29-1></a>@local {
+</span><span id=__span-29-2><a id=__codelineno-29-2 name=__codelineno-29-2 href=#__codelineno-29-2></a>  apiEndpoint: &quot;http://localhost:8080&quot;
+</span><span id=__span-29-3><a id=__codelineno-29-3 name=__codelineno-29-3 href=#__codelineno-29-3></a>  debugMode: true
+</span><span id=__span-29-4><a id=__codelineno-29-4 name=__codelineno-29-4 href=#__codelineno-29-4></a>  customPaths: [&quot;/tmp/dev&quot;, &quot;/var/local&quot;]
+</span><span id=__span-29-5><a id=__codelineno-29-5 name=__codelineno-29-5 href=#__codelineno-29-5></a>
+</span><span id=__span-29-6><a id=__codelineno-29-6 name=__codelineno-29-6 href=#__codelineno-29-6></a>  &quot;&quot;&quot;
+</span><span id=__span-29-7><a id=__codelineno-29-7 name=__codelineno-29-7 href=#__codelineno-29-7></a>  Additional local notes...
+</span><span id=__span-29-8><a id=__codelineno-29-8 name=__codelineno-29-8 href=#__codelineno-29-8></a>  &quot;&quot;&quot;
+</span><span id=__span-29-9><a id=__codelineno-29-9 name=__codelineno-29-9 href=#__codelineno-29-9></a>}
+</span></code></pre></div> <div class="admonition note"> <p class=admonition-title><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/local title="GitHub User: local">@local</a> Output</p> </div> <p>The <code>@local</code> block generates <code>CLAUDE.local.md</code> when using the Claude formatter with <code>version: full</code>. This file should be added to <code>.gitignore</code>.</p> <h3 id=knowledge><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/knowledge title="GitHub User: knowledge">@knowledge</a><a class=headerlink href=#knowledge title="Permanent link">&para;</a></h3> <p>Reference documentation and knowledge:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-30-1><a id=__codelineno-30-1 name=__codelineno-30-1 href=#__codelineno-30-1></a>@knowledge {
+</span><span id=__span-30-2><a id=__codelineno-30-2 name=__codelineno-30-2 href=#__codelineno-30-2></a>  &quot;&quot;&quot;
+</span><span id=__span-30-3><a id=__codelineno-30-3 name=__codelineno-30-3 href=#__codelineno-30-3></a>  ## API Reference
 </span><span id=__span-30-4><a id=__codelineno-30-4 name=__codelineno-30-4 href=#__codelineno-30-4></a>
-</span><span id=__span-30-5><a id=__codelineno-30-5 name=__codelineno-30-5 href=#__codelineno-30-5></a>  # Multi-line - detailed instructions
-</span><span id=__span-30-6><a id=__codelineno-30-6 name=__codelineno-30-6 href=#__codelineno-30-6></a>  &quot;/deploy&quot;: &quot;&quot;&quot;
-</span><span id=__span-30-7><a id=__codelineno-30-7 name=__codelineno-30-7 href=#__codelineno-30-7></a>    Deploy to production:
-</span><span id=__span-30-8><a id=__codelineno-30-8 name=__codelineno-30-8 href=#__codelineno-30-8></a>    1. Run tests: pnpm test
-</span><span id=__span-30-9><a id=__codelineno-30-9 name=__codelineno-30-9 href=#__codelineno-30-9></a>    2. Build: pnpm build
-</span><span id=__span-30-10><a id=__codelineno-30-10 name=__codelineno-30-10 href=#__codelineno-30-10></a>    3. Deploy: pnpm deploy:prod
-</span><span id=__span-30-11><a id=__codelineno-30-11 name=__codelineno-30-11 href=#__codelineno-30-11></a>  &quot;&quot;&quot;
+</span><span id=__span-30-5><a id=__codelineno-30-5 name=__codelineno-30-5 href=#__codelineno-30-5></a>  ### Authentication
+</span><span id=__span-30-6><a id=__codelineno-30-6 name=__codelineno-30-6 href=#__codelineno-30-6></a>  - POST /api/auth/login - User login
+</span><span id=__span-30-7><a id=__codelineno-30-7 name=__codelineno-30-7 href=#__codelineno-30-7></a>  - POST /api/auth/logout - User logout
+</span><span id=__span-30-8><a id=__codelineno-30-8 name=__codelineno-30-8 href=#__codelineno-30-8></a>
+</span><span id=__span-30-9><a id=__codelineno-30-9 name=__codelineno-30-9 href=#__codelineno-30-9></a>  ### Users
+</span><span id=__span-30-10><a id=__codelineno-30-10 name=__codelineno-30-10 href=#__codelineno-30-10></a>  - GET /api/users - List users
+</span><span id=__span-30-11><a id=__codelineno-30-11 name=__codelineno-30-11 href=#__codelineno-30-11></a>  - GET /api/users/:id - Get user by ID
 </span><span id=__span-30-12><a id=__codelineno-30-12 name=__codelineno-30-12 href=#__codelineno-30-12></a>
-</span><span id=__span-30-13><a id=__codelineno-30-13 name=__codelineno-30-13 href=#__codelineno-30-13></a>  # Single-line - short command
-</span><span id=__span-30-14><a id=__codelineno-30-14 name=__codelineno-30-14 href=#__codelineno-30-14></a>  &quot;/format&quot;: &quot;Run prettier on all files&quot;
-</span><span id=__span-30-15><a id=__codelineno-30-15 name=__codelineno-30-15 href=#__codelineno-30-15></a>}
-</span></code></pre></div> <h3 id=identifiers>Identifiers<a class=headerlink href=#identifiers title="Permanent link">&para;</a></h3> <p>Bare words are treated as strings:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-31-1><a id=__codelineno-31-1 name=__codelineno-31-1 href=#__codelineno-31-1></a>@meta {
-</span><span id=__span-31-2><a id=__codelineno-31-2 name=__codelineno-31-2 href=#__codelineno-31-2></a>  team: Frontend  # Same as &quot;Frontend&quot;
-</span><span id=__span-31-3><a id=__codelineno-31-3 name=__codelineno-31-3 href=#__codelineno-31-3></a>}
-</span></code></pre></div> <h3 id=arrays>Arrays<a class=headerlink href=#arrays title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-32-1><a id=__codelineno-32-1 name=__codelineno-32-1 href=#__codelineno-32-1></a>tags: [frontend, react, typescript]
-</span><span id=__span-32-2><a id=__codelineno-32-2 name=__codelineno-32-2 href=#__codelineno-32-2></a>patterns: [&quot;hooks&quot;, &quot;composition&quot;, &quot;render props&quot;]
-</span><span id=__span-32-3><a id=__codelineno-32-3 name=__codelineno-32-3 href=#__codelineno-32-3></a>numbers: [1, 2, 3]
-</span></code></pre></div> <h3 id=objects>Objects<a class=headerlink href=#objects title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-33-1><a id=__codelineno-33-1 name=__codelineno-33-1 href=#__codelineno-33-1></a>code: {
-</span><span id=__span-33-2><a id=__codelineno-33-2 name=__codelineno-33-2 href=#__codelineno-33-2></a>  style: &quot;functional&quot;
-</span><span id=__span-33-3><a id=__codelineno-33-3 name=__codelineno-33-3 href=#__codelineno-33-3></a>  testing: {
-</span><span id=__span-33-4><a id=__codelineno-33-4 name=__codelineno-33-4 href=#__codelineno-33-4></a>    required: true
-</span><span id=__span-33-5><a id=__codelineno-33-5 name=__codelineno-33-5 href=#__codelineno-33-5></a>    coverage: 80
-</span><span id=__span-33-6><a id=__codelineno-33-6 name=__codelineno-33-6 href=#__codelineno-33-6></a>  }
-</span><span id=__span-33-7><a id=__codelineno-33-7 name=__codelineno-33-7 href=#__codelineno-33-7></a>}
-</span></code></pre></div> <h2 id=type-expressions>Type Expressions<a class=headerlink href=#type-expressions title="Permanent link">&para;</a></h2> <h3 id=range>Range<a class=headerlink href=#range title="Permanent link">&para;</a></h3> <p>Numeric range constraint:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-34-1><a id=__codelineno-34-1 name=__codelineno-34-1 href=#__codelineno-34-1></a>strictness: range(1..10)
-</span><span id=__span-34-2><a id=__codelineno-34-2 name=__codelineno-34-2 href=#__codelineno-34-2></a>verbosity: range(0..5) = 2
-</span></code></pre></div> <h3 id=enum>Enum<a class=headerlink href=#enum title="Permanent link">&para;</a></h3> <p>String enumeration:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-35-1><a id=__codelineno-35-1 name=__codelineno-35-1 href=#__codelineno-35-1></a>format: enum(&quot;json&quot;, &quot;text&quot;, &quot;markdown&quot;)
-</span><span id=__span-35-2><a id=__codelineno-35-2 name=__codelineno-35-2 href=#__codelineno-35-2></a>level: enum(&quot;debug&quot;, &quot;info&quot;, &quot;warn&quot;, &quot;error&quot;) = &quot;info&quot;
-</span></code></pre></div> <h2 id=comments>Comments<a class=headerlink href=#comments title="Permanent link">&para;</a></h2> <p>Single-line comments with <code>#</code>:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-36-1><a id=__codelineno-36-1 name=__codelineno-36-1 href=#__codelineno-36-1></a># This is a comment
-</span><span id=__span-36-2><a id=__codelineno-36-2 name=__codelineno-36-2 href=#__codelineno-36-2></a>@meta {
-</span><span id=__span-36-3><a id=__codelineno-36-3 name=__codelineno-36-3 href=#__codelineno-36-3></a>  id: &quot;project&quot;  # Inline comment
-</span><span id=__span-36-4><a id=__codelineno-36-4 name=__codelineno-36-4 href=#__codelineno-36-4></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-36-5><a id=__codelineno-36-5 name=__codelineno-36-5 href=#__codelineno-36-5></a>}
-</span></code></pre></div> <h2 id=path-references>Path References<a class=headerlink href=#path-references title="Permanent link">&para;</a></h2> <p>Path syntax for imports and inheritance:</p> <table> <thead> <tr> <th>Format</th> <th>Example</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>Namespaced</td> <td><code>@company/team</code></td> <td>Registry namespace</td> </tr> <tr> <td>Versioned</td> <td><code>@company/team@1.0.0</code></td> <td>With version</td> </tr> <tr> <td>Relative</td> <td><code>./parent</code></td> <td>Relative path</td> </tr> <tr> <td>Nested</td> <td><code>@company/guards/security</code></td> <td>Nested path</td> </tr> </tbody> </table> <h2 id=reserved-words>Reserved Words<a class=headerlink href=#reserved-words title="Permanent link">&para;</a></h2> <p>The following are reserved and cannot be used as identifiers:</p> <ul> <li><code>true</code>, <code>false</code>, <code>null</code></li> <li><code>range</code>, <code>enum</code></li> <li>All block keywords (<code>@meta</code>, <code>@identity</code>, etc.)</li> </ul> <h2 id=file-extensions>File Extensions<a class=headerlink href=#file-extensions title="Permanent link">&para;</a></h2> <table> <thead> <tr> <th>Extension</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>.prs</code></td> <td>PromptScript source file</td> </tr> <tr> <td><code>.promptscript</code></td> <td>Alternative extension (supported)</td> </tr> </tbody> </table> <h2 id=known-issues-gotchas>Known Issues &amp; Gotchas<a class=headerlink href=#known-issues-gotchas title="Permanent link">&para;</a></h2> <h3 id=multiline-strings-in-objects>Multiline Strings in Objects<a class=headerlink href=#multiline-strings-in-objects title="Permanent link">&para;</a></h3> <p>Multiline strings (`"""..."""``) cannot be used as "loose" content inside an object with curly braces. They must always be assigned to a key.</p> <p><strong>❌ Invalid:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-37-1><a id=__codelineno-37-1 name=__codelineno-37-1 href=#__codelineno-37-1></a>@standards {
-</span><span id=__span-37-2><a id=__codelineno-37-2 name=__codelineno-37-2 href=#__codelineno-37-2></a>  diagrams: {
-</span><span id=__span-37-3><a id=__codelineno-37-3 name=__codelineno-37-3 href=#__codelineno-37-3></a>    format: &quot;Mermaid&quot;
-</span><span id=__span-37-4><a id=__codelineno-37-4 name=__codelineno-37-4 href=#__codelineno-37-4></a>    types: [flowchart, sequence]
-</span><span id=__span-37-5><a id=__codelineno-37-5 name=__codelineno-37-5 href=#__codelineno-37-5></a>    &quot;&quot;&quot;
-</span><span id=__span-37-6><a id=__codelineno-37-6 name=__codelineno-37-6 href=#__codelineno-37-6></a>    Example:
-</span><span id=__span-37-7><a id=__codelineno-37-7 name=__codelineno-37-7 href=#__codelineno-37-7></a>    ```mermaid
-</span><span id=__span-37-8><a id=__codelineno-37-8 name=__codelineno-37-8 href=#__codelineno-37-8></a>    flowchart LR
-</span><span id=__span-37-9><a id=__codelineno-37-9 name=__codelineno-37-9 href=#__codelineno-37-9></a>      A[Input] --&gt; B[Process] --&gt; C[Output]
-</span><span id=__span-37-10><a id=__codelineno-37-10 name=__codelineno-37-10 href=#__codelineno-37-10></a>    ```
-</span><span id=__span-37-11><a id=__codelineno-37-11 name=__codelineno-37-11 href=#__codelineno-37-11></a>    &quot;&quot;&quot;
-</span><span id=__span-37-12><a id=__codelineno-37-12 name=__codelineno-37-12 href=#__codelineno-37-12></a>  }
-</span><span id=__span-37-13><a id=__codelineno-37-13 name=__codelineno-37-13 href=#__codelineno-37-13></a>}
-</span></code></pre></div> <p>This will cause a parse error:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-38-1><a id=__codelineno-38-1 name=__codelineno-38-1 href=#__codelineno-38-1></a>Expecting token of type --&gt; RBrace &lt;-- but found --&gt; &#39;&quot;&quot;&quot;...
-</span></code></pre></div> <p><strong>✅ Valid - assign to a key:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-39-1><a id=__codelineno-39-1 name=__codelineno-39-1 href=#__codelineno-39-1></a>@standards {
-</span><span id=__span-39-2><a id=__codelineno-39-2 name=__codelineno-39-2 href=#__codelineno-39-2></a>  diagrams: {
-</span><span id=__span-39-3><a id=__codelineno-39-3 name=__codelineno-39-3 href=#__codelineno-39-3></a>    format: &quot;Mermaid&quot;
-</span><span id=__span-39-4><a id=__codelineno-39-4 name=__codelineno-39-4 href=#__codelineno-39-4></a>    types: [flowchart, sequence]
-</span><span id=__span-39-5><a id=__codelineno-39-5 name=__codelineno-39-5 href=#__codelineno-39-5></a>    example: &quot;&quot;&quot;
-</span><span id=__span-39-6><a id=__codelineno-39-6 name=__codelineno-39-6 href=#__codelineno-39-6></a>      ```mermaid
-</span><span id=__span-39-7><a id=__codelineno-39-7 name=__codelineno-39-7 href=#__codelineno-39-7></a>      flowchart LR
-</span><span id=__span-39-8><a id=__codelineno-39-8 name=__codelineno-39-8 href=#__codelineno-39-8></a>        A[Input] --&gt; B[Process] --&gt; C[Output]
-</span><span id=__span-39-9><a id=__codelineno-39-9 name=__codelineno-39-9 href=#__codelineno-39-9></a>      ```
-</span><span id=__span-39-10><a id=__codelineno-39-10 name=__codelineno-39-10 href=#__codelineno-39-10></a>    &quot;&quot;&quot;
-</span><span id=__span-39-11><a id=__codelineno-39-11 name=__codelineno-39-11 href=#__codelineno-39-11></a>  }
-</span><span id=__span-39-12><a id=__codelineno-39-12 name=__codelineno-39-12 href=#__codelineno-39-12></a>}
-</span></code></pre></div> <p><strong>✅ Valid - use at block level:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-40-1><a id=__codelineno-40-1 name=__codelineno-40-1 href=#__codelineno-40-1></a>@knowledge {
-</span><span id=__span-40-2><a id=__codelineno-40-2 name=__codelineno-40-2 href=#__codelineno-40-2></a>  &quot;&quot;&quot;
-</span><span id=__span-40-3><a id=__codelineno-40-3 name=__codelineno-40-3 href=#__codelineno-40-3></a>  Multiline content works directly in blocks
-</span><span id=__span-40-4><a id=__codelineno-40-4 name=__codelineno-40-4 href=#__codelineno-40-4></a>  without needing a key assignment.
-</span><span id=__span-40-5><a id=__codelineno-40-5 name=__codelineno-40-5 href=#__codelineno-40-5></a>  &quot;&quot;&quot;
-</span><span id=__span-40-6><a id=__codelineno-40-6 name=__codelineno-40-6 href=#__codelineno-40-6></a>}
-</span></code></pre></div> <div class="admonition tip"> <p class=admonition-title>Rule of Thumb</p> </div> <p>Inside <code>{ }</code> braces, everything needs a key. Multiline strings without keys only work directly inside blocks like <code>@identity { ... }</code> or <code>@knowledge { ... }</code>.</p> <h2 id=environment-variable-interpolation>Environment Variable Interpolation<a class=headerlink href=#environment-variable-interpolation title="Permanent link">&para;</a></h2> <p>String values can reference environment variables for dynamic configuration:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-41-1><a id=__codelineno-41-1 name=__codelineno-41-1 href=#__codelineno-41-1></a>@context {
-</span><span id=__span-41-2><a id=__codelineno-41-2 name=__codelineno-41-2 href=#__codelineno-41-2></a>  api-endpoint: &quot;${API_ENDPOINT}&quot;
-</span><span id=__span-41-3><a id=__codelineno-41-3 name=__codelineno-41-3 href=#__codelineno-41-3></a>  environment: &quot;${NODE_ENV:-development}&quot;
-</span><span id=__span-41-4><a id=__codelineno-41-4 name=__codelineno-41-4 href=#__codelineno-41-4></a>}
-</span></code></pre></div> <h3 id=syntax>Syntax<a class=headerlink href=#syntax title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Pattern</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>${VAR}</code></td> <td>Substitute with variable value</td> </tr> <tr> <td><code>${VAR:-default}</code></td> <td>Substitute with variable or default</td> </tr> </tbody> </table> <h3 id=examples>Examples<a class=headerlink href=#examples title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-42-1><a id=__codelineno-42-1 name=__codelineno-42-1 href=#__codelineno-42-1></a>@meta {
-</span><span id=__span-42-2><a id=__codelineno-42-2 name=__codelineno-42-2 href=#__codelineno-42-2></a>  id: &quot;project-${PROJECT_NAME:-default}&quot;
-</span><span id=__span-42-3><a id=__codelineno-42-3 name=__codelineno-42-3 href=#__codelineno-42-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-42-4><a id=__codelineno-42-4 name=__codelineno-42-4 href=#__codelineno-42-4></a>}
-</span><span id=__span-42-5><a id=__codelineno-42-5 name=__codelineno-42-5 href=#__codelineno-42-5></a>
-</span><span id=__span-42-6><a id=__codelineno-42-6 name=__codelineno-42-6 href=#__codelineno-42-6></a>@context {
-</span><span id=__span-42-7><a id=__codelineno-42-7 name=__codelineno-42-7 href=#__codelineno-42-7></a>  &quot;&quot;&quot;
-</span><span id=__span-42-8><a id=__codelineno-42-8 name=__codelineno-42-8 href=#__codelineno-42-8></a>  Running in ${NODE_ENV:-development} mode.
-</span><span id=__span-42-9><a id=__codelineno-42-9 name=__codelineno-42-9 href=#__codelineno-42-9></a>  API Key: ${API_KEY}
-</span><span id=__span-42-10><a id=__codelineno-42-10 name=__codelineno-42-10 href=#__codelineno-42-10></a>  &quot;&quot;&quot;
-</span><span id=__span-42-11><a id=__codelineno-42-11 name=__codelineno-42-11 href=#__codelineno-42-11></a>}
+</span><span id=__span-30-13><a id=__codelineno-30-13 name=__codelineno-30-13 href=#__codelineno-30-13></a>  ## Architecture Notes
+</span><span id=__span-30-14><a id=__codelineno-30-14 name=__codelineno-30-14 href=#__codelineno-30-14></a>
+</span><span id=__span-30-15><a id=__codelineno-30-15 name=__codelineno-30-15 href=#__codelineno-30-15></a>  The service follows a clean architecture pattern with:
+</span><span id=__span-30-16><a id=__codelineno-30-16 name=__codelineno-30-16 href=#__codelineno-30-16></a>  - Controllers for HTTP handling
+</span><span id=__span-30-17><a id=__codelineno-30-17 name=__codelineno-30-17 href=#__codelineno-30-17></a>  - Services for business logic
+</span><span id=__span-30-18><a id=__codelineno-30-18 name=__codelineno-30-18 href=#__codelineno-30-18></a>  - Repositories for data access
+</span><span id=__span-30-19><a id=__codelineno-30-19 name=__codelineno-30-19 href=#__codelineno-30-19></a>  &quot;&quot;&quot;
+</span><span id=__span-30-20><a id=__codelineno-30-20 name=__codelineno-30-20 href=#__codelineno-30-20></a>}
+</span></code></pre></div> <h2 id=extend-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/extend title="GitHub User: extend">@extend</a> Block<a class=headerlink href=#extend-block title="Permanent link">&para;</a></h2> <p>Modify inherited or existing blocks:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-31-1><a id=__codelineno-31-1 name=__codelineno-31-1 href=#__codelineno-31-1></a># Extend a top-level block
+</span><span id=__span-31-2><a id=__codelineno-31-2 name=__codelineno-31-2 href=#__codelineno-31-2></a>@extend identity {
+</span><span id=__span-31-3><a id=__codelineno-31-3 name=__codelineno-31-3 href=#__codelineno-31-3></a>  &quot;&quot;&quot;
+</span><span id=__span-31-4><a id=__codelineno-31-4 name=__codelineno-31-4 href=#__codelineno-31-4></a>  Additional identity information.
+</span><span id=__span-31-5><a id=__codelineno-31-5 name=__codelineno-31-5 href=#__codelineno-31-5></a>  &quot;&quot;&quot;
+</span><span id=__span-31-6><a id=__codelineno-31-6 name=__codelineno-31-6 href=#__codelineno-31-6></a>}
+</span><span id=__span-31-7><a id=__codelineno-31-7 name=__codelineno-31-7 href=#__codelineno-31-7></a>
+</span><span id=__span-31-8><a id=__codelineno-31-8 name=__codelineno-31-8 href=#__codelineno-31-8></a># Extend a nested path
+</span><span id=__span-31-9><a id=__codelineno-31-9 name=__codelineno-31-9 href=#__codelineno-31-9></a>@extend standards.code {
+</span><span id=__span-31-10><a id=__codelineno-31-10 name=__codelineno-31-10 href=#__codelineno-31-10></a>  frameworks: [react, vue]
+</span><span id=__span-31-11><a id=__codelineno-31-11 name=__codelineno-31-11 href=#__codelineno-31-11></a>}
+</span><span id=__span-31-12><a id=__codelineno-31-12 name=__codelineno-31-12 href=#__codelineno-31-12></a>
+</span><span id=__span-31-13><a id=__codelineno-31-13 name=__codelineno-31-13 href=#__codelineno-31-13></a># Extend multiple levels deep
+</span><span id=__span-31-14><a id=__codelineno-31-14 name=__codelineno-31-14 href=#__codelineno-31-14></a>@extend standards.code.testing {
+</span><span id=__span-31-15><a id=__codelineno-31-15 name=__codelineno-31-15 href=#__codelineno-31-15></a>  e2e: true
+</span><span id=__span-31-16><a id=__codelineno-31-16 name=__codelineno-31-16 href=#__codelineno-31-16></a>  coverage: 90
+</span><span id=__span-31-17><a id=__codelineno-31-17 name=__codelineno-31-17 href=#__codelineno-31-17></a>}
+</span></code></pre></div> <h2 id=values>Values<a class=headerlink href=#values title="Permanent link">&para;</a></h2> <h3 id=primitive-types>Primitive Types<a class=headerlink href=#primitive-types title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Type</th> <th>Examples</th> </tr> </thead> <tbody> <tr> <td>String</td> <td><code>"hello"</code>, <code>'world'</code></td> </tr> <tr> <td>Number</td> <td><code>42</code>, <code>3.14</code>, <code>-10</code></td> </tr> <tr> <td>Boolean</td> <td><code>true</code>, <code>false</code></td> </tr> <tr> <td>Null</td> <td><code>null</code></td> </tr> </tbody> </table> <h3 id=strings>Strings<a class=headerlink href=#strings title="Permanent link">&para;</a></h3> <p>PromptScript supports two string syntaxes:</p> <h4 id=single-line-strings>Single-line Strings<a class=headerlink href=#single-line-strings title="Permanent link">&para;</a></h4> <p>Use double or single quotes for short, single-line values:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-32-1><a id=__codelineno-32-1 name=__codelineno-32-1 href=#__codelineno-32-1></a>@shortcuts {
+</span><span id=__span-32-2><a id=__codelineno-32-2 name=__codelineno-32-2 href=#__codelineno-32-2></a>  &quot;/review&quot;: &quot;Review code for quality and best practices&quot;
+</span><span id=__span-32-3><a id=__codelineno-32-3 name=__codelineno-32-3 href=#__codelineno-32-3></a>  &quot;/help&quot;: &#39;Show available commands&#39;
+</span><span id=__span-32-4><a id=__codelineno-32-4 name=__codelineno-32-4 href=#__codelineno-32-4></a>}
+</span></code></pre></div> <h4 id=multi-line-strings>Multi-line Strings<a class=headerlink href=#multi-line-strings title="Permanent link">&para;</a></h4> <p>Use triple quotes (<code>"""</code>) for content that spans multiple lines:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-33-1><a id=__codelineno-33-1 name=__codelineno-33-1 href=#__codelineno-33-1></a>@shortcuts {
+</span><span id=__span-33-2><a id=__codelineno-33-2 name=__codelineno-33-2 href=#__codelineno-33-2></a>  &quot;/test&quot;: &quot;&quot;&quot;
+</span><span id=__span-33-3><a id=__codelineno-33-3 name=__codelineno-33-3 href=#__codelineno-33-3></a>    Write unit tests using:
+</span><span id=__span-33-4><a id=__codelineno-33-4 name=__codelineno-33-4 href=#__codelineno-33-4></a>    - Vitest as the test runner
+</span><span id=__span-33-5><a id=__codelineno-33-5 name=__codelineno-33-5 href=#__codelineno-33-5></a>    - AAA pattern (Arrange, Act, Assert)
+</span><span id=__span-33-6><a id=__codelineno-33-6 name=__codelineno-33-6 href=#__codelineno-33-6></a>    - Target &gt;90% coverage
+</span><span id=__span-33-7><a id=__codelineno-33-7 name=__codelineno-33-7 href=#__codelineno-33-7></a>  &quot;&quot;&quot;
+</span><span id=__span-33-8><a id=__codelineno-33-8 name=__codelineno-33-8 href=#__codelineno-33-8></a>}
+</span></code></pre></div> <p>Multi-line strings:</p> <ul> <li>Preserve line breaks and formatting</li> <li>Are ideal for lists, instructions, and documentation</li> <li>Can be used anywhere a string is expected</li> </ul> <div class="admonition tip"> <p class=admonition-title>When to Use Which</p> <table> <thead> <tr> <th>Content Type</th> <th>Recommended Syntax</th> </tr> </thead> <tbody> <tr> <td>Short description (1 line)</td> <td><code>"..."</code> or <code>'...'</code></td> </tr> <tr> <td>Multiple lines, lists, steps</td> <td><code>"""..."""</code></td> </tr> <tr> <td>Code examples, documentation</td> <td><code>"""..."""</code></td> </tr> </tbody> </table> <p>Both forms are semantically equivalent - choose based on readability.</p> </div> <h4 id=example-mixed-usage>Example: Mixed Usage<a class=headerlink href=#example-mixed-usage title="Permanent link">&para;</a></h4> <div class="language-text highlight"><pre><span></span><code><span id=__span-34-1><a id=__codelineno-34-1 name=__codelineno-34-1 href=#__codelineno-34-1></a>@shortcuts {
+</span><span id=__span-34-2><a id=__codelineno-34-2 name=__codelineno-34-2 href=#__codelineno-34-2></a>  # Single-line - simple description
+</span><span id=__span-34-3><a id=__codelineno-34-3 name=__codelineno-34-3 href=#__codelineno-34-3></a>  &quot;/review&quot;: &quot;Review code for quality and best practices&quot;
+</span><span id=__span-34-4><a id=__codelineno-34-4 name=__codelineno-34-4 href=#__codelineno-34-4></a>
+</span><span id=__span-34-5><a id=__codelineno-34-5 name=__codelineno-34-5 href=#__codelineno-34-5></a>  # Multi-line - detailed instructions
+</span><span id=__span-34-6><a id=__codelineno-34-6 name=__codelineno-34-6 href=#__codelineno-34-6></a>  &quot;/deploy&quot;: &quot;&quot;&quot;
+</span><span id=__span-34-7><a id=__codelineno-34-7 name=__codelineno-34-7 href=#__codelineno-34-7></a>    Deploy to production:
+</span><span id=__span-34-8><a id=__codelineno-34-8 name=__codelineno-34-8 href=#__codelineno-34-8></a>    1. Run tests: pnpm test
+</span><span id=__span-34-9><a id=__codelineno-34-9 name=__codelineno-34-9 href=#__codelineno-34-9></a>    2. Build: pnpm build
+</span><span id=__span-34-10><a id=__codelineno-34-10 name=__codelineno-34-10 href=#__codelineno-34-10></a>    3. Deploy: pnpm deploy:prod
+</span><span id=__span-34-11><a id=__codelineno-34-11 name=__codelineno-34-11 href=#__codelineno-34-11></a>  &quot;&quot;&quot;
+</span><span id=__span-34-12><a id=__codelineno-34-12 name=__codelineno-34-12 href=#__codelineno-34-12></a>
+</span><span id=__span-34-13><a id=__codelineno-34-13 name=__codelineno-34-13 href=#__codelineno-34-13></a>  # Single-line - short command
+</span><span id=__span-34-14><a id=__codelineno-34-14 name=__codelineno-34-14 href=#__codelineno-34-14></a>  &quot;/format&quot;: &quot;Run prettier on all files&quot;
+</span><span id=__span-34-15><a id=__codelineno-34-15 name=__codelineno-34-15 href=#__codelineno-34-15></a>}
+</span></code></pre></div> <h3 id=identifiers>Identifiers<a class=headerlink href=#identifiers title="Permanent link">&para;</a></h3> <p>Bare words are treated as strings:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-35-1><a id=__codelineno-35-1 name=__codelineno-35-1 href=#__codelineno-35-1></a>@meta {
+</span><span id=__span-35-2><a id=__codelineno-35-2 name=__codelineno-35-2 href=#__codelineno-35-2></a>  team: Frontend  # Same as &quot;Frontend&quot;
+</span><span id=__span-35-3><a id=__codelineno-35-3 name=__codelineno-35-3 href=#__codelineno-35-3></a>}
+</span></code></pre></div> <h3 id=arrays>Arrays<a class=headerlink href=#arrays title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-36-1><a id=__codelineno-36-1 name=__codelineno-36-1 href=#__codelineno-36-1></a>tags: [frontend, react, typescript]
+</span><span id=__span-36-2><a id=__codelineno-36-2 name=__codelineno-36-2 href=#__codelineno-36-2></a>patterns: [&quot;hooks&quot;, &quot;composition&quot;, &quot;render props&quot;]
+</span><span id=__span-36-3><a id=__codelineno-36-3 name=__codelineno-36-3 href=#__codelineno-36-3></a>numbers: [1, 2, 3]
+</span></code></pre></div> <h3 id=objects>Objects<a class=headerlink href=#objects title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-37-1><a id=__codelineno-37-1 name=__codelineno-37-1 href=#__codelineno-37-1></a>code: {
+</span><span id=__span-37-2><a id=__codelineno-37-2 name=__codelineno-37-2 href=#__codelineno-37-2></a>  style: &quot;functional&quot;
+</span><span id=__span-37-3><a id=__codelineno-37-3 name=__codelineno-37-3 href=#__codelineno-37-3></a>  testing: {
+</span><span id=__span-37-4><a id=__codelineno-37-4 name=__codelineno-37-4 href=#__codelineno-37-4></a>    required: true
+</span><span id=__span-37-5><a id=__codelineno-37-5 name=__codelineno-37-5 href=#__codelineno-37-5></a>    coverage: 80
+</span><span id=__span-37-6><a id=__codelineno-37-6 name=__codelineno-37-6 href=#__codelineno-37-6></a>  }
+</span><span id=__span-37-7><a id=__codelineno-37-7 name=__codelineno-37-7 href=#__codelineno-37-7></a>}
+</span></code></pre></div> <h2 id=type-expressions>Type Expressions<a class=headerlink href=#type-expressions title="Permanent link">&para;</a></h2> <h3 id=range>Range<a class=headerlink href=#range title="Permanent link">&para;</a></h3> <p>Numeric range constraint:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-38-1><a id=__codelineno-38-1 name=__codelineno-38-1 href=#__codelineno-38-1></a>strictness: range(1..10)
+</span><span id=__span-38-2><a id=__codelineno-38-2 name=__codelineno-38-2 href=#__codelineno-38-2></a>verbosity: range(0..5) = 2
+</span></code></pre></div> <h3 id=enum>Enum<a class=headerlink href=#enum title="Permanent link">&para;</a></h3> <p>String enumeration:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-39-1><a id=__codelineno-39-1 name=__codelineno-39-1 href=#__codelineno-39-1></a>format: enum(&quot;json&quot;, &quot;text&quot;, &quot;markdown&quot;)
+</span><span id=__span-39-2><a id=__codelineno-39-2 name=__codelineno-39-2 href=#__codelineno-39-2></a>level: enum(&quot;debug&quot;, &quot;info&quot;, &quot;warn&quot;, &quot;error&quot;) = &quot;info&quot;
+</span></code></pre></div> <h2 id=comments>Comments<a class=headerlink href=#comments title="Permanent link">&para;</a></h2> <p>Single-line comments with <code>#</code>:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-40-1><a id=__codelineno-40-1 name=__codelineno-40-1 href=#__codelineno-40-1></a># This is a comment
+</span><span id=__span-40-2><a id=__codelineno-40-2 name=__codelineno-40-2 href=#__codelineno-40-2></a>@meta {
+</span><span id=__span-40-3><a id=__codelineno-40-3 name=__codelineno-40-3 href=#__codelineno-40-3></a>  id: &quot;project&quot;  # Inline comment
+</span><span id=__span-40-4><a id=__codelineno-40-4 name=__codelineno-40-4 href=#__codelineno-40-4></a>  syntax: &quot;1.0.0&quot;
+</span><span id=__span-40-5><a id=__codelineno-40-5 name=__codelineno-40-5 href=#__codelineno-40-5></a>}
+</span></code></pre></div> <h2 id=path-references>Path References<a class=headerlink href=#path-references title="Permanent link">&para;</a></h2> <p>Path syntax for imports and inheritance:</p> <table> <thead> <tr> <th>Format</th> <th>Example</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>Namespaced</td> <td><code>@company/team</code></td> <td>Registry namespace</td> </tr> <tr> <td>Versioned</td> <td><code>@company/team@1.0.0</code></td> <td>With version</td> </tr> <tr> <td>Relative</td> <td><code>./parent</code></td> <td>Relative path</td> </tr> <tr> <td>Nested</td> <td><code>@company/guards/security</code></td> <td>Nested path</td> </tr> </tbody> </table> <h2 id=reserved-words>Reserved Words<a class=headerlink href=#reserved-words title="Permanent link">&para;</a></h2> <p>The following are reserved and cannot be used as identifiers:</p> <ul> <li><code>true</code>, <code>false</code>, <code>null</code></li> <li><code>range</code>, <code>enum</code></li> <li>All block keywords (<code>@meta</code>, <code>@identity</code>, etc.)</li> </ul> <h2 id=file-extensions>File Extensions<a class=headerlink href=#file-extensions title="Permanent link">&para;</a></h2> <table> <thead> <tr> <th>Extension</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>.prs</code></td> <td>PromptScript source file</td> </tr> <tr> <td><code>.promptscript</code></td> <td>Alternative extension (supported)</td> </tr> </tbody> </table> <h2 id=known-issues-gotchas>Known Issues &amp; Gotchas<a class=headerlink href=#known-issues-gotchas title="Permanent link">&para;</a></h2> <h3 id=multiline-strings-in-objects>Multiline Strings in Objects<a class=headerlink href=#multiline-strings-in-objects title="Permanent link">&para;</a></h3> <p>Multiline strings (`"""..."""``) cannot be used as "loose" content inside an object with curly braces. They must always be assigned to a key.</p> <p><strong>❌ Invalid:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-41-1><a id=__codelineno-41-1 name=__codelineno-41-1 href=#__codelineno-41-1></a>@standards {
+</span><span id=__span-41-2><a id=__codelineno-41-2 name=__codelineno-41-2 href=#__codelineno-41-2></a>  diagrams: {
+</span><span id=__span-41-3><a id=__codelineno-41-3 name=__codelineno-41-3 href=#__codelineno-41-3></a>    format: &quot;Mermaid&quot;
+</span><span id=__span-41-4><a id=__codelineno-41-4 name=__codelineno-41-4 href=#__codelineno-41-4></a>    types: [flowchart, sequence]
+</span><span id=__span-41-5><a id=__codelineno-41-5 name=__codelineno-41-5 href=#__codelineno-41-5></a>    &quot;&quot;&quot;
+</span><span id=__span-41-6><a id=__codelineno-41-6 name=__codelineno-41-6 href=#__codelineno-41-6></a>    Example:
+</span><span id=__span-41-7><a id=__codelineno-41-7 name=__codelineno-41-7 href=#__codelineno-41-7></a>    ```mermaid
+</span><span id=__span-41-8><a id=__codelineno-41-8 name=__codelineno-41-8 href=#__codelineno-41-8></a>    flowchart LR
+</span><span id=__span-41-9><a id=__codelineno-41-9 name=__codelineno-41-9 href=#__codelineno-41-9></a>      A[Input] --&gt; B[Process] --&gt; C[Output]
+</span><span id=__span-41-10><a id=__codelineno-41-10 name=__codelineno-41-10 href=#__codelineno-41-10></a>    ```
+</span><span id=__span-41-11><a id=__codelineno-41-11 name=__codelineno-41-11 href=#__codelineno-41-11></a>    &quot;&quot;&quot;
+</span><span id=__span-41-12><a id=__codelineno-41-12 name=__codelineno-41-12 href=#__codelineno-41-12></a>  }
+</span><span id=__span-41-13><a id=__codelineno-41-13 name=__codelineno-41-13 href=#__codelineno-41-13></a>}
+</span></code></pre></div> <p>This will cause a parse error:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-42-1><a id=__codelineno-42-1 name=__codelineno-42-1 href=#__codelineno-42-1></a>Expecting token of type --&gt; RBrace &lt;-- but found --&gt; &#39;&quot;&quot;&quot;...
+</span></code></pre></div> <p><strong>✅ Valid - assign to a key:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-43-1><a id=__codelineno-43-1 name=__codelineno-43-1 href=#__codelineno-43-1></a>@standards {
+</span><span id=__span-43-2><a id=__codelineno-43-2 name=__codelineno-43-2 href=#__codelineno-43-2></a>  diagrams: {
+</span><span id=__span-43-3><a id=__codelineno-43-3 name=__codelineno-43-3 href=#__codelineno-43-3></a>    format: &quot;Mermaid&quot;
+</span><span id=__span-43-4><a id=__codelineno-43-4 name=__codelineno-43-4 href=#__codelineno-43-4></a>    types: [flowchart, sequence]
+</span><span id=__span-43-5><a id=__codelineno-43-5 name=__codelineno-43-5 href=#__codelineno-43-5></a>    example: &quot;&quot;&quot;
+</span><span id=__span-43-6><a id=__codelineno-43-6 name=__codelineno-43-6 href=#__codelineno-43-6></a>      ```mermaid
+</span><span id=__span-43-7><a id=__codelineno-43-7 name=__codelineno-43-7 href=#__codelineno-43-7></a>      flowchart LR
+</span><span id=__span-43-8><a id=__codelineno-43-8 name=__codelineno-43-8 href=#__codelineno-43-8></a>        A[Input] --&gt; B[Process] --&gt; C[Output]
+</span><span id=__span-43-9><a id=__codelineno-43-9 name=__codelineno-43-9 href=#__codelineno-43-9></a>      ```
+</span><span id=__span-43-10><a id=__codelineno-43-10 name=__codelineno-43-10 href=#__codelineno-43-10></a>    &quot;&quot;&quot;
+</span><span id=__span-43-11><a id=__codelineno-43-11 name=__codelineno-43-11 href=#__codelineno-43-11></a>  }
+</span><span id=__span-43-12><a id=__codelineno-43-12 name=__codelineno-43-12 href=#__codelineno-43-12></a>}
+</span></code></pre></div> <p><strong>✅ Valid - use at block level:</strong></p> <div class="language-text highlight"><pre><span></span><code><span id=__span-44-1><a id=__codelineno-44-1 name=__codelineno-44-1 href=#__codelineno-44-1></a>@knowledge {
+</span><span id=__span-44-2><a id=__codelineno-44-2 name=__codelineno-44-2 href=#__codelineno-44-2></a>  &quot;&quot;&quot;
+</span><span id=__span-44-3><a id=__codelineno-44-3 name=__codelineno-44-3 href=#__codelineno-44-3></a>  Multiline content works directly in blocks
+</span><span id=__span-44-4><a id=__codelineno-44-4 name=__codelineno-44-4 href=#__codelineno-44-4></a>  without needing a key assignment.
+</span><span id=__span-44-5><a id=__codelineno-44-5 name=__codelineno-44-5 href=#__codelineno-44-5></a>  &quot;&quot;&quot;
+</span><span id=__span-44-6><a id=__codelineno-44-6 name=__codelineno-44-6 href=#__codelineno-44-6></a>}
+</span></code></pre></div> <div class="admonition tip"> <p class=admonition-title>Rule of Thumb</p> </div> <p>Inside <code>{ }</code> braces, everything needs a key. Multiline strings without keys only work directly inside blocks like <code>@identity { ... }</code> or <code>@knowledge { ... }</code>.</p> <h2 id=environment-variable-interpolation>Environment Variable Interpolation<a class=headerlink href=#environment-variable-interpolation title="Permanent link">&para;</a></h2> <p>String values can reference environment variables for dynamic configuration:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-45-1><a id=__codelineno-45-1 name=__codelineno-45-1 href=#__codelineno-45-1></a>@context {
+</span><span id=__span-45-2><a id=__codelineno-45-2 name=__codelineno-45-2 href=#__codelineno-45-2></a>  api-endpoint: &quot;${API_ENDPOINT}&quot;
+</span><span id=__span-45-3><a id=__codelineno-45-3 name=__codelineno-45-3 href=#__codelineno-45-3></a>  environment: &quot;${NODE_ENV:-development}&quot;
+</span><span id=__span-45-4><a id=__codelineno-45-4 name=__codelineno-45-4 href=#__codelineno-45-4></a>}
+</span></code></pre></div> <h3 id=syntax>Syntax<a class=headerlink href=#syntax title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Pattern</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>${VAR}</code></td> <td>Substitute with variable value</td> </tr> <tr> <td><code>${VAR:-default}</code></td> <td>Substitute with variable or default</td> </tr> </tbody> </table> <h3 id=examples>Examples<a class=headerlink href=#examples title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-46-1><a id=__codelineno-46-1 name=__codelineno-46-1 href=#__codelineno-46-1></a>@meta {
+</span><span id=__span-46-2><a id=__codelineno-46-2 name=__codelineno-46-2 href=#__codelineno-46-2></a>  id: &quot;project-${PROJECT_NAME:-default}&quot;
+</span><span id=__span-46-3><a id=__codelineno-46-3 name=__codelineno-46-3 href=#__codelineno-46-3></a>  syntax: &quot;1.0.0&quot;
+</span><span id=__span-46-4><a id=__codelineno-46-4 name=__codelineno-46-4 href=#__codelineno-46-4></a>}
+</span><span id=__span-46-5><a id=__codelineno-46-5 name=__codelineno-46-5 href=#__codelineno-46-5></a>
+</span><span id=__span-46-6><a id=__codelineno-46-6 name=__codelineno-46-6 href=#__codelineno-46-6></a>@context {
+</span><span id=__span-46-7><a id=__codelineno-46-7 name=__codelineno-46-7 href=#__codelineno-46-7></a>  &quot;&quot;&quot;
+</span><span id=__span-46-8><a id=__codelineno-46-8 name=__codelineno-46-8 href=#__codelineno-46-8></a>  Running in ${NODE_ENV:-development} mode.
+</span><span id=__span-46-9><a id=__codelineno-46-9 name=__codelineno-46-9 href=#__codelineno-46-9></a>  API Key: ${API_KEY}
+</span><span id=__span-46-10><a id=__codelineno-46-10 name=__codelineno-46-10 href=#__codelineno-46-10></a>  &quot;&quot;&quot;
+</span><span id=__span-46-11><a id=__codelineno-46-11 name=__codelineno-46-11 href=#__codelineno-46-11></a>}
 </span></code></pre></div> <div class="admonition warning"> <p class=admonition-title>Missing Variables</p> </div> <p>If a variable is not set and no default is provided:</p> <div class="language-text highlight"><pre><span></span><code>- An empty string is substituted
 - A warning is logged to the console
 

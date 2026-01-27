@@ -241,6 +241,10 @@
          <lastmod>2026-01-27</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/createLogger/</loc>
+         <lastmod>2026-01-27</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/createPathReference/</loc>
          <lastmod>2026-01-27</lastmod>
     </url>
@@ -362,6 +366,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/InheritDeclaration/</loc>
+         <lastmod>2026-01-27</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/Logger/</loc>
          <lastmod>2026-01-27</lastmod>
     </url>
     <url>
@@ -530,6 +538,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/XML_CONVENTION/</loc>
+         <lastmod>2026-01-27</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/noopLogger/</loc>
          <lastmod>2026-01-27</lastmod>
     </url>
     <url>
@@ -1350,6 +1362,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/guides/registry/</loc>
+         <lastmod>2026-01-27</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/plans/2026-01-27-verbose-debug-logging-design/</loc>
          <lastmod>2026-01-27</lastmod>
     </url>
     <url>
