@@ -180,9 +180,7 @@ describe('GitHubFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                testing: {
-                  coverage: 80,
-                },
+                testing: ['Target >80% coverage for libraries'],
               },
               loc: createLoc(),
             },
@@ -363,7 +361,10 @@ describe('GitHubFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                typescript: { strictMode: true },
+                typescript: [
+                  'Strict mode enabled',
+                  'Never use `any` type - use `unknown` with type guards',
+                ],
               },
               loc: createLoc(),
             },

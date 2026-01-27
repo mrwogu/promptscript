@@ -912,53 +912,26 @@ export class GitHubFormatter extends BaseFormatter {
     const props = this.getProps(standards.content);
     const subsections: string[] = [];
 
-    this.addStandardsSubsection(
-      subsections,
-      renderer,
-      props['typescript'],
-      'typescript',
-      this.formatStandardsObject.bind(this)
-    );
-    this.addStandardsSubsection(
-      subsections,
-      renderer,
-      props['naming'],
-      'naming',
-      this.formatNamingStandards.bind(this)
-    );
-    this.addStandardsSubsection(
-      subsections,
-      renderer,
-      props['errors'],
-      'error-handling',
-      this.formatErrorStandards.bind(this)
-    );
-    this.addStandardsSubsection(
-      subsections,
-      renderer,
-      props['testing'],
-      'testing',
-      this.formatTestingStandards.bind(this)
-    );
+    const sectionMap: Record<string, string> = {
+      typescript: 'typescript',
+      naming: 'naming',
+      errors: 'error-handling',
+      testing: 'testing',
+    };
+
+    for (const [key, sectionName] of Object.entries(sectionMap)) {
+      const value = props[key];
+      if (Array.isArray(value)) {
+        const items = this.formatStandardsList(value);
+        if (items.length > 0) {
+          subsections.push(renderer.renderSection(sectionName, renderer.renderList(items), 2));
+        }
+      }
+    }
 
     if (subsections.length === 0) return null;
 
     return renderer.renderSection('code-standards', subsections.join('\n\n'));
-  }
-
-  private addStandardsSubsection(
-    subsections: string[],
-    renderer: ConventionRenderer,
-    value: Value | undefined,
-    name: string,
-    formatter: (obj: Record<string, Value>) => string[]
-  ): void {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return;
-
-    const items = formatter(value as Record<string, Value>);
-    if (items.length > 0) {
-      subsections.push(renderer.renderSection(name, renderer.renderList(items), 2));
-    }
   }
 
   private commands(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1164,59 +1137,6 @@ export class GitHubFormatter extends BaseFormatter {
 
   private formatTechItem(arr: Value[]): string {
     return arr.map(String).join(', ');
-  }
-
-  private formatStandardsObject(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['strictMode']) items.push('Strict mode enabled, no `any` types');
-    if (obj['useUnknown']) items.push(`Use \`unknown\` ${this.valueToString(obj['useUnknown'])}`);
-    if (obj['interfaces'])
-      items.push(`Prefer \`interface\` ${this.valueToString(obj['interfaces'])}`);
-    if (obj['types']) items.push(`Use \`type\` ${this.valueToString(obj['types'])}`);
-    if (obj['exports']) items.push(`${this.capitalize(this.valueToString(obj['exports']))}`);
-    if (obj['returnTypes'])
-      items.push(`Explicit return types ${this.valueToString(obj['returnTypes'])}`);
-
-    return items;
-  }
-
-  private formatNamingStandards(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['files']) items.push(`Files: \`${this.valueToString(obj['files'])}\``);
-    if (obj['classes']) items.push(`Classes/Interfaces: \`${this.valueToString(obj['classes'])}\``);
-    if (obj['functions'])
-      items.push(`Functions/Variables: \`${this.valueToString(obj['functions'])}\``);
-    if (obj['constants']) items.push(`Constants: \`${this.valueToString(obj['constants'])}\``);
-
-    return items;
-  }
-
-  private formatErrorStandards(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['customClasses'])
-      items.push(
-        `Use custom error classes extending \`${this.valueToString(obj['customClasses'])}\``
-      );
-    if (obj['locationInfo']) items.push('Always include location information');
-    if (obj['messages'])
-      items.push(`Provide ${this.valueToString(obj['messages'])} error messages`);
-
-    return items;
-  }
-
-  private formatTestingStandards(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['filePattern']) items.push(`Test files: \`${this.valueToString(obj['filePattern'])}\``);
-    if (obj['pattern']) items.push(`Follow ${this.valueToString(obj['pattern'])} pattern`);
-    if (obj['coverage'])
-      items.push(`Target >${this.valueToString(obj['coverage'])}% coverage for libraries`);
-    if (obj['fixtures']) items.push(`Use fixtures ${this.valueToString(obj['fixtures'])}`);
-
-    return items;
   }
 
   private formatRestriction(text: string): string {
