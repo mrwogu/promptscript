@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload CLI artifact
         if: matrix.node-version == '25.x'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cli-dist
           path: dist/packages/cli
