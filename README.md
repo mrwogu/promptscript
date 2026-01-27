@@ -192,8 +192,12 @@ Write once, compile to native formats for the industry's leading AI tools.
 If you have existing `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md` files, use AI-assisted migration:
 
 ```bash
-# In Claude Code, Cursor, or GitHub Copilot
-/migrate
+# 1. Initialize with migration skill
+prs init --migrate
+
+# 2. Use the migration skill in your AI tool
+/migrate  # Claude Code, Cursor
+# or: @workspace /migrate  # GitHub Copilot
 ```
 
 The AI will discover your existing instruction files, analyze the content, and generate properly structured PromptScript files—preserving all your standards, restrictions, and custom commands.
