@@ -46,6 +46,21 @@ Update a central policy and propagate changes to 100+ repositories automatically
 Already have existing AI instructions? Use the `/migrate` command to automatically convert `CLAUDE.md`, `.cursorrules`, `copilot-instructions.md`, or Antigravity rules to PromptScript.
 </div>
 
+<div class="feature-card" markdown>
+### :material-cog-play: Skills & Agents
+Define reusable commands, skills, and AI agents with specific tools and permissions.
+</div>
+
+<div class="feature-card" markdown>
+### :material-shield-check: Validation & Linting
+Catch syntax errors, missing fields, and policy violations before they reach production.
+</div>
+
+<div class="feature-card" markdown>
+### :material-package-variant: Registry & Sharing
+Publish and share instruction packages across your organization via `@inherit @company/standards`.
+</div>
+
 </div>
 
 ## The Business Problem: "Prompt Drift"
