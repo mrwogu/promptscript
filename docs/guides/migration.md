@@ -784,6 +784,41 @@ If compiled output is missing content:
 2. Verify no syntax errors in blocks
 3. Use `--verbose` flag for debugging
 
+## AI-Assisted Migration
+
+For automated migration using AI assistants, PromptScript provides a dedicated skill that guides the AI through the migration process.
+
+### Using the Migration Skill
+
+**Claude Code:**
+
+```bash
+# Use the migrate skill
+/migrate
+
+# Or ask directly
+"migrate my existing instructions to PromptScript"
+```
+
+**GitHub Copilot:**
+
+Reference the migrate skill in your prompt or use Chat with the migration context.
+
+**Cursor:**
+
+Use Composer with migration context or reference the PromptScript migration documentation.
+
+### What the AI Will Do
+
+1. **Discover** existing instruction files (CLAUDE.md, .cursorrules, copilot-instructions.md)
+2. **Analyze** content and classify into PromptScript blocks
+3. **Generate** properly structured PromptScript files
+4. **Validate** the output with `prs validate`
+
+### Best Practices for AI Migration
+
+For detailed guidelines on AI-assisted migration, including content mapping patterns and common pitfalls, see [AI Migration Best Practices](ai-migration-best-practices.md).
+
 ## Next Steps
 
 After migration:

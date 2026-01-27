@@ -49,4 +49,12 @@ Migrate existing AI instructions to PromptScript.
 
 </div>
 
+<div class="feature-card" markdown>
+### :material-robot: AI-Assisted Migration
+Automated migration using AI assistants.
+
+[AI Migration Guide →](ai-migration-best-practices.md)
+
+</div>
+
 </div>

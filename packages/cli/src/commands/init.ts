@@ -14,6 +14,8 @@ import {
   getAllTargets,
   getSuggestedTargets,
   formatDetectionResults,
+  formatMigrationHint,
+  hasMigrationCandidates,
   type AIToolTarget,
 } from '../utils/ai-tools-detector.js';
 import { findPrettierConfig } from '../prettier/loader.js';
@@ -107,6 +109,25 @@ export async function initCommand(
     console.log('Next steps:');
     ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
     ConsoleOutput.muted('2. Run: prs compile');
+
+    // Show migration hint if there are existing non-PromptScript instruction files
+    if (hasMigrationCandidates(aiToolsDetection)) {
+      const migrationHint = formatMigrationHint(aiToolsDetection);
+      for (const line of migrationHint) {
+        if (
+          line.startsWith('📋') ||
+          line.includes('migrated') ||
+          line.includes('See:') ||
+          line.includes('Or use')
+        ) {
+          ConsoleOutput.info(line.replace(/^\s+/, ''));
+        } else if (line.trim().startsWith('•')) {
+          ConsoleOutput.muted(line);
+        } else if (line.trim()) {
+          console.log(line);
+        }
+      }
+    }
   } catch (error) {
     if ((error as Error).name === 'ExitPromptError') {
       // User cancelled with Ctrl+C
