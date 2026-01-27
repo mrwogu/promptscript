@@ -3,7 +3,7 @@ name: 'committing'
 description: 'Creates well-structured git commits following conventional commit format. Use when committing changes, preparing commits, or when asked to commit code.'
 ---
 
-<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.814Z - do not edit -->
 
 # Git Committing
 

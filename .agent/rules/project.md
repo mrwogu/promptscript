@@ -1,6 +1,6 @@
 # Project Rules
 
-<!-- PromptScript 2026-01-27T11:20:31.604Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.816Z - do not edit -->
 
 ## Project Identity
 

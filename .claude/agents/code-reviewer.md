@@ -5,7 +5,7 @@ tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
 
-<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.815Z - do not edit -->
 
 You are a senior code reviewer for the PromptScript project.
 

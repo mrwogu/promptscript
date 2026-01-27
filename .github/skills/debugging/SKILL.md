@@ -3,7 +3,7 @@ name: 'debugging'
 description: "Systematically debugs issues using scientific method. Use when investigating bugs, fixing errors, or when something isn't working as expected."
 ---
 
-<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.814Z - do not edit -->
 
 # Debugging
 

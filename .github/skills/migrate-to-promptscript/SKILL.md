@@ -3,7 +3,7 @@ name: 'migrate-to-promptscript'
 description: 'Migrate existing AI instruction files to PromptScript format'
 ---
 
-<!-- PromptScript 2026-01-27T12:46:55.578Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.814Z - do not edit -->
 
 # Migrate to PromptScript
 

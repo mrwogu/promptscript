@@ -3,7 +3,7 @@ name: 'refactoring'
 description: 'Improves code structure without changing behavior. Use when cleaning up code, reducing complexity, or when asked to refactor.'
 ---
 
-<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.815Z - do not edit -->
 
 # Refactoring
 

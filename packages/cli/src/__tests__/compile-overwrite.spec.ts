@@ -558,7 +558,7 @@ describe('compile command - overwrite protection', () => {
       expect(mockWriteFile).toHaveBeenCalled();
     });
 
-    it('should NOT detect marker after line 10', async () => {
+    it('should NOT detect marker after line 20', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
 
       mockCompile.mockResolvedValue({
@@ -575,8 +575,8 @@ describe('compile command - overwrite protection', () => {
         return false;
       });
 
-      // Marker on line 15 (after first 10 lines)
-      const lines = Array(14).fill('# Some content');
+      // Marker on line 25 (after first 20 lines)
+      const lines = Array(24).fill('# Some content');
       lines.push(PROMPTSCRIPT_MARKER);
       mockReadFile.mockResolvedValue(lines.join('\n'));
 
@@ -584,7 +584,7 @@ describe('compile command - overwrite protection', () => {
 
       await compileCommand({}, mockServices);
 
-      // Should prompt because marker is not in first 10 lines
+      // Should prompt because marker is not in first 20 lines
       expect(mockPrompts.select).toHaveBeenCalled();
     });
   });

@@ -5,7 +5,7 @@ tools: ['read', 'search', 'execute', 'web']
 model: Claude Sonnet 4.5
 ---
 
-<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.814Z - do not edit -->
 
 You are a PromptScript language expert.
 

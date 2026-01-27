@@ -10,7 +10,7 @@ allowed-tools:
 user-invocable: true
 ---
 
-<!-- PromptScript 2026-01-27T12:46:55.580Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.815Z - do not edit -->
 
 # Migrate to PromptScript
 

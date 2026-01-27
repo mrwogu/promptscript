@@ -3,7 +3,7 @@ name: 'code-reviewing'
 description: 'Reviews code for bugs, security issues, and quality improvements. Use when reviewing pull requests, checking code quality, or when asked to review changes.'
 ---
 
-<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+<!-- PromptScript 2026-01-27T13:03:51.815Z - do not edit -->
 
 # Code Reviewing
 
