@@ -205,7 +205,7 @@ export class Resolver {
     }
 
     const parentPath = this.loader.resolveRef(ast.inherit.path, absPath);
-    this.logger.verbose(`Resolving inherit: ${ast.inherit.path}`);
+    this.logger.verbose(`Resolving inherit: ${ast.inherit.path.raw}`);
     this.logger.verbose(`  → ${parentPath}`);
 
     try {
@@ -240,7 +240,7 @@ export class Resolver {
 
     for (const use of ast.uses) {
       const importPath = this.loader.resolveRef(use.path, absPath);
-      this.logger.verbose(`Resolving import: ${use.path}`);
+      this.logger.verbose(`Resolving import: ${use.path.raw}`);
       this.logger.verbose(`  → ${importPath}`);
 
       try {

@@ -375,6 +375,69 @@ Runtime validation rules and file targeting:
 
 The `globs` property is used by multifile formatters (GitHub, Claude, Cursor) to generate path-specific instruction files.
 
+#### GitHub Copilot `applyTo` Integration
+
+When using `version: multifile` or `version: full` for GitHub Copilot, the `globs` patterns generate separate instruction files with `applyTo` frontmatter:
+
+```promptscript
+@guards {
+  globs: ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "**/*.test.ts"]
+}
+
+@standards {
+  typescript: [
+    "Use strict TypeScript with no any types"
+    "Prefer interfaces over type aliases"
+  ]
+
+  testing: [
+    "Use Vitest for unit tests"
+    "Follow AAA pattern (Arrange, Act, Assert)"
+  ]
+}
+```
+
+This generates:
+
+**`.github/instructions/typescript.instructions.md`:**
+
+```markdown
+---
+applyTo:
+  - '**/*.ts'
+  - '**/*.tsx'
+---
+
+# TypeScript Standards
+
+- Use strict TypeScript with no any types
+- Prefer interfaces over type aliases
+```
+
+**`.github/instructions/testing.instructions.md`:**
+
+```markdown
+---
+applyTo:
+  - '**/*.spec.ts'
+  - '**/*.test.ts'
+---
+
+# Testing Standards
+
+- Use Vitest for unit tests
+- Follow AAA pattern (Arrange, Act, Assert)
+```
+
+!!! note "Version Required"
+Path-specific instruction files are only generated with `version: multifile` or `version: full`:
+
+    ```yaml
+    targets:
+      - github:
+          version: multifile
+    ```
+
 ### @skills
 
 Define reusable skills that AI assistants can invoke:

@@ -186,16 +186,30 @@ Without it, shortcuts with `prompt: true` will only appear in the main file.
 
 PromptScript supports multiple format versions for tools that have evolved their configuration format:
 
-| Tool        | Version     | Output Path                 | When to Use              |
-| ----------- | ----------- | --------------------------- | ------------------------ |
-| Cursor      | (modern)    | `.cursor/rules/project.mdc` | Cursor 0.45+ (default)   |
-| Cursor      | legacy      | `.cursorrules`              | Older Cursor versions    |
-| Antigravity | simple      | `.agent/rules/project.md`   | Plain Markdown (default) |
-| Antigravity | frontmatter | `.agent/rules/project.md`   | With activation types    |
+| Tool           | Version     | Output Path                                | When to Use                        |
+| -------------- | ----------- | ------------------------------------------ | ---------------------------------- |
+| GitHub Copilot | simple      | `.github/copilot-instructions.md`          | Single file (default)              |
+| GitHub Copilot | multifile   | + `.github/instructions/*.instructions.md` | Path-specific rules with `applyTo` |
+| GitHub Copilot | full        | + `.github/skills/`, `AGENTS.md`           | Skills and custom agents           |
+| Claude Code    | simple      | `CLAUDE.md`                                | Single file (default)              |
+| Claude Code    | multifile   | + `.claude/rules/*.md`                     | Path-specific rules                |
+| Claude Code    | full        | + `.claude/skills/`, `CLAUDE.local.md`     | Skills and local config            |
+| Cursor         | (modern)    | `.cursor/rules/project.mdc`                | Cursor 0.45+ (default)             |
+| Cursor         | legacy      | `.cursorrules`                             | Older Cursor versions              |
+| Antigravity    | simple      | `.agent/rules/project.md`                  | Plain Markdown (default)           |
+| Antigravity    | frontmatter | `.agent/rules/project.md`                  | With activation types              |
 
 ```yaml
-# For older Cursor versions
 targets:
+  # GitHub Copilot with path-specific instructions
+  - github:
+      version: multifile # Enables .github/instructions/*.instructions.md
+
+  # Claude Code with skills support
+  - claude:
+      version: full
+
+  # For older Cursor versions
   - cursor:
       version: legacy
 
