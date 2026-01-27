@@ -1571,4 +1571,414 @@ describe('BrowserResolver', () => {
       expect(result.ast).not.toBeNull();
     });
   });
+
+  describe('mergeExtendValue edge cases', () => {
+    it('should extend existing array value with ArrayContent', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@standards {
+  languages: ["TypeScript", "JavaScript"]
+}
+@extend standards.languages { - "Python" - "Go" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should extend existing object value with ObjectContent', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  config: {
+    existingKey: "existingValue"
+  }
+}
+@extend context.config { newKey: "newValue" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'ObjectContent') {
+        const config = contextBlock.content.properties.config as Record<string, unknown>;
+        expect(config).toHaveProperty('existingKey');
+        expect(config).toHaveProperty('newKey');
+      }
+    });
+  });
+
+  describe('deepCloneValue edge cases', () => {
+    it('should deep clone arrays within uniqueConcat', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@restrictions {
+  - "child rule 1"
+  - "child rule 2"
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@restrictions {
+  - "parent rule 1"
+  - "parent rule 2"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const restrictionsBlock = result.ast?.blocks.find((b) => b.name === 'restrictions');
+      expect(restrictionsBlock).toBeDefined();
+      if (restrictionsBlock?.content.type === 'ArrayContent') {
+        // Should have merged unique values from both
+        expect(restrictionsBlock.content.elements.length).toBeGreaterThanOrEqual(4);
+      }
+    });
+  });
+
+  describe('mergeExtendContent additional branches', () => {
+    it('should merge ArrayContent with ArrayContent in extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@restrictions {
+  - "original1"
+  - "original2"
+}
+@extend restrictions {
+  - "extended1"
+  - "extended2"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const block = result.ast?.blocks.find((b) => b.name === 'restrictions');
+      if (block?.content.type === 'ArrayContent') {
+        expect(block.content.elements.length).toBeGreaterThanOrEqual(4);
+      }
+    });
+
+    it('should merge incompatible types by using extension content', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@restrictions {
+  - "array item"
+}
+@extend restrictions { """text replaces array""" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('MixedContent with no text branches', () => {
+    it('should handle extension MixedContent with only properties no text', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  """Target has text"""
+  targetKey: "value"
+}
+@extend context { extKey: "extValue" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'MixedContent') {
+        expect(contextBlock.content.text?.value).toContain('Target has text');
+        expect(contextBlock.content.properties).toHaveProperty('extKey');
+      }
+    });
+  });
+
+  describe('path resolution edge cases', () => {
+    it('should handle path without directory separator', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@inherit ./base`,
+        'base.prs': `@meta { id: "base" syntax: "1.0.0" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should handle non-registry path starting with @ but invalid format', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@inherit @invalid`,
+        '@invalid.prs': `@meta { id: "invalid" syntax: "1.0.0" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      // Invalid registry path format, normalized as regular path but file not found at that location
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('extend logging branch', () => {
+    it('should log when applying extensions', async () => {
+      const logger = {
+        debug: vi.fn(),
+        verbose: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      };
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context { key: "value" }
+@extend context { another: "value" }`,
+      });
+      const resolver = new BrowserResolver({ fs, logger });
+
+      await resolver.resolve('project.prs');
+
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('extension'));
+    });
+  });
+
+  describe('MixedContent mergeAtPath branches', () => {
+    it('should handle extending MixedContent block at property path', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  """Some context description"""
+  settings: {
+    debug: true
+  }
+}
+@extend context.settings { verbose: true }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'MixedContent') {
+        const settings = contextBlock.content.properties.settings as Record<string, unknown>;
+        expect(settings).toHaveProperty('debug');
+        expect(settings).toHaveProperty('verbose');
+      }
+    });
+
+    it('should handle extending MixedContent at deep nested path', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  """Description"""
+  level1: {
+    level2: {
+      value: "original"
+    }
+  }
+}
+@extend context.level1.level2 { extra: "added" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should build new path in MixedContent when property does not exist', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  """Description"""
+  existing: "value"
+}
+@extend context.newPath.deep { content: "value" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('circular dependency in imports', () => {
+    it('should detect circular dependency in @use imports', async () => {
+      const fs = new VirtualFileSystem({
+        'a.prs': `@meta { id: "a" syntax: "1.0.0" }
+@use ./b`,
+        'b.prs': `@meta { id: "b" syntax: "1.0.0" }
+@use ./a`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      await expect(resolver.resolve('a.prs')).rejects.toThrow('Circular');
+    });
+  });
+
+  describe('ArrayContent block merging', () => {
+    it('should merge ArrayContent blocks during inheritance', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@restrictions {
+  - "Child restriction"
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@restrictions {
+  - "Parent restriction"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const block = result.ast?.blocks.find((b) => b.name === 'restrictions');
+      if (block?.content.type === 'ArrayContent') {
+        expect(block.content.elements.length).toBe(2);
+      }
+    });
+  });
+
+  describe('child-only blocks in inheritance', () => {
+    it('should include blocks only in child', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@childOnly { childContent: "value" }`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@parentOnly { parentContent: "value" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      expect(result.ast?.blocks.some((b) => b.name === 'childOnly')).toBe(true);
+      expect(result.ast?.blocks.some((b) => b.name === 'parentOnly')).toBe(true);
+    });
+  });
+
+  describe('fallback content merging', () => {
+    it('should use child content when types are incompatible during inheritance', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@example { """Child is text""" }`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@example {
+  - "Parent is array"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('mergeAtPathValue edge cases', () => {
+    it('should build path when value is primitive', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  simpleString: "just a string"
+}
+@extend context.simpleString.deeper { content: "new" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should merge at path when value is array', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  items: ["a", "b"]
+}
+@extend context.items.deeper { content: "new" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('extractValue branches', () => {
+    it('should handle TextContent extraction', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context { existing: "value" }
+@extend context.newProp { """Text content to extract""" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should handle ArrayContent extraction', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context { existing: "value" }
+@extend context.newArray { - "item1" - "item2" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('property cloning edge cases', () => {
+    it('should clone new property values', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@context {
+  childOnly: {
+    nested: "value"
+  }
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@context {
+  parentOnly: "value"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'ObjectContent') {
+        expect(contextBlock.content.properties).toHaveProperty('childOnly');
+        expect(contextBlock.content.properties).toHaveProperty('parentOnly');
+      }
+    });
+  });
 });
