@@ -463,7 +463,8 @@ ${this.stripAllIndent(content)}`;
   }
 
   /**
-   * Extract code standards from @standards block (same as GitHub/Cursor).
+   * Extract code standards from @standards block.
+   * Expects arrays of strings (pass-through format).
    */
   private codeStandards(ast: Program, _renderer: ConventionRenderer): string | null {
     const standards = this.findBlock(ast, 'standards');
@@ -472,47 +473,27 @@ ${this.stripAllIndent(content)}`;
     const props = this.getProps(standards.content);
     const subsections: string[] = [];
 
-    // TypeScript standards
-    const typescript = props['typescript'];
-    if (typescript && typeof typescript === 'object' && !Array.isArray(typescript)) {
-      const items = this.formatTypeScriptStandards(typescript as Record<string, Value>);
-      if (items.length > 0) {
-        subsections.push(`### TypeScript\n\n${items.map((i) => '- ' + i).join('\n')}`);
-      }
-    }
+    // Map of property keys to section titles
+    const sectionMap: Record<string, string> = {
+      typescript: 'TypeScript',
+      naming: 'Naming Conventions',
+      errors: 'Error Handling',
+      testing: 'Testing',
+    };
 
-    // Naming conventions
-    const naming = props['naming'];
-    if (naming && typeof naming === 'object' && !Array.isArray(naming)) {
-      const items = this.formatNamingStandards(naming as Record<string, Value>);
-      if (items.length > 0) {
-        subsections.push(`### Naming Conventions\n\n${items.map((i) => '- ' + i).join('\n')}`);
-      }
-    }
-
-    // Error handling
-    const errors = props['errors'];
-    if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
-      const items = this.formatErrorStandards(errors as Record<string, Value>);
-      if (items.length > 0) {
-        subsections.push(`### Error Handling\n\n${items.map((i) => '- ' + i).join('\n')}`);
-      }
-    }
-
-    // Testing standards
-    const testing = props['testing'];
-    if (testing && typeof testing === 'object' && !Array.isArray(testing)) {
-      const items = this.formatTestingStandards(testing as Record<string, Value>);
-      if (items.length > 0) {
-        subsections.push(`### Testing\n\n${items.map((i) => '- ' + i).join('\n')}`);
+    for (const [key, title] of Object.entries(sectionMap)) {
+      const value = props[key];
+      if (Array.isArray(value)) {
+        const items = this.formatStandardsList(value);
+        if (items.length > 0) {
+          subsections.push(`### ${title}\n\n${items.map((i) => '- ' + i).join('\n')}`);
+        }
       }
     }
 
     if (subsections.length === 0) return null;
 
-    return `## Code Standards
-
-${subsections.join('\n\n')}`;
+    return `## Code Standards\n\n${subsections.join('\n\n')}`;
   }
 
   /**
@@ -786,68 +767,5 @@ ${items.map((i) => '- ' + i).join('\n')}`;
       .replace(/^"/, '')
       .replace(/"$/, '')
       .replace(/^Never\s+/i, "Don't ");
-  }
-
-  // Helper methods for formatting standards
-
-  private formatTypeScriptStandards(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['strictMode']) items.push('Strict mode enabled, no `any` types');
-    if (obj['noAny']) items.push('Never use `any` type - use `unknown` with type guards');
-    if (obj['useUnknown']) items.push(`Use \`unknown\` ${this.valueToString(obj['useUnknown'])}`);
-    if (obj['interfaces'])
-      items.push(`Prefer \`interface\` ${this.valueToString(obj['interfaces'])}`);
-    if (obj['types']) items.push(`Use \`type\` ${this.valueToString(obj['types'])}`);
-    if (obj['exports']) items.push(`${this.capitalize(this.valueToString(obj['exports']))}`);
-    if (obj['returnTypes'])
-      items.push(`Explicit return types ${this.valueToString(obj['returnTypes'])}`);
-
-    return items;
-  }
-
-  private formatNamingStandards(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['files']) items.push(`Files: \`${this.valueToString(obj['files'])}\``);
-    if (obj['classes']) items.push(`Classes/Interfaces: \`${this.valueToString(obj['classes'])}\``);
-    if (obj['interfaces']) items.push(`Interfaces: \`${this.valueToString(obj['interfaces'])}\``);
-    if (obj['functions'])
-      items.push(`Functions/Variables: \`${this.valueToString(obj['functions'])}\``);
-    if (obj['variables']) items.push(`Variables: \`${this.valueToString(obj['variables'])}\``);
-    if (obj['constants']) items.push(`Constants: \`${this.valueToString(obj['constants'])}\``);
-
-    return items;
-  }
-
-  private formatErrorStandards(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['customClasses'])
-      items.push(
-        `Use custom error classes extending \`${this.valueToString(obj['customClasses'])}\``
-      );
-    if (obj['locationInfo']) items.push('Always include location information');
-    if (obj['messages'])
-      items.push(`Provide ${this.valueToString(obj['messages'])} error messages`);
-
-    return items;
-  }
-
-  private formatTestingStandards(obj: Record<string, Value>): string[] {
-    const items: string[] = [];
-
-    if (obj['filePattern']) items.push(`Test files: \`${this.valueToString(obj['filePattern'])}\``);
-    if (obj['pattern']) items.push(`Follow ${this.valueToString(obj['pattern'])} pattern`);
-    if (obj['framework']) items.push(`Framework: ${this.valueToString(obj['framework'])}`);
-    if (obj['coverage'])
-      items.push(`Target >${this.valueToString(obj['coverage'])}% coverage for libraries`);
-    if (obj['fixtures']) items.push(`Use fixtures ${this.valueToString(obj['fixtures'])}`);
-
-    return items;
-  }
-
-  private capitalize(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }

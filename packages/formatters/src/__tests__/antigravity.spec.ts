@@ -130,7 +130,7 @@ describe('AntigravityFormatter', () => {
       expect(result.content).toContain('**Monorepo:** Nx with pnpm workspaces');
     });
 
-    it('should include code standards with typescript subsection', () => {
+    it('should include TypeScript standards from array format', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -140,11 +140,11 @@ describe('AntigravityFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                typescript: {
-                  strictMode: true,
-                  noAny: true,
-                  exports: 'named only, no default exports',
-                },
+                typescript: [
+                  'Strict mode enabled',
+                  'Never use `any` type - use `unknown` with type guards',
+                  'Named exports only',
+                ],
               },
               loc: createLoc(),
             },
@@ -156,12 +156,12 @@ describe('AntigravityFormatter', () => {
       const result = formatter.format(ast);
       expect(result.content).toContain('## Code Standards');
       expect(result.content).toContain('### TypeScript');
-      expect(result.content).toContain('Strict mode enabled');
-      expect(result.content).toContain('Never use `any` type');
-      expect(result.content).toContain('Named only, no default exports');
+      expect(result.content).toContain('- Strict mode enabled');
+      expect(result.content).toContain('- Never use `any` type - use `unknown` with type guards');
+      expect(result.content).toContain('- Named exports only');
     });
 
-    it('should include naming conventions from standards', () => {
+    it('should include naming conventions from array format', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -171,11 +171,11 @@ describe('AntigravityFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                naming: {
-                  files: 'kebab-case.ts',
-                  classes: 'PascalCase',
-                  functions: 'camelCase',
-                },
+                naming: [
+                  'Files: `kebab-case.ts`',
+                  'Classes: `PascalCase`',
+                  'Functions: `camelCase`',
+                ],
               },
               loc: createLoc(),
             },
@@ -185,11 +185,9 @@ describe('AntigravityFormatter', () => {
       };
 
       const result = formatter.format(ast);
-      expect(result.content).toContain('## Code Standards');
       expect(result.content).toContain('### Naming Conventions');
-      expect(result.content).toContain('Files: `kebab-case.ts`');
-      expect(result.content).toContain('Classes/Interfaces: `PascalCase`');
-      expect(result.content).toContain('Functions/Variables: `camelCase`');
+      expect(result.content).toContain('- Files: `kebab-case.ts`');
+      expect(result.content).toContain('- Classes: `PascalCase`');
     });
 
     it('should include git commits from standards', () => {
@@ -256,7 +254,7 @@ describe('AntigravityFormatter', () => {
       expect(result.content).toContain('\\_\\_dirname');
     });
 
-    it('should include testing standards from standards', () => {
+    it('should include testing standards from array format', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -266,12 +264,12 @@ describe('AntigravityFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                testing: {
-                  framework: 'vitest',
-                  filePattern: '*.spec.ts',
-                  pattern: 'Arrange-Act-Assert',
-                  coverage: 90,
-                },
+                testing: [
+                  'Framework: vitest',
+                  'Test files: `*.spec.ts`',
+                  'Follow Arrange-Act-Assert pattern',
+                  'Target >90% coverage for libraries',
+                ],
               },
               loc: createLoc(),
             },
@@ -282,13 +280,13 @@ describe('AntigravityFormatter', () => {
 
       const result = formatter.format(ast);
       expect(result.content).toContain('### Testing');
-      expect(result.content).toContain('vitest');
-      expect(result.content).toContain('*.spec.ts');
-      expect(result.content).toContain('Arrange-Act-Assert');
-      expect(result.content).toContain('90%');
+      expect(result.content).toContain('- Framework: vitest');
+      expect(result.content).toContain('- Test files: `*.spec.ts`');
+      expect(result.content).toContain('- Follow Arrange-Act-Assert pattern');
+      expect(result.content).toContain('- Target >90% coverage for libraries');
     });
 
-    it('should include error handling standards', () => {
+    it('should include error handling standards from array format', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -298,11 +296,11 @@ describe('AntigravityFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                errors: {
-                  customClasses: 'BaseError',
-                  locationInfo: true,
-                  messages: 'descriptive',
-                },
+                errors: [
+                  'Use custom error classes extending `BaseError`',
+                  'Always include location information',
+                  'Provide descriptive error messages',
+                ],
               },
               loc: createLoc(),
             },
@@ -313,9 +311,9 @@ describe('AntigravityFormatter', () => {
 
       const result = formatter.format(ast);
       expect(result.content).toContain('### Error Handling');
-      expect(result.content).toContain('BaseError');
-      expect(result.content).toContain('location information');
-      expect(result.content).toContain('descriptive');
+      expect(result.content).toContain('- Use custom error classes extending `BaseError`');
+      expect(result.content).toContain('- Always include location information');
+      expect(result.content).toContain('- Provide descriptive error messages');
     });
 
     it('should include commands section from shortcuts', () => {
@@ -564,12 +562,8 @@ Never leave TODO without issue reference`,
             content: {
               type: 'ObjectContent',
               properties: {
-                typescript: {
-                  strictMode: true,
-                },
-                naming: {
-                  files: 'kebab-case.ts',
-                },
+                typescript: ['Strict mode enabled'],
+                naming: ['Files: `kebab-case.ts`'],
               },
               loc: createLoc(),
             },
