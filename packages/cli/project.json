@@ -9,10 +9,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/../../dist/packages/cli"],
       "options": {
-        "commands": [
-          "nx run cli:bundle",
-          "node -e \"const pkg = require('./packages/cli/package.json'); const pub = require('./packages/cli/package.publish.json'); pub.version = pkg.version; require('fs').writeFileSync('./dist/packages/cli/package.json', JSON.stringify(pub, null, 2));\""
-        ],
+        "commands": ["nx run cli:bundle", "node scripts/prepare-cli-publish.mjs"],
         "parallel": false,
         "cwd": "{workspaceRoot}"
       },
@@ -25,15 +22,7 @@
         "outputPath": "dist/packages/cli",
         "main": "packages/cli/src/index.ts",
         "tsConfig": "packages/cli/tsconfig.lib.json",
-        "assets": [
-          "packages/cli/*.md",
-          "packages/cli/bin/**/*",
-          {
-            "input": "packages/cli",
-            "glob": "package.publish.json",
-            "output": "."
-          }
-        ],
+        "assets": ["packages/cli/*.md", "packages/cli/bin/**/*"],
         "bundle": true,
         "platform": "node",
         "format": ["esm"],
