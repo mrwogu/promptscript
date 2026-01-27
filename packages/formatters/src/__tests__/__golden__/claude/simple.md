@@ -41,13 +41,6 @@ flowchart TB
   formatters --> core
 ```
 
-## Code Style
-
-- Strict TypeScript, no `any`
-- Named exports only
-- Files: kebab-case.ts
-- Testing: vitest, >90% coverage
-
 ## Git Commits
 
 - Format: Conventional Commits

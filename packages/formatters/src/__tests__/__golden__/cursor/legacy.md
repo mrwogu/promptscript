@@ -37,23 +37,24 @@ flowchart TB
 - Linting: ESLint + Prettier
 
 Code style:
-- useUnknown: with type guards instead of any
-- interfaces: for object shapes
-- types: for unions and intersections
-- exports: named only, no default exports
-- returnTypes: explicit on public functions
-- files: kebab-case.ts
-- classes: PascalCase
-- interfaces: PascalCase
-- functions: camelCase
-- variables: camelCase
-- constants: UPPER_SNAKE_CASE
-- customClasses: extend PSError
-- messages: actionable
-- filePattern: *.spec.ts next to source
-- pattern: AAA (Arrange, Act, Assert)
-- fixtures: for parser tests
-- framework: vitest
+- Strict mode enabled
+- Never use `any` type - use `unknown` with type guards
+- Prefer `interface` for object shapes
+- Use `type` for unions and intersections
+- Named exports only, no default exports
+- Explicit return types on public functions
+- Files: `kebab-case.ts`
+- Classes/Interfaces: `PascalCase`
+- Functions/Variables: `camelCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Use custom error classes extending `PSError`
+- Always include location information
+- Provide actionable error messages
+- Test files: `*.spec.ts` next to source
+- Follow AAA (Arrange, Act, Assert) pattern
+- Target >90% coverage for libraries
+- Use fixtures for parser tests
+- Framework: vitest
 
 Git Commits:
 - format: Conventional Commits

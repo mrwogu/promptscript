@@ -173,12 +173,12 @@ describe('GitHubFormatter Edge Cases', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                testing: {
-                  filePattern: '*.spec.ts',
-                  pattern: 'AAA',
-                  coverage: 90,
-                  fixtures: 'for parser tests',
-                },
+                testing: [
+                  'Test files: `*.spec.ts`',
+                  'Follow AAA pattern',
+                  'Target >90% coverage',
+                  'Use fixtures for parser tests',
+                ],
               },
               loc: createLoc(),
             },

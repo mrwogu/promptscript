@@ -61,36 +61,33 @@ flowchart TB
 
 ### TypeScript
 
-- Strict mode enabled, no `any` types
+- Strict mode enabled
 - Never use `any` type - use `unknown` with type guards
-- Use `unknown` with type guards instead of any
 - Prefer `interface` for object shapes
 - Use `type` for unions and intersections
-- Named only, no default exports
-- Explicit return types explicit on public functions
+- Named exports only, no default exports
+- Explicit return types on public functions
 
 ### Naming Conventions
 
 - Files: `kebab-case.ts`
 - Classes/Interfaces: `PascalCase`
-- Interfaces: `PascalCase`
 - Functions/Variables: `camelCase`
-- Variables: `camelCase`
 - Constants: `UPPER_SNAKE_CASE`
 
 ### Error Handling
 
-- Use custom error classes extending `extend PSError`
+- Use custom error classes extending `PSError`
 - Always include location information
 - Provide actionable error messages
 
 ### Testing
 
-- Test files: `*.spec.ts next to source`
+- Test files: `*.spec.ts` next to source
 - Follow AAA (Arrange, Act, Assert) pattern
-- Framework: vitest
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
+- Framework: vitest
 
 ## Git Commits
 

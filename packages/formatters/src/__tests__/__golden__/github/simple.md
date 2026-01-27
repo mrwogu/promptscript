@@ -53,12 +53,12 @@ flowchart TB
 
 ### typescript
 
-- Strict mode enabled, no `any` types
-- Use `unknown` with type guards instead of any
+- Strict mode enabled
+- Never use `any` type - use `unknown` with type guards
 - Prefer `interface` for object shapes
 - Use `type` for unions and intersections
-- Named only, no default exports
-- Explicit return types explicit on public functions
+- Named exports only, no default exports
+- Explicit return types on public functions
 
 ### naming
 
@@ -69,16 +69,17 @@ flowchart TB
 
 ### error-handling
 
-- Use custom error classes extending `extend PSError`
+- Use custom error classes extending `PSError`
 - Always include location information
 - Provide actionable error messages
 
 ### testing
 
-- Test files: `*.spec.ts next to source`
+- Test files: `*.spec.ts` next to source
 - Follow AAA (Arrange, Act, Assert) pattern
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
+- Framework: vitest
 
 ## commands
 
