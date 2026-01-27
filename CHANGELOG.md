@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha.4](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2026-01-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **compiler:** Generated files now have compact marker instead of verbose header. Existing files with legacy marker still recognized.
+
+### chore
+
+* prepare alpha release ([8c3a428](https://github.com/mrwogu/promptscript/commit/8c3a428856bc088fb27a4fdd6a16185fe5e63589))
+
+
+### Features
+
+* **compiler:** add compact PromptScript marker to all outputs ([6d74480](https://github.com/mrwogu/promptscript/commit/6d744800a4ab38030b6c23b2ab949c79977ab12e))
+
 ## [1.0.0-alpha.3](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2026-01-27)
 
 
