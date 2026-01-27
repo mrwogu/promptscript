@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   encodeState,
   decodeState,
@@ -258,6 +258,127 @@ describe('share utilities', () => {
 
       const exampleId = getExampleIdFromUrl();
       expect(exampleId).toBeNull();
+    });
+
+    it('loadStateFromUrl should return null for invalid state', () => {
+      Object.defineProperty(window, 'location', {
+        value: { href: 'https://example.com/playground?s=invalid-compressed-data' },
+        writable: true,
+      });
+
+      const state = loadStateFromUrl();
+      expect(state).toBeNull();
+    });
+  });
+
+  describe('updateUrlState', () => {
+    let replaceStateCalls: Array<{ state: unknown; title: string; url: string }> = [];
+
+    beforeEach(() => {
+      replaceStateCalls = [];
+      Object.defineProperty(window, 'location', {
+        value: { href: 'https://example.com/playground' },
+        writable: true,
+      });
+      Object.defineProperty(window, 'history', {
+        value: {
+          replaceState: (state: unknown, title: string, url: string) => {
+            replaceStateCalls.push({ state, title, url });
+          },
+        },
+        writable: true,
+      });
+    });
+
+    it('should update URL with encoded state', async () => {
+      const { updateUrlState } = await import('../utils/share');
+      updateUrlState(mockFiles, 'claude');
+
+      expect(replaceStateCalls.length).toBe(1);
+      expect(replaceStateCalls[0].url).toContain('s=');
+      expect(replaceStateCalls[0].url).toContain('f=claude');
+    });
+
+    it('should remove example param when updating state', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { href: 'https://example.com/playground?e=minimal' },
+        writable: true,
+      });
+
+      const { updateUrlState } = await import('../utils/share');
+      updateUrlState(mockFiles);
+
+      expect(replaceStateCalls[0].url).not.toContain('e=');
+    });
+  });
+
+  describe('clearUrlState', () => {
+    let replaceStateCalls: Array<{ state: unknown; title: string; url: string }> = [];
+
+    beforeEach(() => {
+      replaceStateCalls = [];
+      Object.defineProperty(window, 'location', {
+        value: { href: 'https://example.com/playground?s=encoded&f=github&e=minimal' },
+        writable: true,
+      });
+      Object.defineProperty(window, 'history', {
+        value: {
+          replaceState: (state: unknown, title: string, url: string) => {
+            replaceStateCalls.push({ state, title, url });
+          },
+        },
+        writable: true,
+      });
+    });
+
+    it('should remove all state params from URL', async () => {
+      const { clearUrlState } = await import('../utils/share');
+      clearUrlState();
+
+      expect(replaceStateCalls.length).toBe(1);
+      expect(replaceStateCalls[0].url).not.toContain('s=');
+      expect(replaceStateCalls[0].url).not.toContain('f=');
+      expect(replaceStateCalls[0].url).not.toContain('e=');
+    });
+  });
+
+  describe('copyShareUrl', () => {
+    it('should copy URL to clipboard and return true on success', async () => {
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: writeTextMock },
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(window, 'location', {
+        value: { href: 'https://example.com/playground' },
+        writable: true,
+      });
+
+      const { copyShareUrl } = await import('../utils/share');
+      const result = await copyShareUrl(mockFiles, 'github');
+
+      expect(result).toBe(true);
+      expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('https://example.com'));
+    });
+
+    it('should return false when clipboard fails', async () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          writeText: vi.fn().mockRejectedValue(new Error('Clipboard error')),
+        },
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(window, 'location', {
+        value: { href: 'https://example.com/playground' },
+        writable: true,
+      });
+
+      const { copyShareUrl } = await import('../utils/share');
+      const result = await copyShareUrl(mockFiles);
+
+      expect(result).toBe(false);
     });
   });
 });

@@ -5,6 +5,9 @@ import {
   selectActiveFileContent,
   selectEnabledTargets,
   selectOutputsForFormatter,
+  selectOutputForFormatter,
+  selectErrors,
+  selectHasErrors,
   type PlaygroundConfig,
 } from '../store';
 
@@ -85,6 +88,18 @@ describe('PlaygroundStore', () => {
       const state = usePlaygroundStore.getState();
       expect(state.files[0].path).toBe('renamed.prs');
       expect(state.activeFile).toBe('renamed.prs');
+    });
+
+    it('should rename a file without changing activeFile when not the active file', () => {
+      const { addFile, renameFile } = usePlaygroundStore.getState();
+      addFile('other.prs', 'other content');
+
+      // Active file is now 'other.prs'
+      renameFile('project.prs', 'renamed.prs');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.files.find((f) => f.path === 'renamed.prs')).toBeDefined();
+      expect(state.activeFile).toBe('other.prs'); // activeFile unchanged
     });
 
     it('should set multiple files', () => {
@@ -239,6 +254,28 @@ describe('PlaygroundStore', () => {
       expect(state.config.formatting.tabWidth).toBe(4);
       expect(state.config.formatting.printWidth).toBe(100);
       expect(state.config.formatting.proseWrap).toBe('preserve'); // unchanged
+    });
+
+    it('should replace entire config with setConfig', () => {
+      const { setConfig } = usePlaygroundStore.getState();
+      const newConfig: PlaygroundConfig = {
+        targets: {
+          github: { enabled: false, version: 'minimal' },
+          claude: { enabled: false, version: 'lite' },
+          cursor: { enabled: false, version: 'standard' },
+          antigravity: { enabled: false, version: 'frontmatter' },
+        },
+        formatting: {
+          tabWidth: 4,
+          proseWrap: 'always',
+          printWidth: 120,
+        },
+      };
+
+      setConfig(newConfig);
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config).toEqual(newConfig);
     });
   });
 
@@ -424,6 +461,83 @@ describe('PlaygroundStore', () => {
 
       const outputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'cursor');
       expect(outputs).toHaveLength(2);
+    });
+
+    it('selectOutputForFormatter should return first output (legacy selector)', () => {
+      const { setCompileResult } = usePlaygroundStore.getState();
+      const outputMap = new Map([
+        ['CLAUDE.md', { path: 'CLAUDE.md', content: 'claude main' }],
+        ['.claude/rules/test.md', { path: '.claude/rules/test.md', content: 'claude rule' }],
+      ]);
+      setCompileResult({
+        success: true,
+        outputs: outputMap,
+        errors: [],
+        warnings: [],
+        stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+      });
+
+      const output = selectOutputForFormatter(usePlaygroundStore.getState(), 'claude');
+      expect(output).toBeDefined();
+      expect(output?.path).toBe('CLAUDE.md');
+    });
+
+    it('selectOutputForFormatter should return undefined when no outputs', () => {
+      const output = selectOutputForFormatter(usePlaygroundStore.getState(), 'claude');
+      expect(output).toBeUndefined();
+    });
+
+    it('selectErrors should return errors array', () => {
+      const { setCompileResult } = usePlaygroundStore.getState();
+      setCompileResult({
+        success: false,
+        outputs: new Map(),
+        errors: [
+          { name: 'Error', code: 'PS0001', message: 'Test error 1' },
+          { name: 'Error', code: 'PS0002', message: 'Test error 2' },
+        ],
+        warnings: [],
+        stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+      });
+
+      const errors = selectErrors(usePlaygroundStore.getState());
+      expect(errors).toHaveLength(2);
+      expect(errors[0].message).toBe('Test error 1');
+    });
+
+    it('selectErrors should return empty array when no compile result', () => {
+      const errors = selectErrors(usePlaygroundStore.getState());
+      expect(errors).toEqual([]);
+    });
+
+    it('selectHasErrors should return true when there are errors', () => {
+      const { setCompileResult } = usePlaygroundStore.getState();
+      setCompileResult({
+        success: false,
+        outputs: new Map(),
+        errors: [{ name: 'Error', code: 'PS0001', message: 'Test error' }],
+        warnings: [],
+        stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+      });
+
+      expect(selectHasErrors(usePlaygroundStore.getState())).toBe(true);
+    });
+
+    it('selectHasErrors should return false when no errors', () => {
+      const { setCompileResult } = usePlaygroundStore.getState();
+      setCompileResult({
+        success: true,
+        outputs: new Map(),
+        errors: [],
+        warnings: [],
+        stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+      });
+
+      expect(selectHasErrors(usePlaygroundStore.getState())).toBe(false);
+    });
+
+    it('selectHasErrors should return false when no compile result', () => {
+      expect(selectHasErrors(usePlaygroundStore.getState())).toBe(false);
     });
   });
 });

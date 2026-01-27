@@ -1,9 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   PRS_LANGUAGE_ID,
   prsLanguageDefinition,
   prsLanguageConfiguration,
   prsThemeRules,
+  registerPrsLanguage,
+  createPrsCompletionProvider,
 } from '../utils/prs-language';
 
 describe('prs-language', () => {
@@ -137,6 +139,198 @@ describe('prs-language', () => {
       expect(tokens).toContain('number');
       expect(tokens).toContain('identifier');
       expect(tokens).toContain('delimiter');
+    });
+  });
+
+  describe('registerPrsLanguage', () => {
+    it('should register language with Monaco', () => {
+      const mockMonaco = {
+        languages: {
+          getLanguages: vi.fn().mockReturnValue([]),
+          register: vi.fn(),
+          setMonarchTokensProvider: vi.fn(),
+          setLanguageConfiguration: vi.fn(),
+        },
+        editor: {
+          defineTheme: vi.fn(),
+        },
+      };
+
+      registerPrsLanguage(mockMonaco as never);
+
+      expect(mockMonaco.languages.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: PRS_LANGUAGE_ID,
+          extensions: ['.prs'],
+        })
+      );
+      expect(mockMonaco.languages.setMonarchTokensProvider).toHaveBeenCalledWith(
+        PRS_LANGUAGE_ID,
+        prsLanguageDefinition
+      );
+      expect(mockMonaco.languages.setLanguageConfiguration).toHaveBeenCalledWith(
+        PRS_LANGUAGE_ID,
+        prsLanguageConfiguration
+      );
+      expect(mockMonaco.editor.defineTheme).toHaveBeenCalledWith(
+        'prs-dark',
+        expect.objectContaining({
+          base: 'vs-dark',
+          inherit: true,
+          rules: prsThemeRules,
+        })
+      );
+    });
+
+    it('should not register if language already exists', () => {
+      const mockMonaco = {
+        languages: {
+          getLanguages: vi.fn().mockReturnValue([{ id: PRS_LANGUAGE_ID }]),
+          register: vi.fn(),
+          setMonarchTokensProvider: vi.fn(),
+          setLanguageConfiguration: vi.fn(),
+        },
+        editor: {
+          defineTheme: vi.fn(),
+        },
+      };
+
+      registerPrsLanguage(mockMonaco as never);
+
+      expect(mockMonaco.languages.register).not.toHaveBeenCalled();
+      expect(mockMonaco.languages.setMonarchTokensProvider).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createPrsCompletionProvider', () => {
+    it('should return a completion provider', () => {
+      const mockMonaco = {
+        languages: {
+          CompletionItemKind: {
+            Keyword: 14,
+          },
+          CompletionItemInsertTextRule: {
+            InsertAsSnippet: 4,
+          },
+        },
+      };
+
+      const provider = createPrsCompletionProvider(mockMonaco as never);
+
+      expect(provider).toBeDefined();
+      expect(typeof provider.provideCompletionItems).toBe('function');
+    });
+
+    it('should provide directive completions', () => {
+      const mockMonaco = {
+        languages: {
+          CompletionItemKind: {
+            Keyword: 14,
+          },
+          CompletionItemInsertTextRule: {
+            InsertAsSnippet: 4,
+          },
+        },
+      };
+
+      const mockModel = {
+        getWordUntilPosition: vi.fn().mockReturnValue({
+          word: '@',
+          startColumn: 1,
+          endColumn: 2,
+        }),
+      };
+
+      const mockPosition = {
+        lineNumber: 1,
+        column: 2,
+      };
+
+      const provider = createPrsCompletionProvider(mockMonaco as never);
+      const result = provider.provideCompletionItems(mockModel as never, mockPosition as never);
+
+      expect(result.suggestions).toBeDefined();
+      expect(result.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result.suggestions.map((s: { label: string }) => s.label);
+      expect(labels).toContain('@meta');
+      expect(labels).toContain('@inherit');
+      expect(labels).toContain('@identity');
+      expect(labels).toContain('@context');
+      expect(labels).toContain('@standards');
+      expect(labels).toContain('@restrictions');
+      expect(labels).toContain('@shortcuts');
+      expect(labels).toContain('@tools');
+      expect(labels).toContain('@examples');
+    });
+
+    it('should provide snippet insertText for directives', () => {
+      const mockMonaco = {
+        languages: {
+          CompletionItemKind: {
+            Keyword: 14,
+          },
+          CompletionItemInsertTextRule: {
+            InsertAsSnippet: 4,
+          },
+        },
+      };
+
+      const mockModel = {
+        getWordUntilPosition: vi.fn().mockReturnValue({
+          word: '',
+          startColumn: 1,
+          endColumn: 1,
+        }),
+      };
+
+      const mockPosition = {
+        lineNumber: 1,
+        column: 1,
+      };
+
+      const provider = createPrsCompletionProvider(mockMonaco as never);
+      const result = provider.provideCompletionItems(mockModel as never, mockPosition as never);
+
+      const metaSuggestion = result.suggestions.find((s: { label: string }) => s.label === '@meta');
+      expect(metaSuggestion).toBeDefined();
+      expect(metaSuggestion.insertText).toContain('@meta');
+      expect(metaSuggestion.insertText).toContain('$1');
+      expect(metaSuggestion.insertTextRules).toBe(4); // InsertAsSnippet
+    });
+
+    it('should include documentation for suggestions', () => {
+      const mockMonaco = {
+        languages: {
+          CompletionItemKind: {
+            Keyword: 14,
+          },
+          CompletionItemInsertTextRule: {
+            InsertAsSnippet: 4,
+          },
+        },
+      };
+
+      const mockModel = {
+        getWordUntilPosition: vi.fn().mockReturnValue({
+          word: '',
+          startColumn: 1,
+          endColumn: 1,
+        }),
+      };
+
+      const mockPosition = {
+        lineNumber: 1,
+        column: 1,
+      };
+
+      const provider = createPrsCompletionProvider(mockMonaco as never);
+      const result = provider.provideCompletionItems(mockModel as never, mockPosition as never);
+
+      result.suggestions.forEach((suggestion: { documentation?: string }) => {
+        expect(suggestion.documentation).toBeDefined();
+        expect(typeof suggestion.documentation).toBe('string');
+      });
     });
   });
 });
