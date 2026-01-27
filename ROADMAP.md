@@ -2,18 +2,32 @@
 
 > **Vision:** Make PromptScript the industry standard for AI context management—the Terraform of prompts.
 
-## 🎯 Current Focus
+## ✅ Recently Completed
 
-### Web Playground (Now)
+### Web Playground
 
 **Goal:** Try PromptScript without installing anything.
 
-- [ ] **WASM-compiled parser/compiler**
-- [ ] **Interactive browser editor**
-  - Monaco editor integration
-  - Live preview of all output formats
-  - Share via URL
-- [ ] **Example gallery**
+- [x] **Browser-compatible compiler** (pure JS, no WASM needed)
+- [x] **Interactive browser editor**
+  - Monaco editor with PRS syntax highlighting
+  - Live preview of all output formats (GitHub, Claude, Cursor, Antigravity)
+  - Share via URL with config settings
+  - Multi-file support with tab-based editing
+- [x] **Example gallery** (10 examples from beginner to advanced)
+- [x] **Config panel** for target/formatting settings
+
+---
+
+## 🎯 Current Focus
+
+### VS Code Extension
+
+**Goal:** First-class editing experience in VS Code.
+
+- [ ] **Syntax highlighting** for `.prs` files
+- [ ] **Snippets** for common patterns
+- [ ] **Preview pane** — See compiled output side-by-side
 
 ---
 

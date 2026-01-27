@@ -19,7 +19,6 @@ Fixes #(issue number)
 - [ ] I have added tests that prove my fix/feature works
 - [ ] All new and existing tests pass
 - [ ] I have updated the documentation accordingly
-- [ ] I have added an entry to CHANGELOG.md
 
 ## Screenshots (if applicable)
 

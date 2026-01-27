@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Features
+
+- **playground:** Add web playground for trying PromptScript in the browser
+  - Monaco editor with PRS syntax highlighting
+  - Live compilation preview for all output formats (GitHub, Claude, Cursor, Antigravity)
+  - URL sharing with LZ-String compression (includes files, formatter, config settings)
+  - Example gallery with 10 examples from beginner to advanced
+  - Config panel for target/formatting settings
+  - Multi-file tab support with smart naming for duplicates
+  - Disabled formatters are visually indicated and non-clickable
+
+- **browser-compiler:** New package for browser-based compilation
+  - In-memory virtual file system
+  - Browser-compatible resolver (no Node.js dependencies)
+  - Bundled registry files for `@inherit` support
+
+### Bug Fixes
+
+- **formatters:** Fix indentation issues in generated SKILL.md, instructions, rules, and agent files
+  - Add `dedent()` method to GitHub, Claude, and Cursor formatters
+  - Properly handle multiline strings where first line was trimmed
+
+- **formatters:** Cursor formatter now uses full identity content when it starts with "You are"
+
 ## [1.0.0-alpha.5](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2026-01-27)
 
 

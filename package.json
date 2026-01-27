@@ -15,6 +15,7 @@
     "docs:serve": "mkdocs serve",
     "docs:build": "mkdocs build --strict",
     "docs:generate": "typedoc",
+    "playground:serve": "nx serve playground",
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "prepare": "husky"
   },
@@ -42,6 +43,7 @@
     "husky": "^9.1.7",
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "22.3.3",
+    "path-browserify": "^1.0.1",
     "prettier": "~3.6.2",
     "ts-json-schema-generator": "^2.4.0",
     "ts-node": "^10.9.2",

@@ -114,6 +114,49 @@ jobs:
       - name: Copy 404.html to root
         run: cp docs/404.html gh-pages-content/404.html
 
+      - name: Build playground
+        run: pnpm nx build playground
+
+      - name: Deploy playground version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ALIAS="${{ steps.version.outputs.alias }}"
+
+          # Create playground directory if needed
+          mkdir -p gh-pages-content/playground
+
+          # Deploy to versioned directory (dev or vX.Y.Z)
+          rm -rf "gh-pages-content/playground/$VERSION"
+          cp -r dist/packages/playground "gh-pages-content/playground/$VERSION"
+
+          # If this is a release, also update 'latest'
+          if [[ "$ALIAS" == "latest" ]]; then
+            rm -rf gh-pages-content/playground/latest
+            cp -r dist/packages/playground gh-pages-content/playground/latest
+          fi
+
+          # Create index.html redirect to latest (or dev if no latest exists)
+          if [[ -d "gh-pages-content/playground/latest" ]]; then
+            DEFAULT_VERSION="latest"
+          else
+            DEFAULT_VERSION="dev"
+          fi
+
+          cat > gh-pages-content/playground/index.html << EOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Redirecting...</title>
+            <meta http-equiv="refresh" content="0; url=./$DEFAULT_VERSION/">
+            <link rel="canonical" href="./$DEFAULT_VERSION/">
+          </head>
+          <body>
+            <p>Redirecting to <a href="./$DEFAULT_VERSION/">playground/$DEFAULT_VERSION/</a>...</p>
+          </body>
+          </html>
+          EOF
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:

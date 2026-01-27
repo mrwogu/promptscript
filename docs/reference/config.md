@@ -311,6 +311,15 @@ targets:
 Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`.
 Type `/` in Cursor chat (1.6+) to invoke them. See [Language Reference](language.md#cursor-slash-commands-16).
 
+!!! info "Cursor Identity Handling"
+The Cursor formatter handles `@identity` blocks intelligently:
+
+    - If the identity starts with "You are...", the **full content** is used as the intro
+    - Otherwise, a generated intro like "You are working on {project}" is created
+    - Multiline strings are automatically dedented to remove source indentation
+
+    This means your `@identity` content appears exactly as written (without extra indentation).
+
 **Target Configuration:**
 
 Targets can be specified as simple names or with configuration:

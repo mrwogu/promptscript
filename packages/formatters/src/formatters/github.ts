@@ -402,7 +402,9 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push(`# ${config.description}`);
     lines.push('');
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content to handle multiline strings where line 1 was trimmed
+      const dedentedContent = this.dedent(config.content);
+      lines.push(dedentedContent);
     }
 
     return {
@@ -530,7 +532,9 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('---');
     lines.push('');
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content to handle multiline strings where line 1 was trimmed
+      const dedentedContent = this.dedent(config.content);
+      lines.push(dedentedContent);
     }
 
     return {
@@ -586,8 +590,10 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('---');
     lines.push('');
     if (config.content) {
-      // Normalize content for Prettier: trim trailing whitespace from table cells
-      const normalizedContent = this.normalizeMarkdownForPrettier(config.content);
+      // First dedent (using lines 2+ for indent calculation since line 1 may be trimmed)
+      // Then normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       lines.push(normalizedContent);
     }
 
@@ -595,6 +601,38 @@ export class GitHubFormatter extends BaseFormatter {
       path: `.github/skills/${config.name}/SKILL.md`,
       content: lines.join('\n') + '\n',
     };
+  }
+
+  /**
+   * Remove common leading indentation from multiline text.
+   * Calculates minimum indent from lines 2+ only, since line 1 may have been
+   * trimmed (losing its indentation) while subsequent lines retain theirs.
+   */
+  private dedent(text: string): string {
+    const lines = text.split('\n');
+    if (lines.length <= 1) return text.trim();
+
+    // Calculate minimum indent from lines 2+ only
+    const minIndent = lines
+      .slice(1)
+      .filter((line) => line.trim().length > 0)
+      .reduce((min, line) => {
+        const match = line.match(/^(\s*)/);
+        const indent = match?.[1]?.length ?? 0;
+        return Math.min(min, indent);
+      }, Infinity);
+
+    if (minIndent === 0 || minIndent === Infinity) {
+      return text.trim();
+    }
+
+    const firstLine = lines[0] ?? '';
+    return [
+      firstLine.trim(),
+      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
+    ]
+      .join('\n')
+      .trim();
   }
 
   // ============================================================
@@ -781,7 +819,9 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('');
 
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content to handle multiline strings where line 1 was trimmed
+      const dedentedContent = this.dedent(config.content);
+      lines.push(dedentedContent);
     }
 
     return {
