@@ -592,6 +592,15 @@ describe('CursorFormatter', () => {
         expect(result.path).toBe('.cursor/rules/project.mdc');
         expect(result.content).toMatch(/^---\n/);
       });
+
+      it('should default to modern format for unknown version', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'unknown-version' });
+
+        expect(result.path).toBe('.cursor/rules/project.mdc');
+        expect(result.content).toMatch(/^---\n/);
+        expect(result.content).toContain('alwaysApply: true');
+      });
     });
 
     describe('legacy format', () => {
