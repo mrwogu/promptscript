@@ -22,17 +22,22 @@ program
   .description('PromptScript CLI - Standardize AI instructions')
   .version(getPackageVersion(__dirname, './package.json'))
   .option('--verbose', 'Enable verbose output')
+  .option('--debug', 'Enable debug output (includes verbose)')
   .option('--quiet', 'Suppress non-error output')
   .hook('preAction', (thisCommand) => {
     const opts = thisCommand.opts();
-    // Set global context based on flags
+    // Set global context based on flags (debug > verbose > quiet)
     if (opts['quiet']) {
       setContext({ logLevel: LogLevel.Quiet });
+    } else if (opts['debug']) {
+      setContext({ logLevel: LogLevel.Debug });
     } else if (opts['verbose']) {
       setContext({ logLevel: LogLevel.Verbose });
     }
-    // Also check environment variables
-    if (
+    // Also check environment variables (debug takes precedence)
+    if (process.env['PROMPTSCRIPT_DEBUG'] === '1' || process.env['PROMPTSCRIPT_DEBUG'] === 'true') {
+      setContext({ logLevel: LogLevel.Debug });
+    } else if (
       process.env['PROMPTSCRIPT_VERBOSE'] === '1' ||
       process.env['PROMPTSCRIPT_VERBOSE'] === 'true'
     ) {

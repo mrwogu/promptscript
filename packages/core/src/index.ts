@@ -19,3 +19,6 @@ export * from './errors/index.js';
 
 // Utilities
 export * from './utils/index.js';
+
+// Logger
+export * from './logger.js';

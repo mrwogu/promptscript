@@ -1,4 +1,4 @@
-import type { PSError } from '@promptscript/core';
+import { noopLogger, type Logger, type PSError } from '@promptscript/core';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { Resolver, type ResolvedAST } from '@promptscript/resolver';
 import { Validator, type ValidatorConfig } from '@promptscript/validator';
@@ -105,11 +105,15 @@ export class Compiler {
   private readonly resolver: Resolver;
   private readonly validator: Validator;
   private readonly loadedFormatters: LoadedFormatter[];
+  private readonly logger: Logger;
 
   constructor(private readonly options: CompilerOptions) {
-    this.resolver = new Resolver(options.resolver);
-    this.validator = new Validator(options.validator);
+    this.logger = options.logger ?? noopLogger;
+    this.resolver = new Resolver({ ...options.resolver, logger: this.logger });
+    this.validator = new Validator({ ...options.validator, logger: this.logger });
     this.loadedFormatters = this.loadFormatters(options.formatters);
+
+    this.logger.debug(`Compiler initialized with ${this.loadedFormatters.length} formatters`);
   }
 
   /**
@@ -119,6 +123,11 @@ export class Compiler {
    * @returns Compilation result with outputs, errors, and stats
    */
   async compile(entryPath: string): Promise<CompileResult> {
+    this.logger.verbose(`Entry: ${entryPath}`);
+    this.logger.verbose(
+      `Targets: ${this.loadedFormatters.map((f) => f.formatter.name).join(', ')}`
+    );
+
     const startTotal = Date.now();
     const stats: CompileStats = {
       resolveTime: 0,
@@ -128,6 +137,7 @@ export class Compiler {
     };
 
     // Stage 1: Resolve
+    this.logger.verbose('=== Stage 1: Resolve ===');
     const startResolve = Date.now();
     let resolved: ResolvedAST;
 
@@ -136,6 +146,7 @@ export class Compiler {
     } catch (err) {
       stats.resolveTime = Date.now() - startResolve;
       stats.totalTime = Date.now() - startTotal;
+      this.logger.verbose(`Resolve failed (${stats.resolveTime}ms)`);
 
       return {
         success: false,
@@ -147,6 +158,7 @@ export class Compiler {
     }
 
     stats.resolveTime = Date.now() - startResolve;
+    this.logger.verbose(`Resolve completed (${stats.resolveTime}ms)`);
 
     // Check for resolve errors
     if (resolved.errors.length > 0 || !resolved.ast) {
@@ -162,9 +174,11 @@ export class Compiler {
     }
 
     // Stage 2: Validate
+    this.logger.verbose('=== Stage 2: Validate ===');
     const startValidate = Date.now();
     const validation = this.validator.validate(resolved.ast);
     stats.validateTime = Date.now() - startValidate;
+    this.logger.verbose(`Validate completed (${stats.validateTime}ms)`);
 
     // Check for validation errors
     if (!validation.valid) {
@@ -180,14 +194,24 @@ export class Compiler {
     }
 
     // Stage 3: Format
+    this.logger.verbose('=== Stage 3: Format ===');
     const startFormat = Date.now();
     const outputs = new Map<string, FormatterOutput>();
     const formatErrors: CompileError[] = [];
 
     for (const { formatter, config } of this.loadedFormatters) {
+      const formatterStart = Date.now();
+      this.logger.verbose(`Formatting for ${formatter.name}`);
+
       try {
         const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
+        this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
+
         const output = formatter.format(resolved.ast, formatOptions);
+        const formatterTime = Date.now() - formatterStart;
+
+        this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
+
         // Use output path as key to support multiple targets with same formatter
         // (e.g., cursor modern + cursor legacy)
         // Add PromptScript marker to all outputs for overwrite detection
@@ -196,6 +220,7 @@ export class Compiler {
         // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
         if (output.additionalFiles) {
           for (const additionalFile of output.additionalFiles) {
+            this.logger.verbose(`  → ${additionalFile.path} (additional)`);
             outputs.set(additionalFile.path, addMarkerToOutput(additionalFile));
           }
         }
@@ -210,6 +235,7 @@ export class Compiler {
 
     stats.formatTime = Date.now() - startFormat;
     stats.totalTime = Date.now() - startTotal;
+    this.logger.verbose(`Format completed (${stats.formatTime}ms)`);
 
     if (formatErrors.length > 0) {
       return {

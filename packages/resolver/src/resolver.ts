@@ -1,5 +1,5 @@
 import { parse } from '@promptscript/parser';
-import type { Program } from '@promptscript/core';
+import { noopLogger, type Logger, type Program } from '@promptscript/core';
 import { ResolveError, CircularDependencyError, FileNotFoundError } from '@promptscript/core';
 import { FileLoader, type LoaderOptions } from './loader.js';
 import { resolveInheritance } from './inheritance.js';
@@ -13,6 +13,8 @@ import { resolveNativeSkills } from './skills.js';
 export interface ResolverOptions extends LoaderOptions {
   /** Whether to cache resolved ASTs. Defaults to true. */
   cache?: boolean;
+  /** Logger for verbose/debug output */
+  logger?: Logger;
 }
 
 /**
@@ -53,12 +55,14 @@ export class Resolver {
   private readonly cache: Map<string, ResolvedAST>;
   private readonly resolving: Set<string>;
   private readonly cacheEnabled: boolean;
+  private readonly logger: Logger;
 
   constructor(options: ResolverOptions) {
     this.loader = new FileLoader(options);
     this.cache = new Map();
     this.resolving = new Set();
     this.cacheEnabled = options.cache !== false;
+    this.logger = options.logger ?? noopLogger;
   }
 
   /**
@@ -73,20 +77,24 @@ export class Resolver {
 
     // Check for circular dependency
     if (this.resolving.has(absPath)) {
+      this.logger.debug(`Circular dependency detected: ${absPath}`);
       throw new CircularDependencyError([...this.resolving, absPath]);
     }
 
     // Check cache
     if (this.cacheEnabled && this.cache.has(absPath)) {
+      this.logger.debug(`Cache hit: ${absPath}`);
       return this.cache.get(absPath)!;
     }
 
     this.resolving.add(absPath);
+    this.logger.verbose(`Parsing ${absPath}`);
 
     try {
       const result = await this.doResolve(absPath);
 
       if (this.cacheEnabled) {
+        this.logger.debug(`Cache store: ${absPath}`);
         this.cache.set(absPath, result);
       }
 
@@ -110,6 +118,7 @@ export class Resolver {
     }
 
     let ast = parseData.ast;
+    this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     // Resolve inheritance
     ast = await this.resolveInherit(ast, absPath, sources, errors);
@@ -118,16 +127,33 @@ export class Resolver {
     ast = await this.resolveImports(ast, absPath, sources, errors);
 
     // Apply extensions
+    if (ast.extends.length > 0) {
+      this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
+    }
     ast = applyExtends(ast);
 
     // Resolve native skill files (replace @skills content with SKILL.md files if available)
     ast = await resolveNativeSkills(ast, this.loader.getRegistryPath(), absPath);
 
+    this.logger.debug(`Resolved ${sources.length} source file(s)`);
     return {
       ast,
       sources: [...new Set(sources)],
       errors,
     };
+  }
+
+  /**
+   * Count nodes in AST for debug output.
+   */
+  private countNodes(ast: Program): number {
+    let count = 1; // Program node itself
+    if (ast.meta) count++;
+    if (ast.inherit) count++;
+    count += ast.uses.length;
+    count += ast.blocks.length;
+    count += ast.extends.length;
+    return count;
   }
 
   /**
@@ -179,6 +205,8 @@ export class Resolver {
     }
 
     const parentPath = this.loader.resolveRef(ast.inherit.path, absPath);
+    this.logger.verbose(`Resolving inherit: ${ast.inherit.path}`);
+    this.logger.verbose(`  → ${parentPath}`);
 
     try {
       const parent = await this.resolve(parentPath);
@@ -186,6 +214,7 @@ export class Resolver {
       errors.push(...parent.errors);
 
       if (parent.ast) {
+        this.logger.debug(`Merging with parent AST`);
         return resolveInheritance(parent.ast, ast);
       }
     } catch (err) {
@@ -211,6 +240,8 @@ export class Resolver {
 
     for (const use of ast.uses) {
       const importPath = this.loader.resolveRef(use.path, absPath);
+      this.logger.verbose(`Resolving import: ${use.path}`);
+      this.logger.verbose(`  → ${importPath}`);
 
       try {
         const imported = await this.resolve(importPath);
@@ -218,6 +249,7 @@ export class Resolver {
         errors.push(...imported.errors);
 
         if (imported.ast) {
+          this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);
           result = resolveUses(result, use, imported.ast);
         }
       } catch (err) {

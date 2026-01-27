@@ -1,4 +1,4 @@
-import type { Program } from '@promptscript/core';
+import { noopLogger, type Logger, type Program } from '@promptscript/core';
 import type {
   ValidationRule,
   ValidatorConfig,
@@ -35,6 +35,7 @@ export class Validator {
   private rules: ValidationRule[];
   private config: ValidatorConfig;
   private disabledRules: Set<string>;
+  private logger: Logger;
 
   /**
    * Create a new validator instance.
@@ -45,6 +46,7 @@ export class Validator {
     this.config = config;
     this.rules = [...allRules];
     this.disabledRules = new Set(config.disableRules ?? []);
+    this.logger = config.logger ?? noopLogger;
 
     // Add custom rules if provided
     if (config.customRules) {
@@ -52,6 +54,8 @@ export class Validator {
         this.rules.push(rule);
       }
     }
+
+    this.logger.debug(`Validator initialized with ${this.rules.length} rules`);
   }
 
   /**
@@ -62,10 +66,16 @@ export class Validator {
    */
   validate(ast: Program): ValidationResult {
     const messages: ValidationMessage[] = [];
+    const activeRules = this.rules.filter(
+      (r) => !this.disabledRules.has(r.name) && !this.disabledRules.has(r.id)
+    );
+
+    this.logger.verbose(`Running ${activeRules.length} validation rules`);
 
     for (const rule of this.rules) {
       // Skip if rule is disabled via disableRules
       if (this.disabledRules.has(rule.name) || this.disabledRules.has(rule.id)) {
+        this.logger.debug(`Skipping disabled rule: ${rule.name}`);
         continue;
       }
 
@@ -75,8 +85,11 @@ export class Validator {
 
       // Skip if rule is turned off
       if (severity === 'off') {
+        this.logger.debug(`Skipping off rule: ${rule.name}`);
         continue;
       }
+
+      this.logger.debug(`Running rule: ${rule.name} (${severity})`);
 
       // Create rule context
       const ctx: RuleContext = {
@@ -100,6 +113,10 @@ export class Validator {
     const errors = messages.filter((m) => m.severity === 'error');
     const warnings = messages.filter((m) => m.severity === 'warning');
     const infos = messages.filter((m) => m.severity === 'info');
+
+    if (errors.length > 0 || warnings.length > 0) {
+      this.logger.verbose(`Validation: ${errors.length} error(s), ${warnings.length} warning(s)`);
+    }
 
     return {
       valid: errors.length === 0,

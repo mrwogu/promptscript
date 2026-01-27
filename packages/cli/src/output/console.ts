@@ -11,6 +11,8 @@ export enum LogLevel {
   Normal = 1,
   /** Verbose output with additional details */
   Verbose = 2,
+  /** Debug output with maximum details */
+  Debug = 3,
 }
 
 /**
@@ -57,6 +59,13 @@ export function isVerbose(): boolean {
  */
 export function isQuiet(): boolean {
   return globalContext.logLevel <= LogLevel.Quiet;
+}
+
+/**
+ * Check if debug logging is enabled.
+ */
+export function isDebug(): boolean {
+  return globalContext.logLevel >= LogLevel.Debug;
 }
 
 /**

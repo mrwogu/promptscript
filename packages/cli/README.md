@@ -69,6 +69,8 @@ Options:
   --dry-run               Preview changes without writing files
   --force                 Force overwrite existing files without prompts
   --registry <path>       Path or URL to registry
+  --verbose               Show detailed compilation progress
+  --debug                 Show debug information (includes verbose)
 ```
 
 **Watch Mode:** Uses [chokidar](https://github.com/paulmillr/chokidar) for reliable file watching across all platforms. Automatically recompiles when `.prs` files change.

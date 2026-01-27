@@ -1,4 +1,9 @@
-import type { OutputConvention, PrettierMarkdownOptions, Program } from '@promptscript/core';
+import type {
+  Logger,
+  OutputConvention,
+  PrettierMarkdownOptions,
+  Program,
+} from '@promptscript/core';
 import type { ResolverOptions } from '@promptscript/resolver';
 import type { ValidatorConfig, ValidationMessage } from '@promptscript/validator';
 
@@ -87,6 +92,8 @@ export interface CompilerOptions {
   customConventions?: Record<string, OutputConvention>;
   /** Prettier formatting options for markdown output */
   prettier?: PrettierMarkdownOptions;
+  /** Logger for verbose/debug output */
+  logger?: Logger;
 }
 
 /**

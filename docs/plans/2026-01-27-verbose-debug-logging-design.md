@@ -13,12 +13,12 @@ Add a `Logger` interface that flows through the compilation pipeline. Each compo
 
 ## Log Levels
 
-| Level | Flag | Shows |
-|-------|------|-------|
-| Quiet | `--quiet` | Errors only |
-| Normal | (default) | Result + stats |
+| Level   | Flag        | Shows                                               |
+| ------- | ----------- | --------------------------------------------------- |
+| Quiet   | `--quiet`   | Errors only                                         |
+| Normal  | (default)   | Result + stats                                      |
 | Verbose | `--verbose` | + pipeline stages, files, imports, per-stage timing |
-| Debug | `--debug` | + AST nodes, tokens, validation details, cache hits |
+| Debug   | `--debug`   | + AST nodes, tokens, validation details, cache hits |
 
 ## Logger Interface
 
@@ -167,19 +167,19 @@ Shows everything from verbose, plus:
 
 ### Files to Modify
 
-| Package | File | Change |
-|---------|------|--------|
-| core | `src/logger.ts` | **New** - Logger interface |
-| core | `src/index.ts` | Export Logger |
-| cli | `src/output/console.ts` | Add `LogLevel.Debug`, update `isDebug()` |
-| cli | `src/cli.ts` | Add `--debug` option |
-| compiler | `src/types.ts` | Add `logger?: Logger` to CompilerOptions |
-| compiler | `src/compiler.ts` | Log stage transitions |
-| resolver | `src/types.ts` | Add `logger?: Logger` to ResolverOptions |
-| resolver | `src/resolver.ts` | Log parsing, imports, inheritance |
-| validator | `src/types.ts` | Add `logger?: Logger` to ValidatorConfig |
-| validator | `src/validator.ts` | Log rule execution |
-| cli | `src/commands/compile.ts` | Create logger, pass to Compiler |
+| Package   | File                      | Change                                   |
+| --------- | ------------------------- | ---------------------------------------- |
+| core      | `src/logger.ts`           | **New** - Logger interface               |
+| core      | `src/index.ts`            | Export Logger                            |
+| cli       | `src/output/console.ts`   | Add `LogLevel.Debug`, update `isDebug()` |
+| cli       | `src/cli.ts`              | Add `--debug` option                     |
+| compiler  | `src/types.ts`            | Add `logger?: Logger` to CompilerOptions |
+| compiler  | `src/compiler.ts`         | Log stage transitions                    |
+| resolver  | `src/types.ts`            | Add `logger?: Logger` to ResolverOptions |
+| resolver  | `src/resolver.ts`         | Log parsing, imports, inheritance        |
+| validator | `src/types.ts`            | Add `logger?: Logger` to ValidatorConfig |
+| validator | `src/validator.ts`        | Log rule execution                       |
+| cli       | `src/commands/compile.ts` | Create logger, pass to Compiler          |
 
 ### Tests
 
