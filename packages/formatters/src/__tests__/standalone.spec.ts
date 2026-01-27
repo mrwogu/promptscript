@@ -31,7 +31,7 @@ function createTestProgram(overrides: Partial<Program> = {}): Program {
       {
         type: 'Block',
         loc: defaultLoc,
-        name: 'project',
+        name: 'identity',
         content: {
           type: 'TextContent',
           loc: defaultLoc,
@@ -51,7 +51,7 @@ describe('format (standalone)', () => {
     const output = format(ast);
 
     expect(output.path).toBe('.github/copilot-instructions.md');
-    expect(output.content).toContain('test-project');
+    expect(output.content).toContain('Test project content');
   });
 
   it('should accept formatter by name', () => {

@@ -3,6 +3,8 @@ name: 'testing-code'
 description: 'Writes comprehensive tests following AAA pattern. Use for unit and integration tests.'
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+
 # Testing Code
 
 ## AAA Pattern

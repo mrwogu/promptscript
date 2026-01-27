@@ -5,6 +5,8 @@ tools: ['read', 'edit', 'execute', 'search']
 model: Claude Sonnet 4.5
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+
 You are a debugging specialist for PromptScript.
 
       ## Architecture Knowledge

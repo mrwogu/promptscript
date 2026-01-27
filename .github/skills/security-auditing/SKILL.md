@@ -3,6 +3,8 @@ name: 'security-auditing'
 description: 'Audits code for security vulnerabilities and OWASP issues. Use when reviewing security, checking for vulnerabilities, or when asked to audit code security.'
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+
 # Security Auditing
 
 ## OWASP Top 10 Checklist

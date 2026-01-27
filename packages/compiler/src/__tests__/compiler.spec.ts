@@ -351,9 +351,10 @@ describe('Compiler', () => {
       expect(result.outputs.has('.cursor/commands/test.md')).toBe(true);
       expect(result.outputs.has('.cursor/commands/build.md')).toBe(true);
 
-      // Verify additional file content
+      // Verify additional file content (marker is prepended by compiler)
       const testCommand = result.outputs.get('.cursor/commands/test.md');
-      expect(testCommand?.content).toBe('Test command content');
+      expect(testCommand?.content).toContain('Test command content');
+      expect(testCommand?.content).toContain('<!-- PromptScript');
     });
 
     it('should pass warnings from validation', async () => {

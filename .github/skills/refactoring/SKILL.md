@@ -3,6 +3,8 @@ name: 'refactoring'
 description: 'Improves code structure without changing behavior. Use when cleaning up code, reducing complexity, or when asked to refactor.'
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+
 # Refactoring
 
 ## Golden Rule

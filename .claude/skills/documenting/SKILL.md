@@ -3,6 +3,8 @@ name: 'documenting'
 description: 'Creates clear, maintainable documentation for code and APIs. Use when writing README files, API docs, code comments, or when asked to document code.'
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+
 # Documenting
 
 ## Documentation Types

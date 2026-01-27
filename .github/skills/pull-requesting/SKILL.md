@@ -3,6 +3,8 @@ name: 'pull-requesting'
 description: 'Creates well-structured pull requests with clear descriptions. Use when creating PRs, preparing changes for review, or when asked to open a pull request.'
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+
 # Pull Requesting
 
 ## PR Structure

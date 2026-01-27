@@ -3,6 +3,8 @@ name: 'debugging'
 description: "Systematically debugs issues using scientific method. Use when investigating bugs, fixing errors, or when something isn't working as expected."
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+
 # Debugging
 
 ## Scientific Method

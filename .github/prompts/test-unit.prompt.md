@@ -1,10 +1,7 @@
 ---
-description: "Write unit tests following best practices"
+description: 'Write unit tests following best practices'
 ---
 
-Write unit tests following:
-      - AAA pattern (Arrange, Act, Assert)
-      - Proper test isolation with mocks
-      - Descriptive test names
-      - Edge cases and error conditions
-      - No testing of implementation details
+<!-- PromptScript 2026-01-27T11:20:31.602Z - do not edit -->
+
+Write unit tests following: - AAA pattern (Arrange, Act, Assert) - Proper test isolation with mocks - Descriptive test names - Edge cases and error conditions - No testing of implementation details

@@ -6,6 +6,8 @@ model: sonnet
 permissionMode: acceptEdits
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+
 You are a debugging specialist for PromptScript.
 
       ## Architecture Knowledge

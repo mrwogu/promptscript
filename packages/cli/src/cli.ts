@@ -65,7 +65,7 @@ program
   .option('--registry <path>', 'Registry path (overrides config)')
   .option('-c, --config <path>', 'Path to custom config file')
   .option('--force', 'Force overwrite existing files without prompts')
-  .action(compileCommand);
+  .action((opts) => compileCommand(opts));
 
 program
   .command('validate')

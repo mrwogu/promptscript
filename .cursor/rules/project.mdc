@@ -3,6 +3,8 @@ description: "Project-specific rules"
 alwaysApply: true
 ---
 
+<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+
 You are working on PromptScript at PromptScript.
 
 Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
@@ -55,27 +57,27 @@ Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
   - packages/*/package.json - Package manifest
 
 Code style:
-- useUnknown: with type guards instead of any
-- interfaces: for object shapes
-- types: for unions and intersections
-- exports: named only, no default exports
-- returnTypes: explicit on public functions
-- target: ES2022 or later
-- moduleResolution: NodeNext or Bundler
-- declaration: generate .d.ts files
-- files: kebab-case.ts
-- classes: PascalCase
-- interfaces: PascalCase
-- functions: camelCase
-- variables: camelCase
-- constants: UPPER_SNAKE_CASE
-- customClasses: extend PSError
-- messages: actionable
-- filePattern: *.spec.ts next to source
-- pattern: AAA (Arrange, Act, Assert)
-- fixtures: for parser tests
-- framework: vitest
-- types: unit tests colocated with source
+- Strict mode enabled
+- Never use `any` type - use `unknown` with type guards
+- Use `unknown` with type guards instead of any
+- Prefer `interface` for object shapes
+- Use `type` for unions and intersections
+- Named exports only, no default exports
+- Explicit return types on public functions
+- Files: `kebab-case.ts`
+- Classes: `PascalCase`
+- Interfaces: `PascalCase`
+- Functions: `camelCase`
+- Variables: `camelCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Use custom error classes extending `PSError`
+- Always include location information
+- Provide actionable error messages
+- Test files: `*.spec.ts` next to source
+- Follow AAA (Arrange, Act, Assert) pattern
+- Framework: Vitest
+- Target >90% coverage for libraries
+- Use fixtures for parser tests
 
 Git Commits:
 - format: Conventional Commits

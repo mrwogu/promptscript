@@ -1,10 +1,13 @@
 # CLAUDE.md
 
+<!-- PromptScript 2026-01-27T11:20:31.603Z - do not edit -->
+
 ## Project
 
 You prioritize security in all interactions and code generation.
 
 Security mindset:
+
 - Assume all input is potentially malicious
 - Apply defense in depth principles
 - Follow the principle of least privilege
@@ -13,6 +16,7 @@ Security mindset:
 You prioritize code quality and maintainability in all outputs.
 
 Quality principles:
+
 - Write code for humans first, machines second
 - Favor readability over cleverness
 - Keep functions small and focused
@@ -21,6 +25,7 @@ Quality principles:
 You are a helpful, accurate, and thoughtful AI assistant.
 
 Core principles:
+
 - Accuracy over speed - verify before responding
 - Clarity over complexity - explain simply first
 - Safety first - never compromise security
@@ -42,36 +47,29 @@ typescript, Node.js 20+, Nx + pnpm
 
 The project is organized as a monorepo with these packages:
 
-  ```mermaid
-  flowchart TB
-    subgraph packages
-      core[core - Types, errors, utilities]
-      parser[parser - Chevrotain-based parser]
-      resolver[resolver - Inheritance & import resolution]
-      validator[validator - AST validation rules]
-      compiler[compiler - Pipeline orchestration]
-      formatters[formatters - Output formatters]
-      cli[cli - Command-line interface]
-    end
+```mermaid
+flowchart TB
+  subgraph packages
+    core[core - Types, errors, utilities]
+    parser[parser - Chevrotain-based parser]
+    resolver[resolver - Inheritance & import resolution]
+    validator[validator - AST validation rules]
+    compiler[compiler - Pipeline orchestration]
+    formatters[formatters - Output formatters]
+    cli[cli - Command-line interface]
+  end
 
-    cli --> compiler
-    cli --> resolver
-    compiler --> resolver
-    compiler --> validator
-    compiler --> formatters
-    resolver --> parser
-    parser --> core
-    resolver --> core
-    validator --> core
-    formatters --> core
-  ```
-
-## Code Style
-
-- Strict TypeScript, no `any`
-- Named exports only
-- Files: kebab-case.ts
-- Testing: vitest, >90% coverage
+  cli --> compiler
+  cli --> resolver
+  compiler --> resolver
+  compiler --> validator
+  compiler --> formatters
+  resolver --> parser
+  parser --> core
+  resolver --> core
+  validator --> core
+  formatters --> core
+```
 
 ## Git Commits
 
@@ -88,20 +86,20 @@ The project is organized as a monorepo with these packages:
 
 ```
 /review    - Review code for quality, type safety, and best practices
-/test      - 
-/test-unit - 
-/test-integration - 
-/test-coverage - 
-/test-e2e  - 
-/build     - 
-/newpkg    - 
-/quality   - 
-/refactor  - 
-/security-review - 
-/threat-model - 
-/cli       - 
-/export    - 
-/type      - 
+/test      -
+/test-unit -
+/test-integration -
+/test-coverage -
+/test-e2e  -
+/build     -
+/newpkg    -
+/quality   -
+/refactor  -
+/security-review -
+/threat-model -
+/cli       -
+/export    -
+/type      -
 ```
 
 ```bash
@@ -112,18 +110,19 @@ The project is organized as a monorepo with these packages:
   pnpm nx run-many -t test  # Test all packages
   pnpm nx graph             # View dependency graph
   pnpm prs compile          # Compile .prs files (uses local dev version)
-  ```
+```
 
 ## Post-Work Verification
 
 After completing code changes, always run:
-  ```bash
-  pnpm run format     # Format code with Prettier
-  pnpm run lint       # Check for linting errors
-  pnpm run build      # Build all packages
-  pnpm run typecheck  # Verify TypeScript types
-  pnpm run test       # Run all tests
-  ```
+
+```bash
+pnpm run format     # Format code with Prettier
+pnpm run lint       # Check for linting errors
+pnpm run build      # Build all packages
+pnpm run typecheck  # Verify TypeScript types
+pnpm run test       # Run all tests
+```
 
 ## Documentation
 
