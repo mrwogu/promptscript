@@ -1,6 +1,6 @@
 # Agent Instructions
 
-<!-- PromptScript 2026-01-27T13:03:51.814Z - do not edit -->
+<!-- PromptScript 2026-01-27T21:55:57.838Z - do not edit -->
 
 ## Identity
 
@@ -87,8 +87,8 @@ The project is organized as a monorepo with these packages:
 ## Project Structure (Monorepo)
 
 - packages/ - Individual packages
-- packages/\*/src/ - Package source
-- packages/\*/package.json - Package manifest
+- packages/*/src/ - Package source
+- packages/*/package.json - Package manifest
 
 ## Restrictions
 

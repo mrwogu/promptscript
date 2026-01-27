@@ -3,7 +3,7 @@ name: 'migrate-to-promptscript'
 description: 'Migrate existing AI instruction files to PromptScript format'
 ---
 
-<!-- PromptScript 2026-01-27T13:03:51.814Z - do not edit -->
+<!-- PromptScript 2026-01-27T21:55:57.838Z - do not edit -->
 
 # Migrate to PromptScript
 
@@ -24,13 +24,13 @@ Claude Code:
 Cursor:
 
 - .cursorrules
-- .cursor/rules/\*.md
-- .cursor/rules/\*.mdc
+- .cursor/rules/*.md
+- .cursor/rules/*.mdc
 
 GitHub Copilot:
 
 - .github/copilot-instructions.md
-- .github/instructions/\*.md
+- .github/instructions/*.md
 
 Other:
 
@@ -212,12 +212,15 @@ Before completing migration:
 ## Troubleshooting
 
 ### Missing @meta Error
+
 Add required metadata block at the start.
 
 ### Multiline String in Object Error
+
 Assign multiline strings to named keys, don't leave them loose
 inside objects.
 
 ### Content Not Appearing in Output
+
 Check block names match expected patterns and
 verify syntax with prs validate --verbose.

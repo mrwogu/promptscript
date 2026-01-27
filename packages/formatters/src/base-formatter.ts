@@ -239,10 +239,19 @@ export abstract class BaseFormatter implements Formatter {
       let processedLine = unindentedLine;
 
       // Escape markdown special characters in path-like content (outside code blocks)
+      // Only escape __name__ outside of backticks
       // __name__ → \_\_name\_\_ (prevents bold)
       processedLine = processedLine.replace(/__([^_]+)__/g, '\\_\\_$1\\_\\_');
-      // path/*/file → path/\*/file (prevents italic/list)
-      processedLine = processedLine.replace(/\/\*/g, '/\\*');
+      // Note: Don't escape /* - Prettier doesn't escape it and it's typically inside backticks
+
+      // Check for blank line after headers BEFORE table detection
+      const prevLine = result.length > 0 ? result[result.length - 1] : '';
+      const isHeader = prevLine?.trimStart().startsWith('#');
+
+      // Add blank line after header if content follows
+      if (isHeader && processedLine.trim()) {
+        result.push('');
+      }
 
       // Detect table rows (lines starting with |)
       if (processedLine.trimStart().startsWith('|') && processedLine.trimEnd().endsWith('|')) {
@@ -256,10 +265,10 @@ export abstract class BaseFormatter implements Formatter {
           inTable = false;
         }
 
-        // Add blank line before list item if previous line was non-empty text (not a list item or blank)
-        const prevLine = result.length > 0 ? result[result.length - 1] : '';
         const isListItem = processedLine.trimStart().startsWith('- ');
-        if (isListItem && prevLine && !prevLine.trimStart().startsWith('- ')) {
+
+        // Add blank line before list item if previous line was non-empty text (not a list item, header, or blank)
+        if (isListItem && prevLine && !prevLine.trimStart().startsWith('- ') && !isHeader) {
           result.push('');
         }
 
@@ -314,9 +323,8 @@ export abstract class BaseFormatter implements Formatter {
 
       // Escape markdown special characters for Prettier compatibility
       // Escape __ to \_\_ (to avoid emphasis parsing)
+      // Note: Don't escape /* - Prettier doesn't escape it
       stripped = stripped.replace(/__/g, '\\_\\_');
-      // Escape /* to /\* (to avoid glob patterns being interpreted)
-      stripped = stripped.replace(/\/\*/g, '/\\*');
 
       // Add blank line before list item if previous line was non-empty and not a list
       const prevLine = result.length > 0 ? result[result.length - 1] : '';

@@ -402,9 +402,10 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push(`# ${config.description}`);
     lines.push('');
     if (config.content) {
-      // Dedent content to handle multiline strings where line 1 was trimmed
+      // Dedent content and normalize for Prettier compatibility
       const dedentedContent = this.dedent(config.content);
-      lines.push(dedentedContent);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {
@@ -515,9 +516,11 @@ export class GitHubFormatter extends BaseFormatter {
   private generatePromptFile(config: PromptConfig): FormatterOutput {
     const lines: string[] = [];
 
-    // YAML frontmatter
+    // YAML frontmatter - use single quotes (Prettier default for YAML strings)
     lines.push('---');
-    lines.push(`description: "${config.description}"`);
+    // Use double quotes if description contains apostrophe, single quotes otherwise
+    const descQuote = config.description.includes("'") ? '"' : "'";
+    lines.push(`description: ${descQuote}${config.description}${descQuote}`);
     if (config.mode === 'agent') {
       lines.push('mode: agent');
       if (config.tools && config.tools.length > 0) {
@@ -532,14 +535,15 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('---');
     lines.push('');
     if (config.content) {
-      // Dedent content to handle multiline strings where line 1 was trimmed
+      // Dedent content and normalize for Prettier compatibility
       const dedentedContent = this.dedent(config.content);
-      lines.push(dedentedContent);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {
       path: `.github/prompts/${config.name}.prompt.md`,
-      content: lines.join('\n'),
+      content: lines.join('\n') + '\n',
     };
   }
 
@@ -819,9 +823,10 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('');
 
     if (config.content) {
-      // Dedent content to handle multiline strings where line 1 was trimmed
+      // Dedent content and normalize for Prettier compatibility
       const dedentedContent = this.dedent(config.content);
-      lines.push(dedentedContent);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {

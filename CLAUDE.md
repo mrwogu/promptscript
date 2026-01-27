@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-01-27T13:03:51.815Z - do not edit -->
+<!-- PromptScript 2026-01-27T21:55:57.840Z - do not edit -->
 
 ## Project
 
@@ -128,7 +128,7 @@ After completing code changes, always run:
 
 ## Diagrams
 
-- Use Mermaid (exception: packages/\*/README.md must use ASCII art because npm does not render Mermaid) for diagrams
+- Use Mermaid (exception: packages/*/README.md must use ASCII art because npm does not render Mermaid) for diagrams
 - Types: flowchart, sequence, class, state, ER, gantt, pie
 
 ## Don'ts

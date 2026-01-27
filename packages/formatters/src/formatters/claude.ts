@@ -335,9 +335,10 @@ export class ClaudeFormatter extends BaseFormatter {
     lines.push(`# ${config.description}`);
     lines.push('');
     if (config.content) {
-      // Dedent content to handle multiline strings where line 1 was trimmed
+      // Dedent content and normalize for Prettier compatibility
       const dedentedContent = this.dedent(config.content);
-      lines.push(dedentedContent);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {
@@ -629,9 +630,10 @@ export class ClaudeFormatter extends BaseFormatter {
     lines.push('');
 
     if (config.content) {
-      // Dedent content to handle multiline strings where line 1 was trimmed
+      // Dedent content and normalize for Prettier compatibility
       const dedentedContent = this.dedent(config.content);
-      lines.push(dedentedContent);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {

@@ -231,10 +231,10 @@ export class ConventionRenderer {
   /**
    * Escape markdown special characters for Prettier compatibility.
    * - Escapes __ to \_\_ (to avoid emphasis)
-   * - Escapes /* to /\* (to avoid glob patterns being interpreted)
+   * Note: Don't escape /* - Prettier doesn't escape it
    */
   private escapeMarkdownSpecialChars(content: string): string {
-    return content.replace(/__/g, '\\_\\_').replace(/\/\*/g, '/\\*');
+    return content.replace(/__/g, '\\_\\_');
   }
 
   private indentContent(content: string, renderer: SectionRenderer, level: number): string {
