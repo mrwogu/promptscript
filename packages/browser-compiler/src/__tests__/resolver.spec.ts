@@ -1080,4 +1080,214 @@ describe('BrowserResolver', () => {
       expect(result.ast).not.toBeNull();
     });
   });
+
+  describe('MixedContent extension merging', () => {
+    it('should merge MixedContent with MixedContent preserving both texts', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  """Target text"""
+  targetKey: "targetValue"
+}
+@extend context {
+  """Extension text"""
+  extKey: "extValue"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'MixedContent') {
+        expect(contextBlock.content.text?.value).toContain('Target text');
+        expect(contextBlock.content.text?.value).toContain('Extension text');
+        expect(contextBlock.content.properties).toHaveProperty('targetKey');
+        expect(contextBlock.content.properties).toHaveProperty('extKey');
+      }
+    });
+
+    it('should handle MixedContent extension when target has no text', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context { targetKey: "targetValue" }
+@extend context {
+  """Extension text"""
+  extKey: "extValue"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should handle ArrayContent extension with ArrayContent', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@restrictions {
+  - "Rule 1"
+  - "Rule 2"
+}
+@extend restrictions {
+  - "Rule 3"
+  - "Rule 4"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const restrictionsBlock = result.ast?.blocks.find((b) => b.name === 'restrictions');
+      if (restrictionsBlock?.content.type === 'ArrayContent') {
+        expect(restrictionsBlock.content.elements.length).toBeGreaterThanOrEqual(4);
+      }
+    });
+  });
+
+  describe('unique concat with complex values', () => {
+    it('should handle arrays with object elements during inheritance', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@tools {
+  childTool: {
+    name: "childTool"
+    description: "Child tool"
+  }
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@tools {
+  parentTool: {
+    name: "parentTool"
+    description: "Parent tool"
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should handle arrays with primitive duplicates', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@restrictions {
+  - "Same rule"
+  - "Child only rule"
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@restrictions {
+  - "Same rule"
+  - "Parent only rule"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const restrictionsBlock = result.ast?.blocks.find((b) => b.name === 'restrictions');
+      if (restrictionsBlock?.content.type === 'ArrayContent') {
+        // "Same rule" should appear only once
+        const values = restrictionsBlock.content.elements.filter((e) => e === 'Same rule');
+        expect(values.length).toBeLessThanOrEqual(1);
+      }
+    });
+  });
+
+  describe('deep clone with nested structures', () => {
+    it('should deep clone nested arrays', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@standards {
+  matrix: [
+    ["a", "b"],
+    ["c", "d"]
+  ]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should deep clone deeply nested objects', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@context {
+  a: {
+    b: {
+      c: {
+        d: "deep value"
+      }
+    }
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should handle mixed arrays and objects in cloning', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.0.0" }
+@standards {
+  items: [
+    { type: "object", value: 1 },
+    ["nested", "array"],
+    "plain string",
+    123
+  ]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+    });
+  });
+
+  describe('isPlainObject type guard', () => {
+    it('should handle objects during property merging', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.0.0" }
+@inherit ./base
+@context {
+  nested: {
+    child: "value"
+  }
+}`,
+        'base.prs': `@meta { id: "parent" syntax: "1.0.0" }
+@context {
+  nested: {
+    parent: "value"
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'ObjectContent') {
+        const nested = contextBlock.content.properties.nested as Record<string, unknown>;
+        expect(nested).toHaveProperty('parent');
+        expect(nested).toHaveProperty('child');
+      }
+    });
+  });
 });

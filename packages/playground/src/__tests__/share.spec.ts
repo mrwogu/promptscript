@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import LZString from 'lz-string';
 import {
   encodeState,
   decodeState,
@@ -75,6 +76,55 @@ describe('share utilities', () => {
       const decoded = decodeState(encoded);
       // Empty array is valid
       expect(decoded?.files).toEqual([]);
+    });
+
+    it('should return null if files is not an array', () => {
+      // Manually create invalid state with files as object instead of array
+      const invalidState = {
+        files: { path: 'test.prs', content: 'test' }, // Object instead of array
+        version: '1',
+      };
+      const json = JSON.stringify(invalidState);
+      const encoded = LZString.compressToEncodedURIComponent(json);
+
+      const decoded = decodeState(encoded);
+      expect(decoded).toBeNull();
+    });
+
+    it('should return null if file path is not a string', () => {
+      // Manually create invalid state with non-string path
+      const invalidState = {
+        files: [{ path: 123, content: 'test' }], // path is number
+        version: '1',
+      };
+      const json = JSON.stringify(invalidState);
+      const encoded = LZString.compressToEncodedURIComponent(json);
+
+      const decoded = decodeState(encoded);
+      expect(decoded).toBeNull();
+    });
+
+    it('should return null if file content is not a string', () => {
+      // Manually create invalid state with non-string content
+      const invalidState = {
+        files: [{ path: 'test.prs', content: { nested: 'object' } }], // content is object
+        version: '1',
+      };
+      const json = JSON.stringify(invalidState);
+      const encoded = LZString.compressToEncodedURIComponent(json);
+
+      const decoded = decodeState(encoded);
+      expect(decoded).toBeNull();
+    });
+
+    it('should return null on JSON parse error', () => {
+      // Create invalid compressed data that decompresses to invalid JSON
+      // Use a string that LZString can decompress but results in invalid JSON
+      const invalidJson = 'not valid json {{{';
+      const encoded = LZString.compressToEncodedURIComponent(invalidJson);
+
+      const decoded = decodeState(encoded);
+      expect(decoded).toBeNull();
     });
   });
 
@@ -165,6 +215,54 @@ describe('share utilities', () => {
 
       expect(decoded?.config?.formatting?.tabWidth).toBe(4);
       expect(decoded?.config?.formatting?.proseWrap).toBeUndefined();
+    });
+
+    it('should include non-default printWidth in formatting', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        formatting: {
+          ...defaultConfig.formatting,
+          printWidth: 120,
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.formatting?.printWidth).toBe(120);
+    });
+
+    it('should include non-default proseWrap in formatting', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        formatting: {
+          ...defaultConfig.formatting,
+          proseWrap: 'always',
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.formatting?.proseWrap).toBe('always');
+    });
+
+    it('should include multiple non-default formatting settings', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        formatting: {
+          tabWidth: 4,
+          proseWrap: 'never',
+          printWidth: 100,
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.formatting?.tabWidth).toBe(4);
+      expect(decoded?.config?.formatting?.proseWrap).toBe('never');
+      expect(decoded?.config?.formatting?.printWidth).toBe(100);
     });
 
     it('mergeConfigWithDefaults should restore full config from partial', () => {

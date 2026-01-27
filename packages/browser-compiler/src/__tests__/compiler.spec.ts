@@ -1,11 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   compile,
   compileFor,
   VirtualFileSystem,
   BrowserCompiler,
+  createBrowserCompiler,
   getBundledRegistryFiles,
 } from '../index.js';
+import type { Formatter } from '@promptscript/formatters';
+import type { OutputConvention } from '@promptscript/core';
 
 describe('compile', () => {
   it('should compile a simple file', async () => {
@@ -437,6 +440,167 @@ describe('BrowserCompiler advanced', () => {
     await compiler.compile('project.prs');
 
     expect(logs.some((l) => l.includes('verbose'))).toBe(true);
+  });
+
+  it('should accept formatter instance directly', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a mock formatter instance
+    const mockFormatter: Formatter = {
+      name: 'mock',
+      outputPath: 'mock.md',
+      description: 'Mock formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn().mockReturnValue({
+        path: 'mock.md',
+        content: '# Mock output',
+      }),
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [mockFormatter],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('mock.md')).toBe(true);
+    expect(mockFormatter.format).toHaveBeenCalled();
+  });
+
+  it('should handle formatter that produces additional files', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a mock formatter that returns additional files
+    const mockFormatter: Formatter = {
+      name: 'multi-file',
+      outputPath: 'main.md',
+      description: 'Multi-file formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn().mockReturnValue({
+        path: 'main.md',
+        content: '# Main',
+        additionalFiles: [
+          { path: 'additional1.md', content: '# Additional 1' },
+          { path: 'additional2.md', content: '# Additional 2' },
+        ],
+      }),
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [mockFormatter],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('main.md')).toBe(true);
+    expect(result.outputs.has('additional1.md')).toBe(true);
+    expect(result.outputs.has('additional2.md')).toBe(true);
+  });
+
+  it('should handle formatter that throws error', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a mock formatter that throws
+    const mockFormatter: Formatter = {
+      name: 'failing',
+      outputPath: 'fail.md',
+      description: 'Failing formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn().mockImplementation(() => {
+        throw new Error('Formatter crashed');
+      }),
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [mockFormatter],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PS4000')).toBe(true);
+    expect(result.errors.some((e) => e.message.includes('Formatter crashed'))).toBe(true);
+  });
+
+  it('should handle custom conventions from customConventions option', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const customConvention: OutputConvention = {
+      name: 'custom',
+      description: 'Custom convention',
+      section: {
+        start: '## {{name}}',
+        end: '',
+      },
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'claude', config: { convention: 'myCustom' } }],
+      customConventions: { myCustom: customConvention },
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should handle version in target config', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'claude', config: { version: 'lite' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+});
+
+describe('createBrowserCompiler', () => {
+  it('should create a BrowserCompiler instance', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "test" syntax: "1.0.0" }`,
+    });
+
+    const compiler = createBrowserCompiler({ fs });
+
+    expect(compiler).toBeInstanceOf(BrowserCompiler);
+
+    const result = await compiler.compile('project.prs');
+    expect(result.success).toBe(true);
   });
 });
 
