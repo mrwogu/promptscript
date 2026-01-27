@@ -43,7 +43,7 @@ Update a central policy and propagate changes to 100+ repositories automatically
 
 <div class="feature-card" markdown>
 ### :material-robot: AI-Assisted Migration
-Already have `CLAUDE.md` or `.cursorrules`? Use the `/migrate` command in your AI assistant to automatically convert existing instructions to PromptScript format.
+Already have existing AI instructions? Use the `/migrate` command to automatically convert `CLAUDE.md`, `.cursorrules`, `copilot-instructions.md`, or Antigravity rules to PromptScript.
 </div>
 
 </div>
