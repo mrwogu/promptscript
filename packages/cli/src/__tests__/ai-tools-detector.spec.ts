@@ -107,6 +107,7 @@ describe('utils/ai-tools-detector', () => {
       const detection: AIToolsDetection = {
         detected: ['github', 'claude'],
         details: { github: [], claude: [], cursor: [], antigravity: [] },
+        migrationCandidates: [],
       };
 
       const suggested = getSuggestedTargets(detection);
@@ -118,6 +119,7 @@ describe('utils/ai-tools-detector', () => {
       const detection: AIToolsDetection = {
         detected: [],
         details: { github: [], claude: [], cursor: [], antigravity: [] },
+        migrationCandidates: [],
       };
 
       const suggested = getSuggestedTargets(detection);
@@ -136,6 +138,7 @@ describe('utils/ai-tools-detector', () => {
           cursor: [],
           antigravity: [],
         },
+        migrationCandidates: [],
       };
 
       const lines = formatDetectionResults(detection);
@@ -148,6 +151,7 @@ describe('utils/ai-tools-detector', () => {
       const detection: AIToolsDetection = {
         detected: [],
         details: { github: [], claude: [], cursor: [], antigravity: [] },
+        migrationCandidates: [],
       };
 
       const lines = formatDetectionResults(detection);
@@ -164,6 +168,7 @@ describe('utils/ai-tools-detector', () => {
           cursor: [],
           antigravity: ['.agent/rules/project.md'],
         },
+        migrationCandidates: [],
       };
 
       const lines = formatDetectionResults(detection);
