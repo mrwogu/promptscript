@@ -198,7 +198,7 @@ If you have existing `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md` f
 
 The AI will discover your existing instruction files, analyze the content, and generate properly structured PromptScript files—preserving all your standards, restrictions, and custom commands.
 
-👉 **[Full Migration Guide →](https://getpromptscript.dev/guides/migration/)**
+👉 **[Full Migration Guide →](https://getpromptscript.dev/latest/guides/migration/)**
 
 ## 📦 Installation
 
