@@ -222,6 +222,11 @@
       "additionalProperties": false,
       "description": "Output configuration. Global output settings applied to all targets."
     },
+    "formatting": {
+      "$ref": "#/definitions/FormattingConfig",
+      "description": "Formatting configuration. Controls how generated markdown files are formatted.",
+      "example": "formatting:\n  prettier: true  # Auto-detect .prettierrc\n\nformatting:\n  tabWidth: 4\n  proseWrap: always"
+    },
     "targets": {
       "type": "array",
       "items": {
@@ -270,6 +275,72 @@
   ],
   "additionalProperties": false,
   "definitions": {
+    "FormattingConfig": {
+      "type": "object",
+      "properties": {
+        "prettier": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PrettierMarkdownOptions"
+            }
+          ],
+          "description": "Enable Prettier formatting.\n- `true`: Auto-detect .prettierrc in project\n- `string`: Path to Prettier config file\n- `PrettierMarkdownOptions`: Explicit options",
+          "example": "formatting:\n  prettier: true  # Auto-detect\n\nformatting:\n  prettier: \"./config/.prettierrc\"  # Explicit path\n\nformatting:\n  proseWrap: always\n  tabWidth: 4"
+        },
+        "proseWrap": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never",
+            "preserve"
+          ],
+          "description": "Explicit proseWrap setting (shorthand for prettier.proseWrap)."
+        },
+        "tabWidth": {
+          "type": "number",
+          "description": "Explicit tabWidth setting (shorthand for prettier.tabWidth)."
+        },
+        "printWidth": {
+          "type": "number",
+          "description": "Explicit printWidth setting (shorthand for prettier.printWidth)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Formatting configuration for output files. Controls how generated markdown is formatted."
+    },
+    "PrettierMarkdownOptions": {
+      "type": "object",
+      "properties": {
+        "proseWrap": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never",
+            "preserve"
+          ],
+          "description": "How to wrap prose.\n- 'always': Wrap prose at printWidth\n- 'never': Do not wrap prose\n- 'preserve': Preserve original wrapping",
+          "default": "preserve"
+        },
+        "tabWidth": {
+          "type": "number",
+          "description": "Number of spaces per indentation level.",
+          "default": 2
+        },
+        "printWidth": {
+          "type": "number",
+          "description": "Maximum line width for prose wrapping.",
+          "default": 80
+        }
+      },
+      "additionalProperties": false,
+      "description": "Prettier markdown formatting options. These options control how markdown output is formatted."
+    },
     "TargetEntry": {
       "anyOf": [
         {
