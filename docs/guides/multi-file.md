@@ -99,12 +99,12 @@ Split by type of concern:
 }
 
 @standards {
-  security: {
-    authentication: required
-    authorization: "RBAC"
-    inputValidation: required
-    outputEncoding: required
-  }
+  security: [
+    "Authentication required"
+    "Use RBAC for authorization"
+    "Input validation required"
+    "Output encoding required"
+  ]
 }
 ```
 
@@ -118,12 +118,12 @@ Split by type of concern:
 }
 
 @standards {
-  testing: {
-    framework: "vitest"
-    coverage: 80
-    patterns: ["unit", "integration", "e2e"]
-    mocking: "MSW for API mocking"
-  }
+  testing: [
+    "Use vitest as test framework"
+    "Maintain 80% code coverage"
+    "Write unit, integration, and e2e tests"
+    "Use MSW for API mocking"
+  ]
 }
 
 @shortcuts {
@@ -174,11 +174,11 @@ For large projects, split by feature area:
 }
 
 @standards {
-  auth: {
-    tokenStorage: "httpOnly cookies"
-    sessionTimeout: 3600
-    refreshTokenRotation: true
-  }
+  auth: [
+    "Store tokens in httpOnly cookies"
+    "Session timeout: 3600 seconds"
+    "Enable refresh token rotation"
+  ]
 }
 
 @knowledge {

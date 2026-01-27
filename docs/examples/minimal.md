@@ -43,10 +43,10 @@ my-project/
 }
 
 @standards {
-  code: {
-    style: "functional"
-    documentation: "JSDoc for public APIs"
-  }
+  code: [
+    "Use functional programming style"
+    "Document public APIs with JSDoc"
+  ]
 }
 
 @shortcuts {

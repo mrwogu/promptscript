@@ -65,23 +65,23 @@ workspace/
 }
 
 @standards {
-  code: {
-    language: "TypeScript"
-    style: "functional"
-    components: "functional with hooks"
-    stateManagement: "React Query for server, Zustand for client"
-  }
+  code: [
+    "Use TypeScript for all code"
+    "Prefer functional programming style"
+    "Use functional components with hooks"
+    "React Query for server state, Zustand for client state"
+  ]
 
-  testing: {
-    framework: "Vitest"
-    coverage: 80
-    patterns: ["unit", "integration"]
-  }
+  testing: [
+    "Use Vitest as test framework"
+    "Maintain 80% code coverage"
+    "Write unit and integration tests"
+  ]
 
-  accessibility: {
-    wcag: "2.1 AA"
-    testing: "required"
-  }
+  accessibility: [
+    "Follow WCAG 2.1 AA guidelines"
+    "Accessibility testing required"
+  ]
 }
 
 @restrictions {

@@ -247,13 +247,13 @@ promptscript:
 }
 
 @standards {
-  code: {
-    review: required
-    testing: required
-  }
-  git: {
-    conventionalCommits: true
-  }
+  code: [
+    "Code review required for all changes"
+    "Tests required for all code"
+  ]
+  git: [
+    "Use conventional commits format"
+  ]
 }
 
 @restrictions {

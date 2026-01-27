@@ -102,11 +102,11 @@ Use Git repositories as shared registries with version control.
 }
 
 @standards {
-  code: {
-    components: "functional with hooks"
-    state: "React Query + Zustand"
-    styling: "Tailwind utility classes"
-  }
+  code: [
+    "Use functional components with hooks"
+    "React Query for server state, Zustand for client"
+    "Use Tailwind utility classes for styling"
+  ]
 }
 
 @shortcuts {
@@ -138,16 +138,16 @@ Use Git repositories as shared registries with version control.
 }
 
 @standards {
-  api: {
-    versioning: "URL path"
-    documentation: "OpenAPI 3.0"
-    authentication: "JWT"
-  }
+  api: [
+    "Use URL path versioning"
+    "Document with OpenAPI 3.0"
+    "Use JWT for authentication"
+  ]
 
-  database: {
-    migrations: required
-    transactions: "for multi-step operations"
-  }
+  database: [
+    "Use migrations for schema changes"
+    "Use transactions for multi-step operations"
+  ]
 }
 
 @restrictions {

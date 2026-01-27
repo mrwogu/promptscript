@@ -69,11 +69,11 @@ Open `.promptscript/project.prs` and customize:
 }
 
 @standards {
-  code: {
-    style: "functional"
-    patterns: [hooks, composition]
-    testing: required
-  }
+  code: [
+    "Use functional programming style"
+    "Prefer hooks and composition patterns"
+    "Write tests for all code"
+  ]
 }
 
 @shortcuts {

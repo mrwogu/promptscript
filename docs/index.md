@@ -87,8 +87,14 @@ flowchart LR
     }
 
     @standards {
-      typescript: { strictMode: true, noAny: true }
-      testing: { framework: "vitest", coverage: 90 }
+      typescript: [
+        "Strict mode enabled"
+        "Never use any type"
+      ]
+      testing: [
+        "Use vitest as test framework"
+        "Maintain 90% code coverage"
+      ]
     }
 
     @restrictions {

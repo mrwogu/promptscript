@@ -111,33 +111,23 @@ acme-promptscript-registry/
 }
 
 @standards {
-  code: {
-    review: {
-      required: true
-      minApprovers: 2
-    }
-    documentation: {
-      publicApi: required
-      inlineComments: "for complex logic"
-    }
-    testing: {
-      required: true
-      coverage: 80
-    }
-  }
+  code: [
+    "Code review required with minimum 2 approvers"
+    "Document all public APIs"
+    "Add inline comments for complex logic"
+    "Write tests for all code (80% coverage)"
+  ]
 
-  git: {
-    conventionalCommits: true
-    branchNaming: "type/TICKET-description"
-    signedCommits: required
-  }
+  git: [
+    "Use conventional commits format"
+    "Branch naming: type/TICKET-description"
+    "Signed commits required"
+  ]
 
-  deployment: {
-    environments: ["dev", "staging", "prod"]
-    approvals: {
-      prod: ["team-lead", "security"]
-    }
-  }
+  deployment: [
+    "Environments: dev, staging, prod"
+    "Production requires team-lead and security approval"
+  ]
 }
 
 @restrictions {
@@ -172,49 +162,38 @@ acme-promptscript-registry/
 }
 
 @standards {
-  authentication: {
-    method: "OAuth 2.0 / OIDC"
-    mfa: {
-      required: true
-      methods: ["TOTP", "WebAuthn"]
-    }
-    session: {
-      timeout: 3600
-      refreshToken: true
-    }
-  }
+  authentication: [
+    "Use OAuth 2.0 / OIDC"
+    "MFA required (TOTP or WebAuthn)"
+    "Session timeout: 3600 seconds"
+    "Enable refresh token rotation"
+  ]
 
-  authorization: {
-    model: "RBAC with ABAC extensions"
-    principle: "least privilege"
-    audit: required
-  }
+  authorization: [
+    "RBAC with ABAC extensions"
+    "Apply least privilege principle"
+    "Audit logging required"
+  ]
 
-  dataProtection: {
-    encryption: {
-      atRest: "AES-256"
-      inTransit: "TLS 1.3"
-    }
-    pii: {
-      masking: required
-      retention: "per data classification"
-    }
-  }
+  dataProtection: [
+    "Encrypt at rest with AES-256"
+    "Encrypt in transit with TLS 1.3"
+    "Mask PII in all outputs"
+    "Follow data classification for retention"
+  ]
 
-  dependencies: {
-    scanning: "daily"
-    vulnerabilities: {
-      critical: "block deployment"
-      high: "fix within 7 days"
-      medium: "fix within 30 days"
-    }
-  }
+  dependencies: [
+    "Daily vulnerability scanning"
+    "Critical vulnerabilities block deployment"
+    "High vulnerabilities: fix within 7 days"
+    "Medium vulnerabilities: fix within 30 days"
+  ]
 
-  secrets: {
-    storage: "HashiCorp Vault"
-    rotation: "90 days"
-    neverInCode: true
-  }
+  secrets: [
+    "Store in HashiCorp Vault"
+    "Rotate every 90 days"
+    "Never store secrets in code"
+  ]
 }
 
 @restrictions {
@@ -270,37 +249,27 @@ acme-promptscript-registry/
 }
 
 @standards {
-  soc2: {
-    logging: {
-      required: true
-      retention: "1 year"
-      tamperProof: true
-    }
-    accessControl: {
-      documented: true
-      reviewed: "quarterly"
-    }
-    changeManagement: {
-      documented: true
-      approved: true
-      tested: true
-    }
-  }
+  soc2: [
+    "Logging required with 1 year retention"
+    "Tamper-proof audit logs"
+    "Access control documented and reviewed quarterly"
+    "Change management: documented, approved, tested"
+  ]
 
-  gdpr: {
-    dataMinimization: true
-    purposeLimitation: true
-    consentManagement: required
-    rightToErasure: required
-    dataPortability: required
-    breachNotification: "72 hours"
-  }
+  gdpr: [
+    "Apply data minimization"
+    "Enforce purpose limitation"
+    "Consent management required"
+    "Support right to erasure"
+    "Enable data portability"
+    "Breach notification within 72 hours"
+  ]
 
-  pci: {
-    applicable: "payment services only"
-    cardDataStorage: "never store full PAN"
-    encryption: required
-  }
+  pci: [
+    "Applies to payment services only"
+    "Never store full PAN"
+    "Encryption required"
+  ]
 }
 
 @restrictions {
@@ -390,63 +359,33 @@ acme-promptscript-registry/
 }
 
 @standards {
-  code: {
-    framework: "React 18+"
-    language: "TypeScript (strict mode)"
-    components: {
-      style: "functional"
-      patterns: ["hooks", "composition"]
-    }
-    state: {
-      server: "React Query"
-      client: "Zustand (when needed)"
-    }
-    styling: {
-      method: "TailwindCSS"
-      designTokens: "@acme/design-tokens"
-    }
-  }
+  code: [
+    "Use React 18+ framework"
+    "TypeScript in strict mode"
+    "Functional components with hooks and composition"
+    "React Query for server state, Zustand for client"
+    "TailwindCSS with @acme/design-tokens"
+  ]
 
-  performance: {
-    bundleSize: {
-      initial: "< 200KB gzipped"
-      lazy: "per-route code splitting"
-    }
-    coreWebVitals: {
-      lcp: "< 2.5s"
-      fid: "< 100ms"
-      cls: "< 0.1"
-    }
-  }
+  performance: [
+    "Initial bundle < 200KB gzipped"
+    "Per-route code splitting"
+    "LCP < 2.5s, FID < 100ms, CLS < 0.1"
+  ]
 
-  accessibility: {
-    standard: "WCAG 2.1 AA"
-    testing: {
-      automated: "axe-core"
-      manual: "required for new features"
-    }
-    requirements: [
-      "keyboard navigation",
-      "screen reader support",
-      "color contrast",
-      "focus management"
-    ]
-  }
+  accessibility: [
+    "WCAG 2.1 AA compliance"
+    "Automated testing with axe-core"
+    "Manual testing required for new features"
+    "Support keyboard navigation and screen readers"
+    "Ensure color contrast and focus management"
+  ]
 
-  testing: {
-    unit: {
-      framework: "Vitest"
-      coverage: 80
-    }
-    integration: {
-      framework: "Testing Library"
-      coverage: "critical paths"
-    }
-    e2e: {
-      framework: "Playwright"
-      coverage: "happy paths"
-    }
-  }
+  testing: [
+    "Unit tests with Vitest (80% coverage)"
+    "Integration tests with Testing Library"
+    "E2E tests with Playwright for happy paths"
+  ]
 }
 
 @restrictions {

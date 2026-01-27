@@ -198,20 +198,12 @@ prs init
 
     ```promptscript
     @standards {
-      code: {
-        style: "functional"
-        testing: {
-          required: true
-          coverage: 80
-        }
-        documentation: {
-          publicApi: "JSDoc"
-        }
-        linting: {
-          eslint: true
-          prettier: true
-        }
-      }
+      code: [
+        "Use functional programming style"
+        "Write tests for all code (80% coverage)"
+        "Document public APIs with JSDoc"
+        "Use ESLint and Prettier"
+      ]
     }
     ```
 
@@ -359,14 +351,11 @@ prs init
     }
 
     @standards {
-      code: {
-        style: "functional"
-        testing: {
-          required: true
-          coverage: 80
-        }
-        documentation: "JSDoc for public APIs"
-      }
+      code: [
+        "Use functional programming style"
+        "Write tests for all code (80% coverage)"
+        "Document public APIs with JSDoc"
+      ]
     }
 
     @restrictions {

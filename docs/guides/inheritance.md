@@ -101,23 +101,20 @@ Different blocks merge differently during inheritance:
     ```promptscript
     # Parent
     @standards {
-      code: {
-        style: "clean"
-        testing: required
-      }
+      code: [
+        "Follow clean code principles"
+        "Testing required"
+      ]
     }
 
     # Child
     @inherit ./parent
 
     @standards {
-      code: {
-        frameworks: [react]  # Added
-        testing: {           # Overrides primitive with object
-          required: true
-          coverage: 80
-        }
-      }
+      code: [
+        "Use React framework"
+        "80% test coverage required"
+      ]
     }
     ```
 
@@ -125,11 +122,11 @@ Different blocks merge differently during inheritance:
 
     ```yaml
     code:
-      style: "clean"         # From parent
-      frameworks: [react]    # From child
-      testing:               # Child object replaces parent primitive
-        required: true
-        coverage: 80
+      # Arrays are concatenated (parent first, then child)
+      - "Follow clean code principles"
+      - "Testing required"
+      - "Use React framework"
+      - "80% test coverage required"
     ```
 
 ### Arrays (Concatenate)
@@ -331,11 +328,11 @@ Create reusable fragments:
 }
 
 @standards {
-  testing: {
-    framework: "vitest"
-    coverage: 80
-    patterns: ["unit", "integration"]
-  }
+  testing: [
+    "Use vitest as test framework"
+    "Maintain 80% code coverage"
+    "Write unit and integration tests"
+  ]
 }
 
 @shortcuts {

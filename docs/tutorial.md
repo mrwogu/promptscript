@@ -44,16 +44,16 @@ Create `registry/@acme/org.prs`:
 }
 
 @standards {
-  code: {
-    style: "clean code"
-    documentation: required
-    testing: required
-  }
+  code: [
+    "Follow clean code principles"
+    "Document all public APIs"
+    "Write tests for all code"
+  ]
 
-  security: {
-    inputValidation: required
-    secretsHandling: "never hardcode"
-  }
+  security: [
+    "Validate all user input"
+    "Never hardcode secrets"
+  ]
 }
 
 @restrictions {

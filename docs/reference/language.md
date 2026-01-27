@@ -170,34 +170,31 @@ Supports both key-value properties and text content.
 
 ### @standards
 
-Coding standards and conventions:
+Coding standards and conventions using category-based arrays:
 
 ```promptscript
 @standards {
-  code: {
-    style: "clean code"
-    patterns: [hooks, composition]
-    testing: {
-      required: true
-      coverage: 80
-      framework: "vitest"
-    }
-  }
+  code: [
+    "Use clean code principles"
+    "Prefer hooks and composition patterns"
+    "Write tests for all code (80% coverage minimum)"
+    "Use vitest as the test framework"
+  ]
 
-  naming: {
-    components: "PascalCase"
-    functions: "camelCase"
-    constants: "UPPER_SNAKE_CASE"
-  }
+  naming: [
+    "Components: PascalCase"
+    "Functions: camelCase"
+    "Constants: UPPER_SNAKE_CASE"
+  ]
 
-  documentation: {
-    required: true
-    format: "JSDoc"
-  }
+  documentation: [
+    "Document all public APIs"
+    "Use JSDoc format"
+  ]
 }
 ```
 
-Deep object structures are supported and merged during inheritance.
+Standards are organized by category (e.g., `code`, `naming`, `documentation`) with each category containing an array of human-readable rules. This format is passed through to output as-is, preserving the exact wording you provide.
 
 ### @restrictions
 

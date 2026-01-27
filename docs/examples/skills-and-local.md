@@ -54,24 +54,24 @@ my-project/
 }
 
 @standards {
-  typescript: {
-    strictMode: true
-    exports: "named only"
-  }
+  typescript: [
+    "Strict mode enabled"
+    "Use named exports only"
+  ]
 
-  naming: {
-    files: "kebab-case.ts"
-  }
+  naming: [
+    "Files: kebab-case.ts"
+  ]
 
-  testing: {
-    framework: "vitest"
-    coverage: 90
-  }
+  testing: [
+    "Use vitest as test framework"
+    "Maintain 90% code coverage"
+  ]
 
-  git: {
-    format: "Conventional Commits"
-    types: [feat, fix, docs, style, refactor, test, chore]
-  }
+  git: [
+    "Use Conventional Commits format"
+    "Types: feat, fix, docs, style, refactor, test, chore"
+  ]
 }
 
 @guards {

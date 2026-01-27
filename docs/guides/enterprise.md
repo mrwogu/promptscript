@@ -96,17 +96,17 @@ promptscript-registry/
 }
 
 @standards {
-  code: {
-    review: required
-    documentation: required
-    testing: required
-  }
+  code: [
+    "Code review required"
+    "Documentation required"
+    "Testing required"
+  ]
 
-  git: {
-    conventionalCommits: true
-    branchNaming: "feature|bugfix|hotfix/TICKET-description"
-    prRequired: true
-  }
+  git: [
+    "Use conventional commits format"
+    "Branch naming: feature|bugfix|hotfix/TICKET-description"
+    "Pull request required"
+  ]
 }
 
 @restrictions {
@@ -138,24 +138,14 @@ promptscript-registry/
 }
 
 @standards {
-  security: {
-    authentication: {
-      mfa: required
-      sessionTimeout: 3600
-    }
-    authorization: {
-      rbac: true
-      leastPrivilege: true
-    }
-    dataProtection: {
-      encryption: "AES-256"
-      pii: "masked in logs"
-    }
-    dependencies: {
-      vulnerabilityScan: required
-      updatePolicy: "weekly"
-    }
-  }
+  security: [
+    "MFA required"
+    "Session timeout: 3600 seconds"
+    "RBAC with least privilege principle"
+    "Encrypt with AES-256"
+    "Mask PII in logs"
+    "Weekly vulnerability scanning"
+  ]
 }
 
 @restrictions {
@@ -225,23 +215,21 @@ promptscript-registry/
 }
 
 @standards {
-  code: {
-    patterns: ["hooks", "composition", "render props"]
-    components: {
-      style: "functional"
-      props: "TypeScript interfaces"
-    }
-  }
+  code: [
+    "Use hooks, composition, and render props patterns"
+    "Functional components only"
+    "TypeScript interfaces for props"
+  ]
 
-  accessibility: {
-    wcag: "2.1 AA"
-    testing: required
-  }
+  accessibility: [
+    "WCAG 2.1 AA compliance"
+    "Accessibility testing required"
+  ]
 
-  performance: {
-    bundleSize: "monitored"
-    coreWebVitals: "tracked"
-  }
+  performance: [
+    "Monitor bundle size"
+    "Track Core Web Vitals"
+  ]
 }
 
 @shortcuts {
@@ -297,17 +285,17 @@ promptscript-registry/
 }
 
 @standards {
-  api: {
-    versioning: "URL path (/v1, /v2)"
-    documentation: "OpenAPI 3.0"
-    authentication: "JWT + OAuth2"
-  }
+  api: [
+    "URL path versioning (/v1, /v2)"
+    "Document with OpenAPI 3.0"
+    "JWT + OAuth2 authentication"
+  ]
 
-  database: {
-    migrations: required
-    indexing: "reviewed"
-    queryOptimization: required
-  }
+  database: [
+    "Use migrations for schema changes"
+    "Review all indexes"
+    "Query optimization required"
+  ]
 }
 
 @shortcuts {
