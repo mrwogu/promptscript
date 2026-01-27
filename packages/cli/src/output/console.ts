@@ -130,6 +130,14 @@ export const ConsoleOutput = {
   },
 
   /**
+   * Print an unchanged file message.
+   */
+  unchanged(message: string): void {
+    if (isQuiet()) return;
+    console.log(chalk.gray(`  ○ ${message}`));
+  },
+
+  /**
    * Print an info message.
    */
   info(message: string): void {
