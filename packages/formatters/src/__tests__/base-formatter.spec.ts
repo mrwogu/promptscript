@@ -461,4 +461,29 @@ describe('BaseFormatter', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('formatStandardsList', () => {
+    it('should convert array of strings to string array', () => {
+      const input: Value[] = ['Strict mode enabled', 'Never use any type'];
+      const result = (formatter as any).formatStandardsList(input);
+      expect(result).toEqual(['Strict mode enabled', 'Never use any type']);
+    });
+
+    it('should return empty array for non-array input', () => {
+      const result = (formatter as any).formatStandardsList({ key: 'value' });
+      expect(result).toEqual([]);
+    });
+
+    it('should filter out empty strings', () => {
+      const input: Value[] = ['Rule 1', '', 'Rule 2'];
+      const result = (formatter as any).formatStandardsList(input);
+      expect(result).toEqual(['Rule 1', 'Rule 2']);
+    });
+
+    it('should convert non-string values using valueToString', () => {
+      const input: Value[] = ['Rule 1', 123, true];
+      const result = (formatter as any).formatStandardsList(input);
+      expect(result).toEqual(['Rule 1', '123', 'true']);
+    });
+  });
 });

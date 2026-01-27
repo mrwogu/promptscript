@@ -99,6 +99,15 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Format standards list from array of values (pass-through).
+   * Returns array of strings for rendering as bullet list.
+   */
+  protected formatStandardsList(items: Value): string[] {
+    if (!Array.isArray(items)) return [];
+    return items.map((item) => this.valueToString(item)).filter((s) => s.length > 0);
+  }
+
+  /**
    * Format an array as comma-separated string.
    */
   protected formatArray(arr: unknown[]): string {
