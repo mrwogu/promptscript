@@ -19,6 +19,12 @@ import {
   type AIToolTarget,
 } from '../utils/ai-tools-detector.js';
 import { findPrettierConfig } from '../prettier/loader.js';
+import {
+  MIGRATE_SKILL_CLAUDE,
+  MIGRATE_SKILL_GITHUB,
+  MIGRATE_SKILL_CURSOR,
+  MIGRATE_SKILL_ANTIGRAVITY,
+} from '../templates/migrate-skill.js';
 
 /**
  * Resolved configuration after prompts or CLI args.
@@ -77,6 +83,39 @@ export async function initCommand(
     const projectPsContent = generateProjectPs(config, projectInfo);
     await fs.writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
 
+    // Install migration skill if requested
+    const installedSkillPaths: string[] = [];
+    if (options.migrate) {
+      if (config.targets.includes('claude')) {
+        await fs.mkdir('.claude/skills/migrate-to-promptscript', { recursive: true });
+        await fs.writeFile(
+          '.claude/skills/migrate-to-promptscript/SKILL.md',
+          MIGRATE_SKILL_CLAUDE,
+          'utf-8'
+        );
+        installedSkillPaths.push('.claude/skills/migrate-to-promptscript/SKILL.md');
+      }
+      if (config.targets.includes('github')) {
+        await fs.mkdir('.github/skills/migrate-to-promptscript', { recursive: true });
+        await fs.writeFile(
+          '.github/skills/migrate-to-promptscript/SKILL.md',
+          MIGRATE_SKILL_GITHUB,
+          'utf-8'
+        );
+        installedSkillPaths.push('.github/skills/migrate-to-promptscript/SKILL.md');
+      }
+      if (config.targets.includes('cursor')) {
+        await fs.mkdir('.cursor/commands', { recursive: true });
+        await fs.writeFile('.cursor/commands/migrate.md', MIGRATE_SKILL_CURSOR, 'utf-8');
+        installedSkillPaths.push('.cursor/commands/migrate.md');
+      }
+      if (config.targets.includes('antigravity')) {
+        await fs.mkdir('.agent/rules', { recursive: true });
+        await fs.writeFile('.agent/rules/migrate.md', MIGRATE_SKILL_ANTIGRAVITY, 'utf-8');
+        installedSkillPaths.push('.agent/rules/migrate.md');
+      }
+    }
+
     spinner.succeed('PromptScript initialized');
 
     // Show summary
@@ -84,6 +123,9 @@ export async function initCommand(
     console.log('Created:');
     ConsoleOutput.success('promptscript.yaml');
     ConsoleOutput.success('.promptscript/project.prs');
+    for (const skillPath of installedSkillPaths) {
+      ConsoleOutput.success(skillPath);
+    }
     ConsoleOutput.newline();
     console.log('Configuration:');
     ConsoleOutput.muted(`  Project: ${config.projectId}`);
@@ -107,24 +149,44 @@ export async function initCommand(
 
     ConsoleOutput.newline();
     console.log('Next steps:');
-    ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
-    ConsoleOutput.muted('2. Run: prs compile');
 
-    // Show migration hint if there are existing non-PromptScript instruction files
-    if (hasMigrationCandidates(aiToolsDetection)) {
-      const migrationHint = formatMigrationHint(aiToolsDetection);
-      for (const line of migrationHint) {
-        if (
-          line.startsWith('📋') ||
-          line.includes('migrated') ||
-          line.includes('See:') ||
-          line.includes('Or use')
-        ) {
-          ConsoleOutput.info(line.replace(/^\s+/, ''));
-        } else if (line.trim().startsWith('•')) {
-          ConsoleOutput.muted(line);
-        } else if (line.trim()) {
-          console.log(line);
+    // Show migration-specific instructions if --migrate was used
+    if (options.migrate && installedSkillPaths.length > 0) {
+      ConsoleOutput.muted('1. Use the migration skill to convert existing instructions:');
+      if (config.targets.includes('claude')) {
+        ConsoleOutput.muted('   Claude Code: /migrate');
+      }
+      if (config.targets.includes('github')) {
+        ConsoleOutput.muted('   GitHub Copilot: @workspace /migrate');
+      }
+      if (config.targets.includes('cursor')) {
+        ConsoleOutput.muted('   Cursor: /migrate');
+      }
+      if (config.targets.includes('antigravity')) {
+        ConsoleOutput.muted('   Antigravity: Ask to "migrate to PromptScript"');
+      }
+      ConsoleOutput.muted('2. Review generated .promptscript/project.prs');
+      ConsoleOutput.muted('3. Run: prs compile');
+    } else {
+      ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
+      ConsoleOutput.muted('2. Run: prs compile');
+
+      // Show migration hint if there are existing non-PromptScript instruction files
+      if (hasMigrationCandidates(aiToolsDetection)) {
+        const migrationHint = formatMigrationHint(aiToolsDetection);
+        for (const line of migrationHint) {
+          if (
+            line.startsWith('📋') ||
+            line.includes('migrated') ||
+            line.includes('See:') ||
+            line.includes('Or use')
+          ) {
+            ConsoleOutput.info(line.replace(/^\s+/, ''));
+          } else if (line.trim().startsWith('•')) {
+            ConsoleOutput.muted(line);
+          } else if (line.trim()) {
+            console.log(line);
+          }
         }
       }
     }

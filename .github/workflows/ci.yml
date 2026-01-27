@@ -143,6 +143,58 @@ jobs:
           grep -q "<!-- PromptScript" .github/copilot-instructions.md
           grep -q "GitHub Copilot Instructions" .github/copilot-instructions.md
 
+      - name: Smoke test - init with --migrate flag
+        run: |
+          mkdir -p /tmp/test-migrate
+          cd /tmp/test-migrate
+
+          # Test --migrate with all targets
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name migrate-test --targets github claude cursor antigravity --migrate -y
+
+          # Verify base files exist
+          test -f promptscript.yaml
+          test -f .promptscript/project.prs
+
+          # Verify GitHub migration skill
+          test -f .github/skills/migrate-to-promptscript/SKILL.md
+          grep -q "migrate-to-promptscript" .github/skills/migrate-to-promptscript/SKILL.md
+          grep -q "user-invocable: true" .github/skills/migrate-to-promptscript/SKILL.md
+
+          # Verify Claude migration skill
+          test -f .claude/skills/migrate-to-promptscript/SKILL.md
+          grep -q "migrate-to-promptscript" .claude/skills/migrate-to-promptscript/SKILL.md
+          grep -q "allowed-tools:" .claude/skills/migrate-to-promptscript/SKILL.md
+
+          # Verify Cursor migration command
+          test -f .cursor/commands/migrate.md
+          grep -q "Migrate to PromptScript" .cursor/commands/migrate.md
+
+          # Verify Antigravity migration rule
+          test -f .agent/rules/migrate.md
+          grep -q "Migrate to PromptScript" .agent/rules/migrate.md
+
+          # Verify compilation still works after --migrate
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile
+
+      - name: Smoke test - init without --migrate (verify no migration files)
+        run: |
+          mkdir -p /tmp/test-no-migrate
+          cd /tmp/test-no-migrate
+
+          # Init without --migrate
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name no-migrate-test --targets github claude -y
+
+          # Verify base files exist
+          test -f promptscript.yaml
+          test -f .promptscript/project.prs
+
+          # Verify migration files do NOT exist
+          test ! -f .github/skills/migrate-to-promptscript/SKILL.md
+          test ! -f .claude/skills/migrate-to-promptscript/SKILL.md
+          test ! -d .cursor/commands
+          test ! -d .agent/rules
+
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest

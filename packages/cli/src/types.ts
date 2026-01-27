@@ -18,6 +18,8 @@ export interface InitOptions {
   yes?: boolean;
   /** Force reinitialize even if already initialized */
   force?: boolean;
+  /** Install migration skill for AI-assisted migration */
+  migrate?: boolean;
 }
 
 /**

@@ -56,6 +56,7 @@ program
   .option('-i, --interactive', 'Force interactive mode')
   .option('-y, --yes', 'Skip prompts, use defaults')
   .option('-f, --force', 'Force reinitialize even if already initialized')
+  .option('-m, --migrate', 'Install migration skill for AI-assisted migration')
   .action((opts) => initCommand(opts));
 
 program

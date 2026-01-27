@@ -123,6 +123,184 @@ git add .
 git commit -m "chore: initialize promptscript infrastructure"
 ```
 
+## Quick Start: Migrating Existing Projects
+
+Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`? Use AI-assisted migration to convert your existing instructions to PromptScript.
+
+### 1. Initialize with Migration Support
+
+Initialize PromptScript with the `--migrate` flag to install the migration skill:
+
+```bash
+prs init --migrate
+```
+
+This creates:
+
+- `promptscript.yaml` - Compiler configuration
+- `.promptscript/project.prs` - Empty project template
+- `.claude/skills/migrate-to-promptscript/SKILL.md` - Migration skill (if Claude target)
+- `.github/skills/migrate-to-promptscript/SKILL.md` - Migration skill (if GitHub target)
+- `.cursor/commands/migrate.md` - Migration command (if Cursor target)
+- `.agent/rules/migrate.md` - Migration rule (if Antigravity target)
+
+Your existing AI instruction files remain untouched.
+
+### 2. Invoke the Migration Skill
+
+Use your AI assistant to migrate existing content. The migration skill analyzes your files and generates proper PromptScript.
+
+=== "Claude Code"
+
+    ```bash
+    # Use the migrate skill
+    /migrate
+
+    # Or describe what you want
+    "Migrate my existing CLAUDE.md to PromptScript"
+    ```
+
+=== "GitHub Copilot"
+
+    ```
+    @workspace /migrate
+    ```
+
+=== "Cursor"
+
+    ```bash
+    # Use the migrate command
+    /migrate
+    ```
+
+=== "Antigravity"
+
+    ```
+    # Ask to migrate using the installed rule
+    "Migrate my existing AI instructions to PromptScript"
+    ```
+
+### 3. What the AI Will Do
+
+The migration skill guides the AI through a structured process:
+
+1. **Discover** - Find all existing instruction files:
+   - `CLAUDE.md`, `CLAUDE.local.md`
+   - `.cursorrules`, `.cursor/rules/*.mdc`
+   - `.github/copilot-instructions.md`
+   - `AGENTS.md`
+
+2. **Analyze** - Read and classify content by type:
+   - "You are..." → `@identity`
+   - Tech stack info → `@context`
+   - "Always/Should..." → `@standards`
+   - "Never/Don't..." → `@restrictions`
+   - `/commands` → `@shortcuts`
+
+3. **Generate** - Create properly structured `.prs` files
+
+4. **Validate** - Run `prs validate` to check syntax
+
+### 4. Review and Refine
+
+After migration, review the generated `.promptscript/project.prs`:
+
+```bash
+# Validate syntax
+prs validate
+
+# Preview compiled output without writing files
+prs compile --dry-run
+
+# Compare with original files
+diff CLAUDE.md <(prs compile --target claude --stdout)
+```
+
+### 5. Compile and Replace
+
+Once satisfied, compile to replace your old files with generated versions:
+
+```bash
+prs compile
+```
+
+### 6. Clean Up (Optional)
+
+After verifying the compiled output matches your expectations, you can remove the original source files since PromptScript is now your source of truth:
+
+```bash
+# Backup first if needed
+git add .
+git commit -m "chore: migrate to promptscript"
+
+# Then remove old source files (compiled versions remain)
+# The compiled CLAUDE.md, .cursorrules etc. are regenerated from .prs
+```
+
+!!! tip "Keep Original Files During Transition"
+You don't have to delete original files immediately. Run both systems in parallel until you're confident the migration is complete.
+
+### Migration Example
+
+**Before** (CLAUDE.md):
+
+```markdown
+# Project
+
+You are a Python developer working on a FastAPI service.
+
+## Stack
+
+- Python 3.11, FastAPI, PostgreSQL
+
+## Rules
+
+- Write type hints for all functions
+- Use async/await for I/O
+
+## Don'ts
+
+- Don't commit .env files
+```
+
+**After** (.promptscript/project.prs):
+
+```promptscript
+@meta {
+  id: "api-service"
+  syntax: "1.0.0"
+}
+
+@identity {
+  """
+  You are a Python developer working on a FastAPI service.
+  """
+}
+
+@context {
+  languages: [python]
+  runtime: "Python 3.11"
+  frameworks: [fastapi]
+  database: "PostgreSQL"
+}
+
+@standards {
+  code: [
+    "Write type hints for all functions"
+    "Use async/await for I/O operations"
+  ]
+}
+
+@restrictions {
+  - "Don't commit .env files"
+}
+```
+
+For detailed migration guidance, see:
+
+- [Migration Guide](guides/migration.md) - Complete manual migration reference
+- [AI Migration Best Practices](guides/ai-migration-best-practices.md) - Guidelines for AI-assisted migration
+
 ## Project Structure
 
 After initialization, your project will have:

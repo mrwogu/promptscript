@@ -739,9 +739,13 @@ describe('compile command - overwrite protection', () => {
       // Both files have same content but different timestamps
       mockReadFile.mockImplementation((path: string) => {
         if (path.includes('file1.md')) {
-          return Promise.resolve(`<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nContent 1`);
+          return Promise.resolve(
+            `<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nContent 1`
+          );
         }
-        return Promise.resolve(`<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nContent 2`);
+        return Promise.resolve(
+          `<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nContent 2`
+        );
       });
 
       await compileCommand({}, mockServices);
@@ -773,9 +777,13 @@ describe('compile command - overwrite protection', () => {
 
       mockReadFile.mockImplementation((path: string) => {
         if (path.includes('unchanged.md')) {
-          return Promise.resolve(`<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nUnchanged`);
+          return Promise.resolve(
+            `<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nUnchanged`
+          );
         }
-        return Promise.resolve(`<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nOriginal`);
+        return Promise.resolve(
+          `<!-- PromptScript 2023-01-01T00:00:00.000Z - do not edit -->\n\nOriginal`
+        );
       });
 
       await compileCommand({}, mockServices);
@@ -807,7 +815,9 @@ describe('compile command - overwrite protection', () => {
       });
 
       // Same content with different timestamp
-      mockReadFile.mockResolvedValue(`<!-- PromptScript 2020-01-01T00:00:00.000Z - do not edit -->\n\nSame content`);
+      mockReadFile.mockResolvedValue(
+        `<!-- PromptScript 2020-01-01T00:00:00.000Z - do not edit -->\n\nSame content`
+      );
 
       await compileCommand({ dryRun: true }, mockServices);
 
@@ -833,7 +843,9 @@ describe('compile command - overwrite protection', () => {
         return false;
       });
 
-      mockReadFile.mockResolvedValue(`<!-- PromptScript 2020-01-01T00:00:00.000Z - do not edit -->\n\nOld content`);
+      mockReadFile.mockResolvedValue(
+        `<!-- PromptScript 2020-01-01T00:00:00.000Z - do not edit -->\n\nOld content`
+      );
 
       await compileCommand({ dryRun: true }, mockServices);
 
@@ -1175,7 +1187,9 @@ describe('compile command - overwrite protection', () => {
       });
 
       await expect(compileCommand({}, mockServices)).rejects.toThrow('process.exit called');
-      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Empty target configuration'));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Empty target configuration')
+      );
     });
   });
 

@@ -108,5 +108,18 @@ describe('cli', () => {
 
       expect(mockParse).toHaveBeenCalledWith(['node', 'prs', 'init', '--team', 'frontend']);
     });
+
+    it('should register --migrate option for init command', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'init', '--migrate']);
+
+      // Verify init command is registered
+      expect(mockCommand).toHaveBeenCalledWith('init');
+      // Verify --migrate option is registered (among other options)
+      expect(mockOption).toHaveBeenCalledWith(
+        '-m, --migrate',
+        'Install migration skill for AI-assisted migration'
+      );
+    });
   });
 });

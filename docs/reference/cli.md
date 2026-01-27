@@ -60,6 +60,8 @@ prs init [options]
 | `--targets <targets...>` | Target AI tools (github, claude, cursor)             |
 | `-i, --interactive`      | Force interactive mode with prompts                  |
 | `-y, --yes`              | Skip prompts, use defaults                           |
+| `-f, --force`            | Force reinitialize even if already initialized       |
+| `-m, --migrate`          | Install migration skill for AI-assisted migration    |
 
 **Examples:**
 
@@ -78,6 +80,9 @@ prs init --team frontend --inherit @frontend/team
 
 # Initialize with specific targets only
 prs init --targets github claude
+
+# Initialize with migration skill for existing projects
+prs init --migrate
 
 # Full non-interactive setup
 prs init -n my-project --inherit @company/team --targets github claude cursor
