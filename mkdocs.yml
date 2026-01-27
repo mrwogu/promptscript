@@ -141,10 +141,6 @@ extra:
 extra_css:
   - assets/stylesheets/extra.css
 
-extra_javascript:
-  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
-  - assets/javascript/mermaid-init.js
-
 nav:
   - Home: index.md
   - Getting Started:
