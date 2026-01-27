@@ -41,6 +41,11 @@ Structure instructions like code. Inherit from `@company/backend-security` or `@
 Update a central policy and propagate changes to 100+ repositories automatically. No more manual copy-pasting.
 </div>
 
+<div class="feature-card" markdown>
+### :material-robot: AI-Assisted Migration
+Already have `CLAUDE.md` or `.cursorrules`? Use the `/migrate` command in your AI assistant to automatically convert existing instructions to PromptScript format.
+</div>
+
 </div>
 
 ## The Business Problem: "Prompt Drift"

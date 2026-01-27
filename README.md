@@ -187,6 +187,19 @@ Write once, compile to native formats for the industry's leading AI tools.
     git commit -m "chore: setup PromptScript infrastructure"
     ```
 
+### Already Have AI Instructions?
+
+If you have existing `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md` files, use AI-assisted migration:
+
+```bash
+# In Claude Code, Cursor, or GitHub Copilot
+/migrate
+```
+
+The AI will discover your existing instruction files, analyze the content, and generate properly structured PromptScript files—preserving all your standards, restrictions, and custom commands.
+
+👉 **[Full Migration Guide →](https://getpromptscript.dev/guides/migration/)**
+
 ## 📦 Installation
 
 ```bash
