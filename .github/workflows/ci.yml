@@ -113,6 +113,11 @@ jobs:
         node-version: ['22', '24', '25']
 
     steps:
+      - name: Install git
+        run: |
+          apt-get update && apt-get install -y git
+          git --version
+
       - name: Download CLI artifact
         uses: actions/download-artifact@v7
         with:
@@ -194,6 +199,80 @@ jobs:
           test ! -f .claude/skills/migrate-to-promptscript/SKILL.md
           test ! -d .cursor/commands
           test ! -d .agent/rules
+
+      - name: Smoke test - all targets compilation
+        run: |
+          mkdir -p /tmp/test-all-targets
+          cd /tmp/test-all-targets
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name all-targets --targets github claude cursor antigravity -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile
+
+          # Verify all target outputs exist
+          test -f .github/copilot-instructions.md
+          test -f CLAUDE.md
+          test -f .cursor/rules/project.mdc
+          test -f .agent/rules/project.md
+
+      - name: Smoke test - validate with --strict flag
+        run: |
+          mkdir -p /tmp/test-strict
+          cd /tmp/test-strict
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name strict-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate --strict
+
+      - name: Smoke test - diff command
+        run: |
+          mkdir -p /tmp/test-diff
+          cd /tmp/test-diff
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name diff-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile
+
+          # Modify source and check diff
+          echo '# Extra content' >> .promptscript/project.prs
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js diff || true
+
+      - name: Smoke test - check command
+        run: |
+          mkdir -p /tmp/test-check
+          cd /tmp/test-check
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name check-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js check
+
+      - name: Smoke test - update-check command
+        run: |
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js update-check || true
+
+      - name: Smoke test - verbose and quiet flags
+        run: |
+          mkdir -p /tmp/test-flags
+          cd /tmp/test-flags
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name flags-test --targets github -y
+
+          # Test verbose
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate --verbose
+
+          # Test quiet
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile --quiet
+
+      - name: Smoke test - pull command (registry)
+        run: |
+          mkdir -p /tmp/test-pull
+          cd /tmp/test-pull
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name pull-test --targets github -y
+
+          # Pull should work (downloads registry)
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js pull || echo "Pull completed or registry not configured"
+
+      - name: Smoke test - compile with watch disabled
+        run: |
+          mkdir -p /tmp/test-watch
+          cd /tmp/test-watch
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name watch-test --targets github claude -y
+
+          # Compile without watch (default)
+          timeout 5 node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile || true
+          test -f .github/copilot-instructions.md
+          test -f CLAUDE.md
 
   codeql:
     name: CodeQL Analysis

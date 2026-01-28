@@ -8,10 +8,14 @@
       (function () {
         var path = window.location.pathname;
         var defined = ['/latest/', '/dev/', '/v'];
+        var excluded = ['/playground', '/playground-dev'];
         var isVersioned = defined.some(function (prefix) {
           return path.startsWith(prefix);
         });
-        if (!isVersioned && path !== '/') {
+        var isExcluded = excluded.some(function (prefix) {
+          return path.startsWith(prefix);
+        });
+        if (!isVersioned && !isExcluded && path !== '/') {
           window.location.replace('/latest' + path + window.location.search + window.location.hash);
         }
       })();

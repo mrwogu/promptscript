@@ -1,219 +1,395 @@
-# Official Registry
+# Registry
 
-The PromptScript Registry is the official collection of reusable configurations for AI assistants. It provides pre-built roles, tech stacks, and best practice fragments that you can inherit or import into your projects.
+PromptScript supports registries - collections of reusable configurations that can be inherited across projects. The official registry contains 1,134 configurations, but you can also create your own.
+
+## Official Registry
 
 **Repository:** [github.com/mrwogu/promptscript-registry](https://github.com/mrwogu/promptscript-registry)
+
+The official registry includes:
+
+| Namespace     | Count | Description                                    |
+| ------------- | ----- | ---------------------------------------------- |
+| `@prompts/`   | 632   | General-purpose prompts (coding, writing, etc) |
+| `@fragments/` | 441   | Reusable mixins (testing, security, agents)    |
+| `@roles/`     | 18    | AI personas (developer, creative, specialist)  |
+| `@skills/`    | 28    | Claude Code skills                             |
+| `@stacks/`    | 7     | Framework configs (React, Vue, Node, Python)   |
+| `@agents/`    | 5     | Specialized AI agents                          |
+| `@core/`      | 3     | Universal foundations                          |
 
 ## Quick Start
 
 ### 1. Configure Registry
 
-Add the registry to your `promptscript.yaml`:
+Add to your `promptscript.yaml`:
 
 ```yaml
 registry:
   git:
     url: https://github.com/mrwogu/promptscript-registry.git
-    ref: v0.1.0 # Pin to specific version
+    ref: main # Or pin to version: v1.0.0
 ```
 
 ### 2. Inherit Configurations
 
-Use `@inherit` to extend registry configurations:
-
 ```promptscript
 @meta {
   id: "my-project"
   syntax: "1.0.0"
 }
 
-@inherit @roles/developer/fullstack
+@inherit @stacks/react
+@use @fragments/testing
 ```
 
-### 3. Pull and Compile
+### 3. Compile
 
 ```bash
-prs pull     # Download registry files
-prs compile  # Generate output
+prs compile  # Automatically fetches registry and generates output
 ```
+
+**Note:** When using a Git registry, the CLI automatically clones and caches the repository. You don't need to run `prs pull` separately - the `compile` and `validate` commands handle this automatically.
+
+The registry is cached at `~/.promptscript/.cache/git/` with a default TTL of 1 hour. Use `prs pull --refresh` to force an update.
+
+## Using `prs init`
+
+The `prs init` command can automatically suggest configurations:
+
+```bash
+prs init
+```
+
+It will:
+
+1. Detect your tech stack (React, Node, Python, etc.)
+2. Offer to connect to the official registry
+3. Suggest relevant configurations
+4. Generate your `promptscript.yaml` and `.promptscript/project.prs`
 
 ## Available Configurations
 
-### Core (`@core/`)
+### Tech Stacks (`@stacks/`)
 
-Universal foundations that all other configurations build upon.
-
-| File             | Description                       |
-| ---------------- | --------------------------------- |
-| `@core/base`     | Universal AI assistant foundation |
-| `@core/security` | Security best practices           |
-| `@core/quality`  | Code quality standards            |
+| File                     | Description        |
+| ------------------------ | ------------------ |
+| `@stacks/react`          | React + TypeScript |
+| `@stacks/vue`            | Vue 3 + TypeScript |
+| `@stacks/node`           | Node.js backend    |
+| `@stacks/python`         | Python development |
+| `@stacks/rust`           | Rust development   |
+| `@stacks/go`             | Go development     |
+| `@stacks/typescript-lib` | TypeScript library |
 
 ### Roles (`@roles/`)
 
-Pre-configured AI personas optimized for specific tasks.
-
-#### Developer Roles
-
-| File                         | Description                               |
-| ---------------------------- | ----------------------------------------- |
-| `@roles/developer/fullstack` | Full-stack developer                      |
-| `@roles/developer/frontend`  | Frontend specialist                       |
-| `@roles/developer/backend`   | Backend specialist                        |
-| `@roles/developer/devops`    | DevOps engineer                           |
-| `@roles/developer/dba`       | Database administrator                    |
-| `@roles/developer/senior`    | Senior developer with architectural focus |
-| `@roles/developer/qa`        | Quality assurance specialist              |
-
-#### Creative Roles
-
-| File                          | Description           |
-| ----------------------------- | --------------------- |
-| `@roles/creative/writer`      | Creative writer       |
-| `@roles/creative/storyteller` | Narrative storyteller |
-| `@roles/creative/copywriter`  | Marketing copywriter  |
-
-#### Professional Roles
-
-| File                              | Description           |
-| --------------------------------- | --------------------- |
-| `@roles/professional/consultant`  | Business consultant   |
-| `@roles/professional/coach`       | Professional coach    |
-| `@roles/professional/analyst`     | Data/business analyst |
-| `@roles/professional/tech-writer` | Technical writer      |
-
-#### Specialist Roles
-
-| File                           | Description             |
-| ------------------------------ | ----------------------- |
-| `@roles/specialist/teacher`    | Educational instructor  |
-| `@roles/specialist/translator` | Language translator     |
-| `@roles/specialist/reviewer`   | Content reviewer        |
-| `@roles/specialist/terminal`   | Linux terminal emulator |
-
-### Tech Stacks (`@stacks/`)
-
-Framework and language-specific configurations with best practices.
-
-| File             | Description        |
-| ---------------- | ------------------ |
-| `@stacks/react`  | React + TypeScript |
-| `@stacks/vue`    | Vue 3 + TypeScript |
-| `@stacks/node`   | Node.js backend    |
-| `@stacks/python` | Python development |
-| `@stacks/rust`   | Rust development   |
-| `@stacks/go`     | Go development     |
+| Path                          | Description            |
+| ----------------------------- | ---------------------- |
+| `@roles/developer/fullstack`  | Full-stack developer   |
+| `@roles/developer/frontend`   | Frontend specialist    |
+| `@roles/developer/backend`    | Backend specialist     |
+| `@roles/developer/devops`     | DevOps engineer        |
+| `@roles/creative/writer`      | Creative writer        |
+| `@roles/professional/analyst` | Data/business analyst  |
+| `@roles/specialist/teacher`   | Educational instructor |
 
 ### Fragments (`@fragments/`)
 
-Reusable configuration blocks that can be imported with `@use`.
+Core mixins:
 
-| File                         | Description                    |
-| ---------------------------- | ------------------------------ |
-| `@fragments/testing`         | Testing standards and patterns |
-| `@fragments/documentation`   | Documentation guidelines       |
-| `@fragments/git-conventions` | Git workflow conventions       |
-| `@fragments/code-review`     | Code review guidelines         |
-| `@fragments/accessibility`   | Web accessibility (WCAG)       |
+| File                       | Description               |
+| -------------------------- | ------------------------- |
+| `@fragments/testing`       | Testing standards         |
+| `@fragments/typescript`    | TypeScript best practices |
+| `@fragments/documentation` | Documentation guidelines  |
+| `@fragments/code-review`   | Code review guidelines    |
+| `@fragments/accessibility` | Web accessibility (WCAG)  |
+
+Categorized fragments:
+
+| Category         | Count | Examples                       |
+| ---------------- | ----- | ------------------------------ |
+| `testing/`       | 157   | TDD patterns, test generation  |
+| `agents/`        | 139   | Agent guidelines, expert modes |
+| `security/`      | 72    | OWASP, vulnerability scanning  |
+| `documentation/` | 18    | Documentation generation       |
+
+### Prompts (`@prompts/`)
+
+632 general-purpose prompts organized by category:
+
+| Category     | Count | Examples                         |
+| ------------ | ----- | -------------------------------- |
+| `coding/`    | 250   | code-reviewer, linux-terminal    |
+| `general/`   | 241   | travel-guide, excel-sheet        |
+| `business/`  | 58    | seo-specialist, accountant       |
+| `education/` | 49    | math-teacher, philosophy-teacher |
+| `writing/`   | 34    | novelist, poet, screenwriter     |
 
 ## Usage Patterns
 
-### Inherit a Role
-
-Best for adopting a complete persona:
+### Pattern 1: Inherit a Tech Stack
 
 ```promptscript
-@meta {
-  id: "my-project"
-  syntax: "1.0.0"
-}
-
-@inherit @roles/developer/fullstack
-
-@context {
-  # Add project-specific context
-  project: "E-commerce Platform"
-}
-```
-
-### Use a Tech Stack
-
-Tech stacks inherit from roles and add framework specifics:
-
-```promptscript
-@meta {
-  id: "react-app"
-  syntax: "1.0.0"
-}
+@meta { id: "react-app", syntax: "1.0.0" }
 
 @inherit @stacks/react
 ```
 
-### Import Fragments
-
-Use `@use` to merge fragment blocks directly into your file:
+### Pattern 2: Mix in Fragments
 
 ```promptscript
-@meta {
-  id: "my-project"
-  syntax: "1.0.0"
-}
+@meta { id: "secure-app", syntax: "1.0.0" }
 
-@inherit @core/base
-@use @fragments/testing        # Merges testing standards
-@use @fragments/code-review    # Merges code review guidelines
-
-@identity {
-  """
-  Custom identity for my project.
-  """
-}
+@inherit @stacks/node
+@use @fragments/testing
+@use @fragments/security/owasp-security-review
 ```
 
-Fragments are merged into your file - their `@standards`, `@restrictions`, etc. become part of your configuration.
-
-### Combine Multiple Sources
+### Pattern 3: Use Prompts Directly
 
 ```promptscript
-@meta {
-  id: "enterprise-app"
-  syntax: "1.0.0"
-}
+@meta { id: "terminal", syntax: "1.0.0" }
 
-@inherit @stacks/react
-@use @fragments/accessibility
-@use @fragments/git-conventions
+@inherit @prompts/coding/linux-terminal
+```
 
-@context {
-  company: "Acme Corp"
-  compliance: [soc2, gdpr]
-}
+## How Git Registry Resolution Works
+
+When you configure a Git registry, the CLI handles everything automatically:
+
+1. **On first use:** The registry is cloned to `~/.promptscript/.cache/git/<hash>/`
+2. **On subsequent uses:** The cached version is used if not stale (default: 1 hour TTL)
+3. **On cache expiry:** The registry is updated with `git fetch`
+
+```
+prs init --yes
+    ↓
+Creates config with registry.git.url
+
+prs compile
+    ↓
+resolveRegistryPath() → checks cache validity
+    ↓
+If stale/missing: GitRegistry.fetch() → clone/update
+    ↓
+Compiler uses cached registry path
+```
+
+### Cache Configuration
+
+Control caching behavior in `promptscript.yaml`:
+
+```yaml
+registry:
+  git:
+    url: https://github.com/mrwogu/promptscript-registry.git
+    ref: main
+  cache:
+    enabled: true # Set to false to always fetch
+    ttl: 3600000 # Cache TTL in ms (default: 1 hour)
+```
+
+### Force Refresh
+
+```bash
+prs pull --refresh  # Force re-clone the registry
 ```
 
 ## Version Pinning
 
-Always pin to a specific version for stability:
+Pin to a specific version for stability:
 
 ```yaml
-# promptscript.yaml
 registry:
   git:
-    url: https://github.com/mrwogu/promptscript-registry.git
-    ref: v0.1.0 # Recommended: pin to version tag
+    ref: v1.0.0
 ```
 
-Available refs:
+Or in `.prs` files:
 
-- `v0.1.0`, `v0.2.0`, etc. - Stable releases (recommended)
-- `main` - Latest development (may change)
+```promptscript
+@inherit @stacks/react@v1.0.0
+```
 
-## Contributing
+---
 
-Want to add configurations to the registry?
+## Creating Custom Registries
+
+You can create your own registry for your organization.
+
+### Registry Structure
+
+```
+my-registry/
+├── registry-manifest.yaml    # Catalog of all configurations
+├── @core/
+│   └── base.prs
+├── @roles/
+│   └── developer/
+│       └── fullstack.prs
+├── @stacks/
+│   └── react.prs
+└── @fragments/
+    └── testing.prs
+```
+
+### Registry Manifest
+
+The `registry-manifest.yaml` file catalogs all configurations and enables `prs init` suggestions:
+
+```yaml
+version: '1'
+
+meta:
+  name: 'My Company Registry'
+  description: 'Internal AI instruction configurations'
+  lastUpdated: '2025-01-28'
+
+namespaces:
+  '@core':
+    description: 'Universal foundations'
+    priority: 100
+  '@roles':
+    description: 'AI personas'
+    priority: 90
+  '@stacks':
+    description: 'Tech stack configurations'
+    priority: 80
+  '@fragments':
+    description: 'Reusable mixins'
+    priority: 70
+
+catalog:
+  - id: '@core/base'
+    path: '@core/base.prs'
+    name: 'Base Foundation'
+    description: 'Universal AI assistant foundation'
+    tags: [core, foundation]
+    targets: [github, claude, cursor]
+    dependencies: []
+    detectionHints:
+      always: true
+
+  - id: '@stacks/react'
+    path: '@stacks/react.prs'
+    name: 'React Stack'
+    description: 'React + TypeScript configuration'
+    tags: [react, typescript, frontend]
+    targets: [github, claude, cursor]
+    dependencies: ['@core/base']
+    detectionHints:
+      dependencies: ['react', 'react-dom']
+      frameworks: ['react', 'nextjs']
+
+suggestionRules:
+  - condition: { always: true }
+    suggest: { inherit: '@core/base' }
+  - condition: { frameworks: ['react'] }
+    suggest: { inherit: '@stacks/react', use: ['@fragments/testing'] }
+```
+
+### Manifest Fields
+
+#### `catalog` Entry Fields
+
+| Field            | Required | Description                              |
+| ---------------- | -------- | ---------------------------------------- |
+| `id`             | Yes      | Unique ID matching file path             |
+| `path`           | Yes      | Path to the `.prs` file                  |
+| `name`           | Yes      | Human-readable name                      |
+| `description`    | Yes      | Brief description                        |
+| `tags`           | Yes      | Searchable tags                          |
+| `targets`        | No       | Supported targets (github, claude, etc.) |
+| `dependencies`   | No       | Required configurations                  |
+| `detectionHints` | No       | Auto-suggestion hints (see below)        |
+
+#### `detectionHints` Fields
+
+| Field          | Description                                    |
+| -------------- | ---------------------------------------------- |
+| `always`       | Always suggest this configuration              |
+| `files`        | Suggest if these files exist                   |
+| `dependencies` | Suggest if package.json has these dependencies |
+| `languages`    | Suggest for these languages                    |
+| `frameworks`   | Suggest for these frameworks                   |
+
+### Using Your Registry
+
+#### Git Registry
+
+Host on GitHub, GitLab, or any Git provider:
+
+```yaml
+registry:
+  git:
+    url: https://github.com/your-org/your-registry.git
+    ref: main
+```
+
+#### Local Registry
+
+For development or air-gapped environments:
+
+```yaml
+registry:
+  path: ./path/to/registry
+```
+
+### Verification Scripts
+
+Add these to your registry's `package.json`:
+
+```json
+{
+  "scripts": {
+    "verify": "node scripts/verify-manifest.js",
+    "rebuild": "node scripts/rebuild-catalog.js"
+  }
+}
+```
+
+**verify-manifest.js** - Checks all `.prs` files are in the catalog:
+
+```javascript
+// Scan all .prs files and compare against catalog
+// Exit with error if any files are missing
+```
+
+**rebuild-catalog.js** - Regenerates catalog from files:
+
+```javascript
+// Parse all .prs files and extract @meta information
+// Update registry-manifest.yaml with new entries
+```
+
+See the [official registry scripts](https://github.com/mrwogu/promptscript-registry/tree/main/scripts) for reference implementations.
+
+### CI/CD Integration
+
+Add manifest verification to your CI pipeline:
+
+```yaml
+# .github/workflows/verify-manifest.yml
+name: Verify Manifest
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - run: npm run verify
+```
+
+## Contributing to Official Registry
 
 1. Fork [promptscript-registry](https://github.com/mrwogu/promptscript-registry)
-2. Add your configuration in the appropriate namespace
+2. Add your `.prs` file in the appropriate namespace
 3. Ensure `@meta.id` matches the file path
-4. Submit a pull request
+4. Run `npm run rebuild` to update the catalog
+5. Submit a pull request
 
-See the [registry README](https://github.com/mrwogu/promptscript-registry#contributing) for guidelines.
+See the [contributing guide](https://github.com/mrwogu/promptscript-registry/blob/main/CONTRIBUTING.md) for details.

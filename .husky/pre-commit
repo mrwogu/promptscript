@@ -1,3 +1,4 @@
-pnpm format
+pnpm prs validate --strict
+pnpm format:check
 pnpm nx affected -t lint --base=HEAD
 pnpm schema:check

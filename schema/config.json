@@ -270,7 +270,6 @@
   "required": [
     "version",
     "project",
-    "registry",
     "targets"
   ],
   "additionalProperties": false,

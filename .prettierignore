@@ -13,3 +13,6 @@
 
 # PromptScript generated files - managed by prs compile
 CHANGELOG.md
+
+# schema
+schema/config.json

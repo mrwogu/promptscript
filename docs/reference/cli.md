@@ -310,20 +310,11 @@ Check configuration and dependencies.
 prs check [options]
 ```
 
-**Options:**
-
-| Option  | Description           |
-| ------- | --------------------- |
-| `--fix` | Attempt to fix issues |
-
 **Examples:**
 
 ```bash
 # Check project health
 prs check
-
-# Check and fix
-prs check --fix
 ```
 
 ---

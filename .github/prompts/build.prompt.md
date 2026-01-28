@@ -1,13 +1,16 @@
 ---
-description: 'Run verification commands'
+description: 'Run full verification pipeline'
 ---
 
-<!-- PromptScript 2026-01-27T21:40:11.378Z - do not edit -->
+<!-- PromptScript 2026-01-28T20:23:43.562Z - do not edit -->
 
-Run verification commands:
+Run complete verification pipeline (all steps required):
 
-- pnpm run format (Prettier)
-- pnpm run lint (ESLint)
-- pnpm run build (all packages)
-- pnpm run typecheck (TypeScript)
-- pnpm run test (all tests)
+1. pnpm run format # Format code with Prettier
+2. pnpm run lint # Check for linting errors
+3. pnpm run typecheck # Verify TypeScript types
+4. pnpm run test # Run all tests
+5. pnpm prs validate --strict # Validate .prs files
+6. pnpm schema:check # Verify JSON schemas are current
+
+If any step fails, fix the issue before proceeding.

@@ -52,6 +52,7 @@ describe('commands/init', () => {
     input: any;
     confirm: any;
     checkbox: any;
+    select: any;
   };
 
   beforeEach(() => {
@@ -72,6 +73,7 @@ describe('commands/init', () => {
       input: vi.fn().mockResolvedValue('test-project'),
       confirm: vi.fn().mockResolvedValue(false),
       checkbox: vi.fn().mockResolvedValue(['github', 'claude', 'cursor']),
+      select: vi.fn().mockResolvedValue('skip'), // default: skip registry
     };
 
     mockServices = {
@@ -188,13 +190,29 @@ describe('commands/init', () => {
       );
     });
 
-    it('should use default registry when --yes flag without registry option', async () => {
+    it('should use official git registry when --yes flag without registry option', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      // The default registry path is ./registry when using --yes
+      // The default is official git registry when using --yes
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining("path: './registry'"),
+        expect.stringContaining('git:'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('github.com/mrwogu/promptscript-registry'),
+        'utf-8'
+      );
+    });
+
+    it('should use local registry when --yes flag with --registry option', async () => {
+      await initCommand({ yes: true, registry: './my-registry' }, mockServices);
+
+      // Local registry when --registry is specified
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining("path: './my-registry'"),
         'utf-8'
       );
     });
@@ -236,27 +254,30 @@ describe('commands/init', () => {
       expect(mockExit).not.toHaveBeenCalled();
     });
 
-    it('should comment out inherit when not provided', async () => {
+    it('should use manifest suggestions in --yes mode', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("# inherit: '@company/team'"),
-        'utf-8'
+      // Check that promptscript.yaml was written with suggested inherit from manifest
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(yamlCall).toBeDefined();
+      // With --yes, manifest suggestions are applied automatically
+      expect(yamlCall![1]).toContain("inherit: '@core/base'");
     });
   });
 
   describe('interactive mode', () => {
     it('should run interactive prompts when no --yes flag', async () => {
       mockPrompts.input.mockResolvedValue('interactive-project');
-      mockPrompts.confirm.mockResolvedValue(false);
+      mockPrompts.select.mockResolvedValue('skip'); // skip registry
+      mockPrompts.confirm.mockResolvedValue(false); // no inherit
       mockPrompts.checkbox.mockResolvedValue(['github']);
 
       await initCommand({}, mockServices);
 
       expect(mockPrompts.input).toHaveBeenCalled();
-      expect(mockPrompts.confirm).toHaveBeenCalled();
+      expect(mockPrompts.select).toHaveBeenCalled();
       expect(mockPrompts.checkbox).toHaveBeenCalled();
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
@@ -269,9 +290,8 @@ describe('commands/init', () => {
       mockPrompts.input
         .mockResolvedValueOnce('my-project') // project name
         .mockResolvedValueOnce('@company/team'); // inheritance path
-      mockPrompts.confirm
-        .mockResolvedValueOnce(true) // wants inherit
-        .mockResolvedValueOnce(false); // no registry
+      mockPrompts.select.mockResolvedValue('skip'); // skip registry
+      mockPrompts.confirm.mockResolvedValueOnce(true); // wants inherit
       mockPrompts.checkbox.mockResolvedValue(['github']);
 
       await initCommand({}, mockServices);
@@ -290,13 +310,12 @@ describe('commands/init', () => {
       );
     });
 
-    it('should ask for registry path when user wants registry', async () => {
+    it('should ask for registry path when user wants local registry', async () => {
       mockPrompts.input
         .mockResolvedValueOnce('my-project') // project name
         .mockResolvedValueOnce('./my-registry'); // registry path
-      mockPrompts.confirm
-        .mockResolvedValueOnce(false) // no inherit
-        .mockResolvedValueOnce(true); // wants registry
+      mockPrompts.select.mockResolvedValue('local'); // local registry
+      mockPrompts.confirm.mockResolvedValue(false); // no inherit
       mockPrompts.checkbox.mockResolvedValue(['cursor']);
 
       await initCommand({}, mockServices);
@@ -308,11 +327,31 @@ describe('commands/init', () => {
       );
     });
 
-    it('should not include registry when user declines', async () => {
+    it('should configure git registry when user selects official', async () => {
       mockPrompts.input.mockResolvedValueOnce('my-project');
-      mockPrompts.confirm
-        .mockResolvedValueOnce(false) // no inherit
-        .mockResolvedValueOnce(false); // no registry
+      mockPrompts.select.mockResolvedValue('official'); // official registry
+      mockPrompts.confirm.mockResolvedValue(false); // no inherit
+      mockPrompts.checkbox.mockResolvedValue(['github']);
+
+      await initCommand({}, mockServices);
+
+      // Should have git registry configuration
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('git:'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('github.com/mrwogu/promptscript-registry'),
+        'utf-8'
+      );
+    });
+
+    it('should not include registry when user skips', async () => {
+      mockPrompts.input.mockResolvedValueOnce('my-project');
+      mockPrompts.select.mockResolvedValue('skip'); // skip registry
+      mockPrompts.confirm.mockResolvedValue(false); // no inherit
       mockPrompts.checkbox.mockResolvedValue(['github']);
 
       await initCommand({}, mockServices);
@@ -329,9 +368,8 @@ describe('commands/init', () => {
       mockPrompts.input
         .mockResolvedValueOnce('from-prompt') // project name (overrides default)
         .mockResolvedValueOnce('@other/path'); // inheritance path
-      mockPrompts.confirm
-        .mockResolvedValueOnce(true) // wants inherit
-        .mockResolvedValueOnce(false); // no registry
+      mockPrompts.select.mockResolvedValue('skip'); // skip registry
+      mockPrompts.confirm.mockResolvedValueOnce(true); // wants inherit
       mockPrompts.checkbox.mockResolvedValue(['claude']);
 
       await initCommand(
@@ -596,7 +634,8 @@ describe('commands/init', () => {
     it('should show Prettier detection in interactive mode', async () => {
       mockFindPrettierConfig.mockReturnValue('/mock/project/.prettierrc');
       mockPrompts.input.mockResolvedValue('test-project');
-      mockPrompts.confirm.mockResolvedValue(false);
+      mockPrompts.select.mockResolvedValue('skip'); // skip registry
+      mockPrompts.confirm.mockResolvedValue(false); // no inherit
       mockPrompts.checkbox.mockResolvedValue(['github']);
 
       await initCommand({}, mockServices);

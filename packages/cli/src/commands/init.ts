@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { getPackageVersion } from '@promptscript/core';
+import { getPackageVersion, type RegistryManifest } from '@promptscript/core';
 import { type CliServices, createDefaultServices } from '../services.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +25,33 @@ import {
   MIGRATE_SKILL_CURSOR,
   MIGRATE_SKILL_ANTIGRAVITY,
 } from '../templates/migrate-skill.js';
+import {
+  loadManifest,
+  loadManifestFromUrl,
+  ManifestLoadError,
+  OFFICIAL_REGISTRY,
+  isValidGitUrl,
+} from '../utils/manifest-loader.js';
+import {
+  buildProjectContext,
+  calculateSuggestions,
+  createSuggestionChoices,
+  parseSelectedChoices,
+  formatSuggestionResult,
+} from '../utils/suggestion-engine.js';
+
+/**
+ * Registry configuration - either local path or remote git.
+ */
+interface RegistryConfig {
+  type: 'local' | 'git';
+  /** Local path (for type: 'local') */
+  path?: string;
+  /** Git URL (for type: 'git') */
+  url?: string;
+  /** Git branch/ref (for type: 'git') */
+  ref?: string;
+}
 
 /**
  * Resolved configuration after prompts or CLI args.
@@ -33,7 +60,8 @@ interface ResolvedConfig {
   projectId: string;
   team?: string;
   inherit?: string;
-  registry?: string;
+  use?: string[];
+  registry?: RegistryConfig;
   targets: AIToolTarget[];
   /** Path to detected Prettier config, or null if not found */
   prettierConfigPath: string | null;
@@ -63,12 +91,26 @@ export async function initCommand(
     // Detect Prettier configuration
     const prettierConfigPath = findPrettierConfig(process.cwd());
 
+    // Try to load manifest for suggestions (optional - don't fail if not found)
+    let manifest: RegistryManifest | undefined;
+    try {
+      const registryPath = options.registry ?? './registry';
+      const { manifest: loadedManifest } = await loadManifest({ registryPath }, services);
+      manifest = loadedManifest;
+    } catch (error) {
+      // Manifest loading is optional - continue without it
+      if (!(error instanceof ManifestLoadError)) {
+        throw error;
+      }
+    }
+
     // Resolve configuration (interactive or from CLI args)
     const config = await resolveConfig(
       options,
       projectInfo,
       aiToolsDetection,
       prettierConfigPath,
+      manifest,
       services
     );
 
@@ -134,7 +176,14 @@ export async function initCommand(
       ConsoleOutput.muted(`  Inherit: ${config.inherit}`);
     }
     if (config.registry) {
-      ConsoleOutput.muted(`  Registry: ${config.registry}`);
+      if (config.registry.type === 'git') {
+        ConsoleOutput.muted(`  Registry: ${config.registry.url} (${config.registry.ref})`);
+      } else {
+        ConsoleOutput.muted(`  Registry: ${config.registry.path} (local)`);
+      }
+    }
+    if (config.use && config.use.length > 0) {
+      ConsoleOutput.muted(`  Use: ${config.use.join(', ')}`);
     }
 
     // Show Prettier detection status
@@ -210,15 +259,48 @@ async function resolveConfig(
   projectInfo: ProjectInfo,
   aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>,
   prettierConfigPath: string | null,
+  manifest: RegistryManifest | undefined,
   services: CliServices
 ): Promise<ResolvedConfig> {
-  // If --yes flag, use all defaults
+  // If --yes flag, use all defaults (including manifest suggestions)
   if (options.yes) {
+    let inherit = options.inherit;
+    let use: string[] | undefined;
+    let activeManifest = manifest;
+
+    // Try to fetch official registry manifest if not already loaded
+    if (!activeManifest) {
+      try {
+        const { manifest: remoteManifest } = await loadManifestFromUrl();
+        activeManifest = remoteManifest;
+      } catch {
+        // Ignore - continue without manifest
+      }
+    }
+
+    // Apply manifest suggestions if available
+    if (activeManifest) {
+      const context = await buildProjectContext(projectInfo, services);
+      const suggestions = calculateSuggestions(activeManifest, context);
+      if (!inherit && suggestions.inherit) {
+        inherit = suggestions.inherit;
+      }
+      if (suggestions.use.length > 0) {
+        use = suggestions.use;
+      }
+    }
+
+    // Default to official registry in --yes mode
+    const registry: RegistryConfig = options.registry
+      ? { type: 'local', path: options.registry }
+      : { type: 'git', url: OFFICIAL_REGISTRY.url, ref: OFFICIAL_REGISTRY.branch };
+
     return {
       projectId: options.name ?? projectInfo.name,
       team: options.team,
-      inherit: options.inherit,
-      registry: options.registry ?? './registry',
+      inherit,
+      use,
+      registry,
       targets: (options.targets as AIToolTarget[]) ?? getSuggestedTargets(aiToolsDetection),
       prettierConfigPath,
     };
@@ -226,11 +308,15 @@ async function resolveConfig(
 
   // If not interactive and all required options provided, use them
   if (!options.interactive && options.name && options.targets) {
+    const registry: RegistryConfig | undefined = options.registry
+      ? { type: 'local', path: options.registry }
+      : undefined;
+
     return {
       projectId: options.name,
       team: options.team,
       inherit: options.inherit,
-      registry: options.registry,
+      registry,
       targets: options.targets as AIToolTarget[],
       prettierConfigPath,
     };
@@ -242,6 +328,7 @@ async function resolveConfig(
     projectInfo,
     aiToolsDetection,
     prettierConfigPath,
+    manifest,
     services
   );
 }
@@ -254,6 +341,7 @@ async function runInteractivePrompts(
   projectInfo: ProjectInfo,
   aiToolsDetection: Awaited<ReturnType<typeof detectAITools>>,
   prettierConfigPath: string | null,
+  manifest: RegistryManifest | undefined,
   services: CliServices
 ): Promise<ResolvedConfig> {
   const { prompts } = services;
@@ -290,41 +378,143 @@ async function runInteractivePrompts(
     default: options.name ?? projectInfo.name,
   });
 
-  // 2. Inheritance
-  const wantsInherit = await prompts.confirm({
-    message: 'Do you want to inherit from a parent configuration?',
-    default: false,
+  // 2. Registry configuration
+  let registry: RegistryConfig | undefined;
+  let activeManifest = manifest;
+
+  const registryChoice = await prompts.select({
+    message: 'Registry configuration:',
+    choices: [
+      {
+        name: `📦 Use official PromptScript Registry (${OFFICIAL_REGISTRY.url})`,
+        value: 'official',
+      },
+      {
+        name: '🔗 Connect to a custom Git registry',
+        value: 'custom-git',
+      },
+      {
+        name: '📁 Use a local registry directory',
+        value: 'local',
+      },
+      {
+        name: '⏭️  Skip registry (configure later)',
+        value: 'skip',
+      },
+    ],
+    default: manifest ? 'official' : 'skip',
   });
 
-  let inherit: string | undefined;
-  if (wantsInherit) {
-    inherit = await prompts.input({
-      message: 'Inheritance path (e.g., @company/team):',
-      default: options.inherit ?? '@company/team',
+  if (registryChoice === 'official') {
+    registry = {
+      type: 'git',
+      url: OFFICIAL_REGISTRY.url,
+      ref: OFFICIAL_REGISTRY.branch,
+    };
+    // Fetch manifest from official registry if not already loaded
+    if (!activeManifest) {
+      try {
+        ConsoleOutput.muted('Fetching registry manifest...');
+        const { manifest: remoteManifest } = await loadManifestFromUrl();
+        activeManifest = remoteManifest;
+        ConsoleOutput.success(
+          `Loaded ${remoteManifest.catalog.length} configurations from official registry`
+        );
+      } catch {
+        ConsoleOutput.warn('Could not fetch registry manifest - suggestions will be limited');
+      }
+    }
+  } else if (registryChoice === 'custom-git') {
+    const gitUrl = await prompts.input({
+      message: 'Git repository URL:',
+      default: 'https://github.com/your-org/your-registry.git',
       validate: (value) => {
-        if (!value.startsWith('@')) {
-          return 'Inheritance path should start with @';
+        if (!isValidGitUrl(value)) {
+          return 'Please enter a valid Git repository URL (https:// or git@)';
         }
         return true;
       },
     });
-  }
-
-  // 3. Registry
-  const wantsRegistry = await prompts.confirm({
-    message: 'Do you want to configure a registry?',
-    default: false,
-  });
-
-  let registry: string | undefined;
-  if (wantsRegistry) {
-    registry = await prompts.input({
-      message: 'Registry path:',
+    const gitRef = await prompts.input({
+      message: 'Branch or tag:',
+      default: 'main',
+    });
+    registry = {
+      type: 'git',
+      url: gitUrl,
+      ref: gitRef,
+    };
+  } else if (registryChoice === 'local') {
+    const localPath = await prompts.input({
+      message: 'Local registry path:',
       default: options.registry ?? './registry',
     });
+    registry = {
+      type: 'local',
+      path: localPath,
+    };
   }
 
-  // 4. Targets
+  // 3. Manifest-based suggestions (if available)
+  let inherit: string | undefined = options.inherit;
+  let use: string[] | undefined;
+
+  if (activeManifest) {
+    const context = await buildProjectContext(projectInfo, services);
+    const suggestions = calculateSuggestions(activeManifest, context);
+
+    // Show suggestions
+    if (suggestions.inherit || suggestions.use.length > 0) {
+      ConsoleOutput.newline();
+      console.log('📦 Suggested configurations based on your project:');
+      const suggestionLines = formatSuggestionResult(suggestions);
+      for (const line of suggestionLines) {
+        ConsoleOutput.muted(`  ${line}`);
+      }
+      ConsoleOutput.newline();
+
+      // Create choices for selection
+      const choices = createSuggestionChoices(activeManifest, suggestions);
+
+      if (choices.length > 0) {
+        const selected = await prompts.checkbox({
+          message: 'Select configurations to use:',
+          choices: choices.map((c) => ({
+            name: c.description ? `${c.name} - ${c.description}` : c.name,
+            value: c.value,
+            checked: c.checked,
+          })),
+        });
+
+        const parsed = parseSelectedChoices(selected);
+        inherit = parsed.inherit;
+        use = parsed.use.length > 0 ? parsed.use : undefined;
+      }
+    }
+  }
+
+  // 4. Manual inheritance (if no manifest or user skipped suggestions)
+  if (!inherit) {
+    const wantsInherit = await prompts.confirm({
+      message: 'Do you want to inherit from a parent configuration?',
+      default: false,
+    });
+
+    if (wantsInherit) {
+      inherit = await prompts.input({
+        message: 'Inheritance path (e.g., @stacks/react):',
+        default: options.inherit ?? '@stacks/react',
+        validate: (value) => {
+          if (!value.startsWith('@')) {
+            return 'Inheritance path should start with @';
+          }
+          return true;
+        },
+      });
+    }
+  }
+
+  // 5. Targets
   const suggestedTargets = getSuggestedTargets(aiToolsDetection);
   const allTargets = getAllTargets();
 
@@ -343,7 +533,7 @@ async function runInteractivePrompts(
     },
   });
 
-  // 5. Team (optional, derived from inherit or asked separately)
+  // 6. Team (optional, derived from inherit or asked separately)
   let team: string | undefined = options.team;
   if (inherit && !team) {
     // Extract team from inherit path: @company/team -> company
@@ -357,6 +547,7 @@ async function runInteractivePrompts(
     projectId,
     team,
     inherit,
+    use,
     registry,
     targets,
     prettierConfigPath,
@@ -391,15 +582,39 @@ function generateConfig(config: ResolvedConfig): string {
   if (config.inherit) {
     lines.push(`inherit: '${config.inherit}'`);
   } else {
-    lines.push("# inherit: '@company/team'");
+    lines.push("# inherit: '@stacks/react'");
+  }
+
+  lines.push('');
+
+  // Add use array if configured
+  if (config.use && config.use.length > 0) {
+    lines.push('use:');
+    for (const useItem of config.use) {
+      lines.push(`  - '${useItem}'`);
+    }
+  } else {
+    lines.push('# use:', "#   - '@fragments/testing'", "#   - '@fragments/typescript'");
   }
 
   lines.push('');
 
   if (config.registry) {
-    lines.push('registry:', `  path: '${config.registry}'`);
+    if (config.registry.type === 'git') {
+      lines.push('registry:', '  git:', `    url: '${config.registry.url}'`);
+      if (config.registry.ref) {
+        lines.push(`    ref: '${config.registry.ref}'`);
+      }
+    } else {
+      lines.push('registry:', `  path: '${config.registry.path}'`);
+    }
   } else {
-    lines.push('# registry:', "#   path: './registry'");
+    lines.push(
+      '# registry:',
+      '#   git:',
+      "#     url: 'https://github.com/mrwogu/promptscript-registry.git'",
+      "#     ref: 'main'"
+    );
   }
 
   lines.push('', 'targets:');
@@ -432,7 +647,15 @@ function generateConfig(config: ResolvedConfig): string {
  * Generate the project.prs file content.
  */
 function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): string {
-  const inheritLine = config.inherit ? `@inherit ${config.inherit}` : '# @inherit @company/team';
+  const inheritLine = config.inherit ? `@inherit ${config.inherit}` : '# @inherit @stacks/react';
+
+  // Generate @use directives
+  let useLines = '';
+  if (config.use && config.use.length > 0) {
+    useLines = config.use.map((u) => `@use ${u}`).join('\n');
+  } else {
+    useLines = '# @use @fragments/testing\n# @use @fragments/typescript';
+  }
 
   const languagesLine =
     projectInfo.languages.length > 0
@@ -456,11 +679,12 @@ function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): st
 }
 
 ${inheritLine}
+${useLines}
 
 @identity {
   """
   You are working on the ${config.projectId} project.
-  
+
   [Describe your project here]
   """
 }

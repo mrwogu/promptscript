@@ -114,6 +114,42 @@ Options:
 
 By default, diff output is shown through a pager (`less`) for easy scrolling. Use `--no-pager` to disable this behavior. You can customize the pager via the `PAGER` environment variable.
 
+### Check for Updates
+
+```bash
+prs update-check
+```
+
+Checks if a newer version of the CLI is available on npm and displays the result:
+
+```
+@promptscript/cli v1.0.0
+✓ Up to date
+```
+
+Or if an update is available:
+
+```
+@promptscript/cli v1.0.0
+Update available: 1.0.0 → 1.1.0 (npm i -g @promptscript/cli)
+```
+
+**Automatic Update Checks:** The CLI automatically checks for updates once every 24 hours when running any command. The check is non-blocking and cached locally. To disable automatic checks, set the `PROMPTSCRIPT_NO_UPDATE_CHECK` environment variable:
+
+```bash
+PROMPTSCRIPT_NO_UPDATE_CHECK=1 prs compile
+```
+
+## Environment Variables
+
+| Variable                       | Description                                    |
+| ------------------------------ | ---------------------------------------------- |
+| `PROMPTSCRIPT_NO_UPDATE_CHECK` | Set to `1` to disable automatic update checks  |
+| `PROMPTSCRIPT_VERBOSE`         | Set to `1` to enable verbose output            |
+| `PROMPTSCRIPT_DEBUG`           | Set to `1` to enable debug output              |
+| `PAGER`                        | Custom pager for diff output (default: `less`) |
+| `NO_COLOR`                     | Set to disable colored output                  |
+
 ## Configuration
 
 Create a `promptscript.yaml` file:

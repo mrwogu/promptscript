@@ -134,7 +134,7 @@ registry:
       expect(config.project.id).toBe('test-project');
       expect(config.project.team).toBe('frontend');
       expect(config.targets).toEqual(['github', 'claude']);
-      expect(config.registry.path).toBe('./registry');
+      expect(config.registry?.path).toBe('./registry');
     });
 
     it('should throw error for invalid YAML', async () => {
