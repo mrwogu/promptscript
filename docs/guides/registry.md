@@ -8,15 +8,15 @@ PromptScript supports registries - collections of reusable configurations that c
 
 The official registry includes:
 
-| Namespace      | Count | Description                                    |
-| -------------- | ----- | ---------------------------------------------- |
-| `@prompts/`    | 632   | General-purpose prompts (coding, writing, etc) |
-| `@fragments/`  | 441   | Reusable mixins (testing, security, agents)    |
-| `@roles/`      | 18    | AI personas (developer, creative, specialist)  |
-| `@skills/`     | 28    | Claude Code skills                             |
-| `@stacks/`     | 7     | Framework configs (React, Vue, Node, Python)   |
-| `@agents/`     | 5     | Specialized AI agents                          |
-| `@core/`       | 3     | Universal foundations                          |
+| Namespace     | Count | Description                                    |
+| ------------- | ----- | ---------------------------------------------- |
+| `@prompts/`   | 632   | General-purpose prompts (coding, writing, etc) |
+| `@fragments/` | 441   | Reusable mixins (testing, security, agents)    |
+| `@roles/`     | 18    | AI personas (developer, creative, specialist)  |
+| `@skills/`    | 28    | Claude Code skills                             |
+| `@stacks/`    | 7     | Framework configs (React, Vue, Node, Python)   |
+| `@agents/`    | 5     | Specialized AI agents                          |
+| `@core/`      | 3     | Universal foundations                          |
 
 ## Quick Start
 
@@ -69,60 +69,60 @@ It will:
 
 ### Tech Stacks (`@stacks/`)
 
-| File                    | Description                  |
-| ----------------------- | ---------------------------- |
-| `@stacks/react`         | React + TypeScript           |
-| `@stacks/vue`           | Vue 3 + TypeScript           |
-| `@stacks/node`          | Node.js backend              |
-| `@stacks/python`        | Python development           |
-| `@stacks/rust`          | Rust development             |
-| `@stacks/go`            | Go development               |
-| `@stacks/typescript-lib`| TypeScript library           |
+| File                     | Description        |
+| ------------------------ | ------------------ |
+| `@stacks/react`          | React + TypeScript |
+| `@stacks/vue`            | Vue 3 + TypeScript |
+| `@stacks/node`           | Node.js backend    |
+| `@stacks/python`         | Python development |
+| `@stacks/rust`           | Rust development   |
+| `@stacks/go`             | Go development     |
+| `@stacks/typescript-lib` | TypeScript library |
 
 ### Roles (`@roles/`)
 
-| Path                           | Description                  |
-| ------------------------------ | ---------------------------- |
-| `@roles/developer/fullstack`   | Full-stack developer         |
-| `@roles/developer/frontend`    | Frontend specialist          |
-| `@roles/developer/backend`     | Backend specialist           |
-| `@roles/developer/devops`      | DevOps engineer              |
-| `@roles/creative/writer`       | Creative writer              |
-| `@roles/professional/analyst`  | Data/business analyst        |
-| `@roles/specialist/teacher`    | Educational instructor       |
+| Path                          | Description            |
+| ----------------------------- | ---------------------- |
+| `@roles/developer/fullstack`  | Full-stack developer   |
+| `@roles/developer/frontend`   | Frontend specialist    |
+| `@roles/developer/backend`    | Backend specialist     |
+| `@roles/developer/devops`     | DevOps engineer        |
+| `@roles/creative/writer`      | Creative writer        |
+| `@roles/professional/analyst` | Data/business analyst  |
+| `@roles/specialist/teacher`   | Educational instructor |
 
 ### Fragments (`@fragments/`)
 
 Core mixins:
 
-| File                       | Description                    |
-| -------------------------- | ------------------------------ |
-| `@fragments/testing`       | Testing standards              |
-| `@fragments/typescript`    | TypeScript best practices      |
-| `@fragments/documentation` | Documentation guidelines       |
-| `@fragments/code-review`   | Code review guidelines         |
-| `@fragments/accessibility` | Web accessibility (WCAG)       |
+| File                       | Description               |
+| -------------------------- | ------------------------- |
+| `@fragments/testing`       | Testing standards         |
+| `@fragments/typescript`    | TypeScript best practices |
+| `@fragments/documentation` | Documentation guidelines  |
+| `@fragments/code-review`   | Code review guidelines    |
+| `@fragments/accessibility` | Web accessibility (WCAG)  |
 
 Categorized fragments:
 
-| Category         | Count | Examples                              |
-| ---------------- | ----- | ------------------------------------- |
-| `testing/`       | 157   | TDD patterns, test generation         |
-| `agents/`        | 139   | Agent guidelines, expert modes        |
-| `security/`      | 72    | OWASP, vulnerability scanning         |
-| `documentation/` | 18    | Documentation generation              |
+| Category         | Count | Examples                       |
+| ---------------- | ----- | ------------------------------ |
+| `testing/`       | 157   | TDD patterns, test generation  |
+| `agents/`        | 139   | Agent guidelines, expert modes |
+| `security/`      | 72    | OWASP, vulnerability scanning  |
+| `documentation/` | 18    | Documentation generation       |
 
 ### Prompts (`@prompts/`)
 
 632 general-purpose prompts organized by category:
 
-| Category     | Count | Examples                           |
-| ------------ | ----- | ---------------------------------- |
-| `coding/`    | 250   | code-reviewer, linux-terminal      |
-| `general/`   | 241   | travel-guide, excel-sheet          |
-| `business/`  | 58    | seo-specialist, accountant         |
-| `education/` | 49    | math-teacher, philosophy-teacher   |
-| `writing/`   | 34    | novelist, poet, screenwriter       |
+| Category     | Count | Examples                         |
+| ------------ | ----- | -------------------------------- |
+| `coding/`    | 250   | code-reviewer, linux-terminal    |
+| `general/`   | 241   | travel-guide, excel-sheet        |
+| `business/`  | 58    | seo-specialist, accountant       |
+| `education/` | 49    | math-teacher, philosophy-teacher |
+| `writing/`   | 34    | novelist, poet, screenwriter     |
 
 ## Usage Patterns
 
@@ -198,51 +198,51 @@ The `registry-manifest.yaml` file catalogs all configurations and enables `prs i
 version: '1'
 
 meta:
-  name: "My Company Registry"
-  description: "Internal AI instruction configurations"
-  lastUpdated: "2025-01-28"
+  name: 'My Company Registry'
+  description: 'Internal AI instruction configurations'
+  lastUpdated: '2025-01-28'
 
 namespaces:
-  "@core":
-    description: "Universal foundations"
+  '@core':
+    description: 'Universal foundations'
     priority: 100
-  "@roles":
-    description: "AI personas"
+  '@roles':
+    description: 'AI personas'
     priority: 90
-  "@stacks":
-    description: "Tech stack configurations"
+  '@stacks':
+    description: 'Tech stack configurations'
     priority: 80
-  "@fragments":
-    description: "Reusable mixins"
+  '@fragments':
+    description: 'Reusable mixins'
     priority: 70
 
 catalog:
-  - id: "@core/base"
-    path: "@core/base.prs"
-    name: "Base Foundation"
-    description: "Universal AI assistant foundation"
+  - id: '@core/base'
+    path: '@core/base.prs'
+    name: 'Base Foundation'
+    description: 'Universal AI assistant foundation'
     tags: [core, foundation]
     targets: [github, claude, cursor]
     dependencies: []
     detectionHints:
       always: true
 
-  - id: "@stacks/react"
-    path: "@stacks/react.prs"
-    name: "React Stack"
-    description: "React + TypeScript configuration"
+  - id: '@stacks/react'
+    path: '@stacks/react.prs'
+    name: 'React Stack'
+    description: 'React + TypeScript configuration'
     tags: [react, typescript, frontend]
     targets: [github, claude, cursor]
-    dependencies: ["@core/base"]
+    dependencies: ['@core/base']
     detectionHints:
-      dependencies: ["react", "react-dom"]
-      frameworks: ["react", "nextjs"]
+      dependencies: ['react', 'react-dom']
+      frameworks: ['react', 'nextjs']
 
 suggestionRules:
   - condition: { always: true }
-    suggest: { inherit: "@core/base" }
-  - condition: { frameworks: ["react"] }
-    suggest: { inherit: "@stacks/react", use: ["@fragments/testing"] }
+    suggest: { inherit: '@core/base' }
+  - condition: { frameworks: ['react'] }
+    suggest: { inherit: '@stacks/react', use: ['@fragments/testing'] }
 ```
 
 ### Manifest Fields
