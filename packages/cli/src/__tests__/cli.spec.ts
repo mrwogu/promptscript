@@ -121,5 +121,12 @@ describe('cli', () => {
         'Install migration skill for AI-assisted migration'
       );
     });
+
+    it('should register update-check command', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'update-check']);
+
+      expect(mockCommand).toHaveBeenCalledWith('update-check');
+    });
   });
 });

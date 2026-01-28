@@ -17,6 +17,7 @@ export { validateCommand } from './commands/validate.js';
 export { pullCommand } from './commands/pull.js';
 export { diffCommand } from './commands/diff.js';
 export { checkCommand } from './commands/check.js';
+export { updateCheckCommand } from './commands/update-check.js';
 
 // Config
 export { loadConfig, findConfigFile, CONFIG_FILES } from './config/loader.js';
@@ -32,6 +33,17 @@ export {
   isQuiet,
 } from './output/console.js';
 export type { CLIContext } from './output/console.js';
+
+// Version check utilities
+export {
+  checkForUpdates,
+  forceCheckForUpdates,
+  fetchLatestVersion,
+  getCacheDir,
+  getCachePath,
+  printUpdateNotification,
+} from './utils/version-check.js';
+export type { UpdateInfo } from './utils/version-check.js';
 
 // Types
 export type {

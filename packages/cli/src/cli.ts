@@ -13,18 +13,20 @@ import { validateCommand } from './commands/validate.js';
 import { pullCommand } from './commands/pull.js';
 import { diffCommand } from './commands/diff.js';
 import { checkCommand } from './commands/check.js';
+import { updateCheckCommand } from './commands/update-check.js';
 import { setContext, LogLevel } from './output/console.js';
+import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 
 const program = new Command();
 
 program
   .name('prs')
   .description('PromptScript CLI - Standardize AI instructions')
-  .version(getPackageVersion(__dirname, './package.json'))
+  .version(getPackageVersion(__dirname, '../package.json'))
   .option('--verbose', 'Enable verbose output')
   .option('--debug', 'Enable debug output (includes verbose)')
   .option('--quiet', 'Suppress non-error output')
-  .hook('preAction', (thisCommand) => {
+  .hook('preAction', async (thisCommand, actionCommand) => {
     const opts = thisCommand.opts();
     // Set global context based on flags (debug > verbose > quiet)
     if (opts['quiet']) {
@@ -42,6 +44,18 @@ program
       process.env['PROMPTSCRIPT_VERBOSE'] === 'true'
     ) {
       setContext({ logLevel: LogLevel.Verbose });
+    }
+
+    // Skip version check for update-check command (it does its own check)
+    if (actionCommand.name() === 'update-check') {
+      return;
+    }
+
+    // Check for updates (non-blocking, respects cache and quiet mode)
+    const currentVersion = getPackageVersion(__dirname, '../package.json');
+    const updateInfo = await checkForUpdates(currentVersion);
+    if (updateInfo) {
+      printUpdateNotification(updateInfo);
     }
   });
 
@@ -107,6 +121,8 @@ program
   .description('Check configuration and dependencies health')
   .option('--fix', 'Attempt to fix issues')
   .action(checkCommand);
+
+program.command('update-check').description('Check for CLI updates').action(updateCheckCommand);
 
 /**
  * Run the CLI.
