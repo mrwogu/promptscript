@@ -379,9 +379,9 @@ describe('utils/suggestion-engine', () => {
       const choices = createSuggestionChoices(sampleManifest, result);
 
       expect(choices).toHaveLength(2);
-      expect(choices[0].value).toBe('inherit:@stacks/react');
-      expect(choices[0].checked).toBe(true);
-      expect(choices[1].value).toBe('use:@fragments/testing');
+      expect(choices[0]!.value).toBe('inherit:@stacks/react');
+      expect(choices[0]!.checked).toBe(true);
+      expect(choices[1]!.value).toBe('use:@fragments/testing');
     });
 
     it('should include entry descriptions', () => {
@@ -394,7 +394,7 @@ describe('utils/suggestion-engine', () => {
 
       const choices = createSuggestionChoices(sampleManifest, result);
 
-      expect(choices[0].description).toBe('React configuration');
+      expect(choices[0]!.description).toBe('React configuration');
     });
   });
 

@@ -260,14 +260,14 @@ catalog: []
       const entries = getCatalogEntriesByNamespace(sampleManifest, '@core');
 
       expect(entries).toHaveLength(1);
-      expect(entries[0].id).toBe('@core/base');
+      expect(entries[0]!.id).toBe('@core/base');
     });
 
     it('should normalize namespace without @ prefix', () => {
       const entries = getCatalogEntriesByNamespace(sampleManifest, 'stacks');
 
       expect(entries).toHaveLength(1);
-      expect(entries[0].id).toBe('@stacks/react');
+      expect(entries[0]!.id).toBe('@stacks/react');
     });
 
     it('should return empty array for unknown namespace', () => {
@@ -282,7 +282,7 @@ catalog: []
       const entries = getCatalogEntriesByTag(sampleManifest, 'frontend');
 
       expect(entries).toHaveLength(1);
-      expect(entries[0].id).toBe('@stacks/react');
+      expect(entries[0]!.id).toBe('@stacks/react');
     });
 
     it('should return multiple entries with same tag', () => {
@@ -325,9 +325,9 @@ catalog: []
       const sorted = getNamespacesSortedByPriority(sampleManifest);
 
       expect(sorted).toHaveLength(3);
-      expect(sorted[0].name).toBe('@core');
-      expect(sorted[1].name).toBe('@stacks');
-      expect(sorted[2].name).toBe('@fragments');
+      expect(sorted[0]!.name).toBe('@core');
+      expect(sorted[1]!.name).toBe('@stacks');
+      expect(sorted[2]!.name).toBe('@fragments');
     });
   });
 

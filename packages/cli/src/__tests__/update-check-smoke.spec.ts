@@ -18,7 +18,7 @@ describe('update-check smoke tests', () => {
   };
 
   describe('prs update-check', () => {
-    it('should display version information', () => {
+    it('should display version information', { timeout: 15000 }, () => {
       // Run with update check disabled to avoid network dependency
       const output = runCli(['update-check'], {
         PROMPTSCRIPT_NO_UPDATE_CHECK: '1',

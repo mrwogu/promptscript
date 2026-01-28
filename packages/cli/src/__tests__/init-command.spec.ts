@@ -254,14 +254,16 @@ describe('commands/init', () => {
       expect(mockExit).not.toHaveBeenCalled();
     });
 
-    it('should comment out inherit when not provided', async () => {
+    it('should use manifest suggestions in --yes mode', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("# inherit: '@stacks/react'"),
-        'utf-8'
+      // Check that promptscript.yaml was written with suggested inherit from manifest
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(yamlCall).toBeDefined();
+      // With --yes, manifest suggestions are applied automatically
+      expect(yamlCall![1]).toContain("inherit: '@core/base'");
     });
   });
 
