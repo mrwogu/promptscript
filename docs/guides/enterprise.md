@@ -97,14 +97,14 @@ promptscript-registry/
 
 @standards {
   code: [
-    "Code review required"
-    "Documentation required"
+    "Code review required",
+    "Documentation required",
     "Testing required"
   ]
 
   git: [
-    "Use conventional commits format"
-    "Branch naming: feature|bugfix|hotfix/TICKET-description"
+    "Use conventional commits format",
+    "Branch naming: feature|bugfix|hotfix/TICKET-description",
     "Pull request required"
   ]
 }
@@ -123,7 +123,7 @@ promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9ACMMcGPLES4AT3YZCs+QEYKABmu7xgpcrMgAggGEAsgFFBbpWiVsCDY7AF8xMW5pTiwILANhPTkQXRT7AE1mAFdBDGoYXPEXAElcuDgIOAF2XKxBd29ff0DYtgoI+z98wQA3DCgs+EQkgFpBAEUs-riE5h6YakE4NBgYKVHBAGUYRizqGcFIWiwNgFVtahHGGP3GQSl4CGVWDb8oKAx1Foh5+5h5qDMNB8dhJVJhDrcKoYVhSPJSOCJewsB6yZBJCTyPwPQT5HoQGAAd1xMAAjlkIPl1mkJJiQAARZi7EECVrifLkylrOy05IAFXgsVYyhJnKpPMEAF0OhJlHE0RjkucCixWPN2MFWP1BCwSCQ4oiwEoSNgJXSAELUGGMHCCLX64WyMAwbB7GAAH3UWWUkEI7pwzCwvtUfOKbgA0l4+SMHnBGPs0GyzckAApZd6iwZVTNc6lJaWscIvVjcfJVW5sxGiexjeQAOX+Cx1zD1cSWO3yWERSh1VJiEH6cAltZADfmi3UBkw5Xbu328RJ+KJQ5pghHLighIwBkNzHezGJcIEghogZ2bJPe4gjAJK429cbiyy2j+NB22DWr84D1YN-ggkJOJbQAa1YA9xB6dNWAWT5oDiW8IWLKEA2oLBdi7JE6VUbQ5xmeRnAAJX+AliRRAojUWHC9gOSCoGgq11Dg2J4AleRVCkJkV2cABxTgYI4BwnzQI8Cg45kYiCEI0lCEBQklBgbgMfAiFIcgYCoWgQAYccKjYfBzFkoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAs2oBzAPQAjDHBhVaAHVb8SMLBl7AFvXhAAmiXnJCCREqTEObecAJ7sMhfYYCMFAAxuLrLUOGOQAQQBhAFkAUV5AoTQhbAg2TwBfBQV+XU4sCCxrdUsLEE8tAE1mAFdeDGoYcq9-AElyuDgIOFV2cqxeILCIqJiMtgpkrx7K3gA3DCgS+ERLAFpeAEUSyczs5jGYais0GBgded4AZRhGEuo13khaLEOAVWlqOcZ0i8ZeHXgIYVZDyKgoBhxH0IJsPjBNlBmGhlOxcvkEQokr9FC0MKwdBUdHAcsMWJ99MhLFpDJFPrxKmMIDAAO4UmAARxKEEqBxAdGJBhAABFmGdYap+l5KkyWftDBzhiSQAAVeAZVjCemi1kFXgAXSGWmEmUJnMMDyqLFYm3YcVYk14LBIJEyOLAQhI2Al+pAACFqOjGDheBbbYr9GAYNhzjAAD7iErCSCEMM4ZhYGOiGW1QIAaVCMrmnzgjAuaCFLqlXIACiUAcrpi1K2K2ZZNaxkSlKi03kKcRphgtDAA5CFbK3MG2ZKynSpYHFCK2s9IQSZwNXdkB9zbbcTWTCNUdnC5ZelU2kL-Jdrn+KA0jDWe3MAHMOmY1S8GgJ05Cp83iCMalHw69-vbEppHBGhTmwfZgM4T5WC-eBeBpTIfQAa1YO8vDGctWC2IFoEyb9EiGfg4HjagsDOCdcWlURpB3NZDD8AAlCFqTpfEqgdbZqPOS50KgTDPXEHCMngNVDFEHQ+SPPwAHFOCwjheCnEo0AfKpxP5dJYniY8EhABJ1QYV5rHwIhSHIGQaHoEBVyaNh8CcXSgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -145,11 +145,11 @@ promptscript-registry/
 
 @standards {
   security: [
-    "MFA required"
-    "Session timeout: 3600 seconds"
-    "RBAC with least privilege principle"
-    "Encrypt with AES-256"
-    "Mask PII in logs"
+    "MFA required",
+    "Session timeout: 3600 seconds",
+    "RBAC with least privilege principle",
+    "Encrypt with AES-256",
+    "Mask PII in logs",
     "Weekly vulnerability scanning"
   ]
 }
@@ -175,7 +175,7 @@ promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9HBiMArtQhYAnvLES4+9hkKz5ARgoAGe0dYBfMWO7TOWPfuHG5IEaB4oIAgmjkvqEAwgCyAKKCGtq6BkkCrFIY1FJwgljMghhQUIIsUjAU-kFOrqzucBlZOXmiIck6PrLI-hLysQBioYLUMACOWhCjUk4SfSAAyvBwEGz5EHzMWliyAMwAbHZ2SZpsubNz8gBKAEIxggDuejiCsBiNgjQQAG7QMMowT66ViMCDkGAXebxEHUfRoLCPZ5heILAC0ACYAKz7SEBWLvADWggACgBJUmScRQZjKOC4+QAdRgMAJUF83y0UFYMGoGAARtAfElGBhWKwIKxlBcALpiOruUaNXSMbxsVr+VEBAByMG+PPSSkBmDgcAeSlylM+UAwEvyRCwF018h1euorxpJ1YK28esEWQEju1uv1UggcH5sBOKSFYBg2B08EDzuDbq0GkEuuKAAoAJSCJRJDbQbKCLRejCxwRgMsq1ZepMgUJQB4YfR5b7FaTYQGiqRJUV6CAAL0Baf1ErQ2wbTZbbdL6cwvL4HF0I77Ex5EETwXlrG4BNYzAesCkAL8IRqwQkAGJr4IltG0ld4FtqIxE-UQpqH500spJhUUASvAsg4FgWBoHAiCqKoTwEhAFAYIwfAUCwJDqJov6GF+ggAGqctyvICkBaSjGgSjeJKsgdKk+jcEhKFoRq96YbRIy6luDxlDgmismGOyCGBEFQTBcEIQxlRoRhj76KijA8YwfGNNUgSqXKIDONKDBeLC+BEKQ4JULQIAMK6KxsPg1gaUAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAs2oBzAPRwYjAK7UIWAJ5VaAHVb8SMLBl7BVvXhAAmiXspCCR4yTLnyze3nHnsMhE2YCMFAAw-7rAF9VVX4jTixbHQd7EH99AEE0cnleeIBhAFkAUUdrWQVHLVZDDGpDOF4sZl4MKCheFkMYCmjYttUg1hC4IpKyit1WfQlpfPkTZAd9MwyAMXjeahgARykIJcMzOinTEABleDgINkqIDWYpLBMAZgA2b29clmK4LZ2zACUAIXTeAHc5DheLAMD1eDQIAA3aAwYQwcGyViMCDkGBvIb6XZZJHUeRoLD-QGpLJ7AC0ACYAKy3dGY3YZUEAa14AAUAJJsgxDKDMYSvEDbDHTEAAdRgMEZUBSkKkUFYMGoGAARtBInBGBhWKwIKxhHFeABdDrBNRLHqyRgRNgDByk3YAORgkIVhSE8MwcDgfyE5S54KgGB1lSIWH1drMjud1GBvNyrCOEWdvBKWjDDqdLsMEDgytgTxsBTAMGwMngaYjGejUgkvCdtQAFABKXhCRxnaClXhSeMYIu8MDdy3HePlkDxKB-DDyCqQ2pGbDwzWGRyauQQABe8OrLp1aEuo-Hk+nXZrmEVGg4sk3y9WCogZdigRN-EZrGYf1ghjhUQxMX13D4A5RkiD54AuahGDLLoMTtICCxSYQ1iaKAdXgEwcCwLA0DgRBRFEAFGQgCgMEYDQKBYEgrGAhRbV4AA1WV5UVFUUIKJY0CECJdRMEZ4P4EiyIo2i4LGRYnXvP4GhwSRJWzK5eAwrCcLwgiiIE5oKKo+DSUYaTGFknpWj-QIQACA0GHCXF8CIUhUSUegQCjI42HwDxTKAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -228,18 +228,18 @@ promptscript-registry/
 
 @standards {
   code: [
-    "Use hooks, composition, and render props patterns"
-    "Functional components only"
+    "Use hooks, composition, and render props patterns",
+    "Functional components only",
     "TypeScript interfaces for props"
   ]
 
   accessibility: [
-    "WCAG 2.1 AA compliance"
+    "WCAG 2.1 AA compliance",
     "Accessibility testing required"
   ]
 
   performance: [
-    "Monitor bundle size"
+    "Monitor bundle size",
     "Track Core Web Vitals"
   ]
 }
@@ -253,7 +253,7 @@ promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7vGClJMyABiG9px0gxAXzFjuCFYcGGoILEFuZmoAcxUAIww4GACAV2TI6LjkxlSwrAN-VkCpTixwg2E9OW9a6oBNZlTBDGoYFsF1TU9BUoA3GChmND52QSI0UKwKIokAUUJJ6nLkxGqAWkEAJRgMRgiMbUEAFQNJgGVGMLQsDcEAWWZS6nEAYXPzlqPSuAgY8UMcA4JDgdwACqEwNESIdGO1huUSBAAF7YCBsO4AQUYcLgv3i0AqggAFAB1V6YgDiggATBRzIJMZiAJTVXR1Vh+VgBFgeQgRUT2dl2CQAYlFJxgjBwgnOAkYAGtZoJNm5SDAAO7RBWyHZ7CLmAAcAGo7gAZQ4xVIYGIwWSnC5XCA3QQAVlN9k2ACFUtAZIIAGrhFKe2UFKBBGL2jDQDVBKTvc53Y7wcqsKOB4NAwTGyVAyOCM0QeLUVqFUNy7B27a7faCACKqVClVzAC10gJtMrxYzqNLg-s8iG7q9mGQ2GV1lIwgNxP1BsNRrdQy5dlgh+tEskpJ1mFBnoIgdRUoO2ndzjhWjAdz8-gCDECYCQSdw9nwVL7WUK6t5OUVuEChxSK0UhwFU9gsKUsjINUEjyAAqhkODMMwCpwHQggsOOvzlGwGFAYIbTaKEgg0MMYGYFgHAvKCv4SHBripKw+zoqwGBQJhY5oBO7BgWwUCFHR9HyA6MCXNcERBNRYB7PAu7UKRGhoLR1QALrKnsuL4oSBTQbBNTklStL0oymKcWQEawikQkMdiWnFjplQcPm6aETAACOvptF4anKksULUDCzHVjB9gMY8rDhNEgjxExUiwIeKLWfpImloqgijm0gikjA8SZgIUAqfY6l-tyxRwMhyy5FgYGCgxKhYdxrBlPIzivG0VYdHqdaNTxtxCfIKjIahrU1O1a7tEIuRAmOgjDUqA0gCozn9c4pL5O0K1gXGuD5amIo1CoGDmOYgnODsfQQJqLQ4vA2kRgUdg+CAPiqQwZTUAY+BEKQ5AwFQtAgAwAy0Kx+DmC9QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAh1JwA9GGpsOrACZVaAHVb8SMLBl7BFvXhGmJe8kIJjCxE9p2mGtvOAE92GQvsMBGCgAZP11tqEkXEAAxcykrEEUAX0VFfghWHBhqCCwBZmoAcxEAIww4GFiAV3y0zJF8xkLkrDsYpV1OLBS7DRtrCIjfXgBNZkLeDGoYAd5xSUteaRgANxgoZjQVdl4iNCSsCjrtAFFCNeom-MQbAFpeACUTRlSMGV4AFTs1gGVGZLQsU94AWWYp6l8AGFns8BncpnAIBlfPY4BwSHAvgAFJJgdIkW6MYYLJokCAAL2wEDYXwAgowsXBIdloM1eAAKADqgNJAHFeAAmCiuXik0kASjaHR80VYsRYFkIqU0XXaPm03D49xgjBwvGeakYAGstrwziFSDAAO7pLX6S4Ya68VwADgA1F8ADK3DKFDAZGD6R4vN4QD68ACsDq6ZwAQoVoHpeAA1FIFEPqmpQeIZL0YaBG+LSYHPL7KuEp-Sxjhw3h2h7wJqsDK8R0QbLUQa1BMa7Cei5XVIARUKSRa5YAWsU1DJdYredRVXHrlV419AcwyGxGidpMlZr4prN5otGl8giYsLOTrl8tJRswoP9bFhqIUZ0Mvs8cIMYOeIVCYXY4TASAz+JaKgiBGgqysKnSirEcK3NIgzSHArRdCwUz6MgNjaIYACqJQ4MwzBanAdC8CwS6Qk0bBETBvBDDISS8DQCwIZgWAcACiIgHQ6EGMEhSsNcxKsBgUDEYuaDLuwCFsFAtQcVxhjejArzvKk8SsWAlrwBe1D0RIaDsTYAC6uqWpS1K0jUqFySAzJspy3K8qSIlkMmmIFLJXQYSA5KmfW5ktCWVY1kMACOEZDOEhm6vsaLUBifHtmhHncb8rApOkvDZLx0iwLYBJuZxSXyY22q8AuQy8IyMDZDGKRCfpXRGawkFKHAuEHJUWAITKnkiCRYmsHuSDcYCQxtiMFpWn14mfJ0PW4fhhiBCNh7DOolRwouvDzTqs3cSIAWLdxjLVMMAUIZmuA1Qdu2GCIGCuK4MmBJc0wQMaAwUvAZnJjUIogJEBkMI01B2PgRCkOQMByPQICzLQAn4K4-1AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -304,14 +304,14 @@ promptscript-registry/
 
 @standards {
   api: [
-    "URL path versioning (/v1, /v2)"
-    "Document with OpenAPI 3.0"
+    "URL path versioning (/v1, /v2)",
+    "Document with OpenAPI 3.0",
     "JWT + OAuth2 authentication"
   ]
 
   database: [
-    "Use migrations for schema changes"
-    "Review all indexes"
+    "Use migrations for schema changes",
+    "Review all indexes",
     "Query optimization required"
   ]
 }
@@ -325,7 +325,7 @@ promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0AIwyMA1pynyxEuAE92GQrPkBGCgAZb+8YKUkLIAEKadrPSDEBfMTFuCFYcGGoILEFuZmoAc3UMOBgggFdk6NiE5MZUiKwjQNZgqU4sSKNhAzlfWuqATWZUwQxqGBbBDW1dQVKANxgoZjQ+dkEiNHCsCiKJAFFCSepy5MRqgFpBADlmUooAKzgW70EAFSNJgGVGCLQsDcEAJTnL07BUqGOpQQBxagw0DgAIoAGUEAEEAAoASTgDwAItgMBoMqU4BA4uIMCdhuUSBAAF7YCBsB4AWQgN2YyWofUp8Ba1EYOEiMEYWDyKUc+jqrACrCCLHYRCiom5dV8jgAxFKzmycIJLgJtLNBJtHql2BA+LIdntDoIAEw2ADUDxB2LiqQwcRgsnOVxuEDuggArGbHJsAGL-PgAd1iWl18CwAClLgikSi7YJIdSsHE2pdQYITU8YFIIHDPYIAPKPMmySEROAkDAPU4hkJxWShkOqmUQpksjjszmqzYAYVg2MZzNZbbaCOYZZC6ykEQG4jRGIFObmU6w48nnEE+KpNLpjHg1R5Dn5QTgAm8rSkRzFEgBEFkyGqEnkAFVHmDMLhBANaCTWNXBAAKFR9JYdCCABhoAJQOBI94gPCzC5KMUR+pECq5pMrBQtCggAMz2JKUE1KGADqpypnm4KpLghotBRYRaowxKknhggALqqlIUZJDGt6ONBD4ZPiiYMawRxgLEghwMyMBloIzKWjuTHQY8MB0jAfotFAnwhKUhDyXeNRAqk4SVLi2qEkJghtAAjqkEBtD41SsXyRTcHAOCxFguRYOeu4gCoV7yK48LwLOEIwuM3hoMwIT3Ex8gqBJYRlgFNRBeimK9BxGQJVJ5axb5HBHsl8iEfk7QFV5ghIW+daFXlKgCf8HBFSAnZtNg7TsQI0ZrhijVfvuIB+MxDBlNQRj4EQpDkDAVC0CADAfuibD4JYg1AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAh1JwA9ACMMjANacAJlVoAdVvxIwsGXsGW9eEWYl6KQgmMPGSZrWcZ284AT3YZCh4wEYKABm+3WuoRI3EAAhSzk-AF9lZX4IVhwYaggsAWZqAHMLOBhYgFcctMyRHMY85KwHGJV9TiwUhy07WxA-XQBNZjzeDGoYHt4JaTleWRgANxgoZjQ1dl4iNCSsCmrdAFFCJep6nMQ7AFpeADlmMYoAKzge614AFQclgGVGZLQsQ94AJXWnu7A8lAbrJeABxagYNA4ACKABleABBAAKAEk4J8ACLYDASQpjOAQDL+DC3Gb1EgQABe2AgbE+AFkIK9mDlqOMmfAetRGDgUjBGFhyrl-EZWmLlNFWLEWOwiKltCKWm1eNw+Hd+TheE8NNI1rwjl88uwIGpDKdzldeAAmLwAak+sJJGTyGAyMEMD2erwg714AFZ7SKjgAxCFqADu6SkZvgWAAUk9Mdjce7eEiWVgMn0nnDeLbvjBZBB0UHeAB5L70wxI5JwEgYT7quD1VgZQxx2N61WI7m8jgCoV6o4AYVgJK5PL5A76mOY9fiB1kyUm-nxhKlpfWK6wi+XnF4FOZrPZjHgzXFrVYktizZJsl6smuCt0kIghmQdl0xgAql94ZhcF4SZaFpVh4gyXgAAoRHGdw6F4GCrQASmMOhP1FDFmDKOZUnDFJNTLJZWGRFFeAAZl8EA0JFL8QDjAB1O483LBE8lwK0ejYxJjUYGk6UvXQAF09XvDQU3fdCf0KCksz41hrjAdJ7B5GB614HknTPKjJJAL4JggGBwx6KAgXiMZCC06jdFo6E8iSRoyRNKk5N4PoAEc8ggPobAE3hhKvap+DgHB0iwMosCfc8RFfYxggxeB10RVEFmsNBmHiD5fOMEoVPrWKMISolRmTDBCjgXKGyykARA4Zt8uMeiKn6WqIt4PDAI7OqqpEGSIQ4eqQGHPpsH6UScVK-perkqIQEiQSGDqagHHwIhSHIGAFHoEBgIJNh8HcWagA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -387,7 +387,7 @@ promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ix3CKxwxqELIO4dSOAB6MGo2DlYpF1ZuFnYiX1FxQRpmACsYRiwLEABhJRU1QQAFbV0HCWoYLTgfbSMcgHMfHAUAIwoWEiCMRj4gxgLVL00yjD0QaIl9ScnkgGJ5krCMrMEAeQA3L02IGAB3KcEAZRgoMHU4HYhGGBSxqEEwbUEAQVyAWQBRQUHlYdoFCOADEYNgFFU4IgDIJ1G9GCwFOxBCQMKwMI0YHx2DC4etqFIvIIcBB-tQjLiTgo0FodIIsDcANb8OCUgBC0Cg7kaklYz2oqIZbCOi0EAGkYEZBABJeKNajYCBsVmsSmvBS4WTrRkCE7HdaU4oYIzYrBQk5YbxoGBq9FQIwMxjmj4QQiYVhnGEzBzOVUxRmsZj7WBSTHCL2zCqCUWvYrSwRfSJadxmo5sjBXQQAVQASgAZWQ4LBYNBQoI9NAQCi9PidVRBTaWI5wgDiXwAKoIBkM1MFENJYYIW-xfj2vJS252gtpCbRB3nSb4Z14VRI4cV1scp47mWbB7kqtg7nBqbTfDv+CKlgAReAQRriY5GZRYo5ZzPcGswIIKCC-VRaB67BQuyGoqKwdAyqwaAapBpywFklK5BgBKQR8zBSOMkHXgq+zjskcLXtgGDthgbSwJBRrNOiQp+tMkZzI4ICOAAugwnCWkY+BEKQ5AwFQtAgAw2y0EqrD4JYzFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEV1ZmSxxG1CGiwB6GswBWMRlgFwAOqwACJGFgy9g63rwgATRL1VMArnCxCY1ALRpm1XVEuHecAJ7sMhOaWAIwUAAzhnqwAvurqGhCsOA4QWLwaHKRwUmCC7JwmcZos+YRpBqxGsgpKQSAAwjZ22tS8AAqu7lFG1DAucKmuPnUA5qk4VgBGFCwkUhiM2lKMTfZOLm4YHiBFRp47O5W83HxtgjVpAPIAbg7XEDAA7ru8AMowUGCOcHcQjDC8DbuXhgVy8ACC9QAsgBRXgrWxrOAUF4AMRg2CsvTgiC8jghjBYVnYvBIGFYGBGMG07DxvEu1BMDl4OAgiOoPjprysaCBvCwfwA1jo1Ed8QAhaBQRIjYysUHUMkCtgvE68ADSMB8vAAkvkRtRsBA2KK6eCrLhzJdBbo3q9LnS2hgfDSROZXlhxGgYGaKVAfALGDjeFCIIRMKwPl59lFYqx4oLWMxHrATFT9NGDt1jnxwW0dbwYawTC5EiIXuKMD9eABVABKABlzDgsFg0DipPM0BAKAttDMhFJrsEXviAOIwgAqvGWqxa2UQpl44508LnDjpE+nUlcTNoy94DbZaV3DlFRnxbUur23geFIgP9V62ABcB5fLvOlVfAAIvAICMlSvD4tjUi8NbVhofYwFIVgQPCQguJG7A4nS4oWnYrB0LqrBoBa2HvLASh0vUGCMthULMCYWzYT+hqPBuYq8D+2AYJOGCTLA2FOmMFLKvGRwxoc0QgNEAC6DCcJ6Pj4EQpDkDAKggAwty0MarD4MEolAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

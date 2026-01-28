@@ -44,7 +44,7 @@ registry:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABCKxwxqELPwtwsGRgGs4Aemow3C1gsAVzgYJzBqDABzEk4sbw4XayiQEwBdBjjqUXwiUnIYKloQBgA3OzgINnwdVKA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO4RWOGNQhZB3OAMYBrOAB6ahgMbScAVzgYbzBqDABzPnZgjl8XRJA7AF0GTixqRXwiUnIYKloQBgA3dzgINnwzbKA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -144,7 +144,7 @@ Categorized fragments:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJucLBkYBrOAHpqMKVhABfALoNOWagE98RUuRhVaIBgDdBcCG3wBGNUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRgZGWALQY0aGXUFwAnuwyFJMgIwUADGZmCAvlNa3uEVjhjUIWQdzgDGAazgB6OQUsECsAXQZOLGptfCJSchgqWhAGADcXOAg2fCNQoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -160,7 +160,7 @@ Categorized fragments:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJucLBkYBrOAHpWzACYwAOq24BXODDFhqGAOYlOWeRwl9D6rTr0Hjp+TsaahWAJ5zmAdwxw0AFoXN2EPQOoYADcIGB8QAF8AXQZTag98IlJyGCpaEAYowTgINnwARkSgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaDGjQy6guAE92GQpJkBGCgAYLMwQF8pre9wiscMahCyDucAYwDWcAD0rMxiMI4Kcl5g1BgA5nzsQRw+znERUdwx8YlYQXKK7li6gcwA7hhwaCoFSh66KsoAbhAwZSA2ALoMnFjUuvhEpOQwVLQgDE1ucBBs+CYdQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -174,7 +174,7 @@ Categorized fragments:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuNZmSxwA9CwAmfAOYyofAK6EAtB2ok+GKCAC+AXQacs1AJ74ipcjCq0QDAG6C4ENvgCMJoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEB2okIrDFBl1BcAJ7sMhSTICMFAAzGZggL5TWV7opwxqELIO41mZLHAD0LMYoDmXlCKAK6EALRyCkpQIOYAugycWNQa+ESk5DBUtCAMAG4OcBBs+PpxQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -236,6 +236,12 @@ Or in `.prs` files:
 ```promptscript
 @inherit @stacks/react@v1.0.0
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJucLBkYBrOAHpqMKVm4A3AIwUADNpABfALoNOWagE98RUuRhVaIBqsFwIbfOv1A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ---
 

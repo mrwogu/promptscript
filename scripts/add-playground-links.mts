@@ -30,7 +30,8 @@ const LINK_BLOCK_REGEX = new RegExp(
 
 // Regex to match PRS code blocks
 // Matches ```prs, ```promptscript, or ```prs title="..." etc.
-const CODE_BLOCK_REGEX = /```(?:prs|promptscript)(?:\s+[^\n]*)?\n([\s\S]*?)```/g;
+// Note: Use [ \t]+ (not \s+) to avoid matching newlines in the optional attribute part
+const CODE_BLOCK_REGEX = /```(?:prs|promptscript)(?:[ \t]+[^\n]*)?\n([\s\S]*?)```/g;
 
 interface ShareableState {
   files: Array<{ path: string; content: string }>;
@@ -48,6 +49,32 @@ interface ProcessResult {
 
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Remove common leading whitespace from all lines (dedent).
+ * This is needed for code blocks inside tabbed content which have extra indentation.
+ */
+function dedent(text: string): string {
+  const lines = text.split('\n');
+
+  // Find minimum indentation (ignoring empty lines)
+  let minIndent = Infinity;
+  for (const line of lines) {
+    if (line.trim().length === 0) continue;
+    const match = line.match(/^(\s*)/);
+    if (match) {
+      minIndent = Math.min(minIndent, match[1].length);
+    }
+  }
+
+  // If no indentation found or infinite, return as-is
+  if (minIndent === Infinity || minIndent === 0) {
+    return text;
+  }
+
+  // Remove the common indentation from all lines
+  return lines.map((line) => line.slice(minIndent)).join('\n');
 }
 
 /**
@@ -113,7 +140,8 @@ function processMarkdownFile(filePath: string, mode: 'add' | 'check' | 'clean'):
 
   // Find all PRS code blocks and add links after them
   const newContent = content.replace(CODE_BLOCK_REGEX, (match, codeContent: string) => {
-    const trimmedCode = codeContent.trim();
+    // Dedent first (removes common leading whitespace from tabbed content), then trim
+    const trimmedCode = dedent(codeContent).trim();
 
     // Skip empty or very short examples
     if (trimmedCode.length < 10) {

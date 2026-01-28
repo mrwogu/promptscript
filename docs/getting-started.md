@@ -70,8 +70,8 @@ Open `.promptscript/project.prs` and customize:
 
 @standards {
   code: [
-    "Use functional programming style"
-    "Prefer hooks and composition patterns"
+    "Use functional programming style",
+    "Prefer hooks and composition patterns",
     "Write tests for all code"
   ]
 }
@@ -101,7 +101,7 @@ Open `.promptscript/project.prs` and customize:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABXpywQso-sCUrFIYyoCazAK78M1GH4Ad2ZqAGsIVgBzfjY-fgAlGAx5PzRyCEZsCDYKZ34AFTkcVSwUsIEC0TQYAGVGagg0LDpE5NSdAA5WgDU7GHzXYzNWSzgy1h5-HjhHfJYeGAFkfJcQAFU4QLBvVnkc1gwofiko6lISSJjx0Vh3FSEQAAUAsBhqfhxmZjDZjEn+CwyMw4HYDidsBxqKw4Pc1gB1RocfgccazMChPxQY4LAZuZT8AC6ShGYy+1CwjG8WFmTgJAGJ+LUIGRYKVGtF+IAkwn4PGYVJINmycTYUFEgxAAHoAgA3CAwILCbQgJJyhWA5iLfgYj4AR28RzsDn+PH4ACN4FgTud9ox4MZ8oyAPJm2SpIJ2EpSMhYARYajeQI8qKcd7YeDW5g+7XQe0E4SS1EKJBzAkqb3NP0BgZp3nwBpNWxsZWI-r8XZ2FGW2H4h4a9g2ZVDXMqUvIitWpOzbyg6KIVYPcT8PpJvyzXCBUcB1isd4DlRDorjK78AAyEDN52oDh1GuBs-YsJb-CHAEFzxCsFDlAAKU-Uc7RGCtU-yF9wLYUgCUA6Gtf4pLxlKrwpFgoRKqmdYZr6KLZgOixwAWzQHMqtTeFEIbjPwIHyKEK4slIMowIKh5wvWHDsMqp6HGKABek44IEuJ+ACcDoZhVo4WBHIxAR1DMERJE0tqmIWle7z8CQGCRGUkQYGa0BGnk-4jCYIAmISDA2Nu+BEKQ5AwFQtAgAwRG0Ac+A6OpQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO7TOWCFkXC9ckLt-jBAE1mAFdBDGoYQQB3ZmoAawhWAHNBNnDBACUYDG1wtHIIRmwINgpvABUtHEE4AUZ42QrFNBgAZUZqCDQsOiycvLMADj6ANXcYbz9bB1YnOoxWKQipOC8AlikYWWRvCXkAVTgosBDWbVLWDChBNWTqUhIk1LrFWHk6PZ8ABUiwGGoghwzGY8TWiykghYZGYcHcl1u2A41FYcA+X3kAHUuhxBBw6mswHFwlAbptJv4JABdMSzebA6hYRghLBrUQBADEgjaEDIsFqWC6KUEgCTCQRSZjMvhGNzpNhQRRTEAAekiADcIDBovJTCBshqtVDmFtBETAQBHELXdyeCGCABG8CwtweF0Y8Fs3i5AHl7Zo8tF3DU1GQsLJBSEomLkpwAdh4C7mKHTdAPQF5Mr8TokOsJBIQz1w9RI18tnBOt1ZaxddiJoIzu48U60ZS8yx2K5ddMAnnBLXcQ3nVm1iE4SlEF8JMpBOMs+E1rgonPi6xWADJ4Jp1U6s9BAAZCD2h7UTxmo0wtfsNE9vPTgCCD8RWGR4gAFHfqA8UjA+nftL+4GORkAEoMV8cDvDpdMVT+XIsDiHVczzAswzxYtJhvMsKx6S5dTaEJkhjOpBFg7Q4l3Xk1DVGBpVZWxe3bDh2F1O8rgVAAvJccCiclwiWWoCKI51SPgoVUko6hmGo2jCWJR1nwBQQSAwJIBCSDB7WgG1ylbWY7BAOwqQYVwT3wIhSHIGAqFoEAGGo2hLnwMwDKAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -292,7 +292,7 @@ You are a Python developer working on a FastAPI service.
 
 @standards {
   code: [
-    "Write type hints for all functions"
+    "Write type hints for all functions",
     "Use async/await for I/O operations"
   ]
 }
@@ -303,7 +303,7 @@ You are a Python developer working on a FastAPI service.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAY0EALRwY1AG4RGMYYNb9+cAJ7sMhAcICMFAAxGlrAL7LlAAV6csELOv7BlqpSFOqAmswCu-DGoYAP4ABXVcNn4eGBkYKGY0aX4Ad2ZqAGsIVgBzfiiMfgAxDDgsAEFQgEk1aTkFClchDxblC1ZrFnYiLGcmqAxc3wwc+AFkNAicNgBdJupfdggSGF0QcMiVAGYKPT1PfjBqUhg0zLhxsFKsUQg5lWjsDAAjUtXm0OYynKCAZQBFAAypna1jKgx4gR4cD6DxYMXGTTcIAA6tQHMFHEl+DhslgYWB0gEoFBDotGPY2HADsiAKpSAIaViMAD0GBSGAchyJVRZAHl8kljpTWNSPA97qDWFYgmV0RSIFTYapxM0ACJsADkvRYJBIXIonBkh2g8BBIDMMwYdmo6nwRFI5BgVFoIAYcVoitY+D0FqAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKABht7WAXzFju0zlghZDw-XJB7-cUEATWYAV0EMahhIwQAFQ1w2QSkYDRgoZjR1QQB3ZmoAawhWAHNBZKEAMQw4LABBOIBJQTVNbRgKXwD7J1YXFnYiLB8gqAwysIxS+FlkNEScNgBdX2ow9gg+cxAEpPEAZgoLC3sJMGpSGHyiuDmwWoElVaCpbAwAI1qYHbjmOtK0QAygBFAAyvWcrG4dQmb2oUjgowkLFSc18EnkAHVqJ4Yl5soIcCUsEiwAVIlAoIIwBtGB42HB5HQMX4AKpqSJGViMAD0GFyGE8NIpTV5AHkKtlLgzWEzAhIXn0XNE6rj6RBGcjBMo-AARNgAchGLBIJGFFE4Ghp0HgvRADmWDHc1EM+CIpHInRo9BA6VomtY+AsDqAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
