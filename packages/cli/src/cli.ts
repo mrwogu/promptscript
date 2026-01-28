@@ -119,7 +119,6 @@ program
 program
   .command('check')
   .description('Check configuration and dependencies health')
-  .option('--fix', 'Attempt to fix issues')
   .action(checkCommand);
 
 program.command('update-check').description('Check for CLI updates').action(updateCheckCommand);

@@ -93,7 +93,5 @@ export interface DiffOptions {
 /**
  * Options for the check command.
  */
-export interface CheckOptions {
-  /** Attempt to fix issues automatically */
-  fix?: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface CheckOptions {}
