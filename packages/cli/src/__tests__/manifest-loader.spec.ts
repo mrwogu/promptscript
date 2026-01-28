@@ -9,6 +9,9 @@ import {
   getNamespacesSortedByPriority,
   searchCatalog,
   ManifestLoadError,
+  isRemoteUrl,
+  isValidGitHostUrl,
+  isValidGitUrl,
 } from '../utils/manifest-loader.js';
 import { type CliServices } from '../services.js';
 import type { RegistryManifest } from '@promptscript/core';
@@ -366,6 +369,97 @@ catalog: []
       const results = searchCatalog(sampleManifest, 'nonexistent');
 
       expect(results).toEqual([]);
+    });
+  });
+
+  describe('isRemoteUrl', () => {
+    it('should return true for HTTPS URLs', () => {
+      expect(isRemoteUrl('https://github.com/user/repo.git')).toBe(true);
+      expect(isRemoteUrl('https://example.com/registry')).toBe(true);
+    });
+
+    it('should return true for HTTP URLs', () => {
+      expect(isRemoteUrl('http://example.com/registry')).toBe(true);
+    });
+
+    it('should return true for git@ SSH URLs', () => {
+      expect(isRemoteUrl('git@github.com:user/repo.git')).toBe(true);
+    });
+
+    it('should return false for local paths', () => {
+      expect(isRemoteUrl('./registry')).toBe(false);
+      expect(isRemoteUrl('../promptscript-registry')).toBe(false);
+      expect(isRemoteUrl('/absolute/path')).toBe(false);
+    });
+  });
+
+  describe('isValidGitUrl', () => {
+    it('should accept valid HTTPS URLs without host restriction', () => {
+      expect(isValidGitUrl('https://github.com/user/repo.git')).toBe(true);
+      expect(isValidGitUrl('https://gitlab.com/user/repo.git')).toBe(true);
+      expect(isValidGitUrl('https://git.company.com/team/repo.git')).toBe(true);
+      expect(isValidGitUrl('https://self-hosted.internal/repo')).toBe(true);
+    });
+
+    it('should accept valid SSH URLs without host restriction', () => {
+      expect(isValidGitUrl('git@github.com:user/repo.git')).toBe(true);
+      expect(isValidGitUrl('git@git.company.com:team/repo.git')).toBe(true);
+    });
+
+    it('should reject invalid URLs', () => {
+      expect(isValidGitUrl('not-a-url')).toBe(false);
+      expect(isValidGitUrl('')).toBe(false);
+      expect(isValidGitUrl('./local-path')).toBe(false);
+      expect(isValidGitUrl('ftp://example.com/repo')).toBe(false);
+    });
+
+    it('should validate against allowed hosts when specified', () => {
+      const allowedHosts = ['github.com', 'git.company.com'];
+
+      expect(isValidGitUrl('https://github.com/user/repo.git', allowedHosts)).toBe(true);
+      expect(isValidGitUrl('https://git.company.com/team/repo', allowedHosts)).toBe(true);
+      expect(isValidGitUrl('https://gitlab.com/user/repo', allowedHosts)).toBe(false);
+      expect(isValidGitUrl('git@github.com:user/repo.git', allowedHosts)).toBe(true);
+      expect(isValidGitUrl('git@gitlab.com:user/repo.git', allowedHosts)).toBe(false);
+    });
+  });
+
+  describe('isValidGitHostUrl', () => {
+    it('should accept valid GitHub HTTPS URLs', () => {
+      expect(isValidGitHostUrl('https://github.com/user/repo.git')).toBe(true);
+      expect(isValidGitHostUrl('https://github.com/org/registry')).toBe(true);
+    });
+
+    it('should accept valid GitLab HTTPS URLs', () => {
+      expect(isValidGitHostUrl('https://gitlab.com/user/repo.git')).toBe(true);
+    });
+
+    it('should accept valid Bitbucket HTTPS URLs', () => {
+      expect(isValidGitHostUrl('https://bitbucket.org/user/repo.git')).toBe(true);
+    });
+
+    it('should accept valid SSH URLs', () => {
+      expect(isValidGitHostUrl('git@github.com:user/repo.git')).toBe(true);
+      expect(isValidGitHostUrl('git@gitlab.com:user/repo.git')).toBe(true);
+    });
+
+    it('should reject URLs with spoofed hostnames (security test)', () => {
+      // These are malicious URLs that try to bypass simple substring checks
+      expect(isValidGitHostUrl('https://evil.com/github.com/fake')).toBe(false);
+      expect(isValidGitHostUrl('https://github.com.evil.com/user/repo')).toBe(false);
+      expect(isValidGitHostUrl('https://fakegithub.com/user/repo')).toBe(false);
+      expect(isValidGitHostUrl('https://evil.com?github.com')).toBe(false);
+    });
+
+    it('should reject self-hosted Git servers (use isValidGitUrl for those)', () => {
+      expect(isValidGitHostUrl('https://git.company.com/team/repo')).toBe(false);
+      expect(isValidGitHostUrl('https://self-hosted.internal/repo')).toBe(false);
+    });
+
+    it('should reject invalid URLs', () => {
+      expect(isValidGitHostUrl('not-a-url')).toBe(false);
+      expect(isValidGitHostUrl('')).toBe(false);
+      expect(isValidGitHostUrl('./local-path')).toBe(false);
     });
   });
 });

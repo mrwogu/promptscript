@@ -378,5 +378,69 @@ export function githubRepoToManifestUrl(repoUrl: string, branch: string = 'main'
  * Check if a URL points to a remote resource.
  */
 export function isRemoteUrl(path: string): boolean {
-  return path.startsWith('http://') || path.startsWith('https://') || path.includes('github.com');
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return true;
+  }
+
+  // Check for git@ SSH URLs (e.g., git@github.com:user/repo.git)
+  if (path.startsWith('git@')) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Known public Git hosting providers.
+ */
+const KNOWN_GIT_HOSTS = ['github.com', 'gitlab.com', 'bitbucket.org'];
+
+/**
+ * Validate that a URL hostname matches one of the known Git hosting providers.
+ * Uses proper URL parsing to prevent hostname spoofing attacks.
+ */
+export function isValidGitHostUrl(url: string): boolean {
+  return isValidGitUrl(url, KNOWN_GIT_HOSTS);
+}
+
+/**
+ * Validate that a URL is a valid Git repository URL.
+ * Optionally restricts to a list of allowed hosts for security.
+ *
+ * @param url - The URL to validate
+ * @param allowedHosts - Optional list of allowed hostnames. If not provided, any valid URL is accepted.
+ */
+export function isValidGitUrl(url: string, allowedHosts?: string[]): boolean {
+  try {
+    // Handle SSH URLs (git@hostname:user/repo.git)
+    if (url.startsWith('git@')) {
+      const hostMatch = url.match(/^git@([^:]+):/);
+      if (hostMatch && hostMatch[1]) {
+        const host = hostMatch[1];
+        return allowedHosts ? allowedHosts.includes(host) : true;
+      }
+      return false;
+    }
+
+    // Handle HTTPS/HTTP URLs
+    if (!url.startsWith('https://') && !url.startsWith('http://')) {
+      return false;
+    }
+
+    const parsed = new URL(url);
+
+    // Must have a valid hostname
+    if (!parsed.hostname || parsed.hostname.length === 0) {
+      return false;
+    }
+
+    // If allowed hosts are specified, check against them
+    if (allowedHosts) {
+      return allowedHosts.includes(parsed.hostname);
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
 }

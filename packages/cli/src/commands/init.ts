@@ -30,6 +30,7 @@ import {
   loadManifestFromUrl,
   ManifestLoadError,
   OFFICIAL_REGISTRY,
+  isValidGitUrl,
 } from '../utils/manifest-loader.js';
 import {
   buildProjectContext,
@@ -428,8 +429,8 @@ async function runInteractivePrompts(
       message: 'Git repository URL:',
       default: 'https://github.com/your-org/your-registry.git',
       validate: (value) => {
-        if (!value.includes('github.com') && !value.includes('gitlab.com')) {
-          return 'Please enter a valid Git repository URL';
+        if (!isValidGitUrl(value)) {
+          return 'Please enter a valid Git repository URL (https:// or git@)';
         }
         return true;
       },
