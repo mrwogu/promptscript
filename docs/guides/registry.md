@@ -43,12 +43,15 @@ registry:
 @use @fragments/testing
 ```
 
-### 3. Pull and Compile
+### 3. Compile
 
 ```bash
-prs pull     # Download registry files
-prs compile  # Generate output
+prs compile  # Automatically fetches registry and generates output
 ```
+
+**Note:** When using a Git registry, the CLI automatically clones and caches the repository. You don't need to run `prs pull` separately - the `compile` and `validate` commands handle this automatically.
+
+The registry is cached at `~/.promptscript/.cache/git/` with a default TTL of 1 hour. Use `prs pull --refresh` to force an update.
 
 ## Using `prs init`
 
@@ -150,6 +153,48 @@ Categorized fragments:
 @meta { id: "terminal", syntax: "1.0.0" }
 
 @inherit @prompts/coding/linux-terminal
+```
+
+## How Git Registry Resolution Works
+
+When you configure a Git registry, the CLI handles everything automatically:
+
+1. **On first use:** The registry is cloned to `~/.promptscript/.cache/git/<hash>/`
+2. **On subsequent uses:** The cached version is used if not stale (default: 1 hour TTL)
+3. **On cache expiry:** The registry is updated with `git fetch`
+
+```
+prs init --yes
+    ↓
+Creates config with registry.git.url
+
+prs compile
+    ↓
+resolveRegistryPath() → checks cache validity
+    ↓
+If stale/missing: GitRegistry.fetch() → clone/update
+    ↓
+Compiler uses cached registry path
+```
+
+### Cache Configuration
+
+Control caching behavior in `promptscript.yaml`:
+
+```yaml
+registry:
+  git:
+    url: https://github.com/mrwogu/promptscript-registry.git
+    ref: main
+  cache:
+    enabled: true  # Set to false to always fetch
+    ttl: 3600000   # Cache TTL in ms (default: 1 hour)
+```
+
+### Force Refresh
+
+```bash
+prs pull --refresh  # Force re-clone the registry
 ```
 
 ## Version Pinning
