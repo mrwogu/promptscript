@@ -1,6 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import type { PromptScriptConfig } from '@promptscript/core';
 import { getGitCachePath, hasRegistryConfig } from '../utils/registry-resolver.js';
+
+// Minimal config for testing - only the fields we care about
+type TestConfig = {
+  version: '1';
+  registry?: {
+    git?: {
+      url: string;
+      ref?: string;
+      path?: string;
+      auth?: { type: 'token'; tokenEnvVar: string };
+    };
+    url?: string;
+    path?: string;
+    cache?: { enabled?: boolean; ttl?: number };
+  };
+};
 
 /**
  * Tests for registry-resolver utility.
@@ -43,7 +58,7 @@ describe('utils/registry-resolver', () => {
 
   describe('hasRegistryConfig', () => {
     it('should return true for git registry', () => {
-      const config: PromptScriptConfig = {
+      const config: TestConfig = {
         version: '1',
         registry: {
           git: {
@@ -56,7 +71,7 @@ describe('utils/registry-resolver', () => {
     });
 
     it('should return true for HTTP registry', () => {
-      const config: PromptScriptConfig = {
+      const config: TestConfig = {
         version: '1',
         registry: {
           url: 'https://registry.example.com',
@@ -67,7 +82,7 @@ describe('utils/registry-resolver', () => {
     });
 
     it('should return true for local path registry', () => {
-      const config: PromptScriptConfig = {
+      const config: TestConfig = {
         version: '1',
         registry: {
           path: './registry',
@@ -78,7 +93,7 @@ describe('utils/registry-resolver', () => {
     });
 
     it('should return false when no registry configured', () => {
-      const config: PromptScriptConfig = {
+      const config: TestConfig = {
         version: '1',
       };
 
@@ -86,7 +101,7 @@ describe('utils/registry-resolver', () => {
     });
 
     it('should return false for empty registry object', () => {
-      const config: PromptScriptConfig = {
+      const config: TestConfig = {
         version: '1',
         registry: {},
       };
@@ -95,7 +110,7 @@ describe('utils/registry-resolver', () => {
     });
 
     it('should return true for git registry with all options', () => {
-      const config: PromptScriptConfig = {
+      const config: TestConfig = {
         version: '1',
         registry: {
           git: {

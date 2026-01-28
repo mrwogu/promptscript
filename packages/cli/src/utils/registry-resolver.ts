@@ -123,7 +123,8 @@ export function getGitCachePath(url: string, ref: string = 'main'): string {
 
 /**
  * Check if the registry is configured and accessible.
+ * Accepts any config object with an optional registry field.
  */
-export function hasRegistryConfig(config: PromptScriptConfig): boolean {
+export function hasRegistryConfig(config: { registry?: PromptScriptConfig['registry'] }): boolean {
   return !!(config.registry?.git || config.registry?.url || config.registry?.path);
 }
