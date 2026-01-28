@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha.7](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2026-01-28)
+
+
+### chore
+
+* prepare alpha release ([9f2f1ed](https://github.com/mrwogu/promptscript/commit/9f2f1ed61923048312206118ff1e0a10679f9899))
+
+
+### Features
+
+* **cli:** add registry manifest support for init command ([790ae31](https://github.com/mrwogu/promptscript/commit/790ae312bfef2cb80a74feb6ccbb334f15a3985b))
+
 ## [1.0.0-alpha.6](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2026-01-28)
 
 
