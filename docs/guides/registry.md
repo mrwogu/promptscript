@@ -187,8 +187,8 @@ registry:
     url: https://github.com/mrwogu/promptscript-registry.git
     ref: main
   cache:
-    enabled: true  # Set to false to always fetch
-    ttl: 3600000   # Cache TTL in ms (default: 1 hour)
+    enabled: true # Set to false to always fetch
+    ttl: 3600000 # Cache TTL in ms (default: 1 hour)
 ```
 
 ### Force Refresh
