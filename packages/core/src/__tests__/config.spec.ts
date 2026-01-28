@@ -87,8 +87,8 @@ describe('PromptScriptConfig', () => {
         targets: [],
       };
 
-      expect(config.registry.cache?.enabled).toBe(true);
-      expect(config.registry.cache?.ttl).toBe(300000);
+      expect(config.registry?.cache?.enabled).toBe(true);
+      expect(config.registry?.cache?.ttl).toBe(300000);
     });
 
     it('should accept auth settings with token', () => {
@@ -105,8 +105,8 @@ describe('PromptScriptConfig', () => {
         targets: [],
       };
 
-      expect(config.registry.auth?.type).toBe('bearer');
-      expect(config.registry.auth?.token).toBe('secret-token');
+      expect(config.registry?.auth?.type).toBe('bearer');
+      expect(config.registry?.auth?.token).toBe('secret-token');
     });
 
     it('should accept auth settings with env var', () => {
@@ -122,7 +122,7 @@ describe('PromptScriptConfig', () => {
         targets: [],
       };
 
-      expect(config.registry.auth?.tokenEnvVar).toBe('REGISTRY_TOKEN');
+      expect(config.registry?.auth?.tokenEnvVar).toBe('REGISTRY_TOKEN');
     });
   });
 

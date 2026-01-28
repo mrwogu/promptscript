@@ -536,5 +536,104 @@ describe('version-check', () => {
 
       expect(mockFetch).toHaveBeenCalled();
     });
+
+    it('should return null when cached version shows no update available', async () => {
+      mockFsModule.existsSync.mockReturnValue(true);
+      mockFsModule.readFileSync.mockReturnValue(
+        JSON.stringify({
+          lastCheck: new Date().toISOString(),
+          latestVersion: '1.0.0', // Same as current
+          currentVersion: '1.0.0',
+        })
+      );
+
+      const mockFetch = vi.fn();
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates('1.0.0');
+
+      // Should return null (no update) without fetching
+      expect(result).toBeNull();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return null when fetch fails to get latest version', async () => {
+      mockFsModule.existsSync.mockReturnValue(false); // No cache
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates('1.0.0');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when current version is already latest', async () => {
+      mockFsModule.existsSync.mockReturnValue(false); // No cache
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '1.0.0' }), // Same as current
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates('1.0.0');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null in quiet mode', async () => {
+      const { setContext, LogLevel } = await import('../output/console.js');
+      setContext({ logLevel: LogLevel.Quiet });
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates('1.0.0');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('verbose logging', () => {
+    beforeEach(async () => {
+      const { setContext, LogLevel } = await import('../output/console.js');
+      setContext({ logLevel: LogLevel.Verbose });
+      vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(async () => {
+      const { setContext, LogLevel } = await import('../output/console.js');
+      setContext({ logLevel: LogLevel.Normal });
+    });
+
+    it('should log verbose message on HTTP error', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { fetchLatestVersion } = await import('../utils/version-check.js');
+      const result = await fetchLatestVersion();
+
+      expect(result).toBeNull();
+    });
+
+    it('should log verbose message on network error', async () => {
+      const error = new Error('ECONNREFUSED');
+      (error as NodeJS.ErrnoException).code = 'ECONNREFUSED';
+      const mockFetch = vi.fn().mockRejectedValue(error);
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { fetchLatestVersion } = await import('../utils/version-check.js');
+      const result = await fetchLatestVersion();
+
+      expect(result).toBeNull();
+    });
   });
 });

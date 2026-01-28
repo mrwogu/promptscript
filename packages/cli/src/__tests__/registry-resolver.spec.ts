@@ -316,5 +316,43 @@ describe('utils/registry-resolver', () => {
 
       expect(result.source).toBe('git');
     });
+
+    it('should propagate clone errors that are not FileNotFoundError', async () => {
+      mockCacheManager.isValid.mockResolvedValue(false);
+      mockGitRegistry.fetch.mockRejectedValue(new Error('Network timeout'));
+
+      const config: PromptScriptConfig = {
+        version: '1',
+        project: { id: 'test' },
+        targets: ['github'],
+        registry: {
+          git: { url: 'https://github.com/org/registry.git' },
+        },
+      };
+
+      await expect(resolveRegistryPath(config)).rejects.toThrow(
+        'Failed to clone registry from https://github.com/org/registry.git: Network timeout'
+      );
+    });
+
+    it('should not throw when manifest is not found (FileNotFoundError)', async () => {
+      mockCacheManager.isValid.mockResolvedValue(false);
+      mockCacheManager.getCachePath.mockReturnValue('/cache/git/registry');
+      mockGitRegistry.fetch.mockRejectedValue(new Error('File not found'));
+
+      const config: PromptScriptConfig = {
+        version: '1',
+        project: { id: 'test' },
+        targets: ['github'],
+        registry: {
+          git: { url: 'https://github.com/org/registry.git' },
+        },
+      };
+
+      const result = await resolveRegistryPath(config);
+
+      expect(result.source).toBe('git');
+      expect(result.path).toBe('/cache/git/registry');
+    });
   });
 });

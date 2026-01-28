@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-01-27T22:31:21.222Z - do not edit -->
+<!-- PromptScript 2026-01-28T20:23:43.564Z - do not edit -->
 
 ## Project
 
@@ -114,14 +114,17 @@ pnpm prs compile          # Compile .prs files (uses local dev version)
 
 ## Post-Work Verification
 
-After completing code changes, always run:
+(MANDATORY)
+
+After completing ANY code changes, run ALL steps in order:
 
 ```bash
-pnpm run format     # Format code with Prettier
-pnpm run lint       # Check for linting errors
-pnpm run build      # Build all packages
-pnpm run typecheck  # Verify TypeScript types
-pnpm run test       # Run all tests
+pnpm run format           # 1. Format code with Prettier
+pnpm run lint             # 2. Check for linting errors
+pnpm run typecheck        # 3. Verify TypeScript types
+pnpm run test             # 4. Run all tests
+pnpm prs validate --strict  # 5. Validate .prs files
+pnpm schema:check         # 6. Verify JSON schemas are current
 ```
 
 ## Documentation
@@ -147,6 +150,10 @@ pnpm run test       # Run all tests
 - Don't use `import.meta.dirname` in vite/vitest configs - use `\_\_dirname`
 - Don't reference line numbers in test names or comments
 - Don't make code changes without verifying documentation consistency
+- Don't document features that don't exist or don't work - ideas go to ROADMAP.md
+- Don't skip the full verification pipeline (format, lint, typecheck, test, validate, schema:check)
+- Don't consider work complete until all CI checks pass (use `gh pr checks --watch`)
+- Don't commit directly to main - always use feature branches
 - Don't commit directly to main/master
 - Don't force push to shared branches
 - Don't commit secrets or credentials

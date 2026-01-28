@@ -11,4 +11,8 @@
   - "Never use `import.meta.dirname` in vite/vitest configs - use `__dirname`"
   - "Never reference line numbers in test names or comments"
   - "Never make code changes without verifying documentation consistency"
+  - "Never document features that don't exist or don't work - ideas go to ROADMAP.md"
+  - "Never skip the full verification pipeline (format, lint, typecheck, test, validate, schema:check)"
+  - "Never consider work complete until all CI checks pass (use `gh pr checks --watch`)"
+  - "Never commit directly to main - always use feature branches"
 }

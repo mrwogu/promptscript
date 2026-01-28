@@ -1,6 +1,6 @@
 # Agent Instructions
 
-<!-- PromptScript 2026-01-27T21:55:57.838Z - do not edit -->
+<!-- PromptScript 2026-01-28T20:23:43.562Z - do not edit -->
 
 ## Identity
 
@@ -102,6 +102,10 @@ The project is organized as a monorepo with these packages:
 - Never use `import.meta.dirname` in vite/vitest configs - use `__dirname`
 - Never reference line numbers in test names or comments
 - Never make code changes without verifying documentation consistency
+- Never document features that don't exist or don't work - ideas go to ROADMAP.md
+- Never skip the full verification pipeline (format, lint, typecheck, test, validate, schema:check)
+- Never consider work complete until all CI checks pass (use `gh pr checks --watch`)
+- Never commit directly to main - always use feature branches
 - Never commit directly to main/master
 - Never force push to shared branches
 - Never commit secrets or credentials

@@ -274,6 +274,43 @@ describe('utils/suggestion-engine', () => {
       // which should win over Python and the always fallback
       expect(result.inherit).toBe('@stacks/react');
     });
+
+    it('should match dependencies condition', () => {
+      // Create a manifest with a dependencies-based suggestion rule
+      const manifestWithDepRule: RegistryManifest = {
+        version: '1',
+        meta: {
+          name: 'Test Registry',
+          description: 'Test',
+          lastUpdated: '2026-01-28',
+        },
+        namespaces: { '@core': { description: 'Core', priority: 100 } },
+        catalog: [],
+        suggestionRules: [
+          {
+            condition: { dependencies: ['vitest', 'jest'] },
+            suggest: { use: ['@fragments/testing'] },
+          },
+          {
+            condition: { always: true },
+            suggest: { inherit: '@core/base' },
+          },
+        ],
+      };
+
+      const context: ProjectContext = {
+        files: [],
+        dependencies: ['react', 'vitest', 'typescript'],
+        languages: [],
+        frameworks: [],
+      };
+
+      const result = calculateSuggestions(manifestWithDepRule, context);
+
+      expect(result.use).toContain('@fragments/testing');
+      expect(result.reasoning.some((r) => r.trigger === 'dependency')).toBe(true);
+      expect(result.reasoning.some((r) => r.matchedValue === 'vitest')).toBe(true);
+    });
   });
 
   describe('getMatchingCatalogEntries', () => {

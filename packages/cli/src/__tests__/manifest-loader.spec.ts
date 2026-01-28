@@ -246,6 +246,28 @@ catalog: []
         'Unsupported manifest version'
       );
     });
+
+    it('should use default registry path when no registryPath provided', async () => {
+      // When no registryPath is provided and no candidate paths exist,
+      // it should fall back to './registry' and fail with ManifestLoadError
+      mockFs.existsSync.mockReturnValue(false);
+
+      await expect(loadManifest({}, mockServices)).rejects.toThrow(ManifestLoadError);
+    });
+
+    it('should find registry in candidate locations', async () => {
+      // Test that it finds a registry in ../promptscript-registry
+      mockFs.existsSync.mockImplementation((path: string) => {
+        // Only the second candidate exists
+        return path.includes('promptscript-registry');
+      });
+      mockFs.readFile.mockResolvedValue(manifestYaml);
+
+      const result = await loadManifest({}, mockServices);
+
+      expect(result.manifest.version).toBe('1');
+      expect(result.path).toContain('promptscript-registry');
+    });
   });
 
   describe('getCatalogEntry', () => {
@@ -416,6 +438,20 @@ catalog: []
       expect(isValidGitUrl('')).toBe(false);
       expect(isValidGitUrl('./local-path')).toBe(false);
       expect(isValidGitUrl('ftp://example.com/repo')).toBe(false);
+    });
+
+    it('should reject malformed git@ URLs', () => {
+      // git@ URL without proper host:path format
+      expect(isValidGitUrl('git@')).toBe(false);
+      expect(isValidGitUrl('git@missing-colon')).toBe(false);
+      expect(isValidGitUrl('git@:no-host')).toBe(false);
+    });
+
+    it('should handle URL parsing errors gracefully', () => {
+      // URLs that cause parsing exceptions
+      expect(isValidGitUrl('https://[invalid')).toBe(false);
+      expect(isValidGitUrl('://broken')).toBe(false);
+      expect(isValidGitUrl('https://:8080/path')).toBe(false);
     });
 
     it('should validate against allowed hosts when specified', () => {

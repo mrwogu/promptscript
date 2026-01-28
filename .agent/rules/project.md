@@ -1,6 +1,6 @@
 # Project Rules
 
-<!-- PromptScript 2026-01-27T13:03:51.816Z - do not edit -->
+<!-- PromptScript 2026-01-28T20:23:43.566Z - do not edit -->
 
 ## Project Identity
 
@@ -107,6 +107,9 @@ The project is organized as a monorepo with these packages:
 - Framework: Vitest
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
+- Meaningful coverage
+- Isolated tests
+- Descriptive naming
 
 ## Git Commits
 
@@ -159,14 +162,17 @@ The project is organized as a monorepo with these packages:
 ## Post-Work Verification
 
 After completing any code changes, run the following commands to ensure code quality:
-After completing code changes, always run:
+(MANDATORY)
+
+After completing ANY code changes, run ALL steps in order:
 
 ```bash
-  pnpm run format     # Format code with Prettier
-  pnpm run lint       # Check for linting errors
-  pnpm run build      # Build all packages
-  pnpm run typecheck  # Verify TypeScript types
-  pnpm run test       # Run all tests
+  pnpm run format           # 1. Format code with Prettier
+  pnpm run lint             # 2. Check for linting errors
+  pnpm run typecheck        # 3. Verify TypeScript types
+  pnpm run test             # 4. Run all tests
+  pnpm prs validate --strict  # 5. Validate .prs files
+  pnpm schema:check         # 6. Verify JSON schemas are current
 ```
 
 ## Documentation
