@@ -191,18 +191,27 @@ export abstract class BaseFormatter implements Formatter {
    * - Trims trailing whitespace from lines
    * - Normalizes markdown table formatting
    * - Adds blank lines before lists when preceded by text
+   * - Adds blank lines before code blocks when preceded by text
    * - Escapes markdown special characters in paths
    */
   protected normalizeMarkdownForPrettier(content: string): string {
     const lines = content.split('\n');
 
-    // Find common leading indentation (minimum non-empty, non-code-block line indent)
+    // Find common leading indentation (minimum non-empty line indent)
+    // Include code block markers in calculation to handle content that's mainly code blocks
     let minIndent = Infinity;
     let inCodeBlock = false;
     for (const line of lines) {
       const trimmed = line.trimEnd();
-      if (trimmed.startsWith('```')) {
+      // Check for code block markers (need trimStart to handle indented markers)
+      if (trimmed.trimStart().startsWith('```')) {
         inCodeBlock = !inCodeBlock;
+        // Include code block markers in minIndent calculation
+        if (trimmed.length > 0) {
+          const match = line.match(/^(\s*)/);
+          const leadingSpaces = match?.[1]?.length ?? 0;
+          minIndent = Math.min(minIndent, leadingSpaces);
+        }
         continue;
       }
       if (inCodeBlock) continue;
@@ -222,16 +231,27 @@ export abstract class BaseFormatter implements Formatter {
     for (const line of lines) {
       const trimmedLine = line.trimEnd();
 
-      // Track code blocks
-      if (trimmedLine.trimStart().startsWith('```')) {
-        inCodeBlock = !inCodeBlock;
-      }
-
       // Strip common indentation from all lines
       const unindentedLine = minIndent > 0 ? trimmedLine.slice(minIndent) : trimmedLine;
 
+      // Check for code block start BEFORE toggling inCodeBlock
+      const isCodeBlockMarker = trimmedLine.trimStart().startsWith('```');
+      const isCodeBlockStart = isCodeBlockMarker && !inCodeBlock;
+
+      // Toggle code block state
+      if (isCodeBlockMarker) {
+        inCodeBlock = !inCodeBlock;
+      }
+
       // Inside code blocks, just use unindented line
       if (inCodeBlock || unindentedLine.startsWith('```')) {
+        // Add blank line before code block if previous line is non-empty text
+        if (isCodeBlockStart) {
+          const prevLine = result.length > 0 ? (result[result.length - 1] ?? '') : '';
+          if (prevLine.trim() && !prevLine.startsWith('#')) {
+            result.push('');
+          }
+        }
         result.push(unindentedLine);
         continue;
       }
@@ -239,10 +259,20 @@ export abstract class BaseFormatter implements Formatter {
       let processedLine = unindentedLine;
 
       // Escape markdown special characters in path-like content (outside code blocks)
+      // Only escape __name__ outside of backticks
       // __name__ → \_\_name\_\_ (prevents bold)
       processedLine = processedLine.replace(/__([^_]+)__/g, '\\_\\_$1\\_\\_');
-      // path/*/file → path/\*/file (prevents italic/list)
-      processedLine = processedLine.replace(/\/\*/g, '/\\*');
+      // Escape * in glob patterns (like packages/* or .cursor/rules/*.md) outside backticks
+      processedLine = this.escapeGlobAsteriskOutsideBackticks(processedLine);
+
+      // Check for blank line after headers BEFORE table detection
+      const prevLine = result.length > 0 ? result[result.length - 1] : '';
+      const isHeader = prevLine?.trimStart().startsWith('#');
+
+      // Add blank line after header if content follows
+      if (isHeader && processedLine.trim()) {
+        result.push('');
+      }
 
       // Detect table rows (lines starting with |)
       if (processedLine.trimStart().startsWith('|') && processedLine.trimEnd().endsWith('|')) {
@@ -256,10 +286,19 @@ export abstract class BaseFormatter implements Formatter {
           inTable = false;
         }
 
-        // Add blank line before list item if previous line was non-empty text (not a list item or blank)
-        const prevLine = result.length > 0 ? result[result.length - 1] : '';
         const isListItem = processedLine.trimStart().startsWith('- ');
-        if (isListItem && prevLine && !prevLine.trimStart().startsWith('- ')) {
+        const isNumberedItem = /^\d+\.\s/.test(processedLine.trimStart());
+        const prevLineTrimmed = prevLine?.trimStart() ?? '';
+        const isPrevListItem = prevLineTrimmed.startsWith('- ') || /^\d+\.\s/.test(prevLineTrimmed);
+        // Check if previous line ends with colon (like "Security mindset:")
+        const prevEndsWithColon = prevLine?.trimEnd().endsWith(':') ?? false;
+
+        // Add blank line before list item if:
+        // - previous line was non-empty text that's not a list item, header, or blank
+        // - OR previous line ends with colon (like "Security mindset:")
+        if ((isListItem || isNumberedItem) && prevLine && !isPrevListItem && !isHeader) {
+          result.push('');
+        } else if ((isListItem || isNumberedItem) && prevEndsWithColon) {
           result.push('');
         }
 
@@ -273,6 +312,25 @@ export abstract class BaseFormatter implements Formatter {
     }
 
     return result.join('\n');
+  }
+
+  /**
+   * Escape glob asterisks (like packages/* or .cursor/rules/*.md) outside of backticks.
+   * Prettier escapes these to prevent them from being interpreted as emphasis markers.
+   */
+  private escapeGlobAsteriskOutsideBackticks(line: string): string {
+    // Split by backticks to identify code spans
+    const parts = line.split('`');
+    return parts
+      .map((part, index) => {
+        // Even indices are outside backticks, odd indices are inside
+        if (index % 2 === 0) {
+          // Escape * when preceded by / (glob patterns like packages/* or .cursor/rules/*.md)
+          return part.replace(/\/\*/g, '/\\*');
+        }
+        return part;
+      })
+      .join('`');
   }
 
   /**
@@ -292,7 +350,7 @@ export abstract class BaseFormatter implements Formatter {
       if (trimmedEnd.trimStart().startsWith('```')) {
         // Add blank line before code block if previous line was non-empty
         if (!inCodeBlock) {
-          const prevLine = result.length > 0 ? result[result.length - 1] : '';
+          const prevLine = result.length > 0 ? (result[result.length - 1] ?? '') : '';
           if (prevLine && prevLine.trim()) {
             result.push('');
           }
@@ -315,12 +373,17 @@ export abstract class BaseFormatter implements Formatter {
       // Escape markdown special characters for Prettier compatibility
       // Escape __ to \_\_ (to avoid emphasis parsing)
       stripped = stripped.replace(/__/g, '\\_\\_');
-      // Escape /* to /\* (to avoid glob patterns being interpreted)
-      stripped = stripped.replace(/\/\*/g, '/\\*');
+      // Escape * in glob patterns outside backticks
+      stripped = this.escapeGlobAsteriskOutsideBackticks(stripped);
 
       // Add blank line before list item if previous line was non-empty and not a list
-      const prevLine = result.length > 0 ? result[result.length - 1] : '';
-      if (stripped.startsWith('- ') && prevLine && !prevLine.startsWith('- ')) {
+      const prevLine = result.length > 0 ? (result[result.length - 1] ?? '') : '';
+      const isListItem = stripped.startsWith('- ') || /^\d+\.\s/.test(stripped);
+      const isPrevList = prevLine.startsWith('- ') || /^\d+\.\s/.test(prevLine);
+      const prevEndsWithColon = prevLine.trimEnd().endsWith(':');
+      if (isListItem && prevLine && !isPrevList) {
+        result.push('');
+      } else if (isListItem && prevEndsWithColon) {
         result.push('');
       }
 

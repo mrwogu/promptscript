@@ -470,15 +470,54 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   private intro(ast: Program): string {
-    const projectInfo = this.extractProjectInfo(ast);
-
-    // If project text starts with "You are", use it directly
-    if (projectInfo.text.toLowerCase().startsWith('you are')) {
-      return projectInfo.text;
+    // First check if identity block has rich content that should be used in full
+    const identity = this.findBlock(ast, 'identity');
+    if (identity) {
+      const fullText = this.dedent(this.extractText(identity.content));
+      // If identity starts with "You are", use the full content
+      if (fullText.toLowerCase().startsWith('you are')) {
+        return fullText;
+      }
     }
 
+    // Otherwise use extracted project info for a generated intro
+    const projectInfo = this.extractProjectInfo(ast);
     const orgSuffix = projectInfo.org ? ` at ${projectInfo.org}` : '';
     return `You are working on ${projectInfo.text}${orgSuffix}.`;
+  }
+
+  /**
+   * Remove common leading whitespace from all lines (dedent).
+   * Handles the case where trim() was already called, causing the first line
+   * to lose its indentation while subsequent lines retain theirs.
+   */
+  private dedent(text: string): string {
+    const lines = text.split('\n');
+    if (lines.length <= 1) return text.trim();
+
+    // Find minimum indentation from lines 2+ (ignoring empty lines and first line)
+    // First line may have lost indentation due to trim()
+    const minIndent = lines
+      .slice(1)
+      .filter((line) => line.trim().length > 0)
+      .reduce((min, line) => {
+        const match = line.match(/^(\s*)/);
+        const indent = match?.[1]?.length ?? 0;
+        return Math.min(min, indent);
+      }, Infinity);
+
+    if (minIndent === 0 || minIndent === Infinity) {
+      return text.trim();
+    }
+
+    // Remove the common indentation from lines 2+, keep first line as-is
+    const firstLine = lines[0] ?? '';
+    return [
+      firstLine.trim(),
+      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
+    ]
+      .join('\n')
+      .trim();
   }
 
   /**

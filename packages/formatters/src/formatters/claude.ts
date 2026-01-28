@@ -335,7 +335,10 @@ export class ClaudeFormatter extends BaseFormatter {
     lines.push(`# ${config.description}`);
     lines.push('');
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content and normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {
@@ -459,8 +462,10 @@ export class ClaudeFormatter extends BaseFormatter {
     lines.push('---');
     lines.push('');
     if (config.content) {
-      // Normalize content for Prettier: trim trailing whitespace from table cells
-      const normalizedContent = this.normalizeMarkdownForPrettier(config.content);
+      // First dedent (using lines 2+ for indent calculation since line 1 may be trimmed)
+      // Then normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       lines.push(normalizedContent);
     }
 
@@ -468,6 +473,38 @@ export class ClaudeFormatter extends BaseFormatter {
       path: `.claude/skills/${config.name}/SKILL.md`,
       content: lines.join('\n') + '\n',
     };
+  }
+
+  /**
+   * Remove common leading indentation from multiline text.
+   * Calculates minimum indent from lines 2+ only, since line 1 may have been
+   * trimmed (losing its indentation) while subsequent lines retain theirs.
+   */
+  private dedent(text: string): string {
+    const lines = text.split('\n');
+    if (lines.length <= 1) return text.trim();
+
+    // Calculate minimum indent from lines 2+ only
+    const minIndent = lines
+      .slice(1)
+      .filter((line) => line.trim().length > 0)
+      .reduce((min, line) => {
+        const match = line.match(/^(\s*)/);
+        const indent = match?.[1]?.length ?? 0;
+        return Math.min(min, indent);
+      }, Infinity);
+
+    if (minIndent === 0 || minIndent === Infinity) {
+      return text.trim();
+    }
+
+    const firstLine = lines[0] ?? '';
+    return [
+      firstLine.trim(),
+      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
+    ]
+      .join('\n')
+      .trim();
   }
 
   // ============================================================
@@ -593,7 +630,10 @@ export class ClaudeFormatter extends BaseFormatter {
     lines.push('');
 
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content and normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {
@@ -669,7 +709,9 @@ export class ClaudeFormatter extends BaseFormatter {
       .filter((para) => para)
       .join('\n\n'); // Rejoin with single blank line
 
-    return renderer.renderSection('Project', cleanText) + '\n';
+    // Normalize for Prettier compatibility (blank lines before lists, etc.)
+    const normalizedText = this.normalizeMarkdownForPrettier(cleanText);
+    return renderer.renderSection('Project', normalizedText) + '\n';
   }
 
   private techStack(ast: Program, renderer: ConventionRenderer): string | null {
@@ -742,8 +784,11 @@ export class ClaudeFormatter extends BaseFormatter {
     const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
     if (!archMatch) return null;
 
-    const content = archMatch.replace('## Architecture', '').trim();
-    return renderer.renderSection('Architecture', content) + '\n';
+    // Remove header but keep consistent indentation for normalizeMarkdownForPrettier
+    const content = archMatch.replace('## Architecture', '');
+    // Normalize for Prettier compatibility (strip code block indentation, etc.)
+    const normalizedContent = this.normalizeMarkdownForPrettier(content);
+    return renderer.renderSection('Architecture', normalizedContent.trim()) + '\n';
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
@@ -850,7 +895,8 @@ export class ClaudeFormatter extends BaseFormatter {
       const props = this.getProps(shortcuts.content);
       for (const [cmd, desc] of Object.entries(props)) {
         const shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
-        commandLines.push(`${cmd.padEnd(10)} - ${shortDesc}`);
+        // Trim to avoid trailing spaces when description is empty
+        commandLines.push(`${cmd.padEnd(10)} - ${shortDesc}`.trimEnd());
       }
     }
 
@@ -862,8 +908,11 @@ export class ClaudeFormatter extends BaseFormatter {
       const text = this.extractText(knowledge.content);
       const match = this.extractSectionWithCodeBlock(text, '## Development Commands');
       if (match) {
-        const devCmds = match.replace('## Development Commands', '').trim();
-        content += '\n\n' + devCmds;
+        // Remove header but keep consistent indentation for normalizeMarkdownForPrettier
+        const devCmds = match.replace('## Development Commands', '');
+        // Normalize for Prettier compatibility
+        const normalizedDevCmds = this.normalizeMarkdownForPrettier(devCmds);
+        content += '\n\n' + normalizedDevCmds.trim();
       }
     }
 
@@ -878,8 +927,11 @@ export class ClaudeFormatter extends BaseFormatter {
     const match = this.extractSectionWithCodeBlock(text, '## Post-Work Verification');
     if (!match) return null;
 
-    const content = match.replace('## Post-Work Verification', '').trim();
-    return renderer.renderSection('Post-Work Verification', content) + '\n';
+    // Remove header but keep consistent indentation for normalizeMarkdownForPrettier
+    const content = match.replace('## Post-Work Verification', '');
+    // Normalize for Prettier compatibility
+    const normalizedContent = this.normalizeMarkdownForPrettier(content);
+    return renderer.renderSection('Post-Work Verification', normalizedContent.trim()) + '\n';
   }
 
   private documentation(ast: Program, renderer: ConventionRenderer): string | null {

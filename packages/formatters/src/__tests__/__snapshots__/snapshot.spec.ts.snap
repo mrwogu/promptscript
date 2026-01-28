@@ -32,7 +32,7 @@ flowchart TB
     formatters[formatters - Output formatters]
     cli[cli - Command-line interface]
   end
-  
+
   cli --> compiler
   compiler --> parser
   compiler --> resolver
@@ -83,6 +83,7 @@ pnpm nx graph             # View dependency graph
 ## Post-Work Verification
 
 After completing code changes, always run:
+
 \`\`\`bash
 pnpm run format     # Format code with Prettier
 pnpm run lint       # Check for linting errors
@@ -122,7 +123,13 @@ description: "Project-specific rules"
 alwaysApply: true
 ---
 
-You are working on PromptScript at PromptScript.
+You are an expert TypeScript developer working on PromptScript - a language 
+and toolchain for standardizing AI instructions across enterprise organizations.
+
+PromptScript compiles \`.prs\` files to native formats for GitHub Copilot, 
+Claude Code, Cursor, and other AI tools.
+
+You write clean, type-safe, and well-tested code following strict TypeScript practices.
 
 Tech stack: typescript, Node.js 20+, Nx, pnpm workspaces
 

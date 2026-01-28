@@ -149,6 +149,19 @@ Core identity and persona definition:
 
 The identity block defines who the AI assistant should be.
 
+**Formatter Behavior:**
+
+| Formatter       | How @identity is used                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| **GitHub**      | Included in the output as introductory text                                                         |
+| **Claude**      | Placed at the beginning of CLAUDE.md                                                                |
+| **Cursor**      | If starts with "You are...", used as full intro; otherwise generates "You are working on {project}" |
+| **Antigravity** | Included in project description                                                                     |
+
+!!! tip "Best Practice"
+Start your `@identity` with "You are..." for consistent output across all formatters.
+Multiline strings are automatically dedented to remove source indentation.
+
 ### @context
 
 Project context and environment:

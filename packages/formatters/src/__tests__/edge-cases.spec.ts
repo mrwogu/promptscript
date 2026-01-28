@@ -89,7 +89,7 @@ describe('GitHubFormatter Edge Cases', () => {
         f.path.includes('.github/prompts/deploy.prompt.md')
       );
       expect(promptFile).toBeDefined();
-      expect(promptFile?.content).toContain('description: "Deploy application"');
+      expect(promptFile?.content).toContain("description: 'Deploy application'");
       expect(promptFile?.content).toContain('mode: agent');
       // Tools should be in inline YAML array format with mapped names
       expect(promptFile?.content).toContain("tools: ['run_terminal', 'read_file']");
@@ -124,7 +124,7 @@ describe('GitHubFormatter Edge Cases', () => {
         f.path.includes('.github/prompts/review.prompt.md')
       );
       expect(promptFile).toBeDefined();
-      expect(promptFile?.content).toContain('description: "Code review"');
+      expect(promptFile?.content).toContain("description: 'Code review'");
     });
 
     it('should map Claude Code tool names in agent mode prompts', () => {

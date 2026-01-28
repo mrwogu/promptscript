@@ -231,10 +231,33 @@ export class ConventionRenderer {
   /**
    * Escape markdown special characters for Prettier compatibility.
    * - Escapes __ to \_\_ (to avoid emphasis)
-   * - Escapes /* to /\* (to avoid glob patterns being interpreted)
+   * - Escapes * in glob patterns (like packages/*) outside backticks
    */
   private escapeMarkdownSpecialChars(content: string): string {
-    return content.replace(/__/g, '\\_\\_').replace(/\/\*/g, '/\\*');
+    return content
+      .split('\n')
+      .map((line) => {
+        let result = line.replace(/__/g, '\\_\\_');
+        result = this.escapeGlobAsteriskOutsideBackticks(result);
+        return result;
+      })
+      .join('\n');
+  }
+
+  /**
+   * Escape glob asterisks (like packages/* or .cursor/rules/*.md) outside of backticks.
+   */
+  private escapeGlobAsteriskOutsideBackticks(line: string): string {
+    const parts = line.split('`');
+    return parts
+      .map((part, index) => {
+        // Even indices are outside backticks, odd indices are inside
+        if (index % 2 === 0) {
+          return part.replace(/\/\*/g, '/\\*');
+        }
+        return part;
+      })
+      .join('`');
   }
 
   private indentContent(content: string, renderer: SectionRenderer, level: number): string {

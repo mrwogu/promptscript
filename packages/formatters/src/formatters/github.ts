@@ -402,7 +402,10 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push(`# ${config.description}`);
     lines.push('');
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content and normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {
@@ -513,9 +516,11 @@ export class GitHubFormatter extends BaseFormatter {
   private generatePromptFile(config: PromptConfig): FormatterOutput {
     const lines: string[] = [];
 
-    // YAML frontmatter
+    // YAML frontmatter - use single quotes (Prettier default for YAML strings)
     lines.push('---');
-    lines.push(`description: "${config.description}"`);
+    // Use double quotes if description contains apostrophe, single quotes otherwise
+    const descQuote = config.description.includes("'") ? '"' : "'";
+    lines.push(`description: ${descQuote}${config.description}${descQuote}`);
     if (config.mode === 'agent') {
       lines.push('mode: agent');
       if (config.tools && config.tools.length > 0) {
@@ -530,12 +535,15 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('---');
     lines.push('');
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content and normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {
       path: `.github/prompts/${config.name}.prompt.md`,
-      content: lines.join('\n'),
+      content: lines.join('\n') + '\n',
     };
   }
 
@@ -586,8 +594,10 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('---');
     lines.push('');
     if (config.content) {
-      // Normalize content for Prettier: trim trailing whitespace from table cells
-      const normalizedContent = this.normalizeMarkdownForPrettier(config.content);
+      // First dedent (using lines 2+ for indent calculation since line 1 may be trimmed)
+      // Then normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       lines.push(normalizedContent);
     }
 
@@ -595,6 +605,38 @@ export class GitHubFormatter extends BaseFormatter {
       path: `.github/skills/${config.name}/SKILL.md`,
       content: lines.join('\n') + '\n',
     };
+  }
+
+  /**
+   * Remove common leading indentation from multiline text.
+   * Calculates minimum indent from lines 2+ only, since line 1 may have been
+   * trimmed (losing its indentation) while subsequent lines retain theirs.
+   */
+  private dedent(text: string): string {
+    const lines = text.split('\n');
+    if (lines.length <= 1) return text.trim();
+
+    // Calculate minimum indent from lines 2+ only
+    const minIndent = lines
+      .slice(1)
+      .filter((line) => line.trim().length > 0)
+      .reduce((min, line) => {
+        const match = line.match(/^(\s*)/);
+        const indent = match?.[1]?.length ?? 0;
+        return Math.min(min, indent);
+      }, Infinity);
+
+    if (minIndent === 0 || minIndent === Infinity) {
+      return text.trim();
+    }
+
+    const firstLine = lines[0] ?? '';
+    return [
+      firstLine.trim(),
+      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
+    ]
+      .join('\n')
+      .trim();
   }
 
   // ============================================================
@@ -781,7 +823,10 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push('');
 
     if (config.content) {
-      lines.push(config.content);
+      // Dedent content and normalize for Prettier compatibility
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
     }
 
     return {

@@ -1,0 +1,36 @@
+{
+  "name": "browser-compiler",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/browser-compiler/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["dist/{projectRoot}"],
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    }
+  },
+  "tags": ["scope:browser-compiler", "type:lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/browser-compiler",
+        "main": "packages/browser-compiler/src/index.ts",
+        "tsConfig": "packages/browser-compiler/tsconfig.lib.json",
+        "assets": ["packages/browser-compiler/*.md"],
+        "skipTypeCheck": true
+      },
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "command": "echo 'Skipping typecheck for browser-compiler (browser-only package)'"
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}

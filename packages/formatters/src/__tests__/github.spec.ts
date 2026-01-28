@@ -330,6 +330,55 @@ describe('GitHubFormatter', () => {
       expect(result.additionalFiles).toBeUndefined();
     });
 
+    it('should default to simple mode for unknown version', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast, { version: 'unknown-version' });
+      expect(result.additionalFiles).toBeUndefined();
+      expect(result.content).toContain('# GitHub Copilot Instructions');
+    });
+
+    it('should skip markdown header with XML convention in multifile mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'Test project',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'multifile', convention: 'xml' });
+      expect(result.content).not.toContain('# GitHub Copilot Instructions');
+      expect(result.content).toContain('<project>');
+    });
+
+    it('should skip markdown header with XML convention in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'Test project',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full', convention: 'xml' });
+      expect(result.content).not.toContain('# GitHub Copilot Instructions');
+      expect(result.content).toContain('<project>');
+    });
+
     it('should generate instruction files in multifile mode with guards', () => {
       const ast: Program = {
         ...createMinimalProgram(),

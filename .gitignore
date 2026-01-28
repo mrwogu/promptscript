@@ -9,6 +9,10 @@ tmp/
 out-tsc/
 *.tsbuildinfo
 
+# Generated TypeScript declarations
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.d.ts.map
+
 # Nx
 .nx/
 

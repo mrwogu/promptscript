@@ -1,0 +1,654 @@
+import { describe, it, expect, vi } from 'vitest';
+import {
+  compile,
+  compileFor,
+  VirtualFileSystem,
+  BrowserCompiler,
+  createBrowserCompiler,
+  getBundledRegistryFiles,
+} from '../index.js';
+import type { Formatter } from '@promptscript/formatters';
+import type { OutputConvention } from '@promptscript/core';
+
+describe('compile', () => {
+  it('should compile a simple file', async () => {
+    const files = {
+      'project.prs': `
+        @meta {
+          id: "test-project"
+          syntax: "1.0.0"
+        }
+        @identity {
+          """You are a helpful assistant."""
+        }
+      `,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(result.outputs.size).toBeGreaterThan(0);
+
+    // Check that Claude output exists
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    expect(claudeOutput).toBeDefined();
+    expect(claudeOutput?.content).toContain('helpful assistant');
+  });
+
+  it('should return errors for invalid syntax', async () => {
+    const files = {
+      'project.prs': `
+        @meta {
+          id: "invalid
+        }
+      `,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('should return error for missing entry file', async () => {
+    const files = {
+      'other.prs': '@meta { id: "other" syntax: "1.0.0" }',
+    };
+
+    const result = await compile(files, 'missing.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors.some((e) => e.message.includes('not found'))).toBe(true);
+  });
+
+  it('should support inheritance with bundled registry', async () => {
+    const files = {
+      'project.prs': `@meta {
+  id: "test-project"
+  syntax: "1.0.0"
+}
+@inherit @core/base`,
+    };
+
+    const result = await compile(files, 'project.prs', { bundledRegistry: true });
+
+    if (!result.success) {
+      console.log('Inheritance test errors:', JSON.stringify(result.errors, null, 2));
+    }
+
+    expect(result.success).toBe(true);
+
+    // Should include content from @core/base
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    expect(claudeOutput?.content).toContain('helpful, accurate, and thoughtful');
+  });
+
+  it('should support @use imports', async () => {
+    const files = {
+      'project.prs': `@meta {
+  id: "test-project"
+  syntax: "1.0.0"
+}
+@use @core/quality`,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    if (!result.success) {
+      console.log('Use test errors:', JSON.stringify(result.errors, null, 2));
+    }
+
+    expect(result.success).toBe(true);
+
+    // Should include content from @core/quality
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    expect(claudeOutput?.content).toContain('code quality');
+  });
+
+  it('should compile multi-file projects', async () => {
+    const files = {
+      'project.prs': `@meta {
+  id: "test-project"
+  syntax: "1.0.0"
+}
+@inherit ./base
+@identity {
+  """Child identity adds to parent."""
+}`,
+      'base.prs': `@meta {
+  id: "base"
+  syntax: "1.0.0"
+}
+@identity {
+  """Base assistant identity."""
+}`,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    if (!result.success) {
+      console.log('Multi-file test errors:', JSON.stringify(result.errors, null, 2));
+    }
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    // Both parent and child identity should be present (merged)
+    expect(claudeOutput?.content).toContain('Base assistant identity');
+    expect(claudeOutput?.content).toContain('Child identity');
+  });
+
+  it('should accept Map as files input', async () => {
+    const files = new Map([
+      [
+        'project.prs',
+        `
+        @meta { id: "map-test" syntax: "1.0.0" }
+        @identity { """Map test identity.""" }
+      `,
+      ],
+    ]);
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.get('CLAUDE.md')?.content).toContain('Map test identity');
+  });
+});
+
+describe('compileFor', () => {
+  it('should compile for a specific formatter', async () => {
+    const files = {
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test identity.""" }
+      `,
+    };
+
+    const result = await compileFor(files, 'project.prs', 'claude');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('CLAUDE.md')).toBe(true);
+    // Should only have claude output, not all formatters
+    // (Note: some formatters may produce additional files)
+  });
+});
+
+describe('BrowserCompiler', () => {
+  it('should allow creating compiler with custom formatters', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: ['claude', 'github'],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('CLAUDE.md')).toBe(true);
+    // GitHub produces multiple files
+    expect(Array.from(result.outputs.keys()).some((k) => k.includes('copilot'))).toBe(true);
+  });
+
+  it('should track compilation stats', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({ fs });
+    const result = await compiler.compile('project.prs');
+
+    expect(result.stats.resolveTime).toBeGreaterThanOrEqual(0);
+    expect(result.stats.validateTime).toBeGreaterThanOrEqual(0);
+    expect(result.stats.formatTime).toBeGreaterThanOrEqual(0);
+    expect(result.stats.totalTime).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('BrowserCompiler advanced', () => {
+  it('should handle formatter config objects', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'claude', config: { enabled: true, version: 'full' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('CLAUDE.md')).toBe(true);
+  });
+
+  it('should throw for unknown formatter name', () => {
+    const fs = new VirtualFileSystem({});
+
+    expect(() => {
+      new BrowserCompiler({
+        fs,
+        formatters: ['unknown-formatter'],
+      });
+    }).toThrow('Unknown formatter');
+  });
+
+  it('should use default formatters when none specified', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({ fs });
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    // Should have multiple formatter outputs
+    expect(result.outputs.size).toBeGreaterThan(1);
+  });
+
+  it('should return configured formatters via getFormatters', () => {
+    const fs = new VirtualFileSystem({});
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: ['claude', 'github'],
+    });
+
+    const formatters = compiler.getFormatters();
+
+    expect(formatters).toHaveLength(2);
+    expect(formatters.map((f) => f.name)).toContain('claude');
+    expect(formatters.map((f) => f.name)).toContain('github');
+  });
+
+  it('should clear cache via clearCache method', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "test" syntax: "1.0.0" }`,
+    });
+
+    const compiler = new BrowserCompiler({ fs, cache: true });
+
+    await compiler.compile('project.prs');
+    compiler.clearCache();
+    // Should not throw and should work normally after clearing cache
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should handle convention name in config', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Use a built-in convention name
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'claude', config: { convention: 'xml' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should handle output path in config', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'claude', config: { output: 'custom/CLAUDE.md' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should handle prettier options', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: ['claude'],
+      prettier: {
+        tabWidth: 4,
+        proseWrap: 'always',
+        printWidth: 100,
+      },
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should handle validation errors', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({ fs });
+    const result = await compiler.compile('project.prs');
+
+    // Empty id should trigger validation error
+    expect(result.success).toBe(false);
+    expect(result.errors.some((e) => e.code !== 'PS0000')).toBe(true);
+  });
+
+  it('should include warnings from validation', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({ fs });
+    const result = await compiler.compile('project.prs');
+
+    // Warnings array should exist even if empty
+    expect(Array.isArray(result.warnings)).toBe(true);
+  });
+
+  it('should report resolve stage errors with timing', async () => {
+    const fs = new VirtualFileSystem({});
+
+    const compiler = new BrowserCompiler({ fs });
+    const result = await compiler.compile('missing.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.stats.resolveTime).toBeGreaterThanOrEqual(0);
+    expect(result.stats.totalTime).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should handle circular dependencies during compile', async () => {
+    const fs = new VirtualFileSystem({
+      'a.prs': `@meta { id: "a" syntax: "1.0.0" }
+@inherit ./b`,
+      'b.prs': `@meta { id: "b" syntax: "1.0.0" }
+@inherit ./a`,
+    });
+
+    const compiler = new BrowserCompiler({ fs });
+    const result = await compiler.compile('a.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors[0].message).toContain('Circular');
+  });
+
+  it('should disable caching when cache option is false', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "test" syntax: "1.0.0" }`,
+    });
+
+    const compiler = new BrowserCompiler({ fs, cache: false });
+
+    const result1 = await compiler.compile('project.prs');
+    const result2 = await compiler.compile('project.prs');
+
+    expect(result1.success).toBe(true);
+    expect(result2.success).toBe(true);
+  });
+
+  it('should use custom logger', async () => {
+    const logs: string[] = [];
+    const logger = {
+      debug: (msg: string) => logs.push(`debug: ${msg}`),
+      verbose: (msg: string) => logs.push(`verbose: ${msg}`),
+      info: (msg: string) => logs.push(`info: ${msg}`),
+      warn: (msg: string) => logs.push(`warn: ${msg}`),
+      error: (msg: string) => logs.push(`error: ${msg}`),
+    };
+
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "test" syntax: "1.0.0" }`,
+    });
+
+    const compiler = new BrowserCompiler({ fs, logger });
+    await compiler.compile('project.prs');
+
+    expect(logs.some((l) => l.includes('verbose'))).toBe(true);
+  });
+
+  it('should accept formatter instance directly', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a mock formatter instance
+    const mockFormatter: Formatter = {
+      name: 'mock',
+      outputPath: 'mock.md',
+      description: 'Mock formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn().mockReturnValue({
+        path: 'mock.md',
+        content: '# Mock output',
+      }),
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [mockFormatter],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('mock.md')).toBe(true);
+    expect(mockFormatter.format).toHaveBeenCalled();
+  });
+
+  it('should handle formatter that produces additional files', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a mock formatter that returns additional files
+    const mockFormatter: Formatter = {
+      name: 'multi-file',
+      outputPath: 'main.md',
+      description: 'Multi-file formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn().mockReturnValue({
+        path: 'main.md',
+        content: '# Main',
+        additionalFiles: [
+          { path: 'additional1.md', content: '# Additional 1' },
+          { path: 'additional2.md', content: '# Additional 2' },
+        ],
+      }),
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [mockFormatter],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('main.md')).toBe(true);
+    expect(result.outputs.has('additional1.md')).toBe(true);
+    expect(result.outputs.has('additional2.md')).toBe(true);
+  });
+
+  it('should handle formatter that throws error', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a mock formatter that throws
+    const mockFormatter: Formatter = {
+      name: 'failing',
+      outputPath: 'fail.md',
+      description: 'Failing formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn().mockImplementation(() => {
+        throw new Error('Formatter crashed');
+      }),
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [mockFormatter],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors.some((e) => e.code === 'PS4000')).toBe(true);
+    expect(result.errors.some((e) => e.message.includes('Formatter crashed'))).toBe(true);
+  });
+
+  it('should handle custom conventions from customConventions option', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const customConvention: OutputConvention = {
+      name: 'custom',
+      description: 'Custom convention',
+      section: {
+        start: '## {{name}}',
+        end: '',
+      },
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'claude', config: { convention: 'myCustom' } }],
+      customConventions: { myCustom: customConvention },
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should handle version in target config', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'claude', config: { version: 'lite' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+  });
+});
+
+describe('createBrowserCompiler', () => {
+  it('should create a BrowserCompiler instance', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "test" syntax: "1.0.0" }`,
+    });
+
+    const compiler = createBrowserCompiler({ fs });
+
+    expect(compiler).toBeInstanceOf(BrowserCompiler);
+
+    const result = await compiler.compile('project.prs');
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept formatter constructor function', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @identity { """Test.""" }
+      `,
+    });
+
+    // Create a formatter constructor function
+    const FormatterClass = function (this: Formatter) {
+      this.name = 'constructor-test';
+      this.outputPath = 'constructor.md';
+      this.description = 'Constructor test formatter';
+      this.defaultConvention = 'markdown';
+      this.format = () => ({
+        path: 'constructor.md',
+        content: '# From Constructor',
+      });
+    } as unknown as new () => Formatter;
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [FormatterClass],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('constructor.md')).toBe(true);
+    expect(result.outputs.get('constructor.md')?.content).toBe('# From Constructor');
+  });
+});
+
+describe('getBundledRegistryFiles', () => {
+  it('should return all bundled files', () => {
+    const files = getBundledRegistryFiles();
+
+    expect(files['@core/base.prs']).toBeDefined();
+    expect(files['@core/quality.prs']).toBeDefined();
+    expect(files['@core/security.prs']).toBeDefined();
+  });
+
+  it('should contain valid PRS content', () => {
+    const files = getBundledRegistryFiles();
+
+    expect(files['@core/base.prs']).toContain('@meta');
+    expect(files['@core/base.prs']).toContain('@identity');
+  });
+});

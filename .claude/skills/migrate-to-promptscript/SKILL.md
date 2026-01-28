@@ -10,7 +10,7 @@ allowed-tools:
 user-invocable: true
 ---
 
-<!-- PromptScript 2026-01-27T13:03:51.815Z - do not edit -->
+<!-- PromptScript 2026-01-27T21:55:57.840Z - do not edit -->
 
 # Migrate to PromptScript
 
@@ -219,12 +219,15 @@ Before completing migration:
 ## Troubleshooting
 
 ### Missing @meta Error
+
 Add required metadata block at the start.
 
 ### Multiline String in Object Error
+
 Assign multiline strings to named keys, don't leave them loose
 inside objects.
 
 ### Content Not Appearing in Output
+
 Check block names match expected patterns and
 verify syntax with prs validate --verbose.

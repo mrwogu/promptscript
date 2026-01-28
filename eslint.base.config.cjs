@@ -79,7 +79,18 @@ const moduleBoundaryRules = [
       'scope:validator',
       'scope:compiler',
       'scope:formatters',
+      'scope:browser-compiler',
     ],
+  },
+  // Browser compiler depends on core, parser, validator, formatters
+  {
+    sourceTag: 'scope:browser-compiler',
+    onlyDependOnLibsWithTags: ['scope:core', 'scope:parser', 'scope:validator', 'scope:formatters'],
+  },
+  // Playground depends on browser-compiler and formatters (for types)
+  {
+    sourceTag: 'scope:playground',
+    onlyDependOnLibsWithTags: ['scope:browser-compiler', 'scope:formatters'],
   },
 ];
 
@@ -142,7 +153,7 @@ function createBaseConfig(baseDirectory) {
               '{projectRoot}/vite.config.{js,ts,mjs,mts}',
               '{projectRoot}/vitest.config.{js,ts,mjs,mts}',
             ],
-            ignoredDependencies: ['vitest', '@nx/vite'],
+            ignoredDependencies: ['vitest', '@nx/vite', 'path-browserify', 'chokidar'],
           },
         ],
       },
