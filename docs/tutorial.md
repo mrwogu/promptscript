@@ -87,8 +87,8 @@ Create `registry/@acme/frontend-team.prs`:
   team: "Frontend"
 }
 
-# Inherit from organization
-@inherit @acme/org
+# In a multi-file setup, you would inherit from organization:
+# @inherit @acme/org
 
 @identity {
   """
@@ -123,7 +123,7 @@ Create `registry/@acme/frontend-team.prs`:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9GGpsOrHgFoOpYYNb9+cAJ7sMhAcICMFAAzn1m-qpJGQAMTntOPKwF8NGgMT8Akqw4MNQQWPyyzCT8zNQA5hisEABe2BBsGiIQgcGh-GIS0jGxXqyZPJxYoTr8wBpa6iBWWgCazACu-BjUMJ3hzgo8-OUAbjBQzGiS7PxEaMFYFHX8AMpzjBAYUMk9WfwASjDiWHT8ACo6c8uMIWjHnYr8JMzl1JoA7jAARjYwjDiszHGsQg8EW1gaHhKIhYLkIYVq4MaSKWpyCfXkrh+pH4bTg8EQSyU+0OjDCxgAHPw3qEcGcLjArjcsIT+AA1UI9MAxfifNqKLasYrWImnDDQamKADCy2W4W5cCwOgFQq0RPZHAV-AA1Gd4JVBfwADIQT7ULrVLnUH4KuAsg5HfgARTawQt8uCoytCuwMCWEMarE8rB8-AAonDMUVtFgEjwujw4FSaeiXIolHA1hBIIx+NQ2rBbaUiANo7H43AKCxyjUlrJSDA3jEANZwATIbpHAC6S0wWA4r1b-GQOGYzBbJxYZGYcFCaVYJ2E3UUwX4NAmtpA3es3o4AFkEhhYjAplh7PbSU6XdRqjrJRi4ZDg6U4CPqFhGG0sImEfUQFJJ2gbAVMI9iSh2HC9KwDbEg6AFAewTRCH+I5jiBSFgYcEEYPwH4KpEMEXihTaIcIUgasySBIQA6iEEHkYmuJZLEbIcpqsa6gqTFGiaZrXh4IDuJ2DAVNe+BEKQ5AwFQtAgAwnozmw+DGAJQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9GGpsOrHgFoOpYYNb9+cAJ7sMhAcICMFAAzn1m-qpJGQAMTntOPKwF8NGgMT8AkpoY-CQArlBYEEqQsNowWCFodPw6zCH8AO6pUDz8EKw4MNQQWPyyzCT8zNQA5hisEABe2BBsiD78InkFRSViEtJV1V6snTycEVg6-MAaWuogVloAmqn8GNQwa6XOCjljAG4wUMxokuz8RGiFWBSz-ADKV4wQGFCNm3n8AEow4lhJABUdFd7owimh-mtFMFmGNqJp0jAAEY2GCMHCsZjHaoQeC3azzDzDEQsFyEEozAkLal3AEFbbyVyo0j8EJweBtaxKb6-RglYwADgyxRw-CBILBEAhd25ADVipswFV+EiQoo3qwhlyxRhoOk8jwAML3e6lZVwSYarVaOUKi38ADUYvgEU1-AAMhAkdR1lMldRURa4DKeX9+ABFEKFP3mwqHAMW7AwO6EhasTysdoAUXJTMG2iwdR46x4cGFuAZLkUSjgTwgkEY-GoYXgGhERF2BaLJbgFBYY2md1kpBgmWoAGs4AJkBs-gBdO6YLAceFT-jIHDMZiTpIsMjMODFFqsJLCDaKQr8GgnYMgBfWRMcACydQw1RgZyw9h+Ycj0cd-CGoy5JEpmIxwJu1BYIwIRYGWlJzCAUh7mgbDjMI9iGrOHBbKwo6hny-AoWh7CLEISGbtuGHkVhvw4UEMEWuUBElJR45kcIUgcBa1HCAA6j0mzcXBrKHm68rCVCOQAi6eTVB6Xo+tQOgeCA7hzgw4zKfgRCkOQMBULQIAMPGh5sPgxhqUAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -140,8 +140,8 @@ Create `.promptscript/project.prs` in your project:
   syntax: "1.0.0"
 }
 
-# Inherit from frontend team (which inherits from org)
-@inherit @acme/frontend-team
+# In a multi-file setup, you would inherit from frontend team:
+# @inherit @acme/frontend-team
 
 @context {
   project: "Checkout Application"
@@ -197,7 +197,7 @@ Create `.promptscript/project.prs` in your project:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSY4YjANbMArlgC0GNGmGDW-fnACe7DIQHCAjBQAMx5awC+KlQGJ+ASVajqELPzDVmJNx-ace-DlJ+AAoAdxwIRhx+CEcYZyw4b09+ZmoAcwBKFQABWKcXfhyMRhIYAHp3Ng5WHllAkitWHJZfQldgFTUaZgArMSw9EABhUQlpVwBBRShI7Ag2MzUeeEZnNCwF1iGAUVkWEjLqRhh+KLFJGTcoZlCzLqEQZSfVfgAVCKSIJNxT8-GrgpyHNNmw3Gl+JNhgBZHYAciSMH2niOJ345GwYDSJAoDwA0jANG4YNgpNR4IgHrJ+NCpFBNrI4Bw0GcxpdXKEIAAvDDUHhU-gABQwGjK7HRHhOcDgsXS-E5uH4AGUsOsYALJjweOTpfwAG4YWY8eaLV7UgDyfPi6ikh15RIwtTObEg1BIJtYD2eZksntYtkFHn6jDkcDQYggkEY6iwjuNfLguSINX8TLjvJ4SU6rxYKwE2bUag4TNl+YehedeviGHSMAEAA4AKzlwswABMdf45IAjlIIOT+a81L7h001CUpTKAEbQFwaMtD+WMGtDNsUfSQyZLQs9vsDgSqqTq16+325OA4NJYRgyLNekDlf7s4RDAASMCgLIV0SfE2ut34G50kibdhHKTBRU4LAX0ed9P3lFxohVNV0RFMVXFiDh0moD1QIfDB9H0DQYOEAAlGA9QgGBQmdFZwWofgJ3gadZywIlvjgI9ExeM9mnEVhblgHha34AtHm9V5rFsSZBTsfgdlqNBmEwxM-TUalBXNJU3n4coFAgR82QmR9yWwU5qWGUyOFZC4-zgZitgFQUAFUdL0tADN-GRykQXh+GpZy0GNayvOgs0hS0tz9MM2zvN8nhH08cgYGsiyktgay0DJKIMHssd+Ck-gCSJYYkrYKDVIFUZYqwAB1bkM38mkMFiBCeT5Z1tFieINS1HU4AAMWxJqlQiRRZXKGcoFmVg5QwPrmKctCoKGt0RtVCBw3k2B0K+XxsNw8LLRWaglVtd1qCJCzeVcTi7Uu-geG+DFiNeb0eJAcwAF0GCgy78CIUhkqoWgQAYKtaC2fB9E+oA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSY4YjANbMArlgC0GNGmGDW-fnACe7DIQHCAjBQAMx5awC+KlQGJ+ASVUZ+JKVCwRZkWOphYpaOn4NaX4Ad2koHn4IVlFqCCx+MGpmEiSU9k4ojlJEG34AARi4hMKMRhIYAHpktg5WHlkckitWApZMwkTgFTUaZgArMSw9EABhUQlpRIBBRSgIRmwINjM1HnhGeLR3NlGAUVkWEkrqRhh+RknJGSSoZlCzXqEQZVfVfgAVHAg4aL-cBcrmIbokFORFss2ElmNR+DMxgBZfYAcj+MCOqVO5345GwYFhJAozwA0jANEkYNgpNR4HkPrJ+IjXO5ZHAOGhLtdpmEIAAvDDUHjPRkABQwGkq7FxKXOcDgMQA5rzcPwAMpYbYwEXwng8Wny-gANwwCx4UNYOoA8kKYHC4FIToKKRgGpc2JBqCQLc83mZLJbWLZRSkhow5HA0GIIJBGOosK7zUK4CoCkR6lF2YnBTw-j0PiwNgJ82o1Bx2Uri89S+6jXaMIqYAIABwAVmrpZgACYm-xaQBHKQQWnCj5qAPj1pqcpyhUAI2gCQ0VbHYSWitGXYo+nhMzWpYHQ5HAk1Um1HwDAdTcBwsKwjBked9ICqwKmMmEowAEjAoJzQgkOBciCPJgPcoT8PciqLPuwhVJgkqcFgn4vD+f4qkBGpariEpSokMQcIq1A+u8ahwRg+j6BoKHCAASjARoQDAEGFhcBJwjO8DzouWAUr8DrwP6rQFOIrAPLAPCNvwJYvH6HzWLYMyinY-D7A0aDMARKaBmoYpWmqnz8FUCgQK+3IyK+tLYBcjJjFZHDAe+iRwFxKw6fwYoAKqGcZaCmW+oJVIgvAefwnloOaDkBdMOqivpPkmWZIEWcFPCvqk5C+DZ-BjBlsAOWgNJXBgLlTvwCn8GSFK5WQbBIdpOoTMlWAAOr8jmoWIhgMS8gKQrutoMR2jqMx6gacAAGKEqFao-IoSpVAuUALKwyoYGNXGxbhSFTV6M2ahAUaqbAeF-ARMBET6DL8DaGzUGqjretQFK2YKzmPc6-A8L8eLUR8frvOYIDmAAugwSHPfgRCkJlVC0CADB1rQbn4PowNAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -130,8 +130,8 @@ flowchart TB
     ```promptscript
     @meta { id: "checkout-service", syntax: "1.0.0" }
 
-    // Inherit company standards (shows composition)
-    @inherit @company/backend-standards
+    # In real projects, you'd inherit company standards:
+    # @inherit @company/backend-standards
 
     @identity {
       """
@@ -142,11 +142,11 @@ flowchart TB
 
     @standards {
       typescript: [
-        "Strict mode enabled"
+        "Strict mode enabled",
         "Never use any type"
       ]
       testing: [
-        "Use vitest as test framework"
+        "Use vitest as test framework",
         "Maintain 90% code coverage"
       ]
     }
@@ -170,7 +170,7 @@ flowchart TB
     ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gPTcAEASVY4Y1CFj4syGVgE8+cLDIAmGasrh8AFHBzMA7pqlpmccRDYBKADqs+9vgAEIw0eKfGZs7gCMMjAGtOZQBaRRU1DVtbBycIZU4scXlgGNi+axBM7Lt0gE1mAFc+NRgSuyI0UQkAIX8g1mU+AFFWAHMXGFE+fWZqAJc2vjY+XDKAYRFAookAZVEANwhGGAo02IAVHAhNOEXlspwVWE1MWRJEzUKzdr4RYja2DCgS6kZtjkYsQupV9Ydslksrl7ABfaIgpzhRqRTSpSH2LCyKpwRhiNBYRB8ZD-WKZWZYMRfPgkZgJPicDA+WDKHLpAEgAByMAW3WuZS8o2RMDp6QAurjRvAku0sTiEQyAKp7PhLDiKEqaeUSMDUUgwXr9Xn0zIAWQwLiULj4AE4AAwAUkkZLKLFZaraPOB9IFkPBrH+jl+iiJSTYcMFIQyTJZ3UqpjKAEEAAoCPhBWSaY0sBLahxBzLM+0KAZoPguNCFCQLZ7xbAWD3Ohzuz26PpYRhFgMSzLcX5LDWZLH4mCNsRIkJgZiNvZNFNldsQTtVvEgbjKrvBgDq-bKhVY7mVmn04hwfAAauJhWma5DHHABlAoM36Xs+8kQhhCspxFj4fT7AlUei-axuyBI2fdxxz4IdqFlQooFYUQqWgcx4DTWIWHYRJ-0mXsAlAvosVmABFAAZfNWAAK17X86D4AANWZZgogQABEAHkACUKNjONYAwAI4DWGdq3+UEQFBPkGESahZHwIhSHIVYaHoEB7TMNh8AARiEoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkq17UYGKLxrMAVjEZY4dXgE9mAVwDkAE14RWOGNQhZeLMhlZLecLOc0ZqmuIgA6Q3u74ABXfsPHPppgWAPQARhiMANacmgC01rb2jq6u7u7empxYRpbAqWnuziBFJW4FAJpqvPYw1UJEaAbGAEIR0azaAKKsAOa6MAa8AO7M1JG6PbxsvLi1AML6UWrGAMoGAG4QjDAU+QUAKjgQcFYbW7U4trAnmEokWSeqcBO8+sQ9bGLV1IxHHHKqES7MppErFYoggC+KRBngSHSSJzyIPcWCUjTgjEMaCwiF4yD2BV4RRWWEMcl4JGYmV4nAwoVgmiKdEJBSKADkYOtBk9auZLGjGqUibwALqsmbwbK9PEElGgkAAVTgtU2HGs1RO6uMYGopBgIzGzIlhRAAFkMLobLpeABOAAMAFITNTaixuXqejBhUTxVCYQVPCJrOTsmwkRLYsSQJyPbTCGhmCreABBAAK-F40SUJxtLEyPoKUY5XMGcHGaB0rDQqmM6zEEDsYdYhd40JbsLgOFGWEYtYj8qKwREmwNRTxJNkgJysTAzD7Ku0+dqI4gY4hIqH2vH0YA6n5aqpWEZJdYTkMjDheAA1IxS1vtwlw8ZQKADkUqvt+JSxDCqTRGHiyIiu4mSYtizYTiAKb-iey68HO1C8OsqhQKwBj0tARhrnArYFCw7BZFBCyyJECGjHiKwAIoADJVjIcgQGwigABorCsij8AAIgA8gASooGaZrAGCRHAuwbkS7YFJCICQqKDBZNQSj4EQpDkDsND0CAHrPGw+AAIxyUAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

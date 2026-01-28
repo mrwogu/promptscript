@@ -115,7 +115,8 @@ workspace/
   syntax: "1.0.0"
 }
 
-@inherit @team/frontend
+# In a multi-file setup, you would inherit from team:
+# @inherit @team/frontend
 
 @context {
   project: "Customer Dashboard"
@@ -163,7 +164,7 @@ workspace/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALQ8McHACNmGaj2GDW-fnACe7DIQHCAjBQAMlzawC+WrQAEIrHNIhZ+jjqQD0YajYOVg1WJxZ2Ik9gLR0aZgArGEYsExAAYTEJKWp+ABEFZVV1Gx1qGDRmOA9maj00gHMPHBElChYSXw7MVj0urMlpOUKVNQ0QB20hCZnY-gBief4AQRURLEmdAGUYKDAZOGkANwhGGH55RVH1fjBa-kYBnLh+CX4SDFYMBvPcGAhchhGCwROw4HQ5icYAB3fi1HjScH8T48V7UIEAa10OAgaCkYIomwWSwA0jA9PwAGIwbAicpwIkyFbA5igzyHLBYFwNF4o-g0GBgaScM4MqZMgDy6mk-Bx4lqFL5WHRjAx3LmTK2IjQlWoni5qpgng+Xx++I24v4ADlmFzIIxsBA2PzykLyqxRXNNLM7JNHBjWMxobAeD9+DEpt7SsSVgAFACS-AAoiFKi4sGK5gAhBTnACqACUADICHCctBwRC+XwYNAQdqSHp6BudI6mImLJbLFlsjX8ADiSYAKvwaz32Pwmf2jcjx54EVgMNAxTombG8yOxyCJ0y82h5BxZ9uLXNO-wpQjaH3B5v4YjJ-wixBxHDpVfLTfR3faL5ELwH9OnjfhcRpLlAmZTGeWo6rUFqrgOw6jgaGJGi8TJPi+yGoX2sYSlsm5YRmD7pOU2C-KcKFwdMUa+mErCOIosGPEREY6MIvjfsIaQABK7Gg-DQs0r6XjI5RQGRqJgKCKROl8UAeHo0bsUCx5cdMvFQPxgm4EerITia3wwOaNi2CAtgALoMJwyp6PgRCkOQMBULQIAMEciKyfgphmUAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALQ8McHACNmGaj2GDW-fnACe7DIQHCAjBQAMlzawC+WrQGJ+ASW0Z+JEVCwQZkWF0YLBE0On49ZhF+AHcoqB5+CFYcaQgsfjBqSX4OUkQnfgABZNTqdOK8kgB6LLYOVg1WLSKWdiIM4C0dGmYAKxhGLBMQAGExCSlqfgARBWVVdRsdahg0Zjh05mo9EYBzdJwRJQoWGrPMVj1qxgnJaTl5lTUNEAdtITev7v5HZwBBFQiLDvHQAZRgUDAMjg0gAbhBGDB+PJFM91JltvxbuJ7rRcsxPBhWBg9sjcDAINMMIwWCJ2HA6D8ETAYvxtjxpIz+MTElhqDSANa6HAQNBSBkUUG-ZwAaRgen4ADEYNgRKs4NKZPx-rSouwglhfKw9nAeY1+DQYGBpJwkZqPtqAPLqaT8UW4nbmvkCxiC5J7H7asGhdbUDK+P3BIkkskSkGO-gAOWYvkgjGwEDYltWNtWrHtP003zs7yKgtYzBisB4ZP4XQ+xeWMp1AAUXPwAKKNdbJLAOn4AIQUyIAqgAlAAyAhwRrQcEQ1WqGDQEFOkkuenXNThpmlfwBevpCZ02oA4p2ACr8ZdHg3n6M0ukGzlYDDQB2n-it0fX2-PjJtVHNB5A4Hk7wTH4D34F1OVoIN+AvP8OS5fhtUnCBxHZV14MTJCbxQ2hqkQXg0MQ6NCJRYJ3ygAcPmgkM0DDE8yPw6pI0FYIzXQzCI0RTj+wQ1snTBP8OK4sjRlWbByX44Ii2+N5S2aVgikUbYsFuft6wU6pCOEEYAAlITQWJDmwuCZFWKAZMSMB6SGLMSSgdI9GbYR-31EEkE+YyoFMmJzKfLyY1JGB4xsWwQFsABdBhOH5PR8CIUhyBgKhaBABg4S5Jz8FMaKgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -200,7 +201,8 @@ validation:
   syntax: "1.0.0"
 }
 
-@inherit @team/frontend
+# In a multi-file setup, you would inherit from team:
+# @inherit @team/frontend
 
 @context {
   project: "Admin Portal"
@@ -241,7 +243,7 @@ validation:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAYeJCKwC0aZtSwYowwa3784AT3YZCA4QEYKABiNLWAX2XKAAhJwxqELPysdSAejDU2HVj0usrFnYiJ2BlVRpmACsYRixdEABBMQl+AAVZeUUQcP5qGBk4R1l1BIBzRxwAVwAjChYSNwbMVnU3UXEpGTkFU1ylHJyVfgBiEf5EmuYqrH9VAElg6lYFfg7U7qz+MFl+EgwVitYy-kYquCxmEns4On5ZHhu6XIOeNXULmBJTtkgyquo2AgbAoc1G4wA0jB1PwAGIwbAA+BgyT8ADC50u12oewOGDKX04s2GqIA8tRHjjIox4EVjrlUQBlD4cb5BP4AoFsBkTFZQdRYCCMOD8HgYOA4KYYCn9QamCysawhThvC6vaU8EVhYZwWIAxylfja1SqDAzOzsIVc1gJRmM0l5GAARyqEHyfiGJrW5tkEAAXtaEgAlZiwSQ1cUwN4ACnWrDucCqaE2dwAbhAYAB3ewASlMXrNPEcABlmGUjmUBPkXW6o7kFQrrPkLg44sDWFqecJElBMxgPqc7IwANb8c72fhoeziOBFNgimowHb5NZt+f5-io4Slk4KKBrFIqDBrjvbXaFxzy-xWCWZM5YTvDYTtQ-CBIACRgUDQ-EzlQPnTbFUrAngoBobs++SbG+QggAA4pw9jYDAjqbHA8ogGYAC6DBEtQ6j4EQpDkDAVC0CADCpjc7b4HomFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAYeJCKwC0aZtSwYowwa3784AT3YZCA4QEYKABiNLWAX2XKAxPwCSKjPxIBXKFgiTIsNTCzO0dPzqzM78AO4hUDz8Ejgw1BBY-GDUzCT8HKSI1vwAArHxiXmZJAD0KWwcrDyWrLks7ERJwMqqNMwAVjCMWLogAIJiEvwACrLyiiCt-NQwMnCJsup9AOaJOM4ARhQsZbuYrOqlouJSMnIKptNKU1Mq-FY2-ZshWLWq9hzUrAr8J8PnCbJWRODA-NasFb8RjOOBYNLxOCBWQ8RF0aZg6IaOEwdINSArZzUbAQNgUd4PGwAaRg6n4ADEYNgifAKZJ+ABhWHwkjxUHg3GcN73dkAeWoqOo-HajHgC0h03ZAGV1Di8WwCUSSWxFfx+j8oOp3Iw4PweBg4DgXhgJddbqYLKxlLkmpwsfJqjaeKaWvc4N0iYllvxfapVBhnLghRBGNrWH0lUrRTMYABHZwQWY1O5hv6RnCyCAALzjfQASsxYJJNhaYNEABT-ViBOD+QGBABuEBgYXiAEpTLmIzxEgAZZgrCErASzdOZuvTR2O52zOEJHqk1g+3XCfpQMIYVXQuKMADW-FhfLQ8XEcAWbFNmxgYFkMD+G4fg-47OE46hCigP4hgcD8t2BKVh0SB1alyS1xhhLBt3uYRjmA4Q+gACRgKA0HCdYgNOZJnFYUCFCDL8UNmQF0KEEAAHFOHibA3yo8Y4AdEAzAAXQYIVqHUfAiFIcgYCoWgQAYDtEU3fA9E4oA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

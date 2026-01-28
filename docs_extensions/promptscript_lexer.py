@@ -38,46 +38,25 @@ class PromptScriptLexer(RegexLexer):
             (r"#.*$", Comment.Single),
             # Whitespace
             (r"\s+", Whitespace),
-            # Block declarations (e.g., @meta, @identity)
+            # Block declarations (e.g., @meta, @identity, @restrictions)
             (
-                r"(@)(meta|identity|standards|shortcuts|agents|skills|local|extend)\b",
+                r"(@)(meta|identity|standards|shortcuts|agents|skills|local|extend|restrictions)\b",
                 bygroups(Punctuation, Keyword.Declaration),
             ),
-            # Inherit and use statements
+            # Inherit statement with path
             (
-                r"\b(inherit)\s+",
-                bygroups(Keyword.Namespace),
-                "inherit_path",
+                r"(@inherit)\s+(@[\w\-./]+(?:@[\w\-.]+)?)",
+                bygroups(Keyword.Namespace, String),
             ),
+            # Use statement with path
             (
-                r"\b(use)\s+",
-                bygroups(Keyword.Namespace),
-                "use_path",
+                r"(@use)\s+(@[\w\-./]+(?:@[\w\-.]+)?|\.[\w\-./]+)",
+                bygroups(Keyword.Namespace, String),
             ),
             # Block content
             (r"\{", Punctuation, "block"),
             # Brackets
             (r"\[", Punctuation, "list"),
-        ],
-        "inherit_path": [
-            # Path with optional version (e.g., "@company/base@1.0.0")
-            (
-                r'(["\']?)(@?[\w\-./]+(?:@[\w\-./]+)?)\1',
-                bygroups(String.Delimiter, String),
-                "#pop",
-            ),
-            (r"\s+", Whitespace),
-            (r"", Text, "#pop"),
-        ],
-        "use_path": [
-            # Path with optional version
-            (
-                r'(["\']?)(@?[\w\-./]+(?:@[\w\-./]+)?)\1',
-                bygroups(String.Delimiter, String),
-                "#pop",
-            ),
-            (r"\s+", Whitespace),
-            (r"", Text, "#pop"),
         ],
         "block": [
             # Comments inside blocks
@@ -86,14 +65,16 @@ class PromptScriptLexer(RegexLexer):
             (r"\s+", Whitespace),
             # Triple-quoted strings (multiline content)
             (r'"""', String.Doc, "docstring"),
-            # Property names in meta blocks
+            # List item marker (for restrictions)
+            (r"-\s+", Punctuation),
+            # Known property names (highlighted as attributes)
             (
-                r"(id|name|syntax|description|version|author|license|homepage|repository|keywords|extends|type|content|convention|trigger|enabled|path)\s*(:)",
+                r"(id|name|syntax|description|version|author|license|homepage|repository|keywords|extends|type|content|convention|trigger|enabled|path|prompt|model|tools)\s*(:)",
                 bygroups(Name.Attribute, Punctuation),
             ),
-            # Category names in standards (code, docs, testing, etc.)
+            # Any identifier followed by colon (category/key names)
             (
-                r"(code|docs|testing|security|performance|accessibility|naming|formatting|architecture|dependencies|versioning|ci|deployment)\s*(:)",
+                r"([\w\-]+)\s*(:)",
                 bygroups(Name.Label, Punctuation),
             ),
             # Nested blocks
@@ -110,20 +91,22 @@ class PromptScriptLexer(RegexLexer):
             # Booleans
             (r"\b(true|false)\b", Keyword.Constant),
             # Other text
-            (r"[^\s\{\}\[\]\"'#]+", Text),
+            (r"[^\s\{\}\[\]\"'#:]+", Text),
         ],
         "list": [
             # Comments
             (r"#.*$", Comment.Single),
             # Whitespace
             (r"\s+", Whitespace),
+            # Comma separator
+            (r",", Punctuation),
             # Strings in lists (rules, etc.)
             (r'"[^"]*"', String.Double),
             (r"'[^']*'", String.Single),
             # End of list
             (r"\]", Punctuation, "#pop"),
             # Other content
-            (r"[^\]\s\"'#]+", Text),
+            (r"[^\]\s\"',#]+", Text),
         ],
         "docstring": [
             # End of docstring

@@ -112,15 +112,15 @@ You can also pin specific imports to versions:
   syntax: "1.0.0"
 }
 
-# Pin to specific version
-@inherit @company/base@v1.0.0
+# Pin to specific version (in a multi-file setup):
+# @inherit @company/base@v1.0.0
 
-# Use latest from configured ref
-@use @company/security as sec
+# Use latest from configured ref:
+# @use @company/security as sec
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUBifgAUIyrM1Vo5ESI34A3GLQhslAATscbwgsfn8WMgxWUQB6ACMMOBh-Dz1DfXNWKwBVZP4obHgwsGpmEn4WVkgAcwBXahgefkawALr8iPLMGNjkxgbQ0X4k1TkQEwBdBk4salF8IlJyGCpaEAYvHzZ8HQmgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUBifgAUIyrM1Vo5ESI34A3GLQht+ACjt+DH4SAFcoLAhxSFhVGCwwtABKREt+AAE7HG8ILEyWMgxWUQB6ACMMOBgMjz1DfXNWKwBVav4obHh8sGpmEn4WVkgAczDqGB5+CbA05syw9ozCzBLS6sZxvNFguHjGEBMAXQZOLGpRfCJSchgqWhAGLx82fB1DoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -282,7 +282,8 @@ promptscript:
   syntax: "1.0.0"
 }
 
-@inherit @org/base
+# In a multi-file setup, you would inherit:
+# @inherit @org/base
 
 @identity {
   """
@@ -299,7 +300,7 @@ promptscript:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDqTgB6MNTYdWPYYNb9+cAJ7sMhAcICMFAAxGlrAL7LlIiKxwxqELPxHNqAc0kAjDHBiXW1jycWI7q-MDKqkogpqoAmswArvwY1DAp-DJynDz8QQBuMFDMaCTB-ERo9lgUkfwAooRV1CG+AgBKMBiMWHT8ACrqVQDKjA5ovQMY0ADuNjwAwsPDddGmFqxWLOxEThEqmdSkMDOuANa6IJ3dTnoAHLH8UBisbokYbjCXgyNjEBP8ACsjzgWHUUBsbm+0ygcwUSxWMXMIDMAF0GMFqOp8ERSOQYFRaCAGIVaBA2Pg9CigA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDqTgB6MNTYdWPYYNb9+cAJ7sMhAcICMFAAxGlrAL7LlAYn4BJFRn4kArlCwQAtJFhqYWZ2h0-OrMzvwA7qFQPPwQrDgw1BBYiNb8InEJSVjpzNQA5pIARhhwMJasGTyc7ljq-MDKqkogpqoAmqH8GNQw3fwycpwx1QBuMFDMaCQ1-ERoiVgUTfwAooQL1O5lAgBKMBiMWEEAKuoLAMqMSWjH-CcY0OFxPADCFxcrLaYWrMoiLHYRByjRUA2opBgkWoAGtdCB9occnoABxtfhQDCsfLODD5GDws6Xa4QW78ACs6LgdSgcXyhMeUGeCnen1a5hAZgAugwatR1PgiKRyDAqLQQAxxrQIGx8HpOUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -345,7 +346,8 @@ targets:
   syntax: "1.0.0"
 }
 
-@inherit @teams/frontend@v1.0.0
+# In a multi-file setup, you would inherit:
+# @inherit @teams/frontend@v1.0.0
 
 @context {
   project: "Customer Portal"
@@ -362,7 +364,7 @@ targets:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALRpm1LBijDBrfvzgBPdhkIDhARgoAGU6tYBfNWoACEVjmkQs-Wx1JwA9GGpsOrDy2AG7GZiY2rLYs7ESuwGoaNMwAVjCMWAYgAMJiElLU-AAKCkoqIJEaqhUV6vwAyjBQYDJw0sEQjDD88orK-GAK-ACC2QCyAKL8jHmS0nAUifwAYjDYItTwAhiMLCLs-CQYrBgA5jBS7HT8Cjzz13AiaL1Yi3XVFtasdnA4pTNYOD8BLvEBeF7KYRZADqCgA1jd1BCoAM1lgNvBPiBLABdBicLDULT4IikcgwKi0EAMYLzCBsfCGbFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALRpm1LBijDBrfvzgBPdhkIDhARgoAGU6tYBfNWoDE-AJLqM-EiKhYIMyLE0wsImh0-FrMIvwA7mFQPPwQrDjSEFiIdvwAAvGJ1MkZHKRwAPRg1GwcrDzpAG7GZiY2rOks7ERY-MBqGjTMAFYwjClCIADCYhJS1PwACgpKKiANGqoLC+r8AMowUGAycNJVEIww-PKKyvxgCvwAgsMAsgCi-IxjktJwFJ38AGIw2CLUeACDCMFgidiuDCsDAAcxgUnYwQUPHewTggVOWE+a2WFmsrDU6TgOFmLywcHaX2EhUxymEBhAAHUFABrfhsE6zc5gP4BQFwPEgSwAXQYnCw1C0+CIpHIMCotBADCq7wgbHwhiFQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
