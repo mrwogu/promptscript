@@ -1,8 +1,10 @@
 /**
  * Playground constants.
- * Keep version in sync with @promptscript/cli package.json
  */
 
-export const VERSION = '1.0.0-alpha.5';
+declare const __APP_VERSION__: string;
+
+/** Version injected from @promptscript/cli package.json at build time */
+export const VERSION = __APP_VERSION__;
 
 export const GITHUB_URL = 'https://github.com/mrwogu/promptscript';

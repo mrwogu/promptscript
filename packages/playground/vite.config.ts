@@ -1,14 +1,22 @@
 /// <reference types='vitest' />
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+
+// Read version from CLI package.json (source of truth for releases)
+const cliPackagePath = resolve(__dirname, '../cli/package.json');
+const cliPackage = JSON.parse(readFileSync(cliPackagePath, 'utf-8')) as { version: string };
 
 export default defineConfig({
   root: __dirname,
   base: './',
   cacheDir: '../../node_modules/.vite/packages/playground',
   plugins: [react(), nxViteTsPaths()],
+  define: {
+    __APP_VERSION__: JSON.stringify(cliPackage.version),
+  },
   resolve: {
     alias: {
       // Provide browser shims for Node.js modules used by dependencies

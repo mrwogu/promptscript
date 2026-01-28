@@ -122,40 +122,20 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           ALIAS="${{ steps.version.outputs.alias }}"
 
-          # Create playground directory if needed
-          mkdir -p gh-pages-content/playground
+          # /playground = latest (production)
+          # /playground-dev = dev version
 
-          # Deploy to versioned directory (dev or vX.Y.Z)
-          rm -rf "gh-pages-content/playground/$VERSION"
-          cp -r dist/packages/playground "gh-pages-content/playground/$VERSION"
-
-          # If this is a release, also update 'latest'
-          if [[ "$ALIAS" == "latest" ]]; then
-            rm -rf gh-pages-content/playground/latest
-            cp -r dist/packages/playground gh-pages-content/playground/latest
-          fi
-
-          # Create index.html redirect to latest (or dev if no latest exists)
-          if [[ -d "gh-pages-content/playground/latest" ]]; then
-            DEFAULT_VERSION="latest"
+          if [[ "$VERSION" == "dev" ]]; then
+            # Dev build goes to /playground-dev
+            rm -rf gh-pages-content/playground-dev
+            cp -r dist/packages/playground gh-pages-content/playground-dev
           else
-            DEFAULT_VERSION="dev"
+            # Tagged release goes to /playground (as latest)
+            if [[ "$ALIAS" == "latest" ]]; then
+              rm -rf gh-pages-content/playground
+              cp -r dist/packages/playground gh-pages-content/playground
+            fi
           fi
-
-          cat > gh-pages-content/playground/index.html << EOF
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Redirecting...</title>
-            <meta http-equiv="refresh" content="0; url=./$DEFAULT_VERSION/">
-            <link rel="canonical" href="./$DEFAULT_VERSION/">
-          </head>
-          <body>
-            <p>Redirecting to <a href="./$DEFAULT_VERSION/">playground/$DEFAULT_VERSION/</a>...</p>
-          </body>
-          </html>
-          EOF
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
