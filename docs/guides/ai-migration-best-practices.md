@@ -67,6 +67,12 @@ Use triple quotes for any content with:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDoi-+sABIICazAK6CM1GFMFxOEZtUEAVAJ5oYAZUbUIaLIIAmMAG4wozLdQrdW94WPEqwzRuLhSZGOIkeCALSCAMKwGEIspgHBGlryGGAwWOoxavBYEKwA5gH8fHysAL4gRQC6DJxY1Or4RKTkMFS0IAwWtEqs+ACMpUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Standards Organization
 
 Group standards by category for clarity:
@@ -88,6 +94,12 @@ Group standards by category for clarity:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYyIACZAB1WA8QOEgAqnBgCwAV1aMsENhigCazAObVSJCK13bsHaqzhTREySADq1CB22Lq8pSrVs4AgO44nNrMcHAQAEawNmICALq2AhxwaiaCIrHiUk4u8slYfmDM1AKaWmiKURCMCsqq6lYxdlKy8gCCHWZYFmIAFG3UBiYwdAJtqqNtYTDUWACUTfGJPMyMiiScWNgN6YlZIAAiq+ubblU1bQAKAJJ+-i44AgBSAMpHjIv7ANIwMGgCACUAKJtA4AWSBAkU-ywzAEPGwMEWCVYAF8QKi4gxNtQAJ74IikcgwKi0EAMABuM3CbHwAEYMUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Restrictions Format
 
 Always use dash prefix for restrictions:
@@ -100,6 +112,12 @@ Always use dash prefix for restrictions:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gLQAEAOiAByMAG4xqvFiRIQsvODEbUYWOL2aTlMACacsEDFDiD+rXrz6CAImwDk8gK6LeGVgE9eWd2hi8I5gAqPjAAysoQaFim5pYCIACCoswQOrx6YBiOUPJEaJpqMQC+IEUAugz61O74RKTkMFS0IAzitBBs+ACMpUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Shortcuts Complexity Levels
 
 **Simple shortcuts** - Single action or description:
@@ -110,6 +128,12 @@ Always use dash prefix for restrictions:
   "/build": "Build for production"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDogD0HOFl6IABLwBKAV1ajcMOfCyi4UiB17dZ4-gCM1UACYidAIQOHRYZtVE1mhqYywQ2m1gF8QHgLoNOWNQAnvhEpOQwVLQgDABuMLSurPgAjN5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Complex shortcuts** - With detailed instructions:
 
@@ -128,6 +152,12 @@ Always use dash prefix for restrictions:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDogD01GADcIMAO69EAAmDdWUhVJrMyWaVmoBXGHMVSAJvEbUIaLBDbTeABRjUwzaiSktDUwSPG9dilu05qUt4g3vJ6UgBKwqJiUrgwLsxuDtSIPnoAjBRSACoAnmgJcBhgMFh5UhBwcNpw6YoATNkAotTUjlI4GKz6UBCsAOZSAxhodWF6AMzZAMowjJom5VJCmlCsdhgARtAQ5vD1CgAs2bb2jiTdjAl+19Ss43rBoQoAvnKvIK8AugwB1Hl8ERSOQYFRaCAGEI7HALKx8BkvkA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Migration Workflow
 
@@ -180,6 +210,12 @@ When combining multiple source files:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDoi-+sABIICazAK6CM1GFMEATGADcYUZmhjUK27kMH8+fVgF8QxgLoNOWagE98RUuRhVaIBitoQ2+AIxmgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Correct:**
 
 ```promptscript
@@ -194,6 +230,12 @@ When combining multiple source files:
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRA1mAKxiMsAWlakYwwa3784AT3YZCA4QEYKABkOLWAXyVKAAr05YIWNf2BKVikCZUBNZgFd+Gahh-fh4YADcYKGY0GGoKeJchd2SlUxBTAF0GW2o1fCJSchgqWhAGCNoINnxddKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Loose Multi-line Strings in Objects
 
@@ -210,6 +252,12 @@ When combining multiple source files:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYyIACYAB1WA8QLhYAnrEHDwAV1aMsENhigLREgdpDaxEgII8eENRqgDWzDnAEYARs0VYBuGJJmUKFHRL6huIAvqIhICEAugycWNTS+ESk5DBUtCAMAG4wtOqs+ACMkUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Correct:**
 
 ```promptscript
@@ -223,6 +271,12 @@ When combining multiple source files:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYyIACYAB1WA8QLhYAnrEHDwAV1aMsENhigLREga2Yc48kNpNjdAgII8eENRqh6D8ARgBGzRVgG4YkmZQUFDoSptrmAL6iESARALoMnFjU0vhEpOQwVLQgDABuMLTqrPgAjLFAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Mixing Block Concerns
 
 **Wrong:**
@@ -235,6 +289,12 @@ When combining multiple source files:
   ]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYyIACZAB1WA8QOEgAqnBgCAKgE80MAMqNqENFimiJkkADkYANxjUBAVzkCMrJVPEBiRTghwBHuwOrwsWoxYEGz6AgC6ogC+IFHhDJwBSvhEpOQwVLQgDOa0Iaz4AIyxQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Correct:**
 
@@ -250,6 +310,12 @@ When combining multiple source files:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYyIACZAB1WA8QOEgAqnBgCAKgE80MAMqNqENFimjxAXVEBfUaIAC1eFi2MsENnAHB9AgLSSQAORgA3GNQCAK5yAhisSgJYKjB6rMYgxgYMnDZK+ESk5DBUtCAM-rQOrPgAjIlAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Forgetting Commas in Arrays
 
 **Wrong:**
@@ -260,6 +326,12 @@ When combining multiple source files:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-lBqwOYBXDH3iIABMiwBPNPEbUIaLGLRTcbMdQEAjKQF0AOqwC+IY3oacs1KfiKlyMKrRAMAbjFoQ2+AIxmgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Correct:**
 
 ```promptscript
@@ -267,6 +339,12 @@ When combining multiple source files:
   languages: [typescript, python, ruby]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-lBqwOYBXDH3iIABMiwBPNPEbUIaLHTFopuNiuoCARlIC6AHVYBfECf0NOWalPxFS5GFVogGANxi0IbfAEZzIA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Quality Checklist
 
@@ -412,6 +490,12 @@ You are a senior engineer working on the API service.
   "/deploy": "Deploy to staging environment"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAY0EALRwY1AG4RGMYYNb9+cAJ7sMhAcICMFAAxGlrAL7LlAAV6csELOv7BlqpSFOqAmswCu-DGoYALVOCGZqfk4AcwhWGGl+AHcIgGs46P42flxggEEABQBJUNl5GApXIQ8a5QtWaxZ2IixnKqgMVmjfDGj4AWQ0dVw2AF0q6l92CBIYXRAC4ZxsgGYKPT1PfjBqUhgU6lS4AbAMOCxRCHGVfh5sDAAjM7nqguZz6KCAZQBFABlTPVrOdOndqDw4G0biweC9kFU3CAAOrUBzBRxoYI4OJYSFgCIBKBQbZTRj2NhwLaIgCqUgCGlYjAA9BgkhgHNsCUUmQB5LKY3bk1iUjw3a5A1hWILnVFk8LCqGqcTVAAibAA5K0WCQSByKJwZNtoPAtsrhAA5GAyRLnCLBTBwOAHCH8OL8cjslQcQhYQGWSVwZbULCMXy4xXVJkcc7CeYAJSm7uG8Fa0dacF8aK2wiZsPIzHUsdVMHzTiwzDUF1iXSirDk1DYs3YgJAZlGDDs1HU+CIpHIFRo9BA1to8vwelbQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## See Also
 

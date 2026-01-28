@@ -43,6 +43,12 @@ registry:
 @use @fragments/testing
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABCKxwxqELPwtwsGRgGs4Aemow3C1gsAVzgYJzBqDABzEk4sbw4XayiQEwBdBjjqUXwiUnIYKloQBgA3OzgINnwdVKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 3. Compile
 
 ```bash
@@ -137,6 +143,12 @@ Categorized fragments:
 @inherit @stacks/react
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJucLBkYBrOAHpqMKVhABfALoNOWagE98RUuRhVaIBgDdBcCG3wBGNUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Pattern 2: Mix in Fragments
 
 ```promptscript
@@ -147,6 +159,12 @@ Categorized fragments:
 @use @fragments/security/owasp-security-review
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJucLBkYBrOAHpWzACYwAOq24BXODDFhqGAOYlOWeRwl9D6rTr0Hjp+TsaahWAJ5zmAdwxw0AFoXN2EPQOoYADcIGB8QAF8AXQZTag98IlJyGCpaEAYowTgINnwARkSgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Pattern 3: Use Prompts Directly
 
 ```promptscript
@@ -154,6 +172,12 @@ Categorized fragments:
 
 @inherit @prompts/coding/linux-terminal
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuNZmSxwA9CwAmfAOYyofAK6EAtB2ok+GKCAC+AXQacs1AJ74ipcjCq0QDAG6C4ENvgCMJoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## How Git Registry Resolution Works
 

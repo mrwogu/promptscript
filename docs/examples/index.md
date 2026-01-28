@@ -80,6 +80,12 @@ Use Git repositories as shared registries with version control.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABXpywQso-sCUrFIYyoCazAK78M1GD9+HBgoNDBvKH4WHghWAHM-ODgIOCwMdgpnITdcpTNWSzgcZmosRm8sOEds4QB6ELDhbRAAZRKAdz8ANwxoDAAjWGjmEhIMnjhjExATAF0GG2pRfCJSchgqWhAGbphaCDZ8HVmgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### React Project
 
 ```promptscript
@@ -115,6 +121,12 @@ Use Git repositories as shared registries with version control.
   "/test": "Write component tests"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRDUYGRlgC0GNGmGDW-fnACe7DIQHCAjBQAM++awC+ChQAFenLBCwr+wBUvkgjSgJrMArvwyjf-ABKYhL8RGgw1FjKEYwQGFAQAF4QrADm-Kn8JMw8kYoAKioRAMqM1BBo0TLkEIzYEGxwFE5Cru0KpqwWLOxE0Y6K-GDUpDAA7szUANZaIMHi0doAHG78UBjpXhhpMHNFpeWVWGtwdonp+xjQ46k8AMIlJWscZ6lpcwBqtvDRANT8Aq-d78AAyEAARqNqCojF0LGdNjw-Dw4A5Wiw8gJkK1nCAAKpwGDDLysCSNVgJfgsMhsaxo264fg4ZjMaZwNZ4hahACKXki9jAU2UkQAbpFlFhsDA6PwAFpeRGsHjDYWMRLWTltQnEgrXKC3ZX8Lw2RJ2akbOBEtFC6iSlQXNJrAC6nTMrHMcBZUUYJrRgzxAHoaWg6exhHN7qJpQFWBMgiFoiGwydXENhIGWWyI20o2IOAFfWdmCRmazpmsM69U3MAOoVAvJuPsfjVjlp4wgYzOhjWGH4IikcgwKi0EAMcW0Cn4bRdoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### API Service
 
@@ -162,6 +174,12 @@ Use Git repositories as shared registries with version control.
   "/test": "Write API tests"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAY0EALRwY1AG4RGMYYNb9+cAJ7sMhAcICMFAAxGlrAL7LlAAV6csELOv7BlqpSFOqAmswCu-DGoYAP4AIwxGAGtOHn4iNGksMN9oHghWAHN+ACUAUQBlABUwXyh+AEEABQBJOH4AdwccfgA5Zh4YCgArOApXIQ9B5QtWaxZ2IiSXFX5qX3YIEhhdEDaO7rqAJkNPfjBqUhh65mpIldzCGng4XZ5sDHCpFcrmOCwMoPyARQAZXZOSM9qBA4CQMKYRtY3hhWHdqDw6tNVKIIAJkP03CAAKpSfhY7I-fiYXD8GTSOAQNjpDK7TEAEWYjF8S3YDSa-AA8glWFVqvwAMwmDwzTE44IAKQA6oU9icAr5cHZ5NhKaNhaoALqWGZ3LAPDBPfjokUDMX8EgQD4qth1MByuCMHAwMH8R0wjLwWmm3FYA6sOARew22XUc2leySDhofjMBIHIP+3Za8zaqxBN7AxgJxH9cQDFowMmh+KvYLpDjUVgYMrSagnOpYZiuqAQOw3dX8PPCcpQeoYdR1GTV3jYYJBACOvngSVC7XUuy7q0L0jUjaCRKgGHS4g4hCSmDgcGO8Pbw1TcBwJywTKwOZmwgA9DE0Mxy8IVnT4JaVBh+KwjhUNRxLCL5vh2j4WlaCbvgMADCQSjiEur6rikHxqquyPhwbwwcIkrAhwgF8tht4QiAZgagwdjUOo+BEKQ5CdDQ9AgEWFJsPgejkUAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Configuration Examples
 

@@ -137,6 +137,12 @@ One source of truth that compiles to every native format you need.
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gPTcAEASVY4Y1CFj4Y0NZgDcYAEz4syGVgE8+cLGoUZqCuAB1WAAQjDR4vqZWYN3AEYZGAa04KAtHBiMArmJY6ibmloE2dmrq3EFo8IxiaFjeOqx6BsasJrx8AArUzABWvslwcYwQkIx8EAqcWOLBZrX1jXzAJnx8RiA9faxdAJrMfpLUMJIDRHHUEgBCLu5pfACirADmFjCifADuzNSuFut8bHy4EwDCIm4jEgDKorIQjDAUnXwAKjgQcFpPLwmOF0sD+mHUJHqf10fD8DSgEAAXvBJHwRMR1mwMFAxowfhxGFgAm8Pn1er1WABfEzZfgAERgkFYE3GfjgGEcsHOzGYUDg3DgRygfJCgugfPaH3Gzxgu0QkoGXT4dTgCQgSQgbHlPUe-kC6k8YGY-h8ShYdT40ogsv6SuUbA47G1IGuvlcfCN1HlAjpAHkAEp0Pj3ACKABlBKxioTNawgzDcgIBHxYBhXHB3hSutSqSBKQBdBj1ajqfBEUjkN40eggeS0WP4ACMeaAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Run Compilation:**
 
 ```bash

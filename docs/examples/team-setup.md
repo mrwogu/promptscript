@@ -99,6 +99,12 @@ workspace/
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDqQD0Yamw6sewwa3784AT3YZCA4QEYKABkOLl-cSR0gAYjPacFIJQF8lSkb05YIWNf2BKVRUdHUwBNZgBXfgxqGGj+aVl7fh4YADcYKGY0GGp+NjMcOJsk+TMYUgoA-nCogCMI6B5+EmZU6lY6aMZGeDgIOth+AHcYOui0cghGbAg2OCrTIJMXVjcWO0IsP2rlkJUAYgP+ABUYRhx+AGUsDEYAa1dTAFp+ACUKxm3dAA4R70uJzUOSujGoEDQWGqrwAat44mBmHlUhksmgSJ5omUGk0IKwAObQ04YaDDPE8ADCVyuCSRqh8UDxhJe70+2wAihFcr5EXk4LkMnzbhwiXCOHBtgBqU7wLwE-gAGQG1BiPLp4qwcCeh2OAEFqBd4V8IrFtfxXlYKlgTTBnnUMPzmoioO16dQIsbTSyrjgYjBmiwyGxMYy6irqL4ABQiQOYVhqCSNACURN1AAUAJL8RiMzH4zi5WYFRIkfgAeRyrHTWbgOUYWqWwRWTxEEow8hiPDgO1MLFSAmQ1UCIAAqvzTsCYKDwZDaXkMFAoNm2jATCph2nYmBcgkIqwvnNWAv+DRmPiVSQSEz6WpYGv18Ixwi9we2MfY8H2N2ybh+DhmMw9xavsD4gB8dwclyEZzqoAo7m2HBdAAWhEbZlLy2a5uw9LYKuIEALpmhqTIDkOQijuOYqytE3YagkF4wMMSKPCBw4ALIkpoeL8D8BgAKTLqky6Chg+b3sOADq4IcPwe7eFizR4hw55FsoGrAdUhFrKYdy9HA-R1NA3hqKRpjDlYzCLswwz8BJFK6gA4vwABMFC6Pwuq6vw+KNKkjKsPA4nkbqPR9AMRk+OUErXrEACOjSxA4mnOC2sQSuCr6sN2-gssIABy6Q7qhcQ5g63YfgFX73q8+WFXkxVYr4Pg5P8uCRNsABWqFeJAMxeGw1XBVAwwYGo3a+vIQxZBgPDXu2zS5DIQq4RpuUgAVgp-p2fZxNW-Ajm8CqrasbhwP+1BYIwESaj2w4SBVnjCJYFKxLh8QBTZ4FfMuQaVdsP6XOp97CBI-6AU95EvVacQYNm3XMKWX3bGDLG7CAEgahDwhSfCUU3ah15URKCkytF8pKmGqrA+jGC6LoahY2B6QQIxgkInSulhYZjI+CsIBOPhDCeBG+BEKQ5AwFQtAgAwgr9Gw+C6PzQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Project Configurations
 
 ### project-a/.promptscript/project.prs
@@ -155,6 +161,12 @@ workspace/
   "/account": "Help with account management"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALQ8McHACNmGaj2GDW-fnACe7DIQHCAjBQAMlzawC+WrQAEIrHNIhZ+jjqQD0YajYOVg1WJxZ2Ik9gLR0aZgArGEYsExAAYTEJKWp+ABEFZVV1Gx1qGDRmOA9maj00gHMPHBElChYSXw7MVj0urMlpOUKVNQ0QB20hCZnY-gBief4AQRURLEmdAGUYKDAZOGkANwhGGH55RVH1fjBa-kYBnLh+CX4SDFYMBvPcGAhchhGCwROw4HQ5icYAB3fi1HjScH8T48V7UIEAa10OAgaCkYIomwWSwA0jA9PwAGIwbAicpwIkyFbA5igzyHLBYFwNF4o-g0GBgaScM4MqZMgDy6mk-Bx4lqFL5WHRjAx3LmTK2IjQlWoni5qpgng+Xx++I24v4ADlmFzIIxsBA2PzykLyqxRXNNLM7JNHBjWMxobAeD9+DEpt7SsSVgAFACS-AAoiFKi4sGK5gAhBTnACqACUADICHCctBwRC+XwYNAQdqSHp6BudI6mImLJbLFlsjX8ADiSYAKvwaz32Pwmf2jcjx54EVgMNAxTombG8yOxyCJ0y82h5BxZ9uLXNO-wpQjaH3B5v4YjJ-wixBxHDpVfLTfR3faL5ELwH9OnjfhcRpLlAmZTGeWo6rUFqrgOw6jgaGJGi8TJPi+yGoX2sYSlsm5YRmD7pOU2C-KcKFwdMUa+mErCOIosGPEREY6MIvjfsIaQABK7Gg-DQs0r6XjI5RQGRqJgKCKROl8UAeHo0bsUCx5cdMvFQPxgm4EerITia3wwOaNi2CAtgALoMJwyp6PgRCkOQMBULQIAMEciKyfgphmUAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### project-a/promptscript.yaml
 
@@ -227,6 +239,12 @@ validation:
   "/report": "Generate reports"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAYeJCKwC0aZtSwYowwa3784AT3YZCA4QEYKABiNLWAX2XKAAhJwxqELPysdSAejDU2HVj0usrFnYiJ2BlVRpmACsYRixdEABBMQl+AAVZeUUQcP5qGBk4R1l1BIBzRxwAVwAjChYSNwbMVnU3UXEpGTkFU1ylHJyVfgBiEf5EmuYqrH9VAElg6lYFfg7U7qz+MFl+EgwVitYy-kYquCxmEns4On5ZHhu6XIOeNXULmBJTtkgyquo2AgbAoc1G4wA0jB1PwAGIwbAA+BgyT8ADC50u12oewOGDKX04s2GqIA8tRHjjIox4EVjrlUQBlD4cb5BP4AoFsBkTFZQdRYCCMOD8HgYOA4KYYCn9QamCysawhThvC6vaU8EVhYZwWIAxylfja1SqDAzOzsIVc1gJRmM0l5GAARyqEHyfiGJrW5tkEAAXtaEgAlZiwSQ1cUwN4ACnWrDucCqaE2dwAbhAYAB3ewASlMXrNPEcABlmGUjmUBPkXW6o7kFQrrPkLg44sDWFqecJElBMxgPqc7IwANb8c72fhoeziOBFNgimowHb5NZt+f5-io4Slk4KKBrFIqDBrjvbXaFxzy-xWCWZM5YTvDYTtQ-CBIACRgUDQ-EzlQPnTbFUrAngoBobs++SbG+QggAA4pw9jYDAjqbHA8ogGYAC6DBEtQ6j4EQpDkDAVC0CADCpjc7b4HomFAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### project-b/promptscript.yaml
 

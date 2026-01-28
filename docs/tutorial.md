@@ -68,6 +68,12 @@ Create `registry/@acme/org.prs`:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9M2oBzYYNb9+cAJ7sMhAcICMFAAyHFy-rLk6QAQQDCAWQCi-G7LSzsENiYC+SpSN5OLAgsNX5gJRVFEBMVAE1mAFd+DGoYFOUrAEkUuDgIOCwMdn4Ad1kAawhWORSsfltHZ1d3YLYKSP4AMWYoKGZS-hYyYrCWHmrawuKeVJ44DJ5+ACN4eppxYMZ4DtNonz9WEWnWWep58M7xmAFkTqiQHr6BodhioeYedJpqxghyeCxFRCEAAEWYjESkhKGD6-DQiWWUAgjAaAAUsnAgQ8AOrUELpDiFBZgWQpOHXIEAXUOKjgMEh+NCt3uIIAarDeNh0rCoPxEvTqPxqgisNiQQA5GAANxgQpwc2uqgZaSwWJiphprF8rH8aUK+MYbVYCwipgAtJKZXL+EQ3PT0TkKjA1AsyfTGKqFtUPl8gZbhFLZULhiQQsqTSEILL+LMivwsMx+MH8mwPuxqL1-SCrFBShhXcnOXH0gKbSLEmKNTr-HAcLIsJC1Zc9iApB7Eky1MJLAAlGUQGCDJWkoUdrvJxJQVhyjDLaBRwEah5SHgQ9WWADinFnHFjEKhQQ8adHCZwBV9MB8IG8VIYQWoanwRFIAKotBADBTnlY+F0N6AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Step 2: Create Team Configuration
 
 Create a team-specific configuration that inherits from the org base.
@@ -115,6 +121,12 @@ Create `registry/@acme/frontend-team.prs`:
   "/test": "Write tests using Vitest and Testing Library"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9GGpsOrHgFoOpYYNb9+cAJ7sMhAcICMFAAzn1m-qpJGQAMTntOPKwF8NGgMT8Akqw4MNQQWPyyzCT8zNQA5hisEABe2BBsGiIQgcGh-GIS0jGxXqyZPJxYoTr8wBpa6iBWWgCazACu-BjUMJ3hzgo8-OUAbjBQzGiS7PxEaMFYFHX8AMpzjBAYUMk9WfwASjDiWHT8ACo6c8uMIWjHnYr8JMzl1JoA7jAARjYwjDiszHGsQg8EW1gaHhKIhYLkIYVq4MaSKWpyCfXkrh+pH4bTg8EQSyU+0OjDCxgAHPw3qEcGcLjArjcsIT+AA1UI9MAxfifNqKLasYrWImnDDQamKADCy2W4W5cCwOgFQq0RPZHAV-AA1Gd4JVBfwADIQT7ULrVLnUH4KuAsg5HfgARTawQt8uCoytCuwMCWEMarE8rB8-AAonDMUVtFgEjwujw4FSaeiXIolHA1hBIIx+NQ2rBbaUiANo7H43AKCxyjUlrJSDA3jEANZwATIbpHAC6S0wWA4r1b-GQOGYzBbJxYZGYcFCaVYJ2E3UUwX4NAmtpA3es3o4AFkEhhYjAplh7PbSU6XdRqjrJRi4ZDg6U4CPqFhGG0sImEfUQFJJ2gbAVMI9iSh2HC9KwDbEg6AFAewTRCH+I5jiBSFgYcEEYPwH4KpEMEXihTaIcIUgasySBIQA6iEEHkYmuJZLEbIcpqsa6gqTFGiaZrXh4IDuJ2DAVNe+BEKQ5AwFQtAgAwnozmw+DGAJQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Step 3: Create Project Configuration
 
@@ -183,6 +195,12 @@ Create `.promptscript/project.prs` in your project:
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSY4YjANbMArlgC0GNGmGDW-fnACe7DIQHCAjBQAMx5awC+KlQGJ+ASVajqELPzDVmJNx-ace-DlJ+AAoAdxwIRhx+CEcYZyw4b09+ZmoAcwBKFQABWKcXfhyMRhIYAHp3Ng5WHllAkitWHJZfQldgFTUaZgArMSw9EABhUQlpVwBBRShI7Ag2MzUeeEZnNCwF1iGAUVkWEjLqRhh+KLFJGTcoZlCzLqEQZSfVfgAVCKSIJNxT8-GrgpyHNNmw3Gl+JNhgBZHYAciSMH2niOJ345GwYDSJAoDwA0jANG4YNgpNR4IgHrJ+NCpFBNrI4Bw0GcxpdXKEIAAvDDUHhU-gABQwGjK7HRHhOcDgsXS-E5uH4AGUsOsYALJjweOTpfwAG4YWY8eaLV7UgDyfPi6ikh15RIwtTObEg1BIJtYD2eZksntYtkFHn6jDkcDQYggkEY6iwjuNfLguSINX8TLjvJ4SU6rxYKwE2bUag4TNl+YehedeviGHSMAEAA4AKzlwswABMdf45IAjlIIOT+a81L7h001CUpTKAEbQFwaMtD+WMGtDNsUfSQyZLQs9vsDgSqqTq16+325OA4NJYRgyLNekDlf7s4RDAASMCgLIV0SfE2ut34G50kibdhHKTBRU4LAX0ed9P3lFxohVNV0RFMVXFiDh0moD1QIfDB9H0DQYOEAAlGA9QgGBQmdFZwWofgJ3gadZywIlvjgI9ExeM9mnEVhblgHha34AtHm9V5rFsSZBTsfgdlqNBmEwxM-TUalBXNJU3n4coFAgR82QmR9yWwU5qWGUyOFZC4-zgZitgFQUAFUdL0tADN-GRykQXh+GpZy0GNayvOgs0hS0tz9MM2zvN8nhH08cgYGsiyktgay0DJKIMHssd+Ck-gCSJYYkrYKDVIFUZYqwAB1bkM38mkMFiBCeT5Z1tFieINS1HU4AAMWxJqlQiRRZXKGcoFmVg5QwPrmKctCoKGt0RtVCBw3k2B0K+XxsNw8LLRWaglVtd1qCJCzeVcTi7Uu-geG+DFiNeb0eJAcwAF0GCgy78CIUhkqoWgQAYKtaC2fB9E+oA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Step 4: Configure the Project
 

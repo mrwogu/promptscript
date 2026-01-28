@@ -169,6 +169,12 @@ flowchart TB
     }
     ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gPTcAEASVY4Y1CFj4syGVgE8+cLDIAmGasrh8AFHBzMA7pqlpmccRDYBKADqs+9vgAEIw0eKfGZs7gCMMjAGtOZQBaRRU1DVtbBycIZU4scXlgGNi+axBM7Lt0gE1mAFc+NRgSuyI0UQkAIX8g1mU+AFFWAHMXGFE+fWZqAJc2vjY+XDKAYRFAookAZVEANwhGGAo02IAVHAhNOEXlspwVWE1MWRJEzUKzdr4RYja2DCgS6kZtjkYsQupV9Ydslksrl7ABfaIgpzhRqRTSpSH2LCyKpwRhiNBYRB8ZD-WKZWZYMRfPgkZgJPicDA+WDKHLpAEgAByMAW3WuZS8o2RMDp6QAurjRvAku0sTiEQyAKp7PhLDiKEqaeUSMDUUgwXr9Xn0zIAWQwLiULj4AE4AAwAUkkZLKLFZaraPOB9IFkPBrH+jl+iiJSTYcMFIQyTJZ3UqpjKAEEAAoCPhBWSaY0sBLahxBzLM+0KAZoPguNCFCQLZ7xbAWD3Ohzuz26PpYRhFgMSzLcX5LDWZLH4mCNsRIkJgZiNvZNFNldsQTtVvEgbjKrvBgDq-bKhVY7mVmn04hwfAAauJhWma5DHHABlAoM36Xs+8kQhhCspxFj4fT7AlUei-axuyBI2fdxxz4IdqFlQooFYUQqWgcx4DTWIWHYRJ-0mXsAlAvosVmABFAAZfNWAAK17X86D4AANWZZgogQABEAHkACUKNjONYAwAI4DWGdq3+UEQFBPkGESahZHwIhSHIVYaHoEB7TMNh8AARiEoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 === "GitHub Copilot"
 
     **Generated file tree:**

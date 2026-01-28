@@ -16,6 +16,7 @@
     "docs:build": "mkdocs build --strict",
     "docs:generate": "typedoc",
     "playground:serve": "nx serve playground",
+    "playground:links": "ts-node --esm scripts/add-playground-links.mts",
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "prepare": "husky"
   },
@@ -33,6 +34,7 @@
     "@swc/cli": "~0.6.0",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@types/lz-string": "^1.5.0",
     "@types/node": "25.1.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
@@ -42,6 +44,7 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "jsonc-eslint-parser": "^2.1.0",
+    "lz-string": "^1.5.0",
     "nx": "22.3.3",
     "path-browserify": "^1.0.1",
     "prettier": "~3.6.2",

@@ -119,6 +119,12 @@ You can also pin specific imports to versions:
 @use @company/security as sec
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUBifgAUIyrM1Vo5ESI34A3GLQhslAATscbwgsfn8WMgxWUQB6ACMMOBh-Dz1DfXNWKwBVZP4obHgwsGpmEn4WVkgAcwBXahgefkawALr8iPLMGNjkxgbQ0X4k1TkQEwBdBk4salF8IlJyGCpaEAYvHzZ8HQmgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Repository Structure
 
 Recommended structure for a Git registry:
@@ -262,6 +268,12 @@ promptscript:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABZtQDmAegBGGODGGDW-fnACe7DIQHCAjBQAMRpSv7iJukAEEAwgFkAov1vi0pgL7LlI3pywQWOr8wMqqSiCmqgCazACu-BjUMIkq1gCSiXBwEHBYGOyJWPx2Ti5uFGH8AGLMUFDMAO7mcdT8LDwQrBJq+aw8STxwqTz8MvDFNBiMAYzwlWYRnt6sInkFA9RDIVUdMALIVeEgrjwpyQBuEDDNyQCOcRDJo2DiifXtOAUS8FGqQiAACoTYb3R7PfivNoYD57P4AXSqEkCByOAIAqgp2mwLv4IGwYdiSCRAsMoSRsAjlF5WD5knlqBAZvjWMNQmYALQAgByMFxbRYxMCahgjGSWDgfy5wmsUEaGHUZLqDWaCkYrUCwTQdSZ10lkVYHhAHnhDH81HU+CIpHIMCotBADH5OTY+D0xqAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **@teams/frontend.prs**
 
 ```promptscript
@@ -285,6 +297,12 @@ promptscript:
   styling: "TailwindCSS"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDqTgB6MNTYdWPYYNb9+cAJ7sMhAcICMFAAxGlrAL7LlIiKxwxqELPxHNqAc0kAjDHBiXW1jycWI7q-MDKqkogpqoAmswArvwY1DAp-DJynDz8QQBuMFDMaCTB-ERo9lgUkfwAooRV1CG+AgBKMBiMWHT8ACrqVQDKjA5ovQMY0ADuNjwAwsPDddGmFqxWLOxEThEqmdSkMDOuANa6IJ3dTnoAHLH8UBisbokYbjCXgyNjEBP8ACsjzgWHUUBsbm+0ygcwUSxWMXMIDMAF0GMFqOp8ERSOQYFRaCAGIVaBA2Pg9CigA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Project Configuration
 
@@ -342,6 +360,12 @@ targets:
   "/portal": "Work on portal features"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALRpm1LBijDBrfvzgBPdhkIDhARgoAGU6tYBfNWoACEVjmkQs-Wx1JwA9GGpsOrDy2AG7GZiY2rLYs7ESuwGoaNMwAVjCMWAYgAMJiElLU-AAKCkoqIJEaqhUV6vwAyjBQYDJw0sEQjDD88orK-GAK-ACC2QCyAKL8jHmS0nAUifwAYjDYItTwAhiMLCLs-CQYrBgA5jBS7HT8Cjzz13AiaL1Yi3XVFtasdnA4pTNYOD8BLvEBeF7KYRZADqCgA1jd1BCoAM1lgNvBPiBLABdBicLDULT4IikcgwKi0EAMYLzCBsfCGbFAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Troubleshooting
 

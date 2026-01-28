@@ -122,6 +122,12 @@ promptscript-registry/
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9ACMMcGPLES4AT3YZCs+QEYKABmu7xgpcrMgAggGEAsgFFBbpWiVsCDY7AF8xMW5pTiwILANhPTkQXRT7AE1mAFdBDGoYXPEXAElcuDgIOAF2XKxBd29ff0DYtgoI+z98wQA3DCgs+EQkgFpBAEUs-riE5h6YakE4NBgYKVHBAGUYRizqGcFIWiwNgFVtahHGGP3GQSl4CGVWDb8oKAx1Foh5+5h5qDMNB8dhJVJhDrcKoYVhSPJSOCJewsB6yZBJCTyPwPQT5HoQGAAd1xMAAjlkIPl1mkJJiQAARZi7EECVrifLkylrOy05IAFXgsVYyhJnKpPMEAF0OhJlHE0RjkucCixWPN2MFWP1BCwSCQ4oiwEoSNgJXSAELUGGMHCCLX64WyMAwbB7GAAH3UWWUkEI7pwzCwvtUfOKbgA0l4+SMHnBGPs0GyzckAApZd6iwZVTNc6lJaWscIvVjcfJVW5sxGiexjeQAOX+Cx1zD1cSWO3yWERSh1VJiEH6cAltZADfmi3UBkw5Xbu328RJ+KJQ5pghHLighIwBkNzHezGJcIEghogZ2bJPe4gjAJK429cbiyy2j+NB22DWr84D1YN-ggkJOJbQAa1YA9xB6dNWAWT5oDiW8IWLKEA2oLBdi7JE6VUbQ5xmeRnAAJX+AliRRAojUWHC9gOSCoGgq11Dg2J4AleRVCkJkV2cABxTgYI4BwnzQI8Cg45kYiCEI0lCEBQklBgbgMfAiFIcgYCoWgQAYccKjYfBzFkoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Security Configuration
 
 ```promptscript
@@ -167,6 +173,12 @@ promptscript-registry/
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9HBiMArtQhYAnvLES4+9hkKz5ARgoAGe0dYBfMWO7TOWPfuHG5IEaB4oIAgmjkvqEAwgCyAKKCGtq6BkkCrFIY1FJwgljMghhQUIIsUjAU-kFOrqzucBlZOXmiIck6PrLI-hLysQBioYLUMACOWhCjUk4SfSAAyvBwEGz5EHzMWliyAMwAbHZ2SZpsubNz8gBKAEIxggDuejiCsBiNgjQQAG7QMMowT66ViMCDkGAXebxEHUfRoLCPZ5heILAC0ACYAKz7SEBWLvADWggACgBJUmScRQZjKOC4+QAdRgMAJUF83y0UFYMGoGAARtAfElGBhWKwIKxlBcALpiOruUaNXSMbxsVr+VEBAByMG+PPSSkBmDgcAeSlylM+UAwEvyRCwF018h1euorxpJ1YK28esEWQEju1uv1UggcH5sBOKSFYBg2B08EDzuDbq0GkEuuKAAoAJSCJRJDbQbKCLRejCxwRgMsq1ZepMgUJQB4YfR5b7FaTYQGiqRJUV6CAAL0Baf1ErQ2wbTZbbdL6cwvL4HF0I77Ex5EETwXlrG4BNYzAesCkAL8IRqwQkAGJr4IltG0ld4FtqIxE-UQpqH500spJhUUASvAsg4FgWBoHAiCqKoTwEhAFAYIwfAUCwJDqJov6GF+ggAGqctyvICkBaSjGgSjeJKsgdKk+jcEhKFoRq96YbRIy6luDxlDgmismGOyCGBEFQTBcEIQxlRoRhj76KijA8YwfGNNUgSqXKIDONKDBeLC+BEKQ4JULQIAMK6KxsPg1gaUAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Team Configuration
 
@@ -240,6 +252,12 @@ promptscript-registry/
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7vGClJMyABiG9px0gxAXzFjuCFYcGGoILEFuZmoAcxUAIww4GACAV2TI6LjkxlSwrAN-VkCpTixwg2E9OW9a6oBNZlTBDGoYFsF1TU9BUoA3GChmND52QSI0UKwKIokAUUJJ6nLkxGqAWkEAJRgMRgiMbUEAFQNJgGVGMLQsDcEAWWZS6nEAYXPzlqPSuAgY8UMcA4JDgdwACqEwNESIdGO1huUSBAAF7YCBsO4AQUYcLgv3i0AqggAFAB1V6YgDiggATBRzIJMZiAJTVXR1Vh+VgBFgeQgRUT2dl2CQAYlFJxgjBwgnOAkYAGtZoJNm5SDAAO7RBWyHZ7CLmAAcAGo7gAZQ4xVIYGIwWSnC5XCA3QQAVlN9k2ACFUtAZIIAGrhFKe2UFKBBGL2jDQDVBKTvc53Y7wcqsKOB4NAwTGyVAyOCM0QeLUVqFUNy7B27a7faCACKqVClVzAC10gJtMrxYzqNLg-s8iG7q9mGQ2GV1lIwgNxP1BsNRrdQy5dlgh+tEskpJ1mFBnoIgdRUoO2ndzjhWjAdz8-gCDECYCQSdw9nwVL7WUK6t5OUVuEChxSK0UhwFU9gsKUsjINUEjyAAqhkODMMwCpwHQggsOOvzlGwGFAYIbTaKEgg0MMYGYFgHAvKCv4SHBripKw+zoqwGBQJhY5oBO7BgWwUCFHR9HyA6MCXNcERBNRYB7PAu7UKRGhoLR1QALrKnsuL4oSBTQbBNTklStL0oymKcWQEawikQkMdiWnFjplQcPm6aETAACOvptF4anKksULUDCzHVjB9gMY8rDhNEgjxExUiwIeKLWfpImloqgijm0gikjA8SZgIUAqfY6l-tyxRwMhyy5FgYGCgxKhYdxrBlPIzivG0VYdHqdaNTxtxCfIKjIahrU1O1a7tEIuRAmOgjDUqA0gCozn9c4pL5O0K1gXGuD5amIo1CoGDmOYgnODsfQQJqLQ4vA2kRgUdg+CAPiqQwZTUAY+BEKQ5AwFQtAgAwAy0Kx+DmC9QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Backend Team
 
 ```promptscript
@@ -306,6 +324,12 @@ promptscript-registry/
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0AIwyMA1pynyxEuAE92GQrPkBGCgAZb+8YKUkLIAEKadrPSDEBfMTFuCFYcGGoILEFuZmoAc3UMOBgggFdk6NiE5MZUiKwjQNZgqU4sSKNhAzlfWuqATWZUwQxqGBbBDW1dQVKANxgoZjQ+dkEiNHCsCiKJAFFCSepy5MRqgFpBADlmUooAKzgW70EAFSNJgGVGCLQsDcEAJTnL07BUqGOpQQBxagw0DgAIoAGUEAEEAAoASTgDwAItgMBoMqU4BA4uIMCdhuUSBAAF7YCBsB4AWQgN2YyWofUp8Ba1EYOEiMEYWDyKUc+jqrACrCCLHYRCiom5dV8jgAxFKzmycIJLgJtLNBJtHql2BA+LIdntDoIAEw2ADUDxB2LiqQwcRgsnOVxuEDuggArGbHJsAGL-PgAd1iWl18CwAClLgikSi7YJIdSsHE2pdQYITU8YFIIHDPYIAPKPMmySEROAkDAPU4hkJxWShkOqmUQpksjjszmqzYAYVg2MZzNZbbaCOYZZC6ykEQG4jRGIFObmU6w48nnEE+KpNLpjHg1R5Dn5QTgAm8rSkRzFEgBEFkyGqEnkAFVHmDMLhBANaCTWNXBAAKFR9JYdCCABhoAJQOBI94gPCzC5KMUR+pECq5pMrBQtCggAMz2JKUE1KGADqpypnm4KpLghotBRYRaowxKknhggALqqlIUZJDGt6ONBD4ZPiiYMawRxgLEghwMyMBloIzKWjuTHQY8MB0jAfotFAnwhKUhDyXeNRAqk4SVLi2qEkJghtAAjqkEBtD41SsXyRTcHAOCxFguRYOeu4gCoV7yK48LwLOEIwuM3hoMwIT3Ex8gqBJYRlgFNRBeimK9BxGQJVJ5axb5HBHsl8iEfk7QFV5ghIW+daFXlKgCf8HBFSAnZtNg7TsQI0ZrhijVfvuIB+MxDBlNQRj4EQpDkDAVC0CADAfuibD4JYg1AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Project Integration
 
 ### Project Configuration
@@ -361,6 +385,12 @@ promptscript-registry/
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ix3CKxwxqELIO4dSOAB6MGo2DlYpF1ZuFnYiX1FxQRpmACsYRiwLEABhJRU1QQAFbV0HCWoYLTgfbSMcgHMfHAUAIwoWEiCMRj4gxgLVL00yjD0QaIl9ScnkgGJ5krCMrMEAeQA3L02IGAB3KcEAZRgoMHU4HYhGGBSxqEEwbUEAQVyAWQBRQUHlYdoFCOADEYNgFFU4IgDIJ1G9GCwFOxBCQMKwMI0YHx2DC4etqFIvIIcBB-tQjLiTgo0FodIIsDcANb8OCUgBC0Cg7kaklYz2oqIZbCOi0EAGkYEZBABJeKNajYCBsVmsSmvBS4WTrRkCE7HdaU4oYIzYrBQk5YbxoGBq9FQIwMxjmj4QQiYVhnGEzBzOVUxRmsZj7WBSTHCL2zCqCUWvYrSwRfSJadxmo5sjBXQQAVQASgAZWQ4LBYNBQoI9NAQCi9PidVRBTaWI5wgDiXwAKoIBkM1MFENJYYIW-xfj2vJS252gtpCbRB3nSb4Z14VRI4cV1scp47mWbB7kqtg7nBqbTfDv+CKlgAReAQRriY5GZRYo5ZzPcGswIIKCC-VRaB67BQuyGoqKwdAyqwaAapBpywFklK5BgBKQR8zBSOMkHXgq+zjskcLXtgGDthgbSwJBRrNOiQp+tMkZzI4ICOAAugwnCWkY+BEKQ5AwFQtAgAw2y0EqrD4JYzFAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Project Config File
 

@@ -81,6 +81,12 @@ Split by type of concern:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO4RWOGNQhZB3FmQytFAHowajYOVilHVgBiQQBJMmZqL2p4NDY4CAAjaE9FQRCMAHM+djgnAFc4GEEKYOpi0qw4QOrGCo8sRUrq2vrGzmbAjjgsFyKemrrCksGWqWZ2puwINkm+maaWlikYZVHFWCjnXfY84T05EF1r8UEATWYKwQxUl8Fq1lXqQV2ANxgUGYaHcgjYglwNQAwlUsMw+D8AApJARQCEwUgUS43WwOVhOFjsIheUR3NSabSmEAw0bw0HI5IYKC2CSpdKZOHURRUoqeHAVLIUXyBXyYAIi2F06iqFFM3EgOwAXQYgy5+CIpHIMCotBADABtFWrHwZgVQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Security fragment:**
 
 ```promptscript
@@ -107,6 +113,12 @@ Split by type of concern:
   ]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEg4MRgFdqELAE8AtGGoYA5n3byxEuBvYZCs+QEYKABkcnWAXzFju1eFjWMsEGxwwqaCWnIgAHIwAG4w1IJEaMyKggCCAAoAkoIA1jAawcwJiozeWMEQ4ixSMC4S4fLRcQksJCTqgmUwtewQGFDBWMyCLXCB1Wy+zFD1YRFpUADuGIWjA9LYMIIYrFKCcLvqEABe28qKCVVoylhzjVGx8YJSEIcARrAHSqrqGoJgGDYVTwe4RACqqUwej4HDUZ32AEdlPEIPAAcUXtgMO8MKkMIxGPA4C53KxPHABHsMNQpMFROJvio1JpZMhQhJ5GlbjhOAFGNgJoJvMiIN4pHNOSBIdsAEoAITSAGEMQkMDziqdBWxJREsqwblh1lBNgE2MKYKLxbr5AB5W6GxKsGpVfQWq09OYAXTErhAri9DD51A0+CIpHIMCotBADDGE3wtn9QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Testing fragment:**
 
@@ -136,6 +148,12 @@ Split by type of concern:
   "/coverage": "Check test coverage and identify gaps"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgOcLBFYBzALRhqGVX3byxEuAE92GQrPkBGCgAY7B1gF8xY7koyspGalLjDDQUVlNVlkQIl5AFU4GEEANwhgwQx-ZK1SGAB3ZmoAa0cJSJAAWQwVARVBAA5bAFJBFik4lniYbVUYQqL5AHVqJLiAV1Ykukl2GFVtZTZxzylBGAAmOOC4buKYuJKAZV7BMFzBAEEABQBJQRJmRjyVVW6AXTEXVjc4HFysRiGsf1E4jkIAA9MF5JYQAYoUCJP1BkF4P9BEM4A9EBFBOpBAA1QZKFJpHBrJGCagjVjtTHYgAqSIeggAMhAAEbaajGQ7HAAiAHkSoilA9qYI9gcjtRTpdrrd7mpAtDuvIQa12joukhgQBhYl3QVYRrMNodOILSTNdgQMCc1QYNAbGFOEBOJ4MThYDn4IikcgwKi0EAMY1otj4KzOoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Pattern 2: Feature-Based Split
 
@@ -193,6 +211,12 @@ For large projects, split by feature area:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMAV1wBaMDGyLqMeWIlwAnuwyFZ8gIwUADNd2sAvmLHcW7IlmF65IXT-GCAYgDBAEFlHE4sCEZsCDZBAFlmKUVYJ38VQQB5MNxBACZrQQB3CDyABQBpAGEAUS9MgCkAdQAVQSxmAGtOOBKynEFtMG04QepmASi2BsEAZTmswQA3CCE5kISAGQLbf187R1ZnOAFWKQxqKT7RfyVcWWQvCXk5zu0O7t7JcRwsLDQWVYUAMghY3Qg8DsEheIDm8DgcXEUT4zGUsgAzAA2KxWQRwGCua7QmHyWqsDAAI1gQxgI3gg06PXEEymSJJAF0xEdnF1WMxirApABzGCefY+SVeIKhcKhcoASUE5KkaGYEHYcHSEky5Syc3aAHp7jhDVBmMKNYJMgBVAnUQTmy3HDKCPUGwTG8Jmi1ojy2+2O33KWbuo0mw3DUaDTIAJTp0c+zNmAHFauHvXxrYJqlptOxBIpAxqwMwvAc-PYQPYOQxItQDPgiKRyDAqLQQAxljBaEj8OZq0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Pattern 3: Environment-Based Split
 
 Different configurations for different environments:
@@ -239,6 +263,12 @@ Different configurations for different environments:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgpMAG4BaTkojU2fdvLES4AT3YZCs+QEYKABht7WAXzFjuLdkSzD9g9Zu2csWUUlGChmNB0sZ3E5ED04mIBiRMEAEWVQ8MjBAFFWDS1WSOiJFUEACWZPakyMKQhWAHMfVgwAI1gpbzL0toBXZrDGxobmtm7BAFlmRgBrQTgYag1GeEEMJQxodthvePsnVhcwxgwoLxj9hIkAGRmzwWDMiICF-j60RAmAQQAFAElZDgsFhPgB6MEnM44ZhwQIADmsiImqWw7Qwi1kUPOv1hWEaNQAygBFG4TABKMHqcCx93ODThGFYqz2cTZYgcIAcAF0GAFqIZ8ERSOQYFRaCAGCFaBA2PgLFygA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ## Using @use for Composition
 
 The `@use` directive imports and merges content from other files - like CSS imports or mixins.
@@ -255,6 +285,12 @@ The `@use` directive imports and merges content from other files - like CSS impo
 # Import with alias - for @extend access
 @use @core/guards/security as sec
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IgY17UIWAJ4AdVloDEggJJlm1LIPHMSg6jEkQ4WaptZ8Bg7izIZWahVi8ATDGp-eQ57CFZJLV0DIxNBAHdVHEEMKAgMOEEAWjNjNyIOVn9UxkZ4OC0XIXdjGBFJXiCQhRglFXVUrMUQAF8AXQZZR3wiUnIYKloQBgA3GFoINnwARj6gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### How @use Merges Content
 
@@ -285,6 +321,12 @@ When you `@use` a file, all blocks from the source are merged into your file:
 # Result: @restrictions contains both items
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gALXxbUIjLBDZwABMAA6rceIC04qSAByMAG4xq4ommZwY4gIIAFAJLiA1jACecZTIC+MmQGJxNZgCsYwqrRluAFcDcQoAegNGIMEsGxdWXn5BYVFWCWlZBSUQADFmKChmAHdxAHkAdSMAZRNxAHMgiAATGCgIVngHVmdWN3EAJXggqCxEcSS4ASERMXEWdgwOiQAjZlxxCA4SBEcAXQZOARt8IlJyGH96EE1aNPwARhBHIA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Alias for Selective Extension
 
 When you need to modify imported content rather than just merge it, use an alias:
@@ -297,6 +339,12 @@ When you need to modify imported content rather than just merge it, use an alias
   testing: { coverage: 95 }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAooQ6sAJrzhoYjCJEa8IZZtQ5iARlGaMA1nAA6rAAJFhYrHApwsGURmoi4vYPt68OliKwDmiR7xYA3GGoMTxgfAE4AVl4AX30YkBiAXQZOLGoAT3wiUnIYKloQBkDaCDZ8AEZEoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Without alias, blocks are simply merged. With alias, you get both:
 
@@ -313,6 +361,12 @@ Imports are processed in order. For same-name blocks, content is merged:
 # Result: /test -> "Run unit tests\n\nRun full suite" (concatenated)
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IjABMAbhlaMYiwdu0BiQdzg5m1LI15zBODHEEiOcLIIC0APkEAdEACVerQWC8UFCCcLwQHF4erPre8EFYiHYOTm6ePn6CfhGCKXAe0QWsvv6BwaHhkSCCABQs6ticjYoAlCAAvgC6DLLUAJ74RKTkMFS0IAzKMLQQbPgAjB1AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 For object properties, later imports override:
 
 ```promptscript
@@ -320,6 +374,12 @@ For object properties, later imports override:
 @use ./strict   # @standards.coverage = 95
 # Result: coverage = 95 (target wins)
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9HCzUIjLINkBiQd3EZWAEwzVVcCiwBuMahgDmQgLyCAnAFYAOqwUAleLyhZEgvQeNnLVwQAosDRMZAHcIVjgAShAAXwBdBk4JAE98IlJyGCpaEAZ9Wgg2fABGOKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Registry vs Local Fragments
 
@@ -336,6 +396,12 @@ For object properties, later imports override:
 @use @fragments/testing
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAATcW1GAHoBjXtQhYAngB1WfAcLDUMAcxKcsccRzhYIrLSAC+AXQZ7q8-EVLkYVWiAYA3GLQht8AIyWQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### When to Use Local Fragments
 
 - **Project-specific**: Only relevant to this project
@@ -346,6 +412,12 @@ For object properties, later imports override:
 @use ./fragments/project-specific
 @use ./features/checkout
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GBjZe1eCMY4YjANbNeWEAF8Aug05ZqAT3xFS5GFVogGANxi0IbfAEYNQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Best Practices
 
@@ -362,6 +434,12 @@ Each fragment should have a single responsibility:
 # everything.prs - Security, testing, docs, etc.
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEcMRgFdqELAE8qtXgFpeAeVZRx-QSLErqQ2HAA6rPhzhYIrAOZS4shUpVGT5-lgysAJhmqu9rfX0Ay5LwAQhiuiLwAshCEMK68LKyMMNSs3nwwAG5J4rimFjRWcgDKaqISdLz2ueWuzIxw5TBYjBQgAL4AugycWNTi+ESk5DCWIAyZtBBs+ACMbUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 2. Use Meaningful Names
 
 ```promptscript
@@ -373,6 +451,12 @@ Each fragment should have a single responsibility:
 @use ./fragments/stuff
 @use ./fragments/misc
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IjGggBaFqwBusiGzgAdVnwHCxE6bPkxq1ZtWU4MrACZQIrSfv0BiQYBlyQQCEMR31DIVFxKRl2eTgsXjAwEP4wk0jzERIIOEYQAF8AXQZZagBPfCJSchgqWhAGTVptVnwARjygA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### 3. Document Dependencies
 
@@ -388,6 +472,12 @@ Add comments explaining why fragments are needed:
 # Project-specific payment integrations
 @use ./features/stripe-integration
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAATcW1GAHoBjXtQhYAngB1WygMSCAYtTYdWAE0Ec4WCKwDmgzFg7VWcQWG0lBe+BDOtBcecZgllfALCGIwkMAC0vBDiRibmymqCAAraAFYwjFjhcGgZEJCMlhjyYeyCphxm1NgQbHAB-EIU4mAw2DLwkliyueEVMFU1bCAAvgC6DJzd8vhEpOQwVLQgDABuMLS1rPgAjKNAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### 4. Keep Import Lists Organized
 
@@ -408,6 +498,12 @@ Add comments explaining why fragments are needed:
 @use ./fragments/testing
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuLMhlYBPAPRhqbDqwAmAHVYaAxCIDCzajBFwsUlRmoq4IgBQYoaHBgBGMLBEb2AlBu4BXOCNxAxhZCXIIKUYYXwCglkNZQMY-ISxpDW0RABUYUhEFDABzEk4sOFjAsQUlThVZDEZouDgIZ2hhDNZ-Ku4a9jrZNEEwAxIomM1WHQAFRQArGEZRQpKyiu64kQp5amLS9jgGtAhKox3Vg-LZDhM+IpAAXwBdBjLqaXwiUnIYKloQAwAG6CVpsfAARieQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 5. Avoid Deep Nesting
 
 ```promptscript
@@ -418,6 +514,12 @@ Add comments explaining why fragments are needed:
 # ❌ Bad: Deep nesting
 @use ./fragments/standards/code/security/v2/latest
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IgY17UIWAJ4AdVnwHCxE6bPkc4WCK0latAYkGAZckEAhDABNEggCIwYaQa3hmFlo6QqLiUjLs8qYYrC4Y1C7yLC4wCjBKKuoiAG4ATCJQ2AEgAL4Augyy1Gr4RKTkMFS0IAw5MLQQbPgAjGVAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Example: Complete Multi-File Setup
 
@@ -482,6 +584,12 @@ my-project/
   "/deploy": "Deploy to staging environment"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUBifgElWOGNQhZ+HUvwBGGODH4tWkAHMAV2psCDYlAAEIOwcnfkjXEgB6T29zVitrMmZqZylZeX4wUICSTiw4KKDvfgpkkowyirhk70YQp1Fq2vrG5vZWjjgsGICenz7S8sHkjDQIcRGMVh4Mah4q1kiayYbpluSeZg6ZrDCI1ijeCq7+YCUVRRBjFQBNZiD+dZ8MVU5wtRikEoFAludGABrfg8GAANxgUGYaAc-AA7rlIWN+Gx+ABZUT8AAK1BkciwFEe-A+XzAzFBzDRLhgbj8CPY4VYcG+q34BXJSxRjAgkEYfOwHGoXMpyiEL3lSjMV22fg4hGcD1l-Pk2hABOJpMKChesqSuqJUGwdOoJGMVOer34AEF+CQIIxSd5qHD3fBxGkYDw+ZasNaSMVcjDsH8pIx4HAxjKqQAVOQ4fgAZQhkMQVPE-AAQhgoZw+PwAHLMWEUaRwOj8ZOiFEZj0QNBYevl+BYABSGbz-AAYqT2KWBAAlFnyeuN5ut9v1gBqThgA4AItGAwIicwRgFqDAMwBFAAy9cnPAgWxU+dsjRG1CC8hCMAEAGkgu4HKwYMN606AHV+1lB0TSVKI4BwXIsA6Sp7ntEA2nOPJhF1WwnAgDAoAgAAvHxYQRJE0DOfhOB9EczkdYQjhgchmG6JA5TXWikUJLBmFUc4AmxMiIAoipjBMEATAAXQYCpqFEfAiFIcgYCoWgQAYBFaE5fAdGEoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Configuration (promptscript.yaml)
 

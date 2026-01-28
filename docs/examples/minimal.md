@@ -56,6 +56,12 @@ my-project/
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABXpywQso-sCUrFIYyoCazAK78M1GD9+HBgoNDBvKH4WHghWAHM-ODgIOCwMdn4wZmp+XFT+KVl5Cmd+ADFmRm84fjZo2Ay6fgCMHgwAI1ho5h4YUuUhN2GlM1ZLFnYiLEcy13d+ABUcAoKMJdE0GABlRmoINBmiuRmauMSSXphqZQ74I+oMeQhGeAGXEbdTc1YLNIz2tQeLUnIMYjABMgyh8AKpwQIRVjPNgYKJSeKPEgkc6qeywBYfAAiVW8JBshW8XRe-AAggAFACStQA7nYcPwAFLbYmMBYAXVGPz+OByWGqWBBcxAAHoQmFhNoQNsRcz+MycNh+KIfNEMsFQmg1WyFsJpQEAG4QGDMhVDABKMEt1p6fSyOX4AEdvKi7A5UnBvPATTKOGlbcIAOr7Dj8bysOx5e5wYwmEAmPkMGzUUT4Iikcj9Gj0EDm64pNj4HRpoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### promptscript.yaml
 
 ```yaml

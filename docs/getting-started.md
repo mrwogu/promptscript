@@ -100,6 +100,12 @@ Open `.promptscript/project.prs` and customize:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABXpywQso-sCUrFIYyoCazAK78M1GH4Ad2ZqAGsIVgBzfjY-fgAlGAx5PzRyCEZsCDYKZ34AFTkcVSwUsIEC0TQYAGVGagg0LDpE5NSdAA5WgDU7GHzXYzNWSzgy1h5-HjhHfJYeGAFkfJcQAFU4QLBvVnkc1gwofiko6lISSJjx0Vh3FSEQAAUAsBhqfhxmZjDZjEn+CwyMw4HYDidsBxqKw4Pc1gB1RocfgccazMChPxQY4LAZuZT8AC6ShGYy+1CwjG8WFmTgJAGJ+LUIGRYKVGtF+IAkwn4PGYVJINmycTYUFEgxAAHoAgA3CAwILCbQgJJyhWA5iLfgYj4AR28RzsDn+PH4ACN4FgTud9ox4MZ8oyAPJm2SpIJ2EpSMhYARYajeQI8qKcd7YeDW5g+7XQe0E4SS1EKJBzAkqb3NP0BgZp3nwBpNWxsZWI-r8XZ2FGW2H4h4a9g2ZVDXMqUvIitWpOzbyg6KIVYPcT8PpJvyzXCBUcB1isd4DlRDorjK78AAyEDN52oDh1GuBs-YsJb-CHAEFzxCsFDlAAKU-Uc7RGCtU-yF9wLYUgCUA6Gtf4pLxlKrwpFgoRKqmdYZr6KLZgOixwAWzQHMqtTeFEIbjPwIHyKEK4slIMowIKh5wvWHDsMqp6HGKABek44IEuJ+ACcDoZhVo4WBHIxAR1DMERJE0tqmIWle7z8CQGCRGUkQYGa0BGnk-4jCYIAmISDA2Nu+BEKQ5AwFQtAgAwRG0Ac+A6OpQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### 3. Compile to Native Formats
 
 Transform your universal `.prs` definition into platform-specific optimization formats.
@@ -295,6 +301,12 @@ You are a Python developer working on a FastAPI service.
   - "Don't commit .env files"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAY0EALRwY1AG4RGMYYNb9+cAJ7sMhAcICMFAAxGlrAL7LlAAV6csELOv7BlqpSFOqAmswCu-DGoYAP4ABXVcNn4eGBkYKGY0aX4Ad2ZqAGsIVgBzfiiMfgAxDDgsAEFQgEk1aTkFClchDxblC1ZrFnYiLGcmqAxc3wwc+AFkNAicNgBdJupfdggSGF0QcMiVAGYKPT1PfjBqUhg0zLhxsFKsUQg5lWjsDAAjUtXm0OYynKCAZQBFAAypna1jKgx4gR4cD6DxYMXGTTcIAA6tQHMFHEl+DhslgYWB0gEoFBDotGPY2HADsiAKpSAIaViMAD0GBSGAchyJVRZAHl8kljpTWNSPA97qDWFYgmV0RSIFTYapxM0ACJsADkvRYJBIXIonBkh2g8BBIDMMwYdmo6nwRFI5BgVFoIAYcVoitY+D0FqAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 For detailed migration guidance, see:
 
