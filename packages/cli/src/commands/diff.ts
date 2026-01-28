@@ -8,6 +8,7 @@ import { loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { createPager, Pager } from '../output/pager.js';
 import { Compiler } from '@promptscript/compiler';
+import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import chalk from 'chalk';
 
 /**
@@ -110,6 +111,11 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
 
   try {
     const config = await loadConfig();
+
+    // Resolve registry path (handles git registries)
+    spinner.text = 'Resolving registry...';
+    const registry = await resolveRegistryPath(config);
+
     spinner.text = 'Compiling...';
 
     // --all is the default behavior when no target is specified
@@ -117,7 +123,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
 
     const compiler = new Compiler({
       resolver: {
-        registryPath: config.registry?.path ?? './registry',
+        registryPath: registry.path,
         localPath: './.promptscript',
       },
       validator: config.validation,

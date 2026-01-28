@@ -5,6 +5,7 @@ import type { CompileResult } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
+import { resolveRegistryPath } from '../utils/registry-resolver.js';
 
 /**
  * JSON output structure for validation results.
@@ -149,11 +150,16 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
 
   try {
     const config = await loadConfig();
+
+    // Resolve registry path (handles git registries)
+    if (!isJsonFormat) spinner.text = 'Resolving registry...';
+    const registry = await resolveRegistryPath(config);
+
     if (!isJsonFormat) spinner.text = 'Validating...';
 
     const compiler = new Compiler({
       resolver: {
-        registryPath: config.registry?.path ?? './registry',
+        registryPath: registry.path,
         localPath: './.promptscript',
       },
       validator: config.validation,
