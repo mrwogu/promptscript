@@ -114,6 +114,26 @@ jobs:
       - name: Copy 404.html to root
         run: cp docs/404.html gh-pages-content/404.html
 
+      - name: Generate sitemap index
+        run: |
+          cd gh-pages-content
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
+          echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
+
+          # Find all versioned sitemaps (mike creates directories like dev/, latest/, v1.0.0/)
+          for sitemap in */sitemap.xml; do
+            if [[ -f "$sitemap" ]]; then
+              echo "  <sitemap>" >> sitemap.xml
+              echo "    <loc>https://getpromptscript.dev/${sitemap}</loc>" >> sitemap.xml
+              echo "  </sitemap>" >> sitemap.xml
+            fi
+          done
+
+          echo '</sitemapindex>' >> sitemap.xml
+
+          echo "Generated sitemap index:"
+          cat sitemap.xml
+
       - name: Build playground
         run: pnpm nx build playground
 
