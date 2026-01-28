@@ -22,12 +22,21 @@ export function useCompiler() {
 
     // Build enabled formatters list with their configs
     const enabledFormatters = (
-      Object.entries(config.targets) as [FormatterName, { enabled: boolean; version?: string }][]
+      Object.entries(config.targets) as [
+        FormatterName,
+        { enabled: boolean; version?: string; convention?: string },
+      ][]
     )
       .filter(([, settings]) => settings.enabled)
       .map(([name, settings]) => ({
         name,
-        config: settings.version ? { version: settings.version } : undefined,
+        config:
+          settings.version || settings.convention
+            ? {
+                ...(settings.version && { version: settings.version }),
+                ...(settings.convention && { convention: settings.convention }),
+              }
+            : undefined,
       }));
 
     // If no formatters enabled, don't compile

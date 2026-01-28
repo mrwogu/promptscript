@@ -277,6 +277,33 @@ describe('PlaygroundStore', () => {
       const state = usePlaygroundStore.getState();
       expect(state.config).toEqual(newConfig);
     });
+
+    it('should set target convention', () => {
+      const { setTargetConvention } = usePlaygroundStore.getState();
+      setTargetConvention('github', 'xml');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.targets.github.convention).toBe('xml');
+    });
+
+    it('should clear target convention when set to undefined', () => {
+      const { setTargetConvention } = usePlaygroundStore.getState();
+      setTargetConvention('claude', 'xml');
+      setTargetConvention('claude', undefined);
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.targets.claude.convention).toBeUndefined();
+    });
+
+    it('should preserve other target settings when changing convention', () => {
+      const { setTargetConvention } = usePlaygroundStore.getState();
+      setTargetConvention('github', 'xml');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.targets.github.enabled).toBe(true);
+      expect(state.config.targets.github.version).toBe('full');
+      expect(state.config.targets.github.convention).toBe('xml');
+    });
   });
 
   describe('selectors', () => {

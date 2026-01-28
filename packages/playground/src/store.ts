@@ -10,11 +10,17 @@ export interface FileState {
 }
 
 /**
+ * Output convention type.
+ */
+export type ConventionType = 'markdown' | 'xml';
+
+/**
  * Target-specific configuration.
  */
 export interface TargetSettings {
   enabled: boolean;
   version?: string;
+  convention?: ConventionType;
 }
 
 /**
@@ -68,6 +74,7 @@ export interface PlaygroundState {
   // Config actions
   setTargetEnabled: (target: FormatterName, enabled: boolean) => void;
   setTargetVersion: (target: FormatterName, version: string | undefined) => void;
+  setTargetConvention: (target: FormatterName, convention: ConventionType | undefined) => void;
   setFormatting: (formatting: Partial<FormattingSettings>) => void;
   setConfig: (config: PlaygroundConfig) => void;
 
@@ -244,6 +251,17 @@ export const usePlaygroundStore = create<PlaygroundState>((set) => ({
         targets: {
           ...state.config.targets,
           [target]: { ...state.config.targets[target], version },
+        },
+      },
+    })),
+
+  setTargetConvention: (target, convention) =>
+    set((state) => ({
+      config: {
+        ...state.config,
+        targets: {
+          ...state.config.targets,
+          [target]: { ...state.config.targets[target], convention },
         },
       },
     })),

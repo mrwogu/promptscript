@@ -1,23 +1,35 @@
-import { usePlaygroundStore, type FormatterName } from '../store';
+import { usePlaygroundStore, type FormatterName, type ConventionType } from '../store';
 
-const TARGET_INFO: Record<FormatterName, { label: string; versions: string[] }> = {
+const TARGET_INFO: Record<
+  FormatterName,
+  { label: string; versions: string[]; supportsXml: boolean }
+> = {
   github: {
     label: 'GitHub Copilot',
     versions: ['simple', 'multifile', 'full'],
+    supportsXml: true,
   },
   claude: {
     label: 'Claude Code',
     versions: ['simple', 'multifile', 'full'],
+    supportsXml: true,
   },
   cursor: {
     label: 'Cursor',
     versions: ['standard', 'legacy'],
+    supportsXml: false, // Cursor only supports markdown
   },
   antigravity: {
     label: 'Antigravity',
     versions: ['simple', 'frontmatter'],
+    supportsXml: true,
   },
 };
+
+const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [
+  { value: 'markdown', label: 'Markdown' },
+  { value: 'xml', label: 'XML' },
+];
 
 const PROSE_WRAP_OPTIONS = ['always', 'never', 'preserve'] as const;
 const TAB_WIDTH_OPTIONS = [2, 4] as const;
@@ -26,6 +38,7 @@ export function ConfigPanel() {
   const config = usePlaygroundStore((s) => s.config);
   const setTargetEnabled = usePlaygroundStore((s) => s.setTargetEnabled);
   const setTargetVersion = usePlaygroundStore((s) => s.setTargetVersion);
+  const setTargetConvention = usePlaygroundStore((s) => s.setTargetConvention);
   const setFormatting = usePlaygroundStore((s) => s.setFormatting);
   const showConfig = usePlaygroundStore((s) => s.showConfig);
   const setShowConfig = usePlaygroundStore((s) => s.setShowConfig);
@@ -89,6 +102,32 @@ export function ConfigPanel() {
                       {info.versions.map((v) => (
                         <option key={v} value={v}>
                           {v}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Convention select */}
+                    <select
+                      value={settings.convention ?? 'markdown'}
+                      onChange={(e) =>
+                        setTargetConvention(
+                          target,
+                          e.target.value === 'markdown'
+                            ? undefined
+                            : (e.target.value as ConventionType)
+                        )
+                      }
+                      disabled={!settings.enabled || !info.supportsXml}
+                      title={!info.supportsXml ? `${info.label} only supports markdown` : undefined}
+                      className="w-24 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
+                    >
+                      {CONVENTION_OPTIONS.map((opt) => (
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          disabled={opt.value === 'xml' && !info.supportsXml}
+                        >
+                          {opt.label}
                         </option>
                       ))}
                     </select>

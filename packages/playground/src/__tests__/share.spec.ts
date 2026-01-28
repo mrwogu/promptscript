@@ -302,6 +302,53 @@ describe('share utilities', () => {
       expect(decoded?.config?.targets?.github?.version).toBe('simple');
       expect(decoded?.config?.targets?.github?.enabled).toBeUndefined();
     });
+
+    it('should include convention in target settings', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        targets: {
+          ...defaultConfig.targets,
+          github: { enabled: true, version: 'full', convention: 'xml' },
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.targets?.github?.convention).toBe('xml');
+      expect(decoded?.config?.targets?.github?.enabled).toBeUndefined(); // enabled is default
+      expect(decoded?.config?.targets?.github?.version).toBeUndefined(); // version is default
+    });
+
+    it('should not include convention when undefined (default)', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        targets: {
+          ...defaultConfig.targets,
+          github: { enabled: true, version: 'full', convention: undefined },
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      // Convention is undefined (default), so it shouldn't be included
+      expect(decoded?.config?.targets?.github?.convention).toBeUndefined();
+    });
+
+    it('should merge convention from partial config', () => {
+      const partial = {
+        targets: {
+          claude: { convention: 'xml' as const },
+        },
+      };
+
+      const merged = mergeConfigWithDefaults(partial);
+
+      expect(merged.targets.claude.convention).toBe('xml');
+      expect(merged.targets.claude.enabled).toBe(true); // default
+      expect(merged.targets.claude.version).toBe('full'); // default
+    });
   });
 
   describe('URL utilities', () => {

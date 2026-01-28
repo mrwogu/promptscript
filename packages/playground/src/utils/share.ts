@@ -70,6 +70,9 @@ function getConfigDiff(config: PlaygroundConfig): PartialConfig | undefined {
     if (settings.version !== defaultSettings.version) {
       settingsDiff.version = settings.version;
     }
+    if (settings.convention !== defaultSettings.convention) {
+      settingsDiff.convention = settings.convention;
+    }
 
     if (Object.keys(settingsDiff).length > 0) {
       targetsDiff[name] = settingsDiff;
