@@ -14,195 +14,195 @@
 </span><span id=__span-0-14><a id=__codelineno-0-14 name=__codelineno-0-14 href=#__codelineno-0-14></a>│   └── ...
 </span><span id=__span-0-15><a id=__codelineno-0-15 name=__codelineno-0-15 href=#__codelineno-0-15></a>└── project-c/
 </span><span id=__span-0-16><a id=__codelineno-0-16 name=__codelineno-0-16 href=#__codelineno-0-16></a>    └── ...
-</span></code></pre></div> <h2 id=shared-configuration>Shared Configuration<a class=headerlink href=#shared-configuration title="Permanent link">&para;</a></h2> <h3 id=registryteamfrontendprs>registry/<a class="magiclink magiclink-github magiclink-repository" href=https://github.com/team/frontend.prs title="GitHub Repository: team/frontend.prs">team/frontend.prs</a><a class=headerlink href=#registryteamfrontendprs title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a>@meta {
-</span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a>  id: &quot;@team/frontend&quot;
-</span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-1-4><a id=__codelineno-1-4 name=__codelineno-1-4 href=#__codelineno-1-4></a>  team: &quot;Frontend&quot;
-</span><span id=__span-1-5><a id=__codelineno-1-5 name=__codelineno-1-5 href=#__codelineno-1-5></a>}
+</span></code></pre></div> <h2 id=shared-configuration>Shared Configuration<a class=headerlink href=#shared-configuration title="Permanent link">&para;</a></h2> <h3 id=registryteamfrontendprs>registry/<a class="magiclink magiclink-github magiclink-repository" href=https://github.com/team/frontend.prs title="GitHub Repository: team/frontend.prs">team/frontend.prs</a><a class=headerlink href=#registryteamfrontendprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@team/frontend&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Frontend&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  You are a frontend developer on the Frontend team.</span>
+<span class=sd>  You build modern, accessible web applications.</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## Tech Stack</span>
+
+<span class=sd>  - React 18 with TypeScript</span>
+<span class=sd>  - Vite for development and building</span>
+<span class=sd>  - TailwindCSS for styling</span>
+<span class=sd>  - React Query for server state</span>
+<span class=sd>  - Vitest + Testing Library for tests</span>
+
+<span class=sd>  ## Architecture</span>
+
+<span class=sd>  - Feature-based folder structure</span>
+<span class=sd>  - Shared component library (@company/ui)</span>
+<span class=sd>  - API client generation from OpenAPI specs</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Use TypeScript for all code&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Prefer functional programming style&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Use functional components with hooks&quot;</span>
+<span class=w>    </span><span class=s2>&quot;React Query for server state, Zustand for client state&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Use Vitest as test framework&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Maintain 80% code coverage&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Write unit and integration tests&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span><span class=nl>accessibility</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Follow WCAG 2.1 AA guidelines&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Accessibility testing required&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use class components&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use any type without justification&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always handle loading and error states&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never hardcode API URLs&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/component&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a new React component with tests&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/hook&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a custom React hook&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write tests using Vitest and Testing Library&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span>:<span class=w> </span><span class=s2>&quot;Review code for accessibility&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDqQD0Yamw6sewwa3784AT3YZCA4QEYKABkOLl-cSR0gAYjPacFIJQF8lSkb05YIWNf2BKVRUdHUwBNZgBXfgxqGGj+aVl7fh4YADcYKGY0GGp+NjMcOJsk+TMYUgoA-nCogCMI6B5+EmZU6lY6aMZGeDgIOth+AHcYOui0cghGbAg2OCrTIJMXVjcWO0IsP2rlkJUAYgP+ABUYRhx+AGUsDEYAa1dTAFp+ACUKxm3dAA4R70uJzUOSujGoEDQWGqrwAat44mBmHlUhksmgSJ5omUGk0IKwAObQ04YaDDPE8ADCVyuCSRqh8UDxhJe70+2wAihFcr5EXk4LkMnzbhwiXCOHBtgBqU7wLwE-gAGQG1BiPLp4qwcCeh2OAEFqBd4V8IrFtfxXlYKlgTTBnnUMPzmoioO16dQIsbTSyrjgYjBmiwyGxMYy6irqL4ABQiQOYVhqCSNACURN1AAUAJL8RiMzH4zi5WYFRIkfgAeRyrHTWbgOUYWqWwRWTxEEow8hiPDgO1MLFSAmQ1UCIAAqvzTsCYKDwZDaXkMFAoNm2jATCph2nYmBcgkIqwvnNWAv+DRmPiVSQSEz6WpYGv18Ixwi9we2MfY8H2N2ybh+DhmMw9xavsD4gB8dwclyEZzqoAo7m2HBdAAWhEbZlLy2a5uw9LYKuIEALpmhqTIDkOQijuOYqytE3YagkF4wMMSKPCBw4ALIkpoeL8D8BgAKTLqky6Chg+b3sOADq4IcPwe7eFizR4hw55FsoGrAdUhFrKYdy9HA-R1NA3hqKRpjDlYzCLswwz8BJFK6gA4vwABMFC6Pwuq6vw+KNKkjKsPA4nkbqPR9AMRk+OUErXrEACOjSxA4mnOC2sQSuCr6sN2-gssIABy6Q7qhcQ5g63YfgFX73q8+WFXkxVYr4Pg5P8uCRNsABWqFeJAMxeGw1XBVAwwYGo3a+vIQxZBgPDXu2zS5DIQq4RpuUgAVgp-p2fZxNW-Ajm8CqrasbhwP+1BYIwESaj2w4SBVnjCJYFKxLh8QBTZ4FfMuQaVdsP6XOp97CBI-6AU95EvVacQYNm3XMKWX3bGDLG7CAEgahDwhSfCUU3ah15URKCkytF8pKmGqrA+jGC6LoahY2B6QQIxgkInSulhYZjI+CsIBOPhDCeBG+BEKQ5AwFQtAgAwgr9Gw+C6PzQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configurations>Project Configurations<a class=headerlink href=#project-configurations title="Permanent link">&para;</a></h2> <h3 id=project-apromptscriptprojectprs>project-a/.promptscript/project.prs<a class=headerlink href=#project-apromptscriptprojectprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;customer-dashboard&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@</span><span class=kn>inherit</span><span class=s>@team/frontend</span>
+
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Customer Dashboard&quot;</span>
+<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/company/customer-dashboard&quot;</span>
+
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## About</span>
+
+<span class=sd>  Self-service dashboard for customers to manage their accounts,</span>
+<span class=sd>  view orders, and track shipments.</span>
+
+<span class=sd>  ## Key Features</span>
+
+<span class=sd>  - Account settings and preferences</span>
+<span class=sd>  - Order history and tracking</span>
+<span class=sd>  - Support ticket management</span>
+<span class=sd>  - Notification preferences</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## API Endpoints</span>
+
+<span class=sd>  Base URL: https://api.company.com/v1</span>
+
+<span class=sd>  ### Account</span>
+<span class=sd>  - GET /account - Get account details</span>
+<span class=sd>  - PUT /account - Update account</span>
+
+<span class=sd>  ### Orders</span>
+<span class=sd>  - GET /orders - List orders</span>
+<span class=sd>  - GET /orders/:id - Get order details</span>
+
+<span class=sd>  ### Support</span>
+<span class=sd>  - GET /tickets - List tickets</span>
+<span class=sd>  - POST /tickets - Create ticket</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/order&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with order-related functionality&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/account&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with account management&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALQ8McHACNmGaj2GDW-fnACe7DIQHCAjBQAMlzawC+WrQAEIrHNIhZ+jjqQD0YajYOVg1WJxZ2Ik9gLR0aZgArGEYsExAAYTEJKWp+ABEFZVV1Gx1qGDRmOA9maj00gHMPHBElChYSXw7MVj0urMlpOUKVNQ0QB20hCZnY-gBief4AQRURLEmdAGUYKDAZOGkANwhGGH55RVH1fjBa-kYBnLh+CX4SDFYMBvPcGAhchhGCwROw4HQ5icYAB3fi1HjScH8T48V7UIEAa10OAgaCkYIomwWSwA0jA9PwAGIwbAicpwIkyFbA5igzyHLBYFwNF4o-g0GBgaScM4MqZMgDy6mk-Bx4lqFL5WHRjAx3LmTK2IjQlWoni5qpgng+Xx++I24v4ADlmFzIIxsBA2PzykLyqxRXNNLM7JNHBjWMxobAeD9+DEpt7SsSVgAFACS-AAoiFKi4sGK5gAhBTnACqACUADICHCctBwRC+XwYNAQdqSHp6BudI6mImLJbLFlsjX8ADiSYAKvwaz32Pwmf2jcjx54EVgMNAxTombG8yOxyCJ0y82h5BxZ9uLXNO-wpQjaH3B5v4YjJ-wixBxHDpVfLTfR3faL5ELwH9OnjfhcRpLlAmZTGeWo6rUFqrgOw6jgaGJGi8TJPi+yGoX2sYSlsm5YRmD7pOU2C-KcKFwdMUa+mErCOIosGPEREY6MIvjfsIaQABK7Gg-DQs0r6XjI5RQGRqJgKCKROl8UAeHo0bsUCx5cdMvFQPxgm4EerITia3wwOaNi2CAtgALoMJwyp6PgRCkOQMBULQIAMEciKyfgphmUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-apromptscriptyaml>project-a/promptscript.yaml<a class=headerlink href=#project-apromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=nt>input</span><span class=p>:</span>
+</span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
+</span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a>
+</span><span id=__span-1-4><a id=__codelineno-1-4 name=__codelineno-1-4 href=#__codelineno-1-4></a><span class=nt>registry</span><span class=p>:</span>
+</span><span id=__span-1-5><a id=__codelineno-1-5 name=__codelineno-1-5 href=#__codelineno-1-5></a><span class=w>  </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">../registry</span>
 </span><span id=__span-1-6><a id=__codelineno-1-6 name=__codelineno-1-6 href=#__codelineno-1-6></a>
-</span><span id=__span-1-7><a id=__codelineno-1-7 name=__codelineno-1-7 href=#__codelineno-1-7></a>@identity {
-</span><span id=__span-1-8><a id=__codelineno-1-8 name=__codelineno-1-8 href=#__codelineno-1-8></a>  &quot;&quot;&quot;
-</span><span id=__span-1-9><a id=__codelineno-1-9 name=__codelineno-1-9 href=#__codelineno-1-9></a>  You are a frontend developer on the Frontend team.
-</span><span id=__span-1-10><a id=__codelineno-1-10 name=__codelineno-1-10 href=#__codelineno-1-10></a>  You build modern, accessible web applications.
-</span><span id=__span-1-11><a id=__codelineno-1-11 name=__codelineno-1-11 href=#__codelineno-1-11></a>  &quot;&quot;&quot;
-</span><span id=__span-1-12><a id=__codelineno-1-12 name=__codelineno-1-12 href=#__codelineno-1-12></a>}
-</span><span id=__span-1-13><a id=__codelineno-1-13 name=__codelineno-1-13 href=#__codelineno-1-13></a>
-</span><span id=__span-1-14><a id=__codelineno-1-14 name=__codelineno-1-14 href=#__codelineno-1-14></a>@context {
-</span><span id=__span-1-15><a id=__codelineno-1-15 name=__codelineno-1-15 href=#__codelineno-1-15></a>  &quot;&quot;&quot;
-</span><span id=__span-1-16><a id=__codelineno-1-16 name=__codelineno-1-16 href=#__codelineno-1-16></a>  ## Tech Stack
+</span><span id=__span-1-7><a id=__codelineno-1-7 name=__codelineno-1-7 href=#__codelineno-1-7></a><span class=nt>targets</span><span class=p>:</span>
+</span><span id=__span-1-8><a id=__codelineno-1-8 name=__codelineno-1-8 href=#__codelineno-1-8></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
+</span><span id=__span-1-9><a id=__codelineno-1-9 name=__codelineno-1-9 href=#__codelineno-1-9></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-10><a id=__codelineno-1-10 name=__codelineno-1-10 href=#__codelineno-1-10></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.github/copilot-instructions.md</span>
+</span><span id=__span-1-11><a id=__codelineno-1-11 name=__codelineno-1-11 href=#__codelineno-1-11></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
+</span><span id=__span-1-12><a id=__codelineno-1-12 name=__codelineno-1-12 href=#__codelineno-1-12></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-13><a id=__codelineno-1-13 name=__codelineno-1-13 href=#__codelineno-1-13></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CLAUDE.md</span>
+</span><span id=__span-1-14><a id=__codelineno-1-14 name=__codelineno-1-14 href=#__codelineno-1-14></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
+</span><span id=__span-1-15><a id=__codelineno-1-15 name=__codelineno-1-15 href=#__codelineno-1-15></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-16><a id=__codelineno-1-16 name=__codelineno-1-16 href=#__codelineno-1-16></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.cursorrules</span>
 </span><span id=__span-1-17><a id=__codelineno-1-17 name=__codelineno-1-17 href=#__codelineno-1-17></a>
-</span><span id=__span-1-18><a id=__codelineno-1-18 name=__codelineno-1-18 href=#__codelineno-1-18></a>  - React 18 with TypeScript
-</span><span id=__span-1-19><a id=__codelineno-1-19 name=__codelineno-1-19 href=#__codelineno-1-19></a>  - Vite for development and building
-</span><span id=__span-1-20><a id=__codelineno-1-20 name=__codelineno-1-20 href=#__codelineno-1-20></a>  - TailwindCSS for styling
-</span><span id=__span-1-21><a id=__codelineno-1-21 name=__codelineno-1-21 href=#__codelineno-1-21></a>  - React Query for server state
-</span><span id=__span-1-22><a id=__codelineno-1-22 name=__codelineno-1-22 href=#__codelineno-1-22></a>  - Vitest + Testing Library for tests
-</span><span id=__span-1-23><a id=__codelineno-1-23 name=__codelineno-1-23 href=#__codelineno-1-23></a>
-</span><span id=__span-1-24><a id=__codelineno-1-24 name=__codelineno-1-24 href=#__codelineno-1-24></a>  ## Architecture
-</span><span id=__span-1-25><a id=__codelineno-1-25 name=__codelineno-1-25 href=#__codelineno-1-25></a>
-</span><span id=__span-1-26><a id=__codelineno-1-26 name=__codelineno-1-26 href=#__codelineno-1-26></a>  - Feature-based folder structure
-</span><span id=__span-1-27><a id=__codelineno-1-27 name=__codelineno-1-27 href=#__codelineno-1-27></a>  - Shared component library (@company/ui)
-</span><span id=__span-1-28><a id=__codelineno-1-28 name=__codelineno-1-28 href=#__codelineno-1-28></a>  - API client generation from OpenAPI specs
-</span><span id=__span-1-29><a id=__codelineno-1-29 name=__codelineno-1-29 href=#__codelineno-1-29></a>  &quot;&quot;&quot;
-</span><span id=__span-1-30><a id=__codelineno-1-30 name=__codelineno-1-30 href=#__codelineno-1-30></a>}
-</span><span id=__span-1-31><a id=__codelineno-1-31 name=__codelineno-1-31 href=#__codelineno-1-31></a>
-</span><span id=__span-1-32><a id=__codelineno-1-32 name=__codelineno-1-32 href=#__codelineno-1-32></a>@standards {
-</span><span id=__span-1-33><a id=__codelineno-1-33 name=__codelineno-1-33 href=#__codelineno-1-33></a>  code: [
-</span><span id=__span-1-34><a id=__codelineno-1-34 name=__codelineno-1-34 href=#__codelineno-1-34></a>    &quot;Use TypeScript for all code&quot;
-</span><span id=__span-1-35><a id=__codelineno-1-35 name=__codelineno-1-35 href=#__codelineno-1-35></a>    &quot;Prefer functional programming style&quot;
-</span><span id=__span-1-36><a id=__codelineno-1-36 name=__codelineno-1-36 href=#__codelineno-1-36></a>    &quot;Use functional components with hooks&quot;
-</span><span id=__span-1-37><a id=__codelineno-1-37 name=__codelineno-1-37 href=#__codelineno-1-37></a>    &quot;React Query for server state, Zustand for client state&quot;
-</span><span id=__span-1-38><a id=__codelineno-1-38 name=__codelineno-1-38 href=#__codelineno-1-38></a>  ]
-</span><span id=__span-1-39><a id=__codelineno-1-39 name=__codelineno-1-39 href=#__codelineno-1-39></a>
-</span><span id=__span-1-40><a id=__codelineno-1-40 name=__codelineno-1-40 href=#__codelineno-1-40></a>  testing: [
-</span><span id=__span-1-41><a id=__codelineno-1-41 name=__codelineno-1-41 href=#__codelineno-1-41></a>    &quot;Use Vitest as test framework&quot;
-</span><span id=__span-1-42><a id=__codelineno-1-42 name=__codelineno-1-42 href=#__codelineno-1-42></a>    &quot;Maintain 80% code coverage&quot;
-</span><span id=__span-1-43><a id=__codelineno-1-43 name=__codelineno-1-43 href=#__codelineno-1-43></a>    &quot;Write unit and integration tests&quot;
-</span><span id=__span-1-44><a id=__codelineno-1-44 name=__codelineno-1-44 href=#__codelineno-1-44></a>  ]
-</span><span id=__span-1-45><a id=__codelineno-1-45 name=__codelineno-1-45 href=#__codelineno-1-45></a>
-</span><span id=__span-1-46><a id=__codelineno-1-46 name=__codelineno-1-46 href=#__codelineno-1-46></a>  accessibility: [
-</span><span id=__span-1-47><a id=__codelineno-1-47 name=__codelineno-1-47 href=#__codelineno-1-47></a>    &quot;Follow WCAG 2.1 AA guidelines&quot;
-</span><span id=__span-1-48><a id=__codelineno-1-48 name=__codelineno-1-48 href=#__codelineno-1-48></a>    &quot;Accessibility testing required&quot;
-</span><span id=__span-1-49><a id=__codelineno-1-49 name=__codelineno-1-49 href=#__codelineno-1-49></a>  ]
-</span><span id=__span-1-50><a id=__codelineno-1-50 name=__codelineno-1-50 href=#__codelineno-1-50></a>}
-</span><span id=__span-1-51><a id=__codelineno-1-51 name=__codelineno-1-51 href=#__codelineno-1-51></a>
-</span><span id=__span-1-52><a id=__codelineno-1-52 name=__codelineno-1-52 href=#__codelineno-1-52></a>@restrictions {
-</span><span id=__span-1-53><a id=__codelineno-1-53 name=__codelineno-1-53 href=#__codelineno-1-53></a>  - &quot;Never use class components&quot;
-</span><span id=__span-1-54><a id=__codelineno-1-54 name=__codelineno-1-54 href=#__codelineno-1-54></a>  - &quot;Never use any type without justification&quot;
-</span><span id=__span-1-55><a id=__codelineno-1-55 name=__codelineno-1-55 href=#__codelineno-1-55></a>  - &quot;Always handle loading and error states&quot;
-</span><span id=__span-1-56><a id=__codelineno-1-56 name=__codelineno-1-56 href=#__codelineno-1-56></a>  - &quot;Never hardcode API URLs&quot;
-</span><span id=__span-1-57><a id=__codelineno-1-57 name=__codelineno-1-57 href=#__codelineno-1-57></a>}
-</span><span id=__span-1-58><a id=__codelineno-1-58 name=__codelineno-1-58 href=#__codelineno-1-58></a>
-</span><span id=__span-1-59><a id=__codelineno-1-59 name=__codelineno-1-59 href=#__codelineno-1-59></a>@shortcuts {
-</span><span id=__span-1-60><a id=__codelineno-1-60 name=__codelineno-1-60 href=#__codelineno-1-60></a>  &quot;/component&quot;: &quot;Create a new React component with tests&quot;
-</span><span id=__span-1-61><a id=__codelineno-1-61 name=__codelineno-1-61 href=#__codelineno-1-61></a>  &quot;/hook&quot;: &quot;Create a custom React hook&quot;
-</span><span id=__span-1-62><a id=__codelineno-1-62 name=__codelineno-1-62 href=#__codelineno-1-62></a>  &quot;/test&quot;: &quot;Write tests using Vitest and Testing Library&quot;
-</span><span id=__span-1-63><a id=__codelineno-1-63 name=__codelineno-1-63 href=#__codelineno-1-63></a>  &quot;/a11y&quot;: &quot;Review code for accessibility&quot;
-</span><span id=__span-1-64><a id=__codelineno-1-64 name=__codelineno-1-64 href=#__codelineno-1-64></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDqQD0Yamw6sewwa3784AT3YZCA4QEYKABkOLl-cSR0gAYjPacFIJQF8lSkb05YIWNf2BKVRUdHUwBNZgBXfgxqGGj+aVl7fh4YADcYKGY0GGp+NjMcOJsk+TMYUgoA-nCogCMI6B5+EmZU6lY6aMZGeDgIOth+AHcYOui0cghGbAg2OCrTIJMXVjcWO0IsP2rlkJUAYgP+ABUYRhx+AGUsDEYAa1dTAFp+ACUKxm3dAA4R70uJzUOSujGoEDQWGqrwAat44mBmHlUhksmgSJ5omUGk0IKwAObQ04YaDDPE8ADCVyuCSRqh8UDxhJe70+2wAihFcr5EXk4LkMnzbhwiXCOHBtgBqU7wLwE-gAGQG1BiPLp4qwcCeh2OAEFqBd4V8IrFtfxXlYKlgTTBnnUMPzmoioO16dQIsbTSyrjgYjBmiwyGxMYy6irqL4ABQiQOYVhqCSNACURN1AAUAJL8RiMzH4zi5WYFRIkfgAeRyrHTWbgOUYWqWwRWTxEEow8hiPDgO1MLFSAmQ1UCIAAqvzTsCYKDwZDaXkMFAoNm2jATCph2nYmBcgkIqwvnNWAv+DRmPiVSQSEz6WpYGv18Ixwi9we2MfY8H2N2ybh+DhmMw9xavsD4gB8dwclyEZzqoAo7m2HBdAAWhEbZlLy2a5uw9LYKuIEALpmhqTIDkOQijuOYqytE3YagkF4wMMSKPCBw4ALIkpoeL8D8BgAKTLqky6Chg+b3sOADq4IcPwe7eFizR4hw55FsoGrAdUhFrKYdy9HA-R1NA3hqKRpjDlYzCLswwz8BJFK6gA4vwABMFC6Pwuq6vw+KNKkjKsPA4nkbqPR9AMRk+OUErXrEACOjSxA4mnOC2sQSuCr6sN2-gssIABy6Q7qhcQ5g63YfgFX73q8+WFXkxVYr4Pg5P8uCRNsABWqFeJAMxeGw1XBVAwwYGo3a+vIQxZBgPDXu2zS5DIQq4RpuUgAVgp-p2fZxNW-Ajm8CqrasbhwP+1BYIwESaj2w4SBVnjCJYFKxLh8QBTZ4FfMuQaVdsP6XOp97CBI-6AU95EvVacQYNm3XMKWX3bGDLG7CAEgahDwhSfCUU3ah15URKCkytF8pKmGqrA+jGC6LoahY2B6QQIxgkInSulhYZjI+CsIBOPhDCeBG+BEKQ5AwFQtAgAwgr9Gw+C6PzQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configurations>Project Configurations<a class=headerlink href=#project-configurations title="Permanent link">&para;</a></h2> <h3 id=project-apromptscriptprojectprs>project-a/.promptscript/project.prs<a class=headerlink href=#project-apromptscriptprojectprs title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a>@meta {
-</span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a>  id: &quot;customer-dashboard&quot;
-</span><span id=__span-2-3><a id=__codelineno-2-3 name=__codelineno-2-3 href=#__codelineno-2-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-2-4><a id=__codelineno-2-4 name=__codelineno-2-4 href=#__codelineno-2-4></a>}
-</span><span id=__span-2-5><a id=__codelineno-2-5 name=__codelineno-2-5 href=#__codelineno-2-5></a>
-</span><span id=__span-2-6><a id=__codelineno-2-6 name=__codelineno-2-6 href=#__codelineno-2-6></a>@inherit @team/frontend
-</span><span id=__span-2-7><a id=__codelineno-2-7 name=__codelineno-2-7 href=#__codelineno-2-7></a>
-</span><span id=__span-2-8><a id=__codelineno-2-8 name=__codelineno-2-8 href=#__codelineno-2-8></a>@context {
-</span><span id=__span-2-9><a id=__codelineno-2-9 name=__codelineno-2-9 href=#__codelineno-2-9></a>  project: &quot;Customer Dashboard&quot;
-</span><span id=__span-2-10><a id=__codelineno-2-10 name=__codelineno-2-10 href=#__codelineno-2-10></a>  repository: &quot;github.com/company/customer-dashboard&quot;
-</span><span id=__span-2-11><a id=__codelineno-2-11 name=__codelineno-2-11 href=#__codelineno-2-11></a>
-</span><span id=__span-2-12><a id=__codelineno-2-12 name=__codelineno-2-12 href=#__codelineno-2-12></a>  &quot;&quot;&quot;
-</span><span id=__span-2-13><a id=__codelineno-2-13 name=__codelineno-2-13 href=#__codelineno-2-13></a>  ## About
-</span><span id=__span-2-14><a id=__codelineno-2-14 name=__codelineno-2-14 href=#__codelineno-2-14></a>
-</span><span id=__span-2-15><a id=__codelineno-2-15 name=__codelineno-2-15 href=#__codelineno-2-15></a>  Self-service dashboard for customers to manage their accounts,
-</span><span id=__span-2-16><a id=__codelineno-2-16 name=__codelineno-2-16 href=#__codelineno-2-16></a>  view orders, and track shipments.
-</span><span id=__span-2-17><a id=__codelineno-2-17 name=__codelineno-2-17 href=#__codelineno-2-17></a>
-</span><span id=__span-2-18><a id=__codelineno-2-18 name=__codelineno-2-18 href=#__codelineno-2-18></a>  ## Key Features
-</span><span id=__span-2-19><a id=__codelineno-2-19 name=__codelineno-2-19 href=#__codelineno-2-19></a>
-</span><span id=__span-2-20><a id=__codelineno-2-20 name=__codelineno-2-20 href=#__codelineno-2-20></a>  - Account settings and preferences
-</span><span id=__span-2-21><a id=__codelineno-2-21 name=__codelineno-2-21 href=#__codelineno-2-21></a>  - Order history and tracking
-</span><span id=__span-2-22><a id=__codelineno-2-22 name=__codelineno-2-22 href=#__codelineno-2-22></a>  - Support ticket management
-</span><span id=__span-2-23><a id=__codelineno-2-23 name=__codelineno-2-23 href=#__codelineno-2-23></a>  - Notification preferences
-</span><span id=__span-2-24><a id=__codelineno-2-24 name=__codelineno-2-24 href=#__codelineno-2-24></a>  &quot;&quot;&quot;
-</span><span id=__span-2-25><a id=__codelineno-2-25 name=__codelineno-2-25 href=#__codelineno-2-25></a>}
-</span><span id=__span-2-26><a id=__codelineno-2-26 name=__codelineno-2-26 href=#__codelineno-2-26></a>
-</span><span id=__span-2-27><a id=__codelineno-2-27 name=__codelineno-2-27 href=#__codelineno-2-27></a>@knowledge {
-</span><span id=__span-2-28><a id=__codelineno-2-28 name=__codelineno-2-28 href=#__codelineno-2-28></a>  &quot;&quot;&quot;
-</span><span id=__span-2-29><a id=__codelineno-2-29 name=__codelineno-2-29 href=#__codelineno-2-29></a>  ## API Endpoints
-</span><span id=__span-2-30><a id=__codelineno-2-30 name=__codelineno-2-30 href=#__codelineno-2-30></a>
-</span><span id=__span-2-31><a id=__codelineno-2-31 name=__codelineno-2-31 href=#__codelineno-2-31></a>  Base URL: https://api.company.com/v1
-</span><span id=__span-2-32><a id=__codelineno-2-32 name=__codelineno-2-32 href=#__codelineno-2-32></a>
-</span><span id=__span-2-33><a id=__codelineno-2-33 name=__codelineno-2-33 href=#__codelineno-2-33></a>  ### Account
-</span><span id=__span-2-34><a id=__codelineno-2-34 name=__codelineno-2-34 href=#__codelineno-2-34></a>  - GET /account - Get account details
-</span><span id=__span-2-35><a id=__codelineno-2-35 name=__codelineno-2-35 href=#__codelineno-2-35></a>  - PUT /account - Update account
-</span><span id=__span-2-36><a id=__codelineno-2-36 name=__codelineno-2-36 href=#__codelineno-2-36></a>
-</span><span id=__span-2-37><a id=__codelineno-2-37 name=__codelineno-2-37 href=#__codelineno-2-37></a>  ### Orders
-</span><span id=__span-2-38><a id=__codelineno-2-38 name=__codelineno-2-38 href=#__codelineno-2-38></a>  - GET /orders - List orders
-</span><span id=__span-2-39><a id=__codelineno-2-39 name=__codelineno-2-39 href=#__codelineno-2-39></a>  - GET /orders/:id - Get order details
-</span><span id=__span-2-40><a id=__codelineno-2-40 name=__codelineno-2-40 href=#__codelineno-2-40></a>
-</span><span id=__span-2-41><a id=__codelineno-2-41 name=__codelineno-2-41 href=#__codelineno-2-41></a>  ### Support
-</span><span id=__span-2-42><a id=__codelineno-2-42 name=__codelineno-2-42 href=#__codelineno-2-42></a>  - GET /tickets - List tickets
-</span><span id=__span-2-43><a id=__codelineno-2-43 name=__codelineno-2-43 href=#__codelineno-2-43></a>  - POST /tickets - Create ticket
-</span><span id=__span-2-44><a id=__codelineno-2-44 name=__codelineno-2-44 href=#__codelineno-2-44></a>  &quot;&quot;&quot;
-</span><span id=__span-2-45><a id=__codelineno-2-45 name=__codelineno-2-45 href=#__codelineno-2-45></a>}
-</span><span id=__span-2-46><a id=__codelineno-2-46 name=__codelineno-2-46 href=#__codelineno-2-46></a>
-</span><span id=__span-2-47><a id=__codelineno-2-47 name=__codelineno-2-47 href=#__codelineno-2-47></a>@shortcuts {
-</span><span id=__span-2-48><a id=__codelineno-2-48 name=__codelineno-2-48 href=#__codelineno-2-48></a>  &quot;/order&quot;: &quot;Help with order-related functionality&quot;
-</span><span id=__span-2-49><a id=__codelineno-2-49 name=__codelineno-2-49 href=#__codelineno-2-49></a>  &quot;/account&quot;: &quot;Help with account management&quot;
-</span><span id=__span-2-50><a id=__codelineno-2-50 name=__codelineno-2-50 href=#__codelineno-2-50></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALQ8McHACNmGaj2GDW-fnACe7DIQHCAjBQAMlzawC+WrQAEIrHNIhZ+jjqQD0YajYOVg1WJxZ2Ik9gLR0aZgArGEYsExAAYTEJKWp+ABEFZVV1Gx1qGDRmOA9maj00gHMPHBElChYSXw7MVj0urMlpOUKVNQ0QB20hCZnY-gBief4AQRURLEmdAGUYKDAZOGkANwhGGH55RVH1fjBa-kYBnLh+CX4SDFYMBvPcGAhchhGCwROw4HQ5icYAB3fi1HjScH8T48V7UIEAa10OAgaCkYIomwWSwA0jA9PwAGIwbAicpwIkyFbA5igzyHLBYFwNF4o-g0GBgaScM4MqZMgDy6mk-Bx4lqFL5WHRjAx3LmTK2IjQlWoni5qpgng+Xx++I24v4ADlmFzIIxsBA2PzykLyqxRXNNLM7JNHBjWMxobAeD9+DEpt7SsSVgAFACS-AAoiFKi4sGK5gAhBTnACqACUADICHCctBwRC+XwYNAQdqSHp6BudI6mImLJbLFlsjX8ADiSYAKvwaz32Pwmf2jcjx54EVgMNAxTombG8yOxyCJ0y82h5BxZ9uLXNO-wpQjaH3B5v4YjJ-wixBxHDpVfLTfR3faL5ELwH9OnjfhcRpLlAmZTGeWo6rUFqrgOw6jgaGJGi8TJPi+yGoX2sYSlsm5YRmD7pOU2C-KcKFwdMUa+mErCOIosGPEREY6MIvjfsIaQABK7Gg-DQs0r6XjI5RQGRqJgKCKROl8UAeHo0bsUCx5cdMvFQPxgm4EerITia3wwOaNi2CAtgALoMJwyp6PgRCkOQMBULQIAMEciKyfgphmUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-apromptscriptyaml>project-a/promptscript.yaml<a class=headerlink href=#project-apromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a><span class=nt>input</span><span class=p>:</span>
-</span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
-</span><span id=__span-3-3><a id=__codelineno-3-3 name=__codelineno-3-3 href=#__codelineno-3-3></a>
-</span><span id=__span-3-4><a id=__codelineno-3-4 name=__codelineno-3-4 href=#__codelineno-3-4></a><span class=nt>registry</span><span class=p>:</span>
-</span><span id=__span-3-5><a id=__codelineno-3-5 name=__codelineno-3-5 href=#__codelineno-3-5></a><span class=w>  </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">../registry</span>
-</span><span id=__span-3-6><a id=__codelineno-3-6 name=__codelineno-3-6 href=#__codelineno-3-6></a>
-</span><span id=__span-3-7><a id=__codelineno-3-7 name=__codelineno-3-7 href=#__codelineno-3-7></a><span class=nt>targets</span><span class=p>:</span>
-</span><span id=__span-3-8><a id=__codelineno-3-8 name=__codelineno-3-8 href=#__codelineno-3-8></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
-</span><span id=__span-3-9><a id=__codelineno-3-9 name=__codelineno-3-9 href=#__codelineno-3-9></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-3-10><a id=__codelineno-3-10 name=__codelineno-3-10 href=#__codelineno-3-10></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.github/copilot-instructions.md</span>
-</span><span id=__span-3-11><a id=__codelineno-3-11 name=__codelineno-3-11 href=#__codelineno-3-11></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
-</span><span id=__span-3-12><a id=__codelineno-3-12 name=__codelineno-3-12 href=#__codelineno-3-12></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-3-13><a id=__codelineno-3-13 name=__codelineno-3-13 href=#__codelineno-3-13></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CLAUDE.md</span>
-</span><span id=__span-3-14><a id=__codelineno-3-14 name=__codelineno-3-14 href=#__codelineno-3-14></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
-</span><span id=__span-3-15><a id=__codelineno-3-15 name=__codelineno-3-15 href=#__codelineno-3-15></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-3-16><a id=__codelineno-3-16 name=__codelineno-3-16 href=#__codelineno-3-16></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.cursorrules</span>
-</span><span id=__span-3-17><a id=__codelineno-3-17 name=__codelineno-3-17 href=#__codelineno-3-17></a>
-</span><span id=__span-3-18><a id=__codelineno-3-18 name=__codelineno-3-18 href=#__codelineno-3-18></a><span class=nt>validation</span><span class=p>:</span>
-</span><span id=__span-3-19><a id=__codelineno-3-19 name=__codelineno-3-19 href=#__codelineno-3-19></a><span class=w>  </span><span class=nt>strict</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span></code></pre></div> <h3 id=project-bpromptscriptprojectprs>project-b/.promptscript/project.prs<a class=headerlink href=#project-bpromptscriptprojectprs title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a>@meta {
-</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a>  id: &quot;admin-portal&quot;
-</span><span id=__span-4-3><a id=__codelineno-4-3 name=__codelineno-4-3 href=#__codelineno-4-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a>}
-</span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a>
-</span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a>@inherit @team/frontend
-</span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a>
-</span><span id=__span-4-8><a id=__codelineno-4-8 name=__codelineno-4-8 href=#__codelineno-4-8></a>@context {
-</span><span id=__span-4-9><a id=__codelineno-4-9 name=__codelineno-4-9 href=#__codelineno-4-9></a>  project: &quot;Admin Portal&quot;
-</span><span id=__span-4-10><a id=__codelineno-4-10 name=__codelineno-4-10 href=#__codelineno-4-10></a>  repository: &quot;github.com/company/admin-portal&quot;
-</span><span id=__span-4-11><a id=__codelineno-4-11 name=__codelineno-4-11 href=#__codelineno-4-11></a>
-</span><span id=__span-4-12><a id=__codelineno-4-12 name=__codelineno-4-12 href=#__codelineno-4-12></a>  &quot;&quot;&quot;
-</span><span id=__span-4-13><a id=__codelineno-4-13 name=__codelineno-4-13 href=#__codelineno-4-13></a>  ## About
-</span><span id=__span-4-14><a id=__codelineno-4-14 name=__codelineno-4-14 href=#__codelineno-4-14></a>
-</span><span id=__span-4-15><a id=__codelineno-4-15 name=__codelineno-4-15 href=#__codelineno-4-15></a>  Internal admin portal for managing customers, orders,
-</span><span id=__span-4-16><a id=__codelineno-4-16 name=__codelineno-4-16 href=#__codelineno-4-16></a>  and system configuration.
-</span><span id=__span-4-17><a id=__codelineno-4-17 name=__codelineno-4-17 href=#__codelineno-4-17></a>
-</span><span id=__span-4-18><a id=__codelineno-4-18 name=__codelineno-4-18 href=#__codelineno-4-18></a>  ## Key Features
-</span><span id=__span-4-19><a id=__codelineno-4-19 name=__codelineno-4-19 href=#__codelineno-4-19></a>
-</span><span id=__span-4-20><a id=__codelineno-4-20 name=__codelineno-4-20 href=#__codelineno-4-20></a>  - Customer management
-</span><span id=__span-4-21><a id=__codelineno-4-21 name=__codelineno-4-21 href=#__codelineno-4-21></a>  - Order processing
-</span><span id=__span-4-22><a id=__codelineno-4-22 name=__codelineno-4-22 href=#__codelineno-4-22></a>  - System configuration
-</span><span id=__span-4-23><a id=__codelineno-4-23 name=__codelineno-4-23 href=#__codelineno-4-23></a>  - Analytics dashboard
-</span><span id=__span-4-24><a id=__codelineno-4-24 name=__codelineno-4-24 href=#__codelineno-4-24></a>  &quot;&quot;&quot;
-</span><span id=__span-4-25><a id=__codelineno-4-25 name=__codelineno-4-25 href=#__codelineno-4-25></a>}
-</span><span id=__span-4-26><a id=__codelineno-4-26 name=__codelineno-4-26 href=#__codelineno-4-26></a>
-</span><span id=__span-4-27><a id=__codelineno-4-27 name=__codelineno-4-27 href=#__codelineno-4-27></a>@extend standards {
-</span><span id=__span-4-28><a id=__codelineno-4-28 name=__codelineno-4-28 href=#__codelineno-4-28></a>  security: {
-</span><span id=__span-4-29><a id=__codelineno-4-29 name=__codelineno-4-29 href=#__codelineno-4-29></a>    authentication: &quot;SSO required&quot;
-</span><span id=__span-4-30><a id=__codelineno-4-30 name=__codelineno-4-30 href=#__codelineno-4-30></a>    authorization: &quot;Role-based (admin, support, viewer)&quot;
-</span><span id=__span-4-31><a id=__codelineno-4-31 name=__codelineno-4-31 href=#__codelineno-4-31></a>    auditLogging: required
-</span><span id=__span-4-32><a id=__codelineno-4-32 name=__codelineno-4-32 href=#__codelineno-4-32></a>  }
-</span><span id=__span-4-33><a id=__codelineno-4-33 name=__codelineno-4-33 href=#__codelineno-4-33></a>}
-</span><span id=__span-4-34><a id=__codelineno-4-34 name=__codelineno-4-34 href=#__codelineno-4-34></a>
-</span><span id=__span-4-35><a id=__codelineno-4-35 name=__codelineno-4-35 href=#__codelineno-4-35></a>@restrictions {
-</span><span id=__span-4-36><a id=__codelineno-4-36 name=__codelineno-4-36 href=#__codelineno-4-36></a>  - &quot;Always check user permissions before actions&quot;
-</span><span id=__span-4-37><a id=__codelineno-4-37 name=__codelineno-4-37 href=#__codelineno-4-37></a>  - &quot;Log all admin actions for audit&quot;
-</span><span id=__span-4-38><a id=__codelineno-4-38 name=__codelineno-4-38 href=#__codelineno-4-38></a>}
-</span><span id=__span-4-39><a id=__codelineno-4-39 name=__codelineno-4-39 href=#__codelineno-4-39></a>
-</span><span id=__span-4-40><a id=__codelineno-4-40 name=__codelineno-4-40 href=#__codelineno-4-40></a>@shortcuts {
-</span><span id=__span-4-41><a id=__codelineno-4-41 name=__codelineno-4-41 href=#__codelineno-4-41></a>  &quot;/admin&quot;: &quot;Help with admin functionality&quot;
-</span><span id=__span-4-42><a id=__codelineno-4-42 name=__codelineno-4-42 href=#__codelineno-4-42></a>  &quot;/report&quot;: &quot;Generate reports&quot;
-</span><span id=__span-4-43><a id=__codelineno-4-43 name=__codelineno-4-43 href=#__codelineno-4-43></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAYeJCKwC0aZtSwYowwa3784AT3YZCA4QEYKABiNLWAX2XKAAhJwxqELPysdSAejDU2HVj0usrFnYiJ2BlVRpmACsYRixdEABBMQl+AAVZeUUQcP5qGBk4R1l1BIBzRxwAVwAjChYSNwbMVnU3UXEpGTkFU1ylHJyVfgBiEf5EmuYqrH9VAElg6lYFfg7U7qz+MFl+EgwVitYy-kYquCxmEns4On5ZHhu6XIOeNXULmBJTtkgyquo2AgbAoc1G4wA0jB1PwAGIwbAA+BgyT8ADC50u12oewOGDKX04s2GqIA8tRHjjIox4EVjrlUQBlD4cb5BP4AoFsBkTFZQdRYCCMOD8HgYOA4KYYCn9QamCysawhThvC6vaU8EVhYZwWIAxylfja1SqDAzOzsIVc1gJRmM0l5GAARyqEHyfiGJrW5tkEAAXtaEgAlZiwSQ1cUwN4ACnWrDucCqaE2dwAbhAYAB3ewASlMXrNPEcABlmGUjmUBPkXW6o7kFQrrPkLg44sDWFqecJElBMxgPqc7IwANb8c72fhoeziOBFNgimowHb5NZt+f5-io4Slk4KKBrFIqDBrjvbXaFxzy-xWCWZM5YTvDYTtQ-CBIACRgUDQ-EzlQPnTbFUrAngoBobs++SbG+QggAA4pw9jYDAjqbHA8ogGYAC6DBEtQ6j4EQpDkDAVC0CADCpjc7b4HomFAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-bpromptscriptyaml>project-b/promptscript.yaml<a class=headerlink href=#project-bpromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a><span class=nt>input</span><span class=p>:</span>
-</span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
-</span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a>
-</span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a><span class=nt>registry</span><span class=p>:</span>
-</span><span id=__span-5-5><a id=__codelineno-5-5 name=__codelineno-5-5 href=#__codelineno-5-5></a><span class=w>  </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">../registry</span>
-</span><span id=__span-5-6><a id=__codelineno-5-6 name=__codelineno-5-6 href=#__codelineno-5-6></a>
-</span><span id=__span-5-7><a id=__codelineno-5-7 name=__codelineno-5-7 href=#__codelineno-5-7></a><span class=nt>targets</span><span class=p>:</span>
-</span><span id=__span-5-8><a id=__codelineno-5-8 name=__codelineno-5-8 href=#__codelineno-5-8></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
-</span><span id=__span-5-9><a id=__codelineno-5-9 name=__codelineno-5-9 href=#__codelineno-5-9></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-5-10><a id=__codelineno-5-10 name=__codelineno-5-10 href=#__codelineno-5-10></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
-</span><span id=__span-5-11><a id=__codelineno-5-11 name=__codelineno-5-11 href=#__codelineno-5-11></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-5-12><a id=__codelineno-5-12 name=__codelineno-5-12 href=#__codelineno-5-12></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
-</span><span id=__span-5-13><a id=__codelineno-5-13 name=__codelineno-5-13 href=#__codelineno-5-13></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-18><a id=__codelineno-1-18 name=__codelineno-1-18 href=#__codelineno-1-18></a><span class=nt>validation</span><span class=p>:</span>
+</span><span id=__span-1-19><a id=__codelineno-1-19 name=__codelineno-1-19 href=#__codelineno-1-19></a><span class=w>  </span><span class=nt>strict</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span></code></pre></div> <h3 id=project-bpromptscriptprojectprs>project-b/.promptscript/project.prs<a class=headerlink href=#project-bpromptscriptprojectprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;admin-portal&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@</span><span class=kn>inherit</span><span class=s>@team/frontend</span>
+
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Admin Portal&quot;</span>
+<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/company/admin-portal&quot;</span>
+
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## About</span>
+
+<span class=sd>  Internal admin portal for managing customers, orders,</span>
+<span class=sd>  and system configuration.</span>
+
+<span class=sd>  ## Key Features</span>
+
+<span class=sd>  - Customer management</span>
+<span class=sd>  - Order processing</span>
+<span class=sd>  - System configuration</span>
+<span class=sd>  - Analytics dashboard</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>security</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span>authentication:<span class=w> </span><span class=s2>&quot;SSO required&quot;</span>
+<span class=w>    </span>authorization:<span class=w> </span><span class=s2>&quot;Role-based (admin, support, viewer)&quot;</span>
+<span class=w>    </span>auditLogging:<span class=w> </span>required
+<span class=w>  </span><span class=p>}</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always check user permissions before actions&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Log all admin actions for audit&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/admin&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with admin functionality&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/report&quot;</span>:<span class=w> </span><span class=s2>&quot;Generate reports&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAYeJCKwC0aZtSwYowwa3784AT3YZCA4QEYKABiNLWAX2XKAAhJwxqELPysdSAejDU2HVj0usrFnYiJ2BlVRpmACsYRixdEABBMQl+AAVZeUUQcP5qGBk4R1l1BIBzRxwAVwAjChYSNwbMVnU3UXEpGTkFU1ylHJyVfgBiEf5EmuYqrH9VAElg6lYFfg7U7qz+MFl+EgwVitYy-kYquCxmEns4On5ZHhu6XIOeNXULmBJTtkgyquo2AgbAoc1G4wA0jB1PwAGIwbAA+BgyT8ADC50u12oewOGDKX04s2GqIA8tRHjjIox4EVjrlUQBlD4cb5BP4AoFsBkTFZQdRYCCMOD8HgYOA4KYYCn9QamCysawhThvC6vaU8EVhYZwWIAxylfja1SqDAzOzsIVc1gJRmM0l5GAARyqEHyfiGJrW5tkEAAXtaEgAlZiwSQ1cUwN4ACnWrDucCqaE2dwAbhAYAB3ewASlMXrNPEcABlmGUjmUBPkXW6o7kFQrrPkLg44sDWFqecJElBMxgPqc7IwANb8c72fhoeziOBFNgimowHb5NZt+f5-io4Slk4KKBrFIqDBrjvbXaFxzy-xWCWZM5YTvDYTtQ-CBIACRgUDQ-EzlQPnTbFUrAngoBobs++SbG+QggAA4pw9jYDAjqbHA8ogGYAC6DBEtQ6j4EQpDkDAVC0CADCpjc7b4HomFAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-bpromptscriptyaml>project-b/promptscript.yaml<a class=headerlink href=#project-bpromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a><span class=nt>input</span><span class=p>:</span>
+</span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
+</span><span id=__span-2-3><a id=__codelineno-2-3 name=__codelineno-2-3 href=#__codelineno-2-3></a>
+</span><span id=__span-2-4><a id=__codelineno-2-4 name=__codelineno-2-4 href=#__codelineno-2-4></a><span class=nt>registry</span><span class=p>:</span>
+</span><span id=__span-2-5><a id=__codelineno-2-5 name=__codelineno-2-5 href=#__codelineno-2-5></a><span class=w>  </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">../registry</span>
+</span><span id=__span-2-6><a id=__codelineno-2-6 name=__codelineno-2-6 href=#__codelineno-2-6></a>
+</span><span id=__span-2-7><a id=__codelineno-2-7 name=__codelineno-2-7 href=#__codelineno-2-7></a><span class=nt>targets</span><span class=p>:</span>
+</span><span id=__span-2-8><a id=__codelineno-2-8 name=__codelineno-2-8 href=#__codelineno-2-8></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
+</span><span id=__span-2-9><a id=__codelineno-2-9 name=__codelineno-2-9 href=#__codelineno-2-9></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-2-10><a id=__codelineno-2-10 name=__codelineno-2-10 href=#__codelineno-2-10></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
+</span><span id=__span-2-11><a id=__codelineno-2-11 name=__codelineno-2-11 href=#__codelineno-2-11></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-2-12><a id=__codelineno-2-12 name=__codelineno-2-12 href=#__codelineno-2-12></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
+</span><span id=__span-2-13><a id=__codelineno-2-13 name=__codelineno-2-13 href=#__codelineno-2-13></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </span></code></pre></div> <h2 id=inheritance-visualization>Inheritance Visualization<a class=headerlink href=#inheritance-visualization title="Permanent link">&para;</a></h2> <pre class=mermaid><code>flowchart TD
     A["@team/frontend&lt;br/&gt;Team base configuration"] --&gt; B["customer-dashboard&lt;br/&gt;Project A"]
     A --&gt; C["admin-portal&lt;br/&gt;Project B"]
@@ -212,47 +212,47 @@
         E["Identity&lt;br/&gt;Standards&lt;br/&gt;Restrictions&lt;br/&gt;Shortcuts"]
     end
 
-    A --- E</code></pre> <h2 id=usage>Usage<a class=headerlink href=#usage title="Permanent link">&para;</a></h2> <h3 id=compile-all-projects>Compile All Projects<a class=headerlink href=#compile-all-projects title="Permanent link">&para;</a></h3> <p>From each project directory:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a><span class=nb>cd</span><span class=w> </span>project-a<span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span>prs<span class=w> </span>compile
-</span><span id=__span-6-2><a id=__codelineno-6-2 name=__codelineno-6-2 href=#__codelineno-6-2></a><span class=nb>cd</span><span class=w> </span>../project-b<span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span>prs<span class=w> </span>compile
-</span></code></pre></div> <p>Or use a script:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-7-1><a id=__codelineno-7-1 name=__codelineno-7-1 href=#__codelineno-7-1></a><span class=ch>#!/bin/bash</span>
-</span><span id=__span-7-2><a id=__codelineno-7-2 name=__codelineno-7-2 href=#__codelineno-7-2></a><span class=k>for</span><span class=w> </span>dir<span class=w> </span><span class=k>in</span><span class=w> </span>project-*/<span class=p>;</span><span class=w> </span><span class=k>do</span>
-</span><span id=__span-7-3><a id=__codelineno-7-3 name=__codelineno-7-3 href=#__codelineno-7-3></a><span class=w>  </span><span class=nb>echo</span><span class=w> </span><span class=s2>&quot;Compiling </span><span class=nv>$dir</span><span class=s2>...&quot;</span>
-</span><span id=__span-7-4><a id=__codelineno-7-4 name=__codelineno-7-4 href=#__codelineno-7-4></a><span class=w>  </span><span class=o>(</span><span class=nb>cd</span><span class=w> </span><span class=s2>&quot;</span><span class=nv>$dir</span><span class=s2>&quot;</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span>prs<span class=w> </span>compile<span class=o>)</span>
-</span><span id=__span-7-5><a id=__codelineno-7-5 name=__codelineno-7-5 href=#__codelineno-7-5></a><span class=k>done</span>
-</span></code></pre></div> <h3 id=validate>Validate<a class=headerlink href=#validate title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a>prs<span class=w> </span>validate<span class=w> </span>--strict
-</span></code></pre></div> <h3 id=update-team-config>Update Team Config<a class=headerlink href=#update-team-config title="Permanent link">&para;</a></h3> <p>When you update <code>@team/frontend</code>:</p> <ol> <li>Update version in <code>@meta</code></li> <li>Notify team members</li> <li>Each project recompiles to get updates</li> </ol> <h2 id=cicd-integration>CI/CD Integration<a class=headerlink href=#cicd-integration title="Permanent link">&para;</a></h2> <h3 id=github-actions>GitHub Actions<a class=headerlink href=#github-actions title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a><span class=c1># .github/workflows/promptscript.yml</span>
-</span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">PromptScript CI</span>
-</span><span id=__span-9-3><a id=__codelineno-9-3 name=__codelineno-9-3 href=#__codelineno-9-3></a>
-</span><span id=__span-9-4><a id=__codelineno-9-4 name=__codelineno-9-4 href=#__codelineno-9-4></a><span class=nt>on</span><span class=p>:</span>
-</span><span id=__span-9-5><a id=__codelineno-9-5 name=__codelineno-9-5 href=#__codelineno-9-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
-</span><span id=__span-9-6><a id=__codelineno-9-6 name=__codelineno-9-6 href=#__codelineno-9-6></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
-</span><span id=__span-9-7><a id=__codelineno-9-7 name=__codelineno-9-7 href=#__codelineno-9-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;.promptscript/**&#39;</span>
-</span><span id=__span-9-8><a id=__codelineno-9-8 name=__codelineno-9-8 href=#__codelineno-9-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
-</span><span id=__span-9-9><a id=__codelineno-9-9 name=__codelineno-9-9 href=#__codelineno-9-9></a>
-</span><span id=__span-9-10><a id=__codelineno-9-10 name=__codelineno-9-10 href=#__codelineno-9-10></a><span class=nt>jobs</span><span class=p>:</span>
-</span><span id=__span-9-11><a id=__codelineno-9-11 name=__codelineno-9-11 href=#__codelineno-9-11></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
-</span><span id=__span-9-12><a id=__codelineno-9-12 name=__codelineno-9-12 href=#__codelineno-9-12></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-</span><span id=__span-9-13><a id=__codelineno-9-13 name=__codelineno-9-13 href=#__codelineno-9-13></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
-</span><span id=__span-9-14><a id=__codelineno-9-14 name=__codelineno-9-14 href=#__codelineno-9-14></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-</span><span id=__span-9-15><a id=__codelineno-9-15 name=__codelineno-9-15 href=#__codelineno-9-15></a>
-</span><span id=__span-9-16><a id=__codelineno-9-16 name=__codelineno-9-16 href=#__codelineno-9-16></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Checkout registry</span>
-</span><span id=__span-9-17><a id=__codelineno-9-17 name=__codelineno-9-17 href=#__codelineno-9-17></a><span class=w>        </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-</span><span id=__span-9-18><a id=__codelineno-9-18 name=__codelineno-9-18 href=#__codelineno-9-18></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-9-19><a id=__codelineno-9-19 name=__codelineno-9-19 href=#__codelineno-9-19></a><span class=w>          </span><span class=nt>repository</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">company/promptscript-registry</span>
-</span><span id=__span-9-20><a id=__codelineno-9-20 name=__codelineno-9-20 href=#__codelineno-9-20></a><span class=w>          </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">registry</span>
-</span><span id=__span-9-21><a id=__codelineno-9-21 name=__codelineno-9-21 href=#__codelineno-9-21></a>
-</span><span id=__span-9-22><a id=__codelineno-9-22 name=__codelineno-9-22 href=#__codelineno-9-22></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
-</span><span id=__span-9-23><a id=__codelineno-9-23 name=__codelineno-9-23 href=#__codelineno-9-23></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-9-24><a id=__codelineno-9-24 name=__codelineno-9-24 href=#__codelineno-9-24></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
-</span><span id=__span-9-25><a id=__codelineno-9-25 name=__codelineno-9-25 href=#__codelineno-9-25></a>
-</span><span id=__span-9-26><a id=__codelineno-9-26 name=__codelineno-9-26 href=#__codelineno-9-26></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
-</span><span id=__span-9-27><a id=__codelineno-9-27 name=__codelineno-9-27 href=#__codelineno-9-27></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
-</span><span id=__span-9-28><a id=__codelineno-9-28 name=__codelineno-9-28 href=#__codelineno-9-28></a>
-</span><span id=__span-9-29><a id=__codelineno-9-29 name=__codelineno-9-29 href=#__codelineno-9-29></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate</span>
-</span><span id=__span-9-30><a id=__codelineno-9-30 name=__codelineno-9-30 href=#__codelineno-9-30></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs validate --strict</span>
-</span><span id=__span-9-31><a id=__codelineno-9-31 name=__codelineno-9-31 href=#__codelineno-9-31></a>
-</span><span id=__span-9-32><a id=__codelineno-9-32 name=__codelineno-9-32 href=#__codelineno-9-32></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Check compiled files</span>
-</span><span id=__span-9-33><a id=__codelineno-9-33 name=__codelineno-9-33 href=#__codelineno-9-33></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
-</span><span id=__span-9-34><a id=__codelineno-9-34 name=__codelineno-9-34 href=#__codelineno-9-34></a><span class=w>          </span><span class=no>prs compile</span>
-</span><span id=__span-9-35><a id=__codelineno-9-35 name=__codelineno-9-35 href=#__codelineno-9-35></a><span class=w>          </span><span class=no>git diff --exit-code</span>
+    A --- E</code></pre> <h2 id=usage>Usage<a class=headerlink href=#usage title="Permanent link">&para;</a></h2> <h3 id=compile-all-projects>Compile All Projects<a class=headerlink href=#compile-all-projects title="Permanent link">&para;</a></h3> <p>From each project directory:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a><span class=nb>cd</span><span class=w> </span>project-a<span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span>prs<span class=w> </span>compile
+</span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a><span class=nb>cd</span><span class=w> </span>../project-b<span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span>prs<span class=w> </span>compile
+</span></code></pre></div> <p>Or use a script:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a><span class=ch>#!/bin/bash</span>
+</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a><span class=k>for</span><span class=w> </span>dir<span class=w> </span><span class=k>in</span><span class=w> </span>project-*/<span class=p>;</span><span class=w> </span><span class=k>do</span>
+</span><span id=__span-4-3><a id=__codelineno-4-3 name=__codelineno-4-3 href=#__codelineno-4-3></a><span class=w>  </span><span class=nb>echo</span><span class=w> </span><span class=s2>&quot;Compiling </span><span class=nv>$dir</span><span class=s2>...&quot;</span>
+</span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a><span class=w>  </span><span class=o>(</span><span class=nb>cd</span><span class=w> </span><span class=s2>&quot;</span><span class=nv>$dir</span><span class=s2>&quot;</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span>prs<span class=w> </span>compile<span class=o>)</span>
+</span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a><span class=k>done</span>
+</span></code></pre></div> <h3 id=validate>Validate<a class=headerlink href=#validate title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>prs<span class=w> </span>validate<span class=w> </span>--strict
+</span></code></pre></div> <h3 id=update-team-config>Update Team Config<a class=headerlink href=#update-team-config title="Permanent link">&para;</a></h3> <p>When you update <code>@team/frontend</code>:</p> <ol> <li>Update version in <code>@meta</code></li> <li>Notify team members</li> <li>Each project recompiles to get updates</li> </ol> <h2 id=cicd-integration>CI/CD Integration<a class=headerlink href=#cicd-integration title="Permanent link">&para;</a></h2> <h3 id=github-actions>GitHub Actions<a class=headerlink href=#github-actions title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a><span class=c1># .github/workflows/promptscript.yml</span>
+</span><span id=__span-6-2><a id=__codelineno-6-2 name=__codelineno-6-2 href=#__codelineno-6-2></a><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">PromptScript CI</span>
+</span><span id=__span-6-3><a id=__codelineno-6-3 name=__codelineno-6-3 href=#__codelineno-6-3></a>
+</span><span id=__span-6-4><a id=__codelineno-6-4 name=__codelineno-6-4 href=#__codelineno-6-4></a><span class=nt>on</span><span class=p>:</span>
+</span><span id=__span-6-5><a id=__codelineno-6-5 name=__codelineno-6-5 href=#__codelineno-6-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
+</span><span id=__span-6-6><a id=__codelineno-6-6 name=__codelineno-6-6 href=#__codelineno-6-6></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
+</span><span id=__span-6-7><a id=__codelineno-6-7 name=__codelineno-6-7 href=#__codelineno-6-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;.promptscript/**&#39;</span>
+</span><span id=__span-6-8><a id=__codelineno-6-8 name=__codelineno-6-8 href=#__codelineno-6-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
+</span><span id=__span-6-9><a id=__codelineno-6-9 name=__codelineno-6-9 href=#__codelineno-6-9></a>
+</span><span id=__span-6-10><a id=__codelineno-6-10 name=__codelineno-6-10 href=#__codelineno-6-10></a><span class=nt>jobs</span><span class=p>:</span>
+</span><span id=__span-6-11><a id=__codelineno-6-11 name=__codelineno-6-11 href=#__codelineno-6-11></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
+</span><span id=__span-6-12><a id=__codelineno-6-12 name=__codelineno-6-12 href=#__codelineno-6-12></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span id=__span-6-13><a id=__codelineno-6-13 name=__codelineno-6-13 href=#__codelineno-6-13></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
+</span><span id=__span-6-14><a id=__codelineno-6-14 name=__codelineno-6-14 href=#__codelineno-6-14></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span id=__span-6-15><a id=__codelineno-6-15 name=__codelineno-6-15 href=#__codelineno-6-15></a>
+</span><span id=__span-6-16><a id=__codelineno-6-16 name=__codelineno-6-16 href=#__codelineno-6-16></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Checkout registry</span>
+</span><span id=__span-6-17><a id=__codelineno-6-17 name=__codelineno-6-17 href=#__codelineno-6-17></a><span class=w>        </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span id=__span-6-18><a id=__codelineno-6-18 name=__codelineno-6-18 href=#__codelineno-6-18></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
+</span><span id=__span-6-19><a id=__codelineno-6-19 name=__codelineno-6-19 href=#__codelineno-6-19></a><span class=w>          </span><span class=nt>repository</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">company/promptscript-registry</span>
+</span><span id=__span-6-20><a id=__codelineno-6-20 name=__codelineno-6-20 href=#__codelineno-6-20></a><span class=w>          </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">registry</span>
+</span><span id=__span-6-21><a id=__codelineno-6-21 name=__codelineno-6-21 href=#__codelineno-6-21></a>
+</span><span id=__span-6-22><a id=__codelineno-6-22 name=__codelineno-6-22 href=#__codelineno-6-22></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
+</span><span id=__span-6-23><a id=__codelineno-6-23 name=__codelineno-6-23 href=#__codelineno-6-23></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
+</span><span id=__span-6-24><a id=__codelineno-6-24 name=__codelineno-6-24 href=#__codelineno-6-24></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
+</span><span id=__span-6-25><a id=__codelineno-6-25 name=__codelineno-6-25 href=#__codelineno-6-25></a>
+</span><span id=__span-6-26><a id=__codelineno-6-26 name=__codelineno-6-26 href=#__codelineno-6-26></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
+</span><span id=__span-6-27><a id=__codelineno-6-27 name=__codelineno-6-27 href=#__codelineno-6-27></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
+</span><span id=__span-6-28><a id=__codelineno-6-28 name=__codelineno-6-28 href=#__codelineno-6-28></a>
+</span><span id=__span-6-29><a id=__codelineno-6-29 name=__codelineno-6-29 href=#__codelineno-6-29></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate</span>
+</span><span id=__span-6-30><a id=__codelineno-6-30 name=__codelineno-6-30 href=#__codelineno-6-30></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs validate --strict</span>
+</span><span id=__span-6-31><a id=__codelineno-6-31 name=__codelineno-6-31 href=#__codelineno-6-31></a>
+</span><span id=__span-6-32><a id=__codelineno-6-32 name=__codelineno-6-32 href=#__codelineno-6-32></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Check compiled files</span>
+</span><span id=__span-6-33><a id=__codelineno-6-33 name=__codelineno-6-33 href=#__codelineno-6-33></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
+</span><span id=__span-6-34><a id=__codelineno-6-34 name=__codelineno-6-34 href=#__codelineno-6-34></a><span class=w>          </span><span class=no>prs compile</span>
+</span><span id=__span-6-35><a id=__codelineno-6-35 name=__codelineno-6-35 href=#__codelineno-6-35></a><span class=w>          </span><span class=no>git diff --exit-code</span>
 </span></code></pre></div> <h2 id=best-practices>Best Practices<a class=headerlink href=#best-practices title="Permanent link">&para;</a></h2> <h3 id=team-config>Team Config<a class=headerlink href=#team-config title="Permanent link">&para;</a></h3> <ol> <li>Keep team config focused on shared patterns</li> <li>Don't include project-specific details</li> <li>Version and changelog team updates</li> <li>Document breaking changes</li> </ol> <h3 id=project-config>Project Config<a class=headerlink href=#project-config title="Permanent link">&para;</a></h3> <ol> <li>Override only what's needed</li> <li>Add project-specific context</li> <li>Include relevant API documentation</li> <li>Keep shortcuts relevant to the project</li> </ol> <h3 id=registry-management>Registry Management<a class=headerlink href=#registry-management title="Permanent link">&para;</a></h3> <ol> <li>Use a separate repository for the registry</li> <li>Review changes before merging</li> <li>Tag releases for version tracking</li> <li>Communicate updates to team</li> </ol> <h2 id=next-steps>Next Steps<a class=headerlink href=#next-steps title="Permanent link">&para;</a></h2> <ul> <li><a href=../enterprise/ >Enterprise Setup</a> - Organization-wide deployment</li> <li><a href=../../guides/inheritance/ >Inheritance Guide</a> - Advanced patterns</li> </ul> </article> </div> <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script> <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script> </div> <button type=button class="md-top md-icon" data-md-component=top hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg> Back to top </button> </main> <footer class=md-footer> <nav class="md-footer__inner md-grid" aria-label=Footer> <a href=../minimal/ class="md-footer__link md-footer__link--prev" aria-label="Previous: Minimal"> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg> </div> <div class=md-footer__title> <span class=md-footer__direction> Previous </span> <div class=md-ellipsis> Minimal </div> </div> </a> <a href=../enterprise/ class="md-footer__link md-footer__link--next" aria-label="Next: Enterprise"> <div class=md-footer__title> <span class=md-footer__direction> Next </span> <div class=md-ellipsis> Enterprise </div> </div> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg> </div> </a> </nav> <div class="md-footer-meta md-typeset"> <div class="md-footer-meta__inner md-grid"> <div class=md-copyright> <div class=md-copyright__highlight> Copyright &copy; 2026 PromptScript Contributors </div> Made with <a href=https://squidfunk.github.io/mkdocs-material/ target=_blank rel=noopener> Material for MkDocs </a> </div> <div class=md-social> <a href=https://github.com/mrwogu/promptscript target=_blank rel=noopener title=github.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 512 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg> </a> <a href=https://www.npmjs.com/org/promptscript target=_blank rel=noopener title=www.npmjs.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 576 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M288 288h-32v-64h32zm288-128v192H288v32H160v-32H0V160zm-416 32H32v128h64v-96h32v96h32zm160 0H192v160h64v-32h64zm224 0H352v128h64v-96h32v96h32v-96h32v96h32z"/></svg> </a> </div> </div> </div> </footer> </div> <div class=md-dialog data-md-component=dialog> <div class="md-dialog__inner md-typeset"></div> </div> <div class=md-progress data-md-component=progress role=progressbar></div> <script id=__config type=application/json>{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link", "content.tooltips", "content.action.edit", "content.action.view", "header.autohide", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script> <script src=../../assets/javascripts/bundle.79ae519e.min.js></script> </body> </html>

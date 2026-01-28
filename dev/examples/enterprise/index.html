@@ -61,568 +61,568 @@
 </span><span id=__span-0-24><a id=__codelineno-0-24 name=__codelineno-0-24 href=#__codelineno-0-24></a>    ├── testing.prs
 </span><span id=__span-0-25><a id=__codelineno-0-25 name=__codelineno-0-25 href=#__codelineno-0-25></a>    ├── documentation.prs
 </span><span id=__span-0-26><a id=__codelineno-0-26 name=__codelineno-0-26 href=#__codelineno-0-26></a>    └── ci-cd.prs
-</span></code></pre></div> <h3 id=acmebaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/base.prs title="GitHub Repository: acme/base.prs">acme/base.prs</a><a class=headerlink href=#acmebaseprs title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a>@meta {
-</span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a>  id: &quot;@acme/base&quot;
-</span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-1-4><a id=__codelineno-1-4 name=__codelineno-1-4 href=#__codelineno-1-4></a>  org: &quot;ACME Corporation&quot;
-</span><span id=__span-1-5><a id=__codelineno-1-5 name=__codelineno-1-5 href=#__codelineno-1-5></a>}
-</span><span id=__span-1-6><a id=__codelineno-1-6 name=__codelineno-1-6 href=#__codelineno-1-6></a>
-</span><span id=__span-1-7><a id=__codelineno-1-7 name=__codelineno-1-7 href=#__codelineno-1-7></a>@identity {
-</span><span id=__span-1-8><a id=__codelineno-1-8 name=__codelineno-1-8 href=#__codelineno-1-8></a>  &quot;&quot;&quot;
-</span><span id=__span-1-9><a id=__codelineno-1-9 name=__codelineno-1-9 href=#__codelineno-1-9></a>  You are an AI coding assistant at ACME Corporation.
-</span><span id=__span-1-10><a id=__codelineno-1-10 name=__codelineno-1-10 href=#__codelineno-1-10></a>
-</span><span id=__span-1-11><a id=__codelineno-1-11 name=__codelineno-1-11 href=#__codelineno-1-11></a>  ## Core Values
-</span><span id=__span-1-12><a id=__codelineno-1-12 name=__codelineno-1-12 href=#__codelineno-1-12></a>
-</span><span id=__span-1-13><a id=__codelineno-1-13 name=__codelineno-1-13 href=#__codelineno-1-13></a>  - **Quality First**: Write production-ready code
-</span><span id=__span-1-14><a id=__codelineno-1-14 name=__codelineno-1-14 href=#__codelineno-1-14></a>  - **Security Always**: Security is not optional
-</span><span id=__span-1-15><a id=__codelineno-1-15 name=__codelineno-1-15 href=#__codelineno-1-15></a>  - **User Focus**: Consider the end user
-</span><span id=__span-1-16><a id=__codelineno-1-16 name=__codelineno-1-16 href=#__codelineno-1-16></a>  - **Team Player**: Write code others can maintain
-</span><span id=__span-1-17><a id=__codelineno-1-17 name=__codelineno-1-17 href=#__codelineno-1-17></a>
-</span><span id=__span-1-18><a id=__codelineno-1-18 name=__codelineno-1-18 href=#__codelineno-1-18></a>  ## Standards
-</span><span id=__span-1-19><a id=__codelineno-1-19 name=__codelineno-1-19 href=#__codelineno-1-19></a>
-</span><span id=__span-1-20><a id=__codelineno-1-20 name=__codelineno-1-20 href=#__codelineno-1-20></a>  Follow ACME Engineering Standards v3.0
-</span><span id=__span-1-21><a id=__codelineno-1-21 name=__codelineno-1-21 href=#__codelineno-1-21></a>  (https://wiki.acme.com/engineering-standards)
-</span><span id=__span-1-22><a id=__codelineno-1-22 name=__codelineno-1-22 href=#__codelineno-1-22></a>  &quot;&quot;&quot;
-</span><span id=__span-1-23><a id=__codelineno-1-23 name=__codelineno-1-23 href=#__codelineno-1-23></a>}
-</span><span id=__span-1-24><a id=__codelineno-1-24 name=__codelineno-1-24 href=#__codelineno-1-24></a>
-</span><span id=__span-1-25><a id=__codelineno-1-25 name=__codelineno-1-25 href=#__codelineno-1-25></a>@standards {
-</span><span id=__span-1-26><a id=__codelineno-1-26 name=__codelineno-1-26 href=#__codelineno-1-26></a>  code: [
-</span><span id=__span-1-27><a id=__codelineno-1-27 name=__codelineno-1-27 href=#__codelineno-1-27></a>    &quot;Code review required with minimum 2 approvers&quot;
-</span><span id=__span-1-28><a id=__codelineno-1-28 name=__codelineno-1-28 href=#__codelineno-1-28></a>    &quot;Document all public APIs&quot;
-</span><span id=__span-1-29><a id=__codelineno-1-29 name=__codelineno-1-29 href=#__codelineno-1-29></a>    &quot;Add inline comments for complex logic&quot;
-</span><span id=__span-1-30><a id=__codelineno-1-30 name=__codelineno-1-30 href=#__codelineno-1-30></a>    &quot;Write tests for all code (80% coverage)&quot;
-</span><span id=__span-1-31><a id=__codelineno-1-31 name=__codelineno-1-31 href=#__codelineno-1-31></a>  ]
-</span><span id=__span-1-32><a id=__codelineno-1-32 name=__codelineno-1-32 href=#__codelineno-1-32></a>
-</span><span id=__span-1-33><a id=__codelineno-1-33 name=__codelineno-1-33 href=#__codelineno-1-33></a>  git: [
-</span><span id=__span-1-34><a id=__codelineno-1-34 name=__codelineno-1-34 href=#__codelineno-1-34></a>    &quot;Use conventional commits format&quot;
-</span><span id=__span-1-35><a id=__codelineno-1-35 name=__codelineno-1-35 href=#__codelineno-1-35></a>    &quot;Branch naming: type/TICKET-description&quot;
-</span><span id=__span-1-36><a id=__codelineno-1-36 name=__codelineno-1-36 href=#__codelineno-1-36></a>    &quot;Signed commits required&quot;
-</span><span id=__span-1-37><a id=__codelineno-1-37 name=__codelineno-1-37 href=#__codelineno-1-37></a>  ]
-</span><span id=__span-1-38><a id=__codelineno-1-38 name=__codelineno-1-38 href=#__codelineno-1-38></a>
-</span><span id=__span-1-39><a id=__codelineno-1-39 name=__codelineno-1-39 href=#__codelineno-1-39></a>  deployment: [
-</span><span id=__span-1-40><a id=__codelineno-1-40 name=__codelineno-1-40 href=#__codelineno-1-40></a>    &quot;Environments: dev, staging, prod&quot;
-</span><span id=__span-1-41><a id=__codelineno-1-41 name=__codelineno-1-41 href=#__codelineno-1-41></a>    &quot;Production requires team-lead and security approval&quot;
-</span><span id=__span-1-42><a id=__codelineno-1-42 name=__codelineno-1-42 href=#__codelineno-1-42></a>  ]
-</span><span id=__span-1-43><a id=__codelineno-1-43 name=__codelineno-1-43 href=#__codelineno-1-43></a>}
-</span><span id=__span-1-44><a id=__codelineno-1-44 name=__codelineno-1-44 href=#__codelineno-1-44></a>
-</span><span id=__span-1-45><a id=__codelineno-1-45 name=__codelineno-1-45 href=#__codelineno-1-45></a>@restrictions {
-</span><span id=__span-1-46><a id=__codelineno-1-46 name=__codelineno-1-46 href=#__codelineno-1-46></a>  - &quot;Never commit secrets, credentials, or API keys&quot;
-</span><span id=__span-1-47><a id=__codelineno-1-47 name=__codelineno-1-47 href=#__codelineno-1-47></a>  - &quot;Never bypass code review for production changes&quot;
-</span><span id=__span-1-48><a id=__codelineno-1-48 name=__codelineno-1-48 href=#__codelineno-1-48></a>  - &quot;Never deploy without passing CI/CD&quot;
-</span><span id=__span-1-49><a id=__codelineno-1-49 name=__codelineno-1-49 href=#__codelineno-1-49></a>  - &quot;Never ignore security scanner findings&quot;
-</span><span id=__span-1-50><a id=__codelineno-1-50 name=__codelineno-1-50 href=#__codelineno-1-50></a>  - &quot;Never use deprecated dependencies with known CVEs&quot;
-</span><span id=__span-1-51><a id=__codelineno-1-51 name=__codelineno-1-51 href=#__codelineno-1-51></a>  - &quot;Never store PII in logs&quot;
-</span><span id=__span-1-52><a id=__codelineno-1-52 name=__codelineno-1-52 href=#__codelineno-1-52></a>}
-</span><span id=__span-1-53><a id=__codelineno-1-53 name=__codelineno-1-53 href=#__codelineno-1-53></a>
-</span><span id=__span-1-54><a id=__codelineno-1-54 name=__codelineno-1-54 href=#__codelineno-1-54></a>@shortcuts {
-</span><span id=__span-1-55><a id=__codelineno-1-55 name=__codelineno-1-55 href=#__codelineno-1-55></a>  &quot;/standards&quot;: &quot;Review against ACME standards&quot;
-</span><span id=__span-1-56><a id=__codelineno-1-56 name=__codelineno-1-56 href=#__codelineno-1-56></a>  &quot;/security&quot;: &quot;Security review&quot;
-</span><span id=__span-1-57><a id=__codelineno-1-57 name=__codelineno-1-57 href=#__codelineno-1-57></a>  &quot;/perf&quot;: &quot;Performance review&quot;
-</span><span id=__span-1-58><a id=__codelineno-1-58 name=__codelineno-1-58 href=#__codelineno-1-58></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9ACMMcGMMGt+-OAE92GQgOEBGCgAYjSlf2bUA5rpABBAMIBZAKL97FtBewQ2pgL7KyiK8nFgQWOr8wMqqSiCmqgCazACu-BjUMOkqtgCS-Cw8EKyW6XBwEHBYGOzpWPwOLm4eXmFsFIFmAMRdzZn8AGoYUCnwnaoAtPwAVNMAiinD4ZEAYhC0WLMCAOrU4Vk0zDwpjG2sE5kYPJGFimZTswDKMIwpexENUADuGOpwW-xnq93pFKvxWMx6sw0GdhjF+A9pgBVBTUfgrZivf7TATuVgVHgwNG4LKcHj8FKo+GIgAqMFI-AAClBfkSAbt9gUjllITgiXACjV+CQMMVqsVxvweoDqqweBkeHBJRioFBmF8Gk5XM4SsUYETiqVHrL5dRFfwAG4AZhMZgAFDgsFg0HBEFIpF8IABrCAUcSSCgsEhSTiWPUGkoTKo1U2KgCU8Li-k6ImjcoVAuiZluAmQ8NiIHchP4mQtEBgGsyAEcUusYOTPbhhcUICQUiR+AAmdJoQ4W-kJVRCEAAEUx7dC6VV-DQKRkUAgjAajNySviZgLth45OKC9YWSDknYArAFi5ZFghH4arDjEHBY5HH4HCqJ7PwygXOLdoAHIYAKRcv21AYJYMAJuuqgALqSmGWC5vmw4ogebD9uwPisMM54kOEb7UCKWD3sOABCIGsIwODgqQhoCBEaDSDSuT2AA0s4NITIScCMHsMIYURwiPBAlj7uSh64SWMA1nWPCDjBrDwoS5DMOoR7wfweYbsOOpltQbCqa6-CEhadBqNUYYlCZhwyZBQ7CIyunHKcGESVJmQChwpATLAVzZOSCjAssPZ9nCNlyQE8msCIblYHsTlsJm1LDgAcjAwHYeEagvJkWBwCZ3H1qEEDDLl5horYK78F6MB-IOUzCClaUyOomDlF+WSluWGqnmiVknGcBQ4DUYFrol9WpUShkwEpkSNjgqT1C1FQlG4uRSPYI61cl41okJEL9P5byBVxNT7mikByoaI33FtaWUlkimZIw2D1pN9FypwjDlgKs2VRCXwqPYAzOFdkw3RNVQWFkK75MU17MJYV3hUEcBzdQWCvDlUSJiAUhprGa42AASqlnXpJYor4vUjSuHjGaDsIuMvIdETCDYQLM5EHUVvTOP0dQYCs8OjJEt1Irke1JPc+ufggH4UEMKE1DqPgRCkOQMBULQIAMMBFRsPgeiy0AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmesecurityprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/security.prs title="GitHub Repository: acme/security.prs">acme/security.prs</a><a class=headerlink href=#acmesecurityprs title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a>@meta {
-</span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a>  id: &quot;@acme/security&quot;
-</span><span id=__span-2-3><a id=__codelineno-2-3 name=__codelineno-2-3 href=#__codelineno-2-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-2-4><a id=__codelineno-2-4 name=__codelineno-2-4 href=#__codelineno-2-4></a>}
-</span><span id=__span-2-5><a id=__codelineno-2-5 name=__codelineno-2-5 href=#__codelineno-2-5></a>
-</span><span id=__span-2-6><a id=__codelineno-2-6 name=__codelineno-2-6 href=#__codelineno-2-6></a>@identity {
-</span><span id=__span-2-7><a id=__codelineno-2-7 name=__codelineno-2-7 href=#__codelineno-2-7></a>  &quot;&quot;&quot;
-</span><span id=__span-2-8><a id=__codelineno-2-8 name=__codelineno-2-8 href=#__codelineno-2-8></a>  Apply ACME security standards to all code.
-</span><span id=__span-2-9><a id=__codelineno-2-9 name=__codelineno-2-9 href=#__codelineno-2-9></a>  Security is everyone&#39;s responsibility.
-</span><span id=__span-2-10><a id=__codelineno-2-10 name=__codelineno-2-10 href=#__codelineno-2-10></a>  &quot;&quot;&quot;
-</span><span id=__span-2-11><a id=__codelineno-2-11 name=__codelineno-2-11 href=#__codelineno-2-11></a>}
-</span><span id=__span-2-12><a id=__codelineno-2-12 name=__codelineno-2-12 href=#__codelineno-2-12></a>
-</span><span id=__span-2-13><a id=__codelineno-2-13 name=__codelineno-2-13 href=#__codelineno-2-13></a>@standards {
-</span><span id=__span-2-14><a id=__codelineno-2-14 name=__codelineno-2-14 href=#__codelineno-2-14></a>  authentication: [
-</span><span id=__span-2-15><a id=__codelineno-2-15 name=__codelineno-2-15 href=#__codelineno-2-15></a>    &quot;Use OAuth 2.0 / OIDC&quot;
-</span><span id=__span-2-16><a id=__codelineno-2-16 name=__codelineno-2-16 href=#__codelineno-2-16></a>    &quot;MFA required (TOTP or WebAuthn)&quot;
-</span><span id=__span-2-17><a id=__codelineno-2-17 name=__codelineno-2-17 href=#__codelineno-2-17></a>    &quot;Session timeout: 3600 seconds&quot;
-</span><span id=__span-2-18><a id=__codelineno-2-18 name=__codelineno-2-18 href=#__codelineno-2-18></a>    &quot;Enable refresh token rotation&quot;
-</span><span id=__span-2-19><a id=__codelineno-2-19 name=__codelineno-2-19 href=#__codelineno-2-19></a>  ]
-</span><span id=__span-2-20><a id=__codelineno-2-20 name=__codelineno-2-20 href=#__codelineno-2-20></a>
-</span><span id=__span-2-21><a id=__codelineno-2-21 name=__codelineno-2-21 href=#__codelineno-2-21></a>  authorization: [
-</span><span id=__span-2-22><a id=__codelineno-2-22 name=__codelineno-2-22 href=#__codelineno-2-22></a>    &quot;RBAC with ABAC extensions&quot;
-</span><span id=__span-2-23><a id=__codelineno-2-23 name=__codelineno-2-23 href=#__codelineno-2-23></a>    &quot;Apply least privilege principle&quot;
-</span><span id=__span-2-24><a id=__codelineno-2-24 name=__codelineno-2-24 href=#__codelineno-2-24></a>    &quot;Audit logging required&quot;
-</span><span id=__span-2-25><a id=__codelineno-2-25 name=__codelineno-2-25 href=#__codelineno-2-25></a>  ]
-</span><span id=__span-2-26><a id=__codelineno-2-26 name=__codelineno-2-26 href=#__codelineno-2-26></a>
-</span><span id=__span-2-27><a id=__codelineno-2-27 name=__codelineno-2-27 href=#__codelineno-2-27></a>  dataProtection: [
-</span><span id=__span-2-28><a id=__codelineno-2-28 name=__codelineno-2-28 href=#__codelineno-2-28></a>    &quot;Encrypt at rest with AES-256&quot;
-</span><span id=__span-2-29><a id=__codelineno-2-29 name=__codelineno-2-29 href=#__codelineno-2-29></a>    &quot;Encrypt in transit with TLS 1.3&quot;
-</span><span id=__span-2-30><a id=__codelineno-2-30 name=__codelineno-2-30 href=#__codelineno-2-30></a>    &quot;Mask PII in all outputs&quot;
-</span><span id=__span-2-31><a id=__codelineno-2-31 name=__codelineno-2-31 href=#__codelineno-2-31></a>    &quot;Follow data classification for retention&quot;
-</span><span id=__span-2-32><a id=__codelineno-2-32 name=__codelineno-2-32 href=#__codelineno-2-32></a>  ]
-</span><span id=__span-2-33><a id=__codelineno-2-33 name=__codelineno-2-33 href=#__codelineno-2-33></a>
-</span><span id=__span-2-34><a id=__codelineno-2-34 name=__codelineno-2-34 href=#__codelineno-2-34></a>  dependencies: [
-</span><span id=__span-2-35><a id=__codelineno-2-35 name=__codelineno-2-35 href=#__codelineno-2-35></a>    &quot;Daily vulnerability scanning&quot;
-</span><span id=__span-2-36><a id=__codelineno-2-36 name=__codelineno-2-36 href=#__codelineno-2-36></a>    &quot;Critical vulnerabilities block deployment&quot;
-</span><span id=__span-2-37><a id=__codelineno-2-37 name=__codelineno-2-37 href=#__codelineno-2-37></a>    &quot;High vulnerabilities: fix within 7 days&quot;
-</span><span id=__span-2-38><a id=__codelineno-2-38 name=__codelineno-2-38 href=#__codelineno-2-38></a>    &quot;Medium vulnerabilities: fix within 30 days&quot;
-</span><span id=__span-2-39><a id=__codelineno-2-39 name=__codelineno-2-39 href=#__codelineno-2-39></a>  ]
-</span><span id=__span-2-40><a id=__codelineno-2-40 name=__codelineno-2-40 href=#__codelineno-2-40></a>
-</span><span id=__span-2-41><a id=__codelineno-2-41 name=__codelineno-2-41 href=#__codelineno-2-41></a>  secrets: [
-</span><span id=__span-2-42><a id=__codelineno-2-42 name=__codelineno-2-42 href=#__codelineno-2-42></a>    &quot;Store in HashiCorp Vault&quot;
-</span><span id=__span-2-43><a id=__codelineno-2-43 name=__codelineno-2-43 href=#__codelineno-2-43></a>    &quot;Rotate every 90 days&quot;
-</span><span id=__span-2-44><a id=__codelineno-2-44 name=__codelineno-2-44 href=#__codelineno-2-44></a>    &quot;Never store secrets in code&quot;
-</span><span id=__span-2-45><a id=__codelineno-2-45 name=__codelineno-2-45 href=#__codelineno-2-45></a>  ]
-</span><span id=__span-2-46><a id=__codelineno-2-46 name=__codelineno-2-46 href=#__codelineno-2-46></a>}
-</span><span id=__span-2-47><a id=__codelineno-2-47 name=__codelineno-2-47 href=#__codelineno-2-47></a>
-</span><span id=__span-2-48><a id=__codelineno-2-48 name=__codelineno-2-48 href=#__codelineno-2-48></a>@restrictions {
-</span><span id=__span-2-49><a id=__codelineno-2-49 name=__codelineno-2-49 href=#__codelineno-2-49></a>  - &quot;Never store passwords in plain text&quot;
-</span><span id=__span-2-50><a id=__codelineno-2-50 name=__codelineno-2-50 href=#__codelineno-2-50></a>  - &quot;Never log sensitive data (passwords, tokens, PII)&quot;
-</span><span id=__span-2-51><a id=__codelineno-2-51 name=__codelineno-2-51 href=#__codelineno-2-51></a>  - &quot;Never use MD5 or SHA1 for security purposes&quot;
-</span><span id=__span-2-52><a id=__codelineno-2-52 name=__codelineno-2-52 href=#__codelineno-2-52></a>  - &quot;Never disable TLS certificate verification&quot;
-</span><span id=__span-2-53><a id=__codelineno-2-53 name=__codelineno-2-53 href=#__codelineno-2-53></a>  - &quot;Never use eval() or similar unsafe functions&quot;
-</span><span id=__span-2-54><a id=__codelineno-2-54 name=__codelineno-2-54 href=#__codelineno-2-54></a>  - &quot;Never trust user input without validation&quot;
-</span><span id=__span-2-55><a id=__codelineno-2-55 name=__codelineno-2-55 href=#__codelineno-2-55></a>  - &quot;Never expose stack traces in production&quot;
-</span><span id=__span-2-56><a id=__codelineno-2-56 name=__codelineno-2-56 href=#__codelineno-2-56></a>  - &quot;Always use parameterized queries (no SQL concatenation)&quot;
-</span><span id=__span-2-57><a id=__codelineno-2-57 name=__codelineno-2-57 href=#__codelineno-2-57></a>  - &quot;Always validate and sanitize file uploads&quot;
-</span><span id=__span-2-58><a id=__codelineno-2-58 name=__codelineno-2-58 href=#__codelineno-2-58></a>  - &quot;Always implement rate limiting for APIs&quot;
-</span><span id=__span-2-59><a id=__codelineno-2-59 name=__codelineno-2-59 href=#__codelineno-2-59></a>}
-</span><span id=__span-2-60><a id=__codelineno-2-60 name=__codelineno-2-60 href=#__codelineno-2-60></a>
-</span><span id=__span-2-61><a id=__codelineno-2-61 name=__codelineno-2-61 href=#__codelineno-2-61></a>@knowledge {
-</span><span id=__span-2-62><a id=__codelineno-2-62 name=__codelineno-2-62 href=#__codelineno-2-62></a>  &quot;&quot;&quot;
-</span><span id=__span-2-63><a id=__codelineno-2-63 name=__codelineno-2-63 href=#__codelineno-2-63></a>  ## Security Resources
-</span><span id=__span-2-64><a id=__codelineno-2-64 name=__codelineno-2-64 href=#__codelineno-2-64></a>
-</span><span id=__span-2-65><a id=__codelineno-2-65 name=__codelineno-2-65 href=#__codelineno-2-65></a>  - Security Guidelines: https://wiki.acme.com/security
-</span><span id=__span-2-66><a id=__codelineno-2-66 name=__codelineno-2-66 href=#__codelineno-2-66></a>  - Incident Response: https://wiki.acme.com/incident-response
-</span><span id=__span-2-67><a id=__codelineno-2-67 name=__codelineno-2-67 href=#__codelineno-2-67></a>  - Security Training: https://learn.acme.com/security
-</span><span id=__span-2-68><a id=__codelineno-2-68 name=__codelineno-2-68 href=#__codelineno-2-68></a>  - Bug Bounty: https://hackerone.com/acme
-</span><span id=__span-2-69><a id=__codelineno-2-69 name=__codelineno-2-69 href=#__codelineno-2-69></a>
-</span><span id=__span-2-70><a id=__codelineno-2-70 name=__codelineno-2-70 href=#__codelineno-2-70></a>  ## Contacts
-</span><span id=__span-2-71><a id=__codelineno-2-71 name=__codelineno-2-71 href=#__codelineno-2-71></a>
-</span><span id=__span-2-72><a id=__codelineno-2-72 name=__codelineno-2-72 href=#__codelineno-2-72></a>  - Security Team: security@acme.com
-</span><span id=__span-2-73><a id=__codelineno-2-73 name=__codelineno-2-73 href=#__codelineno-2-73></a>  - Incident Hotline: +1-800-SEC-ACME
-</span><span id=__span-2-74><a id=__codelineno-2-74 name=__codelineno-2-74 href=#__codelineno-2-74></a>  - Slack: #security-help
-</span><span id=__span-2-75><a id=__codelineno-2-75 name=__codelineno-2-75 href=#__codelineno-2-75></a>  &quot;&quot;&quot;
-</span><span id=__span-2-76><a id=__codelineno-2-76 name=__codelineno-2-76 href=#__codelineno-2-76></a>}
-</span><span id=__span-2-77><a id=__codelineno-2-77 name=__codelineno-2-77 href=#__codelineno-2-77></a>
-</span><span id=__span-2-78><a id=__codelineno-2-78 name=__codelineno-2-78 href=#__codelineno-2-78></a>@shortcuts {
-</span><span id=__span-2-79><a id=__codelineno-2-79 name=__codelineno-2-79 href=#__codelineno-2-79></a>  &quot;/threat-model&quot;: &quot;Help create a threat model&quot;
-</span><span id=__span-2-80><a id=__codelineno-2-80 name=__codelineno-2-80 href=#__codelineno-2-80></a>  &quot;/vuln-check&quot;: &quot;Check for common vulnerabilities&quot;
-</span><span id=__span-2-81><a id=__codelineno-2-81 name=__codelineno-2-81 href=#__codelineno-2-81></a>  &quot;/secure-code&quot;: &quot;Review code for security issues&quot;
-</span><span id=__span-2-82><a id=__codelineno-2-82 name=__codelineno-2-82 href=#__codelineno-2-82></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9HBiMArtQhYAnsMGt+-OCvYZCA4QEYKABjPrWAXw0aRvTlmUr+wDVvUhLWgIJpyLj4AwgCyAKLacorO2lgYrDwY1Dxw-FjM-BhQUPwsPDAU7vwAylFKqvwQqTAAbjDUKmwwAOSp1PBobHAQAEbQzoWaQl4jGjasdnBxCUkprkUY8riOEIzYEGwCyEUeIACqsvwA8j5LOPwATGb8UscAkgAiQd5awyEAYj787QCO8hDtHj8AAUABUjqCAAr8ZjUfgAdRgPVOuFYAEoXrtSnBumw0hBJMwlgIAMwANlMpkiLAScExwzCrAwPVg3xgYHacHO6QA1pxvsw4k42C8ALq2IaLXCwiAAL3Wm342yGuwASgAhYL8ADuynOPk1QX4RA4rFxZvpwj8AX4sAwU34NAgNWgMAA5jBHUpWIwIOQYJaQKceMpbcw3W6IKw3Wy-gCYDwxRKtIk4pDqIK5MLWFsdgyfQ00FhMsXOcXdbh+D4wsUALQXACsZMDjMYheLUbS1Hi3XLev4oIAMsV+CYSYGQvaefxIXc7pVNFkckSsGglnSvCrhu9mNlmNr+KmMLkoPbupA1tn+GBYWzTdmkxMhvk0Jx8j6IPBc1vhA8MNAXBqeQoFYepmX6Co4DWVhWCjN1AyCcpViyfggJAsC+igZRP1SFlmEYacXygZgVEkdhAwACQgN1zjQ0Du0w7Cv2vCBCB1PVOwAdkPDAVA3PNhBCBMIHkEhUOA+jwKwpxmMgNiKxwTsSSpRI+MfIpZDbGAsDgb9XmGYp0naBd+Ao+1FKCWE0H4AA1RYoCwQNVUFbBPVqeoXAAThU3j+J-EAADl3LhKZYU9TT2h0ky8gDTctHFawJREMslEYbNUjcIZa2GIK6hCozPUwHFtVhOZO3If9NA4QhHLi-hsuEXL6jDGNZDNbC6h4uIQSKuASuSOA6DSZg+TNIbZzuDE6oawLgv4eRDhCB4GxhOFigonwjGvW9NOiCo12oTpZD8rQZqauEQzgZlWSHEdGHqJwL1c1D6ggJ6H2mnK5oWtyaiyYE0VW7QCWgJJ5rNDAwE9MB5B9dKXjOuasGoBbix+uEozXPtpSWVCsl4BUJk+xq5qII7wriAiu3EeATJoZgeHkNKNiJooZp8KBtV8+bDkwbtJA4JRZQTfg-le2ngVYDJigARUHXI2EvThCamtnhg5rm+LxrDU09eIgSu2CnGFljWXkchmAwFIEfVznuYJf0yNLZ6sJIbDo22uEfFnPzxjsHkpe1WAeA9eYhk8F4AGJI5KMoYlVeAiWoe66SfU7Y4UcoXAAcX+fIsNA3T+BwLBV10qQpF1HkIAocRJAoFgSBkOPVDVu4P3fYsE7gTozRgAQS7LxAK6rmu64KRupCjX1O9rTle9kNXSkzmJQW7KM4IH0u0HLqQ7WoVha4kCfmCb3as7V9V5BjdUiXYFQt6HiucHEPkM1AhvT6kcfk34aP+EsnoNKqcl4txcKCGApABDn2cGIY+n8SBtw7o4UygoC7934AAaiMLWAAHJSWsxQwhBFrMEcIS9TwEQEJHGBqhaw4BgFANARQI6bj9qwEQXJYRYAUFFTKuwpC4HaNgWsJAGaMOEIYEAFFGHWS0s9Y8QjIHFjEfnF4wgpB0VrIwBhBFJHDCCLo6cN44SNzEZoOiGEII4XUSAZumcYDaPEfo4QCcXQwAPDFT21I9ouCqHAeQ8BLBWBAFYUUDBHANHwEQUg-oqC0BAAwPK5p8BGFCUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmecomplianceprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/compliance.prs title="GitHub Repository: acme/compliance.prs">acme/compliance.prs</a><a class=headerlink href=#acmecomplianceprs title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a>@meta {
-</span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a>  id: &quot;@acme/compliance&quot;
-</span><span id=__span-3-3><a id=__codelineno-3-3 name=__codelineno-3-3 href=#__codelineno-3-3></a>  syntax: &quot;1.2.0&quot;
-</span><span id=__span-3-4><a id=__codelineno-3-4 name=__codelineno-3-4 href=#__codelineno-3-4></a>}
-</span><span id=__span-3-5><a id=__codelineno-3-5 name=__codelineno-3-5 href=#__codelineno-3-5></a>
-</span><span id=__span-3-6><a id=__codelineno-3-6 name=__codelineno-3-6 href=#__codelineno-3-6></a>@identity {
-</span><span id=__span-3-7><a id=__codelineno-3-7 name=__codelineno-3-7 href=#__codelineno-3-7></a>  &quot;&quot;&quot;
-</span><span id=__span-3-8><a id=__codelineno-3-8 name=__codelineno-3-8 href=#__codelineno-3-8></a>  Ensure code meets ACME compliance requirements.
-</span><span id=__span-3-9><a id=__codelineno-3-9 name=__codelineno-3-9 href=#__codelineno-3-9></a>  We are SOC 2 Type II and GDPR compliant.
-</span><span id=__span-3-10><a id=__codelineno-3-10 name=__codelineno-3-10 href=#__codelineno-3-10></a>  &quot;&quot;&quot;
-</span><span id=__span-3-11><a id=__codelineno-3-11 name=__codelineno-3-11 href=#__codelineno-3-11></a>}
-</span><span id=__span-3-12><a id=__codelineno-3-12 name=__codelineno-3-12 href=#__codelineno-3-12></a>
-</span><span id=__span-3-13><a id=__codelineno-3-13 name=__codelineno-3-13 href=#__codelineno-3-13></a>@standards {
-</span><span id=__span-3-14><a id=__codelineno-3-14 name=__codelineno-3-14 href=#__codelineno-3-14></a>  soc2: [
-</span><span id=__span-3-15><a id=__codelineno-3-15 name=__codelineno-3-15 href=#__codelineno-3-15></a>    &quot;Logging required with 1 year retention&quot;
-</span><span id=__span-3-16><a id=__codelineno-3-16 name=__codelineno-3-16 href=#__codelineno-3-16></a>    &quot;Tamper-proof audit logs&quot;
-</span><span id=__span-3-17><a id=__codelineno-3-17 name=__codelineno-3-17 href=#__codelineno-3-17></a>    &quot;Access control documented and reviewed quarterly&quot;
-</span><span id=__span-3-18><a id=__codelineno-3-18 name=__codelineno-3-18 href=#__codelineno-3-18></a>    &quot;Change management: documented, approved, tested&quot;
-</span><span id=__span-3-19><a id=__codelineno-3-19 name=__codelineno-3-19 href=#__codelineno-3-19></a>  ]
-</span><span id=__span-3-20><a id=__codelineno-3-20 name=__codelineno-3-20 href=#__codelineno-3-20></a>
-</span><span id=__span-3-21><a id=__codelineno-3-21 name=__codelineno-3-21 href=#__codelineno-3-21></a>  gdpr: [
-</span><span id=__span-3-22><a id=__codelineno-3-22 name=__codelineno-3-22 href=#__codelineno-3-22></a>    &quot;Apply data minimization&quot;
-</span><span id=__span-3-23><a id=__codelineno-3-23 name=__codelineno-3-23 href=#__codelineno-3-23></a>    &quot;Enforce purpose limitation&quot;
-</span><span id=__span-3-24><a id=__codelineno-3-24 name=__codelineno-3-24 href=#__codelineno-3-24></a>    &quot;Consent management required&quot;
-</span><span id=__span-3-25><a id=__codelineno-3-25 name=__codelineno-3-25 href=#__codelineno-3-25></a>    &quot;Support right to erasure&quot;
-</span><span id=__span-3-26><a id=__codelineno-3-26 name=__codelineno-3-26 href=#__codelineno-3-26></a>    &quot;Enable data portability&quot;
-</span><span id=__span-3-27><a id=__codelineno-3-27 name=__codelineno-3-27 href=#__codelineno-3-27></a>    &quot;Breach notification within 72 hours&quot;
-</span><span id=__span-3-28><a id=__codelineno-3-28 name=__codelineno-3-28 href=#__codelineno-3-28></a>  ]
-</span><span id=__span-3-29><a id=__codelineno-3-29 name=__codelineno-3-29 href=#__codelineno-3-29></a>
-</span><span id=__span-3-30><a id=__codelineno-3-30 name=__codelineno-3-30 href=#__codelineno-3-30></a>  pci: [
-</span><span id=__span-3-31><a id=__codelineno-3-31 name=__codelineno-3-31 href=#__codelineno-3-31></a>    &quot;Applies to payment services only&quot;
-</span><span id=__span-3-32><a id=__codelineno-3-32 name=__codelineno-3-32 href=#__codelineno-3-32></a>    &quot;Never store full PAN&quot;
-</span><span id=__span-3-33><a id=__codelineno-3-33 name=__codelineno-3-33 href=#__codelineno-3-33></a>    &quot;Encryption required&quot;
-</span><span id=__span-3-34><a id=__codelineno-3-34 name=__codelineno-3-34 href=#__codelineno-3-34></a>  ]
-</span><span id=__span-3-35><a id=__codelineno-3-35 name=__codelineno-3-35 href=#__codelineno-3-35></a>}
-</span><span id=__span-3-36><a id=__codelineno-3-36 name=__codelineno-3-36 href=#__codelineno-3-36></a>
-</span><span id=__span-3-37><a id=__codelineno-3-37 name=__codelineno-3-37 href=#__codelineno-3-37></a>@restrictions {
-</span><span id=__span-3-38><a id=__codelineno-3-38 name=__codelineno-3-38 href=#__codelineno-3-38></a>  - &quot;Never process data beyond stated purpose&quot;
-</span><span id=__span-3-39><a id=__codelineno-3-39 name=__codelineno-3-39 href=#__codelineno-3-39></a>  - &quot;Never retain data longer than necessary&quot;
-</span><span id=__span-3-40><a id=__codelineno-3-40 name=__codelineno-3-40 href=#__codelineno-3-40></a>  - &quot;Always document data processing activities&quot;
-</span><span id=__span-3-41><a id=__codelineno-3-41 name=__codelineno-3-41 href=#__codelineno-3-41></a>  - &quot;Always provide data subject rights mechanisms&quot;
-</span><span id=__span-3-42><a id=__codelineno-3-42 name=__codelineno-3-42 href=#__codelineno-3-42></a>  - &quot;Never transfer data to non-approved regions&quot;
-</span><span id=__span-3-43><a id=__codelineno-3-43 name=__codelineno-3-43 href=#__codelineno-3-43></a>}
-</span><span id=__span-3-44><a id=__codelineno-3-44 name=__codelineno-3-44 href=#__codelineno-3-44></a>
-</span><span id=__span-3-45><a id=__codelineno-3-45 name=__codelineno-3-45 href=#__codelineno-3-45></a>@knowledge {
-</span><span id=__span-3-46><a id=__codelineno-3-46 name=__codelineno-3-46 href=#__codelineno-3-46></a>  &quot;&quot;&quot;
-</span><span id=__span-3-47><a id=__codelineno-3-47 name=__codelineno-3-47 href=#__codelineno-3-47></a>  ## Compliance Resources
-</span><span id=__span-3-48><a id=__codelineno-3-48 name=__codelineno-3-48 href=#__codelineno-3-48></a>
-</span><span id=__span-3-49><a id=__codelineno-3-49 name=__codelineno-3-49 href=#__codelineno-3-49></a>  - Compliance Portal: https://compliance.acme.com
-</span><span id=__span-3-50><a id=__codelineno-3-50 name=__codelineno-3-50 href=#__codelineno-3-50></a>  - Data Classification: https://wiki.acme.com/data-classification
-</span><span id=__span-3-51><a id=__codelineno-3-51 name=__codelineno-3-51 href=#__codelineno-3-51></a>  - Privacy Policy: https://acme.com/privacy
-</span><span id=__span-3-52><a id=__codelineno-3-52 name=__codelineno-3-52 href=#__codelineno-3-52></a>
-</span><span id=__span-3-53><a id=__codelineno-3-53 name=__codelineno-3-53 href=#__codelineno-3-53></a>  ## Data Classification
-</span><span id=__span-3-54><a id=__codelineno-3-54 name=__codelineno-3-54 href=#__codelineno-3-54></a>
-</span><span id=__span-3-55><a id=__codelineno-3-55 name=__codelineno-3-55 href=#__codelineno-3-55></a>  - **Public**: Marketing materials, public docs
-</span><span id=__span-3-56><a id=__codelineno-3-56 name=__codelineno-3-56 href=#__codelineno-3-56></a>  - **Internal**: Internal communications, non-sensitive
-</span><span id=__span-3-57><a id=__codelineno-3-57 name=__codelineno-3-57 href=#__codelineno-3-57></a>  - **Confidential**: Business data, customer info
-</span><span id=__span-3-58><a id=__codelineno-3-58 name=__codelineno-3-58 href=#__codelineno-3-58></a>  - **Restricted**: PII, financial data, credentials
-</span><span id=__span-3-59><a id=__codelineno-3-59 name=__codelineno-3-59 href=#__codelineno-3-59></a>
-</span><span id=__span-3-60><a id=__codelineno-3-60 name=__codelineno-3-60 href=#__codelineno-3-60></a>  ## Regional Requirements
-</span><span id=__span-3-61><a id=__codelineno-3-61 name=__codelineno-3-61 href=#__codelineno-3-61></a>
-</span><span id=__span-3-62><a id=__codelineno-3-62 name=__codelineno-3-62 href=#__codelineno-3-62></a>  - EU: GDPR compliance required
-</span><span id=__span-3-63><a id=__codelineno-3-63 name=__codelineno-3-63 href=#__codelineno-3-63></a>  - California: CCPA compliance required
-</span><span id=__span-3-64><a id=__codelineno-3-64 name=__codelineno-3-64 href=#__codelineno-3-64></a>  - Healthcare: HIPAA where applicable
-</span><span id=__span-3-65><a id=__codelineno-3-65 name=__codelineno-3-65 href=#__codelineno-3-65></a>  &quot;&quot;&quot;
-</span><span id=__span-3-66><a id=__codelineno-3-66 name=__codelineno-3-66 href=#__codelineno-3-66></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9CzJQIGVoxjDBrfvzgBPdhkIDhARgoAmCgAZVrAL5q1I3pywQsW-sDUbVIKxoCirHAArtQw-Cw8YZIwWHD8AIIAwgCyfuHMcgpKYaEAjkEQoZLscBSe-ADqYRih-ADKAPKJ-Cb8ACpaaGEAkt38ijz8AOIAIgAKAErpmYpYZepCPktqtqz2cFgDNTxxHgtwzIwmAsjlXiAAMswA5tcQrNf8eQWhgwDuLjj8hvxaMDVPGJOCBsXwaRZtUhdagAWhozGYYH6QR4Ln4UBucDB53ijGUcDiLHY1GYUH4PEOQWKHEGA0BADcIDA3jBBvkahxqFAtNjFokcIprlFFBghdSBBTGFSnKy6P00PD6bL+BwNqywQBdOwLa48GgnM6LeIK7nk7AYfgke4QK0AL2wILWPgW5wCYGY1GU-DQITQzDgYXkVs2zlBzvBfLYAfYlpFYqcgPyhXV4fBwjqQQVHqwTwg1xwOawzH4MGoGGCoV5wgCGAARrAzZtvdm69AXDzU+cAEKhcRfVjMZyQRgOtj8D64e78ADsrRwzBCWNTWrWCzQjAgBpdRpNTLiRe9GC01M0pcZ+P4bG5VZAADkYErqJoi7UwEEoGSxvFbzeAoxqJ0obqM8yY8JqKzaiIoQbNQECMEBuzlDCiz3o+3okvicQ8Oa-C1jAWhsIMGzYKy3q+v6KipshwioaWgKbFO2FNhiDx0bgij8KwMCYTUHZIUaUBvEeWGUieTEWvCmH3I84jOIyzjwGC1EgPEgnCehzCMpEjYWsEtYAFbcTmsH5rElrcQKrAQHAJBLvxNEPmxZaBGAdHiSqxYDqwMIYAqJJKoMoR3FGVirPYADWA5vLAPBCu45TeGCADESX8IkGTkFkXoTPAC6eopq4aMh6UzNk-BjC2UACAWWBoHAiBSDIGXyIoygUOIkgULI-EjDhiRQOWcAQMOo6sNVWC1fVjUfOFEDtRIMBdRkUjiTCjADQSw1waN-FjLB9LiG4FXyIwWjjZNDVSB1i2yFINAQAdp3ahoKX8L1Tb9YNW0jkBz38MhABUANjEE9ZwUDAjJDU4UxNJsacgoUBwHKPpg4w5KHFiCyAwD3TsKWrAYFAEP8HjnKE2SsgkEEVk-Y6yOcWwMLRkNckqNj-BA+lrCQJE7CIyTXZBENXEEjpcpShsGR0fc7r8UDOUwXBNIk2MvRypAhNKIj4vhK8wJE1j5SvTlwUU-wOVJkUThGxzfgAKoCKMkzTJlrU5DAVvqhziRE8NHpWRgAiJIkX6uy1ZUga8-EABL-FAuAjqEAgx90X7xOOOCltUu4jvW7PnIlNggNYGoME4AH4EQUKUDQ9AgI+Q1sPghgl0AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=frontendbaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/frontend/base.prs title="GitHub Repository: frontend/base.prs">frontend/base.prs</a><a class=headerlink href=#frontendbaseprs title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a>@meta {
-</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a>  id: &quot;@frontend/base&quot;
-</span><span id=__span-4-3><a id=__codelineno-4-3 name=__codelineno-4-3 href=#__codelineno-4-3></a>  syntax: &quot;3.0.0&quot;
-</span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a>  team: &quot;Frontend Platform&quot;
-</span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a>}
-</span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a>
-</span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a>@inherit @acme/base
-</span><span id=__span-4-8><a id=__codelineno-4-8 name=__codelineno-4-8 href=#__codelineno-4-8></a>@use @acme/security
-</span><span id=__span-4-9><a id=__codelineno-4-9 name=__codelineno-4-9 href=#__codelineno-4-9></a>@use @acme/compliance
-</span><span id=__span-4-10><a id=__codelineno-4-10 name=__codelineno-4-10 href=#__codelineno-4-10></a>
-</span><span id=__span-4-11><a id=__codelineno-4-11 name=__codelineno-4-11 href=#__codelineno-4-11></a>@identity {
-</span><span id=__span-4-12><a id=__codelineno-4-12 name=__codelineno-4-12 href=#__codelineno-4-12></a>  &quot;&quot;&quot;
-</span><span id=__span-4-13><a id=__codelineno-4-13 name=__codelineno-4-13 href=#__codelineno-4-13></a>  You are a frontend developer at ACME.
+</span></code></pre></div> <h3 id=acmebaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/base.prs title="GitHub Repository: acme/base.prs">acme/base.prs</a><a class=headerlink href=#acmebaseprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/base&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=w>  </span>org:<span class=w> </span><span class=s2>&quot;ACME Corporation&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  You are an AI coding assistant at ACME Corporation.</span>
+
+<span class=sd>  ## Core Values</span>
+
+<span class=sd>  - **Quality First**: Write production-ready code</span>
+<span class=sd>  - **Security Always**: Security is not optional</span>
+<span class=sd>  - **User Focus**: Consider the end user</span>
+<span class=sd>  - **Team Player**: Write code others can maintain</span>
+
+<span class=sd>  ## Standards</span>
+
+<span class=sd>  Follow ACME Engineering Standards v3.0</span>
+<span class=sd>  (https://wiki.acme.com/engineering-standards)</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Code review required with minimum 2 approvers&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Document all public APIs&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Add inline comments for complex logic&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Write tests for all code (80% coverage)&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span>git:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Use conventional commits format&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Branch naming: type/TICKET-description&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Signed commits required&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span><span class=nl>deployment</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Environments: dev, staging, prod&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Production requires team-lead and security approval&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never commit secrets, credentials, or API keys&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never bypass code review for production changes&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never deploy without passing CI/CD&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never ignore security scanner findings&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use deprecated dependencies with known CVEs&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never store PII in logs&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/standards&quot;</span>:<span class=w> </span><span class=s2>&quot;Review against ACME standards&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/security&quot;</span>:<span class=w> </span><span class=s2>&quot;Security review&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/perf&quot;</span>:<span class=w> </span><span class=s2>&quot;Performance review&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9ACMMcGMMGt+-OAE92GQgOEBGCgAYjSlf2bUA5rpABBAMIBZAKL97FtBewQ2pgL7KyiK8nFgQWOr8wMqqSiCmqgCazACu-BjUMOkqtgCS-Cw8EKyW6XBwEHBYGOzpWPwOLm4eXmFsFIFmAMRdzZn8AGoYUCnwnaoAtPwAVNMAiinD4ZEAYhC0WLMCAOrU4Vk0zDwpjG2sE5kYPJGFimZTswDKMIwpexENUADuGOpwW-xnq93pFKvxWMx6sw0GdhjF+A9pgBVBTUfgrZivf7TATuVgVHgwNG4LKcHj8FKo+GIgAqMFI-AAClBfkSAbt9gUjllITgiXACjV+CQMMVqsVxvweoDqqweBkeHBJRioFBmF8Gk5XM4SsUYETiqVHrL5dRFfwAG4AZhMZgAFDgsFg0HBEFIpF8IABrCAUcSSCgsEhSTiWPUGkoTKo1U2KgCU8Li-k6ImjcoVAuiZluAmQ8NiIHchP4mQtEBgGsyAEcUusYOTPbhhcUICQUiR+AAmdJoQ4W-kJVRCEAAEUx7dC6VV-DQKRkUAgjAajNySviZgLth45OKC9YWSDknYArAFi5ZFghH4arDjEHBY5HH4HCqJ7PwygXOLdoAHIYAKRcv21AYJYMAJuuqgALqSmGWC5vmw4ogebD9uwPisMM54kOEb7UCKWD3sOABCIGsIwODgqQhoCBEaDSDSuT2AA0s4NITIScCMHsMIYURwiPBAlj7uSh64SWMA1nWPCDjBrDwoS5DMOoR7wfweYbsOOpltQbCqa6-CEhadBqNUYYlCZhwyZBQ7CIyunHKcGESVJmQChwpATLAVzZOSCjAssPZ9nCNlyQE8msCIblYHsTlsJm1LDgAcjAwHYeEagvJkWBwCZ3H1qEEDDLl5horYK78F6MB-IOUzCClaUyOomDlF+WSluWGqnmiVknGcBQ4DUYFrol9WpUShkwEpkSNjgqT1C1FQlG4uRSPYI61cl41okJEL9P5byBVxNT7mikByoaI33FtaWUlkimZIw2D1pN9FypwjDlgKs2VRCXwqPYAzOFdkw3RNVQWFkK75MU17MJYV3hUEcBzdQWCvDlUSJiAUhprGa42AASqlnXpJYor4vUjSuHjGaDsIuMvIdETCDYQLM5EHUVvTOP0dQYCs8OjJEt1Irke1JPc+ufggH4UEMKE1DqPgRCkOQMBULQIAMMBFRsPgeiy0AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmesecurityprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/security.prs title="GitHub Repository: acme/security.prs">acme/security.prs</a><a class=headerlink href=#acmesecurityprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/security&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Apply ACME security standards to all code.</span>
+<span class=sd>  Security is everyone&#39;s responsibility.</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>authentication:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Use OAuth 2.0 / OIDC&quot;</span>
+<span class=w>    </span><span class=s2>&quot;MFA required (TOTP or WebAuthn)&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Session timeout: 3600 seconds&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Enable refresh token rotation&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span>authorization:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;RBAC with ABAC extensions&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Apply least privilege principle&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Audit logging required&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span>dataProtection:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Encrypt at rest with AES-256&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Encrypt in transit with TLS 1.3&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Mask PII in all outputs&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Follow data classification for retention&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span><span class=nl>dependencies</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Daily vulnerability scanning&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Critical vulnerabilities block deployment&quot;</span>
+<span class=w>    </span><span class=s2>&quot;High vulnerabilities: fix within 7 days&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Medium vulnerabilities: fix within 30 days&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span>secrets:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Store in HashiCorp Vault&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Rotate every 90 days&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Never store secrets in code&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never store passwords in plain text&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never log sensitive data (passwords, tokens, PII)&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use MD5 or SHA1 for security purposes&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never disable TLS certificate verification&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use eval() or similar unsafe functions&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never trust user input without validation&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never expose stack traces in production&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always use parameterized queries (no SQL concatenation)&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always validate and sanitize file uploads&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always implement rate limiting for APIs&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## Security Resources</span>
+
+<span class=sd>  - Security Guidelines: https://wiki.acme.com/security</span>
+<span class=sd>  - Incident Response: https://wiki.acme.com/incident-response</span>
+<span class=sd>  - Security Training: https://learn.acme.com/security</span>
+<span class=sd>  - Bug Bounty: https://hackerone.com/acme</span>
+
+<span class=sd>  ## Contacts</span>
+
+<span class=sd>  - Security Team: security@acme.com</span>
+<span class=sd>  - Incident Hotline: +1-800-SEC-ACME</span>
+<span class=sd>  - Slack: #security-help</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/threat-model&quot;</span>:<span class=w> </span><span class=s2>&quot;Help create a threat model&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/vuln-check&quot;</span>:<span class=w> </span><span class=s2>&quot;Check for common vulnerabilities&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/secure-code&quot;</span>:<span class=w> </span><span class=s2>&quot;Review code for security issues&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9HBiMArtQhYAnsMGt+-OCvYZCA4QEYKABjPrWAXw0aRvTlmUr+wDVvUhLWgIJpyLj4AwgCyAKLacorO2lgYrDwY1Dxw-FjM-BhQUPwsPDAU7vwAylFKqvwQqTAAbjDUKmwwAOSp1PBobHAQAEbQzoWaQl4jGjasdnBxCUkprkUY8riOEIzYEGwCyEUeIACqsvwA8j5LOPwATGb8UscAkgAiQd5awyEAYj787QCO8hDtHj8AAUABUjqCAAr8ZjUfgAdRgPVOuFYAEoXrtSnBumw0hBJMwlgIAMwANlMpkiLAScExwzCrAwPVg3xgYHacHO6QA1pxvsw4k42C8ALq2IaLXCwiAAL3Wm342yGuwASgAhYL8ADuynOPk1QX4RA4rFxZvpwj8AX4sAwU34NAgNWgMAA5jBHUpWIwIOQYJaQKceMpbcw3W6IKw3Wy-gCYDwxRKtIk4pDqIK5MLWFsdgyfQ00FhMsXOcXdbh+D4wsUALQXACsZMDjMYheLUbS1Hi3XLev4oIAMsV+CYSYGQvaefxIXc7pVNFkckSsGglnSvCrhu9mNlmNr+KmMLkoPbupA1tn+GBYWzTdmkxMhvk0Jx8j6IPBc1vhA8MNAXBqeQoFYepmX6Co4DWVhWCjN1AyCcpViyfggJAsC+igZRP1SFlmEYacXygZgVEkdhAwACQgN1zjQ0Du0w7Cv2vCBCB1PVOwAdkPDAVA3PNhBCBMIHkEhUOA+jwKwpxmMgNiKxwTsSSpRI+MfIpZDbGAsDgb9XmGYp0naBd+Ao+1FKCWE0H4AA1RYoCwQNVUFbBPVqeoXAAThU3j+J-EAADl3LhKZYU9TT2h0ky8gDTctHFawJREMslEYbNUjcIZa2GIK6hCozPUwHFtVhOZO3If9NA4QhHLi-hsuEXL6jDGNZDNbC6h4uIQSKuASuSOA6DSZg+TNIbZzuDE6oawLgv4eRDhCB4GxhOFigonwjGvW9NOiCo12oTpZD8rQZqauEQzgZlWSHEdGHqJwL1c1D6ggJ6H2mnK5oWtyaiyYE0VW7QCWgJJ5rNDAwE9MB5B9dKXjOuasGoBbix+uEozXPtpSWVCsl4BUJk+xq5qII7wriAiu3EeATJoZgeHkNKNiJooZp8KBtV8+bDkwbtJA4JRZQTfg-le2ngVYDJigARUHXI2EvThCamtnhg5rm+LxrDU09eIgSu2CnGFljWXkchmAwFIEfVznuYJf0yNLZ6sJIbDo22uEfFnPzxjsHkpe1WAeA9eYhk8F4AGJI5KMoYlVeAiWoe66SfU7Y4UcoXAAcX+fIsNA3T+BwLBV10qQpF1HkIAocRJAoFgSBkOPVDVu4P3fYsE7gTozRgAQS7LxAK6rmu64KRupCjX1O9rTle9kNXSkzmJQW7KM4IH0u0HLqQ7WoVha4kCfmCb3as7V9V5BjdUiXYFQt6HiucHEPkM1AhvT6kcfk34aP+EsnoNKqcl4txcKCGApABDn2cGIY+n8SBtw7o4UygoC7934AAaiMLWAAHJSWsxQwhBFrMEcIS9TwEQEJHGBqhaw4BgFANARQI6bj9qwEQXJYRYAUFFTKuwpC4HaNgWsJAGaMOEIYEAFFGHWS0s9Y8QjIHFjEfnF4wgpB0VrIwBhBFJHDCCLo6cN44SNzEZoOiGEII4XUSAZumcYDaPEfo4QCcXQwAPDFT21I9ouCqHAeQ8BLBWBAFYUUDBHANHwEQUg-oqC0BAAwPK5p8BGFCUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmecomplianceprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/compliance.prs title="GitHub Repository: acme/compliance.prs">acme/compliance.prs</a><a class=headerlink href=#acmecomplianceprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/compliance&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.2.0&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Ensure code meets ACME compliance requirements.</span>
+<span class=sd>  We are SOC 2 Type II and GDPR compliant.</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>soc2:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Logging required with 1 year retention&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Tamper-proof audit logs&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Access control documented and reviewed quarterly&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Change management: documented, approved, tested&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span>gdpr:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Apply data minimization&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Enforce purpose limitation&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Consent management required&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Support right to erasure&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Enable data portability&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Breach notification within 72 hours&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span>pci:<span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Applies to payment services only&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Never store full PAN&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Encryption required&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never process data beyond stated purpose&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never retain data longer than necessary&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always document data processing activities&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always provide data subject rights mechanisms&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never transfer data to non-approved regions&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## Compliance Resources</span>
+
+<span class=sd>  - Compliance Portal: https://compliance.acme.com</span>
+<span class=sd>  - Data Classification: https://wiki.acme.com/data-classification</span>
+<span class=sd>  - Privacy Policy: https://acme.com/privacy</span>
+
+<span class=sd>  ## Data Classification</span>
+
+<span class=sd>  - **Public**: Marketing materials, public docs</span>
+<span class=sd>  - **Internal**: Internal communications, non-sensitive</span>
+<span class=sd>  - **Confidential**: Business data, customer info</span>
+<span class=sd>  - **Restricted**: PII, financial data, credentials</span>
+
+<span class=sd>  ## Regional Requirements</span>
+
+<span class=sd>  - EU: GDPR compliance required</span>
+<span class=sd>  - California: CCPA compliance required</span>
+<span class=sd>  - Healthcare: HIPAA where applicable</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9CzJQIGVoxjDBrfvzgBPdhkIDhARgoAmCgAZVrAL5q1I3pywQsW-sDUbVIKxoCirHAArtQw-Cw8YZIwWHD8AIIAwgCyfuHMcgpKYaEAjkEQoZLscBSe-ADqYRih-ADKAPKJ-Cb8ACpaaGEAkt38ijz8AOIAIgAKAErpmYpYZepCPktqtqz2cFgDNTxxHgtwzIwmAsjlXiAAMswA5tcQrNf8eQWhgwDuLjj8hvxaMDVPGJOCBsXwaRZtUhdagAWhozGYYH6QR4Ln4UBucDB53ijGUcDiLHY1GYUH4PEOQWKHEGA0BADcIDA3jBBvkahxqFAtNjFokcIprlFFBghdSBBTGFSnKy6P00PD6bL+BwNqywQBdOwLa48GgnM6LeIK7nk7AYfgke4QK0AL2wILWPgW5wCYGY1GU-DQITQzDgYXkVs2zlBzvBfLYAfYlpFYqcgPyhXV4fBwjqQQVHqwTwg1xwOawzH4MGoGGCoV5wgCGAARrAzZtvdm69AXDzU+cAEKhcRfVjMZyQRgOtj8D64e78ADsrRwzBCWNTWrWCzQjAgBpdRpNTLiRe9GC01M0pcZ+P4bG5VZAADkYErqJoi7UwEEoGSxvFbzeAoxqJ0obqM8yY8JqKzaiIoQbNQECMEBuzlDCiz3o+3okvicQ8Oa-C1jAWhsIMGzYKy3q+v6KipshwioaWgKbFO2FNhiDx0bgij8KwMCYTUHZIUaUBvEeWGUieTEWvCmH3I84jOIyzjwGC1EgPEgnCehzCMpEjYWsEtYAFbcTmsH5rElrcQKrAQHAJBLvxNEPmxZaBGAdHiSqxYDqwMIYAqJJKoMoR3FGVirPYADWA5vLAPBCu45TeGCADESX8IkGTkFkXoTPAC6eopq4aMh6UzNk-BjC2UACAWWBoHAiBSDIGXyIoygUOIkgULI-EjDhiRQOWcAQMOo6sNVWC1fVjUfOFEDtRIMBdRkUjiTCjADQSw1waN-FjLB9LiG4FXyIwWjjZNDVSB1i2yFINAQAdp3ahoKX8L1Tb9YNW0jkBz38MhABUANjEE9ZwUDAjJDU4UxNJsacgoUBwHKPpg4w5KHFiCyAwD3TsKWrAYFAEP8HjnKE2SsgkEEVk-Y6yOcWwMLRkNckqNj-BA+lrCQJE7CIyTXZBENXEEjpcpShsGR0fc7r8UDOUwXBNIk2MvRypAhNKIj4vhK8wJE1j5SvTlwUU-wOVJkUThGxzfgAKoCKMkzTJlrU5DAVvqhziRE8NHpWRgAiJIkX6uy1ZUga8-EABL-FAuAjqEAgx90X7xOOOCltUu4jvW7PnIlNggNYGoME4AH4EQUKUDQ9AgI+Q1sPghgl0AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=frontendbaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/frontend/base.prs title="GitHub Repository: frontend/base.prs">frontend/base.prs</a><a class=headerlink href=#frontendbaseprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@frontend/base&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;3.0.0&quot;</span>
+<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Frontend Platform&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@</span><span class=kn>inherit</span><span class=s>@acme/base</span>
+<span class=err>@</span><span class=kn>use</span><span class=s>@acme/security</span>
+<span class=err>@</span><span class=kn>use</span><span class=s>@acme/compliance</span>
+
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  You are a frontend developer at ACME.</span>
+
+<span class=sd>  ## Expertise</span>
+
+<span class=sd>  - Modern JavaScript/TypeScript</span>
+<span class=sd>  - React ecosystem</span>
+<span class=sd>  - Web performance optimization</span>
+<span class=sd>  - Accessibility (WCAG 2.1 AA)</span>
+<span class=sd>  - Design systems</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## Frontend Platform Stack</span>
+
+<span class=sd>  - **Framework**: React 18</span>
+<span class=sd>  - **Language**: TypeScript 5</span>
+<span class=sd>  - **Build**: Vite 5</span>
+<span class=sd>  - **Styling**: TailwindCSS + @acme/design-tokens</span>
+<span class=sd>  - **State**: React Query + Zustand</span>
+<span class=sd>  - **Testing**: Vitest + Testing Library + Playwright</span>
+<span class=sd>  - **Components**: @acme/ui (shared design system)</span>
+
+<span class=sd>  ## Architecture</span>
+
+<span class=sd>  - Feature-based folder structure</span>
+<span class=sd>  - Micro-frontends for large apps</span>
+<span class=sd>  - Module federation for sharing</span>
+<span class=sd>  - API client generation from OpenAPI</span>
+
+<span class=sd>  ## Key Resources</span>
+
+<span class=sd>  - Design System: https://design.acme.com</span>
+<span class=sd>  - Component Library: https://ui.acme.com</span>
+<span class=sd>  - Frontend Wiki: https://wiki.acme.com/frontend</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Use React 18+ framework&quot;</span>
+<span class=w>    </span><span class=s2>&quot;TypeScript in strict mode&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Functional components with hooks and composition&quot;</span>
+<span class=w>    </span><span class=s2>&quot;React Query for server state, Zustand for client&quot;</span>
+<span class=w>    </span><span class=s2>&quot;TailwindCSS with @acme/design-tokens&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span><span class=nl>performance</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Initial bundle &lt; 200KB gzipped&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Per-route code splitting&quot;</span>
+<span class=w>    </span><span class=s2>&quot;LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span><span class=nl>accessibility</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;WCAG 2.1 AA compliance&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Automated testing with axe-core&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Manual testing required for new features&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Support keyboard navigation and screen readers&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Ensure color contrast and focus management&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+
+<span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Unit tests with Vitest (80% coverage)&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Integration tests with Testing Library&quot;</span>
+<span class=w>    </span><span class=s2>&quot;E2E tests with Playwright for happy paths&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use class components&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use any type without documentation&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never ignore accessibility requirements&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never skip loading/error states&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never hardcode URLs or config values&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use inline styles (use Tailwind)&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/component&quot;</span>:<span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>    Create a new React component with:</span>
+<span class=sd>    - TypeScript interface for props</span>
+<span class=sd>    - Unit tests</span>
+<span class=sd>    - Storybook story</span>
+<span class=sd>    - Accessibility considerations</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+
+<span class=w>  </span><span class=s2>&quot;/hook&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a custom React hook with tests&quot;</span>
+
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>    Write tests using:</span>
+<span class=sd>    - Vitest for unit tests</span>
+<span class=sd>    - Testing Library for integration</span>
+<span class=sd>    - Proper mocking patterns</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+
+<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span>:<span class=w> </span><span class=s2>&quot;Review for accessibility issues&quot;</span>
+
+<span class=w>  </span><span class=s2>&quot;/perf&quot;</span>:<span class=w> </span><span class=s2>&quot;Review for performance issues&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABMNTYdWPAPQAjDHBjDBrfvzgBPdhkIDhAZgoAGEyrX8OpfSABiE9px78AClGxhm1EuYC+q1REIVhwYaggsfhEMRhIYeUVlVhEAVyUomLiZJUYU8KxNQLSYDNj4ljIoCAxWRiTA3k4sCM1+YFV1FRBzdQBNZhT+DGoSjH5xSSd+HhgANxgoZjQwociAQQBhAFkAUQoAiwBiQ-4dwmXqZqUD9QBafi3mGeo1ACkMWYwAZUZwtCwZAAVTTLH5-LAdfj3ABKMBikRgLC0cA4Pgs9wA6jA5PwLp5vDU6vwls0SBAAF7YCBsSH3NaMOpwOAQOTQFr8AAUGI2awA4vwAEwUACM-DWawAlLT+AAReAQADmamRqLgkK6fgOIhYjkIkXaFg13SOJ3sk2krncWHxJH4XywMQA1jcofwAFRu+ykGAAdy8jo9Alh8P4woAHNKPQAZGoKlIYBUwQP8YGg34Qf78ACskbdACEUtAeMmAGoREo59Hut32zRVVgK5OAjDQH3BHgbL5ffgAalKWRmzKVtywzEdnDVVY99uwSbdQbhjEiAEUUmFWn2AFppB3SXOA+DNBul8so3spw-BBX8KMs6jDDeWjCaH3hBU4CFTt0bZhkNhNOBk2iMoZELTk4BwYYYGcQdFWVTQURgEgpVYSFjjFahGBwcslzyeoq1sOEsDw24FCUZxPCgZ4NCwagUlwkZpS2CBfmYW4JkcaQ4HGLx+HcahEyGNA0EnO4HieFJYHGaCwipNgeOoDRIPCBtpTWFwAEl+EYKomn4RNWFk5p5ImW0AHlllYdSNJddCAGkYFaWE4AGTD4Bde45SHNQvgQ1EBA-LARMQGQZFgpUKEyGAKAqaUfz-Qz2BvO8HwCrAgrgELQIgSKyhi39pTNTjnAxCBHQgNKMqyttytyuJ8pIGQOKkHh1W6drVH8VDkhRGoeGGHhuINdQWBmARkEhToQAAVXSYMl1DMM+3Eb0-WoZ1jXUKbUxgMEM0iYIaPCBaSCeZRNq24RbBSWpjNYDAoG0380H-dhuLbXB+BwZgx24vqnr-Zk7p6S6QHmlc12oVp8Q0MJ5kU3qODofht16i0YZ0iAmhB7aWygNtpE7bsPpwft4nC1gRzHCcQYAXRdPEvBIQkYHGyahBADTWAiapHrkG6eCkgAeQVjGMOy8308kM2WVqLqmlwwluCQUg4J6Zg0cgIiPBUcY5qMNhcfgRaFLM4GR2wNJlY3QzFkhzf4DYo27EXTGFOmXRiRlmVZKoCjZiwpu5PlBRFMU1gBrWWb14Q1lV39Z2cDgUSvfgSaGQgYFuFhGPljmthqeNHuTnX+BGABHQsRgo3jDJ9aTsDwtU8+EL4UmErxInHTQ5GYAb+Hu2ZFTktR-rgX4YE4Mu4WeZv2eEHZWDgPCnsWRSdVoxRIn+zxcm45n7sTOJ2A97r1BLq8A62jnpu5yIS-eiJSbLEvOTDYwAFInvhhMYClFvOaOAVPeO6lhDyP0+geFODZkpyHvFDGOIAdgCh2GAlEEDSZuGfK+RUH4FJfQwMJVomBcBzwsPTVgXVAgjBRMdO6Q1pTCAAHJzBWMUbS7gmSR1elgMhYlmGsMUuwmorQCjLDTk-AYkQeDMFyMfB0wMLr3AEfDfgcEvCjAZPAH2bICjT0rhAEY8i+GuhUSsOA5U0B8T7jwK8MgwgSARgo9ySiOYsNUcpHgo0SjTWhFGbivEdSQGvJ8KAa4THKJAO4th6Rgj1hKCiOs8BOTsObK2ds-9Opaggp3XIvC2htRkBUF6iUIRIA5hqQOjsRiziGAPX0-BwbcNKRI3AiB2b3B2ntTMwQODUDADEEoMMaBLFElte4t8IhoN4R0u0o4oa9zHDRLwhQql0i0UyFkujWg6mZM8EeYyjQumEDIb6Y5hA2A2DUtWYw96jltE0s5jpWmkwfuYQpJcLkVI6lUjE+QSgP34GkS+syX6HnwTdKZby1kXmgdeW8cCHz4N6TAYBI9ZkuAkBcfgp1GDlRgSQvpS82qVMKRgYUwpCjlOELCIeDSYZe20Vsv2rQIBMnCe8w0IAZB4i+TSuYWN67DLCDaFmaj2UuM6iAXwtMGBNChvgIgpByDRRoPQEA8NmRsHwMKaVQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configuration>Project Configuration<a class=headerlink href=#project-configuration title="Permanent link">&para;</a></h2> <h3 id=example-project>Example Project<a class=headerlink href=#example-project title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># checkout-app/promptscript/project.prs</span>
+<span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-app&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;2.1.0&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@</span><span class=kn>inherit</span><span class=s>@frontend/base</span>
+
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Checkout Application&quot;</span>
+<span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/acme/checkout-app&quot;</span>
+<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Commerce&quot;</span>
+<span class=w>  </span>productOwner:<span class=w> </span><span class=s2>&quot;Jane Smith&quot;</span>
+<span class=w>  </span>techLead:<span class=w> </span><span class=s2>&quot;John Doe&quot;</span>
+
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## Overview</span>
+
+<span class=sd>  Multi-step checkout flow for ACME e-commerce platform.</span>
+<span class=sd>  Handles cart review, shipping, payment, and confirmation.</span>
+
+<span class=sd>  ## Key Integrations</span>
+
+<span class=sd>  - Payment: Stripe Elements</span>
+<span class=sd>  - Shipping: ShipEngine API</span>
+<span class=sd>  - Tax: Avalara</span>
+<span class=sd>  - Analytics: Segment + Mixpanel</span>
+
+<span class=sd>  ## Architecture</span>
+
+<span class=sd>  - Micro-frontend (Module Federation)</span>
+<span class=sd>  - Shared shell: @acme/commerce-shell</span>
+<span class=sd>  - Feature flags: LaunchDarkly</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>payment:<span class=w> </span><span class=p>{</span>
+<span class=w>    </span>provider:<span class=w> </span><span class=s2>&quot;Stripe&quot;</span>
+<span class=w>    </span>pciCompliance:<span class=w> </span><span class=kc>true</span>
+<span class=w>    </span>neverStoreCardData:<span class=w> </span><span class=kc>true</span>
+<span class=w>  </span><span class=p>}</span>
+<span class=p>}</span>
+
+<span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## API Endpoints</span>
+
+<span class=sd>  ### Cart Service (cart.acme.com)</span>
+<span class=sd>  - GET /cart - Get current cart</span>
+<span class=sd>  - PUT /cart/items/:id - Update item</span>
+<span class=sd>  - DELETE /cart/items/:id - Remove item</span>
+
+<span class=sd>  ### Checkout Service (checkout.acme.com)</span>
+<span class=sd>  - POST /checkout/start - Initialize checkout</span>
+<span class=sd>  - PUT /checkout/:id/shipping - Set shipping</span>
+<span class=sd>  - PUT /checkout/:id/payment - Process payment</span>
+<span class=sd>  - POST /checkout/:id/complete - Complete order</span>
+
+<span class=sd>  ## Feature Flags</span>
+
+<span class=sd>  - checkout-apple-pay: Apple Pay integration</span>
+<span class=sd>  - checkout-express: One-click checkout</span>
+<span class=sd>  - checkout-affirm: Affirm financing</span>
+
+<span class=sd>  ## Error Codes</span>
+
+<span class=sd>  - CART_EMPTY: Cart has no items</span>
+<span class=sd>  - SHIPPING_UNAVAILABLE: Cannot ship to address</span>
+<span class=sd>  - PAYMENT_DECLINED: Payment failed</span>
+<span class=sd>  - INVENTORY_ERROR: Item out of stock</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/checkout-flow&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with checkout flow implementation&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/payment&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with Stripe payment integration&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/shipping&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with shipping calculation&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/cart&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with cart management&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkAmCgEYKABn2sAvmLHcIrRdQhZB3MGo2DlYpAHoAIww4GDdWbhZ2Ij9RcUEaZgArJSwLEABhRRV1PwBBXSgIRmwINicJahg0ZjhfZmojPIBzXxw1CIoWEjCMRj4wxiLVDW1desEOUjz85hI+akZYkAN0oKk1RiwAeQB3VhhqPIApDHPBAGUSXvmOSYAZGAwZORAr5hxxAARZhbOISfTbbZpADE0MERwAbhcERAYCcwYIALJqKBYCCaOAcNCCSZKaZ+MBQZgnQRgdqCUr5TEAUUEME0Q3Wm3SUGwdOoJAoOwAErcpLA4CSMNQ-I0UWi6II4DgILpPF1FZgjHx2IqxSS2JABTU2ELWDtYYIANIwIyCACSSS61BNrDgGM0ggAChhtZxcg8sD40DBBMzYDqsO60p77iq1awurI46rmYnPKHSl77TtPQAVMyyUoIjC8l25hmsUtGPGMODJmBdSOCADUWIghEw5ygGMtpQ2KteWDUjQ97cYQU0gWCnCkggAFJjmPtYIIAGIwKQXV0ASgrcelm6ViigUFk3FG405F02BJPPZj68+w8atN5XXrgjeGDUrEmgOlZQoCMHYIScVxzXiZJZyVARQmlKRJVSCQtUjWRkIkXZmBRLdLh+e4g1VUE0hQxgIBWMhKluTZZCDNRYhIwRziRagCPaGB8gQgCBFo6h6J2CCIPcZRWGpWApC6UMMLAqEJD7bMw1CZpPCjXtLU4mUHmRKpQ3naoZQoS8YEGVY90fABxZk80ECZpT8T1zP4EkR0adgpRlCsvQAVWs2yZTCXwYBIOAwkQaRBE9Ly0CkbBQ0CkgK0BZk3is1k-KwAKOGC0Lws9AAlILsLirK1LhQoyRKLTqBRbk9KmEpDLGYyhjMiRPS9I57l80lig0MJCTsiKHVYXwIFLCAAC9Qx68lPJ8myZpKHLwmVVU0HVIb7ic1aEy6ObuvqvqwvCVD-SGr0gk2OBJVO9hPM6g6KqO6QJlWch+FDT0KPejhBHaXC1KfbAR1DNd32jCtFpmHR3s0LUiwqUMfTtFTGxdPE6kfKGtCIGh4E-I5zg5SoVBJQ6sEh8ntDAI0SCLGmIAFWlPGo9VAeZaggmoQQVi3CHH3yUo8rzAB9ZlMS9PMAE1ZA0vwcGiJjmEkLLozah5hXtL1swAOXMkWvJ10oADVSntN5SgAIRS2XblEvwdoWZWvikRprs80opZZHXRaS-I3ntHXmUBWRkebMAMGgTcK0D43mR9o48qlsW8ryxPZHtLK-o0P6wFg5gVFAyFwLibhlXaLBGA0JCi4mKnKWpeQ8mFGAoGJE5ejJp6KSpGkIEooL-VdeZ5DCW6KaQH4W7bwQO9wQNg1DcfJCddHanNWSfn6+N1sTJup9b9vO523euilKAq95DGN9r-SJ+bw-Z87u-BBIW4MEkyNwJAZwAF0GH9B0fARBSDvSoLQEADAWKtDYPgGwP8gA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-config>Project Config<a class=headerlink href=#project-config title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=c1># checkout-app/promptscript.yaml</span>
+</span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a><span class=nt>input</span><span class=p>:</span>
+</span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">promptscript/project.prs</span>
+</span><span id=__span-1-4><a id=__codelineno-1-4 name=__codelineno-1-4 href=#__codelineno-1-4></a>
+</span><span id=__span-1-5><a id=__codelineno-1-5 name=__codelineno-1-5 href=#__codelineno-1-5></a><span class=nt>registry</span><span class=p>:</span>
+</span><span id=__span-1-6><a id=__codelineno-1-6 name=__codelineno-1-6 href=#__codelineno-1-6></a><span class=w>  </span><span class=nt>url</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/acme/promptscript-registry</span>
+</span><span id=__span-1-7><a id=__codelineno-1-7 name=__codelineno-1-7 href=#__codelineno-1-7></a><span class=w>  </span><span class=nt>auth</span><span class=p>:</span>
+</span><span id=__span-1-8><a id=__codelineno-1-8 name=__codelineno-1-8 href=#__codelineno-1-8></a><span class=w>    </span><span class=nt>token</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${GITHUB_TOKEN}</span>
+</span><span id=__span-1-9><a id=__codelineno-1-9 name=__codelineno-1-9 href=#__codelineno-1-9></a>
+</span><span id=__span-1-10><a id=__codelineno-1-10 name=__codelineno-1-10 href=#__codelineno-1-10></a><span class=nt>targets</span><span class=p>:</span>
+</span><span id=__span-1-11><a id=__codelineno-1-11 name=__codelineno-1-11 href=#__codelineno-1-11></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
+</span><span id=__span-1-12><a id=__codelineno-1-12 name=__codelineno-1-12 href=#__codelineno-1-12></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-13><a id=__codelineno-1-13 name=__codelineno-1-13 href=#__codelineno-1-13></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.github/copilot-instructions.md</span>
+</span><span id=__span-1-14><a id=__codelineno-1-14 name=__codelineno-1-14 href=#__codelineno-1-14></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
+</span><span id=__span-1-15><a id=__codelineno-1-15 name=__codelineno-1-15 href=#__codelineno-1-15></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-16><a id=__codelineno-1-16 name=__codelineno-1-16 href=#__codelineno-1-16></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CLAUDE.md</span>
+</span><span id=__span-1-17><a id=__codelineno-1-17 name=__codelineno-1-17 href=#__codelineno-1-17></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
+</span><span id=__span-1-18><a id=__codelineno-1-18 name=__codelineno-1-18 href=#__codelineno-1-18></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-19><a id=__codelineno-1-19 name=__codelineno-1-19 href=#__codelineno-1-19></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.cursor/rules/project.mdc</span>
+</span><span id=__span-1-20><a id=__codelineno-1-20 name=__codelineno-1-20 href=#__codelineno-1-20></a>
+</span><span id=__span-1-21><a id=__codelineno-1-21 name=__codelineno-1-21 href=#__codelineno-1-21></a><span class=nt>validation</span><span class=p>:</span>
+</span><span id=__span-1-22><a id=__codelineno-1-22 name=__codelineno-1-22 href=#__codelineno-1-22></a><span class=w>  </span><span class=nt>strict</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-1-23><a id=__codelineno-1-23 name=__codelineno-1-23 href=#__codelineno-1-23></a><span class=w>  </span><span class=nt>rules</span><span class=p>:</span>
+</span><span id=__span-1-24><a id=__codelineno-1-24 name=__codelineno-1-24 href=#__codelineno-1-24></a><span class=w>    </span><span class=nt>require-knowledge</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
+</span><span id=__span-1-25><a id=__codelineno-1-25 name=__codelineno-1-25 href=#__codelineno-1-25></a>
+</span><span id=__span-1-26><a id=__codelineno-1-26 name=__codelineno-1-26 href=#__codelineno-1-26></a><span class=nt>watch</span><span class=p>:</span>
+</span><span id=__span-1-27><a id=__codelineno-1-27 name=__codelineno-1-27 href=#__codelineno-1-27></a><span class=w>  </span><span class=nt>debounce</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+</span></code></pre></div> <h2 id=governance>Governance<a class=headerlink href=#governance title="Permanent link">&para;</a></h2> <h3 id=codeowners>CODEOWNERS<a class=headerlink href=#codeowners title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a># Registry CODEOWNERS
+</span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a>* @acme/platform-team
+</span><span id=__span-2-3><a id=__codelineno-2-3 name=__codelineno-2-3 href=#__codelineno-2-3></a>
+</span><span id=__span-2-4><a id=__codelineno-2-4 name=__codelineno-2-4 href=#__codelineno-2-4></a># Organization base requires security review
+</span><span id=__span-2-5><a id=__codelineno-2-5 name=__codelineno-2-5 href=#__codelineno-2-5></a>@acme/base.prs @acme/security-team @acme/platform-team
+</span><span id=__span-2-6><a id=__codelineno-2-6 name=__codelineno-2-6 href=#__codelineno-2-6></a>@acme/security.prs @acme/security-team
+</span><span id=__span-2-7><a id=__codelineno-2-7 name=__codelineno-2-7 href=#__codelineno-2-7></a>@acme/compliance.prs @acme/compliance-team @acme/legal
+</span><span id=__span-2-8><a id=__codelineno-2-8 name=__codelineno-2-8 href=#__codelineno-2-8></a>
+</span><span id=__span-2-9><a id=__codelineno-2-9 name=__codelineno-2-9 href=#__codelineno-2-9></a># Team bases require team lead approval
+</span><span id=__span-2-10><a id=__codelineno-2-10 name=__codelineno-2-10 href=#__codelineno-2-10></a>@frontend/ @acme/frontend-leads
+</span><span id=__span-2-11><a id=__codelineno-2-11 name=__codelineno-2-11 href=#__codelineno-2-11></a>@backend/ @acme/backend-leads
+</span><span id=__span-2-12><a id=__codelineno-2-12 name=__codelineno-2-12 href=#__codelineno-2-12></a>@mobile/ @acme/mobile-leads
+</span></code></pre></div> <h3 id=pr-template>PR Template<a class=headerlink href=#pr-template title="Permanent link">&para;</a></h3> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a><span class=gu>## PromptScript Registry Change</span>
+</span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a>
+</span><span id=__span-3-3><a id=__codelineno-3-3 name=__codelineno-3-3 href=#__codelineno-3-3></a><span class=gu>### Type</span>
+</span><span id=__span-3-4><a id=__codelineno-3-4 name=__codelineno-3-4 href=#__codelineno-3-4></a>
+</span><span id=__span-3-5><a id=__codelineno-3-5 name=__codelineno-3-5 href=#__codelineno-3-5></a><span class=k>- [ ]</span> Organization policy update
+</span><span id=__span-3-6><a id=__codelineno-3-6 name=__codelineno-3-6 href=#__codelineno-3-6></a><span class=k>- [ ]</span> Team configuration update
+</span><span id=__span-3-7><a id=__codelineno-3-7 name=__codelineno-3-7 href=#__codelineno-3-7></a><span class=k>- [ ]</span> New fragment
+</span><span id=__span-3-8><a id=__codelineno-3-8 name=__codelineno-3-8 href=#__codelineno-3-8></a><span class=k>- [ ]</span> Bug fix
+</span><span id=__span-3-9><a id=__codelineno-3-9 name=__codelineno-3-9 href=#__codelineno-3-9></a>
+</span><span id=__span-3-10><a id=__codelineno-3-10 name=__codelineno-3-10 href=#__codelineno-3-10></a><span class=gu>### Breaking Change?</span>
+</span><span id=__span-3-11><a id=__codelineno-3-11 name=__codelineno-3-11 href=#__codelineno-3-11></a>
+</span><span id=__span-3-12><a id=__codelineno-3-12 name=__codelineno-3-12 href=#__codelineno-3-12></a><span class=k>- [ ]</span> Yes - includes migration guide
+</span><span id=__span-3-13><a id=__codelineno-3-13 name=__codelineno-3-13 href=#__codelineno-3-13></a><span class=k>- [ ]</span> No
+</span><span id=__span-3-14><a id=__codelineno-3-14 name=__codelineno-3-14 href=#__codelineno-3-14></a>
+</span><span id=__span-3-15><a id=__codelineno-3-15 name=__codelineno-3-15 href=#__codelineno-3-15></a><span class=gu>### Checklist</span>
+</span><span id=__span-3-16><a id=__codelineno-3-16 name=__codelineno-3-16 href=#__codelineno-3-16></a>
+</span><span id=__span-3-17><a id=__codelineno-3-17 name=__codelineno-3-17 href=#__codelineno-3-17></a><span class=k>- [ ]</span> Updated version in <span class=ni>@meta</span>
+</span><span id=__span-3-18><a id=__codelineno-3-18 name=__codelineno-3-18 href=#__codelineno-3-18></a><span class=k>- [ ]</span> Added CHANGELOG entry
+</span><span id=__span-3-19><a id=__codelineno-3-19 name=__codelineno-3-19 href=#__codelineno-3-19></a><span class=k>- [ ]</span> Tested with sample project
+</span><span id=__span-3-20><a id=__codelineno-3-20 name=__codelineno-3-20 href=#__codelineno-3-20></a><span class=k>- [ ]</span> Notified affected teams
+</span></code></pre></div> <h2 id=cicd>CI/CD<a class=headerlink href=#cicd title="Permanent link">&para;</a></h2> <h3 id=registry-ci>Registry CI<a class=headerlink href=#registry-ci title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a><span class=c1># .github/workflows/registry-ci.yml</span>
+</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Registry CI</span>
+</span><span id=__span-4-3><a id=__codelineno-4-3 name=__codelineno-4-3 href=#__codelineno-4-3></a>
+</span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a><span class=nt>on</span><span class=p>:</span>
+</span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
+</span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a><span class=w>    </span><span class=nt>branches</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">[</span><span class=nv>main</span><span class="p p-Indicator">]</span>
+</span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a><span class=w>  </span><span class=nt>pull_request</span><span class=p>:</span>
+</span><span id=__span-4-8><a id=__codelineno-4-8 name=__codelineno-4-8 href=#__codelineno-4-8></a>
+</span><span id=__span-4-9><a id=__codelineno-4-9 name=__codelineno-4-9 href=#__codelineno-4-9></a><span class=nt>jobs</span><span class=p>:</span>
+</span><span id=__span-4-10><a id=__codelineno-4-10 name=__codelineno-4-10 href=#__codelineno-4-10></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
+</span><span id=__span-4-11><a id=__codelineno-4-11 name=__codelineno-4-11 href=#__codelineno-4-11></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span id=__span-4-12><a id=__codelineno-4-12 name=__codelineno-4-12 href=#__codelineno-4-12></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
+</span><span id=__span-4-13><a id=__codelineno-4-13 name=__codelineno-4-13 href=#__codelineno-4-13></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
 </span><span id=__span-4-14><a id=__codelineno-4-14 name=__codelineno-4-14 href=#__codelineno-4-14></a>
-</span><span id=__span-4-15><a id=__codelineno-4-15 name=__codelineno-4-15 href=#__codelineno-4-15></a>  ## Expertise
-</span><span id=__span-4-16><a id=__codelineno-4-16 name=__codelineno-4-16 href=#__codelineno-4-16></a>
-</span><span id=__span-4-17><a id=__codelineno-4-17 name=__codelineno-4-17 href=#__codelineno-4-17></a>  - Modern JavaScript/TypeScript
-</span><span id=__span-4-18><a id=__codelineno-4-18 name=__codelineno-4-18 href=#__codelineno-4-18></a>  - React ecosystem
-</span><span id=__span-4-19><a id=__codelineno-4-19 name=__codelineno-4-19 href=#__codelineno-4-19></a>  - Web performance optimization
-</span><span id=__span-4-20><a id=__codelineno-4-20 name=__codelineno-4-20 href=#__codelineno-4-20></a>  - Accessibility (WCAG 2.1 AA)
-</span><span id=__span-4-21><a id=__codelineno-4-21 name=__codelineno-4-21 href=#__codelineno-4-21></a>  - Design systems
-</span><span id=__span-4-22><a id=__codelineno-4-22 name=__codelineno-4-22 href=#__codelineno-4-22></a>  &quot;&quot;&quot;
-</span><span id=__span-4-23><a id=__codelineno-4-23 name=__codelineno-4-23 href=#__codelineno-4-23></a>}
-</span><span id=__span-4-24><a id=__codelineno-4-24 name=__codelineno-4-24 href=#__codelineno-4-24></a>
-</span><span id=__span-4-25><a id=__codelineno-4-25 name=__codelineno-4-25 href=#__codelineno-4-25></a>@context {
-</span><span id=__span-4-26><a id=__codelineno-4-26 name=__codelineno-4-26 href=#__codelineno-4-26></a>  &quot;&quot;&quot;
-</span><span id=__span-4-27><a id=__codelineno-4-27 name=__codelineno-4-27 href=#__codelineno-4-27></a>  ## Frontend Platform Stack
+</span><span id=__span-4-15><a id=__codelineno-4-15 name=__codelineno-4-15 href=#__codelineno-4-15></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
+</span><span id=__span-4-16><a id=__codelineno-4-16 name=__codelineno-4-16 href=#__codelineno-4-16></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
+</span><span id=__span-4-17><a id=__codelineno-4-17 name=__codelineno-4-17 href=#__codelineno-4-17></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
+</span><span id=__span-4-18><a id=__codelineno-4-18 name=__codelineno-4-18 href=#__codelineno-4-18></a>
+</span><span id=__span-4-19><a id=__codelineno-4-19 name=__codelineno-4-19 href=#__codelineno-4-19></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
+</span><span id=__span-4-20><a id=__codelineno-4-20 name=__codelineno-4-20 href=#__codelineno-4-20></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
+</span><span id=__span-4-21><a id=__codelineno-4-21 name=__codelineno-4-21 href=#__codelineno-4-21></a>
+</span><span id=__span-4-22><a id=__codelineno-4-22 name=__codelineno-4-22 href=#__codelineno-4-22></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate all files</span>
+</span><span id=__span-4-23><a id=__codelineno-4-23 name=__codelineno-4-23 href=#__codelineno-4-23></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
+</span><span id=__span-4-24><a id=__codelineno-4-24 name=__codelineno-4-24 href=#__codelineno-4-24></a><span class=w>          </span><span class=no>for file in $(find . -name &quot;*.prs&quot;); do</span>
+</span><span id=__span-4-25><a id=__codelineno-4-25 name=__codelineno-4-25 href=#__codelineno-4-25></a><span class=w>            </span><span class=no>echo &quot;Validating $file...&quot;</span>
+</span><span id=__span-4-26><a id=__codelineno-4-26 name=__codelineno-4-26 href=#__codelineno-4-26></a><span class=w>            </span><span class=no>prs validate &quot;$file&quot; --strict</span>
+</span><span id=__span-4-27><a id=__codelineno-4-27 name=__codelineno-4-27 href=#__codelineno-4-27></a><span class=w>          </span><span class=no>done</span>
 </span><span id=__span-4-28><a id=__codelineno-4-28 name=__codelineno-4-28 href=#__codelineno-4-28></a>
-</span><span id=__span-4-29><a id=__codelineno-4-29 name=__codelineno-4-29 href=#__codelineno-4-29></a>  - **Framework**: React 18
-</span><span id=__span-4-30><a id=__codelineno-4-30 name=__codelineno-4-30 href=#__codelineno-4-30></a>  - **Language**: TypeScript 5
-</span><span id=__span-4-31><a id=__codelineno-4-31 name=__codelineno-4-31 href=#__codelineno-4-31></a>  - **Build**: Vite 5
-</span><span id=__span-4-32><a id=__codelineno-4-32 name=__codelineno-4-32 href=#__codelineno-4-32></a>  - **Styling**: TailwindCSS + @acme/design-tokens
-</span><span id=__span-4-33><a id=__codelineno-4-33 name=__codelineno-4-33 href=#__codelineno-4-33></a>  - **State**: React Query + Zustand
-</span><span id=__span-4-34><a id=__codelineno-4-34 name=__codelineno-4-34 href=#__codelineno-4-34></a>  - **Testing**: Vitest + Testing Library + Playwright
-</span><span id=__span-4-35><a id=__codelineno-4-35 name=__codelineno-4-35 href=#__codelineno-4-35></a>  - **Components**: @acme/ui (shared design system)
-</span><span id=__span-4-36><a id=__codelineno-4-36 name=__codelineno-4-36 href=#__codelineno-4-36></a>
-</span><span id=__span-4-37><a id=__codelineno-4-37 name=__codelineno-4-37 href=#__codelineno-4-37></a>  ## Architecture
-</span><span id=__span-4-38><a id=__codelineno-4-38 name=__codelineno-4-38 href=#__codelineno-4-38></a>
-</span><span id=__span-4-39><a id=__codelineno-4-39 name=__codelineno-4-39 href=#__codelineno-4-39></a>  - Feature-based folder structure
-</span><span id=__span-4-40><a id=__codelineno-4-40 name=__codelineno-4-40 href=#__codelineno-4-40></a>  - Micro-frontends for large apps
-</span><span id=__span-4-41><a id=__codelineno-4-41 name=__codelineno-4-41 href=#__codelineno-4-41></a>  - Module federation for sharing
-</span><span id=__span-4-42><a id=__codelineno-4-42 name=__codelineno-4-42 href=#__codelineno-4-42></a>  - API client generation from OpenAPI
-</span><span id=__span-4-43><a id=__codelineno-4-43 name=__codelineno-4-43 href=#__codelineno-4-43></a>
-</span><span id=__span-4-44><a id=__codelineno-4-44 name=__codelineno-4-44 href=#__codelineno-4-44></a>  ## Key Resources
+</span><span id=__span-4-29><a id=__codelineno-4-29 name=__codelineno-4-29 href=#__codelineno-4-29></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Check for circular dependencies</span>
+</span><span id=__span-4-30><a id=__codelineno-4-30 name=__codelineno-4-30 href=#__codelineno-4-30></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">./scripts/check-circular-deps.sh</span>
+</span><span id=__span-4-31><a id=__codelineno-4-31 name=__codelineno-4-31 href=#__codelineno-4-31></a>
+</span><span id=__span-4-32><a id=__codelineno-4-32 name=__codelineno-4-32 href=#__codelineno-4-32></a><span class=w>  </span><span class=nt>test-projects</span><span class=p>:</span>
+</span><span id=__span-4-33><a id=__codelineno-4-33 name=__codelineno-4-33 href=#__codelineno-4-33></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span id=__span-4-34><a id=__codelineno-4-34 name=__codelineno-4-34 href=#__codelineno-4-34></a><span class=w>    </span><span class=nt>needs</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">validate</span>
+</span><span id=__span-4-35><a id=__codelineno-4-35 name=__codelineno-4-35 href=#__codelineno-4-35></a><span class=w>    </span><span class=nt>strategy</span><span class=p>:</span>
+</span><span id=__span-4-36><a id=__codelineno-4-36 name=__codelineno-4-36 href=#__codelineno-4-36></a><span class=w>      </span><span class=nt>matrix</span><span class=p>:</span>
+</span><span id=__span-4-37><a id=__codelineno-4-37 name=__codelineno-4-37 href=#__codelineno-4-37></a><span class=w>        </span><span class=nt>project</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">[</span><span class=nv>sample-frontend</span><span class="p p-Indicator">,</span><span class=w> </span><span class=nv>sample-backend</span><span class="p p-Indicator">,</span><span class=w> </span><span class=nv>sample-mobile</span><span class="p p-Indicator">]</span>
+</span><span id=__span-4-38><a id=__codelineno-4-38 name=__codelineno-4-38 href=#__codelineno-4-38></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
+</span><span id=__span-4-39><a id=__codelineno-4-39 name=__codelineno-4-39 href=#__codelineno-4-39></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span id=__span-4-40><a id=__codelineno-4-40 name=__codelineno-4-40 href=#__codelineno-4-40></a>
+</span><span id=__span-4-41><a id=__codelineno-4-41 name=__codelineno-4-41 href=#__codelineno-4-41></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span id=__span-4-42><a id=__codelineno-4-42 name=__codelineno-4-42 href=#__codelineno-4-42></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
+</span><span id=__span-4-43><a id=__codelineno-4-43 name=__codelineno-4-43 href=#__codelineno-4-43></a><span class=w>          </span><span class=nt>repository</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">acme/${{ matrix.project }}</span>
+</span><span id=__span-4-44><a id=__codelineno-4-44 name=__codelineno-4-44 href=#__codelineno-4-44></a><span class=w>          </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">test-project</span>
 </span><span id=__span-4-45><a id=__codelineno-4-45 name=__codelineno-4-45 href=#__codelineno-4-45></a>
-</span><span id=__span-4-46><a id=__codelineno-4-46 name=__codelineno-4-46 href=#__codelineno-4-46></a>  - Design System: https://design.acme.com
-</span><span id=__span-4-47><a id=__codelineno-4-47 name=__codelineno-4-47 href=#__codelineno-4-47></a>  - Component Library: https://ui.acme.com
-</span><span id=__span-4-48><a id=__codelineno-4-48 name=__codelineno-4-48 href=#__codelineno-4-48></a>  - Frontend Wiki: https://wiki.acme.com/frontend
-</span><span id=__span-4-49><a id=__codelineno-4-49 name=__codelineno-4-49 href=#__codelineno-4-49></a>  &quot;&quot;&quot;
-</span><span id=__span-4-50><a id=__codelineno-4-50 name=__codelineno-4-50 href=#__codelineno-4-50></a>}
-</span><span id=__span-4-51><a id=__codelineno-4-51 name=__codelineno-4-51 href=#__codelineno-4-51></a>
-</span><span id=__span-4-52><a id=__codelineno-4-52 name=__codelineno-4-52 href=#__codelineno-4-52></a>@standards {
-</span><span id=__span-4-53><a id=__codelineno-4-53 name=__codelineno-4-53 href=#__codelineno-4-53></a>  code: [
-</span><span id=__span-4-54><a id=__codelineno-4-54 name=__codelineno-4-54 href=#__codelineno-4-54></a>    &quot;Use React 18+ framework&quot;
-</span><span id=__span-4-55><a id=__codelineno-4-55 name=__codelineno-4-55 href=#__codelineno-4-55></a>    &quot;TypeScript in strict mode&quot;
-</span><span id=__span-4-56><a id=__codelineno-4-56 name=__codelineno-4-56 href=#__codelineno-4-56></a>    &quot;Functional components with hooks and composition&quot;
-</span><span id=__span-4-57><a id=__codelineno-4-57 name=__codelineno-4-57 href=#__codelineno-4-57></a>    &quot;React Query for server state, Zustand for client&quot;
-</span><span id=__span-4-58><a id=__codelineno-4-58 name=__codelineno-4-58 href=#__codelineno-4-58></a>    &quot;TailwindCSS with @acme/design-tokens&quot;
-</span><span id=__span-4-59><a id=__codelineno-4-59 name=__codelineno-4-59 href=#__codelineno-4-59></a>  ]
-</span><span id=__span-4-60><a id=__codelineno-4-60 name=__codelineno-4-60 href=#__codelineno-4-60></a>
-</span><span id=__span-4-61><a id=__codelineno-4-61 name=__codelineno-4-61 href=#__codelineno-4-61></a>  performance: [
-</span><span id=__span-4-62><a id=__codelineno-4-62 name=__codelineno-4-62 href=#__codelineno-4-62></a>    &quot;Initial bundle &lt; 200KB gzipped&quot;
-</span><span id=__span-4-63><a id=__codelineno-4-63 name=__codelineno-4-63 href=#__codelineno-4-63></a>    &quot;Per-route code splitting&quot;
-</span><span id=__span-4-64><a id=__codelineno-4-64 name=__codelineno-4-64 href=#__codelineno-4-64></a>    &quot;LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1&quot;
-</span><span id=__span-4-65><a id=__codelineno-4-65 name=__codelineno-4-65 href=#__codelineno-4-65></a>  ]
-</span><span id=__span-4-66><a id=__codelineno-4-66 name=__codelineno-4-66 href=#__codelineno-4-66></a>
-</span><span id=__span-4-67><a id=__codelineno-4-67 name=__codelineno-4-67 href=#__codelineno-4-67></a>  accessibility: [
-</span><span id=__span-4-68><a id=__codelineno-4-68 name=__codelineno-4-68 href=#__codelineno-4-68></a>    &quot;WCAG 2.1 AA compliance&quot;
-</span><span id=__span-4-69><a id=__codelineno-4-69 name=__codelineno-4-69 href=#__codelineno-4-69></a>    &quot;Automated testing with axe-core&quot;
-</span><span id=__span-4-70><a id=__codelineno-4-70 name=__codelineno-4-70 href=#__codelineno-4-70></a>    &quot;Manual testing required for new features&quot;
-</span><span id=__span-4-71><a id=__codelineno-4-71 name=__codelineno-4-71 href=#__codelineno-4-71></a>    &quot;Support keyboard navigation and screen readers&quot;
-</span><span id=__span-4-72><a id=__codelineno-4-72 name=__codelineno-4-72 href=#__codelineno-4-72></a>    &quot;Ensure color contrast and focus management&quot;
-</span><span id=__span-4-73><a id=__codelineno-4-73 name=__codelineno-4-73 href=#__codelineno-4-73></a>  ]
-</span><span id=__span-4-74><a id=__codelineno-4-74 name=__codelineno-4-74 href=#__codelineno-4-74></a>
-</span><span id=__span-4-75><a id=__codelineno-4-75 name=__codelineno-4-75 href=#__codelineno-4-75></a>  testing: [
-</span><span id=__span-4-76><a id=__codelineno-4-76 name=__codelineno-4-76 href=#__codelineno-4-76></a>    &quot;Unit tests with Vitest (80% coverage)&quot;
-</span><span id=__span-4-77><a id=__codelineno-4-77 name=__codelineno-4-77 href=#__codelineno-4-77></a>    &quot;Integration tests with Testing Library&quot;
-</span><span id=__span-4-78><a id=__codelineno-4-78 name=__codelineno-4-78 href=#__codelineno-4-78></a>    &quot;E2E tests with Playwright for happy paths&quot;
-</span><span id=__span-4-79><a id=__codelineno-4-79 name=__codelineno-4-79 href=#__codelineno-4-79></a>  ]
-</span><span id=__span-4-80><a id=__codelineno-4-80 name=__codelineno-4-80 href=#__codelineno-4-80></a>}
-</span><span id=__span-4-81><a id=__codelineno-4-81 name=__codelineno-4-81 href=#__codelineno-4-81></a>
-</span><span id=__span-4-82><a id=__codelineno-4-82 name=__codelineno-4-82 href=#__codelineno-4-82></a>@restrictions {
-</span><span id=__span-4-83><a id=__codelineno-4-83 name=__codelineno-4-83 href=#__codelineno-4-83></a>  - &quot;Never use class components&quot;
-</span><span id=__span-4-84><a id=__codelineno-4-84 name=__codelineno-4-84 href=#__codelineno-4-84></a>  - &quot;Never use any type without documentation&quot;
-</span><span id=__span-4-85><a id=__codelineno-4-85 name=__codelineno-4-85 href=#__codelineno-4-85></a>  - &quot;Never ignore accessibility requirements&quot;
-</span><span id=__span-4-86><a id=__codelineno-4-86 name=__codelineno-4-86 href=#__codelineno-4-86></a>  - &quot;Never skip loading/error states&quot;
-</span><span id=__span-4-87><a id=__codelineno-4-87 name=__codelineno-4-87 href=#__codelineno-4-87></a>  - &quot;Never hardcode URLs or config values&quot;
-</span><span id=__span-4-88><a id=__codelineno-4-88 name=__codelineno-4-88 href=#__codelineno-4-88></a>  - &quot;Never use inline styles (use Tailwind)&quot;
-</span><span id=__span-4-89><a id=__codelineno-4-89 name=__codelineno-4-89 href=#__codelineno-4-89></a>}
-</span><span id=__span-4-90><a id=__codelineno-4-90 name=__codelineno-4-90 href=#__codelineno-4-90></a>
-</span><span id=__span-4-91><a id=__codelineno-4-91 name=__codelineno-4-91 href=#__codelineno-4-91></a>@shortcuts {
-</span><span id=__span-4-92><a id=__codelineno-4-92 name=__codelineno-4-92 href=#__codelineno-4-92></a>  &quot;/component&quot;: &quot;&quot;&quot;
-</span><span id=__span-4-93><a id=__codelineno-4-93 name=__codelineno-4-93 href=#__codelineno-4-93></a>    Create a new React component with:
-</span><span id=__span-4-94><a id=__codelineno-4-94 name=__codelineno-4-94 href=#__codelineno-4-94></a>    - TypeScript interface for props
-</span><span id=__span-4-95><a id=__codelineno-4-95 name=__codelineno-4-95 href=#__codelineno-4-95></a>    - Unit tests
-</span><span id=__span-4-96><a id=__codelineno-4-96 name=__codelineno-4-96 href=#__codelineno-4-96></a>    - Storybook story
-</span><span id=__span-4-97><a id=__codelineno-4-97 name=__codelineno-4-97 href=#__codelineno-4-97></a>    - Accessibility considerations
-</span><span id=__span-4-98><a id=__codelineno-4-98 name=__codelineno-4-98 href=#__codelineno-4-98></a>  &quot;&quot;&quot;
-</span><span id=__span-4-99><a id=__codelineno-4-99 name=__codelineno-4-99 href=#__codelineno-4-99></a>
-</span><span id=__span-4-100><a id=__codelineno-4-100 name=__codelineno-4-100 href=#__codelineno-4-100></a>  &quot;/hook&quot;: &quot;Create a custom React hook with tests&quot;
-</span><span id=__span-4-101><a id=__codelineno-4-101 name=__codelineno-4-101 href=#__codelineno-4-101></a>
-</span><span id=__span-4-102><a id=__codelineno-4-102 name=__codelineno-4-102 href=#__codelineno-4-102></a>  &quot;/test&quot;: &quot;&quot;&quot;
-</span><span id=__span-4-103><a id=__codelineno-4-103 name=__codelineno-4-103 href=#__codelineno-4-103></a>    Write tests using:
-</span><span id=__span-4-104><a id=__codelineno-4-104 name=__codelineno-4-104 href=#__codelineno-4-104></a>    - Vitest for unit tests
-</span><span id=__span-4-105><a id=__codelineno-4-105 name=__codelineno-4-105 href=#__codelineno-4-105></a>    - Testing Library for integration
-</span><span id=__span-4-106><a id=__codelineno-4-106 name=__codelineno-4-106 href=#__codelineno-4-106></a>    - Proper mocking patterns
-</span><span id=__span-4-107><a id=__codelineno-4-107 name=__codelineno-4-107 href=#__codelineno-4-107></a>  &quot;&quot;&quot;
-</span><span id=__span-4-108><a id=__codelineno-4-108 name=__codelineno-4-108 href=#__codelineno-4-108></a>
-</span><span id=__span-4-109><a id=__codelineno-4-109 name=__codelineno-4-109 href=#__codelineno-4-109></a>  &quot;/a11y&quot;: &quot;Review for accessibility issues&quot;
-</span><span id=__span-4-110><a id=__codelineno-4-110 name=__codelineno-4-110 href=#__codelineno-4-110></a>
-</span><span id=__span-4-111><a id=__codelineno-4-111 name=__codelineno-4-111 href=#__codelineno-4-111></a>  &quot;/perf&quot;: &quot;Review for performance issues&quot;
-</span><span id=__span-4-112><a id=__codelineno-4-112 name=__codelineno-4-112 href=#__codelineno-4-112></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABMNTYdWPAPQAjDHBjDBrfvzgBPdhkIDhAZgoAGEyrX8OpfSABiE9px78AClGxhm1EuYC+q1REIVhwYaggsfhEMRhIYeUVlVhEAVyUomLiZJUYU8KxNQLSYDNj4ljIoCAxWRiTA3k4sCM1+YFV1FRBzdQBNZhT+DGoSjH5xSSd+HhgANxgoZjQwociAQQBhAFkAUQoAiwBiQ-4dwmXqZqUD9QBafi3mGeo1ACkMWYwAZUZwtCwZAAVTTLH5-LAdfj3ABKMBikRgLC0cA4Pgs9wA6jA5PwLp5vDU6vwls0SBAAF7YCBsSH3NaMOpwOAQOTQFr8AAUGI2awA4vwAEwUACM-DWawAlLT+AAReAQADmamRqLgkK6fgOIhYjkIkXaFg13SOJ3sk2krncWHxJH4XywMQA1jcofwAFRu+ykGAAdy8jo9Alh8P4woAHNKPQAZGoKlIYBUwQP8YGg34Qf78ACskbdACEUtAeMmAGoREo59Hut32zRVVgK5OAjDQH3BHgbL5ffgAalKWRmzKVtywzEdnDVVY99uwSbdQbhjEiAEUUmFWn2AFppB3SXOA+DNBul8so3spw-BBX8KMs6jDDeWjCaH3hBU4CFTt0bZhkNhNOBk2iMoZELTk4BwYYYGcQdFWVTQURgEgpVYSFjjFahGBwcslzyeoq1sOEsDw24FCUZxPCgZ4NCwagUlwkZpS2CBfmYW4JkcaQ4HGLx+HcahEyGNA0EnO4HieFJYHGaCwipNgeOoDRIPCBtpTWFwAEl+EYKomn4RNWFk5p5ImW0AHlllYdSNJddCAGkYFaWE4AGTD4Bde45SHNQvgQ1EBA-LARMQGQZFgpUKEyGAKAqaUfz-Qz2BvO8HwCrAgrgELQIgSKyhi39pTNTjnAxCBHQgNKMqyttytyuJ8pIGQOKkHh1W6drVH8VDkhRGoeGGHhuINdQWBmARkEhToQAAVXSYMl1DMM+3Eb0-WoZ1jXUKbUxgMEM0iYIaPCBaSCeZRNq24RbBSWpjNYDAoG0380H-dhuLbXB+BwZgx24vqnr-Zk7p6S6QHmlc12oVp8Q0MJ5kU3qODofht16i0YZ0iAmhB7aWygNtpE7bsPpwft4nC1gRzHCcQYAXRdPEvBIQkYHGyahBADTWAiapHrkG6eCkgAeQVjGMOy8308kM2WVqLqmlwwluCQUg4J6Zg0cgIiPBUcY5qMNhcfgRaFLM4GR2wNJlY3QzFkhzf4DYo27EXTGFOmXRiRlmVZKoCjZiwpu5PlBRFMU1gBrWWb14Q1lV39Z2cDgUSvfgSaGQgYFuFhGPljmthqeNHuTnX+BGABHQsRgo3jDJ9aTsDwtU8+EL4UmErxInHTQ5GYAb+Hu2ZFTktR-rgX4YE4Mu4WeZv2eEHZWDgPCnsWRSdVoxRIn+zxcm45n7sTOJ2A97r1BLq8A62jnpu5yIS-eiJSbLEvOTDYwAFInvhhMYClFvOaOAVPeO6lhDyP0+geFODZkpyHvFDGOIAdgCh2GAlEEDSZuGfK+RUH4FJfQwMJVomBcBzwsPTVgXVAgjBRMdO6Q1pTCAAHJzBWMUbS7gmSR1elgMhYlmGsMUuwmorQCjLDTk-AYkQeDMFyMfB0wMLr3AEfDfgcEvCjAZPAH2bICjT0rhAEY8i+GuhUSsOA5U0B8T7jwK8MgwgSARgo9ySiOYsNUcpHgo0SjTWhFGbivEdSQGvJ8KAa4THKJAO4th6Rgj1hKCiOs8BOTsObK2ds-9Opaggp3XIvC2htRkBUF6iUIRIA5hqQOjsRiziGAPX0-BwbcNKRI3AiB2b3B2ntTMwQODUDADEEoMMaBLFElte4t8IhoN4R0u0o4oa9zHDRLwhQql0i0UyFkujWg6mZM8EeYyjQumEDIb6Y5hA2A2DUtWYw96jltE0s5jpWmkwfuYQpJcLkVI6lUjE+QSgP34GkS+syX6HnwTdKZby1kXmgdeW8cCHz4N6TAYBI9ZkuAkBcfgp1GDlRgSQvpS82qVMKRgYUwpCjlOELCIeDSYZe20Vsv2rQIBMnCe8w0IAZB4i+TSuYWN67DLCDaFmaj2UuM6iAXwtMGBNChvgIgpByDRRoPQEA8NmRsHwMKaVQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configuration>Project Configuration<a class=headerlink href=#project-configuration title="Permanent link">&para;</a></h2> <h3 id=example-project>Example Project<a class=headerlink href=#example-project title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a># checkout-app/promptscript/project.prs
-</span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a>@meta {
-</span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a>  id: &quot;checkout-app&quot;
-</span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a>  syntax: &quot;2.1.0&quot;
-</span><span id=__span-5-5><a id=__codelineno-5-5 name=__codelineno-5-5 href=#__codelineno-5-5></a>}
-</span><span id=__span-5-6><a id=__codelineno-5-6 name=__codelineno-5-6 href=#__codelineno-5-6></a>
-</span><span id=__span-5-7><a id=__codelineno-5-7 name=__codelineno-5-7 href=#__codelineno-5-7></a>@inherit @frontend/base
-</span><span id=__span-5-8><a id=__codelineno-5-8 name=__codelineno-5-8 href=#__codelineno-5-8></a>
-</span><span id=__span-5-9><a id=__codelineno-5-9 name=__codelineno-5-9 href=#__codelineno-5-9></a>@context {
-</span><span id=__span-5-10><a id=__codelineno-5-10 name=__codelineno-5-10 href=#__codelineno-5-10></a>  project: &quot;Checkout Application&quot;
-</span><span id=__span-5-11><a id=__codelineno-5-11 name=__codelineno-5-11 href=#__codelineno-5-11></a>  repository: &quot;github.com/acme/checkout-app&quot;
-</span><span id=__span-5-12><a id=__codelineno-5-12 name=__codelineno-5-12 href=#__codelineno-5-12></a>  team: &quot;Commerce&quot;
-</span><span id=__span-5-13><a id=__codelineno-5-13 name=__codelineno-5-13 href=#__codelineno-5-13></a>  productOwner: &quot;Jane Smith&quot;
-</span><span id=__span-5-14><a id=__codelineno-5-14 name=__codelineno-5-14 href=#__codelineno-5-14></a>  techLead: &quot;John Doe&quot;
-</span><span id=__span-5-15><a id=__codelineno-5-15 name=__codelineno-5-15 href=#__codelineno-5-15></a>
-</span><span id=__span-5-16><a id=__codelineno-5-16 name=__codelineno-5-16 href=#__codelineno-5-16></a>  &quot;&quot;&quot;
-</span><span id=__span-5-17><a id=__codelineno-5-17 name=__codelineno-5-17 href=#__codelineno-5-17></a>  ## Overview
-</span><span id=__span-5-18><a id=__codelineno-5-18 name=__codelineno-5-18 href=#__codelineno-5-18></a>
-</span><span id=__span-5-19><a id=__codelineno-5-19 name=__codelineno-5-19 href=#__codelineno-5-19></a>  Multi-step checkout flow for ACME e-commerce platform.
-</span><span id=__span-5-20><a id=__codelineno-5-20 name=__codelineno-5-20 href=#__codelineno-5-20></a>  Handles cart review, shipping, payment, and confirmation.
-</span><span id=__span-5-21><a id=__codelineno-5-21 name=__codelineno-5-21 href=#__codelineno-5-21></a>
-</span><span id=__span-5-22><a id=__codelineno-5-22 name=__codelineno-5-22 href=#__codelineno-5-22></a>  ## Key Integrations
+</span><span id=__span-4-46><a id=__codelineno-4-46 name=__codelineno-4-46 href=#__codelineno-4-46></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
+</span><span id=__span-4-47><a id=__codelineno-4-47 name=__codelineno-4-47 href=#__codelineno-4-47></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
+</span><span id=__span-4-48><a id=__codelineno-4-48 name=__codelineno-4-48 href=#__codelineno-4-48></a>
+</span><span id=__span-4-49><a id=__codelineno-4-49 name=__codelineno-4-49 href=#__codelineno-4-49></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Compile test project</span>
+</span><span id=__span-4-50><a id=__codelineno-4-50 name=__codelineno-4-50 href=#__codelineno-4-50></a><span class=w>        </span><span class=nt>working-directory</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">test-project</span>
+</span><span id=__span-4-51><a id=__codelineno-4-51 name=__codelineno-4-51 href=#__codelineno-4-51></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs compile</span>
+</span><span id=__span-4-52><a id=__codelineno-4-52 name=__codelineno-4-52 href=#__codelineno-4-52></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>
+</span><span id=__span-4-53><a id=__codelineno-4-53 name=__codelineno-4-53 href=#__codelineno-4-53></a><span class=w>          </span><span class=nt>PROMPTSCRIPT_REGISTRY</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.workspace }}</span>
+</span></code></pre></div> <h3 id=project-ci>Project CI<a class=headerlink href=#project-ci title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a><span class=c1># Project .github/workflows/promptscript.yml</span>
+</span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">PromptScript</span>
+</span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a>
+</span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a><span class=nt>on</span><span class=p>:</span>
+</span><span id=__span-5-5><a id=__codelineno-5-5 name=__codelineno-5-5 href=#__codelineno-5-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
+</span><span id=__span-5-6><a id=__codelineno-5-6 name=__codelineno-5-6 href=#__codelineno-5-6></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
+</span><span id=__span-5-7><a id=__codelineno-5-7 name=__codelineno-5-7 href=#__codelineno-5-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript/**&#39;</span>
+</span><span id=__span-5-8><a id=__codelineno-5-8 name=__codelineno-5-8 href=#__codelineno-5-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
+</span><span id=__span-5-9><a id=__codelineno-5-9 name=__codelineno-5-9 href=#__codelineno-5-9></a><span class=w>  </span><span class=nt>pull_request</span><span class=p>:</span>
+</span><span id=__span-5-10><a id=__codelineno-5-10 name=__codelineno-5-10 href=#__codelineno-5-10></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
+</span><span id=__span-5-11><a id=__codelineno-5-11 name=__codelineno-5-11 href=#__codelineno-5-11></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript/**&#39;</span>
+</span><span id=__span-5-12><a id=__codelineno-5-12 name=__codelineno-5-12 href=#__codelineno-5-12></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
+</span><span id=__span-5-13><a id=__codelineno-5-13 name=__codelineno-5-13 href=#__codelineno-5-13></a>
+</span><span id=__span-5-14><a id=__codelineno-5-14 name=__codelineno-5-14 href=#__codelineno-5-14></a><span class=nt>jobs</span><span class=p>:</span>
+</span><span id=__span-5-15><a id=__codelineno-5-15 name=__codelineno-5-15 href=#__codelineno-5-15></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
+</span><span id=__span-5-16><a id=__codelineno-5-16 name=__codelineno-5-16 href=#__codelineno-5-16></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span id=__span-5-17><a id=__codelineno-5-17 name=__codelineno-5-17 href=#__codelineno-5-17></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
+</span><span id=__span-5-18><a id=__codelineno-5-18 name=__codelineno-5-18 href=#__codelineno-5-18></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span id=__span-5-19><a id=__codelineno-5-19 name=__codelineno-5-19 href=#__codelineno-5-19></a>
+</span><span id=__span-5-20><a id=__codelineno-5-20 name=__codelineno-5-20 href=#__codelineno-5-20></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
+</span><span id=__span-5-21><a id=__codelineno-5-21 name=__codelineno-5-21 href=#__codelineno-5-21></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
+</span><span id=__span-5-22><a id=__codelineno-5-22 name=__codelineno-5-22 href=#__codelineno-5-22></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
 </span><span id=__span-5-23><a id=__codelineno-5-23 name=__codelineno-5-23 href=#__codelineno-5-23></a>
-</span><span id=__span-5-24><a id=__codelineno-5-24 name=__codelineno-5-24 href=#__codelineno-5-24></a>  - Payment: Stripe Elements
-</span><span id=__span-5-25><a id=__codelineno-5-25 name=__codelineno-5-25 href=#__codelineno-5-25></a>  - Shipping: ShipEngine API
-</span><span id=__span-5-26><a id=__codelineno-5-26 name=__codelineno-5-26 href=#__codelineno-5-26></a>  - Tax: Avalara
-</span><span id=__span-5-27><a id=__codelineno-5-27 name=__codelineno-5-27 href=#__codelineno-5-27></a>  - Analytics: Segment + Mixpanel
-</span><span id=__span-5-28><a id=__codelineno-5-28 name=__codelineno-5-28 href=#__codelineno-5-28></a>
-</span><span id=__span-5-29><a id=__codelineno-5-29 name=__codelineno-5-29 href=#__codelineno-5-29></a>  ## Architecture
-</span><span id=__span-5-30><a id=__codelineno-5-30 name=__codelineno-5-30 href=#__codelineno-5-30></a>
-</span><span id=__span-5-31><a id=__codelineno-5-31 name=__codelineno-5-31 href=#__codelineno-5-31></a>  - Micro-frontend (Module Federation)
-</span><span id=__span-5-32><a id=__codelineno-5-32 name=__codelineno-5-32 href=#__codelineno-5-32></a>  - Shared shell: @acme/commerce-shell
-</span><span id=__span-5-33><a id=__codelineno-5-33 name=__codelineno-5-33 href=#__codelineno-5-33></a>  - Feature flags: LaunchDarkly
-</span><span id=__span-5-34><a id=__codelineno-5-34 name=__codelineno-5-34 href=#__codelineno-5-34></a>  &quot;&quot;&quot;
-</span><span id=__span-5-35><a id=__codelineno-5-35 name=__codelineno-5-35 href=#__codelineno-5-35></a>}
-</span><span id=__span-5-36><a id=__codelineno-5-36 name=__codelineno-5-36 href=#__codelineno-5-36></a>
-</span><span id=__span-5-37><a id=__codelineno-5-37 name=__codelineno-5-37 href=#__codelineno-5-37></a>@extend standards {
-</span><span id=__span-5-38><a id=__codelineno-5-38 name=__codelineno-5-38 href=#__codelineno-5-38></a>  payment: {
-</span><span id=__span-5-39><a id=__codelineno-5-39 name=__codelineno-5-39 href=#__codelineno-5-39></a>    provider: &quot;Stripe&quot;
-</span><span id=__span-5-40><a id=__codelineno-5-40 name=__codelineno-5-40 href=#__codelineno-5-40></a>    pciCompliance: true
-</span><span id=__span-5-41><a id=__codelineno-5-41 name=__codelineno-5-41 href=#__codelineno-5-41></a>    neverStoreCardData: true
-</span><span id=__span-5-42><a id=__codelineno-5-42 name=__codelineno-5-42 href=#__codelineno-5-42></a>  }
-</span><span id=__span-5-43><a id=__codelineno-5-43 name=__codelineno-5-43 href=#__codelineno-5-43></a>}
-</span><span id=__span-5-44><a id=__codelineno-5-44 name=__codelineno-5-44 href=#__codelineno-5-44></a>
-</span><span id=__span-5-45><a id=__codelineno-5-45 name=__codelineno-5-45 href=#__codelineno-5-45></a>@knowledge {
-</span><span id=__span-5-46><a id=__codelineno-5-46 name=__codelineno-5-46 href=#__codelineno-5-46></a>  &quot;&quot;&quot;
-</span><span id=__span-5-47><a id=__codelineno-5-47 name=__codelineno-5-47 href=#__codelineno-5-47></a>  ## API Endpoints
-</span><span id=__span-5-48><a id=__codelineno-5-48 name=__codelineno-5-48 href=#__codelineno-5-48></a>
-</span><span id=__span-5-49><a id=__codelineno-5-49 name=__codelineno-5-49 href=#__codelineno-5-49></a>  ### Cart Service (cart.acme.com)
-</span><span id=__span-5-50><a id=__codelineno-5-50 name=__codelineno-5-50 href=#__codelineno-5-50></a>  - GET /cart - Get current cart
-</span><span id=__span-5-51><a id=__codelineno-5-51 name=__codelineno-5-51 href=#__codelineno-5-51></a>  - PUT /cart/items/:id - Update item
-</span><span id=__span-5-52><a id=__codelineno-5-52 name=__codelineno-5-52 href=#__codelineno-5-52></a>  - DELETE /cart/items/:id - Remove item
-</span><span id=__span-5-53><a id=__codelineno-5-53 name=__codelineno-5-53 href=#__codelineno-5-53></a>
-</span><span id=__span-5-54><a id=__codelineno-5-54 name=__codelineno-5-54 href=#__codelineno-5-54></a>  ### Checkout Service (checkout.acme.com)
-</span><span id=__span-5-55><a id=__codelineno-5-55 name=__codelineno-5-55 href=#__codelineno-5-55></a>  - POST /checkout/start - Initialize checkout
-</span><span id=__span-5-56><a id=__codelineno-5-56 name=__codelineno-5-56 href=#__codelineno-5-56></a>  - PUT /checkout/:id/shipping - Set shipping
-</span><span id=__span-5-57><a id=__codelineno-5-57 name=__codelineno-5-57 href=#__codelineno-5-57></a>  - PUT /checkout/:id/payment - Process payment
-</span><span id=__span-5-58><a id=__codelineno-5-58 name=__codelineno-5-58 href=#__codelineno-5-58></a>  - POST /checkout/:id/complete - Complete order
-</span><span id=__span-5-59><a id=__codelineno-5-59 name=__codelineno-5-59 href=#__codelineno-5-59></a>
-</span><span id=__span-5-60><a id=__codelineno-5-60 name=__codelineno-5-60 href=#__codelineno-5-60></a>  ## Feature Flags
-</span><span id=__span-5-61><a id=__codelineno-5-61 name=__codelineno-5-61 href=#__codelineno-5-61></a>
-</span><span id=__span-5-62><a id=__codelineno-5-62 name=__codelineno-5-62 href=#__codelineno-5-62></a>  - checkout-apple-pay: Apple Pay integration
-</span><span id=__span-5-63><a id=__codelineno-5-63 name=__codelineno-5-63 href=#__codelineno-5-63></a>  - checkout-express: One-click checkout
-</span><span id=__span-5-64><a id=__codelineno-5-64 name=__codelineno-5-64 href=#__codelineno-5-64></a>  - checkout-affirm: Affirm financing
-</span><span id=__span-5-65><a id=__codelineno-5-65 name=__codelineno-5-65 href=#__codelineno-5-65></a>
-</span><span id=__span-5-66><a id=__codelineno-5-66 name=__codelineno-5-66 href=#__codelineno-5-66></a>  ## Error Codes
-</span><span id=__span-5-67><a id=__codelineno-5-67 name=__codelineno-5-67 href=#__codelineno-5-67></a>
-</span><span id=__span-5-68><a id=__codelineno-5-68 name=__codelineno-5-68 href=#__codelineno-5-68></a>  - CART_EMPTY: Cart has no items
-</span><span id=__span-5-69><a id=__codelineno-5-69 name=__codelineno-5-69 href=#__codelineno-5-69></a>  - SHIPPING_UNAVAILABLE: Cannot ship to address
-</span><span id=__span-5-70><a id=__codelineno-5-70 name=__codelineno-5-70 href=#__codelineno-5-70></a>  - PAYMENT_DECLINED: Payment failed
-</span><span id=__span-5-71><a id=__codelineno-5-71 name=__codelineno-5-71 href=#__codelineno-5-71></a>  - INVENTORY_ERROR: Item out of stock
-</span><span id=__span-5-72><a id=__codelineno-5-72 name=__codelineno-5-72 href=#__codelineno-5-72></a>  &quot;&quot;&quot;
-</span><span id=__span-5-73><a id=__codelineno-5-73 name=__codelineno-5-73 href=#__codelineno-5-73></a>}
-</span><span id=__span-5-74><a id=__codelineno-5-74 name=__codelineno-5-74 href=#__codelineno-5-74></a>
-</span><span id=__span-5-75><a id=__codelineno-5-75 name=__codelineno-5-75 href=#__codelineno-5-75></a>@shortcuts {
-</span><span id=__span-5-76><a id=__codelineno-5-76 name=__codelineno-5-76 href=#__codelineno-5-76></a>  &quot;/checkout-flow&quot;: &quot;Help with checkout flow implementation&quot;
-</span><span id=__span-5-77><a id=__codelineno-5-77 name=__codelineno-5-77 href=#__codelineno-5-77></a>  &quot;/payment&quot;: &quot;Help with Stripe payment integration&quot;
-</span><span id=__span-5-78><a id=__codelineno-5-78 name=__codelineno-5-78 href=#__codelineno-5-78></a>  &quot;/shipping&quot;: &quot;Help with shipping calculation&quot;
-</span><span id=__span-5-79><a id=__codelineno-5-79 name=__codelineno-5-79 href=#__codelineno-5-79></a>  &quot;/cart&quot;: &quot;Help with cart management&quot;
-</span><span id=__span-5-80><a id=__codelineno-5-80 name=__codelineno-5-80 href=#__codelineno-5-80></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkAmCgEYKABn2sAvmLHcIrRdQhZB3MGo2DlYpAHoAIww4GDdWbhZ2Ij9RcUEaZgArJSwLEABhRRV1PwBBXSgIRmwINicJahg0ZjhfZmojPIBzXxw1CIoWEjCMRj4wxiLVDW1desEOUjz85hI+akZYkAN0oKk1RiwAeQB3VhhqPIApDHPBAGUSXvmOSYAZGAwZORAr5hxxAARZhbOISfTbbZpADE0MERwAbhcERAYCcwYIALJqKBYCCaOAcNCCSZKaZ+MBQZgnQRgdqCUr5TEAUUEME0Q3Wm3SUGwdOoJAoOwAErcpLA4CSMNQ-I0UWi6II4DgILpPF1FZgjHx2IqxSS2JABTU2ELWDtYYIANIwIyCACSSS61BNrDgGM0ggAChhtZxcg8sD40DBBMzYDqsO60p77iq1awurI46rmYnPKHSl77TtPQAVMyyUoIjC8l25hmsUtGPGMODJmBdSOCADUWIghEw5ygGMtpQ2KteWDUjQ97cYQU0gWCnCkggAFJjmPtYIIAGIwKQXV0ASgrcelm6ViigUFk3FG405F02BJPPZj68+w8atN5XXrgjeGDUrEmgOlZQoCMHYIScVxzXiZJZyVARQmlKRJVSCQtUjWRkIkXZmBRLdLh+e4g1VUE0hQxgIBWMhKluTZZCDNRYhIwRziRagCPaGB8gQgCBFo6h6J2CCIPcZRWGpWApC6UMMLAqEJD7bMw1CZpPCjXtLU4mUHmRKpQ3naoZQoS8YEGVY90fABxZk80ECZpT8T1zP4EkR0adgpRlCsvQAVWs2yZTCXwYBIOAwkQaRBE9Ly0CkbBQ0CkgK0BZk3is1k-KwAKOGC0Lws9AAlILsLirK1LhQoyRKLTqBRbk9KmEpDLGYyhjMiRPS9I57l80lig0MJCTsiKHVYXwIFLCAAC9Qx68lPJ8myZpKHLwmVVU0HVIb7ic1aEy6ObuvqvqwvCVD-SGr0gk2OBJVO9hPM6g6KqO6QJlWch+FDT0KPejhBHaXC1KfbAR1DNd32jCtFpmHR3s0LUiwqUMfTtFTGxdPE6kfKGtCIGh4E-I5zg5SoVBJQ6sEh8ntDAI0SCLGmIAFWlPGo9VAeZaggmoQQVi3CHH3yUo8rzAB9ZlMS9PMAE1ZA0vwcGiJjmEkLLozah5hXtL1swAOXMkWvJ10oADVSntN5SgAIRS2XblEvwdoWZWvikRprs80opZZHXRaS-I3ntHXmUBWRkebMAMGgTcK0D43mR9o48qlsW8ryxPZHtLK-o0P6wFg5gVFAyFwLibhlXaLBGA0JCi4mKnKWpeQ8mFGAoGJE5ejJp6KSpGkIEooL-VdeZ5DCW6KaQH4W7bwQO9wQNg1DcfJCddHanNWSfn6+N1sTJup9b9vO523euilKAq95DGN9r-SJ+bw-Z87u-BBIW4MEkyNwJAZwAF0GH9B0fARBSDvSoLQEADAWKtDYPgGwP8gA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-config>Project Config<a class=headerlink href=#project-config title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a><span class=c1># checkout-app/promptscript.yaml</span>
-</span><span id=__span-6-2><a id=__codelineno-6-2 name=__codelineno-6-2 href=#__codelineno-6-2></a><span class=nt>input</span><span class=p>:</span>
-</span><span id=__span-6-3><a id=__codelineno-6-3 name=__codelineno-6-3 href=#__codelineno-6-3></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">promptscript/project.prs</span>
-</span><span id=__span-6-4><a id=__codelineno-6-4 name=__codelineno-6-4 href=#__codelineno-6-4></a>
-</span><span id=__span-6-5><a id=__codelineno-6-5 name=__codelineno-6-5 href=#__codelineno-6-5></a><span class=nt>registry</span><span class=p>:</span>
-</span><span id=__span-6-6><a id=__codelineno-6-6 name=__codelineno-6-6 href=#__codelineno-6-6></a><span class=w>  </span><span class=nt>url</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/acme/promptscript-registry</span>
-</span><span id=__span-6-7><a id=__codelineno-6-7 name=__codelineno-6-7 href=#__codelineno-6-7></a><span class=w>  </span><span class=nt>auth</span><span class=p>:</span>
-</span><span id=__span-6-8><a id=__codelineno-6-8 name=__codelineno-6-8 href=#__codelineno-6-8></a><span class=w>    </span><span class=nt>token</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${GITHUB_TOKEN}</span>
-</span><span id=__span-6-9><a id=__codelineno-6-9 name=__codelineno-6-9 href=#__codelineno-6-9></a>
-</span><span id=__span-6-10><a id=__codelineno-6-10 name=__codelineno-6-10 href=#__codelineno-6-10></a><span class=nt>targets</span><span class=p>:</span>
-</span><span id=__span-6-11><a id=__codelineno-6-11 name=__codelineno-6-11 href=#__codelineno-6-11></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
-</span><span id=__span-6-12><a id=__codelineno-6-12 name=__codelineno-6-12 href=#__codelineno-6-12></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-6-13><a id=__codelineno-6-13 name=__codelineno-6-13 href=#__codelineno-6-13></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.github/copilot-instructions.md</span>
-</span><span id=__span-6-14><a id=__codelineno-6-14 name=__codelineno-6-14 href=#__codelineno-6-14></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
-</span><span id=__span-6-15><a id=__codelineno-6-15 name=__codelineno-6-15 href=#__codelineno-6-15></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-6-16><a id=__codelineno-6-16 name=__codelineno-6-16 href=#__codelineno-6-16></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CLAUDE.md</span>
-</span><span id=__span-6-17><a id=__codelineno-6-17 name=__codelineno-6-17 href=#__codelineno-6-17></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
-</span><span id=__span-6-18><a id=__codelineno-6-18 name=__codelineno-6-18 href=#__codelineno-6-18></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-6-19><a id=__codelineno-6-19 name=__codelineno-6-19 href=#__codelineno-6-19></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.cursor/rules/project.mdc</span>
-</span><span id=__span-6-20><a id=__codelineno-6-20 name=__codelineno-6-20 href=#__codelineno-6-20></a>
-</span><span id=__span-6-21><a id=__codelineno-6-21 name=__codelineno-6-21 href=#__codelineno-6-21></a><span class=nt>validation</span><span class=p>:</span>
-</span><span id=__span-6-22><a id=__codelineno-6-22 name=__codelineno-6-22 href=#__codelineno-6-22></a><span class=w>  </span><span class=nt>strict</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-6-23><a id=__codelineno-6-23 name=__codelineno-6-23 href=#__codelineno-6-23></a><span class=w>  </span><span class=nt>rules</span><span class=p>:</span>
-</span><span id=__span-6-24><a id=__codelineno-6-24 name=__codelineno-6-24 href=#__codelineno-6-24></a><span class=w>    </span><span class=nt>require-knowledge</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
-</span><span id=__span-6-25><a id=__codelineno-6-25 name=__codelineno-6-25 href=#__codelineno-6-25></a>
-</span><span id=__span-6-26><a id=__codelineno-6-26 name=__codelineno-6-26 href=#__codelineno-6-26></a><span class=nt>watch</span><span class=p>:</span>
-</span><span id=__span-6-27><a id=__codelineno-6-27 name=__codelineno-6-27 href=#__codelineno-6-27></a><span class=w>  </span><span class=nt>debounce</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
-</span></code></pre></div> <h2 id=governance>Governance<a class=headerlink href=#governance title="Permanent link">&para;</a></h2> <h3 id=codeowners>CODEOWNERS<a class=headerlink href=#codeowners title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-7-1><a id=__codelineno-7-1 name=__codelineno-7-1 href=#__codelineno-7-1></a># Registry CODEOWNERS
-</span><span id=__span-7-2><a id=__codelineno-7-2 name=__codelineno-7-2 href=#__codelineno-7-2></a>* @acme/platform-team
-</span><span id=__span-7-3><a id=__codelineno-7-3 name=__codelineno-7-3 href=#__codelineno-7-3></a>
-</span><span id=__span-7-4><a id=__codelineno-7-4 name=__codelineno-7-4 href=#__codelineno-7-4></a># Organization base requires security review
-</span><span id=__span-7-5><a id=__codelineno-7-5 name=__codelineno-7-5 href=#__codelineno-7-5></a>@acme/base.prs @acme/security-team @acme/platform-team
-</span><span id=__span-7-6><a id=__codelineno-7-6 name=__codelineno-7-6 href=#__codelineno-7-6></a>@acme/security.prs @acme/security-team
-</span><span id=__span-7-7><a id=__codelineno-7-7 name=__codelineno-7-7 href=#__codelineno-7-7></a>@acme/compliance.prs @acme/compliance-team @acme/legal
-</span><span id=__span-7-8><a id=__codelineno-7-8 name=__codelineno-7-8 href=#__codelineno-7-8></a>
-</span><span id=__span-7-9><a id=__codelineno-7-9 name=__codelineno-7-9 href=#__codelineno-7-9></a># Team bases require team lead approval
-</span><span id=__span-7-10><a id=__codelineno-7-10 name=__codelineno-7-10 href=#__codelineno-7-10></a>@frontend/ @acme/frontend-leads
-</span><span id=__span-7-11><a id=__codelineno-7-11 name=__codelineno-7-11 href=#__codelineno-7-11></a>@backend/ @acme/backend-leads
-</span><span id=__span-7-12><a id=__codelineno-7-12 name=__codelineno-7-12 href=#__codelineno-7-12></a>@mobile/ @acme/mobile-leads
-</span></code></pre></div> <h3 id=pr-template>PR Template<a class=headerlink href=#pr-template title="Permanent link">&para;</a></h3> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a><span class=gu>## PromptScript Registry Change</span>
-</span><span id=__span-8-2><a id=__codelineno-8-2 name=__codelineno-8-2 href=#__codelineno-8-2></a>
-</span><span id=__span-8-3><a id=__codelineno-8-3 name=__codelineno-8-3 href=#__codelineno-8-3></a><span class=gu>### Type</span>
-</span><span id=__span-8-4><a id=__codelineno-8-4 name=__codelineno-8-4 href=#__codelineno-8-4></a>
-</span><span id=__span-8-5><a id=__codelineno-8-5 name=__codelineno-8-5 href=#__codelineno-8-5></a><span class=k>- [ ]</span> Organization policy update
-</span><span id=__span-8-6><a id=__codelineno-8-6 name=__codelineno-8-6 href=#__codelineno-8-6></a><span class=k>- [ ]</span> Team configuration update
-</span><span id=__span-8-7><a id=__codelineno-8-7 name=__codelineno-8-7 href=#__codelineno-8-7></a><span class=k>- [ ]</span> New fragment
-</span><span id=__span-8-8><a id=__codelineno-8-8 name=__codelineno-8-8 href=#__codelineno-8-8></a><span class=k>- [ ]</span> Bug fix
-</span><span id=__span-8-9><a id=__codelineno-8-9 name=__codelineno-8-9 href=#__codelineno-8-9></a>
-</span><span id=__span-8-10><a id=__codelineno-8-10 name=__codelineno-8-10 href=#__codelineno-8-10></a><span class=gu>### Breaking Change?</span>
-</span><span id=__span-8-11><a id=__codelineno-8-11 name=__codelineno-8-11 href=#__codelineno-8-11></a>
-</span><span id=__span-8-12><a id=__codelineno-8-12 name=__codelineno-8-12 href=#__codelineno-8-12></a><span class=k>- [ ]</span> Yes - includes migration guide
-</span><span id=__span-8-13><a id=__codelineno-8-13 name=__codelineno-8-13 href=#__codelineno-8-13></a><span class=k>- [ ]</span> No
-</span><span id=__span-8-14><a id=__codelineno-8-14 name=__codelineno-8-14 href=#__codelineno-8-14></a>
-</span><span id=__span-8-15><a id=__codelineno-8-15 name=__codelineno-8-15 href=#__codelineno-8-15></a><span class=gu>### Checklist</span>
-</span><span id=__span-8-16><a id=__codelineno-8-16 name=__codelineno-8-16 href=#__codelineno-8-16></a>
-</span><span id=__span-8-17><a id=__codelineno-8-17 name=__codelineno-8-17 href=#__codelineno-8-17></a><span class=k>- [ ]</span> Updated version in <span class=ni>@meta</span>
-</span><span id=__span-8-18><a id=__codelineno-8-18 name=__codelineno-8-18 href=#__codelineno-8-18></a><span class=k>- [ ]</span> Added CHANGELOG entry
-</span><span id=__span-8-19><a id=__codelineno-8-19 name=__codelineno-8-19 href=#__codelineno-8-19></a><span class=k>- [ ]</span> Tested with sample project
-</span><span id=__span-8-20><a id=__codelineno-8-20 name=__codelineno-8-20 href=#__codelineno-8-20></a><span class=k>- [ ]</span> Notified affected teams
-</span></code></pre></div> <h2 id=cicd>CI/CD<a class=headerlink href=#cicd title="Permanent link">&para;</a></h2> <h3 id=registry-ci>Registry CI<a class=headerlink href=#registry-ci title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a><span class=c1># .github/workflows/registry-ci.yml</span>
-</span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Registry CI</span>
-</span><span id=__span-9-3><a id=__codelineno-9-3 name=__codelineno-9-3 href=#__codelineno-9-3></a>
-</span><span id=__span-9-4><a id=__codelineno-9-4 name=__codelineno-9-4 href=#__codelineno-9-4></a><span class=nt>on</span><span class=p>:</span>
-</span><span id=__span-9-5><a id=__codelineno-9-5 name=__codelineno-9-5 href=#__codelineno-9-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
-</span><span id=__span-9-6><a id=__codelineno-9-6 name=__codelineno-9-6 href=#__codelineno-9-6></a><span class=w>    </span><span class=nt>branches</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">[</span><span class=nv>main</span><span class="p p-Indicator">]</span>
-</span><span id=__span-9-7><a id=__codelineno-9-7 name=__codelineno-9-7 href=#__codelineno-9-7></a><span class=w>  </span><span class=nt>pull_request</span><span class=p>:</span>
-</span><span id=__span-9-8><a id=__codelineno-9-8 name=__codelineno-9-8 href=#__codelineno-9-8></a>
-</span><span id=__span-9-9><a id=__codelineno-9-9 name=__codelineno-9-9 href=#__codelineno-9-9></a><span class=nt>jobs</span><span class=p>:</span>
-</span><span id=__span-9-10><a id=__codelineno-9-10 name=__codelineno-9-10 href=#__codelineno-9-10></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
-</span><span id=__span-9-11><a id=__codelineno-9-11 name=__codelineno-9-11 href=#__codelineno-9-11></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-</span><span id=__span-9-12><a id=__codelineno-9-12 name=__codelineno-9-12 href=#__codelineno-9-12></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
-</span><span id=__span-9-13><a id=__codelineno-9-13 name=__codelineno-9-13 href=#__codelineno-9-13></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-</span><span id=__span-9-14><a id=__codelineno-9-14 name=__codelineno-9-14 href=#__codelineno-9-14></a>
-</span><span id=__span-9-15><a id=__codelineno-9-15 name=__codelineno-9-15 href=#__codelineno-9-15></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
-</span><span id=__span-9-16><a id=__codelineno-9-16 name=__codelineno-9-16 href=#__codelineno-9-16></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-9-17><a id=__codelineno-9-17 name=__codelineno-9-17 href=#__codelineno-9-17></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
-</span><span id=__span-9-18><a id=__codelineno-9-18 name=__codelineno-9-18 href=#__codelineno-9-18></a>
-</span><span id=__span-9-19><a id=__codelineno-9-19 name=__codelineno-9-19 href=#__codelineno-9-19></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
-</span><span id=__span-9-20><a id=__codelineno-9-20 name=__codelineno-9-20 href=#__codelineno-9-20></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
-</span><span id=__span-9-21><a id=__codelineno-9-21 name=__codelineno-9-21 href=#__codelineno-9-21></a>
-</span><span id=__span-9-22><a id=__codelineno-9-22 name=__codelineno-9-22 href=#__codelineno-9-22></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate all files</span>
-</span><span id=__span-9-23><a id=__codelineno-9-23 name=__codelineno-9-23 href=#__codelineno-9-23></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
-</span><span id=__span-9-24><a id=__codelineno-9-24 name=__codelineno-9-24 href=#__codelineno-9-24></a><span class=w>          </span><span class=no>for file in $(find . -name &quot;*.prs&quot;); do</span>
-</span><span id=__span-9-25><a id=__codelineno-9-25 name=__codelineno-9-25 href=#__codelineno-9-25></a><span class=w>            </span><span class=no>echo &quot;Validating $file...&quot;</span>
-</span><span id=__span-9-26><a id=__codelineno-9-26 name=__codelineno-9-26 href=#__codelineno-9-26></a><span class=w>            </span><span class=no>prs validate &quot;$file&quot; --strict</span>
-</span><span id=__span-9-27><a id=__codelineno-9-27 name=__codelineno-9-27 href=#__codelineno-9-27></a><span class=w>          </span><span class=no>done</span>
-</span><span id=__span-9-28><a id=__codelineno-9-28 name=__codelineno-9-28 href=#__codelineno-9-28></a>
-</span><span id=__span-9-29><a id=__codelineno-9-29 name=__codelineno-9-29 href=#__codelineno-9-29></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Check for circular dependencies</span>
-</span><span id=__span-9-30><a id=__codelineno-9-30 name=__codelineno-9-30 href=#__codelineno-9-30></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">./scripts/check-circular-deps.sh</span>
-</span><span id=__span-9-31><a id=__codelineno-9-31 name=__codelineno-9-31 href=#__codelineno-9-31></a>
-</span><span id=__span-9-32><a id=__codelineno-9-32 name=__codelineno-9-32 href=#__codelineno-9-32></a><span class=w>  </span><span class=nt>test-projects</span><span class=p>:</span>
-</span><span id=__span-9-33><a id=__codelineno-9-33 name=__codelineno-9-33 href=#__codelineno-9-33></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-</span><span id=__span-9-34><a id=__codelineno-9-34 name=__codelineno-9-34 href=#__codelineno-9-34></a><span class=w>    </span><span class=nt>needs</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">validate</span>
-</span><span id=__span-9-35><a id=__codelineno-9-35 name=__codelineno-9-35 href=#__codelineno-9-35></a><span class=w>    </span><span class=nt>strategy</span><span class=p>:</span>
-</span><span id=__span-9-36><a id=__codelineno-9-36 name=__codelineno-9-36 href=#__codelineno-9-36></a><span class=w>      </span><span class=nt>matrix</span><span class=p>:</span>
-</span><span id=__span-9-37><a id=__codelineno-9-37 name=__codelineno-9-37 href=#__codelineno-9-37></a><span class=w>        </span><span class=nt>project</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">[</span><span class=nv>sample-frontend</span><span class="p p-Indicator">,</span><span class=w> </span><span class=nv>sample-backend</span><span class="p p-Indicator">,</span><span class=w> </span><span class=nv>sample-mobile</span><span class="p p-Indicator">]</span>
-</span><span id=__span-9-38><a id=__codelineno-9-38 name=__codelineno-9-38 href=#__codelineno-9-38></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
-</span><span id=__span-9-39><a id=__codelineno-9-39 name=__codelineno-9-39 href=#__codelineno-9-39></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-</span><span id=__span-9-40><a id=__codelineno-9-40 name=__codelineno-9-40 href=#__codelineno-9-40></a>
-</span><span id=__span-9-41><a id=__codelineno-9-41 name=__codelineno-9-41 href=#__codelineno-9-41></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-</span><span id=__span-9-42><a id=__codelineno-9-42 name=__codelineno-9-42 href=#__codelineno-9-42></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-9-43><a id=__codelineno-9-43 name=__codelineno-9-43 href=#__codelineno-9-43></a><span class=w>          </span><span class=nt>repository</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">acme/${{ matrix.project }}</span>
-</span><span id=__span-9-44><a id=__codelineno-9-44 name=__codelineno-9-44 href=#__codelineno-9-44></a><span class=w>          </span><span class=nt>path</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">test-project</span>
-</span><span id=__span-9-45><a id=__codelineno-9-45 name=__codelineno-9-45 href=#__codelineno-9-45></a>
-</span><span id=__span-9-46><a id=__codelineno-9-46 name=__codelineno-9-46 href=#__codelineno-9-46></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
-</span><span id=__span-9-47><a id=__codelineno-9-47 name=__codelineno-9-47 href=#__codelineno-9-47></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
-</span><span id=__span-9-48><a id=__codelineno-9-48 name=__codelineno-9-48 href=#__codelineno-9-48></a>
-</span><span id=__span-9-49><a id=__codelineno-9-49 name=__codelineno-9-49 href=#__codelineno-9-49></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Compile test project</span>
-</span><span id=__span-9-50><a id=__codelineno-9-50 name=__codelineno-9-50 href=#__codelineno-9-50></a><span class=w>        </span><span class=nt>working-directory</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">test-project</span>
-</span><span id=__span-9-51><a id=__codelineno-9-51 name=__codelineno-9-51 href=#__codelineno-9-51></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs compile</span>
-</span><span id=__span-9-52><a id=__codelineno-9-52 name=__codelineno-9-52 href=#__codelineno-9-52></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>
-</span><span id=__span-9-53><a id=__codelineno-9-53 name=__codelineno-9-53 href=#__codelineno-9-53></a><span class=w>          </span><span class=nt>PROMPTSCRIPT_REGISTRY</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.workspace }}</span>
-</span></code></pre></div> <h3 id=project-ci>Project CI<a class=headerlink href=#project-ci title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-10-1><a id=__codelineno-10-1 name=__codelineno-10-1 href=#__codelineno-10-1></a><span class=c1># Project .github/workflows/promptscript.yml</span>
-</span><span id=__span-10-2><a id=__codelineno-10-2 name=__codelineno-10-2 href=#__codelineno-10-2></a><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">PromptScript</span>
-</span><span id=__span-10-3><a id=__codelineno-10-3 name=__codelineno-10-3 href=#__codelineno-10-3></a>
-</span><span id=__span-10-4><a id=__codelineno-10-4 name=__codelineno-10-4 href=#__codelineno-10-4></a><span class=nt>on</span><span class=p>:</span>
-</span><span id=__span-10-5><a id=__codelineno-10-5 name=__codelineno-10-5 href=#__codelineno-10-5></a><span class=w>  </span><span class=nt>push</span><span class=p>:</span>
-</span><span id=__span-10-6><a id=__codelineno-10-6 name=__codelineno-10-6 href=#__codelineno-10-6></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
-</span><span id=__span-10-7><a id=__codelineno-10-7 name=__codelineno-10-7 href=#__codelineno-10-7></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript/**&#39;</span>
-</span><span id=__span-10-8><a id=__codelineno-10-8 name=__codelineno-10-8 href=#__codelineno-10-8></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
-</span><span id=__span-10-9><a id=__codelineno-10-9 name=__codelineno-10-9 href=#__codelineno-10-9></a><span class=w>  </span><span class=nt>pull_request</span><span class=p>:</span>
-</span><span id=__span-10-10><a id=__codelineno-10-10 name=__codelineno-10-10 href=#__codelineno-10-10></a><span class=w>    </span><span class=nt>paths</span><span class=p>:</span>
-</span><span id=__span-10-11><a id=__codelineno-10-11 name=__codelineno-10-11 href=#__codelineno-10-11></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript/**&#39;</span>
-</span><span id=__span-10-12><a id=__codelineno-10-12 name=__codelineno-10-12 href=#__codelineno-10-12></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&#39;promptscript.yaml&#39;</span>
-</span><span id=__span-10-13><a id=__codelineno-10-13 name=__codelineno-10-13 href=#__codelineno-10-13></a>
-</span><span id=__span-10-14><a id=__codelineno-10-14 name=__codelineno-10-14 href=#__codelineno-10-14></a><span class=nt>jobs</span><span class=p>:</span>
-</span><span id=__span-10-15><a id=__codelineno-10-15 name=__codelineno-10-15 href=#__codelineno-10-15></a><span class=w>  </span><span class=nt>validate</span><span class=p>:</span>
-</span><span id=__span-10-16><a id=__codelineno-10-16 name=__codelineno-10-16 href=#__codelineno-10-16></a><span class=w>    </span><span class=nt>runs-on</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-</span><span id=__span-10-17><a id=__codelineno-10-17 name=__codelineno-10-17 href=#__codelineno-10-17></a><span class=w>    </span><span class=nt>steps</span><span class=p>:</span>
-</span><span id=__span-10-18><a id=__codelineno-10-18 name=__codelineno-10-18 href=#__codelineno-10-18></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-</span><span id=__span-10-19><a id=__codelineno-10-19 name=__codelineno-10-19 href=#__codelineno-10-19></a>
-</span><span id=__span-10-20><a id=__codelineno-10-20 name=__codelineno-10-20 href=#__codelineno-10-20></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>uses</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-node@v4</span>
-</span><span id=__span-10-21><a id=__codelineno-10-21 name=__codelineno-10-21 href=#__codelineno-10-21></a><span class=w>        </span><span class=nt>with</span><span class=p>:</span>
-</span><span id=__span-10-22><a id=__codelineno-10-22 name=__codelineno-10-22 href=#__codelineno-10-22></a><span class=w>          </span><span class=nt>node-version</span><span class=p>:</span><span class=w> </span><span class=s>&#39;20&#39;</span>
-</span><span id=__span-10-23><a id=__codelineno-10-23 name=__codelineno-10-23 href=#__codelineno-10-23></a>
-</span><span id=__span-10-24><a id=__codelineno-10-24 name=__codelineno-10-24 href=#__codelineno-10-24></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
-</span><span id=__span-10-25><a id=__codelineno-10-25 name=__codelineno-10-25 href=#__codelineno-10-25></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
-</span><span id=__span-10-26><a id=__codelineno-10-26 name=__codelineno-10-26 href=#__codelineno-10-26></a>
-</span><span id=__span-10-27><a id=__codelineno-10-27 name=__codelineno-10-27 href=#__codelineno-10-27></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate</span>
-</span><span id=__span-10-28><a id=__codelineno-10-28 name=__codelineno-10-28 href=#__codelineno-10-28></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs validate --strict</span>
-</span><span id=__span-10-29><a id=__codelineno-10-29 name=__codelineno-10-29 href=#__codelineno-10-29></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>
-</span><span id=__span-10-30><a id=__codelineno-10-30 name=__codelineno-10-30 href=#__codelineno-10-30></a><span class=w>          </span><span class=nt>GITHUB_TOKEN</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.REGISTRY_TOKEN }}</span>
-</span><span id=__span-10-31><a id=__codelineno-10-31 name=__codelineno-10-31 href=#__codelineno-10-31></a>
-</span><span id=__span-10-32><a id=__codelineno-10-32 name=__codelineno-10-32 href=#__codelineno-10-32></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Ensure compiled files are up to date</span>
-</span><span id=__span-10-33><a id=__codelineno-10-33 name=__codelineno-10-33 href=#__codelineno-10-33></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
-</span><span id=__span-10-34><a id=__codelineno-10-34 name=__codelineno-10-34 href=#__codelineno-10-34></a><span class=w>          </span><span class=no>prs compile</span>
-</span><span id=__span-10-35><a id=__codelineno-10-35 name=__codelineno-10-35 href=#__codelineno-10-35></a><span class=w>          </span><span class=no>if ! git diff --exit-code; then</span>
-</span><span id=__span-10-36><a id=__codelineno-10-36 name=__codelineno-10-36 href=#__codelineno-10-36></a><span class=w>            </span><span class=no>echo &quot;::error::Generated files are out of date&quot;</span>
-</span><span id=__span-10-37><a id=__codelineno-10-37 name=__codelineno-10-37 href=#__codelineno-10-37></a><span class=w>            </span><span class=no>echo &quot;Run &#39;prs compile&#39; and commit the changes&quot;</span>
-</span><span id=__span-10-38><a id=__codelineno-10-38 name=__codelineno-10-38 href=#__codelineno-10-38></a><span class=w>            </span><span class=no>exit 1</span>
-</span><span id=__span-10-39><a id=__codelineno-10-39 name=__codelineno-10-39 href=#__codelineno-10-39></a><span class=w>          </span><span class=no>fi</span>
-</span><span id=__span-10-40><a id=__codelineno-10-40 name=__codelineno-10-40 href=#__codelineno-10-40></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>
-</span><span id=__span-10-41><a id=__codelineno-10-41 name=__codelineno-10-41 href=#__codelineno-10-41></a><span class=w>          </span><span class=nt>GITHUB_TOKEN</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.REGISTRY_TOKEN }}</span>
-</span></code></pre></div> <h2 id=metrics-monitoring>Metrics &amp; Monitoring<a class=headerlink href=#metrics-monitoring title="Permanent link">&para;</a></h2> <h3 id=adoption-dashboard>Adoption Dashboard<a class=headerlink href=#adoption-dashboard title="Permanent link">&para;</a></h3> <p>Track across the organization:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-11-1><a id=__codelineno-11-1 name=__codelineno-11-1 href=#__codelineno-11-1></a><span class=c1># metrics-config.yaml</span>
-</span><span id=__span-11-2><a id=__codelineno-11-2 name=__codelineno-11-2 href=#__codelineno-11-2></a><span class=nt>metrics</span><span class=p>:</span>
-</span><span id=__span-11-3><a id=__codelineno-11-3 name=__codelineno-11-3 href=#__codelineno-11-3></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">projects_with_promptscript</span>
-</span><span id=__span-11-4><a id=__codelineno-11-4 name=__codelineno-11-4 href=#__codelineno-11-4></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">count(repos with promptscript.yaml)</span>
-</span><span id=__span-11-5><a id=__codelineno-11-5 name=__codelineno-11-5 href=#__codelineno-11-5></a>
-</span><span id=__span-11-6><a id=__codelineno-11-6 name=__codelineno-11-6 href=#__codelineno-11-6></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">registry_update_frequency</span>
-</span><span id=__span-11-7><a id=__codelineno-11-7 name=__codelineno-11-7 href=#__codelineno-11-7></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">commits per week to registry</span>
-</span><span id=__span-11-8><a id=__codelineno-11-8 name=__codelineno-11-8 href=#__codelineno-11-8></a>
-</span><span id=__span-11-9><a id=__codelineno-11-9 name=__codelineno-11-9 href=#__codelineno-11-9></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">validation_error_rate</span>
-</span><span id=__span-11-10><a id=__codelineno-11-10 name=__codelineno-11-10 href=#__codelineno-11-10></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CI failures due to promptscript validation</span>
-</span><span id=__span-11-11><a id=__codelineno-11-11 name=__codelineno-11-11 href=#__codelineno-11-11></a>
-</span><span id=__span-11-12><a id=__codelineno-11-12 name=__codelineno-11-12 href=#__codelineno-11-12></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">average_inheritance_depth</span>
-</span><span id=__span-11-13><a id=__codelineno-11-13 name=__codelineno-11-13 href=#__codelineno-11-13></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">avg(@inherit chain length)</span>
+</span><span id=__span-5-24><a id=__codelineno-5-24 name=__codelineno-5-24 href=#__codelineno-5-24></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Install PromptScript</span>
+</span><span id=__span-5-25><a id=__codelineno-5-25 name=__codelineno-5-25 href=#__codelineno-5-25></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g @promptscript/cli</span>
+</span><span id=__span-5-26><a id=__codelineno-5-26 name=__codelineno-5-26 href=#__codelineno-5-26></a>
+</span><span id=__span-5-27><a id=__codelineno-5-27 name=__codelineno-5-27 href=#__codelineno-5-27></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Validate</span>
+</span><span id=__span-5-28><a id=__codelineno-5-28 name=__codelineno-5-28 href=#__codelineno-5-28></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">prs validate --strict</span>
+</span><span id=__span-5-29><a id=__codelineno-5-29 name=__codelineno-5-29 href=#__codelineno-5-29></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>
+</span><span id=__span-5-30><a id=__codelineno-5-30 name=__codelineno-5-30 href=#__codelineno-5-30></a><span class=w>          </span><span class=nt>GITHUB_TOKEN</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.REGISTRY_TOKEN }}</span>
+</span><span id=__span-5-31><a id=__codelineno-5-31 name=__codelineno-5-31 href=#__codelineno-5-31></a>
+</span><span id=__span-5-32><a id=__codelineno-5-32 name=__codelineno-5-32 href=#__codelineno-5-32></a><span class=w>      </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">Ensure compiled files are up to date</span>
+</span><span id=__span-5-33><a id=__codelineno-5-33 name=__codelineno-5-33 href=#__codelineno-5-33></a><span class=w>        </span><span class=nt>run</span><span class=p>:</span><span class=w> </span><span class="p p-Indicator">|</span>
+</span><span id=__span-5-34><a id=__codelineno-5-34 name=__codelineno-5-34 href=#__codelineno-5-34></a><span class=w>          </span><span class=no>prs compile</span>
+</span><span id=__span-5-35><a id=__codelineno-5-35 name=__codelineno-5-35 href=#__codelineno-5-35></a><span class=w>          </span><span class=no>if ! git diff --exit-code; then</span>
+</span><span id=__span-5-36><a id=__codelineno-5-36 name=__codelineno-5-36 href=#__codelineno-5-36></a><span class=w>            </span><span class=no>echo &quot;::error::Generated files are out of date&quot;</span>
+</span><span id=__span-5-37><a id=__codelineno-5-37 name=__codelineno-5-37 href=#__codelineno-5-37></a><span class=w>            </span><span class=no>echo &quot;Run &#39;prs compile&#39; and commit the changes&quot;</span>
+</span><span id=__span-5-38><a id=__codelineno-5-38 name=__codelineno-5-38 href=#__codelineno-5-38></a><span class=w>            </span><span class=no>exit 1</span>
+</span><span id=__span-5-39><a id=__codelineno-5-39 name=__codelineno-5-39 href=#__codelineno-5-39></a><span class=w>          </span><span class=no>fi</span>
+</span><span id=__span-5-40><a id=__codelineno-5-40 name=__codelineno-5-40 href=#__codelineno-5-40></a><span class=w>        </span><span class=nt>env</span><span class=p>:</span>
+</span><span id=__span-5-41><a id=__codelineno-5-41 name=__codelineno-5-41 href=#__codelineno-5-41></a><span class=w>          </span><span class=nt>GITHUB_TOKEN</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.REGISTRY_TOKEN }}</span>
+</span></code></pre></div> <h2 id=metrics-monitoring>Metrics &amp; Monitoring<a class=headerlink href=#metrics-monitoring title="Permanent link">&para;</a></h2> <h3 id=adoption-dashboard>Adoption Dashboard<a class=headerlink href=#adoption-dashboard title="Permanent link">&para;</a></h3> <p>Track across the organization:</p> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a><span class=c1># metrics-config.yaml</span>
+</span><span id=__span-6-2><a id=__codelineno-6-2 name=__codelineno-6-2 href=#__codelineno-6-2></a><span class=nt>metrics</span><span class=p>:</span>
+</span><span id=__span-6-3><a id=__codelineno-6-3 name=__codelineno-6-3 href=#__codelineno-6-3></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">projects_with_promptscript</span>
+</span><span id=__span-6-4><a id=__codelineno-6-4 name=__codelineno-6-4 href=#__codelineno-6-4></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">count(repos with promptscript.yaml)</span>
+</span><span id=__span-6-5><a id=__codelineno-6-5 name=__codelineno-6-5 href=#__codelineno-6-5></a>
+</span><span id=__span-6-6><a id=__codelineno-6-6 name=__codelineno-6-6 href=#__codelineno-6-6></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">registry_update_frequency</span>
+</span><span id=__span-6-7><a id=__codelineno-6-7 name=__codelineno-6-7 href=#__codelineno-6-7></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">commits per week to registry</span>
+</span><span id=__span-6-8><a id=__codelineno-6-8 name=__codelineno-6-8 href=#__codelineno-6-8></a>
+</span><span id=__span-6-9><a id=__codelineno-6-9 name=__codelineno-6-9 href=#__codelineno-6-9></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">validation_error_rate</span>
+</span><span id=__span-6-10><a id=__codelineno-6-10 name=__codelineno-6-10 href=#__codelineno-6-10></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CI failures due to promptscript validation</span>
+</span><span id=__span-6-11><a id=__codelineno-6-11 name=__codelineno-6-11 href=#__codelineno-6-11></a>
+</span><span id=__span-6-12><a id=__codelineno-6-12 name=__codelineno-6-12 href=#__codelineno-6-12></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">average_inheritance_depth</span>
+</span><span id=__span-6-13><a id=__codelineno-6-13 name=__codelineno-6-13 href=#__codelineno-6-13></a><span class=w>    </span><span class=nt>query</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">avg(@inherit chain length)</span>
 </span></code></pre></div> <h2 id=best-practices-summary>Best Practices Summary<a class=headerlink href=#best-practices-summary title="Permanent link">&para;</a></h2> <div class="admonition tip"> <p class=admonition-title>Organization Base</p> </div> <p>Keep <code>@acme/base</code> focused on universal policies that apply everywhere.</p> <div class="admonition tip"> <p class=admonition-title>Security Integration</p> </div> <p>Always <code>@use @acme/security</code> in team bases, never skip security.</p> <div class="admonition tip"> <p class=admonition-title>Version Management</p> </div> <p>Tag registry releases and pin versions in production projects.</p> <div class="admonition warning"> <p class=admonition-title>Breaking Changes</p> </div> <p>Major version bumps require migration guides and team notification.</p> <div class="admonition warning"> <p class=admonition-title>Review Process</p> </div> <p>All registry changes need appropriate CODEOWNER approval.</p> <h2 id=rollout-timeline>Rollout Timeline<a class=headerlink href=#rollout-timeline title="Permanent link">&para;</a></h2> <table> <thead> <tr> <th>Phase</th> <th>Duration</th> <th>Goals</th> </tr> </thead> <tbody> <tr> <td>Pilot</td> <td>4 weeks</td> <td>3 teams, feedback collection</td> </tr> <tr> <td>Team Rollout</td> <td>8 weeks</td> <td>All teams onboarded</td> </tr> <tr> <td>Mandatory</td> <td>Ongoing</td> <td>Required for new projects</td> </tr> <tr> <td>Full Migration</td> <td>6 months</td> <td>All existing projects migrated</td> </tr> </tbody> </table> </article> </div> <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script> <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script> </div> <button type=button class="md-top md-icon" data-md-component=top hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg> Back to top </button> </main> <footer class=md-footer> <nav class="md-footer__inner md-grid" aria-label=Footer> <a href=../team-setup/ class="md-footer__link md-footer__link--prev" aria-label="Previous: Team Setup"> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg> </div> <div class=md-footer__title> <span class=md-footer__direction> Previous </span> <div class=md-ellipsis> Team Setup </div> </div> </a> <a href=../skills-and-local/ class="md-footer__link md-footer__link--next" aria-label="Next: Skills & Local"> <div class=md-footer__title> <span class=md-footer__direction> Next </span> <div class=md-ellipsis> Skills & Local </div> </div> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg> </div> </a> </nav> <div class="md-footer-meta md-typeset"> <div class="md-footer-meta__inner md-grid"> <div class=md-copyright> <div class=md-copyright__highlight> Copyright &copy; 2026 PromptScript Contributors </div> Made with <a href=https://squidfunk.github.io/mkdocs-material/ target=_blank rel=noopener> Material for MkDocs </a> </div> <div class=md-social> <a href=https://github.com/mrwogu/promptscript target=_blank rel=noopener title=github.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 512 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg> </a> <a href=https://www.npmjs.com/org/promptscript target=_blank rel=noopener title=www.npmjs.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 576 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M288 288h-32v-64h32zm288-128v192H288v32H160v-32H0V160zm-416 32H32v128h64v-96h32v96h32zm160 0H192v160h64v-32h64zm224 0H352v128h64v-96h32v96h32v-96h32v96h32z"/></svg> </a> </div> </div> </div> </footer> </div> <div class=md-dialog data-md-component=dialog> <div class="md-dialog__inner md-typeset"></div> </div> <div class=md-progress data-md-component=progress role=progressbar></div> <script id=__config type=application/json>{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link", "content.tooltips", "content.action.edit", "content.action.view", "header.autohide", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script> <script src=../../assets/javascripts/bundle.79ae519e.min.js></script> </body> </html>

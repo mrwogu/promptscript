@@ -54,402 +54,402 @@
 </span><span id=__span-1-24><a id=__codelineno-1-24 name=__codelineno-1-24 href=#__codelineno-1-24></a>/test - Run tests
 </span><span id=__span-1-25><a id=__codelineno-1-25 name=__codelineno-1-25 href=#__codelineno-1-25></a>/lint - Run linter
 </span></code></pre></div> <p><strong>Mapped to:</strong></p> <ul> <li>Identity: "You are a senior developer..."</li> <li>Context: Tech stack section</li> <li>Standards: Standards section</li> <li>Restrictions: Don'ts section</li> <li>Shortcuts: Commands section</li> </ul> <h2 id=step-2-create-promptscript-structure>Step 2: Create PromptScript Structure<a class=headerlink href=#step-2-create-promptscript-structure title="Permanent link">&para;</a></h2> <h3 id=initialize-project>Initialize Project<a class=headerlink href=#initialize-project title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a>prs<span class=w> </span>init
-</span></code></pre></div> <h3 id=create-base-structure>Create Base Structure<a class=headerlink href=#create-base-structure title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a># .promptscript/project.prs
-</span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a>@meta {
-</span><span id=__span-3-3><a id=__codelineno-3-3 name=__codelineno-3-3 href=#__codelineno-3-3></a>  id: &quot;checkout-service&quot;
-</span><span id=__span-3-4><a id=__codelineno-3-4 name=__codelineno-3-4 href=#__codelineno-3-4></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-3-5><a id=__codelineno-3-5 name=__codelineno-3-5 href=#__codelineno-3-5></a>}
-</span><span id=__span-3-6><a id=__codelineno-3-6 name=__codelineno-3-6 href=#__codelineno-3-6></a>
-</span><span id=__span-3-7><a id=__codelineno-3-7 name=__codelineno-3-7 href=#__codelineno-3-7></a># Content will be added in next steps
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgAYnJ1gF8xYgMSCAwmw52QQB3aChBACMYQQwpKRgpSXFWIixBOA40BDcAXQZOLGpzfCJSchgqWhAGPV04CDZ8OxA3IA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=step-3-migrate-content>Step 3: Migrate Content<a class=headerlink href=#step-3-migrate-content title="Permanent link">&para;</a></h2> <h3 id=identity-block>Identity Block<a class=headerlink href=#identity-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=1:2><input checked=checked id=__tabbed_1_1 name=__tabbed_1 type=radio><input id=__tabbed_1_2 name=__tabbed_1 type=radio><div class=tabbed-labels><label for=__tabbed_1_1>Before (Markdown)</label><label for=__tabbed_1_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a>You are a senior developer working on the checkout service.
-</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a>Focus on clean, maintainable code.
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>@identity {
-</span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a>  &quot;&quot;&quot;
-</span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a>  You are a senior developer working on the checkout service.
-</span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a>  Focus on clean, maintainable code.
-</span><span id=__span-5-5><a id=__codelineno-5-5 name=__codelineno-5-5 href=#__codelineno-5-5></a>  &quot;&quot;&quot;
-</span><span id=__span-5-6><a id=__codelineno-5-6 name=__codelineno-5-6 href=#__codelineno-5-6></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDoi-+sABMJEBNZgFdBGajGmC4nCM2qCAJjABuMKMzQxVAdxUBrCKwDmgtoNxzGOGIxOSsCg5oiMYFbkJHCAGLMjBJw1kKMsBisdIIkGOZYiawYAEawgiwavv4B-Hx8eYIAviAlALoMnFjUAJ74RKTkPjT0INq0yqz4AIzlQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=context-block>Context Block<a class=headerlink href=#context-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=2:2><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>Before (Markdown)</label><label for=__tabbed_2_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a><span class=gu>## Tech Stack</span>
+</span></code></pre></div> <h3 id=create-base-structure>Create Base Structure<a class=headerlink href=#create-base-structure title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/project.prs</span>
+<span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-service&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=p>}</span>
+
+<span class=c1># Content will be added in next steps</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgAYnJ1gF8xYgMSCAwmw52QQB3aChBACMYQQwpKRgpSXFWIixBOA40BDcAXQZOLGpzfCJSchgqWhAGPV04CDZ8OxA3IA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=step-3-migrate-content>Step 3: Migrate Content<a class=headerlink href=#step-3-migrate-content title="Permanent link">&para;</a></h2> <h3 id=identity-block>Identity Block<a class=headerlink href=#identity-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=1:2><input checked=checked id=__tabbed_1_1 name=__tabbed_1 type=radio><input id=__tabbed_1_2 name=__tabbed_1 type=radio><div class=tabbed-labels><label for=__tabbed_1_1>Before (Markdown)</label><label for=__tabbed_1_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a>You are a senior developer working on the checkout service.
+</span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a>Focus on clean, maintainable code.
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  You are a senior developer working on the checkout service.</span>
+<span class=sd>  Focus on clean, maintainable code.</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDoi-+sABMJEBNZgFdBGajGmC4nCM2qCAJjABuMKMzQxVAdxUBrCKwDmgtoNxzGOGIxOSsCg5oiMYFbkJHCAGLMjBJw1kKMsBisdIIkGOZYiawYAEawgiwavv4B-Hx8eYIAviAlALoMnFjUAJ74RKTkPjT0INq0yqz4AIzlQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=context-block>Context Block<a class=headerlink href=#context-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=2:2><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>Before (Markdown)</label><label for=__tabbed_2_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a><span class=gu>## Tech Stack</span>
+</span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a>
+</span><span id=__span-4-3><a id=__codelineno-4-3 name=__codelineno-4-3 href=#__codelineno-4-3></a><span class=k>-</span><span class=w> </span>Node.js 20
+</span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a><span class=k>-</span><span class=w> </span>TypeScript
+</span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a><span class=k>-</span><span class=w> </span>PostgreSQL
+</span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a><span class=k>-</span><span class=w> </span>Redis for caching
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>stack:<span class=w> </span><span class=p>{</span>
+<span class=w>    </span>runtime:<span class=w> </span><span class=s2>&quot;Node.js 20&quot;</span>
+<span class=w>    </span>language:<span class=w> </span><span class=s2>&quot;TypeScript&quot;</span>
+<span class=w>    </span>database:<span class=w> </span><span class=s2>&quot;PostgreSQL&quot;</span>
+<span class=w>    </span>cache:<span class=w> </span><span class=s2>&quot;Redis&quot;</span>
+<span class=w>  </span><span class=p>}</span>
+
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  The checkout service handles payment processing</span>
+<span class=sd>  and order management for the e-commerce platform.</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-nFhowNaIABMAA6rIZKmTqAV3YQSMYaJAA5ZgBMYFAFZwhAJgAMq8dOlQMrAOayMN5UNUAVAJ5oYAZUbUIaLDMJC0lNbAwAIww4J1UABWYeG2pvAEUAGSCQyUY+HFiQACUYTQg4LIsAX3FzCzMQCukXfKFGfIFmWSwhGOoANwhGGCEca01YA0w3JXYhGmYhuDgIW1rpMaFmam1qIRJrBxgZ7rAtoVxhmABaFhIlaiG5qyxT6hIKNal6xqFKkEqALoMThYahufBEUjkHQ0eggPowWgQNj4ACM-yAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=standards-block>Standards Block<a class=headerlink href=#standards-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=3:2><input checked=checked id=__tabbed_3_1 name=__tabbed_3 type=radio><input id=__tabbed_3_2 name=__tabbed_3 type=radio><div class=tabbed-labels><label for=__tabbed_3_1>Before (Markdown)</label><label for=__tabbed_3_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a><span class=gu>## Coding Standards</span>
+</span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a>
+</span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a><span class=k>-</span><span class=w> </span>Use functional programming patterns
+</span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a><span class=k>-</span><span class=w> </span>Write tests for all code (80% coverage)
+</span><span id=__span-5-5><a id=__codelineno-5-5 name=__codelineno-5-5 href=#__codelineno-5-5></a><span class=k>-</span><span class=w> </span>Document public APIs with JSDoc
+</span><span id=__span-5-6><a id=__codelineno-5-6 name=__codelineno-5-6 href=#__codelineno-5-6></a><span class=k>-</span><span class=w> </span>Use ESLint and Prettier
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Use functional programming style&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Write tests for all code (80% coverage)&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Document public APIs with JSDoc&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Use ESLint and Prettier&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYyIACZAB1WA8RPHCQAVTgwBYAK6tGWCGwxQBNZgHNqpEhFZ6BcLAE9Y00ZMnSA6tQgcBHC3EXNqArdt4FAAoADgAGAFIBFgA3GEM9GABKWzF7KRAAEWZGJRJOLB0lACMoCEYBAEEABQBJLwB3VxwBACkAZWzGVPSMuQUAUXaAGRNCjFYeAWrqGCx1eJ77AF07CQBfEHXlhgLqS3wiUnIYKloQBjjaDVZ8AEYtoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=restrictions-block>Restrictions Block<a class=headerlink href=#restrictions-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=4:2><input checked=checked id=__tabbed_4_1 name=__tabbed_4 type=radio><input id=__tabbed_4_2 name=__tabbed_4 type=radio><div class=tabbed-labels><label for=__tabbed_4_1>Before (Markdown)</label><label for=__tabbed_4_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a><span class=gu>## Don&#39;ts</span>
 </span><span id=__span-6-2><a id=__codelineno-6-2 name=__codelineno-6-2 href=#__codelineno-6-2></a>
-</span><span id=__span-6-3><a id=__codelineno-6-3 name=__codelineno-6-3 href=#__codelineno-6-3></a><span class=k>-</span><span class=w> </span>Node.js 20
-</span><span id=__span-6-4><a id=__codelineno-6-4 name=__codelineno-6-4 href=#__codelineno-6-4></a><span class=k>-</span><span class=w> </span>TypeScript
-</span><span id=__span-6-5><a id=__codelineno-6-5 name=__codelineno-6-5 href=#__codelineno-6-5></a><span class=k>-</span><span class=w> </span>PostgreSQL
-</span><span id=__span-6-6><a id=__codelineno-6-6 name=__codelineno-6-6 href=#__codelineno-6-6></a><span class=k>-</span><span class=w> </span>Redis for caching
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-7-1><a id=__codelineno-7-1 name=__codelineno-7-1 href=#__codelineno-7-1></a>@context {
-</span><span id=__span-7-2><a id=__codelineno-7-2 name=__codelineno-7-2 href=#__codelineno-7-2></a>  stack: {
-</span><span id=__span-7-3><a id=__codelineno-7-3 name=__codelineno-7-3 href=#__codelineno-7-3></a>    runtime: &quot;Node.js 20&quot;
-</span><span id=__span-7-4><a id=__codelineno-7-4 name=__codelineno-7-4 href=#__codelineno-7-4></a>    language: &quot;TypeScript&quot;
-</span><span id=__span-7-5><a id=__codelineno-7-5 name=__codelineno-7-5 href=#__codelineno-7-5></a>    database: &quot;PostgreSQL&quot;
-</span><span id=__span-7-6><a id=__codelineno-7-6 name=__codelineno-7-6 href=#__codelineno-7-6></a>    cache: &quot;Redis&quot;
-</span><span id=__span-7-7><a id=__codelineno-7-7 name=__codelineno-7-7 href=#__codelineno-7-7></a>  }
-</span><span id=__span-7-8><a id=__codelineno-7-8 name=__codelineno-7-8 href=#__codelineno-7-8></a>
-</span><span id=__span-7-9><a id=__codelineno-7-9 name=__codelineno-7-9 href=#__codelineno-7-9></a>  &quot;&quot;&quot;
-</span><span id=__span-7-10><a id=__codelineno-7-10 name=__codelineno-7-10 href=#__codelineno-7-10></a>  The checkout service handles payment processing
-</span><span id=__span-7-11><a id=__codelineno-7-11 name=__codelineno-7-11 href=#__codelineno-7-11></a>  and order management for the e-commerce platform.
-</span><span id=__span-7-12><a id=__codelineno-7-12 name=__codelineno-7-12 href=#__codelineno-7-12></a>  &quot;&quot;&quot;
-</span><span id=__span-7-13><a id=__codelineno-7-13 name=__codelineno-7-13 href=#__codelineno-7-13></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-nFhowNaIABMAA6rIZKmTqAV3YQSMYaJAA5ZgBMYFAFZwhAJgAMq8dOlQMrAOayMN5UNUAVAJ5oYAZUbUIaLDMJC0lNbAwAIww4J1UABWYeG2pvAEUAGSCQyUY+HFiQACUYTQg4LIsAX3FzCzMQCukXfKFGfIFmWSwhGOoANwhGGCEca01YA0w3JXYhGmYhuDgIW1rpMaFmam1qIRJrBxgZ7rAtoVxhmABaFhIlaiG5qyxT6hIKNal6xqFKkEqALoMThYahufBEUjkHQ0eggPowWgQNj4ACM-yAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=standards-block>Standards Block<a class=headerlink href=#standards-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=3:2><input checked=checked id=__tabbed_3_1 name=__tabbed_3 type=radio><input id=__tabbed_3_2 name=__tabbed_3 type=radio><div class=tabbed-labels><label for=__tabbed_3_1>Before (Markdown)</label><label for=__tabbed_3_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a><span class=gu>## Coding Standards</span>
+</span><span id=__span-6-3><a id=__codelineno-6-3 name=__codelineno-6-3 href=#__codelineno-6-3></a><span class=k>-</span><span class=w> </span>Never commit secrets or credentials
+</span><span id=__span-6-4><a id=__codelineno-6-4 name=__codelineno-6-4 href=#__codelineno-6-4></a><span class=k>-</span><span class=w> </span>Don&#39;t use <span class=sb>`var`</span>, use <span class=sb>`const`</span> or <span class=sb>`let`</span>
+</span><span id=__span-6-5><a id=__codelineno-6-5 name=__codelineno-6-5 href=#__codelineno-6-5></a><span class=k>-</span><span class=w> </span>Never bypass code review
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never commit secrets or credentials&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Don&#39;t use var, use const or let&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never bypass code review&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gLQAEAOiAByMAG4xqvFiRIQsvODEbUYWOL2aTlMACacsEDFDiD+rXhct9BAETYByeQFdFvURmp1eLmFLZx5TV5YLFNzSwtrYTEJXgAjAE9MOHUWPV4VUQgYAHcwiIBfEAKAXQZ9agT8IlJyGCpaEAZxWgg2fABGYqA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=shortcuts-block>Shortcuts Block<a class=headerlink href=#shortcuts-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=5:2><input checked=checked id=__tabbed_5_1 name=__tabbed_5 type=radio><input id=__tabbed_5_2 name=__tabbed_5 type=radio><div class=tabbed-labels><label for=__tabbed_5_1>Before (Markdown)</label><label for=__tabbed_5_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-7-1><a id=__codelineno-7-1 name=__codelineno-7-1 href=#__codelineno-7-1></a><span class=gu>## Commands</span>
+</span><span id=__span-7-2><a id=__codelineno-7-2 name=__codelineno-7-2 href=#__codelineno-7-2></a>
+</span><span id=__span-7-3><a id=__codelineno-7-3 name=__codelineno-7-3 href=#__codelineno-7-3></a><span class=k>-</span><span class=w> </span>/test - Run the test suite
+</span><span id=__span-7-4><a id=__codelineno-7-4 name=__codelineno-7-4 href=#__codelineno-7-4></a><span class=k>-</span><span class=w> </span>/lint - Run ESLint
+</span><span id=__span-7-5><a id=__codelineno-7-5 name=__codelineno-7-5 href=#__codelineno-7-5></a><span class=k>-</span><span class=w> </span>/build - Build for production
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Run the test suite with coverage&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/lint&quot;</span>:<span class=w> </span><span class=s2>&quot;Run ESLint and fix issues&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/build&quot;</span>:<span class=w> </span><span class=s2>&quot;Build for production deployment&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDogD0HOFl6IABLwBKAV1ajcMOfCyi4UiB1EB3dTlEsAbjGoYA5jF7dZo69d58oEdiPEhpsgKIBlADKPlGVgATUUhCUQg4VXgLKxsXPgAjNShA514AIWTgsGZqURpmQKlGLAg2UUCYcmYATxJOYRBLOIBfEBaAXQYG6hr8IlJyGCpaEAZDWjLWfABGdqA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=knowledge-block>Knowledge Block<a class=headerlink href=#knowledge-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=6:2><input checked=checked id=__tabbed_6_1 name=__tabbed_6 type=radio><input id=__tabbed_6_2 name=__tabbed_6 type=radio><div class=tabbed-labels><label for=__tabbed_6_1>Before (Markdown)</label><label for=__tabbed_6_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-8-1><a id=__codelineno-8-1 name=__codelineno-8-1 href=#__codelineno-8-1></a><span class=gu>## API Reference</span>
 </span><span id=__span-8-2><a id=__codelineno-8-2 name=__codelineno-8-2 href=#__codelineno-8-2></a>
-</span><span id=__span-8-3><a id=__codelineno-8-3 name=__codelineno-8-3 href=#__codelineno-8-3></a><span class=k>-</span><span class=w> </span>Use functional programming patterns
-</span><span id=__span-8-4><a id=__codelineno-8-4 name=__codelineno-8-4 href=#__codelineno-8-4></a><span class=k>-</span><span class=w> </span>Write tests for all code (80% coverage)
-</span><span id=__span-8-5><a id=__codelineno-8-5 name=__codelineno-8-5 href=#__codelineno-8-5></a><span class=k>-</span><span class=w> </span>Document public APIs with JSDoc
-</span><span id=__span-8-6><a id=__codelineno-8-6 name=__codelineno-8-6 href=#__codelineno-8-6></a><span class=k>-</span><span class=w> </span>Use ESLint and Prettier
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a>@standards {
-</span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a>  code: [
-</span><span id=__span-9-3><a id=__codelineno-9-3 name=__codelineno-9-3 href=#__codelineno-9-3></a>    &quot;Use functional programming style&quot;
-</span><span id=__span-9-4><a id=__codelineno-9-4 name=__codelineno-9-4 href=#__codelineno-9-4></a>    &quot;Write tests for all code (80% coverage)&quot;
-</span><span id=__span-9-5><a id=__codelineno-9-5 name=__codelineno-9-5 href=#__codelineno-9-5></a>    &quot;Document public APIs with JSDoc&quot;
-</span><span id=__span-9-6><a id=__codelineno-9-6 name=__codelineno-9-6 href=#__codelineno-9-6></a>    &quot;Use ESLint and Prettier&quot;
-</span><span id=__span-9-7><a id=__codelineno-9-7 name=__codelineno-9-7 href=#__codelineno-9-7></a>  ]
-</span><span id=__span-9-8><a id=__codelineno-9-8 name=__codelineno-9-8 href=#__codelineno-9-8></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYyIACZAB1WA8RPHCQAVTgwBYAK6tGWCGwxQBNZgHNqpEhFZ6BcLAE9Y00ZMnSA6tQgcBHC3EXNqArdt4FAAoADgAGAFIBFgA3GEM9GABKWzF7KRAAEWZGJRJOLB0lACMoCEYBAEEABQBJLwB3VxwBACkAZWzGVPSMuQUAUXaAGRNCjFYeAWrqGCx1eJ77AF07CQBfEHXlhgLqS3wiUnIYKloQBjjaDVZ8AEYtoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=restrictions-block>Restrictions Block<a class=headerlink href=#restrictions-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=4:2><input checked=checked id=__tabbed_4_1 name=__tabbed_4 type=radio><input id=__tabbed_4_2 name=__tabbed_4 type=radio><div class=tabbed-labels><label for=__tabbed_4_1>Before (Markdown)</label><label for=__tabbed_4_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-10-1><a id=__codelineno-10-1 name=__codelineno-10-1 href=#__codelineno-10-1></a><span class=gu>## Don&#39;ts</span>
-</span><span id=__span-10-2><a id=__codelineno-10-2 name=__codelineno-10-2 href=#__codelineno-10-2></a>
-</span><span id=__span-10-3><a id=__codelineno-10-3 name=__codelineno-10-3 href=#__codelineno-10-3></a><span class=k>-</span><span class=w> </span>Never commit secrets or credentials
-</span><span id=__span-10-4><a id=__codelineno-10-4 name=__codelineno-10-4 href=#__codelineno-10-4></a><span class=k>-</span><span class=w> </span>Don&#39;t use <span class=sb>`var`</span>, use <span class=sb>`const`</span> or <span class=sb>`let`</span>
-</span><span id=__span-10-5><a id=__codelineno-10-5 name=__codelineno-10-5 href=#__codelineno-10-5></a><span class=k>-</span><span class=w> </span>Never bypass code review
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-11-1><a id=__codelineno-11-1 name=__codelineno-11-1 href=#__codelineno-11-1></a>@restrictions {
-</span><span id=__span-11-2><a id=__codelineno-11-2 name=__codelineno-11-2 href=#__codelineno-11-2></a>  - &quot;Never commit secrets or credentials&quot;
-</span><span id=__span-11-3><a id=__codelineno-11-3 name=__codelineno-11-3 href=#__codelineno-11-3></a>  - &quot;Don&#39;t use var, use const or let&quot;
-</span><span id=__span-11-4><a id=__codelineno-11-4 name=__codelineno-11-4 href=#__codelineno-11-4></a>  - &quot;Never bypass code review&quot;
-</span><span id=__span-11-5><a id=__codelineno-11-5 name=__codelineno-11-5 href=#__codelineno-11-5></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gLQAEAOiAByMAG4xqvFiRIQsvODEbUYWOL2aTlMACacsEDFDiD+rXhct9BAETYByeQFdFvURmp1eLmFLZx5TV5YLFNzSwtrYTEJXgAjAE9MOHUWPV4VUQgYAHcwiIBfEAKAXQZ9agT8IlJyGCpaEAZxWgg2fABGYqA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=shortcuts-block>Shortcuts Block<a class=headerlink href=#shortcuts-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=5:2><input checked=checked id=__tabbed_5_1 name=__tabbed_5 type=radio><input id=__tabbed_5_2 name=__tabbed_5 type=radio><div class=tabbed-labels><label for=__tabbed_5_1>Before (Markdown)</label><label for=__tabbed_5_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-12-1><a id=__codelineno-12-1 name=__codelineno-12-1 href=#__codelineno-12-1></a><span class=gu>## Commands</span>
-</span><span id=__span-12-2><a id=__codelineno-12-2 name=__codelineno-12-2 href=#__codelineno-12-2></a>
-</span><span id=__span-12-3><a id=__codelineno-12-3 name=__codelineno-12-3 href=#__codelineno-12-3></a><span class=k>-</span><span class=w> </span>/test - Run the test suite
-</span><span id=__span-12-4><a id=__codelineno-12-4 name=__codelineno-12-4 href=#__codelineno-12-4></a><span class=k>-</span><span class=w> </span>/lint - Run ESLint
-</span><span id=__span-12-5><a id=__codelineno-12-5 name=__codelineno-12-5 href=#__codelineno-12-5></a><span class=k>-</span><span class=w> </span>/build - Build for production
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-13-1><a id=__codelineno-13-1 name=__codelineno-13-1 href=#__codelineno-13-1></a>@shortcuts {
-</span><span id=__span-13-2><a id=__codelineno-13-2 name=__codelineno-13-2 href=#__codelineno-13-2></a>  &quot;/test&quot;: &quot;Run the test suite with coverage&quot;
-</span><span id=__span-13-3><a id=__codelineno-13-3 name=__codelineno-13-3 href=#__codelineno-13-3></a>  &quot;/lint&quot;: &quot;Run ESLint and fix issues&quot;
-</span><span id=__span-13-4><a id=__codelineno-13-4 name=__codelineno-13-4 href=#__codelineno-13-4></a>  &quot;/build&quot;: &quot;Build for production deployment&quot;
-</span><span id=__span-13-5><a id=__codelineno-13-5 name=__codelineno-13-5 href=#__codelineno-13-5></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDogD0HOFl6IABLwBKAV1ajcMOfCyi4UiB1EB3dTlEsAbjGoYA5jF7dZo69d58oEdiPEhpsgKIBlADKPlGVgATUUhCUQg4VXgLKxsXPgAjNShA514AIWTgsGZqURpmQKlGLAg2UUCYcmYATxJOYRBLOIBfEBaAXQYG6hr8IlJyGCpaEAZDWjLWfABGdqA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=knowledge-block>Knowledge Block<a class=headerlink href=#knowledge-block title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=6:2><input checked=checked id=__tabbed_6_1 name=__tabbed_6 type=radio><input id=__tabbed_6_2 name=__tabbed_6 type=radio><div class=tabbed-labels><label for=__tabbed_6_1>Before (Markdown)</label><label for=__tabbed_6_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-14-1><a id=__codelineno-14-1 name=__codelineno-14-1 href=#__codelineno-14-1></a><span class=gu>## API Reference</span>
-</span><span id=__span-14-2><a id=__codelineno-14-2 name=__codelineno-14-2 href=#__codelineno-14-2></a>
-</span><span id=__span-14-3><a id=__codelineno-14-3 name=__codelineno-14-3 href=#__codelineno-14-3></a><span class=gu>### Authentication</span>
-</span><span id=__span-14-4><a id=__codelineno-14-4 name=__codelineno-14-4 href=#__codelineno-14-4></a>
-</span><span id=__span-14-5><a id=__codelineno-14-5 name=__codelineno-14-5 href=#__codelineno-14-5></a><span class=k>-</span><span class=w> </span>POST /auth/login
-</span><span id=__span-14-6><a id=__codelineno-14-6 name=__codelineno-14-6 href=#__codelineno-14-6></a><span class=k>-</span><span class=w> </span>POST /auth/logout
-</span><span id=__span-14-7><a id=__codelineno-14-7 name=__codelineno-14-7 href=#__codelineno-14-7></a>
-</span><span id=__span-14-8><a id=__codelineno-14-8 name=__codelineno-14-8 href=#__codelineno-14-8></a><span class=gu>### Orders</span>
-</span><span id=__span-14-9><a id=__codelineno-14-9 name=__codelineno-14-9 href=#__codelineno-14-9></a>
-</span><span id=__span-14-10><a id=__codelineno-14-10 name=__codelineno-14-10 href=#__codelineno-14-10></a><span class=k>-</span><span class=w> </span>GET /orders
-</span><span id=__span-14-11><a id=__codelineno-14-11 name=__codelineno-14-11 href=#__codelineno-14-11></a><span class=k>-</span><span class=w> </span>POST /orders
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-15-1><a id=__codelineno-15-1 name=__codelineno-15-1 href=#__codelineno-15-1></a>@knowledge {
-</span><span id=__span-15-2><a id=__codelineno-15-2 name=__codelineno-15-2 href=#__codelineno-15-2></a>  &quot;&quot;&quot;
-</span><span id=__span-15-3><a id=__codelineno-15-3 name=__codelineno-15-3 href=#__codelineno-15-3></a>  ## API Reference
+</span><span id=__span-8-3><a id=__codelineno-8-3 name=__codelineno-8-3 href=#__codelineno-8-3></a><span class=gu>### Authentication</span>
+</span><span id=__span-8-4><a id=__codelineno-8-4 name=__codelineno-8-4 href=#__codelineno-8-4></a>
+</span><span id=__span-8-5><a id=__codelineno-8-5 name=__codelineno-8-5 href=#__codelineno-8-5></a><span class=k>-</span><span class=w> </span>POST /auth/login
+</span><span id=__span-8-6><a id=__codelineno-8-6 name=__codelineno-8-6 href=#__codelineno-8-6></a><span class=k>-</span><span class=w> </span>POST /auth/logout
+</span><span id=__span-8-7><a id=__codelineno-8-7 name=__codelineno-8-7 href=#__codelineno-8-7></a>
+</span><span id=__span-8-8><a id=__codelineno-8-8 name=__codelineno-8-8 href=#__codelineno-8-8></a><span class=gu>### Orders</span>
+</span><span id=__span-8-9><a id=__codelineno-8-9 name=__codelineno-8-9 href=#__codelineno-8-9></a>
+</span><span id=__span-8-10><a id=__codelineno-8-10 name=__codelineno-8-10 href=#__codelineno-8-10></a><span class=k>-</span><span class=w> </span>GET /orders
+</span><span id=__span-8-11><a id=__codelineno-8-11 name=__codelineno-8-11 href=#__codelineno-8-11></a><span class=k>-</span><span class=w> </span>POST /orders
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## API Reference</span>
+
+<span class=sd>  ### Authentication</span>
+<span class=sd>  - POST /auth/login</span>
+<span class=sd>  - POST /auth/logout</span>
+
+<span class=sd>  ### Orders</span>
+<span class=sd>  - GET /orders - List orders</span>
+<span class=sd>  - POST /orders - Create order</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDoi-+sABMJEBiUYICCABQCSggEowwMap0YxurLSLHipAV1ycsERtghsduwQFpB0gPIBlACqCA9BiM4PUZgDmENpCNvZObp7euH6BzEZa1rriEo7UACaqcEki9gDiAKLuHswZWXaCADIQcFiCpZm0OcLhLsUN5fYAwmrYMPVl1M2C-Hx8ocIAviCTALoMJtQAnvhEpOQwVLQgDABuWZas+ACMM0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=step-4-complete-migration>Step 4: Complete Migration<a class=headerlink href=#step-4-complete-migration title="Permanent link">&para;</a></h2> <h3 id=full-example>Full Example<a class=headerlink href=#full-example title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=7:2><input checked=checked id=__tabbed_7_1 name=__tabbed_7 type=radio><input id=__tabbed_7_2 name=__tabbed_7 type=radio><div class=tabbed-labels><label for=__tabbed_7_1>Before (CLAUDE.md)</label><label for=__tabbed_7_2>After (project.prs)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-9-1><a id=__codelineno-9-1 name=__codelineno-9-1 href=#__codelineno-9-1></a><span class=gh># Checkout Service</span>
+</span><span id=__span-9-2><a id=__codelineno-9-2 name=__codelineno-9-2 href=#__codelineno-9-2></a>
+</span><span id=__span-9-3><a id=__codelineno-9-3 name=__codelineno-9-3 href=#__codelineno-9-3></a>You are a senior developer working on the checkout service.
+</span><span id=__span-9-4><a id=__codelineno-9-4 name=__codelineno-9-4 href=#__codelineno-9-4></a>
+</span><span id=__span-9-5><a id=__codelineno-9-5 name=__codelineno-9-5 href=#__codelineno-9-5></a><span class=gu>## Tech Stack</span>
+</span><span id=__span-9-6><a id=__codelineno-9-6 name=__codelineno-9-6 href=#__codelineno-9-6></a>
+</span><span id=__span-9-7><a id=__codelineno-9-7 name=__codelineno-9-7 href=#__codelineno-9-7></a><span class=k>-</span><span class=w> </span>Node.js 20
+</span><span id=__span-9-8><a id=__codelineno-9-8 name=__codelineno-9-8 href=#__codelineno-9-8></a><span class=k>-</span><span class=w> </span>TypeScript
+</span><span id=__span-9-9><a id=__codelineno-9-9 name=__codelineno-9-9 href=#__codelineno-9-9></a><span class=k>-</span><span class=w> </span>PostgreSQL
+</span><span id=__span-9-10><a id=__codelineno-9-10 name=__codelineno-9-10 href=#__codelineno-9-10></a>
+</span><span id=__span-9-11><a id=__codelineno-9-11 name=__codelineno-9-11 href=#__codelineno-9-11></a><span class=gu>## Standards</span>
+</span><span id=__span-9-12><a id=__codelineno-9-12 name=__codelineno-9-12 href=#__codelineno-9-12></a>
+</span><span id=__span-9-13><a id=__codelineno-9-13 name=__codelineno-9-13 href=#__codelineno-9-13></a><span class=k>-</span><span class=w> </span>Use functional programming
+</span><span id=__span-9-14><a id=__codelineno-9-14 name=__codelineno-9-14 href=#__codelineno-9-14></a><span class=k>-</span><span class=w> </span>Write tests (80% coverage)
+</span><span id=__span-9-15><a id=__codelineno-9-15 name=__codelineno-9-15 href=#__codelineno-9-15></a><span class=k>-</span><span class=w> </span>Document public APIs
+</span><span id=__span-9-16><a id=__codelineno-9-16 name=__codelineno-9-16 href=#__codelineno-9-16></a>
+</span><span id=__span-9-17><a id=__codelineno-9-17 name=__codelineno-9-17 href=#__codelineno-9-17></a><span class=gu>## Don&#39;ts</span>
+</span><span id=__span-9-18><a id=__codelineno-9-18 name=__codelineno-9-18 href=#__codelineno-9-18></a>
+</span><span id=__span-9-19><a id=__codelineno-9-19 name=__codelineno-9-19 href=#__codelineno-9-19></a><span class=k>-</span><span class=w> </span>Never commit secrets
+</span><span id=__span-9-20><a id=__codelineno-9-20 name=__codelineno-9-20 href=#__codelineno-9-20></a><span class=k>-</span><span class=w> </span>Don&#39;t use var
+</span><span id=__span-9-21><a id=__codelineno-9-21 name=__codelineno-9-21 href=#__codelineno-9-21></a>
+</span><span id=__span-9-22><a id=__codelineno-9-22 name=__codelineno-9-22 href=#__codelineno-9-22></a><span class=gu>## Commands</span>
+</span><span id=__span-9-23><a id=__codelineno-9-23 name=__codelineno-9-23 href=#__codelineno-9-23></a>
+</span><span id=__span-9-24><a id=__codelineno-9-24 name=__codelineno-9-24 href=#__codelineno-9-24></a>/test - Run tests
+</span><span id=__span-9-25><a id=__codelineno-9-25 name=__codelineno-9-25 href=#__codelineno-9-25></a>/lint - Run linter
+</span><span id=__span-9-26><a id=__codelineno-9-26 name=__codelineno-9-26 href=#__codelineno-9-26></a>
+</span><span id=__span-9-27><a id=__codelineno-9-27 name=__codelineno-9-27 href=#__codelineno-9-27></a><span class=gu>## API Reference</span>
+</span><span id=__span-9-28><a id=__codelineno-9-28 name=__codelineno-9-28 href=#__codelineno-9-28></a>
+</span><span id=__span-9-29><a id=__codelineno-9-29 name=__codelineno-9-29 href=#__codelineno-9-29></a><span class=gu>### Orders</span>
+</span><span id=__span-9-30><a id=__codelineno-9-30 name=__codelineno-9-30 href=#__codelineno-9-30></a>
+</span><span id=__span-9-31><a id=__codelineno-9-31 name=__codelineno-9-31 href=#__codelineno-9-31></a><span class=k>-</span><span class=w> </span>GET /orders
+</span><span id=__span-9-32><a id=__codelineno-9-32 name=__codelineno-9-32 href=#__codelineno-9-32></a><span class=k>-</span><span class=w> </span>POST /orders
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-service&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  You are a senior developer working on the checkout service.</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>stack:<span class=w> </span><span class=p>{</span>
+<span class=w>    </span>runtime:<span class=w> </span><span class=s2>&quot;Node.js 20&quot;</span>
+<span class=w>    </span>language:<span class=w> </span><span class=s2>&quot;TypeScript&quot;</span>
+<span class=w>    </span>database:<span class=w> </span><span class=s2>&quot;PostgreSQL&quot;</span>
+<span class=w>  </span><span class=p>}</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Use functional programming style&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Write tests for all code (80% coverage)&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Document public APIs with JSDoc&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never commit secrets&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Don&#39;t use var&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Run the test suite&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/lint&quot;</span>:<span class=w> </span><span class=s2>&quot;Run ESLint&quot;</span>
+<span class=p>}</span>
+
+<span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  ## API Reference</span>
+
+<span class=sd>  ### Orders</span>
+<span class=sd>  - GET /orders - List orders</span>
+<span class=sd>  - POST /orders - Create order</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSY4YjANbMArlgC0cGNQBuERjGGDW-bTrgBPdhkIDhARgoAGSxq06Avps07+AAV6csELHv7AnzoRANINtnAE1pfgxqGCj+BVYIZmp+HhglGChmNEV+AHdk8QhWAHN+Nn5cWMZRCWkseMUVNQp-Z2CbZwdWNtcWdiIGv1DdLAwJAWGAnWopdggSGBMQADlmNIoAKzh+ACYLTun+KAxSqQwSpcCAFT0cgGVGagg0LEPpnmwMACMMBWWAArMOBYEoxe4ARQAMu97L1ur0XCDTp9qDwdlMAiw0gJkL12iAAKoKfhgOaMTxsDBQfg0Zhg0gkYplEF6WCwgkAdWeHEq8CwOzAySiUBp2NiAAoABwWACk-BYGWoFxgAEoOTphAARZiMKSLdi0qTfKCqfgAQQBAEkdnkvDh+AApe46xgagC68McIxcMRBzwpSVYGPx-FkgRW6VyLBITIaCieMAFGvD2rYAHIGlISUporCET64Dhklg9QLfKHhAB6Dgg4TLABKc0qoj5IPiUi86hC02rpvY9cCTa0AFF7lDim8e3Cej7xKxmHlYDxLhWRtoOtPnABibcW638BswMCKThqb3TXd7gDyaMUcFD4YA4iPrvwq8k0rQw-wJ+3P-ej78AC173G+H53t+4YAMIxNgsQAdQlZBCh8IgHY7oMB41B6PgRCkOQMBULQIAMEqcBBvgpjoUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=step-5-configure-and-compile>Step 5: Configure and Compile<a class=headerlink href=#step-5-configure-and-compile title="Permanent link">&para;</a></h2> <h3 id=update-configuration>Update Configuration<a class=headerlink href=#update-configuration title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-10-1><a id=__codelineno-10-1 name=__codelineno-10-1 href=#__codelineno-10-1></a><span class=c1># promptscript.yaml</span>
+</span><span id=__span-10-2><a id=__codelineno-10-2 name=__codelineno-10-2 href=#__codelineno-10-2></a><span class=nt>input</span><span class=p>:</span>
+</span><span id=__span-10-3><a id=__codelineno-10-3 name=__codelineno-10-3 href=#__codelineno-10-3></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
+</span><span id=__span-10-4><a id=__codelineno-10-4 name=__codelineno-10-4 href=#__codelineno-10-4></a>
+</span><span id=__span-10-5><a id=__codelineno-10-5 name=__codelineno-10-5 href=#__codelineno-10-5></a><span class=nt>targets</span><span class=p>:</span>
+</span><span id=__span-10-6><a id=__codelineno-10-6 name=__codelineno-10-6 href=#__codelineno-10-6></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
+</span><span id=__span-10-7><a id=__codelineno-10-7 name=__codelineno-10-7 href=#__codelineno-10-7></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-10-8><a id=__codelineno-10-8 name=__codelineno-10-8 href=#__codelineno-10-8></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.github/copilot-instructions.md</span>
+</span><span id=__span-10-9><a id=__codelineno-10-9 name=__codelineno-10-9 href=#__codelineno-10-9></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
+</span><span id=__span-10-10><a id=__codelineno-10-10 name=__codelineno-10-10 href=#__codelineno-10-10></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-10-11><a id=__codelineno-10-11 name=__codelineno-10-11 href=#__codelineno-10-11></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CLAUDE.md</span>
+</span><span id=__span-10-12><a id=__codelineno-10-12 name=__codelineno-10-12 href=#__codelineno-10-12></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
+</span><span id=__span-10-13><a id=__codelineno-10-13 name=__codelineno-10-13 href=#__codelineno-10-13></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id=__span-10-14><a id=__codelineno-10-14 name=__codelineno-10-14 href=#__codelineno-10-14></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.cursorrules</span>
+</span><span id=__span-10-15><a id=__codelineno-10-15 name=__codelineno-10-15 href=#__codelineno-10-15></a>
+</span><span id=__span-10-16><a id=__codelineno-10-16 name=__codelineno-10-16 href=#__codelineno-10-16></a><span class=nt>validation</span><span class=p>:</span>
+</span><span id=__span-10-17><a id=__codelineno-10-17 name=__codelineno-10-17 href=#__codelineno-10-17></a><span class=w>  </span><span class=nt>strict</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span></code></pre></div> <h3 id=compile-and-compare>Compile and Compare<a class=headerlink href=#compile-and-compare title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-11-1><a id=__codelineno-11-1 name=__codelineno-11-1 href=#__codelineno-11-1></a><span class=c1># Generate new files</span>
+</span><span id=__span-11-2><a id=__codelineno-11-2 name=__codelineno-11-2 href=#__codelineno-11-2></a>prs<span class=w> </span>compile<span class=w> </span>--dry-run
+</span><span id=__span-11-3><a id=__codelineno-11-3 name=__codelineno-11-3 href=#__codelineno-11-3></a>
+</span><span id=__span-11-4><a id=__codelineno-11-4 name=__codelineno-11-4 href=#__codelineno-11-4></a><span class=c1># Review changes</span>
+</span><span id=__span-11-5><a id=__codelineno-11-5 name=__codelineno-11-5 href=#__codelineno-11-5></a>prs<span class=w> </span>diff<span class=w> </span>--all
+</span></code></pre></div> <h3 id=validate>Validate<a class=headerlink href=#validate title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-12-1><a id=__codelineno-12-1 name=__codelineno-12-1 href=#__codelineno-12-1></a>prs<span class=w> </span>validate
+</span></code></pre></div> <h2 id=step-6-update-git>Step 6: Update Git<a class=headerlink href=#step-6-update-git title="Permanent link">&para;</a></h2> <h3 id=remove-old-files-from-source-control>Remove Old Files from Source Control<a class=headerlink href=#remove-old-files-from-source-control title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-13-1><a id=__codelineno-13-1 name=__codelineno-13-1 href=#__codelineno-13-1></a><span class=c1># Keep generated files, but don&#39;t edit manually</span>
+</span><span id=__span-13-2><a id=__codelineno-13-2 name=__codelineno-13-2 href=#__codelineno-13-2></a>git<span class=w> </span>rm<span class=w> </span>--cached<span class=w> </span>.github/copilot-instructions.md<span class=w> </span>CLAUDE.md<span class=w> </span>.cursorrules
+</span><span id=__span-13-3><a id=__codelineno-13-3 name=__codelineno-13-3 href=#__codelineno-13-3></a>
+</span><span id=__span-13-4><a id=__codelineno-13-4 name=__codelineno-13-4 href=#__codelineno-13-4></a><span class=c1># Add to .gitignore if you want (optional)</span>
+</span><span id=__span-13-5><a id=__codelineno-13-5 name=__codelineno-13-5 href=#__codelineno-13-5></a><span class=c1># Or keep them tracked but generated</span>
+</span></code></pre></div> <h3 id=commit-migration>Commit Migration<a class=headerlink href=#commit-migration title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-14-1><a id=__codelineno-14-1 name=__codelineno-14-1 href=#__codelineno-14-1></a>git<span class=w> </span>add<span class=w> </span>.promptscript/<span class=w> </span>promptscript.yaml
+</span><span id=__span-14-2><a id=__codelineno-14-2 name=__codelineno-14-2 href=#__codelineno-14-2></a>git<span class=w> </span>add<span class=w> </span>.github/copilot-instructions.md<span class=w> </span>CLAUDE.md<span class=w> </span>.cursorrules
+</span><span id=__span-14-3><a id=__codelineno-14-3 name=__codelineno-14-3 href=#__codelineno-14-3></a>git<span class=w> </span>commit<span class=w> </span>-m<span class=w> </span><span class=s2>&quot;chore: migrate AI instructions to PromptScript&quot;</span>
+</span></code></pre></div> <h2 id=migration-patterns>Migration Patterns<a class=headerlink href=#migration-patterns title="Permanent link">&para;</a></h2> <h3 id=merging-multiple-sources>Merging Multiple Sources<a class=headerlink href=#merging-multiple-sources title="Permanent link">&para;</a></h3> <p>If you have different instructions in different files:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=p>}</span>
+
+<span class=c1># From copilot-instructions.md</span>
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Content from GitHub Copilot instructions...</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=c1># From CLAUDE.md</span>
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Content from Claude instructions...</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=c1># From .cursorrules</span>
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=c1># Rules from Cursor...</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUBifgDFqzEvxZpozLOIis4WagFd5ENjgKEh4lAAFeTiwILFF+YCUVRRBjFQBhNg52fjA7BwBxGIAJHwAjfgznKFd+Dy9ff0CKZsShFPalM1ZLGzyKgBkAQQBVABEAUWDQ1jCWdiIseNbk1IrMqJy+tKgMHx4YWs9vP2imluU2ldNzVitbe34KRh9aZmpfWDhwrwxWHgxqDw4EsLlYAEo+T6bB5pF5wN7NCidEAmAC6DCi1FE+CIpHIMCotBADAAbjBaAFWPgdCigA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=extracting-common-patterns>Extracting Common Patterns<a class=headerlink href=#extracting-common-patterns title="Permanent link">&para;</a></h3> <p>If you have similar instructions across projects, extract to registry:</p> <div class=highlight><pre><span></span><code><span class=c1># registry/@company/base.prs</span>
+<span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@company/base&quot;</span>
+<span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
+<span class=p>}</span>
+
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=c1># Common standards...</span>
+<span class=p>}</span>
+
+<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=c1># Common restrictions...</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuLMhlYBPAPQAjDHBjyxEuKvYZCs+QEYKABhv7WAXzFjucAaykZqUuMIOCAYkEAYWYSEjZBNxVPbzgKBLEnVhdqeCxqCEYsCDZfUXFAkLCI8TS3TOzc1njExxAHAF0GTgzVfCJSchgqWhAGADcYWmr8CwagA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Then inherit:</p> <div class=highlight><pre><span></span><code><span class=c1># Project file</span>
+<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/base</span>
+
+<span class=err>@context</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=c1># Project-specific context</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuLMhlYBPAPQAjDHBgAdVmvFsOhUcDUiRAYhEAFaswBWMRlgC0cNNYiRGIluyJY1AXxDeAugycWNTS+ESk5DBUtCAMAG6CcBBs+ACMfkA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=handling-tool-specific-content>Handling Tool-Specific Content<a class=headerlink href=#handling-tool-specific-content title="Permanent link">&para;</a></h3> <p>Some content may be specific to certain tools:</p> <div class=highlight><pre><span></span><code><span class=c1># Most content is shared</span>
+<span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Shared identity...</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=c1># Tool-specific might need adjustment</span>
+<span class=c1># Consider using params for variations</span>
+<span class=err>@params</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>tool?:<span class=w> </span>enum(<span class=s2>&quot;copilot&quot;</span>,<span class=w> </span><span class=s2>&quot;claude&quot;</span>,<span class=w> </span><span class=s2>&quot;cursor&quot;</span>)
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIQAmnLBCwBPAATAAOqzFjJIeYpliAyjgzUYfMf0HCRFQ9NmKFC1gF9p0gMRiAKs2ZQAtHDQxGESIzEkIAOY4WGKsMFpiGHwAVgCucFgkgrZiAMJscLrUYvEQrAFimNSkcGJgzNkAbhoQ2BAZ0txFJRLGYlhOUAD8iGKcsSQAFPIsaNDMWPJ0ckxQGLECUzOMsbQV8gCU0hYgFgC6DILUIvhEpOQwVLQgDJUwtPWs+ACMu0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=advanced-block-migration>Advanced Block Migration<a class=headerlink href=#advanced-block-migration title="Permanent link">&para;</a></h2> <h3 id=skills-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/skills title="GitHub User: skills">@skills</a> Block<a class=headerlink href=#skills-block title="Permanent link">&para;</a></h3> <p>Skills define reusable capabilities for AI agents:</p> <div class="tabbed-set tabbed-alternate" data-tabs=8:2><input checked=checked id=__tabbed_8_1 name=__tabbed_8 type=radio><input id=__tabbed_8_2 name=__tabbed_8 type=radio><div class=tabbed-labels><label for=__tabbed_8_1>Before (CLAUDE.md)</label><label for=__tabbed_8_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-15-1><a id=__codelineno-15-1 name=__codelineno-15-1 href=#__codelineno-15-1></a><span class=gu>## Skills</span>
+</span><span id=__span-15-2><a id=__codelineno-15-2 name=__codelineno-15-2 href=#__codelineno-15-2></a>
+</span><span id=__span-15-3><a id=__codelineno-15-3 name=__codelineno-15-3 href=#__codelineno-15-3></a><span class=gu>### Code Review</span>
 </span><span id=__span-15-4><a id=__codelineno-15-4 name=__codelineno-15-4 href=#__codelineno-15-4></a>
-</span><span id=__span-15-5><a id=__codelineno-15-5 name=__codelineno-15-5 href=#__codelineno-15-5></a>  ### Authentication
-</span><span id=__span-15-6><a id=__codelineno-15-6 name=__codelineno-15-6 href=#__codelineno-15-6></a>  - POST /auth/login
-</span><span id=__span-15-7><a id=__codelineno-15-7 name=__codelineno-15-7 href=#__codelineno-15-7></a>  - POST /auth/logout
-</span><span id=__span-15-8><a id=__codelineno-15-8 name=__codelineno-15-8 href=#__codelineno-15-8></a>
-</span><span id=__span-15-9><a id=__codelineno-15-9 name=__codelineno-15-9 href=#__codelineno-15-9></a>  ### Orders
-</span><span id=__span-15-10><a id=__codelineno-15-10 name=__codelineno-15-10 href=#__codelineno-15-10></a>  - GET /orders - List orders
-</span><span id=__span-15-11><a id=__codelineno-15-11 name=__codelineno-15-11 href=#__codelineno-15-11></a>  - POST /orders - Create order
-</span><span id=__span-15-12><a id=__codelineno-15-12 name=__codelineno-15-12 href=#__codelineno-15-12></a>  &quot;&quot;&quot;
-</span><span id=__span-15-13><a id=__codelineno-15-13 name=__codelineno-15-13 href=#__codelineno-15-13></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gDoi-+sABMJEBiUYICCABQCSggEowwMap0YxurLSLHipAV1ycsERtghsduwQFpB0gPIBlACqCA9BiM4PUZgDmENpCNvZObp7euH6BzEZa1rriEo7UACaqcEki9gDiAKLuHswZWXaCADIQcFiCpZm0OcLhLsUN5fYAwmrYMPVl1M2C-Hx8ocIAviCTALoMJtQAnvhEpOQwVLQgDABuWZas+ACMM0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=step-4-complete-migration>Step 4: Complete Migration<a class=headerlink href=#step-4-complete-migration title="Permanent link">&para;</a></h2> <h3 id=full-example>Full Example<a class=headerlink href=#full-example title="Permanent link">&para;</a></h3> <div class="tabbed-set tabbed-alternate" data-tabs=7:2><input checked=checked id=__tabbed_7_1 name=__tabbed_7 type=radio><input id=__tabbed_7_2 name=__tabbed_7 type=radio><div class=tabbed-labels><label for=__tabbed_7_1>Before (CLAUDE.md)</label><label for=__tabbed_7_2>After (project.prs)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-16-1><a id=__codelineno-16-1 name=__codelineno-16-1 href=#__codelineno-16-1></a><span class=gh># Checkout Service</span>
+</span><span id=__span-15-5><a id=__codelineno-15-5 name=__codelineno-15-5 href=#__codelineno-15-5></a>When reviewing code:
+</span><span id=__span-15-6><a id=__codelineno-15-6 name=__codelineno-15-6 href=#__codelineno-15-6></a>
+</span><span id=__span-15-7><a id=__codelineno-15-7 name=__codelineno-15-7 href=#__codelineno-15-7></a><span class=k>1.</span> Check for type safety
+</span><span id=__span-15-8><a id=__codelineno-15-8 name=__codelineno-15-8 href=#__codelineno-15-8></a><span class=k>2.</span> Verify error handling
+</span><span id=__span-15-9><a id=__codelineno-15-9 name=__codelineno-15-9 href=#__codelineno-15-9></a><span class=k>3.</span> Ensure tests exist
+</span><span id=__span-15-10><a id=__codelineno-15-10 name=__codelineno-15-10 href=#__codelineno-15-10></a>
+</span><span id=__span-15-11><a id=__codelineno-15-11 name=__codelineno-15-11 href=#__codelineno-15-11></a><span class=gu>### Deployment</span>
+</span><span id=__span-15-12><a id=__codelineno-15-12 name=__codelineno-15-12 href=#__codelineno-15-12></a>
+</span><span id=__span-15-13><a id=__codelineno-15-13 name=__codelineno-15-13 href=#__codelineno-15-13></a>Steps to deploy:
+</span><span id=__span-15-14><a id=__codelineno-15-14 name=__codelineno-15-14 href=#__codelineno-15-14></a>
+</span><span id=__span-15-15><a id=__codelineno-15-15 name=__codelineno-15-15 href=#__codelineno-15-15></a><span class=k>1.</span> Build the project
+</span><span id=__span-15-16><a id=__codelineno-15-16 name=__codelineno-15-16 href=#__codelineno-15-16></a><span class=k>2.</span> Run tests
+</span><span id=__span-15-17><a id=__codelineno-15-17 name=__codelineno-15-17 href=#__codelineno-15-17></a><span class=k>3.</span> Deploy to staging
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>code-review:<span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review code for quality and best practices&quot;</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>      When reviewing code:</span>
+<span class=sd>      1. Check for type safety</span>
+<span class=sd>      2. Verify error handling</span>
+<span class=sd>      3. Ensure tests exist</span>
+<span class=sd>    &quot;&quot;&quot;</span>
+<span class=w>  </span><span class=p>}</span>
+
+<span class=w>  </span><span class=nl>deployment</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Deploy the application&quot;</span>
+<span class=w>    </span>steps:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Build the project&quot;</span>,<span class=w> </span><span class=s2>&quot;Run tests&quot;</span>,<span class=w> </span><span class=s2>&quot;Deploy to staging&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYwC01GADcIMAO6IABMAA6rKYqWK+cRtQhosENtNkgASiLHipvGFLDNqUgI4BXDFAhYAnlIyseUgEbwsUjQYjNqM8Pryysos7JxYeiARiQpRygDqOJxSQqISEKwA5mbMfIiRqUoAjBRSAMKZjADWltZSbmgWcBhgMG7lFVIATDUAajAaYO7j1K04njzOhf0VAMw1AKKscPZCbf5wUkQQcFjLykkRKcoAvvJnUnzkzK4kcdJyV1Gq6praulL6AAiMCe7lwFgwaHIEEY2B0rEuAxOILg0mQ+gAQvZoN5wYEZgArGAhfR0AGGewKDgnOCk8nA0FtZhSE4YAr5Ar6AC691un2uIGuXIYcWornwRFI5BgVFoIAYwnGcHh+EqgqAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=agents-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/agents title="GitHub User: agents">@agents</a> Block<a class=headerlink href=#agents-block title="Permanent link">&para;</a></h3> <p>Define specialized AI subagents:</p> <div class="tabbed-set tabbed-alternate" data-tabs=9:2><input checked=checked id=__tabbed_9_1 name=__tabbed_9 type=radio><input id=__tabbed_9_2 name=__tabbed_9 type=radio><div class=tabbed-labels><label for=__tabbed_9_1>Before (AGENTS.md)</label><label for=__tabbed_9_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-16-1><a id=__codelineno-16-1 name=__codelineno-16-1 href=#__codelineno-16-1></a><span class=gh># Code Reviewer</span>
 </span><span id=__span-16-2><a id=__codelineno-16-2 name=__codelineno-16-2 href=#__codelineno-16-2></a>
-</span><span id=__span-16-3><a id=__codelineno-16-3 name=__codelineno-16-3 href=#__codelineno-16-3></a>You are a senior developer working on the checkout service.
+</span><span id=__span-16-3><a id=__codelineno-16-3 name=__codelineno-16-3 href=#__codelineno-16-3></a>Reviews code for quality.
 </span><span id=__span-16-4><a id=__codelineno-16-4 name=__codelineno-16-4 href=#__codelineno-16-4></a>
-</span><span id=__span-16-5><a id=__codelineno-16-5 name=__codelineno-16-5 href=#__codelineno-16-5></a><span class=gu>## Tech Stack</span>
-</span><span id=__span-16-6><a id=__codelineno-16-6 name=__codelineno-16-6 href=#__codelineno-16-6></a>
-</span><span id=__span-16-7><a id=__codelineno-16-7 name=__codelineno-16-7 href=#__codelineno-16-7></a><span class=k>-</span><span class=w> </span>Node.js 20
-</span><span id=__span-16-8><a id=__codelineno-16-8 name=__codelineno-16-8 href=#__codelineno-16-8></a><span class=k>-</span><span class=w> </span>TypeScript
-</span><span id=__span-16-9><a id=__codelineno-16-9 name=__codelineno-16-9 href=#__codelineno-16-9></a><span class=k>-</span><span class=w> </span>PostgreSQL
-</span><span id=__span-16-10><a id=__codelineno-16-10 name=__codelineno-16-10 href=#__codelineno-16-10></a>
-</span><span id=__span-16-11><a id=__codelineno-16-11 name=__codelineno-16-11 href=#__codelineno-16-11></a><span class=gu>## Standards</span>
-</span><span id=__span-16-12><a id=__codelineno-16-12 name=__codelineno-16-12 href=#__codelineno-16-12></a>
-</span><span id=__span-16-13><a id=__codelineno-16-13 name=__codelineno-16-13 href=#__codelineno-16-13></a><span class=k>-</span><span class=w> </span>Use functional programming
-</span><span id=__span-16-14><a id=__codelineno-16-14 name=__codelineno-16-14 href=#__codelineno-16-14></a><span class=k>-</span><span class=w> </span>Write tests (80% coverage)
-</span><span id=__span-16-15><a id=__codelineno-16-15 name=__codelineno-16-15 href=#__codelineno-16-15></a><span class=k>-</span><span class=w> </span>Document public APIs
-</span><span id=__span-16-16><a id=__codelineno-16-16 name=__codelineno-16-16 href=#__codelineno-16-16></a>
-</span><span id=__span-16-17><a id=__codelineno-16-17 name=__codelineno-16-17 href=#__codelineno-16-17></a><span class=gu>## Don&#39;ts</span>
-</span><span id=__span-16-18><a id=__codelineno-16-18 name=__codelineno-16-18 href=#__codelineno-16-18></a>
-</span><span id=__span-16-19><a id=__codelineno-16-19 name=__codelineno-16-19 href=#__codelineno-16-19></a><span class=k>-</span><span class=w> </span>Never commit secrets
-</span><span id=__span-16-20><a id=__codelineno-16-20 name=__codelineno-16-20 href=#__codelineno-16-20></a><span class=k>-</span><span class=w> </span>Don&#39;t use var
-</span><span id=__span-16-21><a id=__codelineno-16-21 name=__codelineno-16-21 href=#__codelineno-16-21></a>
-</span><span id=__span-16-22><a id=__codelineno-16-22 name=__codelineno-16-22 href=#__codelineno-16-22></a><span class=gu>## Commands</span>
-</span><span id=__span-16-23><a id=__codelineno-16-23 name=__codelineno-16-23 href=#__codelineno-16-23></a>
-</span><span id=__span-16-24><a id=__codelineno-16-24 name=__codelineno-16-24 href=#__codelineno-16-24></a>/test - Run tests
-</span><span id=__span-16-25><a id=__codelineno-16-25 name=__codelineno-16-25 href=#__codelineno-16-25></a>/lint - Run linter
-</span><span id=__span-16-26><a id=__codelineno-16-26 name=__codelineno-16-26 href=#__codelineno-16-26></a>
-</span><span id=__span-16-27><a id=__codelineno-16-27 name=__codelineno-16-27 href=#__codelineno-16-27></a><span class=gu>## API Reference</span>
-</span><span id=__span-16-28><a id=__codelineno-16-28 name=__codelineno-16-28 href=#__codelineno-16-28></a>
-</span><span id=__span-16-29><a id=__codelineno-16-29 name=__codelineno-16-29 href=#__codelineno-16-29></a><span class=gu>### Orders</span>
-</span><span id=__span-16-30><a id=__codelineno-16-30 name=__codelineno-16-30 href=#__codelineno-16-30></a>
-</span><span id=__span-16-31><a id=__codelineno-16-31 name=__codelineno-16-31 href=#__codelineno-16-31></a><span class=k>-</span><span class=w> </span>GET /orders
-</span><span id=__span-16-32><a id=__codelineno-16-32 name=__codelineno-16-32 href=#__codelineno-16-32></a><span class=k>-</span><span class=w> </span>POST /orders
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-17-1><a id=__codelineno-17-1 name=__codelineno-17-1 href=#__codelineno-17-1></a>@meta {
-</span><span id=__span-17-2><a id=__codelineno-17-2 name=__codelineno-17-2 href=#__codelineno-17-2></a>  id: &quot;checkout-service&quot;
-</span><span id=__span-17-3><a id=__codelineno-17-3 name=__codelineno-17-3 href=#__codelineno-17-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-17-4><a id=__codelineno-17-4 name=__codelineno-17-4 href=#__codelineno-17-4></a>}
-</span><span id=__span-17-5><a id=__codelineno-17-5 name=__codelineno-17-5 href=#__codelineno-17-5></a>
-</span><span id=__span-17-6><a id=__codelineno-17-6 name=__codelineno-17-6 href=#__codelineno-17-6></a>@identity {
-</span><span id=__span-17-7><a id=__codelineno-17-7 name=__codelineno-17-7 href=#__codelineno-17-7></a>  &quot;&quot;&quot;
-</span><span id=__span-17-8><a id=__codelineno-17-8 name=__codelineno-17-8 href=#__codelineno-17-8></a>  You are a senior developer working on the checkout service.
-</span><span id=__span-17-9><a id=__codelineno-17-9 name=__codelineno-17-9 href=#__codelineno-17-9></a>  &quot;&quot;&quot;
-</span><span id=__span-17-10><a id=__codelineno-17-10 name=__codelineno-17-10 href=#__codelineno-17-10></a>}
-</span><span id=__span-17-11><a id=__codelineno-17-11 name=__codelineno-17-11 href=#__codelineno-17-11></a>
-</span><span id=__span-17-12><a id=__codelineno-17-12 name=__codelineno-17-12 href=#__codelineno-17-12></a>@context {
-</span><span id=__span-17-13><a id=__codelineno-17-13 name=__codelineno-17-13 href=#__codelineno-17-13></a>  stack: {
-</span><span id=__span-17-14><a id=__codelineno-17-14 name=__codelineno-17-14 href=#__codelineno-17-14></a>    runtime: &quot;Node.js 20&quot;
-</span><span id=__span-17-15><a id=__codelineno-17-15 name=__codelineno-17-15 href=#__codelineno-17-15></a>    language: &quot;TypeScript&quot;
-</span><span id=__span-17-16><a id=__codelineno-17-16 name=__codelineno-17-16 href=#__codelineno-17-16></a>    database: &quot;PostgreSQL&quot;
-</span><span id=__span-17-17><a id=__codelineno-17-17 name=__codelineno-17-17 href=#__codelineno-17-17></a>  }
-</span><span id=__span-17-18><a id=__codelineno-17-18 name=__codelineno-17-18 href=#__codelineno-17-18></a>}
-</span><span id=__span-17-19><a id=__codelineno-17-19 name=__codelineno-17-19 href=#__codelineno-17-19></a>
-</span><span id=__span-17-20><a id=__codelineno-17-20 name=__codelineno-17-20 href=#__codelineno-17-20></a>@standards {
-</span><span id=__span-17-21><a id=__codelineno-17-21 name=__codelineno-17-21 href=#__codelineno-17-21></a>  code: [
-</span><span id=__span-17-22><a id=__codelineno-17-22 name=__codelineno-17-22 href=#__codelineno-17-22></a>    &quot;Use functional programming style&quot;
-</span><span id=__span-17-23><a id=__codelineno-17-23 name=__codelineno-17-23 href=#__codelineno-17-23></a>    &quot;Write tests for all code (80% coverage)&quot;
-</span><span id=__span-17-24><a id=__codelineno-17-24 name=__codelineno-17-24 href=#__codelineno-17-24></a>    &quot;Document public APIs with JSDoc&quot;
-</span><span id=__span-17-25><a id=__codelineno-17-25 name=__codelineno-17-25 href=#__codelineno-17-25></a>  ]
-</span><span id=__span-17-26><a id=__codelineno-17-26 name=__codelineno-17-26 href=#__codelineno-17-26></a>}
-</span><span id=__span-17-27><a id=__codelineno-17-27 name=__codelineno-17-27 href=#__codelineno-17-27></a>
-</span><span id=__span-17-28><a id=__codelineno-17-28 name=__codelineno-17-28 href=#__codelineno-17-28></a>@restrictions {
-</span><span id=__span-17-29><a id=__codelineno-17-29 name=__codelineno-17-29 href=#__codelineno-17-29></a>  - &quot;Never commit secrets&quot;
-</span><span id=__span-17-30><a id=__codelineno-17-30 name=__codelineno-17-30 href=#__codelineno-17-30></a>  - &quot;Don&#39;t use var&quot;
-</span><span id=__span-17-31><a id=__codelineno-17-31 name=__codelineno-17-31 href=#__codelineno-17-31></a>}
-</span><span id=__span-17-32><a id=__codelineno-17-32 name=__codelineno-17-32 href=#__codelineno-17-32></a>
-</span><span id=__span-17-33><a id=__codelineno-17-33 name=__codelineno-17-33 href=#__codelineno-17-33></a>@shortcuts {
-</span><span id=__span-17-34><a id=__codelineno-17-34 name=__codelineno-17-34 href=#__codelineno-17-34></a>  &quot;/test&quot;: &quot;Run the test suite&quot;
-</span><span id=__span-17-35><a id=__codelineno-17-35 name=__codelineno-17-35 href=#__codelineno-17-35></a>  &quot;/lint&quot;: &quot;Run ESLint&quot;
-</span><span id=__span-17-36><a id=__codelineno-17-36 name=__codelineno-17-36 href=#__codelineno-17-36></a>}
-</span><span id=__span-17-37><a id=__codelineno-17-37 name=__codelineno-17-37 href=#__codelineno-17-37></a>
-</span><span id=__span-17-38><a id=__codelineno-17-38 name=__codelineno-17-38 href=#__codelineno-17-38></a>@knowledge {
-</span><span id=__span-17-39><a id=__codelineno-17-39 name=__codelineno-17-39 href=#__codelineno-17-39></a>  &quot;&quot;&quot;
-</span><span id=__span-17-40><a id=__codelineno-17-40 name=__codelineno-17-40 href=#__codelineno-17-40></a>  ## API Reference
-</span><span id=__span-17-41><a id=__codelineno-17-41 name=__codelineno-17-41 href=#__codelineno-17-41></a>
-</span><span id=__span-17-42><a id=__codelineno-17-42 name=__codelineno-17-42 href=#__codelineno-17-42></a>  ### Orders
-</span><span id=__span-17-43><a id=__codelineno-17-43 name=__codelineno-17-43 href=#__codelineno-17-43></a>  - GET /orders - List orders
-</span><span id=__span-17-44><a id=__codelineno-17-44 name=__codelineno-17-44 href=#__codelineno-17-44></a>  - POST /orders - Create order
-</span><span id=__span-17-45><a id=__codelineno-17-45 name=__codelineno-17-45 href=#__codelineno-17-45></a>  &quot;&quot;&quot;
-</span><span id=__span-17-46><a id=__codelineno-17-46 name=__codelineno-17-46 href=#__codelineno-17-46></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSY4YjANbMArlgC0cGNQBuERjGGDW-bTrgBPdhkIDhARgoAGSxq06Avps07+AAV6csELHv7AnzoRANINtnAE1pfgxqGCj+BVYIZmp+HhglGChmNEV+AHdk8QhWAHN+Nn5cWMZRCWkseMUVNQp-Z2CbZwdWNtcWdiIGv1DdLAwJAWGAnWopdggSGBMQADlmNIoAKzh+ACYLTun+KAxSqQwSpcCAFT0cgGVGagg0LEPpnmwMACMMBWWAArMOBYEoxe4ARQAMu97L1ur0XCDTp9qDwdlMAiw0gJkL12iAAKoKfhgOaMTxsDBQfg0Zhg0gkYplEF6WCwgkAdWeHEq8CwOzAySiUBp2NiAAoABwWACk-BYGWoFxgAEoOTphAARZiMKSLdi0qTfKCqfgAQQBAEkdnkvDh+AApe46xgagC68McIxcMRBzwpSVYGPx-FkgRW6VyLBITIaCieMAFGvD2rYAHIGlISUporCET64Dhklg9QLfKHhAB6Dgg4TLABKc0qoj5IPiUi86hC02rpvY9cCTa0AFF7lDim8e3Cej7xKxmHlYDxLhWRtoOtPnABibcW638BswMCKThqb3TXd7gDyaMUcFD4YA4iPrvwq8k0rQw-wJ+3P-ej78AC173G+H53t+4YAMIxNgsQAdQlZBCh8IgHY7oMB41B6PgRCkOQMBULQIAMEqcBBvgpjoUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=step-5-configure-and-compile>Step 5: Configure and Compile<a class=headerlink href=#step-5-configure-and-compile title="Permanent link">&para;</a></h2> <h3 id=update-configuration>Update Configuration<a class=headerlink href=#update-configuration title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-18-1><a id=__codelineno-18-1 name=__codelineno-18-1 href=#__codelineno-18-1></a><span class=c1># promptscript.yaml</span>
-</span><span id=__span-18-2><a id=__codelineno-18-2 name=__codelineno-18-2 href=#__codelineno-18-2></a><span class=nt>input</span><span class=p>:</span>
-</span><span id=__span-18-3><a id=__codelineno-18-3 name=__codelineno-18-3 href=#__codelineno-18-3></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
+</span><span id=__span-16-5><a id=__codelineno-16-5 name=__codelineno-16-5 href=#__codelineno-16-5></a>Tools: Read, Grep, Bash
+</span><span id=__span-16-6><a id=__codelineno-16-6 name=__codelineno-16-6 href=#__codelineno-16-6></a>Model: claude-sonnet
+</span><span id=__span-16-7><a id=__codelineno-16-7 name=__codelineno-16-7 href=#__codelineno-16-7></a>
+</span><span id=__span-16-8><a id=__codelineno-16-8 name=__codelineno-16-8 href=#__codelineno-16-8></a>Instructions:
+</span><span id=__span-16-9><a id=__codelineno-16-9 name=__codelineno-16-9 href=#__codelineno-16-9></a>Review code checking for type safety and error handling.
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>agents</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>code-reviewer:<span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Reviews code for quality and best practices&quot;</span>
+<span class=w>    </span>tools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span>,<span class=w> </span><span class=s2>&quot;Grep&quot;</span>,<span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
+<span class=w>    </span>model:<span class=w> </span><span class=s2>&quot;sonnet&quot;</span>
+<span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>      Review code checking for:</span>
+<span class=sd>      - Type safety</span>
+<span class=sd>      - Error handling</span>
+<span class=sd>      - Test coverage</span>
+<span class=sd>    &quot;&quot;&quot;</span>
+<span class=w>  </span><span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYwC01GADcIMAO4xqiAATAAOqxnKVyvnEbUIaLBDaz5IAEoix4uDN4wZYZtRkBHAK4YoELAE8ZGVjxkAjeCwZGgxGXUZ4Q0VVVSxmZig4WWRDEwweQzoZQwBxITQsnJAAIQw4HEMAXRjY5RJmPigDEDg2VhgsaKU6yzYOdhbokFremRNRCT6+SxwYRgBrCFYAcxs7RFHe-hkAFQ80azgMME6PLbqdgFFqajsZHB8eN1WL2J3doL7hKQwVmDeymG3TqAF8tqCQKCqgxOFhqB58ERSOQYFRaCAGD9aHpWPgAIxQoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=local-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/local title="GitHub User: local">@local</a> Block<a class=headerlink href=#local-block title="Permanent link">&para;</a></h3> <p>Private instructions not committed to version control:</p> <div class="tabbed-set tabbed-alternate" data-tabs=10:2><input checked=checked id=__tabbed_10_1 name=__tabbed_10 type=radio><input id=__tabbed_10_2 name=__tabbed_10 type=radio><div class=tabbed-labels><label for=__tabbed_10_1>Before (CLAUDE.local.md)</label><label for=__tabbed_10_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-17-1><a id=__codelineno-17-1 name=__codelineno-17-1 href=#__codelineno-17-1></a><span class=gh># Local Development</span>
+</span><span id=__span-17-2><a id=__codelineno-17-2 name=__codelineno-17-2 href=#__codelineno-17-2></a>
+</span><span id=__span-17-3><a id=__codelineno-17-3 name=__codelineno-17-3 href=#__codelineno-17-3></a><span class=k>-</span><span class=w> </span>API endpoint: http://localhost:8080
+</span><span id=__span-17-4><a id=__codelineno-17-4 name=__codelineno-17-4 href=#__codelineno-17-4></a><span class=k>-</span><span class=w> </span>Debug mode enabled
+</span><span id=__span-17-5><a id=__codelineno-17-5 name=__codelineno-17-5 href=#__codelineno-17-5></a><span class=k>-</span><span class=w> </span>Use staging database
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>local</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>apiEndpoint:<span class=w> </span><span class=s2>&quot;http://localhost:8080&quot;</span>
+<span class=w>  </span>debugMode:<span class=w> </span><span class=kc>true</span>
+
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Local development notes:</span>
+<span class=sd>  - Use staging database for testing</span>
+<span class=sd>  - Mock external services</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hmhAKKsAJmmYR2iAAQAdEDixY0iAPRKozRhig5mcLIgAcABiMyprCRcuCYAIwCuAcwCyza5KzU7MM2cuXTIKbmfhIAMuqaEtYAbjBqaCScWBKszBxwiL4hALQSAKpwMBK6GA5iDlHYGDYYhRJgzNQS6VjlWX65LowA1hJEHNSskYXU0RCM8O3+gTNTAL4gcwC6DEnUAJ74RKTkMFS0IAyxtBBs+ACMi0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=guards-block-with-globs><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/guards title="GitHub User: guards">@guards</a> Block with Globs<a class=headerlink href=#guards-block-with-globs title="Permanent link">&para;</a></h3> <p>File-specific rules using glob patterns:</p> <div class="tabbed-set tabbed-alternate" data-tabs=11:2><input checked=checked id=__tabbed_11_1 name=__tabbed_11 type=radio><input id=__tabbed_11_2 name=__tabbed_11 type=radio><div class=tabbed-labels><label for=__tabbed_11_1>Before (.github/instructions/)</label><label for=__tabbed_11_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-18-1><a id=__codelineno-18-1 name=__codelineno-18-1 href=#__codelineno-18-1></a>---
+</span><span id=__span-18-2><a id=__codelineno-18-2 name=__codelineno-18-2 href=#__codelineno-18-2></a><span class=gu>applyTo: src/components/**/*.tsx</span>
+</span><span id=__span-18-3><a id=__codelineno-18-3 name=__codelineno-18-3 href=#__codelineno-18-3></a><span class=gu>---</span>
 </span><span id=__span-18-4><a id=__codelineno-18-4 name=__codelineno-18-4 href=#__codelineno-18-4></a>
-</span><span id=__span-18-5><a id=__codelineno-18-5 name=__codelineno-18-5 href=#__codelineno-18-5></a><span class=nt>targets</span><span class=p>:</span>
-</span><span id=__span-18-6><a id=__codelineno-18-6 name=__codelineno-18-6 href=#__codelineno-18-6></a><span class=w>  </span><span class=nt>github</span><span class=p>:</span>
-</span><span id=__span-18-7><a id=__codelineno-18-7 name=__codelineno-18-7 href=#__codelineno-18-7></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-18-8><a id=__codelineno-18-8 name=__codelineno-18-8 href=#__codelineno-18-8></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.github/copilot-instructions.md</span>
-</span><span id=__span-18-9><a id=__codelineno-18-9 name=__codelineno-18-9 href=#__codelineno-18-9></a><span class=w>  </span><span class=nt>claude</span><span class=p>:</span>
-</span><span id=__span-18-10><a id=__codelineno-18-10 name=__codelineno-18-10 href=#__codelineno-18-10></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-18-11><a id=__codelineno-18-11 name=__codelineno-18-11 href=#__codelineno-18-11></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">CLAUDE.md</span>
-</span><span id=__span-18-12><a id=__codelineno-18-12 name=__codelineno-18-12 href=#__codelineno-18-12></a><span class=w>  </span><span class=nt>cursor</span><span class=p>:</span>
-</span><span id=__span-18-13><a id=__codelineno-18-13 name=__codelineno-18-13 href=#__codelineno-18-13></a><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id=__span-18-14><a id=__codelineno-18-14 name=__codelineno-18-14 href=#__codelineno-18-14></a><span class=w>    </span><span class=nt>output</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.cursorrules</span>
-</span><span id=__span-18-15><a id=__codelineno-18-15 name=__codelineno-18-15 href=#__codelineno-18-15></a>
-</span><span id=__span-18-16><a id=__codelineno-18-16 name=__codelineno-18-16 href=#__codelineno-18-16></a><span class=nt>validation</span><span class=p>:</span>
-</span><span id=__span-18-17><a id=__codelineno-18-17 name=__codelineno-18-17 href=#__codelineno-18-17></a><span class=w>  </span><span class=nt>strict</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span></code></pre></div> <h3 id=compile-and-compare>Compile and Compare<a class=headerlink href=#compile-and-compare title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-19-1><a id=__codelineno-19-1 name=__codelineno-19-1 href=#__codelineno-19-1></a><span class=c1># Generate new files</span>
-</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a>prs<span class=w> </span>compile<span class=w> </span>--dry-run
-</span><span id=__span-19-3><a id=__codelineno-19-3 name=__codelineno-19-3 href=#__codelineno-19-3></a>
-</span><span id=__span-19-4><a id=__codelineno-19-4 name=__codelineno-19-4 href=#__codelineno-19-4></a><span class=c1># Review changes</span>
-</span><span id=__span-19-5><a id=__codelineno-19-5 name=__codelineno-19-5 href=#__codelineno-19-5></a>prs<span class=w> </span>diff<span class=w> </span>--all
-</span></code></pre></div> <h3 id=validate>Validate<a class=headerlink href=#validate title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-20-1><a id=__codelineno-20-1 name=__codelineno-20-1 href=#__codelineno-20-1></a>prs<span class=w> </span>validate
-</span></code></pre></div> <h2 id=step-6-update-git>Step 6: Update Git<a class=headerlink href=#step-6-update-git title="Permanent link">&para;</a></h2> <h3 id=remove-old-files-from-source-control>Remove Old Files from Source Control<a class=headerlink href=#remove-old-files-from-source-control title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-21-1><a id=__codelineno-21-1 name=__codelineno-21-1 href=#__codelineno-21-1></a><span class=c1># Keep generated files, but don&#39;t edit manually</span>
-</span><span id=__span-21-2><a id=__codelineno-21-2 name=__codelineno-21-2 href=#__codelineno-21-2></a>git<span class=w> </span>rm<span class=w> </span>--cached<span class=w> </span>.github/copilot-instructions.md<span class=w> </span>CLAUDE.md<span class=w> </span>.cursorrules
-</span><span id=__span-21-3><a id=__codelineno-21-3 name=__codelineno-21-3 href=#__codelineno-21-3></a>
-</span><span id=__span-21-4><a id=__codelineno-21-4 name=__codelineno-21-4 href=#__codelineno-21-4></a><span class=c1># Add to .gitignore if you want (optional)</span>
-</span><span id=__span-21-5><a id=__codelineno-21-5 name=__codelineno-21-5 href=#__codelineno-21-5></a><span class=c1># Or keep them tracked but generated</span>
-</span></code></pre></div> <h3 id=commit-migration>Commit Migration<a class=headerlink href=#commit-migration title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-22-1><a id=__codelineno-22-1 name=__codelineno-22-1 href=#__codelineno-22-1></a>git<span class=w> </span>add<span class=w> </span>.promptscript/<span class=w> </span>promptscript.yaml
-</span><span id=__span-22-2><a id=__codelineno-22-2 name=__codelineno-22-2 href=#__codelineno-22-2></a>git<span class=w> </span>add<span class=w> </span>.github/copilot-instructions.md<span class=w> </span>CLAUDE.md<span class=w> </span>.cursorrules
-</span><span id=__span-22-3><a id=__codelineno-22-3 name=__codelineno-22-3 href=#__codelineno-22-3></a>git<span class=w> </span>commit<span class=w> </span>-m<span class=w> </span><span class=s2>&quot;chore: migrate AI instructions to PromptScript&quot;</span>
-</span></code></pre></div> <h2 id=migration-patterns>Migration Patterns<a class=headerlink href=#migration-patterns title="Permanent link">&para;</a></h2> <h3 id=merging-multiple-sources>Merging Multiple Sources<a class=headerlink href=#merging-multiple-sources title="Permanent link">&para;</a></h3> <p>If you have different instructions in different files:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-23-1><a id=__codelineno-23-1 name=__codelineno-23-1 href=#__codelineno-23-1></a>@meta {
-</span><span id=__span-23-2><a id=__codelineno-23-2 name=__codelineno-23-2 href=#__codelineno-23-2></a>  id: &quot;my-project&quot;
-</span><span id=__span-23-3><a id=__codelineno-23-3 name=__codelineno-23-3 href=#__codelineno-23-3></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-23-4><a id=__codelineno-23-4 name=__codelineno-23-4 href=#__codelineno-23-4></a>}
-</span><span id=__span-23-5><a id=__codelineno-23-5 name=__codelineno-23-5 href=#__codelineno-23-5></a>
-</span><span id=__span-23-6><a id=__codelineno-23-6 name=__codelineno-23-6 href=#__codelineno-23-6></a># From copilot-instructions.md
-</span><span id=__span-23-7><a id=__codelineno-23-7 name=__codelineno-23-7 href=#__codelineno-23-7></a>@identity {
-</span><span id=__span-23-8><a id=__codelineno-23-8 name=__codelineno-23-8 href=#__codelineno-23-8></a>  &quot;&quot;&quot;
-</span><span id=__span-23-9><a id=__codelineno-23-9 name=__codelineno-23-9 href=#__codelineno-23-9></a>  Content from GitHub Copilot instructions...
-</span><span id=__span-23-10><a id=__codelineno-23-10 name=__codelineno-23-10 href=#__codelineno-23-10></a>  &quot;&quot;&quot;
-</span><span id=__span-23-11><a id=__codelineno-23-11 name=__codelineno-23-11 href=#__codelineno-23-11></a>}
-</span><span id=__span-23-12><a id=__codelineno-23-12 name=__codelineno-23-12 href=#__codelineno-23-12></a>
-</span><span id=__span-23-13><a id=__codelineno-23-13 name=__codelineno-23-13 href=#__codelineno-23-13></a># From CLAUDE.md
-</span><span id=__span-23-14><a id=__codelineno-23-14 name=__codelineno-23-14 href=#__codelineno-23-14></a>@context {
-</span><span id=__span-23-15><a id=__codelineno-23-15 name=__codelineno-23-15 href=#__codelineno-23-15></a>  &quot;&quot;&quot;
-</span><span id=__span-23-16><a id=__codelineno-23-16 name=__codelineno-23-16 href=#__codelineno-23-16></a>  Content from Claude instructions...
-</span><span id=__span-23-17><a id=__codelineno-23-17 name=__codelineno-23-17 href=#__codelineno-23-17></a>  &quot;&quot;&quot;
-</span><span id=__span-23-18><a id=__codelineno-23-18 name=__codelineno-23-18 href=#__codelineno-23-18></a>}
-</span><span id=__span-23-19><a id=__codelineno-23-19 name=__codelineno-23-19 href=#__codelineno-23-19></a>
-</span><span id=__span-23-20><a id=__codelineno-23-20 name=__codelineno-23-20 href=#__codelineno-23-20></a># From .cursorrules
-</span><span id=__span-23-21><a id=__codelineno-23-21 name=__codelineno-23-21 href=#__codelineno-23-21></a>@standards {
-</span><span id=__span-23-22><a id=__codelineno-23-22 name=__codelineno-23-22 href=#__codelineno-23-22></a>  # Rules from Cursor...
-</span><span id=__span-23-23><a id=__codelineno-23-23 name=__codelineno-23-23 href=#__codelineno-23-23></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUBifgDFqzEvxZpozLOIis4WagFd5ENjgKEh4lAAFeTiwILFF+YCUVRRBjFQBhNg52fjA7BwBxGIAJHwAjfgznKFd+Dy9ff0CKZsShFPalM1ZLGzyKgBkAQQBVABEAUWDQ1jCWdiIseNbk1IrMqJy+tKgMHx4YWs9vP2imluU2ldNzVitbe34KRh9aZmpfWDhwrwxWHgxqDw4EsLlYAEo+T6bB5pF5wN7NCidEAmAC6DCi1FE+CIpHIMCotBADAAbjBaAFWPgdCigA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=extracting-common-patterns>Extracting Common Patterns<a class=headerlink href=#extracting-common-patterns title="Permanent link">&para;</a></h3> <p>If you have similar instructions across projects, extract to registry:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-24-1><a id=__codelineno-24-1 name=__codelineno-24-1 href=#__codelineno-24-1></a># registry/@company/base.prs
-</span><span id=__span-24-2><a id=__codelineno-24-2 name=__codelineno-24-2 href=#__codelineno-24-2></a>@meta {
-</span><span id=__span-24-3><a id=__codelineno-24-3 name=__codelineno-24-3 href=#__codelineno-24-3></a>  id: &quot;@company/base&quot;
-</span><span id=__span-24-4><a id=__codelineno-24-4 name=__codelineno-24-4 href=#__codelineno-24-4></a>  syntax: &quot;1.0.0&quot;
-</span><span id=__span-24-5><a id=__codelineno-24-5 name=__codelineno-24-5 href=#__codelineno-24-5></a>}
-</span><span id=__span-24-6><a id=__codelineno-24-6 name=__codelineno-24-6 href=#__codelineno-24-6></a>
-</span><span id=__span-24-7><a id=__codelineno-24-7 name=__codelineno-24-7 href=#__codelineno-24-7></a>@standards {
-</span><span id=__span-24-8><a id=__codelineno-24-8 name=__codelineno-24-8 href=#__codelineno-24-8></a>  # Common standards...
-</span><span id=__span-24-9><a id=__codelineno-24-9 name=__codelineno-24-9 href=#__codelineno-24-9></a>}
-</span><span id=__span-24-10><a id=__codelineno-24-10 name=__codelineno-24-10 href=#__codelineno-24-10></a>
-</span><span id=__span-24-11><a id=__codelineno-24-11 name=__codelineno-24-11 href=#__codelineno-24-11></a>@restrictions {
-</span><span id=__span-24-12><a id=__codelineno-24-12 name=__codelineno-24-12 href=#__codelineno-24-12></a>  # Common restrictions...
-</span><span id=__span-24-13><a id=__codelineno-24-13 name=__codelineno-24-13 href=#__codelineno-24-13></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuLMhlYBPAPQAjDHBjyxEuKvYZCs+QEYKABhv7WAXzFjucAaykZqUuMIOCAYkEAYWYSEjZBNxVPbzgKBLEnVhdqeCxqCEYsCDZfUXFAkLCI8TS3TOzc1njExxAHAF0GTgzVfCJSchgqWhAGADcYWmr8CwagA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>Then inherit:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-25-1><a id=__codelineno-25-1 name=__codelineno-25-1 href=#__codelineno-25-1></a># Project file
-</span><span id=__span-25-2><a id=__codelineno-25-2 name=__codelineno-25-2 href=#__codelineno-25-2></a>@inherit @company/base
-</span><span id=__span-25-3><a id=__codelineno-25-3 name=__codelineno-25-3 href=#__codelineno-25-3></a>
-</span><span id=__span-25-4><a id=__codelineno-25-4 name=__codelineno-25-4 href=#__codelineno-25-4></a>@context {
-</span><span id=__span-25-5><a id=__codelineno-25-5 name=__codelineno-25-5 href=#__codelineno-25-5></a>  # Project-specific context
-</span><span id=__span-25-6><a id=__codelineno-25-6 name=__codelineno-25-6 href=#__codelineno-25-6></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuLMhlYBPAPQAjDHBgAdVmvFsOhUcDUiRAYhEAFaswBWMRlgC0cNNYiRGIluyJY1AXxDeAugycWNTS+ESk5DBUtCAMAG6CcBBs+ACMfkA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=handling-tool-specific-content>Handling Tool-Specific Content<a class=headerlink href=#handling-tool-specific-content title="Permanent link">&para;</a></h3> <p>Some content may be specific to certain tools:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-26-1><a id=__codelineno-26-1 name=__codelineno-26-1 href=#__codelineno-26-1></a># Most content is shared
-</span><span id=__span-26-2><a id=__codelineno-26-2 name=__codelineno-26-2 href=#__codelineno-26-2></a>@identity {
-</span><span id=__span-26-3><a id=__codelineno-26-3 name=__codelineno-26-3 href=#__codelineno-26-3></a>  &quot;&quot;&quot;
-</span><span id=__span-26-4><a id=__codelineno-26-4 name=__codelineno-26-4 href=#__codelineno-26-4></a>  Shared identity...
-</span><span id=__span-26-5><a id=__codelineno-26-5 name=__codelineno-26-5 href=#__codelineno-26-5></a>  &quot;&quot;&quot;
-</span><span id=__span-26-6><a id=__codelineno-26-6 name=__codelineno-26-6 href=#__codelineno-26-6></a>}
-</span><span id=__span-26-7><a id=__codelineno-26-7 name=__codelineno-26-7 href=#__codelineno-26-7></a>
-</span><span id=__span-26-8><a id=__codelineno-26-8 name=__codelineno-26-8 href=#__codelineno-26-8></a># Tool-specific might need adjustment
-</span><span id=__span-26-9><a id=__codelineno-26-9 name=__codelineno-26-9 href=#__codelineno-26-9></a># Consider using params for variations
-</span><span id=__span-26-10><a id=__codelineno-26-10 name=__codelineno-26-10 href=#__codelineno-26-10></a>@params {
-</span><span id=__span-26-11><a id=__codelineno-26-11 name=__codelineno-26-11 href=#__codelineno-26-11></a>  tool?: enum(&quot;copilot&quot;, &quot;claude&quot;, &quot;cursor&quot;)
-</span><span id=__span-26-12><a id=__codelineno-26-12 name=__codelineno-26-12 href=#__codelineno-26-12></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIQAmnLBCwBPAATAAOqzFjJIeYpliAyjgzUYfMf0HCRFQ9NmKFC1gF9p0gMRiAKs2ZQAtHDQxGESIzEkIAOY4WGKsMFpiGHwAVgCucFgkgrZiAMJscLrUYvEQrAFimNSkcGJgzNkAbhoQ2BAZ0txFJRLGYlhOUAD8iGKcsSQAFPIsaNDMWPJ0ckxQGLECUzOMsbQV8gCU0hYgFgC6DILUIvhEpOQwVLQgDJUwtPWs+ACMu0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=advanced-block-migration>Advanced Block Migration<a class=headerlink href=#advanced-block-migration title="Permanent link">&para;</a></h2> <h3 id=skills-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/skills title="GitHub User: skills">@skills</a> Block<a class=headerlink href=#skills-block title="Permanent link">&para;</a></h3> <p>Skills define reusable capabilities for AI agents:</p> <div class="tabbed-set tabbed-alternate" data-tabs=8:2><input checked=checked id=__tabbed_8_1 name=__tabbed_8 type=radio><input id=__tabbed_8_2 name=__tabbed_8 type=radio><div class=tabbed-labels><label for=__tabbed_8_1>Before (CLAUDE.md)</label><label for=__tabbed_8_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-27-1><a id=__codelineno-27-1 name=__codelineno-27-1 href=#__codelineno-27-1></a><span class=gu>## Skills</span>
-</span><span id=__span-27-2><a id=__codelineno-27-2 name=__codelineno-27-2 href=#__codelineno-27-2></a>
-</span><span id=__span-27-3><a id=__codelineno-27-3 name=__codelineno-27-3 href=#__codelineno-27-3></a><span class=gu>### Code Review</span>
-</span><span id=__span-27-4><a id=__codelineno-27-4 name=__codelineno-27-4 href=#__codelineno-27-4></a>
-</span><span id=__span-27-5><a id=__codelineno-27-5 name=__codelineno-27-5 href=#__codelineno-27-5></a>When reviewing code:
-</span><span id=__span-27-6><a id=__codelineno-27-6 name=__codelineno-27-6 href=#__codelineno-27-6></a>
-</span><span id=__span-27-7><a id=__codelineno-27-7 name=__codelineno-27-7 href=#__codelineno-27-7></a><span class=k>1.</span> Check for type safety
-</span><span id=__span-27-8><a id=__codelineno-27-8 name=__codelineno-27-8 href=#__codelineno-27-8></a><span class=k>2.</span> Verify error handling
-</span><span id=__span-27-9><a id=__codelineno-27-9 name=__codelineno-27-9 href=#__codelineno-27-9></a><span class=k>3.</span> Ensure tests exist
-</span><span id=__span-27-10><a id=__codelineno-27-10 name=__codelineno-27-10 href=#__codelineno-27-10></a>
-</span><span id=__span-27-11><a id=__codelineno-27-11 name=__codelineno-27-11 href=#__codelineno-27-11></a><span class=gu>### Deployment</span>
-</span><span id=__span-27-12><a id=__codelineno-27-12 name=__codelineno-27-12 href=#__codelineno-27-12></a>
-</span><span id=__span-27-13><a id=__codelineno-27-13 name=__codelineno-27-13 href=#__codelineno-27-13></a>Steps to deploy:
-</span><span id=__span-27-14><a id=__codelineno-27-14 name=__codelineno-27-14 href=#__codelineno-27-14></a>
-</span><span id=__span-27-15><a id=__codelineno-27-15 name=__codelineno-27-15 href=#__codelineno-27-15></a><span class=k>1.</span> Build the project
-</span><span id=__span-27-16><a id=__codelineno-27-16 name=__codelineno-27-16 href=#__codelineno-27-16></a><span class=k>2.</span> Run tests
-</span><span id=__span-27-17><a id=__codelineno-27-17 name=__codelineno-27-17 href=#__codelineno-27-17></a><span class=k>3.</span> Deploy to staging
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-28-1><a id=__codelineno-28-1 name=__codelineno-28-1 href=#__codelineno-28-1></a>@skills {
-</span><span id=__span-28-2><a id=__codelineno-28-2 name=__codelineno-28-2 href=#__codelineno-28-2></a>  code-review: {
-</span><span id=__span-28-3><a id=__codelineno-28-3 name=__codelineno-28-3 href=#__codelineno-28-3></a>    description: &quot;Review code for quality and best practices&quot;
-</span><span id=__span-28-4><a id=__codelineno-28-4 name=__codelineno-28-4 href=#__codelineno-28-4></a>    content: &quot;&quot;&quot;
-</span><span id=__span-28-5><a id=__codelineno-28-5 name=__codelineno-28-5 href=#__codelineno-28-5></a>      When reviewing code:
-</span><span id=__span-28-6><a id=__codelineno-28-6 name=__codelineno-28-6 href=#__codelineno-28-6></a>      1. Check for type safety
-</span><span id=__span-28-7><a id=__codelineno-28-7 name=__codelineno-28-7 href=#__codelineno-28-7></a>      2. Verify error handling
-</span><span id=__span-28-8><a id=__codelineno-28-8 name=__codelineno-28-8 href=#__codelineno-28-8></a>      3. Ensure tests exist
-</span><span id=__span-28-9><a id=__codelineno-28-9 name=__codelineno-28-9 href=#__codelineno-28-9></a>    &quot;&quot;&quot;
-</span><span id=__span-28-10><a id=__codelineno-28-10 name=__codelineno-28-10 href=#__codelineno-28-10></a>  }
-</span><span id=__span-28-11><a id=__codelineno-28-11 name=__codelineno-28-11 href=#__codelineno-28-11></a>
-</span><span id=__span-28-12><a id=__codelineno-28-12 name=__codelineno-28-12 href=#__codelineno-28-12></a>  deployment: {
-</span><span id=__span-28-13><a id=__codelineno-28-13 name=__codelineno-28-13 href=#__codelineno-28-13></a>    description: &quot;Deploy the application&quot;
-</span><span id=__span-28-14><a id=__codelineno-28-14 name=__codelineno-28-14 href=#__codelineno-28-14></a>    steps: [&quot;Build the project&quot;, &quot;Run tests&quot;, &quot;Deploy to staging&quot;]
-</span><span id=__span-28-15><a id=__codelineno-28-15 name=__codelineno-28-15 href=#__codelineno-28-15></a>  }
-</span><span id=__span-28-16><a id=__codelineno-28-16 name=__codelineno-28-16 href=#__codelineno-28-16></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYwC01GADcIMAO6IABMAA6rKYqWK+cRtQhosENtNkgASiLHipvGFLDNqUgI4BXDFAhYAnlIyseUgEbwsUjQYjNqM8Pryysos7JxYeiARiQpRygDqOJxSQqISEKwA5mbMfIiRqUoAjBRSAMKZjADWltZSbmgWcBhgMG7lFVIATDUAajAaYO7j1K04njzOhf0VAMw1AKKscPZCbf5wUkQQcFjLykkRKcoAvvJnUnzkzK4kcdJyV1Gq6praulL6AAiMCe7lwFgwaHIEEY2B0rEuAxOILg0mQ+gAQvZoN5wYEZgArGAhfR0AGGewKDgnOCk8nA0FtZhSE4YAr5Ar6AC691un2uIGuXIYcWornwRFI5BgVFoIAYwnGcHh+EqgqAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=agents-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/agents title="GitHub User: agents">@agents</a> Block<a class=headerlink href=#agents-block title="Permanent link">&para;</a></h3> <p>Define specialized AI subagents:</p> <div class="tabbed-set tabbed-alternate" data-tabs=9:2><input checked=checked id=__tabbed_9_1 name=__tabbed_9 type=radio><input id=__tabbed_9_2 name=__tabbed_9 type=radio><div class=tabbed-labels><label for=__tabbed_9_1>Before (AGENTS.md)</label><label for=__tabbed_9_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-29-1><a id=__codelineno-29-1 name=__codelineno-29-1 href=#__codelineno-29-1></a><span class=gh># Code Reviewer</span>
-</span><span id=__span-29-2><a id=__codelineno-29-2 name=__codelineno-29-2 href=#__codelineno-29-2></a>
-</span><span id=__span-29-3><a id=__codelineno-29-3 name=__codelineno-29-3 href=#__codelineno-29-3></a>Reviews code for quality.
-</span><span id=__span-29-4><a id=__codelineno-29-4 name=__codelineno-29-4 href=#__codelineno-29-4></a>
-</span><span id=__span-29-5><a id=__codelineno-29-5 name=__codelineno-29-5 href=#__codelineno-29-5></a>Tools: Read, Grep, Bash
-</span><span id=__span-29-6><a id=__codelineno-29-6 name=__codelineno-29-6 href=#__codelineno-29-6></a>Model: claude-sonnet
-</span><span id=__span-29-7><a id=__codelineno-29-7 name=__codelineno-29-7 href=#__codelineno-29-7></a>
-</span><span id=__span-29-8><a id=__codelineno-29-8 name=__codelineno-29-8 href=#__codelineno-29-8></a>Instructions:
-</span><span id=__span-29-9><a id=__codelineno-29-9 name=__codelineno-29-9 href=#__codelineno-29-9></a>Review code checking for type safety and error handling.
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-30-1><a id=__codelineno-30-1 name=__codelineno-30-1 href=#__codelineno-30-1></a>@agents {
-</span><span id=__span-30-2><a id=__codelineno-30-2 name=__codelineno-30-2 href=#__codelineno-30-2></a>  code-reviewer: {
-</span><span id=__span-30-3><a id=__codelineno-30-3 name=__codelineno-30-3 href=#__codelineno-30-3></a>    description: &quot;Reviews code for quality and best practices&quot;
-</span><span id=__span-30-4><a id=__codelineno-30-4 name=__codelineno-30-4 href=#__codelineno-30-4></a>    tools: [&quot;Read&quot;, &quot;Grep&quot;, &quot;Bash&quot;]
-</span><span id=__span-30-5><a id=__codelineno-30-5 name=__codelineno-30-5 href=#__codelineno-30-5></a>    model: &quot;sonnet&quot;
-</span><span id=__span-30-6><a id=__codelineno-30-6 name=__codelineno-30-6 href=#__codelineno-30-6></a>    content: &quot;&quot;&quot;
-</span><span id=__span-30-7><a id=__codelineno-30-7 name=__codelineno-30-7 href=#__codelineno-30-7></a>      Review code checking for:
-</span><span id=__span-30-8><a id=__codelineno-30-8 name=__codelineno-30-8 href=#__codelineno-30-8></a>      - Type safety
-</span><span id=__span-30-9><a id=__codelineno-30-9 name=__codelineno-30-9 href=#__codelineno-30-9></a>      - Error handling
-</span><span id=__span-30-10><a id=__codelineno-30-10 name=__codelineno-30-10 href=#__codelineno-30-10></a>      - Test coverage
-</span><span id=__span-30-11><a id=__codelineno-30-11 name=__codelineno-30-11 href=#__codelineno-30-11></a>    &quot;&quot;&quot;
-</span><span id=__span-30-12><a id=__codelineno-30-12 name=__codelineno-30-12 href=#__codelineno-30-12></a>  }
-</span><span id=__span-30-13><a id=__codelineno-30-13 name=__codelineno-30-13 href=#__codelineno-30-13></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-iwCYwC01GADcIMAO4xqiAATAAOqxnKVyvnEbUIaLBDaz5IAEoix4uDN4wZYZtRkBHAK4YoELAE8ZGVjxkAjeCwZGgxGXUZ4Q0VVVSxmZig4WWRDEwweQzoZQwBxITQsnJAAIQw4HEMAXRjY5RJmPigDEDg2VhgsaKU6yzYOdhbokFremRNRCT6+SxwYRgBrCFYAcxs7RFHe-hkAFQ80azgMME6PLbqdgFFqajsZHB8eN1WL2J3doL7hKQwVmDeymG3TqAF8tqCQKCqgxOFhqB58ERSOQYFRaCAGD9aHpWPgAIxQoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=local-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/local title="GitHub User: local">@local</a> Block<a class=headerlink href=#local-block title="Permanent link">&para;</a></h3> <p>Private instructions not committed to version control:</p> <div class="tabbed-set tabbed-alternate" data-tabs=10:2><input checked=checked id=__tabbed_10_1 name=__tabbed_10 type=radio><input id=__tabbed_10_2 name=__tabbed_10 type=radio><div class=tabbed-labels><label for=__tabbed_10_1>Before (CLAUDE.local.md)</label><label for=__tabbed_10_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-31-1><a id=__codelineno-31-1 name=__codelineno-31-1 href=#__codelineno-31-1></a><span class=gh># Local Development</span>
-</span><span id=__span-31-2><a id=__codelineno-31-2 name=__codelineno-31-2 href=#__codelineno-31-2></a>
-</span><span id=__span-31-3><a id=__codelineno-31-3 name=__codelineno-31-3 href=#__codelineno-31-3></a><span class=k>-</span><span class=w> </span>API endpoint: http://localhost:8080
-</span><span id=__span-31-4><a id=__codelineno-31-4 name=__codelineno-31-4 href=#__codelineno-31-4></a><span class=k>-</span><span class=w> </span>Debug mode enabled
-</span><span id=__span-31-5><a id=__codelineno-31-5 name=__codelineno-31-5 href=#__codelineno-31-5></a><span class=k>-</span><span class=w> </span>Use staging database
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-32-1><a id=__codelineno-32-1 name=__codelineno-32-1 href=#__codelineno-32-1></a>@local {
-</span><span id=__span-32-2><a id=__codelineno-32-2 name=__codelineno-32-2 href=#__codelineno-32-2></a>  apiEndpoint: &quot;http://localhost:8080&quot;
-</span><span id=__span-32-3><a id=__codelineno-32-3 name=__codelineno-32-3 href=#__codelineno-32-3></a>  debugMode: true
-</span><span id=__span-32-4><a id=__codelineno-32-4 name=__codelineno-32-4 href=#__codelineno-32-4></a>
-</span><span id=__span-32-5><a id=__codelineno-32-5 name=__codelineno-32-5 href=#__codelineno-32-5></a>  &quot;&quot;&quot;
-</span><span id=__span-32-6><a id=__codelineno-32-6 name=__codelineno-32-6 href=#__codelineno-32-6></a>  Local development notes:
-</span><span id=__span-32-7><a id=__codelineno-32-7 name=__codelineno-32-7 href=#__codelineno-32-7></a>  - Use staging database for testing
-</span><span id=__span-32-8><a id=__codelineno-32-8 name=__codelineno-32-8 href=#__codelineno-32-8></a>  - Mock external services
-</span><span id=__span-32-9><a id=__codelineno-32-9 name=__codelineno-32-9 href=#__codelineno-32-9></a>  &quot;&quot;&quot;
-</span><span id=__span-32-10><a id=__codelineno-32-10 name=__codelineno-32-10 href=#__codelineno-32-10></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hmhAKKsAJmmYR2iAAQAdEDixY0iAPRKozRhig5mcLIgAcABiMyprCRcuCYAIwCuAcwCyza5KzU7MM2cuXTIKbmfhIAMuqaEtYAbjBqaCScWBKszBxwiL4hALQSAKpwMBK6GA5iDlHYGDYYhRJgzNQS6VjlWX65LowA1hJEHNSskYXU0RCM8O3+gTNTAL4gcwC6DEnUAJ74RKTkMFS0IAyxtBBs+ACMi0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=guards-block-with-globs><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/guards title="GitHub User: guards">@guards</a> Block with Globs<a class=headerlink href=#guards-block-with-globs title="Permanent link">&para;</a></h3> <p>File-specific rules using glob patterns:</p> <div class="tabbed-set tabbed-alternate" data-tabs=11:2><input checked=checked id=__tabbed_11_1 name=__tabbed_11 type=radio><input id=__tabbed_11_2 name=__tabbed_11 type=radio><div class=tabbed-labels><label for=__tabbed_11_1>Before (.github/instructions/)</label><label for=__tabbed_11_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-33-1><a id=__codelineno-33-1 name=__codelineno-33-1 href=#__codelineno-33-1></a>---
-</span><span id=__span-33-2><a id=__codelineno-33-2 name=__codelineno-33-2 href=#__codelineno-33-2></a><span class=gu>applyTo: src/components/**/*.tsx</span>
-</span><span id=__span-33-3><a id=__codelineno-33-3 name=__codelineno-33-3 href=#__codelineno-33-3></a><span class=gu>---</span>
-</span><span id=__span-33-4><a id=__codelineno-33-4 name=__codelineno-33-4 href=#__codelineno-33-4></a>
-</span><span id=__span-33-5><a id=__codelineno-33-5 name=__codelineno-33-5 href=#__codelineno-33-5></a><span class=gh># Component Guidelines</span>
-</span><span id=__span-33-6><a id=__codelineno-33-6 name=__codelineno-33-6 href=#__codelineno-33-6></a>
-</span><span id=__span-33-7><a id=__codelineno-33-7 name=__codelineno-33-7 href=#__codelineno-33-7></a>Use functional components with TypeScript.
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-34-1><a id=__codelineno-34-1 name=__codelineno-34-1 href=#__codelineno-34-1></a>@guards {
-</span><span id=__span-34-2><a id=__codelineno-34-2 name=__codelineno-34-2 href=#__codelineno-34-2></a>  globs: [&quot;src/components/**/*.tsx&quot;]
-</span><span id=__span-34-3><a id=__codelineno-34-3 name=__codelineno-34-3 href=#__codelineno-34-3></a>
-</span><span id=__span-34-4><a id=__codelineno-34-4 name=__codelineno-34-4 href=#__codelineno-34-4></a>  &quot;&quot;&quot;
-</span><span id=__span-34-5><a id=__codelineno-34-5 name=__codelineno-34-5 href=#__codelineno-34-5></a>  Component Guidelines:
-</span><span id=__span-34-6><a id=__codelineno-34-6 name=__codelineno-34-6 href=#__codelineno-34-6></a>  - Use functional components
-</span><span id=__span-34-7><a id=__codelineno-34-7 name=__codelineno-34-7 href=#__codelineno-34-7></a>  - Include TypeScript types
-</span><span id=__span-34-8><a id=__codelineno-34-8 name=__codelineno-34-8 href=#__codelineno-34-8></a>  - Add unit tests
-</span><span id=__span-34-9><a id=__codelineno-34-9 name=__codelineno-34-9 href=#__codelineno-34-9></a>  &quot;&quot;&quot;
-</span><span id=__span-34-10><a id=__codelineno-34-10 name=__codelineno-34-10 href=#__codelineno-34-10></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gOZTMBGcRAAJkAHRBxqjAPQsybTljgyAVKrUVlhCQF0xrA8OMmJZkEZPGAwswWslwgOIBXCABMYUCA6GWrALTCAKpwMMJgLqyMWBBsGFDC8miK7HD+JkEAktFQLp7CACoAnmgwAMqM1BBoWMJYpfAZxkEAgu7uwlEQdRxwys3C5masVgC+IGO6DErUxfhEpOQwVLQgDABuMLRxrPgAjJNAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=params-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/params title="GitHub User: params">@params</a> Block<a class=headerlink href=#params-block title="Permanent link">&para;</a></h3> <p>Configurable parameters with types:</p> <div class="tabbed-set tabbed-alternate" data-tabs=12:2><input checked=checked id=__tabbed_12_1 name=__tabbed_12 type=radio><input id=__tabbed_12_2 name=__tabbed_12 type=radio><div class=tabbed-labels><label for=__tabbed_12_1>Before (Markdown)</label><label for=__tabbed_12_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-35-1><a id=__codelineno-35-1 name=__codelineno-35-1 href=#__codelineno-35-1></a><span class=gu>## Configuration</span>
-</span><span id=__span-35-2><a id=__codelineno-35-2 name=__codelineno-35-2 href=#__codelineno-35-2></a>
-</span><span id=__span-35-3><a id=__codelineno-35-3 name=__codelineno-35-3 href=#__codelineno-35-3></a><span class=k>-</span><span class=w> </span>Verbosity: 1-5 (default: 3)
-</span><span id=__span-35-4><a id=__codelineno-35-4 name=__codelineno-35-4 href=#__codelineno-35-4></a><span class=k>-</span><span class=w> </span>Output format: json | text | markdown
-</span><span id=__span-35-5><a id=__codelineno-35-5 name=__codelineno-35-5 href=#__codelineno-35-5></a><span class=k>-</span><span class=w> </span>Strict mode: on/off
-</span></code></pre></div> </div> <div class=tabbed-block> <div class="language-text highlight"><pre><span></span><code><span id=__span-36-1><a id=__codelineno-36-1 name=__codelineno-36-1 href=#__codelineno-36-1></a>@params {
-</span><span id=__span-36-2><a id=__codelineno-36-2 name=__codelineno-36-2 href=#__codelineno-36-2></a>  verbosity: range(1..5) = 3
-</span><span id=__span-36-3><a id=__codelineno-36-3 name=__codelineno-36-3 href=#__codelineno-36-3></a>  format?: enum(&quot;json&quot;, &quot;text&quot;, &quot;markdown&quot;) = &quot;text&quot;
-</span><span id=__span-36-4><a id=__codelineno-36-4 name=__codelineno-36-4 href=#__codelineno-36-4></a>  strict: boolean = false
-</span><span id=__span-36-5><a id=__codelineno-36-5 name=__codelineno-36-5 href=#__codelineno-36-5></a>}
-</span></code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gG4zUBGzOBCwBPRAAJqGVgHMYACgCMFCgFYAlBIC8EgMwAdVhJOmwzaiWwB+SZwCuJBQZAArOGxd0JLjoSxePiBW1ADWACbMAO6sLlq6vkQBIEampnBY1BCMWJKCzLAyOhJgGFBwMKmmAL4g1QC6DJyZovhEpOQwVLQgDLy0EGz4SnVAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=extend-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/extend title="GitHub User: extend">@extend</a> Block<a class=headerlink href=#extend-block title="Permanent link">&para;</a></h3> <p>Modify inherited blocks at specific paths:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-37-1><a id=__codelineno-37-1 name=__codelineno-37-1 href=#__codelineno-37-1></a>@inherit @company/base
-</span><span id=__span-37-2><a id=__codelineno-37-2 name=__codelineno-37-2 href=#__codelineno-37-2></a>
-</span><span id=__span-37-3><a id=__codelineno-37-3 name=__codelineno-37-3 href=#__codelineno-37-3></a># Add to existing identity
-</span><span id=__span-37-4><a id=__codelineno-37-4 name=__codelineno-37-4 href=#__codelineno-37-4></a>@extend identity {
-</span><span id=__span-37-5><a id=__codelineno-37-5 name=__codelineno-37-5 href=#__codelineno-37-5></a>  &quot;&quot;&quot;
-</span><span id=__span-37-6><a id=__codelineno-37-6 name=__codelineno-37-6 href=#__codelineno-37-6></a>  Additional expertise in React development.
-</span><span id=__span-37-7><a id=__codelineno-37-7 name=__codelineno-37-7 href=#__codelineno-37-7></a>  &quot;&quot;&quot;
-</span><span id=__span-37-8><a id=__codelineno-37-8 name=__codelineno-37-8 href=#__codelineno-37-8></a>}
-</span><span id=__span-37-9><a id=__codelineno-37-9 name=__codelineno-37-9 href=#__codelineno-37-9></a>
-</span><span id=__span-37-10><a id=__codelineno-37-10 name=__codelineno-37-10 href=#__codelineno-37-10></a># Modify nested standards
-</span><span id=__span-37-11><a id=__codelineno-37-11 name=__codelineno-37-11 href=#__codelineno-37-11></a>@extend standards.code.testing {
-</span><span id=__span-37-12><a id=__codelineno-37-12 name=__codelineno-37-12 href=#__codelineno-37-12></a>  framework: &quot;vitest&quot;
-</span><span id=__span-37-13><a id=__codelineno-37-13 name=__codelineno-37-13 href=#__codelineno-37-13></a>  coverage: 90
-</span><span id=__span-37-14><a id=__codelineno-37-14 name=__codelineno-37-14 href=#__codelineno-37-14></a>}
-</span><span id=__span-37-15><a id=__codelineno-37-15 name=__codelineno-37-15 href=#__codelineno-37-15></a>
-</span><span id=__span-37-16><a id=__codelineno-37-16 name=__codelineno-37-16 href=#__codelineno-37-16></a># Add to restrictions array
-</span><span id=__span-37-17><a id=__codelineno-37-17 name=__codelineno-37-17 href=#__codelineno-37-17></a>@extend restrictions {
-</span><span id=__span-37-18><a id=__codelineno-37-18 name=__codelineno-37-18 href=#__codelineno-37-18></a>  - &quot;Use functional components only&quot;
-</span><span id=__span-37-19><a id=__codelineno-37-19 name=__codelineno-37-19 href=#__codelineno-37-19></a>  - &quot;No class-based components&quot;
-</span><span id=__span-37-20><a id=__codelineno-37-20 name=__codelineno-37-20 href=#__codelineno-37-20></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAggBNBvLM15EIcLBFYBzXhEGcZWAJ4AdVgAEiHViKUqI63sC29eGkNdutLQwSYhsMUCYTQxqMuDEX2AEowGIxYvMoAbjBQzGgkKhQWVjapWgC+Wlp8ALLMTmBqvKzwHCLSGAYY1IJwWrqE+uVYlYLVtRQsyhQc0rIK5va8YNSkMADuzNQA1ogpkSaldpYs0aNyMHMAnAAMGVmsfI6i4tSl1BBhLqxwvNWjmjp6nCJn0hdXbLeDlgC0KQBVPzDACurE+rDcvBYZDYKlubCgmhsQ3+1gAcuJGFAMHA4L8AEa4mAiGFoOHsOoo9IgdIAXQYKmoanwRFI5BgVFoIAYazg13wAEZaUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=validation-checklist>Validation Checklist<a class=headerlink href=#validation-checklist title="Permanent link">&para;</a></h2> <p>After migration, verify:</p> <ul class=task-list> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> <code>prs validate</code> passes without errors</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> <code>prs compile</code> generates all targets</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> Generated files match expected content</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> No duplicate or conflicting instructions</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> All custom commands work in each tool</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> Team members can compile locally</li> </ul> <h2 id=common-issues>Common Issues<a class=headerlink href=#common-issues title="Permanent link">&para;</a></h2> <h3 id=missing-metadata>Missing Metadata<a class=headerlink href=#missing-metadata title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-38-1><a id=__codelineno-38-1 name=__codelineno-38-1 href=#__codelineno-38-1></a>Error: @meta block is required
-</span></code></pre></div> <p>Add required <code>@meta</code> block with <code>id</code> and <code>syntax</code>.</p> <h3 id=invalid-syntax>Invalid Syntax<a class=headerlink href=#invalid-syntax title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-39-1><a id=__codelineno-39-1 name=__codelineno-39-1 href=#__codelineno-39-1></a>Error: Unexpected token at line 15
-</span></code></pre></div> <p>Check PromptScript syntax, especially:</p> <ul> <li>Colons after property names</li> <li>Proper string quoting</li> <li>Array/object brackets</li> </ul> <h3 id=multiline-strings-in-objects>Multiline Strings in Objects<a class=headerlink href=#multiline-strings-in-objects title="Permanent link">&para;</a></h3> <p>Multiline strings cannot be loose inside objects:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-40-1><a id=__codelineno-40-1 name=__codelineno-40-1 href=#__codelineno-40-1></a># ❌ Invalid
-</span><span id=__span-40-2><a id=__codelineno-40-2 name=__codelineno-40-2 href=#__codelineno-40-2></a>@standards {
-</span><span id=__span-40-3><a id=__codelineno-40-3 name=__codelineno-40-3 href=#__codelineno-40-3></a>  code: {
-</span><span id=__span-40-4><a id=__codelineno-40-4 name=__codelineno-40-4 href=#__codelineno-40-4></a>    style: &quot;clean&quot;
-</span><span id=__span-40-5><a id=__codelineno-40-5 name=__codelineno-40-5 href=#__codelineno-40-5></a>    &quot;&quot;&quot;
-</span><span id=__span-40-6><a id=__codelineno-40-6 name=__codelineno-40-6 href=#__codelineno-40-6></a>    Additional notes...
-</span><span id=__span-40-7><a id=__codelineno-40-7 name=__codelineno-40-7 href=#__codelineno-40-7></a>    &quot;&quot;&quot;
-</span><span id=__span-40-8><a id=__codelineno-40-8 name=__codelineno-40-8 href=#__codelineno-40-8></a>  }
-</span><span id=__span-40-9><a id=__codelineno-40-9 name=__codelineno-40-9 href=#__codelineno-40-9></a>}
-</span><span id=__span-40-10><a id=__codelineno-40-10 name=__codelineno-40-10 href=#__codelineno-40-10></a>
-</span><span id=__span-40-11><a id=__codelineno-40-11 name=__codelineno-40-11 href=#__codelineno-40-11></a># ✅ Valid - assign to a key
-</span><span id=__span-40-12><a id=__codelineno-40-12 name=__codelineno-40-12 href=#__codelineno-40-12></a>@standards {
-</span><span id=__span-40-13><a id=__codelineno-40-13 name=__codelineno-40-13 href=#__codelineno-40-13></a>  code: {
-</span><span id=__span-40-14><a id=__codelineno-40-14 name=__codelineno-40-14 href=#__codelineno-40-14></a>    style: &quot;clean&quot;
-</span><span id=__span-40-15><a id=__codelineno-40-15 name=__codelineno-40-15 href=#__codelineno-40-15></a>    notes: &quot;&quot;&quot;
-</span><span id=__span-40-16><a id=__codelineno-40-16 name=__codelineno-40-16 href=#__codelineno-40-16></a>      Additional notes...
-</span><span id=__span-40-17><a id=__codelineno-40-17 name=__codelineno-40-17 href=#__codelineno-40-17></a>    &quot;&quot;&quot;
-</span><span id=__span-40-18><a id=__codelineno-40-18 name=__codelineno-40-18 href=#__codelineno-40-18></a>  }
-</span><span id=__span-40-19><a id=__codelineno-40-19 name=__codelineno-40-19 href=#__codelineno-40-19></a>}
-</span></code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMRJJly5fAJ6xlUprAG7VawyEOy1AQUGCIWCGwxRxrZhzgUPRuSbNyAvjIBrDIAxOKAoOTiAGqOEILiALTiGHBwEADmsljMyeIA1jAaMrz8QiJiKuYKSpVq4pra4rqM+sGm5nIubjqmvV6W1rb2rI7OrvAeFP0+7f6BIH4AugycWNQa+ESk5DBUtCAMAG4wtMP4AIwLQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=content-loss>Content Loss<a class=headerlink href=#content-loss title="Permanent link">&para;</a></h3> <p>If compiled output is missing content:</p> <ol> <li>Check block names are correct</li> <li>Verify no syntax errors in blocks</li> <li>Use <code>--verbose</code> flag for debugging</li> </ol> <h2 id=ai-assisted-migration>AI-Assisted Migration<a class=headerlink href=#ai-assisted-migration title="Permanent link">&para;</a></h2> <p>For automated migration using AI assistants, PromptScript provides a dedicated skill that guides the AI through the migration process.</p> <h3 id=using-the-migration-skill>Using the Migration Skill<a class=headerlink href=#using-the-migration-skill title="Permanent link">&para;</a></h3> <p><strong>Claude Code:</strong></p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-41-1><a id=__codelineno-41-1 name=__codelineno-41-1 href=#__codelineno-41-1></a><span class=c1># Use the migrate skill</span>
-</span><span id=__span-41-2><a id=__codelineno-41-2 name=__codelineno-41-2 href=#__codelineno-41-2></a>/migrate
-</span><span id=__span-41-3><a id=__codelineno-41-3 name=__codelineno-41-3 href=#__codelineno-41-3></a>
-</span><span id=__span-41-4><a id=__codelineno-41-4 name=__codelineno-41-4 href=#__codelineno-41-4></a><span class=c1># Or ask directly</span>
-</span><span id=__span-41-5><a id=__codelineno-41-5 name=__codelineno-41-5 href=#__codelineno-41-5></a><span class=s2>&quot;migrate my existing instructions to PromptScript&quot;</span>
+</span><span id=__span-18-5><a id=__codelineno-18-5 name=__codelineno-18-5 href=#__codelineno-18-5></a><span class=gh># Component Guidelines</span>
+</span><span id=__span-18-6><a id=__codelineno-18-6 name=__codelineno-18-6 href=#__codelineno-18-6></a>
+</span><span id=__span-18-7><a id=__codelineno-18-7 name=__codelineno-18-7 href=#__codelineno-18-7></a>Use functional components with TypeScript.
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=err>@guards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>globs:<span class=w> </span><span class=p>[</span><span class=s2>&quot;src/components/**/*.tsx&quot;</span><span class=p>]</span>
+
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Component Guidelines:</span>
+<span class=sd>  - Use functional components</span>
+<span class=sd>  - Include TypeScript types</span>
+<span class=sd>  - Add unit tests</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gOZTMBGcRAAJkAHRBxqjAPQsybTljgyAVKrUVlhCQF0xrA8OMmJZkEZPGAwswWslwgOIBXCABMYUCA6GWrALTCAKpwMMJgLqyMWBBsGFDC8miK7HD+JkEAktFQLp7CACoAnmgwAMqM1BBoWMJYpfAZxkEAgu7uwlEQdRxwys3C5masVgC+IGO6DErUxfhEpOQwVLQgDABuMLRxrPgAjJNAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=params-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/params title="GitHub User: params">@params</a> Block<a class=headerlink href=#params-block title="Permanent link">&para;</a></h3> <p>Configurable parameters with types:</p> <div class="tabbed-set tabbed-alternate" data-tabs=12:2><input checked=checked id=__tabbed_12_1 name=__tabbed_12 type=radio><input id=__tabbed_12_2 name=__tabbed_12 type=radio><div class=tabbed-labels><label for=__tabbed_12_1>Before (Markdown)</label><label for=__tabbed_12_2>After (PromptScript)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-19-1><a id=__codelineno-19-1 name=__codelineno-19-1 href=#__codelineno-19-1></a><span class=gu>## Configuration</span>
+</span><span id=__span-19-2><a id=__codelineno-19-2 name=__codelineno-19-2 href=#__codelineno-19-2></a>
+</span><span id=__span-19-3><a id=__codelineno-19-3 name=__codelineno-19-3 href=#__codelineno-19-3></a><span class=k>-</span><span class=w> </span>Verbosity: 1-5 (default: 3)
+</span><span id=__span-19-4><a id=__codelineno-19-4 name=__codelineno-19-4 href=#__codelineno-19-4></a><span class=k>-</span><span class=w> </span>Output format: json | text | markdown
+</span><span id=__span-19-5><a id=__codelineno-19-5 name=__codelineno-19-5 href=#__codelineno-19-5></a><span class=k>-</span><span class=w> </span>Strict mode: on/off
+</span></code></pre></div> </div> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=err>@params</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>verbosity:<span class=w> </span>range(1..5)<span class=w> </span>=<span class=w> </span><span class=m>3</span>
+<span class=w>  </span>format?:<span class=w> </span>enum(<span class=s2>&quot;json&quot;</span>,<span class=w> </span><span class=s2>&quot;text&quot;</span>,<span class=w> </span><span class=s2>&quot;markdown&quot;</span>)<span class=w> </span>=<span class=w> </span><span class=s2>&quot;text&quot;</span>
+<span class=w>  </span>strict:<span class=w> </span>boolean<span class=w> </span>=<span class=w> </span><span class=kc>false</span>
+<span class=p>}</span>
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gG4zUBGzOBCwBPRAAJqGVgHMYACgCMFCgFYAlBIC8EgMwAdVhJOmwzaiWwB+SZwCuJBQZAArOGxd0JLjoSxePiBW1ADWACbMAO6sLlq6vkQBIEampnBY1BCMWJKCzLAyOhJgGFBwMKmmAL4g1QC6DJyZovhEpOQwVLQgDLy0EGz4SnVAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=extend-block><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/extend title="GitHub User: extend">@extend</a> Block<a class=headerlink href=#extend-block title="Permanent link">&para;</a></h3> <p>Modify inherited blocks at specific paths:</p> <div class=highlight><pre><span></span><code><span class=err>@</span><span class=kn>inherit</span><span class=s>@company/base</span>
+
+<span class=c1># Add to existing identity</span>
+<span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>identity</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>  Additional expertise in React development.</span>
+<span class=sd>  &quot;&quot;&quot;</span>
+<span class=p>}</span>
+
+<span class=c1># Modify nested standards</span>
+<span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards.code.testing</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>framework:<span class=w> </span><span class=s2>&quot;vitest&quot;</span>
+<span class=w>  </span>coverage:<span class=w> </span><span class=m>90</span>
+<span class=p>}</span>
+
+<span class=c1># Add to restrictions array</span>
+<span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Use functional components only&quot;</span>
+<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;No class-based components&quot;</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAggBNBvLM15EIcLBFYBzXhEGcZWAJ4AdVgAEiHViKUqI63sC29eGkNdutLQwSYhsMUCYTQxqMuDEX2AEowGIxYvMoAbjBQzGgkKhQWVjapWgC+Wlp8ALLMTmBqvKzwHCLSGAYY1IJwWrqE+uVYlYLVtRQsyhQc0rIK5va8YNSkMADuzNQA1ogpkSaldpYs0aNyMHMAnAAMGVmsfI6i4tSl1BBhLqxwvNWjmjp6nCJn0hdXbLeDlgC0KQBVPzDACurE+rDcvBYZDYKlubCgmhsQ3+1gAcuJGFAMHA4L8AEa4mAiGFoOHsOoo9IgdIAXQYKmoanwRFI5BgVFoIAYazg13wAEZaUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=validation-checklist>Validation Checklist<a class=headerlink href=#validation-checklist title="Permanent link">&para;</a></h2> <p>After migration, verify:</p> <ul class=task-list> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> <code>prs validate</code> passes without errors</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> <code>prs compile</code> generates all targets</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> Generated files match expected content</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> No duplicate or conflicting instructions</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> All custom commands work in each tool</li> <li class=task-list-item><label class=task-list-control><input type=checkbox disabled><span class=task-list-indicator></span></label> Team members can compile locally</li> </ul> <h2 id=common-issues>Common Issues<a class=headerlink href=#common-issues title="Permanent link">&para;</a></h2> <h3 id=missing-metadata>Missing Metadata<a class=headerlink href=#missing-metadata title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-20-1><a id=__codelineno-20-1 name=__codelineno-20-1 href=#__codelineno-20-1></a>Error: @meta block is required
+</span></code></pre></div> <p>Add required <code>@meta</code> block with <code>id</code> and <code>syntax</code>.</p> <h3 id=invalid-syntax>Invalid Syntax<a class=headerlink href=#invalid-syntax title="Permanent link">&para;</a></h3> <div class="language-text highlight"><pre><span></span><code><span id=__span-21-1><a id=__codelineno-21-1 name=__codelineno-21-1 href=#__codelineno-21-1></a>Error: Unexpected token at line 15
+</span></code></pre></div> <p>Check PromptScript syntax, especially:</p> <ul> <li>Colons after property names</li> <li>Proper string quoting</li> <li>Array/object brackets</li> </ul> <h3 id=multiline-strings-in-objects>Multiline Strings in Objects<a class=headerlink href=#multiline-strings-in-objects title="Permanent link">&para;</a></h3> <p>Multiline strings cannot be loose inside objects:</p> <div class=highlight><pre><span></span><code><span class=c1># ❌ Invalid</span>
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span>style:<span class=w> </span><span class=s2>&quot;clean&quot;</span>
+<span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>    Additional notes...</span>
+<span class=sd>    &quot;&quot;&quot;</span>
+<span class=w>  </span><span class=p>}</span>
+<span class=p>}</span>
+
+<span class=c1># ✅ Valid - assign to a key</span>
+<span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span>style:<span class=w> </span><span class=s2>&quot;clean&quot;</span>
+<span class=w>    </span>notes:<span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=sd>      Additional notes...</span>
+<span class=sd>    &quot;&quot;&quot;</span>
+<span class=w>  </span><span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMRJJly5fAJ6xlUprAG7VawyEOy1AQUGCIWCGwxRxrZhzgUPRuSbNyAvjIBrDIAxOKAoOTiAGqOEILiALTiGHBwEADmsljMyeIA1jAaMrz8QiJiKuYKSpVq4pra4rqM+sGm5nIubjqmvV6W1rb2rI7OrvAeFP0+7f6BIH4AugycWNQa+ESk5DBUtCAMAG4wtMP4AIwLQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=content-loss>Content Loss<a class=headerlink href=#content-loss title="Permanent link">&para;</a></h3> <p>If compiled output is missing content:</p> <ol> <li>Check block names are correct</li> <li>Verify no syntax errors in blocks</li> <li>Use <code>--verbose</code> flag for debugging</li> </ol> <h2 id=ai-assisted-migration>AI-Assisted Migration<a class=headerlink href=#ai-assisted-migration title="Permanent link">&para;</a></h2> <p>For automated migration using AI assistants, PromptScript provides a dedicated skill that guides the AI through the migration process.</p> <h3 id=using-the-migration-skill>Using the Migration Skill<a class=headerlink href=#using-the-migration-skill title="Permanent link">&para;</a></h3> <p><strong>Claude Code:</strong></p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-22-1><a id=__codelineno-22-1 name=__codelineno-22-1 href=#__codelineno-22-1></a><span class=c1># Use the migrate skill</span>
+</span><span id=__span-22-2><a id=__codelineno-22-2 name=__codelineno-22-2 href=#__codelineno-22-2></a>/migrate
+</span><span id=__span-22-3><a id=__codelineno-22-3 name=__codelineno-22-3 href=#__codelineno-22-3></a>
+</span><span id=__span-22-4><a id=__codelineno-22-4 name=__codelineno-22-4 href=#__codelineno-22-4></a><span class=c1># Or ask directly</span>
+</span><span id=__span-22-5><a id=__codelineno-22-5 name=__codelineno-22-5 href=#__codelineno-22-5></a><span class=s2>&quot;migrate my existing instructions to PromptScript&quot;</span>
 </span></code></pre></div> <p><strong>GitHub Copilot:</strong></p> <p>Reference the migrate skill in your prompt or use Chat with the migration context.</p> <p><strong>Cursor:</strong></p> <p>Use Composer with migration context or reference the PromptScript migration documentation.</p> <h3 id=what-the-ai-will-do>What the AI Will Do<a class=headerlink href=#what-the-ai-will-do title="Permanent link">&para;</a></h3> <ol> <li><strong>Discover</strong> existing instruction files (CLAUDE.md, .cursorrules, copilot-instructions.md)</li> <li><strong>Analyze</strong> content and classify into PromptScript blocks</li> <li><strong>Generate</strong> properly structured PromptScript files</li> <li><strong>Validate</strong> the output with <code>prs validate</code></li> </ol> <h3 id=best-practices-for-ai-migration>Best Practices for AI Migration<a class=headerlink href=#best-practices-for-ai-migration title="Permanent link">&para;</a></h3> <p>For detailed guidelines on AI-assisted migration, including content mapping patterns and common pitfalls, see <a href=../ai-migration-best-practices/ >AI Migration Best Practices</a>.</p> <h2 id=next-steps>Next Steps<a class=headerlink href=#next-steps title="Permanent link">&para;</a></h2> <p>After migration:</p> <ol> <li><a href=../inheritance/ >Set up inheritance</a> if you have multiple projects</li> <li><a href=../multi-file/ >Organize multi-file setup</a> for complex projects</li> <li><a href=../enterprise/#cicd-integration>Configure CI/CD</a> for validation</li> <li>Train team on PromptScript workflow</li> </ol> </article> </div> <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script> <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script> </div> <button type=button class="md-top md-icon" data-md-component=top hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg> Back to top </button> </main> <footer class=md-footer> <nav class="md-footer__inner md-grid" aria-label=Footer> <a href=../enterprise/ class="md-footer__link md-footer__link--prev" aria-label="Previous: Enterprise Setup"> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg> </div> <div class=md-footer__title> <span class=md-footer__direction> Previous </span> <div class=md-ellipsis> Enterprise Setup </div> </div> </a> <a href=../../api-reference/ class="md-footer__link md-footer__link--next" aria-label="Next: Index"> <div class=md-footer__title> <span class=md-footer__direction> Next </span> <div class=md-ellipsis> Index </div> </div> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg> </div> </a> </nav> <div class="md-footer-meta md-typeset"> <div class="md-footer-meta__inner md-grid"> <div class=md-copyright> <div class=md-copyright__highlight> Copyright &copy; 2026 PromptScript Contributors </div> Made with <a href=https://squidfunk.github.io/mkdocs-material/ target=_blank rel=noopener> Material for MkDocs </a> </div> <div class=md-social> <a href=https://github.com/mrwogu/promptscript target=_blank rel=noopener title=github.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 512 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg> </a> <a href=https://www.npmjs.com/org/promptscript target=_blank rel=noopener title=www.npmjs.com class=md-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 576 512"><!-- Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M288 288h-32v-64h32zm288-128v192H288v32H160v-32H0V160zm-416 32H32v128h64v-96h32v96h32zm160 0H192v160h64v-32h64zm224 0H352v128h64v-96h32v96h32v-96h32v96h32z"/></svg> </a> </div> </div> </div> </footer> </div> <div class=md-dialog data-md-component=dialog> <div class="md-dialog__inner md-typeset"></div> </div> <div class=md-progress data-md-component=progress role=progressbar></div> <script id=__config type=application/json>{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link", "content.tooltips", "content.action.edit", "content.action.view", "header.autohide", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script> <script src=../../assets/javascripts/bundle.79ae519e.min.js></script> </body> </html>
