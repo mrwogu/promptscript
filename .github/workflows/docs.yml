@@ -111,8 +111,11 @@ jobs:
           ref: gh-pages
           path: gh-pages-content
 
-      - name: Copy 404.html to root
-        run: cp docs/404.html gh-pages-content/404.html
+      - name: Copy root files (404, robots, llms)
+        run: |
+          cp docs/404.html gh-pages-content/404.html
+          cp docs/robots.txt gh-pages-content/robots.txt
+          cp docs/llms.txt gh-pages-content/llms.txt
 
       - name: Generate sitemap index
         run: |
