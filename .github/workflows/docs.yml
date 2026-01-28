@@ -19,8 +19,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -147,18 +147,26 @@ jobs:
 
           # /playground = latest (production)
           # /playground-dev = dev version
+          # Both directories are stored on gh-pages so they persist across deployments
+
+          cd gh-pages-content
 
           if [[ "$VERSION" == "dev" ]]; then
             # Dev build goes to /playground-dev
-            rm -rf gh-pages-content/playground-dev
-            cp -r dist/packages/playground gh-pages-content/playground-dev
+            rm -rf playground-dev
+            cp -r ../dist/packages/playground playground-dev
           else
             # Tagged release goes to /playground (as latest)
             if [[ "$ALIAS" == "latest" ]]; then
-              rm -rf gh-pages-content/playground
-              cp -r dist/packages/playground gh-pages-content/playground
+              rm -rf playground
+              cp -r ../dist/packages/playground playground
             fi
           fi
+
+          # Commit playground to gh-pages so it persists across deployments
+          git add playground playground-dev 2>/dev/null || true
+          git commit -m "Deploy playground ($VERSION)" || echo "No playground changes to commit"
+          git push origin gh-pages
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
