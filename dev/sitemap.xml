@@ -113,6 +113,10 @@
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/checkForUpdates/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/compileCommand/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
@@ -125,7 +129,23 @@
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/fetchLatestVersion/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/findConfigFile/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/forceCheckForUpdates/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/getCacheDir/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/getCachePath/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
@@ -149,6 +169,10 @@
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/printUpdateNotification/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/pullCommand/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
@@ -158,6 +182,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/setContext/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/updateCheckCommand/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
@@ -186,6 +214,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/PullOptions/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/UpdateInfo/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
@@ -433,6 +465,14 @@
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/CatalogEntry/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/DetectionHints/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/Diagnostic/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
@@ -469,6 +509,10 @@
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/NamespaceDefinition/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ObjectContent/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
@@ -497,7 +541,19 @@
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ProjectContext/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PromptScriptConfig/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/RegistryManifest/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/RegistryMeta/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
@@ -509,11 +565,35 @@
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SourceAttribution/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SourceLocation/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SourceRange/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SuggestionAction/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SuggestionCondition/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SuggestionReasoning/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SuggestionResult/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SuggestionRule/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
@@ -566,6 +646,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/GithubVersion/</loc>
+         <lastmod>2026-01-28</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ManifestTarget/</loc>
          <lastmod>2026-01-28</lastmod>
     </url>
     <url>
