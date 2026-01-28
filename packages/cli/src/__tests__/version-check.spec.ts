@@ -295,5 +295,246 @@ describe('version-check', () => {
 
       expect(result.info?.updateAvailable).toBe(false);
     });
+
+    it('should handle v prefix in versions', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: 'v2.0.0' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { forceCheckForUpdates } = await import('../utils/version-check.js');
+      const result = await forceCheckForUpdates('v1.0.0');
+
+      expect(result.info?.updateAvailable).toBe(true);
+    });
+
+    it('should handle versions with different segment counts', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '1.0.0.1' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { forceCheckForUpdates } = await import('../utils/version-check.js');
+      const result = await forceCheckForUpdates('1.0.0');
+
+      expect(result.info?.updateAvailable).toBe(true);
+    });
+
+    it('should handle prerelease to stable upgrade', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '1.0.0' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { forceCheckForUpdates } = await import('../utils/version-check.js');
+      const result = await forceCheckForUpdates('1.0.0-beta.2');
+
+      expect(result.info?.updateAvailable).toBe(true);
+    });
+
+    it('should handle same version different prerelease', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '1.0.0-beta.1' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { forceCheckForUpdates } = await import('../utils/version-check.js');
+      const result = await forceCheckForUpdates('1.0.0-alpha.1');
+
+      // Both are prereleases, base versions are equal, no upgrade
+      expect(result.info?.updateAvailable).toBe(false);
+    });
+  });
+
+  describe('fetchLatestVersion edge cases', () => {
+    beforeEach(() => {
+      vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('should return null when version field is missing', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ name: '@promptscript/cli' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { fetchLatestVersion } = await import('../utils/version-check.js');
+      const result = await fetchLatestVersion();
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle error with code property', async () => {
+      const error = new Error('Connection refused') as NodeJS.ErrnoException;
+      error.code = 'ECONNREFUSED';
+      const mockFetch = vi.fn().mockRejectedValue(error);
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { fetchLatestVersion } = await import('../utils/version-check.js');
+      const result = await fetchLatestVersion();
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('checkForUpdates with cache', () => {
+    let mockFsModule: {
+      existsSync: ReturnType<typeof vi.fn>;
+      readFileSync: ReturnType<typeof vi.fn>;
+      writeFileSync: ReturnType<typeof vi.fn>;
+      mkdirSync: ReturnType<typeof vi.fn>;
+    };
+
+    beforeEach(() => {
+      vi.stubGlobal('fetch', vi.fn());
+
+      mockFsModule = {
+        existsSync: vi.fn().mockReturnValue(false),
+        readFileSync: vi.fn(),
+        writeFileSync: vi.fn(),
+        mkdirSync: vi.fn(),
+      };
+
+      vi.doMock('fs', () => mockFsModule);
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.doUnmock('fs');
+    });
+
+    it('should use cached result when valid', async () => {
+      mockFsModule.existsSync.mockReturnValue(true);
+      mockFsModule.readFileSync.mockReturnValue(
+        JSON.stringify({
+          lastCheck: new Date().toISOString(),
+          latestVersion: '2.0.0',
+          currentVersion: '1.0.0',
+        })
+      );
+
+      const mockFetch = vi.fn();
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates('1.0.0');
+
+      // Should use cached result without fetching
+      expect(result?.updateAvailable).toBe(true);
+      expect(result?.latestVersion).toBe('2.0.0');
+    });
+
+    it('should fetch when cache is expired', async () => {
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 2); // 2 days ago
+
+      mockFsModule.existsSync.mockReturnValue(true);
+      mockFsModule.readFileSync.mockReturnValue(
+        JSON.stringify({
+          lastCheck: oldDate.toISOString(),
+          latestVersion: '1.5.0',
+          currentVersion: '1.0.0',
+        })
+      );
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '2.0.0' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      await checkForUpdates('1.0.0');
+
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    it('should fetch when current version changed', async () => {
+      mockFsModule.existsSync.mockReturnValue(true);
+      mockFsModule.readFileSync.mockReturnValue(
+        JSON.stringify({
+          lastCheck: new Date().toISOString(),
+          latestVersion: '2.0.0',
+          currentVersion: '0.9.0', // Different from current
+        })
+      );
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '2.0.0' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      await checkForUpdates('1.0.0');
+
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    it('should handle cache read error gracefully', async () => {
+      mockFsModule.existsSync.mockReturnValue(true);
+      mockFsModule.readFileSync.mockImplementation(() => {
+        throw new Error('Permission denied');
+      });
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '2.0.0' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates('1.0.0');
+
+      expect(mockFetch).toHaveBeenCalled();
+      expect(result?.updateAvailable).toBe(true);
+    });
+
+    it('should handle invalid cache JSON gracefully', async () => {
+      mockFsModule.existsSync.mockReturnValue(true);
+      mockFsModule.readFileSync.mockReturnValue('invalid json {{{');
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '2.0.0' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates('1.0.0');
+
+      expect(mockFetch).toHaveBeenCalled();
+      expect(result?.updateAvailable).toBe(true);
+    });
+
+    it('should handle invalid cache date gracefully', async () => {
+      mockFsModule.existsSync.mockReturnValue(true);
+      mockFsModule.readFileSync.mockReturnValue(
+        JSON.stringify({
+          lastCheck: 'invalid-date',
+          latestVersion: '2.0.0',
+          currentVersion: '1.0.0',
+        })
+      );
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '2.0.0' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      await checkForUpdates('1.0.0');
+
+      expect(mockFetch).toHaveBeenCalled();
+    });
   });
 });

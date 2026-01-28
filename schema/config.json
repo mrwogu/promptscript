@@ -25,9 +25,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "id"
-      ],
+      "required": ["id"],
       "additionalProperties": false,
       "description": "Project identification"
     },
@@ -86,9 +84,7 @@
             "path": {
               "type": "string",
               "description": "Subdirectory within the repository to use as registry root.",
-              "examples": [
-                "registry/"
-              ],
+              "examples": ["registry/"],
               "example": "registry/"
             },
             "auth": {
@@ -96,10 +92,7 @@
               "properties": {
                 "type": {
                   "type": "string",
-                  "enum": [
-                    "token",
-                    "ssh"
-                  ],
+                  "enum": ["token", "ssh"],
                   "description": "Authentication type.\n- 'token': Use a personal access token (PAT)\n- 'ssh': Use SSH key authentication"
                 },
                 "token": {
@@ -116,16 +109,12 @@
                   "default": "~/.ssh/id_rsa"
                 }
               },
-              "required": [
-                "type"
-              ],
+              "required": ["type"],
               "additionalProperties": false,
               "description": "Authentication options for private repositories"
             }
           },
-          "required": [
-            "url"
-          ],
+          "required": ["url"],
           "additionalProperties": false,
           "description": "Git repository configuration. When specified, the registry will be cloned from a Git repository."
         },
@@ -149,10 +138,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "bearer",
-                "basic"
-              ],
+              "enum": ["bearer", "basic"],
               "description": "Authentication type"
             },
             "token": {
@@ -164,9 +150,7 @@
               "description": "Environment variable containing the token (alternative to token)"
             }
           },
-          "required": [
-            "type"
-          ],
+          "required": ["type"],
           "additionalProperties": false,
           "description": "Authentication for HTTP registries"
         }
@@ -255,11 +239,7 @@
           "type": "object",
           "additionalProperties": {
             "type": "string",
-            "enum": [
-              "error",
-              "warning",
-              "off"
-            ]
+            "enum": ["error", "warning", "off"]
           }
         }
       },
@@ -267,12 +247,7 @@
       "description": "Validation settings"
     }
   },
-  "required": [
-    "version",
-    "project",
-    "registry",
-    "targets"
-  ],
+  "required": ["version", "project", "targets"],
   "additionalProperties": false,
   "definitions": {
     "FormattingConfig": {
@@ -295,11 +270,7 @@
         },
         "proseWrap": {
           "type": "string",
-          "enum": [
-            "always",
-            "never",
-            "preserve"
-          ],
+          "enum": ["always", "never", "preserve"],
           "description": "Explicit proseWrap setting (shorthand for prettier.proseWrap)."
         },
         "tabWidth": {
@@ -319,11 +290,7 @@
       "properties": {
         "proseWrap": {
           "type": "string",
-          "enum": [
-            "always",
-            "never",
-            "preserve"
-          ],
+          "enum": ["always", "never", "preserve"],
           "description": "How to wrap prose.\n- 'always': Wrap prose at printWidth\n- 'never': Do not wrap prose\n- 'preserve': Preserve original wrapping",
           "default": "preserve"
         },
@@ -411,10 +378,7 @@
     },
     "BuiltInConventionName": {
       "type": "string",
-      "enum": [
-        "xml",
-        "markdown"
-      ],
+      "enum": ["xml", "markdown"],
       "description": "Built-in convention names."
     },
     "OutputConvention": {
@@ -438,12 +402,7 @@
         },
         "listStyle": {
           "type": "string",
-          "enum": [
-            "dash",
-            "asterisk",
-            "bullet",
-            "numbered"
-          ],
+          "enum": ["dash", "asterisk", "bullet", "numbered"],
           "description": "How to render lists.",
           "default": "'dash' (- item)"
         },
@@ -462,18 +421,12 @@
               "type": "string"
             }
           },
-          "required": [
-            "start",
-            "end"
-          ],
+          "required": ["start", "end"],
           "additionalProperties": false,
           "description": "Whether to wrap content in a root element."
         }
       },
-      "required": [
-        "name",
-        "section"
-      ],
+      "required": ["name", "section"],
       "additionalProperties": false,
       "description": "Output convention definition."
     },
@@ -492,12 +445,7 @@
         },
         "nameTransform": {
           "type": "string",
-          "enum": [
-            "kebab-case",
-            "camelCase",
-            "PascalCase",
-            "none"
-          ],
+          "enum": ["kebab-case", "camelCase", "PascalCase", "none"],
           "description": "Whether to convert section names.",
           "default": "kebab-case"
         },
@@ -507,9 +455,7 @@
           "default": "'  ' (2 spaces)"
         }
       },
-      "required": [
-        "start"
-      ],
+      "required": ["start"],
       "additionalProperties": false,
       "description": "Section rendering configuration."
     }

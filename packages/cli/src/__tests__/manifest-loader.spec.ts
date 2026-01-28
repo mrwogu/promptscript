@@ -12,6 +12,11 @@ import {
   isRemoteUrl,
   isValidGitHostUrl,
   isValidGitUrl,
+  loadManifestFromUrl,
+  githubRepoToManifestUrl,
+  getRegistryBaseDir,
+  resolveCatalogEntryPath,
+  OFFICIAL_REGISTRY,
 } from '../utils/manifest-loader.js';
 import { type CliServices } from '../services.js';
 import type { RegistryManifest } from '@promptscript/core';
@@ -460,6 +465,237 @@ catalog: []
       expect(isValidGitHostUrl('not-a-url')).toBe(false);
       expect(isValidGitHostUrl('')).toBe(false);
       expect(isValidGitHostUrl('./local-path')).toBe(false);
+    });
+  });
+
+  describe('loadManifestFromUrl', () => {
+    beforeEach(() => {
+      vi.stubGlobal('fetch', vi.fn());
+      clearManifestCache();
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('should load manifest from URL', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(manifestYaml),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const result = await loadManifestFromUrl('https://example.com/manifest.yaml');
+
+      expect(result.manifest.version).toBe('1');
+      expect(result.url).toBe('https://example.com/manifest.yaml');
+      expect(result.cached).toBe(false);
+    });
+
+    it('should use default official registry URL when not specified', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(manifestYaml),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      await loadManifestFromUrl();
+
+      expect(mockFetch).toHaveBeenCalledWith(OFFICIAL_REGISTRY.manifestUrl, expect.any(Object));
+    });
+
+    it('should cache manifest from URL', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(manifestYaml),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const result1 = await loadManifestFromUrl('https://example.com/manifest.yaml');
+      const result2 = await loadManifestFromUrl('https://example.com/manifest.yaml');
+
+      expect(result1.cached).toBe(false);
+      expect(result2.cached).toBe(true);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip cache when useCache is false', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(manifestYaml),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      await loadManifestFromUrl('https://example.com/manifest.yaml');
+      const result = await loadManifestFromUrl('https://example.com/manifest.yaml', false);
+
+      expect(result.cached).toBe(false);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw ManifestLoadError on HTTP error', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      await expect(loadManifestFromUrl('https://example.com/manifest.yaml')).rejects.toThrow(
+        ManifestLoadError
+      );
+    });
+
+    it('should throw ManifestLoadError on network error', async () => {
+      const mockFetch = vi.fn().mockRejectedValue(new Error('Network error'));
+      vi.stubGlobal('fetch', mockFetch);
+
+      await expect(loadManifestFromUrl('https://example.com/manifest.yaml')).rejects.toThrow(
+        ManifestLoadError
+      );
+    });
+
+    it('should throw ManifestLoadError on invalid manifest', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('version: "2"\nmeta:\n  name: Test\ncatalog: []'),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      await expect(loadManifestFromUrl('https://example.com/manifest.yaml')).rejects.toThrow(
+        'Unsupported manifest version'
+      );
+    });
+  });
+
+  describe('githubRepoToManifestUrl', () => {
+    it('should convert GitHub HTTPS URL to raw manifest URL', () => {
+      const url = githubRepoToManifestUrl('https://github.com/user/repo.git');
+
+      expect(url).toBe('https://raw.githubusercontent.com/user/repo/main/registry-manifest.yaml');
+    });
+
+    it('should handle URL without .git suffix', () => {
+      const url = githubRepoToManifestUrl('https://github.com/user/repo');
+
+      expect(url).toBe('https://raw.githubusercontent.com/user/repo/main/registry-manifest.yaml');
+    });
+
+    it('should use custom branch', () => {
+      const url = githubRepoToManifestUrl('https://github.com/user/repo.git', 'develop');
+
+      expect(url).toBe(
+        'https://raw.githubusercontent.com/user/repo/develop/registry-manifest.yaml'
+      );
+    });
+
+    it('should convert GitHub SSH URL', () => {
+      const url = githubRepoToManifestUrl('git@github.com:user/repo.git');
+
+      expect(url).toBe('https://raw.githubusercontent.com/user/repo/main/registry-manifest.yaml');
+    });
+
+    it('should throw ManifestLoadError for invalid URL', () => {
+      expect(() => githubRepoToManifestUrl('https://gitlab.com/user/repo')).toThrow(
+        ManifestLoadError
+      );
+      expect(() => githubRepoToManifestUrl('not-a-url')).toThrow(ManifestLoadError);
+    });
+  });
+
+  describe('getRegistryBaseDir', () => {
+    it('should return directory of manifest path', () => {
+      const result = getRegistryBaseDir('/path/to/registry/registry-manifest.yaml');
+
+      expect(result).toBe('/path/to/registry');
+    });
+
+    it('should handle nested paths', () => {
+      const result = getRegistryBaseDir('/home/user/registries/main/registry-manifest.yaml');
+
+      expect(result).toBe('/home/user/registries/main');
+    });
+  });
+
+  describe('resolveCatalogEntryPath', () => {
+    it('should resolve catalog entry path relative to manifest', () => {
+      const entry = sampleManifest.catalog[0]!;
+      const result = resolveCatalogEntryPath('/registry/registry-manifest.yaml', entry);
+
+      expect(result).toBe('/registry/@core/base.prs');
+    });
+
+    it('should handle nested entry paths', () => {
+      const entry = { ...sampleManifest.catalog[1]!, path: '@stacks/deep/nested/react.prs' };
+      const result = resolveCatalogEntryPath('/registry/registry-manifest.yaml', entry);
+
+      expect(result).toBe('/registry/@stacks/deep/nested/react.prs');
+    });
+  });
+
+  describe('manifest validation edge cases', () => {
+    it('should throw ManifestLoadError for missing meta', async () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFile.mockResolvedValue(`
+version: '1'
+catalog: []
+`);
+
+      await expect(loadManifest({ registryPath: './registry' }, mockServices)).rejects.toThrow(
+        'missing required field: meta'
+      );
+    });
+
+    it('should throw ManifestLoadError for missing catalog', async () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  name: Test
+  description: Test
+  lastUpdated: '2026-01-28'
+`);
+
+      await expect(loadManifest({ registryPath: './registry' }, mockServices)).rejects.toThrow(
+        'missing required field: catalog'
+      );
+    });
+
+    it('should throw ManifestLoadError when catalog is not an array', async () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  name: Test
+  description: Test
+  lastUpdated: '2026-01-28'
+catalog: "not-an-array"
+`);
+
+      await expect(loadManifest({ registryPath: './registry' }, mockServices)).rejects.toThrow(
+        'catalog must be an array'
+      );
+    });
+  });
+
+  describe('loadManifest with direct YAML file path', () => {
+    it('should load manifest when path ends with .yaml', async () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFile.mockResolvedValue(manifestYaml);
+
+      const result = await loadManifest({ registryPath: './custom-manifest.yaml' }, mockServices);
+
+      expect(result.manifest.version).toBe('1');
+      expect(result.path).toContain('custom-manifest.yaml');
+    });
+
+    it('should load manifest when path ends with .yml', async () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFile.mockResolvedValue(manifestYaml);
+
+      const result = await loadManifest({ registryPath: './custom-manifest.yml' }, mockServices);
+
+      expect(result.manifest.version).toBe('1');
     });
   });
 });

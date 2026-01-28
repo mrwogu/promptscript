@@ -126,7 +126,7 @@ export interface PromptScriptConfig {
   };
 
   /** Registry configuration */
-  registry: {
+  registry?: {
     /** Local path to registry */
     path?: string;
     /** Remote URL (HTTP registry) */

@@ -64,6 +64,8 @@ export async function resolveRegistryPath(config: PromptScriptConfig): Promise<R
     }
 
     // Need to clone/update - use GitRegistry
+    // Note: GitRegistry creates its own cache manager internally, so the cache
+    // will be written by ensureCloned() when we call fetch().
     const registry = createGitRegistry({
       url: gitConfig.url,
       ref,
@@ -76,8 +78,22 @@ export async function resolveRegistryPath(config: PromptScriptConfig): Promise<R
     });
 
     // Trigger a fetch to ensure the repo is cloned
-    // We use exists() on the root to trigger the clone without needing a specific file
-    await registry.exists('.');
+    // We fetch registry-manifest.yaml which should always exist in a valid registry.
+    // This propagates clone errors (unlike exists() which swallows them).
+    try {
+      await registry.fetch('registry-manifest.yaml');
+    } catch (error) {
+      // If manifest doesn't exist, registry might still be valid (no manifest)
+      // but if it's a clone error, we should propagate it
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('not found') && !message.includes('FileNotFoundError')) {
+        throw new Error(
+          `Failed to clone registry from ${gitConfig.url}: ${message}. ` +
+            `Please check your network connection and registry configuration.`
+        );
+      }
+      // Manifest not found is OK - just means registry doesn't have one
+    }
 
     // Return the cache path
     const subPath = gitConfig.path ?? '';
