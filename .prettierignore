@@ -16,3 +16,6 @@ CHANGELOG.md
 
 # schema
 schema/config.json
+
+# Lock files - machine generated
+pnpm-lock.yaml
