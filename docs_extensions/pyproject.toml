@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "promptscript-pygments"
+version = "1.0.0"
+description = "Pygments lexer for PromptScript syntax highlighting"
+requires-python = ">=3.9"
+dependencies = ["pygments>=2.0"]
+
+[project.entry-points."pygments.lexers"]
+promptscript = "docs_extensions.promptscript_lexer:PromptScriptLexer"

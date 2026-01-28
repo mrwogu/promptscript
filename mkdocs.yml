@@ -8,6 +8,9 @@ edit_uri: edit/main/docs/
 
 copyright: Copyright &copy; 2026 PromptScript Contributors
 
+hooks:
+  - docs_extensions/mkdocs_hooks.py
+
 theme:
   name: material
   language: en
@@ -120,6 +123,12 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: promptscript
+          class: highlight
+          format: !!python/name:docs_extensions.mkdocs_hooks.format_promptscript
+        - name: prs
+          class: highlight
+          format: !!python/name:docs_extensions.mkdocs_hooks.format_promptscript
   - pymdownx.tabbed:
       alternate_style: true
       combine_header_slug: true

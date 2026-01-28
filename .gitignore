@@ -68,5 +68,12 @@ vitest.config.*.timestamp*
 site/
 .cache/
 
+# Python (docs extensions)
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+
 # Generated API docs (regenerated in CI)
 docs/api-reference/
