@@ -8,7 +8,7 @@
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/frontend-team</span>
+<span class=kn>@inherit</span><span class=s>@company/frontend-team</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABCKxwxqELPwssyGVqID0Yamw6se4hykICYAugycWNSi+ESk5DBUtCAMAG52cBBs+DohQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>The child inherits all blocks from the parent, which can then be extended.</p> <h2 id=registry-structure>Registry Structure<a class=headerlink href=#registry-structure title="Permanent link">&para;</a></h2> <p>Organize your registry with namespaces:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-0-1><a id=__codelineno-0-1 name=__codelineno-0-1 href=#__codelineno-0-1></a>registry/
 </span><span id=__span-0-2><a id=__codelineno-0-2 name=__codelineno-0-2 href=#__codelineno-0-2></a>├── @company/
 </span><span id=__span-0-3><a id=__codelineno-0-3 name=__codelineno-0-3 href=#__codelineno-0-3></a>│   ├── base.prs           # Organization base
@@ -29,7 +29,7 @@
 <span class=p>}</span>
 
 <span class=c1># Child</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>./parent</span>
+<span class=err>@inherit</span><span class=w> </span><span class=err>./parent</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -50,7 +50,7 @@
 <span class=p>}</span>
 
 <span class=c1># Child</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>./parent</span>
+<span class=err>@inherit</span><span class=w> </span><span class=err>./parent</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>code</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
@@ -65,15 +65,15 @@
 </span><span id=__span-2-5><a id=__codelineno-2-5 name=__codelineno-2-5 href=#__codelineno-2-5></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&quot;Use</span><span class=nv> </span><span class=s>React</span><span class=nv> </span><span class=s>framework&quot;</span>
 </span><span id=__span-2-6><a id=__codelineno-2-6 name=__codelineno-2-6 href=#__codelineno-2-6></a><span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class=s>&quot;80%</span><span class=nv> </span><span class=s>test</span><span class=nv> </span><span class=s>coverage</span><span class=nv> </span><span class=s>required&quot;</span>
 </span></code></pre></div> </div> </div> </div> <h3 id=arrays-concatenate>Arrays (Concatenate)<a class=headerlink href=#arrays-concatenate title="Permanent link">&para;</a></h3> <p><code>@restrictions</code> and array values concatenate:</p> <div class="tabbed-set tabbed-alternate" data-tabs=5:1><input checked=checked id=__tabbed_5_1 name=__tabbed_5 type=radio><div class=tabbed-labels><label for=__tabbed_5_1>Source</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># Parent</span>
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never expose secrets&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never expose secrets&quot;</span>
 <span class=p>}</span>
 
 <span class=c1># Child</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>./parent</span>
+<span class=err>@inherit</span><span class=w> </span><span class=err>./parent</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always use TypeScript&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always use TypeScript&quot;</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gALXxbUIjLBDZwABMAA6rcXPkBacVJAA5GADcY1cUTTM4McYcZ8scFTPniAvjKvyAxOIDCOaABMHc7hFY5tCCxxCgB6TD52e1l5Xn5BYVFWCWkY6yUVAEEoAHcMAE8JAFdDcQAVfLQYAGVTCDQsSzTbEBsAXQZOAXz8IlJyGCpaEAYtWiT8AEZWoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=6:1><input checked=checked id=__tabbed_6_1 name=__tabbed_6 type=radio><div class=tabbed-labels><label for=__tabbed_6_1>Merged Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a><span class=gu>## Restrictions</span>
 </span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a>
@@ -81,16 +81,16 @@
 </span><span id=__span-3-4><a id=__codelineno-3-4 name=__codelineno-3-4 href=#__codelineno-3-4></a><span class=k>-</span><span class=w> </span>Always use TypeScript
 </span></code></pre></div> </div> </div> </div> <h3 id=shortcuts-override>Shortcuts (Override)<a class=headerlink href=#shortcuts-override title="Permanent link">&para;</a></h3> <p><code>@shortcuts</code> entries override by key:</p> <div class="tabbed-set tabbed-alternate" data-tabs=7:1><input checked=checked id=__tabbed_7_1 name=__tabbed_7 type=radio><div class=tabbed-labels><label for=__tabbed_7_1>Source</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=c1># Parent</span>
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write unit tests&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/docs&quot;</span>:<span class=w> </span><span class=s2>&quot;Generate documentation&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write unit tests&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/docs&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Generate documentation&quot;</span>
 <span class=p>}</span>
 
 <span class=c1># Child</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>./parent</span>
+<span class=err>@inherit</span><span class=w> </span><span class=err>./parent</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write tests with Vitest&quot;</span><span class=w>  </span><span class=c1># Overrides</span>
-<span class=w>  </span><span class=s2>&quot;/lint&quot;</span>:<span class=w> </span><span class=s2>&quot;Run ESLint&quot;</span><span class=w>               </span><span class=c1># Added</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write tests with Vitest&quot;</span><span class=w>  </span><span class=c1># Overrides</span>
+<span class=w>  </span><span class=s2>&quot;/lint&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Run ESLint&quot;</span><span class=w>               </span><span class=c1># Added</span>
 <span class=p>}</span>
 </code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuLnypIAPQc4WRYnGKA6tQgdxw1vvGqximfIXKAJs0ZwNWkAHFOMathji7IkpyxsCDYLWXkAXxlLeQBicQBhHGgbaLluCFYcDxMKJUxqAKiwtL4BIVEJaWLrFXh1JGddfW8zCQB3fRxxADVmtUU5OIB5ADcPPRt4VJqoDPrNRQAlI3EAUQBlABk5gas9vbiAQRtJlOrwkHCAXQYA6gBPfCJSchgqWhAGMdpg1nwARkuQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=8:1><input checked=checked id=__tabbed_8_1 name=__tabbed_8 type=radio><div class=tabbed-labels><label for=__tabbed_8_1>Merged Output</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a><span class=gu>## Shortcuts</span>
 </span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a>
@@ -99,7 +99,7 @@
 </span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a>| /test | Write tests with Vitest |
 </span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a>| /docs | Generate documentation |
 </span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a>| /lint | Run ESLint |
-</span></code></pre></div> </div> </div> </div> <h2 id=using-extend>Using <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/extend title="GitHub User: extend">@extend</a><a class=headerlink href=#using-extend title="Permanent link">&para;</a></h2> <p>The <code>@extend</code> block modifies specific paths:</p> <h3 id=extending-top-level-blocks>Extending Top-Level Blocks<a class=headerlink href=#extending-top-level-blocks title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=err>@</span><span class=kn>inherit</span><span class=s>@company/base</span>
+</span></code></pre></div> </div> </div> </div> <h2 id=using-extend>Using <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/extend title="GitHub User: extend">@extend</a><a class=headerlink href=#using-extend title="Permanent link">&para;</a></h2> <p>The <code>@extend</code> block modifies specific paths:</p> <h3 id=extending-top-level-blocks>Extending Top-Level Blocks<a class=headerlink href=#extending-top-level-blocks title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=s>@company/base</span>
 
 <span class=c1># Add to identity</span>
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>identity</span><span class=w> </span><span class=p>{</span>
@@ -107,14 +107,14 @@
 <span class=sd>  Additional identity context.</span>
 <span class=sd>  &quot;&quot;&quot;</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAggBNBvLM14RBnLBCwBPADqsAAkQ6sRk6bLm9gS3rwUhjp1oaGDZENhigSp7Hbxbs1FA0ZPelAXxC+ALoM0tRy+ESk5DBUtCAMAG4wtDas+ACMAUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=extending-nested-paths>Extending Nested Paths<a class=headerlink href=#extending-nested-paths title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=err>@</span><span class=kn>inherit</span><span class=s>@company/base</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAggBNBvLM14RBnLBCwBPADqsAAkQ6sRk6bLm9gS3rwUhjp1oaGDZENhigSp7Hbxbs1FA0ZPelAXxC+ALoM0tRy+ESk5DBUtCAMAG4wtDas+ACMAUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=extending-nested-paths>Extending Nested Paths<a class=headerlink href=#extending-nested-paths title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=s>@company/base</span>
 
 <span class=c1># Modify nested structure</span>
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards.code.testing</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>e2e:<span class=w> </span>required
-<span class=w>  </span>coverage:<span class=w> </span><span class=m>90</span>
+<span class=w>  </span><span class=nl>e2e</span><span class=p>:</span><span class=w> </span>required
+<span class=w>  </span><span class=nl>coverage</span><span class=p>:</span><span class=w> </span><span class=m>90</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAsswAmEMAE9ereByG84WagFdGWRdRgAdVgAEiHVrPkYDGakLgUWQmBQ7yIrAOa9gW3rxgAmGIl7qAjooQ6kJuvCwAbjDUGI4+vACcAAxaAL4gqQC6DJwKYvhEpOQ2NPQgUbQQbPgAjBlAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=multiple-extensions>Multiple Extensions<a class=headerlink href=#multiple-extensions title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=err>@</span><span class=kn>inherit</span><span class=s>@company/base</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAsswAmEMAE9ereByG84WagFdGWRdRgAdVgAEiHVrPkYDGakLgUWQmBQ7yIrAOa9gW3rxgAmGIl7qAjooQ6kJuvCwAbjDUGI4+vACcAAxaAL4gqQC6DJwKYvhEpOQ2NPQgUbQQbPgAjBlAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=multiple-extensions>Multiple Extensions<a class=headerlink href=#multiple-extensions title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=s>@company/base</span>
 
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>identity</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -123,32 +123,32 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards.code</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>framework:<span class=w> </span><span class=s2>&quot;react&quot;</span>
+<span class=w>  </span><span class=nl>framework</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;react&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Use functional components only&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Use functional components only&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAAQQBnLBCwBPIcAA6rIULkgVaxUICazAK5CM1GPqFhqbfsKJoY1LBQVK1q1awC+Chb0IWhcLBkEDATgKFjFZBxNqUhgAd2ZqAGtEZRBDDEYsdXdWTz5OYUM-aghMiDY4CI0AWlSAVTgjMB1WMrYMKCEWMjZxSrYoKWyQVwBdBnFqKXwiUnIYKloQBgA3Gzhy1nwARhGgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=composition-with-use>Composition with <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a><a class=headerlink href=#composition-with-use title="Permanent link">&para;</a></h2> <p>Use <code>@use</code> to import and merge fragments (like mixins):</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/frontend</span>
+<span class=kn>@inherit</span><span class=s>@company/frontend</span>
 
 <span class=c1># Import fragments - blocks are merged into your file</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@core/security</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@core/compliance</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@fragments/testing</span>
+<span class=kn>@use</span><span class=s>@core/security</span>
+<span class=kn>@use</span><span class=s>@core/compliance</span>
+<span class=kn>@use</span><span class=s>@fragments/testing</span>
 
 <span class=c1># With alias - also available for @extend</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@fragments/api-standards</span><span class=w> </span><span class=err>as</span><span class=w> </span><span class=err>api</span>
+<span class=kn>@use</span><span class=s>@fragments/api-standards</span><span class=w> </span><span class=err>as</span><span class=w> </span><span class=err>api</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAkAngFoazAFYxGWYYNb9+cUewyEBwgIwUADAcWsAvkqUABCKxwxqELPwssyGVqID0Yamw6se5qwAxPwAkmTM1I7eGADmJJxYcPzi-ABGUMyMANbJGNQw-AnUsTA8-NZYzPyizACu1PyQsJZ1cIXOkTAe7YwNDqKt7U4sBR4u5BBujDBDHTHxiXAeHHBY1rGBIQDqDjj8GFBTyamHcNUYAG4Y0BgZhWCRTkR+AawWbfPUcQnsyxhoCDiNZuHj5Hh5PKAkAmAC6DES1FE+CIpHIMCotBADEudjgEDY+B0MKAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=how-use-differs-from-inherit>How <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a> Differs from <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/inherit title="GitHub User: inherit">@inherit</a><a class=headerlink href=#how-use-differs-from-inherit title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Feature</th> <th><code>@inherit</code></th> <th><code>@use</code></th> </tr> </thead> <tbody> <tr> <td><strong>Quantity</strong></td> <td>Single parent only</td> <td>Multiple allowed</td> </tr> <tr> <td><strong>Semantics</strong></td> <td>"IS-A" (this project IS a TypeScript library)</td> <td>"HAS-A" (this project HAS security standards)</td> </tr> <tr> <td><strong>Purpose</strong></td> <td>Define fundamental project type</td> <td>Add optional capabilities</td> </tr> <tr> <td><strong>Merge precedence</strong></td> <td>Child overrides parent</td> <td>Later <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a> overrides earlier</td> </tr> <tr> <td><strong><a class="magiclink magiclink-github magiclink-mention" href=https://github.com/extend title="GitHub User: extend">@extend</a> support</strong></td> <td>Always available</td> <td>Only with alias</td> </tr> </tbody> </table> <h3 id=when-to-use-which>When to Use Which<a class=headerlink href=#when-to-use-which title="Permanent link">&para;</a></h3> <p><strong>Use <code>@inherit</code> for:</strong></p> <ul> <li>Defining your project's fundamental type (library, backend, frontend)</li> <li>Building organizational hierarchies (base → team → project)</li> <li>When you want a single, clear inheritance chain</li> </ul> <div class=highlight><pre><span></span><code><span class=c1># This project IS a TypeScript library</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@stacks/typescript-lib</span>
+<span class=kn>@inherit</span><span class=s>@stacks/typescript-lib</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJucLBkYBrOAHosATzTxGQtFgC0UCACMQAXwC6DTlmqL8RUuRhVaIBgDdBcCG3wBGQ0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p><strong>Use <code>@use</code> for:</strong></p> <ul> <li>Adding optional capabilities (security, testing, quality)</li> <li>Mixing in reusable fragments</li> <li>When you need multiple imports</li> </ul> <div class=highlight><pre><span></span><code><span class=c1># This project HAS these capabilities</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@core/security</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@core/quality</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@fragments/testing</span>
+<span class=kn>@use</span><span class=s>@core/security</span>
+<span class=kn>@use</span><span class=s>@core/quality</span>
+<span class=kn>@use</span><span class=s>@fragments/testing</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAATcW1GAHoBjXtQhYAngB1WfAcNESAjrwxQ5SlfyHcw1DAHMSnLHHEc4WCK3MgAvgF0G16vPxFS5DBUtCAMAG4wtBBs+ACMbkA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=merge-precedence>Merge Precedence<a class=headerlink href=#merge-precedence title="Permanent link">&para;</a></h3> <p>When the same property exists in multiple sources:</p> <div class="language-text highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>@inherit @stacks/typescript-lib    # Base values
 </span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a>@use @core/security                # Overrides @inherit for same keys
 </span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a>@use @core/quality                 # Overrides earlier @use for same keys
@@ -169,8 +169,8 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write comprehensive tests&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/coverage&quot;</span>:<span class=w> </span><span class=s2>&quot;Check test coverage&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write comprehensive tests&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/coverage&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Check test coverage&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuYahgDmfdnAD0HOFgisV8sRLgBPdhkKz5ARgoAGB0dYBfMWO66MrKRmpS4YWNBHT0DWWRgiXkAVTgYQQA3CFDBDEDUpVIYAHdmagBrZwlokABZDH0BfUEADnsAUkEWKQSWRJhlFRhikvkAdWoUhIBXVhS0n0l2GBVlPTYQ+Cw4XoBdMTdWDzgcfKxGEZWg8TkQbWX5axBB4ebmMmoYHE44CA6l3VWQYPlNds6qh6SDOAGEXowCp8sPcOl1gZsQC41gxOFhqKZ8ERSOQYFRaCAGHC3mx8DYkUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>When imported with <code>@use @fragments/testing</code>, these blocks are merged directly into your file.</p> <h2 id=best-practices>Best Practices<a class=headerlink href=#best-practices title="Permanent link">&para;</a></h2> <h3 id=1-keep-base-configurations-minimal>1. Keep Base Configurations Minimal<a class=headerlink href=#1-keep-base-configurations-minimal title="Permanent link">&para;</a></h3> <p>Organization base should include only universal standards:</p> <div class=highlight><pre><span></span><code><span class=c1># @company/base.prs</span>
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
@@ -185,9 +185,9 @@
 <span class=sd>  &quot;&quot;&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never expose credentials&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Follow data protection policies&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never expose credentials&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Follow data protection policies&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuLMhlYBPAPQAjDHBjyxEuKvYZCs+QEYKABhv7WAXzFju0zlghZVwg3JD7-cUEATWYAV0EMahhI8QBBAElIuDgIOAF2SKxBOIBhAFkAUUFc5mo0Cl8AMWYoKGYAd0ElTDVBAHMwtygIVnhYqUFNeGyaDEYPRnhKoID7J1YXaPTqCAmINjgfIIBaPwA5GAA3GGpBIjRmXWboqXcIDCg4ewk9+Rq6xsEpbCEaZg46zYgkuPUYEHg8xADgAugx3NRVPgiKRyDAqLQQAwTrQNqx8BZoUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=2-use-team-configurations-for-specialization>2. Use Team Configurations for Specialization<a class=headerlink href=#2-use-team-configurations-for-specialization title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @company/frontend.prs</span>
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
@@ -195,7 +195,7 @@
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/base</span>
+<span class=kn>@inherit</span><span class=s>@company/base</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -214,19 +214,19 @@
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/frontend</span>
+<span class=kn>@inherit</span><span class=s>@company/frontend</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Checkout Application&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Checkout Application&quot;</span>
 
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>  E-commerce checkout flow with Stripe integration.</span>
 <span class=sd>  &quot;&quot;&quot;</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkBGCgAZb+1gF8xY7hFaLqELIO4syGKxGAPRg1GwcrFIurH4RRD6i4oI0zABWSlgWIADCiirqPgCCulAQjNgQbA4GciD69ckAopr+fNSMMIKM+aoagmBQzADugsPeOIIAylheaF3uHADm1JVsFLUNDo4gjgC6DJyzRvhEpOQwVLQgDABuMLRVrPiWu0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=4-version-your-registry>4. Version Your Registry<a class=headerlink href=#4-version-your-registry title="Permanent link">&para;</a></h3> <p>Use semantic versioning for registry files:</p> <div class=highlight><pre><span></span><code><span class=err>@</span><span class=kn>inherit</span><span class=s>@company/frontend@1.0.0</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkBGCgAZb+1gF8xY7hFaLqELIO4syGKxGAPRg1GwcrFIurH4RRD6i4oI0zABWSlgWIADCiirqPgCCulAQjNgQbA4GciD69ckAopr+fNSMMIKM+aoagmBQzADugsPeOIIAylheaF3uHADm1JVsFLUNDo4gjgC6DJyzRvhEpOQwVLQgDABuMLRVrPiWu0A" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=4-version-your-registry>4. Version Your Registry<a class=headerlink href=#4-version-your-registry title="Permanent link">&para;</a></h3> <p>Use semantic versioning for registry files:</p> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=s>@company/frontend@1.0.0</span>
 </code></pre></div> <h3 id=5-document-inheritance-chains>5. Document Inheritance Chains<a class=headerlink href=#5-document-inheritance-chains title="Permanent link">&para;</a></h3> <p>Include comments explaining the hierarchy:</p> <div class=highlight><pre><span></span><code><span class=c1># Inheritance chain:</span>
 <span class=c1># @company/base → @company/frontend → this file</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/frontend</span>
+<span class=kn>@inherit</span><span class=s>@company/frontend</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAizIZWATwD0AIwxwYvQEmEAoZjHiw1Nh1YATBb1wQ4vSLAA6rfhFY4Y1CFiXNhq9Zs7aQAXwC6DTlmpRfCJSchgqWhAGADdbOAg2fABGLyA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=common-patterns>Common Patterns<a class=headerlink href=#common-patterns title="Permanent link">&para;</a></h2> <h3 id=platform-specific-configurations>Platform-Specific Configurations<a class=headerlink href=#platform-specific-configurations title="Permanent link">&para;</a></h3> <pre class=mermaid><code>flowchart TD
     A["@company/base"] --&gt; B["@company/web"]
     A --&gt; C["@company/mobile"]
@@ -237,22 +237,22 @@
 
     C --&gt; G["@company/mobile-ios"]
     C --&gt; H["@company/mobile-android"]</code></pre> <h3 id=shared-standards-with-team-overrides>Shared Standards with Team Overrides<a class=headerlink href=#shared-standards-with-team-overrides title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># Use shared security, override team-specific</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/frontend</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@core/security</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@core/compliance</span>
+<span class=kn>@inherit</span><span class=s>@company/frontend</span>
+<span class=kn>@use</span><span class=s>@core/security</span>
+<span class=kn>@use</span><span class=s>@core/compliance</span>
 
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards.security</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>additionalRules:<span class=w> </span><span class=p>[</span><span class=s2>&quot;CSP headers&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>additionalRules</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;CSP headers&quot;</span><span class=p>]</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuLMhlYBPAPRhqbDqwAmAHVbcArnBhiW1GLN2MtQrNI3bd+5odkTyEKYxgarRZSpFwsUlRjUKnAUJmbC0iLAGiIiGCoqwhBsGFAASlqwcIgiyGogAMIAygAKIgLxgnD5ALoaAL4g9TUMnFjU0vhEpOQwVLQgDABuVcms+ACMTUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=environment-specific-extensions>Environment-Specific Extensions<a class=headerlink href=#environment-specific-extensions title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=err>@</span><span class=kn>inherit</span><span class=s>@company/frontend</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuLMhlYBPAPRhqbDqwAmAHVbcArnBhiW1GLN2MtQrNI3bd+5odkTyEKYxgarRZSpFwsUlRjUKnAUJmbC0iLAGiIiGCoqwhBsGFAASlqwcIgiyGogAMIAygAKIgLxgnD5ALoaAL4g9TUMnFjU0vhEpOQwVLQgDABuVcms+ACMTUA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=environment-specific-extensions>Environment-Specific Extensions<a class=headerlink href=#environment-specific-extensions title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=kn>@inherit</span><span class=s>@company/frontend</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>environment:<span class=w> </span>production
+<span class=w>  </span><span class=nl>environment</span><span class=p>:</span><span class=w> </span>production
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;No console.log statements&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;No debug code&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;No console.log statements&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;No debug code&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIvtFYABMAA6rQYM4A3CNTYlOWRIJrMAJgFdGWCGzEBfMWO4DOawdXhZqEbbtZxhYiQFpBIkADlmgvnGaUUMwA5oJwWNgwCuxwHs6Cbh7egmowAEYaoSypcaz6IPoAugyK1ACe+ESk5DBUtCAMUjC09vgAjAVAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=debugging-inheritance>Debugging Inheritance<a class=headerlink href=#debugging-inheritance title="Permanent link">&para;</a></h2> <h3 id=view-resolved-configuration>View Resolved Configuration<a class=headerlink href=#view-resolved-configuration title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-6-1><a id=__codelineno-6-1 name=__codelineno-6-1 href=#__codelineno-6-1></a>prs<span class=w> </span>compile<span class=w> </span>--dry-run<span class=w> </span>--verbose
 </span></code></pre></div> <h3 id=validate-inheritance-chain>Validate Inheritance Chain<a class=headerlink href=#validate-inheritance-chain title="Permanent link">&para;</a></h3> <div class="language-bash highlight"><pre><span></span><code><span id=__span-7-1><a id=__codelineno-7-1 name=__codelineno-7-1 href=#__codelineno-7-1></a>prs<span class=w> </span>validate<span class=w> </span>--verbose

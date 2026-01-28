@@ -64,7 +64,7 @@
 </span></code></pre></div> <h3 id=acmebaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/base.prs title="GitHub Repository: acme/base.prs">acme/base.prs</a><a class=headerlink href=#acmebaseprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/base&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span>org:<span class=w> </span><span class=s2>&quot;ACME Corporation&quot;</span>
+<span class=w>  </span><span class=nl>org</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;ACME Corporation&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
@@ -93,7 +93,7 @@
 <span class=w>    </span><span class=s2>&quot;Write tests for all code (80% coverage)&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>git:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>git</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Use conventional commits format&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Branch naming: type/TICKET-description&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Signed commits required&quot;</span>
@@ -105,19 +105,19 @@
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never commit secrets, credentials, or API keys&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never bypass code review for production changes&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never deploy without passing CI/CD&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never ignore security scanner findings&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use deprecated dependencies with known CVEs&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never store PII in logs&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never commit secrets, credentials, or API keys&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never bypass code review for production changes&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never deploy without passing CI/CD&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never ignore security scanner findings&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use deprecated dependencies with known CVEs&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never store PII in logs&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/standards&quot;</span>:<span class=w> </span><span class=s2>&quot;Review against ACME standards&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/security&quot;</span>:<span class=w> </span><span class=s2>&quot;Security review&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/perf&quot;</span>:<span class=w> </span><span class=s2>&quot;Performance review&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/standards&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review against ACME standards&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/security&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Security review&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/perf&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Performance review&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9ACMMcGMMGt+-OAE92GQgOEBGCgAYjSlf2bUA5rpABBAMIBZAKL97FtBewQ2pgL7KyiK8nFgQWOr8wMqqSiCmqgCazACu-BjUMOkqtgCS-Cw8EKyW6XBwEHBYGOzpWPwOLm4eXmFsFIFmAMRdzZn8AGoYUCnwnaoAtPwAVNMAiinD4ZEAYhC0WLMCAOrU4Vk0zDwpjG2sE5kYPJGFimZTswDKMIwpexENUADuGOpwW-xnq93pFKvxWMx6sw0GdhjF+A9pgBVBTUfgrZivf7TATuVgVHgwNG4LKcHj8FKo+GIgAqMFI-AAClBfkSAbt9gUjllITgiXACjV+CQMMVqsVxvweoDqqweBkeHBJRioFBmF8Gk5XM4SsUYETiqVHrL5dRFfwAG4AZhMZgAFDgsFg0HBEFIpF8IABrCAUcSSCgsEhSTiWPUGkoTKo1U2KgCU8Li-k6ImjcoVAuiZluAmQ8NiIHchP4mQtEBgGsyAEcUusYOTPbhhcUICQUiR+AAmdJoQ4W-kJVRCEAAEUx7dC6VV-DQKRkUAgjAajNySviZgLth45OKC9YWSDknYArAFi5ZFghH4arDjEHBY5HH4HCqJ7PwygXOLdoAHIYAKRcv21AYJYMAJuuqgALqSmGWC5vmw4ogebD9uwPisMM54kOEb7UCKWD3sOABCIGsIwODgqQhoCBEaDSDSuT2AA0s4NITIScCMHsMIYURwiPBAlj7uSh64SWMA1nWPCDjBrDwoS5DMOoR7wfweYbsOOpltQbCqa6-CEhadBqNUYYlCZhwyZBQ7CIyunHKcGESVJmQChwpATLAVzZOSCjAssPZ9nCNlyQE8msCIblYHsTlsJm1LDgAcjAwHYeEagvJkWBwCZ3H1qEEDDLl5horYK78F6MB-IOUzCClaUyOomDlF+WSluWGqnmiVknGcBQ4DUYFrol9WpUShkwEpkSNjgqT1C1FQlG4uRSPYI61cl41okJEL9P5byBVxNT7mikByoaI33FtaWUlkimZIw2D1pN9FypwjDlgKs2VRCXwqPYAzOFdkw3RNVQWFkK75MU17MJYV3hUEcBzdQWCvDlUSJiAUhprGa42AASqlnXpJYor4vUjSuHjGaDsIuMvIdETCDYQLM5EHUVvTOP0dQYCs8OjJEt1Irke1JPc+ufggH4UEMKE1DqPgRCkOQMBULQIAMMBFRsPgeiy0AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmesecurityprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/security.prs title="GitHub Repository: acme/security.prs">acme/security.prs</a><a class=headerlink href=#acmesecurityprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/security&quot;</span>
@@ -132,20 +132,20 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>authentication:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>authentication</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Use OAuth 2.0 / OIDC&quot;</span>
 <span class=w>    </span><span class=s2>&quot;MFA required (TOTP or WebAuthn)&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Session timeout: 3600 seconds&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Enable refresh token rotation&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>authorization:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>authorization</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;RBAC with ABAC extensions&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Apply least privilege principle&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Audit logging required&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>dataProtection:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>dataProtection</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Encrypt at rest with AES-256&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Encrypt in transit with TLS 1.3&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Mask PII in all outputs&quot;</span>
@@ -159,24 +159,24 @@
 <span class=w>    </span><span class=s2>&quot;Medium vulnerabilities: fix within 30 days&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>secrets:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>secrets</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Store in HashiCorp Vault&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Rotate every 90 days&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Never store secrets in code&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never store passwords in plain text&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never log sensitive data (passwords, tokens, PII)&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use MD5 or SHA1 for security purposes&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never disable TLS certificate verification&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use eval() or similar unsafe functions&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never trust user input without validation&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never expose stack traces in production&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always use parameterized queries (no SQL concatenation)&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always validate and sanitize file uploads&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always implement rate limiting for APIs&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never store passwords in plain text&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never log sensitive data (passwords, tokens, PII)&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use MD5 or SHA1 for security purposes&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never disable TLS certificate verification&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use eval() or similar unsafe functions&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never trust user input without validation&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never expose stack traces in production&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always use parameterized queries (no SQL concatenation)&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always validate and sanitize file uploads&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always implement rate limiting for APIs&quot;</span>
 <span class=p>}</span>
 
 <span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
@@ -197,9 +197,9 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/threat-model&quot;</span>:<span class=w> </span><span class=s2>&quot;Help create a threat model&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/vuln-check&quot;</span>:<span class=w> </span><span class=s2>&quot;Check for common vulnerabilities&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/secure-code&quot;</span>:<span class=w> </span><span class=s2>&quot;Review code for security issues&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/threat-model&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help create a threat model&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/vuln-check&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Check for common vulnerabilities&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/secure-code&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review code for security issues&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9HBiMArtQhYAnsMGt+-OCvYZCA4QEYKABjPrWAXw0aRvTlmUr+wDVvUhLWgIJpyLj4AwgCyAKLacorO2lgYrDwY1Dxw-FjM-BhQUPwsPDAU7vwAylFKqvwQqTAAbjDUKmwwAOSp1PBobHAQAEbQzoWaQl4jGjasdnBxCUkprkUY8riOEIzYEGwCyEUeIACqsvwA8j5LOPwATGb8UscAkgAiQd5awyEAYj787QCO8hDtHj8AAUABUjqCAAr8ZjUfgAdRgPVOuFYAEoXrtSnBumw0hBJMwlgIAMwANlMpkiLAScExwzCrAwPVg3xgYHacHO6QA1pxvsw4k42C8ALq2IaLXCwiAAL3Wm342yGuwASgAhYL8ADuynOPk1QX4RA4rFxZvpwj8AX4sAwU34NAgNWgMAA5jBHUpWIwIOQYJaQKceMpbcw3W6IKw3Wy-gCYDwxRKtIk4pDqIK5MLWFsdgyfQ00FhMsXOcXdbh+D4wsUALQXACsZMDjMYheLUbS1Hi3XLev4oIAMsV+CYSYGQvaefxIXc7pVNFkckSsGglnSvCrhu9mNlmNr+KmMLkoPbupA1tn+GBYWzTdmkxMhvk0Jx8j6IPBc1vhA8MNAXBqeQoFYepmX6Co4DWVhWCjN1AyCcpViyfggJAsC+igZRP1SFlmEYacXygZgVEkdhAwACQgN1zjQ0Du0w7Cv2vCBCB1PVOwAdkPDAVA3PNhBCBMIHkEhUOA+jwKwpxmMgNiKxwTsSSpRI+MfIpZDbGAsDgb9XmGYp0naBd+Ao+1FKCWE0H4AA1RYoCwQNVUFbBPVqeoXAAThU3j+J-EAADl3LhKZYU9TT2h0ky8gDTctHFawJREMslEYbNUjcIZa2GIK6hCozPUwHFtVhOZO3If9NA4QhHLi-hsuEXL6jDGNZDNbC6h4uIQSKuASuSOA6DSZg+TNIbZzuDE6oawLgv4eRDhCB4GxhOFigonwjGvW9NOiCo12oTpZD8rQZqauEQzgZlWSHEdGHqJwL1c1D6ggJ6H2mnK5oWtyaiyYE0VW7QCWgJJ5rNDAwE9MB5B9dKXjOuasGoBbix+uEozXPtpSWVCsl4BUJk+xq5qII7wriAiu3EeATJoZgeHkNKNiJooZp8KBtV8+bDkwbtJA4JRZQTfg-le2ngVYDJigARUHXI2EvThCamtnhg5rm+LxrDU09eIgSu2CnGFljWXkchmAwFIEfVznuYJf0yNLZ6sJIbDo22uEfFnPzxjsHkpe1WAeA9eYhk8F4AGJI5KMoYlVeAiWoe66SfU7Y4UcoXAAcX+fIsNA3T+BwLBV10qQpF1HkIAocRJAoFgSBkOPVDVu4P3fYsE7gTozRgAQS7LxAK6rmu64KRupCjX1O9rTle9kNXSkzmJQW7KM4IH0u0HLqQ7WoVha4kCfmCb3as7V9V5BjdUiXYFQt6HiucHEPkM1AhvT6kcfk34aP+EsnoNKqcl4txcKCGApABDn2cGIY+n8SBtw7o4UygoC7934AAaiMLWAAHJSWsxQwhBFrMEcIS9TwEQEJHGBqhaw4BgFANARQI6bj9qwEQXJYRYAUFFTKuwpC4HaNgWsJAGaMOEIYEAFFGHWS0s9Y8QjIHFjEfnF4wgpB0VrIwBhBFJHDCCLo6cN44SNzEZoOiGEII4XUSAZumcYDaPEfo4QCcXQwAPDFT21I9ouCqHAeQ8BLBWBAFYUUDBHANHwEQUg-oqC0BAAwPK5p8BGFCUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=acmecomplianceprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/acme/compliance.prs title="GitHub Repository: acme/compliance.prs">acme/compliance.prs</a><a class=headerlink href=#acmecomplianceprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@acme/compliance&quot;</span>
@@ -214,14 +214,14 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>soc2:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>soc2</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Logging required with 1 year retention&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Tamper-proof audit logs&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Access control documented and reviewed quarterly&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Change management: documented, approved, tested&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>gdpr:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>gdpr</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Apply data minimization&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Enforce purpose limitation&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Consent management required&quot;</span>
@@ -230,19 +230,19 @@
 <span class=w>    </span><span class=s2>&quot;Breach notification within 72 hours&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>pci:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>pci</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Applies to payment services only&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Never store full PAN&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Encryption required&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never process data beyond stated purpose&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never retain data longer than necessary&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always document data processing activities&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always provide data subject rights mechanisms&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never transfer data to non-approved regions&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never process data beyond stated purpose&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never retain data longer than necessary&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always document data processing activities&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always provide data subject rights mechanisms&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never transfer data to non-approved regions&quot;</span>
 <span class=p>}</span>
 
 <span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
@@ -270,12 +270,13 @@
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDIxIwA9CzJQIGVoxjDBrfvzgBPdhkIDhARgoAmCgAZVrAL5q1I3pywQsW-sDUbVIKxoCirHAArtQw-Cw8YZIwWHD8AIIAwgCyfuHMcgpKYaEAjkEQoZLscBSe-ADqYRih-ADKAPKJ-Cb8ACpaaGEAkt38ijz8AOIAIgAKAErpmYpYZepCPktqtqz2cFgDNTxxHgtwzIwmAsjlXiAAMswA5tcQrNf8eQWhgwDuLjj8hvxaMDVPGJOCBsXwaRZtUhdagAWhozGYYH6QR4Ln4UBucDB53ijGUcDiLHY1GYUH4PEOQWKHEGA0BADcIDA3jBBvkahxqFAtNjFokcIprlFFBghdSBBTGFSnKy6P00PD6bL+BwNqywQBdOwLa48GgnM6LeIK7nk7AYfgke4QK0AL2wILWPgW5wCYGY1GU-DQITQzDgYXkVs2zlBzvBfLYAfYlpFYqcgPyhXV4fBwjqQQVHqwTwg1xwOawzH4MGoGGCoV5wgCGAARrAzZtvdm69AXDzU+cAEKhcRfVjMZyQRgOtj8D64e78ADsrRwzBCWNTWrWCzQjAgBpdRpNTLiRe9GC01M0pcZ+P4bG5VZAADkYErqJoi7UwEEoGSxvFbzeAoxqJ0obqM8yY8JqKzaiIoQbNQECMEBuzlDCiz3o+3okvicQ8Oa-C1jAWhsIMGzYKy3q+v6KipshwioaWgKbFO2FNhiDx0bgij8KwMCYTUHZIUaUBvEeWGUieTEWvCmH3I84jOIyzjwGC1EgPEgnCehzCMpEjYWsEtYAFbcTmsH5rElrcQKrAQHAJBLvxNEPmxZaBGAdHiSqxYDqwMIYAqJJKoMoR3FGVirPYADWA5vLAPBCu45TeGCADESX8IkGTkFkXoTPAC6eopq4aMh6UzNk-BjC2UACAWWBoHAiBSDIGXyIoygUOIkgULI-EjDhiRQOWcAQMOo6sNVWC1fVjUfOFEDtRIMBdRkUjiTCjADQSw1waN-FjLB9LiG4FXyIwWjjZNDVSB1i2yFINAQAdp3ahoKX8L1Tb9YNW0jkBz38MhABUANjEE9ZwUDAjJDU4UxNJsacgoUBwHKPpg4w5KHFiCyAwD3TsKWrAYFAEP8HjnKE2SsgkEEVk-Y6yOcWwMLRkNckqNj-BA+lrCQJE7CIyTXZBENXEEjpcpShsGR0fc7r8UDOUwXBNIk2MvRypAhNKIj4vhK8wJE1j5SvTlwUU-wOVJkUThGxzfgAKoCKMkzTJlrU5DAVvqhziRE8NHpWRgAiJIkX6uy1ZUga8-EABL-FAuAjqEAgx90X7xOOOCltUu4jvW7PnIlNggNYGoME4AH4EQUKUDQ9AgI+Q1sPghgl0AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=frontendbaseprs><a class="magiclink magiclink-github magiclink-repository" href=https://github.com/frontend/base.prs title="GitHub Repository: frontend/base.prs">frontend/base.prs</a><a class=headerlink href=#frontendbaseprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@frontend/base&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;3.0.0&quot;</span>
-<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Frontend Platform&quot;</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Frontend Platform&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@acme/base</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@acme/security</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@acme/compliance</span>
+<span class=c1># In a multi-file setup, you would inherit and use:</span>
+<span class=c1># @inherit @acme/base</span>
+<span class=c1># @use @acme/security</span>
+<span class=c1># @use @acme/compliance</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -348,17 +349,17 @@
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use class components&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use any type without documentation&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never ignore accessibility requirements&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never skip loading/error states&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never hardcode URLs or config values&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use inline styles (use Tailwind)&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use class components&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use any type without documentation&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never ignore accessibility requirements&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never skip loading/error states&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never hardcode URLs or config values&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use inline styles (use Tailwind)&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/component&quot;</span>:<span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/component&quot;</span><span class=err>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>    Create a new React component with:</span>
 <span class=sd>    - TypeScript interface for props</span>
 <span class=sd>    - Unit tests</span>
@@ -366,33 +367,34 @@
 <span class=sd>    - Accessibility considerations</span>
 <span class=sd>  &quot;&quot;&quot;</span>
 
-<span class=w>  </span><span class=s2>&quot;/hook&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a custom React hook with tests&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/hook&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Create a custom React hook with tests&quot;</span>
 
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>    Write tests using:</span>
 <span class=sd>    - Vitest for unit tests</span>
 <span class=sd>    - Testing Library for integration</span>
 <span class=sd>    - Proper mocking patterns</span>
 <span class=sd>  &quot;&quot;&quot;</span>
 
-<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span>:<span class=w> </span><span class=s2>&quot;Review for accessibility issues&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review for accessibility issues&quot;</span>
 
-<span class=w>  </span><span class=s2>&quot;/perf&quot;</span>:<span class=w> </span><span class=s2>&quot;Review for performance issues&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/perf&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review for performance issues&quot;</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABMNTYdWPAPQAjDHBjDBrfvzgBPdhkIDhAZgoAGEyrX8OpfSABiE9px78AClGxhm1EuYC+q1REIVhwYaggsfhEMRhIYeUVlVhEAVyUomLiZJUYU8KxNQLSYDNj4ljIoCAxWRiTA3k4sCM1+YFV1FRBzdQBNZhT+DGoSjH5xSSd+HhgANxgoZjQwociAQQBhAFkAUQoAiwBiQ-4dwmXqZqUD9QBafi3mGeo1ACkMWYwAZUZwtCwZAAVTTLH5-LAdfj3ABKMBikRgLC0cA4Pgs9wA6jA5PwLp5vDU6vwls0SBAAF7YCBsSH3NaMOpwOAQOTQFr8AAUGI2awA4vwAEwUACM-DWawAlLT+AAReAQADmamRqLgkK6fgOIhYjkIkXaFg13SOJ3sk2krncWHxJH4XywMQA1jcofwAFRu+ykGAAdy8jo9Alh8P4woAHNKPQAZGoKlIYBUwQP8YGg34Qf78ACskbdACEUtAeMmAGoREo59Hut32zRVVgK5OAjDQH3BHgbL5ffgAalKWRmzKVtywzEdnDVVY99uwSbdQbhjEiAEUUmFWn2AFppB3SXOA+DNBul8so3spw-BBX8KMs6jDDeWjCaH3hBU4CFTt0bZhkNhNOBk2iMoZELTk4BwYYYGcQdFWVTQURgEgpVYSFjjFahGBwcslzyeoq1sOEsDw24FCUZxPCgZ4NCwagUlwkZpS2CBfmYW4JkcaQ4HGLx+HcahEyGNA0EnO4HieFJYHGaCwipNgeOoDRIPCBtpTWFwAEl+EYKomn4RNWFk5p5ImW0AHlllYdSNJddCAGkYFaWE4AGTD4Bde45SHNQvgQ1EBA-LARMQGQZFgpUKEyGAKAqaUfz-Qz2BvO8HwCrAgrgELQIgSKyhi39pTNTjnAxCBHQgNKMqyttytyuJ8pIGQOKkHh1W6drVH8VDkhRGoeGGHhuINdQWBmARkEhToQAAVXSYMl1DMM+3Eb0-WoZ1jXUKbUxgMEM0iYIaPCBaSCeZRNq24RbBSWpjNYDAoG0380H-dhuLbXB+BwZgx24vqnr-Zk7p6S6QHmlc12oVp8Q0MJ5kU3qODofht16i0YZ0iAmhB7aWygNtpE7bsPpwft4nC1gRzHCcQYAXRdPEvBIQkYHGyahBADTWAiapHrkG6eCkgAeQVjGMOy8308kM2WVqLqmlwwluCQUg4J6Zg0cgIiPBUcY5qMNhcfgRaFLM4GR2wNJlY3QzFkhzf4DYo27EXTGFOmXRiRlmVZKoCjZiwpu5PlBRFMU1gBrWWb14Q1lV39Z2cDgUSvfgSaGQgYFuFhGPljmthqeNHuTnX+BGABHQsRgo3jDJ9aTsDwtU8+EL4UmErxInHTQ5GYAb+Hu2ZFTktR-rgX4YE4Mu4WeZv2eEHZWDgPCnsWRSdVoxRIn+zxcm45n7sTOJ2A97r1BLq8A62jnpu5yIS-eiJSbLEvOTDYwAFInvhhMYClFvOaOAVPeO6lhDyP0+geFODZkpyHvFDGOIAdgCh2GAlEEDSZuGfK+RUH4FJfQwMJVomBcBzwsPTVgXVAgjBRMdO6Q1pTCAAHJzBWMUbS7gmSR1elgMhYlmGsMUuwmorQCjLDTk-AYkQeDMFyMfB0wMLr3AEfDfgcEvCjAZPAH2bICjT0rhAEY8i+GuhUSsOA5U0B8T7jwK8MgwgSARgo9ySiOYsNUcpHgo0SjTWhFGbivEdSQGvJ8KAa4THKJAO4th6Rgj1hKCiOs8BOTsObK2ds-9Opaggp3XIvC2htRkBUF6iUIRIA5hqQOjsRiziGAPX0-BwbcNKRI3AiB2b3B2ntTMwQODUDADEEoMMaBLFElte4t8IhoN4R0u0o4oa9zHDRLwhQql0i0UyFkujWg6mZM8EeYyjQumEDIb6Y5hA2A2DUtWYw96jltE0s5jpWmkwfuYQpJcLkVI6lUjE+QSgP34GkS+syX6HnwTdKZby1kXmgdeW8cCHz4N6TAYBI9ZkuAkBcfgp1GDlRgSQvpS82qVMKRgYUwpCjlOELCIeDSYZe20Vsv2rQIBMnCe8w0IAZB4i+TSuYWN67DLCDaFmaj2UuM6iAXwtMGBNChvgIgpByDRRoPQEA8NmRsHwMKaVQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configuration>Project Configuration<a class=headerlink href=#project-configuration title="Permanent link">&para;</a></h2> <h3 id=example-project>Example Project<a class=headerlink href=#example-project title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># checkout-app/promptscript/project.prs</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABMNTYdWPAPQAjDHBjDBrfvzgBPdhkIDhAZgoAGEyrX8OpfSABiE9px78AClGxhm1EuYC+q1QBifgBJNQx+EgBXKCwIAFpIWA0YLCi0On5NZij+AHccqGcIVhwYaggsfgxpfiilRCD+ERKyiqqRDEYSGHlFZVZgkXqYZq6emSVGKPbNJuGlMe7eljIoCBrGAdUWnk44rE1+YFV1FRBzdQBNHOrqUYjxSSd+PYA3GChmNHLqqoBBADCAFkAKIUAIWQLBUGEH7UOJKSHqeL8YHMPbUNQAKQwbwwAGVGBU0FgZAAVTQ-IkkrCnfiogBKMC6VRgLC0cA4PgsqIA6jA5Px4Z5vJtRt84iQIAAvbAQNj01H-RhbOBwCByaCVI4ACj5gP+AHF+AAmCgARn4-3+AEolfwACLwCAAczUnO5cHp5z8kJELEchCqJwsvouUOC9metTcHi8JH4BKwXQA1siGfwAFRZ+ykGAFaipnMCZms-gWgAcDpzABkaq6ohhXTAS-xKdTiRBSfwAKw1rMAISi0B4bYAapVRv3edms8nNOtWK62+SMNA8iUeICCQT+ABqJYTPYa93xLDMVOcb2znPJ7CtrOllmMKoARSi5SOh4AWvUU9IA7kvAcTLhOU5cge7YgSUrr8LWmrUBg1Dfq47iaHkFSujgdK3lmgLMGQbD7HAbadMsMgjvwupwDgyEwM4J5uh6mhcjAJD2qw9LQta1CMDgU6vjM2yzrYLJpPc8QKEozieEUvxctQURCfcDrAhAxLMIkDhSDwcD8KK-DuNQLbVGgaA3iiaIYjEoxgAx5TymwBleBodEVMuDr-C4IT8Iw6z7PwLasI5cTOU8iYAPI-Kw3khBmPEANIwEczJwDkfHwBmqLOqeagEqx3ICDhWAWYgMgyEx7oUOMMAUKsDoEURIXsPBiHIZoxVYKVcDlZREA1cs9WEQ60aOLUfIQKmEBdT1fWbtNg09MNJAyE8408D6Fzbao-hcawIhcjUPDIXpxz0iwewCMg9JnCAACqixlq+FaVoe4j5oW6YRuod0djANLdlUJQaFgFQvSQGLKD9v3CLYUSsK+CqsBgUB+YRaDEew+mbrg-A4Mwl76cd6NERqYVcTDd3Pe+n4oS51ApNQHyM0dHCZH+R21IZ-kQPslywyAa4bluO57rjOBHr0VWsOel7XgLAC6GYigm4rXbdQggGElQbGjcgIzwyQADxmsYxiJYOQUyt2PybVTWsuOU8QSFEHDo3sGjkJUoGugLd21oCLj8Kb5q9nAmS2CEjohxW5skBH-CArWe6m6YFpKxmXRqhqWrrIcGsWHdBrGmalrWv8pPe+K-ta-8buEQ+zgcFysH5JUku6DA8QsKpDvCMCNRNmjLe+-w9wAI4jvcsmuSFeQGeJwnev3IAEukmMIvwV6aHIzCnfwKNvG6TnhLUcDEjAnDjyymIr5rwigqwcDCejXyM4GYOKFUJOeNM+kkBqM2di-MYbK32uoUesFC6-S1vdVglRLAgRxh3fgk5R7UUrMYAApOjFmwD7SrzCBwV0SEKZIK5CgvGwFW7LjanIJCKFa6P1NKCChWAqGSzjBhLCOEGb4wwOZI4mBcD3wsOAvaOx7iKQ0hTfSoYrLCAAHIwBZnURY-lFD6VWJjFqHCBaomUao34IxqisCOIcH47dcA5CqDwZg0weg6ApgYrWKi1HMS8A8VU8Bc7akODfKeEB7hOP0TDQxIB3EKWmmgIy+8eCwRkOUCQrMUwt1cUYtR7keCXVGPdRktZ9KuUDJAOC+IoCfjEYoyJxjGamJKEuUYXJFzwGoqY4WUBNzSEIbtf0tEvBYGmBw86YYQAyB0VjOkSAta+iLkne4D5qiHwLPwGmVdJnWJwI0OZqJ-qAx7CUDg1AwBdDsq5Gg3xLK-VRPAxBo8rlWWTF4XehNUyg2eZrZUPj1San8UcQMGpMSnyueGDMwgZAE0vMIGwgIFnuwiP-C8iY1mQreRLdhYitoyFHtCmZO05l8naKMe56joGfLQRBKohkEZ3OQeSmhY8EIMI6vww5MBSGn3JS4CQ8JIgOOmnQkRRzn5bVmVijAFoLRzGmcIZkx8VmGWzr435+cjgQHVJU8wWKRS4tlaovmC9DKqzFIjUY6qX5ZQjL4EAvhFYMH2ChfARBSDkDqjQegIAWYajYPgC0NqgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configuration>Project Configuration<a class=headerlink href=#project-configuration title="Permanent link">&para;</a></h2> <h3 id=example-project>Example Project<a class=headerlink href=#example-project title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># checkout-app/promptscript/project.prs</span>
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-app&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;2.1.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@frontend/base</span>
+<span class=c1># In a multi-file setup, you would inherit from frontend base:</span>
+<span class=c1># @inherit @frontend/base</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Checkout Application&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Checkout Application&quot;</span>
 <span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/acme/checkout-app&quot;</span>
-<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Commerce&quot;</span>
-<span class=w>  </span>productOwner:<span class=w> </span><span class=s2>&quot;Jane Smith&quot;</span>
-<span class=w>  </span>techLead:<span class=w> </span><span class=s2>&quot;John Doe&quot;</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Commerce&quot;</span>
+<span class=w>  </span><span class=nl>productOwner</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Jane Smith&quot;</span>
+<span class=w>  </span><span class=nl>techLead</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;John Doe&quot;</span>
 
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>  ## Overview</span>
@@ -416,10 +418,10 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>payment:<span class=w> </span><span class=p>{</span>
-<span class=w>    </span>provider:<span class=w> </span><span class=s2>&quot;Stripe&quot;</span>
-<span class=w>    </span>pciCompliance:<span class=w> </span><span class=kc>true</span>
-<span class=w>    </span>neverStoreCardData:<span class=w> </span><span class=kc>true</span>
+<span class=w>  </span><span class=nl>payment</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>provider</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Stripe&quot;</span>
+<span class=w>    </span><span class=nl>pciCompliance</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
+<span class=w>    </span><span class=nl>neverStoreCardData</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
@@ -454,12 +456,12 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/checkout-flow&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with checkout flow implementation&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/payment&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with Stripe payment integration&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/shipping&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with shipping calculation&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/cart&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with cart management&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/checkout-flow&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help with checkout flow implementation&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/payment&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help with Stripe payment integration&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/shipping&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help with shipping calculation&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/cart&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help with cart management&quot;</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkAmCgEYKABn2sAvmLHcIrRdQhZB3MGo2DlYpAHoAIww4GDdWbhZ2Ij9RcUEaZgArJSwLEABhRRV1PwBBXSgIRmwINicJahg0ZjhfZmojPIBzXxw1CIoWEjCMRj4wxiLVDW1desEOUjz85hI+akZYkAN0oKk1RiwAeQB3VhhqPIApDHPBAGUSXvmOSYAZGAwZORAr5hxxAARZhbOISfTbbZpADE0MERwAbhcERAYCcwYIALJqKBYCCaOAcNCCSZKaZ+MBQZgnQRgdqCUr5TEAUUEME0Q3Wm3SUGwdOoJAoOwAErcpLA4CSMNQ-I0UWi6II4DgILpPF1FZgjHx2IqxSS2JABTU2ELWDtYYIANIwIyCACSSS61BNrDgGM0ggAChhtZxcg8sD40DBBMzYDqsO60p77iq1awurI46rmYnPKHSl77TtPQAVMyyUoIjC8l25hmsUtGPGMODJmBdSOCADUWIghEw5ygGMtpQ2KteWDUjQ97cYQU0gWCnCkggAFJjmPtYIIAGIwKQXV0ASgrcelm6ViigUFk3FG405F02BJPPZj68+w8atN5XXrgjeGDUrEmgOlZQoCMHYIScVxzXiZJZyVARQmlKRJVSCQtUjWRkIkXZmBRLdLh+e4g1VUE0hQxgIBWMhKluTZZCDNRYhIwRziRagCPaGB8gQgCBFo6h6J2CCIPcZRWGpWApC6UMMLAqEJD7bMw1CZpPCjXtLU4mUHmRKpQ3naoZQoS8YEGVY90fABxZk80ECZpT8T1zP4EkR0adgpRlCsvQAVWs2yZTCXwYBIOAwkQaRBE9Ly0CkbBQ0CkgK0BZk3is1k-KwAKOGC0Lws9AAlILsLirK1LhQoyRKLTqBRbk9KmEpDLGYyhjMiRPS9I57l80lig0MJCTsiKHVYXwIFLCAAC9Qx68lPJ8myZpKHLwmVVU0HVIb7ic1aEy6ObuvqvqwvCVD-SGr0gk2OBJVO9hPM6g6KqO6QJlWch+FDT0KPejhBHaXC1KfbAR1DNd32jCtFpmHR3s0LUiwqUMfTtFTGxdPE6kfKGtCIGh4E-I5zg5SoVBJQ6sEh8ntDAI0SCLGmIAFWlPGo9VAeZaggmoQQVi3CHH3yUo8rzAB9ZlMS9PMAE1ZA0vwcGiJjmEkLLozah5hXtL1swAOXMkWvJ10oADVSntN5SgAIRS2XblEvwdoWZWvikRprs80opZZHXRaS-I3ntHXmUBWRkebMAMGgTcK0D43mR9o48qlsW8ryxPZHtLK-o0P6wFg5gVFAyFwLibhlXaLBGA0JCi4mKnKWpeQ8mFGAoGJE5ejJp6KSpGkIEooL-VdeZ5DCW6KaQH4W7bwQO9wQNg1DcfJCddHanNWSfn6+N1sTJup9b9vO523euilKAq95DGN9r-SJ+bw-Z87u-BBIW4MEkyNwJAZwAF0GH9B0fARBSDvSoLQEADAWKtDYPgGwP8gA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-config>Project Config<a class=headerlink href=#project-config title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=c1># checkout-app/promptscript.yaml</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkAmCgEYKABn2sAvmLEBiQQElxQkmqgsCE1IWEE4fjU0OkEjdUEAd3UoKUlWRWoILEEwamYSHLz2TlSAIwwIxA9Bbgh0mEzs7ly2DlYpAHpyiLdWbhZiwmzRcUEaZgArJSwLEABhRRV1bIBBXSgIRmwINicJahg0Zjgs5mojWYBzLJw1UooWEg6MRj4OxkXVDW1dPcEOUizOb5PjURgwP7jKRqRhYADyCVYDVmACkMEjBABlEg3P4cD4AGRgGBkchAKOYOHEABFmBCQL0JPoGQzRu5PHCAG4NTkQGAJRmCACyASCmjgHDQgg+Si+2TAUGYCRyZ0EKzmQoAooIYJpHqDwWMoNgwGcSBQDIIABLoqSwODSjDUbIHXn8mJwHAQXR1S4xTBGPjsGK26VsSDUEjbNgW1iW9mCADSMCM3mKl2o0dYcEFmkEAAUMIHODMsVhMmgYIJNbAg1gc6M85ivT7WJdZM3vZq23Uqyt815LXmACpmWQrTkYY2Zodq1hToxBRhwDswS51wQAamFEEImCRUEFCZWYK9+KwagOuZ3jDyISKbVSAAohcxoWEAGIwKQNLMASlnZsnW-cJFCgKBZG4F43n1BpwXFMDD0bQQv2wS8qwVDBLhXQQCQwNRWA+aknWUKAjEtZknFcOM+iIR9wgEdonSkB0RgkAM61kNiJDGPJeR-ahZkxctvXpS12MYCBgTIDZ0XBWRyzUCFRgkJFuWoYSzhgOZmOIgQFOoJTLWo6ixG4ZRWCVWApEuKtuMo1kJGPAdq3aI46nrI8Ex050sR5TYqyfLZnQoaCYAefIAOQgBxTVh0Ed4nWyPNov4aVLwOdhHWdWd8wAVXixLnQ6LIYBIOAOkQaRBDzPK0CkbAq1KkhZ2pTUCTi7UiqwEqOHKyrqrzAAlMrmG5SQ+q8zwFllZY-OoXlDSCz5llC15wseKKJDzfM4UxQqZSWDQOglJKarTLIICnCAAC8q0OuVcoKhKHuWAbOk9b00F9c7MTSz7W0uJ6DpW46qs6DiS3O-M8nBOAHUh9hcr2kHZrB6R3nych+CrPNpOxjhBDOASvJQ4kLwOFDjWw69Xu+HRsc0ANx3WKtC1TDy10zIJdmQumtCIGh4BwuEkT1DYVGlUGsFnfntDACMSHHBWIEjHI6jk31Sc1ag8moQRgR-BtZzmFYhuHAB9TUhXzYcAE1ZB87IcAqQRLImsqG22rErS8fMBwAOWii28oDlYADUVi8AkVgAIQ6x30Us7IAf+ZhBBJKQDnh3KVjtrUA8ttq5gJLwA81alZHZjcwAwaBv1nMvw81Qu4SGu2raGoa29kLw+qJjQibABjmBUCiWSo3puE9M4sEYDRWPH95pZCRUBSQMkrRgKApQSG4pbR+U18kGSypLLM-nkDpEZljf5C3nfEn34SKyrG+0g4DML8cskTpbb62zyFmA-Xe+8AYAMuI6KA89jQ8zjD-K+wVb7AO3qA3A2VshRnnLZOsVEQDOAALoMBLOcfARBSDYyoLQEADB1InDYPgGw+CgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-config>Project Config<a class=headerlink href=#project-config title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=c1># checkout-app/promptscript.yaml</span>
 </span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a><span class=nt>input</span><span class=p>:</span>
 </span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">promptscript/project.prs</span>
 </span><span id=__span-1-4><a id=__codelineno-1-4 name=__codelineno-1-4 href=#__codelineno-1-4></a>

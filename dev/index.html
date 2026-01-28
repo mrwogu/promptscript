@@ -40,8 +40,8 @@
     Compiler --&gt; Cursor["Cursor"]
     Compiler --&gt; CI["CI/CD Audit"]</code></pre> <h2 id=quick-example>Quick Example<a class=headerlink href=#quick-example title="Permanent link">&para;</a></h2> <div class="tabbed-set tabbed-alternate" data-tabs=1:1><input checked=checked id=__tabbed_1_1 name=__tabbed_1 type=radio><div class=tabbed-labels><label for=__tabbed_1_1>PromptScript (.prs)</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;checkout-service&quot;</span>,<span class=w> </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span><span class=w> </span><span class=p>}</span>
 
-<span class=err>//</span><span class=w> </span><span class=err>Inherit</span><span class=w> </span><span class=err>company</span><span class=w> </span><span class=err>standards</span><span class=w> </span><span class=err>(shows</span><span class=w> </span><span class=err>composition)</span>
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@company/backend-standards</span>
+<span class=c1># In real projects, you&#39;d inherit company standards:</span>
+<span class=c1># @inherit @company/backend-standards</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -51,33 +51,33 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>typescript:<span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Strict mode enabled&quot;</span>
+<span class=w>  </span><span class=nl>typescript</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;Strict mode enabled&quot;</span><span class=p>,</span>
 <span class=w>    </span><span class=s2>&quot;Never use any type&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=w>  </span><span class=nl>testing</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
-<span class=w>    </span><span class=s2>&quot;Use vitest as test framework&quot;</span>
+<span class=w>    </span><span class=s2>&quot;Use vitest as test framework&quot;</span><span class=p>,</span>
 <span class=w>    </span><span class=s2>&quot;Maintain 90% code coverage&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never expose API keys in code&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never skip input validation&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never expose API keys in code&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never skip input validation&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/review&quot;</span>:<span class=w> </span><span class=s2>&quot;Security-focused code review&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write unit tests with Vitest&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/review&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Security-focused code review&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write unit tests with Vitest&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>security-audit:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>security-audit</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Audit code for vulnerabilities&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Check for: SQL injection, XSS, IDOR, PII leaks.&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
-</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gPTcAEASVY4Y1CFj4syGVgE8+cLDIAmGasrh8AFHBzMA7pqlpmccRDYBKADqs+9vgAEIw0eKfGZs7gCMMjAGtOZQBaRRU1DVtbBycIZU4scXlgGNi+axBM7Lt0gE1mAFc+NRgSuyI0UQkAIX8g1mU+AFFWAHMXGFE+fWZqAJc2vjY+XDKAYRFAookAZVEANwhGGAo02IAVHAhNOEXlspwVWE1MWRJEzUKzdr4RYja2DCgS6kZtjkYsQupV9Ydslksrl7ABfaIgpzhRqRTSpSH2LCyKpwRhiNBYRB8ZD-WKZWZYMRfPgkZgJPicDA+WDKHLpAEgAByMAW3WuZS8o2RMDp6QAurjRvAku0sTiEQyAKp7PhLDiKEqaeUSMDUUgwXr9Xn0zIAWQwLiULj4AE4AAwAUkkZLKLFZaraPOB9IFkPBrH+jl+iiJSTYcMFIQyTJZ3UqpjKAEEAAoCPhBWSaY0sBLahxBzLM+0KAZoPguNCFCQLZ7xbAWD3Ohzuz26PpYRhFgMSzLcX5LDWZLH4mCNsRIkJgZiNvZNFNldsQTtVvEgbjKrvBgDq-bKhVY7mVmn04hwfAAauJhWma5DHHABlAoM36Xs+8kQhhCspxFj4fT7AlUei-axuyBI2fdxxz4IdqFlQooFYUQqWgcx4DTWIWHYRJ-0mXsAlAvosVmABFAAZfNWAAK17X86D4AANWZZgogQABEAHkACUKNjONYAwAI4DWGdq3+UEQFBPkGESahZHwIhSHIVYaHoEB7TMNh8AARiEoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=2:3><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><input id=__tabbed_2_3 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>GitHub Copilot</label><label for=__tabbed_2_2>Claude Code</label><label for=__tabbed_2_3>Cursor</label></div> <div class=tabbed-content> <div class=tabbed-block> <p><strong>Generated file tree:</strong> <div class="language-text highlight"><pre><span></span><code><span id=__span-0-1><a id=__codelineno-0-1 name=__codelineno-0-1 href=#__codelineno-0-1></a>.github/
+</code></pre></div> </div> </div> </div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkq17UYGKLxrMAVjEZY4dXgE9mAVwDkAE14RWOGNQhZeLMhlZLecLOc0ZqmuIgA6Q3u74ABXfsPHPppgWAPQARhiMANacmgC01rb2jq6u7u7empxYRpbAqWnuziBFJW4FAJpqvPYw1UJEaAbGAEIR0azaAKKsAOa6MAa8AO7M1JG6PbxsvLi1AML6UWrGAMoGAG4QjDAU+QUAKjgQcFYbW7U4trAnmEokWSeqcBO8+sQ9bGLV1IxHHHKqES7MppErFYoggC+KRBngSHSSJzyIPcWCUjTgjEMaCwiF4yD2BV4RRWWEMcl4JGYmV4nAwoVgmiKdEJBSKADkYOtBk9auZLGjGqUibwALqsmbwbK9PEElGgkAAVTgtU2HGs1RO6uMYGopBgIzGzIlhRAAFkMLobLpeABOAAMAFITNTaixuXqejBhUTxVCYQVPCJrOTsmwkRLYsSQJyPbTCGhmCreABBAAK-F40SUJxtLEyPoKUY5XMGcHGaB0rDQqmM6zEEDsYdYhd40JbsLgOFGWEYtYj8qKwREmwNRTxJNkgJysTAzD7Ku0+dqI4gY4hIqH2vH0YA6n5aqpWEZJdYTkMjDheAA1IxS1vtwlw8ZQKADkUqvt+JSxDCqTRGHiyIiu4mSYtizYTiAKb-iey68HO1C8OsqhQKwBj0tARhrnArYFCw7BZFBCyyJECGjHiKwAIoADJVjIcgQGwigABorCsij8AAIgA8gASooGaZrAGCRHAuwbkS7YFJCICQqKDBZNQSj4EQpDkDsND0CAHrPGw+AAIxyUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="tabbed-set tabbed-alternate" data-tabs=2:3><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><input id=__tabbed_2_3 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>GitHub Copilot</label><label for=__tabbed_2_2>Claude Code</label><label for=__tabbed_2_3>Cursor</label></div> <div class=tabbed-content> <div class=tabbed-block> <p><strong>Generated file tree:</strong> <div class="language-text highlight"><pre><span></span><code><span id=__span-0-1><a id=__codelineno-0-1 name=__codelineno-0-1 href=#__codelineno-0-1></a>.github/
 </span><span id=__span-0-2><a id=__codelineno-0-2 name=__codelineno-0-2 href=#__codelineno-0-2></a>├── copilot-instructions.md
 </span><span id=__span-0-3><a id=__codelineno-0-3 name=__codelineno-0-3 href=#__codelineno-0-3></a>├── prompts/
 </span><span id=__span-0-4><a id=__codelineno-0-4 name=__codelineno-0-4 href=#__codelineno-0-4></a>│   ├── review.prompt.md

@@ -21,16 +21,16 @@
 <span class=p>}</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>languages:<span class=w> </span><span class=p>[</span>typescript<span class=p>]</span>
-<span class=w>  </span>runtime:<span class=w> </span><span class=s2>&quot;Node.js 20+&quot;</span>
-<span class=w>  </span>monorepo:<span class=w> </span><span class=p>{</span>
-<span class=w>    </span>tool:<span class=w> </span><span class=s2>&quot;Nx&quot;</span>
-<span class=w>    </span>packageManager:<span class=w> </span><span class=s2>&quot;pnpm&quot;</span>
+<span class=w>  </span><span class=nl>languages</span><span class=p>:</span><span class=w> </span><span class=p>[</span>typescript<span class=p>]</span>
+<span class=w>  </span><span class=nl>runtime</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Node.js 20+&quot;</span>
+<span class=w>  </span><span class=nl>monorepo</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
+<span class=w>    </span><span class=nl>tool</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Nx&quot;</span>
+<span class=w>    </span><span class=nl>packageManager</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;pnpm&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>typescript:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>typescript</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Strict mode enabled&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Use named exports only&quot;</span>
 <span class=w>  </span><span class=p>]</span>
@@ -44,32 +44,32 @@
 <span class=w>    </span><span class=s2>&quot;Maintain 90% code coverage&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>git:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>git</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Use Conventional Commits format&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Types: feat, fix, docs, style, refactor, test, chore&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
 <span class=err>@guards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>globs:<span class=w> </span><span class=p>[</span><span class=s2>&quot;**/*.ts&quot;</span>,<span class=w> </span><span class=s2>&quot;**/*.tsx&quot;</span>,<span class=w> </span><span class=s2>&quot;**/*.spec.ts&quot;</span><span class=p>]</span>
+<span class=w>  </span><span class=nl>globs</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;**/*.ts&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;**/*.tsx&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;**/*.spec.ts&quot;</span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use any type - use unknown with type guards&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use default exports - only named exports&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never commit without tests&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never skip error handling&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use any type - use unknown with type guards&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use default exports - only named exports&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never commit without tests&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never skip error handling&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/review&quot;</span>:<span class=w> </span><span class=s2>&quot;Review code for quality and best practices&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write comprehensive unit tests&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/docs&quot;</span>:<span class=w> </span><span class=s2>&quot;Generate documentation&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/review&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review code for quality and best practices&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write comprehensive unit tests&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/docs&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Generate documentation&quot;</span>
 
-<span class=w>  </span><span class=s2>&quot;/deploy&quot;</span>:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=s2>&quot;/deploy&quot;</span><span class=err>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Deploy to production&quot;</span>
-<span class=w>    </span>prompt:<span class=w> </span><span class=kc>true</span>
-<span class=w>    </span>steps:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Build&quot;</span>,<span class=w> </span><span class=s2>&quot;Test&quot;</span>,<span class=w> </span><span class=s2>&quot;Deploy to staging&quot;</span>,<span class=w> </span><span class=s2>&quot;Run smoke tests&quot;</span>,<span class=w> </span><span class=s2>&quot;Deploy to production&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>prompt</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
+<span class=w>    </span><span class=nl>steps</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Build&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Test&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Deploy to staging&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Run smoke tests&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Deploy to production&quot;</span><span class=p>]</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
@@ -78,12 +78,12 @@
 <span class=c1># ============================================================</span>
 
 <span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>commit:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>commit</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Create git commits following project conventions&quot;</span>
-<span class=w>    </span>disableModelInvocation:<span class=w> </span><span class=kc>true</span>
-<span class=w>    </span>context:<span class=w> </span><span class=s2>&quot;fork&quot;</span>
-<span class=w>    </span>agent:<span class=w> </span><span class=s2>&quot;general-purpose&quot;</span>
-<span class=w>    </span>allowedTools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Bash&quot;</span>,<span class=w> </span><span class=s2>&quot;Read&quot;</span>,<span class=w> </span><span class=s2>&quot;Write&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>disableModelInvocation</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
+<span class=w>    </span><span class=nl>context</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;fork&quot;</span>
+<span class=w>    </span><span class=nl>agent</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;general-purpose&quot;</span>
+<span class=w>    </span><span class=nl>allowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Bash&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Write&quot;</span><span class=p>]</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      When creating commits:</span>
 <span class=sd>      1. Use Conventional Commits format: type(scope): description</span>
@@ -95,9 +95,9 @@
 <span class=sd>    &quot;&quot;&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span>review:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>review</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Review code changes for quality and issues&quot;</span>
-<span class=w>    </span>userInvocable:<span class=w> </span><span class=kc>true</span>
+<span class=w>    </span><span class=nl>userInvocable</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      Perform thorough code review checking:</span>
 
@@ -123,9 +123,9 @@
 <span class=sd>    &quot;&quot;&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span>test:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>test</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Write comprehensive unit tests&quot;</span>
-<span class=w>    </span>userInvocable:<span class=w> </span><span class=kc>true</span>
+<span class=w>    </span><span class=nl>userInvocable</span><span class=p>:</span><span class=w> </span><span class=kc>true</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      When writing tests:</span>
 <span class=sd>      1. Use Vitest as the test runner</span>
@@ -137,9 +137,9 @@
 <span class=sd>    &quot;&quot;&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span>refactor:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>refactor</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Suggest and implement code refactoring&quot;</span>
-<span class=w>    </span>context:<span class=w> </span><span class=s2>&quot;inherit&quot;</span>
+<span class=w>    </span><span class=nl>context</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;inherit&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      When refactoring:</span>
 <span class=sd>      1. Ensure tests pass before and after</span>
@@ -155,11 +155,11 @@
 <span class=c1># ============================================================</span>
 
 <span class=p>@</span><span class=kd>agents</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>code-reviewer:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code-reviewer</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Expert code reviewer. Use proactively after code changes.&quot;</span>
-<span class=w>    </span>tools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span>,<span class=w> </span><span class=s2>&quot;Grep&quot;</span>,<span class=w> </span><span class=s2>&quot;Glob&quot;</span>,<span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
-<span class=w>    </span>model:<span class=w> </span><span class=s2>&quot;sonnet&quot;</span>
-<span class=w>    </span>skills:<span class=w> </span><span class=p>[</span><span class=s2>&quot;review&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Glob&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>model</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;sonnet&quot;</span>
+<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;review&quot;</span><span class=p>]</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      You are a senior code reviewer ensuring high standards of code quality.</span>
 
@@ -175,11 +175,11 @@
 <span class=sd>    &quot;&quot;&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span>debugger:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>debugger</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Debugging specialist for errors and test failures.&quot;</span>
-<span class=w>    </span>tools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span>,<span class=w> </span><span class=s2>&quot;Edit&quot;</span>,<span class=w> </span><span class=s2>&quot;Bash&quot;</span>,<span class=w> </span><span class=s2>&quot;Grep&quot;</span>,<span class=w> </span><span class=s2>&quot;Glob&quot;</span><span class=p>]</span>
-<span class=w>    </span>model:<span class=w> </span><span class=s2>&quot;inherit&quot;</span>
-<span class=w>    </span>permissionMode:<span class=w> </span><span class=s2>&quot;acceptEdits&quot;</span>
+<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Edit&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Glob&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>model</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;inherit&quot;</span>
+<span class=w>    </span><span class=nl>permissionMode</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;acceptEdits&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      You are an expert debugger specializing in root cause analysis.</span>
 

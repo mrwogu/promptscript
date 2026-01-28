@@ -17,7 +17,7 @@
 </span></code></pre></div> <h2 id=shared-configuration>Shared Configuration<a class=headerlink href=#shared-configuration title="Permanent link">&para;</a></h2> <h3 id=registryteamfrontendprs>registry/<a class="magiclink magiclink-github magiclink-repository" href=https://github.com/team/frontend.prs title="GitHub Repository: team/frontend.prs">team/frontend.prs</a><a class=headerlink href=#registryteamfrontendprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@team/frontend&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Frontend&quot;</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Frontend&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
@@ -65,28 +65,29 @@
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use class components&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use any type without justification&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always handle loading and error states&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never hardcode API URLs&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use class components&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use any type without justification&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always handle loading and error states&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never hardcode API URLs&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/component&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a new React component with tests&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/hook&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a custom React hook&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write tests using Vitest and Testing Library&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span>:<span class=w> </span><span class=s2>&quot;Review code for accessibility&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/component&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Create a new React component with tests&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/hook&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Create a custom React hook&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write tests using Vitest and Testing Library&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review code for accessibility&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAABDqQD0Yamw6sewwa3784AT3YZCA4QEYKABkOLl-cSR0gAYjPacFIJQF8lSkb05YIWNf2BKVRUdHUwBNZgBXfgxqGGj+aVl7fh4YADcYKGY0GGp+NjMcOJsk+TMYUgoA-nCogCMI6B5+EmZU6lY6aMZGeDgIOth+AHcYOui0cghGbAg2OCrTIJMXVjcWO0IsP2rlkJUAYgP+ABUYRhx+AGUsDEYAa1dTAFp+ACUKxm3dAA4R70uJzUOSujGoEDQWGqrwAat44mBmHlUhksmgSJ5omUGk0IKwAObQ04YaDDPE8ADCVyuCSRqh8UDxhJe70+2wAihFcr5EXk4LkMnzbhwiXCOHBtgBqU7wLwE-gAGQG1BiPLp4qwcCeh2OAEFqBd4V8IrFtfxXlYKlgTTBnnUMPzmoioO16dQIsbTSyrjgYjBmiwyGxMYy6irqL4ABQiQOYVhqCSNACURN1AAUAJL8RiMzH4zi5WYFRIkfgAeRyrHTWbgOUYWqWwRWTxEEow8hiPDgO1MLFSAmQ1UCIAAqvzTsCYKDwZDaXkMFAoNm2jATCph2nYmBcgkIqwvnNWAv+DRmPiVSQSEz6WpYGv18Ixwi9we2MfY8H2N2ybh+DhmMw9xavsD4gB8dwclyEZzqoAo7m2HBdAAWhEbZlLy2a5uw9LYKuIEALpmhqTIDkOQijuOYqytE3YagkF4wMMSKPCBw4ALIkpoeL8D8BgAKTLqky6Chg+b3sOADq4IcPwe7eFizR4hw55FsoGrAdUhFrKYdy9HA-R1NA3hqKRpjDlYzCLswwz8BJFK6gA4vwABMFC6Pwuq6vw+KNKkjKsPA4nkbqPR9AMRk+OUErXrEACOjSxA4mnOC2sQSuCr6sN2-gssIABy6Q7qhcQ5g63YfgFX73q8+WFXkxVYr4Pg5P8uCRNsABWqFeJAMxeGw1XBVAwwYGo3a+vIQxZBgPDXu2zS5DIQq4RpuUgAVgp-p2fZxNW-Ajm8CqrasbhwP+1BYIwESaj2w4SBVnjCJYFKxLh8QBTZ4FfMuQaVdsP6XOp97CBI-6AU95EvVacQYNm3XMKWX3bGDLG7CAEgahDwhSfCUU3ah15URKCkytF8pKmGqrA+jGC6LoahY2B6QQIxgkInSulhYZjI+CsIBOPhDCeBG+BEKQ5AwFQtAgAwgr9Gw+C6PzQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-configurations>Project Configurations<a class=headerlink href=#project-configurations title="Permanent link">&para;</a></h2> <h3 id=project-apromptscriptprojectprs>project-a/.promptscript/project.prs<a class=headerlink href=#project-apromptscriptprojectprs title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;customer-dashboard&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@team/frontend</span>
+<span class=c1># In a multi-file setup, you would inherit from team:</span>
+<span class=c1># @inherit @team/frontend</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Customer Dashboard&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Customer Dashboard&quot;</span>
 <span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/company/customer-dashboard&quot;</span>
 
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -125,10 +126,10 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/order&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with order-related functionality&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/account&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with account management&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/order&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help with order-related functionality&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/account&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help with account management&quot;</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALQ8McHACNmGaj2GDW-fnACe7DIQHCAjBQAMlzawC+WrQAEIrHNIhZ+jjqQD0YajYOVg1WJxZ2Ik9gLR0aZgArGEYsExAAYTEJKWp+ABEFZVV1Gx1qGDRmOA9maj00gHMPHBElChYSXw7MVj0urMlpOUKVNQ0QB20hCZnY-gBief4AQRURLEmdAGUYKDAZOGkANwhGGH55RVH1fjBa-kYBnLh+CX4SDFYMBvPcGAhchhGCwROw4HQ5icYAB3fi1HjScH8T48V7UIEAa10OAgaCkYIomwWSwA0jA9PwAGIwbAicpwIkyFbA5igzyHLBYFwNF4o-g0GBgaScM4MqZMgDy6mk-Bx4lqFL5WHRjAx3LmTK2IjQlWoni5qpgng+Xx++I24v4ADlmFzIIxsBA2PzykLyqxRXNNLM7JNHBjWMxobAeD9+DEpt7SsSVgAFACS-AAoiFKi4sGK5gAhBTnACqACUADICHCctBwRC+XwYNAQdqSHp6BudI6mImLJbLFlsjX8ADiSYAKvwaz32Pwmf2jcjx54EVgMNAxTombG8yOxyCJ0y82h5BxZ9uLXNO-wpQjaH3B5v4YjJ-wixBxHDpVfLTfR3faL5ELwH9OnjfhcRpLlAmZTGeWo6rUFqrgOw6jgaGJGi8TJPi+yGoX2sYSlsm5YRmD7pOU2C-KcKFwdMUa+mErCOIosGPEREY6MIvjfsIaQABK7Gg-DQs0r6XjI5RQGRqJgKCKROl8UAeHo0bsUCx5cdMvFQPxgm4EerITia3wwOaNi2CAtgALoMJwyp6PgRCkOQMBULQIAMEciKyfgphmUAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-apromptscriptyaml>project-a/promptscript.yaml<a class=headerlink href=#project-apromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=nt>input</span><span class=p>:</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHSYBXOFmYkY1ALQ8McHACNmGaj2GDW-fnACe7DIQHCAjBQAMlzawC+WrQGJ+ASW0Z+JEVCwQZkWF0YLBE0On49ZhF+AHcoqB5+CFYcaQgsfjBqSX4OUkQnfgABZNTqdOK8kgB6LLYOVg1WLSKWdiIM4C0dGmYAKxhGLBMQAGExCSlqfgARBWVVdRsdahg0Zjh05mo9EYBzdJwRJQoWGrPMVj1qxgnJaTl5lTUNEAdtITev7v5HZwBBFQiLDvHQAZRgUDAMjg0gAbhBGDB+PJFM91JltvxbuJ7rRcsxPBhWBg9sjcDAINMMIwWCJ2HA6D8ETAYvxtjxpIz+MTElhqDSANa6HAQNBSBkUUG-ZwAaRgen4ADEYNgRKs4NKZPx-rSouwglhfKw9nAeY1+DQYGBpJwkZqPtqAPLqaT8UW4nbmvkCxiC5J7H7asGhdbUDK+P3BIkkskSkGO-gAOWYvkgjGwEDYltWNtWrHtP003zs7yKgtYzBisB4ZP4XQ+xeWMp1AAUXPwAKKNdbJLAOn4AIQUyIAqgAlAAyAhwRrQcEQ1WqGDQEFOkkuenXNThpmlfwBevpCZ02oA4p2ACr8ZdHg3n6M0ukGzlYDDQB2n-it0fX2-PjJtVHNB5A4Hk7wTH4D34F1OVoIN+AvP8OS5fhtUnCBxHZV14MTJCbxQ2hqkQXg0MQ6NCJRYJ3ygAcPmgkM0DDE8yPw6pI0FYIzXQzCI0RTj+wQ1snTBP8OK4sjRlWbByX44Ii2+N5S2aVgikUbYsFuft6wU6pCOEEYAAlITQWJDmwuCZFWKAZMSMB6SGLMSSgdI9GbYR-31EEkE+YyoFMmJzKfLyY1JGB4xsWwQFsABdBhOH5PR8CIUhyBgKhaBABg4S5Jz8FMaKgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-apromptscriptyaml>project-a/promptscript.yaml<a class=headerlink href=#project-apromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-1-1><a id=__codelineno-1-1 name=__codelineno-1-1 href=#__codelineno-1-1></a><span class=nt>input</span><span class=p>:</span>
 </span><span id=__span-1-2><a id=__codelineno-1-2 name=__codelineno-1-2 href=#__codelineno-1-2></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
 </span><span id=__span-1-3><a id=__codelineno-1-3 name=__codelineno-1-3 href=#__codelineno-1-3></a>
 </span><span id=__span-1-4><a id=__codelineno-1-4 name=__codelineno-1-4 href=#__codelineno-1-4></a><span class=nt>registry</span><span class=p>:</span>
@@ -152,10 +153,11 @@
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@team/frontend</span>
+<span class=c1># In a multi-file setup, you would inherit from team:</span>
+<span class=c1># @inherit @team/frontend</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Admin Portal&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Admin Portal&quot;</span>
 <span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/company/admin-portal&quot;</span>
 
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -175,22 +177,22 @@
 
 <span class=p>@</span><span class=kd>extend</span><span class=w> </span><span class=err>standards</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=nl>security</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span>authentication:<span class=w> </span><span class=s2>&quot;SSO required&quot;</span>
-<span class=w>    </span>authorization:<span class=w> </span><span class=s2>&quot;Role-based (admin, support, viewer)&quot;</span>
-<span class=w>    </span>auditLogging:<span class=w> </span>required
+<span class=w>    </span><span class=nl>authentication</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;SSO required&quot;</span>
+<span class=w>    </span><span class=nl>authorization</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Role-based (admin, support, viewer)&quot;</span>
+<span class=w>    </span><span class=nl>auditLogging</span><span class=p>:</span><span class=w> </span>required
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always check user permissions before actions&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Log all admin actions for audit&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always check user permissions before actions&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Log all admin actions for audit&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/admin&quot;</span>:<span class=w> </span><span class=s2>&quot;Help with admin functionality&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/report&quot;</span>:<span class=w> </span><span class=s2>&quot;Generate reports&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/admin&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Help with admin functionality&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/report&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Generate reports&quot;</span>
 <span class=p>}</span>
-</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAYeJCKwC0aZtSwYowwa3784AT3YZCA4QEYKABiNLWAX2XKAAhJwxqELPysdSAejDU2HVj0usrFnYiJ2BlVRpmACsYRixdEABBMQl+AAVZeUUQcP5qGBk4R1l1BIBzRxwAVwAjChYSNwbMVnU3UXEpGTkFU1ylHJyVfgBiEf5EmuYqrH9VAElg6lYFfg7U7qz+MFl+EgwVitYy-kYquCxmEns4On5ZHhu6XIOeNXULmBJTtkgyquo2AgbAoc1G4wA0jB1PwAGIwbAA+BgyT8ADC50u12oewOGDKX04s2GqIA8tRHjjIox4EVjrlUQBlD4cb5BP4AoFsBkTFZQdRYCCMOD8HgYOA4KYYCn9QamCysawhThvC6vaU8EVhYZwWIAxylfja1SqDAzOzsIVc1gJRmM0l5GAARyqEHyfiGJrW5tkEAAXtaEgAlZiwSQ1cUwN4ACnWrDucCqaE2dwAbhAYAB3ewASlMXrNPEcABlmGUjmUBPkXW6o7kFQrrPkLg44sDWFqecJElBMxgPqc7IwANb8c72fhoeziOBFNgimowHb5NZt+f5-io4Slk4KKBrFIqDBrjvbXaFxzy-xWCWZM5YTvDYTtQ-CBIACRgUDQ-EzlQPnTbFUrAngoBobs++SbG+QggAA4pw9jYDAjqbHA8ogGYAC6DBEtQ6j4EQpDkDAVC0CADCpjc7b4HomFAA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-bpromptscriptyaml>project-b/promptscript.yaml<a class=headerlink href=#project-bpromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a><span class=nt>input</span><span class=p>:</span>
+</code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-hACaIAEAHRAYeJCKwC0aZtSwYowwa3784AT3YZCA4QEYKABiNLWAX2XKAxPwCSKjPxIBXKFgiTIsNTCzO0dPzqzM78AO4hUDz8Ejgw1BBY-GDUzCT8HKSI1vwAArHxiXmZJAD0KWwcrDyWrLks7ERJwMqqNMwAVjCMWLogAIJiEvwACrLyiiCt-NQwMnCJsup9AOaJOM4ARhQsZbuYrOqlouJSMnIKptNKU1Mq-FY2-ZshWLWq9hzUrAr8J8PnCbJWRODA-NasFb8RjOOBYNLxOCBWQ8RF0aZg6IaOEwdINSArZzUbAQNgUd4PGwAaRg6n4ADEYNgifAKZJ+ABhWHwkjxUHg3GcN73dkAeWoqOo-HajHgC0h03ZAGV1Di8WwCUSSWxFfx+j8oOp3Iw4PweBg4DgXhgJddbqYLKxlLkmpwsfJqjaeKaWvc4N0iYllvxfapVBhnLghRBGNrWH0lUrRTMYABHZwQWY1O5hv6RnCyCAALzjfQASsxYJJNhaYNEABT-ViBOD+QGBABuEBgYXiAEpTLmIzxEgAZZgrCErASzdOZuvTR2O52zOEJHqk1g+3XCfpQMIYVXQuKMADW-FhfLQ8XEcAWbFNmxgYFkMD+G4fg-47OE46hCigP4hgcD8t2BKVh0SB1alyS1xhhLBt3uYRjmA4Q+gACRgKA0HCdYgNOZJnFYUCFCDL8UNmQF0KEEAAHFOHibA3yo8Y4AdEAzAAXQYIVqHUfAiFIcgYCoWgQAYDtEU3fA9E4oA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=project-bpromptscriptyaml>project-b/promptscript.yaml<a class=headerlink href=#project-bpromptscriptyaml title="Permanent link">&para;</a></h3> <div class="language-yaml highlight"><pre><span></span><code><span id=__span-2-1><a id=__codelineno-2-1 name=__codelineno-2-1 href=#__codelineno-2-1></a><span class=nt>input</span><span class=p>:</span>
 </span><span id=__span-2-2><a id=__codelineno-2-2 name=__codelineno-2-2 href=#__codelineno-2-2></a><span class=w>  </span><span class=nt>entry</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">.promptscript/project.prs</span>
 </span><span id=__span-2-3><a id=__codelineno-2-3 name=__codelineno-2-3 href=#__codelineno-2-3></a>
 </span><span id=__span-2-4><a id=__codelineno-2-4 name=__codelineno-2-4 href=#__codelineno-2-4></a><span class=nt>registry</span><span class=p>:</span>

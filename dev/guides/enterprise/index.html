@@ -53,7 +53,7 @@
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@org/base&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span>org:<span class=w> </span><span class=s2>&quot;ACME Corporation&quot;</span>
+<span class=w>  </span><span class=nl>org</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;ACME Corporation&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
@@ -75,23 +75,23 @@
 <span class=w>    </span><span class=s2>&quot;Testing required&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>git:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>git</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Use conventional commits format&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Branch naming: feature|bugfix|hotfix/TICKET-description&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Pull request required&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never commit secrets or credentials&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never bypass security reviews&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always follow data protection policies&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use deprecated dependencies with known vulnerabilities&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never commit secrets or credentials&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never bypass security reviews&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always follow data protection policies&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use deprecated dependencies with known vulnerabilities&quot;</span>
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/security&quot;</span>:<span class=w> </span><span class=s2>&quot;Review code for security vulnerabilities&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/docs&quot;</span>:<span class=w> </span><span class=s2>&quot;Generate or update documentation&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/security&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review code for security vulnerabilities&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/docs&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Generate or update documentation&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9ACMMcGPLES4AT3YZCs+QEYKABmu7xgpcrMgAggGEAsgFFBbpWiVsCDY7AF8xMW5pTiwILANhPTkQXRT7AE1mAFdBDGoYXPEXAElcuDgIOAF2XKxBd29ff0DYtgoI+z98wQA3DCgs+EQkgFpBAEUs-riE5h6YakE4NBgYKVHBAGUYRizqGcFIWiwNgFVtahHGGP3GQSl4CGVWDb8oKAx1Foh5+5h5qDMNB8dhJVJhDrcKoYVhSPJSOCJewsB6yZBJCTyPwPQT5HoQGAAd1xMAAjlkIPl1mkJJiQAARZi7EECVrifLkylrOy05IAFXgsVYyhJnKpPMEAF0OhJlHE0RjkucCixWPN2MFWP1BCwSCQ4oiwEoSNgJXSAELUGGMHCCLX64WyMAwbB7GAAH3UWWUkEI7pwzCwvtUfOKbgA0l4+SMHnBGPs0GyzckAApZd6iwZVTNc6lJaWscIvVjcfJVW5sxGiexjeQAOX+Cx1zD1cSWO3yWERSh1VJiEH6cAltZADfmi3UBkw5Xbu328RJ+KJQ5pghHLighIwBkNzHezGJcIEghogZ2bJPe4gjAJK429cbiyy2j+NB22DWr84D1YN-ggkJOJbQAa1YA9xB6dNWAWT5oDiW8IWLKEA2oLBdi7JE6VUbQ5xmeRnAAJX+AliRRAojUWHC9gOSCoGgq11Dg2J4AleRVCkJkV2cABxTgYI4BwnzQI8Cg45kYiCEI0lCEBQklBgbgMfAiFIcgYCoWgQAYccKjYfBzFkoA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=security-configuration>Security Configuration<a class=headerlink href=#security-configuration title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @org/security.prs</span>
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
@@ -116,13 +116,13 @@
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
 
-<span class=err>@restrictions</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never store passwords in plain text&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never log sensitive data&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never disable security features&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Never use eval() or similar unsafe functions&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always validate and sanitize user input&quot;</span>
-<span class=w>  </span>-<span class=w> </span><span class=s2>&quot;Always use parameterized queries&quot;</span>
+<span class=p>@</span><span class=kd>restrictions</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never store passwords in plain text&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never log sensitive data&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never disable security features&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Never use eval() or similar unsafe functions&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always validate and sanitize user input&quot;</span>
+<span class=w>  </span><span class=p>- </span><span class=s2>&quot;Always use parameterized queries&quot;</span>
 <span class=p>}</span>
 
 <span class=err>@knowledge</span><span class=w> </span><span class=p>{</span>
@@ -138,11 +138,11 @@
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@teams/frontend&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Frontend&quot;</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Frontend&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@org/base</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@org/security</span>
+<span class=kn>@inherit</span><span class=s>@org/base</span>
+<span class=kn>@use</span><span class=s>@org/security</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -194,20 +194,20 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/component&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a React component&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/hook&quot;</span>:<span class=w> </span><span class=s2>&quot;Create a custom hook&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write tests with Vitest&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span>:<span class=w> </span><span class=s2>&quot;Review accessibility&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/component&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Create a React component&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/hook&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Create a custom hook&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write tests with Vitest&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/a11y&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Review accessibility&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7vGClJMyABiG9px0gxAXzFjuCFYcGGoILEFuZmoAcxUAIww4GACAV2TI6LjkxlSwrAN-VkCpTixwg2E9OW9a6oBNZlTBDGoYFsF1TU9BUoA3GChmND52QSI0UKwKIokAUUJJ6nLkxGqAWkEAJRgMRgiMbUEAFQNJgGVGMLQsDcEAWWZS6nEAYXPzlqPSuAgY8UMcA4JDgdwACqEwNESIdGO1huUSBAAF7YCBsO4AQUYcLgv3i0AqggAFAB1V6YgDiggATBRzIJMZiAJTVXR1Vh+VgBFgeQgRUT2dl2CQAYlFJxgjBwgnOAkYAGtZoJNm5SDAAO7RBWyHZ7CLmAAcAGo7gAZQ4xVIYGIwWSnC5XCA3QQAVlN9k2ACFUtAZIIAGrhFKe2UFKBBGL2jDQDVBKTvc53Y7wcqsKOB4NAwTGyVAyOCM0QeLUVqFUNy7B27a7faCACKqVClVzAC10gJtMrxYzqNLg-s8iG7q9mGQ2GV1lIwgNxP1BsNRrdQy5dlgh+tEskpJ1mFBnoIgdRUoO2ndzjhWjAdz8-gCDECYCQSdw9nwVL7WUK6t5OUVuEChxSK0UhwFU9gsKUsjINUEjyAAqhkODMMwCpwHQggsOOvzlGwGFAYIbTaKEgg0MMYGYFgHAvKCv4SHBripKw+zoqwGBQJhY5oBO7BgWwUCFHR9HyA6MCXNcERBNRYB7PAu7UKRGhoLR1QALrKnsuL4oSBTQbBNTklStL0oymKcWQEawikQkMdiWnFjplQcPm6aETAACOvptF4anKksULUDCzHVjB9gMY8rDhNEgjxExUiwIeKLWfpImloqgijm0gikjA8SZgIUAqfY6l-tyxRwMhyy5FgYGCgxKhYdxrBlPIzivG0VYdHqdaNTxtxCfIKjIahrU1O1a7tEIuRAmOgjDUqA0gCozn9c4pL5O0K1gXGuD5amIo1CoGDmOYgnODsfQQJqLQ4vA2kRgUdg+CAPiqQwZTUAY+BEKQ5AwFQtAgAwAy0Kx+DmC9QA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=backend-team>Backend Team<a class=headerlink href=#backend-team title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># @teams/backend.prs</span>
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;@teams/backend&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
-<span class=w>  </span>team:<span class=w> </span><span class=s2>&quot;Backend&quot;</span>
+<span class=w>  </span><span class=nl>team</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Backend&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@org/base</span>
-<span class=err>@</span><span class=kn>use</span><span class=s>@org/security</span>
+<span class=kn>@inherit</span><span class=s>@org/base</span>
+<span class=kn>@use</span><span class=s>@org/security</span>
 
 <span class=p>@</span><span class=kd>identity</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
@@ -241,13 +241,13 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>standards</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>api:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>api</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;URL path versioning (/v1, /v2)&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Document with OpenAPI 3.0&quot;</span>
 <span class=w>    </span><span class=s2>&quot;JWT + OAuth2 authentication&quot;</span>
 <span class=w>  </span><span class=p>]</span>
 
-<span class=w>  </span>database:<span class=w> </span><span class=p>[</span>
+<span class=w>  </span><span class=nl>database</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
 <span class=w>    </span><span class=s2>&quot;Use migrations for schema changes&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Review all indexes&quot;</span>
 <span class=w>    </span><span class=s2>&quot;Query optimization required&quot;</span>
@@ -255,10 +255,10 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>shortcuts</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=s2>&quot;/api&quot;</span>:<span class=w> </span><span class=s2>&quot;Design API endpoint&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/schema&quot;</span>:<span class=w> </span><span class=s2>&quot;Design database schema&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/test&quot;</span>:<span class=w> </span><span class=s2>&quot;Write tests with Jest&quot;</span>
-<span class=w>  </span><span class=s2>&quot;/migrate&quot;</span>:<span class=w> </span><span class=s2>&quot;Create database migration&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/api&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Design API endpoint&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/schema&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Design database schema&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/test&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Write tests with Jest&quot;</span>
+<span class=w>  </span><span class=s2>&quot;/migrate&quot;</span><span class=err>:</span><span class=w> </span><span class=s2>&quot;Create database migration&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0AIwyMA1pynyxEuAE92GQrPkBGCgAZb+8YKUkLIAEKadrPSDEBfMTFuCFYcGGoILEFuZmoAc3UMOBgggFdk6NiE5MZUiKwjQNZgqU4sSKNhAzlfWuqATWZUwQxqGBbBDW1dQVKANxgoZjQ+dkEiNHCsCiKJAFFCSepy5MRqgFpBADlmUooAKzgW70EAFSNJgGVGCLQsDcEAJTnL07BUqGOpQQBxagw0DgAIoAGUEAEEAAoASTgDwAItgMBoMqU4BA4uIMCdhuUSBAAF7YCBsB4AWQgN2YyWofUp8Ba1EYOEiMEYWDyKUc+jqrACrCCLHYRCiom5dV8jgAxFKzmycIJLgJtLNBJtHql2BA+LIdntDoIAEw2ADUDxB2LiqQwcRgsnOVxuEDuggArGbHJsAGL-PgAd1iWl18CwAClLgikSi7YJIdSsHE2pdQYITU8YFIIHDPYIAPKPMmySEROAkDAPU4hkJxWShkOqmUQpksjjszmqzYAYVg2MZzNZbbaCOYZZC6ykEQG4jRGIFObmU6w48nnEE+KpNLpjHg1R5Dn5QTgAm8rSkRzFEgBEFkyGqEnkAFVHmDMLhBANaCTWNXBAAKFR9JYdCCABhoAJQOBI94gPCzC5KMUR+pECq5pMrBQtCggAMz2JKUE1KGADqpypnm4KpLghotBRYRaowxKknhggALqqlIUZJDGt6ONBD4ZPiiYMawRxgLEghwMyMBloIzKWjuTHQY8MB0jAfotFAnwhKUhDyXeNRAqk4SVLi2qEkJghtAAjqkEBtD41SsXyRTcHAOCxFguRYOeu4gCoV7yK48LwLOEIwuM3hoMwIT3Ex8gqBJYRlgFNRBeimK9BxGQJVJ5axb5HBHsl8iEfk7QFV5ghIW+daFXlKgCf8HBFSAnZtNg7TsQI0ZrhijVfvuIB+MxDBlNQRj4EQpDkDAVC0CADAfuibD4JYg1AA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h2 id=project-integration>Project Integration<a class=headerlink href=#project-integration title="Permanent link">&para;</a></h2> <h3 id=project-configuration>Project Configuration<a class=headerlink href=#project-configuration title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># .promptscript/project.prs</span>
 <span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
@@ -266,10 +266,10 @@
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
 
-<span class=err>@</span><span class=kn>inherit</span><span class=s>@teams/frontend</span>
+<span class=kn>@inherit</span><span class=s>@teams/frontend</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>project:<span class=w> </span><span class=s2>&quot;Customer Portal&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Customer Portal&quot;</span>
 <span class=w>  </span><span class=na>repository</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;github.com/acme/customer-portal&quot;</span>
 
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>

@@ -7,10 +7,10 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>agents</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>code-reviewer:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>code-reviewer</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Expert code review specialist. Proactively reviews code for quality, security, and maintainability.&quot;</span>
-<span class=w>    </span>tools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span>,<span class=w> </span><span class=s2>&quot;Grep&quot;</span>,<span class=w> </span><span class=s2>&quot;Glob&quot;</span>,<span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
-<span class=w>    </span>model:<span class=w> </span><span class=s2>&quot;sonnet&quot;</span>
+<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Glob&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>model</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;sonnet&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      You are a senior code reviewer ensuring high standards of code quality and security.</span>
 
@@ -38,11 +38,11 @@
 <span class=sd>    &quot;&quot;&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span>debugger:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>debugger</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Debugging specialist for errors, test failures, and unexpected behavior.&quot;</span>
-<span class=w>    </span>tools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span>,<span class=w> </span><span class=s2>&quot;Edit&quot;</span>,<span class=w> </span><span class=s2>&quot;Bash&quot;</span>,<span class=w> </span><span class=s2>&quot;Grep&quot;</span>,<span class=w> </span><span class=s2>&quot;Glob&quot;</span><span class=p>]</span>
-<span class=w>    </span>model:<span class=w> </span><span class=s2>&quot;inherit&quot;</span>
-<span class=w>    </span>permissionMode:<span class=w> </span><span class=s2>&quot;acceptEdits&quot;</span>
+<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Edit&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Bash&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Grep&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Glob&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>model</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;inherit&quot;</span>
+<span class=w>    </span><span class=nl>permissionMode</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;acceptEdits&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      You are an expert debugger specializing in root cause analysis.</span>
 
@@ -71,10 +71,10 @@
 <span class=sd>    &quot;&quot;&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span>data-scientist:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>data-scientist</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Data analysis expert for SQL queries, BigQuery operations, and data insights.&quot;</span>
-<span class=w>    </span>tools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Bash&quot;</span>,<span class=w> </span><span class=s2>&quot;Read&quot;</span>,<span class=w> </span><span class=s2>&quot;Write&quot;</span><span class=p>]</span>
-<span class=w>    </span>model:<span class=w> </span><span class=s2>&quot;sonnet&quot;</span>
+<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Bash&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Read&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Write&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>model</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;sonnet&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      You are a data scientist specializing in SQL and BigQuery analysis.</span>
 
@@ -102,12 +102,12 @@
 <span class=sd>    &quot;&quot;&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 
-<span class=w>  </span>db-reader:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>db-reader</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Execute read-only database queries. Use when analyzing data or generating reports.&quot;</span>
-<span class=w>    </span>tools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Bash&quot;</span>,<span class=w> </span><span class=s2>&quot;Read&quot;</span><span class=p>]</span>
-<span class=w>    </span>disallowedTools:<span class=w> </span><span class=p>[</span><span class=s2>&quot;Write&quot;</span>,<span class=w> </span><span class=s2>&quot;Edit&quot;</span><span class=p>]</span>
-<span class=w>    </span>model:<span class=w> </span><span class=s2>&quot;haiku&quot;</span>
-<span class=w>    </span>permissionMode:<span class=w> </span><span class=s2>&quot;dontAsk&quot;</span>
+<span class=w>    </span><span class=na>tools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Bash&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Read&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>disallowedTools</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;Write&quot;</span><span class=p>,</span><span class=w> </span><span class=s2>&quot;Edit&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=na>model</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;haiku&quot;</span>
+<span class=w>    </span><span class=nl>permissionMode</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;dontAsk&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      You are a database analyst with read-only access. Execute SELECT queries to answer questions about the data.</span>
 
@@ -157,7 +157,7 @@
 </span><span id=__span-2-9><a id=__codelineno-2-9 name=__codelineno-2-9 href=#__codelineno-2-9></a>
 </span><span id=__span-2-10><a id=__codelineno-2-10 name=__codelineno-2-10 href=#__codelineno-2-10></a>You are a database analyst with read-only access...
 </span></code></pre></div> </div> </div> </div> <h2 id=using-with-skills-claude-only>Using with Skills (Claude only)<a class=headerlink href=#using-with-skills-claude-only title="Permanent link">&para;</a></h2> <p>You can preload skills into subagents using the <code>skills</code> field:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>skills</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>error-handling:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>error-handling</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Error handling patterns&quot;</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=sd>      Always use try-catch blocks...</span>
@@ -166,9 +166,9 @@
 <span class=p>}</span>
 
 <span class=p>@</span><span class=kd>agents</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span>debugger:<span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>debugger</span><span class=p>:</span><span class=w> </span><span class=p>{</span>
 <span class=w>    </span><span class=na>description</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;Debug specialist&quot;</span>
-<span class=w>    </span>skills:<span class=w> </span><span class=p>[</span><span class=s2>&quot;error-handling&quot;</span><span class=p>]</span>
+<span class=w>    </span><span class=nl>skills</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s2>&quot;error-handling&quot;</span><span class=p>]</span>
 <span class=w>    </span><span class=na>content</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;You are an expert debugger.&quot;</span>
 <span class=w>  </span><span class=p>}</span>
 <span class=p>}</span>
