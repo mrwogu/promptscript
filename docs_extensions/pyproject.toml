@@ -9,5 +9,8 @@ description = "Pygments lexer for PromptScript syntax highlighting"
 requires-python = ">=3.9"
 dependencies = ["pygments>=2.0"]
 
+[tool.setuptools]
+py-modules = ["promptscript_lexer", "mkdocs_hooks"]
+
 [project.entry-points."pygments.lexers"]
-promptscript = "docs_extensions.promptscript_lexer:PromptScriptLexer"
+promptscript = "promptscript_lexer:PromptScriptLexer"
