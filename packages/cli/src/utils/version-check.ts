@@ -26,25 +26,13 @@ export interface UpdateInfo {
 }
 
 /**
- * Get the cache directory path based on OS.
- * - Linux/macOS: ~/.cache/promptscript/
- * - Windows: %LOCALAPPDATA%\promptscript\
+ * Get the cache directory path.
+ * Uses ~/.promptscript/.cache/ for consistency with Git registry cache.
+ *
+ * - All platforms: ~/.promptscript/.cache/
  */
 export function getCacheDir(): string {
-  if (process.platform === 'win32') {
-    const localAppData = process.env['LOCALAPPDATA'];
-    if (localAppData) {
-      return join(localAppData, 'promptscript');
-    }
-    // Fallback for Windows if LOCALAPPDATA is not set
-    return join(homedir(), 'AppData', 'Local', 'promptscript');
-  }
-  // Linux/macOS - use XDG_CACHE_HOME or default to ~/.cache
-  const xdgCache = process.env['XDG_CACHE_HOME'];
-  if (xdgCache) {
-    return join(xdgCache, 'promptscript');
-  }
-  return join(homedir(), '.cache', 'promptscript');
+  return join(homedir(), '.promptscript', '.cache');
 }
 
 /**

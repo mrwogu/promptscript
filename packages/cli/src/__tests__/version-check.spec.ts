@@ -22,34 +22,21 @@ describe('version-check', () => {
   });
 
   describe('getCacheDir', () => {
-    it('should return XDG_CACHE_HOME path when set', async () => {
-      process.env['XDG_CACHE_HOME'] = '/custom/cache';
-      Object.defineProperty(process, 'platform', { value: 'linux' });
-
+    it('should return ~/.promptscript/.cache/', async () => {
       const { getCacheDir } = await import('../utils/version-check.js');
       const result = getCacheDir();
 
-      expect(result).toBe(join('/custom/cache', 'promptscript'));
+      // Unified cache path for consistency with Git registry cache
+      expect(result).toBe(join(homedir(), '.promptscript', '.cache'));
     });
 
-    it('should return ~/.cache/promptscript when XDG not set', async () => {
-      delete process.env['XDG_CACHE_HOME'];
-      Object.defineProperty(process, 'platform', { value: 'darwin' });
-
+    it('should use same parent directory as git registry cache', async () => {
       const { getCacheDir } = await import('../utils/version-check.js');
       const result = getCacheDir();
 
-      expect(result).toBe(join(homedir(), '.cache', 'promptscript'));
-    });
-
-    it('should return LOCALAPPDATA path on Windows', async () => {
-      process.env['LOCALAPPDATA'] = 'C:\\Users\\Test\\AppData\\Local';
-      Object.defineProperty(process, 'platform', { value: 'win32' });
-
-      const { getCacheDir } = await import('../utils/version-check.js');
-      const result = getCacheDir();
-
-      expect(result).toBe(join('C:\\Users\\Test\\AppData\\Local', 'promptscript'));
+      // Both version cache and git cache should be under ~/.promptscript/.cache/
+      expect(result).toContain('.promptscript');
+      expect(result).toContain('.cache');
     });
   });
 
