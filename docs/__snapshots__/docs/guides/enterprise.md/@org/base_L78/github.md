@@ -11,6 +11,25 @@ Core values:
 - User-centric design
 - Collaborative development
 
+## code-standards
+
+### code
+
+- Code review required
+- Documentation required
+- Testing required
+
+### git
+
+- Use conventional commits format
+- Branch naming: feature|bugfix|hotfix/TICKET-description
+- Pull request required
+
+## shortcuts
+
+- /security: Review code for security vulnerabilities
+- /docs: Generate or update documentation
+
 ## donts
 
 - Don't commit secrets or credentials

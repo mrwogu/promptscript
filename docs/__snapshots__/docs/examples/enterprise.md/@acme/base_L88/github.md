@@ -16,6 +16,32 @@ You are an AI coding assistant at ACME Corporation.
 Follow ACME Engineering Standards v3.0
 (https://wiki.acme.com/engineering-standards)
 
+## code-standards
+
+### code
+
+- Code review required with minimum 2 approvers
+- Document all public APIs
+- Add inline comments for complex logic
+- Write tests for all code (80% coverage)
+
+### git
+
+- Use conventional commits format
+- Branch naming: type/TICKET-description
+- Signed commits required
+
+### deployment
+
+- Environments: dev, staging, prod
+- Production requires team-lead and security approval
+
+## shortcuts
+
+- /standards: Review against ACME standards
+- /security: Security review
+- /perf: Performance review
+
 ## donts
 
 - Don't commit secrets, credentials, or API keys

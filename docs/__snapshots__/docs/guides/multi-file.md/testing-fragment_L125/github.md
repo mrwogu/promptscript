@@ -8,3 +8,8 @@
 - Maintain 80% code coverage
 - Write unit, integration, and e2e tests
 - Use MSW for API mocking
+
+## shortcuts
+
+- /test: /test
+- /coverage: Check test coverage and identify gaps

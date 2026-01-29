@@ -6,6 +6,19 @@
  *   pnpm docs:validate                 # Validate all examples
  *   pnpm docs:validate --check         # CI mode (exit 1 on errors)
  *   pnpm docs:validate --update-snapshots  # Update output snapshots
+ *   pnpm docs:validate --update-outputs    # Update inline output blocks in docs
+ *
+ * Output blocks in documentation:
+ *   Use <!-- output:TARGET for="META_ID" --> to mark expected output blocks.
+ *   The validator will compare them against actual compiled output.
+ *
+ *   Example:
+ *     <!-- output:github for="my-example" -->
+ *     ```markdown
+ *     ## shortcuts
+ *     - /review: Review code
+ *     ```
+ *     <!-- /output -->
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, existsSync } from 'fs';
@@ -46,6 +59,26 @@ interface SnapshotDiff {
   actual: string;
 }
 
+interface OutputBlock {
+  target: string;
+  metaId: string;
+  expectedOutput: string;
+  file: string;
+  line: number;
+  startIndex: number;
+  endIndex: number;
+  rawMatch: string;
+}
+
+interface OutputMismatch {
+  file: string;
+  line: number;
+  metaId: string;
+  target: string;
+  expected: string;
+  actual: string;
+}
+
 interface ValidationStats {
   filesProcessed: number;
   codeBlocksFound: number;
@@ -53,6 +86,9 @@ interface ValidationStats {
   validationErrors: number;
   snapshotDiffs: number;
   snapshotsUpdated: number;
+  outputBlocksFound: number;
+  outputMismatches: number;
+  outputsUpdated: number;
 }
 
 // Constants
@@ -68,6 +104,11 @@ const TARGET_EXTENSIONS: Record<string, string> = {
 
 // Regex to match PRS code blocks (same as add-playground-links.mts)
 const CODE_BLOCK_REGEX = /```(?:prs|promptscript)(?:[ \t]+[^\n]*)?\n([\s\S]*?)```/g;
+
+// Regex to match output blocks: <!-- output:TARGET for="META_ID" --> ... <!-- /output -->
+// The closing tag is optional
+const OUTPUT_BLOCK_REGEX =
+  /<!-- output:(\w+) for="([^"]+)" -->\s*```(?:markdown|md)?\n([\s\S]*?)```\s*(?:<!-- \/output -->)?/g;
 
 // Colors for terminal output
 const colors = {
@@ -257,6 +298,41 @@ function extractCodeBlocks(filePath: string): CodeBlock[] {
       line,
       column,
       metaId,
+      rawMatch: match[0],
+    });
+  }
+
+  return blocks;
+}
+
+/**
+ * Extract all output blocks from a markdown file.
+ * These are marked with <!-- output:TARGET for="META_ID" --> comments.
+ */
+function extractOutputBlocks(filePath: string): OutputBlock[] {
+  const content = readFileSync(filePath, 'utf-8');
+  const blocks: OutputBlock[] = [];
+
+  let match: RegExpExecArray | null;
+  OUTPUT_BLOCK_REGEX.lastIndex = 0;
+
+  while ((match = OUTPUT_BLOCK_REGEX.exec(content)) !== null) {
+    const target = match[1];
+    const metaId = match[2];
+    const expectedOutput = match[3].trim();
+
+    // Calculate line number
+    const beforeMatch = content.slice(0, match.index);
+    const line = (beforeMatch.match(/\n/g) || []).length + 1;
+
+    blocks.push({
+      target,
+      metaId,
+      expectedOutput,
+      file: filePath,
+      line,
+      startIndex: match.index,
+      endIndex: match.index + match[0].length,
       rawMatch: match[0],
     });
   }
@@ -468,13 +544,24 @@ function compareSnapshots(
 }
 
 /**
- * Normalize output for comparison (ignore timestamps, etc.).
+ * Normalize output for comparison (ignore timestamps, trailing whitespace, etc.).
  */
 function normalizeOutput(content: string): string {
-  // Remove PromptScript timestamp markers
-  return content.replace(
-    /<!-- PromptScript \d{4}-\d{2}-\d{2}T[\d:.]+ - do not edit -->/g,
-    '<!-- PromptScript TIMESTAMP - do not edit -->'
+  return (
+    content
+      // Remove PromptScript timestamp markers
+      .replace(
+        /<!-- PromptScript \d{4}-\d{2}-\d{2}T[\d:.]+ - do not edit -->/g,
+        '<!-- PromptScript TIMESTAMP - do not edit -->'
+      )
+      // Normalize line endings
+      .replace(/\r\n/g, '\n')
+      // Remove trailing whitespace from each line
+      .split('\n')
+      .map((line) => line.trimEnd())
+      .join('\n')
+      // Remove trailing newlines
+      .trimEnd()
   );
 }
 
@@ -494,6 +581,109 @@ function updateSnapshots(block: CodeBlock, outputs: Map<string, string>, rootDir
   }
 
   return updated;
+}
+
+/**
+ * Validate output blocks against compiled outputs.
+ */
+function validateOutputBlocks(
+  outputBlocks: OutputBlock[],
+  compiledOutputs: Map<string, Map<string, string>>
+): OutputMismatch[] {
+  const mismatches: OutputMismatch[] = [];
+
+  for (const block of outputBlocks) {
+    const outputs = compiledOutputs.get(block.metaId);
+    if (!outputs) {
+      // No compiled output for this metaId - the source example might not exist or failed to compile
+      mismatches.push({
+        file: block.file,
+        line: block.line,
+        metaId: block.metaId,
+        target: block.target,
+        expected: block.expectedOutput,
+        actual: `(no compiled output - check if example with id="${block.metaId}" exists and compiles)`,
+      });
+      continue;
+    }
+
+    const actualOutput = outputs.get(block.target);
+    if (!actualOutput) {
+      mismatches.push({
+        file: block.file,
+        line: block.line,
+        metaId: block.metaId,
+        target: block.target,
+        expected: block.expectedOutput,
+        actual: `(no output for target "${block.target}")`,
+      });
+      continue;
+    }
+
+    // Compare normalized outputs
+    if (normalizeOutput(block.expectedOutput) !== normalizeOutput(actualOutput)) {
+      mismatches.push({
+        file: block.file,
+        line: block.line,
+        metaId: block.metaId,
+        target: block.target,
+        expected: block.expectedOutput,
+        actual: actualOutput,
+      });
+    }
+  }
+
+  return mismatches;
+}
+
+/**
+ * Update output blocks in markdown files with actual compiled output.
+ */
+function updateOutputBlocks(
+  outputBlocks: OutputBlock[],
+  compiledOutputs: Map<string, Map<string, string>>
+): number {
+  // Group blocks by file
+  const blocksByFile = new Map<string, OutputBlock[]>();
+  for (const block of outputBlocks) {
+    const existing = blocksByFile.get(block.file) ?? [];
+    existing.push(block);
+    blocksByFile.set(block.file, existing);
+  }
+
+  let updatedCount = 0;
+
+  for (const [filePath, blocks] of blocksByFile) {
+    let content = readFileSync(filePath, 'utf-8');
+    let offset = 0;
+
+    // Sort blocks by startIndex to process in order
+    const sortedBlocks = [...blocks].sort((a, b) => a.startIndex - b.startIndex);
+
+    for (const block of sortedBlocks) {
+      const outputs = compiledOutputs.get(block.metaId);
+      if (!outputs) continue;
+
+      const actualOutput = outputs.get(block.target);
+      if (!actualOutput) continue;
+
+      // Build the new block content
+      const newBlock = `<!-- output:${block.target} for="${block.metaId}" -->\n\`\`\`markdown\n${actualOutput.trim()}\n\`\`\`\n<!-- /output -->`;
+
+      // Replace in content (accounting for previous replacements via offset)
+      const adjustedStart = block.startIndex + offset;
+      const adjustedEnd = block.endIndex + offset;
+      content = content.slice(0, adjustedStart) + newBlock + content.slice(adjustedEnd);
+
+      // Update offset for next replacement
+      offset += newBlock.length - (block.endIndex - block.startIndex);
+      updatedCount++;
+    }
+
+    writeFileSync(filePath, content);
+  }
+
+  return updatedCount;
 }
 
 // Reporting utilities
@@ -559,12 +749,51 @@ function formatSnapshotDiff(diff: SnapshotDiff, rootDir: string): string {
 }
 
 /**
+ * Format an output mismatch.
+ */
+function formatOutputMismatch(mismatch: OutputMismatch, rootDir: string): string {
+  const relPath = relative(rootDir, mismatch.file);
+  const lines: string[] = [];
+
+  lines.push(`${colors.bold(relPath)}:${mismatch.line} (${mismatch.metaId}) - ${mismatch.target}`);
+  lines.push(`  ${colors.red('Output mismatch')}`);
+  lines.push('');
+
+  if (mismatch.actual.startsWith('(no ')) {
+    lines.push(`  ${colors.yellow(mismatch.actual)}`);
+  } else {
+    // Show a simplified diff
+    const expectedLines = mismatch.expected.split('\n').slice(0, 5);
+    const actualLines = mismatch.actual.split('\n').slice(0, 5);
+
+    lines.push(`  ${colors.red('Expected')} (from docs, first 5 lines):`);
+    for (const line of expectedLines) {
+      lines.push(`    ${colors.gray(line)}`);
+    }
+
+    lines.push('');
+    lines.push(`  ${colors.green('Actual')} (from compiler, first 5 lines):`);
+    for (const line of actualLines) {
+      lines.push(`    ${colors.gray(line)}`);
+    }
+  }
+
+  lines.push('');
+  lines.push(`  Run with ${colors.blue('--update-outputs')} to fix.`);
+
+  return lines.join('\n');
+}
+
+/**
  * Print summary statistics.
  */
 function printSummary(stats: ValidationStats): void {
   console.log('\n' + colors.bold('Summary'));
   console.log(`  Files processed: ${stats.filesProcessed}`);
   console.log(`  Code blocks found: ${stats.codeBlocksFound}`);
+  if (stats.outputBlocksFound > 0) {
+    console.log(`  Output blocks found: ${stats.outputBlocksFound}`);
+  }
 
   if (stats.parseErrors > 0) {
     console.log(`  ${colors.red('Parse errors')}: ${stats.parseErrors}`);
@@ -578,9 +807,15 @@ function printSummary(stats: ValidationStats): void {
   if (stats.snapshotsUpdated > 0) {
     console.log(`  ${colors.green('Snapshots updated')}: ${stats.snapshotsUpdated}`);
   }
+  if (stats.outputMismatches > 0) {
+    console.log(`  ${colors.yellow('Output mismatches')}: ${stats.outputMismatches}`);
+  }
+  if (stats.outputsUpdated > 0) {
+    console.log(`  ${colors.green('Outputs updated')}: ${stats.outputsUpdated}`);
+  }
 
   const total = stats.parseErrors + stats.validationErrors;
-  if (total === 0 && stats.snapshotDiffs === 0) {
+  if (total === 0 && stats.snapshotDiffs === 0 && stats.outputMismatches === 0) {
     console.log(`\n${colors.green('✓')} All documentation examples are valid!`);
   }
 }
@@ -590,6 +825,7 @@ function printSummary(stats: ValidationStats): void {
 interface Options {
   check: boolean;
   updateSnapshots: boolean;
+  updateOutputs: boolean;
 }
 
 async function main(): Promise<void> {
@@ -597,15 +833,21 @@ async function main(): Promise<void> {
   const options: Options = {
     check: args.includes('--check'),
     updateSnapshots: args.includes('--update-snapshots'),
+    updateOutputs: args.includes('--update-outputs'),
   };
 
   const rootDir = process.cwd();
   const docsDir = join(rootDir, DOCS_DIR);
 
   console.log(`\n${colors.bold('PromptScript Documentation Validator')}\n`);
-  console.log(
-    `Mode: ${options.check ? 'check (CI)' : options.updateSnapshots ? 'update snapshots' : 'validate'}`
-  );
+  const mode = options.check
+    ? 'check (CI)'
+    : options.updateSnapshots
+      ? 'update snapshots'
+      : options.updateOutputs
+        ? 'update outputs'
+        : 'validate';
+  console.log(`Mode: ${mode}`);
   console.log('');
 
   // Find all markdown files
@@ -614,6 +856,10 @@ async function main(): Promise<void> {
 
   const allErrors: ValidationError[] = [];
   const allDiffs: SnapshotDiff[] = [];
+  const allOutputMismatches: OutputMismatch[] = [];
+  const allOutputBlocks: OutputBlock[] = [];
+  // Map of metaId -> Map<target, output>
+  const compiledOutputs = new Map<string, Map<string, string>>();
   const stats: ValidationStats = {
     filesProcessed: 0,
     codeBlocksFound: 0,
@@ -621,6 +867,9 @@ async function main(): Promise<void> {
     validationErrors: 0,
     snapshotDiffs: 0,
     snapshotsUpdated: 0,
+    outputBlocksFound: 0,
+    outputMismatches: 0,
+    outputsUpdated: 0,
   };
 
   // Process each file
@@ -630,6 +879,11 @@ async function main(): Promise<void> {
 
     const blocks = extractCodeBlocks(file);
     stats.codeBlocksFound += blocks.length;
+
+    // Extract output blocks from the file
+    const outputBlocks = extractOutputBlocks(file);
+    allOutputBlocks.push(...outputBlocks);
+    stats.outputBlocksFound += outputBlocks.length;
 
     for (const block of blocks) {
       // Phase 1: Parse validation
@@ -645,10 +899,13 @@ async function main(): Promise<void> {
         stats.validationErrors += blockValidationErrors.length;
       }
 
-      // Phase 3: Snapshot comparison (only for complete examples that compile successfully)
+      // Phase 3: Compile and store outputs (for snapshot comparison and output validation)
       if (parseErrors.length === 0 && blockValidationErrors.length === 0 && block.metaId) {
         const outputs = await compileCodeBlock(block);
         if (outputs && outputs.size > 0) {
+          // Store outputs for output block validation
+          compiledOutputs.set(block.metaId, outputs);
+
           if (options.updateSnapshots) {
             const updated = updateSnapshots(block, outputs, rootDir);
             stats.snapshotsUpdated += updated;
@@ -659,6 +916,18 @@ async function main(): Promise<void> {
           }
         }
       }
+    }
+  }
+
+  // Phase 4: Validate or update output blocks
+  if (allOutputBlocks.length > 0) {
+    if (options.updateOutputs) {
+      const updated = updateOutputBlocks(allOutputBlocks, compiledOutputs);
+      stats.outputsUpdated = updated;
+    } else {
+      const mismatches = validateOutputBlocks(allOutputBlocks, compiledOutputs);
+      allOutputMismatches.push(...mismatches);
+      stats.outputMismatches = mismatches.length;
     }
   }
 
@@ -680,19 +949,36 @@ async function main(): Promise<void> {
     }
   }
 
+  // Print output mismatches (not in update mode)
+  if (allOutputMismatches.length > 0 && !options.updateOutputs) {
+    console.log(colors.bold('Output Mismatches:\n'));
+    for (const mismatch of allOutputMismatches) {
+      console.log(formatOutputMismatch(mismatch, rootDir));
+      console.log('');
+    }
+  }
+
   // Print summary
   printSummary(stats);
 
   // Exit with error code in check mode
-  // Note: Currently lenient - only fail on snapshot diffs, not parse errors
+  // Note: Currently lenient - only fail on snapshot/output diffs, not parse errors
   // This allows CI to pass while documentation errors are being fixed
   // TODO: Make stricter once all documentation is fixed
   if (options.check) {
     const hasSnapshotDiffs = stats.snapshotDiffs > 0;
-    if (hasSnapshotDiffs) {
-      console.log(
-        `\n${colors.red('✗')} Snapshot validation failed. Run with --update-snapshots to update.`
-      );
+    const hasOutputMismatches = stats.outputMismatches > 0;
+    if (hasSnapshotDiffs || hasOutputMismatches) {
+      if (hasSnapshotDiffs) {
+        console.log(
+          `\n${colors.red('✗')} Snapshot validation failed. Run with --update-snapshots to update.`
+        );
+      }
+      if (hasOutputMismatches) {
+        console.log(
+          `\n${colors.red('✗')} Output validation failed. Run with --update-outputs to update.`
+        );
+      }
       process.exit(1);
     }
     if (stats.parseErrors > 0 || stats.validationErrors > 0) {

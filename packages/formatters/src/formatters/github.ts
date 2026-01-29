@@ -852,6 +852,9 @@ export class GitHubFormatter extends BaseFormatter {
     const codeStandards = this.codeStandards(ast, renderer);
     if (codeStandards) sections.push(codeStandards);
 
+    const shortcuts = this.shortcutsSection(ast, renderer);
+    if (shortcuts) sections.push(shortcuts);
+
     const commands = this.commands(ast, renderer);
     if (commands) sections.push(commands);
 
@@ -946,16 +949,11 @@ export class GitHubFormatter extends BaseFormatter {
     const props = this.getProps(standards.content);
     const subsections: string[] = [];
 
-    const sectionMap: Record<string, string> = {
-      typescript: 'typescript',
-      naming: 'naming',
-      errors: 'error-handling',
-      testing: 'testing',
-    };
-
-    for (const [key, sectionName] of Object.entries(sectionMap)) {
-      const value = props[key];
+    // Iterate over all keys in @standards, not just hardcoded ones
+    for (const [key, value] of Object.entries(props)) {
       if (Array.isArray(value)) {
+        // Map 'errors' to 'error-handling' for backwards compatibility
+        const sectionName = key === 'errors' ? 'error-handling' : key;
         const items = this.formatStandardsList(value);
         if (items.length > 0) {
           subsections.push(renderer.renderSection(sectionName, renderer.renderList(items), 2));
@@ -966,6 +964,37 @@ export class GitHubFormatter extends BaseFormatter {
     if (subsections.length === 0) return null;
 
     return renderer.renderSection('code-standards', subsections.join('\n\n'));
+  }
+
+  /**
+   * Generate shortcuts section for copilot-instructions.md.
+   * Includes shortcuts that don't have prompt: true (those go to .prompt.md files).
+   */
+  private shortcutsSection(ast: Program, renderer: ConventionRenderer): string | null {
+    const block = this.findBlock(ast, 'shortcuts');
+    if (!block) return null;
+
+    const props = this.getProps(block.content);
+    const items: string[] = [];
+
+    for (const [name, value] of Object.entries(props)) {
+      // Skip shortcuts with prompt: true (those generate separate .prompt.md files)
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        if (obj['prompt'] === true || obj['type'] === 'prompt') {
+          continue;
+        }
+        // Object without prompt: true - use description or first line of content
+        const desc = obj['description'] || obj['content'] || name;
+        items.push(`${name}: ${this.valueToString(desc).split('\n')[0]}`);
+      } else {
+        // Simple string shortcut - use first line only
+        items.push(`${name}: ${this.valueToString(value).split('\n')[0]}`);
+      }
+    }
+
+    if (items.length === 0) return null;
+    return renderer.renderSection('shortcuts', renderer.renderList(items));
   }
 
   private commands(ast: Program, renderer: ConventionRenderer): string | null {

@@ -1,5 +1,14 @@
 # GitHub Copilot Instructions
 
+## code-standards
+
+### security
+
+- Authentication required
+- Use RBAC for authorization
+- Input validation required
+- Output encoding required
+
 ## donts
 
 - Don't expose API keys or secrets in code

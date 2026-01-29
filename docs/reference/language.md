@@ -261,7 +261,10 @@ Coding standards and conventions using category-based arrays:
 </a>
 <!-- playground-link-end -->
 
-Standards are organized by category (e.g., `code`, `naming`, `documentation`) with each category containing an array of human-readable rules. This format is passed through to output as-is, preserving the exact wording you provide.
+Standards are organized by category with each category containing an array of human-readable rules. **You can use any category name** (e.g., `code`, `naming`, `security`, `api`, `documentation`) - all keys are supported and will generate corresponding subsections in the output.
+
+!!! note "Backwards Compatibility"
+The `errors` key is automatically mapped to `error-handling` in the output for backwards compatibility.
 
 ### @restrictions
 
@@ -353,6 +356,25 @@ Write unit tests using:
 
 !!! tip "Using Cursor Commands"
 Type `/` in Cursor chat to see available commands, then select to execute.
+
+#### GitHub Copilot Output
+
+Shortcuts are handled differently based on their type:
+
+| Shortcut Type                 | Output Location                    | Behavior                                            |
+| ----------------------------- | ---------------------------------- | --------------------------------------------------- |
+| Simple string                 | `copilot-instructions.md`          | Listed in `## shortcuts` section                    |
+| Object without `prompt: true` | `copilot-instructions.md`          | Listed in `## shortcuts` section (uses description) |
+| Object with `prompt: true`    | `.github/prompts/<name>.prompt.md` | Generates separate prompt file                      |
+
+**Example output in `copilot-instructions.md`:**
+
+```markdown
+## shortcuts
+
+- /review: Review code for quality and best practices
+- /build: Build the project
+```
 
 #### GitHub Copilot Prompts
 

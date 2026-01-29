@@ -4,6 +4,17 @@
 
 Apply ACME security standards to all code.
 
+## code-standards
+
+### security
+
+- MFA required
+- Session timeout: 3600 seconds
+- RBAC with least privilege principle
+- Encrypt with AES-256
+- Mask PII in logs
+- Weekly vulnerability scanning
+
 ## donts
 
 - Don't store passwords in plain text

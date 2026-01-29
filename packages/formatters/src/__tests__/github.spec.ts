@@ -966,4 +966,173 @@ describe('GitHubFormatter', () => {
       expect(agentFile?.content).toContain("tools: ['customtool', 'anothertool', 'read']");
     });
   });
+
+  describe('code-standards with arbitrary keys', () => {
+    it('should generate subsections for any key in @standards', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                code: ['Use functional programming', 'Prefer hooks'],
+                security: ['Validate all input', 'Never expose secrets'],
+                api: ['Use REST conventions', 'Document endpoints'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## code-standards');
+      expect(result.content).toContain('### code');
+      expect(result.content).toContain('- Use functional programming');
+      expect(result.content).toContain('- Prefer hooks');
+      expect(result.content).toContain('### security');
+      expect(result.content).toContain('- Validate all input');
+      expect(result.content).toContain('- Never expose secrets');
+      expect(result.content).toContain('### api');
+      expect(result.content).toContain('- Use REST conventions');
+      expect(result.content).toContain('- Document endpoints');
+    });
+
+    it('should map errors key to error-handling for backwards compatibility', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                errors: ['Handle all exceptions', 'Log errors properly'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('### error-handling');
+      expect(result.content).toContain('- Handle all exceptions');
+    });
+  });
+
+  describe('shortcuts section', () => {
+    it('should generate shortcuts section for simple string shortcuts', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/review': 'Review code for quality',
+                '/test': 'Write unit tests',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## shortcuts');
+      expect(result.content).toContain('- /review: Review code for quality');
+      expect(result.content).toContain('- /test: Write unit tests');
+    });
+
+    it('should use only first line for multi-line shortcuts', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/test': 'Write tests using:\n- Vitest\n- AAA pattern',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('- /test: Write tests using:');
+      expect(result.content).not.toContain('- Vitest');
+    });
+
+    it('should exclude shortcuts with prompt: true from shortcuts section', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/review': 'Review code',
+                '/deploy': {
+                  prompt: true,
+                  description: 'Deploy app',
+                  content: 'Deploy the application',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## shortcuts');
+      expect(result.content).toContain('- /review: Review code');
+      expect(result.content).not.toContain('/deploy');
+    });
+
+    it('should use description for object shortcuts without prompt: true', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/build': {
+                  description: 'Build the project',
+                  steps: ['Run lint', 'Run tests', 'Build'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## shortcuts');
+      expect(result.content).toContain('- /build: Build the project');
+    });
+  });
 });

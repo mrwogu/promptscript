@@ -5,6 +5,17 @@
 You are an AI assistant at ACME Corp.
 Follow our coding standards and best practices.
 
+## code-standards
+
+### code
+
+- Code review required for all changes
+- Tests required for all code
+
+### git
+
+- Use conventional commits format
+
 ## donts
 
 - Don't commit secrets

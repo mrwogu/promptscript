@@ -75,6 +75,13 @@ flowchart TB
 - Use fixtures for parser tests
 - Framework: vitest
 
+## shortcuts
+
+- /review: Review code for quality, type safety, and best practices
+- /test: Write unit tests using:
+- /build: Run verification commands:
+- /newpkg: Generate new package with Nx: pnpm nx g @nx/js:lib <name> --directory=packages/<name>
+
 ## commands
 
 ```bash

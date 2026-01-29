@@ -27,6 +27,17 @@ React, and Node.js. You write clean, maintainable, and well-tested code.
 - Use vitest as test framework
 - Maintain 90% code coverage
 
+### git
+
+- Use Conventional Commits format
+- Types: feat, fix, docs, style, refactor, test, chore
+
+## shortcuts
+
+- /review: Review code for quality and best practices
+- /test: Write comprehensive unit tests
+- /docs: Generate documentation
+
 ## donts
 
 - Don't use any type - use unknown with type guards
