@@ -609,11 +609,6 @@ Define reusable skills that AI assistants can invoke:
       - Security vulnerabilities
     """
   }
-
-  deploy: {
-    description: "Deploy the application"
-    steps: ["Build", "Test", "Deploy to staging", "Deploy to production"]
-  }
 }
 ```
 
@@ -623,16 +618,15 @@ Define reusable skills that AI assistants can invoke:
 </a>
 <!-- playground-link-end -->
 
-| Property                 | Type     | Description                              |
-| ------------------------ | -------- | ---------------------------------------- |
-| `description`            | string   | Human-readable description               |
-| `content`                | string   | Detailed skill instructions              |
-| `disableModelInvocation` | boolean  | Prevent model from auto-invoking skill   |
-| `userInvocable`          | boolean  | Allow user to manually invoke skill      |
-| `context`                | string   | Context mode: `"fork"` or `"inherit"`    |
-| `agent`                  | string   | Agent type: `"general-purpose"`, etc.    |
-| `allowedTools`           | string[] | Tools the skill can use                  |
-| `steps`                  | string[] | Workflow steps (generates workflow file) |
+| Property                 | Type     | Formatter | Description                            |
+| ------------------------ | -------- | --------- | -------------------------------------- |
+| `description`            | string   | All       | Human-readable description             |
+| `content`                | string   | All       | Detailed skill instructions            |
+| `disableModelInvocation` | boolean  | GitHub    | Prevent model from auto-invoking skill |
+| `userInvocable`          | boolean  | Claude    | Allow user to manually invoke skill    |
+| `context`                | string   | Claude    | Context mode: `"fork"` or `"inherit"`  |
+| `agent`                  | string   | Claude    | Agent type: `"general-purpose"`, etc.  |
+| `allowedTools`           | string[] | Claude    | Tools the skill can use                |
 
 Skills are output differently based on the formatter:
 
