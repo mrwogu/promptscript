@@ -153,7 +153,7 @@ function createBaseConfig(baseDirectory) {
               '{projectRoot}/vite.config.{js,ts,mjs,mts}',
               '{projectRoot}/vitest.config.{js,ts,mjs,mts}',
             ],
-            ignoredDependencies: ['vitest', '@nx/vite', 'path-browserify', 'chokidar'],
+            ignoredDependencies: ['vitest', '@nx/vite', 'path-browserify', 'chokidar', 'ora'],
           },
         ],
       },
