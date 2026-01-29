@@ -31,7 +31,15 @@
  *     <!-- /output -->
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, existsSync } from 'fs';
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  statSync,
+  mkdirSync,
+  existsSync,
+  rmSync,
+} from 'fs';
 import { join, relative } from 'path';
 import { createHash } from 'crypto';
 
@@ -97,6 +105,7 @@ interface ValidationStats {
   validationErrors: number;
   snapshotDiffs: number;
   snapshotsUpdated: number;
+  snapshotsRemoved: number;
   outputBlocksFound: number;
   outputMismatches: number;
   outputsUpdated: number;
@@ -642,6 +651,101 @@ function updateSnapshots(block: CodeBlock, outputs: Map<string, string>, rootDir
 }
 
 /**
+ * Get all snapshot directories that currently exist.
+ */
+function getExistingSnapshotDirs(rootDir: string): Set<string> {
+  const snapshotsBase = join(rootDir, SNAPSHOTS_DIR);
+  const existing = new Set<string>();
+
+  if (!existsSync(snapshotsBase)) {
+    return existing;
+  }
+
+  // Recursively find all snapshot directories (those containing target files)
+  function walkDir(dir: string): void {
+    if (!existsSync(dir)) return;
+
+    for (const entry of readdirSync(dir)) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+
+      if (stat.isDirectory()) {
+        // Check if this directory contains snapshot files (claude.md, github.md, cursor.mdc)
+        const hasSnapshots = TARGETS.some((target) => {
+          const ext = TARGET_EXTENSIONS[target] ?? '.md';
+          return existsSync(join(fullPath, `${target}${ext}`));
+        });
+
+        if (hasSnapshots) {
+          existing.add(fullPath);
+        } else {
+          // Continue walking subdirectories
+          walkDir(fullPath);
+        }
+      }
+    }
+  }
+
+  walkDir(snapshotsBase);
+  return existing;
+}
+
+/**
+ * Clean up stale snapshot directories that are no longer valid.
+ * A snapshot is stale if its directory doesn't match any current code block.
+ */
+function cleanStaleSnapshots(validSnapshotDirs: Set<string>, rootDir: string): number {
+  const existing = getExistingSnapshotDirs(rootDir);
+  let removed = 0;
+
+  for (const dir of existing) {
+    if (!validSnapshotDirs.has(dir)) {
+      // This snapshot directory is stale - remove it
+      rmSync(dir, { recursive: true, force: true });
+      removed++;
+    }
+  }
+
+  // Also clean up empty parent directories in __snapshots__
+  const snapshotsBase = join(rootDir, SNAPSHOTS_DIR);
+  cleanEmptyDirs(snapshotsBase);
+
+  return removed;
+}
+
+/**
+ * Recursively remove empty directories.
+ */
+function cleanEmptyDirs(dir: string): boolean {
+  if (!existsSync(dir)) return true;
+
+  const entries = readdirSync(dir);
+  let allEmpty = true;
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry);
+    const stat = statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      const isEmpty = cleanEmptyDirs(fullPath);
+      if (!isEmpty) {
+        allEmpty = false;
+      }
+    } else {
+      allEmpty = false;
+    }
+  }
+
+  // If directory is empty, remove it (but not the root __snapshots__ dir)
+  if (allEmpty && dir !== join(process.cwd(), SNAPSHOTS_DIR)) {
+    rmSync(dir, { recursive: true, force: true });
+    return true;
+  }
+
+  return allEmpty;
+}
+
+/**
  * Validate output blocks against compiled outputs.
  */
 function validateOutputBlocks(
@@ -875,6 +979,9 @@ function printSummary(stats: ValidationStats): void {
   if (stats.snapshotsUpdated > 0) {
     console.log(`  ${colors.green('Snapshots updated')}: ${stats.snapshotsUpdated}`);
   }
+  if (stats.snapshotsRemoved > 0) {
+    console.log(`  ${colors.green('Stale snapshots removed')}: ${stats.snapshotsRemoved}`);
+  }
   if (stats.outputMismatches > 0) {
     console.log(`  ${colors.yellow('Output mismatches')}: ${stats.outputMismatches}`);
   }
@@ -935,10 +1042,14 @@ async function main(): Promise<void> {
     validationErrors: 0,
     snapshotDiffs: 0,
     snapshotsUpdated: 0,
+    snapshotsRemoved: 0,
     outputBlocksFound: 0,
     outputMismatches: 0,
     outputsUpdated: 0,
   };
+
+  // Track valid snapshot directories for cleanup
+  const validSnapshotDirs = new Set<string>();
 
   // Process each file
   for (const file of files) {
@@ -974,6 +1085,10 @@ async function main(): Promise<void> {
           // Store outputs for output block validation
           compiledOutputs.set(block.metaId, outputs);
 
+          // Track valid snapshot directory for this block
+          const snapshotDir = getSnapshotDir(block, rootDir);
+          validSnapshotDirs.add(snapshotDir);
+
           if (options.updateSnapshots) {
             const updated = updateSnapshots(block, outputs, rootDir);
             stats.snapshotsUpdated += updated;
@@ -985,6 +1100,12 @@ async function main(): Promise<void> {
         }
       }
     }
+  }
+
+  // Phase 3.5: Clean up stale snapshots (only in update mode)
+  if (options.updateSnapshots) {
+    const removed = cleanStaleSnapshots(validSnapshotDirs, rootDir);
+    stats.snapshotsRemoved = removed;
   }
 
   // Phase 4: Validate or update output blocks

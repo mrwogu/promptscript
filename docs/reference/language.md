@@ -166,7 +166,10 @@ When you provide an alias, imported blocks are also stored with a prefix for use
 </a>
 <!-- playground-link-end -->
 
-!!! tip "When to Use Alias" - **Without alias**: Simple include/mixin behavior - blocks are merged directly - **With alias**: When you need to selectively extend specific imported blocks
+<!-- prettier-ignore -->
+!!! tip "When to Use Alias"
+    - **Without alias**: Simple include/mixin behavior - blocks are merged directly
+    - **With alias**: When you need to selectively extend specific imported blocks
 
 ## Content Blocks
 
@@ -193,12 +196,12 @@ The identity block defines who the AI assistant should be.
 
 **Formatter Behavior:**
 
-| Formatter       | How @identity is used                                                                               |
-| --------------- | --------------------------------------------------------------------------------------------------- |
-| **GitHub**      | Included in the output as introductory text                                                         |
-| **Claude**      | Placed at the beginning of CLAUDE.md                                                                |
-| **Cursor**      | If starts with "You are...", used as full intro; otherwise generates "You are working on {project}" |
-| **Antigravity** | Included in project description                                                                     |
+| Formatter       | How @identity is used                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------ |
+| **GitHub**      | Included in the output as introductory text                                                            |
+| **Claude**      | Placed at the beginning of CLAUDE.md                                                                   |
+| **Cursor**      | If it starts with "You are...", used as full intro; otherwise generates "You are working on {project}" |
+| **Antigravity** | Included in project description                                                                        |
 
 !!! tip "Best Practice"
 Start your `@identity` with "You are..." for consistent output across all formatters.
@@ -342,7 +345,7 @@ Multi-line shortcuts are automatically converted to executable slash commands:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPEBicQGUIrAOawAtFFUxxgJMJxAE2YiSnLNghtxbKAE8ZcqSAD01GADcIMAO4vEcRcAJS8fX3EWIz0AR2EMHSxHEBknBXEAWWEoLAhtXQNxChFaAVcWEhIMViM4Vw44LAoSIzSXevgsAKCU3rS5AHVqCA5xYVYR8QaxMbhVNUR+8U1xADURzvEMCVw9afFqcdYYaiWVgEFL8UwsDmpZAApz6mpqtRg6cXPGLE-zuDgJywAEo2n0UqwAL4gSEAXQYFmo9nwRFI5BgVFoIAYnhOczY+AAjDCgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJgFdazagFo4UDHBxKWJEhlZi4MwXACe7DIUkyAjBQAM9owF8prV9w2KsjWVjjDXQUEAYkEAZQhWAHNYJShImEFAJMJBMWYfPnMsCDZBNigTQOkQAHpqGAA3CBgAdxkrEAAlSuqawRYxRIBHWQx4rEKQVyLQgFlZKGy4hOTBCh8FahLtXX04Eo44LAoSMSKZDfgseuKZM9YgoIB1aggOQVlWO8FNvwe4SKjEIqClQQA1O5HQTqF44RKvQTUR6sGDUH6CP4AQRRgkwWA41AuAAokdRqHoojA6IIkYwsCSkXA4HCsABKfZDJmuJwgJwAXQYnCw1BM+CIpHIMCotBADAqcI+bHw1jZQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -411,7 +414,7 @@ To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the obje
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPEBicQGUIZWOLhZqEVgHNxgJMJxAE2YiSnLNghtxbKAE9xACgxo0MDLXE7xAYWYSEgxWYwk4GEYsG1YAShk5KRAAemoYADcIGAB3JMRxJIAlDKzs8RZjGHEwAXEAR2EMKAgsBySZBIVxAHkAIwArSKxxbJaccRpAtCx8rWEqo11OGGpseHEKXTHhXuTJsjFkjk0qaimsChJjTqSj+Cw8yU65fenZ6nnnk3hGbWmY-JJADq2g44mErBa4mOYnasjk5TYHHYgJA7TR8IR4hBLSqEKhMIkwjgOl0iC+cgAtOIAGq4zTiDASXBVGHiD6sVgrCniakAQQFE2wHGosmcfOoqz0MDo4j5UVlfLgEUE8UxBTRms6AF8OvDFHyluxxCRmJUJmcDiMxtDmMwoHAbilKuRmG0kE91a8ZtCPjAvpU4L8IP82KiACIwV1OLDMC1m4RRGJwrGmyr5DBGh7q2P2uD5ZAcgD6IpIOia7M8xiLkFgAF0vix2JZUeieZHo9CcFU3OQIIxrLZY-HjInomGeQBGCjiQoQ6H3R3quQAJhnACFhNBjF2qpNBlEeQBmGcdqBu20aKxbPQ8gAsM7nsjgpoA1qzFzyAKynqPnmNxpMo5JmwXxthici6qw2ogNqdYMJY1AOPgRCkOQMCnPQIDpCsJJsPgk6wUAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEAHMIuAK4AjALQ1mZLHFVFS5GDMFwAnuwyFJMgIwUADPaMBfKa1fc4OZtSyNF24VdBQQBiQQBlCDJYYyxqCFZZQUAkwkEoCDgOMVFWULDPb19-OGMYRiwINiDpEAB6ahgANwgYAHcZKxAAJSaW1sEWMRhBMG9BAEdFDHSsExlXarCAeWUAKzKsQVaFHEENLUk4xWHU2U4Yamx4QQp5JWVa-bRtWo5MqmpNZ4oSMWqZV7wLAdQK5YJ7T4HQRHQxg4JDOCMeLPSqsToAdXiHEEilYCmhQLg8zhAzYHHYnXmIGq4MEmIUw1x+LeAUUcASskQNPBqkEADUGZlBBgSrhhizBNRcawLtzgryAIJKvbYDjUXIACgV1EuiRgdEECvKBoVcDgFywAEpuVTicEXG4wWEFWd2IISMwhhCvpttrhocxmFAiWCAUNyMw5khQbSnlhDlLYbSEUiICi2J0ACIwCMmAPesSKcqou3gj1DSQYV3AklYQPByTIKWsAD6apICWmBoaGDELcgsAAutyWOxOPGaraScFs7noThhhg0OQIIxsKj8xpC8WM3LBLZBF1cQTMiHacEAEwUQQAIUU0GyYu963Ke4AzNfZ1BI-nMlWOXuAAs15HrkcAegA1uKhJ7gArJ+ObfnmdYFkWFRVCStrUmCDpOCATiDgw47UCY+B6NEMAfPQICNBc7JsPg1j4UAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -449,6 +452,32 @@ Write unit tests using:
 ```
 
 <!-- /output -->
+
+#### Antigravity Workflows
+
+For Antigravity, shortcuts with `steps` property generate workflow files:
+
+```promptscript
+@shortcuts {
+  "/deploy": {
+    description: "Deploy the application"
+    steps: ["Build the project", "Run tests", "Deploy to staging"]
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPFSQAegAmMcswCeCxJJly5quI2oQ0WCGx0KAImqibxuGOIxpyERtgusFe-XA40OB1kBQAhYWhlRxxnGmYAKxhGLAU6eRAAJWFZDgC4NIzbdQ1HZnEAjABzCFYqhQBdPwBfGWaQZoaGTixqDXwiUnIYKloQBgA3GFpvfABGDqA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+| Property      | Type     | Description                    |
+| ------------- | -------- | ------------------------------ |
+| `description` | string   | Workflow description           |
+| `steps`       | string[] | Ordered list of workflow steps |
+
+Generates `.agent/workflows/deploy.md` with numbered steps.
 
 ### @params
 
@@ -525,7 +554,7 @@ When using `version: multifile` or `version: full` for GitHub Copilot, the `glob
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIDmArhmoATOAAJgAHVZixvKMwBGcRGOSSQAKk0B6TRSxwNdMRu16DcQsdNbd+uGhiNLNs-YPwsrkAF1pAL7S0txwWBiswkKiEtKyWACeTnCM1BBoWKrqMrK2AKpwMGJhaYxYYgAqSTAAyqnp5QDuELhirMxiEQliicnGcbkaAArUMGAw1GIQ7BNgGIzwYswAbhM91Z1QEBiFRiAD-qwDHGHTvFkDshoFRQBqLV5iYMyT-KwtPV57dJe2AGLMKAKRpiACC4LEmCwHGoMgAFKDqNQIrwYCZQWV0XBCtQsABKDQHQIgAK+BicLDUBL4IikcgwKi0EAMVa0CBsfAARhJQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEAHMArhmpi4AWgxpyATyzNVRUuRgzBcLewyFJMgIwUADA5MBfKazfcFSlcLeDBslDMAEZwksgyAFSRAPSRFFhwMnTSINFxCXCEyanp8XBoMIyZOVGx8RxwWCUgALpuru6s3FUYrGLecL6s-lhahXCM1BBoWOF+-qkAqnAwpljDjFiCACr9MADKQyPLAO4QuIKszIJtWoJ9A8kT-jIACtQwYDDUouwvYBiM8ILMAG4vC7rU5QCAYWZJEATepNXrwLAQViycY9SYyGZzABqB3hgjAzFe8lYBwu8MhdBuqQAYswoEFdoIAILMwSYLAcag9AAUjOo1DashgKUZS2FcFm1CwAEoZNCGiBnLUGJwFlp8AYyJQaPQQADaBA2PgbAqgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -613,7 +642,7 @@ Define reusable skills that AI assistants can invoke:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwliRIQsiURKlSAJvEbUIaLBDaKxIAMLUY2GMIDm86c1ny4h5StUQ4GAEawAss3VQASVYAN2ZGbD1WRSxqAFcYZykWdiIFYUMwZmo+J0kVDEtONMNC1hhqDCgAWjRY6jRmOASQROFKqGYAdxhVABVmZiFFZEMAIQw4HEN0kAAlM1VpwwB1LQ5DAF1W5I52AxaD1qllnE5pUwjWS1t7LDhEI+EARgphAFUm2xCiyMqbuSwwky1BI2EeACZXkFGFBYuphEZmFUAIKxXBZHpVUYAT2EMQw0HKjwAzK8AHIwYLlNokTiqYRENy6K7-BytJyHPIAXwkzlMwQgME6inEeTUGi0Oki+3mAqFtnhjBwGCu8FyKmEsSa1CCoXCXhg0TiCTFX12xUOLVNUgACuVgSQ8TgssxYpYcAqLPzBZ1pKdGAIrg9rcIqsJeti0BZ3GAYFhsY8wwBRajULLCZWsVRQCBXRPCADKMEYdXkuOCsSgZQqHmg8kFjlNHPVwh5rGc6nIzGxIta6jgmm0un0MwAIjAu7jcBYMGhyBBwsP21aNXAOGh7sIRiBRrFoIsQDNevAsEsQOPJ3jmMI1wVc5YzxeOlPrzQ-LFGEvNs421yQFyNgYIpqGxfAiFIcgYCoWgQAYKlaEifAnn-IA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHADW0KHAC0RUuRgzBcAJ7sMhSTICMFAAzmtAXymtb3eYrjDbgwSxIkIWScFdvBMXhGagg0LAg2IxAAYWoYbBhBAHNvd2ZPbzgZfzcxCDgMACNYAFlmIKgASVYAN2ZGbEjWSSxqAFdNVgD09iIfaXBmajkc7oCMZM4BmSnWGGoMKGU0duo0ZjhNEFzBJahmAHcYMQAVZmYlSWQZACEMOBwZOkGAJQSxZ8GAdVCOGQAursWH12NEcjtxj1vjhOO54k1WMl0pksHBELs3KZBABVLa9WrTZpLFFeLCCMDDEjYTGCABMFEENUYUHaQUEMWYygAgu1cMMTspbjpBG0MNAFrSAMyMgByMEJ1D2fFYYkERAKESRpKyuwhYzcNjs43itQgMEOvl2QTgITCESibwV5sO6XZjBwGCR8ANAXaW2oNXqjRKMFaHS6PRBHDBg31UICAAUFpTqCRRThhsx2skcG6kqaXe5YYwFEiMQm3MpBKcdGgkoUwPwdLTqwBRajUYaCT2qqAQJGtwQAZRgjDW3hFtXaUHmiyK0G85uyCf1kMNtisICsAIY02oOnwajIlBo9BAirgzXwxm3QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -718,7 +747,7 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIYDmnLHAAEwADqthwlgBMYAWmowAbhBgB3GNUSiJUqXLiNqENFghsdYkACUVa9SNkxhYZtWEBHAK4YoELABPYQxWGWEAI3gsYRoMRnNGeGs9fSxmZig4HWRrOwwZa2FrAHElNCLSqGYIypAAIQw4HGsAXVSpEmY5KCsQODZWGCwUyX0WdkE+lJAO-QBNZm8QpRDhOE4LD2dhJVUNLWFOOG8TVj5hHAg+HHWsUJkMahk4Cgk5qQB1HE5hCFZlMwANYwGSID7CACMFGENm8kj4AWEMggYDAwnS6xgLiUSXY0hwoQEcAhACYYQAxZiMbwiNjCLooyCg1zQZJjfTCADMMPqMERkj2Dj+JBIoIg2BgUEC7w5+js+3UBJgjCB-jgWHBcqk8mEAGFui4IE5YE8QmFdjAChgIrAIbqKfCEhZWCIHsJlE8Jbb4CsXJooFB5KxSKD7cIAHLMZHecgQRiS8LOcMABWozDQhy06Y8hLC-nOcxmoykAF9ZQYYBFvHwBNpdHLDMZTOZLMUQAARKs1gUXOCZxgS9UxNwebPuN0Wjga1wYaCnZKzOXpTLZYS5WxWwogdsAURRIx31kazTqZRgFSPIBK1VqIHajeNfmqmhkABUMlkctZPiYOG05kZKU+n+H4-xLfRM2oEhjTgF0AFlDT6eIkjMfcAhJJdOTgIFoC-ddrHHah5DzGQCz4Opp3Mc55EwLAOGoV0ALlCYOHYaZZiwzlhEWZYnhcUIjkIKCYjkata0OfsVSHCAAC9-guf5dgyGIE1pASQ2lODXiLTiIPLVhSxAUtWgYQRqECfAiFIcgYCoWgQAYZQtDgth8EhYygA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEBgDmnLHAC0RUuRgzBcAJ7sMhSTICMFAAzmtAXymtb3eYrjDbgwSzExl1GADcIMADuMNSSwK5ugp5wjNQQaFgQbEYgAEp+AYHOHjCCYMzUggCOAK4YUBBYOoIYrGKCAEbwWII0GIyJjPAyEW5YzMxQcJLIMukYYjJ00iAA4j5oUzOzUMwNSzIAQhhwODIAur2CJMyeUClwbKz8PayR7mwc7Ck9IEduAJrMJTU+NdqcJKFHKCHz+IIhQScOAlOKsOSCHAQOQ4bQCOoYahiOAUWzvQQAdRwnFErF8zAA1jAJPjTIJUiU7nJKlEIGAwIJ+gDcj4uux3Dhago4PiAEwUQQAMWYjBKzjYx1ObIC9UgsBFd3uggAzBLNjBmXcwZlRCQ+GIINgYFAdHjNfd0uDAgKYIwKRU4FhEPjlIIAMKnXIQbKwTE1OqgmATDANWA+qWMjpJVjOWr1XyYy2x+C-XLBKBQZSsUjU+MAOWYURK5AgjCt9Ry8YACtRmGhISFW4VBXUKvCjq9bm4bHZNZ4GiU5ApQi57VF4LF4olkjMACIwCdTiDw7TtxiWj0tfKFTsFVMRjievIYaCw7pvOf9QbDQSjNJRyYgaYyACiFqwGwgNsuyAfMMCLF+yyrOsICHHOFpwOUqzBGIAAqAxDCMMgEnEHAHEcJxnCk27ErhQ6RO21AkMGcDJgAsoGKTtF0CR-pUIoPvccAUtAmGvjIp7UMoPZiH2ciAZeiTwsomBYBw1Apvhc4sOwigvG8nFal8PyYrktRQoQlEtOOk7TruroHhAABe24ItuoIDC0dZynpxY2rROIDhp5EjlYIBWPsDCKNQOj4GoZCUDQ9AgL4IS0Ww+DGP5QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -1122,9 +1151,29 @@ Path syntax for imports and inheritance:
 
 The following are reserved and cannot be used as identifiers:
 
+**Literals:**
+
 - `true`, `false`, `null`
+
+**Type expressions (for @params):**
+
 - `range`, `enum`
-- All block keywords (`@meta`, `@identity`, etc.)
+
+**Directives:**
+
+- `meta`, `inherit`, `use`, `extend`, `as`
+
+**Block names:**
+
+- `identity`, `context`, `standards`, `restrictions`
+- `knowledge`, `shortcuts`, `guards`, `params`
+- `skills`, `agents`, `local`
+- `workflows`, `prompts` (internal, not user-facing)
+
+!!! note "Internal Block Types"
+The names `workflows` and `prompts` are reserved but not user-facing blocks.
+Workflow files are generated from `@shortcuts` with `steps` property (Antigravity).
+Prompt files are generated from `@shortcuts` with `prompt: true` (GitHub Copilot).
 
 ## File Extensions
 
@@ -1137,7 +1186,7 @@ The following are reserved and cannot be used as identifiers:
 
 ### Multiline Strings in Objects
 
-Multiline strings (`"""..."""``) cannot be used as "loose" content inside an object with curly braces. They must always be assigned to a key.
+Multiline strings (`"""..."""`) cannot be used as "loose" content inside an object with curly braces. They must always be assigned to a key.
 
 **❌ Invalid:**
 
@@ -1240,11 +1289,13 @@ String values can reference environment variables for dynamic configuration:
 
 ```promptscript
 @meta {
-  id: "project-${PROJECT_NAME:-default}"
+  id: "env-vars-example"
   syntax: "1.0.0"
 }
 
 @context {
+  project: "My App - ${PROJECT_NAME:-default}"
+
   """
   Running in ${NODE_ENV:-development} mode.
   API Key: ${API_KEY}
@@ -1253,7 +1304,7 @@ String values can reference environment variables for dynamic configuration:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgazAFYxGWALQASYAAUASgHkAUgFEAwgBUA+gDkAggFkTidVJhgMAVyhYAvvLEJOABPdgxCWXkARgoABjiA1n9WMW4WdiIsYUC5EAC88UE9T1ZWCFYAc0lxbRsDABETKxMbADUXNwA3GChmND52X0ESZjcKHLsdAElBAGkYYNltSamrWZMATWSJfMTfEF8AXQZOLGpg-CJSchgqWhAGbtoINnwog6A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEFWANwC0ijLWVFS5GPLES4AT3YZCs+QEYKABht7WAXzFjuLdkSzD9gmswBWMIxY5iAAsoaCAIJoaILKggAkwAAKAEoA8gBSAKIAwgAqAPoAcpGh2YjKUjBgGACuUFhOIM7ici0d3ql1rKwQrADmkuJJxekAItmF2cUAapXVijBQzGh87A6CJMzVFN6RyQCSggDSMIaySQeHhSfZAJpObXqdjiAOALoMnFjUhvhaMiUGj0EBLWgQNj4CzvIA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

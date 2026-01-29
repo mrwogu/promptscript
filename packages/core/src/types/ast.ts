@@ -131,6 +131,7 @@ export type BlockName =
   | 'guards'
   | 'params'
   | 'skills'
+  | 'agents'
   | 'local'
   | string; // Allow custom blocks
 

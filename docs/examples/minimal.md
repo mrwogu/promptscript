@@ -160,7 +160,7 @@ prs validate
 
 === "Cursor"
 
-    `.cursorrules`
+    `.cursor/rules/project.mdc`
 
     ```text
     # AI Instructions
@@ -206,7 +206,7 @@ targets:
 
   cursor:
     enabled: true
-    output: .cursorrules
+    output: .cursor/rules/project.mdc
 ```
 
 Then:

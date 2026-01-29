@@ -319,6 +319,23 @@ prs check
 
 ---
 
+### prs update-check
+
+Check for CLI updates.
+
+```bash
+prs update-check
+```
+
+**Examples:**
+
+```bash
+# Check if a newer version is available
+prs update-check
+```
+
+---
+
 ## Configuration File
 
 The CLI uses `promptscript.yaml` by default. Override with `--config`:

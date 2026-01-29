@@ -445,7 +445,7 @@ targets:
     output: CLAUDE.md
   cursor:
     enabled: true
-    output: .cursorrules
+    output: .cursor/rules/project.mdc
 
 validation:
   strict: true
@@ -637,13 +637,18 @@ Skills define reusable capabilities for AI agents:
 
       deployment: {
         description: "Deploy the application"
-        steps: ["Build the project", "Run tests", "Deploy to staging"]
+        content: """
+          Deployment process:
+          1. Build the project
+          2. Run tests
+          3. Deploy to staging
+        """
       }
     }
     ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpcuI2oQ0WCGy1iQAJRVr105nOFhm1YQEcArhigQsAT2EMVhlhACN4LGEaDEZTRnhLHV0Wdk4sCxAkrMldKQB1HE5hJVUNCFYAcwc5RGS8gEYKYQBhIsY+Z1dhALQYYTgMMBgA+t0AJmaANRgjMEDZ6m6cYJlfKrGpAGZmgFFWOE8lHsiRIgg4LDHspNyAXwlkuXJmfxJ0rXFcvXhDY1NzMJLAARGAvQK4foYNDkCCMbBmVi3PKXMFwLTISwAIU80FCkOiSwAVjA4pY6EDrJ5JBxLnByZTQeCeswBlgMJUKpVLABdZIPVh3EB3HkMdLUfz4IikcgwKi0EAMZSzOCI-ANYVAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpcuI2oQ0WCGy1iQAJRVr105nOFhm1YQEcArhigQsAT2EMVhlhACN4LGEaDEZTRnhLHV0Wdk4sCxAkrMldKQB1HE5hJVUNCFYAcwc5RGS8gEYKYQBhIsY+Z1dhALQYYTgMMBgA+t0AJmaANRgjMEDZ6m6cYJlfKrGpAGZmgFFWOE8lHsiRIgg4LDHspNyAXwlkuXJmfxJ0rXFcvXhDY1NzMJLAARGAvQK4foYNDkCCMbBmVi3PKpDjsTI3b66UHg97saJLBJwOB1LFSJrCABCnmgoUhBOYACsYHFNsJJsIrJ5JBxLnA2TthDioK8eswBlgMJUKpVrll5ckHqw7iA7gBdBjpaj+fBEUjkGBUWggBjKWZwRH4BqqoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

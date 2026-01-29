@@ -218,8 +218,8 @@ prs validate
 # Preview compiled output without writing files
 prs compile --dry-run
 
-# Compare with original files
-diff CLAUDE.md <(prs compile --target claude --stdout)
+# Compile and check diff against existing files
+prs compile && git diff CLAUDE.md
 ```
 
 ### 5. Compile and Replace

@@ -224,7 +224,7 @@ targets:
 
   cursor:
     enabled: true
-    output: .cursorrules
+    output: .cursor/rules/project.mdc
 
 validation:
   strict: true

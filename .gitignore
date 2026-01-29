@@ -61,6 +61,7 @@ temp/
 /libpeerconnection.log
 /typings
 .claude/plans
+.claude/*.local.*
 
 vitest.config.*.timestamp*
 
