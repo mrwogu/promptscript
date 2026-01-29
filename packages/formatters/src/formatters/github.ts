@@ -541,8 +541,10 @@ export class GitHubFormatter extends BaseFormatter {
       lines.push(normalizedContent);
     }
 
+    // Strip leading slashes from name for clean file paths
+    const cleanName = config.name.replace(/^\/+/, '');
     return {
-      path: `.github/prompts/${config.name}.prompt.md`,
+      path: `.github/prompts/${cleanName}.prompt.md`,
       content: lines.join('\n') + '\n',
     };
   }
@@ -601,8 +603,10 @@ export class GitHubFormatter extends BaseFormatter {
       lines.push(normalizedContent);
     }
 
+    // Strip leading slashes from name for clean file paths
+    const cleanName = config.name.replace(/^\/+/, '');
     return {
-      path: `.github/skills/${config.name}/SKILL.md`,
+      path: `.github/skills/${cleanName}/SKILL.md`,
       content: lines.join('\n') + '\n',
     };
   }
@@ -829,8 +833,10 @@ export class GitHubFormatter extends BaseFormatter {
       lines.push(normalizedContent);
     }
 
+    // Strip leading slashes from name for clean file paths
+    const cleanName = config.name.replace(/^\/+/, '');
     return {
-      path: `.github/agents/${config.name}.md`,
+      path: `.github/agents/${cleanName}.md`,
       content: lines.join('\n') + '\n',
     };
   }

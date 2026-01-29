@@ -326,6 +326,8 @@ Multi-line shortcuts are automatically converted to executable slash commands:
 **Example:**
 
 ```promptscript
+@meta { id: "cursor-slash-commands" syntax: "1.0.0" }
+
 @shortcuts {
   # Single-line → documentation only
   "/review": "Review code quality"
@@ -347,12 +349,13 @@ Multi-line shortcuts are automatically converted to executable slash commands:
 
 Generates `.cursor/commands/test.md`:
 
-```markdown
-Write unit tests using:
+<!-- output:cursor for="cursor-slash-commands" file="commands/test.md" -->
 
-- Vitest as the test runner
-- AAA pattern (Arrange, Act, Assert)
+```markdown
+Write unit tests using: - Vitest as the test runner - AAA pattern (Arrange, Act, Assert)
 ```
+
+<!-- /output -->
 
 !!! tip "Using Cursor Commands"
 Type `/` in Cursor chat to see available commands, then select to execute.
@@ -367,22 +370,15 @@ Shortcuts are handled differently based on their type:
 | Object without `prompt: true` | `copilot-instructions.md`          | Listed in `## shortcuts` section (uses description) |
 | Object with `prompt: true`    | `.github/prompts/<name>.prompt.md` | Generates separate prompt file                      |
 
-**Example output in `copilot-instructions.md`:**
-
-```markdown
-## shortcuts
-
-- /review: Review code for quality and best practices
-- /build: Build the project
-```
-
 #### GitHub Copilot Prompts
 
 To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the object syntax with `prompt: true`:
 
 ```promptscript
+@meta { id: "github-prompts-example" syntax: "1.0.0" }
+
 @shortcuts {
-  # Simple string → documentation only (appears in Commands section)
+  # Simple string → listed in ## shortcuts section
   "/review": "Review code for quality"
 
   # Object with prompt: true → generates .github/prompts/test.prompt.md
@@ -401,7 +397,7 @@ To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the obje
     prompt: true
     description: "Deploy to production"
     mode: agent
-    tools: [run_terminal read_file]
+    tools: [run_terminal, read_file]
     content: """
       Deploy the application to production:
       1. Run tests
@@ -439,6 +435,8 @@ Prompt files are only generated when using `version: multifile` or `version: ful
 
 **Generated file** (`.github/prompts/test.prompt.md`):
 
+<!-- output:github for="github-prompts-example" file="prompts/test.prompt.md" -->
+
 ```markdown
 ---
 description: 'Write unit tests'
@@ -449,6 +447,8 @@ Write unit tests using:
 - Vitest as the test runner
 - AAA pattern (Arrange, Act, Assert)
 ```
+
+<!-- /output -->
 
 ### @params
 
@@ -505,6 +505,8 @@ The `globs` property is used by multifile formatters (GitHub, Claude, Cursor) to
 When using `version: multifile` or `version: full` for GitHub Copilot, the `globs` patterns generate separate instruction files with `applyTo` frontmatter:
 
 ```promptscript
+@meta { id: "guards-applyto-example" syntax: "1.0.0" }
+
 @guards {
   globs: ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "**/*.test.ts"]
 }
@@ -532,20 +534,25 @@ This generates:
 
 **`.github/instructions/typescript.instructions.md`:**
 
+<!-- output:github for="guards-applyto-example" file="instructions/typescript.instructions.md" -->
+
 ```markdown
 ---
 applyTo:
   - '**/*.ts'
   - '**/*.tsx'
+  - '**/*.spec.ts'
+  - '**/*.test.ts'
 ---
 
-# TypeScript Standards
-
-- Use strict TypeScript with no any types
-- Prefer interfaces over type aliases
+# TypeScript-specific coding rules
 ```
 
+<!-- /output -->
+
 **`.github/instructions/testing.instructions.md`:**
+
+<!-- output:github for="guards-applyto-example" file="instructions/testing.instructions.md" -->
 
 ```markdown
 ---
@@ -554,11 +561,12 @@ applyTo:
   - '**/*.test.ts'
 ---
 
-# Testing Standards
+# Testing-specific rules and patterns
 
-- Use Vitest for unit tests
-- Follow AAA pattern (Arrange, Act, Assert)
+Follow project testing conventions.
 ```
+
+<!-- /output -->
 
 !!! note "Version Required"
 Path-specific instruction files are only generated with `version: multifile` or `version: full`:
@@ -574,13 +582,15 @@ Path-specific instruction files are only generated with `version: multifile` or 
 Define reusable skills that AI assistants can invoke:
 
 ```promptscript
+@meta { id: "skills-example" syntax: "1.0.0" }
+
 @skills {
   commit: {
     description: "Create git commits"
     disableModelInvocation: true
     context: "fork"
     agent: "general-purpose"
-    allowedTools: ["Bash" "Read" "Write"]
+    allowedTools: ["Bash", "Read", "Write"]
     content: """
       When creating commits:
       1. Use conventional commit format
@@ -602,7 +612,7 @@ Define reusable skills that AI assistants can invoke:
 
   deploy: {
     description: "Deploy the application"
-    steps: ["Build" "Test" "Deploy to staging" "Deploy to production"]
+    steps: ["Build", "Test", "Deploy to staging", "Deploy to production"]
   }
 }
 ```
@@ -626,54 +636,62 @@ Define reusable skills that AI assistants can invoke:
 
 Skills are output differently based on the formatter:
 
-=== "GitHub Output"
+**GitHub Output** (`.github/skills/commit/SKILL.md`, version: full):
 
-    `.github/skills/<name>/SKILL.md` (version: full)
+<!-- output:github for="skills-example" file="skills/commit/SKILL.md" -->
 
-    ```markdown
-    ---
-    name: commit
-    description: Create git commits
-    ---
+```markdown
+---
+name: 'commit'
+description: 'Create git commits'
+disable-model-invocation: true
+---
 
-    When creating commits:
-    1. Use conventional commit format
-    2. Include Co-Authored-By trailer
-    3. Never amend existing commits
-    ```
+When creating commits:
 
-=== "Claude Output"
+1. Use conventional commit format
+2. Include Co-Authored-By trailer
+3. Never amend existing commits
+```
 
-    `.claude/skills/<name>/SKILL.md` (version: full)
+<!-- /output -->
 
-    ```markdown
-    ---
-    name: commit
-    description: Create git commits
-    disableModelInvocation: true
-    context: fork
-    agent: general-purpose
-    allowedTools:
-      - Bash
-      - Read
-      - Write
-    ---
+**Claude Output** (`.claude/skills/commit/SKILL.md`, version: full):
 
-    When creating commits:
-    1. Use conventional commit format
-    2. Include Co-Authored-By trailer
-    3. Never amend existing commits
-    ```
+<!-- output:claude for="skills-example" file="skills/commit/SKILL.md" -->
+
+```markdown
+---
+name: 'commit'
+description: 'Create git commits'
+context: fork
+agent: general-purpose
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+---
+
+When creating commits:
+
+1. Use conventional commit format
+2. Include Co-Authored-By trailer
+3. Never amend existing commits
+```
+
+<!-- /output -->
 
 ### @agents
 
 Define specialized AI subagents for GitHub Copilot and Claude Code:
 
 ```promptscript
+@meta { id: "agents-example" syntax: "1.0.0" }
+
 @agents {
   code-reviewer: {
     description: "Reviews code for quality and best practices"
-    tools: ["Read" "Grep" "Glob" "Bash"]
+    tools: ["Read", "Grep", "Glob", "Bash"]
     model: "sonnet"
     content: """
       You are a senior code reviewer ensuring high standards.
@@ -693,11 +711,11 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 
   debugger: {
     description: "Debugging specialist for errors and test failures"
-    tools: ["Read" "Edit" "Bash" "Grep" "Glob"]
+    tools: ["Read", "Edit", "Bash", "Grep", "Glob"]
     disallowedTools: ["Write"]
     model: "inherit"
     permissionMode: "acceptEdits"
-    skills: ["error-handling" "testing-patterns"]
+    skills: ["error-handling", "testing-patterns"]
     content: """
       You are an expert debugger specializing in root cause analysis.
     """
@@ -723,54 +741,72 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 
 Agents output by platform:
 
-=== "GitHub Output"
+**GitHub Output** (`.github/agents/code-reviewer.md`, version: full)
 
-    `.github/agents/<name>.md` (version: full)
+Supports: `name`, `description`, `tools`, `model`. Tool and model names are automatically mapped to GitHub Copilot's format:
 
-    Supports: `name`, `description`, `tools`, `model`
+- Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
+- Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
 
-    Tool and model names are automatically mapped to GitHub Copilot's format:
+<!-- output:github for="agents-example" file="agents/code-reviewer.md" -->
 
-    - Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
-    - Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`
+```markdown
+---
+name: code-reviewer
+description: Reviews code for quality and best practices
+tools: ['read', 'search', 'execute']
+model: Claude Sonnet 4.5
+---
 
-    ```markdown
-    ---
-    name: code-reviewer
-    description: Reviews code for quality and best practices
-    tools: ['read', 'search', 'execute']
-    model: Claude Sonnet 4.5
-    ---
+You are a senior code reviewer ensuring high standards.
 
-    You are a senior code reviewer ensuring high standards.
+When invoked:
 
-    When invoked:
-    1. Run git diff to see recent changes
-    2. Focus on modified files
-    3. Begin review immediately
-    ```
+1. Run git diff to see recent changes
+2. Focus on modified files
+3. Begin review immediately
 
-=== "Claude Output"
+Review checklist:
 
-    `.claude/agents/<name>.md` (version: full)
+- Code is clear and readable
+- Functions and variables are well-named
+- No duplicated code
+- Proper error handling
+```
 
-    Supports all properties including `disallowedTools`, `permissionMode`, `skills`
+<!-- /output -->
 
-    ```markdown
-    ---
-    name: code-reviewer
-    description: Reviews code for quality and best practices
-    tools: Read, Grep, Glob, Bash
-    model: sonnet
-    ---
+**Claude Output** (`.claude/agents/code-reviewer.md`, version: full)
 
-    You are a senior code reviewer ensuring high standards.
+Supports all properties including `disallowedTools`, `permissionMode`, `skills`:
 
-    When invoked:
-    1. Run git diff to see recent changes
-    2. Focus on modified files
-    3. Begin review immediately
-    ```
+<!-- output:claude for="agents-example" file="agents/code-reviewer.md" -->
+
+```markdown
+---
+name: code-reviewer
+description: Reviews code for quality and best practices
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+You are a senior code reviewer ensuring high standards.
+
+When invoked:
+
+1. Run git diff to see recent changes
+2. Focus on modified files
+3. Begin review immediately
+
+Review checklist:
+
+- Code is clear and readable
+- Functions and variables are well-named
+- No duplicated code
+- Proper error handling
+```
+
+<!-- /output -->
 
 !!! note "Hooks Support"
 Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are planned but not yet implemented. See [Roadmap](https://github.com/mrwogu/promptscript#roadmap).

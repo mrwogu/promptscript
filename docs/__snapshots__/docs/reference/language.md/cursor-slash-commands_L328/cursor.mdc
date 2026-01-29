@@ -1,0 +1,10 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on the project.
+
+Commands:
+/review - Review code quality
+/test - Write unit tests using:

@@ -12,11 +12,21 @@
  *   Use <!-- output:TARGET for="META_ID" --> to mark expected output blocks.
  *   The validator will compare them against actual compiled output.
  *
- *   Example:
+ *   Main output file:
  *     <!-- output:github for="my-example" -->
  *     ```markdown
  *     ## shortcuts
  *     - /review: Review code
+ *     ```
+ *     <!-- /output -->
+ *
+ *   Additional files (e.g., .prompt.md):
+ *     <!-- output:github for="my-example" file="prompts/test.prompt.md" -->
+ *     ```markdown
+ *     ---
+ *     description: 'Test prompt'
+ *     ---
+ *     Write tests.
  *     ```
  *     <!-- /output -->
  */
@@ -62,6 +72,7 @@ interface SnapshotDiff {
 interface OutputBlock {
   target: string;
   metaId: string;
+  outputFile: string | null; // null = main output file, string = specific file path
   expectedOutput: string;
   file: string;
   line: number;
@@ -105,10 +116,10 @@ const TARGET_EXTENSIONS: Record<string, string> = {
 // Regex to match PRS code blocks (same as add-playground-links.mts)
 const CODE_BLOCK_REGEX = /```(?:prs|promptscript)(?:[ \t]+[^\n]*)?\n([\s\S]*?)```/g;
 
-// Regex to match output blocks: <!-- output:TARGET for="META_ID" --> ... <!-- /output -->
-// The closing tag is optional
+// Regex to match output blocks: <!-- output:TARGET for="META_ID" [file="PATH"] --> ... <!-- /output -->
+// The closing tag is optional. The file attribute is optional (defaults to main output file).
 const OUTPUT_BLOCK_REGEX =
-  /<!-- output:(\w+) for="([^"]+)" -->\s*```(?:markdown|md)?\n([\s\S]*?)```\s*(?:<!-- \/output -->)?/g;
+  /<!-- output:(\w+) for="([^"]+)"(?: file="([^"]+)")? -->\s*```(?:markdown|md|yaml)?\n([\s\S]*?)```\s*(?:<!-- \/output -->)?/g;
 
 // Colors for terminal output
 const colors = {
@@ -307,7 +318,7 @@ function extractCodeBlocks(filePath: string): CodeBlock[] {
 
 /**
  * Extract all output blocks from a markdown file.
- * These are marked with <!-- output:TARGET for="META_ID" --> comments.
+ * These are marked with <!-- output:TARGET for="META_ID" [file="PATH"] --> comments.
  */
 function extractOutputBlocks(filePath: string): OutputBlock[] {
   const content = readFileSync(filePath, 'utf-8');
@@ -319,7 +330,8 @@ function extractOutputBlocks(filePath: string): OutputBlock[] {
   while ((match = OUTPUT_BLOCK_REGEX.exec(content)) !== null) {
     const target = match[1];
     const metaId = match[2];
-    const expectedOutput = match[3].trim();
+    const outputFile = match[3] || null; // Optional file attribute
+    const expectedOutput = match[4].trim();
 
     // Calculate line number
     const beforeMatch = content.slice(0, match.index);
@@ -328,6 +340,7 @@ function extractOutputBlocks(filePath: string): OutputBlock[] {
     blocks.push({
       target,
       metaId,
+      outputFile,
       expectedOutput,
       file: filePath,
       line,
@@ -447,13 +460,22 @@ function getSnapshotDir(block: CodeBlock, rootDir: string): string {
 
 /**
  * Compile a code block for all targets.
+ * Returns a map where keys are either:
+ * - "target" for main output file (e.g., "github" -> copilot-instructions.md)
+ * - "target:path" for additional files (e.g., "github:prompts/test.prompt.md")
  */
 async function compileCodeBlock(block: CodeBlock): Promise<Map<string, string> | null> {
   try {
     const files = new Map<string, string>([['example.prs', block.content]]);
 
+    // Use 'full' version to generate all additional files (prompts, instructions, skills, agents)
+    const formattersWithConfig = TARGETS.map((name) => ({
+      name,
+      config: { version: 'full' },
+    }));
+
     const result: CompileResult = await compile(files, 'example.prs', {
-      formatters: [...TARGETS],
+      formatters: formattersWithConfig,
       bundledRegistry: true,
     });
 
@@ -462,17 +484,44 @@ async function compileCodeBlock(block: CodeBlock): Promise<Map<string, string> |
     }
 
     const outputs = new Map<string, string>();
+    // Track main output files per formatter
+    const mainFiles: Record<string, string> = {
+      claude: 'CLAUDE.md',
+      github: '.github/copilot-instructions.md',
+      cursor: '.cursor/rules/project.mdc',
+    };
+
     for (const [path, output] of result.outputs) {
-      // Extract formatter name from path
-      const formatter = path.includes('CLAUDE')
-        ? 'claude'
-        : path.includes('copilot')
-          ? 'github'
-          : path.includes('.cursor')
-            ? 'cursor'
-            : null;
-      if (formatter) {
+      // Determine formatter from path
+      let formatter: string | null = null;
+      if (path.includes('CLAUDE') || path === 'CLAUDE.md' || path.startsWith('.claude/')) {
+        formatter = 'claude';
+      } else if (path.includes('.github') || path.includes('copilot')) {
+        formatter = 'github';
+      } else if (path.includes('.cursor')) {
+        formatter = 'cursor';
+      }
+
+      if (!formatter) continue;
+
+      // Check if this is the main output file
+      const isMainFile = path === mainFiles[formatter] || path.endsWith(mainFiles[formatter]);
+
+      if (isMainFile) {
+        // Main file: use just the formatter name as key
         outputs.set(formatter, output.content);
+      } else {
+        // Additional file: use "formatter:relativePath" as key
+        // Extract relative path within the formatter's directory
+        let relativePath = path;
+        if (formatter === 'github' && path.startsWith('.github/')) {
+          relativePath = path.slice('.github/'.length);
+        } else if (formatter === 'cursor' && path.startsWith('.cursor/')) {
+          relativePath = path.slice('.cursor/'.length);
+        } else if (formatter === 'claude' && path.startsWith('.claude/')) {
+          relativePath = path.slice('.claude/'.length);
+        }
+        outputs.set(`${formatter}:${relativePath}`, output.content);
       }
     }
 
@@ -544,7 +593,7 @@ function compareSnapshots(
 }
 
 /**
- * Normalize output for comparison (ignore timestamps, trailing whitespace, etc.).
+ * Normalize output for comparison (ignore timestamps, trailing whitespace, quote styles, etc.).
  */
 function normalizeOutput(content: string): string {
   return (
@@ -556,6 +605,15 @@ function normalizeOutput(content: string): string {
       )
       // Normalize line endings
       .replace(/\r\n/g, '\n')
+      // Normalize YAML quote styles (single to double quotes for consistent comparison)
+      // This handles Prettier reformatting '**/*.ts' to "**/*.ts"
+      .replace(/: '([^']+)'/g, ': "$1"')
+      .replace(/- '([^']+)'/g, '- "$1"')
+      // Normalize inline list format from Prettier (collapse to multiline for comparison)
+      // "- item1 - item2" becomes "- item1\n- item2" equivalent
+      .replace(/ - /g, '\n- ')
+      // Remove leading whitespace before list items (indentation normalization)
+      .replace(/^(\s*)- /gm, '- ')
       // Remove trailing whitespace from each line
       .split('\n')
       .map((line) => line.trimEnd())
@@ -600,22 +658,29 @@ function validateOutputBlocks(
         file: block.file,
         line: block.line,
         metaId: block.metaId,
-        target: block.target,
+        target: block.outputFile ? `${block.target}:${block.outputFile}` : block.target,
         expected: block.expectedOutput,
         actual: `(no compiled output - check if example with id="${block.metaId}" exists and compiles)`,
       });
       continue;
     }
 
-    const actualOutput = outputs.get(block.target);
+    // Build the key to look up: either "target" or "target:path"
+    const outputKey = block.outputFile ? `${block.target}:${block.outputFile}` : block.target;
+    const actualOutput = outputs.get(outputKey);
+
     if (!actualOutput) {
+      // If looking for a specific file, list available files for this target
+      const availableFiles = Array.from(outputs.keys())
+        .filter((k) => k === block.target || k.startsWith(`${block.target}:`))
+        .join(', ');
       mismatches.push({
         file: block.file,
         line: block.line,
         metaId: block.metaId,
-        target: block.target,
+        target: outputKey,
         expected: block.expectedOutput,
-        actual: `(no output for target "${block.target}")`,
+        actual: `(no output for "${outputKey}". Available: ${availableFiles || 'none'})`,
       });
       continue;
     }
@@ -626,7 +691,7 @@ function validateOutputBlocks(
         file: block.file,
         line: block.line,
         metaId: block.metaId,
-        target: block.target,
+        target: outputKey,
         expected: block.expectedOutput,
         actual: actualOutput,
       });
@@ -664,11 +729,14 @@ function updateOutputBlocks(
       const outputs = compiledOutputs.get(block.metaId);
       if (!outputs) continue;
 
-      const actualOutput = outputs.get(block.target);
+      // Build the key to look up: either "target" or "target:path"
+      const outputKey = block.outputFile ? `${block.target}:${block.outputFile}` : block.target;
+      const actualOutput = outputs.get(outputKey);
       if (!actualOutput) continue;
 
-      // Build the new block content
-      const newBlock = `<!-- output:${block.target} for="${block.metaId}" -->\n\`\`\`markdown\n${actualOutput.trim()}\n\`\`\`\n<!-- /output -->`;
+      // Build the new block content, preserving the file attribute if present
+      const fileAttr = block.outputFile ? ` file="${block.outputFile}"` : '';
+      const newBlock = `<!-- output:${block.target} for="${block.metaId}"${fileAttr} -->\n\`\`\`markdown\n${actualOutput.trim()}\n\`\`\`\n<!-- /output -->`;
 
       // Replace in content (accounting for previous replacements via offset)
       const adjustedStart = block.startIndex + offset;

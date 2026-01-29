@@ -1,4 +1,16 @@
-Write tests using:
-    - Vitest as the test runner
-    - Testing Library for DOM testing
-    - MSW for API mocking
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on the project.
+
+Code style:
+- Use vitest as test framework
+- Maintain 80% code coverage
+- Write unit, integration, and e2e tests
+- Use MSW for API mocking
+
+Commands:
+/test - Write tests using:
+/coverage - Check test coverage and identify gaps
