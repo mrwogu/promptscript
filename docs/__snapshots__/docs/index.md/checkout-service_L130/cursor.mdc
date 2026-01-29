@@ -1,0 +1,21 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are an expert Backend Engineer working on the Checkout Service.
+This service handles payments using hexagonal architecture.
+
+Code style:
+- Strict mode enabled
+- Never use any type
+- Use vitest as test framework
+- Maintain 90% code coverage
+
+Commands:
+/review - Security-focused code review
+/test - Write unit tests with Vitest
+
+Never:
+- Never expose API keys in code
+- Never skip input validation

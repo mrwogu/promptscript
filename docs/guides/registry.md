@@ -44,7 +44,7 @@ registry:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO4RWOGNQhZB3OAMYBrOAB6ahgMbScAVzgYbzBqDABzPnZgjl8XRJA7AF0GTixqRXwiUnIYKloQBgA3dzgINnwzbKA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEg7hFY4Y1CFldwBjADWcAD01DAY2hIuABThAOYQ-tSKgsqCUkkYAEawUoJgzNSC5BiK8dTMAK6sUgCUzq5VcDCuYNQY8XzsoRz+7vHRgnEwicmp6ZlwOXkFRSVQZRXVtXUgdgC6DJxYKfhEpOQwVLQgDABuXnAQbPhm60A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -138,13 +138,13 @@ Categorized fragments:
 ### Pattern 1: Inherit a Tech Stack
 
 ```promptscript
-@meta { id: "react-app", syntax: "1.0.0" }
+@meta { id: "react-app" syntax: "1.0.0" }
 
 @inherit @stacks/react
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRgZGWALQY0aGXUFwAnuwyFJMgIwUADGZmCAvlNa3uEVjhjUIWQdzgDGAazgB6OQUsECsAXQZOLGptfCJSchgqWhAGADcXOAg2fCNQoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdENRgZGWALQY0aGYLgBPdhkKSZARgoAGUxoC+U1tYDEg7hFY4Y1CFgdwBjANZwA9HIKHoL2ABRyAOYQXtRagkqCYjEYAEawYoJgzNSC5BhakdTMAK6sYgCUIBYAugycWHH4RKTkMFS0IAwAbq5wEGz4htVAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -152,7 +152,7 @@ Categorized fragments:
 ### Pattern 2: Mix in Fragments
 
 ```promptscript
-@meta { id: "secure-app", syntax: "1.0.0" }
+@meta { id: "secure-app" syntax: "1.0.0" }
 
 @inherit @stacks/node
 @use @fragments/testing
@@ -160,7 +160,7 @@ Categorized fragments:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaDGjQy6guAE92GQpJkBGCgAYLMwQF8pre9wiscMahCyDucAYwDWcAD0rMxiMI4Kcl5g1BgA5nzsQRw+znERUdwx8YlYQXKK7li6gcwA7hhwaCoFSh66KsoAbhAwZSA2ALoMnFjUuvhEpOQwVLQgDE1ucBBs+CYdQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBiMArtRgBaDGjQzBcAJ7sMhSTICMFAAzmtAXymtbAYkHcIrHDGoQsTuAMYBrOAB6VmYxGEFBRwAKZQBzCB9qHUEVQTEEjAAjWDFBMGZqQXIMHVjqZgVWMQBKBycFOScwagxYvnYgjh8XWIjouISsJJS0jOyYXPzC4tLyypq67gbw7mbW9qwguUUPLB1A5gB3DDg0FW2lTx0VZQA3CBhDvsEYmHjE5NT0uCycvIKilASmUKlVqiArABdBicIY6fBEUjkGBUWggBi3dxwCBsfDGCFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -168,13 +168,13 @@ Categorized fragments:
 ### Pattern 3: Use Prompts Directly
 
 ```promptscript
-@meta { id: "terminal", syntax: "1.0.0" }
+@meta { id: "terminal" syntax: "1.0.0" }
 
 @inherit @prompts/coding/linux-terminal
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEB2okIrDFBl1BcAJ7sMhSTICMFAAzGZggL5TWV7opwxqELIO41mZLHAD0LMYoDmXlCKAK6EALRyCkpQIOYAugycWNQa+ESk5DBUtCAMAG4OcBBs+PpxQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEB2okIrDFBmC4AT3YZCkmQEYKABiOqAvlNYWAxIO6KcMahCy2azMljgB6FmMUBzLyhFAFdCAFo5BSUoQUEbAApqGH8IOCxqdUFwwT84DAAjWDFBMGZqQXIMdX9qZhDWMQBKEFMAXQZODPV8IlJyGCpaEAYAN0c4CDZ8PVagA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -234,11 +234,11 @@ registry:
 Or in `.prs` files:
 
 ```promptscript
-@inherit @stacks/react@v1.0.0
+@inherit @stacks/react@1.0.0
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJucLBkYBrOAHpqMKVm4A3AIwUADNpABfALoNOWagE98RUuRhVaIBqsFwIbfOv1A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgFwsGRgGs4AemowZWfgEYKABm29efABTKA5hCnUAnrwC0vACZmMAI1h3eYZtV7kMF49WYAV1Y7AEoQAF8AXQZOLEt8IlJyGCpaEAYAN1E4CDZ8dUigA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

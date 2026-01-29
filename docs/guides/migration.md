@@ -563,7 +563,7 @@ Then inherit:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEACtWYArGIyy9IsADqsAAhFY4Y1CBLksyGVgE8A9ACMMcGLNka2HQhOCzevPoJFisAWjhoxESI14t2RFiyAL4gwQC6DJxY1Dr4RKTkMFS0IAwAbipwEGz4AIxhQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEACtWYArGIyy9IsADqs+AAQiscMahAnyWZDKwCeAegBGGODF68+ACmowA5hDhZqu3gFpeAEwcZDsD5OZqXnIMXVshAFdWDwBKWU02DkIJYFlzPkERMSxXODQxCEhGXhZ2IixZAF8QSoBdBk4nXXwiUnIYKloQBgA3VTgINnwARhqgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -820,7 +820,7 @@ Modify inherited blocks at specific paths:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAISs4xqELAAJuLMhlYBPAPQAjDHBgAdVmoDEIgIIATXSKzMRRCHCx8A5iIi7OFrNLXciHVgdv3h0kcDUiRFRAgkNYAvV1hCDYMKBNCNEELZRswgCUYDEZROwA3GChmNBJ7Cn9A4Mq1AF81TREAWWZIsB9WeA4DcyldDGpdOGdXTi6sHr6BihY7Cg5zK19ysGpSGAB3ZmoAa0QK3OEO0ICWfJXLGF2ATgAGGrrWLQjDY2oOoWzo1jgRPpWnVhchDcBle5neFjY3z8YREAFoKgBVFJgACurA+MTiEjQbHs3zYUCcwRh8KCADljIwoEo4LDFMoDNjcexBsTqiBqgBdBj2ajSfBEUjkGBUWggBinOCffAARg5QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rHwAghb2WMy8RAZYQrq8EBaccViyQfxEHL6JyeziJsBB6gEgpeWs6mFWcWwYUNGEaKJxqomVAEowGIwSyQBuMFDMaCQpFMW85WVlrAC+QUF8ALLMVmAmrPAc9oYyFhjUFnAZWZy7WPuHxxQsyRQchvG8RZUO1KQwAO5OANaIUxA-XE2wq6hYgw+uhgAIAnAAGIILVhLXjVXiRXg6QxiXoQNhwXiHD7pViZQjZezYowQPEEl6TcylACqbTAPjprHqvCkaDYKUJbCg6Vm6iZIAAclFGFAVHBTMpVPZefz2CdZnMQHMALoMFLGfBEUjkGBUWggBiQuD41j4ACMWqAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

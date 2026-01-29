@@ -1,0 +1,4 @@
+Write tests using:
+    - Vitest for unit tests
+    - Testing Library for integration
+    - Proper mocking patterns

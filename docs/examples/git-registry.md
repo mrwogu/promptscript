@@ -113,14 +113,14 @@ You can also pin specific imports to versions:
 }
 
 # Pin to specific version (in a multi-file setup):
-# @inherit @company/base@v1.0.0
+@inherit @company/base@1.0.0
 
 # Use latest from configured ref:
-# @use @company/security as sec
+@use @company/security as sec
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggAoRxWZoLhotESEZBADcYWgg2QQAKD0EhEgBXKCwIZUhYH34EtABKRGdBbg8cMIgsQpYyDFZFAHoAIww4GG5gi2tLR1YXAFVmwShseHKwamYSQRZWSABzBOoYKUEFsHzuwoT+7krMGtrmxnmyxTi4TMYQOwBdBk4sakV8IlJyGCpaEAZQ8LZ8M0ugA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWIDEggAoRxWZoLhotESEZBADcYWgg2QQAKD0EhEgBXKCwIZUhYH34EtABKRGdBbg8cMIgsQpYyDFZFAHoAIww4GG4La0sJFyjqGABzCDgsakVBZUEpAYx62ClBMGZqQXIMRV7qZgTWKRyCgFVmwShseHKwdZJBFlZIXoSe2Z6wfNYXbgSD7krMGtrmxjuyiMmpkgoIuj1+oNhqNxpNpjBZvNFstVutNtsQHYALoMThDRT4IikcgwKi0EAMULhNj4MyYoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -254,7 +254,7 @@ promptscript:
 
 @standards {
   code: [
-    "Code review required for all changes"
+    "Code review required for all changes",
     "Tests required for all code"
   ]
   git: [
@@ -269,7 +269,7 @@ promptscript:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9ACMMcGPLES4AT3YZCs+QEYKABmu7xgpcrMgAggGEAsgFFBbpWjsAXzExbmlOLAgsA2E9ORBdBPsATWYAV0EMahhM8RcASUy4OAg4AXZMrEF3b19-CjiAMWYoKGYAdwc06kEWKQhWZUEyjFYpLKk4XKlBdXgqmgxGSMZ4BvtEoJDWbhGxianRez6YWWQ4iXk-KRzsgDcIGE7sgEc0iGyZsCVM1t6cUbKeB2CSXEAAFXmU1e70+gm+PQwfxOIMEAF04soomcLvEAKraXpsO4RCBsJFEkgkKJTBEkbCojGsYKsULZMrUCDLMmsQ5xAC08QAcjAST0WFSosMYIxslg4KjBfIXFB2hgDLSWm1OtpGN0ojE0C0uY8FUlAiBAmiGBFqAZ8ERSOQYFRaCAGGKSmx8OZLUA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuzagHMA9ACMMcGPLES4AT3YZCs+QEYKABmu7xgpcrMgAggGEAsgFFBbpWjsAXzExbmlOLAgsA2E9ORBdBPsATWYAV0EMahhM8RcASUy4OAg4AXZMrEF3b19-CjiAMWYoKGYAdwc06kEWKQhWZUEyjFYpLKk4XKlBdXgqmgxGSMZ4BvtEoJDWbhGxianRez6YWWQ4iXk-KRzsgDcIGE7sgEc0iGyZsCVM1t6cUbKeDyOgXeIAFXmU1e70+gm+PQwfxOdgkAF04soomcwfIAKraXpsO4RCBsJFEkgkKJTBEkbCowQY1jBVihbJlagQZZk1iHOIAWniADkYCSeiwqVFhjBGNksHBGUL5C4oO0MAZaS02p1tIxulEYmgWtzHoqkoEQIE0QwItQDPgiKRyDAqLQQAxxSU2PhzFagA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -283,7 +283,7 @@ promptscript:
 }
 
 # In a multi-file setup, you would inherit:
-# @inherit @org/base
+@inherit @org/base
 
 @identity {
   """
@@ -300,7 +300,7 @@ promptscript:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEAFpIWEE4fm80OkEDZm9BAHdYqClJVhwYaggsRBdBbgg0jKy85moAcxUAIwwwp1Z8qU5-LANhPTkQXU7xQQBNWMEMahhBwXVNThTGgDcYKGY0PnZBIjQMrAp2gFFCNep-MNkAJRgMRiwogBUDNYBlRky0C8FLjGh4gqkAYVvb9q67I5WGJuCx2EQsG0eupSDBEtQANZmEAnM6Q8wADjsEigGFYZW8GDKMGR1zuDwgT0EAFZsaEWlACmVSW8oB9tD8-t17CB7ABdBhNagGfBEUjkGBUWggBizWgQNj4cy8oA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuHUnAD0Yamw6sp8sRLgBPdhkKz5ARgoAGa7tYBfMWIDEggJLihJAK5QsEAFpIWEE4fm80OkEDZm9BAHdYqClJVhwYaggsRBdBbgg0jKy85moAcxUAIwwwiVcACmoYMog4LGoDQQDBKVaMStgUsFLBcgwDMo1vbQBKMXypTn8sTtFxORBdTfWATVjBDCaDwXVNThTFgDcYKGY0PnZBIjQMrAo9QQBRQhfqfzDZAAlGAYRhYKIAFQMLwAyoxMmhwYIIRhoPEClIAMIwmEfLZ2RyseYsdhELDCD7qUgwRLUADWZhAwNB5PMAA47BIoBhWGVvBgyjBGVDYfCIIjBABWTmhFZQAplYWoqDo7TY3HbewgewAXQYSw6+CIpHIMCotBADGutAgbHw5m1QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -347,7 +347,7 @@ targets:
 }
 
 # In a multi-file setup, you would inherit:
-# @inherit @teams/frontend@v1.0.0
+@inherit @teams/frontend@1.0.0
 
 @context {
   project: "Customer Portal"
@@ -364,7 +364,7 @@ targets:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ixAYkEBJcUJIKoWCHVIWEE4fgU0OkEjZgVBAHdYqClJVhwYaggsRDdBbgg0jKy8jlI4AHowajYOViluADdrOxsXVm4WdiIsYQNBGmYAKxhGbLkQAGElFTVBAAVtXQc+-RAHCQBlGCgwdTDqBohGGH7FjChBMG1BAEEJgFkAUUFGadUMuAo+gDEYbAVqPBZBhGCwFOxBCQMKwMABzGB8dhRbRSD5ROARLQ6L7icarMTOVhibhwHCLV5YOC9XHycpYpZIcYAdW0AGtBGxTjpzpc-lgAfAHI4QI4ALoMThYahGfBEUjkGBUWggBgND4QNj4SwioA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMArnCzM+1ALRpm1AVHliJcAJ7sMhWfICMFAAy39rAL5ixAYkEBJcUJIKoWCHVIWEE4fgU0OkEjZgVBAHdYqClJVhwYaggsRDdBbgg0jKy8jlI4AHowajYOViluazsbCXcACmoYAHMIZWojQXVBKR6MACNYFLBtQXIMI07qhTqASjFuFnYiLGEDGeqAKxhGbLkQAGElFTVBAAVtXQdd-RAHCQBlGCgwdTDqADcIIwYDN7hgoIIptRBABBM4AWQAooJGJdVBk4BRdgAxGDYBQdOCyDCMFhLbYkDCsDCdGB8dhRbRSdFROARLQ6THiU7PMTOVhrOA4e4orBwHZc+TldkPJCnADq2gA1oI2CCdGCIbisPj4A5HCBHABdBicLB9fBEUjkGBUWggBh-dEQNj4SwGoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

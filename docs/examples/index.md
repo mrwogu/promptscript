@@ -109,8 +109,8 @@ Use Git repositories as shared registries with version control.
 
 @standards {
   code: [
-    "Use functional components with hooks"
-    "React Query for server state, Zustand for client"
+    "Use functional components with hooks",
+    "React Query for server state, Zustand for client",
     "Use Tailwind utility classes for styling"
   ]
 }
@@ -123,7 +123,7 @@ Use Git repositories as shared registries with version control.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhqMDIywBaDGjTyxEuAE92GQrPkBGCgAZL21gF8xY7tM5YIWPcJ1yQ2n+MEAmswAroIYimGCAEpKKoJEaDDUWIJwiYwQGFAQAF4QrADmkuIkzFJJ4gAqeokAyozUEGgpGuQQjNgQbHAUXr429qyOLOxEKaL+YNSkMADuzNQA1iYgMcoppgAcNhJQGIXBGAUwK9V1DU1YO6nu2YWnGNCz+VIAwrW11xxwrvfeAGpueApADUgkqwPyRQAMhAAEbTah6AYOVjcH77KThKRwTz+FjlWTILwSeQAVTgMEEYGCrBUXVYWUELDIbBcuOeuEEOGYzEWcGupNWsRSAEVgkkPGAFqkkgA3JI3bAwOiCABawQxrCk1JljGyLkF3gpVMqjygz21gmCrmy7mZezglNx0uoNz0dwK1wAumJBo44DzkowbbiJkKAPQstBs9jyFavRTKyKsObREXM5is1NxvyRnl8+PeRNKDiREM-LPc3mLa7yCPfK5IbwAdUaZejsZSjYFflsIFs3oYLiR+CIpHIMCotBADAVtAZ+FMA6AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhqMDIywBaDGjTyxEuAE92GQrPkBGCgAZL21gF8xY7tM5YIWPcJ1yQ2n+MEAmswAroIYimGCAEpKKoJEaDDUWIJwiYwQGFAQAF4QrADmkuIkzFJJ4gAqeokAyozUEGgpGuQQjNgQbHAUXr429qyOLOxEKaL+YNSkMADuzNQA1iYgMcoppgAcNhJQGIXBGAUwK9V1DU1YO6nu2YWnGNCz+VIAwrW11xxwrvfeAGpueApADUgkqwPyRQAMhAAEbTah6AYOVjcH77KThKRwTz+FjlWTILwSeQAVTgMEEYGCrBUXVYWUELDIbBcuOeuEEOGYzEWcHkdBJ3jWcQAisEkh4wAtUkkAG5JG7YGB0QQALWCGNYUmpssY2RcguF5Mp4MeUGeOsEwVc2XczL2cEpuJl1BuejuBWuAF0xINHHAeclGLbcRNSSAAPQstBs9jyFavRQqyKsObRWIpWPxq5+SNRnl8xPeZNKDiRUM-Zgkbm8xbXeRR755lYAdUaFZz6fYghbAr8thAth9DBcSPwRFI5BgVFoIAYitoDPwpmHQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -151,13 +151,13 @@ Use Git repositories as shared registries with version control.
 
 @standards {
   api: [
-    "Use URL path versioning"
-    "Document with OpenAPI 3.0"
+    "Use URL path versioning",
+    "Document with OpenAPI 3.0",
     "Use JWT for authentication"
   ]
 
   database: [
-    "Use migrations for schema changes"
+    "Use migrations for schema changes",
     "Use transactions for multi-step operations"
   ]
 }
@@ -176,7 +176,7 @@ Use Git repositories as shared registries with version control.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKABht7WAXzFju0zlghZDw-XJB7-cUEATWYAV0EMahhIwQAjDEYAa04pQSI0dSx4sOgpCFYAc0EAJQBRAGUAFTAwqEEAQQAFAEk4QQB3TxxBADlmKRgKACs4Cl8A+ydWFxZ2ImzRIOow9gg+cxB+wZH2gCZrewkwalIYDuZqJM2ywhp4OCPBKWwMBLVNpuY4LELoioAigAZJ6XEifagQOAkDBTZysbg-DCsF7UKTtJYSRQQWTIXwSeQAVTUgkJJSBgkwuEEGnUcAgbAKhSeBJAABFmIwwnx2J1uoIAPKZVjNFqCADMdkCElZxJiACkAOpVQRgS6RMK4dzabAMmbSwQAXXhEheAneMFx+L8csEJAgf11bHaauogjgjBwMBhgk9yMK8BZNpJWFOrDgiQ8ztV6pIdQ8qg4aEEzEypyj4aexsc8O40R+kMYGYxvmUfl6MFpboy3xiBQ41FYGHq6mol3aWGYvqgEHcjwNZfkDSgHQwhnaGmb0mwMWiAEcwvBsnEBoYnoOtpX1O7O9FKVAMAVlBxCNlMHA4Bc0f2xNMXHAcJcsFysCWgvIAPSpNDMevyTZsvADriEIrDnI0rTpCiP5-gan72o6Gb-n4ADC0QzrEZpvBgJIIemepPJ+HA-Mh8iKpCHAQWKxGvlMIAOIaDDuNQhj4EQpDkEMND0CAVb0mw+AWPRQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKABht7WAXzFju0zlghZDw-XJB7-cUEATWYAV0EMahhIwQAjDEYAa04pQSI0dSx4sOgpCFYAc0EAJQBRAGUAFTAwqEEAQQAFAEk4QQB3TxxBADlmKRgKACs4Cl8A+ydWFxZ2ImzRIOow9gg+cxB+wZH2gCZrewkwalIYDuZqJM2ywhp4OCPBKWwMBLVNpuY4LELoioAigAZJ6XEifagQOAkDBTZysbg-DCsF7UKTtJYSRQQWTIXwSeQAVTUgkJJSBgkwuEEGnUcAgbAKhXkdHxfgAIsxGGE+OxOt1BAB5TKsZotQQAZjsIFZQQJIGJMQAUgB1KqCMCXSJhXDubTYBkzQISAC68IkLwE7xguLZRJJJAgfwNbHamuogjgjBwMBhgm9yMK8BZdoVJKwp1YcESHldGq1JDqHlUHDQgmYmVOsajTzNjnh3GiP0hjGzGN8yj8vRgtI9GW+MQKHGorAw9XU1Eu7SwzH9UAg7kexsElfkDSgHQwhnaGjb0mwMWiAEcwvBsnEBoYnqOtjX1J6e9FKVAMAVlBxCNlMHA4Bc0UOxNMXHAcJcsNysOWgvIAPSpNDME28ibOy8BOuIQisOcjStOkKIAUBw6-o6zrZsBfgAMLRAusSWm8GAOk6WaGk8v4cD86HyCqkIcDB4rkZ+UwgA4JoMO41CGPgRCkOQQw0PQIC1vSbD4BYzFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

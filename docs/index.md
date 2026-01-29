@@ -128,10 +128,10 @@ flowchart TB
 === "PromptScript (.prs)"
 
     ```promptscript
-    @meta { id: "checkout-service", syntax: "1.0.0" }
+    @meta { id: "checkout-service" syntax: "1.0.0" }
 
     # In real projects, you'd inherit company standards:
-    # @inherit @company/backend-standards
+    @inherit @company/backend-standards
 
     @identity {
       """
@@ -170,7 +170,7 @@ flowchart TB
     ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJjhiMA1swCuWALRwY1AG4RGMGXUFwAnuwyFJMgIwUADPZmCAvlNZuAxIICSrQdRgMKEEaZgAreSw4IxMVAHIxUVY5aggsQRYyDFYTYwFWMQxqMThET0FuCGStNIrMzByAegAjDEVOMQ18wuK4NzdKsU4sNNzgN0FpEBkZv0EATRVBIphlvyI0LXSAITaFDsEAUVYAcyqYLUEAd2ZqBSqTwTZBXFWAYTlFFXSAZS1dfQUCaCAAqOAgcGM-z0qxw2TEsEhmBMfHYkOUcAegjkxBObCCy2ojHBHEYWGUASBcxm02mrFc7lY3Dg3SKJWEwKwJk2cEYqTQWEkyGBkxkPywqTJghIzCGgk4GGasDEhhFUwAcjBtJcMatsrkuZtZpMALqc+AjU5CtUyACqmkEug4LOWkOd6TA1FIMBud1Vc1FIAAshgqgIqoIAJx2ACkGVlqxY2q9JwMdNNbgZAwCLMlIzYkPGczUGq1lw2zAdAEEAAreQT7EyQiMsIbGwQlmSa5PGe5oJJoVSOoLibAQNizLNMuA4W5YRiqQvAmSNAK6H0yKwgP4L1JctRgZgLzSJVurNcQDfpqaNd2bqYAdT3q2UrFq7shVzSOEEADU0hak79NO9xQFAS5zJou6jGoGDKGIaSSEWkyTEMvL8vmrBblW8G1GegiHtQjrKFArBaIq0BpJefTXpMLDsMMW4fPICgEbckg-AAigAMkkERkuOrBGAAGj8PxGN4AAiADyABKRh1vWsAYAocBAteDLOCAzgmgwwzUCY+BEKQ5AwFQtAgAwyaYmw+DWNpQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJjhiMA1swCuWALRwY1AG4RGMGYLgBPdhkKSZARgoAGO4YC+U1i4DEggJKtB1GBihBGmYAK3ksODpBYxUAcjFRVjlqCCxBFjIMVmMjAVYxDGoxOER3QW4IJK1U8ozMbIB6ACMMRU4xDTyCorhBQQ8ACj8Acwg4LGoctUExMYwm2ASwZmogqAxjYeoVfIBKFwqxTixUnOAXPpkrkAvBAE0VQUKYJ58iNC00gCFWhXbBACirFGrBgWkEAHcVgpKsNBGxBLgXgBhOSKFRpADKWl0+gotwAKjgxkYcXoXjgsmJYL1MMY+Oxeso4LDBHJiMM2AEntRGMSOIwsMo-PifNIbhKXM5XKxuOMqYVisJblhjB84IwUmgsJJkLdLiBMRM9GkSMwjoJOPNFjI6PrxQA5GDacHMl5ZHKqj5XMUAXRV8BOwN19pkAFVNIJdBxxk9ejG0mBqKQYFDqApbaGQABZDCVASVQQATlsAFJ0uaXiwXcnhgYbn6pS4Dn5xilBRA2L1zmLpjInTXLYQ0MxIwBBAAKnkEf2MvULLCOPr6fZAA-BcBhaESaFUUYC4mwndcDelBzgOBWWEYqm7txkDT8ulTMkshvkwtOamWN80CUXLxPhAL4NgaDQJq+4oAOopBwgjKKwNQJr0EKpDgggAGqpIGPpnrKm7QFAd5ipoN6wcYagYMosw6sqYp9EcGpaicbBvmO1E1ABgjLKs2jKFAoLJk00CpMBcDLn0FbsMcb6ovICjcSskiYgAigAMokYQdmwUQABqYpiUSeAAIgA8gASlEU7TrAGAKHA+KgYI0qOCAji+gwxyTPgRCkOQMBULQIAMDWLJsPgVhuUAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

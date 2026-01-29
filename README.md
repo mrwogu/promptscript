@@ -114,13 +114,13 @@ One source of truth that compiles to every native format you need.
 **Source:** `.promptscript/project.prs`
 
 ```promptscript
-@meta { id: "checkout-service", syntax: "1.0.0" }
+@meta { id: "checkout-service" syntax: "1.0.0" }
 
-// Inherit approved company standards
+# Inherit approved company standards
 @inherit @company/backend-security
-@inherit @company/typescript-standards
+@use @company/typescript-standards
 
-// Project-specific identity
+# Project-specific identity
 @identity {
   """
   You are an expert Backend Engineer working on the Checkout Service.
@@ -128,7 +128,7 @@ One source of truth that compiles to every native format you need.
   """
 }
 
-// Define reusable tools/skills
+# Define reusable tools/skills
 @skills {
   review: {
     description: "Security-focused code review"
@@ -138,7 +138,7 @@ One source of truth that compiles to every native format you need.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJjhiMA1swCuWALRwY1AG4RGMGXUFwAnuwyFJMgIwUADPZmCAvlNZuA9B8EBJVnOoILEEMNBpmbRgxQRYyDFYTYwFWMQxqMTg3bgh-LSDBbljMBI8AIwxFTjENeWVArBMsnID8wuY4koa0eEZAtHU4ZNT0zPdWL0EABWpmACt5Ae7GCEhGUTFOLCDG1myN9m3hN0FpEBlz1hOATRUQ6hgQy6Ju6mCAIQqFKsEAUVYAcxyMC0ggA7sxqAocv9BGxBLgHgBhOSKFTBADKWl0+gox0EABUcBA4MYsXoHjh4mJYCTMCY+OwSVTBKpoBAAF7wEKCOTEf5sDBQO6MIkcRhYOowXGXU7nM6sVxjCYAERgkFYD3uyjgGFKsHhzGYUDgHjgUKgxqyZugxqOMvuuhgoMkwDxJw2cF6EH6EDYVhAmMYdW2ajAzCDmmiLA2ggdECdFxOJxY7E2-uR8gUgjD1EkPmVAHkAEpGdEARQAMr5WPNxb7WEZmZMfD5BLAMAo4Lj5SdFc4QM4ALoMTbUEz4IikchSmj0ECRWj1-DWAdAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJjhiMA1swCuWALRwY1AG4RGMGYLgBPdhkKSZARgoAGO4YC+U1i4DEggJKs51CFkEMNBpmbRgxQRYyDFZjIwFWMQxqMTh3QW4IHy1-DKjMWIB6ACMMRU4xDXllPyw4wQ8ACmoYAHMIOCxqOLVBMQ6MYtgIsGZqQXIMY1bqFUSASnTuZU085miiurR4Rj80dU6YpJS4QQbBZraOrp6+gaHwwVHxyenZ5QX0gAVZgCt5A7bRgQSCMURiThYfzGFyZCHsaHCFxnGSokDIwQATRUgRagVYgiI22oAQAQmUFBVBABRVjtVgwLSCADuYwUWVagjYglwMEEAGE5IoVAEAMpaXT6CgYgAqOA6Rglej5OCOsFOmGMfHYpyOglU0AgAC94IFBHJiK02BgoLjGPKOIwsDUYNKCdJ0Z6XM5XKwPAARGCQBmCForQawHnMZhQOCFODsqCx2EJ6CxpHulq6GDMyTADFnCFwXYQfYQNiWEDixg1aFqUY1zQRFgQ0MwbPM1Hus4sdiQyuC+QKJ5jSSef0AeQASnRBKKAIoAGS8rH+TvLrFneq+nk8glgGAUcGl6PdPscIEcAF0GJDuvgiKRyK6aPQQGFaBv8FZL0A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

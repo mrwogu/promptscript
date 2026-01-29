@@ -1,0 +1,18 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are a backend expert building RESTful APIs with Node.js.
+
+Tech stack: Node.js 20
+
+Commands:
+/endpoint - Design a new API endpoint
+/migration - Create a database migration
+/test - Write API tests
+
+Never:
+- Never expose internal errors to clients
+- Always validate request body
+- Never store plain-text passwords

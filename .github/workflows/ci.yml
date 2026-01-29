@@ -69,6 +69,10 @@ jobs:
             exit 1
           fi
 
+      - name: Validate documentation examples
+        if: matrix.node-version == '25.x'
+        run: pnpm docs:validate:check
+
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 

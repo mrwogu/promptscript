@@ -112,20 +112,20 @@ acme-promptscript-registry/
 
 @standards {
   code: [
-    "Code review required with minimum 2 approvers"
-    "Document all public APIs"
-    "Add inline comments for complex logic"
+    "Code review required with minimum 2 approvers",
+    "Document all public APIs",
+    "Add inline comments for complex logic",
     "Write tests for all code (80% coverage)"
   ]
 
   git: [
-    "Use conventional commits format"
-    "Branch naming: type/TICKET-description"
+    "Use conventional commits format",
+    "Branch naming: type/TICKET-description",
     "Signed commits required"
   ]
 
   deployment: [
-    "Environments: dev, staging, prod"
+    "Environments: dev, staging, prod",
     "Production requires team-lead and security approval"
   ]
 }
@@ -147,7 +147,7 @@ acme-promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0AIwxwY8sRLgBPdhkKz5ARgoAGKzvGDm1AOamQAQQDCAWQCig9w7QHbAg2WwBfMTFuaU4sCCx9YV05EB1UuwBNZgBXQQxqGDzxVwBJQRYpCFZHPLg4CDgBdjysQQ8fPwCguLYKSLsAYgHOgsEANQwobPh+iQBaQQAqRYBFbMn4xIAxCFosZdkAdWp4wppmKWzGHtY5gowpRIrtOwXlgGUYRmyThLaoADuGH0cAOgk+31+iQaglYzFazDQN0myTeiwAqlpqIItsxvqDFrJ-Kx6lIYNjcIVOFJBNksailosACowUiCAAKUGB5LBx1O5QuhXhOHJcHKGHEJAwVQEVVmgiG4KaUnyUjg8txUCgzABbS8vm81SqMHJVRq72VqrFADcAMw2OwAChwWCwaDgiBUKgBEAA1hAKEo+BQWCQVJxHMbTdU5o0JSrqGqAJTJNLhfrcOOsBNqpJ2Z6yZDJCTyfxkwQFa0QGC6goAR2yuxgNJ9uEEJCqEBI2RIggATHk0OdraLbBISyAACJ4nuxPJawRobJqKAQRhtdkldXpccpVxSGlVVesQqhvjsMVgBwCsiwQiCbWRxhj8fyPkcQQcRqX6+TKAC8tHQADksABSAUR2oDBHBgFMd0EABdeVIywQtixSTFTzYEd2BCVhJhvDssB-agpSwF8JwAISg1hGBwWFSDNWQEjQGAVCZEp3AAaW8Jk5jJOBGBOJE8IolJ3ggRwTxpM94jFetGwKKQXyQ1hkjJchmH0c9UMEIs7AnQ0q2oNgdI9QQyWtOhBDjSNqms85lPgid2RMy5rjwisYAbJsxQ4Ug5lgB4ihpLRIU2QdhxReDVIiNTWG4ApGhODy2DFURXhSAA5GBIMI+IbK+ApiOsoTm1iCBJjgazr1cTdBF9GAQRfBZ5ByvK1H0TA6gAwpK2rXUr2xRyrhucocAlGDtwZNrcvJCyYE0xJWxwHJWm6+pqj8EoVHcScWuyubsUkuFRjCn4IsEiUT2xSBszNabMtmvK6UKDSCkYbBmwW1js04RhqzFFaGrhAFxHcMZvEe+ZDryxoHEKTcyiqB9mEcR64qiOBVuoLBvmIvMJxULMc23FwACVcoGvJHGlElWnaXwSatF95GJr4LoSeQXAhTnEn6mtWZAFRWOoMBuZSdlySGqVaL6qnBfSMIQDCBCGFiah9HwIhSHIGAqFoEAGEg+o2HwMwVaAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0AIwxwY8sRLgBPdhkKz5ARgoAGKzvGDm1AOamQAQQDCAWQCig9w7QHbAg2WwBfMTFuaU4sCCx9YV05EB1UuwBNZgBXQQxqGDzxVwBJQRYpCFZHPLg4CDgBdjysQQ8fPwCguLYKSLsAYgHOgsEANQwobPh+iQBaQQAqRYBFbMn4xIAxCFosZdkAdWp4wppmKWzGHtY5gowpRIrtOwXlgGUYRmyThLaoADuGH0cAOgk+31+iQaglYzFazDQN0myTeiwAqlpqIItsxvqDFrJ-Kx6lIYNjcIVOFJBNksailosACowUiCAAKUGB5LBx1O5QuhXhOHJcHKGHEJAwVQEVVmgiG4KaUnyUjg8txUCgzABbS8vm81SqMHJVRq72VqrFADcAMw2OwAChwWCwaDgiBUKgBEAA1hAKEo+BQWCQVJxHMbTdU5o0JSrqGqAJTJNLhfrcOOsBNqpJ2Z6yZDJCTyfxkwQFa0QGC6goAR2yuxgNJ9uEEJCqEBI2RIggATHk0OdraL5HRiykACJ4nuxPJawRobJqKAQRhtdkldUgcd2EtuKQ0qqr1iFUN8dhisAOAVkWCEQTayOMMcT+R8jiCDiNK83yZQAVy0dAAOSwAFIBRHagMEcGAU3SCQAF15UjLBCzfEBMTPNgR3YEJWEmW8OywX9qClLBXz3FIACFoNYRgcFhUgzVkBI0BgFQmRKdwAGlvCZOYyTgRgTiRfDKIkfd3ggRxTxpc94jFetGwKKRbCQ+UyXIZh9AvNDBCLKj5ENKtqDYPSPUEMlrToQQ40japbPONSdww9kzMua58IrGAGybMUOFIOZYAeIoaS0SFNkHYcUQQwRkNYCJWCiApGhOLy2DFURXhSAA5GAoKI+I7K+AoSNskTm1iCBJjgWyb1cTdBF9GAQXUwQFnkfLCrUfRMDqQDCkratdWvbFnKuG5yhwCVYO3BkuoK8krJgbTElbHAclafr6mqPwShUdxJ3azqQG65aZLhUYIp+KLhIlU9sUgbMzXmnLFsKulCi0gpGGwZsVvY7NOEYasxQ25q4QBcR3DGbw3vmPKluxRoHEKTcyiqR9mEcN6kqiOBNuoLBvhIvN9xULMc23FwACUCpGvJHGlElWnaXwqatdr5Epr5boSeQXAhfnEmGmtuZAFR2OoMBBZSdlyTGqV6KGhnxfSMIQDCRCGFiah9HwIhSHIGAqFoHcQCg+o2HwMwtaAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -169,35 +169,35 @@ acme-promptscript-registry/
 
 @standards {
   authentication: [
-    "Use OAuth 2.0 / OIDC"
-    "MFA required (TOTP or WebAuthn)"
-    "Session timeout: 3600 seconds"
+    "Use OAuth 2.0 / OIDC",
+    "MFA required (TOTP or WebAuthn)",
+    "Session timeout: 3600 seconds",
     "Enable refresh token rotation"
   ]
 
   authorization: [
-    "RBAC with ABAC extensions"
-    "Apply least privilege principle"
+    "RBAC with ABAC extensions",
+    "Apply least privilege principle",
     "Audit logging required"
   ]
 
   dataProtection: [
-    "Encrypt at rest with AES-256"
-    "Encrypt in transit with TLS 1.3"
-    "Mask PII in all outputs"
+    "Encrypt at rest with AES-256",
+    "Encrypt in transit with TLS 1.3",
+    "Mask PII in all outputs",
     "Follow data classification for retention"
   ]
 
   dependencies: [
-    "Daily vulnerability scanning"
-    "Critical vulnerabilities block deployment"
-    "High vulnerabilities: fix within 7 days"
+    "Daily vulnerability scanning",
+    "Critical vulnerabilities block deployment",
+    "High vulnerabilities: fix within 7 days",
     "Medium vulnerabilities: fix within 30 days"
   ]
 
   secrets: [
-    "Store in HashiCorp Vault"
-    "Rotate every 90 days"
+    "Store in HashiCorp Vault",
+    "Rotate every 90 days",
     "Never store secrets in code"
   ]
 }
@@ -240,7 +240,7 @@ acme-promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0cGIwCu1CFgCe8sRLh72GQrPkBGCgAY7h1gF8xY7tM5Zde4UbkhDAPFBAEE0ch8QgGEAWQBRQXUtHX1EgVYpDGopOEEsZkEMKChBFikYCj8AZQ1tb0lcmAA3GGo9NhgAclzqeDQ2OAgAI2hvSuDAxxdWNzh0zOzc0WCMTVxPCEZsCDZZZD8JeQBVdUEAeRC1nEEAJjtBFXOASQARKMcJQ5AYgDEQwV6AEdNBBelJBAAKAAqZyhAAVBMxqIIAOowIaXXCsACUH0+8hqcEGbDyED4zDWsgAzAA2Wy2RIaNg5PFfOKsDBDWAAmBgXpwa75ADWnABzAEXjYeIAuq4VlckRAAF7bXaCfbBL4AJQAQtFBAB3XTXEJ6qKCIgcVjE62s-xhCKCWAYOaCGgQJrQGAAcxgbp0rEYEHIMDt8kuUl0TuY3u9EFY3p5wNBMCkMrlEkyAjh1HFGklrD2B387MYbTQWEKlf5laNuFCcSqAFobgBWGlhkCl8uV+N5agYa1RuvXKEAGSqghsVM7MRdQsEcKeT0k4iKJQpWDQazgnZ+zGKzANgizQkYUBdg0gWwLgjASJ5VoL6ZmwXKaE45UDEHgRc1-heDBoB8JpNCgVhWk5UZUjgLZWFYeNvU7KIUk2IpBFA8DIJGKBdB-XIuWYRgF3fKBmD0Ph2E7AAJCBvWuTCIIHHC8N-O8IEIQ1jT7AB2E8MD0Xcgk+fwYlTCBNBIDCwKYqDcK8NjIE4kc+ypBlMkEl8-CSXosDgP8RIJfJelXQRqJdHAICiJE0EEAA1VYoCwTstXFbA-WaVofAATnUgShOLeQADlPOROYkT9HT+FyPsylDYTBFlZw5W4GsdEYAslj8Jt-BClowuMv1MCJA0kRyUzyCA8QOEIZyEpy4LQujRN1CHLwWn4gRIWKuBSsWOg8mYEVrQGpcnlxercqazRThiF5W0RZEqmokIrDvB8kjqVJt2ofp1AC4IGpAPLWhPCA4E5blx0nRhWi8a93Iw1oIAe59Jsa-LBBmjymiKCFsUWxIyWgLIvutDAwD9MBNEDTK8SOk7kSwagZsrb7kXjbda2NTcMKKaRVRmd7jqaog9sigRiP7JR4Aq3MpE0DKdiJ7L7SgA1-K+05MAHPgOB0JVU0EYFntpiFWAKKoAEUx1KNgb04QmJtZ8N2c537cKzP1B3BC6EK8QX2O5TRyGYDAWWJkI1cEyQyFgSjq0e3CSDwhN1uREIlwO6Y3CFCWDVgKRfV8CYAjDvwAGII8EGpknqLV4Apahbt3V8JBy2Otp8ABxEFylwiD9MEHAsC3fSVBUI0hQgCglD4CgWBINRahSAxDsEJ5vy-SsE7gfprRgWQS7LxAK6rmu64qRuVHjINu6bfl+-UVnM9bwQoQHeNEKH0u0HLlRnWoVha+UKfmCbzbW9ZnVNETHUKXYPQd5HiucCUEVcwghvz5USeM0EKOghrJmAyqnFeLd6hQhgKQWQl9vCKFPt-EgrNO5z08GZcUBdB6CAANRWCbAADnpE2KocQohNmiPEFeF5iKyAjnA-QTYcAwCgGgPwkwgg+1YNwAUSIsBaD0iHL4KhcC9GwE2EgzB87yEsCAaiLDbJlmgRwQoeQcBiMrJI6RCV5AqEYk2RgzDiIyP8FEIxC57zIkbpI8QjFsLQXwniXRl8YAGKkfFWRCdPQwGPHFd2jI46pHOnATQ8ApggCcNKBgng2j4CIKQEMVBaAgAYPlG0+ArARKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0cGIwCu1CFgCe8sRLh72GQrPkBGCgAY7h1gF8xY7tM5Zde4UbkhDAPFBAEE0ch8QgGEAWQBRQXUtHX1EgVYpDGopOEEsZkEMKChBFikYCj8AZQ1tb0lcmAA3GGo9NhgAclzqeDQ2OAgAI2hvSuDAxxdWNzh0zOzc0WCMTVxPCEZsCDZZZD8JeQBVdUEAeRC1nEEAJjtBFXOASQARKPk6A-8YgDEQwV6AEdNBBelJBAAKAAqZyhAAVBMxqIIAOowIaXXCsACUHy+8hqcEGbDyED4zDWsgAzAA2Wy2RIaNg5PHBQ4gOKsDBDWAAmBgXpwa75ADWnABzAEXjYjgkAF1XCsrkiIAAvba7QT7Nn+ABKACFooIAO66a4hQ1RQREDisYl21kSdlhCKCWAYOaCGgQJrQGAAcxgXp0rEYEHIMEdTvklykujdzH9-ogrH9fOBoJgUllggVM2CmQEcOoko00tYe3xHNDbTQWEK9cF9dNuFCcSqAFobgBWGlR9mcxi1+spvLUDB2+Mt65QgAyVUENip-e+HpFgjhTyeknERRKFKwaDWcBX8h+zGKzGNgkLQkYUA9g0gW3LgjASL5tvLObzfnKaE4cpQwgeBKx1eQXgwaAfCaTQoFYVpuVGVI4C2VhWBTf1TxAKIUk2IpBFg+DEJGKBdBA3IeWYRh13-KBmD0Ph2GwgAJCB-WuIiEPHUjyNAt8IEIE0zVHAB2G8MD0E8QE+cCQBiLMIE0EhCLg7ikLIrx+MgITp1HKkGUyKSf0VYwNF6LA4DAp1-CqfJeh3QQWI9HAICiJE0EEAA1VYoCwbDdUlbAg2aVofAATkMyTpNkmz5AAOVC5E5iRIMkgs3JRzKSMgnlMRpjcJsdEYcslj8Dt-ESlpkvsoNMCJY0kRyRzyCg8QOEIfzcsECqEqShM03UScvBaCSBEheq4EaxY6DyZgxTtWbNyeXFut6kAqtaQRNFOGIXm7RFkSqFiQisN8PySOpUiPah+nUaTysq-q4zgbleTnBdGFaLxn2CwjWggX7vzWp7qu205miKCFsUOxIyWgLJtrtDAwCDMBNFDUqc3WzbkSwagdvrHatpTI9mzNA9CKKaQNRmEG+rBog7rSgQaLHJR4BakspE0Eqdjpx6YygY1ovBuqslIfgAdVLNBGBAHOYhVgCiqABFWdSjYF9OFp1bBZAEJhdFppqcLIMJ3BV6MK8GWBN5TRyGYDAWXpg2jakyQyFgJjGz+siSHI1NzuREJNwe5xFW4EVleNWApEDXwJgCZO-AAYlTwQamSepdXgClqC+k98wkCqs6unwAHEQXKMiEKswQcCwQ8rJUFRTRFCAKCUPgKBYEg1FqFIDGCCqnmAoD61zuB+jtGBZEb5vEFb9vO+7io+5UFMwwnjtBRn9RHrLofBChccU0w+em7QFuVHdahWC75R1+YfvLqHx79U0NN9Qpdg9EvxerccBKDFCWBCvcX4qDXqZQQ6dBDuTMCVIuh9B71ChDAUgsg37eEUE-CBJBHpj23p4Jykpa5z0EAAaisB2AAHPSDsVQ4hRA7NEeIh8Hw0VkKnbB+gOw4BgFANAfhJhBAKqwbgQokRYC0JZRO7IVC4F6NgDsJBmA13kJYEALFBGeSHBgjghQ8g4GUfWNRGjuryBUFxDsjABE0U0f4KI9j1zvmRH3NR4guIkWQhRHMVi34wFseonKWjc6+hgNebKwdGTZ1SBAIkmh4BTBAE4OUDBPBtHwEQUgEYqC0BkiAaq9p8BWFSUAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -262,24 +262,24 @@ acme-promptscript-registry/
 
 @standards {
   soc2: [
-    "Logging required with 1 year retention"
-    "Tamper-proof audit logs"
-    "Access control documented and reviewed quarterly"
+    "Logging required with 1 year retention",
+    "Tamper-proof audit logs",
+    "Access control documented and reviewed quarterly",
     "Change management: documented, approved, tested"
   ]
 
   gdpr: [
-    "Apply data minimization"
-    "Enforce purpose limitation"
-    "Consent management required"
-    "Support right to erasure"
-    "Enable data portability"
+    "Apply data minimization",
+    "Enforce purpose limitation",
+    "Consent management required",
+    "Support right to erasure",
+    "Enable data portability",
     "Breach notification within 72 hours"
   ]
 
   pci: [
-    "Applies to payment services only"
-    "Never store full PAN"
+    "Applies to payment services only",
+    "Never store full PAN",
     "Encryption required"
   ]
 }
@@ -317,7 +317,7 @@ acme-promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0LMlAgZWjGPLES4AT3YZCs+QEYKAJgoAGfawC+Ysd2mcsELEeEG5EH0g8UEAUVY4AFdqGEEWKTi+fjhBAEEAYQBZMPjmDS0dONiARyiIWL52OAoAgHU4jFjBAGUAeQzBG0EAFSM0OIBJQcFtKUEAcQARAAUAJTyC7Sxa0OCnV1Z3OAFWKSapVNFQuGZGG1lkAIl5ABlmAHMHiFYHwVLy2PGAdx8cQUsgiMMCa734XggbCcEhuIB6pAG1AAtDRmMwwKMolIfIIoI84NCYfI0oxdHBUix2NRmFBBFIzlEqhxxmMwQA3CAwb4wcZlJocahQIyE2EZHDaB5JbQYSVM2T0xiMrw8uijNCotkqwQcHY8wkAXTcoQeUhol2ugTS6qFdOwQhILwgDoAXthIVsQjDAhEwMxqLpBGgYmhmHA4poHQJvFDPUSQBk2GH2IISNLZV4wWUKnrY7CWlF1X6sO8IA8cMWsMxBDBqBhorERd7WBgAEawW0CQNF1vQHzC3OBABCsSU-1YzG8kEYbrYgl+uBeggA7N0cMwYgTY4atqE0IwIObQrCreROalK4GMEYmYIw9QOWTBGwhY35AA5GCa6i3yvNMBRKBaRmNI31fEAIkYah+mjcQPmzKQDTETZ3FiHZqAgRgYKOAIkUCD8v0DakyVSfZOxbGAjDYcYdmwHlA2DUM9FjXD30-GswQERdSKEPFXnY3BtEEVgYGIpp+xwy0oG+K8SIZG9uMIs54DgF43iUbwOW8eBCRYkA0ikmTFI5RIOyEaIWwAKxE4t0LLLBUj4RhxVYCA4BITcJNYgisFrSIwHYhSL3HVgkQwdVqU1cZYmeRMNiNbgAGtx2+WApElfw1iCLKAgAYhywQEyWIpBDmeB139bSdwkXDCtPbQAxmbsoFkcssDQOBEBUNR8jqooKCUPgKHUCSpjtAqoDrFSpxnVgWqwNqOq634EogfrlBgIb8hUbikUYCbyQgaaYIkmZ0LZJQ-EazRGCMOaFs6lQBo29QVBoCBzpuo0JDywRRs7DJ9qmjCZq+wRcIAKnBmYojbDDIdkLImgS-hVJTWj0IwKA4FVINYcYOkzgJUIIfBwZ2BrZsoHhwQyYFSnFhIKIXOnLDVWCpEkxUjS9GJwRIYTVhIESdgtCp8HZEHKIVOE8lTNVRUdnydiXl9CTIdKtCMOZamZmGVVIGbHRRbl+IvghTGidy-LSpi+nSqzSovEt3mwgAVVkaZ5kWXqAzgr4JIyTHDr9FyMFkDIMmA73NHq4oYAdvVeYACRBKBcGnWJZCTwZgLSOccBrRprWBtsedhdYXBAZx9QYLwoPwIgEUoGh6BAL8VLYfBLCroA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0LMlAgZWjGPLES4AT3YZCs+QEYKAJgoAGfawC+Ysd2mcsELEeEG5EH0g8UEAUVY4AFdqGEEWKTi+fjhBAEEAYQBZMPjmDS0dONiARyiIWL52OAoAgHU4jFjBAGUAeQzBG0EAFSM0OIBJQcFtKUEAcQARAAUAJTyC7Sxa0OCnV1Z3OAFWKSapVNFQuGZGG1lkAIl5ABlmAHMHiFYHwVLy2PGAdx8cQUsgiMMCa734XggbHkdGugR6pAG1AAtDRmMwwKMolIfIIoI84NDYfI0oxdHBUix2NRmFBBFIzlEqhxxmMwQA3CAwb4wcZlJocahQIyE0I3EAZHDaB5JbQYaVM2T0xiMrw8uijNCotlqwQcHY8pwSAC6blCDykNEuRJAaU1Qrp2CEJBeEGdAC9sJCtiAYaLAhEwMxqLpBGgYmhmHA4ppnQJvFCfdaMmwo+xBCRZfKvGCyhUDYm-fIWlFNUGsO8IA8cOWsMxBDBqBhorERRIxREMAAjWAOgShstd6A+YUFtuBABCsSU-1YzG8kEYnrYgl+uBeggA7N0cMwYgSQsbTRI0IwIFbCza7ZzUrXQxgjEzBFHqByyYI2ELW235AA5GDa6gn1rZowCiKBaRmNIfy-dsdGofp43ED48ykQ1BBNFxTW4WIdmoCBGEQo4AiRQI-wA0NqTJVJ9j7TsYCMNhxh2bAeVDcNIz0A9BBI39-wbMEBHXGihDxV5+NwbRBFYGAqKaEdiMCNIoG+e9qIZR9hIos54DgF43iUbwOW8eA0J4m1lNUrSOUSXshGiTsACsZPLPCqywVI+EYSVWAgOASH3BTePIrBG0iMB+M029Z1YJEME1altXGWJnhTDYsIAa1nb5YCkaV-DWIJCoCABiYrBGTJYikEOZ4F3YMTK2UISIq8hChDGYBygWRqywNA4EQFQ1HyVrtF0CglD4Ch1AUqZHXKqAm10hcl1YbqsF6-rBt+dKIHG5QYCm-IVGEpFGAW8kIGWxCFJmPC2SUPwOs0RgjDWjaBpUCaDvUFQaAge6XqPQRSsEWa+wyc6lvwlagZIgAqOGZiibt8IR2QsiadL+D09MWLwjAoDgdUwxRxg6TOAkmsEBHBnYBtWAJtHBFpgUGdpdQSCiHzF0I9VoqRVNdMMvQqYR5NWEgRJ2C0KAmfHKJdOk8lbPVZUdnyfiXkDBSEZq3D8OZJmZmGdVIAZnQZZV+IvghAnKZKsqapStnqpgXNKi8e2qbCABVWRpnmRYRqq5CvgUjICcuoMfIwWQMgySCg80Ubijdz4DSpgAJEEoFwRdYlkTPBkgtIVxwBtGivRduxFsV1hcEBnCNBgvHg-AiARSgaHoEAAN0th8EsRugA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -332,9 +332,9 @@ acme-promptscript-registry/
 }
 
 # In a multi-file setup, you would inherit and use:
-# @inherit @acme/base
-# @use @acme/security
-# @use @acme/compliance
+@inherit @acme/base
+@use @acme/security
+@use @acme/compliance
 
 @identity {
   """
@@ -379,30 +379,30 @@ acme-promptscript-registry/
 
 @standards {
   code: [
-    "Use React 18+ framework"
-    "TypeScript in strict mode"
-    "Functional components with hooks and composition"
-    "React Query for server state, Zustand for client"
+    "Use React 18+ framework",
+    "TypeScript in strict mode",
+    "Functional components with hooks and composition",
+    "React Query for server state, Zustand for client",
     "TailwindCSS with @acme/design-tokens"
   ]
 
   performance: [
-    "Initial bundle < 200KB gzipped"
-    "Per-route code splitting"
+    "Initial bundle < 200KB gzipped",
+    "Per-route code splitting",
     "LCP < 2.5s, FID < 100ms, CLS < 0.1"
   ]
 
   accessibility: [
-    "WCAG 2.1 AA compliance"
-    "Automated testing with axe-core"
-    "Manual testing required for new features"
-    "Support keyboard navigation and screen readers"
+    "WCAG 2.1 AA compliance",
+    "Automated testing with axe-core",
+    "Manual testing required for new features",
+    "Support keyboard navigation and screen readers",
     "Ensure color contrast and focus management"
   ]
 
   testing: [
-    "Unit tests with Vitest (80% coverage)"
-    "Integration tests with Testing Library"
+    "Unit tests with Vitest (80% coverage)",
+    "Integration tests with Testing Library",
     "E2E tests with Playwright for happy paths"
   ]
 }
@@ -441,7 +441,7 @@ acme-promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuYamw6spAegBGGODHliJcAJ7sMhWfIDMFAAy394wR1IWQAMWXtOUwQAUo2GDM1CQOAL5iYgDEggCS4kIkAK5QWBAAtJCwgrpYSWh0gkbMSYIA7iVQPhCsODDUEFiCGGqCSbqI0YLcNXUNTdwYjHxaOnqsMdztMN1DI7qMSf1GXVO6s8Mw6ixkUBAtjONiPVKcaVhGwgZyIPq3jgCaJc3UM0JKKt6CpwBuMFDMND1ZpNACCAGEALIAUQokUcURi0MIQOoaV08Ik6UEkOYp2o4gAUhgfhgAMqMBpoLDqAAqRiBFKpWGu2IASjAhk0YCxjHAOKFHNiAOowTSCVFBEIHGaAtIkCAAL2wEDYrMEoMYhzgcAgmmgjUuAApheDQQBxQQAJgoAEYNaCAJTqgAi8AgAHNxHyBXBrndwvDuCwvIQmqJHAH7hJEYIPJ9Wv5AsESIIyQJGABrTGCbEAKjzHlIMAq1EzBdkHK5gltAA51QWADItD1JDAemAVwT0xmUiDUwQAVgbeYAQkloFIuwA1RozYdCwQF9NGPasD1d2kYaBlGpScFksmCADUGxGp11XvSWGYmc4fsXy4EHC7VcYTQAikl6pdTwAtdoBDUEdaXgNJ1xnOd+RPbswJqD1BEbPVqAwahfz8AIjDKBoPRwFlHzzcFmDINgzjgLtBk2dQJ0EI04BwVCYB8C9PW9Ix+RgEhnVYa5Y1BahGBwOd3yWI5FzcTk8ledJtF0HwgiqYF+WoJIRNedVIQgSlmEyTxVCkOBBClQQAmoDtmjQNAHyxHE8RSGYwCY+oVTYIzghyBiGnXdVQV8WJBEYPYzkEDtWGctJXI+VMAHkgVYXzYhzWMAGkYEuDk4BKAT4BzbE3UvcQyXYgVZDwrArMQdR1BYr0KDmGAKB2dUiJIsL2EQ5DUKMUqsHKuBKuoiA6s2RriPVeMvFaYUIEzCAer6gbd1m4a+FGkh1A+SapH9W5drECIeNYbh+RaKRUIMq5HBYU5ZGQa4JHkABVdY3yaOtTyUYtS2zaMJBuHsYCZfsmhqHIsAad9BBIPE9F+h73CSVh31VVgMCgALiLQUj2EM3dcEEHBmFvQzToxkjdQini4ZuV7BC-H83OoHJ6j+JmTo4QoAJO1pjMCiAzgcP7-u3KBdzUA8jzxnAzy2GrWGvW970FwQAF0c0lFMZVu+6bniRp9nRzREakbIAB5rRsGxktHELFX7IFtup+RfHqdJlCSDgMdOHJyEacCPWV+HG3BXxBHNm1BzgQo3FiF0w5rS2SCjwRwUbI9zbsW1lbVw6JCGbVdX1PYLm1xx4dNC1rTtB0yd9mVA5uUEPeI7AmKcOD13KRppbMGB0hYdSnZASEWjbdGOH5eDBFeABHCdXnk9ywrKIzJNEv0h7JfIsbRQQ7yMTRmHOwRUZ+T0XISVo4EpGBOGnzl8Q3nX5GhVg4FEjGASZkNwZ0JpSaCIsQyJAWjtk4gLX6OdrgT39qXIWT1WCNHbvyXG3dBCzhgbRWsNgACkGNWZgOdEPeIHAPQoUpsgrAqD8agUnp3JCmgUJoQbi-K00JKHUOlkmLCOE8KMwJhgSylxMC4Cfo4HOB1jivGUlpSmhkIw2XkAAORgKzNo6xAo6EMjsLGbUqHK2xMo1RwJpjNFYJcC4QIu64BKE0KQzBFh8FMJTAxNwVFqNYsEN4Wp4CFwNBce+c8ICvCcfo36hiQDuKUrNNAJkj5SHguoeoyg2bPhyuEtxximaeSkNdGYj02SNkMu5EMkAEKkigN+MRijIlZPUTMGoa4Zj8lXPAWipitw7j3EQ-aQZ6LBCwIsKhl14bbExtjFkSAbgBjLinV4rdmgnxLIIWmOiJnWJwJ0WZ2IAZAwHDUDg1AwBDAcu5GggJrJ-WxI9RBTQYGXJsumYIB8iaZjBs8nW2JNQFz1P4y4IZdT4gvpcqMOZ5DqEJreeQrhwTzM9kIIBN5Uy00hW8qWHCHA7XUDA6F0y9qzOFP0GY9z1HwS2ULbEGCwL8MRkg+5nzYJ0IQgwphlxjIHJgGQi+DLfDKFRFDBxs1O4iMOW-HaMysUYFtLaFYUz5AcjPss4y+dfG-OLpcCAOoqmYsjCAdQkpcXytUfzFexkNbSiRg0rV6T9ogDCCrBgZw0L4CIKQcgDUaD0BAKzXUbB8C2jtUAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuYamw6spAegBGGODHliJcAJ7sMhWfIDMFAAy394wR1IWQAMWXtOUwQAUo2GDM1CQOAL5iYgDEggCS4kIkAK5QWBAAtJCwgrpYSWh0gkbMSYIA7iVQPhCsODDUEFiCGGqCSbqI0YLcNXUNTdwYjHxaOjASMQAU1DAA5hBwWNRGgumCUgsYmrA+QdSC5BhGs8pJagCUXdzt44PDMOq6jEn9K4JTM-OLy6vrm9swXbBA4BY6nC5XG7dIYjFhkKAQFqMcbvQTTOYLJYrNYbOBbHaCPYgo4nEoQ1g9KScNJYFaiRz6EAOCQATRKzRmzUJnlUPipADcYFBmGh6s0mgBBADCAFkAKIUSKOKIxOWEUXUNK6JUSNYy5hU6jiABSGH5GAAyowGmgsOoACpGUVWm1YAy-ABKMCGTRgLGMixgoUcawA6jBNAd6nsSEjxiK0iQIAAvbAQNjutYSxjIuBwCCaaCNFaTUNSiUAcUEACYKABGQQSiWXEOCAAi8Ags3EAY4JDg7sZ4SV3BYXkITXpEiHTOVMQ8Km8fgCWBjggtAkYAGsdb8AFR7jykGAVahbg+yL0+wR1gAcmcEB4AMi1ZkkMLMYBfBI7ndaILaggAKwPgeABCSTQFI34AGqNOMIGtgeG5GAirCzN+9oYNAZQ1FIUoWhaggANTQvc6hUvm3bpFgzBbpwA5IXuG7YF+e6Xt6jBNAAikk9QrKRABa7QCGooF7va8BpOhsHwYsJE-lJNSzIIT4FtQGA-KR-hHGUDSzDgbpMVKzBkGw1JwN+dwjJBaJwDgmmAusnbdjkRiBiQLbuiqjbUIwODwVxLx6KwD5uN6eQzOk2i6ECVRit8SRBTMD4yhA1rMJkPLeHAhLAgE1Cfs0aBoIxuqCPqUgpOMYCAvUaZsHl+z2ZpykPhKvixIIjAItSgifqw9VpI1SimYIADyoqsB1sS7j5ADSMArF6cAlH58C7msHZUeIFruX2siGVgpWIOoFEuawFAwjAFBwg+JlmYN7CqepmlGIdWDHXAp3qJBV33LdplhdlrShhAW4QB9X0-bhEP-XwgMkOoo1eGJDJMhjYgRKFFKLC0UiaVIuVTt1BowLIyDutOIAAKq6IIV5cTet6kUox6njuIB0FTcggL+MAugBTQ1DkSzpU0JBk-I3OONTbhnFx6asBgUCk49FnlI0OCCDgzB0bl+Nq2gzD5sNoVczz8iMzxfE-ESujUIKzUCBwhTCXjrREj1EDUtLlt89hUC4WoBFEbhuBkSMlFdqwNF0QxzKCAAuruGoxnGFP+-EjSIqrmhnFI2QADw1jYNjzWB-XJgBopSH7su8749TpKcHCk1SOTkI00mzPXEjU0+Uq+IIJe1kBcCFG4sRtiPN5l-2hRSk+REl3YdaJynOMSEMub5oWCK0pnDfyGWlY1vWjYSkbCJxn3-fyBKSS0bGHA+BwizKZrEdmDA6QsClFtj4gBlC0d8qt3490EDMAAjpBGYQJ9iDTKISCKwUByAP7rzC0+RjaakEPRIwmhmCE0EMrfkXYGoJFaHAa0MBOBQO9IadBMtMHyDlKwOAwVSbCn2GOJYOgmiGyCM8XKsZlafj4OwDeu4IHKSPqw2mrBGhOCkrlcO2s4IQLRLeGwABSUmTsPwwEuBg++IB4gcBOJQlRiw1Fa0Uh-dCL1NAaWWHfamcpqxyhsVgOxEcdJGD0l2QyTUdYYBKisTAuB0Huk3tjMQ3AZjfHFkrYmD55AADkYBOzaPTHqOhcpwmNk9Xxic1iZOyWKKELQVi0lFF-XWT91jMGeJIl2Ssym8yyTkmOwRxg73gHvIstIGGwIgDMNpMTWwVJyXACGaBBDCgwBsdC6h6jKGdqxKZ5UZligctQKQLAO40w9E+XKwIxyQBUuaKAfFtm-F2fsKENQ0LjEWKheAaIoRYRwnhExWMRz2WCFgZ4vjhCDhAOoIp5kpFIF5kOBuUoZisS5EghmnEmjQpKQ0zoDc1j80FoBGoHBqBgCGDVYENARRlX7msGmSimgQJpeVDcwRCF6y3KLNlPMsw5kGQWYZKwxz5kNJQmlM5dzyHULrOi8hXBIoiv07qIkxrWx1hyhpPipkQvUBAuV8LMYN1DP0cYTLclyJ5YITRUlQlnGUUyy1klHEqTUi4t6oTiVzA0mbS1vhlAakEJLbcn8okko4RChFOqMB1jrEYfVVtsk+2QUSAZeYBUHxWAsThG1Zw6rTvGkAXpyEnlCWnYIYjkSSDzHc8IIAwhJwYNSZY+AiCkHIDdGg9AQBO3zGwfAdY61AA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -458,7 +458,7 @@ acme-promptscript-registry/
 }
 
 # In a multi-file setup, you would inherit from frontend base:
-# @inherit @frontend/base
+@inherit @frontend/base
 
 @context {
   project: "Checkout Application"
@@ -535,7 +535,7 @@ acme-promptscript-registry/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOGIwDWzAK5YAtBjRoA9DWZkscRtQhosC6swBWQrFVoAdVgAESMLBl7BTvXhAAmiXsaaCR4qTLTv7vHAAnuwYhK7uAEwUAIwUAAz+rAC+pqZ8AJKsvDYkYlBYEJKQsIFWYmh0vEHivADu4lBOjqyC6li8YDoknTrsnM0ARhhwMIjpvGYQrTDtk11sHKxOcsOjaeYs-YQddtm8ivqMWBEgAMKeohK8AIKyUBCM2BBsSQ7UMGjMcBBYzNRBU4Ac1+ODEgwoLBIcgwjEscgEQiuPlkb14HFIpzOSks1EYMDRiicYmOAHk6qxZqcAFIYSm8ADKJFBaI4AgAMjAMC43CBqcwcNkACLMAkgDYOfzi8X7bh8UkAN1mCogMDqEt4AFl8oVJHAOGh+JdvJ0oMw6p1-rczpqAKK8GCSKG4-EHKDYMD-EgUAIACTpTlgcH4GGoHQ+KrVVTgOA0aGmQKqmCClnYVQD-DYkGoJGebB9rACct4AGkYEFeFkOEDqHnWHANZJeAAFDApzgnRlYdRoGC8W2wVMqAJNhmx2QJ1xjjS21gg+k3ZsZEe8AAqYVcNwVGHdtZXN1YO6ChUYcCnMCBQ94AGotRBCJhKVANcWbnjY2ysGIPo272pmMUfRLM0AAUmrMMSpQAGIwE4sx1gAlCuY6hrBgSCFAUCuGYsLws6sz4nqGHPvsTYwdg359mA7pAmevDshgYisAIQqhsIUBBAEUpJKkhbmEQwGBNYyyhk4wZ7A4yZDq4EkOAcOgqnB1CnAy3YaGKASSYwEDYmQDx0virjdmIBL7A4lJKtQqn-DAZyiax1hGdQJkBLxvGmGYwisOasBOECfaydxMoOK+S79ssXzTMOfEhcWdlhoyyqPH2IFPGGFC4TAkJKEhpG8AA4raq68AioYdE2+VWPw34fOwIZhiuzYAKrFaVYZyL8MAkHAciIM4vBNk1aBONgfadSQK5Cra7JFfabVaONPV9c0TYAEpdcwSqOBwE0xbwcp8BcSImgySWuqlxoSBlcJZVCuUOE2zakgyrWIl4EhyPqZUDZWrC-BAO4QAAXn2b3Io1LUlWD3i9c4n3jvGc4-adHQxnGCYQ69l1aMtChtlej06PicDBlJHaNc9WPHR9uNQuQVh9k2un0xwvD-EpL58ORX4fLwUE0Q2e1NtDEjSPcjrJpu4stm2LTVrWhSvHlItSEQNDwHRpKUk6DwiEa1NYCuKvSGA2YkJupsQDmnTTAZGN7cWtrUDo1C8NicGCyuZw3Ktq4APq2pqzargAmq48UdDgIy8N521dYLD2Mr6GTNkuABy+V+01ac3AAajcGTsjcABCM3h3S3mo+O6LMDkThOB8JONTcId2mn-tTWc7IZGntpCq4rbtnVYAYNAsErj3ue2u3pKrSHAerats+uBkO1s9czBgEJzAiFx0o8RsZgxv8WCMBI4l7wi2PFGa6pILyvowFAhp1KC+vvR01Hmo4eldR2dZoncHjIeht77uEfs-eob9VI9j7GTOqUULwKxeIWYKvJ4boznO4U4ECX5vzRhOJGTwoBn3dIrVBl80qgJwU-PBuB6odFzIefyQ4eIgGSAAXQYB2AE+AiCkHpkYegIBLI-DYPgGI7CgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEjOGIwDWzAK5YAtBjRoA9DWZkscRtQhosC6swBWQrFVoAdVgAESMLBl7BTvXhAAmiXsaaCR4qTLTv7vHAAnuwYhK7uAEwUAIwUAAz+rAC+pqZ8AJKsvDYkYlBYEJKQsIFWYmh0vEHivADu4lBOjqyC6li8YDoknTrsnM0ARhhwMIjpvGYQrTDtk11sHKxOcsOjDnwAFNQwAOYQcFjUQbySvE4HGIOwzWDM1LzkGEG7OmLLAJSmZiz9hB12bKPHT6RhYCIgADCnlEEl4AEFZFAIIxsBA2EkHDs0Mw4BAsPcghD9rgxIMKCwSHIMIxLHIBEJYT5ZJjeBxSBDIUpLNRGDBWYonGIwQB5OqsWYQgBSGAlvAAyiR8ThWRwBAAZGAYFxuEBS5g4bIAEWY-JAaSB-nN5qB3D4IoAbrMHRAYHULQ4ALL5QqSQ4wND8GHeTpQZh1Tr3BGQz0AUV4MEklJ5fMeUGwd2oJAoAQAErKnLA4PwMNQOjsXW6qnAcBo0NNdlVMEFLOwqgX+GxIFm0Wwc6wAnbeABpGAnLIcV691hwD2nXgABWerfBCqOGhgvFjsBXs6BZ3ltdkDdch40sdY+zl8IXGQCZwAKmFXPCHRh09QMPeEax30FCowcCnnsK68AA1LwnoQIQmASlAc5DvCvK1mqWBiDsc5nFBajMMUfRLM0myeswQqlAAYjATizNOXz7gqOClpRgSCFAUCuGYNJ0smsx8n6LHwXRFHYOhm5gOmuxAbw6oYO8AhGqWwhQEEARWkkqQDuYRAEYE1jLKWTjFoCDjNiurhGQ4wLMC6VHUBC8rrmgZoBMZjAQFyZDIrKfKuEcYj8kCDgSk61D2fcMCQvp8nWD51B+QE6nqd8wisOGNy7Ju5mqTaGx8DeGRbssOLTCoCFDhFZYKs6KKbpsqJlhQnEwBSSi0Q4ZwAOKxg+vD0qWHQdVY-DoTs7AlmW34LgAqt1vVlnI+IwCQcByIgzjzpNaBONgm4LSQ35GrG6pdfGs1aLty2rc0ZwAEqLVZO0cHtGk5Xw0KMiG8pVamtXBhIDW0k1lKtfOC4ivKM0Ml4EhyIcfXzlk+IQO+EAAF6bpDTITdNPUY94K3ODDR71pe86fR0NZ1g2WMQ79WiXQoy6cP1i46HycDFiZTMTWDNPvdD9OUuQVibmc7lCxwvD3DZpW8EJaE7LL4l7t+uMSNISKJs2L4a4uzwtJOn6FBidGq1IRA0PAkkihKSbIiIQZ81gKu09IYDdiQL5uxAWadNMXlU89vBDrG1A6A8XJUcrdGQvC10PgA+rGnoLg+ACarjlR0DHFiljiPXubUKrmGQLreABy7Xx5NZfwgAavCGTqvCABCR0Z7KKXk0ebLMDkThODs7MTfCqdxmXCcHZC6oZGXsZGq4S4tkznQYNAlHfjPtexuPIrXanifXddu+uBkj2S3CzBgDpzAiCp1pqRaZg1vcWCMBIhl3-SLtieG7gQrmMAoCBjqMqB2UMOg-wjBADyi0mbTlZO4BmS92B-11AAoB9RQH2XUI5R4jNRrFT2IbdEA5sq6kJpTS8qD3DoOAaAimx4SaoigG-dMRtSGfzqk7JAaDAF0NwGNDoJBZQYHSiuNSIBkgAF0GBM2OPgIgpAhZGHoCAYKeI2D4BiJIoAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

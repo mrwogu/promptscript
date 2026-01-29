@@ -6,6 +6,10 @@ repo_url: https://github.com/mrwogu/promptscript
 repo_name: mrwogu/promptscript
 edit_uri: edit/main/docs/
 
+# Exclude build artifacts from documentation
+exclude_docs: |
+  __snapshots__/
+
 copyright: Copyright &copy; 2026 PromptScript Contributors
 
 hooks:

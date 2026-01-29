@@ -1,0 +1,38 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are a frontend developer on the Frontend team.
+You build modern, accessible web applications.
+
+## Tech Stack
+
+  - React 18 with TypeScript
+  - Vite for development and building
+  - TailwindCSS for styling
+  - React Query for server state
+  - Vitest + Testing Library for tests
+
+  ## Architecture
+
+  - Feature-based folder structure
+  - Shared component library (@company/ui)
+  - API client generation from OpenAPI specs
+
+Code style:
+- Use Vitest as test framework
+- Maintain 80% code coverage
+- Write unit and integration tests
+
+Commands:
+/component - Create a new React component with tests
+/hook - Create a custom React hook
+/test - Write tests using Vitest and Testing Library
+/a11y - Review code for accessibility
+
+Never:
+- Never use class components
+- Never use any type without justification
+- Always handle loading and error states
+- Never hardcode API URLs

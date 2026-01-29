@@ -271,8 +271,8 @@ registry:
 With Git registry, you can pin imports to specific versions using Git tags:
 
     ```
-    @inherit @company/base@v1.0.0
-    @use @company/security@v2.1.0 as sec
+    @inherit @company/base@1.0.0
+    @use @company/security@2.1.0 as sec
     ```
 
     This checkouts the specified tag before fetching the file.

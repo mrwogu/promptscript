@@ -82,7 +82,7 @@ Single inheritance from another PromptScript file:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAYtWYle1GAHMIcLNQCevVqXiZGMADqsAAhFY4Y1CFl6aWZDK1kB6MEPacAJgFoOpDRr4AlGFGwQAbjC8mLga2rr6hrwUlphi7G6sfADqhji8AbQQbLwsrNLUGDpYoTp6BkYmwpgW1rYcrE4uJJoAjBQADB0gAL4AugycMrL4RKTkMFS0IAwZcFms+C09QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAYtWYle1GAHMIcLNQCevVqXiZGMADqs+AAQiscMahCy8tLMhlayA9GCHtOAEwC0HUr158AFGMnS5vJ14HKQwAI1gHXjBmal5yDFlxIQBXVgcASg0+ACUYKGwIADcYOOwcDR09AyNeCitMMXYNLN4AdSMcXmLaCDZeFlY-DF0sFsr9Q2NTYUxLGzsONJcYUi0ARgoABi33Lx8pGXlA4LgwiKiYuPzElLT0kABfAF0GTkP8IlJyGCpaEAZunBeqx8GtHkA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -111,7 +111,7 @@ Import and merge fragments for composition (like mixins):
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvMNWYle1GAHMIcLNQCevALS8ARlGaMA1nF4YZvEjGqyYAE14R2zXowCu1GezHQYAHVYABJ3AwvL4sMgD0sk7GVnBhLGRQEBisjN6sPnyCaMKiAO4QuEaJGIYa2roGpuaWNgCCAHIAIkYAbhjQGNpBYMLBRBysVj7+gcGhMBFR1DFhgc7UBaolvHM+GQJCItIwUNgQLWkjQRRh4hiyZuyxOrLyrLJrrHwAsk5QWBDkQRCbWKVFUCqFmstlYvGEVnMwwCQRCwgmimSVmisSwyjQ8EYCzQWGhozh4RkigWjA+bFicxcizxxzCOkYGCgahYrEgshAAF8ALoMThKZT4IikL5UWggBgHWgQNj4ACMnKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvMNWYle1GAHMIcLNQCevALS8ARlGaMA1nF4YZvEjGqyYAE14R2zXowCu1GezHQYAHVZ8AAk5wMLx+LDIA9LJOxlZw4SxkUBAYrIzBvHwAFDLyiirqvFYKGNrWYsK85BjKshJOrFYAlD58gmjCogDuELhGSRiGGtq6BqbmljYAggByACJGAG4Y0CWw5dQhRBwNLSGBwaHCMJHR1LHhQc7UPaoDvJe8GbzZcgpKqhpFcKtlYBVVNTqDWavgEQhE0hgUGwEAW3lYASCvAo4XEGFkZnYcR0snkrFkPl2AFknFAsBByMEIOCsIM+lAxhYynZeMIrOZdoiDmFjooUlYYnEsMo0PBGNc0KIni9cu8Cl8fjY-hsAbVmPUmpz9iEeeEZHkIIxyWw4pcXDdHlkcm98p9iqUlf9oYD1cCfFzkeEdIwMFA1CxWJBZCAAL4AXQYnHe+CIpEpVFoIAYcNoEDY+AAjKGgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -142,7 +142,7 @@ When you use `@use`, all blocks from the imported file are merged into your file
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAyswCu1RjES8AAi2owA9AHMhGagBM4cuDEYiIWAJ4AdVpNlws1CIywQ2cXsGO9eAWl6GQAORgA3GNV4iNGYtXi1GWSw4D2MAX2NjPgAVFQUYLAkKORpmACttLCpaY0khUOlmWUVlNQ1w3QMEkzMLKxs7BydXdxAAMWYoKGYAd14AeQB1AEF+AAVeJQhVGCgIVngY1njWRN4AJXghKCxeDDAOAJJ-NMRd03hW61tWexZ2DDX7ACNmXF49GAkewACjgwlEMF4kFoWDovFwnHhqXSAEoQLEALoMTgWfT4IikcgwIr0EB+WjPfAARnRQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAyswCu1RjES8AAi2owA9AHMhGagBM4cuDEYiIWAJ4AdVpNlws1CIywQ2cXsGO9eAWl6GQAORgA3GNV4iNGYtXi1GWSw4D2MAX2NjPgAVFQUYLAkKORpmACttLCpaRKkhUOlmWUVlNQ1w3QNnPgAKWQUIc2p9V15VDowAI1hVXjBK3nIMfQVqYVZVAEpjU3gLKxs7BycejwAxZigoZgB3XgB5AHUAQX4ABV4lCFUYKAhWeBjWeNYSgCV4IRQLC8DBgDgBEj+NKIEorTrrWysewsdgYN72AbMXC8PQwEj2ZpwYSiGCjCC0LB0Xi4TjU1LpBYgWIAXQYnAs+nwRFI5BgRXoID8tER+AAjEygA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -161,7 +161,7 @@ When you provide an alias, imported blocks are also stored with a prefix for use
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAATcW1GAHosATzTxG1CGiyCMcQVjgAdVtoDEggHLMA7oKnNegxhlaCiHVgBNBEMs2odnAIyjNGAay1WbntOZw0KOCwbRwxqRzVgbUF1eCwIVgBzREFgK2YANxhqDEyYHIBOAAZBAF9tWpBagF0GTixqKXwiUnIYKloQBiLaCDZ8AEYmoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MAS2owA9FgCeaeI2oQ0WXhji8sG3nwAUEgOYQ4WajN4BaXgBNjGAEaxrvMM2q9yGGQerNBrawBKAB1WPgA5ZgB3Xhk-XkYMVl4iDgDeCDI3DmdHZkYAazhQ-lTOZy0KEyTrDGprDWBQ3k14LAhWA0ReYATmADcYagwDGG6ATgAGXgBfUJmQGYBdBk5TGXwiUnIYKloQBkHaCDZ8AEZFoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -379,7 +379,7 @@ To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the obje
     prompt: true
     description: "Deploy to production"
     mode: agent
-    tools: [run_terminal, read_file]
+    tools: [run_terminal read_file]
     content: """
       Deploy the application to production:
       1. Run tests
@@ -393,7 +393,7 @@ To generate `.github/prompts/*.prompt.md` files for GitHub Copilot, use the obje
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPEBicQGUIZWOLhZqEVgHNxgJMJxAE2YiSnLNghtxbKAE9xACgxo0MDLXE7xAYWYSEgxWYwk4GEYsG1YAShk5KRAAemoYADcIGAB3JMRxJIAlDKzs8RZjGHEwAXEAR2EMKAgsBySZBIVxAHkAIwArSKxxbJaccRpAtCx8rWEqo11OGGpseHEKXTHhXuTJsjFkjk0qaimsChJjTqSj+Cw8yU65fenZ6nnnk3hGbWmY-JJADq2g44mErBa4mOYnasjk5TYHHYgJA7TR8IR4hBLSqEKhMIkwjgOl0iC+cgAtOIAGq4zTiDASXBVGHiD6sVgrCniakAQQFE2wHGosmcfOoqz0MDo4j5UVlfLgEUE8UxBTRms6AF8OvDFHyluxxCRmJUJmcDiMxtDmMwoHAbilKuRmG0kE91a8ZtCPjAvpU4L8IP82KiACIwV1OLDMC1m4RRGJwrGmyr5DBGh7q2P2uD5ZAcgD6IpIOiasrSGGMRcgsAAul8WOxLKj0TzI9HoTgqm5yBBGNZbLH48ZE9EwzyAIwUcSFCHQ+6O9VyABMs4AQsJoMZu1VJoMojyAMyzztQN22jRWLZ6HkAFln89kcFNAGtWUueQBWM9Ri8xnGkxjkmbBfO2GJyLqrDaiA2r1gwljUA4+BEKQ5AwKc9AgOkKwkmw+BTnBQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPEBicQGUIZWOLhZqEVgHNxgJMJxAE2YiSnLNghtxbKAE9xACgxo0MDLXE7xAYWYSEgxWYwk4GEYsG1YAShk5KRAAemoYADcIGAB3JMRxJIAlDKzs8RZjGHEwAXEAR2EMKAgsBySZBIVxAHkAIwArSKxxbJaccRpAtCx8rWEqo11OGGpseHEKXTHhXuTJsjFkjk0qaimsChJjTqSj+Cw8yU65fenZ6nnnk3hGbWmY-JJADq2g44mErBa4mOYnasjk5TYHHYgJA7TR8IR4hBLSqEKhMIkwjgOl0iC+cgAtOIAGq4zTiDASXBVGHiD6sVgrCniakAQQFE2wHGosmcfOoqz0MDo4j5UVlfLgEUE8UxBTRms6AF8OvDFHyluxxCRmJUJmcDiMxtDmMwoHAbilKuRmG0kE91a8ZtCPjAvpU4L8IP82KiACIwV1OLDMC1m4RRGJwrGmyr5DBGh7q2P2uD5ZAcgD6IpIOia7M8xiLkFgAF0vix2JZUeieZHo9CcFU3OQIIxrLZY-HjInomGeQBGCjiQoQ6H3R3quQAJhnACFhNBjF2qpNBlEeQBmGcdqBu20aKxbPQ8gAsM7nsjgpoA1qzFzyAKynqPnmNxpMo5JmwXxthici6qw2ogNqdYMJY1AOPgRCkOQMCnPQIDpCsJJsPgk6wUAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -558,7 +558,7 @@ Define reusable skills that AI assistants can invoke:
     disableModelInvocation: true
     context: "fork"
     agent: "general-purpose"
-    allowedTools: ["Bash", "Read", "Write"]
+    allowedTools: ["Bash" "Read" "Write"]
     content: """
       When creating commits:
       1. Use conventional commit format
@@ -580,13 +580,13 @@ Define reusable skills that AI assistants can invoke:
 
   deploy: {
     description: "Deploy the application"
-    steps: ["Build", "Test", "Deploy to staging", "Deploy to production"]
+    steps: ["Build" "Test" "Deploy to staging" "Deploy to production"]
   }
 }
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwliRIQsiURKlSAJvEbUIaLBDaKxIAMLUY2GMIDm86c1ny4h5StUQ4GAEawAss3VQASVYAN2ZGbD1WRSxqAFcYZykWdiIFYUMwZmo+J0kVDEtONMNC1hhqDCgAWjRY6jRmOASQROFKqGYAdxhVABVmZiFFZEMAIQw4HEM6dJAAJTNVadmAdS0OQwBdVuSOdgMWw9apFZxOaVMI1ktbeyw4RGPhAEYKYQBVJtsQosjK27kWGEmWoJGwTwATG8gowoLF1MIjMwqgBBWK4LI9KqjACewhiGGg5SeAGY3gA5GDBcptEicVTCIhuXTXAEOVpOI55AC+EmcpmCEBgnUU4jyag0Wh0kQOC0FwtsCMYOAw13guRUwliTWoQVC4S8MGicQS4u+e2KRxaZqkAAVyiCSPicFlmLFLDhFRYBULOtIzowBNdHjbhFVhL0cWgLO4wDAsDinuGAKLUahZYQq1iqKAQa5J4QAZRgjDq8jxwViUDKFQ80HkQscZs5GuEvNYznU5GYONFrXUcE02l0+lmABEYN28bgLBg0OQIOERx3rZq4Bw0A9hCMQKNYtAliAZoZevAsMtDBOp-jmMJ1wU85YLyArx1p7eaH5Yoxl1tnO3uRAblNgYIpqBxfAiFIcgYCoWgjxAalaEifBniAoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwliRIQsiURKlSAJvEbUIaLBDaKxIAMLUY2GMIDm86c1ny4h5StUQ4GAEawAss3VQASVYAN2ZGbD1WRSxqAFcYZykWdiIFYUMwZmo+J0kVDEtONMNC1hhqDCgAWjRY6jRmOASQROFKqGYAdxhVABVmZiFFZEMAIQw4HEN0kAAlM1VpwwB1LQ5DAF1W5I52AxaD1qllnE5pUwjWS1t7LDhEI+EARgphAFUm2xCiyMqbuSwwky1BI2EeACZXkFGFBYuphEZmFUAIKxXBZHpVUYAT2EMQw0HKjwAzK8AHIwYLlNokTiqYRENy6K7-BytJyHPIAXwkzlMwQgME6inEeTUGi0Oki+3mAqFtnhjBwGCu8FyKmEsSa1CCoXCXhg0TiCTFX12xUOLVNUgACuVgSQ8TgssxYpYcAqLPzBZ1pKdGAIrg9rcIqsJeti0BZ3GAYFhsY8wwBRajULLCZWsVRQCBXRPCADKMEYdXkuOCsSgZQqHmg8kFjlNHPVwh5rGc6nIzGxIta6jgmm0un0MwAIjAu7jcBYMGhyBBwsP21aNXAOGh7sIRiBRrFoIsQDNevAsEsQOPJ3jmMI1wVc5YzxeOlPrzQ-LFGEvNs421yQFyNgYIpqGxfAiFIcgYCoWgQAYKlaEifAnn-IA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -651,7 +651,7 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 @agents {
   code-reviewer: {
     description: "Reviews code for quality and best practices"
-    tools: ["Read", "Grep", "Glob", "Bash"]
+    tools: ["Read" "Grep" "Glob" "Bash"]
     model: "sonnet"
     content: """
       You are a senior code reviewer ensuring high standards.
@@ -671,11 +671,11 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 
   debugger: {
     description: "Debugging specialist for errors and test failures"
-    tools: ["Read", "Edit", "Bash", "Grep", "Glob"]
+    tools: ["Read" "Edit" "Bash" "Grep" "Glob"]
     disallowedTools: ["Write"]
     model: "inherit"
     permissionMode: "acceptEdits"
-    skills: ["error-handling", "testing-patterns"]
+    skills: ["error-handling" "testing-patterns"]
     content: """
       You are an expert debugger specializing in root cause analysis.
     """
@@ -684,7 +684,7 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIYDmnLHAAEwADqthwlgBMYAWmowAbhBgB3GNUSiJUqXLiNqENFghsdYkACUVa9SNkxhYZtWEBHAK4YoELABPYQxWGWEAI3gsYRoMRnNGeGs9fSxmZig4HWRrOwwZazphawBxJTQikpBSqGYIqusAIQw4HGsAXVSpEmY5KCsQODZWGCwUyX0WdkFBlJBu-QBNZm8QpRDhOE4LD2dhJVUNLWFOOG8TVj5hHAg+HC2sUJkMahk4CglFqQB1HE5hBBWMpmABrGAyRDfYQARgowhs3kkfACwhkEDAYGE6S2MBcSiS7GkOFCAjg0IATPCAGLMRjeERsYS9dGQCGuaDJSb6YQAZnhTRgKMkhwcgJIJAhEGwMCggS+3P0diO6mJMEYoP8cCwUMVUnkwgAwn0XBAnLBXiEwgcYAUMBFYNCDdSkQkLKwRM9hMpXtKHfB1i5NFAoPJWKQIU7hAA5Zho7zkCCMGXhZxRgAK1GYaBOWizHhJYX8V0W8wmUgAvgqDDAIt4+AJtLpFYZjKZzJZqgARWv14XXOA5xjSrUxNwePPuT3Wjja1wYaAXZILRXpTLZYS5Wy2wogYrWACi6PGe+qLTajRqFUvtXqnUW6LgfjqmhkABUMlkctYfiYOPfFRZWVBiBf4-3LfQc2oEgzTgd0AFkTUGeIkjMI8AnJFceTgUFoC-TdrEnah5ELGRiz4S9Z3MK55EwLAOGoD0AJ5aYOHYOYFiwnlhBWNZXhcUJTkIKCYjkOsGxOQd1RHCAAC8gWuIEDgyGJkwZATwzlOCPlLTiIKrVgKxACsOgYQRqECfAiFIcgYCoWg9xAZQtDgth8BhYygA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIYDmnLHAAEwADqthwlgBMYAWmowAbhBgB3GNUSiJUqXLiNqENFghsdYkACUVa9SNkxhYZtWEBHAK4YoELABPYQxWGWEAI3gsYRoMRnNGeGs9fSxmZig4HWRrOwwZa2FrAHElNCLSqGYIypAAIQw4HGsAXVSpEmY5KCsQODZWGCwUyX0WdkE+lJAO-QBNZm8QpRDhOE4LD2dhJVUNLWFOOG8TVj5hHAg+HHWsUJkMahk4Cgk5qQB1HE5hCFZlMwANYwGSID7CACMFGENm8kj4AWEMggYDAwnS6xgLiUSXY0hwoQEcAhACYYQAxZiMbwiNjCLooyCg1zQZJjfTCADMMPqMERkj2Dj+JBIoIg2BgUEC7w5+js+3UBJgjCB-jgWHBcqk8mEAGFui4IE5YE8QmFdjAChgIrAIbqKfCEhZWCIHsJlE8Jbb4CsXJooFB5KxSKD7cIAHLMZHecgQRiS8LOcMABWozDQhy06Y8hLC-nOcxmoykAF9ZQYYBFvHwBNpdHLDMZTOZLMUQAARKs1gUXOCZxgS9UxNwebPuN0Wjga1wYaCnZKzOXpTLZYS5WxWwogdsAURRIx31kazTqZRgFSPIBK1VqIHajeNfmqmhkABUMlkctZPiYOG05kZKU+n+H4-xLfRM2oEhjTgF0AFlDT6eIkjMfcAhJJdOTgIFoC-ddrHHah5DzGQCz4Opp3Mc55EwLAOGoV0ALlCYOHYaZZiwzlhEWZYnhcUIjkIKCYjkata0OfsVSHCAAC9-guf5dgyGIE1pASQ2lODXiLTiIPLVhSxAUtWgYQRqECfAiFIcgYCoWgQAYZQtDgth8EhYygA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -782,7 +782,7 @@ Or with key-value properties:
 @local {
   apiEndpoint: "http://localhost:8080"
   debugMode: true
-  customPaths: ["/tmp/dev", "/var/local"]
+  customPaths: ["/tmp/dev" "/var/local"]
 
   """
   Additional local notes...
@@ -791,7 +791,7 @@ Or with key-value properties:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJTOMYoAAmAAdVkKEY0EAKKsAJmmYR2iIaJA4sWNIgD0+vgKg5mcLIgAcABlubxkhTABGAVwDmAWWbP1WajcYRyFGNwtmEgAFbBw4dWRNfSwyfWcAN006DRB9dIxqI35BTQBdcRCHEAcJIQBBBQUILAg2QSFjdtZmDjgKfsrqofEAXxAR0oZOAIBPfCJSchgqWhAGdJhaVtZ8AEZxoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJTOMYoAAmAAdVkKEY0EAKKsAJmmYR2iIaJA4sWNIgD0+vgKg5mcLIgAcABlubxkhTABGAVwDmAWWbP1WajcYRyFGNwtmEgAFbBw4dWRNfSwyfWcAN00NEH10jGojfkFNAF1xEIcQBwkhAEEFBQgsCDZBIWM21mYOOAo+iqrB8QBfEGGShk4AgE98IlJyGCpaEAZ0mFoW1nwARjGgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -846,7 +846,7 @@ Modify inherited or existing blocks:
 
 # Extend a nested path
 @extend standards.code {
-  frameworks: [react, vue]
+  frameworks: [react vue]
 }
 
 # Extend multiple levels deep
@@ -857,7 +857,7 @@ Modify inherited or existing blocks:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAooQ6sAJrwy8szNAFpYANxhReAIyjNGAawA6rAAJFhYiCM5YIWAJ69gu3r20hHz1vYCCIkRYhsMyk2YW1hCsYMzUJNg+rBR2Dk4JugC+urp8gkbivKzwHGKYuLoGQpxicFgYohjUInAULKY2cWDUpDAA7uGacIi8yNQwGIxYdLzyAK4wALrJqazpJaK8JONQ5uQwvApKcLymMGhFhqW85ZUi1bX1zKYUHOUhAOZNrrwwAEwwvVjUk3Esilajy+vAAnAAGZIgJJTBhmaiWfBEUgbKi0EAMQFwaL4ACM0KAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAooQ6sAJrwy8szNAFpYANxhReAIyjNGAawA6rAAJFhYiCM5YIWAJ69gu3r20hHz1vYCCIkRYhsMyk2YW1hCsYMzUJNg+rBR2Dk4JugC+urp8gkbivKzwHGKYuLoGQpxicFgYohjUInAULKY2cWDUpDAA7uGacIi8yNQwGIxYvPIArjAAusmprOklorwkY1Dm5DC8CkpwvKYwaEWGpbzllSLVtfXMphQc5SEA5k2uvDAATDC9WNQTcSyKrQen14AE4AAzJEBJSYMMzUSz4IikdZUWggBgAuDRfAARihQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -976,13 +976,13 @@ Bare words are treated as strings:
 ### Arrays
 
 ```promptscript
-tags: [frontend, react, typescript]
-patterns: ["hooks", "composition", "render props"]
-numbers: [1, 2, 3]
+tags: [frontend react typescript]
+patterns: ["hooks" "composition" "render props"]
+numbers: [1 2 3]
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-lhgOZyIABMjDU2HVgBM6g6jAyMsMrAE808RtQhosAXQA6rTFg7VWA4fpA5mzANZwrMqyzLM4ELBDZPBVuVIw1II0zGiOIAasrACuJABGQRbIAIwyAEwyAMy6IAC+ugycWNQq+ESk5DBUtCAMAG5J3qz4KflAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-lhgOZyIABMjDU2HVgBNB1GBkZZBWAJ5p4jahDRYAugB1WmLB2qsBwvSBzNmAaziXBllmWZwIWCG0eXZUmNSCNMxoDiD6rKwAriQARgHmyACMggBMggDMOiAAvjoMnFjUyvhEpOQwVLQgDABuCV6s+Em5QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -1093,12 +1093,12 @@ Multiline strings (`"""..."""``) cannot be used as "loose" content inside an obj
 @standards {
   diagrams: {
     format: "Mermaid"
-    types: [flowchart, sequence]
+    types: [flowchart sequence]
     """
     Example:
     ```
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWOuLgYAEcAV05GGABdWzkbEBtZbQBRYjJYRBAAX0iGTixqe3wiUnIYKloQBgA3czgINnwARiygA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bORsQG1ltAFFiMlhEEABfCIZOLGp7fCJSchgqWhAGADdzOAg2fABGTKA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -1123,11 +1123,11 @@ Expecting token of type --> RBrace <-- but found --> '"""...
 @standards {
   diagrams: {
     format: "Mermaid"
-    types: [flowchart, sequence]
+    types: [flowchart sequence]
     example: """
       ```
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWOuLgYAEcAV05GGABdWzkiUnIYIxAbEBAAX0iGTixqe3w4skoaehAAN3M4CDZ8AEZ0oA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPGCIGAObVScRJJly5YZtRLYNUkAFkY+jBEHGt2rAE808DcjBRmAd0Y4RWcXBgARwBXTkYYAF1bOSJSchgjEBsQEABfCIZOLGp7fFiyShp6EAA3czgINnwARjSgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -1,0 +1,14 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on Apply ACME security standards to all code..
+
+Never:
+- Never store passwords in plain text
+- Never log sensitive data
+- Never disable security features
+- Never use eval() or similar unsafe functions
+- Always validate and sanitize user input
+- Always use parameterized queries

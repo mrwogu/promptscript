@@ -44,7 +44,7 @@ my-project/
 
 @standards {
   code: [
-    "Use functional programming style"
+    "Use functional programming style",
     "Document public APIs with JSDoc"
   ]
 }
@@ -57,7 +57,7 @@ my-project/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO7TOWCFkXC9ckLt-jBAE1mAFdBDGoYcMEcGCg0MBCoQRYpCFYAc3C4OAg4AXZBMGZqQVw8wTVNbQpvADFmRhC4QTYU2AxWOkFIjCkMACNYFOYpGFqAv1sHVicWdiIsL0nfVe8AFRwKiqF1xTQYAGVGagg0JaqtJeb0rJJRmGpxAfgL6gxtCEZ4CYkp-xmTnynX61CkLVEAVSMFkyG8fxAAFU4FFEqxPmwMMk1Bl3iQSLdBPlFLBbBIEQARRohPiFNAhIZfQQAQQACgBJFoAd3cOEEAClDlTGGTBABdMSA1jcOA4EpYJpYCHeeQAeli8XkphAhzlXMEXJw2EEilCKU6MTiaANvNFasiADcIDAuVqfAAlGBOl0jMZFEqCACOISx7k8eTgIXgdpAqo4+Td8gA6qcOIIQqx3GVXnBpiA7GKGK5qIp8ERSORxjR6CAHY9cmx8GZ80A" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO7TOWCFkXC9ckLt-jBAE1mAFdBDGoYcMEcGCg0MBCoQRYpCFYAc3C4OAg4AXZBMGZqQVw8wTVNbQpvADFmRhC4QTYU2AxWOkFIjCkMACNYFOYpGFqAv1sHVicWdiIsL0nfVe8AFRwKiqF1xTQYAGVGagg0JaqtJeb0rJJRmGpxAfgL6gxtCEZ4CYkp-xmTnynX61CkLVEAVSMFkyG8fxAAFU4FFEqxPmwMMk1Bl3iQSLdBPlFLB5HR4T4ACKNEJ8QpoEJDL6CACCAAUAJItADu7hwggAUodqYxbBIALpiQGsbhwHAlLBNLAQ7zyAD0sXi8lMIEO8u5gm5OGwgkUoRSnRicTQhr5Yp8asiADcIDBudqfAAlGAut0jMZFEqCACOISx7k8eTgIXg9vVHHyHvkAHVThxBCFWO4yq84NMQHZxQxXNRFPgiKRyOMaPQQE7Hrk2PgzAWgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

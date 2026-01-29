@@ -1,0 +1,23 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on Apply ACME security standards to all code..
+
+Commands:
+/threat-model - Help create a threat model
+/vuln-check - Check for common vulnerabilities
+/secure-code - Review code for security issues
+
+Never:
+- Never store passwords in plain text
+- Never log sensitive data (passwords, tokens, PII)
+- Never use MD5 or SHA1 for security purposes
+- Never disable TLS certificate verification
+- Never use eval() or similar unsafe functions
+- Never trust user input without validation
+- Never expose stack traces in production
+- Always use parameterized queries (no SQL concatenation)
+- Always validate and sanitize file uploads
+- Always implement rate limiting for APIs

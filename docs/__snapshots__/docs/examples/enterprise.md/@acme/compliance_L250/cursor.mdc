@@ -1,0 +1,13 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on Ensure code meets ACME compliance requirements..
+
+Never:
+- Never process data beyond stated purpose
+- Never retain data longer than necessary
+- Always document data processing activities
+- Always provide data subject rights mechanisms
+- Never transfer data to non-approved regions

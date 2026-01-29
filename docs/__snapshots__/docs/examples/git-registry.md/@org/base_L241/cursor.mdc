@@ -1,0 +1,11 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are an AI assistant at ACME Corp.
+Follow our coding standards and best practices.
+
+Never:
+- Never commit secrets
+- Always follow security policies

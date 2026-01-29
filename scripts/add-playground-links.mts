@@ -92,10 +92,40 @@ function encodeState(content: string, filename = 'example.prs'): string {
 }
 
 /**
+ * Prepare code for playground by commenting out @inherit and @use directives
+ * that reference registry packages (not local files).
+ *
+ * Registry packages are commented:
+ *   @inherit @company/base, @inherit @org/security
+ *   @use @company/security, @use @fragments/testing as test
+ *
+ * Local paths are kept as-is:
+ *   @inherit ./local.prs, @inherit ../parent.prs
+ */
+function prepareCodeForPlayground(code: string): string {
+  // Match @inherit or @use followed by @ and a namespace (registry reference)
+  // Pattern: @inherit/@use @namespace/path (optionally with @version and alias)
+  // Examples that get commented:
+  //   @inherit @company/base
+  //   @inherit @acme/frontend-team
+  //   @inherit @org/security@v1.0.0
+  //   @use @company/security
+  //   @use @fragments/testing as test
+  // Examples that stay uncommented:
+  //   @inherit ./local.prs
+  //   @inherit ../parent/file.prs
+  return code.replace(
+    /^(\s*)(@(?:inherit|use)\s+@[\w-]+\/[\w\/-]+(?:@v?[\d.]+)?(?:\s+as\s+\w+)?)\s*$/gm,
+    '$1# $2  # (registry - disabled for playground)'
+  );
+}
+
+/**
  * Generate playground URL for a code example.
  */
 function generatePlaygroundUrl(code: string, filename = 'example.prs'): string {
-  const encoded = encodeState(code, filename);
+  const preparedCode = prepareCodeForPlayground(code);
+  const encoded = encodeState(preparedCode, filename);
   return `${PLAYGROUND_URL}?s=${encoded}`;
 }
 

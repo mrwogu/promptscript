@@ -1,0 +1,14 @@
+# CLAUDE.md
+
+## Project
+
+You are working on a React application.
+Tech stack: TypeScript, React 18, Vite
+
+## Commands
+
+```
+/review    - Review code for quality and best practices
+/test      -
+/refactor  -
+```

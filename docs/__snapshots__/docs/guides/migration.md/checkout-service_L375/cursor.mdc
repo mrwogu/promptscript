@@ -1,0 +1,14 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are a senior developer working on the checkout service.
+
+Commands:
+/test - Run the test suite
+/lint - Run ESLint
+
+Never:
+- Never commit secrets
+- Don't use var

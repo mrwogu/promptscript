@@ -80,22 +80,22 @@ Group standards by category for clarity:
 ```promptscript
 @standards {
   code: [
-    "Use functional programming patterns"
+    "Use functional programming patterns",
     "Write pure functions when possible"
   ]
   testing: [
-    "Write tests for all public functions"
+    "Write tests for all public functions",
     "Use AAA pattern (Arrange, Act, Assert)"
   ]
   documentation: [
-    "Document public APIs with JSDoc"
+    "Document public APIs with JSDoc",
     "Keep README up to date"
   ]
 }
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMROOQy5cqSACqcGOLABXVoywQ2GKOJrMA5tVIkIrG1ewdqrOJrXrNAdWoIDisDaj1DY1M2CQB3HE4rZjg4CAAjWG9ZcQBdHw4+JxtlVSyNEACgvXysCTBmanELSzQDdIhGfSMTM09M9XFNHT0AQVHXLHdZAAph6ntnGDpxYZMl4eSYaiwASj6cn0FmRgMSTn4o1mKfMoARI5OzkLaO4YAFAElYoJxxACkAZTujD2ZQA0jAYGhxAAlACiwxuAFlYeIDFCsMxxMIOHtcqwAL4gfHZBhnagAT3wRFI5BgVFoIAYADdNik2PgAIxEoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMROOQy5cqSACqcGOLABXVoywQ2GKOJrMA5tVIkIrG1ewdqrOJrpr1mgOrUEBxWBtR6hsambBIA7jicVsxwcBAARrCavgC6vhx8TjbKqrJ+IIHBevlYEmDM1OIWlmgGGRCM+kYmZp7evhrauuIAgqOuWO6yABTD1PbOMHQjJkvDKTDUWACUWaW5pYLMjAYknPzRrMX94poAIkcnZ6FtHcMACgCSccE44gBSAGV7ow+qUBgBpGAwNDiABKAFFhrcALLw8QGGFYZjiYQcXZyfYAXxAhOyDDO1AAnvgiKRyDAqLQQAwAG4bVJsfAARhJQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -284,14 +284,14 @@ When combining multiple source files:
 ```promptscript
 @standards {
   code: [
-    "Use TypeScript"
+    "Use TypeScript",
     "Never use any"  # This is a restriction
   ]
 }
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMROOQy5cqSACqcGOIAqATzQwAyo2oQ0WTWvWaAcjABuMauICuu8QMOa5AMQGOBASoT7i1PBYloxYEGx2ALoyAL4gqUkMnDGG+ESk5DBUtCAMrrQJrPgAjBlAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEtBMROOQy5cqSACqcGOIAqATzQwAyo2oQ0WTXTXrNAORgA3GNXEBXXeIGHNcgDEBjgQEmG+4tTwWJaMWBBs9gC6MgC+IGnJDJyxhvhEpOQwVLQgDG60iaz4AIyZQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -475,7 +475,7 @@ You are a senior engineer working on the API service.
 
 @standards {
   code: [
-    "Write type hints for all functions"
+    "Write type hints for all functions",
     "Use async/await for I/O operations"
   ]
 }
@@ -492,7 +492,7 @@ You are a senior engineer working on the API service.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKABht7WAXzFju0zlghZDw-XJB7-cUEATWYAV0EMahhIwTVWCGZqQU4AcwhWGHVBAHckgGsM1ME2QVwYgEEABQBJOPUtHQpfAPsnVhcWdiIsHyCoDFZUsIxU+FlkNENcNgBdX2ow9gg+cxAq6ZxSgGYKCwt7CTBqUhg86ny4CbAMOAEleaCpbAwAI1uYNarmO9TogGUAIoAGTazlY3Dug2e1CkcD6EhYUk+gmQvgk8gA6tRPDEvGgYjgMlh4WAkpEoFBBGAlowPGw4IcJH4AKpqSJGViMAD0GByGE81PJNW5AHkSgSTvTWIzAhJHu0XNE7ji6YkZQjBMo-AARNgAcl6LBIJEFFE4Gmp0HgTO18gAcjANNk7kkYpg4HBznDJOJyALxBxCFgwR0IXAttQsIwwiTNfJuRw7vI1gAlJaCKZJ3rZuJhXFMhPI8jMQwp3UwEveLDMOICdJDFKsLTUNh8dhtEAOWYMdzUQz4IikcgwKi0EAMZ20dX4CxdoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKABht7WAXzFju0zlghZDw-XJB7-cUEATWYAV0EMahhIwTVWCGZqQU4AcwhWGHVBAHckgGsM1ME2QVwYgEEABQBJOPUtHQpfAPsnVhcWdiIsHyCoDFZUsIxU+FlkNENcNgBdX2ow9gg+cxAq6ZxSgGYKCwt7CTBqUhg86ny4CbAMOAEleaCpbAwAI1uYNarmO9TogGUAIoAGTazlY3Dug2e1CkcD6EhYUk+gmQvgk8gA6tRPDEvGgYjgMlh4WAkpEoFBBGAlowPGw4PI6Oi-ABVNSRIysRgAegwOQwnmp5JqPIA8iUCSd6axGYEJI92i5onccXTErKEYJlH4ACJsADkvRYJBIQoonA01Og8EO2r8ADkYBpsnckjFMHA4Oc4ZJxORBeIOIQsGCOhC4FtqFhGGESVr5DyOHd5GsAEpLQRTZO9HNxMK4u2J5HkZiGVN6mCl7xYZhxATpIYpVhaahsPjsNogByzBjuaiGfBEUjkGBUWggBgu2ga-AWbtAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->

@@ -17,6 +17,8 @@
     "docs:generate": "typedoc",
     "playground:serve": "nx serve playground",
     "playground:links": "ts-node --esm scripts/add-playground-links.mts",
+    "docs:validate": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts",
+    "docs:validate:check": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts --check",
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "prepare": "husky"
   },

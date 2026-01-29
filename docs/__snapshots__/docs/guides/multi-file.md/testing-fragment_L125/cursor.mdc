@@ -1,0 +1,4 @@
+Write tests using:
+    - Vitest as the test runner
+    - Testing Library for DOM testing
+    - MSW for API mocking
