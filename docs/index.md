@@ -21,6 +21,11 @@ _Standardize, Audit, and Deploy AI Instructions across your entire Engineering O
 
 <div class="feature-grid" markdown>
 
+<div class="feature-card feature-card--highlight" markdown>
+### :material-package-variant: Registry & Sharing
+Publish and share instruction packages across your organization. Teams inherit from `@company/standards` — update once, propagate everywhere.
+</div>
+
 <div class="feature-card" markdown>
 ### :material-gavel: Enterprise Governance
 Enforce non-negotiable standards globally. Define policies once, apply them everywhere (e.g., "No `any` in TS", "Use parameterized SQL Queries").
@@ -28,7 +33,7 @@ Enforce non-negotiable standards globally. Define policies once, apply them ever
 
 <div class="feature-card" markdown>
 ### :material-lock-off: Vendor Independence
-Don't lock your organization's intellectual property into one tool. Write logic in PromptScript, deploy to GitHub Copilot, Claude, or Cursor.
+Don't lock your organization's IP into one tool. Write logic in PromptScript, deploy to GitHub Copilot, Claude, or Cursor.
 </div>
 
 <div class="feature-card" markdown>
@@ -37,28 +42,13 @@ Structure instructions like code. Inherit from `@company/backend-security` or `@
 </div>
 
 <div class="feature-card" markdown>
-### :material-refresh: Managed Lifecycle
-Update a central policy and propagate changes to 100+ repositories automatically. No more manual copy-pasting.
-</div>
-
-<div class="feature-card" markdown>
-### :material-robot: AI-Assisted Migration
-Already have existing AI instructions? Use the `/migrate` command to automatically convert `CLAUDE.md`, `.cursorrules`, `copilot-instructions.md`, or Antigravity rules to PromptScript.
-</div>
-
-<div class="feature-card" markdown>
-### :material-cog-play: Skills & Agents
-Define reusable commands, skills, and AI agents with specific tools and permissions.
-</div>
-
-<div class="feature-card" markdown>
 ### :material-shield-check: Validation & Linting
 Catch syntax errors, missing fields, and policy violations before they reach production.
 </div>
 
 <div class="feature-card" markdown>
-### :material-package-variant: Registry & Sharing
-Publish and share instruction packages across your organization via `@inherit @company/standards`.
+### :material-cog-play: Skills & Agents
+Define reusable commands, skills, and AI agents with specific tools and permissions.
 </div>
 
 </div>

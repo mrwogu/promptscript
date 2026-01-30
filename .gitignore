@@ -35,6 +35,7 @@ coverage/
 *.swp
 *.swo
 *.code-workspace
+.playwright-mcp/
 
 # OS
 .DS_Store
