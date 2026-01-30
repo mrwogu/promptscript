@@ -10,6 +10,9 @@ export function Header() {
   const setShowExamples = usePlaygroundStore((s) => s.setShowExamples);
   const showConfig = usePlaygroundStore((s) => s.showConfig);
   const setShowConfig = usePlaygroundStore((s) => s.setShowConfig);
+  const showEnvVars = usePlaygroundStore((s) => s.showEnvVars);
+  const setShowEnvVars = usePlaygroundStore((s) => s.setShowEnvVars);
+  const envVarsCount = Object.keys(usePlaygroundStore((s) => s.config.envVars)).length;
   const { handleShare } = useUrlState();
 
   const [showCopied, setShowCopied] = useState(false);
@@ -82,6 +85,30 @@ export function Header() {
             />
           </svg>
           Config
+        </button>
+
+        {/* Env vars button */}
+        <button
+          onClick={() => setShowEnvVars(!showEnvVars)}
+          className={`px-3 py-1 text-sm rounded flex items-center gap-1 ${
+            showEnvVars ? 'bg-ps-primary text-white' : 'bg-ps-bg hover:bg-ps-surface text-gray-300'
+          }`}
+          title="Environment Variables"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          Env
+          {envVarsCount > 0 && (
+            <span className="ml-1 px-1.5 py-0.5 text-xs bg-indigo-500 rounded-full">
+              {envVarsCount}
+            </span>
+          )}
         </button>
 
         {/* Examples button */}

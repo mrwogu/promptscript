@@ -61,6 +61,7 @@ export function useCompiler() {
           proseWrap: config.formatting.proseWrap,
           printWidth: config.formatting.printWidth,
         },
+        envVars: config.envVars,
       });
       setCompileResult(result);
     } catch (error) {

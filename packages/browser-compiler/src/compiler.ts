@@ -56,6 +56,12 @@ export interface BrowserCompilerOptions {
   logger?: Logger;
   /** Whether to cache resolved ASTs. Defaults to true. */
   cache?: boolean;
+  /**
+   * Simulated environment variables for interpolation.
+   * When provided, ${VAR} and ${VAR:-default} syntax in source files
+   * will be replaced with values from this map.
+   */
+  envVars?: Record<string, string>;
 }
 
 /**
@@ -139,6 +145,7 @@ export class BrowserCompiler {
       fs: options.fs,
       cache: options.cache,
       logger: this.logger,
+      envVars: options.envVars,
     });
 
     this.validator = new Validator({ ...options.validator, logger: this.logger });

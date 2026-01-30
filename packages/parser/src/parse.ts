@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { PSLexer } from './lexer/lexer.js';
 import { parser } from './grammar/parser.js';
-import { visitor } from './grammar/visitor.js';
+import { visitor, type EnvProvider } from './grammar/visitor.js';
 import type { Program } from '@promptscript/core';
 import { ParseError } from '@promptscript/core';
 
@@ -27,6 +27,13 @@ export interface ParseOptions {
    * actual environment variable values.
    */
   interpolateEnv?: boolean;
+  /**
+   * Custom environment provider function for variable interpolation.
+   * When provided, this function is used to look up environment variable values
+   * instead of the default process.env lookup.
+   * Only used when interpolateEnv is true.
+   */
+  envProvider?: EnvProvider;
 }
 
 /**
@@ -72,6 +79,7 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     tolerant = false,
     recovery = false,
     interpolateEnv = false,
+    envProvider,
   } = options;
   const isRecoveryMode = tolerant || recovery;
   const errors: ParseError[] = [];
@@ -117,6 +125,11 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
   try {
     // Configure visitor with interpolation setting
     visitor.setInterpolateEnv(interpolateEnv);
+    if (envProvider) {
+      visitor.setEnvProvider(envProvider);
+    } else {
+      visitor.resetEnvProvider();
+    }
     const ast = visitor.visit(cst, filename) as Program;
     return { ast, errors };
   } catch (err) {

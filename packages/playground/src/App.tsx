@@ -4,6 +4,7 @@ import { Editor } from './components/Editor';
 import { OutputPanel } from './components/OutputPanel';
 import { ExampleGallery } from './components/ExampleGallery';
 import { ConfigPanel } from './components/ConfigPanel';
+import { EnvVarsPanel } from './components/EnvVarsPanel';
 import { useCompiler } from './hooks/useCompiler';
 import { usePlaygroundStore } from './store';
 
@@ -35,6 +36,7 @@ export function App() {
       {/* Modals */}
       {showExamples && <ExampleGallery />}
       <ConfigPanel />
+      <EnvVarsPanel />
     </div>
   );
 }

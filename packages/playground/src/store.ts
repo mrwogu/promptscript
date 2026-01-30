@@ -38,6 +38,11 @@ export interface FormattingSettings {
 export interface PlaygroundConfig {
   targets: Record<FormatterName, TargetSettings>;
   formatting: FormattingSettings;
+  /**
+   * Simulated environment variables for interpolation.
+   * These are used to replace ${VAR} and ${VAR:-default} syntax in source files.
+   */
+  envVars: Record<string, string>;
 }
 
 export interface PlaygroundState {
@@ -58,6 +63,7 @@ export interface PlaygroundState {
   showErrors: boolean;
   showExamples: boolean;
   showConfig: boolean;
+  showEnvVars: boolean;
 
   // File actions
   setActiveFile: (path: string) => void;
@@ -78,11 +84,17 @@ export interface PlaygroundState {
   setFormatting: (formatting: Partial<FormattingSettings>) => void;
   setConfig: (config: PlaygroundConfig) => void;
 
+  // Env vars actions
+  setEnvVar: (name: string, value: string) => void;
+  deleteEnvVar: (name: string) => void;
+  setEnvVars: (vars: Record<string, string>) => void;
+
   // UI actions
   setActiveFormatter: (formatter: FormatterName) => void;
   setShowErrors: (show: boolean) => void;
   setShowExamples: (show: boolean) => void;
   setShowConfig: (show: boolean) => void;
+  setShowEnvVars: (show: boolean) => void;
 }
 
 const DEFAULT_FILE = `@meta {
@@ -173,6 +185,7 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     proseWrap: 'preserve',
     printWidth: 80,
   },
+  envVars: {},
 };
 
 export const usePlaygroundStore = create<PlaygroundState>((set) => ({
@@ -187,6 +200,7 @@ export const usePlaygroundStore = create<PlaygroundState>((set) => ({
   showErrors: false,
   showExamples: false,
   showConfig: false,
+  showEnvVars: false,
 
   // File actions
   setActiveFile: (path) => set({ activeFile: path }),
@@ -276,11 +290,41 @@ export const usePlaygroundStore = create<PlaygroundState>((set) => ({
 
   setConfig: (config) => set({ config }),
 
+  // Env vars actions
+  setEnvVar: (name, value) =>
+    set((state) => ({
+      config: {
+        ...state.config,
+        envVars: { ...state.config.envVars, [name]: value },
+      },
+    })),
+
+  deleteEnvVar: (name) =>
+    set((state) => {
+      const { [name]: _deleted, ...rest } = state.config.envVars;
+      void _deleted; // Intentionally unused - destructuring to remove key
+      return {
+        config: {
+          ...state.config,
+          envVars: rest,
+        },
+      };
+    }),
+
+  setEnvVars: (vars) =>
+    set((state) => ({
+      config: {
+        ...state.config,
+        envVars: vars,
+      },
+    })),
+
   // UI actions
   setActiveFormatter: (formatter) => set({ activeFormatter: formatter }),
   setShowErrors: (show) => set({ showErrors: show }),
   setShowExamples: (show) => set({ showExamples: show }),
   setShowConfig: (show) => set({ showConfig: show }),
+  setShowEnvVars: (show) => set({ showEnvVars: show }),
 }));
 
 // Selectors

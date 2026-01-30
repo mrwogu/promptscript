@@ -16,4 +16,4 @@ export * from './lexer/tokens.js';
 
 // Parser components
 export { PromptScriptParser, parser } from './grammar/parser.js';
-export { visitor } from './grammar/visitor.js';
+export { visitor, type EnvProvider } from './grammar/visitor.js';

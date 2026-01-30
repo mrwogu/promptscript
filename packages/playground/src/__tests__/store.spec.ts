@@ -23,6 +23,7 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     proseWrap: 'preserve',
     printWidth: 80,
   },
+  envVars: {},
 };
 
 describe('PlaygroundStore', () => {
@@ -39,6 +40,7 @@ describe('PlaygroundStore', () => {
       showErrors: false,
       showExamples: false,
       showConfig: false,
+      showEnvVars: false,
     });
   });
 
@@ -185,6 +187,13 @@ describe('PlaygroundStore', () => {
 
       expect(usePlaygroundStore.getState().showConfig).toBe(true);
     });
+
+    it('should toggle env vars visibility', () => {
+      const { setShowEnvVars } = usePlaygroundStore.getState();
+      setShowEnvVars(true);
+
+      expect(usePlaygroundStore.getState().showEnvVars).toBe(true);
+    });
   });
 
   describe('config state', () => {
@@ -303,6 +312,108 @@ describe('PlaygroundStore', () => {
       expect(state.config.targets.github.enabled).toBe(true);
       expect(state.config.targets.github.version).toBe('full');
       expect(state.config.targets.github.convention).toBe('xml');
+    });
+  });
+
+  describe('envVars state', () => {
+    it('should set a single env var', () => {
+      const { setEnvVar } = usePlaygroundStore.getState();
+      setEnvVar('API_KEY', 'test-123');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.API_KEY).toBe('test-123');
+    });
+
+    it('should update an existing env var', () => {
+      const { setEnvVar } = usePlaygroundStore.getState();
+      setEnvVar('API_KEY', 'test-123');
+      setEnvVar('API_KEY', 'updated-value');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.API_KEY).toBe('updated-value');
+    });
+
+    it('should set multiple env vars', () => {
+      const { setEnvVar } = usePlaygroundStore.getState();
+      setEnvVar('API_KEY', 'key-123');
+      setEnvVar('PROJECT_NAME', 'my-project');
+      setEnvVar('ENV', 'production');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.API_KEY).toBe('key-123');
+      expect(state.config.envVars.PROJECT_NAME).toBe('my-project');
+      expect(state.config.envVars.ENV).toBe('production');
+    });
+
+    it('should delete an env var', () => {
+      const { setEnvVar, deleteEnvVar } = usePlaygroundStore.getState();
+      setEnvVar('API_KEY', 'test-123');
+      setEnvVar('OTHER_VAR', 'other-value');
+      deleteEnvVar('API_KEY');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.API_KEY).toBeUndefined();
+      expect(state.config.envVars.OTHER_VAR).toBe('other-value');
+    });
+
+    it('should handle deleting non-existent env var', () => {
+      const { deleteEnvVar } = usePlaygroundStore.getState();
+      deleteEnvVar('NON_EXISTENT');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.NON_EXISTENT).toBeUndefined();
+    });
+
+    it('should replace all env vars with setEnvVars', () => {
+      const { setEnvVar, setEnvVars } = usePlaygroundStore.getState();
+      setEnvVar('OLD_VAR', 'old-value');
+
+      setEnvVars({
+        NEW_VAR_1: 'new-value-1',
+        NEW_VAR_2: 'new-value-2',
+      });
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.OLD_VAR).toBeUndefined();
+      expect(state.config.envVars.NEW_VAR_1).toBe('new-value-1');
+      expect(state.config.envVars.NEW_VAR_2).toBe('new-value-2');
+    });
+
+    it('should clear all env vars with empty object', () => {
+      const { setEnvVar, setEnvVars } = usePlaygroundStore.getState();
+      setEnvVar('VAR_1', 'value-1');
+      setEnvVar('VAR_2', 'value-2');
+
+      setEnvVars({});
+
+      const state = usePlaygroundStore.getState();
+      expect(Object.keys(state.config.envVars)).toHaveLength(0);
+    });
+
+    it('should preserve other config when modifying envVars', () => {
+      const { setEnvVar, setTargetEnabled } = usePlaygroundStore.getState();
+      setTargetEnabled('github', false);
+      setEnvVar('TEST_VAR', 'test-value');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.targets.github.enabled).toBe(false);
+      expect(state.config.envVars.TEST_VAR).toBe('test-value');
+    });
+
+    it('should handle env var with empty string value', () => {
+      const { setEnvVar } = usePlaygroundStore.getState();
+      setEnvVar('EMPTY_VAR', '');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.EMPTY_VAR).toBe('');
+    });
+
+    it('should handle env var with special characters in value', () => {
+      const { setEnvVar } = usePlaygroundStore.getState();
+      setEnvVar('SPECIAL_VAR', 'value with spaces & special chars! @#$%');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.config.envVars.SPECIAL_VAR).toBe('value with spaces & special chars! @#$%');
     });
   });
 

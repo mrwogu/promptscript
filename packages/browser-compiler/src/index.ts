@@ -96,6 +96,12 @@ export interface CompileOptions {
    * Prettier formatting options for markdown output.
    */
   prettier?: BrowserCompilerOptions['prettier'];
+  /**
+   * Simulated environment variables for interpolation.
+   * When provided, ${VAR} and ${VAR:-default} syntax in source files
+   * will be replaced with values from this map.
+   */
+  envVars?: Record<string, string>;
 }
 
 /**
@@ -150,6 +156,7 @@ export async function compile(
     validator: options.validator,
     customConventions: options.customConventions,
     prettier: options.prettier,
+    envVars: options.envVars,
   });
 
   // Compile

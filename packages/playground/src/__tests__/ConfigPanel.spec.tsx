@@ -19,6 +19,7 @@ describe('ConfigPanel', () => {
           proseWrap: 'preserve',
           printWidth: 80,
         },
+        envVars: {},
       },
       showConfig: false,
     });
@@ -142,6 +143,7 @@ describe('ConfigPanel', () => {
           proseWrap: 'preserve',
           printWidth: 80,
         },
+        envVars: {},
       },
     });
     render(<ConfigPanel />);

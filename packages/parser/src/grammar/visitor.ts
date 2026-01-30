@@ -21,11 +21,24 @@ import type {
 const BaseVisitor = parser.getBaseCstVisitorConstructor();
 
 /**
+ * Function type for providing environment variable values.
+ * Returns the value for the given variable name, or undefined if not set.
+ */
+export type EnvProvider = (name: string) => string | undefined;
+
+/**
+ * Default environment provider that uses process.env.
+ * This is suitable for Node.js CLI environments.
+ */
+const defaultEnvProvider: EnvProvider = (name: string) => process.env[name];
+
+/**
  * CST Visitor that transforms Concrete Syntax Tree to AST.
  */
 class PromptScriptVisitor extends BaseVisitor {
   private filename: string = '<unknown>';
   private interpolateEnv: boolean = false;
+  private envProvider: EnvProvider = defaultEnvProvider;
 
   constructor() {
     super();
@@ -44,6 +57,21 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   setInterpolateEnv(enabled: boolean): void {
     this.interpolateEnv = enabled;
+  }
+
+  /**
+   * Set a custom environment provider function.
+   * Use this to provide environment variables from sources other than process.env.
+   */
+  setEnvProvider(provider: EnvProvider): void {
+    this.envProvider = provider;
+  }
+
+  /**
+   * Reset the environment provider to the default (process.env).
+   */
+  resetEnvProvider(): void {
+    this.envProvider = defaultEnvProvider;
   }
 
   /**
@@ -499,7 +527,7 @@ class PromptScriptVisitor extends BaseVisitor {
     const envVarPattern = /\$\{([A-Za-z_]\w*)(?::-([^}]*))?\}/g;
 
     return text.replace(envVarPattern, (_match, varName: string, defaultValue?: string) => {
-      const envValue = process.env[varName];
+      const envValue = this.envProvider(varName);
 
       if (envValue !== undefined) {
         return envValue;

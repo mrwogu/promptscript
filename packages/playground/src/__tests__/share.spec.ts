@@ -176,6 +176,7 @@ describe('share utilities', () => {
         proseWrap: 'preserve',
         printWidth: 80,
       },
+      envVars: {},
     };
 
     it('should not include config if all values are default', () => {
@@ -348,6 +349,96 @@ describe('share utilities', () => {
       expect(merged.targets.claude.convention).toBe('xml');
       expect(merged.targets.claude.enabled).toBe(true); // default
       expect(merged.targets.claude.version).toBe('full'); // default
+    });
+
+    it('should not include envVars when empty (default)', () => {
+      const encoded = encodeState(mockFiles, 'github', undefined, defaultConfig);
+      const decoded = decodeState(encoded);
+      expect(decoded?.config?.envVars).toBeUndefined();
+    });
+
+    it('should include envVars when not empty', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        envVars: {
+          API_KEY: 'test-123',
+          PROJECT_NAME: 'my-project',
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.envVars).toEqual({
+        API_KEY: 'test-123',
+        PROJECT_NAME: 'my-project',
+      });
+    });
+
+    it('should preserve envVars through round-trip encoding', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        envVars: {
+          SPECIAL_CHARS: 'value with spaces & symbols!',
+          EMPTY_VALUE: '',
+          UNICODE: '日本語テスト',
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.envVars?.SPECIAL_CHARS).toBe('value with spaces & symbols!');
+      expect(decoded?.config?.envVars?.EMPTY_VALUE).toBe('');
+      expect(decoded?.config?.envVars?.UNICODE).toBe('日本語テスト');
+    });
+
+    it('mergeConfigWithDefaults should merge envVars from partial', () => {
+      const partial = {
+        envVars: {
+          API_KEY: 'from-url',
+          DEBUG: 'true',
+        },
+      };
+
+      const merged = mergeConfigWithDefaults(partial);
+
+      expect(merged.envVars).toEqual({
+        API_KEY: 'from-url',
+        DEBUG: 'true',
+      });
+      // Other config should be defaults
+      expect(merged.targets.github.enabled).toBe(true);
+      expect(merged.formatting.tabWidth).toBe(2);
+    });
+
+    it('mergeConfigWithDefaults should use empty envVars by default', () => {
+      const merged = mergeConfigWithDefaults(undefined);
+      expect(merged.envVars).toEqual({});
+    });
+
+    it('should include envVars with other config changes', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        targets: {
+          ...defaultConfig.targets,
+          github: { enabled: false, version: 'full' },
+        },
+        formatting: {
+          ...defaultConfig.formatting,
+          tabWidth: 4,
+        },
+        envVars: {
+          VAR1: 'value1',
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'github', undefined, config);
+      const decoded = decodeState(encoded);
+
+      expect(decoded?.config?.targets?.github?.enabled).toBe(false);
+      expect(decoded?.config?.formatting?.tabWidth).toBe(4);
+      expect(decoded?.config?.envVars?.VAR1).toBe('value1');
     });
   });
 

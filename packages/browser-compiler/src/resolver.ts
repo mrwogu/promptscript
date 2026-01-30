@@ -40,6 +40,12 @@ export interface BrowserResolverOptions {
   cache?: boolean;
   /** Logger for verbose/debug output */
   logger?: Logger;
+  /**
+   * Simulated environment variables for interpolation.
+   * When provided, ${VAR} and ${VAR:-default} syntax in source files
+   * will be replaced with values from this map.
+   */
+  envVars?: Record<string, string>;
 }
 
 /**
@@ -70,6 +76,7 @@ export class BrowserResolver {
   private readonly resolving: Set<string>;
   private readonly cacheEnabled: boolean;
   private readonly logger: Logger;
+  private readonly envVars?: Record<string, string>;
 
   constructor(options: BrowserResolverOptions) {
     this.fs = options.fs;
@@ -77,6 +84,7 @@ export class BrowserResolver {
     this.resolving = new Set();
     this.cacheEnabled = options.cache !== false;
     this.logger = options.logger ?? noopLogger;
+    this.envVars = options.envVars;
   }
 
   /**
@@ -242,7 +250,16 @@ export class BrowserResolver {
       return { ast: null };
     }
 
-    const parseResult = parse(source, { filename: absPath });
+    // Configure parsing options
+    const parseOptions: Parameters<typeof parse>[1] = { filename: absPath };
+
+    // Enable environment variable interpolation if envVars are provided
+    if (this.envVars && Object.keys(this.envVars).length > 0) {
+      parseOptions.interpolateEnv = true;
+      parseOptions.envProvider = (name: string) => this.envVars?.[name];
+    }
+
+    const parseResult = parse(source, parseOptions);
 
     if (!parseResult.ast) {
       for (const e of parseResult.errors) {

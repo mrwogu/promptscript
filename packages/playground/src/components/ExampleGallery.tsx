@@ -6,6 +6,8 @@ interface Example {
   description: string;
   complexity: 'beginner' | 'intermediate' | 'advanced';
   files: FileState[];
+  /** Optional environment variables to set when loading this example */
+  envVars?: Record<string, string>;
 }
 
 const EXAMPLES: Example[] = [
@@ -89,6 +91,63 @@ const EXAMPLES: Example[] = [
   },
 
   // === INTERMEDIATE ===
+  {
+    id: 'with-env-vars',
+    name: 'Environment Variables',
+    description: 'Using ${VAR} and ${VAR:-default} for dynamic configuration',
+    complexity: 'intermediate',
+    envVars: {
+      PROJECT_NAME: 'My Awesome Project',
+      API_VERSION: 'v2',
+      TEAM_NAME: 'Platform Team',
+    },
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "env-vars-example"
+  syntax: "1.0.0"
+}
+
+@identity {
+  """
+  You are an assistant for \${PROJECT_NAME}.
+  You help the \${TEAM_NAME} build great software.
+  """
+}
+
+@context {
+  """
+  Project: \${PROJECT_NAME}
+  API Version: \${API_VERSION}
+  Team: \${TEAM_NAME}
+  Environment: \${ENVIRONMENT:-development}
+  Debug Mode: \${DEBUG:-false}
+  """
+
+  # Object properties also support env vars
+  project: "\${PROJECT_NAME}"
+  apiVersion: "\${API_VERSION}"
+  logLevel: "\${LOG_LEVEL:-info}"
+}
+
+@standards {
+  # Env vars work in nested structures too
+  api: {
+    version: "\${API_VERSION}"
+    baseUrl: "\${API_BASE_URL:-https://api.example.com}"
+  }
+}
+
+@restrictions {
+  - "Follow \${TEAM_NAME} coding guidelines"
+  - "Use \${API_VERSION} API endpoints"
+  - "Log level must be \${LOG_LEVEL:-info} or higher"
+}
+`,
+      },
+    ],
+  },
   {
     id: 'with-standards',
     name: 'With Standards',
@@ -616,9 +675,12 @@ const COMPLEXITY_LABELS = {
 export function ExampleGallery() {
   const setFiles = usePlaygroundStore((s) => s.setFiles);
   const setShowExamples = usePlaygroundStore((s) => s.setShowExamples);
+  const setEnvVars = usePlaygroundStore((s) => s.setEnvVars);
 
   const loadExample = (example: Example) => {
     setFiles(example.files);
+    // Set env vars if the example has them, otherwise clear them
+    setEnvVars(example.envVars ?? {});
     setShowExamples(false);
   };
 
@@ -662,6 +724,11 @@ export function ExampleGallery() {
         )}
         {example.files.some((f) => f.content.includes('@agents')) && (
           <span className="text-xs px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded">agents</span>
+        )}
+        {example.envVars && Object.keys(example.envVars).length > 0 && (
+          <span className="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">
+            env vars
+          </span>
         )}
       </div>
     </button>

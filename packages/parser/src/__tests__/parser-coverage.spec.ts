@@ -699,6 +699,78 @@ describe('visitor coverage - edge cases', () => {
       }
       delete process.env['TEXT_BLOCK_VAR'];
     });
+
+    it('should use custom envProvider when provided', () => {
+      const customEnvVars: Record<string, string> = {
+        CUSTOM_VAR: 'custom-value',
+        API_KEY: 'sk-test-123',
+      };
+
+      const source = `
+        @meta { id: "test" }
+        @config {
+          value: "\${CUSTOM_VAR}"
+          key: "\${API_KEY}"
+        }
+      `;
+      const result = parse(source, {
+        interpolateEnv: true,
+        envProvider: (name) => customEnvVars[name],
+      });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe('custom-value');
+        expect(configBlock.content.properties['key']).toBe('sk-test-123');
+      }
+    });
+
+    it('should use default when custom envProvider returns undefined', () => {
+      const source = `
+        @meta { id: "test" }
+        @config {
+          value: "\${MISSING:-fallback}"
+        }
+      `;
+      const result = parse(source, {
+        interpolateEnv: true,
+        envProvider: () => undefined,
+      });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe('fallback');
+      }
+    });
+
+    it('should reset to default envProvider when not provided', () => {
+      // First parse with custom provider
+      const customSource = `
+        @meta { id: "test" }
+        @config { value: "\${RESET_TEST_VAR}" }
+      `;
+      parse(customSource, {
+        interpolateEnv: true,
+        envProvider: () => 'custom',
+      });
+
+      // Now parse without custom provider - should use process.env
+      process.env['RESET_TEST_VAR'] = 'from-process-env';
+      const source = `
+        @meta { id: "test" }
+        @config { value: "\${RESET_TEST_VAR}" }
+      `;
+      const result = parse(source, { interpolateEnv: true });
+
+      expect(result.errors).toHaveLength(0);
+      const configBlock = result.ast?.blocks.find((b) => b.name === 'config');
+      if (configBlock?.content?.type === 'ObjectContent') {
+        expect(configBlock.content.properties['value']).toBe('from-process-env');
+      }
+      delete process.env['RESET_TEST_VAR'];
+    });
   });
 
   describe('type expressions', () => {

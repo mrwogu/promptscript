@@ -12,6 +12,7 @@ import type { FileState, FormatterName, PlaygroundConfig, TargetSettings } from 
 export interface PartialConfig {
   targets?: Partial<Record<FormatterName, Partial<TargetSettings>>>;
   formatting?: Partial<PlaygroundConfig['formatting']>;
+  envVars?: Record<string, string>;
 }
 
 /**
@@ -47,6 +48,7 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     proseWrap: 'preserve',
     printWidth: 80,
   },
+  envVars: {},
 };
 
 /**
@@ -97,6 +99,11 @@ function getConfigDiff(config: PlaygroundConfig): PartialConfig | undefined {
     diff.formatting = formattingDiff;
   }
 
+  // Check envVars - include if any variables are defined
+  if (config.envVars && Object.keys(config.envVars).length > 0) {
+    diff.envVars = config.envVars;
+  }
+
   return Object.keys(diff).length > 0 ? diff : undefined;
 }
 
@@ -109,6 +116,7 @@ export function mergeConfigWithDefaults(partial?: PartialConfig): PlaygroundConf
   const config: PlaygroundConfig = {
     targets: { ...DEFAULT_CONFIG.targets },
     formatting: { ...DEFAULT_CONFIG.formatting },
+    envVars: { ...DEFAULT_CONFIG.envVars },
   };
 
   // Merge targets
@@ -130,6 +138,11 @@ export function mergeConfigWithDefaults(partial?: PartialConfig): PlaygroundConf
       ...config.formatting,
       ...partial.formatting,
     };
+  }
+
+  // Merge envVars
+  if (partial.envVars) {
+    config.envVars = { ...partial.envVars };
   }
 
   return config;

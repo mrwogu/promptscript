@@ -652,3 +652,142 @@ describe('getBundledRegistryFiles', () => {
     expect(files['@core/base.prs']).toContain('@identity');
   });
 });
+
+describe('envVars interpolation', () => {
+  it('should interpolate environment variables when envVars option is provided', async () => {
+    const files = {
+      'project.prs': `
+        @meta {
+          id: "test-project"
+          syntax: "1.0.0"
+        }
+        @identity {
+          """
+          API Key: \${API_KEY}
+          Project: \${PROJECT_NAME}
+          """
+        }
+      `,
+    };
+
+    const result = await compile(files, 'project.prs', {
+      envVars: {
+        API_KEY: 'sk-test-123',
+        PROJECT_NAME: 'my-project',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    expect(claudeOutput?.content).toContain('API Key: sk-test-123');
+    expect(claudeOutput?.content).toContain('Project: my-project');
+  });
+
+  it('should use default values for missing env vars', async () => {
+    const files = {
+      'project.prs': `
+        @meta {
+          id: "test-project"
+          syntax: "1.0.0"
+        }
+        @identity {
+          """
+          apiKey: \${API_KEY:-default-key}
+          timeout: \${TIMEOUT:-30}
+          """
+        }
+      `,
+    };
+
+    const result = await compile(files, 'project.prs', {
+      envVars: {
+        API_KEY: 'provided-key',
+        // TIMEOUT is not provided, should use default
+      },
+    });
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    expect(claudeOutput?.content).toContain('provided-key');
+    expect(claudeOutput?.content).toContain('timeout: 30');
+  });
+
+  it('should not interpolate when envVars is not provided', async () => {
+    const files = {
+      'project.prs': `
+        @meta {
+          id: "test-project"
+          syntax: "1.0.0"
+        }
+        @identity {
+          """
+          Value is: \${SOME_VAR}
+          """
+        }
+      `,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    // Without envVars, the ${SOME_VAR} should remain unchanged
+    expect(claudeOutput?.content).toContain('${SOME_VAR}');
+  });
+
+  it('should not interpolate when envVars is empty', async () => {
+    const files = {
+      'project.prs': `
+        @meta {
+          id: "test-project"
+          syntax: "1.0.0"
+        }
+        @identity {
+          """
+          Value is: \${EMPTY_VAR}
+          """
+        }
+      `,
+    };
+
+    const result = await compile(files, 'project.prs', {
+      envVars: {},
+    });
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    // With empty envVars object, interpolation should not happen
+    expect(claudeOutput?.content).toContain('${EMPTY_VAR}');
+  });
+
+  it('should interpolate in inherited files', async () => {
+    const files = {
+      'base.prs': `
+        @meta { id: "base" syntax: "1.0.0" }
+        @identity {
+          """Base with \${BASE_VAR}"""
+        }
+      `,
+      'project.prs': `
+        @meta { id: "project" syntax: "1.0.0" }
+        @inherit ./base
+        @identity {
+          """Child with \${CHILD_VAR}"""
+        }
+      `,
+    };
+
+    const result = await compile(files, 'project.prs', {
+      envVars: {
+        BASE_VAR: 'base-value',
+        CHILD_VAR: 'child-value',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    // When inheriting, base content comes first, child content follows
+    expect(claudeOutput?.content).toContain('base-value');
+    expect(claudeOutput?.content).toContain('child-value');
+  });
+});
