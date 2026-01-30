@@ -296,12 +296,8 @@ export class GitRegistry implements Registry {
     } catch (err) {
       const error = err as Error;
 
-      // Check if it's an auth error
-      if (this.isAuthError(error)) {
-        throw new GitAuthError(`Authentication failed for ${this.url}`, this.url, error);
-      }
-
-      // Check if ref doesn't exist - try fetching all refs
+      // Check if ref doesn't exist first (more specific than auth errors)
+      // A "branch not found" can sometimes look like an auth error to git
       if (this.isRefError(error)) {
         // Try cloning without branch specification and checkout afterward
         try {
@@ -321,6 +317,11 @@ export class GitRegistry implements Registry {
           );
         }
         return;
+      }
+
+      // Check if it's an auth error
+      if (this.isAuthError(error)) {
+        throw new GitAuthError(`Authentication failed for ${this.url}`, this.url, error);
       }
 
       throw new GitCloneError(`Failed to clone repository: ${error.message}`, this.url, error);
