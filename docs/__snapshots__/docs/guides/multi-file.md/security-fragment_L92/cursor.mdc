@@ -5,6 +5,12 @@ alwaysApply: true
 
 You are working on the project.
 
+Code style:
+- Authentication required
+- Use RBAC for authorization
+- Input validation required
+- Output encoding required
+
 Never:
 - Never expose API keys or secrets in code
 - Never commit credentials to version control

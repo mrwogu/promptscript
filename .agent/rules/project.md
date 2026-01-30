@@ -1,6 +1,6 @@
 # Project Rules
 
-<!-- PromptScript 2026-01-28T20:23:43.566Z - do not edit -->
+<!-- PromptScript 2026-01-30T14:27:58.881Z - do not edit -->
 
 ## Project Identity
 
@@ -110,6 +110,96 @@ The project is organized as a monorepo with these packages:
 - Meaningful coverage
 - Isolated tests
 - Descriptive naming
+
+### Workflow
+
+- branchStrategy: gitflow
+- newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
+- prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
+
+### Commits
+
+- Format: conventional commits
+- Scope: atomic changes
+- Message: imperative mood
+
+### Branches
+
+- Main: always deployable
+- Feature: feature/description
+- Bugfix: fix/description
+- Release: release/version
+
+### Unit
+
+- Strict isolation
+- Naming: describe behavior, not implementation
+- Meaningful coverage
+- Fast speed
+
+### Integration
+
+- Scope: component boundaries
+- Setup: clean state
+- Teardown: no side effects
+
+### E2e
+
+- Focus: critical user journeys
+- Stability: no flaky tests
+- Data: isolated test data
+
+### Code
+
+- Descriptive naming
+- Single responsibility functions
+- Comments: explain why, not what
+- Consistent formatting
+- Input validation required
+- Output encoding required
+- Verify before trust for authentication
+- Check authorization at every layer
+
+### Architecture
+
+- Loose coupling
+- High cohesion
+- Explicit dependencies
+
+### Secrets
+
+- Never hardcoded
+- Never logged
+- Prevent exposure
+
+### Dependencies
+
+- Audit regularly
+- Pin versions
+- Use trusted sources only
+
+### Communication
+
+- Professional tone
+- Clear format
+- Citations when applicable
+
+### Reasoning
+
+- Show work
+- Acknowledge uncertainty
+
+### Exports
+
+- style: named exports only
+- barrel: use index.ts for public API
+- internal: prefix with underscore or use /internal
+
+### Publishing
+
+- changelog: maintain CHANGELOG.md
+- semver: follow semantic versioning
+- types: include TypeScript declarations
 
 ## Git Commits
 

@@ -25,12 +25,6 @@ Follow ACME Engineering Standards v3.0
 - Add inline comments for complex logic
 - Write tests for all code (80% coverage)
 
-### git
-
-- Use conventional commits format
-- Branch naming: type/TICKET-description
-- Signed commits required
-
 ### deployment
 
 - Environments: dev, staging, prod

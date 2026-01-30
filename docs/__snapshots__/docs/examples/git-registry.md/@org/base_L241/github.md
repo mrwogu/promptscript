@@ -12,10 +12,6 @@ Follow our coding standards and best practices.
 - Code review required for all changes
 - Tests required for all code
 
-### git
-
-- Use conventional commits format
-
 ## donts
 
 - Don't commit secrets

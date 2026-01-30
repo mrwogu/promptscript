@@ -1,5 +1,12 @@
 # CLAUDE.md
 
+## Code Style
+
+- Authentication required
+- Use RBAC for authorization
+- Input validation required
+- Output encoding required
+
 ## Don'ts
 
 - Don't expose API keys or secrets in code

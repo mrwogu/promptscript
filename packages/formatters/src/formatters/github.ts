@@ -611,38 +611,6 @@ export class GitHubFormatter extends BaseFormatter {
     };
   }
 
-  /**
-   * Remove common leading indentation from multiline text.
-   * Calculates minimum indent from lines 2+ only, since line 1 may have been
-   * trimmed (losing its indentation) while subsequent lines retain theirs.
-   */
-  private dedent(text: string): string {
-    const lines = text.split('\n');
-    if (lines.length <= 1) return text.trim();
-
-    // Calculate minimum indent from lines 2+ only
-    const minIndent = lines
-      .slice(1)
-      .filter((line) => line.trim().length > 0)
-      .reduce((min, line) => {
-        const match = line.match(/^(\s*)/);
-        const indent = match?.[1]?.length ?? 0;
-        return Math.min(min, indent);
-      }, Infinity);
-
-    if (minIndent === 0 || minIndent === Infinity) {
-      return text.trim();
-    }
-
-    const firstLine = lines[0] ?? '';
-    return [
-      firstLine.trim(),
-      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
-    ]
-      .join('\n')
-      .trim();
-  }
-
   // ============================================================
   // AGENTS.md Generation
   // ============================================================
@@ -952,18 +920,16 @@ export class GitHubFormatter extends BaseFormatter {
     const standards = this.findBlock(ast, 'standards');
     if (!standards) return null;
 
-    const props = this.getProps(standards.content);
+    // Use shared extractor for consistent handling of all @standards keys
+    const extracted = this.standardsExtractor.extract(standards.content);
     const subsections: string[] = [];
 
-    // Iterate over all keys in @standards, not just hardcoded ones
-    for (const [key, value] of Object.entries(props)) {
-      if (Array.isArray(value)) {
-        // Map 'errors' to 'error-handling' for backwards compatibility
-        const sectionName = key === 'errors' ? 'error-handling' : key;
-        const items = this.formatStandardsList(value);
-        if (items.length > 0) {
-          subsections.push(renderer.renderSection(sectionName, renderer.renderList(items), 2));
-        }
+    // Dynamically iterate over ALL extracted code standards (not just hardcoded keys)
+    for (const entry of extracted.codeStandards.values()) {
+      if (entry.items.length > 0) {
+        subsections.push(
+          renderer.renderSection(entry.sectionName, renderer.renderList(entry.items), 2)
+        );
       }
     }
 

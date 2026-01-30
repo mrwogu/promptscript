@@ -41,6 +41,27 @@ flowchart TB
   formatters --> core
 ```
 
+## Code Style
+
+- Strict mode enabled
+- Never use `any` type - use `unknown` with type guards
+- Prefer `interface` for object shapes
+- Use `type` for unions and intersections
+- Named exports only, no default exports
+- Explicit return types on public functions
+- Files: `kebab-case.ts`
+- Classes/Interfaces: `PascalCase`
+- Functions/Variables: `camelCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Use custom error classes extending `PSError`
+- Always include location information
+- Provide actionable error messages
+- Test files: `*.spec.ts` next to source
+- Follow AAA (Arrange, Act, Assert) pattern
+- Target >90% coverage for libraries
+- Use fixtures for parser tests
+- Framework: vitest
+
 ## Git Commits
 
 - Format: Conventional Commits

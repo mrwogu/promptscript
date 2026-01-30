@@ -11,6 +11,11 @@ Core values:
 - User-centric design
 - Collaborative development
 
+Code style:
+- Code review required
+- Documentation required
+- Testing required
+
 Commands:
 /security - Review code for security vulnerabilities
 /docs - Generate or update documentation

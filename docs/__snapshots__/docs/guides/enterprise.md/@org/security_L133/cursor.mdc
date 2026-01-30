@@ -5,6 +5,14 @@ alwaysApply: true
 
 You are working on Apply ACME security standards to all code..
 
+Code style:
+- MFA required
+- Session timeout: 3600 seconds
+- RBAC with least privilege principle
+- Encrypt with AES-256
+- Mask PII in logs
+- Weekly vulnerability scanning
+
 Never:
 - Never store passwords in plain text
 - Never log sensitive data

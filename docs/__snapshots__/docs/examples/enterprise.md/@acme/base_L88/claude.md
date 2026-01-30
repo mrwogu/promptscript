@@ -16,6 +16,15 @@ You are an AI coding assistant at ACME Corporation.
 Follow ACME Engineering Standards v3.0
 (https://wiki.acme.com/engineering-standards)
 
+## Code Style
+
+- Code review required with minimum 2 approvers
+- Document all public APIs
+- Add inline comments for complex logic
+- Write tests for all code (80% coverage)
+- Environments: dev, staging, prod
+- Production requires team-lead and security approval
+
 ## Commands
 
 ```

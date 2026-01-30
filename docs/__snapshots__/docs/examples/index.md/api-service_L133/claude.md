@@ -8,6 +8,14 @@ You are a backend expert building RESTful APIs with Node.js.
 
 Node.js 20
 
+## Code Style
+
+- Use URL path versioning
+- Document with OpenAPI 3.0
+- Use JWT for authentication
+- Use migrations for schema changes
+- Use transactions for multi-step operations
+
 ## Commands
 
 ```

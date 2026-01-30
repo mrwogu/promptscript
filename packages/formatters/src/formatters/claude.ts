@@ -475,38 +475,6 @@ export class ClaudeFormatter extends BaseFormatter {
     };
   }
 
-  /**
-   * Remove common leading indentation from multiline text.
-   * Calculates minimum indent from lines 2+ only, since line 1 may have been
-   * trimmed (losing its indentation) while subsequent lines retain theirs.
-   */
-  private dedent(text: string): string {
-    const lines = text.split('\n');
-    if (lines.length <= 1) return text.trim();
-
-    // Calculate minimum indent from lines 2+ only
-    const minIndent = lines
-      .slice(1)
-      .filter((line) => line.trim().length > 0)
-      .reduce((min, line) => {
-        const match = line.match(/^(\s*)/);
-        const indent = match?.[1]?.length ?? 0;
-        return Math.min(min, indent);
-      }, Infinity);
-
-    if (minIndent === 0 || minIndent === Infinity) {
-      return text.trim();
-    }
-
-    const firstLine = lines[0] ?? '';
-    return [
-      firstLine.trim(),
-      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
-    ]
-      .join('\n')
-      .trim();
-  }
-
   // ============================================================
   // Agent File Generation
   // ============================================================
@@ -795,55 +763,18 @@ export class ClaudeFormatter extends BaseFormatter {
     const standards = this.findBlock(ast, 'standards');
     if (!standards) return null;
 
-    const props = this.getProps(standards.content);
+    // Use shared extractor for consistent handling of all @standards keys
+    const extracted = this.standardsExtractor.extract(standards.content);
     const items: string[] = [];
 
-    // Legacy format
-    const code = props['code'];
-    if (code && typeof code === 'object' && !Array.isArray(code)) {
-      const codeObj = code as Record<string, Value>;
-      this.addStyleItems(items, codeObj['style']);
-      this.addStyleItems(items, codeObj['patterns']);
-    }
-
-    // New format - TypeScript
-    if (items.length === 0) {
-      this.extractTypeScriptStandards(props, items);
-      this.extractNamingStandards(props, items);
-      this.extractTestingStandards(props, items);
+    // Collect all items from extracted code standards (dynamically iterates ALL keys)
+    for (const entry of extracted.codeStandards.values()) {
+      items.push(...entry.items);
     }
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection('Code Style', content) + '\n';
-  }
-
-  private extractTypeScriptStandards(props: Record<string, Value>, items: string[]): void {
-    const ts = props['typescript'];
-    if (!ts || typeof ts !== 'object' || Array.isArray(ts)) return;
-
-    const tsObj = ts as Record<string, Value>;
-    if (tsObj['strictMode']) items.push('Strict TypeScript, no `any`');
-    if (tsObj['exports']) items.push('Named exports only');
-  }
-
-  private extractNamingStandards(props: Record<string, Value>, items: string[]): void {
-    const naming = props['naming'];
-    if (!naming || typeof naming !== 'object' || Array.isArray(naming)) return;
-
-    const n = naming as Record<string, Value>;
-    if (n['files']) items.push(`Files: ${this.valueToString(n['files'])}`);
-  }
-
-  private extractTestingStandards(props: Record<string, Value>, items: string[]): void {
-    const testing = props['testing'];
-    if (!testing || typeof testing !== 'object' || Array.isArray(testing)) return;
-
-    const t = testing as Record<string, Value>;
-    const parts: string[] = [];
-    if (t['framework']) parts.push(this.valueToString(t['framework']));
-    if (t['coverage']) parts.push(`>${this.valueToString(t['coverage'])}% coverage`);
-    if (parts.length > 0) items.push(`Testing: ${parts.join(', ')}`);
   }
 
   private gitCommits(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1007,11 +938,5 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     return [];
-  }
-
-  private addStyleItems(items: string[], value: Value | undefined): void {
-    if (!value) return;
-    const arr = Array.isArray(value) ? value : [value];
-    for (const item of arr) items.push(this.valueToString(item));
   }
 }

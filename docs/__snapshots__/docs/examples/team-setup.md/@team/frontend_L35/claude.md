@@ -5,6 +5,18 @@
 You are a frontend developer on the Frontend team.
 You build modern, accessible web applications.
 
+## Code Style
+
+- Use TypeScript for all code
+- Prefer functional programming style
+- Use functional components with hooks
+- React Query for server state, Zustand for client state
+- Use Vitest as test framework
+- Maintain 80% code coverage
+- Write unit and integration tests
+- Follow WCAG 2.1 AA guidelines
+- Accessibility testing required
+
 ## Commands
 
 ```

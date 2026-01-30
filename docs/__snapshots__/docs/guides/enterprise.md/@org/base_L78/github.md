@@ -19,12 +19,6 @@ Core values:
 - Documentation required
 - Testing required
 
-### git
-
-- Use conventional commits format
-- Branch naming: feature|bugfix|hotfix/TICKET-description
-- Pull request required
-
 ## shortcuts
 
 - /security: Review code for security vulnerabilities

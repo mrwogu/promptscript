@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-01-28T20:23:43.562Z - do not edit -->
+<!-- PromptScript 2026-01-30T14:27:58.874Z - do not edit -->
 
 ## project
 
@@ -110,6 +110,100 @@ The project is organized as a monorepo with these packages:
 - Meaningful coverage
 - Isolated tests
 - Descriptive naming
+
+### workflow
+
+- branchStrategy: gitflow
+- newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
+- prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
+
+### commits
+
+- Format: conventional commits
+- Scope: atomic changes
+- Message: imperative mood
+
+### branches
+
+- Main: always deployable
+- Feature: feature/description
+- Bugfix: fix/description
+- Release: release/version
+
+### unit
+
+- Strict isolation
+- Naming: describe behavior, not implementation
+- Meaningful coverage
+- Fast speed
+
+### integration
+
+- Scope: component boundaries
+- Setup: clean state
+- Teardown: no side effects
+
+### e2e
+
+- Focus: critical user journeys
+- Stability: no flaky tests
+- Data: isolated test data
+
+### code
+
+- Descriptive naming
+- Single responsibility functions
+- Comments: explain why, not what
+- Consistent formatting
+- Input validation required
+- Output encoding required
+- Verify before trust for authentication
+- Check authorization at every layer
+
+### architecture
+
+- Loose coupling
+- High cohesion
+- Explicit dependencies
+
+### secrets
+
+- Never hardcoded
+- Never logged
+- Prevent exposure
+
+### dependencies
+
+- Audit regularly
+- Pin versions
+- Use trusted sources only
+
+### communication
+
+- Professional tone
+- Clear format
+- Citations when applicable
+
+### reasoning
+
+- Show work
+- Acknowledge uncertainty
+
+### exports
+
+- style: named exports only
+- barrel: use index.ts for public API
+- internal: prefix with underscore or use /internal
+
+### publishing
+
+- changelog: maintain CHANGELOG.md
+- semver: follow semantic versioning
+- types: include TypeScript declarations
+
+## shortcuts
+
+- /review: Review code for quality, type safety, and best practices
 
 ## commands
 

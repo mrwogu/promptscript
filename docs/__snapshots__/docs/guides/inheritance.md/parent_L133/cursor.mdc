@@ -4,3 +4,7 @@ alwaysApply: true
 ---
 
 You are working on the project.
+
+Code style:
+- Follow clean code principles
+- Testing required

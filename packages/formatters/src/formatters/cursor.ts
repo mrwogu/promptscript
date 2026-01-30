@@ -487,40 +487,6 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   /**
-   * Remove common leading whitespace from all lines (dedent).
-   * Handles the case where trim() was already called, causing the first line
-   * to lose its indentation while subsequent lines retain theirs.
-   */
-  private dedent(text: string): string {
-    const lines = text.split('\n');
-    if (lines.length <= 1) return text.trim();
-
-    // Find minimum indentation from lines 2+ (ignoring empty lines and first line)
-    // First line may have lost indentation due to trim()
-    const minIndent = lines
-      .slice(1)
-      .filter((line) => line.trim().length > 0)
-      .reduce((min, line) => {
-        const match = line.match(/^(\s*)/);
-        const indent = match?.[1]?.length ?? 0;
-        return Math.min(min, indent);
-      }, Infinity);
-
-    if (minIndent === 0 || minIndent === Infinity) {
-      return text.trim();
-    }
-
-    // Remove the common indentation from lines 2+, keep first line as-is
-    const firstLine = lines[0] ?? '';
-    return [
-      firstLine.trim(),
-      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
-    ]
-      .join('\n')
-      .trim();
-  }
-
-  /**
    * Generate YAML frontmatter for Cursor MDC format.
    * @see https://cursor.com/docs/context/rules
    */
@@ -661,83 +627,19 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   private extractCodeStyleItems(ast: Program): string[] {
-    // Only extract code-related standards (not git, config, diagrams, documentation)
-    const codeKeys = ['typescript', 'naming', 'errors', 'testing'];
-
-    // Try context.standards first (new structure)
-    const context = this.findBlock(ast, 'context');
-    if (context) {
-      const standards = this.getProp(context.content, 'standards');
-      if (standards && typeof standards === 'object' && !Array.isArray(standards)) {
-        const filtered = this.filterByKeys(standards as Record<string, Value>, codeKeys);
-        if (Object.keys(filtered).length > 0) {
-          return this.extractNestedRules(filtered);
-        }
-      }
-    }
-
-    // Try @standards block directly
+    // Use shared extractor for consistent handling of all @standards keys
     const standardsBlock = this.findBlock(ast, 'standards');
-    if (standardsBlock) {
-      const props = this.getProps(standardsBlock.content);
-      const filtered = this.filterByKeys(props, codeKeys);
-      if (Object.keys(filtered).length > 0) {
-        return this.extractNestedRules(filtered);
-      }
-    }
+    if (!standardsBlock) return [];
 
-    return [];
-  }
-
-  private filterByKeys(obj: Record<string, Value>, keys: string[]): Record<string, Value> {
-    const result: Record<string, Value> = {};
-    for (const key of keys) {
-      if (obj[key] !== undefined) {
-        result[key] = obj[key];
-      }
-    }
-    return result;
-  }
-
-  private extractNestedRules(obj: Record<string, Value>): string[] {
+    const extracted = this.standardsExtractor.extract(standardsBlock.content);
     const items: string[] = [];
-    for (const rules of Object.values(obj)) {
-      this.flattenRules(rules, items);
+
+    // Collect all items from extracted code standards (dynamically iterates ALL keys)
+    for (const entry of extracted.codeStandards.values()) {
+      items.push(...entry.items);
     }
+
     return items;
-  }
-
-  private flattenRules(rules: Value, items: string[]): void {
-    if (Array.isArray(rules)) {
-      this.extractStringArray(rules, items);
-      return;
-    }
-
-    if (rules && typeof rules === 'object') {
-      this.extractFromObject(rules as Record<string, Value>, items);
-      return;
-    }
-
-    if (typeof rules === 'string') {
-      items.push(rules);
-    }
-  }
-
-  private extractStringArray(arr: Value[], items: string[]): void {
-    for (const item of arr) {
-      if (typeof item === 'string') items.push(item);
-    }
-  }
-
-  private extractFromObject(obj: Record<string, Value>, items: string[]): void {
-    for (const [key, rule] of Object.entries(obj)) {
-      if (Array.isArray(rule)) {
-        this.extractStringArray(rule, items);
-      } else if (typeof rule === 'string') {
-        items.push(`${key}: ${rule}`);
-      }
-      // Skip booleans, numbers, nested objects
-    }
   }
 
   private gitCommits(ast: Program): string | null {

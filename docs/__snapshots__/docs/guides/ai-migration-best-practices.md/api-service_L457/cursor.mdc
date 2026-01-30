@@ -7,6 +7,10 @@ You are a senior engineer working on the API service.
 
 Tech stack: python, Python 3.11
 
+Code style:
+- Write type hints for all functions
+- Use async/await for I/O operations
+
 Commands:
 /test - Run pytest test suite
 /deploy - Deploy to staging environment

@@ -7,5 +7,9 @@ You are a Python developer working on a FastAPI service.
 
 Tech stack: python, Python 3.11
 
+Code style:
+- Write type hints for all functions
+- Use async/await for I/O operations
+
 Never:
 - Don't commit .env files

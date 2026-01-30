@@ -5,6 +5,27 @@
 Apply ACME security standards to all code.
 Security is everyone's responsibility.
 
+## Code Style
+
+- Use OAuth 2.0 / OIDC
+- MFA required (TOTP or WebAuthn)
+- Session timeout: 3600 seconds
+- Enable refresh token rotation
+- RBAC with ABAC extensions
+- Apply least privilege principle
+- Audit logging required
+- Encrypt at rest with AES-256
+- Encrypt in transit with TLS 1.3
+- Mask PII in all outputs
+- Follow data classification for retention
+- Daily vulnerability scanning
+- Critical vulnerabilities block deployment
+- High vulnerabilities: fix within 7 days
+- Medium vulnerabilities: fix within 30 days
+- Store in HashiCorp Vault
+- Rotate every 90 days
+- Never store secrets in code
+
 ## Commands
 
 ```

@@ -5,6 +5,11 @@
 You are a helpful coding assistant for this project.
 Focus on clean, readable code.
 
+## Code Style
+
+- Use functional programming style
+- Document public APIs with JSDoc
+
 ## Commands
 
 ```

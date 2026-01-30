@@ -454,30 +454,20 @@ ${this.stripAllIndent(content)}`;
 
   /**
    * Extract code standards from @standards block.
-   * Expects arrays of strings (pass-through format).
+   * Uses shared extractor for dynamic key iteration (parity with GitHub/Claude/Cursor).
    */
   private codeStandards(ast: Program, _renderer: ConventionRenderer): string | null {
     const standards = this.findBlock(ast, 'standards');
     if (!standards) return null;
 
-    const props = this.getProps(standards.content);
+    // Use shared extractor for consistent handling of all @standards keys
+    const extracted = this.standardsExtractor.extract(standards.content);
     const subsections: string[] = [];
 
-    // Map of property keys to section titles
-    const sectionMap: Record<string, string> = {
-      typescript: 'TypeScript',
-      naming: 'Naming Conventions',
-      errors: 'Error Handling',
-      testing: 'Testing',
-    };
-
-    for (const [key, title] of Object.entries(sectionMap)) {
-      const value = props[key];
-      if (Array.isArray(value)) {
-        const items = this.formatStandardsList(value);
-        if (items.length > 0) {
-          subsections.push(`### ${title}\n\n${items.map((i) => '- ' + i).join('\n')}`);
-        }
+    // Dynamically iterate over ALL extracted code standards (not just hardcoded keys)
+    for (const entry of extracted.codeStandards.values()) {
+      if (entry.items.length > 0) {
+        subsections.push(`### ${entry.title}\n\n${entry.items.map((i) => '- ' + i).join('\n')}`);
       }
     }
 

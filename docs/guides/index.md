@@ -57,4 +57,12 @@ Automated migration using AI assistants.
 
 </div>
 
+<div class="feature-card" markdown>
+### :material-format-list-checks: Formatter Architecture
+Internal architecture and parity patterns for formatters.
+
+[Formatter Architecture →](formatter-architecture.md)
+
+</div>
+
 </div>

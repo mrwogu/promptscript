@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-01-28T20:23:43.564Z - do not edit -->
+<!-- PromptScript 2026-01-30T14:27:58.879Z - do not edit -->
 
 ## Project
 
@@ -70,6 +70,81 @@ flowchart TB
   validator --> core
   formatters --> core
 ```
+
+## Code Style
+
+- Strict mode enabled
+- Never use `any` type - use `unknown` with type guards
+- Use `unknown` with type guards instead of any
+- Prefer `interface` for object shapes
+- Use `type` for unions and intersections
+- Named exports only, no default exports
+- Explicit return types on public functions
+- Files: `kebab-case.ts`
+- Classes: `PascalCase`
+- Interfaces: `PascalCase`
+- Functions: `camelCase`
+- Variables: `camelCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Use custom error classes extending `PSError`
+- Always include location information
+- Provide actionable error messages
+- Test files: `*.spec.ts` next to source
+- Follow AAA (Arrange, Act, Assert) pattern
+- Framework: Vitest
+- Target >90% coverage for libraries
+- Use fixtures for parser tests
+- Meaningful coverage
+- Isolated tests
+- Descriptive naming
+- branchStrategy: gitflow
+- newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
+- prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
+- Format: conventional commits
+- Scope: atomic changes
+- Message: imperative mood
+- Main: always deployable
+- Feature: feature/description
+- Bugfix: fix/description
+- Release: release/version
+- Strict isolation
+- Naming: describe behavior, not implementation
+- Meaningful coverage
+- Fast speed
+- Scope: component boundaries
+- Setup: clean state
+- Teardown: no side effects
+- Focus: critical user journeys
+- Stability: no flaky tests
+- Data: isolated test data
+- Descriptive naming
+- Single responsibility functions
+- Comments: explain why, not what
+- Consistent formatting
+- Input validation required
+- Output encoding required
+- Verify before trust for authentication
+- Check authorization at every layer
+- Loose coupling
+- High cohesion
+- Explicit dependencies
+- Never hardcoded
+- Never logged
+- Prevent exposure
+- Audit regularly
+- Pin versions
+- Use trusted sources only
+- Professional tone
+- Clear format
+- Citations when applicable
+- Show work
+- Acknowledge uncertainty
+- style: named exports only
+- barrel: use index.ts for public API
+- internal: prefix with underscore or use /internal
+- changelog: maintain CHANGELOG.md
+- semver: follow semantic versioning
+- types: include TypeScript declarations
 
 ## Git Commits
 

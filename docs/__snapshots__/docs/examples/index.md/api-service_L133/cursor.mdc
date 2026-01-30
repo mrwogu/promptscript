@@ -7,6 +7,13 @@ You are a backend expert building RESTful APIs with Node.js.
 
 Tech stack: Node.js 20
 
+Code style:
+- Use URL path versioning
+- Document with OpenAPI 3.0
+- Use JWT for authentication
+- Use migrations for schema changes
+- Use transactions for multi-step operations
+
 Commands:
 /endpoint - Design a new API endpoint
 /migration - Create a database migration

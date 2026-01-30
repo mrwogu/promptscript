@@ -46,10 +46,27 @@ flowchart TB
 
 ## Code Style
 
-- Strict TypeScript, no \`any\`
-- Named exports only
-- Files: kebab-case.ts
-- Testing: vitest, >90% coverage
+- strictMode
+- noAny
+- useUnknown: with type guards instead of any
+- interfaces: for object shapes
+- types: for unions and intersections
+- exports: named only, no default exports
+- returnTypes: explicit on public functions
+- files: kebab-case.ts
+- classes: PascalCase
+- interfaces: PascalCase
+- functions: camelCase
+- variables: camelCase
+- constants: UPPER_SNAKE_CASE
+- customClasses: extend PSError
+- locationInfo
+- messages: actionable
+- filePattern: *.spec.ts next to source
+- pattern: AAA (Arrange, Act, Assert)
+- coverage: 90
+- fixtures: for parser tests
+- framework: vitest
 
 ## Git Commits
 
@@ -168,6 +185,8 @@ flowchart TB
 - Linting: ESLint + Prettier
 
 Code style:
+- strictMode
+- noAny
 - useUnknown: with type guards instead of any
 - interfaces: for object shapes
 - types: for unions and intersections
@@ -180,9 +199,11 @@ Code style:
 - variables: camelCase
 - constants: UPPER_SNAKE_CASE
 - customClasses: extend PSError
+- locationInfo
 - messages: actionable
 - filePattern: *.spec.ts next to source
 - pattern: AAA (Arrange, Act, Assert)
+- coverage: 90
 - fixtures: for parser tests
 - framework: vitest
 
@@ -290,6 +311,41 @@ flowchart TB
   validator --> core
   formatters --> core
 \`\`\`
+
+## code-standards
+
+### typescript
+
+- strictMode
+- noAny
+- useUnknown: with type guards instead of any
+- interfaces: for object shapes
+- types: for unions and intersections
+- exports: named only, no default exports
+- returnTypes: explicit on public functions
+
+### naming
+
+- files: kebab-case.ts
+- classes: PascalCase
+- interfaces: PascalCase
+- functions: camelCase
+- variables: camelCase
+- constants: UPPER_SNAKE_CASE
+
+### error-handling
+
+- customClasses: extend PSError
+- locationInfo
+- messages: actionable
+
+### testing
+
+- filePattern: *.spec.ts next to source
+- pattern: AAA (Arrange, Act, Assert)
+- coverage: 90
+- fixtures: for parser tests
+- framework: vitest
 
 ## shortcuts
 

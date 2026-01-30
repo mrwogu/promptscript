@@ -11,6 +11,12 @@ Core values:
 - User-centric design
 - Collaborative development
 
+## Code Style
+
+- Code review required
+- Documentation required
+- Testing required
+
 ## Commands
 
 ```

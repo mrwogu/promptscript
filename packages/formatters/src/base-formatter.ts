@@ -7,6 +7,7 @@ import type {
 } from '@promptscript/core';
 import { DEFAULT_PRETTIER_OPTIONS } from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
+import { StandardsExtractor } from './extractors/index.js';
 import type { FormatOptions, Formatter, FormatterOutput } from './types.js';
 
 /**
@@ -19,6 +20,11 @@ export abstract class BaseFormatter implements Formatter {
   abstract readonly description: string;
   abstract readonly defaultConvention: string;
   abstract format(ast: Program, options?: FormatOptions): FormatterOutput;
+
+  /**
+   * Shared standards extractor for consistent extraction across all formatters.
+   */
+  protected readonly standardsExtractor = new StandardsExtractor();
 
   /**
    * Create a convention renderer for this formatter.
@@ -434,5 +440,38 @@ export abstract class BaseFormatter implements Formatter {
       });
       return '| ' + cells.join(' | ') + ' |';
     });
+  }
+
+  /**
+   * Remove common leading whitespace from all lines (dedent).
+   * Handles the case where trim() was already called, causing the first line
+   * to lose its indentation while subsequent lines retain theirs.
+   * Calculates minimum indent from lines 2+ only.
+   */
+  protected dedent(text: string): string {
+    const lines = text.split('\n');
+    if (lines.length <= 1) return text.trim();
+
+    // Calculate minimum indent from lines 2+ only
+    const minIndent = lines
+      .slice(1)
+      .filter((line) => line.trim().length > 0)
+      .reduce((min, line) => {
+        const match = line.match(/^(\s*)/);
+        const indent = match?.[1]?.length ?? 0;
+        return Math.min(min, indent);
+      }, Infinity);
+
+    if (minIndent === 0 || minIndent === Infinity) {
+      return text.trim();
+    }
+
+    const firstLine = lines[0] ?? '';
+    return [
+      firstLine.trim(),
+      ...lines.slice(1).map((line) => (line.trim().length > 0 ? line.slice(minIndent) : '')),
+    ]
+      .join('\n')
+      .trim();
   }
 }

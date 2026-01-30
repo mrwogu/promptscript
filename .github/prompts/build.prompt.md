@@ -2,7 +2,7 @@
 description: 'Run full verification pipeline'
 ---
 
-<!-- PromptScript 2026-01-28T20:23:43.562Z - do not edit -->
+<!-- PromptScript 2026-01-30T14:27:58.874Z - do not edit -->
 
 Run complete verification pipeline (all steps required):
 

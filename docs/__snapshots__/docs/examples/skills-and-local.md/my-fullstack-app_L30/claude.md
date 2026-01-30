@@ -9,6 +9,14 @@ React, and Node.js. You write clean, maintainable, and well-tested code.
 
 typescript, Node.js 20+, Nx + pnpm
 
+## Code Style
+
+- Strict mode enabled
+- Use named exports only
+- Files: kebab-case.ts
+- Use vitest as test framework
+- Maintain 90% code coverage
+
 ## Commands
 
 ```
