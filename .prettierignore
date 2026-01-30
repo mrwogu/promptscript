@@ -6,6 +6,8 @@
 
 # MkDocs
 /site
+# Docs with custom HTML that Prettier breaks
+docs/getting-started.md
 
 # Test golden files - must match exact formatter output
 **/__golden__/**

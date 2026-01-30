@@ -21,6 +21,73 @@
 
 ## 🎯 Current Focus
 
+### Parameterized Inheritance (Variables in `@inherit` / `@use`)
+
+**Goal:** Enable reusable, configurable rule templates through parameterized inheritance.
+
+**Problem:** Currently, when you `@inherit` or `@use` a file, you get everything as-is. If you want variations (e.g., different project names, languages, strictness levels), you need to create multiple near-duplicate files.
+
+**Proposed Syntax:**
+
+```prs
+# Passing parameters to inherited/used files
+@inherit @stacks/typescript-lib(project: "my-app", runtime: "node20")
+
+@use @core/security(level: "strict", auditFrequency: "weekly")
+@use @core/testing(framework: "vitest", coverage: 90)
+```
+
+```prs
+# Defining parameters in the template (with defaults)
+@meta {
+  name: "typescript-lib"
+  params: {
+    project: string
+    runtime: string = "node18"
+    strictMode?: boolean = true
+  }
+}
+
+@project {
+  name: {{project}}
+  runtime: {{runtime}}
+}
+
+@typescript {
+  {{#if strictMode}}
+  strict: true
+  noImplicitAny: true
+  {{/if}}
+}
+```
+
+**Key Design Decisions:**
+
+| Aspect                 | Proposal                                   | Rationale                                          |
+| ---------------------- | ------------------------------------------ | -------------------------------------------------- |
+| Parameter syntax       | `(key: value, ...)`                        | Familiar from function calls, clean inline         |
+| Variable interpolation | `{{variable}}`                             | Distinguishable from other syntax, Handlebars-like |
+| Conditionals           | `{{#if var}}...{{/if}}`                    | Enables conditional sections based on params       |
+| Defaults               | `param: type = defaultValue`               | Standard default value syntax                      |
+| Required vs optional   | `param: type` vs `param?: type`            | TypeScript-like conventions                        |
+| Type constraints       | `string`, `number`, `boolean`, `enum(...)` | Reuse existing type system                         |
+
+**Use Cases:**
+
+1. **Multi-team templates** — Same base with team-specific project names
+2. **Language stacks** — `@stacks/backend(lang: "python")` vs `(lang: "go")`
+3. **Environment configs** — `@use @core/security(env: "production")`
+4. **Strictness levels** — `@use @core/quality(level: "strict" | "relaxed")`
+
+**Implementation Phases:**
+
+- [ ] **Phase 1: Basic parameters** — `(key: value)` syntax, string interpolation `{{var}}`
+- [ ] **Phase 2: Type validation** — Validate param types at compile time
+- [ ] **Phase 3: Conditionals** — `{{#if}}` / `{{#unless}}` blocks
+- [ ] **Phase 4: Loops** — `{{#each items}}` for dynamic lists
+
+---
+
 ### VS Code Extension
 
 **Goal:** First-class editing experience in VS Code.

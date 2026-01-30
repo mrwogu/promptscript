@@ -1,6 +1,6 @@
 # @promptscript/cli
 
-> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - The Infrastructure-as-Code for AI Context.
+> Part of the [PromptScript](https://github.com/mrwogu/promptscript) ecosystem - The Prompt-as-Code for AI Instructions.
 
 Command-line interface for PromptScript. Compile, validate, and manage AI instructions at enterprise scale.
 

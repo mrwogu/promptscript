@@ -3,9 +3,9 @@
   
   # PromptScript
   
-  **The Infrastructure-as-Code for AI Context**
+  **The Prompt-as-Code for AI Instructions**
 
-_Standardize, Audit, and Deploy AI Instructions across your entire Engineering Organization._
+_Standardize, audit, and deploy instructions across any AI coding assistant._
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)

@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Quick start guide for PromptScript - The Infrastructure-as-Code for AI Context
+description: Quick start guide for PromptScript - The Prompt-as-Code for AI Instructions
 ---
 
 # Getting Started
@@ -34,6 +34,68 @@ Verify installation:
 ```bash
 prs --version
 ```
+
+## Interactive Initialization
+
+PromptScript guides you through setup with an interactive initializer that auto-detects your tech stack and helps you inherit standards from your organization's registry.
+
+<!-- prettier-ignore -->
+<div class="init-demo" id="init-demo">
+<div class="init-demo__wrapper">
+<div class="init-demo__terminal">
+<div class="init-demo__header">
+<span class="init-demo__dot init-demo__dot--red"></span>
+<span class="init-demo__dot init-demo__dot--yellow"></span>
+<span class="init-demo__dot init-demo__dot--green"></span>
+<span class="init-demo__title">Terminal</span>
+<button class="init-demo__replay" title="Replay animation">↻ Replay</button>
+</div>
+<div class="init-demo__output"></div>
+</div>
+<div class="init-demo__generated">
+<div class="init-demo__generated-header">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 7L9 19l-5.5-5.5l1.41-1.41L9 16.17L19.59 5.59z"/></svg>
+Generated Files
+</div>
+<div class="init-demo__files-grid">
+<div class="init-demo__file-preview">
+<div class="init-demo__file-preview-header">promptscript.yaml</div>
+<pre class="init-demo__file-preview-content"><span class="key">version:</span> <span class="str">'1'</span>
+
+<span class="key">input:</span>
+  <span class="key">entry:</span> <span class="str">.promptscript/project.prs</span>
+
+<span class="key">targets:</span>
+  - <span class="str">github</span>
+  - <span class="str">claude</span>
+  - <span class="str">cursor</span></pre>
+</div>
+<div class="init-demo__file-preview">
+<div class="init-demo__file-preview-header">.promptscript/project.prs</div>
+<pre class="init-demo__file-preview-content"><span class="kw">@meta</span> {
+  <span class="key">id:</span> <span class="str">"my-app"</span>
+  <span class="key">syntax:</span> <span class="str">"1.0.0"</span>
+}
+
+<span class="kw">@inherit</span> <span class="str">@company/react-app</span>
+
+<span class="kw">@context</span> {
+  <span class="key">framework:</span> <span class="str">"React 18"</span>
+  <span class="key">language:</span> <span class="str">"TypeScript"</span>
+  <span class="key">testing:</span> <span class="str">"Vitest"</span>
+}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+**Key features:**
+
+- **Auto-detection** — Recognizes package.json, tsconfig, frameworks, and test runners
+- **Registry integration** — Browse and inherit from your organization's published standards
+- **Multi-target setup** — Select which AI tools you want to generate output for
+- **Pre-configured** — Generates ready-to-compile configuration based on your stack
 
 ## Quick Start: From Zero to PromptOps
 
@@ -132,6 +194,28 @@ git commit -m "chore: initialize promptscript infrastructure"
 ## Quick Start: Migrating Existing Projects
 
 Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`? Use AI-assisted migration to convert your existing instructions to PromptScript.
+
+<!-- prettier-ignore -->
+<div class="init-demo" id="migrate-demo">
+<div class="init-demo__wrapper">
+<div class="init-demo__terminal">
+<div class="init-demo__header">
+<span class="init-demo__dot init-demo__dot--red"></span>
+<span class="init-demo__dot init-demo__dot--yellow"></span>
+<span class="init-demo__dot init-demo__dot--green"></span>
+<span class="init-demo__title">Terminal</span>
+<button class="init-demo__replay" title="Replay animation">↻ Replay</button>
+</div>
+<div class="init-demo__output"></div>
+</div>
+</div>
+</div>
+
+**Key features:**
+
+- **Auto-discovery** — Finds all existing AI instruction files in your project
+- **Skill installation** — Installs migration skills for each enabled target
+- **Non-destructive** — Your existing files remain untouched until you compile
 
 ### 1. Initialize with Migration Support
 
@@ -410,26 +494,50 @@ targets:
 
 ## What's Next?
 
-<div class="feature-grid" markdown>
+<div class="ref-list">
 
-<div class="feature-card" markdown>
-### :material-school: Tutorial
-Follow the complete [tutorial](tutorial.md) for a deeper understanding.
-</div>
+<a href="tutorial/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--purple">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9zm6.82 6L12 12.72L5.18 9L12 5.28zM17 16l-5 2.72L7 16v-3.27l5 2.72l5-2.72z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Tutorial</h3>
+    <p>Follow the complete tutorial for a deeper understanding of PromptScript.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
-<div class="feature-card" markdown>
-### :material-book-open-variant: Language Reference
-Learn the full [PromptScript syntax](reference/language.md).
-</div>
+<a href="reference/language/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--blue">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5zM9 13v2h6v-2zm0 4v2h6v-2z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Language Reference</h3>
+    <p>Learn the full PromptScript syntax — blocks, directives, and inheritance.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
-<div class="feature-card" markdown>
-### :material-console: CLI Reference
-Explore all [CLI commands](reference/cli.md).
-</div>
+<a href="reference/cli/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--cyan">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 19V7H4v12h16m0-16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16m-7 14v-2h5v2h-5m-3.42-4L5.57 9H8.4l3.3 3.3c.39.39.39 1.03 0 1.42L8.42 17H5.59l4-4z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>CLI Reference</h3>
+    <p>Explore all CLI commands — compile, validate, pull, and more.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
-<div class="feature-card" markdown>
-### :material-file-tree: Examples
-Browse [real-world examples](examples/index.md).
-</div>
+<a href="examples/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--green">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm13 2h-2v-2h2v-2h-2v2h-2v-2h-2v2h2v2h-2v2h2v-2h2v2h2v2h2v-2h-2z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Examples</h3>
+    <p>Browse real-world configuration examples for various use cases.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
 </div>

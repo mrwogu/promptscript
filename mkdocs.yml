@@ -1,6 +1,6 @@
 site_name: PromptScript
 site_url: https://getpromptscript.dev/
-site_description: The Infrastructure-as-Code for AI Context
+site_description: 'Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.'
 site_author: PromptScript Team
 repo_url: https://github.com/mrwogu/promptscript
 repo_name: mrwogu/promptscript
@@ -153,6 +153,10 @@ extra:
 
 extra_css:
   - assets/stylesheets/extra.css
+
+extra_javascript:
+  - assets/javascripts/compile-demo.js
+  - assets/javascripts/init-demo.js
 
 nav:
   - Home: index.md

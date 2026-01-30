@@ -45,13 +45,13 @@ class PromptScriptLexer(RegexLexer):
             ),
             # Inherit statement with path
             (
-                r"(@inherit)\s+(@[\w\-./]+(?:@[\w\-.]+)?)",
-                bygroups(Keyword.Namespace, String),
+                r"(@inherit)(\s+)(@[\w\-./]+(?:@[\w\-.]+)?)",
+                bygroups(Keyword.Namespace, Whitespace, String),
             ),
             # Use statement with path
             (
-                r"(@use)\s+(@[\w\-./]+(?:@[\w\-.]+)?|\.[\w\-./]+)",
-                bygroups(Keyword.Namespace, String),
+                r"(@use)(\s+)(@[\w\-./]+(?:@[\w\-.]+)?|\.[\w\-./]+)",
+                bygroups(Keyword.Namespace, Whitespace, String),
             ),
             # Block content
             (r"\{", Punctuation, "block"),

@@ -5,7 +5,7 @@ description: Integrating PromptScript validation into CI/CD pipelines
 
 # CI/CD Integration
 
-PromptScript creates infrastructure-as-code for your AI prompts. Like any code, it should be validated and tested in your Continuous Integration (CI) pipeline.
+PromptScript creates prompt-as-code for your AI instructions. Like any code, it should be validated and tested in your Continuous Integration (CI) pipeline.
 
 ## Overview
 
