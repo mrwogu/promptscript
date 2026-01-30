@@ -1,0 +1,289 @@
+/* PromptScript Custom Styles */
+/* Colors from logo.svg gradient: #6D28D9 → #2563EB → #06B6D4 */
+
+:root {
+  /* Primary colors - from logo gradient */
+  --md-primary-fg-color: #6d28d9; /* violet - gradient start */
+  --md-primary-fg-color--light: #8b5cf6; /* lighter violet */
+  --md-primary-fg-color--dark: #5b21b6; /* darker violet */
+  --md-accent-fg-color: #2563eb; /* blue - gradient middle */
+}
+
+[data-md-color-scheme='slate'] {
+  /* Dark mode - use logo dark backgrounds */
+  --md-default-bg-color: #0b1220; /* logo background */
+  --md-default-bg-color--light: #0f1b33; /* logo secondary */
+}
+
+/* Code block styling for PromptScript */
+.language-promptscript {
+  --md-code-hl-keyword-color: #6d28d9; /* violet */
+  --md-code-hl-string-color: #06b6d4; /* cyan - gradient end */
+  --md-code-hl-comment-color: #64748b; /* slate gray */
+  --md-code-hl-function-color: #2563eb; /* blue */
+}
+
+/* Navigation improvements */
+.md-nav__link--active {
+  font-weight: 700;
+}
+
+/* Hero section styling */
+.md-typeset .hero {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.md-typeset .hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #6d28d9 0%, #2563eb 55%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Hide permanent link in hero to keep h1 centered */
+.md-typeset .hero h1 .headerlink {
+  display: none;
+}
+
+/* Hero buttons - stack on mobile */
+.md-typeset .hero .md-button {
+  display: inline-block;
+  margin: 0.25rem;
+}
+
+@media screen and (max-width: 480px) {
+  .md-typeset .hero h1 {
+    font-size: 2rem;
+  }
+
+  .md-typeset .hero .md-button {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+}
+
+/* Feature grid */
+.md-typeset .feature-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin: 3rem 0;
+  padding: 0;
+}
+
+/* Medium screens: 2 columns */
+@media screen and (min-width: 768px) {
+  .md-typeset .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Large screens: 3 columns */
+@media screen and (min-width: 1024px) {
+  .md-typeset .feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+.md-typeset .feature-card {
+  position: relative;
+  padding: 1.75rem 2rem;
+  border-radius: 1rem;
+  background: linear-gradient(
+    145deg,
+    rgba(109, 40, 217, 0.06) 0%,
+    rgba(37, 99, 235, 0.03) 50%,
+    rgba(6, 182, 212, 0.06) 100%
+  );
+  border: 1px solid rgba(109, 40, 217, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+
+  /* Staggered reveal animation */
+  opacity: 0;
+  transform: translateY(16px);
+  animation: feature-card-reveal 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Stagger animation delays for each card */
+.md-typeset .feature-card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.md-typeset .feature-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.md-typeset .feature-card:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.md-typeset .feature-card:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.md-typeset .feature-card:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.md-typeset .feature-card:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+@keyframes feature-card-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Highlighted feature card - spans full width on large screens */
+.md-typeset .feature-card--highlight {
+  background: linear-gradient(
+    135deg,
+    rgba(109, 40, 217, 0.12) 0%,
+    rgba(37, 99, 235, 0.08) 50%,
+    rgba(6, 182, 212, 0.12) 100%
+  );
+  border: 1px solid rgba(109, 40, 217, 0.3);
+}
+
+@media screen and (min-width: 1024px) {
+  .md-typeset .feature-card--highlight {
+    grid-column: span 3;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 2rem 2.5rem;
+  }
+
+  .md-typeset .feature-card--highlight h3 {
+    margin-bottom: 0;
+    font-size: 1.3rem;
+  }
+
+  .md-typeset .feature-card--highlight p {
+    margin: 0;
+  }
+}
+
+/* Subtle gradient glow behind card on hover */
+.md-typeset .feature-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #6d28d9 0%, #2563eb 50%, #06b6d4 100%);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.md-typeset .feature-card:hover {
+  border-color: transparent;
+  transform: translateY(-3px);
+  box-shadow:
+    0 16px 32px -10px rgba(109, 40, 217, 0.2),
+    0 6px 12px -6px rgba(37, 99, 235, 0.12);
+}
+
+.md-typeset .feature-card:hover::before {
+  opacity: 1;
+}
+
+/* Icon styling - make icons prominent */
+.md-typeset .feature-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+/* Large gradient icon */
+.md-typeset .feature-card h3 .twemoji,
+.md-typeset .feature-card h3 svg {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+  transition: all 0.3s ease;
+}
+
+.md-typeset .feature-card:hover h3 .twemoji,
+.md-typeset .feature-card:hover h3 svg {
+  background: linear-gradient(135deg, #6d28d9 0%, #2563eb 50%, #06b6d4 100%);
+  transform: scale(1.1);
+}
+
+.md-typeset .feature-card:hover h3 .twemoji svg,
+.md-typeset .feature-card:hover h3 svg {
+  fill: white;
+  color: white;
+}
+
+/* Card description text */
+.md-typeset .feature-card p {
+  color: var(--md-default-fg-color--light);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.md-typeset .feature-card code {
+  font-size: 0.8rem;
+  padding: 0.15rem 0.4rem;
+  background: rgba(109, 40, 217, 0.1);
+  border-radius: 0.25rem;
+}
+
+/* Mobile adjustments */
+@media screen and (max-width: 480px) {
+  .md-typeset .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .md-typeset .feature-card {
+    padding: 1.5rem;
+  }
+
+  .md-typeset .feature-card h3 .twemoji,
+  .md-typeset .feature-card h3 svg {
+    width: 2rem;
+    height: 2rem;
+    padding: 0.4rem;
+  }
+}
+
+/* Terminal styling - using logo dark colors */
+.md-typeset .terminal {
+  background: #0b1220;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: var(--md-code-font-family);
+  border: 1px solid #0f1b33;
+}
+
+/* Links with gradient on hover */
+.md-typeset a:hover {
+  color: #2563eb;
+}
+
+/* Buttons */
+.md-button--primary {
+  background: linear-gradient(135deg, #6d28d9 0%, #2563eb 100%);
+  border: none;
+}
+
+.md-button--primary:hover {
+  background: linear-gradient(135deg, #5b21b6 0%, #1d4ed8 100%);
+}
