@@ -19,7 +19,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  # Tags get their own concurrency group so they can't be cancelled by main branch builds
+  group: ${{ startsWith(github.ref, 'refs/tags/') && 'pages-release' || 'pages' }}
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
@@ -77,8 +78,14 @@ jobs:
         id: version
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-            echo "alias=" >> $GITHUB_OUTPUT
+            VERSION="${{ github.event.inputs.version }}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            # Set alias=latest for versioned releases (v*), but not for dev/latest
+            if [[ "$VERSION" == v* ]]; then
+              echo "alias=latest" >> $GITHUB_OUTPUT
+            else
+              echo "alias=" >> $GITHUB_OUTPUT
+            fi
           elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
             echo "version=$VERSION" >> $GITHUB_OUTPUT
