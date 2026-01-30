@@ -134,7 +134,19 @@ jobs:
 
       - name: Smoke test - version
         working-directory: cli-package
-        run: node bin/prs.js --version
+        run: |
+          VERSION=$(node bin/prs.js --version)
+          echo "CLI version: $VERSION"
+          # Fail if version is 0.0.0 (indicates package.json not found)
+          if [ "$VERSION" = "0.0.0" ]; then
+            echo "::error::Version detection failed - got 0.0.0"
+            exit 1
+          fi
+          # Verify version matches semver pattern
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "::error::Version does not match semver pattern: $VERSION"
+            exit 1
+          fi
 
       - name: Smoke test - help
         working-directory: cli-package
