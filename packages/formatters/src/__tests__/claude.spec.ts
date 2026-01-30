@@ -979,4 +979,93 @@ describe('ClaudeFormatter', () => {
       });
     });
   });
+
+  describe('testing standards extraction for rule files', () => {
+    it('should extract testing rules from standards block with nested object for rule file', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  framework: 'vitest',
+                  coverage: 80,
+                  pattern: 'AAA',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                // globs as array, containing test patterns
+                globs: ['**/*.spec.ts', '**/__tests__/**'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const testingRule = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/rules/testing.md')
+      );
+      expect(testingRule).toBeDefined();
+      expect(testingRule?.content).toContain('Use vitest for testing');
+      expect(testingRule?.content).toContain('Target >80% coverage');
+      expect(testingRule?.content).toContain('Follow AAA pattern');
+    });
+
+    it('should use default testing rule content when no testing standards in rule file', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                code: ['Write clean code'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                // globs as array, containing test patterns
+                globs: ['**/*.spec.ts'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const testingRule = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/rules/testing.md')
+      );
+      expect(testingRule).toBeDefined();
+      // When no testing standards, default message should be used
+      expect(testingRule?.content).toContain('testing conventions');
+    });
+  });
 });

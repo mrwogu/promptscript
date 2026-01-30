@@ -1135,4 +1135,57 @@ describe('GitHubFormatter', () => {
       expect(result.content).toContain('- /build: Build the project');
     });
   });
+
+  describe('restrictions with ObjectContent items', () => {
+    it('should extract items from ObjectContent with items array', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                items: ['expose secrets', 'commit API keys'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## donts');
+      // Items from ObjectContent are extracted
+      expect(result.content).toContain('expose secrets');
+      expect(result.content).toContain('commit API keys');
+    });
+
+    it('should handle TextContent restrictions with multiple lines', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'TextContent',
+              value: '- use eval\n- use any type\n- skip error handling',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## donts');
+      // TextContent is parsed and each line is extracted
+      expect(result.content).toContain('use eval');
+      expect(result.content).toContain('use any type');
+      expect(result.content).toContain('skip error handling');
+    });
+  });
 });

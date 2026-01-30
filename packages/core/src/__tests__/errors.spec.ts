@@ -7,6 +7,9 @@ import {
   ResolveError,
   FileNotFoundError,
   CircularDependencyError,
+  GitCloneError,
+  GitAuthError,
+  GitRefNotFoundError,
   ValidationError,
 } from '../errors/index.js';
 import type { SourceLocation } from '../types/index.js';
@@ -122,6 +125,80 @@ describe('CircularDependencyError', () => {
     expect(error.code).toBe(ErrorCode.CIRCULAR_DEPENDENCY);
     expect(error.chain).toEqual(chain);
     expect(error.message).toBe('Circular dependency detected: a.prs → b.prs → c.prs → a.prs');
+  });
+});
+
+describe('GitCloneError', () => {
+  it('should create git clone error', () => {
+    const error = new GitCloneError(
+      'Failed to clone repository',
+      'https://github.com/org/repo.git',
+      mockLocation
+    );
+    expect(error.name).toBe('GitCloneError');
+    expect(error.code).toBe(ErrorCode.GIT_CLONE_ERROR);
+    expect(error.url).toBe('https://github.com/org/repo.git');
+    expect(error.message).toBe('Failed to clone repository');
+    expect(error.location).toEqual(mockLocation);
+  });
+
+  it('should include cause when provided', () => {
+    const cause = new Error('Network error');
+    const error = new GitCloneError(
+      'Clone failed',
+      'https://github.com/org/repo.git',
+      mockLocation,
+      cause
+    );
+    expect(error.cause).toBe(cause);
+  });
+
+  it('should work without location', () => {
+    const error = new GitCloneError('Clone failed', 'https://github.com/org/repo.git');
+    expect(error.location).toBeUndefined();
+  });
+});
+
+describe('GitAuthError', () => {
+  it('should create git auth error', () => {
+    const error = new GitAuthError(
+      'Authentication required',
+      'https://github.com/org/private-repo.git',
+      mockLocation
+    );
+    expect(error.name).toBe('GitAuthError');
+    expect(error.code).toBe(ErrorCode.GIT_AUTH_ERROR);
+    expect(error.url).toBe('https://github.com/org/private-repo.git');
+    expect(error.message).toBe('Authentication required');
+    expect(error.location).toEqual(mockLocation);
+  });
+
+  it('should work without location', () => {
+    const error = new GitAuthError('Auth failed', 'https://github.com/org/repo.git');
+    expect(error.location).toBeUndefined();
+  });
+});
+
+describe('GitRefNotFoundError', () => {
+  it('should create git ref not found error', () => {
+    const error = new GitRefNotFoundError(
+      'feature/branch',
+      'https://github.com/org/repo.git',
+      mockLocation
+    );
+    expect(error.name).toBe('GitRefNotFoundError');
+    expect(error.code).toBe(ErrorCode.GIT_REF_NOT_FOUND);
+    expect(error.ref).toBe('feature/branch');
+    expect(error.url).toBe('https://github.com/org/repo.git');
+    expect(error.message).toBe(
+      'Git ref not found: feature/branch in https://github.com/org/repo.git'
+    );
+    expect(error.location).toEqual(mockLocation);
+  });
+
+  it('should work without location', () => {
+    const error = new GitRefNotFoundError('v1.0.0', 'https://github.com/org/repo.git');
+    expect(error.location).toBeUndefined();
   });
 });
 

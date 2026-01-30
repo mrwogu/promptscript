@@ -266,6 +266,110 @@ describe('formatValidationResult', () => {
     expect(result).toContain('No issues found');
     expect(result).toContain('✓');
   });
+
+  it('should format result with warnings', () => {
+    const ast = createTestProgram();
+    // Add an empty block to trigger warning
+    ast.blocks = [
+      {
+        type: 'Block',
+        name: 'identity',
+        loc: { file: 'test.prs', line: 5, column: 1 },
+        content: {
+          type: 'TextContent',
+          value: '',
+          loc: { file: 'test.prs', line: 5, column: 1 },
+        },
+      },
+    ];
+    const validator = new Validator({
+      rules: {
+        'empty-block': 'warning',
+      },
+    });
+    const validationResult = validator.validate(ast);
+
+    const result = formatValidationResult(validationResult);
+
+    expect(result).toContain('warning');
+    expect(result).toContain('⚠');
+  });
+
+  it('should format result with warnings using color', () => {
+    const ast = createTestProgram();
+    ast.blocks = [
+      {
+        type: 'Block',
+        name: 'identity',
+        loc: { file: 'test.prs', line: 5, column: 1 },
+        content: {
+          type: 'TextContent',
+          value: '',
+          loc: { file: 'test.prs', line: 5, column: 1 },
+        },
+      },
+    ];
+    const validator = new Validator({
+      rules: {
+        'empty-block': 'warning',
+      },
+    });
+    const validationResult = validator.validate(ast);
+
+    const result = formatValidationResult(validationResult, { color: true });
+
+    expect(result).toContain('\x1b[33m'); // Yellow for warning
+  });
+
+  it('should format result with info messages', () => {
+    const ast = createTestProgram();
+    const validator = new Validator();
+    // Add a custom rule that reports info
+    validator.addRule({
+      id: 'INFO001',
+      name: 'test-info',
+      description: 'Reports an info',
+      defaultSeverity: 'info',
+      validate: (ctx) => {
+        ctx.report({ message: 'This is an info message' });
+      },
+    });
+    const validationResult = validator.validate(ast);
+
+    const result = formatValidationResult(validationResult);
+
+    expect(result).toContain('info');
+    expect(result).toContain('ℹ');
+  });
+
+  it('should format result with info messages using color', () => {
+    const ast = createTestProgram();
+    const validator = new Validator();
+    validator.addRule({
+      id: 'INFO001',
+      name: 'test-info',
+      description: 'Reports an info',
+      defaultSeverity: 'info',
+      validate: (ctx) => {
+        ctx.report({ message: 'This is an info message' });
+      },
+    });
+    const validationResult = validator.validate(ast);
+
+    const result = formatValidationResult(validationResult, { color: true });
+
+    expect(result).toContain('\x1b[34m'); // Blue for info
+  });
+
+  it('should format result with success message using color', () => {
+    const ast = createTestProgram();
+    const validator = new Validator();
+    const validationResult = validator.validate(ast);
+
+    const result = formatValidationResult(validationResult, { color: true });
+
+    expect(result).toContain('\x1b[32m'); // Green for success
+  });
 });
 
 describe('formatDiagnostic/formatDiagnostics aliases', () => {

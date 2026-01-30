@@ -70,6 +70,26 @@ class TestFormatter extends BaseFormatter {
   public testExtractSectionWithCodeBlock(text: string, header: string): string | null {
     return this.extractSectionWithCodeBlock(text, header);
   }
+
+  public testCreateRenderer(options?: { convention?: string; prettier?: object }) {
+    return this.createRenderer(options);
+  }
+
+  public testGetPrettierOptions(options?: { prettier?: object }) {
+    return this.getPrettierOptions(options);
+  }
+
+  public testGetOutputPath(options?: { outputPath?: string }) {
+    return this.getOutputPath(options);
+  }
+
+  public testNormalizeMarkdownForPrettier(content: string): string {
+    return this.normalizeMarkdownForPrettier(content);
+  }
+
+  public testStripAllIndent(content: string): string {
+    return this.stripAllIndent(content);
+  }
 }
 
 describe('BaseFormatter', () => {
@@ -484,6 +504,210 @@ describe('BaseFormatter', () => {
       const input: Value[] = ['Rule 1', 123, true];
       const result = (formatter as any).formatStandardsList(input);
       expect(result).toEqual(['Rule 1', '123', 'true']);
+    });
+  });
+
+  describe('createRenderer', () => {
+    it('should create renderer with default convention', () => {
+      const renderer = formatter.testCreateRenderer();
+      expect(renderer).toBeDefined();
+    });
+
+    it('should create renderer with xml convention', () => {
+      const renderer = formatter.testCreateRenderer({ convention: 'xml' });
+      expect(renderer).toBeDefined();
+    });
+
+    it('should pass prettier options to renderer', () => {
+      const renderer = formatter.testCreateRenderer({
+        prettier: { tabWidth: 4 },
+      });
+      expect(renderer).toBeDefined();
+    });
+  });
+
+  describe('getPrettierOptions', () => {
+    it('should return default options when none provided', () => {
+      const options = formatter.testGetPrettierOptions();
+      expect(options).toHaveProperty('tabWidth');
+      expect(options).toHaveProperty('printWidth');
+    });
+
+    it('should merge provided options with defaults', () => {
+      const options = formatter.testGetPrettierOptions({
+        prettier: { tabWidth: 4 },
+      });
+      expect(options.tabWidth).toBe(4);
+      expect(options).toHaveProperty('printWidth');
+    });
+  });
+
+  describe('getOutputPath', () => {
+    it('should return default output path', () => {
+      const path = formatter.testGetOutputPath();
+      expect(path).toBe('test.md');
+    });
+
+    it('should use custom output path when provided', () => {
+      const path = formatter.testGetOutputPath({ outputPath: 'custom.md' });
+      expect(path).toBe('custom.md');
+    });
+  });
+
+  describe('normalizeMarkdownForPrettier', () => {
+    it('should strip common leading indentation', () => {
+      const content = '    # Header\n    Content\n    More content';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toBe('# Header\n\nContent\nMore content');
+    });
+
+    it('should preserve code block content', () => {
+      const content = '# Header\n\n```js\n  const x = 1;\n```';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('const x = 1;');
+    });
+
+    it('should add blank line after header', () => {
+      const content = '# Header\nContent';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toBe('# Header\n\nContent');
+    });
+
+    it('should add blank line before list', () => {
+      const content = 'Text\n- Item 1\n- Item 2';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('\n\n- Item 1');
+    });
+
+    it('should not add extra blank line between list items', () => {
+      const content = '- Item 1\n- Item 2\n- Item 3';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toBe('- Item 1\n- Item 2\n- Item 3');
+    });
+
+    it('should add blank line before numbered list', () => {
+      const content = 'Text\n1. First\n2. Second';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('\n\n1. First');
+    });
+
+    it('should escape __name__ pattern', () => {
+      // The regex matches __x__ pattern (double underscores on both sides)
+      const content = 'Use __test__ in paths';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('\\_\\_test\\_\\_');
+    });
+
+    it('should escape glob asterisks outside backticks', () => {
+      const content = 'packages/* glob pattern';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('packages/\\*');
+    });
+
+    it('should not escape asterisks inside backticks', () => {
+      const content = 'Use `packages/*` for glob';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('`packages/*`');
+    });
+
+    it('should format markdown tables', () => {
+      const content = '| Col1 | Col2 |\n|------|------|\n| a | b |';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('| Col1 |');
+      expect(result).toContain('| ---- |');
+    });
+
+    it('should add blank line before code block', () => {
+      const content = 'Some text\n```js\ncode\n```';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('Some text\n\n```js');
+    });
+
+    it('should handle empty content', () => {
+      const result = formatter.testNormalizeMarkdownForPrettier('');
+      expect(result).toBe('');
+    });
+
+    it('should handle content with only code blocks', () => {
+      const content = '```js\ncode\n```';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toBe('```js\ncode\n```');
+    });
+
+    it('should handle text ending with colon before list', () => {
+      const content = 'Steps:\n- Step 1\n- Step 2';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toContain('Steps:\n\n- Step 1');
+    });
+
+    it('should handle multiple tables', () => {
+      const content = '| A | B |\n|---|---|\n| 1 | 2 |\n\nText\n\n| C | D |\n|---|---|\n| 3 | 4 |';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      // Tables are formatted with padding
+      expect(result).toContain('| A');
+      expect(result).toContain('| C');
+    });
+  });
+
+  describe('stripAllIndent', () => {
+    it('should strip all leading whitespace', () => {
+      const content = '    Line 1\n        Line 2\n    Line 3';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toBe('Line 1\nLine 2\nLine 3');
+    });
+
+    it('should preserve code block content indentation', () => {
+      const content = 'Text\n```\n  indented code\n```';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toContain('  indented code');
+    });
+
+    it('should add blank line before code block', () => {
+      const content = 'Some text\n```\ncode\n```';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toContain('Some text\n\n```');
+    });
+
+    it('should escape __ in content', () => {
+      const content = '__dirname is used';
+      const result = formatter.testStripAllIndent(content);
+      // stripAllIndent escapes __ to \_\_ so __dirname becomes \_\_dirname
+      expect(result).toContain('\\_\\_dirname');
+    });
+
+    it('should escape glob patterns', () => {
+      const content = 'Match packages/* files';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toContain('packages/\\*');
+    });
+
+    it('should add blank line before list after text', () => {
+      const content = 'Text here\n- Item 1';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toContain('Text here\n\n- Item 1');
+    });
+
+    it('should add blank line before list after colon', () => {
+      const content = 'Steps:\n- Step 1';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toContain('Steps:\n\n- Step 1');
+    });
+
+    it('should handle numbered lists', () => {
+      const content = 'Steps\n1. First step';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toContain('\n\n1. First step');
+    });
+
+    it('should handle empty content', () => {
+      const result = formatter.testStripAllIndent('');
+      expect(result).toBe('');
+    });
+
+    it('should strip indent from code block markers', () => {
+      const content = '    ```js\n    code\n    ```';
+      const result = formatter.testStripAllIndent(content);
+      expect(result).toContain('```js');
     });
   });
 });
