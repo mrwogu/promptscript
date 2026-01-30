@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha.8](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.7...v1.0.0-alpha.8) (2026-01-30)
+
+
+### chore
+
+* prepare alpha release ([7b1fe19](https://github.com/mrwogu/promptscript/commit/7b1fe197b1ddc9b0fec87c407f557fbaa67113fd))
+
 ## [1.0.0-alpha.7](https://github.com/mrwogu/promptscript/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2026-01-28)
 
 
