@@ -205,8 +205,8 @@ export function formatMigrationHint(detection: AIToolsDetection): string[] {
   }
   lines.push('');
   lines.push('   These can be migrated to PromptScript for unified management.');
+  lines.push('   Run: prs init --migrate');
   lines.push('   See: https://getpromptscript.dev/latest/guides/ai-migration-best-practices');
-  lines.push('   Or use the /migrate skill in Claude Code.');
 
   return lines;
 }
