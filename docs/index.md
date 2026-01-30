@@ -39,7 +39,7 @@ _Standardize, audit, and deploy instructions across any AI coding assistant._
     </div>
     <pre class="compile-demo__code"><code id="typewriter-target"></code></pre>
     <div class="compile-demo__cursor" id="typing-cursor"></div>
-    <div class="compile-demo__badge">Just 4 lines!</div>
+    <div class="compile-demo__badge">Just 5 lines!</div>
   </div>
 
   <div class="compile-demo__arrow">
@@ -106,7 +106,7 @@ TypeScript 5.x · Node 20+ · PostgreSQL
 <span class="hl">## Standards</span>
 <span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>
 <span class="rule">✓</span> Zod for validation
-<span class="rule">✓</span> 90% test coverage
+<span class="rule">✓</span> API: <span class="str">https://api.acme.io</span>
 
 <span class="hl">## Security</span>
 <span class="warn">⛔</span> Never log PII/card data
@@ -190,6 +190,8 @@ Expert Fullstack Engineer.
 
 <span class="hl">## Tech</span> TypeScript · Hexagonal · DDD
 
+<span class="hl">## API</span> <span class="str">https://api.acme.io</span>
+
 <span class="hl">## Commands</span>
 <span class="str">/review</span> Security code review
 <span class="str">/test</span> Write vitest tests
@@ -263,6 +265,8 @@ Expert Fullstack Engineer.
 
 <span class="hl">## Stack</span>
 TypeScript 5.x · Node 20+ · Prisma
+
+<span class="hl">## API</span> <span class="str">https://api.acme.io</span>
 
 <span class="hl">## Rules</span>
 <span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>

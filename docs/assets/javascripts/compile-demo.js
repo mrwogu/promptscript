@@ -34,6 +34,12 @@
     { text: 'prompt:', cls: 'key' },
     { text: ' ', cls: '' },
     { text: 'true', cls: 'bool' },
+    { text: ' }\n', cls: '' },
+    { text: '@standards', cls: 'kw' },
+    { text: ' { ', cls: '' },
+    { text: 'api:', cls: 'key' },
+    { text: ' ', cls: '' },
+    { text: '"${API_URL}"', cls: 'str' },
     { text: ' }', cls: '' },
   ];
 

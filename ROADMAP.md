@@ -325,6 +325,7 @@ _These features are being evaluated based on community interest. Vote with 👍 
 - [ ] **Conditional compilation** — `@if env.production` blocks
 - [ ] **Monorepo support** — Per-package configurations with shared base
 - [ ] **Import from URL** — `@inherit https://example.com/rules.prs`
+- [ ] **Docker container** — Pre-built image with PromptScript CLI, no Node.js/npm installation required
 
 ---
 
