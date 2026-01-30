@@ -1,4 +1,4 @@
-# PromptScript - Infrastructure-as-Code for AI Context
+# PromptScript - Prompt-as-Code for AI Instructions
 # https://getpromptscript.dev
 
 > PromptScript is a language and toolchain for standardizing AI coding assistant
