@@ -109,6 +109,7 @@ jobs:
         env:
           MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.MKDOCS_GIT_COMMITTERS_APIKEY }}
           PYTHONPATH: ${{ github.workspace }}
+          DOCS_VERSION: ${{ steps.version.outputs.version }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
