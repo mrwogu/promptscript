@@ -15,6 +15,77 @@ export interface BaseNode {
 }
 
 // ============================================================
+// Template Types (Parameterized Inheritance)
+// ============================================================
+
+/**
+ * Parameter type for template definitions.
+ */
+export type ParamType =
+  | { kind: 'string' }
+  | { kind: 'number' }
+  | { kind: 'boolean' }
+  | { kind: 'enum'; options: string[] };
+
+/**
+ * Parameter definition in @meta { params: {...} }.
+ *
+ * @example
+ * ```promptscript
+ * @meta {
+ *   params: {
+ *     projectName: string
+ *     strict?: boolean = true
+ *     mode: enum("dev", "prod")
+ *   }
+ * }
+ * ```
+ */
+export interface ParamDefinition extends BaseNode {
+  readonly type: 'ParamDefinition';
+  /** Parameter name */
+  name: string;
+  /** Parameter type */
+  paramType: ParamType;
+  /** Whether the parameter is optional */
+  optional: boolean;
+  /** Default value if optional */
+  defaultValue?: Value;
+}
+
+/**
+ * Parameter argument when calling a template.
+ *
+ * @example
+ * ```promptscript
+ * @inherit @stacks/typescript(projectName: "my-app", strict: true)
+ * ```
+ */
+export interface ParamArgument extends BaseNode {
+  readonly type: 'ParamArgument';
+  /** Argument name */
+  name: string;
+  /** Argument value */
+  value: Value;
+}
+
+/**
+ * Template expression for variable interpolation.
+ *
+ * @example
+ * ```promptscript
+ * @project {
+ *   name: {{projectName}}
+ * }
+ * ```
+ */
+export interface TemplateExpression extends BaseNode {
+  readonly type: 'TemplateExpression';
+  /** Variable name to interpolate */
+  name: string;
+}
+
+// ============================================================
 // Program (Root Node)
 // ============================================================
 
@@ -47,6 +118,10 @@ export interface Program extends BaseNode {
  * @meta {
  *   id: "my-project"
  *   syntax: "1.0.0"
+ *   params: {
+ *     projectName: string
+ *     strict?: boolean = true
+ *   }
  * }
  * ```
  */
@@ -54,6 +129,8 @@ export interface MetaBlock extends BaseNode {
   readonly type: 'MetaBlock';
   /** Key-value pairs */
   fields: Record<string, Value>;
+  /** Template parameter definitions (for parameterized inheritance) */
+  params?: ParamDefinition[];
 }
 
 /**
@@ -63,12 +140,15 @@ export interface MetaBlock extends BaseNode {
  * ```promptscript
  * @inherit @core/org
  * @inherit ./parent
+ * @inherit @stacks/typescript(projectName: "my-app")
  * ```
  */
 export interface InheritDeclaration extends BaseNode {
   readonly type: 'InheritDeclaration';
   /** Path to parent file */
   path: PathReference;
+  /** Template parameters (for parameterized inheritance) */
+  params?: ParamArgument[];
 }
 
 /**
@@ -78,6 +158,7 @@ export interface InheritDeclaration extends BaseNode {
  * ```promptscript
  * @use @core/guards/compliance
  * @use @core/guards/compliance as security
+ * @use @fragments/header(title: "Welcome") as header
  * ```
  */
 export interface UseDeclaration extends BaseNode {
@@ -86,6 +167,8 @@ export interface UseDeclaration extends BaseNode {
   path: PathReference;
   /** Optional alias */
   alias?: string;
+  /** Template parameters (for parameterized imports) */
+  params?: ParamArgument[];
 }
 
 // ============================================================
@@ -243,7 +326,8 @@ export type Value =
   | Value[]
   | { [key: string]: Value }
   | TextContent
-  | TypeExpression;
+  | TypeExpression
+  | TemplateExpression;
 
 /**
  * Type expression for parameter definitions.

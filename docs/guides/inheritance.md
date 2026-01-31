@@ -660,6 +660,246 @@ flowchart TD
 </a>
 <!-- playground-link-end -->
 
+## Parameterized Inheritance (Templates)
+
+PromptScript supports parameterized inheritance, allowing you to create reusable templates with configurable values. This is similar to generics in programming languages or Handlebars-like templates.
+
+### Defining Parameters
+
+Define parameters in the `@meta` block using the `params` field:
+
+```promptscript
+# @stacks/typescript-lib.prs
+@meta {
+  id: "@stacks/typescript-lib"
+  syntax: "1.0.0"
+  params: {
+    projectName: string
+    runtime: string = "node18"
+    strict?: boolean
+    testFramework: enum("vitest", "jest", "mocha") = "vitest"
+  }
+}
+
+@project {
+  name: {{projectName}}
+  runtime: {{runtime}}
+}
+
+@standards {
+  testing: ["Use {{testFramework}} for all tests"]
+}
+```
+
+### Parameter Types
+
+| Type      | Syntax                 | Description             |
+| --------- | ---------------------- | ----------------------- |
+| `string`  | `name: string`         | Text value              |
+| `number`  | `count: number`        | Numeric value           |
+| `boolean` | `enabled: boolean`     | True or false           |
+| `enum`    | `mode: enum("a", "b")` | One of specified values |
+
+### Parameter Modifiers
+
+| Modifier | Syntax                   | Description                         |
+| -------- | ------------------------ | ----------------------------------- |
+| Required | `name: string`           | Must be provided                    |
+| Optional | `name?: string`          | Can be omitted (value is undefined) |
+| Default  | `name: string = "value"` | Uses default if not provided        |
+
+### Passing Parameters
+
+Pass parameters when using `@inherit` or `@use`:
+
+```promptscript
+# project.prs
+@meta {
+  id: "my-app"
+  syntax: "1.0.0"
+}
+
+@inherit @stacks/typescript-lib(projectName: "my-app", runtime: "node20")
+```
+
+Or with `@use`:
+
+```promptscript
+@use ./fragments/testing(framework: "vitest", coverage: 90)
+```
+
+### Template Variables
+
+Use `{{variable}}` syntax to reference parameters in content:
+
+```promptscript
+@meta {
+  id: "template"
+  syntax: "1.0.0"
+  params: {
+    projectName: string
+    author: string = "Team"
+  }
+}
+
+@identity {
+  """
+  You are working on {{projectName}}.
+  This project is maintained by {{author}}.
+  """
+}
+
+@project {
+  name: {{projectName}}
+  maintainer: {{author}}
+}
+```
+
+### Complete Example
+
+=== "Template (Parent)"
+
+    ```promptscript
+    # @stacks/react-app.prs
+    @meta {
+      id: "@stacks/react-app"
+      syntax: "1.0.0"
+      params: {
+        projectName: string
+        port: number = 3000
+        strict: boolean = true
+      }
+    }
+
+    @identity {
+      """
+      You are a React developer working on {{projectName}}.
+      """
+    }
+
+    @context {
+      project: {{projectName}}
+      devServer: "http://localhost:{{port}}"
+      strictMode: {{strict}}
+    }
+
+    @standards {
+      code: ["TypeScript strict mode enabled"]
+    }
+    ```
+
+=== "Project (Child)"
+
+    ```promptscript
+    # project.prs
+    @meta {
+      id: "checkout-app"
+      syntax: "1.0.0"
+    }
+
+    @inherit @stacks/react-app(projectName: "Checkout App", port: 8080)
+
+    @identity {
+      """
+      You specialize in e-commerce checkout flows.
+      """
+    }
+    ```
+
+=== "Resolved Output"
+
+    ```markdown
+    ## Identity
+
+    You are a React developer working on Checkout App.
+
+    You specialize in e-commerce checkout flows.
+
+    ## Context
+
+    - project: Checkout App
+    - devServer: http://localhost:8080
+    - strictMode: true
+
+    ## Standards
+
+    ### Code
+    - TypeScript strict mode enabled
+    ```
+
+### Template Variables vs Environment Variables
+
+PromptScript has two interpolation mechanisms:
+
+| Feature               | Syntax    | Resolved At  | Purpose                       |
+| --------------------- | --------- | ------------ | ----------------------------- |
+| Environment Variables | `${VAR}`  | Parse time   | System configuration, secrets |
+| Template Variables    | `{{var}}` | Resolve time | Parameterized templates       |
+
+```text
+@context {
+  # Environment variable - resolved during parsing
+  apiKey: ${API_KEY}
+
+  # Template variable - resolved during inheritance
+  project: {{projectName}}
+}
+```
+
+### Validation Errors
+
+PromptScript validates parameters at compile time:
+
+**Missing required parameter:**
+
+```
+Error: Missing required parameter 'projectName' for template '@stacks/react-app'
+```
+
+**Unknown parameter:**
+
+```
+Error: Unknown parameter 'unknownParam' for template '@stacks/react-app'.
+Available parameters: projectName, port, strict
+```
+
+**Type mismatch:**
+
+```
+Error: Type mismatch for parameter 'port': expected number, got string
+```
+
+**Invalid enum value:**
+
+```
+Error: Type mismatch for parameter 'mode': expected enum("dev", "prod"), got "staging"
+```
+
+### Best Practices
+
+1. **Use descriptive parameter names** - `projectName` instead of `name`
+2. **Provide sensible defaults** - Reduce required parameters
+3. **Document parameters** - Add comments explaining each parameter
+4. **Validate with enums** - Use enums for constrained choices
+5. **Keep templates focused** - One purpose per template
+
+```promptscript
+@meta {
+  id: "@stacks/api-service"
+  syntax: "1.0.0"
+  params: {
+    # Name of the API service
+    serviceName: string
+
+    # HTTP port for the service (default: 3000)
+    port: number = 3000
+
+    # Environment mode
+    mode: enum("development", "staging", "production") = "development"
+  }
+}
+```
+
 ## Debugging Inheritance
 
 ### View Resolved Configuration

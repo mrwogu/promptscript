@@ -114,6 +114,36 @@ export const Enum = createToken({
   longer_alt: Identifier,
 });
 
+// Type keywords for param definitions (must come before Identifier)
+export const StringType = createToken({
+  name: 'StringType',
+  pattern: /string/,
+  longer_alt: Identifier,
+});
+
+export const NumberType = createToken({
+  name: 'NumberType',
+  pattern: /number/,
+  longer_alt: Identifier,
+});
+
+export const BooleanType = createToken({
+  name: 'BooleanType',
+  pattern: /boolean/,
+  longer_alt: Identifier,
+});
+
+// Template expression tokens
+export const TemplateOpen = createToken({
+  name: 'TemplateOpen',
+  pattern: /\{\{/,
+});
+
+export const TemplateClose = createToken({
+  name: 'TemplateClose',
+  pattern: /\}\}/,
+});
+
 // ============================================================
 // Symbols
 // ============================================================
@@ -222,6 +252,10 @@ export const allTokens: TokenType[] = [
   PathReference,
   RelativePath,
 
+  // Template expression tokens (multi-char, before single braces)
+  TemplateOpen,
+  TemplateClose,
+
   // Multi-char symbols before single-char
   DotDot,
 
@@ -236,6 +270,9 @@ export const allTokens: TokenType[] = [
   Null,
   Range,
   Enum,
+  StringType,
+  NumberType,
+  BooleanType,
 
   // Single-char symbols
   At,

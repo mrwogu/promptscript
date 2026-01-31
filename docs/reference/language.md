@@ -65,6 +65,51 @@ Every PromptScript file must have a `@meta` block defining metadata:
 | `org`    | No       | Organization name                    |
 | `team`   | No       | Team name                            |
 | `tags`   | No       | Array of tags                        |
+| `params` | No       | Parameter definitions for templates  |
+
+### Parameter Definitions
+
+The `params` field defines parameters for parameterized inheritance:
+
+```promptscript
+@meta {
+  id: "@stacks/typescript-lib"
+  syntax: "1.0.0"
+  params: {
+    # Required string parameter
+    projectName: string
+
+    # Optional with default value
+    runtime: string = "node18"
+
+    # Optional parameter (no default, can be undefined)
+    debug?: boolean
+
+    # Enum parameter with constrained values
+    testFramework: enum("vitest", "jest", "mocha") = "vitest"
+
+    # Number parameter
+    port: number = 3000
+  }
+}
+```
+
+**Parameter Types:**
+
+| Type      | Syntax                 | Values                |
+| --------- | ---------------------- | --------------------- |
+| `string`  | `name: string`         | Any text              |
+| `number`  | `count: number`        | Integers and floats   |
+| `boolean` | `enabled: boolean`     | `true` or `false`     |
+| `enum`    | `mode: enum("a", "b")` | One of listed options |
+
+**Parameter Modifiers:**
+
+| Pattern                    | Meaning                     |
+| -------------------------- | --------------------------- |
+| `name: string`             | Required, must be provided  |
+| `name?: string`            | Optional, can be omitted    |
+| `name: string = "default"` | Optional with default value |
 
 ## @inherit Declaration
 
@@ -79,6 +124,9 @@ Single inheritance from another PromptScript file:
 
 # With version constraint
 @inherit @company/frontend-team@1.0.0
+
+# With parameters (see Parameterized Inheritance below)
+@inherit @stacks/react-app(projectName: "my-app", port: 3000)
 ```
 
 <!-- playground-link-start -->
@@ -108,6 +156,9 @@ Import and merge fragments for composition (like mixins):
 @use @core/standards/typescript
 @use @core/restrictions/security
 @use ./local-config
+
+# With parameters (see Parameterized Inheritance below)
+@use ./fragments/testing(framework: "vitest", coverage: 90) as testing
 ```
 
 <!-- playground-link-start -->
@@ -1085,6 +1136,55 @@ code: {
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+### Template Expressions
+
+Use `{{variable}}` syntax to reference template parameters:
+
+```promptscript
+@meta {
+  id: "template-example"
+  syntax: "1.0.0"
+  params: {
+    projectName: string
+    port: number = 3000
+  }
+}
+
+@identity {
+  """
+  You are working on {{projectName}}.
+  """
+}
+
+@context {
+  project: {{projectName}}
+  devServer: "http://localhost:{{port}}"
+}
+```
+
+Template expressions are resolved during inheritance resolution when parameters are bound.
+
+**Valid Variable Names:**
+
+- Must start with a letter or underscore
+- Can contain letters, numbers, and underscores
+- Examples: `{{name}}`, `{{projectName}}`, `{{_internal}}`
+
+**Template vs Environment Variables:**
+
+| Syntax    | Resolved        | Purpose               |
+| --------- | --------------- | --------------------- |
+| `{{var}}` | At resolve time | Template parameters   |
+| `${VAR}`  | At parse time   | Environment variables |
+
+```promptscript
+# Environment variable - from system at parse time
+apiUrl: ${API_URL:-https://api.example.com}
+
+# Template variable - from @inherit params at resolve time
+project: {{projectName}}
+```
 
 ## Type Expressions
 

@@ -239,6 +239,90 @@ const EXAMPLES: Example[] = [
     ],
   },
   {
+    id: 'parameterized-templates',
+    name: 'Parameterized Templates',
+    description: 'Reusable templates with {{variable}} interpolation',
+    complexity: 'intermediate',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "my-react-app"
+  syntax: "1.0.0"
+}
+
+# Inherit from template with parameters
+@inherit ./react-template(
+  projectName: "Checkout App"
+  port: 8080
+  strict: true
+)
+
+@identity {
+  """
+  You specialize in e-commerce checkout flows.
+  You understand payment integrations and cart management.
+  """
+}
+
+@context {
+  """
+  E-commerce checkout application with Stripe integration.
+  """
+}
+`,
+      },
+      {
+        path: 'react-template.prs',
+        content: `@meta {
+  id: "react-template"
+  syntax: "1.0.0"
+  params: {
+    # Required: Name of the project
+    projectName: string
+
+    # Optional: Development server port (default: 3000)
+    port: number = 3000
+
+    # Optional: Enable strict mode (default: true)
+    strict: boolean = true
+
+    # Optional: Test framework choice
+    testFramework: enum("vitest", "jest") = "vitest"
+  }
+}
+
+@identity {
+  """
+  You are a React developer working on {{projectName}}.
+  You follow best practices and write clean code.
+  """
+}
+
+@context {
+  project: {{projectName}}
+  devServer: "http://localhost:{{port}}"
+  strictMode: {{strict}}
+  testing: {{testFramework}}
+}
+
+@standards {
+  code: {
+    language: "TypeScript"
+    framework: "React 18"
+    testing: "{{testFramework}}"
+  }
+}
+
+@restrictions {
+  - "Use functional components only"
+  - "Test coverage must be above 80%"
+}
+`,
+      },
+    ],
+  },
+  {
     id: 'multi-file',
     name: 'Multi-File Project',
     description: 'Local inheritance with shared base configuration',
@@ -724,6 +808,11 @@ export function ExampleGallery() {
         )}
         {example.files.some((f) => f.content.includes('@agents')) && (
           <span className="text-xs px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded">agents</span>
+        )}
+        {example.files.some((f) => f.content.includes('params:') && f.content.includes('{{')) && (
+          <span className="text-xs px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded">
+            templates
+          </span>
         )}
         {example.envVars && Object.keys(example.envVars).length > 0 && (
           <span className="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">

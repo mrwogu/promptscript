@@ -8,6 +8,7 @@ import { blockedPatterns } from './blocked-patterns.js';
 import { validPath } from './valid-path.js';
 import { deprecated } from './deprecated.js';
 import { emptyBlock } from './empty-block.js';
+import { validParams } from './valid-params.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -17,6 +18,7 @@ export { blockedPatterns } from './blocked-patterns.js';
 export { validPath, isValidPath } from './valid-path.js';
 export { deprecated } from './deprecated.js';
 export { emptyBlock } from './empty-block.js';
+export { validParams } from './valid-params.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -37,6 +39,8 @@ export const allRules: ValidationRule[] = [
   deprecated,
   // Empty blocks (PS008)
   emptyBlock,
+  // Valid params (PS009)
+  validParams,
 ];
 
 /**

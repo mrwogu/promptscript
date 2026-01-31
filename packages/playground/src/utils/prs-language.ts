@@ -13,7 +13,7 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
   defaultToken: '',
   tokenPostfix: '.prs',
 
-  keywords: ['true', 'false', 'null'],
+  keywords: ['true', 'false', 'null', 'string', 'number', 'boolean', 'enum'],
 
   // Directive names
   directives: [
@@ -34,6 +34,10 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     '@output',
     '@behavior',
     '@memory',
+    '@guards',
+    '@agents',
+    '@params',
+    '@project',
   ],
 
   // Operators and symbols
@@ -79,6 +83,9 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       [/:/, 'delimiter'],
       [/,/, 'delimiter'],
 
+      // Template expressions {{variable}}
+      [/\{\{/, 'variable.template', '@templateExpression'],
+
       // Numbers
       [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
       [/\d+/, 'number'],
@@ -87,6 +94,11 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       [/"""/, 'string', '@multilineString'],
       [/"([^"\\]|\\.)*$/, 'string.invalid'],
       [/"/, 'string', '@string'],
+    ],
+
+    templateExpression: [
+      [/[a-zA-Z_][a-zA-Z0-9_]*/, 'variable.name'],
+      [/\}\}/, 'variable.template', '@pop'],
     ],
 
     whitespace: [
@@ -102,9 +114,15 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     ],
 
     multilineString: [
-      [/[^"]+/, 'string'],
+      [/\{\{/, 'variable.template', '@templateExpressionInString'],
+      [/[^"{]+/, 'string'],
       [/"""/, 'string', '@pop'],
       [/"/, 'string'],
+    ],
+
+    templateExpressionInString: [
+      [/[a-zA-Z_][a-zA-Z0-9_]*/, 'variable.name'],
+      [/\}\}/, 'variable.template', '@pop'],
     ],
   },
 };
@@ -153,6 +171,8 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'number', foreground: 'f472b6' },
   { token: 'identifier', foreground: 'f8fafc' },
   { token: 'delimiter', foreground: '94a3b8' },
+  { token: 'variable.template', foreground: 'f472b6', fontStyle: 'bold' },
+  { token: 'variable.name', foreground: 'fb923c' },
 ];
 
 /**

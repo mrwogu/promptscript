@@ -81,6 +81,16 @@ export { applyExtends } from './extensions.js';
 // Skill resolution
 export { resolveNativeSkills } from './skills.js';
 
+// Template interpolation
+export {
+  bindParams,
+  interpolateText,
+  interpolateContent,
+  interpolateAST,
+  isTemplateExpression,
+  type TemplateContext,
+} from './template.js';
+
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';
 import { createResolver } from './resolver.js';

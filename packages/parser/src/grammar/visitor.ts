@@ -15,6 +15,10 @@ import type {
   ObjectContent,
   TypeExpression,
   SourceLocation,
+  ParamArgument,
+  ParamDefinition,
+  ParamType,
+  TemplateExpression,
 } from '@promptscript/core';
 
 // Get the base visitor class from the parser
@@ -129,30 +133,47 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   metaBlock(ctx: any): MetaBlock {
     const fields: Record<string, Value> = {};
+    let params: ParamDefinition[] | undefined;
 
     if (ctx.field) {
       for (const fieldNode of ctx.field) {
-        const { name, value } = this.visit(fieldNode);
-        fields[name] = value;
+        const { name, value, isParamsDef, paramsDefs } = this.visit(fieldNode);
+        if (isParamsDef && paramsDefs) {
+          params = paramsDefs;
+        } else {
+          fields[name] = value;
+        }
       }
     }
 
-    return {
+    const meta: MetaBlock = {
       type: 'MetaBlock',
       fields,
       loc: this.loc(ctx.At[0]),
     };
+
+    if (params) {
+      meta.params = params;
+    }
+
+    return meta;
   }
 
   /**
    * inheritDecl → InheritDeclaration
    */
   inheritDecl(ctx: any): InheritDeclaration {
-    return {
+    const inherit: InheritDeclaration = {
       type: 'InheritDeclaration',
       path: this.visit(ctx.pathRef[0]),
       loc: this.loc(ctx.At[0]),
     };
+
+    if (ctx.paramCallList) {
+      inherit.params = this.visit(ctx.paramCallList[0]);
+    }
+
+    return inherit;
   }
 
   /**
@@ -164,6 +185,10 @@ class PromptScriptVisitor extends BaseVisitor {
       path: this.visit(ctx.pathRef[0]),
       loc: this.loc(ctx.At[0]),
     };
+
+    if (ctx.paramCallList) {
+      use.params = this.visit(ctx.paramCallList[0]);
+    }
 
     if (ctx.Identifier) {
       use.alias = ctx.Identifier[0].image;
@@ -317,27 +342,48 @@ class PromptScriptVisitor extends BaseVisitor {
   }
 
   /**
-   * field → { name, value, optional, defaultValue }
+   * field → { name, value, optional, defaultValue, isParamsDef?, paramsDefs? }
    */
   field(ctx: any): {
     name: string;
     value: Value;
     optional?: boolean;
     defaultValue?: Value;
+    isParamsDef?: boolean;
+    paramsDefs?: ParamDefinition[];
   } {
-    // Field key can be either Identifier or StringLiteral
+    // Field key can be Identifier, StringLiteral, or type keywords (string, number, boolean)
     let name: string;
     if (ctx.Identifier) {
       name = ctx.Identifier[0].image;
-    } else {
+    } else if (ctx.StringLiteral) {
       name = this.parseStringLiteral(ctx.StringLiteral[0].image);
+    } else if (ctx.StringType) {
+      name = 'string';
+    } else if (ctx.NumberType) {
+      name = 'number';
+    } else if (ctx.BooleanType) {
+      name = 'boolean';
+    } else {
+      throw new Error('Unknown field key type');
     }
     const optional = ctx.Question ? true : undefined;
     const values = ctx.value;
-    const value = this.visit(values[0]);
+    const valueResult = this.visit(values[0]);
     const defaultValue = values.length > 1 ? this.visit(values[1]) : undefined;
 
-    return { name, value, optional, defaultValue };
+    // Special handling for 'params' field in @meta block
+    // Check if the value was parsed as a paramDefList (returns ParamDefinition[])
+    if (
+      name === 'params' &&
+      Array.isArray(valueResult) &&
+      valueResult.length > 0 &&
+      valueResult[0]?.type === 'ParamDefinition'
+    ) {
+      return { name, value: {}, isParamsDef: true, paramsDefs: valueResult as ParamDefinition[] };
+    }
+
+    return { name, value: valueResult, optional, defaultValue };
   }
 
   /**
@@ -385,12 +431,21 @@ class PromptScriptVisitor extends BaseVisitor {
       return this.visit(ctx.array[0]);
     }
 
+    if (ctx.paramDefList) {
+      // paramDefList returns ParamDefinition[] which is handled specially by field()
+      return this.visit(ctx.paramDefList[0]);
+    }
+
     if (ctx.object) {
       return this.visit(ctx.object[0]);
     }
 
     if (ctx.typeExpr) {
       return this.visit(ctx.typeExpr[0]);
+    }
+
+    if (ctx.templateExpr) {
+      return this.visit(ctx.templateExpr[0]);
     }
 
     if (ctx.Identifier) {
@@ -487,6 +542,95 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   dotPath(ctx: any): string {
     return ctx.Identifier.map((token: IToken) => token.image).join('.');
+  }
+
+  // ============================================================
+  // Template Parameter Visitor Methods
+  // ============================================================
+
+  /**
+   * paramCallList → ParamArgument[]
+   */
+  paramCallList(ctx: any): ParamArgument[] {
+    if (!ctx.paramArg) {
+      return [];
+    }
+    return ctx.paramArg.map((node: CstNode) => this.visit(node));
+  }
+
+  /**
+   * paramArg → ParamArgument
+   */
+  paramArg(ctx: any): ParamArgument {
+    return {
+      type: 'ParamArgument',
+      name: ctx.Identifier[0].image,
+      value: this.visit(ctx.value[0]),
+      loc: this.loc(ctx.Identifier[0]),
+    };
+  }
+
+  /**
+   * paramDefList → ParamDefinition[]
+   */
+  paramDefList(ctx: any): ParamDefinition[] {
+    if (!ctx.paramDef) {
+      return [];
+    }
+    return ctx.paramDef.map((node: CstNode) => this.visit(node));
+  }
+
+  /**
+   * paramDef → ParamDefinition
+   */
+  paramDef(ctx: any): ParamDefinition {
+    const name = ctx.Identifier[0].image;
+    const optional = ctx.Question !== undefined;
+    const paramType = this.visit(ctx.paramType[0]);
+    const defaultValue = ctx.value ? this.visit(ctx.value[0]) : undefined;
+
+    return {
+      type: 'ParamDefinition',
+      name,
+      paramType,
+      optional: optional || defaultValue !== undefined,
+      defaultValue,
+      loc: this.loc(ctx.Identifier[0]),
+    };
+  }
+
+  /**
+   * paramType → ParamType
+   */
+  paramType(ctx: any): ParamType {
+    if (ctx.StringType) {
+      return { kind: 'string' };
+    }
+    if (ctx.NumberType) {
+      return { kind: 'number' };
+    }
+    if (ctx.BooleanType) {
+      return { kind: 'boolean' };
+    }
+    if (ctx.enumType) {
+      const enumExpr = this.visit(ctx.enumType[0]) as { constraints?: { options?: string[] } };
+      return {
+        kind: 'enum',
+        options: enumExpr.constraints?.options ?? [],
+      };
+    }
+    throw new Error('Unknown param type');
+  }
+
+  /**
+   * templateExpr → TemplateExpression
+   */
+  templateExpr(ctx: any): TemplateExpression {
+    return {
+      type: 'TemplateExpression',
+      name: ctx.Identifier[0].image,
+      loc: this.loc(ctx.TemplateOpen[0]),
+    };
   }
 
   // ============================================================
