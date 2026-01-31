@@ -303,7 +303,6 @@ jobs:
             params: {
               projectName: string
               framework: string = "react"
-              strict?: boolean
             }
           }
 
@@ -311,15 +310,8 @@ jobs:
             """
             You are working on {{projectName}}.
             Framework: {{framework}}
+            Follow {{framework}} best practices.
             """
-          }
-
-          @standards {
-            code: {
-              """
-              - Follow {{framework}} best practices
-              """
-            }
           }
           EOF
 
