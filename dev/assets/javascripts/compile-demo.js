@@ -113,6 +113,122 @@
         switchToTab(tab.dataset.target, tabs, panels);
       });
     });
+
+    // Create floating scroll hint (will be enabled after typing animation)
+    const scrollHint = createScrollHint();
+    document.body.appendChild(scrollHint);
+    scrollHint.dataset.enabled = 'false';
+
+    // Make arrow clickable to scroll to output
+    if (compileBtn) {
+      compileBtn.style.cursor = 'pointer';
+      compileBtn.addEventListener('click', function () {
+        scrollToCompileArea(compileBtn, scrollHint);
+      });
+    }
+
+    // Scroll hint click handler
+    scrollHint.addEventListener('click', function () {
+      scrollToCompileArea(compileBtn, scrollHint);
+    });
+
+    // Event listeners for visibility (only active after typing completes)
+    window.addEventListener(
+      'scroll',
+      function () {
+        if (scrollHint.dataset.enabled === 'true') {
+          checkScrollHintVisibility(compileBtn, scrollHint);
+        }
+      },
+      {
+        passive: true,
+      }
+    );
+    window.addEventListener(
+      'resize',
+      function () {
+        if (scrollHint.dataset.enabled === 'true') {
+          checkScrollHintVisibility(compileBtn, scrollHint);
+        }
+      },
+      {
+        passive: true,
+      }
+    );
+
+    // Store scrollHint reference for startAnimation to use
+    demo.scrollHint = scrollHint;
+  }
+
+  function createScrollHint() {
+    var hint = document.createElement('div');
+    hint.className = 'compile-demo__scroll-hint';
+
+    var text = document.createElement('span');
+    text.className = 'compile-demo__scroll-hint-text';
+    text.textContent = 'See compilation';
+    hint.appendChild(text);
+
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'compile-demo__scroll-hint-arrow');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z');
+    svg.appendChild(path);
+    hint.appendChild(svg);
+
+    return hint;
+  }
+
+  function scrollToCompileArea(compileBtn, scrollHint) {
+    if (compileBtn) {
+      compileBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollHint.classList.remove('compile-demo__scroll-hint--visible');
+    }
+  }
+
+  function checkScrollHintVisibility(compileBtn, scrollHint) {
+    if (!compileBtn || !scrollHint) return;
+
+    var arrowRect = compileBtn.getBoundingClientRect();
+    var windowHeight = window.innerHeight;
+
+    // Show hint if the compile arrow is below the viewport
+    var arrowBelowViewport = arrowRect.top > windowHeight;
+
+    if (arrowBelowViewport) {
+      scrollHint.classList.add('compile-demo__scroll-hint--visible');
+    } else {
+      scrollHint.classList.remove('compile-demo__scroll-hint--visible');
+    }
+  }
+
+  function waitForOutputVisible(outputPanel, callback) {
+    if (!outputPanel) return;
+
+    var rect = outputPanel.getBoundingClientRect();
+    var windowHeight = window.innerHeight;
+
+    // If already visible (at least 50% in viewport), start immediately
+    if (rect.top < windowHeight * 0.8) {
+      setTimeout(callback, 500);
+      return;
+    }
+
+    // Otherwise, wait for it to become visible
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            setTimeout(callback, 500);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(outputPanel);
   }
 
   function setupSubfileHandlers(demo) {
@@ -142,6 +258,12 @@
       cursor.classList.remove('compile-demo__cursor--active');
       cursor.classList.add('compile-demo__cursor--done');
 
+      // Enable scroll hint after typing completes
+      if (demo.scrollHint) {
+        demo.scrollHint.dataset.enabled = 'true';
+        checkScrollHintVisibility(compileBtn, demo.scrollHint);
+      }
+
       setTimeout(() => {
         compileBtn.classList.add('compile-demo__arrow-icon--compiling');
 
@@ -164,10 +286,10 @@
             }
           }
 
-          // Start the sequential cycling after a brief pause
-          setTimeout(() => {
+          // Start sequential cycling only when output panel is visible
+          waitForOutputVisible(outputPanel, function () {
             startSequentialCycling(tabs, panels, demo);
-          }, 1000);
+          });
         }, 700);
       }, COMPILE_DELAY);
     });
@@ -218,14 +340,17 @@
       p.classList.toggle('compile-demo__panel--active', isActive);
     });
 
-    // Scroll active vendor tab into view
+    // Scroll active vendor tab into view (within tabs container only)
     const activeTab = Array.from(tabs).find((t) => t.dataset.target === targetId);
     if (activeTab) {
-      activeTab.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
+      const tabsContainer = activeTab.parentElement;
+      if (tabsContainer) {
+        const containerRect = tabsContainer.getBoundingClientRect();
+        const tabRect = activeTab.getBoundingClientRect();
+        const scrollLeft =
+          tabRect.left - containerRect.left - (containerRect.width - tabRect.width) / 2;
+        tabsContainer.scrollBy({ left: scrollLeft, behavior: 'smooth' });
+      }
     }
   }
 
@@ -240,16 +365,16 @@
       f.classList.toggle('compile-demo__file--active', f.dataset.file === fileIdx);
     });
 
-    // Scroll active subfile tab into view
+    // Scroll active subfile tab into view (within subfiles container only)
     const activeSubfile = panel.querySelector('.compile-demo__subfile--active');
     if (activeSubfile) {
       const subfilesContainer = panel.querySelector('.compile-demo__subfiles');
       if (subfilesContainer) {
-        activeSubfile.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center',
-        });
+        const containerRect = subfilesContainer.getBoundingClientRect();
+        const subfileRect = activeSubfile.getBoundingClientRect();
+        const scrollLeft =
+          subfileRect.left - containerRect.left - (containerRect.width - subfileRect.width) / 2;
+        subfilesContainer.scrollBy({ left: scrollLeft, behavior: 'smooth' });
       }
     }
 
