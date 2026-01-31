@@ -1,21 +1,27 @@
 ---
 title: 'PromptScript - Prompt-as-Code for AI Instructions | Copilot, Claude, Cursor'
 description: 'Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.'
+meta:
+  - name: keywords
+    content: PromptScript, AI instructions, GitHub Copilot, Claude Code, Cursor, AI context, prompt engineering, enterprise AI, developer tools, code generation, AI standardization
+  - name: robots
+    content: index, follow
+  - property: og:title
+    content: PromptScript - Prompt-as-Code for AI Instructions
+  - property: og:description
+    content: Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.
+  - property: og:type
+    content: website
+  - name: twitter:card
+    content: summary_large_image
+  - name: twitter:title
+    content: PromptScript - Prompt-as-Code for AI Instructions
 hide:
   - navigation
   - toc
   - edit
   - view
 ---
-
-<!-- SEO Meta Tags -->
-<meta name="keywords" content="PromptScript, AI instructions, GitHub Copilot, Claude Code, Cursor, AI context, prompt engineering, enterprise AI, developer tools, code generation, AI standardization">
-<meta name="robots" content="index, follow">
-<meta property="og:title" content="PromptScript - Prompt-as-Code for AI Instructions">
-<meta property="og:description" content="Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="PromptScript - Prompt-as-Code for AI Instructions">
 
 <div class="hero" markdown>
 

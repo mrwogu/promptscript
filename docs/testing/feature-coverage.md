@@ -1,3 +1,8 @@
+---
+title: Feature Coverage Testing - PromptScript
+description: Documentation for the Feature Coverage Matrix and testing mechanism for PromptScript formatters.
+---
+
 # Feature Coverage Testing
 
 This document describes the Feature Coverage Matrix and testing mechanism for PromptScript formatters.

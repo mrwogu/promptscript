@@ -1,3 +1,8 @@
+---
+title: Agents Example - PromptScript
+description: Learn how to define AI subagents using the @agents block in PromptScript for GitHub Copilot and Claude Code.
+---
+
 # Agents Example
 
 This example demonstrates how to define AI subagents using the `@agents` block in PromptScript. Both **GitHub Copilot** and **Claude Code** support custom agents.

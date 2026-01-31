@@ -16,6 +16,7 @@ hooks:
 
 theme:
   name: material
+  custom_dir: docs/overrides
   language: en
   logo: assets/images/logo.svg
   favicon: assets/images/favicon.svg

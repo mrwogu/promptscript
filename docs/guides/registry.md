@@ -1,3 +1,8 @@
+---
+title: Registry - PromptScript
+description: Learn how to use the official PromptScript registry with 1,134 configurations, or create your own custom registry for your organization.
+---
+
 # Registry
 
 PromptScript supports registries - collections of reusable configurations that can be inherited across projects. The official registry contains 1,134 configurations, but you can also create your own.
