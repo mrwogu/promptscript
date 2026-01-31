@@ -496,7 +496,7 @@ targets:
 
 <div class="ref-list">
 
-<a href="tutorial/" class="ref-item">
+<a href="../tutorial/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9zm6.82 6L12 12.72L5.18 9L12 5.28zM17 16l-5 2.72L7 16v-3.27l5 2.72l5-2.72z"/></svg>
   </div>
@@ -507,7 +507,7 @@ targets:
   <div class="ref-item__arrow">→</div>
 </a>
 
-<a href="reference/language/" class="ref-item">
+<a href="../reference/language/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--blue">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5zM9 13v2h6v-2zm0 4v2h6v-2z"/></svg>
   </div>
@@ -518,7 +518,7 @@ targets:
   <div class="ref-item__arrow">→</div>
 </a>
 
-<a href="reference/cli/" class="ref-item">
+<a href="../reference/cli/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--cyan">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 19V7H4v12h16m0-16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16m-7 14v-2h5v2h-5m-3.42-4L5.57 9H8.4l3.3 3.3c.39.39.39 1.03 0 1.42L8.42 17H5.59l4-4z"/></svg>
   </div>
@@ -529,7 +529,7 @@ targets:
   <div class="ref-item__arrow">→</div>
 </a>
 
-<a href="examples/" class="ref-item">
+<a href="../examples/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--green">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm13 2h-2v-2h2v-2h-2v2h-2v-2h-2v2h2v2h-2v2h2v-2h2v2h2v2h2v-2h-2z"/></svg>
   </div>
