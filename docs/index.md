@@ -4,6 +4,8 @@ description: 'Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy i
 hide:
   - navigation
   - toc
+  - edit
+  - view
 ---
 
 <!-- SEO Meta Tags -->

@@ -217,6 +217,16 @@
       const isActive = p.dataset.panel === targetId;
       p.classList.toggle('compile-demo__panel--active', isActive);
     });
+
+    // Scroll active vendor tab into view
+    const activeTab = Array.from(tabs).find((t) => t.dataset.target === targetId);
+    if (activeTab) {
+      activeTab.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
   }
 
   function switchToSubfile(panel, fileIdx) {
@@ -229,6 +239,19 @@
     files.forEach((f) => {
       f.classList.toggle('compile-demo__file--active', f.dataset.file === fileIdx);
     });
+
+    // Scroll active subfile tab into view
+    const activeSubfile = panel.querySelector('.compile-demo__subfile--active');
+    if (activeSubfile) {
+      const subfilesContainer = panel.querySelector('.compile-demo__subfiles');
+      if (subfilesContainer) {
+        activeSubfile.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center',
+        });
+      }
+    }
 
     // Reset scroll position for newly active file
     const activeFile = panel.querySelector('.compile-demo__file--active');
