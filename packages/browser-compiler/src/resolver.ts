@@ -16,6 +16,9 @@ import {
   deepMerge,
   deepClone,
   isTextContent,
+  bindParams,
+  interpolateAST,
+  type TemplateContext,
 } from '@promptscript/core';
 import { VirtualFileSystem } from './virtual-fs.js';
 import type {
@@ -298,8 +301,31 @@ export class BrowserResolver {
       errors.push(...parent.errors);
 
       if (parent.ast) {
+        // Handle parameterized inheritance (template interpolation)
+        let resolvedParent = parent.ast;
+        if (parent.ast.meta?.params || ast.inherit.params) {
+          this.logger.debug(`Binding template parameters for ${parentPath}`);
+          try {
+            const params = bindParams(
+              ast.inherit.params,
+              parent.ast.meta?.params,
+              parentPath,
+              ast.inherit.loc
+            );
+
+            if (params.size > 0) {
+              const ctx: TemplateContext = { params, sourceFile: parentPath };
+              resolvedParent = interpolateAST(parent.ast, ctx);
+              this.logger.debug(`Interpolated ${params.size} parameter(s)`);
+            }
+          } catch (err) {
+            errors.push(new ResolveError((err as Error).message, ast.inherit.loc));
+            return ast;
+          }
+        }
+
         this.logger.debug(`Merging with parent AST`);
-        return this.resolveInheritance(parent.ast, ast);
+        return this.resolveInheritance(resolvedParent, ast);
       }
     } catch (err) {
       if (err instanceof CircularDependencyError) {
@@ -333,8 +359,26 @@ export class BrowserResolver {
         errors.push(...imported.errors);
 
         if (imported.ast) {
+          // Handle parameterized imports (template interpolation)
+          let resolvedImport = imported.ast;
+          if (imported.ast.meta?.params || use.params) {
+            this.logger.debug(`Binding template parameters for ${importPath}`);
+            try {
+              const params = bindParams(use.params, imported.ast.meta?.params, importPath, use.loc);
+
+              if (params.size > 0) {
+                const ctx: TemplateContext = { params, sourceFile: importPath };
+                resolvedImport = interpolateAST(imported.ast, ctx);
+                this.logger.debug(`Interpolated ${params.size} parameter(s)`);
+              }
+            } catch (err) {
+              errors.push(new ResolveError((err as Error).message, use.loc));
+              continue;
+            }
+          }
+
           this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);
-          result = this.resolveUses(result, use, imported.ast);
+          result = this.resolveUses(result, use, resolvedImport);
         }
       } catch (err) {
         if (err instanceof CircularDependencyError) {

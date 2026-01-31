@@ -4,6 +4,7 @@ import { allRules, getRuleById, getRuleByName } from '../rules/index.js';
 import { deprecated } from '../rules/deprecated.js';
 import { validPath, isValidPath } from '../rules/valid-path.js';
 import { requiredGuards } from '../rules/required-guards.js';
+import { validParams } from '../rules/valid-params.js';
 import type { RuleContext, ValidationMessage, ValidatorConfig } from '../types.js';
 
 /**
@@ -459,5 +460,543 @@ describe('required-guards rule (PS004) additional coverage', () => {
     });
     requiredGuards.validate(ctx);
     expect(messages).toHaveLength(2); // Missing security and privacy
+  });
+});
+
+describe('valid-params rule (PS009) coverage', () => {
+  const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+
+  it('should pass when no params defined', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: undefined,
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should pass when params is empty array', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should pass for valid string param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'projectName',
+            paramType: { kind: 'string' },
+            optional: false,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should pass for valid number param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'port',
+            paramType: { kind: 'number' },
+            optional: false,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should pass for valid boolean param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'strict',
+            paramType: { kind: 'boolean' },
+            optional: false,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should pass for valid enum param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'mode',
+            paramType: { kind: 'enum', options: ['dev', 'prod'] },
+            optional: false,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should report duplicate param names', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'name',
+            paramType: { kind: 'string' },
+            optional: false,
+            loc,
+          },
+          {
+            type: 'ParamDefinition',
+            name: 'name',
+            paramType: { kind: 'string' },
+            optional: false,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('Duplicate parameter');
+    expect(messages[0]!.message).toContain('name');
+  });
+
+  it('should report wrong default type for string param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'name',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: 123,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+    expect(messages[0]!.message).toContain('string');
+    expect(messages[0]!.message).toContain('number');
+  });
+
+  it('should report wrong default type for number param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'count',
+            paramType: { kind: 'number' },
+            optional: true,
+            defaultValue: 'not a number',
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should report wrong default type for boolean param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'enabled',
+            paramType: { kind: 'boolean' },
+            optional: true,
+            defaultValue: 'true',
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should report wrong default value for enum param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'mode',
+            paramType: { kind: 'enum', options: ['dev', 'prod'] },
+            optional: true,
+            defaultValue: 'staging',
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should report optional param without default', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'optional',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: undefined,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('no default value');
+  });
+
+  it('should pass for optional param with valid default', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'optional',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: 'default value',
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should pass for required param without default', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'required',
+            paramType: { kind: 'string' },
+            optional: false,
+            defaultValue: undefined,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should validate multiple params with mixed issues', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'dup',
+            paramType: { kind: 'string' },
+            optional: false,
+            loc,
+          },
+          {
+            type: 'ParamDefinition',
+            name: 'dup',
+            paramType: { kind: 'string' },
+            optional: false,
+            loc,
+          },
+          {
+            type: 'ParamDefinition',
+            name: 'wrongType',
+            paramType: { kind: 'number' },
+            optional: true,
+            defaultValue: 'string',
+            loc,
+          },
+          {
+            type: 'ParamDefinition',
+            name: 'noDefault',
+            paramType: { kind: 'boolean' },
+            optional: true,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(3); // duplicate + wrong type + no default
+  });
+
+  it('should handle null default value', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'nullable',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: null,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should handle array default value', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'list',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: ['a', 'b'],
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should handle TextContent default value for string param', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'text',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: { type: 'TextContent', value: 'hello', loc },
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0); // TextContent counts as string
+  });
+
+  it('should handle TemplateExpression default value', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'template',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: { type: 'TemplateExpression', name: 'var', loc },
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should handle TypeExpression default value', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'typed',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: { type: 'TypeExpression', kind: 'string', loc } as Value,
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should handle object default value', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'obj',
+            paramType: { kind: 'string' },
+            optional: true,
+            defaultValue: { key: 'value' },
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('wrong type');
+  });
+
+  it('should pass for enum with valid string default', () => {
+    const ast = createTestProgram({
+      meta: {
+        type: 'MetaBlock',
+        loc,
+        fields: { id: 'test' },
+        params: [
+          {
+            type: 'ParamDefinition',
+            name: 'mode',
+            paramType: { kind: 'enum', options: ['dev', 'prod', 'test'] },
+            optional: true,
+            defaultValue: 'prod',
+            loc,
+          },
+        ],
+      },
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should handle AST without meta', () => {
+    const ast = createTestProgram({
+      meta: undefined,
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
   });
 });

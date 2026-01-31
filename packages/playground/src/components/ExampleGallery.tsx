@@ -252,11 +252,7 @@ const EXAMPLES: Example[] = [
 }
 
 # Inherit from template with parameters
-@inherit ./react-template(
-  projectName: "Checkout App"
-  port: 8080
-  strict: true
-)
+@inherit ./react-template(projectName: "Checkout App", port: 8080, strict: true)
 
 @identity {
   """

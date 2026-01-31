@@ -9,13 +9,13 @@ import type {
   TextContent,
   TemplateExpression,
   SourceLocation,
-} from '@promptscript/core';
+} from './types/index.js';
 import {
   MissingParamError,
   UnknownParamError,
   ParamTypeMismatchError,
   UndefinedVariableError,
-} from '@promptscript/core';
+} from './errors/index.js';
 
 /**
  * Context for template interpolation.
@@ -211,7 +211,7 @@ export function interpolateText(text: string, ctx: TemplateContext): string {
   // Match {{variable}} patterns
   const pattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
 
-  return text.replace(pattern, (match, varName: string) => {
+  return text.replace(pattern, (_match, varName: string) => {
     const value = ctx.params.get(varName);
     if (value === undefined) {
       throw new UndefinedVariableError(varName, ctx.sourceFile);

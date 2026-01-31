@@ -9,13 +9,13 @@ import type {
   TextContent,
   ObjectContent,
   TemplateExpression,
-} from '@promptscript/core';
+} from '../types/index.js';
 import {
   MissingParamError,
   UnknownParamError,
   ParamTypeMismatchError,
   UndefinedVariableError,
-} from '@promptscript/core';
+} from '../errors/index.js';
 import {
   bindParams,
   interpolateText,
@@ -531,6 +531,233 @@ describe('template', () => {
       const args = [makeArg('rate', 3.14159)];
       const result = bindParams(args, defs, 'test.prs');
       expect(result.get('rate')).toBe(3.14159);
+    });
+  });
+
+  describe('interpolateContent - ArrayContent', () => {
+    it('should interpolate ArrayContent with template expressions', () => {
+      const ctx: TemplateContext = {
+        params: new Map([
+          ['item1', 'first'],
+          ['item2', 'second'],
+        ]),
+        sourceFile: 'test.prs',
+      };
+      const content = {
+        type: 'ArrayContent' as const,
+        elements: [
+          { type: 'TemplateExpression', name: 'item1', loc } as TemplateExpression,
+          'static',
+          { type: 'TemplateExpression', name: 'item2', loc } as TemplateExpression,
+        ],
+        loc,
+      };
+      const result = interpolateContent(content, ctx);
+      expect(result.type).toBe('ArrayContent');
+      expect((result as { elements: unknown[] }).elements).toEqual(['first', 'static', 'second']);
+    });
+
+    it('should interpolate nested arrays in ArrayContent', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['val', 'interpolated']]),
+        sourceFile: 'test.prs',
+      };
+      const content = {
+        type: 'ArrayContent' as const,
+        elements: [[{ type: 'TemplateExpression', name: 'val', loc } as TemplateExpression]],
+        loc,
+      };
+      const result = interpolateContent(content, ctx);
+      expect((result as { elements: unknown[][] }).elements[0]).toEqual(['interpolated']);
+    });
+  });
+
+  describe('interpolateContent - MixedContent', () => {
+    it('should interpolate MixedContent with text and properties', () => {
+      const ctx: TemplateContext = {
+        params: new Map([
+          ['textVar', 'Hello World'],
+          ['propVar', 'property value'],
+        ]),
+        sourceFile: 'test.prs',
+      };
+      const content = {
+        type: 'MixedContent' as const,
+        text: { type: 'TextContent' as const, value: 'Text: {{textVar}}', loc },
+        properties: {
+          prop: { type: 'TemplateExpression', name: 'propVar', loc } as TemplateExpression,
+        },
+        loc,
+      };
+      const result = interpolateContent(content, ctx);
+      expect(result.type).toBe('MixedContent');
+      const mixed = result as { text: TextContent; properties: Record<string, unknown> };
+      expect(mixed.text.value).toBe('Text: Hello World');
+      expect(mixed.properties['prop']).toBe('property value');
+    });
+
+    it('should handle MixedContent without text', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['propVar', 'value']]),
+        sourceFile: 'test.prs',
+      };
+      const content = {
+        type: 'MixedContent' as const,
+        text: undefined,
+        properties: {
+          prop: { type: 'TemplateExpression', name: 'propVar', loc } as TemplateExpression,
+        },
+        loc,
+      };
+      const result = interpolateContent(content, ctx);
+      expect(result.type).toBe('MixedContent');
+      const mixed = result as { text: undefined; properties: Record<string, unknown> };
+      expect(mixed.text).toBeUndefined();
+      expect(mixed.properties['prop']).toBe('value');
+    });
+  });
+
+  describe('valueToString edge cases', () => {
+    it('should convert null to string', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['nullVal', null]]),
+        sourceFile: 'test.prs',
+      };
+      expect(interpolateText('Value: {{nullVal}}', ctx)).toBe('Value: null');
+    });
+
+    it('should convert array to JSON string', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['arr', [1, 2, 3]]]),
+        sourceFile: 'test.prs',
+      };
+      expect(interpolateText('Array: {{arr}}', ctx)).toBe('Array: [1,2,3]');
+    });
+
+    it('should convert object to JSON string', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['obj', { key: 'value' }]]),
+        sourceFile: 'test.prs',
+      };
+      expect(interpolateText('Object: {{obj}}', ctx)).toBe('Object: {"key":"value"}');
+    });
+
+    it('should convert TextContent to its value', () => {
+      const textContent: TextContent = { type: 'TextContent', value: 'text value', loc };
+      const ctx: TemplateContext = {
+        params: new Map([['text', textContent]]),
+        sourceFile: 'test.prs',
+      };
+      expect(interpolateText('Text: {{text}}', ctx)).toBe('Text: text value');
+    });
+  });
+
+  describe('interpolateValue edge cases', () => {
+    it('should preserve TypeExpression without interpolation', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['unused', 'value']]),
+        sourceFile: 'test.prs',
+      };
+      const content: ObjectContent = {
+        type: 'ObjectContent',
+        properties: {
+          typeField: { type: 'TypeExpression', value: 'string', loc },
+        },
+        loc,
+      };
+      const result = interpolateContent(content, ctx) as ObjectContent;
+      expect(result.properties['typeField']).toEqual({
+        type: 'TypeExpression',
+        value: 'string',
+        loc,
+      });
+    });
+
+    it('should throw UndefinedVariableError for undefined TemplateExpression in value', () => {
+      const ctx: TemplateContext = {
+        params: new Map(),
+        sourceFile: 'test.prs',
+      };
+      const content: ObjectContent = {
+        type: 'ObjectContent',
+        properties: {
+          field: { type: 'TemplateExpression', name: 'undefined', loc } as TemplateExpression,
+        },
+        loc,
+      };
+      expect(() => interpolateContent(content, ctx)).toThrow(UndefinedVariableError);
+    });
+  });
+
+  describe('getValueType edge cases', () => {
+    it('should detect array type in validation', () => {
+      const defs = [makeDef('num', 'number')];
+      const args = [makeArg('num', [1, 2, 3])];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
+      try {
+        bindParams(args, defs, 'test.prs');
+      } catch (err) {
+        expect((err as ParamTypeMismatchError).message).toContain('array');
+      }
+    });
+
+    it('should detect object type in validation', () => {
+      const defs = [makeDef('str', 'string')];
+      const args = [makeArg('str', { key: 'value' })];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
+      try {
+        bindParams(args, defs, 'test.prs');
+      } catch (err) {
+        expect((err as ParamTypeMismatchError).message).toContain('object');
+      }
+    });
+
+    it('should detect null type in validation', () => {
+      const defs = [makeDef('str', 'string')];
+      const args = [makeArg('str', null)];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
+      try {
+        bindParams(args, defs, 'test.prs');
+      } catch (err) {
+        expect((err as ParamTypeMismatchError).message).toContain('null');
+      }
+    });
+
+    it('should detect template type in validation', () => {
+      const defs = [makeDef('str', 'string')];
+      const args = [makeArg('str', { type: 'TemplateExpression', name: 'nested', loc })];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
+      try {
+        bindParams(args, defs, 'test.prs');
+      } catch (err) {
+        expect((err as ParamTypeMismatchError).message).toContain('template');
+      }
+    });
+  });
+
+  describe('type validation edge cases', () => {
+    it('should reject string for boolean type', () => {
+      const defs = [makeDef('flag', 'boolean')];
+      const args = [makeArg('flag', 'true')];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
+    });
+
+    it('should reject number for string type', () => {
+      const defs = [makeDef('name', 'string')];
+      const args = [makeArg('name', 123)];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
+    });
+
+    it('should reject boolean for number type', () => {
+      const defs = [makeDef('count', 'number')];
+      const args = [makeArg('count', true)];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
+    });
+
+    it('should reject number for enum type', () => {
+      const defs = [makeDef('mode', 'enum', { enumOptions: ['a', 'b'] })];
+      const args = [makeArg('mode', 1)];
+      expect(() => bindParams(args, defs, 'test.prs')).toThrow(ParamTypeMismatchError);
     });
   });
 

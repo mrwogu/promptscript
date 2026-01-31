@@ -790,4 +790,135 @@ describe('envVars interpolation', () => {
     expect(claudeOutput?.content).toContain('base-value');
     expect(claudeOutput?.content).toContain('child-value');
   });
+
+  it('should interpolate template variables in inherited files', async () => {
+    const files = {
+      'base.prs': `
+        @meta {
+          id: "base"
+          syntax: "1.0.0"
+          params: {
+            projectName: string
+            port: number = 3000
+            testFramework: enum("vitest", "jest") = "vitest"
+          }
+        }
+        @identity {
+          """Working on {{projectName}}."""
+        }
+        @context {
+          project: {{projectName}}
+          port: {{port}}
+          testing: {{testFramework}}
+        }
+      `,
+      'project.prs': `
+        @meta {
+          id: "project"
+          syntax: "1.0.0"
+        }
+        @inherit ./base(projectName: "MyApp", port: 8080)
+      `,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    // Template interpolation: {{projectName}} should become "MyApp"
+    expect(claudeOutput?.content).toContain('MyApp');
+    // Template variables should not remain
+    expect(claudeOutput?.content).not.toContain('{{projectName}}');
+  });
+
+  it('should interpolate template variables in @use imports', async () => {
+    const files = {
+      'fragment.prs': `
+        @meta {
+          id: "fragment"
+          syntax: "1.0.0"
+          params: {
+            componentName: string
+          }
+        }
+        @identity {
+          """Building {{componentName}} component."""
+        }
+      `,
+      'project.prs': `
+        @meta {
+          id: "project"
+          syntax: "1.0.0"
+        }
+        @use ./fragment(componentName: "Button")
+      `,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    const claudeOutput = result.outputs.get('CLAUDE.md');
+    expect(claudeOutput?.content).toContain('Button');
+    expect(claudeOutput?.content).not.toContain('{{componentName}}');
+  });
+
+  it('should report error for missing required template parameter', async () => {
+    const files = {
+      'base.prs': `
+        @meta {
+          id: "base"
+          syntax: "1.0.0"
+          params: {
+            projectName: string
+          }
+        }
+        @identity {
+          """Working on {{projectName}}."""
+        }
+      `,
+      'project.prs': `
+        @meta {
+          id: "project"
+          syntax: "1.0.0"
+        }
+        @inherit ./base
+      `,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors[0]?.message).toContain('projectName');
+  });
+
+  it('should report error for unknown template parameter', async () => {
+    const files = {
+      'base.prs': `
+        @meta {
+          id: "base"
+          syntax: "1.0.0"
+          params: {
+            projectName: string
+          }
+        }
+        @identity {
+          """Working on {{projectName}}."""
+        }
+      `,
+      'project.prs': `
+        @meta {
+          id: "project"
+          syntax: "1.0.0"
+        }
+        @inherit ./base(projectName: "App", unknownParam: "value")
+      `,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors[0]?.message).toContain('unknownParam');
+  });
 });

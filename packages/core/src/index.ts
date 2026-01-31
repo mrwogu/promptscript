@@ -22,3 +22,6 @@ export * from './utils/index.js';
 
 // Logger
 export * from './logger.js';
+
+// Template interpolation
+export * from './template.js';

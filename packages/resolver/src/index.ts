@@ -81,7 +81,7 @@ export { applyExtends } from './extensions.js';
 // Skill resolution
 export { resolveNativeSkills } from './skills.js';
 
-// Template interpolation
+// Template interpolation (re-export from core for backwards compatibility)
 export {
   bindParams,
   interpolateText,
@@ -89,7 +89,7 @@ export {
   interpolateAST,
   isTemplateExpression,
   type TemplateContext,
-} from './template.js';
+} from '@promptscript/core';
 
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';

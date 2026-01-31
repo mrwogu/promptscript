@@ -1,12 +1,20 @@
 import { parse } from '@promptscript/parser';
-import { noopLogger, type Logger, type Program } from '@promptscript/core';
-import { ResolveError, CircularDependencyError, FileNotFoundError } from '@promptscript/core';
+import {
+  noopLogger,
+  type Logger,
+  type Program,
+  ResolveError,
+  CircularDependencyError,
+  FileNotFoundError,
+  bindParams,
+  interpolateAST,
+  type TemplateContext,
+} from '@promptscript/core';
 import { FileLoader, type LoaderOptions } from './loader.js';
 import { resolveInheritance } from './inheritance.js';
 import { resolveUses } from './imports.js';
 import { applyExtends } from './extensions.js';
 import { resolveNativeSkills } from './skills.js';
-import { bindParams, interpolateAST, type TemplateContext } from './template.js';
 
 /**
  * Options for the resolver.
