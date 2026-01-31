@@ -365,6 +365,10 @@
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/bindParams/</loc>
+         <lastmod>2026-01-31</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/compareVersions/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
@@ -425,6 +429,18 @@
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/interpolateAST/</loc>
+         <lastmod>2026-01-31</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/interpolateContent/</loc>
+         <lastmod>2026-01-31</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/interpolateText/</loc>
+         <lastmod>2026-01-31</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/isAbsolutePath/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
@@ -446,6 +462,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/isReservedWord/</loc>
+         <lastmod>2026-01-31</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/isTemplateExpression/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
@@ -622,6 +642,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TargetConfig/</loc>
+         <lastmod>2026-01-31</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/TemplateContext/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
@@ -1245,10 +1269,6 @@
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/bindParams/</loc>
-         <lastmod>2026-01-31</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/buildAuthenticatedUrl/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
@@ -1293,18 +1313,6 @@
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/interpolateAST/</loc>
-         <lastmod>2026-01-31</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/interpolateContent/</loc>
-         <lastmod>2026-01-31</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/interpolateText/</loc>
-         <lastmod>2026-01-31</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/isGitUrl/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
@@ -1314,10 +1322,6 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/isKnownGitHost/</loc>
-         <lastmod>2026-01-31</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/isTemplateExpression/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
@@ -1406,10 +1410,6 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/ResolverOptions/</loc>
-         <lastmod>2026-01-31</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/TemplateContext/</loc>
          <lastmod>2026-01-31</lastmod>
     </url>
     <url>
