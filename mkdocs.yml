@@ -173,6 +173,7 @@ nav:
       - guides/index.md
       - Official Registry: guides/registry.md
       - CI/CD Integration: guides/ci.md
+      - Docker: guides/docker.md
       - Inheritance: guides/inheritance.md
       - Multi-File Organization: guides/multi-file.md
       - Enterprise Setup: guides/enterprise.md

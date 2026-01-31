@@ -1,0 +1,76 @@
+# =============================================================================
+# PromptScript Docker Compose Configuration
+# =============================================================================
+# Example configurations for running PromptScript CLI in Docker.
+#
+# Usage:
+#   docker compose run --rm prs validate
+#   docker compose run --rm prs compile
+#   docker compose up watch
+#
+# For more information, see: https://getpromptscript.dev/guides/docker/
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Main CLI service - run any prs command
+  # ---------------------------------------------------------------------------
+  # Usage: docker compose run --rm prs <command>
+  # Examples:
+  #   docker compose run --rm prs validate
+  #   docker compose run --rm prs compile
+  #   docker compose run --rm prs init --name myproject
+  prs:
+    image: ghcr.io/mrwogu/promptscript:latest
+    volumes:
+      - .:/workspace:rw
+    environment:
+      - NO_COLOR=${NO_COLOR:-}
+      - PROMPTSCRIPT_VERBOSE=${PROMPTSCRIPT_VERBOSE:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+
+  # ---------------------------------------------------------------------------
+  # Watch mode - automatically recompile on file changes
+  # ---------------------------------------------------------------------------
+  # Usage: docker compose up watch
+  # Runs in foreground with TTY for colored output
+  watch:
+    image: ghcr.io/mrwogu/promptscript:latest
+    volumes:
+      - .:/workspace:rw
+    command: ['compile', '--watch']
+    tty: true
+    environment:
+      - PROMPTSCRIPT_VERBOSE=${PROMPTSCRIPT_VERBOSE:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+
+  # ---------------------------------------------------------------------------
+  # Validation service - read-only for CI/CD
+  # ---------------------------------------------------------------------------
+  # Usage: docker compose run --rm validate
+  # Mounts workspace as read-only for security in CI environments
+  validate:
+    image: ghcr.io/mrwogu/promptscript:latest
+    volumes:
+      - .:/workspace:ro
+    command: ['validate', '--strict']
+    environment:
+      - NO_COLOR=${NO_COLOR:-1}
+
+  # ---------------------------------------------------------------------------
+  # Development service - with shell access
+  # ---------------------------------------------------------------------------
+  # Usage: docker compose run --rm dev sh
+  # Useful for debugging or exploring the container
+  dev:
+    image: ghcr.io/mrwogu/promptscript:latest
+    volumes:
+      - .:/workspace:rw
+    entrypoint: []
+    command: ['sh']
+    stdin_open: true
+    tty: true
+    environment:
+      - NO_COLOR=${NO_COLOR:-}
+      - PROMPTSCRIPT_VERBOSE=${PROMPTSCRIPT_VERBOSE:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}

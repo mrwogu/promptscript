@@ -1,0 +1,88 @@
+# =============================================================================
+# Docker Build Context Exclusions
+# =============================================================================
+# Exclude files that are not needed for building the Docker image
+# to reduce build context size and improve build speed.
+
+# Git
+.git
+.gitignore
+
+# Dependencies (will be installed fresh in container)
+node_modules
+packages/*/node_modules
+
+# Build artifacts (will be rebuilt in container)
+dist
+coverage
+.nx
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files (not needed in production image)
+**/*.spec.ts
+**/__tests__
+**/__snapshots__
+**/*.test.ts
+
+# Documentation (not needed in runtime image)
+docs
+site
+*.md
+!packages/*/README.md
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# Environment files (security)
+.env
+.env.*
+!.env.example
+
+# Docker files (avoid recursive builds)
+Dockerfile*
+docker-compose*.yml
+docker-compose*.yaml
+
+# CI/CD configuration
+.github
+.gitlab-ci.yml
+.circleci
+azure-pipelines.yml
+Jenkinsfile
+
+# Development configuration
+.husky
+.prettierignore
+.editorconfig
+eslint*.config.*
+vitest*.config.*
+tsconfig*.json
+!tsconfig.base.json
+
+# Examples and fixtures (not needed in runtime)
+examples
+fixtures
+
+# Local development files
+.promptscript/.cache
+*.local
+
+# Python/MkDocs (documentation)
+docs_extensions
+mkdocs.yml
+__pycache__
+*.pyc
+.python-version

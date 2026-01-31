@@ -809,6 +809,29 @@ workflows:
 
 ---
 
+## Docker-based CI
+
+For consistent environments across all CI systems, use the official Docker image. This eliminates Node.js version mismatches and simplifies configuration.
+
+```yaml
+# Any CI system with Docker support
+image: ghcr.io/mrwogu/promptscript:latest
+
+steps:
+  - prs validate --strict
+  - prs compile
+  - git diff --exit-code
+```
+
+See the [Docker Guide](docker.md) for complete examples including:
+
+- GitHub Actions with container jobs
+- GitLab CI with Docker image
+- Jenkins with Docker agent
+- Azure DevOps with container jobs
+
+---
+
 ## Pre-commit Hooks
 
 Catch issues before they reach CI with local pre-commit hooks.
