@@ -324,8 +324,8 @@ TypeScript 5.x · Node 20+ · Prisma
   <div class="feature-card__icon feature-card__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M2 10.96a.985.985 0 0 1-.37-1.37L3.13 7c.11-.2.28-.34.47-.42l7.83-4.4c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.19.1.35.26.44.46l1.45 2.52c.28.48.11 1.09-.36 1.36l-1 .58v4.96c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.99.99 0 0 1 3 16.5v-5.54c-.3.17-.68.18-1 0M12 4.15L5 8.09l7 3.94l7-3.94zM5 15.91l6 3.38v-6.71L5 9.21zm14 0v-6.7l-6 3.37v6.71z"/></svg>
   </div>
-  <h3>Registry & Sharing</h3>
-  <p>Publish and share instruction packages across your organization. Teams inherit from <code>@company/standards</code> — update once, propagate everywhere.</p>
+  <h3>1,100+ Ready Configurations</h3>
+  <p>Official registry with templates for React, Vue, Node, Python, Rust, Go. Inherit from <code>@stacks/react</code> and start coding in seconds.</p>
 </div>
 
 <div class="feature-card">
@@ -333,7 +333,7 @@ TypeScript 5.x · Node 20+ · Prisma
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h6v4H3zm0 18h6v-4H3zm8 0h6v-4h-6zm8-18h2v18h-2v-4h-4v-2h4V9h-4V7h4zm-8 4h6V3h-6zm0 6h6v-4h-6z"/></svg>
   </div>
   <h3>Hierarchical Inheritance</h3>
-  <p>Structure instructions like code. Inherit from <code>@company/backend-security</code> or <code>@team/checkout-service</code>.</p>
+  <p>Structure instructions like code. Inherit from <code>@company/backend-security</code>, compose with <code>@use @fragments/testing</code>.</p>
 </div>
 
 <div class="feature-card">
@@ -341,31 +341,31 @@ TypeScript 5.x · Node 20+ · Prisma
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m1 22l1-2h20l1 2zm7.5-4a.5.5 0 0 1-.5-.5V14h.08L5.04 9.14l.96-.84l3 3.4V4.5a.5.5 0 0 1 .5-.5a.5.5 0 0 1 .5.5v7h.06l3-3.4l.94.84L10.96 14h.04v3.5a.5.5 0 0 1-.5.5zm6-6.5a.5.5 0 0 1-.5-.5V5.5a.5.5 0 0 1 .5-.5a.5.5 0 0 1 .5.5V8h.06l3-3.4l.94.84L16.46 10h.04v1a.5.5 0 0 1-.5.5a.5.5 0 0 1-.5-.5"/></svg>
   </div>
   <h3>Enterprise Governance</h3>
-  <p>Enforce non-negotiable standards globally. Define policies once, apply them everywhere.</p>
+  <p>CISO-approved standards propagate to 100+ repos. Audit trails, version control, and policy enforcement built-in.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--cyan">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
   </div>
-  <h3>One Source, Many Tools</h3>
-  <p>Write instructions once in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, and more.</p>
+  <h3>One Source, 4+ AI Tools</h3>
+  <p>Write once, compile to GitHub Copilot, Claude Code, Cursor, and Antigravity. Switch vendors without rewriting.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--green">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m10 17l-4-4l1.41-1.41L10 14.17l7.59-7.59L19 8m0-5H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2"/></svg>
   </div>
-  <h3>Validation & Linting</h3>
-  <p>Catch syntax errors, missing fields, and policy violations before they reach production.</p>
+  <h3>Parameterized Templates</h3>
+  <p>Create reusable templates with <code>{{projectName}}</code> variables. Like infrastructure-as-code for AI instructions.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--orange">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 17.93c-3.95-.49-7-3.85-7-7.93c0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41c0 2.08-.8 3.97-2.1 5.39"/></svg>
   </div>
-  <h3>Environment Variables</h3>
-  <p>Dynamic configuration with <code>${VAR:-default}</code> syntax. Customize per environment, team, or project folder.</p>
+  <h3>Registry & Sharing</h3>
+  <p>Host standards in your own Git repo. Run <code>prs pull</code> to sync latest configs across all projects instantly.</p>
 </div>
 
 </div>

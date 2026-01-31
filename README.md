@@ -1,242 +1,318 @@
 <div align="center">
   <img src="docs/assets/logo.svg" alt="PromptScript Logo" width="200" />
-  
-  # PromptScript
-  
-  **The Prompt-as-Code for AI Instructions**
 
-_Standardize, audit, and deploy instructions across any AI coding assistant._
+# PromptScript
+
+**One Source of Truth for All Your AI Coding Assistants**
+
+_Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
-[![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://getpromptscript.dev/)
+[![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/mrwogu/promptscript/pkgs/container/promptscript)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Getting Started](#-getting-started) · [Why PromptScript?](#-why-promptscript) · [Contributing](CONTRIBUTING.md)
+[**Try Playground**](https://getpromptscript.dev/playground/) · [**Documentation**](https://getpromptscript.dev/) · [**Quick Start**](#-quick-start)
 
 </div>
 
 ---
 
-## 📉 The Business Problem: "Prompt Drift"
+## Why PromptScript?
 
-Modern engineering organizations face a critical challenge: **AI Context Fragmentation**.
+| **For IT Managers**                                         | **For Developers**                                            |
+| :---------------------------------------------------------- | :------------------------------------------------------------ |
+| Update security policies across **100+ repos** in seconds   | **1,100+ ready templates** for React, Vue, Node, Python, Rust |
+| **Audit trail** for all AI instructions                     | **Zero migration** — auto-converts existing files             |
+| **Vendor independence** — switch AI tools without rewriting | **Watch mode** for instant feedback                           |
+| **CISO-approved** standards propagate automatically         | **Parameterized templates** like IaC                          |
 
-As you scale to 50+ repositories and deploy multiple AI tools (GitHub Copilot, Claude, Cursor), maintaining coherent AI instructions becomes impossible manually.
+---
 
-- **The Scale Problem:** Updating a security policy across 100 microservices takes weeks of manual PRs.
-- **The Model Volatility:** New models (e.g., Claude Sonnet 4 vs 3.5) require different prompting strategies. You shouldn't have to rewrite 1000 instruction files when a model upgrades.
-- **The Governance Void:** Developers use local, unvetted instructions. Junior devs miss critical security context. There is no audit trail for what constraints your AI is operating under.
+## The Problem: Prompt Drift
 
-Result: **Inconsistent code quality, security risks, and operational chaos.**
-
-## 🛡️ The Solution: PromptOps
-
-**PromptScript turns AI context into managed infrastructure.**
-
-It treats your prompts as code—compiled, validated, and deployed.
-
-```mermaid
-flowchart TB
-    subgraph org["🏢 Organization Registry"]
-        direction TB
-        OrgSec["@company/security<br/>(CISO approved)"]
-        OrgTS["@company/typescript<br/>(Platform team)"]
-        OrgJava["@company/java<br/>(Platform team)"]
-    end
-
-    subgraph teams["👥 Team Standards"]
-        direction TB
-        Backend["@backend/standards"]
-        Frontend["@frontend/standards"]
-        Data["@data/standards"]
-    end
-
-    subgraph projects["📦 Project Repos (100+)"]
-        direction TB
-        P1["checkout-service/.prs"]
-        P2["user-api/.prs"]
-        P3["dashboard/.prs"]
-        Pn["...more repos"]
-    end
-
-    OrgSec --> Backend & Frontend & Data
-    OrgTS --> Backend & Frontend
-    OrgJava --> Data
-
-    Backend --> P1 & P2
-    Frontend --> P3
-    Data --> Pn
-
-    subgraph compile["⚙️ prs compile"]
-        Compiler
-    end
-
-    P1 & P2 & P3 --> Compiler
-
-    Compiler --> Copilot["GitHub Copilot"]
-    Compiler --> Claude["Claude Code"]
-    Compiler --> Cursor["Cursor"]
-    Compiler --> CI["CI/CD Audit"]
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     50+ Repos × 4 AI Tools = Chaos                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   repo-1/CLAUDE.md          repo-1/.cursorrules      repo-1/.github/    │
+│   repo-2/CLAUDE.md          repo-2/.cursorrules      repo-2/.github/    │
+│   repo-3/CLAUDE.md          repo-3/.cursorrules      repo-3/.github/    │
+│        ...                       ...                      ...           │
+│   repo-50/CLAUDE.md         repo-50/.cursorrules     repo-50/.github/   │
+│                                                                         │
+│   ❌ Security policy update = 200 manual file changes                   │
+│   ❌ No audit trail for AI instructions                                 │
+│   ❌ Inconsistent standards across teams                                │
+│   ❌ Vendor lock-in to specific AI tool formats                         │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## ✨ Why PromptScript?
+---
 
-### 1. Enterprise Governance
+## The Solution: PromptOps
 
-Enforce non-negotiable standards globally. Define policies once, apply them everywhere.
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    One Source → All AI Tools                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   @company/security ──┬──→ @team/backend ──→ checkout-service/.prs      │
+│   (CISO approved)     │                                                 │
+│                       ├──→ @team/frontend ──→ dashboard/.prs            │
+│   @company/typescript │                                                 │
+│   (Platform team)     └──→ @team/data ──→ analytics/.prs                │
+│                                                                         │
+│                            ↓ prs compile                                │
+│                                                                         │
+│               ┌────────────┬────────────┬────────────┐                  │
+│               │  Copilot   │   Claude   │   Cursor   │                  │
+│               │  .github/  │  CLAUDE.md │  .cursor/  │                  │
+│               └────────────┴────────────┴────────────┘                  │
+│                                                                         │
+│   ✅ Update once → propagates to all repos                              │
+│   ✅ Full audit trail in version control                                │
+│   ✅ Hierarchical inheritance like code                                 │
+│   ✅ Switch AI vendors without rewriting                                │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
-- _Example:_ "All TypeScript code must use `unknown` instead of `any`."
-- _Example:_ "All SQL queries must use parameterized inputs."
+---
 
-### 2. Vendor Independence
+## Quick Start
 
-Don't lock your organization's intellectual property into a specific tool's format.
+### Option 1: npm (Recommended)
 
-- Write logic in PromptScript (`.prs`).
-- Deploy to **Cursor** today.
-- Deploy to **Windsurf** or **GitHub Copilot** tomorrow.
-- Your context moves with you.
+```bash
+# Install globally
+npm install -g @promptscript/cli
 
-### 3. Hierarchical Inheritance
+# Initialize in your project (auto-detects tech stack)
+prs init
 
-Structure instructions like you structure code.
+# Compile to all AI tools
+prs compile
+```
 
-- `@company/global-security` (CISO approved)
-- `@company/backend-java` (Platform team approved)
-- `@team/checkout-service` (Project specific)
+### Option 2: Docker (No Node.js Required)
 
-## 💻 Code Example
+```bash
+# Compile your project
+docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
 
-One source of truth that compiles to every native format you need.
+# Validate before CI merge
+docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate --strict
+```
+
+### Option 3: Try Online
+
+**[Open Playground](https://getpromptscript.dev/playground/)** — no installation needed.
+
+---
+
+## Code Example
 
 **Source:** `.promptscript/project.prs`
 
 ```promptscript
 @meta { id: "checkout-service" syntax: "1.0.0" }
 
-# Inherit approved company standards
+# Inherit company-wide security standards (CISO approved)
 @inherit @company/backend-security
-@use @company/typescript-standards
 
-# Project-specific identity
+# Compose with reusable fragments
+@use @fragments/testing
+@use @fragments/typescript-strict
+
+# Project-specific context
 @identity {
   """
   You are an expert Backend Engineer working on the Checkout Service.
-  This service handles payments and utilizes a hexagonal architecture.
+  This service handles payments using hexagonal architecture.
   """
 }
 
-# Define reusable tools/skills
-@skills {
-  review: {
-    description: "Security-focused code review"
-    content: "Check for: IDOR, SQL Injection, and PII leaks."
-  }
+# Custom commands for your team
+@shortcuts {
+  "/review": "Security-focused code review"
+  "/test": "Write unit tests with Vitest"
+  "/migrate": "Generate Prisma migration"
 }
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJjhiMA1swCuWALRwY1AG4RGMGYLgBPdhkKSZARgoAGO4YC+U1i4DEggJKs51CFkEMNBpmbRgxQRYyDFZjIwFWMQxqMTh3QW4IHy1-DKjMWIB6ACMMRU4xDXllPyw4wQ8ACmoYAHMIOCxqOLVBMQ6MYtgIsGZqQXIMY1bqFUSASnTuZU085miiurR4Rj80dU6YpJS4QQbBZraOrp6+gaHwwVHxyenZ5QX0gAVZgCt5A7bRgQSCMURiThYfzGFyZCHsaHCFxnGSokDIwQATRUgRagVYgiI22oAQAQmUFBVBABRVjtVgwLSCADuYwUWVagjYglwMEEAGE5IoVAEAMpaXT6CgYgAqOA6Rglej5OCOsFOmGMfHYpyOglU0AgAC94IFBHJiK02BgoLjGPKOIwsDUYNKCdJ0Z6XM5XKwPAARGCQBmCForQawHnMZhQOCFODsqCx2EJ6CxpHulq6GDMyTADFnCFwXYQfYQNiWEDixg1aFqUY1zQRFgQ0MwbPM1Hus4sdiQyuC+QKJ5jSSef0AeQASnRBKKAIoAGS8rH+TvLrFneq+nk8glgGAUcGl6PdPscIEcAF0GJDuvgiKRyK6aPQQGFaBv8FZL0A" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
+[![Try in Playground](https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square)](https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJjhiMA1swCuWALRwY1AG4RGMGYLgBPdhkKSZARgoAGO4YC+U1i4DEggJKs51CFkEMNBpmbRgxQRYyDFZjIwFWMQxqMTh3QW4IHy1-DKjMWIB6ACMMRU4xDXllPyw4wQ8ACmoYAHMIOCxqOLVBMQ6MYtgIsGZqQXIMY1bqFUSASnTuZU085miiurR4Rj80dU6YpJS4QQbBZraOrp6+gaHwwVHxyenZ5QX0gAVZgCt5A7bRgQSCMURiThYfzGFyZCHsaHCFxnGSokDIwQATRUgRagVYgiI22oAQAQmUFBVBABRVjtVgwLSCADuYwUWVagjYglwMEEAGE5IoVAEAMpaXT6CgYgAqOA6Rglej5OCOsFOmGMfHYpyOglU0AgAC94IFBHJiK02BgoLjGPKOIwsDUYNKCdJ0Z6XM5XKwPAARGCQBmCForQawHnMZhQOCFODsqCx2EJ6CxpHulq6GDMyTADFnCFwXYQfYQNiWEDixg1aFqUY1zQRFgQ0MwbPM1Hus4sdiQyuC+QKJ5jSSef0AeQASnRBKKAIoAGS8rH+TvLrFneq+nk8glgGAUcGl6PdPscIEcAF0GJDuvgiKRyK6aPQQGFaBv8FZL0A)
 
-**Run Compilation:**
+**Run:** `prs compile`
 
-```bash
-prs compile
+**Generated Outputs:**
+
+| AI Tool            | Output Files                                                     |
+| :----------------- | :--------------------------------------------------------------- |
+| **GitHub Copilot** | `.github/copilot-instructions.md`, `.github/prompts/*.prompt.md` |
+| **Claude Code**    | `CLAUDE.md`, `.claude/skills/*.md`                               |
+| **Cursor**         | `.cursor/rules/*.mdc`                                            |
+| **Antigravity**    | `.agent/rules/*.md`                                              |
+
+---
+
+## Key Features
+
+### Hierarchical Inheritance
+
+```promptscript
+# Organization level (managed by platform team)
+@inherit @company/global-security      # CISO-approved standards
+@inherit @company/typescript           # Platform standards
+
+# Team level
+@inherit @team/backend-standards       # Team conventions
+
+# Project level overrides
+@extend @standards.testing {
+  coverage: "95%"                      # Override inherited value
+}
 ```
 
-**Generated Outputs (Native Formats):**
+### Parameterized Templates
 
-- **GitHub Copilot:** `.github/copilot-instructions.md` (Optimized XML/Markdown)
-- **Claude Code:** `CLAUDE.md` (With local memory hooks)
-- **Cursor:** `.cursor/rules/tech-stack.mdc` (With glob patterns)
+```promptscript
+@meta {
+  id: "@stacks/typescript-service"
+  params: {
+    projectName: string
+    port: number = 3000
+    database: enum("postgres", "mysql", "mongodb") = "postgres"
+  }
+}
 
-👉 **[See full example with all outputs →](https://getpromptscript.dev/latest/#quick-example)**
+@identity {
+  """
+  You are building {{projectName}} on port {{port}}.
+  Database: {{database}}
+  """
+}
+```
 
-## 📊 Supported Platforms
+**Usage:** `@inherit @stacks/typescript-service(projectName: "checkout", port: 8080)`
 
-Write once, compile to native formats for the industry's leading AI tools.
+### AI-Assisted Migration
 
-| Tool                   | Output Path                       | Format Types      |
-| :--------------------- | :-------------------------------- | :---------------- |
-| **GitHub Copilot**     | `.github/copilot-instructions.md` | Markdown, XML     |
-| **Claude Code**        | `CLAUDE.md`                       | Markdown, XML     |
-| **Cursor**             | `.cursor/rules/*.mdc`             | MDC (Frontmatter) |
-| **Google Antigravity** | `.agent/rules/*.md`               | Markdown          |
-
-## 🚀 Getting Started
-
-### For Team Leads & Architects
-
-1.  **Install the CLI:**
-
-    ```bash
-    npm install -g @promptscript/cli
-    ```
-
-2.  **Initialize your repo:**
-
-    ```bash
-    prs init
-    ```
-
-    _Auto-detects your tech stack (React, Node, Python) and generates a tailored configuration._
-
-3.  **Compile & Commit:**
-    ```bash
-    prs compile
-    git add .
-    git commit -m "chore: setup PromptScript infrastructure"
-    ```
-
-### Already Have AI Instructions?
-
-If you have existing `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md` files, use AI-assisted migration:
+Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`?
 
 ```bash
-# 1. Initialize with migration skill
+# Discover and convert existing files
 prs init --migrate
 
-# 2. Use the migration skill in your AI tool
-/migrate  # Claude Code, Cursor
-# or: @workspace /migrate  # GitHub Copilot
+# Then use the migration skill in your AI tool
+/migrate
 ```
 
-The AI will discover your existing instruction files, analyze the content, and generate properly structured PromptScript files—preserving all your standards, restrictions, and custom commands.
+The AI analyzes your existing instructions and generates properly-structured PromptScript files.
 
-👉 **[Full Migration Guide →](https://getpromptscript.dev/latest/guides/migration/)**
-
-## 📦 Installation
+### Watch Mode for Development
 
 ```bash
-npm install -g @promptscript/cli
+# Auto-recompile on changes
+prs compile --watch
 ```
 
-The CLI bundles all required functionality. Internal packages (core, parser, compiler, etc.) are not published separately.
+### Docker for CI/CD
 
-## 🗺️ Roadmap
+```bash
+# Use in GitHub Actions, GitLab CI, etc.
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/mrwogu/promptscript:latest \
+  validate --strict --output json
+```
 
-🎯 **Current Focus:** Web Playground — Try PromptScript in the browser
+---
 
-**Coming Soon:**
+## Official Registry: 1,100+ Configurations
+
+Inherit from battle-tested templates instead of starting from scratch.
+
+| Category        | Examples                                       | Count |
+| :-------------- | :--------------------------------------------- | :---: |
+| **@stacks/**    | React, Vue, Node, Python, Rust, Go, TypeScript |   7   |
+| **@fragments/** | Testing, Security, Accessibility, Performance  |  441  |
+| **@prompts/**   | Code review, Documentation, Refactoring        |  632  |
+| **@roles/**     | Backend Engineer, Frontend Expert, DevOps      |  18   |
+| **@skills/**    | Claude Code skills with permissions            |  28   |
+| **@agents/**    | Specialized AI agents                          |   5   |
+
+**Example:**
+
+```promptscript
+@inherit @stacks/react
+@use @fragments/testing
+@use @fragments/security
+@use @fragments/accessibility
+```
+
+**[Browse Registry](https://github.com/mrwogu/promptscript-registry)**
+
+---
+
+## Supported Platforms
+
+| AI Tool                | Output Format                     | Features                     |
+| :--------------------- | :-------------------------------- | :--------------------------- |
+| **GitHub Copilot**     | `.github/copilot-instructions.md` | Agent mode, skills, prompts  |
+| **Claude Code**        | `CLAUDE.md`                       | Skills with tool permissions |
+| **Cursor**             | `.cursor/rules/*.mdc`             | Glob patterns, alwaysApply   |
+| **Google Antigravity** | `.agent/rules/*.md`               | Activation modes             |
+
+**Coming Soon:** Windsurf, Aider, Continue, Cline, Zed
+
+---
+
+## Enterprise Features
+
+- **Private Registries** — Host internal standards on private Git repos
+- **Version Pinning** — `@inherit @company/security@2.1.0`
+- **Policy Guards** — Enforce rules at compile time
+- **Environment Variables** — `${API_URL:-https://api.example.com}`
+- **Validation in CI** — `prs validate --strict --output json`
+- **Audit Trail** — All changes tracked in Git
+
+---
+
+## Documentation
+
+| Resource                                                                 | Description                       |
+| :----------------------------------------------------------------------- | :-------------------------------- |
+| [**Getting Started**](https://getpromptscript.dev/getting-started/)      | 5-minute quickstart guide         |
+| [**Language Reference**](https://getpromptscript.dev/reference/syntax/)  | Full syntax documentation         |
+| [**Inheritance Guide**](https://getpromptscript.dev/guides/inheritance/) | Hierarchical composition patterns |
+| [**Registry Guide**](https://getpromptscript.dev/guides/registry/)       | Using and publishing packages     |
+| [**Migration Guide**](https://getpromptscript.dev/guides/migration/)     | Converting existing files         |
+| [**Enterprise Guide**](https://getpromptscript.dev/guides/enterprise/)   | Scaling across organizations      |
+
+---
+
+## Roadmap
 
 - More platforms: Windsurf, Aider, Continue, Cline, Zed
 - GitHub Action for CI/CD drift detection
 - VS Code Extension with LSP
-- Public Registry for sharing rule sets
+- Public Registry for community sharing
 
-👉 **[See full roadmap →](ROADMAP.md)**
+[**Full Roadmap**](ROADMAP.md)
+
+---
 
 ## Contributing
 
-We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ for the AI-First Engineering Community</sub>
+  <sub>Built for the AI-First Engineering Community</sub>
+  <br><br>
+  <a href="https://getpromptscript.dev/">Documentation</a> · <a href="https://getpromptscript.dev/playground/">Playground</a> · <a href="https://github.com/mrwogu/promptscript/issues">Issues</a>
 </div>

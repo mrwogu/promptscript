@@ -45,17 +45,56 @@ def on_page_content(html, page, config, files):
     """
     Hook called after page content is rendered.
 
-    Replaces playground URLs based on DOCS_VERSION environment variable.
-    When DOCS_VERSION=dev, /playground/ links become /playground-dev/.
+    Replaces playground URLs in page content based on DOCS_VERSION.
+    When DOCS_VERSION=dev, playground links become playground-dev.
     """
     docs_version = os.environ.get("DOCS_VERSION", "")
 
     if docs_version == "dev":
-        # Replace playground URLs with playground-dev for dev version
-        html = re.sub(
-            r'(https://getpromptscript\.dev)/playground/',
-            r'\1/playground-dev/',
-            html
-        )
+        html = _replace_playground_urls(html)
 
+    return html
+
+
+def on_post_page(output, page, config):
+    """
+    Hook called after the full page (with template) is rendered.
+
+    Replaces playground URLs in navigation and other template elements.
+    When DOCS_VERSION=dev, playground links become playground-dev.
+    """
+    docs_version = os.environ.get("DOCS_VERSION", "")
+
+    if docs_version == "dev":
+        output = _replace_playground_urls(output)
+
+    return output
+
+
+def _replace_playground_urls(html):
+    """
+    Replace playground URLs with playground-dev URLs.
+
+    Handles both full URLs (https://getpromptscript.dev/playground/)
+    and relative URLs (/playground/).
+    """
+    # Replace full URLs: https://getpromptscript.dev/playground/
+    html = re.sub(
+        r'(https://getpromptscript\.dev)/playground/',
+        r'\1/playground-dev/',
+        html
+    )
+    # Replace quoted relative URLs: href="/playground/"
+    # Negative lookahead to avoid matching playground-dev
+    html = re.sub(
+        r'(href=")(/playground/)(?!dev)',
+        r'\1/playground-dev/',
+        html
+    )
+    # Replace unquoted relative URLs (minified HTML): href=/playground/
+    html = re.sub(
+        r'(href=)(/playground/)(?!dev)',
+        r'\1/playground-dev/',
+        html
+    )
     return html
