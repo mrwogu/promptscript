@@ -91,6 +91,103 @@ targets:
   - claude
 ```
 
+## Self-Hosted Git Servers
+
+PromptScript works with **any Git server**, not just GitHub. This includes self-hosted GitLab, Gitea, Bitbucket Server, Azure DevOps, and other Git-compatible servers.
+
+### Self-Hosted GitLab
+
+```yaml
+# promptscript.yaml
+version: '1'
+
+project:
+  id: my-project
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://gitlab.your-company.com/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITLAB_TOKEN # Use any env var name you prefer
+
+targets:
+  - github
+  - claude
+```
+
+```bash
+# Set your GitLab Personal Access Token (requires read_repository scope)
+export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
+prs pull
+```
+
+### Self-Hosted GitLab with SSH
+
+```yaml
+registry:
+  git:
+    url: git@gitlab.your-company.com:org/promptscript-registry.git
+    ref: main
+    auth:
+      type: ssh
+      sshKeyPath: ~/.ssh/id_ed25519
+```
+
+### Gitea / Forgejo
+
+```yaml
+registry:
+  git:
+    url: https://gitea.your-company.com/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITEA_TOKEN
+```
+
+### Bitbucket Server (Self-Hosted)
+
+```yaml
+registry:
+  git:
+    url: https://bitbucket.your-company.com/scm/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: BITBUCKET_TOKEN
+```
+
+### Azure DevOps Server
+
+```yaml
+registry:
+  git:
+    url: https://dev.your-company.com/org/project/_git/promptscript-registry
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: AZURE_DEVOPS_TOKEN
+```
+
+### Token Types by Provider
+
+| Provider         | Token Type            | Required Scope    |
+| ---------------- | --------------------- | ----------------- |
+| GitLab           | Personal Access Token | `read_repository` |
+| GitLab           | Project Access Token  | `read_repository` |
+| GitLab           | Deploy Token          | `read_repository` |
+| Gitea            | Access Token          | `read:repository` |
+| Bitbucket Server | HTTP Access Token     | Repository read   |
+| Azure DevOps     | Personal Access Token | Code (Read)       |
+
+!!! tip "Environment Variable Naming"
+The `tokenEnvVar` field accepts any environment variable name. Use a name that makes sense for your organization, such as `REGISTRY_TOKEN`, `GITLAB_TOKEN`, or `GIT_REGISTRY_PAT`.
+
 ## Version Pinning
 
 ### Pin to Specific Tag
@@ -225,12 +322,23 @@ promptscript:
     - prs compile
     - git diff --exit-code
   variables:
-    GITHUB_TOKEN: $REGISTRY_TOKEN
+    # Use GITLAB_TOKEN for GitLab registries, or match your tokenEnvVar config
+    GITLAB_TOKEN: $REGISTRY_TOKEN
   only:
     changes:
       - .promptscript/**/*
       - promptscript.yaml
 ```
+
+!!! note "Self-Hosted GitLab CI"
+For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories within the same GitLab instance:
+
+    ```yaml
+    variables:
+      GITLAB_TOKEN: $CI_JOB_TOKEN
+    ```
+
+    For cross-instance access, use a Project Access Token or Deploy Token stored in CI/CD variables.
 
 ## Complete Example
 
@@ -379,9 +487,13 @@ Error: Git authentication failed
 
 **Solutions:**
 
-1. Check `GITHUB_TOKEN` is set: `echo $GITHUB_TOKEN`
-2. Verify token has `repo` scope for private repos
+1. Check your token environment variable is set: `echo $GITLAB_TOKEN` (or your configured `tokenEnvVar`)
+2. Verify token has the required scope:
+   - GitHub: `repo` scope
+   - GitLab: `read_repository` scope
+   - Gitea: `read:repository` scope
 3. For SSH, ensure key is added: `ssh-add -l`
+4. For self-hosted servers, verify the URL is correct and accessible from your network
 
 ### Ref Not Found
 
