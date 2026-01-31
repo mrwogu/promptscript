@@ -4,7 +4,6 @@ site_description: 'Prompt-as-Code for Enterprise AI. Standardize, audit, and dep
 site_author: PromptScript Team
 repo_url: https://github.com/mrwogu/promptscript
 repo_name: mrwogu/promptscript
-edit_uri: edit/main/docs/
 
 # Exclude build artifacts from documentation
 exclude_docs: |
@@ -68,17 +67,12 @@ theme:
     - content.code.annotate
     - content.tabs.link
     - content.tooltips
-    - content.action.edit
-    - content.action.view
-
     # Header
     - header.autohide
     - announce.dismiss
 
   icon:
     repo: fontawesome/brands/github
-    edit: material/pencil
-    view: material/eye
 
 plugins:
   - search:
