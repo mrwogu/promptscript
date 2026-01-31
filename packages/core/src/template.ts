@@ -82,29 +82,29 @@ function validateParamType(
   location?: SourceLocation
 ): void {
   const actualType = getValueType(value);
+  const expected = paramTypeToString(expectedType);
 
   switch (expectedType.kind) {
     case 'string':
       if (actualType !== 'string') {
-        throw new ParamTypeMismatchError(paramName, 'string', actualType, { location });
+        throw new ParamTypeMismatchError(paramName, expected, actualType, { location });
       }
       break;
 
     case 'number':
       if (actualType !== 'number') {
-        throw new ParamTypeMismatchError(paramName, 'number', actualType, { location });
+        throw new ParamTypeMismatchError(paramName, expected, actualType, { location });
       }
       break;
 
     case 'boolean':
       if (actualType !== 'boolean') {
-        throw new ParamTypeMismatchError(paramName, 'boolean', actualType, { location });
+        throw new ParamTypeMismatchError(paramName, expected, actualType, { location });
       }
       break;
 
     case 'enum':
       if (actualType !== 'string' || !expectedType.options.includes(value as string)) {
-        const expected = paramTypeToString(expectedType);
         throw new ParamTypeMismatchError(paramName, expected, String(value), { location });
       }
       break;

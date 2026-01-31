@@ -349,6 +349,11 @@ jobs:
             - claude
           EOF
 
+          # Remove leading whitespace from files (heredoc preserves indentation)
+          for f in .promptscript/*.prs promptscript.yaml; do
+            sed -i 's/^          //' "$f"
+          done
+
           # Compile
           node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate
           node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile

@@ -816,5 +816,99 @@ describe('template', () => {
         expect((err as UndefinedVariableError).message).toContain('test.prs');
       }
     });
+
+    it('should include expected type "string" in ParamTypeMismatchError', () => {
+      const defs = [makeDef('name', 'string')];
+      const args = [makeArg('name', 123)];
+      try {
+        bindParams(args, defs, 'template.prs');
+        expect.fail('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(ParamTypeMismatchError);
+        expect((err as ParamTypeMismatchError).message).toContain('name');
+        expect((err as ParamTypeMismatchError).message).toContain('string');
+        expect((err as ParamTypeMismatchError).message).toContain('number');
+      }
+    });
+
+    it('should include expected type "boolean" in ParamTypeMismatchError', () => {
+      const defs = [makeDef('enabled', 'boolean')];
+      const args = [makeArg('enabled', 'yes')];
+      try {
+        bindParams(args, defs, 'template.prs');
+        expect.fail('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(ParamTypeMismatchError);
+        expect((err as ParamTypeMismatchError).message).toContain('enabled');
+        expect((err as ParamTypeMismatchError).message).toContain('boolean');
+        expect((err as ParamTypeMismatchError).message).toContain('string');
+      }
+    });
+  });
+
+  describe('interpolateContent edge cases', () => {
+    it('should interpolate TextContent value directly', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['name', 'World']]),
+        sourceFile: 'test.prs',
+      };
+      const content: TextContent = {
+        type: 'TextContent',
+        value: 'Hello {{name}}!',
+        loc,
+      };
+      const result = interpolateContent(content, ctx);
+      expect(result).toEqual({
+        type: 'TextContent',
+        value: 'Hello World!',
+        loc,
+      });
+    });
+
+    it('should preserve primitive values in nested objects', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['val', 'test']]),
+        sourceFile: 'test.prs',
+      };
+      const content: ObjectContent = {
+        type: 'ObjectContent',
+        properties: {
+          num: 42,
+          bool: true,
+          nil: null,
+          text: 'plain string',
+        },
+        loc,
+      };
+      const result = interpolateContent(content, ctx);
+      // Primitives pass through unchanged
+      expect((result as ObjectContent).properties['num']).toBe(42);
+      expect((result as ObjectContent).properties['bool']).toBe(true);
+      expect((result as ObjectContent).properties['nil']).toBe(null);
+      expect((result as ObjectContent).properties['text']).toBe('plain string');
+    });
+
+    it('should interpolate nested TextContent values in objects', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['name', 'World']]),
+        sourceFile: 'test.prs',
+      };
+      const nestedText: TextContent = {
+        type: 'TextContent',
+        value: 'Hello {{name}}!',
+        loc,
+      };
+      const content: ObjectContent = {
+        type: 'ObjectContent',
+        properties: {
+          greeting: nestedText,
+        },
+        loc,
+      };
+      const result = interpolateContent(content, ctx) as ObjectContent;
+      const resultText = result.properties['greeting'] as TextContent;
+      expect(resultText.type).toBe('TextContent');
+      expect(resultText.value).toBe('Hello World!');
+    });
   });
 });
