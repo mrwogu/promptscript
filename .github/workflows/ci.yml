@@ -401,3 +401,63 @@ jobs:
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
+
+  docker-build:
+    name: Docker Build & Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: promptscript:ci-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: promptscript:ci-test
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Smoke test Docker image
+        run: |
+          # Test --version
+          VERSION=$(docker run --rm promptscript:ci-test --version)
+          echo "CLI version: $VERSION"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "::error::Invalid version format: $VERSION"
+            exit 1
+          fi
+
+          # Test --help
+          docker run --rm promptscript:ci-test --help | grep -q "prs"
+
+          # Test init + compile
+          mkdir -p /tmp/docker-test
+          cd /tmp/docker-test
+          docker run --rm -v "$(pwd):/workspace" promptscript:ci-test init --name test --targets github -y
+          docker run --rm -v "$(pwd):/workspace" promptscript:ci-test validate
+          docker run --rm -v "$(pwd):/workspace" promptscript:ci-test compile
+          test -f .github/copilot-instructions.md
+          echo "Docker smoke test passed"
