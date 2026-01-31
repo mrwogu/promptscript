@@ -64,10 +64,6 @@ LABEL org.opencontainers.image.title="PromptScript CLI" \
 # Install git (required for prs pull and simple-git)
 RUN apk add --no-cache git
 
-# Create non-root user for security (UID/GID 1000 for compatibility)
-RUN addgroup -g 1000 prs && \
-    adduser -u 1000 -G prs -s /bin/sh -D prs
-
 # Set up application directory
 WORKDIR /app
 
@@ -79,11 +75,12 @@ RUN npm install --omit=dev && \
     npm cache clean --force
 
 # Create workspace directory and set permissions
+# Use existing 'node' user (UID/GID 1000) from node:alpine base image
 RUN mkdir -p /workspace && \
-    chown -R prs:prs /workspace /app
+    chown -R node:node /workspace /app
 
 # Switch to non-root user
-USER prs
+USER node
 
 # Set workspace as working directory for user files
 WORKDIR /workspace
