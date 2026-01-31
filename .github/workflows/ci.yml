@@ -290,6 +290,90 @@ jobs:
           test -f .github/copilot-instructions.md
           test -f CLAUDE.md
 
+      - name: Smoke test - template interpolation
+        run: |
+          mkdir -p /tmp/test-templates/.promptscript
+          cd /tmp/test-templates
+
+          # Create template file with params
+          cat > .promptscript/base-template.prs << 'EOF'
+          @meta {
+            id: "base-template"
+            syntax: "1.0.0"
+            params: {
+              projectName: string
+              framework: string = "react"
+              strict?: boolean
+            }
+          }
+
+          @identity {
+            """
+            You are working on {{projectName}}.
+            Framework: {{framework}}
+            """
+          }
+
+          @standards {
+            code: {
+              """
+              - Follow {{framework}} best practices
+              """
+            }
+          }
+          EOF
+
+          # Create child file that uses template
+          cat > .promptscript/project.prs << 'EOF'
+          @meta {
+            id: "my-project"
+            syntax: "1.0.0"
+          }
+
+          @inherit ./base-template(projectName: "smoke-test-app", framework: "vue")
+
+          @context {
+            """
+            Additional context for the project.
+            """
+          }
+          EOF
+
+          # Create config
+          cat > promptscript.yaml << 'EOF'
+          version: "1.0"
+          project:
+            name: template-test
+          targets:
+            - github
+            - claude
+          EOF
+
+          # Compile
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile
+
+          # Verify output files exist
+          test -f .github/copilot-instructions.md
+          test -f CLAUDE.md
+
+          # Verify interpolation happened (values substituted)
+          grep -q "smoke-test-app" CLAUDE.md
+          grep -q "vue" CLAUDE.md
+          grep -q "Follow vue best practices" CLAUDE.md
+
+          # Verify NO template syntax remains in output
+          if grep -q "{{projectName}}" CLAUDE.md; then
+            echo "::error::Template variable {{projectName}} was not interpolated"
+            exit 1
+          fi
+          if grep -q "{{framework}}" CLAUDE.md; then
+            echo "::error::Template variable {{framework}} was not interpolated"
+            exit 1
+          fi
+
+          echo "Template interpolation working correctly"
+
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
