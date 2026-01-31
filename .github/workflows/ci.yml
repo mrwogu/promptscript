@@ -295,7 +295,7 @@ jobs:
           mkdir -p /tmp/test-templates/.promptscript
           cd /tmp/test-templates
 
-          # Create template file with params
+          # Create template file with params (heredoc content must not be indented)
           cat > .promptscript/base-template.prs << 'EOF'
           @meta {
             id: "base-template"
@@ -350,8 +350,9 @@ jobs:
           EOF
 
           # Remove leading whitespace from files (heredoc preserves indentation)
+          # Use temp file approach for cross-platform compatibility
           for f in .promptscript/*.prs promptscript.yaml; do
-            sed -i 's/^          //' "$f"
+            sed 's/^          //' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
           done
 
           # Compile
