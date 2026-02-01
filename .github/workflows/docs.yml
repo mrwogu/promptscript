@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to deploy (e.g., dev, v1.0.0, or latest)'
+        description: 'Version to deploy (e.g., dev, v1.0.0). Full semver is converted to major.minor (v1.0.0-alpha.5 → v1.0)'
         required: false
         default: 'dev'
 
@@ -76,24 +76,44 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          GIT_REF: ${{ github.ref }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            # Set alias=latest for versioned releases (v*), but not for dev/latest
-            if [[ "$VERSION" == v* ]]; then
+          # Extract major.minor from semver (e.g., v1.2.3-alpha.4 → v1.2)
+          extract_minor_version() {
+            local full_version="$1"
+            echo "$full_version" | sed -E 's/^v?([0-9]+\.[0-9]+).*/v\1/'
+          }
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            # For manual dispatch, use input as-is for dev/latest, otherwise extract minor
+            if [[ "$INPUT_VERSION" == "dev" || "$INPUT_VERSION" == "latest" ]]; then
+              VERSION="$INPUT_VERSION"
+              echo "alias=" >> $GITHUB_OUTPUT
+            elif [[ "$INPUT_VERSION" == v* ]]; then
+              VERSION=$(extract_minor_version "$INPUT_VERSION")
               echo "alias=latest" >> $GITHUB_OUTPUT
             else
+              VERSION="$INPUT_VERSION"
               echo "alias=" >> $GITHUB_OUTPUT
             fi
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
             echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "full_version=$INPUT_VERSION" >> $GITHUB_OUTPUT
+          elif [[ "$GIT_REF" == refs/tags/v* ]]; then
+            FULL_VERSION=${GIT_REF#refs/tags/}
+            VERSION=$(extract_minor_version "$FULL_VERSION")
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
             echo "alias=latest" >> $GITHUB_OUTPUT
           else
             echo "version=dev" >> $GITHUB_OUTPUT
+            echo "full_version=dev" >> $GITHUB_OUTPUT
             echo "alias=" >> $GITHUB_OUTPUT
           fi
+
+          echo "Deploying docs: version=$VERSION (from ${FULL_VERSION:-$VERSION})"
 
       - name: Deploy documentation
         run: |
@@ -126,13 +146,46 @@ jobs:
           cp docs/robots.txt gh-pages-content/robots.txt
           cp docs/llms.txt gh-pages-content/llms.txt
 
+      - name: Cleanup old version directories
+        run: |
+          cd gh-pages-content
+
+          # Remove old full-semver version directories (v1.0.0, v1.0.0-alpha.5, etc.)
+          # Keep only: dev, latest, playground*, and major.minor versions (v1.0, v1.1)
+          for dir in v*; do
+            if [[ -d "$dir" ]]; then
+              # Check if directory matches old pattern (has patch version or prerelease)
+              # Old pattern: v1.0.0, v1.0.0-alpha.5, v1.0.0-beta.1
+              # New pattern: v1.0, v1.1 (only major.minor)
+              if [[ "$dir" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+                echo "Removing old version directory: $dir"
+                rm -rf "$dir"
+              fi
+            fi
+          done
+
+          # Update mike's versions.json to remove old entries
+          if [[ -f "versions.json" ]]; then
+            echo "Updating versions.json to remove old version entries..."
+            # Keep only entries that match: dev, or major.minor pattern (v1.0, v1.1)
+            # Remove entries with patch version (v1.0.0, v1.0.0-alpha.5)
+            jq '[.[] | select(.version == "dev" or (.version | test("^v[0-9]+\\.[0-9]+$")))]' versions.json > versions.json.tmp
+            mv versions.json.tmp versions.json
+            echo "Updated versions.json:"
+            cat versions.json
+          fi
+
+          # Commit cleanup if there are changes
+          git add -A
+          git diff --staged --quiet || git commit -m "Cleanup old version directories (keep only major.minor)"
+
       - name: Generate sitemap index
         run: |
           cd gh-pages-content
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
           echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
 
-          # Find all versioned sitemaps (mike creates directories like dev/, latest/, v1.0.0/)
+          # Find all versioned sitemaps (mike creates directories like dev/, latest/, v1.0/, v1.1/)
           for sitemap in */sitemap.xml; do
             if [[ -f "$sitemap" ]]; then
               echo "  <sitemap>" >> sitemap.xml
