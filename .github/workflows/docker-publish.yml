@@ -179,6 +179,7 @@ jobs:
           IMAGE_REF: ${{ steps.image.outputs.ref }}
         run: |
           mkdir -p "$TEST_DIR"
+          chmod 777 "$TEST_DIR"
           cd "$TEST_DIR"
           docker run --rm -v "$(pwd):/workspace" "$IMAGE_REF" init --name test --targets github -y
           test -f promptscript.yaml && echo "PASS: promptscript.yaml created"
