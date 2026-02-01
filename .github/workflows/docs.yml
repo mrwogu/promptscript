@@ -230,6 +230,18 @@ jobs:
           git commit -m "Deploy playground ($VERSION)" || echo "No playground changes to commit"
           git push origin gh-pages
 
+      - name: Prepare artifact (resolve symlinks)
+        run: |
+          cd gh-pages-content
+          # Pull latest changes after push
+          git pull --rebase origin gh-pages
+          # Convert 'latest' symlink to actual directory to avoid race conditions with tar
+          if [[ -L "latest" ]]; then
+            TARGET=$(readlink latest)
+            rm latest
+            cp -r "$TARGET" latest
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
