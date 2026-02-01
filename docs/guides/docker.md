@@ -32,6 +32,8 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
 | `X.Y`    | Latest patch of minor version      | `ghcr.io/mrwogu/promptscript:1.0`    |
 | `X`      | Latest minor of major version      | `ghcr.io/mrwogu/promptscript:1`      |
 
+All tags are generated automatically by CI/CD when a new version is released.
+
 For production environments, pin to a specific version:
 
 ```bash
@@ -109,49 +111,6 @@ docker run --rm \
   -v $(pwd):/workspace \
   -e NO_COLOR=1 \
   ghcr.io/mrwogu/promptscript:latest validate
-```
-
-## Docker Compose
-
-For convenience, use Docker Compose to simplify commands. Create a `docker-compose.yaml`:
-
-```yaml
-services:
-  prs:
-    image: ghcr.io/mrwogu/promptscript:latest
-    volumes:
-      - .:/workspace:rw
-    environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
-      - PROMPTSCRIPT_VERBOSE=${PROMPTSCRIPT_VERBOSE:-}
-      - NO_COLOR=${NO_COLOR:-}
-
-  watch:
-    image: ghcr.io/mrwogu/promptscript:latest
-    volumes:
-      - .:/workspace:rw
-    command: ['compile', '--watch']
-    tty: true
-
-  validate:
-    image: ghcr.io/mrwogu/promptscript:latest
-    volumes:
-      - .:/workspace:ro
-    command: ['validate', '--strict']
-```
-
-Then run commands with:
-
-```bash
-# Run any prs command
-docker compose run --rm prs validate
-docker compose run --rm prs compile
-
-# Start watch mode
-docker compose up watch
-
-# Run validation (read-only)
-docker compose run --rm validate
 ```
 
 ## CI/CD Integration
@@ -383,7 +342,7 @@ docker run --rm -it --entrypoint sh ghcr.io/mrwogu/promptscript:latest
 
 | Property          | Value                        |
 | ----------------- | ---------------------------- |
-| Base image        | `node:22-alpine`             |
+| Base image        | `node:25-alpine`             |
 | Working directory | `/workspace`                 |
 | User              | `prs` (UID 1000)             |
 | Entrypoint        | `node /app/bin/prs.js`       |
@@ -391,7 +350,7 @@ docker run --rm -it --entrypoint sh ghcr.io/mrwogu/promptscript:latest
 
 The image includes:
 
-- Node.js 22 LTS runtime
+- Node.js 25 runtime
 - Git (required for `prs pull`)
 - PromptScript CLI with production dependencies
 

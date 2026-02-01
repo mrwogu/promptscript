@@ -32,7 +32,7 @@
 .md-typeset .hero {
   text-align: center;
   padding: 0 0 0.5rem;
-  margin-top: -1.75rem;
+  margin-top: -1rem;
 }
 
 .md-typeset .hero h1 {
@@ -886,6 +886,13 @@
   padding: 0;
 }
 
+/* Hide copy button in compile demo */
+.compile-demo .md-clipboard,
+.compile-demo button[data-clipboard-target],
+.compile-demo .copy-button {
+  display: none !important;
+}
+
 @media screen and (min-width: 900px) {
   .compile-demo {
     flex-direction: row;
@@ -1154,6 +1161,42 @@
   50% {
     transform: translateY(8px);
   }
+}
+
+/* Click tooltip near compile button */
+.compile-demo__click-tooltip {
+  position: absolute;
+  top: 0.25rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  background: linear-gradient(135deg, #6d28d9 0%, #06b6d4 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 1rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.compile-demo__click-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #06b6d4;
+}
+
+.compile-demo__click-tooltip--visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Floating scroll indicator */
