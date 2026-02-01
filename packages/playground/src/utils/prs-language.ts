@@ -86,6 +86,9 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       // Template expressions {{variable}}
       [/\{\{/, 'variable.template', '@templateExpression'],
 
+      // Environment variables ${VAR} or ${VAR:-default}
+      [/\$\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
+
       // Numbers
       [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
       [/\d+/, 'number'],
@@ -107,15 +110,21 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     ],
 
     string: [
-      [/[^\\"]+/, 'string'],
+      // Environment variables inside strings
+      [/\$\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
+      [/[^\\"$]+/, 'string'],
       [/@escapes/, 'string.escape'],
       [/\\./, 'string.escape.invalid'],
+      [/\$(?!\{)/, 'string'],
       [/"/, 'string', '@pop'],
     ],
 
     multilineString: [
       [/\{\{/, 'variable.template', '@templateExpressionInString'],
-      [/[^"{]+/, 'string'],
+      // Environment variables inside multiline strings
+      [/\$\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
+      [/[^"{$]+/, 'string'],
+      [/\$(?!\{)/, 'string'],
       [/"""/, 'string', '@pop'],
       [/"/, 'string'],
     ],
@@ -173,6 +182,7 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'delimiter', foreground: '94a3b8' },
   { token: 'variable.template', foreground: 'f472b6', fontStyle: 'bold' },
   { token: 'variable.name', foreground: 'fb923c' },
+  { token: 'variable.env', foreground: 'fbbf24' },
 ];
 
 /**
