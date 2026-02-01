@@ -46,7 +46,9 @@ RUN pnpm install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build all packages
+# Build all packages (disable Nx daemon and cache for Docker build stability)
+ENV NX_DAEMON=false
+ENV NX_SKIP_NX_CACHE=true
 RUN pnpm build
 
 # -----------------------------------------------------------------------------
