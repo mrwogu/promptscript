@@ -23,7 +23,7 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /build
 
 # Install pnpm (corepack may not be available in all Node.js alpine images)
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10
 
 # Copy package files first for better layer caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -36,6 +36,8 @@ COPY packages/resolver/package.json packages/resolver/
 COPY packages/validator/package.json packages/validator/
 COPY packages/compiler/package.json packages/compiler/
 COPY packages/formatters/package.json packages/formatters/
+COPY packages/browser-compiler/package.json packages/browser-compiler/
+COPY packages/playground/package.json packages/playground/
 COPY packages/cli/package.json packages/cli/
 
 # Install dependencies
