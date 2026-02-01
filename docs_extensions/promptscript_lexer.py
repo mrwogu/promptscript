@@ -5,18 +5,20 @@ This lexer provides syntax highlighting for PromptScript, matching the
 highlighting style used in the PromptScript Playground.
 """
 
-from pygments.lexer import RegexLexer, bygroups, include, using
+from pygments.lexer import RegexLexer, bygroups, include
 from pygments.token import (
     Comment,
     Keyword,
     Name,
     Number,
-    Operator,
     Punctuation,
     String,
     Text,
     Whitespace,
 )
+
+# Regex for environment variables: ${VAR} or ${VAR:-default}
+ENV_VAR_PATTERN = r"\$\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\}"
 
 
 class PromptScriptLexer(RegexLexer):
@@ -82,9 +84,11 @@ class PromptScriptLexer(RegexLexer):
             (r"\}", Punctuation, "#pop"),
             # Lists
             (r"\[", Punctuation, "list"),
-            # Strings
-            (r'"[^"]*"', String.Double),
-            (r"'[^']*'", String.Single),
+            # Strings with interpolation
+            (r'"', String.Double, "string_double"),
+            (r"'", String.Single, "string_single"),
+            # Environment variables outside strings
+            (ENV_VAR_PATTERN, Name.Variable),
             # Numbers
             (r"\d+\.\d+\.\d+", Number),  # Semver
             (r"\d+", Number),
@@ -100,20 +104,45 @@ class PromptScriptLexer(RegexLexer):
             (r"\s+", Whitespace),
             # Comma separator
             (r",", Punctuation),
-            # Strings in lists (rules, etc.)
-            (r'"[^"]*"', String.Double),
-            (r"'[^']*'", String.Single),
+            # Strings in lists with interpolation
+            (r'"', String.Double, "string_double"),
+            (r"'", String.Single, "string_single"),
             # End of list
             (r"\]", Punctuation, "#pop"),
             # Other content
             (r"[^\]\s\"',#]+", Text),
         ],
+        "string_double": [
+            # Environment variables inside strings
+            (ENV_VAR_PATTERN, Name.Variable),
+            # End of string
+            (r'"', String.Double, "#pop"),
+            # String content (no env var start)
+            (r'[^"$]+', String.Double),
+            # Dollar sign not followed by brace
+            (r"\$(?!\{)", String.Double),
+        ],
+        "string_single": [
+            # Environment variables inside strings
+            (ENV_VAR_PATTERN, Name.Variable),
+            # End of string
+            (r"'", String.Single, "#pop"),
+            # String content (no env var start)
+            (r"[^'$]+", String.Single),
+            # Dollar sign not followed by brace
+            (r"\$(?!\{)", String.Single),
+        ],
         "docstring": [
+            # Environment variables inside docstrings
+            (ENV_VAR_PATTERN, Name.Variable),
             # End of docstring
             (r'"""', String.Doc, "#pop"),
-            # Content
-            (r'[^"]+', String.Doc),
+            # Content (no env var start or quote)
+            (r'[^"$]+', String.Doc),
+            # Quote not part of closing
             (r'"(?!"")', String.Doc),
+            # Dollar sign not followed by brace
+            (r"\$(?!\{)", String.Doc),
         ],
     }
 

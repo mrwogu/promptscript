@@ -13,7 +13,7 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/mrwogu/promptscript/pkgs/container/promptscript)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[**Try Playground**](https://getpromptscript.dev/playground/) · [**Documentation**](https://getpromptscript.dev/) · [**Quick Start**](#-quick-start)
+[**Try Playground**](https://getpromptscript.dev/playground/) · [**Documentation**](https://getpromptscript.dev/) · [**Quick Start**](#quick-start)
 
 </div>
 
@@ -80,6 +80,19 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Why Not Just Copy Files?
+
+| Approach           | Problem                                           |
+| :----------------- | :------------------------------------------------ |
+| **Copy-paste**     | 50 repos × 4 tools = 200 files to update manually |
+| **Symlinks**       | Don't work with Git, break in CI/CD               |
+| **Git submodules** | Complex, no inheritance, same format issue        |
+| **Scripts**        | Custom code to maintain, no validation            |
+
+**PromptScript gives you:** inheritance, validation, multi-format output, and version control — in one tool.
 
 ---
 
@@ -266,18 +279,18 @@ Inherit from battle-tested templates instead of starting from scratch.
 | **Cursor**             | `.cursor/rules/*.mdc`             | Glob patterns, alwaysApply   |
 | **Google Antigravity** | `.agent/rules/*.md`               | Activation modes             |
 
-**Coming Soon:** Windsurf, Aider, Continue, Cline, Zed
+**[See Roadmap](ROADMAP.md)** for upcoming platforms and features — contributions welcome!
 
 ---
 
-## Enterprise Features
+## Enterprise Ready
 
-- **Private Registries** — Host internal standards on private Git repos
-- **Version Pinning** — `@inherit @company/security@2.1.0`
-- **Policy Guards** — Enforce rules at compile time
-- **Environment Variables** — `${API_URL:-https://api.example.com}`
-- **Validation in CI** — `prs validate --strict --output json`
-- **Audit Trail** — All changes tracked in Git
+| Feature                | Description                           |
+| :--------------------- | :------------------------------------ |
+| **Private Registries** | Host standards on internal Git repos  |
+| **Version Pinning**    | `@inherit @company/security@2.1.0`    |
+| **CI Validation**      | `prs validate --strict --output json` |
+| **Full Audit Trail**   | All changes tracked in Git            |
 
 ---
 
