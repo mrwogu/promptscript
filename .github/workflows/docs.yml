@@ -19,9 +19,9 @@ permissions:
   id-token: write
 
 concurrency:
-  # Tags get their own concurrency group so they can't be cancelled by main branch builds
-  group: ${{ startsWith(github.ref, 'refs/tags/') && 'pages-release' || 'pages' }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  # All docs deployments share same group to prevent gh-pages push conflicts
+  group: pages-deploy
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -119,6 +119,9 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           ALIAS="${{ steps.version.outputs.alias }}"
+
+          # Fetch latest gh-pages to avoid push conflicts
+          git fetch origin gh-pages --depth=1 || true
 
           if [[ -n "$ALIAS" ]]; then
             mike deploy --push --update-aliases "$VERSION" "$ALIAS"
