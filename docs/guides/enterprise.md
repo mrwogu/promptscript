@@ -586,6 +586,65 @@ git push origin v1.0.0
 3. Continuous improvement
 4. Regular reviews
 
+## Version Support Policy
+
+### Supported Node.js Versions
+
+PromptScript supports the following Node.js versions:
+
+| Node.js Version | Support Status                  |
+| --------------- | ------------------------------- |
+| 22.x (LTS)      | :white_check_mark: Full support |
+| 24.x            | :white_check_mark: Full support |
+| 25.x (Current)  | :white_check_mark: Full support |
+| < 22            | :x: Not supported               |
+
+We follow Node.js's [release schedule](https://nodejs.org/en/about/releases/) and support active LTS and current versions.
+
+### PromptScript Version Support
+
+| Version | Status | Support Window               |
+| ------- | ------ | ---------------------------- |
+| 1.x     | Active | Until 2.0 release + 6 months |
+
+**Support includes:**
+
+- Security patches
+- Bug fixes
+- Documentation updates
+- Compatibility with new Node.js LTS versions
+
+### Breaking Changes Policy
+
+We follow [Semantic Versioning](https://semver.org/):
+
+- **Major versions** (1.x → 2.x): May contain breaking changes
+- **Minor versions** (1.0 → 1.1): New features, backwards compatible
+- **Patch versions** (1.0.0 → 1.0.1): Bug fixes only
+
+**Breaking changes will:**
+
+1. Be announced at least 4 weeks in advance
+2. Include migration guides in release notes
+3. Provide deprecation warnings in the previous minor version
+4. Be documented in CHANGELOG.md
+
+### Deprecation Process
+
+1. Feature marked as deprecated with console warning
+2. Documented in release notes with migration path
+3. Deprecated for at least one minor version
+4. Removed in next major version
+
+### Security Updates
+
+Security vulnerabilities are handled according to our [Security Policy](https://github.com/mrwogu/promptscript/blob/main/SECURITY.md):
+
+- **Critical**: Fix within 7 days
+- **High**: Fix within 14 days
+- **Medium**: Fix within 30 days
+- **Low**: Fix in next scheduled release
+
 ## Best Practices
 
 !!! tip "Registry Organization"
