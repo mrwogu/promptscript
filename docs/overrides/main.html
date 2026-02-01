@@ -3,8 +3,11 @@ page-specific or default #} {% if page.meta and page.meta.image %}
 <meta property="og:image" content="{{ page.meta.image }}" />
 <meta name="twitter:image" content="{{ page.meta.image }}" />
 {% else %}
-<meta property="og:image" content="https://getpromptscript.dev/assets/images/og-image.png" />
-<meta name="twitter:image" content="https://getpromptscript.dev/assets/images/og-image.png" />
+<meta property="og:image" content="https://getpromptscript.dev/latest/assets/images/og-image.png" />
+<meta
+  name="twitter:image"
+  content="https://getpromptscript.dev/latest/assets/images/og-image.png"
+/>
 {% endif %}
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
