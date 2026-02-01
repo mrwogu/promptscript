@@ -571,8 +571,8 @@ targets:
 <span class=sd>  &quot;&quot;&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIDWrzAO6wAJgHMYAAmAAdVpMkyQSlfMkBZAK5Qs0CKykt2nLJMHNqvOJJERqMRligBPSfskAjKM0ZW5CwQhcZk1TAxhbVjFJDEleGFcMODgIMVYSEwp-RWVcuQBfEHyAXQYTamd8IlJyGCpaEAYANxhaCDZ8AEYioA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="admonition tip"> <p class=admonition-title>Rule of Thumb</p> </div> <p>Inside <code>{ }</code> braces, everything needs a key. Multiline strings without keys only work directly inside blocks like <code>@identity { ... }</code> or <code>@knowledge { ... }</code>.</p> <h2 id=environment-variable-interpolation>Environment Variable Interpolation<a class=headerlink href=#environment-variable-interpolation title="Permanent link">&para;</a></h2> <p>String values can reference environment variables for dynamic configuration:</p> <div class=highlight><pre><span></span><code><span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>api-endpoint</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;${API_ENDPOINT}&quot;</span>
-<span class=w>  </span><span class=nl>environment</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;${NODE_ENV:-development}&quot;</span>
+<span class=w>  </span><span class=nl>api-endpoint</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;</span><span class=nv>${API_ENDPOINT}</span><span class=s2>&quot;</span>
+<span class=w>  </span><span class=nl>environment</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;</span><span class=nv>${NODE_ENV:-development}</span><span class=s2>&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIvtFYABMAA6rQYIxoIAWk4ATNMwjtEgkSAAkwAIIAFAJIB9AKIA5ACJ6A8gbMAVAL4axEzgDcI1NiU5Y1Gtpm1hYmpmYAaogy8jDuMFDMaL7sziBijiCOALoMftQAnvhEpOQwVLQgDPG0EGz4AIxZQA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <h3 id=syntax>Syntax<a class=headerlink href=#syntax title="Permanent link">&para;</a></h3> <table> <thead> <tr> <th>Pattern</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td><code>${VAR}</code></td> <td>Substitute with variable value</td> </tr> <tr> <td><code>${VAR:-default}</code></td> <td>Substitute with variable or default</td> </tr> </tbody> </table> <h3 id=examples>Examples<a class=headerlink href=#examples title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kd>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;env-vars-example&quot;</span>
@@ -580,11 +580,11 @@ targets:
 <span class=p>}</span>
 
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;My App - ${PROJECT_NAME:-default}&quot;</span>
+<span class=w>  </span><span class=nl>project</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;My App - </span><span class=nv>${PROJECT_NAME:-default}</span><span class=s2>&quot;</span>
 
 <span class=w>  </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=sd>  Running in ${NODE_ENV:-development} mode.</span>
-<span class=sd>  API Key: ${API_KEY}</span>
+<span class=sd>  Running in </span><span class=nv>${NODE_ENV:-development}</span><span class=sd> mode.</span>
+<span class=sd>  API Key: </span><span class=nv>${API_KEY}</span>
 <span class=sd>  &quot;&quot;&quot;</span>
 <span class=p>}</span>
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEFWANwC0ijLWVFS5GPLES4AT3YZCs+QEYKABht7WAXzFjuLdkSzD9gmswBWMIxY5iAAsoaCAIJoaILKggAkwAAKAEoA8gBSAKIAwgAqAPoAcpGh2YjKUjBgGACuUFhOIM7ici0d3ql1rKwQrADmkuJJxekAItmF2cUAapXVijBQzGh87A6CJMzVFN6RyQCSggDSMIaySQeHhSfZAJpObXqdjiAOALoMnFjUhvhaMiUGj0EBLWgQNj4CzvIA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <div class="admonition warning"> <p class=admonition-title>Missing Variables</p> </div> <p>If a variable is not set and no default is provided:</p> <div class="language-text highlight"><pre><span></span><code>- An empty string is substituted

@@ -62,7 +62,7 @@
 
 <span class=c1># ✅ Good: use environment variables for secrets</span>
 <span class=err>@context</span><span class=w> </span><span class=p>{</span>
-<span class=w>  </span><span class=nl>apiKey</span><span class=p>:</span><span class=w> </span>$<span class=p>{</span>API_KEY<span class=p>}</span>
+<span class=w>  </span><span class=nl>apiKey</span><span class=p>:</span><span class=w> </span><span class=nv>${API_KEY}</span>
 <span class=p>}</span>
 </code></pre></div> <h3 id=3-audit-your-registry>3. Audit Your Registry<a class=headerlink href=#3-audit-your-registry title="Permanent link">&para;</a></h3> <p>Regularly review stacks in your registry:</p> <div class="language-bash highlight"><pre><span></span><code><span id=__span-3-1><a id=__codelineno-3-1 name=__codelineno-3-1 href=#__codelineno-3-1></a><span class=c1># List all .prs files in registry</span>
 </span><span id=__span-3-2><a id=__codelineno-3-2 name=__codelineno-3-2 href=#__codelineno-3-2></a>find<span class=w> </span>~/.promptscript/registry<span class=w> </span>-name<span class=w> </span><span class=s2>&quot;*.prs&quot;</span><span class=w> </span>-exec<span class=w> </span>head<span class=w> </span>-20<span class=w> </span><span class=o>{}</span><span class=w> </span><span class=se>\;</span>
