@@ -455,6 +455,7 @@ jobs:
 
           # Test init + compile
           mkdir -p /tmp/docker-test
+          chmod 777 /tmp/docker-test
           cd /tmp/docker-test
           docker run --rm -v "$(pwd):/workspace" promptscript:ci-test init --name test --targets github -y
           docker run --rm -v "$(pwd):/workspace" promptscript:ci-test validate
