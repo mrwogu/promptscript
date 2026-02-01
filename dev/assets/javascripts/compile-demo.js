@@ -119,17 +119,31 @@
     document.body.appendChild(scrollHint);
     scrollHint.dataset.enabled = 'false';
 
+    // Create click tooltip near compile button
+    const clickTooltip = createClickTooltip();
+    if (compileBtn && compileBtn.parentElement) {
+      compileBtn.parentElement.style.position = 'relative';
+      compileBtn.parentElement.appendChild(clickTooltip);
+    }
+
     // Make arrow clickable to scroll to output
     if (compileBtn) {
       compileBtn.style.cursor = 'pointer';
       compileBtn.addEventListener('click', function () {
-        scrollToCompileArea(compileBtn, scrollHint);
+        scrollToCompileArea(compileBtn, scrollHint, outputPanel);
+        clickTooltip.classList.remove('compile-demo__click-tooltip--visible');
       });
     }
 
+    // Click tooltip click handler (same as button)
+    clickTooltip.addEventListener('click', function () {
+      scrollToCompileArea(compileBtn, scrollHint, outputPanel);
+      clickTooltip.classList.remove('compile-demo__click-tooltip--visible');
+    });
+
     // Scroll hint click handler
     scrollHint.addEventListener('click', function () {
-      scrollToCompileArea(compileBtn, scrollHint);
+      scrollToCompileArea(compileBtn, scrollHint, outputPanel);
     });
 
     // Event listeners for visibility (only active after typing completes)
@@ -137,7 +151,7 @@
       'scroll',
       function () {
         if (scrollHint.dataset.enabled === 'true') {
-          checkScrollHintVisibility(compileBtn, scrollHint);
+          checkScrollHintVisibility(compileBtn, scrollHint, outputPanel, clickTooltip);
         }
       },
       {
@@ -148,7 +162,7 @@
       'resize',
       function () {
         if (scrollHint.dataset.enabled === 'true') {
-          checkScrollHintVisibility(compileBtn, scrollHint);
+          checkScrollHintVisibility(compileBtn, scrollHint, outputPanel, clickTooltip);
         }
       },
       {
@@ -156,8 +170,9 @@
       }
     );
 
-    // Store scrollHint reference for startAnimation to use
+    // Store references for startAnimation to use
     demo.scrollHint = scrollHint;
+    demo.clickTooltip = clickTooltip;
   }
 
   function createScrollHint() {
@@ -180,55 +195,110 @@
     return hint;
   }
 
-  function scrollToCompileArea(compileBtn, scrollHint) {
-    if (compileBtn) {
-      compileBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      scrollHint.classList.remove('compile-demo__scroll-hint--visible');
-    }
+  function createClickTooltip() {
+    var tooltip = document.createElement('div');
+    tooltip.className = 'compile-demo__click-tooltip';
+    tooltip.textContent = 'Click';
+    return tooltip;
   }
 
-  function checkScrollHintVisibility(compileBtn, scrollHint) {
+  function scrollToCompileArea(compileBtn, scrollHint, outputPanel) {
+    if (!compileBtn) return;
+
+    // Scroll so output panel is centered in viewport
+    if (outputPanel) {
+      var windowHeight = window.innerHeight;
+      var outputRect = outputPanel.getBoundingClientRect();
+      var outputHeight = outputRect.height;
+      var targetScrollY = window.scrollY + outputRect.top - (windowHeight - outputHeight) / 2;
+      window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+    } else {
+      compileBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    scrollHint.classList.remove('compile-demo__scroll-hint--visible');
+    // Stop bounce animation after user clicks
+    compileBtn.classList.remove('compile-demo__arrow-icon--bounce');
+  }
+
+  function checkScrollHintVisibility(compileBtn, scrollHint, outputPanel, clickTooltip) {
     if (!compileBtn || !scrollHint) return;
 
     var arrowRect = compileBtn.getBoundingClientRect();
     var windowHeight = window.innerHeight;
 
-    // Show hint if the compile arrow is below the viewport
-    var arrowBelowViewport = arrowRect.top > windowHeight;
+    // If user has scrolled past the demo (arrow is above viewport), hide everything
+    if (arrowRect.bottom < 0) {
+      scrollHint.classList.remove('compile-demo__scroll-hint--visible');
+      compileBtn.classList.remove('compile-demo__arrow-icon--bounce');
+      if (clickTooltip) clickTooltip.classList.remove('compile-demo__click-tooltip--visible');
+      return;
+    }
 
-    if (arrowBelowViewport) {
+    // Calculate how much of the arrow is visible in the viewport
+    var visibleTop = Math.max(0, arrowRect.top);
+    var visibleBottom = Math.min(windowHeight, arrowRect.bottom);
+    var visibleHeight = Math.max(0, visibleBottom - visibleTop);
+    var visibilityRatio = arrowRect.height > 0 ? visibleHeight / arrowRect.height : 0;
+
+    // Check if output panel is visible in viewport
+    var outputSufficientlyVisible = false;
+    if (outputPanel) {
+      var outputRect = outputPanel.getBoundingClientRect();
+      outputSufficientlyVisible = outputRect.top < windowHeight * 0.8;
+    }
+
+    // Show hint if the compile arrow is less than 50% visible (and below viewport)
+    var arrowNotSufficientlyVisible = visibilityRatio < 0.5;
+
+    if (arrowNotSufficientlyVisible) {
       scrollHint.classList.add('compile-demo__scroll-hint--visible');
+      compileBtn.classList.remove('compile-demo__arrow-icon--bounce');
+      if (clickTooltip) clickTooltip.classList.remove('compile-demo__click-tooltip--visible');
     } else {
       scrollHint.classList.remove('compile-demo__scroll-hint--visible');
+      // Show bounce animation and click tooltip if arrow is visible but output is not sufficiently visible
+      if (!outputSufficientlyVisible) {
+        compileBtn.classList.add('compile-demo__arrow-icon--bounce');
+        if (clickTooltip) clickTooltip.classList.add('compile-demo__click-tooltip--visible');
+      } else {
+        compileBtn.classList.remove('compile-demo__arrow-icon--bounce');
+        if (clickTooltip) clickTooltip.classList.remove('compile-demo__click-tooltip--visible');
+      }
     }
   }
 
   function waitForOutputVisible(outputPanel, callback) {
     if (!outputPanel) return;
 
-    var rect = outputPanel.getBoundingClientRect();
-    var windowHeight = window.innerHeight;
-
-    // If already visible (at least 50% in viewport), start immediately
-    if (rect.top < windowHeight * 0.8) {
-      setTimeout(callback, 500);
-      return;
+    // Check if output panel is visible in viewport
+    function isOutputSufficientlyVisible() {
+      var rect = outputPanel.getBoundingClientRect();
+      var windowHeight = window.innerHeight;
+      return rect.top < windowHeight * 0.8;
     }
 
-    // Otherwise, wait for it to become visible
-    var observer = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            observer.disconnect();
-            setTimeout(callback, 500);
-          }
-        });
-      },
-      { threshold: 0.2 }
-    );
+    // Always require at least one scroll event before checking visibility
+    // This ensures user has engaged with the page
+    var hasScrolled = false;
 
-    observer.observe(outputPanel);
+    function onScroll() {
+      hasScrolled = true;
+      if (isOutputSufficientlyVisible()) {
+        window.removeEventListener('scroll', onScroll);
+        setTimeout(callback, 500);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Fallback: if output is already visible (desktop), start after delay
+    setTimeout(function () {
+      if (!hasScrolled && isOutputSufficientlyVisible()) {
+        window.removeEventListener('scroll', onScroll);
+        callback();
+      }
+    }, 2000);
   }
 
   function setupSubfileHandlers(demo) {
@@ -261,7 +331,7 @@
       // Enable scroll hint after typing completes
       if (demo.scrollHint) {
         demo.scrollHint.dataset.enabled = 'true';
-        checkScrollHintVisibility(compileBtn, demo.scrollHint);
+        checkScrollHintVisibility(compileBtn, demo.scrollHint, outputPanel, demo.clickTooltip);
       }
 
       setTimeout(() => {
@@ -270,24 +340,26 @@
         setTimeout(() => {
           compileBtn.classList.remove('compile-demo__arrow-icon--compiling');
           compileBtn.classList.add('compile-demo__arrow-icon--done');
-          outputPanel.classList.remove('compile-demo__output--hidden');
-          outputPanel.classList.add('compile-demo__output--revealed');
-          if (placeholder) {
-            placeholder.classList.add('compile-demo__placeholder--hidden');
-            // Fallback for browsers without :has() support
-            if (!supportsHas) {
-              var tabsEl = outputPanel.querySelector('.compile-demo__tabs');
-              var panelsEls = outputPanel.querySelectorAll('.compile-demo__panel');
-              if (tabsEl) tabsEl.style.opacity = '1';
-              panelsEls.forEach(function (p) {
-                p.style.opacity = '1';
-                p.style.pointerEvents = 'auto';
-              });
-            }
-          }
 
-          // Start sequential cycling only when output panel is visible
+          // Wait for user to scroll before revealing output panel
           waitForOutputVisible(outputPanel, function () {
+            outputPanel.classList.remove('compile-demo__output--hidden');
+            outputPanel.classList.add('compile-demo__output--revealed');
+            if (placeholder) {
+              placeholder.classList.add('compile-demo__placeholder--hidden');
+              // Fallback for browsers without :has() support
+              if (!supportsHas) {
+                var tabsEl = outputPanel.querySelector('.compile-demo__tabs');
+                var panelsEls = outputPanel.querySelectorAll('.compile-demo__panel');
+                if (tabsEl) tabsEl.style.opacity = '1';
+                panelsEls.forEach(function (p) {
+                  p.style.opacity = '1';
+                  p.style.pointerEvents = 'auto';
+                });
+              }
+            }
+
+            // Start sequential cycling
             startSequentialCycling(tabs, panels, demo);
           });
         }, 700);
