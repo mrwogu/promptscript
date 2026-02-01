@@ -239,7 +239,15 @@ jobs:
           if [[ -L "latest" ]]; then
             TARGET=$(readlink latest)
             rm latest
-            cp -r "$TARGET" latest
+            if [[ -d "$TARGET" ]]; then
+              cp -r "$TARGET" latest
+            else
+              # Target was cleaned up, find the newest version directory
+              NEWEST=$(ls -d v[0-9]* 2>/dev/null | sort -V | tail -1)
+              if [[ -n "$NEWEST" ]]; then
+                cp -r "$NEWEST" latest
+              fi
+            fi
           fi
 
       - name: Upload artifact
