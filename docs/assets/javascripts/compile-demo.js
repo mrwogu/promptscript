@@ -43,8 +43,8 @@
     { text: ' }', cls: '' },
   ];
 
-  const TYPING_SPEED = 18;
-  const COMPILE_DELAY = 300;
+  const TYPING_SPEED = 9;
+  const COMPILE_DELAY = 150;
   const SUBFILE_DISPLAY_TIME = 4000;
   const SCROLL_DURATION = 3000;
 
@@ -298,7 +298,7 @@
         window.removeEventListener('scroll', onScroll);
         callback();
       }
-    }, 1000);
+    }, 500);
   }
 
   function setupSubfileHandlers(demo) {
