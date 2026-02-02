@@ -169,26 +169,22 @@ function decodeBase64(encoded: string): string | null {
  * "49 47 4E 4F" -> "IGNO"
  */
 function decodeRawHex(hex: string): string | null {
-  try {
-    const cleanHex = hex.replace(/[\s-]/g, '');
-    if (cleanHex.length % 2 !== 0) return null;
+  const cleanHex = hex.replace(/[\s-]/g, '');
+  if (cleanHex.length % 2 !== 0) return null;
 
-    const bytes: number[] = [];
-    for (let i = 0; i < cleanHex.length; i += 2) {
-      const byte = parseInt(cleanHex.substring(i, i + 2), 16);
-      if (isNaN(byte)) return null;
-      bytes.push(byte);
-    }
+  const bytes: number[] = [];
+  for (let i = 0; i < cleanHex.length; i += 2) {
+    const byte = parseInt(cleanHex.substring(i, i + 2), 16);
+    if (isNaN(byte)) return null;
+    bytes.push(byte);
+  }
 
-    const decoded = String.fromCharCode(...bytes);
-    // eslint-disable-next-line no-control-regex
-    if (/[\x00-\x08\x0E-\x1F]/.test(decoded)) {
-      return null;
-    }
-    return decoded;
-  } catch {
+  const decoded = String.fromCharCode(...bytes);
+  // eslint-disable-next-line no-control-regex
+  if (/[\x00-\x08\x0E-\x1F]/.test(decoded)) {
     return null;
   }
+  return decoded;
 }
 
 /**
@@ -196,12 +192,8 @@ function decodeRawHex(hex: string): string | null {
  * "\\x49\\x47\\x4E\\x4F" -> "IGNO"
  */
 function decodeHexEscapes(escaped: string): string | null {
-  try {
-    const hex = escaped.replace(/\\x/g, '');
-    return decodeRawHex(hex);
-  } catch {
-    return null;
-  }
+  const hex = escaped.replace(/\\x/g, '');
+  return decodeRawHex(hex);
 }
 
 /**
@@ -209,14 +201,10 @@ function decodeHexEscapes(escaped: string): string | null {
  * "\\u0049\\u0047" -> "IG"
  */
 function decodeUnicodeEscapes(escaped: string): string | null {
-  try {
-    const decoded = escaped.replace(/\\u([0-9a-fA-F]{4})/g, (_, code) =>
-      String.fromCharCode(parseInt(code, 16))
-    );
-    return decoded;
-  } catch {
-    return null;
-  }
+  const decoded = escaped.replace(/\\u([0-9a-fA-F]{4})/g, (_, code) =>
+    String.fromCharCode(parseInt(code, 16))
+  );
+  return decoded;
 }
 
 /**
@@ -236,15 +224,11 @@ function decodeUrlEncoded(encoded: string): string | null {
  * "&#x49;&#x47;" or "&#73;&#71;" -> "IG"
  */
 function decodeHtmlEntities(entities: string): string | null {
-  try {
-    const decoded = entities.replace(/&#(x?)([0-9a-fA-F]+);/g, (_, isHex, code) => {
-      const charCode = isHex ? parseInt(code, 16) : parseInt(code, 10);
-      return String.fromCharCode(charCode);
-    });
-    return decoded;
-  } catch {
-    return null;
-  }
+  const decoded = entities.replace(/&#(x?)([0-9a-fA-F]+);/g, (_, isHex, code) => {
+    const charCode = isHex ? parseInt(code, 16) : parseInt(code, 10);
+    return String.fromCharCode(charCode);
+  });
+  return decoded;
 }
 
 /**
@@ -252,14 +236,10 @@ function decodeHtmlEntities(entities: string): string | null {
  * "\\111\\107" -> "IG"
  */
 function decodeOctalEscapes(escaped: string): string | null {
-  try {
-    const decoded = escaped.replace(/\\([0-7]{3})/g, (_, octal) =>
-      String.fromCharCode(parseInt(octal, 8))
-    );
-    return decoded;
-  } catch {
-    return null;
-  }
+  const decoded = escaped.replace(/\\([0-7]{3})/g, (_, octal) =>
+    String.fromCharCode(parseInt(octal, 8))
+  );
+  return decoded;
 }
 
 /**
@@ -267,20 +247,16 @@ function decodeOctalEscapes(escaped: string): string | null {
  * "01001001 01000111" -> "IG"
  */
 function decodeBinary(binary: string): string | null {
-  try {
-    const cleanBinary = binary.replace(/\s/g, '');
-    if (cleanBinary.length % 8 !== 0) return null;
+  const cleanBinary = binary.replace(/\s/g, '');
+  if (cleanBinary.length % 8 !== 0) return null;
 
-    let decoded = '';
-    for (let i = 0; i < cleanBinary.length; i += 8) {
-      const byte = parseInt(cleanBinary.substring(i, i + 8), 2);
-      if (isNaN(byte)) return null;
-      decoded += String.fromCharCode(byte);
-    }
-    return decoded;
-  } catch {
-    return null;
+  let decoded = '';
+  for (let i = 0; i < cleanBinary.length; i += 8) {
+    const byte = parseInt(cleanBinary.substring(i, i + 8), 2);
+    if (isNaN(byte)) return null;
+    decoded += String.fromCharCode(byte);
   }
+  return decoded;
 }
 
 /**
