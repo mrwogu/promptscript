@@ -143,9 +143,15 @@ importers:
       '@promptscript/core':
         specifier: workspace:^
         version: link:../core
+      '@promptscript/parser':
+        specifier: workspace:^
+        version: link:../parser
       '@promptscript/resolver':
         specifier: workspace:^
         version: link:../resolver
+      '@promptscript/validator':
+        specifier: workspace:^
+        version: link:../validator
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
