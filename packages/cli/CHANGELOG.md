@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-rc.2](https://github.com/mrwogu/promptscript/compare/v1.0.0-rc.2...v1.1.0-rc.2) (2026-02-02)
+
+
+### Features
+
+* **validator:** add security rules for supply chain injection detection ([5802a2f](https://github.com/mrwogu/promptscript/commit/5802a2f7d258fd6577d30d76d9ae1d1ce31ef123))
+
 ## [1.0.0-rc.2](https://github.com/mrwogu/promptscript/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2026-02-01)
 
 
