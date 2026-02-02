@@ -12,6 +12,8 @@ import { validParams } from './valid-params.js';
 import { suspiciousUrls } from './suspicious-urls.js';
 import { authorityInjection } from './authority-injection.js';
 import { obfuscatedContent } from './obfuscated-content.js';
+import { pathTraversal } from './path-traversal.js';
+import { unicodeSecurity } from './unicode-security.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -55,6 +57,8 @@ export { validParams } from './valid-params.js';
 export { suspiciousUrls } from './suspicious-urls.js';
 export { authorityInjection } from './authority-injection.js';
 export { obfuscatedContent } from './obfuscated-content.js';
+export { pathTraversal, hasPathTraversal } from './path-traversal.js';
+export { unicodeSecurity } from './unicode-security.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -77,10 +81,12 @@ export const allRules: ValidationRule[] = [
   emptyBlock,
   // Valid params (PS009)
   validParams,
-  // Security rules (PS010, PS011, PS012)
+  // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
   obfuscatedContent,
+  pathTraversal,
+  unicodeSecurity,
 ];
 
 /**

@@ -147,6 +147,8 @@ export const SECURITY_STRICT: ValidatorConfig = {
     'suspicious-urls': 'error',
     'authority-injection': 'error',
     'obfuscated-content': 'error',
+    'path-traversal': 'error',
+    'unicode-security': 'error',
     // Other rules at default severity
     'required-meta-id': 'error',
     'required-meta-syntax': 'error',
@@ -196,6 +198,8 @@ export const SECURITY_MODERATE: ValidatorConfig = {
     'suspicious-urls': 'warning',
     'authority-injection': 'warning',
     'obfuscated-content': 'off', // May have false positives
+    'path-traversal': 'error', // Path traversal is always dangerous
+    'unicode-security': 'warning', // Unicode attacks are subtle
     // Other rules at default severity
     'required-meta-id': 'error',
     'required-meta-syntax': 'error',
@@ -233,6 +237,8 @@ export const SECURITY_MINIMAL: ValidatorConfig = {
     'suspicious-urls': 'off',
     'authority-injection': 'off',
     'obfuscated-content': 'off',
+    'path-traversal': 'warning', // Path traversal is always a concern
+    'unicode-security': 'off', // Off for minimal preset
     // Core validation
     'required-meta-id': 'error',
     'required-meta-syntax': 'error',
