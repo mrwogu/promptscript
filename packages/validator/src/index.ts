@@ -44,6 +44,9 @@ export {
   suspiciousUrls,
   authorityInjection,
   obfuscatedContent,
+  pathTraversal,
+  hasPathTraversal,
+  unicodeSecurity,
 } from './rules/index.js';
 
 // Security presets
