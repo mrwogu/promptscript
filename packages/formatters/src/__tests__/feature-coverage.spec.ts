@@ -371,7 +371,8 @@ describe('Feature Implementation Tests', () => {
       formatter.format(longAst);
 
       expect(warnSpy).toHaveBeenCalled();
-      expect(warnSpy.mock.calls[0]?.[0]).toContain('12,000');
+      // Use regex to match locale-independent format (12,000 or 12 000)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/12[,\s]000/);
     });
   });
 

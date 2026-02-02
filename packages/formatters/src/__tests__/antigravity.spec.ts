@@ -784,7 +784,8 @@ Never leave TODO without issue reference`,
       formatter.format(ast);
 
       expect(warnSpy).toHaveBeenCalled();
-      expect(warnSpy.mock.calls[0]?.[0]).toContain('12,000 character limit');
+      // Use regex to match locale-independent format (12,000 or 12 000)
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/12[,\s]000 character limit/);
     });
 
     it('should not warn when content is under limit', () => {
