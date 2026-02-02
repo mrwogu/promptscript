@@ -407,7 +407,7 @@ describe('suspicious-urls rule (PS010)', () => {
       const ast = createTestProgram({
         blocks: [createTextBlock('@skills', 'Visit https://.com/page')],
       });
-      const { ctx, messages } = createRuleContext(ast);
+      const { ctx } = createRuleContext(ast);
 
       // Should not crash on malformed domain
       expect(() => suspiciousUrls.validate(ctx)).not.toThrow();
