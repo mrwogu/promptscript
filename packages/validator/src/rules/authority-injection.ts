@@ -5,38 +5,42 @@ import { walkText } from '../walker.js';
  * Patterns that indicate attempts to inject authoritative override instructions.
  * These patterns are commonly used in prompt injection attacks to make AI models
  * believe they should override their existing instructions or safety measures.
+ *
+ * NOTE: All patterns use bounded quantifiers (e.g., \s{0,10}) instead of unbounded
+ * ones (\s*, \s+) to prevent ReDoS (Regular Expression Denial of Service) attacks.
+ * This ensures O(n) matching time even on adversarial inputs.
  */
 const AUTHORITY_PATTERNS: RegExp[] = [
   // Mandatory/strict mode indicators
-  /\[?\s*MANDATORY\s*(?:POLICY|UPDATE|FOOTER|INSTRUCTION|DIRECTIVE)\s*\]?/i,
-  /\[?\s*OVERRIDE\s*\]?/i,
-  /\[?\s*STRICT[_\s]*MODE\s*[:\s]+ON\s*\]?/i,
-  /\[?\s*SYSTEM\s*(?:OVERRIDE|UPDATE|DIRECTIVE)\s*\]?/i,
-  /\[?\s*ADMIN(?:ISTRATOR)?\s*(?:MODE|OVERRIDE|ACCESS)\s*\]?/i,
-  /\[?\s*ROOT\s*(?:ACCESS|MODE|OVERRIDE)\s*\]?/i,
-  /\[?\s*PRIORITY\s*(?:OVERRIDE|ONE|ALPHA)\s*\]?/i,
-  /\[?\s*EMERGENCY\s*(?:PROTOCOL|OVERRIDE|MODE)\s*\]?/i,
+  /\[?\s{0,10}MANDATORY\s{0,10}(?:POLICY|UPDATE|FOOTER|INSTRUCTION|DIRECTIVE)\s{0,10}\]?/i,
+  /\[?\s{0,10}OVERRIDE\s{0,10}\]?/i,
+  /\[?\s{0,10}STRICT[_\s]{0,10}MODE\s{0,10}[:\s]{1,10}ON\s{0,10}\]?/i,
+  /\[?\s{0,10}SYSTEM\s{0,10}(?:OVERRIDE|UPDATE|DIRECTIVE)\s{0,10}\]?/i,
+  /\[?\s{0,10}ADMIN(?:ISTRATOR)?\s{0,10}(?:MODE|OVERRIDE|ACCESS)\s{0,10}\]?/i,
+  /\[?\s{0,10}ROOT\s{0,10}(?:ACCESS|MODE|OVERRIDE)\s{0,10}\]?/i,
+  /\[?\s{0,10}PRIORITY\s{0,10}(?:OVERRIDE|ONE|ALPHA)\s{0,10}\]?/i,
+  /\[?\s{0,10}EMERGENCY\s{0,10}(?:PROTOCOL|OVERRIDE|MODE)\s{0,10}\]?/i,
 
   // Warning suppression patterns
-  /(?:DO\s+NOT|NEVER|DON'?T)\s+(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
-  /(?:DO\s+NOT|NEVER|DON'?T)\s+(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\s+(?:SECURITY\s+)?WARNINGS?/i,
-  /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s+(?:ALL\s+)?WARNINGS?/i,
-  /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s+(?:ALL\s+)?(?:SECURITY\s+)?(?:ALERTS?|NOTIFICATIONS?)/i,
-  /IGNORE\s+(?:ALL\s+)?(?:SAFETY\s+)?WARNINGS?/i,
-  /(?:SKIP|BYPASS)\s+(?:ALL\s+)?(?:SAFETY\s+)?(?:CHECKS?|VALIDATION)/i,
+  /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
+  /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?/i,
+  /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s{1,10}(?:ALL\s{1,10})?WARNINGS?/i,
+  /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)/i,
+  /IGNORE\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?WARNINGS?/i,
+  /(?:SKIP|BYPASS)\s{1,10}(?:ALL\s{1,10})?(?:SAFETY\s{1,10})?(?:CHECKS?|VALIDATION)/i,
 
   // Execute/follow verbatim patterns
-  /EXECUTE\s+(?:THIS\s+)?VERBATIM/i,
-  /FOLLOW\s+(?:THESE?\s+)?(?:INSTRUCTIONS?\s+)?(?:EXACTLY|PRECISELY|LITERALLY)/i,
-  /(?:MUST|SHALL|WILL)\s+(?:ALWAYS\s+)?COMPLY/i,
-  /(?:ABSOLUTE|UNCONDITIONAL)\s+(?:COMPLIANCE|OBEDIENCE)/i,
-  /NO\s+(?:EXCEPTIONS?|DEVIATIONS?)\s+(?:ALLOWED|PERMITTED)/i,
+  /EXECUTE\s{1,10}(?:THIS\s{1,10})?VERBATIM/i,
+  /FOLLOW\s{1,10}(?:THESE?\s{1,10})?(?:INSTRUCTIONS?\s{1,10})?(?:EXACTLY|PRECISELY|LITERALLY)/i,
+  /(?:MUST|SHALL|WILL)\s{1,10}(?:ALWAYS\s{1,10})?COMPLY/i,
+  /(?:ABSOLUTE|UNCONDITIONAL)\s{1,10}(?:COMPLIANCE|OBEDIENCE)/i,
+  /NO\s{1,10}(?:EXCEPTIONS?|DEVIATIONS?)\s{1,10}(?:ALLOWED|PERMITTED)/i,
 
   // Authority assertion patterns
-  /THIS\s+(?:OVERRIDES?|SUPERSEDES?|REPLACES?)\s+(?:ALL\s+)?(?:PREVIOUS|PRIOR|OTHER)/i,
-  /(?:HIGHEST|TOP|MAXIMUM)\s+PRIORITY\s+(?:INSTRUCTION|DIRECTIVE|ORDER)/i,
-  /(?:CORE|FUNDAMENTAL|BASE)\s+(?:DIRECTIVE|INSTRUCTION)\s+(?:UPDATE|OVERRIDE)/i,
-  /NEW\s+(?:SYSTEM|CORE|BASE)\s+(?:INSTRUCTIONS?|DIRECTIVES?|RULES?)/i,
+  /THIS\s{1,10}(?:OVERRIDES?|SUPERSEDES?|REPLACES?)\s{1,10}(?:ALL\s{1,10})?(?:PREVIOUS|PRIOR|OTHER)/i,
+  /(?:HIGHEST|TOP|MAXIMUM)\s{1,10}PRIORITY\s{1,10}(?:INSTRUCTION|DIRECTIVE|ORDER)/i,
+  /(?:CORE|FUNDAMENTAL|BASE)\s{1,10}(?:DIRECTIVE|INSTRUCTION)\s{1,10}(?:UPDATE|OVERRIDE)/i,
+  /NEW\s{1,10}(?:SYSTEM|CORE|BASE)\s{1,10}(?:INSTRUCTIONS?|DIRECTIVES?|RULES?)/i,
 ];
 
 /**
