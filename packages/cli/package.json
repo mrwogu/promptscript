@@ -48,6 +48,6 @@
   },
   "devDependencies": {
     "@codecov/bundle-analyzer": "^1.9.1",
-    "memfs": "^4.56.4"
+    "memfs": "^4.56.10"
   }
 }
