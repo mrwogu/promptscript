@@ -1800,6 +1800,68 @@ describe('path-traversal rule (PS013)', () => {
       expect(messages[0]!.suggestion).toContain('direct paths');
     });
   });
+
+  describe('inherit path checking', () => {
+    function createProgramWithInherit(inheritPath: string): Program {
+      const defaultLoc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+      return {
+        type: 'Program',
+        loc: defaultLoc,
+        meta: {
+          type: 'MetaBlock',
+          loc: defaultLoc,
+          fields: {
+            id: 'test-project',
+            syntax: '1.0.0',
+          },
+        },
+        inherit: {
+          type: 'InheritDeclaration',
+          path: {
+            type: 'PathReference',
+            raw: inheritPath,
+            segments: inheritPath.split('/'),
+            isRelative: inheritPath.startsWith('.'),
+            loc: defaultLoc,
+          },
+          loc: defaultLoc,
+        },
+        uses: [],
+        blocks: [],
+        extends: [],
+      };
+    }
+
+    it('should allow valid inherit path', () => {
+      const ast = createProgramWithInherit('./base/template');
+      const { ctx, messages } = createRuleContext(ast);
+
+      pathTraversal.validate(ctx);
+
+      expect(messages).toHaveLength(0);
+    });
+
+    it('should detect path traversal in inherit path', () => {
+      const ast = createProgramWithInherit('./foo/../../etc/passwd');
+      const { ctx, messages } = createRuleContext(ast);
+
+      pathTraversal.validate(ctx);
+
+      expect(messages.length).toBeGreaterThan(0);
+      expect(messages[0]!.message).toContain('Path traversal detected');
+      expect(messages[0]!.message).toContain('./foo/../../etc/passwd');
+    });
+
+    it('should detect excessive parent traversal in inherit path', () => {
+      const ast = createProgramWithInherit('../../../secret/base');
+      const { ctx, messages } = createRuleContext(ast);
+
+      pathTraversal.validate(ctx);
+
+      expect(messages.length).toBeGreaterThan(0);
+      expect(messages[0]!.message).toContain('Path traversal detected');
+    });
+  });
 });
 
 describe('security presets include path-traversal', () => {
