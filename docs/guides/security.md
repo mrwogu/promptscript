@@ -116,6 +116,181 @@ The primary concern with external stacks isn't code execution—it's **prompt in
    git diff v1.2.3..v1.3.0 -- *.prs
    ```
 
+## Validation Rules for Security
+
+PromptScript includes built-in validation rules to detect potential prompt injection attempts and other security issues.
+
+### Security Rules
+
+| Rule ID | Name                  | Description                                      | Default Severity |
+| ------- | --------------------- | ------------------------------------------------ | ---------------- |
+| PS005   | `blocked-patterns`    | Detects prompt injection phrases                 | error            |
+| PS010   | `suspicious-urls`     | Detects HTTP URLs, shorteners, credential params | warning          |
+| PS011   | `authority-injection` | Detects authoritative override phrases           | error            |
+| PS012   | `obfuscated-content`  | Detects Base64/hex encoded content               | warning          |
+
+### Using Security Presets
+
+```typescript
+import { createValidator, SECURITY_STRICT } from '@promptscript/validator';
+
+// Strict security for production
+const validator = createValidator(SECURITY_STRICT);
+const result = validator.validate(ast);
+
+// Or based on environment
+import { getSecurityPreset } from '@promptscript/validator';
+const preset = getSecurityPreset(process.env.NODE_ENV); // 'production' | 'development' | 'test'
+```
+
+### Multilingual Prompt Injection Detection
+
+By default, validation rules detect English prompt injection patterns only. For international applications, use multilingual support.
+
+**Supported languages (26 total):**
+
+Western European:
+
+- 🇬🇧 English (en) - included by default
+- 🇵🇱 Polish (pl)
+- 🇪🇸 Spanish (es)
+- 🇩🇪 German (de)
+- 🇫🇷 French (fr)
+- 🇵🇹 Portuguese (pt)
+- 🇮🇹 Italian (it)
+- 🇳🇱 Dutch (nl)
+
+Nordic:
+
+- 🇸🇪 Swedish (sv)
+- 🇳🇴 Norwegian (no)
+- 🇩🇰 Danish (da)
+- 🇫🇮 Finnish (fi)
+
+Central/Eastern European:
+
+- 🇨🇿 Czech (cs)
+- 🇭🇺 Hungarian (hu)
+- 🇺🇦 Ukrainian (uk)
+- 🇬🇷 Greek (el)
+- 🇷🇴 Romanian (ro)
+
+Asian:
+
+- 🇷🇺 Russian (ru)
+- 🇨🇳 Chinese Simplified (zh)
+- 🇯🇵 Japanese (ja)
+- 🇰🇷 Korean (ko)
+- 🇮🇳 Hindi (hi)
+- 🇮🇩 Indonesian (id)
+- 🇻🇳 Vietnamese (vi)
+- 🇹🇭 Thai (th)
+
+Middle Eastern:
+
+- 🇸🇦 Arabic (ar)
+- 🇹🇷 Turkish (tr)
+- 🇮🇱 Hebrew (he)
+
+**Option 1: Use all languages**
+
+```typescript
+import { createValidator, SECURITY_STRICT_MULTILINGUAL } from '@promptscript/validator';
+
+// Includes patterns for all supported languages
+const validator = createValidator(SECURITY_STRICT_MULTILINGUAL);
+```
+
+**Option 2: Select specific languages**
+
+```typescript
+import {
+  createValidator,
+  createMultilingualConfig,
+  SECURITY_STRICT,
+} from '@promptscript/validator';
+
+// Polish and German only
+const config = createMultilingualConfig(SECURITY_STRICT, ['pl', 'de']);
+const validator = createValidator(config);
+```
+
+**Option 3: Add patterns manually**
+
+```typescript
+import { createValidator, BLOCKED_PATTERNS_PL, BLOCKED_PATTERNS_DE } from '@promptscript/validator';
+
+const validator = createValidator({
+  blockedPatterns: [...BLOCKED_PATTERNS_PL, ...BLOCKED_PATTERNS_DE, /my-custom-pattern/i],
+});
+```
+
+### Examples of Detected Patterns
+
+**English:**
+
+- "ignore all previous instructions"
+- "pretend you are..."
+- "bypass your restrictions"
+
+**Polish:**
+
+- "zignoruj wszystkie poprzednie instrukcje"
+- "udawaj, że jesteś..."
+- "omiń swoje ograniczenia"
+
+**German:**
+
+- "ignoriere alle vorherigen Anweisungen"
+- "tu so, als wärst du..."
+- "umgehe deine Einschränkungen"
+
+**Spanish:**
+
+- "ignora todas las instrucciones anteriores"
+- "finge que eres..."
+- "elude tus restricciones"
+
+**Japanese:**
+
+- "以前の指示をすべて無視"
+- "あなたは...のふりをして"
+- "制限を回避"
+
+**Arabic:**
+
+- "تجاهل جميع التعليمات السابقة"
+- "تظاهر بأنك..."
+- "تجاوز القيود"
+
+**Korean:**
+
+- "이전의 모든 지시를 무시"
+- "당신이...인 척"
+- "제한을 우회"
+
+### Custom Patterns
+
+Add organization-specific patterns:
+
+```typescript
+const validator = createValidator({
+  blockedPatterns: [
+    // Company-specific terms
+    /reveal\s+(?:internal|confidential)\s+(?:data|information)/i,
+    /access\s+(?:admin|root)\s+panel/i,
+    // Additional languages
+    /zignoruj\s+zasady\s+firmy/i, // Polish: "ignore company rules"
+  ],
+});
+```
+
+### Limitations
+
+- **New attack patterns**: Attackers constantly evolve techniques. Keep PromptScript updated.
+- **Context-dependent**: Some patterns may cause false positives in legitimate security documentation.
+- **Language coverage**: Not all languages are covered. Add custom patterns for unsupported languages.
+
 ## Environment Variables vs Template Variables
 
 PromptScript has two interpolation mechanisms with different trust models:
