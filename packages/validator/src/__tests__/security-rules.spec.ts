@@ -401,6 +401,31 @@ describe('suspicious-urls rule (PS010)', () => {
 
       expect(messages.length).toBeGreaterThan(0);
     });
+
+    it('should handle URL with only TLD (edge case)', () => {
+      // Edge case: domain that results in empty main domain part
+      const ast = createTestProgram({
+        blocks: [createTextBlock('@skills', 'Visit https://.com/page')],
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      // Should not crash on malformed domain
+      expect(() => suspiciousUrls.validate(ctx)).not.toThrow();
+    });
+
+    it('should detect punycode domain matching known service after normalization', () => {
+      // xn--80ak6aa92e.com - a punycode that when decoded resembles a known service
+      const ast = createTestProgram({
+        blocks: [createTextBlock('@skills', 'See https://xn--googl-gra.com/mail')],
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      suspiciousUrls.validate(ctx);
+
+      // Should flag as punycode
+      expect(messages.length).toBeGreaterThan(0);
+      expect(messages.some((m) => m.message.includes('Punycode'))).toBe(true);
+    });
   });
 });
 

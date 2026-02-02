@@ -328,6 +328,24 @@ describe('unicode-security rule (PS014)', () => {
       expect(messages[0]!.message).toContain('homograph');
     });
 
+    it('should report multiple homoglyphs with "and X more" suffix', () => {
+      // Arrange - Text with >3 different homoglyph characters
+      // Using Cyrillic а (U+0430), о (U+043E), е (U+0435), р (U+0440) mixed with Latin
+      const ast = createTestProgram({
+        blocks: [createTextBlock('@skills', 'p\u0430ss\u043E\u0435\u0440d')], // multiple homoglyphs
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      // Act
+      unicodeSecurity.validate(ctx);
+
+      // Assert
+      expect(messages.length).toBeGreaterThan(0);
+      expect(messages[0]!.message).toContain('homograph');
+      expect(messages[0]!.message).toContain('and');
+      expect(messages[0]!.message).toContain('more');
+    });
+
     it('should NOT flag pure Cyrillic text (legitimate Russian)', () => {
       // Arrange - Pure Russian text without Latin mixing
       const ast = createTestProgram({
