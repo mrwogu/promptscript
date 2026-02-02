@@ -1469,6 +1469,10 @@
          <lastmod>2026-02-02</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/validator/src/functions/hasPathTraversal/</loc>
+         <lastmod>2026-02-02</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/validator/src/functions/isValidPath/</loc>
          <lastmod>2026-02-02</lastmod>
     </url>
@@ -1689,6 +1693,10 @@
          <lastmod>2026-02-02</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/validator/src/variables/pathTraversal/</loc>
+         <lastmod>2026-02-02</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/validator/src/variables/requiredGuards/</loc>
          <lastmod>2026-02-02</lastmod>
     </url>
@@ -1702,6 +1710,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/validator/src/variables/suspiciousUrls/</loc>
+         <lastmod>2026-02-02</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/validator/src/variables/unicodeSecurity/</loc>
          <lastmod>2026-02-02</lastmod>
     </url>
     <url>
