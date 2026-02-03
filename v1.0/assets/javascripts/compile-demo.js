@@ -43,8 +43,8 @@
     { text: ' }', cls: '' },
   ];
 
-  const TYPING_SPEED = 18;
-  const COMPILE_DELAY = 600;
+  const TYPING_SPEED = 9;
+  const COMPILE_DELAY = 150;
   const SUBFILE_DISPLAY_TIME = 4000;
   const SCROLL_DURATION = 3000;
 
@@ -286,7 +286,7 @@
       hasScrolled = true;
       if (isOutputSufficientlyVisible()) {
         window.removeEventListener('scroll', onScroll);
-        setTimeout(callback, 500);
+        setTimeout(callback, 250);
       }
     }
 
@@ -298,7 +298,7 @@
         window.removeEventListener('scroll', onScroll);
         callback();
       }
-    }, 2000);
+    }, 500);
   }
 
   function setupSubfileHandlers(demo) {
@@ -362,7 +362,7 @@
             // Start sequential cycling
             startSequentialCycling(tabs, panels, demo);
           });
-        }, 700);
+        }, 350);
       }, COMPILE_DELAY);
     });
   }
