@@ -224,13 +224,13 @@ export function interpolateText(text: string, ctx: TemplateContext): string {
  * Interpolate a Value, resolving TemplateExpressions.
  */
 function interpolateValue(value: Value, ctx: TemplateContext): Value {
-  if (
-    value === null ||
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean'
-  ) {
+  if (value === null || typeof value === 'number' || typeof value === 'boolean') {
     return value;
+  }
+
+  // Interpolate strings that might contain {{variable}} patterns
+  if (typeof value === 'string') {
+    return interpolateText(value, ctx);
   }
 
   if (Array.isArray(value)) {
