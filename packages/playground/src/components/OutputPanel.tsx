@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import {
   usePlaygroundStore,
   selectOutputsForFormatter,
@@ -58,9 +59,11 @@ export function OutputPanel() {
   const setActiveFormatter = usePlaygroundStore((s) => s.setActiveFormatter);
   const compileResult = usePlaygroundStore((s) => s.compileResult);
   const isCompiling = usePlaygroundStore((s) => s.isCompiling);
-  const enabledTargets = usePlaygroundStore(selectEnabledTargets);
+  const enabledTargets = usePlaygroundStore(useShallow(selectEnabledTargets));
 
-  const outputs = usePlaygroundStore((state) => selectOutputsForFormatter(state, activeFormatter));
+  const outputs = usePlaygroundStore(
+    useShallow((state) => selectOutputsForFormatter(state, activeFormatter))
+  );
 
   // Track active output file index per formatter
   const [activeOutputIndex, setActiveOutputIndex] = useState(0);

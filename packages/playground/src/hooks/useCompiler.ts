@@ -1,11 +1,12 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { compile } from '@promptscript/browser-compiler';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlaygroundStore, selectFilesAsMap, type FormatterName } from '../store';
 
 const DEBOUNCE_MS = 300;
 
 export function useCompiler() {
-  const files = usePlaygroundStore(selectFilesAsMap);
+  const files = usePlaygroundStore(useShallow(selectFilesAsMap));
   const activeFile = usePlaygroundStore((s) => s.activeFile);
   const config = usePlaygroundStore((s) => s.config);
   const setCompiling = usePlaygroundStore((s) => s.setCompiling);
