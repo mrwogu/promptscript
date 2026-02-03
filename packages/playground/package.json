@@ -19,7 +19,7 @@
     "monaco-editor": "^0.55.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "zustand": "^4.5.0"
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@types/lz-string": "^1.5.0",
