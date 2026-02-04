@@ -22,6 +22,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/lz-string": "^1.5.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",

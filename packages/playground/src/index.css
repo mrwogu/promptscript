@@ -1,6 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --color-ps-primary: #6366f1;
+  --color-ps-secondary: #818cf8;
+  --color-ps-bg: #0f172a;
+  --color-ps-surface: #1e293b;
+  --color-ps-border: #334155;
+}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
