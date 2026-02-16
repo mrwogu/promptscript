@@ -36,7 +36,7 @@
     "promptscript": "./bin/prs.js"
   },
   "dependencies": {
-    "@inquirer/prompts": "^8.2.0",
+    "@inquirer/prompts": "^8.2.1",
     "@promptscript/compiler": "workspace:^",
     "@promptscript/core": "workspace:^",
     "@promptscript/parser": "workspace:^",
