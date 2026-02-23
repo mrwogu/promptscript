@@ -25,7 +25,7 @@
   "private": true,
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^9.39.3",
     "@nx/esbuild": "22.5.1",
     "@nx/eslint": "22.5.1",
     "@nx/eslint-plugin": "22.5.1",
