@@ -22,15 +22,15 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/lz-string": "^1.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
-    "autoprefixer": "^10.4.24",
+    "autoprefixer": "^10.4.27",
     "jsdom": "^28.1.0",
     "postcss": "^8.4.0",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.1",
     "typescript": "~5.9.3",
     "vite": "^7.0.0",
     "vitest": "^4.0.18"
