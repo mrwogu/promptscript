@@ -28,6 +28,6 @@
     "@swc/helpers": "~0.5.19",
     "@promptscript/core": "workspace:^",
     "@promptscript/parser": "workspace:^",
-    "simple-git": "^3.32.2"
+    "simple-git": "^3.32.3"
   }
 }
