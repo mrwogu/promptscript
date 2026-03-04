@@ -24,6 +24,11 @@ const TARGET_INFO: Record<
     versions: ['simple', 'frontmatter'],
     supportsXml: true,
   },
+  factory: {
+    label: 'Factory AI',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
 };
 
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [

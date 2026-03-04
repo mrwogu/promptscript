@@ -17,6 +17,7 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     claude: { enabled: true, version: 'full' },
     cursor: { enabled: true, version: 'standard' },
     antigravity: { enabled: true, version: 'frontmatter' },
+    factory: { enabled: true, version: 'full' },
   },
   formatting: {
     tabWidth: 2,
@@ -273,6 +274,7 @@ describe('PlaygroundStore', () => {
           claude: { enabled: false, version: 'lite' },
           cursor: { enabled: false, version: 'standard' },
           antigravity: { enabled: false, version: 'frontmatter' },
+          factory: { enabled: false, version: 'full' },
         },
         formatting: {
           tabWidth: 4,
@@ -449,7 +451,7 @@ describe('PlaygroundStore', () => {
       setTargetEnabled('cursor', false);
 
       const enabled = selectEnabledTargets(usePlaygroundStore.getState());
-      expect(enabled).toEqual(['claude', 'antigravity']);
+      expect(enabled).toEqual(['claude', 'antigravity', 'factory']);
     });
 
     it('selectEnabledTargets should return empty array if all disabled', () => {
@@ -458,6 +460,7 @@ describe('PlaygroundStore', () => {
       setTargetEnabled('claude', false);
       setTargetEnabled('cursor', false);
       setTargetEnabled('antigravity', false);
+      setTargetEnabled('factory', false);
 
       const enabled = selectEnabledTargets(usePlaygroundStore.getState());
       expect(enabled).toEqual([]);

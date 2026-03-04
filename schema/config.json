@@ -359,6 +359,9 @@
             },
             "antigravity": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "factory": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {

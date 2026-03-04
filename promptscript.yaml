@@ -21,6 +21,10 @@ targets:
   # Antigravity
   - antigravity
 
+  # Factory AI - full generates AGENTS.md + .factory/skills/
+  - factory:
+      version: full
+
 validation:
   rules:
     empty-block: warn

@@ -11,7 +11,7 @@
 /**
  * Formatter names that are subject to parity testing.
  */
-export type FormatterName = 'github' | 'cursor' | 'claude' | 'antigravity';
+export type FormatterName = 'github' | 'cursor' | 'claude' | 'antigravity' | 'factory';
 
 /**
  * Source block configuration for section extraction.
@@ -77,7 +77,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
     name: 'Project Identity',
     description: 'Core project description and role definition',
     sources: [{ block: 'identity' }],
-    requiredBy: ['github', 'cursor', 'claude', 'antigravity'],
+    requiredBy: ['github', 'cursor', 'claude', 'antigravity', 'factory'],
     optionalFor: [],
     contentPatterns: [/you are|working on|project|developer/i],
     headerVariations: {
@@ -85,6 +85,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       cursor: '', // Cursor uses inline format
       claude: '## Project',
       antigravity: '## Project Identity',
+      factory: '## Project',
     },
   },
   {
@@ -97,7 +98,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       { block: 'context', property: 'monorepo' },
       { block: 'context', property: 'frameworks' },
     ],
-    requiredBy: ['github', 'antigravity'],
+    requiredBy: ['github', 'antigravity', 'factory'],
     optionalFor: ['cursor', 'claude'],
     contentPatterns: [/typescript|javascript|node|python/i],
     headerVariations: {
@@ -105,6 +106,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       cursor: 'Tech:', // Label format
       claude: '## Tech Stack',
       antigravity: '## Tech Stack',
+      factory: '## Tech Stack',
     },
   },
   {
@@ -116,13 +118,14 @@ export const PARITY_MATRIX: SectionSpec[] = [
       { block: 'architecture' },
     ],
     requiredBy: ['github', 'antigravity'],
-    optionalFor: ['cursor', 'claude'],
+    optionalFor: ['cursor', 'claude', 'factory'],
     contentPatterns: [/mermaid|flowchart|diagram|component/i],
     headerVariations: {
       github: '## Architecture',
       cursor: '', // Embedded in context
       claude: '## Architecture',
       antigravity: '## Architecture',
+      factory: '## Architecture',
     },
   },
   {
@@ -135,7 +138,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       { block: 'standards', property: 'errors' },
       { block: 'standards', property: 'testing' },
     ],
-    requiredBy: ['github', 'cursor', 'antigravity'],
+    requiredBy: ['github', 'cursor', 'antigravity', 'factory'],
     optionalFor: ['claude'],
     contentPatterns: [/strict|any|naming|camelCase|PascalCase/i],
     headerVariations: {
@@ -143,6 +146,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       cursor: ['TypeScript:', 'Naming:', 'Testing:'],
       claude: '## Code Standards',
       antigravity: '## Code Standards',
+      factory: '## Conventions & Patterns',
     },
   },
   {
@@ -150,7 +154,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
     name: 'Git Commits',
     description: 'Commit message format and conventions',
     sources: [{ block: 'standards', property: 'git' }],
-    requiredBy: ['github', 'antigravity'],
+    requiredBy: ['github', 'antigravity', 'factory'],
     optionalFor: ['cursor', 'claude'],
     contentPatterns: [/conventional|commit|feat|fix|type.*scope/i],
     headerVariations: {
@@ -158,6 +162,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       cursor: 'Git:', // Label format
       claude: '## Git Commits',
       antigravity: '## Git Commits',
+      factory: '## Git Workflows',
     },
   },
   {
@@ -166,13 +171,14 @@ export const PARITY_MATRIX: SectionSpec[] = [
     description: 'ESLint, Vite, and other config guidelines',
     sources: [{ block: 'standards', property: 'config' }],
     requiredBy: ['github', 'antigravity'],
-    optionalFor: ['cursor', 'claude'],
+    optionalFor: ['cursor', 'claude', 'factory'],
     contentPatterns: [/eslint|vite|config|__dirname/i],
     headerVariations: {
       github: '## Config Files',
       cursor: 'Config:', // Label format
       claude: '## Configuration Files',
       antigravity: '## Configuration Files',
+      factory: '## Configuration',
     },
   },
   {
@@ -180,7 +186,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
     name: 'Commands',
     description: 'Shortcuts and quick commands',
     sources: [{ block: 'shortcuts' }],
-    requiredBy: ['github', 'cursor', 'claude', 'antigravity'],
+    requiredBy: ['github', 'cursor', 'claude', 'antigravity', 'factory'],
     optionalFor: [],
     contentPatterns: [/\/\w+|command|shortcut/i],
     headerVariations: {
@@ -188,6 +194,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       cursor: 'Commands:',
       claude: '## Commands',
       antigravity: '## Commands',
+      factory: '## Commands',
     },
   },
   {
@@ -196,13 +203,14 @@ export const PARITY_MATRIX: SectionSpec[] = [
     description: 'Build, test, and development scripts',
     sources: [{ block: 'knowledge', textPattern: /## Development Commands[\s\S]*?```/ }],
     requiredBy: ['github', 'antigravity'],
-    optionalFor: ['cursor', 'claude'],
+    optionalFor: ['cursor', 'claude', 'factory'],
     contentPatterns: [/pnpm|npm|yarn|install|build|test/i],
     headerVariations: {
       github: '## Dev Commands',
       cursor: '', // Embedded in knowledge
       claude: '## Development Commands',
       antigravity: '## Development Commands',
+      factory: '## Development Commands',
     },
   },
   {
@@ -211,13 +219,14 @@ export const PARITY_MATRIX: SectionSpec[] = [
     description: 'Commands to run after completing changes',
     sources: [{ block: 'knowledge', textPattern: /## Post-Work[\s\S]*?```/ }],
     requiredBy: ['github', 'antigravity'],
-    optionalFor: ['cursor', 'claude'],
+    optionalFor: ['cursor', 'claude', 'factory'],
     contentPatterns: [/after|verify|format|lint|test/i],
     headerVariations: {
       github: '## Post-Work Verification',
       cursor: '', // Embedded in knowledge
       claude: '## Post-Work Verification',
       antigravity: '## Post-Work Verification',
+      factory: '## Build & Test',
     },
   },
   {
@@ -226,13 +235,14 @@ export const PARITY_MATRIX: SectionSpec[] = [
     description: 'Documentation verification guidelines',
     sources: [{ block: 'standards', property: 'documentation' }],
     requiredBy: ['github', 'antigravity'],
-    optionalFor: ['cursor', 'claude'],
+    optionalFor: ['cursor', 'claude', 'factory'],
     contentPatterns: [/readme|docs|before|after|verify/i],
     headerVariations: {
       github: '## Documentation',
       cursor: '', // May be embedded
       claude: '## Documentation',
       antigravity: '## Documentation',
+      factory: '## Documentation',
     },
   },
   {
@@ -241,13 +251,14 @@ export const PARITY_MATRIX: SectionSpec[] = [
     description: 'Diagram format and Mermaid guidelines',
     sources: [{ block: 'standards', property: 'diagrams' }],
     requiredBy: ['github', 'antigravity'],
-    optionalFor: ['cursor', 'claude'],
+    optionalFor: ['cursor', 'claude', 'factory'],
     contentPatterns: [/mermaid|flowchart|diagram|sequence/i],
     headerVariations: {
       github: '## Diagrams',
       cursor: '', // May be embedded
       claude: '## Diagrams',
       antigravity: '## Diagrams',
+      factory: '## Diagrams',
     },
   },
   {
@@ -255,7 +266,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
     name: 'Restrictions',
     description: "Don'ts and forbidden practices",
     sources: [{ block: 'restrictions' }],
-    requiredBy: ['github', 'cursor', 'claude', 'antigravity'],
+    requiredBy: ['github', 'cursor', 'claude', 'antigravity', 'factory'],
     optionalFor: [],
     contentPatterns: [/never|don't|do not|avoid|forbidden/i],
     headerVariations: {
@@ -263,6 +274,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       cursor: 'Never:',
       claude: "## Don'ts",
       antigravity: "## Don'ts",
+      factory: "## Don'ts",
     },
   },
 ];

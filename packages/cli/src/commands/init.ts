@@ -24,6 +24,7 @@ import {
   MIGRATE_SKILL_GITHUB,
   MIGRATE_SKILL_CURSOR,
   MIGRATE_SKILL_ANTIGRAVITY,
+  MIGRATE_SKILL_FACTORY,
 } from '../templates/migrate-skill.js';
 import {
   loadManifest,
@@ -156,6 +157,15 @@ export async function initCommand(
         await fs.writeFile('.agent/rules/migrate.md', MIGRATE_SKILL_ANTIGRAVITY, 'utf-8');
         installedSkillPaths.push('.agent/rules/migrate.md');
       }
+      if (config.targets.includes('factory')) {
+        await fs.mkdir('.factory/skills/migrate-to-promptscript', { recursive: true });
+        await fs.writeFile(
+          '.factory/skills/migrate-to-promptscript/SKILL.md',
+          MIGRATE_SKILL_FACTORY,
+          'utf-8'
+        );
+        installedSkillPaths.push('.factory/skills/migrate-to-promptscript/SKILL.md');
+      }
     }
 
     spinner.succeed('PromptScript initialized');
@@ -213,6 +223,9 @@ export async function initCommand(
       }
       if (config.targets.includes('antigravity')) {
         ConsoleOutput.muted('   Antigravity: Ask to "migrate to PromptScript"');
+      }
+      if (config.targets.includes('factory')) {
+        ConsoleOutput.muted('   Factory AI: Ask to "migrate to PromptScript"');
       }
       ConsoleOutput.muted('2. Review generated .promptscript/project.prs');
       ConsoleOutput.muted('3. Run: prs compile');
@@ -563,6 +576,7 @@ function formatTargetName(target: AIToolTarget): string {
     claude: 'Claude (Anthropic)',
     cursor: 'Cursor',
     antigravity: 'Antigravity (Google)',
+    factory: 'Factory AI',
   };
   return names[target] ?? target;
 }

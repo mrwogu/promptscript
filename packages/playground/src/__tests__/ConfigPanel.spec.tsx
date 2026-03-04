@@ -13,6 +13,7 @@ describe('ConfigPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: true, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
@@ -44,6 +45,7 @@ describe('ConfigPanel', () => {
     expect(screen.getByText('Claude Code')).toBeInTheDocument();
     expect(screen.getByText('Cursor')).toBeInTheDocument();
     expect(screen.getByText('Antigravity')).toBeInTheDocument();
+    expect(screen.getByText('Factory AI')).toBeInTheDocument();
   });
 
   it('should display formatting options', () => {
@@ -137,6 +139,7 @@ describe('ConfigPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: true, version: 'full' },
         },
         formatting: {
           tabWidth: 2,

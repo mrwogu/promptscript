@@ -98,7 +98,7 @@ describe('utils/ai-tools-detector', () => {
     it('should return all available targets', () => {
       const targets = getAllTargets();
 
-      expect(targets).toEqual(['github', 'claude', 'cursor', 'antigravity']);
+      expect(targets).toEqual(['github', 'claude', 'cursor', 'antigravity', 'factory']);
     });
   });
 
@@ -106,7 +106,7 @@ describe('utils/ai-tools-detector', () => {
     it('should return detected targets when some exist', () => {
       const detection: AIToolsDetection = {
         detected: ['github', 'claude'],
-        details: { github: [], claude: [], cursor: [], antigravity: [] },
+        details: { github: [], claude: [], cursor: [], antigravity: [], factory: [] },
         migrationCandidates: [],
       };
 
@@ -118,13 +118,13 @@ describe('utils/ai-tools-detector', () => {
     it('should return all targets when none detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: { github: [], claude: [], cursor: [], antigravity: [] },
+        details: { github: [], claude: [], cursor: [], antigravity: [], factory: [] },
         migrationCandidates: [],
       };
 
       const suggested = getSuggestedTargets(detection);
 
-      expect(suggested).toEqual(['github', 'claude', 'cursor', 'antigravity']);
+      expect(suggested).toEqual(['github', 'claude', 'cursor', 'antigravity', 'factory']);
     });
   });
 
@@ -150,7 +150,7 @@ describe('utils/ai-tools-detector', () => {
     it('should show message when no tools detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: { github: [], claude: [], cursor: [], antigravity: [] },
+        details: { github: [], claude: [], cursor: [], antigravity: [], factory: [] },
         migrationCandidates: [],
       };
 

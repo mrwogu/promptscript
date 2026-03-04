@@ -255,7 +255,7 @@ export interface PromptScriptConfig {
 /**
  * Supported output targets.
  */
-export type TargetName = 'github' | 'claude' | 'cursor' | 'antigravity' | string;
+export type TargetName = 'github' | 'claude' | 'cursor' | 'antigravity' | 'factory' | string;
 
 /**
  * Default output paths for each target.
@@ -265,4 +265,5 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   claude: 'CLAUDE.md',
   cursor: '.cursor/rules/project.mdc',
   antigravity: '.agent/rules/project.md',
+  factory: 'AGENTS.md',
 };

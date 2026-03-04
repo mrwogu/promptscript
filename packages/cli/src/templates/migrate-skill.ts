@@ -354,6 +354,76 @@ After generating PromptScript files:
 - Comments: # comment
 `;
 
+export const MIGRATE_SKILL_FACTORY = `---
+name: migrate-to-promptscript
+description: Migrate existing AI instruction files to PromptScript format
+user-invocable: true
+disable-model-invocation: false
+---
+
+# Migrate to PromptScript
+
+This skill provides guidance for migrating existing AI instruction files to PromptScript format.
+
+## Overview
+
+PromptScript creates a unified source of truth for all AI coding assistants,
+compiling to native formats for Claude, GitHub Copilot, Cursor, Antigravity, and Factory AI.
+
+## Step 1: Discovery
+
+Search for existing instruction files:
+
+- CLAUDE.md, claude.md, CLAUDE.local.md
+- .cursorrules, .cursor/rules/*.mdc
+- .github/copilot-instructions.md
+- .agent/rules/*.md
+- .factory/skills/*/SKILL.md
+- AGENTS.md, AI_INSTRUCTIONS.md
+
+## Step 2: Content Mapping
+
+Map source content to PromptScript blocks:
+
+| Source Pattern                       | PromptScript Block |
+| ------------------------------------ | ------------------ |
+| You are, persona, identity, role     | @identity          |
+| Tech stack, languages, frameworks    | @context           |
+| Coding standards, conventions, rules | @standards         |
+| Don't, Never, restrictions           | @restrictions      |
+| Commands, shortcuts                  | @shortcuts         |
+| API docs, references                 | @knowledge         |
+| Skills, capabilities                 | @skills            |
+
+## Step 3: Generate PromptScript
+
+Create \`.promptscript/project.prs\` with required blocks:
+
+1. **@meta** - id and syntax fields (required)
+2. **@identity** - persona/role descriptions
+3. **@context** - tech stack info
+4. **@standards** - coding rules organized by category
+5. **@restrictions** - things to avoid (dash prefix)
+6. **@shortcuts** - commands
+7. **@skills** - reusable skill definitions
+
+## Step 4: Validation
+
+After generating PromptScript files:
+
+1. Run \`prs validate\` to check syntax
+2. Run \`prs compile --dry-run\` to preview output
+3. Compare compiled output with original files
+
+## Syntax Reference
+
+- Strings: quoted or identifier
+- Multi-line: triple quotes
+- Arrays: [item1, item2]
+- Objects: { key: value }
+- Comments: # comment
+`;
+
 export const MIGRATE_SKILL_GITHUB = `---
 name: 'migrate-to-promptscript'
 description: 'Migrate existing AI instruction files to PromptScript format'

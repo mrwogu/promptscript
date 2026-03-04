@@ -13,6 +13,7 @@ describe('EnvVarsPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: true, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
@@ -51,6 +52,7 @@ describe('EnvVarsPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: true, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
@@ -137,6 +139,7 @@ describe('EnvVarsPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: true, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
@@ -168,6 +171,7 @@ describe('EnvVarsPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: true, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
