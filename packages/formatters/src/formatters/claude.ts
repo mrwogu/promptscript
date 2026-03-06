@@ -14,12 +14,13 @@ export const CLAUDE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: 'Main + modular rules (.claude/rules/*.md)',
+    description: 'Main + modular rules (.claude/rules/*.md) + commands (.claude/commands/*.md)',
     outputPath: 'CLAUDE.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + skills (.claude/skills/) + agents (.claude/agents/) + local memory',
+    description:
+      'Multifile + skills (.claude/skills/) + agents (.claude/agents/) + commands (.claude/commands/) + local memory',
     outputPath: 'CLAUDE.md',
   },
 } as const;
@@ -55,6 +56,20 @@ interface ClaudeSkillConfig {
   /** Whether user can invoke this skill */
   userInvocable?: boolean;
   /** Skill content/instructions */
+  content: string;
+  /** Resource files to copy alongside SKILL.md */
+  resources?: Array<{ relativePath: string; content: string }>;
+}
+
+/**
+ * Configuration for a Claude command file.
+ */
+interface ClaudeCommandConfig {
+  /** Command name (without leading slash) */
+  name: string;
+  /** Description */
+  description: string;
+  /** Command content/instructions */
   content: string;
 }
 
@@ -187,6 +202,12 @@ export class ClaudeFormatter extends BaseFormatter {
       additionalFiles.push(this.generateRuleFile(rule));
     }
 
+    // Generate command files
+    const commands = this.extractCommands(ast);
+    for (const command of commands) {
+      additionalFiles.push(this.generateCommandFile(command));
+    }
+
     // Main file content
     const sections: string[] = [];
     if (renderer.getConvention().name === 'markdown') {
@@ -225,6 +246,12 @@ export class ClaudeFormatter extends BaseFormatter {
     const agents = this.extractAgents(ast);
     for (const agent of agents) {
       additionalFiles.push(this.generateAgentFile(agent));
+    }
+
+    // Generate command files
+    const commands = this.extractCommands(ast);
+    for (const command of commands) {
+      additionalFiles.push(this.generateCommandFile(command));
     }
 
     // Generate CLAUDE.local.md
@@ -412,6 +439,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeSkillName(name)) continue;
         const obj = value as Record<string, Value>;
         skills.push({
           name,
@@ -425,6 +453,13 @@ export class ClaudeFormatter extends BaseFormatter {
               : undefined,
           userInvocable: obj['userInvocable'] === true,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
+          resources:
+            obj['resources'] && Array.isArray(obj['resources'])
+              ? (obj['resources'] as Array<Record<string, Value>>).map((r) => ({
+                  relativePath: r['relativePath'] as string,
+                  content: r['content'] as string,
+                }))
+              : undefined,
         });
       }
     }
@@ -469,8 +504,84 @@ export class ClaudeFormatter extends BaseFormatter {
       lines.push(normalizedContent);
     }
 
+    const skillDirPath = `.claude/skills/${config.name}`;
+    const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
+
     return {
-      path: `.claude/skills/${config.name}/SKILL.md`,
+      path: `${skillDirPath}/SKILL.md`,
+      content: lines.join('\n') + '\n',
+      additionalFiles: resourceFiles.length > 0 ? resourceFiles : undefined,
+    };
+  }
+
+  // ============================================================
+  // Command File Generation
+  // ============================================================
+
+  /**
+   * Extract command configurations from @shortcuts block.
+   * Commands are shortcuts with `prompt: true` or multiline `content`.
+   */
+  private extractCommands(ast: Program): ClaudeCommandConfig[] {
+    const shortcuts = this.findBlock(ast, 'shortcuts');
+    if (!shortcuts) return [];
+
+    const commands: ClaudeCommandConfig[] = [];
+    const props = this.getProps(shortcuts.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        // TextContent from auto-discovered command files or triple-quoted strings
+        if ('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent') {
+          const content = this.valueToString(value);
+          if (content.includes('\n')) {
+            commands.push({
+              name: name.replace(/^\/+/, ''),
+              description: name.replace(/^\/+/, ''),
+              content,
+            });
+          }
+          continue;
+        }
+
+        const obj = value as Record<string, Value>;
+
+        // Generate command file if it has prompt: true or multiline content
+        if (obj['prompt'] === true || obj['content']) {
+          commands.push({
+            name: name.replace(/^\/+/, ''),
+            description: obj['description'] ? this.valueToString(obj['description']) : name,
+            content: obj['content'] ? this.valueToString(obj['content']) : '',
+          });
+        }
+      }
+    }
+
+    return commands;
+  }
+
+  /**
+   * Generate a .claude/commands/<name>.md file.
+   */
+  private generateCommandFile(config: ClaudeCommandConfig): FormatterOutput {
+    const lines: string[] = [];
+
+    // YAML frontmatter with just description
+    lines.push('---');
+    // Use double quotes if description contains apostrophe, single quotes otherwise
+    const descQuote = config.description.includes("'") ? '"' : "'";
+    lines.push(`description: ${descQuote}${config.description}${descQuote}`);
+    lines.push('---');
+    lines.push('');
+
+    if (config.content) {
+      // Command content is a standalone file - dedent but no Prettier normalization
+      const dedentedContent = this.dedent(config.content);
+      lines.push(dedentedContent);
+    }
+
+    return {
+      path: `.claude/commands/${config.name}.md`,
       content: lines.join('\n') + '\n',
     };
   }

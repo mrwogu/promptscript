@@ -75,11 +75,15 @@ export {
   IMPORT_MARKER_PREFIX,
 } from './imports.js';
 
+// Block alias normalization
+export { normalizeBlockAliases } from './normalize.js';
+
 // Extension resolution
 export { applyExtends } from './extensions.js';
 
 // Skill resolution
-export { resolveNativeSkills } from './skills.js';
+export { resolveNativeSkills, resolveNativeCommands } from './skills.js';
+export type { NativeSkillOptions } from './skills.js';
 
 // Template interpolation (re-export from core for backwards compatibility)
 export {

@@ -1,6 +1,17 @@
-import { readFile, access } from 'fs/promises';
-import { resolve, dirname } from 'path';
+import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
+import { resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
+import type { Logger } from '@promptscript/core';
 import type { Program, Block, ObjectContent, Value, TextContent } from '@promptscript/core';
+
+/**
+ * A resource file discovered alongside a skill's SKILL.md.
+ */
+interface SkillResource {
+  /** Relative path from the skill directory (e.g. "data/colors.csv") */
+  relativePath: string;
+  /** File content (utf-8) */
+  content: string;
+}
 
 /**
  * Result of parsing a native SKILL.md file.
@@ -68,6 +79,154 @@ function parseSkillMd(content: string): ParsedSkillMd {
   return { name, description, content: bodyContent };
 }
 
+/** Files and directories to skip when discovering skill resources. */
+const SKIP_FILES = new Set([
+  'SKILL.md',
+  '.DS_Store',
+  'Thumbs.db',
+  '.gitignore',
+  '.gitkeep',
+  '.npmrc',
+  '.env',
+  '.env.local',
+  '.env.production',
+]);
+
+/** Directory names to skip entirely. */
+const SKIP_DIRS = new Set(['node_modules', '__pycache__', '.git', '.svn']);
+
+/** Maximum size (in bytes) for a single resource file. */
+const MAX_RESOURCE_SIZE = 1_048_576; // 1 MB
+
+/** Maximum total size (in bytes) for all resource files in a skill. */
+const MAX_TOTAL_RESOURCE_SIZE = 10_485_760; // 10 MB
+
+/** Maximum number of resource files per skill. */
+const MAX_RESOURCE_COUNT = 100;
+
+/**
+ * Check if a relative path is safe (no path traversal, not absolute).
+ */
+function isSafeRelativePath(relPath: string): boolean {
+  const normalized = normalize(relPath);
+  if (isAbsolute(normalized)) return false;
+  // Check for traversal using both forward and back slashes (cross-platform)
+  const segments = normalized.split(sep);
+  return !segments.some((s) => s === '..');
+}
+
+/**
+ * Check if a skill name is safe (no path traversal characters).
+ */
+function isSafeSkillName(name: string): boolean {
+  return !name.includes('..') && !name.includes('/') && !name.includes('\\');
+}
+
+/** No-op logger for when no logger is provided. */
+const noopLogger: Logger = {
+  verbose: () => {},
+  debug: () => {},
+};
+
+/**
+ * Discover resource files in a skill directory (everything except SKILL.md).
+ * Skips symlinks, validates paths against traversal, enforces size/count limits,
+ * and rejects binary files.
+ *
+ * @param skillDir - Absolute path to the skill directory
+ * @param logger - Optional logger for reporting skipped files
+ * @returns Array of resource files with relative paths and content
+ */
+async function discoverSkillResources(
+  skillDir: string,
+  logger: Logger = noopLogger
+): Promise<SkillResource[]> {
+  const entries = await readdir(skillDir, { recursive: true, withFileTypes: true });
+  const resources: SkillResource[] = [];
+  let totalSize = 0;
+
+  // Resolve the real path of the skill directory to compare against
+  const realSkillDir = await realpath(skillDir);
+
+  for (const entry of entries) {
+    // Enforce aggregate count limit
+    if (resources.length >= MAX_RESOURCE_COUNT) {
+      logger.verbose(`Skill resource limit reached (${MAX_RESOURCE_COUNT} files) in ${skillDir}`);
+      break;
+    }
+
+    if (!entry.isFile()) {
+      // Skip known junk directories early (won't prevent readdir from listing them,
+      // but their children will be filtered by path check below)
+      if (entry.isDirectory() && SKIP_DIRS.has(entry.name)) continue;
+      continue;
+    }
+    // Skip symlinks reported by readdir
+    if (entry.isSymbolicLink()) continue;
+
+    if (SKIP_FILES.has(entry.name)) continue;
+
+    const fullPath = resolve(entry.parentPath, entry.name);
+    const relPath = relative(skillDir, fullPath);
+
+    // Skip files inside skipped directories
+    const pathSegments = relPath.split(sep);
+    if (pathSegments.some((s) => SKIP_DIRS.has(s))) continue;
+
+    // Validate no path traversal
+    if (!isSafeRelativePath(relPath)) {
+      logger.verbose(`Skipping resource with unsafe path: ${relPath}`);
+      continue;
+    }
+
+    try {
+      // Use lstat to detect symlinks (stat follows them, lstat does not)
+      const fileStat = await lstat(fullPath);
+      if (fileStat.isSymbolicLink()) {
+        logger.verbose(`Skipping symlink resource: ${relPath}`);
+        continue;
+      }
+      if (fileStat.size > MAX_RESOURCE_SIZE) {
+        logger.verbose(`Skipping oversized resource (${fileStat.size} bytes): ${relPath}`);
+        continue;
+      }
+
+      // Verify the resolved real path is still within the skill directory
+      // This catches files inside symlinked directories
+      const realFullPath = await realpath(fullPath);
+      if (!realFullPath.startsWith(realSkillDir + '/')) {
+        logger.verbose(`Skipping resource outside skill directory: ${relPath}`);
+        continue;
+      }
+
+      // Enforce aggregate size limit
+      totalSize += fileStat.size;
+      if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
+        logger.verbose(
+          `Skill total resource size limit reached (${MAX_TOTAL_RESOURCE_SIZE} bytes)`
+        );
+        break;
+      }
+
+      const content = await readFile(fullPath, 'utf-8');
+
+      // Reject binary files: null bytes are a strong indicator of binary content
+      if (content.includes('\0')) {
+        logger.verbose(`Skipping binary resource: ${relPath}`);
+        totalSize -= fileStat.size; // Don't count rejected files
+        continue;
+      }
+
+      resources.push({ relativePath: relPath, content });
+    } catch {
+      // Skip files that can't be read (permissions, I/O errors)
+      logger.verbose(`Skipping unreadable resource: ${relPath}`);
+    }
+  }
+
+  return resources;
+}
+
 /**
  * Check if a file exists.
  */
@@ -81,39 +240,123 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 /**
+ * Options for native skill resolution.
+ */
+export interface NativeSkillOptions {
+  /**
+   * Path to the universal directory for auto-discovering skills and commands.
+   * When set, skills are discovered from `<universalDir>/skills/` and commands from `<universalDir>/commands/`.
+   * Defaults to undefined (disabled). Typically set to `.agents`.
+   */
+  universalDir?: string;
+  /** Logger for reporting skipped files and resolution decisions. */
+  logger?: Logger;
+}
+
+/**
+ * Discover skill directories in a given base path.
+ * Each subdirectory containing a SKILL.md is considered a skill.
+ *
+ * @param basePath - Absolute path to the skills directory (e.g. .promptscript/skills/)
+ * @returns Array of skill names found
+ */
+async function discoverSkillDirs(basePath: string): Promise<string[]> {
+  try {
+    const entries = await readdir(basePath, { withFileTypes: true });
+    const skillNames: string[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (SKIP_DIRS.has(entry.name)) continue;
+      if (!isSafeSkillName(entry.name)) continue;
+      const skillMd = resolve(basePath, entry.name, 'SKILL.md');
+      if (await fileExists(skillMd)) {
+        skillNames.push(entry.name);
+      }
+    }
+    return skillNames;
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Resolve native SKILL.md files for skills defined in the AST.
  *
  * For each skill in the @skills block, checks if a corresponding SKILL.md
- * file exists in the registry at @skills/<name>/SKILL.md. If found, the
+ * file exists in the local skills directory, optionally in .agents/skills/,
+ * or in the registry at @skills/<name>/SKILL.md. If found, the
  * skill's content is replaced with the native file content.
  *
  * @param ast - The resolved AST
  * @param registryPath - Path to the registry
  * @param sourceFile - The source file path (to determine relative skill location)
+ * @param localPath - Optional path to local .promptscript directory
+ * @param options - Optional skill resolution options
  * @returns Updated AST with native skill content
  */
 export async function resolveNativeSkills(
   ast: Program,
   registryPath: string,
-  sourceFile: string
+  sourceFile: string,
+  localPath?: string,
+  options?: NativeSkillOptions
 ): Promise<Program> {
-  // Find @skills block
-  const skillsBlock = ast.blocks.find((b) => b.name === 'skills');
-  if (!skillsBlock || skillsBlock.content.type !== 'ObjectContent') {
-    return ast;
-  }
+  const logger = options?.logger ?? noopLogger;
 
-  const skillsContent = skillsBlock.content as ObjectContent;
+  // Find @skills block (may not exist yet if auto-discovery adds skills)
+  const skillsBlock = ast.blocks.find((b) => b.name === 'skills');
+
+  const skillsContent: ObjectContent =
+    skillsBlock && skillsBlock.content.type === 'ObjectContent'
+      ? (skillsBlock.content as ObjectContent)
+      : {
+          type: 'ObjectContent',
+          properties: {},
+          loc: { file: sourceFile, line: 1, column: 1 },
+        };
+
   const updatedProperties: Record<string, Value> = { ...skillsContent.properties };
   let hasUpdates = false;
 
   // Determine base path for skills
-  // If source file is in @skills directory, use its parent as base
+  // If source file is in a skills directory, use its parent as base
   const sourceDir = dirname(sourceFile);
-  const isSkillsDir = sourceDir.includes('@skills');
+  const isSkillsDir = sourceDir.includes('@skills') || sourceDir.endsWith('/skills');
 
-  for (const [skillName, skillValue] of Object.entries(skillsContent.properties)) {
+  // Auto-discover skills from local and universal directories
+  if (!isSkillsDir && localPath) {
+    const discoveryDirs: string[] = [resolve(localPath, 'skills')];
+    if (options?.universalDir && localPath) {
+      discoveryDirs.push(resolve(localPath, '..', options.universalDir, 'skills'));
+    }
+
+    for (const dir of discoveryDirs) {
+      const discovered = await discoverSkillDirs(dir);
+      for (const skillName of discovered) {
+        // Only add if not already declared in @skills block
+        if (!(skillName in updatedProperties)) {
+          logger.verbose(`Auto-discovered skill: ${skillName} (from ${dir})`);
+          updatedProperties[skillName] = {};
+          hasUpdates = true;
+        }
+      }
+    }
+  }
+
+  // If no skills block existed and no auto-discovered skills, nothing to do
+  if (Object.keys(updatedProperties).length === 0) {
+    return ast;
+  }
+
+  // Resolve each skill's SKILL.md content and resources
+  for (const [skillName, skillValue] of Object.entries(updatedProperties)) {
     if (typeof skillValue !== 'object' || skillValue === null || Array.isArray(skillValue)) {
+      continue;
+    }
+
+    // Validate skill name to prevent path traversal
+    if (!isSafeSkillName(skillName)) {
+      logger.verbose(`Skipping skill with unsafe name: ${skillName}`);
       continue;
     }
 
@@ -123,12 +366,26 @@ export async function resolveNativeSkills(
     let skillMdPath: string | null = null;
 
     if (isSkillsDir) {
-      // Source is in @skills, look for sibling directories
+      // Source is in skills dir, look for sibling directories
       const basePath = sourceDir;
       skillMdPath = resolve(basePath, skillName, 'SKILL.md');
     } else {
-      // Look in registry @skills directory
-      skillMdPath = resolve(registryPath, '@skills', skillName, 'SKILL.md');
+      // Look in local skills/ directory first, then optionally .agents/skills/ (universal),
+      // then registry @skills/
+      const localCandidate = localPath ? resolve(localPath, 'skills', skillName, 'SKILL.md') : null;
+      const universalCandidate =
+        options?.universalDir && localPath
+          ? resolve(localPath, '..', options.universalDir, 'skills', skillName, 'SKILL.md')
+          : null;
+      const registryCandidate = resolve(registryPath, '@skills', skillName, 'SKILL.md');
+
+      if (localCandidate && (await fileExists(localCandidate))) {
+        skillMdPath = localCandidate;
+      } else if (universalCandidate && (await fileExists(universalCandidate))) {
+        skillMdPath = universalCandidate;
+      } else {
+        skillMdPath = registryCandidate;
+      }
     }
 
     if (skillMdPath && (await fileExists(skillMdPath))) {
@@ -149,20 +406,28 @@ export async function resolveNativeSkills(
           } as TextContent;
         }
 
-        // Use native description if not already set or if native is more complete
-        if (
-          parsed.description &&
-          (!skillObj['description'] ||
-            (typeof skillObj['description'] === 'string' &&
-              parsed.description.length > (skillObj['description'] as string).length))
-        ) {
+        // Use native description only as fallback when not set in .prs
+        if (parsed.description && !skillObj['description']) {
           updatedSkill['description'] = parsed.description;
+        }
+
+        // Discover resource files alongside SKILL.md
+        const skillDir = dirname(skillMdPath);
+        const resources = await discoverSkillResources(skillDir, logger);
+        if (resources.length > 0) {
+          // Each resource is { relativePath: string, content: string } which satisfies { [key: string]: Value }
+          const resourceValues: Value[] = resources.map((r) => ({
+            relativePath: r.relativePath,
+            content: r.content,
+          }));
+          updatedSkill['resources'] = resourceValues;
         }
 
         updatedProperties[skillName] = updatedSkill;
         hasUpdates = true;
       } catch {
         // Failed to read skill file, keep original
+        logger.verbose(`Failed to read skill file: ${skillMdPath}`);
       }
     }
   }
@@ -173,15 +438,166 @@ export async function resolveNativeSkills(
 
   // Create updated skills block
   const updatedSkillsBlock: Block = {
-    ...skillsBlock,
+    ...(skillsBlock ?? {
+      type: 'Block' as const,
+      name: 'skills',
+      content: skillsContent,
+      loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+    }),
     content: {
       ...skillsContent,
       properties: updatedProperties,
     },
   };
 
-  // Replace skills block in AST
-  const updatedBlocks = ast.blocks.map((b) => (b.name === 'skills' ? updatedSkillsBlock : b));
+  // Replace or add skills block in AST
+  const updatedBlocks = skillsBlock
+    ? ast.blocks.map((b) => (b.name === 'skills' ? updatedSkillsBlock : b))
+    : [...ast.blocks, updatedSkillsBlock];
+
+  return {
+    ...ast,
+    blocks: updatedBlocks,
+  };
+}
+
+/**
+ * Discover command .md files from a directory.
+ * Each .md file becomes a shortcut: filename (without .md) → file content.
+ *
+ * @param dir - Absolute path to the commands directory
+ * @param logger - Optional logger
+ * @returns Record of command name → TextContent value
+ */
+async function discoverCommandFiles(
+  dir: string,
+  logger: Logger = noopLogger
+): Promise<Record<string, Value>> {
+  const commands: Record<string, Value> = {};
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+      if (entry.isSymbolicLink()) continue;
+
+      const cmdName = '/' + entry.name.replace(/\.md$/, '');
+      const fullPath = resolve(dir, entry.name);
+
+      try {
+        const fileStat = await lstat(fullPath);
+        if (fileStat.isSymbolicLink()) continue;
+        if (fileStat.size > MAX_RESOURCE_SIZE) {
+          logger.verbose(`Skipping oversized command file: ${entry.name}`);
+          continue;
+        }
+
+        const content = await readFile(fullPath, 'utf-8');
+        if (content.includes('\0')) {
+          logger.verbose(`Skipping binary command file: ${entry.name}`);
+          continue;
+        }
+
+        commands[cmdName] = {
+          type: 'TextContent',
+          value: content.trim(),
+          loc: { file: fullPath, line: 1, column: 1, offset: 0 },
+        } as TextContent;
+
+        logger.verbose(`Auto-discovered command: ${cmdName} (from ${dir})`);
+      } catch {
+        logger.verbose(`Skipping unreadable command file: ${entry.name}`);
+      }
+    }
+  } catch {
+    // Directory doesn't exist or can't be read
+  }
+  return commands;
+}
+
+/**
+ * Auto-discover command .md files from local and universal directories
+ * and inject them into the @shortcuts block.
+ *
+ * Scans .promptscript/commands/ and optionally .agents/commands/ for .md files.
+ * Each file becomes a shortcut entry with the filename as command name.
+ * Explicitly declared shortcuts in .prs files take precedence.
+ *
+ * @param ast - The resolved AST
+ * @param sourceFile - The source file path
+ * @param localPath - Path to local .promptscript directory
+ * @param options - Skill resolution options (reuses universalDir and logger)
+ * @returns Updated AST with discovered commands
+ */
+export async function resolveNativeCommands(
+  ast: Program,
+  sourceFile: string,
+  localPath?: string,
+  options?: NativeSkillOptions
+): Promise<Program> {
+  if (!localPath) return ast;
+
+  const logger = options?.logger ?? noopLogger;
+
+  // Collect commands from discovery directories
+  const allCommands: Record<string, Value> = {};
+
+  // Local commands first
+  const localCommands = await discoverCommandFiles(resolve(localPath, 'commands'), logger);
+  Object.assign(allCommands, localCommands);
+
+  // Universal commands (don't overwrite local)
+  if (options?.universalDir) {
+    const universalCommands = await discoverCommandFiles(
+      resolve(localPath, '..', options.universalDir, 'commands'),
+      logger
+    );
+    for (const [name, value] of Object.entries(universalCommands)) {
+      if (!(name in allCommands)) {
+        allCommands[name] = value;
+      }
+    }
+  }
+
+  if (Object.keys(allCommands).length === 0) return ast;
+
+  // Find existing @shortcuts block
+  const shortcutsBlock = ast.blocks.find((b) => b.name === 'shortcuts');
+  const shortcutsContent: ObjectContent =
+    shortcutsBlock && shortcutsBlock.content.type === 'ObjectContent'
+      ? (shortcutsBlock.content as ObjectContent)
+      : {
+          type: 'ObjectContent',
+          properties: {},
+          loc: { file: sourceFile, line: 1, column: 1 },
+        };
+
+  // Merge: existing shortcuts take precedence over discovered ones
+  const mergedProperties: Record<string, Value> = { ...allCommands };
+  for (const [name, value] of Object.entries(shortcutsContent.properties)) {
+    mergedProperties[name] = value; // Explicit declarations win
+  }
+
+  // Check if anything actually changed
+  const existingKeys = new Set(Object.keys(shortcutsContent.properties));
+  const hasNewCommands = Object.keys(allCommands).some((k) => !existingKeys.has(k));
+  if (!hasNewCommands) return ast;
+
+  const updatedBlock: Block = {
+    ...(shortcutsBlock ?? {
+      type: 'Block' as const,
+      name: 'shortcuts',
+      content: shortcutsContent,
+      loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+    }),
+    content: {
+      ...shortcutsContent,
+      properties: mergedProperties,
+    },
+  };
+
+  const updatedBlocks = shortcutsBlock
+    ? ast.blocks.map((b) => (b.name === 'shortcuts' ? updatedBlock : b))
+    : [...ast.blocks, updatedBlock];
 
   return {
     ...ast,
