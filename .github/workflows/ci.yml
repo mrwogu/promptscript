@@ -262,6 +262,42 @@ jobs:
           # Pull should work (downloads registry)
           node $GITHUB_WORKSPACE/cli-package/bin/prs.js pull || echo "Pull completed or registry not configured"
 
+      - name: Smoke test - registry init and validate
+        run: |
+          mkdir -p /tmp/test-registry-init
+          cd /tmp/test-registry-init
+
+          # Initialize a new registry with defaults
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry init my-registry -y
+
+          # Verify scaffold structure
+          test -f my-registry/registry-manifest.yaml
+          test -f my-registry/README.md
+          test -f my-registry/.gitignore
+          test -f my-registry/@core/base.prs
+          test -f my-registry/@core/quality.prs
+          test -f my-registry/@core/security.prs
+          test -f my-registry/@stacks/.gitkeep
+          test -f my-registry/@fragments/.gitkeep
+
+          # Validate the scaffolded registry
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry validate my-registry
+
+          # Validate with --format json
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry validate my-registry --format json | grep '"valid":true'
+
+      - name: Smoke test - registry init --no-seed
+        run: |
+          mkdir -p /tmp/test-registry-noseed
+          cd /tmp/test-registry-noseed
+
+          # Initialize without seed configs
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry init bare-registry -y --no-seed
+
+          # @core should have .gitkeep instead of seed files
+          test -f bare-registry/@core/.gitkeep
+          test ! -f bare-registry/@core/base.prs
+
       - name: Smoke test - compile with watch disabled
         run: |
           mkdir -p /tmp/test-watch

@@ -100,6 +100,7 @@ describe('bundle smoke tests', () => {
       expect(output).toContain('compile');
       expect(output).toContain('validate');
       expect(output).toContain('init');
+      expect(output).toContain('registry');
     });
   });
 });
