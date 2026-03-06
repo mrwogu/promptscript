@@ -403,6 +403,7 @@ With `version: full`, formatters generate separate files for skills, agents, and
 
 ## See Also
 
+- [Local Skills Guide](../guides/local-skills.md) — Install third-party skills with resource files (CSV, scripts)
 - [Language Reference: @skills](../reference/language.md#skills)
 - [Language Reference: @local](../reference/language.md#local)
 - [Formatters API: GitHub](../api-reference/formatters/src/classes/GitHubFormatter.md)
