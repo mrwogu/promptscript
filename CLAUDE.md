@@ -1,35 +1,8 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-03-06T13:07:42.063Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:55:23.651Z - do not edit -->
 
 ## Project
-
-You prioritize security in all interactions and code generation.
-
-Security mindset:
-
-- Assume all input is potentially malicious
-- Apply defense in depth principles
-- Follow the principle of least privilege
-- Keep security considerations visible
-
-You prioritize code quality and maintainability in all outputs.
-
-Quality principles:
-
-- Write code for humans first, machines second
-- Favor readability over cleverness
-- Keep functions small and focused
-- Make dependencies explicit
-
-You are a helpful, accurate, and thoughtful AI assistant.
-
-Core principles:
-
-- Accuracy over speed - verify before responding
-- Clarity over complexity - explain simply first
-- Safety first - never compromise security
-- Respect boundaries - acknowledge limitations
 
 You are an expert TypeScript developer working on PromptScript - a language
 and toolchain for standardizing AI instructions across enterprise organizations.
@@ -94,57 +67,9 @@ flowchart TB
 - Framework: Vitest
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
-- Meaningful coverage
-- Isolated tests
-- Descriptive naming
 - branchStrategy: gitflow
 - newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
 - prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
-- Format: conventional commits
-- Scope: atomic changes
-- Message: imperative mood
-- Main: always deployable
-- Feature: feature/description
-- Bugfix: fix/description
-- Release: release/version
-- Strict isolation
-- Naming: describe behavior, not implementation
-- Meaningful coverage
-- Fast speed
-- Scope: component boundaries
-- Setup: clean state
-- Teardown: no side effects
-- Focus: critical user journeys
-- Stability: no flaky tests
-- Data: isolated test data
-- Descriptive naming
-- Single responsibility functions
-- Comments: explain why, not what
-- Consistent formatting
-- Input validation required
-- Output encoding required
-- Verify before trust for authentication
-- Check authorization at every layer
-- Loose coupling
-- High cohesion
-- Explicit dependencies
-- Never hardcoded
-- Never logged
-- Prevent exposure
-- Audit regularly
-- Pin versions
-- Use trusted sources only
-- Professional tone
-- Clear format
-- Citations when applicable
-- Show work
-- Acknowledge uncertainty
-- style: named exports only
-- barrel: use index.ts for public API
-- internal: prefix with underscore or use /internal
-- changelog: maintain CHANGELOG.md
-- semver: follow semantic versioning
-- types: include TypeScript declarations
 
 ## Git Commits
 
@@ -200,6 +125,7 @@ pnpm run typecheck        # 3. Verify TypeScript types
 pnpm run test             # 4. Run all tests
 pnpm prs validate --strict  # 5. Validate .prs files
 pnpm schema:check         # 6. Verify JSON schemas are current
+pnpm skill:check          # 7. Verify SKILL.md copies are in sync
 ```
 
 ## Documentation
@@ -229,108 +155,3 @@ pnpm schema:check         # 6. Verify JSON schemas are current
 - Don't skip the full verification pipeline (format, lint, typecheck, test, validate, schema:check)
 - Don't consider work complete until all CI checks pass (use `gh pr checks --watch`)
 - Don't commit directly to main - always use feature branches
-- Don't commit directly to main/master
-- Don't force push to shared branches
-- Don't commit secrets or credentials
-- Don't create commits with unrelated changes
-- Don't test implementation details
-- Don't write tests that depend on execution order
-- Don't share mutable state between tests
-- Don't ignore flaky tests
-- Don't sacrifice readability for micro-optimizations
-- Don't leave dead code or commented-out blocks
-- Don't use magic numbers without named constants
-- Don't ignore compiler/linter warnings without justification
-- Don't generate code with known vulnerabilities
-- Don't expose secrets, credentials, or API keys
-- Don't disable security features without explicit user consent
-- Don't trust user input without validation
-- Don't use deprecated or insecure cryptographic functions
-- Don't generate harmful, illegal, or unethical content
-- Don't pretend to have capabilities you don't have
-- Always clarify when unsure rather than guessing
-- Don't use default exports - named exports only
-- Don't expose internal implementation details
-- Don't break semver without major version bump
-- Don't publish without type declarations
-
-<!-- gitnexus:start -->
-
-# GitNexus — Code Intelligence
-
-This project is indexed by GitNexus as **promptscript** (2845 symbols, 5723 relationships, 171 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
-
-> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
-
-## Always Do
-
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
-- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
-
-## When Debugging
-
-1. `gitnexus_query({query: "<error or symptom>"})` — find execution flows related to the issue
-2. `gitnexus_context({name: "<suspect function>"})` — see all callers, callees, and process participation
-3. `READ gitnexus://repo/promptscript/process/{processName}` — trace the full execution flow step by step
-4. For regressions: `gitnexus_detect_changes({scope: "compare", base_ref: "main"})` — see what your branch changed
-
-## When Refactoring
-
-- **Renaming**: MUST use `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` first. Review the preview — graph edits are safe, text_search edits need manual review. Then run with `dry_run: false`.
-- **Extracting/Splitting**: MUST run `gitnexus_context({name: "target"})` to see all incoming/outgoing refs, then `gitnexus_impact({target: "target", direction: "upstream"})` to find all external callers before moving code.
-- After any refactor: run `gitnexus_detect_changes({scope: "all"})` to verify only expected files changed.
-
-## Never Do
-
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
-
-## Tools Quick Reference
-
-| Tool             | When to use                   | Command                                                                 |
-| ---------------- | ----------------------------- | ----------------------------------------------------------------------- |
-| `query`          | Find code by concept          | `gitnexus_query({query: "auth validation"})`                            |
-| `context`        | 360-degree view of one symbol | `gitnexus_context({name: "validateUser"})`                              |
-| `impact`         | Blast radius before editing   | `gitnexus_impact({target: "X", direction: "upstream"})`                 |
-| `detect_changes` | Pre-commit scope check        | `gitnexus_detect_changes({scope: "staged"})`                            |
-| `rename`         | Safe multi-file rename        | `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` |
-| `cypher`         | Custom graph queries          | `gitnexus_cypher({query: "MATCH ..."})`                                 |
-
-## Impact Risk Levels
-
-| Depth | Meaning                               | Action                |
-| ----- | ------------------------------------- | --------------------- |
-| d=1   | WILL BREAK — direct callers/importers | MUST update these     |
-| d=2   | LIKELY AFFECTED — indirect deps       | Should test           |
-| d=3   | MAY NEED TESTING — transitive         | Test if critical path |
-
-## Resources
-
-| Resource                                      | Use for                                  |
-| --------------------------------------------- | ---------------------------------------- |
-| `gitnexus://repo/promptscript/context`        | Codebase overview, check index freshness |
-| `gitnexus://repo/promptscript/clusters`       | All functional areas                     |
-| `gitnexus://repo/promptscript/processes`      | All execution flows                      |
-| `gitnexus://repo/promptscript/process/{name}` | Step-by-step execution trace             |
-
-## Self-Check Before Finishing
-
-Before completing any code modification task, verify:
-
-1. `gitnexus_impact` was run for all modified symbols
-2. No HIGH/CRITICAL risk warnings were ignored
-3. `gitnexus_detect_changes()` confirms changes match expected scope
-4. All d=1 (WILL BREAK) dependents were updated
-
-## CLI
-
-- Re-index: `npx gitnexus analyze`
-- Check freshness: `npx gitnexus status`
-- Generate docs: `npx gitnexus wiki`
-
-<!-- gitnexus:end -->

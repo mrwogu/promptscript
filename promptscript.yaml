@@ -3,26 +3,9 @@ version: '1'
 project:
   id: 'promptscript'
 
-registry:
-  path: ../promptscript-registry
-
 targets:
-  # GitHub Copilot - full generates prompts + skills + agents
-  - github:
-      version: full
-
-  # Claude Code - full generates rules + skills + agents
   - claude:
       version: full
-
-  # Cursor - modern generates .cursor/commands/*.md for multi-line shortcuts
-  - cursor
-
-  # Antigravity
-  - antigravity
-
-  # Factory AI
-  - factory
 
 validation:
   rules:

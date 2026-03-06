@@ -2,7 +2,7 @@
 description: 'Run full verification pipeline'
 ---
 
-<!-- PromptScript 2026-03-06T13:07:42.063Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:55:23.651Z - do not edit -->
 
 Run complete verification pipeline (all steps required):
 
@@ -12,5 +12,6 @@ Run complete verification pipeline (all steps required):
 4. pnpm run test # Run all tests
 5. pnpm prs validate --strict # Validate .prs files
 6. pnpm schema:check # Verify JSON schemas are current
+7. pnpm skill:check # Verify SKILL.md copies are in sync
 
 If any step fails, fix the issue before proceeding.
