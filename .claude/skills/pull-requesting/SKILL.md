@@ -3,7 +3,7 @@ name: 'pull-requesting'
 description: 'Creates well-structured pull requests'
 ---
 
-<!-- PromptScript 2026-03-06T22:37:48.627Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:49:15.348Z - do not edit -->
 
 ## PR Structure
 

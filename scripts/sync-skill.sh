@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Syncs root SKILL.md to downstream copies.
 # Usage:
-#   ./scripts/sync-skill.sh          # copy root → destinations
+#   ./scripts/sync-skill.sh          # copy root -> destinations
 #   ./scripts/sync-skill.sh --check  # verify all copies match (CI mode)
 
 set -euo pipefail

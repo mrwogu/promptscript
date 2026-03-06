@@ -2,7 +2,7 @@
 description: 'Create TypeScript type definitions'
 ---
 
-<!-- PromptScript 2026-03-06T22:37:48.627Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:49:15.348Z - do not edit -->
 
 Create TypeScript type definitions:
 
