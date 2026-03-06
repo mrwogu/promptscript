@@ -1,14 +1,25 @@
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { getPackageVersion, type RegistryManifest } from '@promptscript/core';
 import { type CliServices, createDefaultServices } from '../services.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-/** Directory containing bundled SKILL.md files shipped with the CLI package. */
-const BUNDLED_SKILLS_DIR = resolve(__dirname, '..', '..', 'skills');
+/**
+ * Directory containing bundled SKILL.md files shipped with the CLI package.
+ * In bundled mode (dist/packages/cli/index.js): skills/ is a sibling directory.
+ * In dev mode (packages/cli/src/commands/init.ts): skills/ is two levels up.
+ */
+function findSkillsDir(): string {
+  const candidates = [resolve(__dirname, 'skills'), resolve(__dirname, '..', '..', 'skills')];
+  for (const dir of candidates) {
+    if (existsSync(dir)) return dir;
+  }
+  return candidates[0] as string;
+}
+const BUNDLED_SKILLS_DIR = findSkillsDir();
 
 import type { InitOptions } from '../types.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
