@@ -17,6 +17,7 @@ function deepMergeRegistry(
   if (source.url !== undefined) merged.url = source.url;
 
   if (source.git) {
+    // Auth is replaced atomically (not field-merged) since partial auth configs are invalid
     const mergedAuth = source.git.auth ?? merged.git?.auth;
     merged.git = {
       ...merged.git,

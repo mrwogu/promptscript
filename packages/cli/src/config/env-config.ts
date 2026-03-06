@@ -1,17 +1,6 @@
 import type { PromptScriptConfig } from '@promptscript/core';
 
 /**
- * Environment variable mappings for PromptScript configuration.
- */
-const ENV_MAPPINGS = {
-  PROMPTSCRIPT_REGISTRY_GIT_URL: 'registry.git.url',
-  PROMPTSCRIPT_REGISTRY_GIT_REF: 'registry.git.ref',
-  PROMPTSCRIPT_REGISTRY_URL: 'registry.url',
-  PROMPTSCRIPT_CACHE_TTL: 'registry.cache.ttl',
-  PROMPTSCRIPT_CACHE_ENABLED: 'registry.cache.enabled',
-} as const;
-
-/**
  * Load configuration overrides from environment variables.
  *
  * Supported env vars:
@@ -24,9 +13,7 @@ const ENV_MAPPINGS = {
 export function loadEnvOverrides(): Partial<PromptScriptConfig> {
   const overrides: Partial<PromptScriptConfig> = {};
 
-  const gitUrl =
-    process.env[ENV_MAPPINGS.PROMPTSCRIPT_REGISTRY_GIT_URL] ??
-    process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+  const gitUrl = process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
   const gitRef = process.env['PROMPTSCRIPT_REGISTRY_GIT_REF'];
   const registryUrl = process.env['PROMPTSCRIPT_REGISTRY_URL'];
   const cacheTtl = process.env['PROMPTSCRIPT_CACHE_TTL'];

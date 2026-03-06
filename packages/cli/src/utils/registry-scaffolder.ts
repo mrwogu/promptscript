@@ -153,7 +153,11 @@ export async function scaffoldRegistry(
 
   // Generate .gitignore
   const gitignorePath = join(directory, '.gitignore');
-  await fs.writeFile(gitignorePath, '.DS_Store\nnode_modules/\n*.log\n', 'utf-8');
+  await fs.writeFile(
+    gitignorePath,
+    '.DS_Store\nnode_modules/\n*.log\n*.swp\n*.bak\n.env*\n',
+    'utf-8'
+  );
   createdFiles.push(gitignorePath);
 
   // Create namespace directories
@@ -186,6 +190,14 @@ export async function scaffoldRegistry(
 }
 
 /**
+ * Escape a string for use in YAML single-quoted values.
+ * In YAML single-quoted strings, the only escape is '' for a literal '.
+ */
+function yamlEscape(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+/**
  * Generate registry-manifest.yaml content.
  */
 function generateManifest(
@@ -198,8 +210,8 @@ function generateManifest(
     "version: '1'",
     '',
     'meta:',
-    `  name: '${name}'`,
-    `  description: '${description}'`,
+    `  name: '${yamlEscape(name)}'`,
+    `  description: '${yamlEscape(description)}'`,
     `  lastUpdated: '${new Date().toISOString().split('T')[0]}'`,
     '',
     'namespaces:',
