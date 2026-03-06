@@ -172,4 +172,14 @@ describe('commands/registry/init', () => {
     expect(mockFs.writeFile).not.toHaveBeenCalled();
     expect(mockExit).not.toHaveBeenCalled();
   });
+
+  it('should exit with code 1 when scaffolding fails', async () => {
+    mockFs.mkdir.mockRejectedValue(new Error('Permission denied'));
+
+    await expect(registryInitCommand('test-registry', { yes: true }, mockServices)).rejects.toThrow(
+      'process.exit called'
+    );
+
+    expect(mockExit).toHaveBeenCalledWith(1);
+  });
 });

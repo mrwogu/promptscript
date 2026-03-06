@@ -138,4 +138,93 @@ describe('config/merge-config', () => {
     expect(result.project.team).toBe('frontend');
     expect(result.validation?.rules?.['empty-block']).toBe('warning');
   });
+
+  it('should atomically replace auth from source', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: {
+        git: {
+          url: 'https://github.com/user/reg.git',
+          auth: { type: 'ssh', sshKeyPath: '/old/key' },
+        },
+      },
+    };
+
+    const envOverrides: Partial<PromptScriptConfig> = {
+      registry: {
+        git: {
+          url: 'https://github.com/env/reg.git',
+          auth: { type: 'token', tokenEnvVar: 'GH_TOKEN' },
+        },
+      },
+    };
+
+    const result = mergeConfigs(userConfig, baseProjectConfig, envOverrides);
+
+    expect(result.registry?.git?.auth?.type).toBe('token');
+    expect((result.registry?.git?.auth as { tokenEnvVar?: string })?.tokenEnvVar).toBe('GH_TOKEN');
+  });
+
+  it('should preserve auth from target when source has no auth', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: {
+        git: {
+          url: 'https://github.com/user/reg.git',
+          auth: { type: 'ssh', sshKeyPath: '/my/key' },
+        },
+      },
+    };
+
+    const envOverrides: Partial<PromptScriptConfig> = {
+      registry: {
+        git: { url: 'https://github.com/env/reg.git' },
+      },
+    };
+
+    const result = mergeConfigs(userConfig, baseProjectConfig, envOverrides);
+
+    expect(result.registry?.git?.url).toBe('https://github.com/env/reg.git');
+    expect(result.registry?.git?.auth?.type).toBe('ssh');
+  });
+
+  it('should deep merge registry-level auth settings', () => {
+    const projectConfig: PromptScriptConfig = {
+      ...baseProjectConfig,
+      registry: {
+        auth: { type: 'bearer' as const, tokenEnvVar: 'OLD_TOKEN' },
+      },
+    };
+
+    const envOverrides: Partial<PromptScriptConfig> = {
+      registry: {
+        auth: { type: 'basic' as const, tokenEnvVar: 'NEW_TOKEN' },
+      },
+    };
+
+    const result = mergeConfigs(emptyUserConfig, projectConfig, envOverrides);
+
+    expect(result.registry?.auth?.type).toBe('basic');
+    expect(result.registry?.auth?.tokenEnvVar).toBe('NEW_TOKEN');
+  });
+
+  it('should override url from user config', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: {
+        url: 'https://user-registry.example.com',
+      },
+    };
+
+    const projectConfig: PromptScriptConfig = {
+      ...baseProjectConfig,
+      registry: {
+        url: 'https://project-registry.example.com',
+      },
+    };
+
+    const result = mergeConfigs(userConfig, projectConfig, {});
+
+    expect(result.registry?.url).toBe('https://project-registry.example.com');
+  });
 });

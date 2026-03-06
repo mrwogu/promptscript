@@ -114,4 +114,24 @@ catalog:
 
     expect(mockExit).toHaveBeenCalledWith(1);
   });
+
+  it('should exit with code 1 in strict mode with warnings in JSON format', async () => {
+    mockFs.readdir.mockResolvedValue(['base.prs', 'orphan.prs']);
+
+    await expect(
+      registryValidateCommand('.', { strict: true, format: 'json' }, mockServices)
+    ).rejects.toThrow('process.exit called');
+
+    expect(mockExit).toHaveBeenCalledWith(1);
+  });
+
+  it('should handle unexpected validation errors', async () => {
+    mockFs.readFile.mockRejectedValue(new Error('disk failure'));
+
+    await expect(registryValidateCommand('.', { format: 'text' }, mockServices)).rejects.toThrow(
+      'process.exit called'
+    );
+
+    expect(mockExit).toHaveBeenCalledWith(1);
+  });
 });

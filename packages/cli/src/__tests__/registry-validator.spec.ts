@@ -256,4 +256,147 @@ catalog:
     expect(result.stats.catalogEntries).toBe(1);
     expect(result.stats.prsFiles).toBe(1);
   });
+
+  it('should error when catalog entry is missing id', async () => {
+    mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  name: Test
+  description: Test
+  lastUpdated: '2026-01-01'
+namespaces:
+  '@core':
+    description: Core
+    priority: 100
+catalog:
+  - path: '@core/base.prs'
+    name: Base
+    description: Base config
+    tags: [core]
+    targets: [github]
+    dependencies: []
+`);
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.message.includes('missing required field: id'))).toBe(true);
+  });
+
+  it('should error when catalog entry is missing path', async () => {
+    mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  name: Test
+  description: Test
+  lastUpdated: '2026-01-01'
+namespaces:
+  '@core':
+    description: Core
+    priority: 100
+catalog:
+  - id: '@core/base'
+    name: Base
+    description: Base config
+    tags: [core]
+    targets: [github]
+    dependencies: []
+`);
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.message.includes('missing required field: path'))).toBe(
+      true
+    );
+  });
+
+  it('should handle readdir failure gracefully', async () => {
+    mockFs.readdir.mockRejectedValue(new Error('permission denied'));
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    // Should still succeed - orphan check is skipped
+    expect(result.valid).toBe(true);
+  });
+
+  it('should fail when meta is missing', async () => {
+    mockFs.readFile.mockResolvedValue(`
+version: '1'
+namespaces: {}
+catalog: []
+`);
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.message.includes('meta'))).toBe(true);
+  });
+
+  it('should fail when meta.name is missing', async () => {
+    mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  description: Test
+namespaces: {}
+catalog: []
+`);
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.message.includes('meta missing required field: name'))).toBe(
+      true
+    );
+  });
+
+  it('should fail when namespaces is missing', async () => {
+    mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  name: Test
+catalog: []
+`);
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.message.includes('namespaces'))).toBe(true);
+  });
+
+  it('should fail when catalog is missing', async () => {
+    mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  name: Test
+namespaces:
+  '@core':
+    description: Core
+    priority: 100
+`);
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.message.includes('catalog'))).toBe(true);
+  });
+
+  it('should fail when catalog is not an array', async () => {
+    mockFs.readFile.mockResolvedValue(`
+version: '1'
+meta:
+  name: Test
+namespaces:
+  '@core':
+    description: Core
+    priority: 100
+catalog:
+  base: something
+`);
+
+    const result = await validateRegistry('/test/registry', mockServices);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.message.includes('catalog must be an array'))).toBe(true);
+  });
 });
