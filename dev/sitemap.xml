@@ -793,11 +793,23 @@
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/FactoryFormatter/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/FormatterRegistry/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/GeminiFormatter/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/GitHubFormatter/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/OpenCodeFormatter/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
@@ -965,6 +977,10 @@
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/FactoryVersion/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/FeatureCategory/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
@@ -974,6 +990,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/FormatterFactory/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/GeminiVersion/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/OpenCodeVersion/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
@@ -997,7 +1021,15 @@
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/FACTORY_VERSIONS/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/FEATURE_MATRIX/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/GEMINI_VERSIONS/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
@@ -1006,6 +1038,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/KNOWN_SECTIONS/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OPENCODE_VERSIONS/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
@@ -1325,6 +1361,10 @@
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/normalizeBlockAliases/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/normalizeGitUrl/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
@@ -1342,6 +1382,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/resolveInheritance/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/resolveNativeCommands/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
@@ -1386,6 +1430,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/LoaderOptions/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/NativeSkillOptions/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
@@ -1782,6 +1830,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/guides/inheritance/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/guides/local-skills/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
