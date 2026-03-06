@@ -4,6 +4,9 @@ import { GitHubFormatter } from '../formatters/github.js';
 import { ClaudeFormatter } from '../formatters/claude.js';
 import { CursorFormatter } from '../formatters/cursor.js';
 import { AntigravityFormatter } from '../formatters/antigravity.js';
+import { FactoryFormatter } from '../formatters/factory.js';
+import { OpenCodeFormatter } from '../formatters/opencode.js';
+import { GeminiFormatter } from '../formatters/gemini.js';
 import type { Formatter } from '../types.js';
 import {
   FEATURE_MATRIX,
@@ -160,20 +163,25 @@ describe('Feature Coverage Matrix', () => {
   });
 
   describe('Coverage Summary', () => {
-    it.each(['github', 'cursor', 'claude', 'antigravity'] as ToolName[])(
-      '%s should have valid coverage summary',
-      (tool) => {
-        const coverage = getFeatureCoverage(tool);
+    it.each([
+      'github',
+      'cursor',
+      'claude',
+      'antigravity',
+      'factory',
+      'opencode',
+      'gemini',
+    ] as ToolName[])('%s should have valid coverage summary', (tool) => {
+      const coverage = getFeatureCoverage(tool);
 
-        expect(coverage.tool).toBe(tool);
-        expect(coverage.total).toBe(FEATURE_MATRIX.length);
-        expect(
-          coverage.supported + coverage.partial + coverage.planned + coverage.notSupported
-        ).toBe(coverage.total);
-        expect(coverage.coveragePercent).toBeGreaterThanOrEqual(0);
-        expect(coverage.coveragePercent).toBeLessThanOrEqual(100);
-      }
-    );
+      expect(coverage.tool).toBe(tool);
+      expect(coverage.total).toBe(FEATURE_MATRIX.length);
+      expect(coverage.supported + coverage.partial + coverage.planned + coverage.notSupported).toBe(
+        coverage.total
+      );
+      expect(coverage.coveragePercent).toBeGreaterThanOrEqual(0);
+      expect(coverage.coveragePercent).toBeLessThanOrEqual(100);
+    });
 
     it('cursor should have highest feature coverage (most features)', () => {
       const cursorCoverage = getFeatureCoverage('cursor');
@@ -196,6 +204,9 @@ describe('Feature Implementation Tests', () => {
     formatters.set('claude', new ClaudeFormatter());
     formatters.set('cursor', new CursorFormatter());
     formatters.set('antigravity', new AntigravityFormatter());
+    formatters.set('factory', new FactoryFormatter());
+    formatters.set('opencode', new OpenCodeFormatter());
+    formatters.set('gemini', new GeminiFormatter());
   });
 
   afterEach(() => {
@@ -203,70 +214,85 @@ describe('Feature Implementation Tests', () => {
   });
 
   describe('markdown-output', () => {
-    it.each(['github', 'cursor', 'claude', 'antigravity'] as ToolName[])(
-      '%s should produce valid markdown',
-      (tool) => {
-        if (!toolSupportsFeature(tool, 'markdown-output')) return;
+    it.each([
+      'github',
+      'cursor',
+      'claude',
+      'antigravity',
+      'factory',
+      'opencode',
+      'gemini',
+    ] as ToolName[])('%s should produce valid markdown', (tool) => {
+      if (!toolSupportsFeature(tool, 'markdown-output')) return;
 
-        const formatter = formatters.get(tool)!;
-        const result = formatter.format(createTestAST());
+      const formatter = formatters.get(tool)!;
+      const result = formatter.format(createTestAST());
 
-        // Should have headers
-        expect(result.content).toMatch(/^#|##/m);
+      // Should have headers
+      expect(result.content).toMatch(/^#|##/m);
 
-        // Should have content
-        expect(result.content.length).toBeGreaterThan(100);
-      }
-    );
+      // Should have content
+      expect(result.content.length).toBeGreaterThan(100);
+    });
   });
 
   describe('code-blocks', () => {
-    it.each(['github', 'cursor', 'claude', 'antigravity'] as ToolName[])(
-      '%s should support code blocks',
-      (tool) => {
-        if (!toolSupportsFeature(tool, 'code-blocks')) return;
+    it.each([
+      'github',
+      'cursor',
+      'claude',
+      'antigravity',
+      'factory',
+      'opencode',
+      'gemini',
+    ] as ToolName[])('%s should support code blocks', (tool) => {
+      if (!toolSupportsFeature(tool, 'code-blocks')) return;
 
-        const formatter = formatters.get(tool)!;
-        const ast = createTestAST();
+      const formatter = formatters.get(tool)!;
+      const ast = createTestAST();
 
-        // Add knowledge with code block
-        ast.blocks.push({
-          type: 'Block',
-          name: 'knowledge',
-          content: {
-            type: 'TextContent',
-            value: '## Commands\n\n```bash\npnpm install\n```',
-            loc: createLoc(),
-          },
+      // Add knowledge with code block
+      ast.blocks.push({
+        type: 'Block',
+        name: 'knowledge',
+        content: {
+          type: 'TextContent',
+          value: '## Commands\n\n```bash\npnpm install\n```',
           loc: createLoc(),
-        });
+        },
+        loc: createLoc(),
+      });
 
-        const result = formatter.format(ast);
+      const result = formatter.format(ast);
 
-        // Should preserve code blocks
-        expect(result.content).toContain('```');
-      }
-    );
+      // Should preserve code blocks
+      expect(result.content).toContain('```');
+    });
   });
 
   describe('mermaid-diagrams', () => {
-    it.each(['github', 'cursor', 'claude', 'antigravity'] as ToolName[])(
-      '%s should preserve mermaid diagrams',
-      (tool) => {
-        if (!toolSupportsFeature(tool, 'mermaid-diagrams')) return;
+    it.each([
+      'github',
+      'cursor',
+      'claude',
+      'antigravity',
+      'factory',
+      'opencode',
+      'gemini',
+    ] as ToolName[])('%s should preserve mermaid diagrams', (tool) => {
+      if (!toolSupportsFeature(tool, 'mermaid-diagrams')) return;
 
-        const formatter = formatters.get(tool)!;
-        const result = formatter.format(createTestAST());
+      const formatter = formatters.get(tool)!;
+      const result = formatter.format(createTestAST());
 
-        // Should have mermaid block or reference to diagram
-        const hasMermaid =
-          result.content.includes('```mermaid') ||
-          result.content.includes('flowchart') ||
-          result.content.includes('Mermaid');
+      // Should have mermaid block or reference to diagram
+      const hasMermaid =
+        result.content.includes('```mermaid') ||
+        result.content.includes('flowchart') ||
+        result.content.includes('Mermaid');
 
-        expect(hasMermaid, `${tool} should support mermaid diagrams`).toBe(true);
-      }
-    );
+      expect(hasMermaid, `${tool} should support mermaid diagrams`).toBe(true);
+    });
   });
 
   describe('yaml-frontmatter', () => {

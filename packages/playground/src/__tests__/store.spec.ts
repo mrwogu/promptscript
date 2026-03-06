@@ -17,6 +17,9 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     claude: { enabled: true, version: 'full' },
     cursor: { enabled: true, version: 'standard' },
     antigravity: { enabled: true, version: 'frontmatter' },
+    factory: { enabled: false, version: 'simple' },
+    opencode: { enabled: false, version: 'full' },
+    gemini: { enabled: false, version: 'full' },
   },
   formatting: {
     tabWidth: 2,
@@ -273,6 +276,7 @@ describe('PlaygroundStore', () => {
           claude: { enabled: false, version: 'lite' },
           cursor: { enabled: false, version: 'standard' },
           antigravity: { enabled: false, version: 'frontmatter' },
+          factory: { enabled: false, version: 'simple' },
         },
         formatting: {
           tabWidth: 4,
@@ -577,6 +581,30 @@ describe('PlaygroundStore', () => {
 
       const outputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'antigravity');
       expect(outputs).toHaveLength(2);
+    });
+
+    it('selectOutputsForFormatter should match Factory output files', () => {
+      const { setCompileResult } = usePlaygroundStore.getState();
+      const outputMap = new Map([
+        ['AGENTS.md', { path: 'AGENTS.md', content: 'factory main' }],
+        [
+          '.factory/skills/review/SKILL.md',
+          { path: '.factory/skills/review/SKILL.md', content: 'factory skill' },
+        ],
+        ['CLAUDE.md', { path: 'CLAUDE.md', content: 'claude' }],
+      ]);
+      setCompileResult({
+        success: true,
+        outputs: outputMap,
+        errors: [],
+        warnings: [],
+        stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
+      });
+
+      const outputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'factory');
+      expect(outputs).toHaveLength(2);
+      expect(outputs[0].path).toBe('AGENTS.md');
+      expect(outputs[1].path).toBe('.factory/skills/review/SKILL.md');
     });
 
     it('selectOutputsForFormatter should match Cursor output files', () => {

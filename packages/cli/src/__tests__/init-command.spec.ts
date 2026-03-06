@@ -538,7 +538,11 @@ describe('commands/init', () => {
 
     it('should install all migration files when --migrate is used with all targets', async () => {
       await initCommand(
-        { yes: true, targets: ['github', 'claude', 'cursor', 'antigravity'], migrate: true },
+        {
+          yes: true,
+          targets: ['github', 'claude', 'cursor', 'antigravity', 'factory'],
+          migrate: true,
+        },
         mockServices
       );
 
@@ -560,6 +564,24 @@ describe('commands/init', () => {
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         '.agent/rules/migrate.md',
         expect.any(String),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        '.factory/skills/migrate-to-promptscript/SKILL.md',
+        expect.any(String),
+        'utf-8'
+      );
+    });
+
+    it('should install Factory migration skill when --migrate is used with factory target', async () => {
+      await initCommand({ yes: true, targets: ['factory'], migrate: true }, mockServices);
+
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.factory/skills/migrate-to-promptscript', {
+        recursive: true,
+      });
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        '.factory/skills/migrate-to-promptscript/SKILL.md',
+        expect.stringContaining('migrate-to-promptscript'),
         'utf-8'
       );
     });

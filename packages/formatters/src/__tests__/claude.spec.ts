@@ -550,6 +550,51 @@ describe('ClaudeFormatter', () => {
       expect(skillFile?.content).toContain('agent: general-purpose');
     });
 
+    it('should emit resource files alongside skill SKILL.md in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'ui-skill': {
+                  description: 'UI skill with resources',
+                  content: 'Skill content.',
+                  resources: [
+                    { relativePath: 'data/colors.csv', content: 'red,#ff0000\n' },
+                    { relativePath: 'scripts/search.py', content: 'print("hello")\n' },
+                  ],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.path).toBe('.claude/skills/ui-skill/SKILL.md');
+
+      const resourceFiles = skillFile?.additionalFiles;
+      expect(resourceFiles).toBeDefined();
+      expect(resourceFiles).toHaveLength(2);
+
+      const csv = resourceFiles?.find((f) => f.path.includes('colors.csv'));
+      expect(csv?.path).toBe('.claude/skills/ui-skill/data/colors.csv');
+      expect(csv?.content).toBe('red,#ff0000\n');
+
+      const py = resourceFiles?.find((f) => f.path.includes('search.py'));
+      expect(py?.path).toBe('.claude/skills/ui-skill/scripts/search.py');
+      expect(py?.content).toBe('print("hello")\n');
+    });
+
     it('should generate CLAUDE.local.md in full mode with @local block', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -1066,6 +1111,226 @@ describe('ClaudeFormatter', () => {
       expect(testingRule).toBeDefined();
       // When no testing standards, default message should be used
       expect(testingRule?.content).toContain('testing conventions');
+    });
+  });
+
+  describe('command file generation', () => {
+    it('should generate command files in multifile mode for shortcuts with prompt: true', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  prompt: true,
+                  description: 'Deploy the application',
+                  content: 'Run deployment steps...',
+                },
+                '/review': 'Simple shortcut',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      expect(result.additionalFiles).toBeDefined();
+      const commandFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/deploy.md'
+      );
+      expect(commandFile).toBeDefined();
+      expect(commandFile?.content).toContain("description: 'Deploy the application'");
+      expect(commandFile?.content).toContain('Run deployment steps...');
+
+      // Simple string shortcuts should NOT generate command files
+      const reviewFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/review.md'
+      );
+      expect(reviewFile).toBeUndefined();
+    });
+
+    it('should generate command files in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                test: {
+                  content: 'Run all tests with coverage',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      expect(result.additionalFiles).toBeDefined();
+      const commandFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/test.md'
+      );
+      expect(commandFile).toBeDefined();
+      expect(commandFile?.content).toContain('Run all tests with coverage');
+    });
+
+    it('should not generate command files in simple mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  prompt: true,
+                  description: 'Deploy',
+                  content: 'Deploy steps...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'simple' });
+      expect(result.additionalFiles).toBeUndefined();
+    });
+
+    it('should strip leading slashes from command names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/deploy': {
+                  prompt: true,
+                  description: 'Deploy',
+                  content: 'Deploy steps...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const commandFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/deploy.md'
+      );
+      expect(commandFile).toBeDefined();
+    });
+
+    it('should use command name as description fallback', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                build: {
+                  content: 'Build the project',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const commandFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/build.md'
+      );
+      expect(commandFile).toBeDefined();
+      expect(commandFile?.content).toContain("description: 'build'");
+    });
+
+    it('should use double quotes when description contains apostrophe', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                test: {
+                  prompt: true,
+                  description: "Run the project's tests",
+                  content: 'Test steps...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const commandFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/test.md'
+      );
+      expect(commandFile).toBeDefined();
+      expect(commandFile?.content).toContain('"Run the project\'s tests"');
+    });
+
+    it('should generate command for shortcut with content but no prompt flag', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'monitor-ci': {
+                  description: 'Monitor CI pipeline',
+                  content: 'You are the CI monitor orchestrator.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const commandFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/monitor-ci.md'
+      );
+      expect(commandFile).toBeDefined();
+      expect(commandFile?.content).toContain("description: 'Monitor CI pipeline'");
+      expect(commandFile?.content).toContain('You are the CI monitor orchestrator.');
     });
   });
 });

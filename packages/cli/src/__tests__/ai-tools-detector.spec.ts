@@ -84,6 +84,24 @@ describe('utils/ai-tools-detector', () => {
       expect(result.detected).toContain('cursor');
     });
 
+    it('should detect Factory AI via AGENTS.md', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'AGENTS.md');
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.detected).toContain('factory');
+      expect(result.details.factory).toContain('AGENTS.md');
+    });
+
+    it('should detect Factory AI via .factory directory', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === '.factory');
+      mockFs.readdir.mockResolvedValue(['skills']);
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.detected).toContain('factory');
+    });
+
     it('should return empty when no AI tools detected', async () => {
       mockFs.existsSync.mockReturnValue(false);
       mockFs.readdir.mockRejectedValue(new Error('Not found'));
@@ -98,7 +116,15 @@ describe('utils/ai-tools-detector', () => {
     it('should return all available targets', () => {
       const targets = getAllTargets();
 
-      expect(targets).toEqual(['github', 'claude', 'cursor', 'antigravity']);
+      expect(targets).toEqual([
+        'github',
+        'claude',
+        'cursor',
+        'antigravity',
+        'factory',
+        'opencode',
+        'gemini',
+      ]);
     });
   });
 
@@ -106,7 +132,15 @@ describe('utils/ai-tools-detector', () => {
     it('should return detected targets when some exist', () => {
       const detection: AIToolsDetection = {
         detected: ['github', 'claude'],
-        details: { github: [], claude: [], cursor: [], antigravity: [] },
+        details: {
+          github: [],
+          claude: [],
+          cursor: [],
+          antigravity: [],
+          factory: [],
+          opencode: [],
+          gemini: [],
+        },
         migrationCandidates: [],
       };
 
@@ -118,13 +152,29 @@ describe('utils/ai-tools-detector', () => {
     it('should return all targets when none detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: { github: [], claude: [], cursor: [], antigravity: [] },
+        details: {
+          github: [],
+          claude: [],
+          cursor: [],
+          antigravity: [],
+          factory: [],
+          opencode: [],
+          gemini: [],
+        },
         migrationCandidates: [],
       };
 
       const suggested = getSuggestedTargets(detection);
 
-      expect(suggested).toEqual(['github', 'claude', 'cursor', 'antigravity']);
+      expect(suggested).toEqual([
+        'github',
+        'claude',
+        'cursor',
+        'antigravity',
+        'factory',
+        'opencode',
+        'gemini',
+      ]);
     });
   });
 
@@ -137,6 +187,9 @@ describe('utils/ai-tools-detector', () => {
           claude: [],
           cursor: [],
           antigravity: [],
+          factory: [],
+          opencode: [],
+          gemini: [],
         },
         migrationCandidates: [],
       };
@@ -150,7 +203,15 @@ describe('utils/ai-tools-detector', () => {
     it('should show message when no tools detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: { github: [], claude: [], cursor: [], antigravity: [] },
+        details: {
+          github: [],
+          claude: [],
+          cursor: [],
+          antigravity: [],
+          factory: [],
+          opencode: [],
+          gemini: [],
+        },
         migrationCandidates: [],
       };
 
@@ -167,6 +228,9 @@ describe('utils/ai-tools-detector', () => {
           claude: [],
           cursor: [],
           antigravity: ['.agent/rules/project.md'],
+          factory: [],
+          opencode: [],
+          gemini: [],
         },
         migrationCandidates: [],
       };

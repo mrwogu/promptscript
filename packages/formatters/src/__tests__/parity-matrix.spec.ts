@@ -4,6 +4,9 @@ import { GitHubFormatter } from '../formatters/github.js';
 import { ClaudeFormatter } from '../formatters/claude.js';
 import { CursorFormatter } from '../formatters/cursor.js';
 import { AntigravityFormatter } from '../formatters/antigravity.js';
+import { FactoryFormatter } from '../formatters/factory.js';
+import { OpenCodeFormatter } from '../formatters/opencode.js';
+import { GeminiFormatter } from '../formatters/gemini.js';
 import type { Formatter } from '../types.js';
 import {
   PARITY_MATRIX,
@@ -243,6 +246,9 @@ describe('Parity Matrix Tests', () => {
     formatters.set('claude', new ClaudeFormatter());
     formatters.set('cursor', new CursorFormatter());
     formatters.set('antigravity', new AntigravityFormatter());
+    formatters.set('factory', new FactoryFormatter());
+    formatters.set('opencode', new OpenCodeFormatter());
+    formatters.set('gemini', new GeminiFormatter());
   });
 
   afterEach(() => {
@@ -251,7 +257,15 @@ describe('Parity Matrix Tests', () => {
 
   describe('Matrix Specification Integrity', () => {
     it('should have all formatters represented in the matrix', () => {
-      const formatterNames: FormatterName[] = ['github', 'cursor', 'claude', 'antigravity'];
+      const formatterNames: FormatterName[] = [
+        'github',
+        'cursor',
+        'claude',
+        'antigravity',
+        'factory',
+        'opencode',
+        'gemini',
+      ];
 
       for (const name of formatterNames) {
         const sections = getRequiredSections(name);

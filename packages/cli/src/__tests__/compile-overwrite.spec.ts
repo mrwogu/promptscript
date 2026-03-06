@@ -55,6 +55,12 @@ vi.mock('@promptscript/compiler', () => ({
 // Mock the config loader
 vi.mock('../config/loader.js', () => ({
   loadConfig: () => mockLoadConfig(),
+  CONFIG_FILES: [
+    'promptscript.yaml',
+    'promptscript.yml',
+    '.promptscriptrc.yaml',
+    '.promptscriptrc.yml',
+  ],
 }));
 
 // Mock fs/promises
@@ -1246,9 +1252,9 @@ describe('compile command - overwrite protection', () => {
 
       await compileCommand({ watch: true }, mockServices);
 
-      // Should start chokidar watcher
+      // Should start chokidar watcher (path is resolved to absolute from projectRoot)
       expect(mockChokidarWatch).toHaveBeenCalledWith(
-        './.promptscript/**/*.prs',
+        expect.stringContaining('.promptscript/**/*.prs'),
         expect.objectContaining({
           persistent: true,
           ignoreInitial: true,
@@ -1483,6 +1489,89 @@ describe('compile command - overwrite protection', () => {
       }
 
       vi.useRealTimers();
+    });
+  });
+
+  describe('--cwd option', () => {
+    it('should resolve .promptscript and config from cwd directory', async () => {
+      mockLoadConfig.mockReturnValue(defaultConfig);
+
+      const outputs = new Map([['test', createMockOutput('CLAUDE.md', '# Test')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        // Config file found in the custom cwd
+        if (path === resolve('/my/project', 'promptscript.yaml')) return true;
+        // Entry file found in the custom cwd
+        if (path === resolve('/my/project', '.promptscript', 'project.prs')) return true;
+        // Output file doesn't exist yet
+        return false;
+      });
+
+      await compileCommand({ cwd: '/my/project' }, mockServices);
+
+      // Should have been called with config path from the cwd directory
+      expect(mockLoadConfig).toHaveBeenCalled();
+    });
+
+    it('should use cwd as default output directory', async () => {
+      mockLoadConfig.mockReturnValue(defaultConfig);
+
+      const outputs = new Map([['test', createMockOutput('CLAUDE.md', '# Test content')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path === resolve('/custom/project', 'promptscript.yaml')) return true;
+        if (path === resolve('/custom/project', '.promptscript', 'project.prs')) return true;
+        return false;
+      });
+
+      await compileCommand({ cwd: '/custom/project' }, mockServices);
+
+      // Output should be written relative to the project root (cwd), not current CWD
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        resolve('/custom/project', 'CLAUDE.md'),
+        '# Test content',
+        'utf-8'
+      );
+    });
+
+    it('should fail when entry file not found in cwd directory', async () => {
+      mockLoadConfig.mockReturnValue(defaultConfig);
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path === resolve('/empty/project', 'promptscript.yaml')) return true;
+        // Entry file does NOT exist
+        return false;
+      });
+
+      await expect(compileCommand({ cwd: '/empty/project' }, mockServices)).rejects.toThrow(
+        'process.exit called'
+      );
+    });
+
+    it('should fall back to cwd when no config files found', async () => {
+      // No config files found in cwd - loadConfig should still be called with undefined
+      mockExistsSync.mockReturnValue(false);
+
+      // loadConfig throws when no config file found (simulate)
+      mockLoadConfig.mockImplementation(() => {
+        throw new Error('Config file not found');
+      });
+
+      await expect(compileCommand({ cwd: '/nonexistent' }, mockServices)).rejects.toThrow();
     });
   });
 });

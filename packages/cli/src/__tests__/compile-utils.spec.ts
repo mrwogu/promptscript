@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { TargetEntry, TargetConfig } from '@promptscript/core';
+import { resolve } from 'path';
+import { existsSync } from 'fs';
 
 /**
  * Parse target entries into compiler format.
@@ -94,5 +96,75 @@ describe('parseTargets', () => {
       { name: 'cursor' },
       { name: 'antigravity', config: { enabled: true } },
     ]);
+  });
+});
+
+/**
+ * Find a config file in the given directory by checking all known config file names.
+ *
+ * Note: This is a copy of the function from compile.ts for testing purposes.
+ * The actual function is private to the module.
+ */
+const CONFIG_FILES = [
+  'promptscript.yaml',
+  'promptscript.yml',
+  '.promptscriptrc.yaml',
+  '.promptscriptrc.yml',
+];
+
+function findConfigInDir(dir: string): string | undefined {
+  for (const file of CONFIG_FILES) {
+    const fullPath = resolve(dir, file);
+    if (existsSync(fullPath)) {
+      return fullPath;
+    }
+  }
+  return undefined;
+}
+
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs')>();
+  return {
+    ...actual,
+    existsSync: vi.fn(actual.existsSync),
+  };
+});
+
+describe('findConfigInDir', () => {
+  it('should return path when promptscript.yaml exists', () => {
+    const mockExistsSync = vi.mocked(existsSync);
+    mockExistsSync.mockImplementation((path) => {
+      return String(path).endsWith('promptscript.yaml');
+    });
+
+    const result = findConfigInDir('/my/project');
+    expect(result).toBe(resolve('/my/project', 'promptscript.yaml'));
+  });
+
+  it('should try all config file names', () => {
+    const mockExistsSync = vi.mocked(existsSync);
+    mockExistsSync.mockImplementation((path) => {
+      return String(path).endsWith('.promptscriptrc.yml');
+    });
+
+    const result = findConfigInDir('/my/project');
+    expect(result).toBe(resolve('/my/project', '.promptscriptrc.yml'));
+  });
+
+  it('should return undefined when no config files found', () => {
+    const mockExistsSync = vi.mocked(existsSync);
+    mockExistsSync.mockReturnValue(false);
+
+    const result = findConfigInDir('/empty/project');
+    expect(result).toBeUndefined();
+  });
+
+  it('should return the first matching config file', () => {
+    const mockExistsSync = vi.mocked(existsSync);
+    mockExistsSync.mockReturnValue(true);
+
+    const result = findConfigInDir('/my/project');
+    // Should return the first one (promptscript.yaml), not later matches
+    expect(result).toBe(resolve('/my/project', 'promptscript.yaml'));
   });
 });
