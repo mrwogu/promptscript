@@ -665,6 +665,10 @@
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/UserConfig/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/BlockContent/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
@@ -1850,6 +1854,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/guides/security/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/guides/user-config/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
