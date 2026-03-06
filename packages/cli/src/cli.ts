@@ -14,6 +14,7 @@ import { pullCommand } from './commands/pull.js';
 import { diffCommand } from './commands/diff.js';
 import { checkCommand } from './commands/check.js';
 import { updateCheckCommand } from './commands/update-check.js';
+import { registerRegistryCommands } from './commands/registry/index.js';
 import { setContext, LogLevel } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 
@@ -123,6 +124,9 @@ program
   .action(checkCommand);
 
 program.command('update-check').description('Check for CLI updates').action(updateCheckCommand);
+
+const registry = program.command('registry').description('Manage PromptScript registries');
+registerRegistryCommands(registry);
 
 /**
  * Run the CLI.

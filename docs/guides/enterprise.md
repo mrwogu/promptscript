@@ -46,9 +46,15 @@ flowchart TB
 
 ## Central Registry Setup
 
-### Repository Structure
+### Create Your Registry
 
-Create a central registry repository:
+Use the CLI to scaffold your company registry:
+
+```bash
+prs registry init company-registry --name "ACME Registry" --namespaces @org @teams @fragments @templates
+```
+
+### Repository Structure
 
 ```
 promptscript-registry/
@@ -441,6 +447,39 @@ For production stability, pin to specific versions using Git tags:
     @inherit @teams/frontend@2.0.0
     ```
 
+## Developer Configuration
+
+### User-Level Config
+
+Each developer can set their default registry in `~/.promptscript/config.yaml`:
+
+```yaml
+version: '1'
+registry:
+  git:
+    url: https://github.com/acme/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+defaults:
+  team: frontend
+  targets:
+    - github
+    - claude
+```
+
+This allows `prs init --yes` to automatically connect to the company registry without manual configuration. See [User-Level Configuration](./user-config.md) for details.
+
+### Environment Variables
+
+For CI/CD and developer environments, use environment variables:
+
+```bash
+export PROMPTSCRIPT_REGISTRY_GIT_URL=https://github.com/acme/promptscript-registry.git
+export PROMPTSCRIPT_REGISTRY_GIT_REF=main
+```
+
 ## CI/CD Integration
 
 ### GitHub Actions Workflow
@@ -512,15 +551,8 @@ jobs:
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
 
-      - name: Validate all files
-        run: |
-          find . -name "*.prs" -exec prs validate {} \;
-
-      - name: Check for breaking changes
-        if: github.event_name == 'pull_request'
-        run: |
-          # Custom script to detect breaking changes
-          ./scripts/check-breaking-changes.sh
+      - name: Validate registry
+        run: prs registry validate --strict
 ```
 
 ## Governance

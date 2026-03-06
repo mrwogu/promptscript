@@ -269,6 +269,35 @@ export interface PromptScriptConfig {
 }
 
 /**
+ * User-level configuration stored at ~/.promptscript/config.yaml.
+ * Provides defaults that can be overridden by project config, env vars, or CLI flags.
+ */
+export interface UserConfig {
+  version: '1';
+  registry?: {
+    git?: {
+      url: string;
+      ref?: string;
+      path?: string;
+      auth?: {
+        type: 'token' | 'ssh';
+        tokenEnvVar?: string;
+        sshKeyPath?: string;
+      };
+    };
+    url?: string;
+    cache?: {
+      enabled?: boolean;
+      ttl?: number;
+    };
+  };
+  defaults?: {
+    targets?: string[];
+    team?: string;
+  };
+}
+
+/**
  * Supported output targets.
  */
 export type TargetName =

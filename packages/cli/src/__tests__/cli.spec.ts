@@ -21,6 +21,10 @@ vi.mock('../commands/diff', () => ({
   diffCommand: vi.fn(),
 }));
 
+vi.mock('../commands/registry/index', () => ({
+  registerRegistryCommands: vi.fn(),
+}));
+
 // Store references to mock functions for assertions
 const mockCommand = vi.fn();
 const mockName = vi.fn().mockReturnThis();
@@ -31,12 +35,16 @@ const mockHook = vi.fn().mockReturnThis();
 const mockAction = vi.fn().mockReturnThis();
 const mockParse = vi.fn();
 
-// Create chainable mock for command
-mockCommand.mockImplementation(() => ({
+// Create a chainable mock that supports nested command() calls
+const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
   description: mockDescription,
   option: mockOption,
   action: mockAction,
-}));
+  command: mockCommand,
+});
+
+// Create chainable mock for command
+mockCommand.mockImplementation(() => createChainableMock());
 
 // Mock commander with class
 vi.mock('commander', () => {
@@ -127,6 +135,13 @@ describe('cli', () => {
       run(['node', 'prs', 'update-check']);
 
       expect(mockCommand).toHaveBeenCalledWith('update-check');
+    });
+
+    it('should register registry command group', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'registry']);
+
+      expect(mockCommand).toHaveBeenCalledWith('registry');
     });
   });
 });

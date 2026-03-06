@@ -79,3 +79,4 @@ __pycache__/
 
 # Generated API docs (regenerated in CI)
 docs/api-reference/
+.gitnexus

@@ -2,6 +2,9 @@ import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { parse as parseYaml } from 'yaml';
 import type { PromptScriptConfig } from '@promptscript/core';
+import { loadUserConfig } from './user-config.js';
+import { loadEnvOverrides } from './env-config.js';
+import { mergeConfigs } from './merge-config.js';
 
 /**
  * List of config file names to search for.
@@ -93,4 +96,23 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
     const message = error instanceof Error ? error.message : 'Unknown parse error';
     throw new Error(`Failed to parse ${configFile}: ${message}`);
   }
+}
+
+/**
+ * Load the effective configuration by merging all config sources.
+ * Priority (highest to lowest): CLI flags > env vars > project config > user config.
+ *
+ * @param customPath - Optional custom project config file path.
+ * @param cliFlags - Optional CLI flag overrides.
+ * @returns The merged configuration.
+ */
+export async function loadEffectiveConfig(
+  customPath?: string,
+  cliFlags?: Partial<PromptScriptConfig>
+): Promise<PromptScriptConfig> {
+  const userConfig = await loadUserConfig();
+  const projectConfig = await loadConfig(customPath);
+  const envOverrides = loadEnvOverrides();
+
+  return mergeConfigs(userConfig, projectConfig, envOverrides, cliFlags);
 }
