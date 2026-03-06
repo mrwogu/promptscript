@@ -51,17 +51,17 @@ prs init [options]
 
 **Options:**
 
-| Option                   | Description                                          |
-| ------------------------ | ---------------------------------------------------- |
-| `-n, --name <name>`      | Project name (auto-detected from package.json, etc.) |
-| `-t, --team <team>`      | Team namespace for organization                      |
-| `--inherit <path>`       | Inheritance path (e.g., `@company/team`)             |
-| `--registry <path>`      | Registry path for shared configurations              |
-| `--targets <targets...>` | Target AI tools (github, claude, cursor)             |
-| `-i, --interactive`      | Force interactive mode with prompts                  |
-| `-y, --yes`              | Skip prompts, use defaults                           |
-| `-f, --force`            | Force reinitialize even if already initialized       |
-| `-m, --migrate`          | Install migration skill for AI-assisted migration    |
+| Option                   | Description                                                     |
+| ------------------------ | --------------------------------------------------------------- |
+| `-n, --name <name>`      | Project name (auto-detected from package.json, etc.)            |
+| `-t, --team <team>`      | Team namespace for organization                                 |
+| `--inherit <path>`       | Inheritance path (e.g., `@company/team`)                        |
+| `--registry <path>`      | Registry path for shared configurations                         |
+| `--targets <targets...>` | Target AI tools (github, claude, cursor, opencode, gemini, ...) |
+| `-i, --interactive`      | Force interactive mode with prompts                             |
+| `-y, --yes`              | Skip prompts, use defaults                                      |
+| `-f, --force`            | Force reinitialize even if already initialized                  |
+| `-m, --migrate`          | Install migration skill for AI-assisted migration               |
 
 **Examples:**
 
@@ -179,6 +179,8 @@ prs compile --debug
 | `claude`      | `CLAUDE.md`                       | Claude Code        |
 | `cursor`      | `.cursor/rules/project.mdc`       | Cursor (modern)    |
 | `antigravity` | `.agent/rules/project.md`         | Google Antigravity |
+| `opencode`    | `OPENCODE.md`                     | OpenCode           |
+| `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 
 ---
 

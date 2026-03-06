@@ -46,7 +46,7 @@ docker pull ghcr.io/mrwogu/promptscript:1.0.0
 
 ```bash
 docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest \
-  init --name myproject --targets github,claude
+  init --name myproject --targets github,claude,opencode,gemini
 ```
 
 ### Validate PromptScript Files

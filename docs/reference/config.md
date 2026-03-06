@@ -298,6 +298,8 @@ targets:
 | `claude`      | `CLAUDE.md`                       | `markdown`         | simple / multifile / full   |
 | `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy |
 | `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter        |
+| `opencode`    | `OPENCODE.md`                     | `markdown`         | simple / multifile / full   |
+| `gemini`      | `GEMINI.md`                       | `markdown`         | simple / multifile / full   |
 
 **Cursor Versions:**
 
@@ -359,6 +361,22 @@ targets:
       version: multifile # Main + modular rules in .claude/rules/
   - claude:
       version: full # Multifile + skills + CLAUDE.local.md
+
+  # OpenCode versions
+  - opencode:
+      version: simple # Single OPENCODE.md
+  - opencode:
+      version: multifile # Main + commands
+  - opencode:
+      version: full # Multifile + skills + agents
+
+  # Gemini CLI versions
+  - gemini:
+      version: simple # Single GEMINI.md
+  - gemini:
+      version: multifile # Main + commands + skills
+  - gemini:
+      version: full # Same as multifile (no agent concept)
 ```
 
 **GitHub Copilot Versions:**
@@ -376,6 +394,22 @@ targets:
 | `simple`    | `CLAUDE.md` (single file)                                                                         |
 | `multifile` | Main + `.claude/rules/*.md` with path-specific rules (from `@guards.globs`)                       |
 | `full`      | Multifile + `.claude/skills/<name>/SKILL.md` (from `@skills`) + `CLAUDE.local.md` (from `@local`) |
+
+**OpenCode Versions:**
+
+| Version     | Output Files                                                                  |
+| ----------- | ----------------------------------------------------------------------------- |
+| `simple`    | `OPENCODE.md` (single file)                                                   |
+| `multifile` | Main + `.opencode/commands/<name>.md`                                         |
+| `full`      | Multifile + `.opencode/skills/<name>/SKILL.md` + `.opencode/agents/<name>.md` |
+
+**Gemini CLI Versions:**
+
+| Version     | Output Files                                                             |
+| ----------- | ------------------------------------------------------------------------ |
+| `simple`    | `GEMINI.md` (single file)                                                |
+| `multifile` | Main + `.gemini/commands/<name>.toml` + `.gemini/skills/<name>/skill.md` |
+| `full`      | Same as multifile (Gemini CLI has no agent concept)                      |
 
 **Target Options:**
 
@@ -685,6 +719,10 @@ targets:
   cursor:
     enabled: true
   antigravity:
+    enabled: true
+  opencode:
+    enabled: true
+  gemini:
     enabled: true
 ```
 

@@ -12,6 +12,9 @@ const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'claude', label: 'Claude', icon: '🤖' },
   { name: 'cursor', label: 'Cursor', icon: '↗' },
   { name: 'antigravity', label: 'Antigravity', icon: '🚀' },
+  { name: 'factory', label: 'Factory', icon: '🏭' },
+  { name: 'opencode', label: 'OpenCode', icon: '💻' },
+  { name: 'gemini', label: 'Gemini', icon: '♊' },
 ];
 
 /**

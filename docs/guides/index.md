@@ -42,6 +42,17 @@ Learn best practices and patterns for using PromptScript effectively.
   <div class="ref-item__arrow">→</div>
 </a>
 
+<a href="local-skills/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--teal">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2m-6 10H6v-2h8v2m4-4H6v-2h12v2Z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Local Skills</h3>
+    <p>Install and manage skills directly in your project. Drop in skills from Skills.sh, OpenSkills, or any source — with full resource file support.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
+
 <a href="ci/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--green">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m-1 5v6l5.25 3.15l.75-1.23l-4.5-2.67V7z"/></svg>

@@ -19,7 +19,7 @@ Commands:
 /review - Review code for quality and best practices
 /test - Write comprehensive unit tests
 /docs - Generate documentation
-/deploy - 
+/deploy - Deploy to production
 
 Never:
 - Never use any type - use unknown with type guards

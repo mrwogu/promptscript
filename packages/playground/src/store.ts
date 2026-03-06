@@ -2,7 +2,14 @@ import { create } from 'zustand';
 import type { CompileResult, CompileError } from '@promptscript/browser-compiler';
 import type { FormatterOutput } from '@promptscript/formatters';
 
-export type FormatterName = 'github' | 'claude' | 'cursor' | 'antigravity';
+export type FormatterName =
+  | 'github'
+  | 'claude'
+  | 'cursor'
+  | 'antigravity'
+  | 'factory'
+  | 'opencode'
+  | 'gemini';
 
 export interface FileState {
   path: string;
@@ -179,6 +186,9 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     claude: { enabled: true, version: 'full' },
     cursor: { enabled: true, version: 'standard' },
     antigravity: { enabled: true, version: 'frontmatter' },
+    factory: { enabled: false, version: 'simple' },
+    opencode: { enabled: false, version: 'full' },
+    gemini: { enabled: false, version: 'full' },
   },
   formatting: {
     tabWidth: 2,
@@ -371,6 +381,14 @@ export const selectOutputsForFormatter = (
     ],
     cursor: [/\.cursor\/rules\/.*\.mdc$/, /\.cursorrules$/],
     antigravity: [/\.agent\/rules\/.*\.md$/, /\.agent\/workflows\/.*\.md$/],
+    factory: [/^AGENTS\.md$/, /\.factory\/skills\/.*\/SKILL\.md$/],
+    opencode: [
+      /^OPENCODE\.md$/,
+      /\.opencode\/commands\/.*\.md$/,
+      /\.opencode\/skills\/.*\/SKILL\.md$/,
+      /\.opencode\/agents\/.*\.md$/,
+    ],
+    gemini: [/^GEMINI\.md$/, /\.gemini\/commands\/.*\.toml$/, /\.gemini\/skills\/.*\/skill\.md$/],
   };
 
   const patterns = formatterPatterns[formatter];
@@ -386,6 +404,9 @@ export const selectOutputsForFormatter = (
     github: 'copilot-instructions.md',
     cursor: 'instructions.mdc',
     antigravity: 'project.md',
+    factory: 'AGENTS.md',
+    opencode: 'OPENCODE.md',
+    gemini: 'GEMINI.md',
   };
 
   const mainPattern = mainFilePatterns[formatter];

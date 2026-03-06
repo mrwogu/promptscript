@@ -163,12 +163,14 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate
 
 **Generated Outputs:**
 
-| AI Tool            | Output Files                                                     |
-| :----------------- | :--------------------------------------------------------------- |
-| **GitHub Copilot** | `.github/copilot-instructions.md`, `.github/prompts/*.prompt.md` |
-| **Claude Code**    | `CLAUDE.md`, `.claude/skills/*.md`                               |
-| **Cursor**         | `.cursor/rules/*.mdc`                                            |
-| **Antigravity**    | `.agent/rules/*.md`                                              |
+| AI Tool            | Output Files                                                            |
+| :----------------- | :---------------------------------------------------------------------- |
+| **GitHub Copilot** | `.github/copilot-instructions.md`, `.github/prompts/*.prompt.md`        |
+| **Claude Code**    | `CLAUDE.md`, `.claude/skills/*.md`                                      |
+| **Cursor**         | `.cursor/rules/*.mdc`                                                   |
+| **Antigravity**    | `.agent/rules/*.md`                                                     |
+| **OpenCode**       | `OPENCODE.md`, `.opencode/commands/*.md`, `.opencode/skills/*/SKILL.md` |
+| **Gemini CLI**     | `GEMINI.md`, `.gemini/commands/*.toml`, `.gemini/skills/*/skill.md`     |
 
 ---
 
@@ -278,6 +280,8 @@ Inherit from battle-tested templates instead of starting from scratch.
 | **Claude Code**        | `CLAUDE.md`                       | Skills with tool permissions |
 | **Cursor**             | `.cursor/rules/*.mdc`             | Glob patterns, alwaysApply   |
 | **Google Antigravity** | `.agent/rules/*.md`               | Activation modes             |
+| **OpenCode**           | `OPENCODE.md`                     | Commands, skills, agents     |
+| **Gemini CLI**         | `GEMINI.md`                       | TOML commands, skills        |
 
 **[See Roadmap](ROADMAP.md)** for upcoming platforms and features — contributions welcome!
 

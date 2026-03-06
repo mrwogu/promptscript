@@ -24,6 +24,21 @@ const TARGET_INFO: Record<
     versions: ['simple', 'frontmatter'],
     supportsXml: true,
   },
+  factory: {
+    label: 'Factory AI',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  opencode: {
+    label: 'OpenCode',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: true,
+  },
+  gemini: {
+    label: 'Gemini CLI',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: true,
+  },
 };
 
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [

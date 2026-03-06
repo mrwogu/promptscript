@@ -654,6 +654,7 @@ If imports fail:
 
 ## Next Steps
 
+- [Local Skills](local-skills.md) - Install third-party skills with resource files
 - [Inheritance Guide](inheritance.md) - Deep dive into inheritance patterns
 - [Enterprise Setup](enterprise.md) - Organization-wide registries
 - [Configuration Reference](../reference/config.md) - Full config options
