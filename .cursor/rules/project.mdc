@@ -3,7 +3,7 @@ description: "Project-specific rules"
 alwaysApply: true
 ---
 
-<!-- PromptScript 2026-01-30T14:00:10.623Z - do not edit -->
+<!-- PromptScript 2026-03-05T23:13:25.609Z - do not edit -->
 
 You are working on PromptScript at PromptScript.
 
@@ -151,20 +151,20 @@ Config:
 
 Commands:
 /review - Review code for quality, type safety, and best practices
-/test - 
-/test-unit - 
-/test-integration - 
-/test-coverage - 
-/test-e2e - 
-/build - 
-/newpkg - 
-/quality - 
-/refactor - 
-/security-review - 
-/threat-model - 
-/cli - 
-/export - 
-/type - 
+/test - Write unit tests using Vitest
+/test-unit - Write unit tests following best practices
+/test-integration - Write integration tests for component boundaries
+/test-coverage - Analyze test coverage and suggest improvements
+/test-e2e - Write end-to-end tests for critical user journeys
+/build - Run full verification pipeline
+/newpkg - Generate new package with Nx
+/quality - Review code for quality improvements
+/refactor - Suggest refactoring opportunities
+/security-review - Review code for security vulnerabilities
+/threat-model - Analyze potential security threats
+/cli - Create CLI command handler
+/export - Design public API exports
+/type - Create TypeScript type definitions
 
 Development Commands:
 ```bash

@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-01-30T14:27:58.874Z - do not edit -->
+<!-- PromptScript 2026-03-06T13:07:42.061Z - do not edit -->
 
 ## project
 
