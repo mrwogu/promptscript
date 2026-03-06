@@ -91,6 +91,9 @@ export {
   ClaudeFormatter,
   CursorFormatter,
   AntigravityFormatter,
+  FactoryFormatter,
+  OpenCodeFormatter,
+  GeminiFormatter,
 } from './formatters/index.js';
 
 // GitHub version support
@@ -107,14 +110,32 @@ export type { CursorVersion } from './formatters/cursor.js';
 export { ANTIGRAVITY_VERSIONS } from './formatters/antigravity.js';
 export type { AntigravityVersion, ActivationType } from './formatters/antigravity.js';
 
+// Factory version support
+export { FACTORY_VERSIONS } from './formatters/factory.js';
+export type { FactoryVersion } from './formatters/factory.js';
+
+// OpenCode version support
+export { OPENCODE_VERSIONS } from './formatters/opencode.js';
+export type { OpenCodeVersion } from './formatters/opencode.js';
+
+// Gemini version support
+export { GEMINI_VERSIONS } from './formatters/gemini.js';
+export type { GeminiVersion } from './formatters/gemini.js';
+
 // Register built-in formatters
 import { FormatterRegistry } from './registry.js';
 import { GitHubFormatter } from './formatters/github.js';
 import { ClaudeFormatter } from './formatters/claude.js';
 import { CursorFormatter } from './formatters/cursor.js';
 import { AntigravityFormatter } from './formatters/antigravity.js';
+import { FactoryFormatter } from './formatters/factory.js';
+import { OpenCodeFormatter } from './formatters/opencode.js';
+import { GeminiFormatter } from './formatters/gemini.js';
 
 FormatterRegistry.register('github', () => new GitHubFormatter());
 FormatterRegistry.register('claude', () => new ClaudeFormatter());
 FormatterRegistry.register('cursor', () => new CursorFormatter());
 FormatterRegistry.register('antigravity', () => new AntigravityFormatter());
+FormatterRegistry.register('factory', () => new FactoryFormatter());
+FormatterRegistry.register('opencode', () => new OpenCodeFormatter());
+FormatterRegistry.register('gemini', () => new GeminiFormatter());

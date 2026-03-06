@@ -44,6 +44,8 @@ export interface CompileOptions {
   config?: string;
   /** Force overwrite existing files without prompts */
   force?: boolean;
+  /** Working directory (project root) */
+  cwd?: string;
 }
 
 /**

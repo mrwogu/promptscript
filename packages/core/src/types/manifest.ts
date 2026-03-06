@@ -8,7 +8,14 @@
 /**
  * Target AI tool identifiers.
  */
-export type ManifestTarget = 'github' | 'claude' | 'cursor' | 'antigravity';
+export type ManifestTarget =
+  | 'github'
+  | 'claude'
+  | 'cursor'
+  | 'antigravity'
+  | 'factory'
+  | 'opencode'
+  | 'gemini';
 
 /**
  * Namespace definition in the registry.

@@ -21,6 +21,9 @@ targets:
   # Antigravity
   - antigravity
 
+  # Factory AI
+  - factory
+
 validation:
   rules:
     empty-block: warn

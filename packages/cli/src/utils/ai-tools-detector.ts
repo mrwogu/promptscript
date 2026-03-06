@@ -3,7 +3,14 @@ import { type CliServices, createDefaultServices } from '../services.js';
 /**
  * Supported AI tool targets.
  */
-export type AIToolTarget = 'github' | 'claude' | 'cursor' | 'antigravity';
+export type AIToolTarget =
+  | 'github'
+  | 'claude'
+  | 'cursor'
+  | 'antigravity'
+  | 'factory'
+  | 'opencode'
+  | 'gemini';
 
 /**
  * AI tool detection result.
@@ -42,6 +49,8 @@ const INSTRUCTION_FILES = [
   'AGENTS.md',
   'AI_INSTRUCTIONS.md',
   'AI.md',
+  'OPENCODE.md',
+  'GEMINI.md',
 ];
 
 const AI_TOOL_PATTERNS: AIToolPattern[] = [
@@ -64,6 +73,21 @@ const AI_TOOL_PATTERNS: AIToolPattern[] = [
     target: 'antigravity',
     files: ['.agent/rules/project.md'],
     directories: ['.agent', '.agent/rules'],
+  },
+  {
+    target: 'factory',
+    files: ['AGENTS.md', '.factory/config.json'],
+    directories: ['.factory', '.factory/skills'],
+  },
+  {
+    target: 'opencode',
+    files: ['OPENCODE.md'],
+    directories: ['.opencode', '.opencode/commands', '.opencode/skills', '.opencode/agents'],
+  },
+  {
+    target: 'gemini',
+    files: ['GEMINI.md', '.gemini/settings.json'],
+    directories: ['.gemini', '.gemini/commands', '.gemini/skills'],
   },
 ];
 
@@ -107,6 +131,9 @@ export async function detectAITools(
     claude: [],
     cursor: [],
     antigravity: [],
+    factory: [],
+    opencode: [],
+    gemini: [],
   };
   const migrationCandidates: string[] = [];
 
@@ -150,7 +177,7 @@ export async function detectAITools(
  * Get all available targets.
  */
 export function getAllTargets(): AIToolTarget[] {
-  return ['github', 'claude', 'cursor', 'antigravity'];
+  return ['github', 'claude', 'cursor', 'antigravity', 'factory', 'opencode', 'gemini'];
 }
 
 /**

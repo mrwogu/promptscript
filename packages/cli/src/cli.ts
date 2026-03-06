@@ -85,6 +85,7 @@ program
   .option('--registry <path>', 'Registry path (overrides config)')
   .option('-c, --config <path>', 'Path to custom config file')
   .option('--force', 'Force overwrite existing files without prompts')
+  .option('--cwd <dir>', 'Working directory (project root)')
   .action((opts) => compileCommand(opts));
 
 program

@@ -2,7 +2,7 @@
 
 > **Internal package** - Part of the [PromptScript](https://github.com/mrwogu/promptscript) monorepo.
 
-Output formatters for various AI tools (GitHub Copilot, Claude Code, Cursor, Google Antigravity).
+Output formatters for various AI tools (GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, Gemini CLI).
 
 ## Status
 

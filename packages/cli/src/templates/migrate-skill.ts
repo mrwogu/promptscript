@@ -354,6 +354,77 @@ After generating PromptScript files:
 - Comments: # comment
 `;
 
+export const MIGRATE_SKILL_FACTORY = `---
+name: 'migrate-to-promptscript'
+description: 'Migrate existing AI instruction files to PromptScript format'
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - Bash
+user-invocable: true
+---
+
+# Migrate to PromptScript
+
+## Overview
+
+This skill guides you through migrating existing AI instruction files
+to PromptScript format, creating a unified source of truth for all
+AI coding assistants.
+
+## Step 1: Discovery
+
+Search for existing instruction files:
+
+- CLAUDE.md, claude.md, CLAUDE.local.md
+- .cursorrules, .cursor/rules/*.mdc
+- .github/copilot-instructions.md
+- .agent/rules/*.md
+- AGENTS.md, AI_INSTRUCTIONS.md
+
+## Step 2: Content Mapping
+
+Map source content to PromptScript blocks:
+
+| Source Pattern                       | PromptScript Block |
+| ------------------------------------ | ------------------ |
+| You are, persona, identity, role     | @identity          |
+| Tech stack, languages, frameworks    | @context           |
+| Coding standards, conventions, rules | @standards         |
+| Don't, Never, restrictions           | @restrictions      |
+| Commands, shortcuts                  | @shortcuts         |
+| API docs, references                 | @knowledge         |
+
+## Step 3: Generate PromptScript
+
+Create \`.promptscript/project.prs\` with:
+
+1. **@meta** block with id and syntax fields (required)
+2. **@identity** for persona/role descriptions
+3. **@context** for tech stack info
+4. **@standards** organized by category
+5. **@restrictions** with dash prefix for each item
+6. **@shortcuts** for commands
+
+## Step 4: Validation
+
+After generating:
+
+1. Run \`prs validate\`
+2. Run \`prs compile --dry-run\`
+3. Compare output with original files
+
+## Quality Checklist
+
+- @meta block has id and syntax
+- Standards organized by category
+- Restrictions use dash prefix (-)
+- prs validate passes
+- prs compile produces correct output
+`;
+
 export const MIGRATE_SKILL_GITHUB = `---
 name: 'migrate-to-promptscript'
 description: 'Migrate existing AI instruction files to PromptScript format'

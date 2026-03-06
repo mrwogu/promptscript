@@ -56,7 +56,7 @@ export const KNOWN_SECTIONS: SectionInfo[] = [
     id: 'commands',
     name: 'Commands',
     description: 'Development commands and shortcuts',
-    sourceBlocks: ['shortcuts', 'knowledge'],
+    sourceBlocks: ['shortcuts', 'commands', 'knowledge'],
     required: false,
   },
   {
