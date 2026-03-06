@@ -227,4 +227,74 @@ describe('config/merge-config', () => {
 
     expect(result.registry?.url).toBe('https://project-registry.example.com');
   });
+
+  it('should return source when target registry is undefined', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: {
+        git: { url: 'https://github.com/user/reg.git' },
+      },
+    };
+
+    // baseProjectConfig has no registry — target will be undefined in deepMergeRegistry
+    const result = mergeConfigs(userConfig, baseProjectConfig, {});
+
+    expect(result.registry?.git?.url).toBe('https://github.com/user/reg.git');
+  });
+
+  it('should merge path and url overrides from env', () => {
+    const projectConfig: PromptScriptConfig = {
+      ...baseProjectConfig,
+      registry: {
+        path: './old-registry',
+        url: 'https://old.example.com',
+      },
+    };
+
+    const envOverrides: Partial<PromptScriptConfig> = {
+      registry: {
+        path: './new-registry',
+        url: 'https://new.example.com',
+      },
+    };
+
+    const result = mergeConfigs(emptyUserConfig, projectConfig, envOverrides);
+
+    expect(result.registry?.path).toBe('./new-registry');
+    expect(result.registry?.url).toBe('https://new.example.com');
+  });
+
+  it('should handle env overrides when no registry exists yet', () => {
+    // No user config registry, no project registry — merged.registry is undefined
+    const envOverrides: Partial<PromptScriptConfig> = {
+      registry: {
+        git: { url: 'https://github.com/env/reg.git' },
+      },
+    };
+
+    const result = mergeConfigs(emptyUserConfig, baseProjectConfig, envOverrides);
+
+    expect(result.registry?.git?.url).toBe('https://github.com/env/reg.git');
+  });
+
+  it('should convert user config git.path to registry format', () => {
+    const userConfig: UserConfig = {
+      version: '1',
+      registry: {
+        git: {
+          url: 'https://github.com/user/reg.git',
+          ref: 'v2',
+          path: 'sub/dir',
+          auth: { type: 'ssh', sshKeyPath: '/key' },
+        },
+      },
+    };
+
+    const result = mergeConfigs(userConfig, baseProjectConfig, {});
+
+    expect(result.registry?.git?.url).toBe('https://github.com/user/reg.git');
+    expect(result.registry?.git?.ref).toBe('v2');
+    expect(result.registry?.git?.path).toBe('sub/dir');
+    expect(result.registry?.git?.auth?.type).toBe('ssh');
+  });
 });
