@@ -8,6 +8,22 @@ vi.mock('../prettier/loader.js', () => ({
   findPrettierConfig: () => mockFindPrettierConfig(),
 }));
 
+// Mock manifest-loader (partially)
+const mockLoadManifestFromUrl = vi.fn();
+vi.mock('../utils/manifest-loader.js', async (importOriginal) => {
+  const original = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...original,
+    loadManifestFromUrl: (...args: unknown[]) => mockLoadManifestFromUrl(...args),
+  };
+});
+
+// Mock user-config
+const mockLoadUserConfig = vi.fn();
+vi.mock('../config/user-config.js', () => ({
+  loadUserConfig: (...args: unknown[]) => mockLoadUserConfig(...args),
+}));
+
 // Mock ora
 vi.mock('ora', () => ({
   default: vi.fn().mockReturnValue({
@@ -60,6 +76,10 @@ describe('commands/init', () => {
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     // Default: no Prettier config found
     mockFindPrettierConfig.mockReturnValue(null);
+    // Default: no user config
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    // Default: manifest fetch fails
+    mockLoadManifestFromUrl.mockRejectedValue(new Error('not available'));
 
     mockFs = {
       existsSync: vi.fn().mockReturnValue(false),
@@ -219,6 +239,51 @@ describe('commands/init', () => {
       try {
         await initCommand({ yes: true }, mockServices);
 
+        expect(mockFs.writeFile).toHaveBeenCalledWith(
+          'promptscript.yaml',
+          expect.stringContaining('https://github.com/my-org/my-registry.git'),
+          'utf-8'
+        );
+      } finally {
+        if (originalEnv === undefined) {
+          delete process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+        } else {
+          process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = originalEnv;
+        }
+      }
+    });
+
+    it('should fetch and apply manifest suggestions when registry is configured', async () => {
+      const originalEnv = process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+      process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = 'https://github.com/my-org/my-registry.git';
+
+      mockLoadManifestFromUrl.mockResolvedValue({
+        manifest: {
+          version: '1',
+          meta: { name: 'Test', description: 'Test', lastUpdated: '2026-01-01' },
+          namespaces: {
+            '@core': { description: 'Core', priority: 100 },
+          },
+          catalog: [
+            {
+              id: '@core/base',
+              path: '@core/base.prs',
+              name: 'Base',
+              description: 'Base config',
+              tags: ['core'],
+              targets: ['github'],
+              dependencies: [],
+              detectionHints: { always: true },
+            },
+          ],
+          suggestionRules: [],
+        },
+      });
+
+      try {
+        await initCommand({ yes: true }, mockServices);
+
+        expect(mockLoadManifestFromUrl).toHaveBeenCalled();
         expect(mockFs.writeFile).toHaveBeenCalledWith(
           'promptscript.yaml',
           expect.stringContaining('https://github.com/my-org/my-registry.git'),

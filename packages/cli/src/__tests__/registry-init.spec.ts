@@ -162,6 +162,27 @@ describe('commands/registry/init', () => {
     );
   });
 
+  it('should fall back to default namespaces when none selected', async () => {
+    mockPrompts.input
+      .mockResolvedValueOnce('My Registry') // name
+      .mockResolvedValueOnce('A registry'); // description
+    mockPrompts.checkbox.mockResolvedValueOnce([]); // empty selection
+    mockPrompts.confirm.mockResolvedValueOnce(false); // no seed
+
+    await registryInitCommand('test-registry', {}, mockServices);
+
+    // Should use default namespaces (@core, @stacks, @fragments)
+    expect(mockFs.mkdir).toHaveBeenCalledWith(expect.stringContaining('@core'), {
+      recursive: true,
+    });
+    expect(mockFs.mkdir).toHaveBeenCalledWith(expect.stringContaining('@stacks'), {
+      recursive: true,
+    });
+    expect(mockFs.mkdir).toHaveBeenCalledWith(expect.stringContaining('@fragments'), {
+      recursive: true,
+    });
+  });
+
   it('should handle user cancellation gracefully', async () => {
     const exitError = new Error('User cancelled');
     exitError.name = 'ExitPromptError';
