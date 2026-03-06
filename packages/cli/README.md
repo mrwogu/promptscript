@@ -120,15 +120,15 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 
 ## Supported Targets
 
-| AI Tool                | Output                                             |
-| :--------------------- | :------------------------------------------------- |
-| **GitHub Copilot**     | `.github/copilot-instructions.md`, agents, prompts |
-| **Claude Code**        | `CLAUDE.md`, skills, local memory                  |
-| **Cursor**             | `.cursor/rules/*.mdc`                              |
-| **Google Antigravity** | `.agent/rules/*.md`                                |
+| AI Tool                | Output                                                |
+| :--------------------- | :---------------------------------------------------- |
+| **GitHub Copilot**     | `.github/copilot-instructions.md`, agents, prompts    |
+| **Claude Code**        | `CLAUDE.md`, skills, local memory                     |
+| **Cursor**             | `.cursor/rules/*.mdc`                                 |
+| **Google Antigravity** | `.agent/rules/*.md`                                   |
 | **Factory AI**         | `AGENTS.md`, `.factory/skills/`, `.factory/commands/` |
-| **OpenCode**           | `agents.yaml`                                      |
-| **Gemini CLI**         | `GEMINI.md`                                        |
+| **OpenCode**           | `agents.yaml`                                         |
+| **Gemini CLI**         | `GEMINI.md`                                           |
 
 ## Configuration
 
