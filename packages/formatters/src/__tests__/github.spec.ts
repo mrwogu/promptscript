@@ -1136,6 +1136,578 @@ describe('GitHubFormatter', () => {
     });
   });
 
+  describe('prompt files in multifile mode', () => {
+    it('should generate prompt files in multifile mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  prompt: true,
+                  description: 'Review code',
+                  content: 'Review the code carefully.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      expect(result.additionalFiles).toBeDefined();
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/review.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      expect(promptFile?.content).toContain("description: 'Review code'");
+      expect(promptFile?.content).toContain('Review the code carefully.');
+    });
+  });
+
+  describe('named instruction blocks within guards', () => {
+    it('should generate instruction files from named blocks with applyTo', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts'],
+                security: {
+                  applyTo: ['src/auth/**/*.ts', 'src/crypto/**/*.ts'],
+                  description: 'Security-sensitive code rules',
+                  content: 'All auth code must use bcrypt.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      expect(result.additionalFiles).toBeDefined();
+      const securityFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/security.instructions.md')
+      );
+      expect(securityFile).toBeDefined();
+      expect(securityFile?.content).toContain('applyTo:');
+      expect(securityFile?.content).toContain('"src/auth/**/*.ts"');
+      expect(securityFile?.content).toContain('"src/crypto/**/*.ts"');
+      expect(securityFile?.content).toContain('# Security-sensitive code rules');
+      expect(securityFile?.content).toContain('All auth code must use bcrypt.');
+    });
+
+    it('should generate instruction file with excludeAgent', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts'],
+                testing: {
+                  applyTo: ['**/*.spec.ts'],
+                  excludeAgent: 'code-reviewer',
+                  description: 'Test file rules',
+                  content: 'Use vitest for testing.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const testFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/testing.instructions.md')
+      );
+      expect(testFile).toBeDefined();
+      expect(testFile?.content).toContain('excludeAgent: "code-reviewer"');
+    });
+
+    it('should use default description for named instruction blocks', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts'],
+                styles: {
+                  applyTo: ['**/*.css'],
+                  content: 'Use BEM naming.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const stylesFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/styles.instructions.md')
+      );
+      expect(stylesFile).toBeDefined();
+      expect(stylesFile?.content).toContain('# styles rules');
+    });
+  });
+
+  describe('prompt file tools without agent mode', () => {
+    it('should render tools independently of mode in prompt files', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  prompt: true,
+                  description: 'Review code',
+                  tools: ['Read', 'Grep'],
+                  content: 'Review the code...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/review.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      // Tools should be rendered even without mode: agent
+      expect(promptFile?.content).toContain("tools: ['read', 'search']");
+      expect(promptFile?.content).not.toContain('mode:');
+    });
+
+    it('should render both mode and tools when mode is agent', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  prompt: true,
+                  description: 'Deploy app',
+                  mode: 'agent',
+                  tools: ['Bash'],
+                  content: 'Deploy the application...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/deploy.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      expect(promptFile?.content).toContain('mode: agent');
+      expect(promptFile?.content).toContain("tools: ['execute']");
+    });
+  });
+
+  describe('handoffs in prompt files', () => {
+    it('should render handoffs in prompt file frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'monitor-ci': {
+                  prompt: true,
+                  description: 'Monitor CI pipeline',
+                  handoffs: [
+                    {
+                      label: 'Delegate to CI monitor',
+                      agent: 'ci-monitor-subagent',
+                      prompt: 'Monitor the CI pipeline',
+                    },
+                  ],
+                  content: 'You are the CI monitor...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/monitor-ci.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      expect(promptFile?.content).toContain('handoffs:');
+      expect(promptFile?.content).toContain("label: 'Delegate to CI monitor'");
+      expect(promptFile?.content).toContain('agent: ci-monitor-subagent');
+      expect(promptFile?.content).toContain("prompt: 'Monitor the CI pipeline'");
+    });
+
+    it('should render handoff with send: true', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  prompt: true,
+                  description: 'Deploy',
+                  handoffs: [
+                    {
+                      label: 'Auto deploy',
+                      agent: 'deployer',
+                      prompt: 'Deploy now',
+                      send: true,
+                    },
+                  ],
+                  content: 'Deploy steps...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/deploy.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      expect(promptFile?.content).toContain('send: true');
+    });
+
+    it('should not render handoffs when array is empty', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  prompt: true,
+                  description: 'Review code',
+                  handoffs: [],
+                  content: 'Review...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const promptFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/prompts/review.prompt.md')
+      );
+      expect(promptFile).toBeDefined();
+      expect(promptFile?.content).not.toContain('handoffs:');
+    });
+  });
+
+  describe('handoffs in agent files', () => {
+    it('should render handoffs in agent file frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                orchestrator: {
+                  description: 'Main orchestrator agent',
+                  handoffs: [
+                    {
+                      label: 'Code review',
+                      agent: 'code-reviewer',
+                      prompt: 'Review the code changes',
+                    },
+                    {
+                      label: 'Run tests',
+                      agent: 'test-runner',
+                      prompt: 'Execute the test suite',
+                      send: true,
+                    },
+                  ],
+                  content: 'You orchestrate tasks...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/orchestrator.md')
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile?.content).toContain('handoffs:');
+      expect(agentFile?.content).toContain("label: 'Code review'");
+      expect(agentFile?.content).toContain('agent: code-reviewer');
+      expect(agentFile?.content).toContain("label: 'Run tests'");
+      expect(agentFile?.content).toContain('agent: test-runner');
+      expect(agentFile?.content).toContain('send: true');
+    });
+
+    it('should skip handoff entries missing label or agent', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                helper: {
+                  description: 'Helper agent',
+                  handoffs: [
+                    { label: 'Valid', agent: 'target', prompt: 'Do something' },
+                    { label: '', agent: 'target', prompt: 'Missing label' },
+                    { label: 'Missing agent', agent: '', prompt: 'No agent' },
+                  ],
+                  content: 'Help with tasks...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/helper.md')
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile?.content).toContain('handoffs:');
+      expect(agentFile?.content).toContain("label: 'Valid'");
+      // Should only have 1 handoff entry (the valid one)
+      const handoffCount = (agentFile?.content.match(/- label:/g) ?? []).length;
+      expect(handoffCount).toBe(1);
+    });
+  });
+
+  describe('TypeScript instruction content generation', () => {
+    it('should generate TypeScript instruction file with structured standards', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                typescript: {
+                  strictMode: true,
+                  useUnknown: 'with type guards',
+                  exports: 'named exports only',
+                  returnTypes: 'on public functions',
+                },
+                naming: {
+                  files: 'kebab-case.ts',
+                  classes: 'PascalCase',
+                  functions: 'camelCase',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const tsFile = result.additionalFiles?.find((f) =>
+        f.path.includes('typescript.instructions.md')
+      );
+      expect(tsFile).toBeDefined();
+      expect(tsFile?.content).toContain('strict TypeScript');
+      expect(tsFile?.content).toContain('`unknown` with type guards');
+      expect(tsFile?.content).toContain('Named exports only');
+      expect(tsFile?.content).toContain('return types on public functions');
+      expect(tsFile?.content).toContain('Files: `kebab-case.ts`');
+    });
+  });
+
+  describe('tech stack rendering', () => {
+    it('should render monorepo tech stack info', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                stack: ['TypeScript', 'Node.js'],
+                runtime: 'Node.js 20+',
+                monorepo: {
+                  tool: 'Nx',
+                  packageManager: 'pnpm',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Node.js 20+');
+      expect(result.content).toContain('Nx with pnpm workspaces');
+    });
+  });
+
+  describe('AGENTS.md restrictions rendering', () => {
+    it('should render TextContent restrictions in AGENTS.md (full mode)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'TextContent',
+              value: '- use eval\n- use any type\n- skip tests',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentsFile = result.additionalFiles?.find((f) => f.path === 'AGENTS.md');
+      expect(agentsFile).toBeDefined();
+      expect(agentsFile?.content).toContain('## Restrictions');
+      expect(agentsFile?.content).toContain('- use eval');
+      expect(agentsFile?.content).toContain('- use any type');
+      expect(agentsFile?.content).toContain('- skip tests');
+    });
+
+    it('should render ObjectContent restrictions with items in AGENTS.md (full mode)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are a helpful assistant.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                items: ['expose secrets', 'commit API keys'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentsFile = result.additionalFiles?.find((f) => f.path === 'AGENTS.md');
+      expect(agentsFile).toBeDefined();
+      expect(agentsFile?.content).toContain('## Restrictions');
+      expect(agentsFile?.content).toContain('- expose secrets');
+      expect(agentsFile?.content).toContain('- commit API keys');
+    });
+  });
+
   describe('restrictions with ObjectContent items', () => {
     it('should extract items from ObjectContent with items array', () => {
       const ast: Program = {

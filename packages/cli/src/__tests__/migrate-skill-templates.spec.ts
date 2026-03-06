@@ -4,6 +4,7 @@ import {
   MIGRATE_SKILL_GITHUB,
   MIGRATE_SKILL_CURSOR,
   MIGRATE_SKILL_ANTIGRAVITY,
+  MIGRATE_SKILL_FACTORY,
 } from '../templates/migrate-skill.js';
 
 describe('migrate-skill templates', () => {
@@ -172,12 +173,46 @@ describe('migrate-skill templates', () => {
     });
   });
 
+  describe('MIGRATE_SKILL_FACTORY', () => {
+    it('should have valid YAML frontmatter', () => {
+      expect(MIGRATE_SKILL_FACTORY).toMatch(/^---\n/);
+      expect(MIGRATE_SKILL_FACTORY).toMatch(/\n---\n/);
+    });
+
+    it('should have required frontmatter fields', () => {
+      expect(MIGRATE_SKILL_FACTORY).toContain("name: 'migrate-to-promptscript'");
+      expect(MIGRATE_SKILL_FACTORY).toContain('description:');
+      expect(MIGRATE_SKILL_FACTORY).toContain('allowed-tools:');
+      expect(MIGRATE_SKILL_FACTORY).toContain('user-invocable: true');
+    });
+
+    it('should contain migration steps', () => {
+      expect(MIGRATE_SKILL_FACTORY).toContain('Step 1: Discovery');
+      expect(MIGRATE_SKILL_FACTORY).toContain('Step 2: Content Mapping');
+      expect(MIGRATE_SKILL_FACTORY).toContain('Step 3: Generate PromptScript');
+      expect(MIGRATE_SKILL_FACTORY).toContain('Step 4: Validation');
+    });
+
+    it('should contain content mapping table', () => {
+      expect(MIGRATE_SKILL_FACTORY).toContain('@identity');
+      expect(MIGRATE_SKILL_FACTORY).toContain('@context');
+      expect(MIGRATE_SKILL_FACTORY).toContain('@standards');
+      expect(MIGRATE_SKILL_FACTORY).toContain('@restrictions');
+    });
+
+    it('should contain quality checklist', () => {
+      expect(MIGRATE_SKILL_FACTORY).toContain('Quality Checklist');
+      expect(MIGRATE_SKILL_FACTORY).toContain('prs validate');
+    });
+  });
+
   describe('template consistency', () => {
     it('all templates should mention prs validate', () => {
       expect(MIGRATE_SKILL_CLAUDE).toContain('prs validate');
       expect(MIGRATE_SKILL_GITHUB).toContain('prs validate');
       expect(MIGRATE_SKILL_CURSOR).toContain('prs validate');
       expect(MIGRATE_SKILL_ANTIGRAVITY).toContain('prs validate');
+      expect(MIGRATE_SKILL_FACTORY).toContain('prs validate');
     });
 
     it('all templates should mention prs compile', () => {
@@ -185,6 +220,7 @@ describe('migrate-skill templates', () => {
       expect(MIGRATE_SKILL_GITHUB).toContain('prs compile');
       expect(MIGRATE_SKILL_CURSOR).toContain('prs compile');
       expect(MIGRATE_SKILL_ANTIGRAVITY).toContain('prs compile');
+      expect(MIGRATE_SKILL_FACTORY).toContain('prs compile');
     });
 
     it('all templates should have content mapping section', () => {
@@ -193,6 +229,7 @@ describe('migrate-skill templates', () => {
       expect(MIGRATE_SKILL_GITHUB).toMatch(contentMappingPattern);
       expect(MIGRATE_SKILL_CURSOR).toMatch(contentMappingPattern);
       expect(MIGRATE_SKILL_ANTIGRAVITY).toMatch(contentMappingPattern);
+      expect(MIGRATE_SKILL_FACTORY).toMatch(contentMappingPattern);
     });
 
     it('all templates should have @meta block mentioned', () => {
@@ -200,6 +237,7 @@ describe('migrate-skill templates', () => {
       expect(MIGRATE_SKILL_GITHUB).toContain('@meta');
       expect(MIGRATE_SKILL_CURSOR).toContain('@meta');
       expect(MIGRATE_SKILL_ANTIGRAVITY).toContain('@meta');
+      expect(MIGRATE_SKILL_FACTORY).toContain('@meta');
     });
   });
 });

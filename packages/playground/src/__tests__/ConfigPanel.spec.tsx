@@ -13,6 +13,9 @@ describe('ConfigPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: false, version: 'simple' },
+          opencode: { enabled: false, version: 'full' },
+          gemini: { enabled: false, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
@@ -44,6 +47,9 @@ describe('ConfigPanel', () => {
     expect(screen.getByText('Claude Code')).toBeInTheDocument();
     expect(screen.getByText('Cursor')).toBeInTheDocument();
     expect(screen.getByText('Antigravity')).toBeInTheDocument();
+    expect(screen.getByText('Factory AI')).toBeInTheDocument();
+    expect(screen.getByText('OpenCode')).toBeInTheDocument();
+    expect(screen.getByText('Gemini CLI')).toBeInTheDocument();
   });
 
   it('should display formatting options', () => {
@@ -137,6 +143,9 @@ describe('ConfigPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
+          factory: { enabled: false, version: 'simple' },
+          opencode: { enabled: false, version: 'full' },
+          gemini: { enabled: false, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
