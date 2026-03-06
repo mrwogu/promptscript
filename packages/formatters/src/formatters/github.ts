@@ -52,6 +52,8 @@ interface PromptConfig {
   mode?: 'agent';
   /** Allowed tools in agent mode */
   tools?: string[];
+  /** Handoff definitions for delegation to other agents */
+  handoffs?: GitHubHandoff[];
   /** Prompt content */
   content: string;
 }
@@ -86,6 +88,22 @@ interface GitHubAgentConfig {
   model?: string;
   /** System prompt content */
   content: string;
+  /** Handoff definitions for delegation to other agents */
+  handoffs?: GitHubHandoff[];
+}
+
+/**
+ * Configuration for a handoff to another agent.
+ */
+interface GitHubHandoff {
+  /** Display label for the handoff */
+  label: string;
+  /** Target agent name */
+  agent: string;
+  /** Prompt/instructions for the handoff */
+  prompt: string;
+  /** Whether to auto-send the handoff */
+  send?: boolean;
 }
 
 /**
@@ -493,6 +511,7 @@ export class GitHubFormatter extends BaseFormatter {
 
         // Check if this shortcut should be a prompt file
         if (obj['prompt'] === true || obj['type'] === 'prompt') {
+          const handoffs = this.extractHandoffs(obj['handoffs']);
           prompts.push({
             name,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
@@ -501,6 +520,7 @@ export class GitHubFormatter extends BaseFormatter {
               obj['tools'] && Array.isArray(obj['tools'])
                 ? obj['tools'].map((t) => this.valueToString(t))
                 : undefined,
+            handoffs: handoffs.length > 0 ? handoffs : undefined,
             content: obj['content'] ? this.valueToString(obj['content']) : '',
           });
         }
@@ -523,14 +543,17 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push(`description: ${descQuote}${config.description}${descQuote}`);
     if (config.mode === 'agent') {
       lines.push('mode: agent');
-      if (config.tools && config.tools.length > 0) {
-        // Map tool names and use inline YAML array format
-        const mappedTools = config.tools
-          .map((tool) => TOOL_NAME_MAPPING[tool] ?? tool.toLowerCase())
-          .filter((t, i, arr) => arr.indexOf(t) === i); // deduplicate
-        const toolsArray = mappedTools.map((t) => `'${t}'`).join(', ');
-        lines.push(`tools: [${toolsArray}]`);
-      }
+    }
+    if (config.tools && config.tools.length > 0) {
+      // Map tool names and use inline YAML array format
+      const mappedTools = config.tools
+        .map((tool) => TOOL_NAME_MAPPING[tool] ?? tool.toLowerCase())
+        .filter((t, i, arr) => arr.indexOf(t) === i); // deduplicate
+      const toolsArray = mappedTools.map((t) => `'${t}'`).join(', ');
+      lines.push(`tools: [${toolsArray}]`);
+    }
+    if (config.handoffs && config.handoffs.length > 0) {
+      lines.push(...this.renderHandoffsYaml(config.handoffs));
     }
     lines.push('---');
     lines.push('');
@@ -716,11 +739,13 @@ export class GitHubFormatter extends BaseFormatter {
         const description = obj['description'] ? this.valueToString(obj['description']) : '';
         if (!description) continue; // description is required
 
+        const handoffs = this.extractHandoffs(obj['handoffs']);
         agents.push({
           name,
           description,
           tools: this.parseToolsArray(obj['tools']),
           model: obj['model'] ? this.valueToString(obj['model']) : undefined,
+          handoffs: handoffs.length > 0 ? handoffs : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
         });
       }
@@ -746,6 +771,56 @@ export class GitHubFormatter extends BaseFormatter {
     const unique = [...new Set(mapped)];
 
     return unique.length > 0 ? unique : undefined;
+  }
+
+  /**
+   * Extract handoff definitions from a handoffs value.
+   */
+  private extractHandoffs(value: Value | undefined): GitHubHandoff[] {
+    if (!value || !Array.isArray(value)) return [];
+
+    const handoffs: GitHubHandoff[] = [];
+    for (const item of value) {
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
+        const obj = item as Record<string, Value>;
+        const label = obj['label'] ? this.valueToString(obj['label']) : '';
+        const agent = obj['agent'] ? this.valueToString(obj['agent']) : '';
+        const prompt = obj['prompt'] ? this.valueToString(obj['prompt']) : '';
+
+        if (label && agent) {
+          handoffs.push({
+            label,
+            agent,
+            prompt,
+            send: obj['send'] === true ? true : undefined,
+          });
+        }
+      }
+    }
+
+    return handoffs;
+  }
+
+  /**
+   * Render handoffs as YAML lines for frontmatter.
+   */
+  private renderHandoffsYaml(handoffs: GitHubHandoff[]): string[] {
+    const lines: string[] = [];
+    lines.push('handoffs:');
+    for (const handoff of handoffs) {
+      // Use double quotes if label contains apostrophe, single quotes otherwise
+      const labelQuote = handoff.label.includes("'") ? '"' : "'";
+      lines.push(`  - label: ${labelQuote}${handoff.label}${labelQuote}`);
+      lines.push(`    agent: ${handoff.agent}`);
+      if (handoff.prompt) {
+        const promptQuote = handoff.prompt.includes("'") ? '"' : "'";
+        lines.push(`    prompt: ${promptQuote}${handoff.prompt}${promptQuote}`);
+      }
+      if (handoff.send) {
+        lines.push('    send: true');
+      }
+    }
+    return lines;
   }
 
   /**
@@ -789,6 +864,10 @@ export class GitHubFormatter extends BaseFormatter {
     const mappedModel = this.mapModelName(config.model);
     if (mappedModel) {
       lines.push(`model: ${mappedModel}`);
+    }
+
+    if (config.handoffs && config.handoffs.length > 0) {
+      lines.push(...this.renderHandoffsYaml(config.handoffs));
     }
 
     lines.push('---');

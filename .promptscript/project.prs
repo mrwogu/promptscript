@@ -3,7 +3,7 @@
 
 @meta {
   id: "promptscript"
-  syntax: "1.0.0"
+  syntax: "1.1.0"
   org: "PromptScript"
   tags: [typescript, monorepo, nx, parser, compiler]
 }
@@ -20,6 +20,7 @@
 @use @fragments/git-conventions
 @use @skills/base
 @use @skills/migrate
+@use @skills/promptscript
 
 # === LOCAL CONFIGURATION ===
 # Project-specific settings (modular)

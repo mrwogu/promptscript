@@ -14,7 +14,8 @@ import { FileLoader, type LoaderOptions } from './loader.js';
 import { resolveInheritance } from './inheritance.js';
 import { resolveUses } from './imports.js';
 import { applyExtends } from './extensions.js';
-import { resolveNativeSkills } from './skills.js';
+import { resolveNativeSkills, resolveNativeCommands, type NativeSkillOptions } from './skills.js';
+import { normalizeBlockAliases } from './normalize.js';
 
 /**
  * Options for the resolver.
@@ -24,6 +25,8 @@ export interface ResolverOptions extends LoaderOptions {
   cache?: boolean;
   /** Logger for verbose/debug output */
   logger?: Logger;
+  /** Options for native skill resolution */
+  skills?: NativeSkillOptions;
 }
 
 /**
@@ -65,8 +68,10 @@ export class Resolver {
   private readonly resolving: Set<string>;
   private readonly cacheEnabled: boolean;
   private readonly logger: Logger;
+  private readonly options: ResolverOptions;
 
   constructor(options: ResolverOptions) {
+    this.options = options;
     this.loader = new FileLoader(options);
     this.cache = new Map();
     this.resolving = new Set();
@@ -126,7 +131,7 @@ export class Resolver {
       return { ast: null, sources, errors };
     }
 
-    let ast = parseData.ast;
+    let ast = normalizeBlockAliases(parseData.ast);
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
     // Resolve inheritance
@@ -142,7 +147,19 @@ export class Resolver {
     ast = applyExtends(ast);
 
     // Resolve native skill files (replace @skills content with SKILL.md files if available)
-    ast = await resolveNativeSkills(ast, this.loader.getRegistryPath(), absPath);
+    ast = await resolveNativeSkills(
+      ast,
+      this.loader.getRegistryPath(),
+      absPath,
+      this.loader.getLocalPath(),
+      { ...this.options.skills, logger: this.logger }
+    );
+
+    // Auto-discover command files from local and universal directories
+    ast = await resolveNativeCommands(ast, absPath, this.loader.getLocalPath(), {
+      ...this.options.skills,
+      logger: this.logger,
+    });
 
     this.logger.debug(`Resolved ${sources.length} source file(s)`);
     return {

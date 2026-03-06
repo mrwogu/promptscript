@@ -412,7 +412,22 @@ export class CursorFormatter extends BaseFormatter {
     const commands: FormatterOutput[] = [];
 
     for (const [name, value] of Object.entries(props)) {
-      const content = this.valueToString(value);
+      let content = '';
+
+      // Handle object shortcuts with prompt/content properties (but not TextContent AST nodes)
+      if (
+        value &&
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        !('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent')
+      ) {
+        const obj = value as Record<string, Value>;
+        if (obj['prompt'] === true || obj['content']) {
+          content = obj['content'] ? this.valueToString(obj['content']) : '';
+        }
+      } else {
+        content = this.valueToString(value);
+      }
 
       // Only multi-line content becomes a command file
       if (content.includes('\n')) {
@@ -742,7 +757,18 @@ export class CursorFormatter extends BaseFormatter {
 
     const lines: string[] = [];
     for (const [cmd, desc] of Object.entries(props)) {
-      const shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
+      let shortDesc = '';
+      if (
+        desc &&
+        typeof desc === 'object' &&
+        !Array.isArray(desc) &&
+        !('type' in desc && (desc as Record<string, unknown>)['type'] === 'TextContent')
+      ) {
+        const obj = desc as Record<string, Value>;
+        shortDesc = obj['description'] ? this.valueToString(obj['description']) : '';
+      } else {
+        shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
+      }
       lines.push(`${cmd} - ${shortDesc}`);
     }
 
