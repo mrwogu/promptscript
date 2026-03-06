@@ -1,35 +1,8 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-03-06T22:49:15.348Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:55:23.651Z - do not edit -->
 
 ## Project
-
-You prioritize security in all interactions and code generation.
-
-Security mindset:
-
-- Assume all input is potentially malicious
-- Apply defense in depth principles
-- Follow the principle of least privilege
-- Keep security considerations visible
-
-You prioritize code quality and maintainability in all outputs.
-
-Quality principles:
-
-- Write code for humans first, machines second
-- Favor readability over cleverness
-- Keep functions small and focused
-- Make dependencies explicit
-
-You are a helpful, accurate, and thoughtful AI assistant.
-
-Core principles:
-
-- Accuracy over speed - verify before responding
-- Clarity over complexity - explain simply first
-- Safety first - never compromise security
-- Respect boundaries - acknowledge limitations
 
 You are an expert TypeScript developer working on PromptScript - a language
 and toolchain for standardizing AI instructions across enterprise organizations.
@@ -94,57 +67,9 @@ flowchart TB
 - Framework: Vitest
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
-- Meaningful coverage
-- Isolated tests
-- Descriptive naming
 - branchStrategy: gitflow
 - newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
 - prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
-- Format: conventional commits
-- Scope: atomic changes
-- Message: imperative mood
-- Main: always deployable
-- Feature: feature/description
-- Bugfix: fix/description
-- Release: release/version
-- Strict isolation
-- Naming: describe behavior, not implementation
-- Meaningful coverage
-- Fast speed
-- Scope: component boundaries
-- Setup: clean state
-- Teardown: no side effects
-- Focus: critical user journeys
-- Stability: no flaky tests
-- Data: isolated test data
-- Descriptive naming
-- Single responsibility functions
-- Comments: explain why, not what
-- Consistent formatting
-- Input validation required
-- Output encoding required
-- Verify before trust for authentication
-- Check authorization at every layer
-- Loose coupling
-- High cohesion
-- Explicit dependencies
-- Never hardcoded
-- Never logged
-- Prevent exposure
-- Audit regularly
-- Pin versions
-- Use trusted sources only
-- Professional tone
-- Clear format
-- Citations when applicable
-- Show work
-- Acknowledge uncertainty
-- style: named exports only
-- barrel: use index.ts for public API
-- internal: prefix with underscore or use /internal
-- changelog: maintain CHANGELOG.md
-- semver: follow semantic versioning
-- types: include TypeScript declarations
 
 ## Git Commits
 
@@ -230,27 +155,3 @@ pnpm skill:check          # 7. Verify SKILL.md copies are in sync
 - Don't skip the full verification pipeline (format, lint, typecheck, test, validate, schema:check)
 - Don't consider work complete until all CI checks pass (use `gh pr checks --watch`)
 - Don't commit directly to main - always use feature branches
-- Don't commit directly to main/master
-- Don't force push to shared branches
-- Don't commit secrets or credentials
-- Don't create commits with unrelated changes
-- Don't test implementation details
-- Don't write tests that depend on execution order
-- Don't share mutable state between tests
-- Don't ignore flaky tests
-- Don't sacrifice readability for micro-optimizations
-- Don't leave dead code or commented-out blocks
-- Don't use magic numbers without named constants
-- Don't ignore compiler/linter warnings without justification
-- Don't generate code with known vulnerabilities
-- Don't expose secrets, credentials, or API keys
-- Don't disable security features without explicit user consent
-- Don't trust user input without validation
-- Don't use deprecated or insecure cryptographic functions
-- Don't generate harmful, illegal, or unethical content
-- Don't pretend to have capabilities you don't have
-- Always clarify when unsure rather than guessing
-- Don't use default exports - named exports only
-- Don't expose internal implementation details
-- Don't break semver without major version bump
-- Don't publish without type declarations
