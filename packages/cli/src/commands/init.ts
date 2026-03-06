@@ -1,10 +1,14 @@
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, resolve } from 'path';
+import { readFileSync } from 'fs';
 import { getPackageVersion, type RegistryManifest } from '@promptscript/core';
 import { type CliServices, createDefaultServices } from '../services.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+/** Directory containing bundled SKILL.md files shipped with the CLI package. */
+const BUNDLED_SKILLS_DIR = resolve(__dirname, '..', '..', 'skills');
 
 import type { InitOptions } from '../types.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
@@ -19,13 +23,6 @@ import {
   type AIToolTarget,
 } from '../utils/ai-tools-detector.js';
 import { findPrettierConfig } from '../prettier/loader.js';
-import {
-  MIGRATE_SKILL_CLAUDE,
-  MIGRATE_SKILL_GITHUB,
-  MIGRATE_SKILL_CURSOR,
-  MIGRATE_SKILL_ANTIGRAVITY,
-  MIGRATE_SKILL_FACTORY,
-} from '../templates/migrate-skill.js';
 import {
   loadManifest,
   loadManifestFromUrl,
@@ -127,44 +124,20 @@ export async function initCommand(
     await fs.writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
 
     // Install migration skill if requested
+    // Copies bundled SKILL.md to .promptscript/skills/ so that
+    // `prs compile` auto-discovers and outputs to all target directories
     const installedSkillPaths: string[] = [];
     if (options.migrate) {
-      if (config.targets.includes('claude')) {
-        await fs.mkdir('.claude/skills/migrate-to-promptscript', { recursive: true });
-        await fs.writeFile(
-          '.claude/skills/migrate-to-promptscript/SKILL.md',
-          MIGRATE_SKILL_CLAUDE,
-          'utf-8'
-        );
-        installedSkillPaths.push('.claude/skills/migrate-to-promptscript/SKILL.md');
-      }
-      if (config.targets.includes('github')) {
-        await fs.mkdir('.github/skills/migrate-to-promptscript', { recursive: true });
-        await fs.writeFile(
-          '.github/skills/migrate-to-promptscript/SKILL.md',
-          MIGRATE_SKILL_GITHUB,
-          'utf-8'
-        );
-        installedSkillPaths.push('.github/skills/migrate-to-promptscript/SKILL.md');
-      }
-      if (config.targets.includes('cursor')) {
-        await fs.mkdir('.cursor/commands', { recursive: true });
-        await fs.writeFile('.cursor/commands/migrate.md', MIGRATE_SKILL_CURSOR, 'utf-8');
-        installedSkillPaths.push('.cursor/commands/migrate.md');
-      }
-      if (config.targets.includes('antigravity')) {
-        await fs.mkdir('.agent/rules', { recursive: true });
-        await fs.writeFile('.agent/rules/migrate.md', MIGRATE_SKILL_ANTIGRAVITY, 'utf-8');
-        installedSkillPaths.push('.agent/rules/migrate.md');
-      }
-      if (config.targets.includes('factory')) {
-        await fs.mkdir('.factory/skills/migrate-to-promptscript', { recursive: true });
-        await fs.writeFile(
-          '.factory/skills/migrate-to-promptscript/SKILL.md',
-          MIGRATE_SKILL_FACTORY,
-          'utf-8'
-        );
-        installedSkillPaths.push('.factory/skills/migrate-to-promptscript/SKILL.md');
+      const skillName = 'migrate-to-promptscript';
+      const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
+      const skillDest = `.promptscript/skills/${skillName}`;
+      try {
+        const skillContent = readFileSync(skillSource, 'utf-8');
+        await fs.mkdir(skillDest, { recursive: true });
+        await fs.writeFile(`${skillDest}/SKILL.md`, skillContent, 'utf-8');
+        installedSkillPaths.push(`${skillDest}/SKILL.md`);
+      } catch {
+        ConsoleOutput.warn(`Could not install migration skill from ${skillSource}`);
       }
     }
 
@@ -211,24 +184,12 @@ export async function initCommand(
 
     // Show migration-specific instructions if --migrate was used
     if (options.migrate && installedSkillPaths.length > 0) {
-      ConsoleOutput.muted('1. Use the migration skill to convert existing instructions:');
-      if (config.targets.includes('claude')) {
-        ConsoleOutput.muted('   Claude Code: /migrate');
-      }
-      if (config.targets.includes('github')) {
-        ConsoleOutput.muted('   GitHub Copilot: @workspace /migrate');
-      }
-      if (config.targets.includes('cursor')) {
-        ConsoleOutput.muted('   Cursor: /migrate');
-      }
-      if (config.targets.includes('antigravity')) {
-        ConsoleOutput.muted('   Antigravity: Ask to "migrate to PromptScript"');
-      }
-      if (config.targets.includes('factory')) {
-        ConsoleOutput.muted('   Factory AI: /migrate');
-      }
-      ConsoleOutput.muted('2. Review generated .promptscript/project.prs');
-      ConsoleOutput.muted('3. Run: prs compile');
+      ConsoleOutput.muted('1. Run: prs compile');
+      ConsoleOutput.muted('2. Use the migration skill in your AI tool:');
+      ConsoleOutput.muted('   Claude Code / Factory AI: /migrate-to-promptscript');
+      ConsoleOutput.muted('   GitHub Copilot: @workspace /migrate-to-promptscript');
+      ConsoleOutput.muted('   Cursor: /migrate-to-promptscript');
+      ConsoleOutput.muted('3. Review generated .promptscript/project.prs');
     } else {
       ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
       ConsoleOutput.muted('2. Run: prs compile');

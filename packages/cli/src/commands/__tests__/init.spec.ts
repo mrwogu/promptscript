@@ -74,7 +74,7 @@ describe('initCommand', () => {
   });
 
   describe('--migrate flag', () => {
-    it('should create migration skill for Claude target', async () => {
+    it('should install migration skill to .promptscript/skills when --migrate is used', async () => {
       vi.mocked(mockFs.existsSync).mockReturnValue(false);
       const options: InitOptions = {
         ...defaultOptions,
@@ -86,74 +86,12 @@ describe('initCommand', () => {
 
       await initCommand(options, mockServices);
 
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.claude/skills/migrate-to-promptscript', {
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/migrate-to-promptscript', {
         recursive: true,
       });
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.claude/skills/migrate-to-promptscript/SKILL.md',
+        '.promptscript/skills/migrate-to-promptscript/SKILL.md',
         expect.stringContaining('migrate-to-promptscript'),
-        'utf-8'
-      );
-    });
-
-    it('should create migration skill for GitHub target', async () => {
-      vi.mocked(mockFs.existsSync).mockReturnValue(false);
-      const options: InitOptions = {
-        ...defaultOptions,
-        yes: true,
-        name: 'test-project',
-        targets: ['github'],
-        migrate: true,
-      };
-
-      await initCommand(options, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.github/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.github/skills/migrate-to-promptscript/SKILL.md',
-        expect.stringContaining('migrate-to-promptscript'),
-        'utf-8'
-      );
-    });
-
-    it('should create migration command for Cursor target', async () => {
-      vi.mocked(mockFs.existsSync).mockReturnValue(false);
-      const options: InitOptions = {
-        ...defaultOptions,
-        yes: true,
-        name: 'test-project',
-        targets: ['cursor'],
-        migrate: true,
-      };
-
-      await initCommand(options, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.cursor/commands', { recursive: true });
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.cursor/commands/migrate.md',
-        expect.stringContaining('Migrate to PromptScript'),
-        'utf-8'
-      );
-    });
-
-    it('should create migration rule for Antigravity target', async () => {
-      vi.mocked(mockFs.existsSync).mockReturnValue(false);
-      const options: InitOptions = {
-        ...defaultOptions,
-        yes: true,
-        name: 'test-project',
-        targets: ['antigravity'],
-        migrate: true,
-      };
-
-      await initCommand(options, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.agent/rules', { recursive: true });
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.agent/rules/migrate.md',
-        expect.stringContaining('Migrate to PromptScript'),
         'utf-8'
       );
     });
@@ -173,15 +111,11 @@ describe('initCommand', () => {
       // Should create base files
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
 
-      // Should NOT create migration skill directories
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.claude/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.github/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.cursor/commands', { recursive: true });
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.agent/rules', { recursive: true });
+      // Should NOT create migration skill
+      expect(mockFs.mkdir).not.toHaveBeenCalledWith(
+        '.promptscript/skills/migrate-to-promptscript',
+        { recursive: true }
+      );
     });
   });
 });

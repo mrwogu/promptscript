@@ -456,87 +456,20 @@ describe('commands/init', () => {
   });
 
   describe('--migrate flag', () => {
-    it('should install Claude migration skill when --migrate is used with claude target', async () => {
+    it('should install migration skill to .promptscript/skills when --migrate is used', async () => {
       await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
 
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.claude/skills/migrate-to-promptscript', {
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/migrate-to-promptscript', {
         recursive: true,
       });
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.claude/skills/migrate-to-promptscript/SKILL.md',
+        '.promptscript/skills/migrate-to-promptscript/SKILL.md',
         expect.stringContaining('migrate-to-promptscript'),
         'utf-8'
       );
     });
 
-    it('should install GitHub migration skill when --migrate is used with github target', async () => {
-      await initCommand({ yes: true, targets: ['github'], migrate: true }, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.github/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.github/skills/migrate-to-promptscript/SKILL.md',
-        expect.stringContaining('migrate-to-promptscript'),
-        'utf-8'
-      );
-    });
-
-    it('should install both migration skills when --migrate is used with both targets', async () => {
-      await initCommand({ yes: true, targets: ['github', 'claude'], migrate: true }, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.claude/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.github/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.claude/skills/migrate-to-promptscript/SKILL.md',
-        expect.any(String),
-        'utf-8'
-      );
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.github/skills/migrate-to-promptscript/SKILL.md',
-        expect.any(String),
-        'utf-8'
-      );
-    });
-
-    it('should not install migration skills when --migrate is not used', async () => {
-      await initCommand({ yes: true, targets: ['github', 'claude'] }, mockServices);
-
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.claude/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.github/skills/migrate-to-promptscript', {
-        recursive: true,
-      });
-    });
-
-    it('should install Cursor migration command when --migrate is used with cursor target', async () => {
-      await initCommand({ yes: true, targets: ['cursor'], migrate: true }, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.cursor/commands', { recursive: true });
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.cursor/commands/migrate.md',
-        expect.stringContaining('Migrate to PromptScript'),
-        'utf-8'
-      );
-    });
-
-    it('should install Antigravity migration rule when --migrate is used with antigravity target', async () => {
-      await initCommand({ yes: true, targets: ['antigravity'], migrate: true }, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.agent/rules', { recursive: true });
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.agent/rules/migrate.md',
-        expect.stringContaining('Migrate to PromptScript'),
-        'utf-8'
-      );
-    });
-
-    it('should install all migration files when --migrate is used with all targets', async () => {
+    it('should install same skill regardless of target', async () => {
       await initCommand(
         {
           yes: true,
@@ -546,51 +479,31 @@ describe('commands/init', () => {
         mockServices
       );
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.claude/skills/migrate-to-promptscript/SKILL.md',
-        expect.any(String),
-        'utf-8'
-      );
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.github/skills/migrate-to-promptscript/SKILL.md',
-        expect.any(String),
-        'utf-8'
-      );
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.cursor/commands/migrate.md',
-        expect.any(String),
-        'utf-8'
-      );
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.agent/rules/migrate.md',
-        expect.any(String),
-        'utf-8'
-      );
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.factory/skills/migrate-to-promptscript/SKILL.md',
-        expect.any(String),
-        'utf-8'
-      );
-    });
-
-    it('should install Factory migration skill when --migrate is used with factory target', async () => {
-      await initCommand({ yes: true, targets: ['factory'], migrate: true }, mockServices);
-
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.factory/skills/migrate-to-promptscript', {
+      // Only one skill installed to .promptscript/skills/ (auto-discovery handles targets)
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/migrate-to-promptscript', {
         recursive: true,
       });
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.factory/skills/migrate-to-promptscript/SKILL.md',
+        '.promptscript/skills/migrate-to-promptscript/SKILL.md',
         expect.stringContaining('migrate-to-promptscript'),
         'utf-8'
       );
     });
 
-    it('should show migration skill paths in output when --migrate is used', async () => {
+    it('should not install migration skill when --migrate is not used', async () => {
+      await initCommand({ yes: true, targets: ['github', 'claude'] }, mockServices);
+
+      expect(mockFs.mkdir).not.toHaveBeenCalledWith(
+        '.promptscript/skills/migrate-to-promptscript',
+        { recursive: true }
+      );
+    });
+
+    it('should show migration skill path in output when --migrate is used', async () => {
       await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('.claude/skills/migrate-to-promptscript/SKILL.md')
+        expect.stringContaining('.promptscript/skills/migrate-to-promptscript/SKILL.md')
       );
     });
 
