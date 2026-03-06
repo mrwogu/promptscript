@@ -218,10 +218,16 @@ export class Compiler {
         outputs.set(output.path, addMarkerToOutput(output));
 
         // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
+        // Recursively collect nested additionalFiles (e.g., skill resource files)
         if (output.additionalFiles) {
-          for (const additionalFile of output.additionalFiles) {
+          const queue = [...output.additionalFiles];
+          while (queue.length > 0) {
+            const additionalFile = queue.shift()!;
             this.logger.verbose(`  → ${additionalFile.path} (additional)`);
             outputs.set(additionalFile.path, addMarkerToOutput(additionalFile));
+            if (additionalFile.additionalFiles) {
+              queue.push(...additionalFile.additionalFiles);
+            }
           }
         }
       } catch (err) {

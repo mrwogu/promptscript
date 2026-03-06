@@ -242,6 +242,15 @@
       },
       "description": "Custom convention definitions. Register custom conventions that can be referenced by name in targets."
     },
+    "universalDir": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "description": "Universal directory for auto-discovering skills and commands. Skills are discovered from `<universalDir>/skills/` and commands from `<universalDir>/commands/`.\n\n- `true` or omitted: Use default `.agents/` directory\n- `false`: Disable universal directory discovery\n- `string`: Custom path (relative to project root)",
+      "default": ".agents",
+      "example": "universalDir: true           # Use .agents/ (default)\nuniversalDir: '.my-agents'   # Custom directory\nuniversalDir: false          # Disable"
+    },
     "validation": {
       "type": "object",
       "properties": {
@@ -358,6 +367,15 @@
               "$ref": "#/definitions/TargetConfig"
             },
             "antigravity": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "factory": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "opencode": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "gemini": {
               "$ref": "#/definitions/TargetConfig"
             }
           },

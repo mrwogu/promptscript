@@ -13,7 +13,14 @@
 /**
  * Tool/Formatter names.
  */
-export type ToolName = 'github' | 'cursor' | 'claude' | 'antigravity';
+export type ToolName =
+  | 'github'
+  | 'cursor'
+  | 'claude'
+  | 'antigravity'
+  | 'factory'
+  | 'opencode'
+  | 'gemini';
 
 /**
  * Feature implementation status.
@@ -41,7 +48,7 @@ export interface FeatureSpec {
   /** How to test this feature */
   testStrategy?: string;
   /** Link to tool documentation */
-  docsUrl?: Record<ToolName, string>;
+  docsUrl?: Partial<Record<ToolName, string>>;
 }
 
 /**
@@ -73,6 +80,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported',
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported',
+      gemini: 'supported',
     },
   },
   {
@@ -85,6 +95,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'not-supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
   {
@@ -97,6 +110,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported',
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported',
+      gemini: 'supported',
     },
   },
   {
@@ -109,6 +125,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported',
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported',
+      gemini: 'supported',
     },
   },
 
@@ -123,6 +142,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported',
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported',
+      gemini: 'supported',
     },
   },
   {
@@ -135,6 +157,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported', // .claude/rules/*.md (multifile mode)
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported', // .opencode/commands/, skills/, agents/
+      gemini: 'supported', // .gemini/commands/, skills/
     },
     testStrategy: 'Check additionalFiles in FormatterOutput',
   },
@@ -148,6 +173,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported',
       claude: 'not-supported',
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check for .agent/workflows/ output',
   },
@@ -161,6 +189,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
 
@@ -175,6 +206,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported', // In .claude/rules/*.md and skills
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported', // In commands, skills, agents
+      gemini: 'supported', // In skills (commands use TOML)
     },
     testStrategy: 'Check for --- delimited YAML block',
   },
@@ -188,6 +222,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported',
+      gemini: 'supported',
     },
   },
   {
@@ -200,6 +237,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported', // paths in .claude/rules/*.md
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
   {
@@ -212,6 +252,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
 
@@ -226,6 +269,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported', // paths in .claude/rules/*.md (multifile mode)
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check globs field in frontmatter',
   },
@@ -239,6 +285,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported', // All rules always apply
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported',
+      gemini: 'supported',
     },
   },
   {
@@ -251,6 +300,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
   {
@@ -263,6 +315,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
 
@@ -277,6 +332,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported', // No known limit
       claude: 'not-supported', // No known limit
       antigravity: 'supported', // 12,000 chars
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check warning for content > limit',
   },
@@ -290,6 +348,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'supported',
       antigravity: 'supported',
+      factory: 'supported',
+      opencode: 'supported',
+      gemini: 'supported',
     },
   },
 
@@ -304,6 +365,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'not-supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check for @file/@folder references',
   },
@@ -317,6 +381,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'not-supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
   {
@@ -329,6 +396,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'partial', // Via terminal
       claude: 'not-supported',
       antigravity: 'not-supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
   },
   {
@@ -341,6 +411,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported', // globs in frontmatter
       claude: 'supported', // .claude/rules/*.md with paths frontmatter
       antigravity: 'supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check for path-specific files with glob patterns in frontmatter',
   },
@@ -354,6 +427,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported',
       claude: 'not-supported',
       antigravity: 'not-supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check for .github/prompts/*.prompt.md files',
   },
@@ -367,6 +443,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported', // .cursor/commands/*.md (multi-line @shortcuts)
       claude: 'supported', // .claude/skills/<name>/SKILL.md (via @skills block)
       antigravity: 'supported', // .agent/workflows/*.yaml (via @shortcuts with steps)
+      factory: 'supported', // .factory/skills/<name>/SKILL.md
+      opencode: 'supported', // .opencode/commands/<name>.md
+      gemini: 'supported', // .gemini/commands/<name>.toml
     },
     testStrategy:
       'Check for .cursor/commands/*.md, .github/prompts/*.prompt.md, .claude/skills/*/SKILL.md, or .agent/workflows/*.yaml',
@@ -387,6 +466,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported',
       claude: 'supported', // .claude/skills/<name>/SKILL.md
       antigravity: 'not-supported',
+      factory: 'supported',
+      opencode: 'supported', // .opencode/skills/<name>/SKILL.md
+      gemini: 'supported', // .gemini/skills/<name>/skill.md
     },
     testStrategy: 'Check for skills directory with SKILL.md files',
   },
@@ -401,6 +483,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported',
       claude: 'supported', // .claude/agents/<name>.md
       antigravity: 'not-supported',
+      factory: 'not-supported',
+      opencode: 'supported', // .opencode/agents/<name>.md
+      gemini: 'not-supported',
     },
     testStrategy: 'Check for AGENTS.md, .github/agents/ or .claude/agents/ files',
   },
@@ -414,6 +499,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported',
       claude: 'supported', // CLAUDE.local.md
       antigravity: 'not-supported',
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check for CLAUDE.local.md file',
   },
@@ -427,6 +515,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported', // nested .cursor/rules
       claude: 'supported', // <subdir>/CLAUDE.md
       antigravity: 'supported', // nested .agent files
+      factory: 'not-supported',
+      opencode: 'not-supported',
+      gemini: 'not-supported',
     },
     testStrategy: 'Check for nested instruction files',
   },
@@ -520,8 +611,8 @@ export function generateFeatureMatrixReport(): string {
   const lines: string[] = [
     '# Feature Coverage Matrix',
     '',
-    '| Feature | GitHub | Cursor | Claude | Antigravity |',
-    '|---------|--------|--------|--------|-------------|',
+    '| Feature | GitHub | Cursor | Claude | Antigravity | Factory | OpenCode | Gemini |',
+    '|---------|--------|--------|--------|-------------|---------|----------|--------|',
   ];
 
   for (const feature of FEATURE_MATRIX) {
@@ -539,7 +630,7 @@ export function generateFeatureMatrixReport(): string {
     };
 
     lines.push(
-      `| ${feature.name} | ${statusEmoji(feature.tools.github)} | ${statusEmoji(feature.tools.cursor)} | ${statusEmoji(feature.tools.claude)} | ${statusEmoji(feature.tools.antigravity)} |`
+      `| ${feature.name} | ${statusEmoji(feature.tools.github)} | ${statusEmoji(feature.tools.cursor)} | ${statusEmoji(feature.tools.claude)} | ${statusEmoji(feature.tools.antigravity)} | ${statusEmoji(feature.tools.factory)} | ${statusEmoji(feature.tools.opencode)} | ${statusEmoji(feature.tools.gemini)} |`
     );
   }
 

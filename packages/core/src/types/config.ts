@@ -245,6 +245,22 @@ export interface PromptScriptConfig {
    */
   customConventions?: Record<string, OutputConvention>;
 
+  /**
+   * Universal directory for auto-discovering skills and commands.
+   * Skills are discovered from `<universalDir>/skills/` and commands from `<universalDir>/commands/`.
+   *
+   * - `true` or omitted: Use default `.agents/` directory
+   * - `false`: Disable universal directory discovery
+   * - `string`: Custom path (relative to project root)
+   *
+   * @default '.agents'
+   * @example
+   * universalDir: true           # Use .agents/ (default)
+   * universalDir: '.my-agents'   # Custom directory
+   * universalDir: false          # Disable
+   */
+  universalDir?: string | boolean;
+
   /** Validation settings */
   validation?: {
     requiredGuards?: string[];
@@ -255,7 +271,15 @@ export interface PromptScriptConfig {
 /**
  * Supported output targets.
  */
-export type TargetName = 'github' | 'claude' | 'cursor' | 'antigravity' | string;
+export type TargetName =
+  | 'github'
+  | 'claude'
+  | 'cursor'
+  | 'antigravity'
+  | 'factory'
+  | 'opencode'
+  | 'gemini'
+  | string;
 
 /**
  * Default output paths for each target.
@@ -265,4 +289,7 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   claude: 'CLAUDE.md',
   cursor: '.cursor/rules/project.mdc',
   antigravity: '.agent/rules/project.md',
+  factory: 'AGENTS.md',
+  opencode: 'OPENCODE.md',
+  gemini: 'GEMINI.md',
 };

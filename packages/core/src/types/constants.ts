@@ -15,6 +15,7 @@ export const BLOCK_TYPES = [
   'restrictions',
   'knowledge',
   'shortcuts',
+  'commands',
   'guards',
   'params',
   'skills',

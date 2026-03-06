@@ -15,6 +15,7 @@ describe('BLOCK_TYPES', () => {
     expect(BLOCK_TYPES).toContain('local');
     expect(BLOCK_TYPES).toContain('agents');
     expect(BLOCK_TYPES).toContain('workflows');
+    expect(BLOCK_TYPES).toContain('commands');
     expect(BLOCK_TYPES).toContain('prompts');
   });
 

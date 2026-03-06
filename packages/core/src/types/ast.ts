@@ -211,6 +211,7 @@ export type BlockName =
   | 'restrictions'
   | 'knowledge'
   | 'shortcuts'
+  | 'commands'
   | 'guards'
   | 'params'
   | 'skills'

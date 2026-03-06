@@ -1,3 +1,4 @@
+import { normalize, isAbsolute, sep } from 'path';
 import type {
   Block,
   BlockContent,
@@ -473,5 +474,35 @@ export abstract class BaseFormatter implements Formatter {
     ]
       .join('\n')
       .trim();
+  }
+
+  /**
+   * Filter resource files to only include safe paths.
+   * Rejects paths with traversal, absolute paths, and unsafe names.
+   */
+  protected sanitizeResourceFiles(
+    resources: Array<{ relativePath: string; content: string }> | undefined,
+    targetDir: string
+  ): FormatterOutput[] {
+    if (!resources || resources.length === 0) return [];
+
+    return resources
+      .filter((r) => {
+        const normalized = normalize(r.relativePath);
+        if (isAbsolute(normalized)) return false;
+        const segments = normalized.split(sep);
+        return !segments.some((s) => s === '..');
+      })
+      .map((r) => ({
+        path: `${targetDir}/${r.relativePath}`,
+        content: r.content,
+      }));
+  }
+
+  /**
+   * Check if a skill name is safe for use in file paths.
+   */
+  protected isSafeSkillName(name: string): boolean {
+    return !name.includes('..') && !name.includes('/') && !name.includes('\\');
   }
 }
