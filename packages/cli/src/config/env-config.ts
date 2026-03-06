@@ -19,9 +19,8 @@ export function loadEnvOverrides(): Partial<PromptScriptConfig> {
   const cacheTtl = process.env['PROMPTSCRIPT_CACHE_TTL'];
   const cacheEnabled = process.env['PROMPTSCRIPT_CACHE_ENABLED'];
 
-  const hasGit = gitUrl || gitRef;
   const hasCache = cacheTtl || cacheEnabled;
-  const hasRegistry = hasGit || registryUrl || hasCache;
+  const hasRegistry = gitUrl || gitRef || registryUrl || hasCache;
 
   if (!hasRegistry) {
     return overrides;
@@ -29,9 +28,9 @@ export function loadEnvOverrides(): Partial<PromptScriptConfig> {
 
   const registry: NonNullable<PromptScriptConfig['registry']> = {};
 
-  if (hasGit) {
+  if (gitUrl) {
     registry.git = {
-      url: gitUrl ?? '',
+      url: gitUrl,
       ...(gitRef ? { ref: gitRef } : {}),
     };
   }

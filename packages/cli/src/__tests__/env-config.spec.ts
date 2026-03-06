@@ -88,6 +88,15 @@ describe('config/env-config', () => {
     expect(overrides.registry?.cache?.enabled).toBe(false);
   });
 
+  it('should ignore PROMPTSCRIPT_REGISTRY_GIT_REF without PROMPTSCRIPT_REGISTRY_GIT_URL', () => {
+    process.env['PROMPTSCRIPT_REGISTRY_GIT_REF'] = 'develop';
+
+    const overrides = loadEnvOverrides();
+
+    // gitRef alone should not create a registry.git entry
+    expect(overrides.registry?.git).toBeUndefined();
+  });
+
   it('should combine multiple env vars', () => {
     process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = 'https://github.com/org/reg.git';
     process.env['PROMPTSCRIPT_REGISTRY_GIT_REF'] = 'develop';

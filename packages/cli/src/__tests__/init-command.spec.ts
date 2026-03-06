@@ -212,6 +212,27 @@ describe('commands/init', () => {
       );
     });
 
+    it('should use env var PROMPTSCRIPT_REGISTRY_GIT_URL when --yes flag', async () => {
+      const originalEnv = process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+      process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = 'https://github.com/my-org/my-registry.git';
+
+      try {
+        await initCommand({ yes: true }, mockServices);
+
+        expect(mockFs.writeFile).toHaveBeenCalledWith(
+          'promptscript.yaml',
+          expect.stringContaining('https://github.com/my-org/my-registry.git'),
+          'utf-8'
+        );
+      } finally {
+        if (originalEnv === undefined) {
+          delete process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+        } else {
+          process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = originalEnv;
+        }
+      }
+    });
+
     it('should use non-interactive mode with provided name and targets', async () => {
       await initCommand(
         {

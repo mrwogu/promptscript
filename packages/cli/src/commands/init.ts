@@ -42,6 +42,7 @@ import {
   githubRepoToManifestUrl,
 } from '../utils/manifest-loader.js';
 import { loadUserConfig } from '../config/user-config.js';
+import { loadEnvOverrides } from '../config/env-config.js';
 import {
   buildProjectContext,
   calculateSuggestions,
@@ -251,27 +252,33 @@ async function resolveConfig(
   // If --yes flag, use all defaults (including manifest suggestions)
   if (options.yes) {
     const userConfig = await loadUserConfig();
+    const envOverrides = loadEnvOverrides();
     let inherit = options.inherit;
     let use: string[] | undefined;
     let activeManifest = manifest;
 
-    // Determine registry from CLI flag, user config, or skip
+    // Determine registry from CLI flag, env vars, user config, or skip
+    // Priority: CLI flags > env vars > user config
+    const envGitUrl = envOverrides.registry?.git?.url;
+    const envGitRef = envOverrides.registry?.git?.ref;
+    const userGitUrl = userConfig.registry?.git?.url;
+    const userGitRef = userConfig.registry?.git?.ref;
+    const effectiveGitUrl = envGitUrl || userGitUrl;
+    const effectiveGitRef = envGitRef ?? userGitRef;
+
     let registry: RegistryConfig | undefined;
     if (options.registry) {
       registry = { type: 'local', path: options.registry };
-    } else if (userConfig.registry?.git?.url) {
+    } else if (effectiveGitUrl) {
       registry = {
         type: 'git',
-        url: userConfig.registry.git.url,
-        ref: userConfig.registry.git.ref ?? 'main',
+        url: effectiveGitUrl,
+        ref: effectiveGitRef ?? 'main',
       };
-      // Try to fetch manifest from user-configured registry
+      // Try to fetch manifest from configured registry
       if (!activeManifest) {
         try {
-          const manifestUrl = githubRepoToManifestUrl(
-            userConfig.registry.git.url,
-            userConfig.registry.git.ref
-          );
+          const manifestUrl = githubRepoToManifestUrl(effectiveGitUrl, effectiveGitRef);
           const { manifest: remoteManifest } = await loadManifestFromUrl(manifestUrl);
           activeManifest = remoteManifest;
         } catch {
