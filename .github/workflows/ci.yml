@@ -284,7 +284,7 @@ jobs:
           node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry validate my-registry
 
           # Validate with --format json
-          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry validate my-registry --format json | grep '"valid":true'
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry validate my-registry --format json | grep '"valid": true'
 
       - name: Smoke test - registry init --no-seed
         run: |
