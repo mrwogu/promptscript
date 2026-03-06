@@ -1,20 +1,13 @@
 ---
 name: 'promptscript'
-description: 'PromptScript language expert for reading, writing, modifying, and troubleshooting .prs files. Use when working with PromptScript syntax, creating or editing .prs files, adding blocks like @identity, @standards, @restrictions, @shortcuts, @skills, or @agents, configuring promptscript.yaml, resolving compilation errors, understanding inheritance (@inherit) and composition (@use, @extend), or migrating AI instructions to PromptScript. Also use when asked about compilation targets (GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI).'
-allowed-tools:
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
-user-invocable: true
+description: '>-'
 ---
 
-<!-- PromptScript 2026-03-04T17:03:43.105Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:37:48.627Z - do not edit -->
 
 # PromptScript Language Guide
 
-PromptScript is a domain-specific language that compiles `.prs` files into native instruction formats for AI coding assistants (GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI). One source of truth, multiple outputs.
+PromptScript is a domain-specific language that compiles `.prs` files into native instruction formats for AI coding assistants (GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI). One source of truth, multiple outputs.
 
 ## File Structure
 
@@ -302,6 +295,8 @@ prs diff --target claude    # Show compilation diff
 | Cursor      | .cursor/rules/project.mdc       | .cursor/commands/\*.md      |
 | Antigravity | .agent/rules/project.md         | .agent/rules/\*.md          |
 | Factory     | AGENTS.md                       | .factory/skills/\*/SKILL.md |
+| OpenCode    | agents.yaml                     | --------------------------- |
+| Gemini      | GEMINI.md                       | --------------------------- |
 
 ## Project Organization
 
@@ -317,14 +312,6 @@ Typical modular structure:
 ```
 
 The entry file uses `@use ./context`, `@use ./standards`, etc. to compose them.
-
-## Registry Namespaces
-
-- `@core/*` - Foundation (base, security, quality)
-- `@stacks/*` - Tech stack templates
-- `@fragments/*` - Reusable fragments
-- `@skills/*` - Skill libraries
-- `@agents/*` - Agent definitions
 
 ## Common Mistakes
 

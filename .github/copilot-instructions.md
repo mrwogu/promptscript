@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-03-06T13:07:42.061Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:37:48.624Z - do not edit -->
 
 ## project
 
@@ -257,6 +257,7 @@ After completing ANY code changes, run ALL steps in order:
   pnpm run test             # 4. Run all tests
   pnpm prs validate --strict  # 5. Validate .prs files
   pnpm schema:check         # 6. Verify JSON schemas are current
+  pnpm skill:check          # 7. Verify SKILL.md copies are in sync
 ```
 
 ## donts

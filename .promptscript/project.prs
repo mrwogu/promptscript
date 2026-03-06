@@ -20,7 +20,6 @@
 @use @fragments/git-conventions
 @use @skills/base
 @use @skills/migrate
-@use @skills/promptscript
 
 # === LOCAL CONFIGURATION ===
 # Project-specific settings (modular)

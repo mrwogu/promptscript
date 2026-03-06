@@ -2,7 +2,7 @@
 description: 'Write integration tests for component boundaries'
 ---
 
-<!-- PromptScript 2026-03-06T13:07:42.063Z - do not edit -->
+<!-- PromptScript 2026-03-06T22:37:48.627Z - do not edit -->
 
 Write integration tests for component boundaries:
 
