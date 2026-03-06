@@ -16,7 +16,6 @@ import {
   githubRepoToManifestUrl,
   getRegistryBaseDir,
   resolveCatalogEntryPath,
-  OFFICIAL_REGISTRY,
 } from '../utils/manifest-loader.js';
 import { type CliServices } from '../services.js';
 import type { RegistryManifest } from '@promptscript/core';
@@ -526,18 +525,6 @@ catalog: []
       expect(result.manifest.version).toBe('1');
       expect(result.url).toBe('https://example.com/manifest.yaml');
       expect(result.cached).toBe(false);
-    });
-
-    it('should use default official registry URL when not specified', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        text: () => Promise.resolve(manifestYaml),
-      });
-      vi.stubGlobal('fetch', mockFetch);
-
-      await loadManifestFromUrl();
-
-      expect(mockFetch).toHaveBeenCalledWith(OFFICIAL_REGISTRY.manifestUrl, expect.any(Object));
     });
 
     it('should cache manifest from URL', async () => {

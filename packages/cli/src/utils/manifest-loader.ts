@@ -5,17 +5,6 @@ import type { CliServices } from '../services.js';
 import { createDefaultServices } from '../services.js';
 
 /**
- * Official PromptScript Registry configuration.
- */
-export const OFFICIAL_REGISTRY = {
-  name: 'PromptScript Official Registry',
-  url: 'https://github.com/mrwogu/promptscript-registry.git',
-  branch: 'main',
-  manifestUrl:
-    'https://raw.githubusercontent.com/mrwogu/promptscript-registry/main/registry-manifest.yaml',
-} as const;
-
-/**
  * Error thrown when manifest loading fails.
  */
 export class ManifestLoadError extends Error {
@@ -283,21 +272,17 @@ export interface RemoteLoadedManifest {
 /**
  * Load manifest from a remote URL.
  *
- * @param url - URL to fetch manifest from (defaults to official registry)
+ * @param url - URL to fetch manifest from
  * @param useCache - Whether to use in-memory cache
  * @returns The loaded manifest with metadata
  *
  * @example
  * ```typescript
- * // Load from official registry
- * const { manifest } = await loadManifestFromUrl();
- *
- * // Load from custom URL
  * const { manifest } = await loadManifestFromUrl('https://example.com/registry-manifest.yaml');
  * ```
  */
 export async function loadManifestFromUrl(
-  url: string = OFFICIAL_REGISTRY.manifestUrl,
+  url: string,
   useCache: boolean = true
 ): Promise<RemoteLoadedManifest> {
   // Check cache

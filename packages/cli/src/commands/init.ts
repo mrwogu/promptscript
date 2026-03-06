@@ -38,9 +38,11 @@ import {
   loadManifest,
   loadManifestFromUrl,
   ManifestLoadError,
-  OFFICIAL_REGISTRY,
   isValidGitUrl,
+  githubRepoToManifestUrl,
 } from '../utils/manifest-loader.js';
+import { loadUserConfig } from '../config/user-config.js';
+import { loadEnvOverrides } from '../config/env-config.js';
 import {
   buildProjectContext,
   calculateSuggestions,
@@ -249,17 +251,39 @@ async function resolveConfig(
 ): Promise<ResolvedConfig> {
   // If --yes flag, use all defaults (including manifest suggestions)
   if (options.yes) {
+    const userConfig = await loadUserConfig();
+    const envOverrides = loadEnvOverrides();
     let inherit = options.inherit;
     let use: string[] | undefined;
     let activeManifest = manifest;
 
-    // Try to fetch official registry manifest if not already loaded
-    if (!activeManifest) {
-      try {
-        const { manifest: remoteManifest } = await loadManifestFromUrl();
-        activeManifest = remoteManifest;
-      } catch {
-        // Ignore - continue without manifest
+    // Determine registry from CLI flag, env vars, user config, or skip
+    // Priority: CLI flags > env vars > user config
+    const envGitUrl = envOverrides.registry?.git?.url;
+    const envGitRef = envOverrides.registry?.git?.ref;
+    const userGitUrl = userConfig.registry?.git?.url;
+    const userGitRef = userConfig.registry?.git?.ref;
+    const effectiveGitUrl = envGitUrl || userGitUrl;
+    const effectiveGitRef = envGitRef ?? userGitRef;
+
+    let registry: RegistryConfig | undefined;
+    if (options.registry) {
+      registry = { type: 'local', path: options.registry };
+    } else if (effectiveGitUrl) {
+      registry = {
+        type: 'git',
+        url: effectiveGitUrl,
+        ref: effectiveGitRef ?? 'main',
+      };
+      // Try to fetch manifest from configured registry
+      if (!activeManifest) {
+        try {
+          const manifestUrl = githubRepoToManifestUrl(effectiveGitUrl, effectiveGitRef);
+          const { manifest: remoteManifest } = await loadManifestFromUrl(manifestUrl);
+          activeManifest = remoteManifest;
+        } catch {
+          // Ignore - continue without manifest
+        }
       }
     }
 
@@ -275,18 +299,16 @@ async function resolveConfig(
       }
     }
 
-    // Default to official registry in --yes mode
-    const registry: RegistryConfig = options.registry
-      ? { type: 'local', path: options.registry }
-      : { type: 'git', url: OFFICIAL_REGISTRY.url, ref: OFFICIAL_REGISTRY.branch };
-
     return {
       projectId: options.name ?? projectInfo.name,
-      team: options.team,
+      team: options.team ?? userConfig.defaults?.team,
       inherit,
       use,
       registry,
-      targets: (options.targets as AIToolTarget[]) ?? getSuggestedTargets(aiToolsDetection),
+      targets:
+        (options.targets as AIToolTarget[]) ??
+        (userConfig.defaults?.targets as AIToolTarget[]) ??
+        getSuggestedTargets(aiToolsDetection),
       prettierConfigPath,
     };
   }
@@ -365,17 +387,13 @@ async function runInteractivePrompts(
 
   // 2. Registry configuration
   let registry: RegistryConfig | undefined;
-  let activeManifest = manifest;
+  const activeManifest = manifest;
 
   const registryChoice = await prompts.select({
     message: 'Registry configuration:',
     choices: [
       {
-        name: `📦 Use official PromptScript Registry (${OFFICIAL_REGISTRY.url})`,
-        value: 'official',
-      },
-      {
-        name: '🔗 Connect to a custom Git registry',
+        name: '🔗 Connect to a Git registry',
         value: 'custom-git',
       },
       {
@@ -387,29 +405,10 @@ async function runInteractivePrompts(
         value: 'skip',
       },
     ],
-    default: manifest ? 'official' : 'skip',
+    default: 'skip',
   });
 
-  if (registryChoice === 'official') {
-    registry = {
-      type: 'git',
-      url: OFFICIAL_REGISTRY.url,
-      ref: OFFICIAL_REGISTRY.branch,
-    };
-    // Fetch manifest from official registry if not already loaded
-    if (!activeManifest) {
-      try {
-        ConsoleOutput.muted('Fetching registry manifest...');
-        const { manifest: remoteManifest } = await loadManifestFromUrl();
-        activeManifest = remoteManifest;
-        ConsoleOutput.success(
-          `Loaded ${remoteManifest.catalog.length} configurations from official registry`
-        );
-      } catch {
-        ConsoleOutput.warn('Could not fetch registry manifest - suggestions will be limited');
-      }
-    }
-  } else if (registryChoice === 'custom-git') {
+  if (registryChoice === 'custom-git') {
     const gitUrl = await prompts.input({
       message: 'Git repository URL:',
       default: 'https://github.com/your-org/your-registry.git',
@@ -600,7 +599,7 @@ function generateConfig(config: ResolvedConfig): string {
     lines.push(
       '# registry:',
       '#   git:',
-      "#     url: 'https://github.com/mrwogu/promptscript-registry.git'",
+      "#     url: 'https://github.com/your-org/your-registry.git'",
       "#     ref: 'main'"
     );
   }

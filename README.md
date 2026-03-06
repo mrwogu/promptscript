@@ -268,7 +268,7 @@ Inherit from battle-tested templates instead of starting from scratch.
 @use @fragments/accessibility
 ```
 
-**[Browse Registry](https://github.com/mrwogu/promptscript-registry)**
+Create your own registry with `prs registry init` or connect to any Git-hosted registry.
 
 ---
 

@@ -8,6 +8,22 @@ vi.mock('../prettier/loader.js', () => ({
   findPrettierConfig: () => mockFindPrettierConfig(),
 }));
 
+// Mock manifest-loader (partially)
+const mockLoadManifestFromUrl = vi.fn();
+vi.mock('../utils/manifest-loader.js', async (importOriginal) => {
+  const original = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...original,
+    loadManifestFromUrl: (...args: unknown[]) => mockLoadManifestFromUrl(...args),
+  };
+});
+
+// Mock user-config
+const mockLoadUserConfig = vi.fn();
+vi.mock('../config/user-config.js', () => ({
+  loadUserConfig: (...args: unknown[]) => mockLoadUserConfig(...args),
+}));
+
 // Mock ora
 vi.mock('ora', () => ({
   default: vi.fn().mockReturnValue({
@@ -60,6 +76,10 @@ describe('commands/init', () => {
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     // Default: no Prettier config found
     mockFindPrettierConfig.mockReturnValue(null);
+    // Default: no user config
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    // Default: manifest fetch fails
+    mockLoadManifestFromUrl.mockRejectedValue(new Error('not available'));
 
     mockFs = {
       existsSync: vi.fn().mockReturnValue(false),
@@ -190,18 +210,13 @@ describe('commands/init', () => {
       );
     });
 
-    it('should use official git registry when --yes flag without registry option', async () => {
+    it('should skip registry when --yes flag without registry option', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      // The default is official git registry when using --yes
+      // No registry configured by default - should show commented-out placeholder
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining('git:'),
-        'utf-8'
-      );
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining('github.com/mrwogu/promptscript-registry'),
+        expect.stringContaining('# registry:'),
         'utf-8'
       );
     });
@@ -215,6 +230,72 @@ describe('commands/init', () => {
         expect.stringContaining("path: './my-registry'"),
         'utf-8'
       );
+    });
+
+    it('should use env var PROMPTSCRIPT_REGISTRY_GIT_URL when --yes flag', async () => {
+      const originalEnv = process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+      process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = 'https://github.com/my-org/my-registry.git';
+
+      try {
+        await initCommand({ yes: true }, mockServices);
+
+        expect(mockFs.writeFile).toHaveBeenCalledWith(
+          'promptscript.yaml',
+          expect.stringContaining('https://github.com/my-org/my-registry.git'),
+          'utf-8'
+        );
+      } finally {
+        if (originalEnv === undefined) {
+          delete process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+        } else {
+          process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = originalEnv;
+        }
+      }
+    });
+
+    it('should fetch and apply manifest suggestions when registry is configured', async () => {
+      const originalEnv = process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+      process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = 'https://github.com/my-org/my-registry.git';
+
+      mockLoadManifestFromUrl.mockResolvedValue({
+        manifest: {
+          version: '1',
+          meta: { name: 'Test', description: 'Test', lastUpdated: '2026-01-01' },
+          namespaces: {
+            '@core': { description: 'Core', priority: 100 },
+          },
+          catalog: [
+            {
+              id: '@core/base',
+              path: '@core/base.prs',
+              name: 'Base',
+              description: 'Base config',
+              tags: ['core'],
+              targets: ['github'],
+              dependencies: [],
+              detectionHints: { always: true },
+            },
+          ],
+          suggestionRules: [],
+        },
+      });
+
+      try {
+        await initCommand({ yes: true }, mockServices);
+
+        expect(mockLoadManifestFromUrl).toHaveBeenCalled();
+        expect(mockFs.writeFile).toHaveBeenCalledWith(
+          'promptscript.yaml',
+          expect.stringContaining('https://github.com/my-org/my-registry.git'),
+          'utf-8'
+        );
+      } finally {
+        if (originalEnv === undefined) {
+          delete process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+        } else {
+          process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = originalEnv;
+        }
+      }
     });
 
     it('should use non-interactive mode with provided name and targets', async () => {
@@ -254,16 +335,15 @@ describe('commands/init', () => {
       expect(mockExit).not.toHaveBeenCalled();
     });
 
-    it('should use manifest suggestions in --yes mode', async () => {
+    it('should skip registry and suggestions in --yes mode without local manifest', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      // Check that promptscript.yaml was written with suggested inherit from manifest
+      // Check that promptscript.yaml was written with commented-out inherit (no manifest available)
       const yamlCall = mockFs.writeFile.mock.calls.find(
         (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
       expect(yamlCall).toBeDefined();
-      // With --yes, manifest suggestions are applied automatically
-      expect(yamlCall![1]).toContain("inherit: '@core/base'");
+      expect(yamlCall![1]).toContain("# inherit: '@stacks/react'");
     });
   });
 
@@ -327,9 +407,12 @@ describe('commands/init', () => {
       );
     });
 
-    it('should configure git registry when user selects official', async () => {
-      mockPrompts.input.mockResolvedValueOnce('my-project');
-      mockPrompts.select.mockResolvedValue('official'); // official registry
+    it('should configure git registry when user selects custom-git', async () => {
+      mockPrompts.input
+        .mockResolvedValueOnce('my-project') // project name
+        .mockResolvedValueOnce('https://github.com/my-org/my-registry.git') // git url
+        .mockResolvedValueOnce('main'); // branch
+      mockPrompts.select.mockResolvedValue('custom-git'); // custom git registry
       mockPrompts.confirm.mockResolvedValue(false); // no inherit
       mockPrompts.checkbox.mockResolvedValue(['github']);
 
@@ -343,7 +426,7 @@ describe('commands/init', () => {
       );
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining('github.com/mrwogu/promptscript-registry'),
+        expect.stringContaining('my-org/my-registry'),
         'utf-8'
       );
     });

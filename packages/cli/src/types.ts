@@ -97,3 +97,45 @@ export interface DiffOptions {
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CheckOptions {}
+
+/**
+ * Options for the registry init command.
+ */
+export interface RegistryInitOptions {
+  /** Registry name */
+  name?: string;
+  /** Registry description */
+  description?: string;
+  /** Namespace names to create */
+  namespaces?: string[];
+  /** Skip prompts, use defaults */
+  yes?: boolean;
+  /** Output directory */
+  output?: string;
+  /** Whether to seed with starter configs (default true) */
+  seed?: boolean;
+}
+
+/**
+ * Options for the registry validate command.
+ */
+export interface RegistryValidateOptions {
+  /** Treat warnings as errors */
+  strict?: boolean;
+  /** Output format */
+  format?: 'text' | 'json';
+}
+
+/**
+ * Options for the registry publish command.
+ */
+export interface RegistryPublishOptions {
+  /** Preview what would be published */
+  dryRun?: boolean;
+  /** Skip validation */
+  force?: boolean;
+  /** Git commit message */
+  message?: string;
+  /** Git tag for release */
+  tag?: string;
+}

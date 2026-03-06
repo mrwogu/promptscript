@@ -1,4 +1,0 @@
-[submodule "registry"]
-	path = registry
-	url = https://github.com/mrwogu/promptscript-registry.git
-	branch = main

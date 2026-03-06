@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
-import { loadConfig, findConfigFile, CONFIG_FILES } from '../config/loader.js';
+import { loadConfig, findConfigFile, CONFIG_FILES, loadEffectiveConfig } from '../config/loader.js';
 
 // Mock fs modules
 vi.mock('fs', () => ({
@@ -13,6 +13,14 @@ vi.mock('fs/promises', () => ({
   writeFile: vi.fn(),
   mkdir: vi.fn(),
   rm: vi.fn(),
+}));
+
+vi.mock('../config/user-config.js', () => ({
+  loadUserConfig: vi.fn().mockResolvedValue({ version: '1' }),
+}));
+
+vi.mock('../config/env-config.js', () => ({
+  loadEnvOverrides: vi.fn().mockReturnValue({}),
 }));
 
 describe('config/loader', () => {
@@ -200,6 +208,40 @@ project:
         expect.stringContaining("Environment variable 'MISSING_VAR' is not set")
       );
       warnSpy.mockRestore();
+    });
+  });
+
+  describe('loadEffectiveConfig', () => {
+    it('should merge user config, project config, env overrides, and CLI flags', async () => {
+      const { loadUserConfig } = await import('../config/user-config.js');
+      const { loadEnvOverrides } = await import('../config/env-config.js');
+
+      vi.mocked(loadUserConfig).mockResolvedValue({
+        version: '1',
+        registry: { git: { url: 'https://github.com/user/reg.git' } },
+      });
+
+      vi.mocked(loadEnvOverrides).mockReturnValue({
+        registry: { cache: { enabled: true } },
+      });
+
+      vi.mocked(existsSync).mockReturnValueOnce(true);
+      vi.mocked(readFile).mockResolvedValueOnce(`
+version: '1'
+project:
+  id: "test-project"
+targets:
+  - github
+`);
+
+      const result = await loadEffectiveConfig(undefined, {
+        targets: ['claude'],
+      });
+
+      expect(result.project.id).toBe('test-project');
+      expect(result.targets).toEqual(['claude']);
+      expect(result.registry?.git?.url).toBe('https://github.com/user/reg.git');
+      expect(result.registry?.cache?.enabled).toBe(true);
     });
   });
 });

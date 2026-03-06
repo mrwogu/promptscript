@@ -1,38 +1,30 @@
 ---
 title: Registry - PromptScript
-description: Learn how to use the official PromptScript registry with 1,134 configurations, or create your own custom registry for your organization.
+description: Learn how to create and manage PromptScript registries for your organization, with self-service registry commands and decentralized architecture.
 ---
 
 # Registry
 
-PromptScript supports registries - collections of reusable configurations that can be inherited across projects. The official registry contains 1,134 configurations, but you can also create your own.
-
-## Official Registry
-
-**Repository:** [github.com/mrwogu/promptscript-registry](https://github.com/mrwogu/promptscript-registry)
-
-The official registry includes:
-
-| Namespace     | Count | Description                                    |
-| ------------- | ----- | ---------------------------------------------- |
-| `@prompts/`   | 632   | General-purpose prompts (coding, writing, etc) |
-| `@fragments/` | 441   | Reusable mixins (testing, security, agents)    |
-| `@roles/`     | 18    | AI personas (developer, creative, specialist)  |
-| `@skills/`    | 28    | Claude Code skills                             |
-| `@stacks/`    | 7     | Framework configs (React, Vue, Node, Python)   |
-| `@agents/`    | 5     | Specialized AI agents                          |
-| `@core/`      | 3     | Universal foundations                          |
+PromptScript supports registries - collections of reusable configurations that can be inherited across projects. Each organization creates and manages their own registry, giving full control over AI instruction standards.
 
 ## Quick Start
 
-### 1. Configure Registry
+### 1. Create a Registry
+
+```bash
+prs registry init my-company-registry
+```
+
+This scaffolds a complete registry with starter configurations. See [Creating a Registry](#creating-a-registry) for details.
+
+### 2. Configure Your Project
 
 Add to your `promptscript.yaml`:
 
 ```yaml
 registry:
   git:
-    url: https://github.com/mrwogu/promptscript-registry.git
+    url: https://github.com/your-org/your-registry.git
     ref: main # Or pin to version: v1.0.0
 ```
 
@@ -66,7 +58,7 @@ The registry is cached at `~/.promptscript/.cache/git/` with a default TTL of 1 
 
 ## Using `prs init`
 
-The `prs init` command can automatically suggest configurations:
+The `prs init` command can connect to your registry and suggest configurations:
 
 ```bash
 prs init
@@ -75,68 +67,11 @@ prs init
 It will:
 
 1. Detect your tech stack (React, Node, Python, etc.)
-2. Offer to connect to the official registry
-3. Suggest relevant configurations
+2. Offer to connect to a Git or local registry
+3. Suggest relevant configurations from your registry's catalog
 4. Generate your `promptscript.yaml` and `.promptscript/project.prs`
 
-## Available Configurations
-
-### Tech Stacks (`@stacks/`)
-
-| File                     | Description        |
-| ------------------------ | ------------------ |
-| `@stacks/react`          | React + TypeScript |
-| `@stacks/vue`            | Vue 3 + TypeScript |
-| `@stacks/node`           | Node.js backend    |
-| `@stacks/python`         | Python development |
-| `@stacks/rust`           | Rust development   |
-| `@stacks/go`             | Go development     |
-| `@stacks/typescript-lib` | TypeScript library |
-
-### Roles (`@roles/`)
-
-| Path                          | Description            |
-| ----------------------------- | ---------------------- |
-| `@roles/developer/fullstack`  | Full-stack developer   |
-| `@roles/developer/frontend`   | Frontend specialist    |
-| `@roles/developer/backend`    | Backend specialist     |
-| `@roles/developer/devops`     | DevOps engineer        |
-| `@roles/creative/writer`      | Creative writer        |
-| `@roles/professional/analyst` | Data/business analyst  |
-| `@roles/specialist/teacher`   | Educational instructor |
-
-### Fragments (`@fragments/`)
-
-Core mixins:
-
-| File                       | Description               |
-| -------------------------- | ------------------------- |
-| `@fragments/testing`       | Testing standards         |
-| `@fragments/typescript`    | TypeScript best practices |
-| `@fragments/documentation` | Documentation guidelines  |
-| `@fragments/code-review`   | Code review guidelines    |
-| `@fragments/accessibility` | Web accessibility (WCAG)  |
-
-Categorized fragments:
-
-| Category         | Count | Examples                       |
-| ---------------- | ----- | ------------------------------ |
-| `testing/`       | 157   | TDD patterns, test generation  |
-| `agents/`        | 139   | Agent guidelines, expert modes |
-| `security/`      | 72    | OWASP, vulnerability scanning  |
-| `documentation/` | 18    | Documentation generation       |
-
-### Prompts (`@prompts/`)
-
-632 general-purpose prompts organized by category:
-
-| Category     | Count | Examples                         |
-| ------------ | ----- | -------------------------------- |
-| `coding/`    | 250   | code-reviewer, linux-terminal    |
-| `general/`   | 241   | travel-guide, excel-sheet        |
-| `business/`  | 58    | seo-specialist, accountant       |
-| `education/` | 49    | math-teacher, philosophy-teacher |
-| `writing/`   | 34    | novelist, poet, screenwriter     |
+You can also set a default registry via [user-level config](./user-config.md) so `prs init --yes` automatically uses it.
 
 ## Usage Patterns
 
@@ -213,7 +148,7 @@ Control caching behavior in `promptscript.yaml`:
 ```yaml
 registry:
   git:
-    url: https://github.com/mrwogu/promptscript-registry.git
+    url: https://github.com/your-org/your-registry.git
     ref: main
   cache:
     enabled: true # Set to false to always fetch
@@ -250,9 +185,34 @@ Or in `.prs` files:
 
 ---
 
-## Creating Custom Registries
+## Creating a Registry
 
-You can create your own registry for your organization.
+Use the `prs registry init` command to scaffold a new registry:
+
+```bash
+prs registry init my-registry
+```
+
+This creates the full directory structure, manifest, and optional seed configurations.
+
+### Interactive Mode
+
+```bash
+prs registry init my-registry
+# Prompts for: name, description, namespaces, seed configs
+```
+
+### Non-Interactive Mode
+
+```bash
+prs registry init my-registry --yes --name "My Company Registry" --namespaces @core @stacks @fragments
+```
+
+### Skip Seed Configs
+
+```bash
+prs registry init my-registry --no-seed
+```
 
 ### Registry Structure
 
@@ -372,59 +332,74 @@ registry:
   path: ./path/to/registry
 ```
 
-### Verification Scripts
+### Validating a Registry
 
-Add these to your registry's `package.json`:
+Use `prs registry validate` to check your registry structure:
 
-```json
-{
-  "scripts": {
-    "verify": "node scripts/verify-manifest.js",
-    "rebuild": "node scripts/rebuild-catalog.js"
-  }
-}
+```bash
+prs registry validate ./my-registry
 ```
 
-**verify-manifest.js** - Checks all `.prs` files are in the catalog:
+Validation checks:
 
-```javascript
-// Scan all .prs files and compare against catalog
-// Exit with error if any files are missing
+- `registry-manifest.yaml` exists and parses correctly
+- Manifest schema is valid (version, meta, namespaces, catalog)
+- All catalog entry `.prs` files exist
+- Catalog IDs match declared namespaces
+- No circular dependencies
+- Warns about orphaned `.prs` files not in catalog
+
+Use `--strict` to treat warnings as errors:
+
+```bash
+prs registry validate ./my-registry --strict
 ```
 
-**rebuild-catalog.js** - Regenerates catalog from files:
+Use `--format json` for machine-readable output:
 
-```javascript
-// Parse all .prs files and extract @meta information
-// Update registry-manifest.yaml with new entries
+```bash
+prs registry validate ./my-registry --format json
 ```
 
-See the [official registry scripts](https://github.com/mrwogu/promptscript-registry/tree/main/scripts) for reference implementations.
+### Publishing a Registry
+
+Use `prs registry publish` to commit and push registry updates:
+
+```bash
+prs registry publish ./my-registry
+```
+
+This will:
+
+1. Validate the registry (use `--force` to skip)
+2. Update `meta.lastUpdated` in the manifest
+3. Stage, commit, and push changes
+
+Options:
+
+```bash
+prs registry publish ./my-registry --dry-run              # Preview without publishing
+prs registry publish ./my-registry -m "Add React stack"    # Custom commit message
+prs registry publish ./my-registry --tag v1.0.0            # Tag the release
+prs registry publish ./my-registry --force                 # Skip validation
+```
 
 ### CI/CD Integration
 
-Add manifest verification to your CI pipeline:
+Add registry validation to your CI pipeline:
 
 ```yaml
-# .github/workflows/verify-manifest.yml
-name: Verify Manifest
+# .github/workflows/registry.yml
+name: Registry CI
 on: [push, pull_request]
 jobs:
-  verify:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-      - run: npm ci
-      - run: npm run verify
+        with:
+          node-version: '20'
+      - run: npm install -g @promptscript/cli
+      - run: prs registry validate --strict
 ```
-
-## Contributing to Official Registry
-
-1. Fork [promptscript-registry](https://github.com/mrwogu/promptscript-registry)
-2. Add your `.prs` file in the appropriate namespace
-3. Ensure `@meta.id` matches the file path
-4. Run `npm run rebuild` to update the catalog
-5. Submit a pull request
-
-See the [contributing guide](https://github.com/mrwogu/promptscript-registry/blob/main/CONTRIBUTING.md) for details.
