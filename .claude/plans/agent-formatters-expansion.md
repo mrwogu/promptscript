@@ -257,6 +257,33 @@ pnpm skill:check
 10. **Phase 8** (Schema) — Update schema
 11. **Phase 9** (Final verify) — Full pipeline pass
 
+## Implementation Deviations
+
+The following deviations from the original plan were made during implementation:
+
+### Agent ID Changes
+- `kiro-cli` → `kiro`: Simplified for better CLI ergonomics (`--agent kiro` vs `--agent kiro-cli`)
+- `iflow-cli` → `iflow`: Same simplification rationale
+
+### Deferred Agents
+The following planned agents were not implemented in this phase:
+- `kimi-cli` (Kimi Code CLI): Insufficient documentation on instruction file format
+- `replit` (Replit): Agent format not yet standardized
+- `universal`: Generic concept, deferred pending clearer use case
+- `trae-cn` (Trae CN): Same `.trae/` path as `trae`, would need locale-based config — deferred to avoid complexity
+
+### hasCommands Set to `false` for All New Formatters
+The plan specified `hasCommands: true` for Windsurf (Step 2.1), but the implementation uses `hasCommands: false` for all 31 new formatters. This was intentional: none of the new markdown-based agents have a documented commands directory convention distinct from their skills directory. Commands support would generate individual files in a `<dotDir>/commands/` directory that these agents don't read.
+
+### Output Path Collisions
+Codex, Amp, and Droid all output to `AGENTS.md` (same as Factory). A compiler warning (`PS4001 output-path-collision`) was added post-review to alert users when multiple formatters target the same output path.
+
+### Windsurf Main File
+The plan listed `.windsurfrules` as the main file, but the implementation uses `.windsurf/rules/project.md` — the newer Windsurf format that replaced the legacy single-file convention.
+
+### Amp Main File
+The plan listed `.amp/rules/` as the main file path, but the implementation outputs to `AGENTS.md` with a shared `.agents/` directory, consistent with how Amp reads from the universal agents directory.
+
 ## Risks & Considerations
 
 1. **Agent format verification**: Some agents' exact file formats are undocumented. Need to verify by testing with actual agents or checking their source code.

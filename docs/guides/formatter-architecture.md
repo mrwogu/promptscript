@@ -249,16 +249,25 @@ Most new AI agents follow a standard markdown-based instruction format. For thes
 If the new agent reads markdown instructions from a file or directory:
 
 ```typescript
-registry.register(
-  'my-agent',
-  new MarkdownInstructionFormatter({
-    outputPath: '.myagent/rules/project.md',
-    agentName: 'My Agent',
-  })
-);
+export class MyAgentFormatter extends MarkdownInstructionFormatter {
+  constructor() {
+    super({
+      name: 'my-agent',
+      outputPath: '.myagent/rules/project.md',
+      description: 'My Agent rules (Markdown)',
+      defaultConvention: 'markdown',
+      mainFileHeader: '# Project Rules',
+      dotDir: '.myagent',
+      skillFileName: 'SKILL.md',
+      hasAgents: false,
+      hasCommands: false,
+      hasSkills: true,
+    });
+  }
+}
 ```
 
-This is how 31 of the 38 supported agents are implemented. The `MarkdownInstructionFormatter` handles all standard sections (`@identity`, `@standards`, `@shortcuts`, etc.) and outputs well-structured markdown to the configured path.
+This is how 31 of the 38 supported agents are implemented. Each formatter is a thin subclass that only provides constructor configuration. The `MarkdownInstructionFormatter` base class handles all standard sections (`@identity`, `@standards`, `@shortcuts`, etc.) and outputs well-structured markdown to the configured path.
 
 ### Advanced Case: Custom Formatter
 
