@@ -377,6 +377,99 @@
             },
             "gemini": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "windsurf": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "cline": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "roo": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "codex": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "continue": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "augment": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "goose": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "kilo": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "amp": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "trae": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "junie": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "kiro": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "cortex": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "crush": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "command-code": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "kode": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "mcpjam": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "mistral-vibe": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "mux": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "openhands": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "pi": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "qoder": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "qwen-code": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "zencoder": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "neovate": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "pochi": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "adal": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "iflow": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "openclaw": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "codebuddy": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "droid": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
