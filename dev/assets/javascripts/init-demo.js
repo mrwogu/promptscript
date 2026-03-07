@@ -26,7 +26,7 @@
         { type: 'success', text: '  ✓ React 18 detected' },
         { type: 'success', text: '  ✓ Vitest detected' },
         { type: 'blank' },
-        { type: 'question', text: '  ? Select a registry to inherit from:' },
+        { type: 'question', text: '  ? Select from your organization registry:' },
         {
           type: 'options',
           options: [
@@ -48,6 +48,9 @@
             { text: 'Claude Code', checked: true },
             { text: 'Cursor', checked: true },
             { text: 'Antigravity', checked: false },
+            { text: 'Factory AI', checked: false },
+            { text: 'OpenCode', checked: false },
+            { text: 'Gemini CLI', checked: false },
           ],
         },
         { type: 'blank' },
@@ -85,6 +88,9 @@
             { text: 'Claude Code', checked: true },
             { text: 'Cursor', checked: true },
             { text: 'Antigravity', checked: false },
+            { text: 'Factory AI', checked: false },
+            { text: 'OpenCode', checked: false },
+            { text: 'Gemini CLI', checked: false },
           ],
         },
         { type: 'blank' },
