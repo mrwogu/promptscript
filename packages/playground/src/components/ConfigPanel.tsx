@@ -39,6 +39,161 @@ const TARGET_INFO: Record<
     versions: ['simple', 'multifile', 'full'],
     supportsXml: true,
   },
+  windsurf: {
+    label: 'Windsurf',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  cline: {
+    label: 'Cline',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  roo: {
+    label: 'Roo Code',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  codex: {
+    label: 'Codex',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  continue: {
+    label: 'Continue',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  augment: {
+    label: 'Augment',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  goose: {
+    label: 'Goose',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  kilo: {
+    label: 'Kilo Code',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  amp: {
+    label: 'Amp',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  trae: {
+    label: 'Trae',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  junie: {
+    label: 'Junie',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  kiro: {
+    label: 'Kiro CLI',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  cortex: {
+    label: 'Cortex Code',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  crush: {
+    label: 'Crush',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  'command-code': {
+    label: 'Command Code',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  kode: {
+    label: 'Kode',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  mcpjam: {
+    label: 'MCPJam',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  'mistral-vibe': {
+    label: 'Mistral Vibe',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  mux: {
+    label: 'Mux',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  openhands: {
+    label: 'OpenHands',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  pi: {
+    label: 'Pi',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  qoder: {
+    label: 'Qoder',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  'qwen-code': {
+    label: 'Qwen Code',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  zencoder: {
+    label: 'Zencoder',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  neovate: {
+    label: 'Neovate',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  pochi: {
+    label: 'Pochi',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  adal: {
+    label: 'AdaL',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  iflow: {
+    label: 'iFlow CLI',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  openclaw: {
+    label: 'OpenClaw',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  codebuddy: {
+    label: 'CodeBuddy',
+    versions: ['simple'],
+    supportsXml: false,
+  },
+  droid: {
+    label: 'Droid',
+    versions: ['simple'],
+    supportsXml: false,
+  },
 };
 
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [
@@ -93,7 +248,10 @@ export function ConfigPanel() {
                   (typeof TARGET_INFO)[FormatterName],
                 ][]
               ).map(([target, info]) => {
-                const settings = config.targets[target];
+                const settings = config.targets[target] ?? {
+                  enabled: false,
+                  version: info.versions[0],
+                };
                 return (
                   <div key={target} className="flex items-center gap-3">
                     {/* Enable checkbox */}

@@ -5,7 +5,7 @@
 
 **One Source of Truth for All Your AI Coding Assistants**
 
-_Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
+_Write once. Compile to 38 AI coding agents -- GitHub Copilot, Claude Code, Cursor, and more._
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
@@ -34,7 +34,7 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                     50+ Repos × 7 AI Tools = Chaos                      │
+│                    50+ Repos × 38 AI Tools = Chaos                      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   repo-1/CLAUDE.md          repo-1/.cursorrules      repo-1/.github/    │
@@ -85,12 +85,12 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 
 ## Why Not Just Copy Files?
 
-| Approach           | Problem                                           |
-| :----------------- | :------------------------------------------------ |
-| **Copy-paste**     | 50 repos × 7 tools = 350 files to update manually |
-| **Symlinks**       | Don't work with Git, break in CI/CD               |
-| **Git submodules** | Complex, no inheritance, same format issue        |
-| **Scripts**        | Custom code to maintain, no validation            |
+| Approach           | Problem                                             |
+| :----------------- | :-------------------------------------------------- |
+| **Copy-paste**     | 50 repos × 38 tools = 1900 files to update manually |
+| **Symlinks**       | Don't work with Git, break in CI/CD                 |
+| **Git submodules** | Complex, no inheritance, same format issue          |
+| **Scripts**        | Custom code to maintain, no validation              |
 
 **PromptScript gives you:** inheritance, validation, multi-format output, and version control — in one tool.
 
@@ -276,7 +276,9 @@ Create your registry with `prs registry init` or connect to any Git-hosted regis
 
 ---
 
-## Supported Platforms
+## Supported Platforms (38 AI Agents)
+
+PromptScript supports 38 AI coding agents out of the box. Here are the primary targets with specialized output formats:
 
 | AI Tool                | Output Format                     | Features                     |
 | :--------------------- | :-------------------------------- | :--------------------------- |
@@ -288,7 +290,17 @@ Create your registry with `prs registry init` or connect to any Git-hosted regis
 | **OpenCode**           | `OPENCODE.md`                     | Commands, skills, agents     |
 | **Gemini CLI**         | `GEMINI.md`                       | TOML commands, skills        |
 
-**[See Roadmap](ROADMAP.md)** for upcoming platforms and features — contributions welcome!
+Plus 31 additional agents using the `MarkdownInstructionFormatter` pattern:
+
+| Tier                         | Agents                                                                                                                                                           |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tier 1 (High priority)**   | Windsurf, Cline, Roo Code, Codex, Continue                                                                                                                       |
+| **Tier 2 (Medium priority)** | Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI                                                                                                            |
+| **Tier 3 (Additional)**      | Cortex, Crush, Command Code, Kode, MCPJam, Mistral Vibe, Mux, OpenHands, Pi, Qoder, Qwen Code, Zencoder, Neovate, Pochi, AdaL, iFlow, OpenClaw, CodeBuddy, Droid |
+
+Each agent formatter outputs to its native configuration path (e.g., `.windsurf/rules/project.md`, `.clinerules`, `.roorules`). See the [formatters package](packages/formatters/README.md) for the full list.
+
+**[See Roadmap](ROADMAP.md)** for upcoming features -- contributions welcome!
 
 ---
 
@@ -318,10 +330,10 @@ Create your registry with `prs registry init` or connect to any Git-hosted regis
 
 ## Roadmap
 
-- More platforms: Windsurf, Aider, Continue, Cline, Zed
 - GitHub Action for CI/CD drift detection
 - VS Code Extension with LSP
 - Public Registry for community sharing
+- Parameterized inheritance for reusable templates
 
 [**Full Roadmap**](ROADMAP.md)
 

@@ -9,7 +9,7 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 ## Overview
 
-PromptScript compiles to multiple targets (GitHub Copilot, Claude Code, Cursor, etc.). Each formatter must produce semantically equivalent output from the same input. To ensure this parity, formatters share common extraction and rendering logic.
+PromptScript compiles to 38 AI agent targets (GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more). Each formatter must produce semantically equivalent output from the same input. To ensure this parity, formatters share common extraction and rendering logic.
 
 ```mermaid
 flowchart TB
@@ -37,6 +37,16 @@ flowchart TB
             CL["ClaudeFormatter"]
             CU["CursorFormatter"]
             AG["AntigravityFormatter"]
+            FA["FactoryFormatter"]
+            OC["OpenCodeFormatter"]
+            GE["GeminiFormatter"]
+        end
+
+        subgraph "MarkdownInstructionFormatter (31 agents)"
+            MI["MarkdownInstructionFormatter"]
+            T1["Tier 1: Windsurf, Cline, Roo Code, Codex, Continue"]
+            T2["Tier 2: Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI"]
+            T3["Tier 3: Cortex, Crush, Command Code, Kode, + 15 more"]
         end
     end
 
@@ -51,8 +61,9 @@ flowchart TB
     AST --> BR
     BR --> SE
     BR --> SR
-    SE --> GH & CL & CU & AG
-    SR --> GH & CL & CU & AG
+    SE --> GH & CL & CU & AG & FA & OC & GE & MI
+    SR --> GH & CL & CU & AG & FA & OC & GE & MI
+    MI --> T1 & T2 & T3
     GH --> GHO
     CL --> CLO
     CU --> CUO
@@ -231,7 +242,27 @@ The parity matrix (`parity-matrix.spec.ts`) validates that:
 
 ## Adding a New Formatter
 
-To add a new target formatter:
+Most new AI agents follow a standard markdown-based instruction format. For these agents, adding support requires only a simple constructor call using `MarkdownInstructionFormatter` -- no new class needed.
+
+### Simple Case: MarkdownInstructionFormatter (most agents)
+
+If the new agent reads markdown instructions from a file or directory:
+
+```typescript
+registry.register(
+  'my-agent',
+  new MarkdownInstructionFormatter({
+    outputPath: '.myagent/rules/project.md',
+    agentName: 'My Agent',
+  })
+);
+```
+
+This is how 31 of the 38 supported agents are implemented. The `MarkdownInstructionFormatter` handles all standard sections (`@identity`, `@standards`, `@shortcuts`, etc.) and outputs well-structured markdown to the configured path.
+
+### Advanced Case: Custom Formatter
+
+For agents with unique output formats (e.g., TOML commands, frontmatter metadata, multiple output files), extend `BaseFormatter` directly:
 
 1. **Extend BaseFormatter**:
 
