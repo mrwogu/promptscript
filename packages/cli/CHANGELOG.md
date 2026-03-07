@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0](https://github.com/mrwogu/promptscript/compare/v1.0.0...v1.1.0) (2026-03-07)
+
+
+### Features
+
+* add Factory AI, OpenCode, and Gemini CLI compilation targets ([9c206af](https://github.com/mrwogu/promptscript/commit/9c206af40fe35412b948b1a32d9fec8b309e3c91))
+* add root SKILL.md as canonical source with sync pipeline ([#75](https://github.com/mrwogu/promptscript/issues/75)) ([cc76023](https://github.com/mrwogu/promptscript/commit/cc76023eaea92318303081dcd439ae3185b1bbe0))
+* **cli:** enterprise registry redesign ([#74](https://github.com/mrwogu/promptscript/issues/74)) ([a1ce2ca](https://github.com/mrwogu/promptscript/commit/a1ce2cad2a80d902e380907dd5b1c474952f8b6f))
+
+
+### Bug Fixes
+
+* **cli:** include skills in build assets and update CI smoke tests ([62d8d0b](https://github.com/mrwogu/promptscript/commit/62d8d0bbc86f02ad11424110fb7bf2215dd80299))
+
 ## [1.0.0](https://github.com/mrwogu/promptscript/compare/v1.0.0-rc.3...v1.0.0) (2026-03-06)
 
 
