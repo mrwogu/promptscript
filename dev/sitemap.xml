@@ -813,6 +813,10 @@
          <lastmod>2026-03-07</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/MarkdownInstructionFormatter/</loc>
+         <lastmod>2026-03-07</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/OpenCodeFormatter/</loc>
          <lastmod>2026-03-07</lastmod>
     </url>
@@ -949,6 +953,22 @@
          <lastmod>2026-03-07</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/MarkdownAgentConfig/</loc>
+         <lastmod>2026-03-07</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/MarkdownCommandConfig/</loc>
+         <lastmod>2026-03-07</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/MarkdownFormatterConfig/</loc>
+         <lastmod>2026-03-07</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/MarkdownSkillConfig/</loc>
+         <lastmod>2026-03-07</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/ParityReport/</loc>
          <lastmod>2026-03-07</lastmod>
     </url>
@@ -1001,7 +1021,15 @@
          <lastmod>2026-03-07</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/MarkdownVersion/</loc>
+         <lastmod>2026-03-07</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/OpenCodeVersion/</loc>
+         <lastmod>2026-03-07</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/SectionNameKey/</loc>
          <lastmod>2026-03-07</lastmod>
     </url>
     <url>
