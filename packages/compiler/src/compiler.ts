@@ -1,7 +1,7 @@
 import { noopLogger, type Logger, type PSError } from '@promptscript/core';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { Resolver, type ResolvedAST } from '@promptscript/resolver';
-import { Validator, type ValidatorConfig } from '@promptscript/validator';
+import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
 import type {
   CompilerOptions,
   CompileResult,
@@ -198,6 +198,8 @@ export class Compiler {
     const startFormat = Date.now();
     const outputs = new Map<string, FormatterOutput>();
     const formatErrors: CompileError[] = [];
+    const formatWarnings: ValidationMessage[] = [];
+    const outputPathOwners = new Map<string, string>();
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
@@ -212,8 +214,19 @@ export class Compiler {
 
         this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
 
-        // Use output path as key to support multiple targets with same formatter
-        // (e.g., cursor modern + cursor legacy)
+        // Warn if multiple formatters target the same output path
+        const existingOwner = outputPathOwners.get(output.path);
+        if (existingOwner) {
+          formatWarnings.push({
+            ruleId: 'PS4001',
+            ruleName: 'output-path-collision',
+            severity: 'warning',
+            message: `Output path '${output.path}' is written by both '${existingOwner}' and '${formatter.name}'. The latter will overwrite the former.`,
+            suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+          });
+        }
+        outputPathOwners.set(output.path, formatter.name);
+
         // Add PromptScript marker to all outputs for overwrite detection
         outputs.set(output.path, addMarkerToOutput(output));
 
@@ -243,12 +256,14 @@ export class Compiler {
     stats.totalTime = Date.now() - startTotal;
     this.logger.verbose(`Format completed (${stats.formatTime}ms)`);
 
+    const allWarnings = [...validation.warnings, ...formatWarnings];
+
     if (formatErrors.length > 0) {
       return {
         success: false,
         outputs,
         errors: formatErrors,
-        warnings: validation.warnings,
+        warnings: allWarnings,
         stats,
       };
     }
@@ -257,7 +272,7 @@ export class Compiler {
       success: true,
       outputs,
       errors: [],
-      warnings: validation.warnings,
+      warnings: allWarnings,
       stats,
     };
   }
