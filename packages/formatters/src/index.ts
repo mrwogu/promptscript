@@ -10,8 +10,17 @@
 // Types
 export type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types.js';
 
-// Base class
+// Base classes
 export { BaseFormatter } from './base-formatter.js';
+export { MarkdownInstructionFormatter } from './markdown-instruction-formatter.js';
+export type {
+  MarkdownFormatterConfig,
+  MarkdownCommandConfig,
+  MarkdownSkillConfig,
+  MarkdownAgentConfig,
+  MarkdownVersion,
+  SectionNameKey,
+} from './markdown-instruction-formatter.js';
 
 // Registry
 export { FormatterRegistry } from './registry.js';
