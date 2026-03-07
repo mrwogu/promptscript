@@ -1,9 +1,9 @@
 ---
-title: Registry - PromptScript
+title: Build Your Registry - PromptScript
 description: Learn how to create and manage PromptScript registries for your organization, with self-service registry commands and decentralized architecture.
 ---
 
-# Registry
+# Build Your Registry
 
 PromptScript supports registries - collections of reusable configurations that can be inherited across projects. Each organization creates and manages their own registry, giving full control over AI instruction standards.
 
@@ -403,3 +403,10 @@ jobs:
       - run: npm install -g @promptscript/cli
       - run: prs registry validate --strict
 ```
+
+---
+
+## Next Steps
+
+- [Enterprise Setup](enterprise.md) — Scale PromptScript across your organization
+- [CI/CD Integration](ci.md) — Automate validation and compilation in your pipeline

@@ -21,12 +21,12 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 
 ## Why PromptScript?
 
-| **For IT Managers**                                         | **For Developers**                                            |
-| :---------------------------------------------------------- | :------------------------------------------------------------ |
-| Update security policies across **100+ repos** in seconds   | **1,100+ ready templates** for React, Vue, Node, Python, Rust |
-| **Audit trail** for all AI instructions                     | **Zero migration** — auto-converts existing files             |
-| **Vendor independence** — switch AI tools without rewriting | **Watch mode** for instant feedback                           |
-| **CISO-approved** standards propagate automatically         | **Parameterized templates** like IaC                          |
+| **For IT Managers**                                         | **For Developers**                                             |
+| :---------------------------------------------------------- | :------------------------------------------------------------- |
+| Update security policies across **100+ repos** in seconds   | **Scaffold your registry** in minutes — inherit team standards |
+| **Audit trail** for all AI instructions                     | **Zero migration** — auto-converts existing files              |
+| **Vendor independence** — switch AI tools without rewriting | **Watch mode** for instant feedback                            |
+| **Organizational standards** propagate automatically        | **Parameterized templates** like IaC                           |
 
 ---
 
@@ -34,7 +34,7 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                     50+ Repos × 4 AI Tools = Chaos                      │
+│                     50+ Repos × 7 AI Tools = Chaos                      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   repo-1/CLAUDE.md          repo-1/.cursorrules      repo-1/.github/    │
@@ -61,17 +61,17 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   @company/security ──┬──→ @team/backend ──→ checkout-service/.prs      │
-│   (CISO approved)     │                                                 │
+│   (Security team)     │                                                 │
 │                       ├──→ @team/frontend ──→ dashboard/.prs            │
 │   @company/typescript │                                                 │
 │   (Platform team)     └──→ @team/data ──→ analytics/.prs                │
 │                                                                         │
 │                            ↓ prs compile                                │
 │                                                                         │
-│               ┌────────────┬────────────┬────────────┐                  │
-│               │  Copilot   │   Claude   │   Cursor   │                  │
-│               │  .github/  │  CLAUDE.md │  .cursor/  │                  │
-│               └────────────┴────────────┴────────────┘                  │
+│    ┌─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐│
+│    │ Copilot │ Claude  │ Cursor  │Antigrav.│Factory  │OpenCode │ Gemini  ││
+│    │ .github/│CLAUDE.md│ .cursor/│ .agent/ │AGENTS.md│OPENCODE │GEMINI.md││
+│    └─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘│
 │                                                                         │
 │   ✅ Update once → propagates to all repos                              │
 │   ✅ Full audit trail in version control                                │
@@ -87,7 +87,7 @@ _Write once. Compile to GitHub Copilot, Claude Code, Cursor, and more._
 
 | Approach           | Problem                                           |
 | :----------------- | :------------------------------------------------ |
-| **Copy-paste**     | 50 repos × 4 tools = 200 files to update manually |
+| **Copy-paste**     | 50 repos × 7 tools = 350 files to update manually |
 | **Symlinks**       | Don't work with Git, break in CI/CD               |
 | **Git submodules** | Complex, no inheritance, same format issue        |
 | **Scripts**        | Custom code to maintain, no validation            |
@@ -134,7 +134,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate
 ```promptscript
 @meta { id: "checkout-service" syntax: "1.0.0" }
 
-# Inherit company-wide security standards (CISO approved)
+# Inherit company-wide security standards
 @inherit @company/backend-security
 
 # Compose with reusable fragments
@@ -180,7 +180,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate
 
 ```promptscript
 # Organization level (managed by platform team)
-@inherit @company/global-security      # CISO-approved standards
+@inherit @company/global-security      # Organization-wide standards
 @inherit @company/typescript           # Platform standards
 
 # Team level
@@ -246,29 +246,33 @@ docker run --rm -v $(pwd):/workspace \
 
 ---
 
-## Official Registry: 1,100+ Configurations
+## Enterprise Registry
 
-Inherit from battle-tested templates instead of starting from scratch.
+Build your organization's private registry of AI standards.
 
-| Category        | Examples                                       | Count |
-| :-------------- | :--------------------------------------------- | :---: |
-| **@stacks/**    | React, Vue, Node, Python, Rust, Go, TypeScript |   7   |
-| **@fragments/** | Testing, Security, Accessibility, Performance  |  441  |
-| **@prompts/**   | Code review, Documentation, Refactoring        |  632  |
-| **@roles/**     | Backend Engineer, Frontend Expert, DevOps      |  18   |
-| **@skills/**    | Claude Code skills with permissions            |  28   |
-| **@agents/**    | Specialized AI agents                          |   5   |
+**Example registry structure:**
 
-**Example:**
-
-```promptscript
-@inherit @stacks/react
-@use @fragments/testing
-@use @fragments/security
-@use @fragments/accessibility
+```
+@company/security      — CISO-approved guardrails
+@company/typescript    — Platform team standards
+@company/react-app     — Frontend team defaults
 ```
 
-Create your own registry with `prs registry init` or connect to any Git-hosted registry.
+**Quick start:**
+
+```bash
+prs registry init my-company-standards
+prs registry validate
+prs registry publish
+```
+
+Teams inherit with a single line:
+
+```promptscript
+@inherit @company/security
+```
+
+Create your registry with `prs registry init` or connect to any Git-hosted registry.
 
 ---
 
@@ -280,6 +284,7 @@ Create your own registry with `prs registry init` or connect to any Git-hosted r
 | **Claude Code**        | `CLAUDE.md`                       | Skills with tool permissions |
 | **Cursor**             | `.cursor/rules/*.mdc`             | Glob patterns, alwaysApply   |
 | **Google Antigravity** | `.agent/rules/*.md`               | Activation modes             |
+| **Factory AI**         | `AGENTS.md`                       | Commands, handoffs, skills   |
 | **OpenCode**           | `OPENCODE.md`                     | Commands, skills, agents     |
 | **Gemini CLI**         | `GEMINI.md`                       | TOML commands, skills        |
 

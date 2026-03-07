@@ -168,7 +168,7 @@ nav:
       - Configuration: reference/config.md
   - Guides:
       - guides/index.md
-      - Official Registry: guides/registry.md
+      - Build Your Registry: guides/registry.md
       - CI/CD Integration: guides/ci.md
       - Docker: guides/docker.md
       - Inheritance: guides/inheritance.md
