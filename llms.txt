@@ -15,7 +15,7 @@
 
 ## Guides
 
-- Official Registry: https://getpromptscript.dev/latest/guides/registry/
+- Build Your Registry: https://getpromptscript.dev/latest/guides/registry/
 - CI/CD Integration: https://getpromptscript.dev/latest/guides/ci/
 - Inheritance: https://getpromptscript.dev/latest/guides/inheritance/
 - Multi-File Organization: https://getpromptscript.dev/latest/guides/multi-file/
