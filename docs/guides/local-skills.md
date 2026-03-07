@@ -248,4 +248,4 @@ For cross-target compatibility, consider parameterizing the path or documenting 
 
 - [Skills & Local Memory](../examples/skills-and-local.md) — Example of `@skills` with inline content
 - [Multi-File Organization](multi-file.md) — Organizing `.prs` files with `@use` imports
-- [Official Registry](registry.md) — Publishing and consuming registry packages
+- [Build Your Registry](registry.md) — Publishing and consuming registry packages

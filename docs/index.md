@@ -1,21 +1,21 @@
 ---
-title: 'PromptScript - Prompt-as-Code for AI Instructions | Copilot, Claude, Cursor'
-description: 'Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.'
+title: 'PromptScript — One Source, 7 AI Tools | Enterprise AI Standards'
+description: 'Write AI instructions once, compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, and 3 more targets. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
 meta:
   - name: keywords
-    content: PromptScript, AI instructions, GitHub Copilot, Claude Code, Cursor, AI context, prompt engineering, enterprise AI, developer tools, code generation, AI standardization
+    content: PromptScript, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
   - name: robots
     content: index, follow
   - property: og:title
-    content: PromptScript - Prompt-as-Code for AI Instructions
+    content: PromptScript — One Source, 7 AI Tools
   - property: og:description
-    content: Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.
+    content: Write AI instructions once, compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, and 3 more targets. Enterprise prompt standardization with inheritance, validation, and CI/CD.
   - property: og:type
     content: website
   - name: twitter:card
     content: summary_large_image
   - name: twitter:title
-    content: PromptScript - Prompt-as-Code for AI Instructions
+    content: PromptScript — One Source, 7 AI Tools
 hide:
   - navigation
   - toc
@@ -27,12 +27,12 @@ hide:
 
 # PromptScript
 
-**The Prompt-as-Code for AI Instructions**
+**One Prompt Codebase. Seven AI Tools. Zero Drift.**
 
-_Standardize, audit, and deploy instructions across any AI coding assistant._
+_Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, and 4 more targets._
 
-[:material-rocket-launch: Get Started](getting-started.md){ .md-button .md-button--primary }
-[:material-play-circle: Try Playground](/playground/){ .md-button .md-button--secondary }
+[:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
+[:material-book-open-variant: See Enterprise Guide](guides/enterprise.md){ .md-button .md-button--secondary }
 [:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
 
 </div>
@@ -69,6 +69,18 @@ _Standardize, audit, and deploy instructions across any AI coding assistant._
         <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--cursor" title="Cursor">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>
         </span>
+        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--antigravity" title="Antigravity">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </span>
+        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--factory" title="Factory AI">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM12 9.95L5 13v7h14v-9h-3l-1.04-4H14l-.96 4L12 11v-1.05zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>
+        </span>
+        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--opencode" title="OpenCode">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+        </span>
+        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--gemini" title="Gemini CLI">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        </span>
       </div>
       <div class="compile-demo__placeholder-text">Awaiting compilation...</div>
     </div>
@@ -87,6 +99,26 @@ _Standardize, audit, and deploy instructions across any AI coding assistant._
         <span class="compile-demo__tab-icon compile-demo__tab-icon--cursor">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>
         </span> Cursor <span class="compile-demo__tab-count">2 files</span>
+      </span>
+      <span class="compile-demo__tab" data-target="antigravity">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--antigravity">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </span> Antigravity <span class="compile-demo__tab-count">2 files</span>
+      </span>
+      <span class="compile-demo__tab" data-target="factory">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--factory">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM12 9.95L5 13v7h14v-9h-3l-1.04-4H14l-.96 4L12 11v-1.05zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>
+        </span> Factory <span class="compile-demo__tab-count">2 files</span>
+      </span>
+      <span class="compile-demo__tab" data-target="opencode">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--opencode">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+        </span> OpenCode <span class="compile-demo__tab-count">2 files</span>
+      </span>
+      <span class="compile-demo__tab" data-target="gemini">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--gemini">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        </span> Gemini <span class="compile-demo__tab-count">2 files</span>
       </span>
     </div>
 
@@ -309,6 +341,200 @@ TypeScript 5.x · Node 20+ · Prisma
 </div>
 </div>
 
+    <div class="compile-demo__panel" data-panel="antigravity">
+      <div class="compile-demo__subfiles">
+        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">checkout.md</span>
+        <span class="compile-demo__subfile" data-file="1">security.md</span>
+      </div>
+      <div class="compile-demo__file compile-demo__file--active" data-file="0">
+        <div class="compile-demo__header compile-demo__header--antigravity">
+          <span class="compile-demo__filename">.agent/rules/checkout.md</span>
+        </div>
+        <pre class="compile-demo__code"><code><span class="key">---</span>
+
+<span class="key">description:</span> <span class="str">Checkout Service standards</span>
+<span class="key">activation:</span> <span class="str">always</span>
+<span class="key">---</span>
+
+<span class="cm"># Checkout Service</span>
+<span class="inherited">&larr; @acme/platform-standards</span>
+
+<span class="hl">## Project</span>
+Expert Fullstack Engineer.
+
+<span class="hl">## Stack</span>
+TypeScript 5.x &middot; Node 20+ &middot; Prisma
+
+<span class="hl">## Rules</span>
+<span class="rule">&#10003;</span> Strict mode, no <span class="str">`any`</span>
+<span class="rule">&#10003;</span> Zod validation on inputs
+
+<span class="hl">## Security</span>
+<span class="warn">&#9940;</span> Never log PII or card data
+<span class="warn">&#9940;</span> Parameterized queries only</code></pre>
+
+</div>
+<div class="compile-demo__file" data-file="1">
+<div class="compile-demo__header compile-demo__header--antigravity">
+<span class="compile-demo__filename">.agent/rules/security.md</span>
+</div>
+<pre class="compile-demo__code"><code><span class="key">---</span>
+<span class="key">description:</span> <span class="str">Security audit skill</span>
+<span class="key">activation:</span> <span class="str">manual</span>
+<span class="key">---</span>
+
+<span class="cm"># Security Audit</span>
+
+<span class="hl">Scan for vulnerabilities:</span>
+
+&bull; SQL injection risks
+&bull; XSS attack vectors
+&bull; Hardcoded secrets
+&bull; Missing input validation</code></pre>
+
+</div>
+</div>
+
+    <div class="compile-demo__panel" data-panel="factory">
+      <div class="compile-demo__subfiles">
+        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">AGENTS.md</span>
+        <span class="compile-demo__subfile" data-file="1">review.skill</span>
+      </div>
+      <div class="compile-demo__file compile-demo__file--active" data-file="0">
+        <div class="compile-demo__header compile-demo__header--factory">
+          <span class="compile-demo__filename">AGENTS.md</span>
+        </div>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service Agent</span>
+
+<span class="inherited">&larr; @acme/platform-standards</span>
+
+<span class="hl">## Role</span>
+Expert Fullstack Engineer working on
+the Checkout Service.
+
+<span class="hl">## Commands</span>
+<span class="str">/review</span> Security code review
+<span class="str">/test</span> Write vitest tests
+
+<span class="hl">## Handoffs</span>
+<span class="rule">&#10140;</span> <span class="str">security-audit</span> for vulnerability scans
+<span class="rule">&#10140;</span> <span class="str">migration</span> for DB schema changes</code></pre>
+
+</div>
+<div class="compile-demo__file" data-file="1">
+<div class="compile-demo__header compile-demo__header--factory">
+<span class="compile-demo__filename">.factory/skills/review.skill</span>
+</div>
+<pre class="compile-demo__code"><code><span class="key">---</span>
+<span class="key">name:</span> <span class="str">review</span>
+<span class="key">description:</span> <span class="str">Security code review</span>
+<span class="key">---</span>
+
+Perform security-focused review.
+
+<span class="hl">Focus areas:</span>
+&bull; Authentication flows
+&bull; Data validation
+&bull; Error handling
+&bull; Secrets management</code></pre>
+
+</div>
+</div>
+
+    <div class="compile-demo__panel" data-panel="opencode">
+      <div class="compile-demo__subfiles">
+        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">OPENCODE.md</span>
+        <span class="compile-demo__subfile" data-file="1">review.md</span>
+      </div>
+      <div class="compile-demo__file compile-demo__file--active" data-file="0">
+        <div class="compile-demo__header compile-demo__header--opencode">
+          <span class="compile-demo__filename">OPENCODE.md</span>
+        </div>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span>
+
+<span class="inherited">&larr; @acme/platform-standards</span>
+
+<span class="hl">## Project</span>
+Expert Fullstack Engineer.
+
+<span class="hl">## Tech</span> TypeScript &middot; Hexagonal &middot; DDD
+
+<span class="hl">## Commands</span>
+<span class="str">/review</span> Security code review
+<span class="str">/test</span> Write vitest tests
+
+<span class="hl">## Skills</span>
+<span class="rule">&#9654;</span> <span class="str">security-audit</span>
+<span class="rule">&#9654;</span> <span class="str">migration</span></code></pre>
+
+</div>
+<div class="compile-demo__file" data-file="1">
+<div class="compile-demo__header compile-demo__header--opencode">
+<span class="compile-demo__filename">.opencode/commands/review.md</span>
+</div>
+<pre class="compile-demo__code"><code><span class="key">---</span>
+<span class="key">name:</span> <span class="str">review</span>
+<span class="key">description:</span> <span class="str">Security code review</span>
+<span class="key">---</span>
+
+Perform security-focused review.
+
+<span class="hl">Check for:</span>
+&bull; SQL injection risks
+&bull; XSS attack vectors
+&bull; Hardcoded secrets
+&bull; Missing input validation</code></pre>
+
+</div>
+</div>
+
+    <div class="compile-demo__panel" data-panel="gemini">
+      <div class="compile-demo__subfiles">
+        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">GEMINI.md</span>
+        <span class="compile-demo__subfile" data-file="1">review.toml</span>
+      </div>
+      <div class="compile-demo__file compile-demo__file--active" data-file="0">
+        <div class="compile-demo__header compile-demo__header--gemini">
+          <span class="compile-demo__filename">GEMINI.md</span>
+        </div>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span>
+
+<span class="inherited">&larr; @acme/platform-standards</span>
+
+<span class="hl">## Project</span>
+Expert Fullstack Engineer.
+
+<span class="hl">## Tech</span> TypeScript &middot; Hexagonal &middot; DDD
+
+<span class="hl">## Commands</span>
+<span class="str">/review</span> Security code review
+<span class="str">/test</span> Write vitest tests
+
+<span class="hl">## Don'ts</span>
+<span class="warn">&#10007;</span> Don't use <span class="str">`any`</span> - use Zod
+<span class="warn">&#10007;</span> Don't log payment data</code></pre>
+
+</div>
+<div class="compile-demo__file" data-file="1">
+<div class="compile-demo__header compile-demo__header--gemini">
+<span class="compile-demo__filename">.gemini/commands/review.toml</span>
+</div>
+<pre class="compile-demo__code"><code><span class="key">[command]</span>
+<span class="key">name</span> = <span class="str">"review"</span>
+<span class="key">description</span> = <span class="str">"Security code review"</span>
+
+<span class="key">[command.steps]</span>
+<span class="key">action</span> = <span class="str">"review"</span>
+
+<span class="hl"># Focus areas:</span>
+<span class="cm"># SQL injection risks</span>
+<span class="cm"># XSS attack vectors</span>
+<span class="cm"># Hardcoded secrets</span>
+<span class="cm"># Missing input validation</span></code></pre>
+
+</div>
+</div>
+
   </div>
 </div>
 
@@ -328,50 +554,50 @@ TypeScript 5.x · Node 20+ · Prisma
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M2 10.96a.985.985 0 0 1-.37-1.37L3.13 7c.11-.2.28-.34.47-.42l7.83-4.4c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.19.1.35.26.44.46l1.45 2.52c.28.48.11 1.09-.36 1.36l-1 .58v4.96c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.99.99 0 0 1 3 16.5v-5.54c-.3.17-.68.18-1 0M12 4.15L5 8.09l7 3.94l7-3.94zM5 15.91l6 3.38v-6.71L5 9.21zm14 0v-6.7l-6 3.37v6.71z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
   </div>
-  <h3>1,100+ Ready Configurations</h3>
-  <p>Official registry with templates for React, Vue, Node, Python, Rust, Go. Inherit from <code>@stacks/react</code> and start coding in seconds.</p>
+  <h3>Write Once, Compile to 7 AI Tools</h3>
+  <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, Antigravity, Factory AI, and OpenCode. Add new tools without rewriting.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--blue">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h6v4H3zm0 18h6v-4H3zm8 0h6v-4h-6zm8-18h2v18h-2v-4h-4v-2h4V9h-4V7h4zm-8 4h6V3h-6zm0 6h6v-4h-6z"/></svg>
   </div>
-  <h3>Hierarchical Inheritance</h3>
-  <p>Structure instructions like code. Inherit from <code>@company/backend-security</code>, compose with <code>@use @fragments/testing</code>.</p>
+  <h3>Hierarchical Inheritance at Scale</h3>
+  <p>Org-wide policies inherit into team standards, which inherit into projects. Change once at the top, propagate everywhere.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--amber">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m1 22l1-2h20l1 2zm7.5-4a.5.5 0 0 1-.5-.5V14h.08L5.04 9.14l.96-.84l3 3.4V4.5a.5.5 0 0 1 .5-.5a.5.5 0 0 1 .5.5v7h.06l3-3.4l.94.84L10.96 14h.04v3.5a.5.5 0 0 1-.5.5zm6-6.5a.5.5 0 0 1-.5-.5V5.5a.5.5 0 0 1 .5-.5a.5.5 0 0 1 .5.5V8h.06l3-3.4l.94.84L16.46 10h.04v1a.5.5 0 0 1-.5.5a.5.5 0 0 1-.5-.5"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-6.45 9-12V5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
   </div>
-  <h3>Enterprise Governance</h3>
-  <p>CISO-approved standards propagate to 100+ repos. Audit trails, version control, and policy enforcement built-in.</p>
+  <h3>Audit Trails & Policy Enforcement</h3>
+  <p>Every standard versioned and traceable. Run <code>prs validate --strict</code> in CI to block non-compliant configs before production.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 17.93c-3.95-.49-7-3.85-7-7.93c0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41c0 2.08-.8 3.97-2.1 5.39"/></svg>
   </div>
-  <h3>One Source, 4+ AI Tools</h3>
-  <p>Write once, compile to GitHub Copilot, Claude Code, Cursor, and Antigravity. Switch vendors without rewriting.</p>
+  <h3>Your Private Standards Registry</h3>
+  <p>Host standards in a private Git registry. Teams inherit from <code>@company/security</code>, <code>@company/react-app</code> — your standards, your control.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--green">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m10 17l-4-4l1.41-1.41L10 14.17l7.59-7.59L19 8m0-5H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2"/></svg>
   </div>
-  <h3>Parameterized Templates</h3>
-  <p>Create reusable templates with <code>{{projectName}}</code> variables. Like infrastructure-as-code for AI instructions.</p>
+  <h3>CI/CD Pipeline Integration</h3>
+  <p>Add <code>prs compile --check</code> to your pipeline. Detect drift, enforce standards, fail builds on non-compliance.</p>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--orange">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 17.93c-3.95-.49-7-3.85-7-7.93c0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41c0 2.08-.8 3.97-2.1 5.39"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M2 10.96a.985.985 0 0 1-.37-1.37L3.13 7c.11-.2.28-.34.47-.42l7.83-4.4c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.19.1.35.26.44.46l1.45 2.52c.28.48.11 1.09-.36 1.36l-1 .58v4.96c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.99.99 0 0 1 3 16.5v-5.54c-.3.17-.68.18-1 0M12 4.15L5 8.09l7 3.94l7-3.94zM5 15.91l6 3.38v-6.71L5 9.21zm14 0v-6.7l-6 3.37v6.71z"/></svg>
   </div>
-  <h3>Registry & Sharing</h3>
-  <p>Host standards in your own Git repo. Run <code>prs pull</code> to sync latest configs across all projects instantly.</p>
+  <h3>Zero-Touch Rollout to 100+ Repos</h3>
+  <p>Update a security policy once. Every repo gets the latest standards compiled to every AI tool — no manual PRs.</p>
 </div>
 
 </div>
@@ -385,8 +611,8 @@ TypeScript 5.x · Node 20+ · Prisma
   <div class="section-divider__line"></div>
 </div>
 
-<h2 class="section-title">The Problem: Prompt Drift</h2>
-<p class="section-subtitle">As you scale AI tools across your organization, chaos emerges</p>
+<h2 class="section-title">The Problem: AI Instructions Don't Scale</h2>
+<p class="section-subtitle">Your organization adopted AI coding tools. Without infrastructure, every team configures differently.</p>
 
 <div class="problem-grid">
 
@@ -400,10 +626,10 @@ TypeScript 5.x · Node 20+ · Prisma
 
 <div class="problem-card">
   <div class="problem-card__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 17h-2v-2h2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41c0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
   </div>
-  <h3>Model Volatility</h3>
-  <p>New models require different prompting strategies. You shouldn't rewrite <strong>1000 files</strong> when a model upgrades.</p>
+  <h3>Tool Fragmentation</h3>
+  <p>Your teams use Copilot, Claude, and Cursor. Each has its own format. Keeping them <strong>in sync is a full-time job</strong>.</p>
 </div>
 
 <div class="problem-card">
@@ -414,10 +640,18 @@ TypeScript 5.x · Node 20+ · Prisma
   <p>No audit trail. Junior devs miss critical security context. <strong>Unvetted instructions</strong> everywhere.</p>
 </div>
 
+<div class="problem-card">
+  <div class="problem-card__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+  </div>
+  <h3>Vendor Lock-in Risk</h3>
+  <p>You went all-in on Cursor rules. Now leadership evaluates Claude Code. <strong>Rewriting 200 repos</strong> is not an option.</p>
+</div>
+
 </div>
 
 <div class="problem-result">
-  <span class="problem-result__icon">⚠️</span>
+  <span class="problem-result__icon">&#9888;&#65039;</span>
   <span class="problem-result__text">Result: <strong>Inconsistent code quality, security risks, and operational chaos.</strong></span>
 </div>
 
@@ -437,7 +671,7 @@ TypeScript 5.x · Node 20+ · Prisma
 flowchart TB
     subgraph org["🏢 Organization Registry"]
         direction TB
-        OrgSec["@company/security<br/>(CISO approved)"]
+        OrgSec["@company/security<br/>(Security team)"]
         OrgTS["@company/typescript<br/>(Platform team)"]
         OrgJava["@company/java<br/>(Platform team)"]
     end
@@ -475,7 +709,9 @@ flowchart TB
     Compiler --> Claude["Claude Code"]
     Compiler --> Cursor["Cursor"]
     Compiler --> Antigravity["Antigravity"]
-    Compiler --> Other["Other Tools..."]
+    Compiler --> Factory["Factory AI"]
+    Compiler --> OpenCode["OpenCode"]
+    Compiler --> Gemini["Gemini CLI"]
     Compiler --> CI["CI/CD Audit"]
 ```
 
@@ -768,7 +1004,7 @@ flowchart TB
 <div class="cta-section">
   <h2 class="cta-section__title">Ready to Standardize Your AI Instructions?</h2>
   <p class="cta-section__subtitle">Join engineering teams using PromptScript to manage AI context at scale</p>
-  <a href="getting-started/" class="md-button md-button--primary">Get Started</a>
-  <a href="/playground/" class="md-button md-button--secondary">Try Playground</a>
+  <a href="getting-started/" class="md-button md-button--primary">Get Started in 5 Minutes</a>
+  <a href="guides/enterprise/" class="md-button md-button--secondary">See Enterprise Guide</a>
   <a href="https://github.com/mrwogu/promptscript" class="md-button">View on GitHub</a>
 </div>

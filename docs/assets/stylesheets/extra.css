@@ -996,6 +996,26 @@
   border-bottom-color: #22c55e;
 }
 
+.compile-demo__header--antigravity {
+  background: linear-gradient(180deg, #2d1a5e 0%, #1a1a2e 100%);
+  border-bottom-color: #a78bfa;
+}
+
+.compile-demo__header--factory {
+  background: linear-gradient(180deg, #4a1d3d 0%, #1a1a2e 100%);
+  border-bottom-color: #f472b6;
+}
+
+.compile-demo__header--opencode {
+  background: linear-gradient(180deg, #0c3547 0%, #1a1a2e 100%);
+  border-bottom-color: #38bdf8;
+}
+
+.compile-demo__header--gemini {
+  background: linear-gradient(180deg, #1a3d35 0%, #1a1a2e 100%);
+  border-bottom-color: #34d399;
+}
+
 /* Code blocks */
 .compile-demo__code {
   margin: 0;
@@ -1384,6 +1404,22 @@
 
 [data-md-color-scheme='default'] .compile-demo__header--cursor {
   background: linear-gradient(180deg, #bbf7d0 0%, #f1f5f9 100%);
+}
+
+[data-md-color-scheme='default'] .compile-demo__header--antigravity {
+  background: linear-gradient(180deg, #ede9fe 0%, #f1f5f9 100%);
+}
+
+[data-md-color-scheme='default'] .compile-demo__header--factory {
+  background: linear-gradient(180deg, #fce7f3 0%, #f1f5f9 100%);
+}
+
+[data-md-color-scheme='default'] .compile-demo__header--opencode {
+  background: linear-gradient(180deg, #e0f2fe 0%, #f1f5f9 100%);
+}
+
+[data-md-color-scheme='default'] .compile-demo__header--gemini {
+  background: linear-gradient(180deg, #d1fae5 0%, #f1f5f9 100%);
 }
 
 [data-md-color-scheme='default'] .compile-demo__tabs {
@@ -1776,6 +1812,26 @@
   background: rgba(34, 197, 94, 0.15);
 }
 
+.compile-demo__placeholder-icon--antigravity {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.15);
+}
+
+.compile-demo__placeholder-icon--factory {
+  color: #f472b6;
+  background: rgba(244, 114, 182, 0.15);
+}
+
+.compile-demo__placeholder-icon--opencode {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.compile-demo__placeholder-icon--gemini {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+}
+
 .compile-demo__placeholder-text {
   font-size: 0.85rem;
   font-weight: 500;
@@ -1805,6 +1861,18 @@
 }
 .compile-demo__tab-icon--cursor {
   color: #4ade80;
+}
+.compile-demo__tab-icon--antigravity {
+  color: #a78bfa;
+}
+.compile-demo__tab-icon--factory {
+  color: #f472b6;
+}
+.compile-demo__tab-icon--opencode {
+  color: #38bdf8;
+}
+.compile-demo__tab-icon--gemini {
+  color: #34d399;
 }
 
 /* Tab file count badge */
