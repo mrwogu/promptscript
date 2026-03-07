@@ -7,12 +7,6 @@
       "ignore": ["src/**/*.spec.ts", "src/**/*.test.ts"]
     }
   },
-  "ignoreDependencies": [
-    "@swc/cli",
-    "@swc/core",
-    "@swc/helpers",
-    "@swc-node/register",
-    "tslib"
-  ],
+  "ignoreDependencies": ["@swc/cli", "@swc/core", "@swc/helpers", "@swc-node/register", "tslib"],
   "ignoreExportsUsedInFile": true
 }
