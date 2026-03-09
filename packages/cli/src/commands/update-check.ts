@@ -17,6 +17,12 @@ export async function updateCheckCommand(): Promise<void> {
   // Print current version
   console.log(`@promptscript/cli v${currentVersion}`);
 
+  // Skip network check if explicitly disabled
+  if (process.env['PROMPTSCRIPT_NO_UPDATE_CHECK']) {
+    ConsoleOutput.success('Update check disabled (PROMPTSCRIPT_NO_UPDATE_CHECK)');
+    return;
+  }
+
   // Force check for updates
   const { info, error } = await forceCheckForUpdates(currentVersion);
 

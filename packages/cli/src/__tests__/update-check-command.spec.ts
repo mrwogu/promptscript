@@ -25,15 +25,23 @@ import { ConsoleOutput } from '../output/console.js';
 describe('update-check command', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
 
+  const originalEnv = process.env['PROMPTSCRIPT_NO_UPDATE_CHECK'];
+
   beforeEach(() => {
     vi.clearAllMocks();
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     process.exitCode = undefined;
+    delete process.env['PROMPTSCRIPT_NO_UPDATE_CHECK'];
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
     process.exitCode = undefined;
+    if (originalEnv !== undefined) {
+      process.env['PROMPTSCRIPT_NO_UPDATE_CHECK'] = originalEnv;
+    } else {
+      delete process.env['PROMPTSCRIPT_NO_UPDATE_CHECK'];
+    }
   });
 
   it('should print current version', async () => {
@@ -80,6 +88,18 @@ describe('update-check command', () => {
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Update available: 1.0.0'));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('2.0.0'));
+  });
+
+  it('should skip network call when PROMPTSCRIPT_NO_UPDATE_CHECK is set', async () => {
+    process.env['PROMPTSCRIPT_NO_UPDATE_CHECK'] = '1';
+
+    await updateCheckCommand();
+
+    expect(consoleSpy).toHaveBeenCalledWith('@promptscript/cli v1.0.0');
+    expect(ConsoleOutput.success).toHaveBeenCalledWith(
+      'Update check disabled (PROMPTSCRIPT_NO_UPDATE_CHECK)'
+    );
+    expect(forceCheckForUpdates).not.toHaveBeenCalled();
   });
 
   it('should show error when network fails', async () => {

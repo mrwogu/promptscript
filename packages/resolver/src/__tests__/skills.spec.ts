@@ -1053,7 +1053,10 @@ Content.
   });
 
   describe('unreadable files', () => {
-    it('should skip files that cannot be read', async () => {
+    // Root bypasses POSIX file permission checks, so chmod 0o000 has no effect
+    const isRoot = process.getuid?.() === 0;
+
+    it.skipIf(isRoot)('should skip files that cannot be read', async () => {
       const localPath = join(testDir, '.promptscript');
       const skillDir = join(localPath, 'skills', 'perm-skill');
       await mkdir(skillDir, { recursive: true });
@@ -1422,7 +1425,10 @@ describe('resolveNativeCommands', () => {
     expect(result).toBe(ast);
   });
 
-  it('should skip unreadable command files', async () => {
+  // Root bypasses POSIX file permission checks, so chmod 0o000 has no effect
+  const isRoot = process.getuid?.() === 0;
+
+  it.skipIf(isRoot)('should skip unreadable command files', async () => {
     const localPath = join(testDir, '.promptscript');
     const commandsDir = join(localPath, 'commands');
     await mkdir(commandsDir, { recursive: true });

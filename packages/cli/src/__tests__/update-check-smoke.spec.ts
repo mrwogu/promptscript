@@ -24,8 +24,9 @@ describe('update-check smoke tests', () => {
         PROMPTSCRIPT_NO_UPDATE_CHECK: '1',
       });
 
-      // Should show package name and version
+      // Should show package name and version, and indicate check is disabled
       expect(output).toMatch(/@promptscript\/cli v\d+\.\d+\.\d+/);
+      expect(output).toContain('Update check disabled');
     });
 
     it('should be listed in help', () => {
