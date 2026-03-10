@@ -377,6 +377,11 @@ describe('New Agent Formatters', () => {
         expect(VERSIONS.full.name).toBe('full');
       });
 
+      it('should return versions from static getSupportedVersions()', () => {
+        const versions = Formatter.getSupportedVersions();
+        expect(versions).toBe(VERSIONS);
+      });
+
       it('should format minimal program with correct header', () => {
         const ast = createMinimalProgram();
         const result = formatter.format(ast);

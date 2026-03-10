@@ -542,4 +542,64 @@ describe('Additional Feature Matrix Functions', () => {
     // Check for planned status in legend
     expect(report).toContain('📋 Planned');
   });
+
+  it('generateFeatureMatrixReport should render planned emoji for planned features', () => {
+    // Temporarily add a planned feature to exercise the planned branch
+    const testFeature = {
+      id: 'test-planned-feature',
+      name: 'Test Planned',
+      description: 'Temporary feature for coverage',
+      category: 'advanced' as const,
+      tools: {
+        github: 'planned' as const,
+        cursor: 'not-supported' as const,
+        claude: 'supported' as const,
+        antigravity: 'not-supported' as const,
+        factory: 'not-supported' as const,
+        opencode: 'not-supported' as const,
+        gemini: 'not-supported' as const,
+      },
+    };
+    FEATURE_MATRIX.push(testFeature);
+    try {
+      const report = generateFeatureMatrixReport();
+      expect(report).toContain('Test Planned');
+      // The row should contain 📋 for GitHub's planned status
+      const lines = report.split('\n');
+      const testLine = lines.find((l) => l.includes('Test Planned'));
+      expect(testLine).toContain('📋');
+    } finally {
+      FEATURE_MATRIX.pop();
+    }
+  });
+
+  it('generateFeatureMatrixReport should render dash for undefined status', () => {
+    // Add a feature with a missing tool status to exercise the default branch
+    const testFeature = {
+      id: 'test-undefined-status',
+      name: 'Test Undefined',
+      description: 'Temporary feature for coverage',
+      category: 'advanced' as const,
+      tools: {
+        github: 'supported' as const,
+        cursor: 'supported' as const,
+        claude: 'supported' as const,
+        antigravity: 'supported' as const,
+        factory: 'supported' as const,
+        opencode: 'supported' as const,
+        // gemini intentionally omitted to trigger default branch
+      } as Record<string, 'supported' | 'not-supported' | 'planned' | 'partial'>,
+    };
+    FEATURE_MATRIX.push(testFeature as (typeof FEATURE_MATRIX)[number]);
+    try {
+      const report = generateFeatureMatrixReport();
+      const lines = report.split('\n');
+      const testLine = lines.find((l) => l.includes('Test Undefined'));
+      expect(testLine).toBeDefined();
+      // Should contain '—' for the missing gemini status
+      expect(testLine).toContain('—');
+    } finally {
+      FEATURE_MATRIX.pop();
+    }
+  });
 });
