@@ -9,7 +9,7 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 ## Overview
 
-PromptScript compiles to 38 AI agent targets (GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more). Each formatter must produce semantically equivalent output from the same input. To ensure this parity, formatters share common extraction and rendering logic.
+PromptScript compiles to 37 AI agent targets (GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more). Each formatter must produce semantically equivalent output from the same input. To ensure this parity, formatters share common extraction and rendering logic.
 
 ```mermaid
 flowchart TB

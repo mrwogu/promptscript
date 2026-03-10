@@ -32,7 +32,7 @@ export const AMP_VERSIONS = {
  * Amp uses `AGENTS.md` as its main configuration file
  * and `.agents/skills/<name>/SKILL.md` for skills (shared directory).
  *
- * @remarks Shares `AGENTS.md` output path with `factory`, `codex`, and `droid`.
+ * @remarks Shares `AGENTS.md` output path with `factory` and `codex`.
  * Do not target more than one in a single compile run without configuring
  * distinct `output` paths, or the last writer will overwrite the others.
  *

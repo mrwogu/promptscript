@@ -75,5 +75,3 @@ export { OpenClawFormatter, OPENCLAW_VERSIONS } from './openclaw.js';
 export type { OpenClawVersion } from './openclaw.js';
 export { CodeBuddyFormatter, CODEBUDDY_VERSIONS } from './codebuddy.js';
 export type { CodeBuddyVersion } from './codebuddy.js';
-export { DroidFormatter, DROID_VERSIONS } from './droid.js';
-export type { DroidVersion } from './droid.js';

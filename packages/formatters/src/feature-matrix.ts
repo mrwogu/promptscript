@@ -54,8 +54,7 @@ export type ToolName =
   | 'adal'
   | 'iflow'
   | 'openclaw'
-  | 'codebuddy'
-  | 'droid';
+  | 'codebuddy';
 
 /**
  * Feature implementation status.

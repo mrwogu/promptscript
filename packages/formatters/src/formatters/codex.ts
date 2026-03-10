@@ -37,7 +37,7 @@ export const CODEX_VERSIONS = {
  * - **multifile**: Single AGENTS.md file (reserved for future expansion)
  * - **full**: AGENTS.md + skills
  *
- * @remarks Shares `AGENTS.md` output path with `factory`, `amp`, and `droid`.
+ * @remarks Shares `AGENTS.md` output path with `factory` and `amp`.
  * Do not target more than one in a single compile run without configuring
  * distinct `output` paths, or the last writer will overwrite the others.
  *

@@ -342,7 +342,6 @@ export type TargetName =
   | 'iflow'
   | 'openclaw'
   | 'codebuddy'
-  | 'droid'
   | string;
 
 /**
@@ -390,5 +389,4 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   iflow: '.iflow/rules/project.md',
   openclaw: 'INSTRUCTIONS.md',
   codebuddy: '.codebuddy/rules/project.md',
-  droid: 'AGENTS.md',
 };

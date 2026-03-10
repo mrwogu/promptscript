@@ -1,21 +1,21 @@
 ---
-title: 'PromptScript — One Source, 7 AI Tools | Enterprise AI Standards'
-description: 'Write AI instructions once, compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, and 3 more targets. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
+title: 'PromptScript — One Source, 37 AI Agents | Enterprise AI Standards'
+description: 'Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
 meta:
   - name: keywords
     content: PromptScript, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
   - name: robots
     content: index, follow
   - property: og:title
-    content: PromptScript — One Source, 7 AI Tools
+    content: PromptScript — One Source, 37 AI Agents
   - property: og:description
-    content: Write AI instructions once, compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, and 3 more targets. Enterprise prompt standardization with inheritance, validation, and CI/CD.
+    content: Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.
   - property: og:type
     content: website
   - name: twitter:card
     content: summary_large_image
   - name: twitter:title
-    content: PromptScript — One Source, 7 AI Tools
+    content: PromptScript — One Source, 37 AI Agents
 hide:
   - navigation
   - toc
@@ -27,9 +27,9 @@ hide:
 
 # PromptScript
 
-**One Prompt Codebase. Seven AI Tools. Zero Drift.**
+**One Prompt Codebase. 37 AI Agents. Zero Drift.**
 
-_Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, and 4 more targets._
+_Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and 32 more._
 
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
 [:material-book-open-variant: See Enterprise Guide](guides/enterprise.md){ .md-button .md-button--secondary }
@@ -556,8 +556,8 @@ Expert Fullstack Engineer.
   <div class="feature-card__icon feature-card__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
   </div>
-  <h3>Write Once, Compile to 7 AI Tools</h3>
-  <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, Antigravity, Factory AI, and OpenCode. Add new tools without rewriting.</p>
+  <h3>Write Once, Compile to 37 AI Agents</h3>
+  <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, Roo Code, and 31 more. Add new agents without rewriting.</p>
 </div>
 
 <div class="feature-card">

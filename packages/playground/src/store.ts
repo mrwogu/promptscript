@@ -39,8 +39,7 @@ export type FormatterName =
   | 'adal'
   | 'iflow'
   | 'openclaw'
-  | 'codebuddy'
-  | 'droid';
+  | 'codebuddy';
 
 export interface FileState {
   path: string;
@@ -217,40 +216,39 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     claude: { enabled: true, version: 'full' },
     cursor: { enabled: true, version: 'standard' },
     antigravity: { enabled: true, version: 'frontmatter' },
-    factory: { enabled: false, version: 'simple' },
+    factory: { enabled: false, version: 'full' },
     opencode: { enabled: false, version: 'full' },
     gemini: { enabled: false, version: 'full' },
-    windsurf: { enabled: false, version: 'simple' },
-    cline: { enabled: false, version: 'simple' },
-    roo: { enabled: false, version: 'simple' },
-    codex: { enabled: false, version: 'simple' },
-    continue: { enabled: false, version: 'simple' },
-    augment: { enabled: false, version: 'simple' },
-    goose: { enabled: false, version: 'simple' },
-    kilo: { enabled: false, version: 'simple' },
-    amp: { enabled: false, version: 'simple' },
-    trae: { enabled: false, version: 'simple' },
-    junie: { enabled: false, version: 'simple' },
-    kiro: { enabled: false, version: 'simple' },
-    cortex: { enabled: false, version: 'simple' },
-    crush: { enabled: false, version: 'simple' },
-    'command-code': { enabled: false, version: 'simple' },
-    kode: { enabled: false, version: 'simple' },
-    mcpjam: { enabled: false, version: 'simple' },
-    'mistral-vibe': { enabled: false, version: 'simple' },
-    mux: { enabled: false, version: 'simple' },
-    openhands: { enabled: false, version: 'simple' },
-    pi: { enabled: false, version: 'simple' },
-    qoder: { enabled: false, version: 'simple' },
-    'qwen-code': { enabled: false, version: 'simple' },
-    zencoder: { enabled: false, version: 'simple' },
-    neovate: { enabled: false, version: 'simple' },
-    pochi: { enabled: false, version: 'simple' },
-    adal: { enabled: false, version: 'simple' },
-    iflow: { enabled: false, version: 'simple' },
-    openclaw: { enabled: false, version: 'simple' },
-    codebuddy: { enabled: false, version: 'simple' },
-    droid: { enabled: false, version: 'simple' },
+    windsurf: { enabled: false, version: 'full' },
+    cline: { enabled: false, version: 'full' },
+    roo: { enabled: false, version: 'full' },
+    codex: { enabled: false, version: 'full' },
+    continue: { enabled: false, version: 'full' },
+    augment: { enabled: false, version: 'full' },
+    goose: { enabled: false, version: 'full' },
+    kilo: { enabled: false, version: 'full' },
+    amp: { enabled: false, version: 'full' },
+    trae: { enabled: false, version: 'full' },
+    junie: { enabled: false, version: 'full' },
+    kiro: { enabled: false, version: 'full' },
+    cortex: { enabled: false, version: 'full' },
+    crush: { enabled: false, version: 'full' },
+    'command-code': { enabled: false, version: 'full' },
+    kode: { enabled: false, version: 'full' },
+    mcpjam: { enabled: false, version: 'full' },
+    'mistral-vibe': { enabled: false, version: 'full' },
+    mux: { enabled: false, version: 'full' },
+    openhands: { enabled: false, version: 'full' },
+    pi: { enabled: false, version: 'full' },
+    qoder: { enabled: false, version: 'full' },
+    'qwen-code': { enabled: false, version: 'full' },
+    zencoder: { enabled: false, version: 'full' },
+    neovate: { enabled: false, version: 'full' },
+    pochi: { enabled: false, version: 'full' },
+    adal: { enabled: false, version: 'full' },
+    iflow: { enabled: false, version: 'full' },
+    openclaw: { enabled: false, version: 'full' },
+    codebuddy: { enabled: false, version: 'full' },
   },
   formatting: {
     tabWidth: 2,
@@ -481,7 +479,6 @@ export const selectOutputsForFormatter = (
     iflow: [/^\.iflow\/rules\/.*\.md$/, /^\.iflow\/skills\/.*\.md$/],
     openclaw: [/^INSTRUCTIONS\.md$/, /^skills\/.*\.md$/],
     codebuddy: [/^\.codebuddy\/rules\/.*\.md$/, /^\.codebuddy\/skills\/.*\.md$/],
-    droid: [/^AGENTS\.md$/, /^\.factory\/skills\/.*\.md$/],
   };
 
   const patterns = formatterPatterns[formatter];
@@ -530,7 +527,6 @@ export const selectOutputsForFormatter = (
     iflow: 'project.md',
     openclaw: 'INSTRUCTIONS.md',
     codebuddy: 'project.md',
-    droid: 'AGENTS.md',
   };
 
   const mainPattern = mainFilePatterns[formatter];

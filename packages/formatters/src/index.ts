@@ -140,7 +140,6 @@ import { AdalFormatter } from './formatters/adal.js';
 import { IflowFormatter } from './formatters/iflow.js';
 import { OpenClawFormatter } from './formatters/openclaw.js';
 import { CodeBuddyFormatter } from './formatters/codebuddy.js';
-import { DroidFormatter } from './formatters/droid.js';
 
 // Original 7
 FormatterRegistry.register('github', () => new GitHubFormatter());
@@ -183,4 +182,3 @@ FormatterRegistry.register('adal', () => new AdalFormatter());
 FormatterRegistry.register('iflow', () => new IflowFormatter());
 FormatterRegistry.register('openclaw', () => new OpenClawFormatter());
 FormatterRegistry.register('codebuddy', () => new CodeBuddyFormatter());
-FormatterRegistry.register('droid', () => new DroidFormatter());

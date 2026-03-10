@@ -45,7 +45,6 @@ const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'iflow', label: 'iFlow CLI', icon: '🌀' },
   { name: 'openclaw', label: 'OpenClaw', icon: '🦀' },
   { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
-  { name: 'droid', label: 'Droid', icon: '🤖' },
 ];
 
 /**
@@ -123,31 +122,26 @@ export function OutputPanel() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Formatter tabs */}
-      <div className="flex border-b border-ps-border bg-ps-bg">
-        {FORMATTERS.map((formatter) => {
-          const isEnabled = enabledTargets.includes(formatter.name);
-          const isActive = activeFormatter === formatter.name;
+      {/* Formatter tabs — only show enabled targets */}
+      <div className="flex border-b border-ps-border bg-ps-bg overflow-x-auto">
+        {FORMATTERS.filter((formatter) => enabledTargets.includes(formatter.name)).map(
+          (formatter) => {
+            const isActive = activeFormatter === formatter.name;
 
-          return (
-            <button
-              key={formatter.name}
-              onClick={() => isEnabled && setActiveFormatter(formatter.name)}
-              disabled={!isEnabled}
-              className={`px-4 py-2 text-sm flex items-center gap-2 ${
-                !isEnabled
-                  ? 'opacity-30 cursor-not-allowed text-gray-500'
-                  : isActive
-                    ? 'tab-active text-white'
-                    : 'tab-inactive text-gray-400'
-              }`}
-              title={!isEnabled ? `${formatter.label} is disabled in config` : undefined}
-            >
-              <span>{formatter.icon}</span>
-              <span>{formatter.label}</span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={formatter.name}
+                onClick={() => setActiveFormatter(formatter.name)}
+                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap ${
+                  isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
+                }`}
+              >
+                <span>{formatter.icon}</span>
+                <span>{formatter.label}</span>
+              </button>
+            );
+          }
+        )}
       </div>
 
       {/* Output content */}

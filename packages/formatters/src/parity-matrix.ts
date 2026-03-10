@@ -52,8 +52,7 @@ export type FormatterName =
   | 'adal'
   | 'iflow'
   | 'openclaw'
-  | 'codebuddy'
-  | 'droid';
+  | 'codebuddy';
 
 /**
  * Source block configuration for section extraction.

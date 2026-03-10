@@ -38,7 +38,6 @@ import { AdalFormatter, ADAL_VERSIONS } from '../formatters/adal.js';
 import { IflowFormatter, IFLOW_VERSIONS } from '../formatters/iflow.js';
 import { OpenClawFormatter, OPENCLAW_VERSIONS } from '../formatters/openclaw.js';
 import { CodeBuddyFormatter, CODEBUDDY_VERSIONS } from '../formatters/codebuddy.js';
-import { DroidFormatter, DROID_VERSIONS } from '../formatters/droid.js';
 
 const createLoc = (): SourceLocation => ({
   file: 'test.prs',
@@ -347,15 +346,6 @@ const NEW_FORMATTERS = [
     mainHeader: '# Project Rules',
     dotDir: '.codebuddy',
   },
-  {
-    name: 'droid',
-    Formatter: DroidFormatter,
-    VERSIONS: DROID_VERSIONS,
-    outputPath: 'AGENTS.md',
-    description: 'Droid instructions (Markdown)',
-    mainHeader: '# AGENTS.md',
-    dotDir: '.factory',
-  },
 ] as const;
 
 describe('New Agent Formatters', () => {
@@ -449,9 +439,9 @@ describe('New Agent Formatters', () => {
       }
     );
 
-    it('should have 38 total formatters registered (7 original + 31 new)', () => {
+    it('should have 37 total formatters registered (7 original + 30 new)', () => {
       const all = FormatterRegistry.list();
-      expect(all.length).toBe(38);
+      expect(all.length).toBe(37);
     });
   });
 });

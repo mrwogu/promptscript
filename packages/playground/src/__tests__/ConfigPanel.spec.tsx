@@ -13,9 +13,39 @@ describe('ConfigPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
-          factory: { enabled: false, version: 'simple' },
+          factory: { enabled: false, version: 'full' },
           opencode: { enabled: false, version: 'full' },
           gemini: { enabled: false, version: 'full' },
+          windsurf: { enabled: false, version: 'full' },
+          cline: { enabled: false, version: 'full' },
+          roo: { enabled: false, version: 'full' },
+          codex: { enabled: false, version: 'full' },
+          continue: { enabled: false, version: 'full' },
+          augment: { enabled: false, version: 'full' },
+          goose: { enabled: false, version: 'full' },
+          kilo: { enabled: false, version: 'full' },
+          amp: { enabled: false, version: 'full' },
+          trae: { enabled: false, version: 'full' },
+          junie: { enabled: false, version: 'full' },
+          kiro: { enabled: false, version: 'full' },
+          cortex: { enabled: false, version: 'full' },
+          crush: { enabled: false, version: 'full' },
+          'command-code': { enabled: false, version: 'full' },
+          kode: { enabled: false, version: 'full' },
+          mcpjam: { enabled: false, version: 'full' },
+          'mistral-vibe': { enabled: false, version: 'full' },
+          mux: { enabled: false, version: 'full' },
+          openhands: { enabled: false, version: 'full' },
+          pi: { enabled: false, version: 'full' },
+          qoder: { enabled: false, version: 'full' },
+          'qwen-code': { enabled: false, version: 'full' },
+          zencoder: { enabled: false, version: 'full' },
+          neovate: { enabled: false, version: 'full' },
+          pochi: { enabled: false, version: 'full' },
+          adal: { enabled: false, version: 'full' },
+          iflow: { enabled: false, version: 'full' },
+          openclaw: { enabled: false, version: 'full' },
+          codebuddy: { enabled: false, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
@@ -76,9 +106,9 @@ describe('ConfigPanel', () => {
     usePlaygroundStore.setState({ showConfig: true });
     render(<ConfigPanel />);
 
-    // Find the version select for GitHub (it's the first one after the checkbox)
+    // Find the version select for GitHub (selects[0] is ProseWrap from Formatting section)
     const selects = screen.getAllByRole('combobox');
-    const githubVersionSelect = selects[0]; // First select is for GitHub
+    const githubVersionSelect = selects[1]; // First target select (after ProseWrap)
 
     fireEvent.change(githubVersionSelect, { target: { value: 'multifile' } });
     expect(usePlaygroundStore.getState().config.targets.github.version).toBe('multifile');
@@ -143,9 +173,39 @@ describe('ConfigPanel', () => {
           claude: { enabled: true, version: 'full' },
           cursor: { enabled: true, version: 'standard' },
           antigravity: { enabled: true, version: 'frontmatter' },
-          factory: { enabled: false, version: 'simple' },
+          factory: { enabled: false, version: 'full' },
           opencode: { enabled: false, version: 'full' },
           gemini: { enabled: false, version: 'full' },
+          windsurf: { enabled: false, version: 'full' },
+          cline: { enabled: false, version: 'full' },
+          roo: { enabled: false, version: 'full' },
+          codex: { enabled: false, version: 'full' },
+          continue: { enabled: false, version: 'full' },
+          augment: { enabled: false, version: 'full' },
+          goose: { enabled: false, version: 'full' },
+          kilo: { enabled: false, version: 'full' },
+          amp: { enabled: false, version: 'full' },
+          trae: { enabled: false, version: 'full' },
+          junie: { enabled: false, version: 'full' },
+          kiro: { enabled: false, version: 'full' },
+          cortex: { enabled: false, version: 'full' },
+          crush: { enabled: false, version: 'full' },
+          'command-code': { enabled: false, version: 'full' },
+          kode: { enabled: false, version: 'full' },
+          mcpjam: { enabled: false, version: 'full' },
+          'mistral-vibe': { enabled: false, version: 'full' },
+          mux: { enabled: false, version: 'full' },
+          openhands: { enabled: false, version: 'full' },
+          pi: { enabled: false, version: 'full' },
+          qoder: { enabled: false, version: 'full' },
+          'qwen-code': { enabled: false, version: 'full' },
+          zencoder: { enabled: false, version: 'full' },
+          neovate: { enabled: false, version: 'full' },
+          pochi: { enabled: false, version: 'full' },
+          adal: { enabled: false, version: 'full' },
+          iflow: { enabled: false, version: 'full' },
+          openclaw: { enabled: false, version: 'full' },
+          codebuddy: { enabled: false, version: 'full' },
         },
         formatting: {
           tabWidth: 2,
@@ -158,7 +218,7 @@ describe('ConfigPanel', () => {
     render(<ConfigPanel />);
 
     const selects = screen.getAllByRole('combobox');
-    const githubVersionSelect = selects[0];
+    const githubVersionSelect = selects[1]; // First target select (after ProseWrap)
 
     expect(githubVersionSelect).toBeDisabled();
   });

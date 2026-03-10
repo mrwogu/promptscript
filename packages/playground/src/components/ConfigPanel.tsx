@@ -189,11 +189,6 @@ const TARGET_INFO: Record<
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
-  droid: {
-    label: 'Droid',
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
 };
 
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [
@@ -238,6 +233,67 @@ export function ConfigPanel() {
         </div>
 
         <div className="p-4 space-y-6">
+          {/* Formatting Section */}
+          <section>
+            <h3 className="text-sm font-medium text-gray-300 mb-3">Formatting</h3>
+            <div className="space-y-3">
+              {/* Tab Width */}
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-gray-200 min-w-[100px]">Tab Width</label>
+                <div className="flex gap-2">
+                  {TAB_WIDTH_OPTIONS.map((width) => (
+                    <button
+                      key={width}
+                      onClick={() => setFormatting({ tabWidth: width })}
+                      className={`px-3 py-1 text-sm rounded ${
+                        config.formatting.tabWidth === width
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      {width}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Prose Wrap */}
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-gray-200 min-w-[100px]">Prose Wrap</label>
+                <select
+                  value={config.formatting.proseWrap}
+                  onChange={(e) =>
+                    setFormatting({
+                      proseWrap: e.target.value as (typeof PROSE_WRAP_OPTIONS)[number],
+                    })
+                  }
+                  className="flex-1 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 focus:outline-none focus:border-indigo-500"
+                >
+                  {PROSE_WRAP_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Print Width */}
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-gray-200 min-w-[100px]">Print Width</label>
+                <input
+                  type="number"
+                  min={40}
+                  max={200}
+                  value={config.formatting.printWidth}
+                  onChange={(e) =>
+                    setFormatting({ printWidth: parseInt(e.target.value, 10) || 80 })
+                  }
+                  className="w-20 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+          </section>
+
           {/* Targets Section */}
           <section>
             <h3 className="text-sm font-medium text-gray-300 mb-3">Targets</h3>
@@ -307,67 +363,6 @@ export function ConfigPanel() {
                   </div>
                 );
               })}
-            </div>
-          </section>
-
-          {/* Formatting Section */}
-          <section>
-            <h3 className="text-sm font-medium text-gray-300 mb-3">Formatting</h3>
-            <div className="space-y-3">
-              {/* Tab Width */}
-              <div className="flex items-center gap-3">
-                <label className="text-sm text-gray-200 min-w-[100px]">Tab Width</label>
-                <div className="flex gap-2">
-                  {TAB_WIDTH_OPTIONS.map((width) => (
-                    <button
-                      key={width}
-                      onClick={() => setFormatting({ tabWidth: width })}
-                      className={`px-3 py-1 text-sm rounded ${
-                        config.formatting.tabWidth === width
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
-                      {width}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prose Wrap */}
-              <div className="flex items-center gap-3">
-                <label className="text-sm text-gray-200 min-w-[100px]">Prose Wrap</label>
-                <select
-                  value={config.formatting.proseWrap}
-                  onChange={(e) =>
-                    setFormatting({
-                      proseWrap: e.target.value as (typeof PROSE_WRAP_OPTIONS)[number],
-                    })
-                  }
-                  className="flex-1 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 focus:outline-none focus:border-indigo-500"
-                >
-                  {PROSE_WRAP_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Print Width */}
-              <div className="flex items-center gap-3">
-                <label className="text-sm text-gray-200 min-w-[100px]">Print Width</label>
-                <input
-                  type="number"
-                  min={40}
-                  max={200}
-                  value={config.formatting.printWidth}
-                  onChange={(e) =>
-                    setFormatting({ printWidth: parseInt(e.target.value, 10) || 80 })
-                  }
-                  className="w-20 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
             </div>
           </section>
         </div>

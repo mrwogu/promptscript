@@ -143,7 +143,6 @@
 | iFlow              | ✅ Done | `.iflow/rules/project.md`         | —        |
 | OpenClaw           | ✅ Done | `INSTRUCTIONS.md`                 | —        |
 | CodeBuddy          | ✅ Done | `.codebuddy/rules/project.md`     | —        |
-| Droid              | ✅ Done | `AGENTS.md`                       | —        |
 
 ### 2. CI/CD Integration
 

@@ -2,7 +2,7 @@
 
 > **Internal package** - Part of the [PromptScript](https://github.com/mrwogu/promptscript) monorepo.
 
-Output formatters for 38 AI coding agents.
+Output formatters for 37 AI coding agents.
 
 ## Supported Formatters
 
@@ -62,7 +62,6 @@ Output formatters for 38 AI coding agents.
 | iFlow        | `.iflow/rules/project.md`       |
 | OpenClaw     | `INSTRUCTIONS.md`               |
 | CodeBuddy    | `.codebuddy/rules/project.md`   |
-| Droid        | `AGENTS.md`                     |
 
 ## Status
 

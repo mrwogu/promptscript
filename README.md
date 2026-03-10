@@ -5,7 +5,7 @@
 
 **One Source of Truth for All Your AI Coding Assistants**
 
-_Write once. Compile to 38 AI coding agents -- GitHub Copilot, Claude Code, Cursor, and more._
+_Write once. Compile to 37 AI coding agents -- GitHub Copilot, Claude Code, Cursor, and more._
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
@@ -34,7 +34,7 @@ _Write once. Compile to 38 AI coding agents -- GitHub Copilot, Claude Code, Curs
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    50+ Repos × 38 AI Tools = Chaos                      │
+│                    50+ Repos × 37 AI Tools = Chaos                      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   repo-1/CLAUDE.md          repo-1/.cursorrules      repo-1/.github/    │
@@ -276,9 +276,9 @@ Create your registry with `prs registry init` or connect to any Git-hosted regis
 
 ---
 
-## Supported Platforms (38 AI Agents)
+## Supported Platforms (37 AI Agents)
 
-PromptScript supports 38 AI coding agents out of the box. Here are the primary targets with specialized output formats:
+PromptScript supports 37 AI coding agents out of the box. Here are the primary targets with specialized output formats:
 
 | AI Tool                | Output Format                     | Features                     |
 | :--------------------- | :-------------------------------- | :--------------------------- |
@@ -290,13 +290,13 @@ PromptScript supports 38 AI coding agents out of the box. Here are the primary t
 | **OpenCode**           | `OPENCODE.md`                     | Commands, skills, agents     |
 | **Gemini CLI**         | `GEMINI.md`                       | TOML commands, skills        |
 
-Plus 31 additional agents using the `MarkdownInstructionFormatter` pattern:
+Plus 30 additional agents using the `MarkdownInstructionFormatter` pattern:
 
-| Tier                         | Agents                                                                                                                                                           |
-| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Tier 1 (High priority)**   | Windsurf, Cline, Roo Code, Codex, Continue                                                                                                                       |
-| **Tier 2 (Medium priority)** | Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI                                                                                                            |
-| **Tier 3 (Additional)**      | Cortex, Crush, Command Code, Kode, MCPJam, Mistral Vibe, Mux, OpenHands, Pi, Qoder, Qwen Code, Zencoder, Neovate, Pochi, AdaL, iFlow, OpenClaw, CodeBuddy, Droid |
+| Tier                         | Agents                                                                                                                                                    |
+| :--------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tier 1 (High priority)**   | Windsurf, Cline, Roo Code, Codex, Continue                                                                                                                |
+| **Tier 2 (Medium priority)** | Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI                                                                                                     |
+| **Tier 3 (Additional)**      | Cortex, Crush, Command Code, Kode, MCPJam, Mistral Vibe, Mux, OpenHands, Pi, Qoder, Qwen Code, Zencoder, Neovate, Pochi, AdaL, iFlow, OpenClaw, CodeBuddy |
 
 Each agent formatter outputs to its native configuration path (e.g., `.windsurf/rules/project.md`, `.clinerules`, `.roorules`). See the [formatters package](packages/formatters/README.md) for the full list.
 

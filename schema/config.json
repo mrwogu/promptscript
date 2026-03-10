@@ -467,9 +467,6 @@
             },
             "codebuddy": {
               "$ref": "#/definitions/TargetConfig"
-            },
-            "droid": {
-              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
