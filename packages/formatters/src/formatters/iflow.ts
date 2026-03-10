@@ -10,12 +10,12 @@ export const IFLOW_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.iflow/rules/project.md + .iflow/skills/<name>/SKILL.md',
+    description: 'Single .iflow/rules/project.md file (skills via full mode)',
     outputPath: '.iflow/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .iflow/skills/<name>/SKILL.md',
+    description: '.iflow/rules/project.md + .iflow/skills/<name>/SKILL.md',
     outputPath: '.iflow/rules/project.md',
   },
 } as const;

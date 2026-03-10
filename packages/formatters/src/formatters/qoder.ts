@@ -10,12 +10,12 @@ export const QODER_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.qoder/rules/project.md + .qoder/skills/<name>/SKILL.md',
+    description: 'Single .qoder/rules/project.md file (skills via full mode)',
     outputPath: '.qoder/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .qoder/skills/<name>/SKILL.md',
+    description: '.qoder/rules/project.md + .qoder/skills/<name>/SKILL.md',
     outputPath: '.qoder/rules/project.md',
   },
 } as const;

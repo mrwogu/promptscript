@@ -16,12 +16,12 @@ export const CONTINUE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.continue/rules/project.md + .continue/skills/<name>/SKILL.md',
+    description: 'Single .continue/rules/project.md file (skills via full mode)',
     outputPath: '.continue/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .continue/skills/<name>/SKILL.md',
+    description: '.continue/rules/project.md + .continue/skills/<name>/SKILL.md',
     outputPath: '.continue/rules/project.md',
   },
 } as const;
@@ -34,8 +34,8 @@ export const CONTINUE_VERSIONS = {
  *
  * Supports three versions:
  * - **simple** (default): Single `.continue/rules/project.md` file
- * - **multifile**: Rules + skills
- * - **full**: Equivalent to multifile
+ * - **multifile**: Single rules file (reserved for future expansion)
+ * - **full**: Rules + skills
  *
  * @example
  * ```yaml

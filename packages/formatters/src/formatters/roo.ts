@@ -16,12 +16,12 @@ export const ROO_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.roorules + .roo/skills/<name>/SKILL.md',
+    description: 'Single .roorules file (skills via full mode)',
     outputPath: '.roorules',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .roo/skills/<name>/SKILL.md',
+    description: '.roorules + .roo/skills/<name>/SKILL.md',
     outputPath: '.roorules',
   },
 } as const;
@@ -34,8 +34,8 @@ export const ROO_VERSIONS = {
  *
  * Supports three versions:
  * - **simple** (default): Single `.roorules` file
- * - **multifile**: Rules + skills
- * - **full**: Equivalent to multifile
+ * - **multifile**: Single rules file (reserved for future expansion)
+ * - **full**: Rules + skills
  *
  * @example
  * ```yaml

@@ -10,12 +10,12 @@ export const KODE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.kode/rules/project.md + .kode/skills/<name>/SKILL.md',
+    description: 'Single .kode/rules/project.md file (skills via full mode)',
     outputPath: '.kode/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .kode/skills/<name>/SKILL.md',
+    description: '.kode/rules/project.md + .kode/skills/<name>/SKILL.md',
     outputPath: '.kode/rules/project.md',
   },
 } as const;

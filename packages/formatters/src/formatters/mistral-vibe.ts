@@ -10,12 +10,12 @@ export const MISTRAL_VIBE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.vibe/rules/project.md + .vibe/skills/<name>/SKILL.md',
+    description: 'Single .vibe/rules/project.md file (skills via full mode)',
     outputPath: '.vibe/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .vibe/skills/<name>/SKILL.md',
+    description: '.vibe/rules/project.md + .vibe/skills/<name>/SKILL.md',
     outputPath: '.vibe/rules/project.md',
   },
 } as const;

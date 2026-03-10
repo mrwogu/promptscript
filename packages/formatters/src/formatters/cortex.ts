@@ -16,12 +16,12 @@ export const CORTEX_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.cortex/rules/project.md + .cortex/skills/<name>/SKILL.md',
+    description: 'Single .cortex/rules/project.md file (skills via full mode)',
     outputPath: '.cortex/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .cortex/skills/<name>/SKILL.md',
+    description: '.cortex/rules/project.md + .cortex/skills/<name>/SKILL.md',
     outputPath: '.cortex/rules/project.md',
   },
 } as const;

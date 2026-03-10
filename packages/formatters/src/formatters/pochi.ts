@@ -10,12 +10,12 @@ export const POCHI_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.pochi/rules/project.md + .pochi/skills/<name>/SKILL.md',
+    description: 'Single .pochi/rules/project.md file (skills via full mode)',
     outputPath: '.pochi/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .pochi/skills/<name>/SKILL.md',
+    description: '.pochi/rules/project.md + .pochi/skills/<name>/SKILL.md',
     outputPath: '.pochi/rules/project.md',
   },
 } as const;

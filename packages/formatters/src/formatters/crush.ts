@@ -13,12 +13,12 @@ export const CRUSH_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.crush/rules/project.md + .crush/skills/<name>/SKILL.md',
+    description: 'Single .crush/rules/project.md file (skills via full mode)',
     outputPath: '.crush/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .crush/skills/<name>/SKILL.md',
+    description: '.crush/rules/project.md + .crush/skills/<name>/SKILL.md',
     outputPath: '.crush/rules/project.md',
   },
 } as const;

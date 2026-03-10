@@ -16,12 +16,12 @@ export const TRAE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.trae/rules/project.md + .trae/skills/<name>/SKILL.md',
+    description: 'Single .trae/rules/project.md file (skills via full mode)',
     outputPath: '.trae/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .trae/skills/<name>/SKILL.md',
+    description: '.trae/rules/project.md + .trae/skills/<name>/SKILL.md',
     outputPath: '.trae/rules/project.md',
   },
 } as const;

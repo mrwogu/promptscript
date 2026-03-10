@@ -16,12 +16,12 @@ export const GOOSE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.goose/rules/project.md + .goose/skills/<name>/SKILL.md',
+    description: 'Single .goose/rules/project.md file (skills via full mode)',
     outputPath: '.goose/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .goose/skills/<name>/SKILL.md',
+    description: '.goose/rules/project.md + .goose/skills/<name>/SKILL.md',
     outputPath: '.goose/rules/project.md',
   },
 } as const;

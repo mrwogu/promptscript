@@ -16,12 +16,12 @@ export const AUGMENT_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.augment/rules/project.md + .augment/skills/<name>/SKILL.md',
+    description: 'Single .augment/rules/project.md file (skills via full mode)',
     outputPath: '.augment/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .augment/skills/<name>/SKILL.md',
+    description: '.augment/rules/project.md + .augment/skills/<name>/SKILL.md',
     outputPath: '.augment/rules/project.md',
   },
 } as const;

@@ -16,12 +16,12 @@ export const KILO_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.kilocode/rules/project.md + .kilocode/skills/<name>/SKILL.md',
+    description: 'Single .kilocode/rules/project.md file (skills via full mode)',
     outputPath: '.kilocode/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .kilocode/skills/<name>/SKILL.md',
+    description: '.kilocode/rules/project.md + .kilocode/skills/<name>/SKILL.md',
     outputPath: '.kilocode/rules/project.md',
   },
 } as const;

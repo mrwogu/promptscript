@@ -13,12 +13,12 @@ export const COMMAND_CODE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.commandcode/rules/project.md + .commandcode/skills/<name>/SKILL.md',
+    description: 'Single .commandcode/rules/project.md file (skills via full mode)',
     outputPath: '.commandcode/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .commandcode/skills/<name>/SKILL.md',
+    description: '.commandcode/rules/project.md + .commandcode/skills/<name>/SKILL.md',
     outputPath: '.commandcode/rules/project.md',
   },
 } as const;

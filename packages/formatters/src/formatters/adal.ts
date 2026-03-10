@@ -10,12 +10,12 @@ export const ADAL_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.adal/rules/project.md + .adal/skills/<name>/SKILL.md',
+    description: 'Single .adal/rules/project.md file (skills via full mode)',
     outputPath: '.adal/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .adal/skills/<name>/SKILL.md',
+    description: '.adal/rules/project.md + .adal/skills/<name>/SKILL.md',
     outputPath: '.adal/rules/project.md',
   },
 } as const;

@@ -16,12 +16,12 @@ export const CODEX_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: 'AGENTS.md + .agents/skills/<name>/SKILL.md',
+    description: 'Single AGENTS.md file (skills via full mode)',
     outputPath: 'AGENTS.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .agents/skills/<name>/SKILL.md',
+    description: 'AGENTS.md + .agents/skills/<name>/SKILL.md',
     outputPath: 'AGENTS.md',
   },
 } as const;
@@ -34,15 +34,19 @@ export const CODEX_VERSIONS = {
  *
  * Supports three versions:
  * - **simple** (default): Single `AGENTS.md` file
- * - **multifile**: Main + skills
- * - **full**: Equivalent to multifile
+ * - **multifile**: Single AGENTS.md file (reserved for future expansion)
+ * - **full**: AGENTS.md + skills
+ *
+ * @remarks Shares `AGENTS.md` output path with `factory`, `amp`, and `droid`.
+ * Do not target more than one in a single compile run without configuring
+ * distinct `output` paths, or the last writer will overwrite the others.
  *
  * @example
  * ```yaml
  * targets:
  *   - codex  # uses simple mode
  *   - codex:
- *       version: multifile
+ *       version: full
  * ```
  */
 export class CodexFormatter extends MarkdownInstructionFormatter {

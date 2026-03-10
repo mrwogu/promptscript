@@ -16,12 +16,12 @@ export const KIRO_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.kiro/rules/project.md + .kiro/skills/<name>/SKILL.md',
+    description: 'Single .kiro/rules/project.md file (skills via full mode)',
     outputPath: '.kiro/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .kiro/skills/<name>/SKILL.md',
+    description: '.kiro/rules/project.md + .kiro/skills/<name>/SKILL.md',
     outputPath: '.kiro/rules/project.md',
   },
 } as const;

@@ -10,12 +10,12 @@ export const ZENCODER_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.zencoder/rules/project.md + .zencoder/skills/<name>/SKILL.md',
+    description: 'Single .zencoder/rules/project.md file (skills via full mode)',
     outputPath: '.zencoder/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .zencoder/skills/<name>/SKILL.md',
+    description: '.zencoder/rules/project.md + .zencoder/skills/<name>/SKILL.md',
     outputPath: '.zencoder/rules/project.md',
   },
 } as const;

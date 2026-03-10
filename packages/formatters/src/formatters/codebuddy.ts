@@ -10,12 +10,12 @@ export const CODEBUDDY_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.codebuddy/rules/project.md + .codebuddy/skills/<name>/SKILL.md',
+    description: 'Single .codebuddy/rules/project.md file (skills via full mode)',
     outputPath: '.codebuddy/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .codebuddy/skills/<name>/SKILL.md',
+    description: '.codebuddy/rules/project.md + .codebuddy/skills/<name>/SKILL.md',
     outputPath: '.codebuddy/rules/project.md',
   },
 } as const;

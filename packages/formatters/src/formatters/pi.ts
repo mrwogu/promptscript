@@ -10,12 +10,12 @@ export const PI_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.pi/rules/project.md + .pi/skills/<name>/SKILL.md',
+    description: 'Single .pi/rules/project.md file (skills via full mode)',
     outputPath: '.pi/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .pi/skills/<name>/SKILL.md',
+    description: '.pi/rules/project.md + .pi/skills/<name>/SKILL.md',
     outputPath: '.pi/rules/project.md',
   },
 } as const;

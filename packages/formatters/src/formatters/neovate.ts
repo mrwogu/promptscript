@@ -10,12 +10,12 @@ export const NEOVATE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.neovate/rules/project.md + .neovate/skills/<name>/SKILL.md',
+    description: 'Single .neovate/rules/project.md file (skills via full mode)',
     outputPath: '.neovate/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .neovate/skills/<name>/SKILL.md',
+    description: '.neovate/rules/project.md + .neovate/skills/<name>/SKILL.md',
     outputPath: '.neovate/rules/project.md',
   },
 } as const;

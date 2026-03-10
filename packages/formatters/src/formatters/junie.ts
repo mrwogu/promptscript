@@ -16,12 +16,12 @@ export const JUNIE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.junie/rules/project.md + .junie/skills/<name>/SKILL.md',
+    description: 'Single .junie/rules/project.md file (skills via full mode)',
     outputPath: '.junie/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .junie/skills/<name>/SKILL.md',
+    description: '.junie/rules/project.md + .junie/skills/<name>/SKILL.md',
     outputPath: '.junie/rules/project.md',
   },
 } as const;

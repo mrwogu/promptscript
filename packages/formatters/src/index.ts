@@ -99,7 +99,6 @@ export * from './formatters/index.js';
 
 // Register built-in formatters
 import { FormatterRegistry } from './registry.js';
-
 // Original 7
 import { GitHubFormatter } from './formatters/github.js';
 import { ClaudeFormatter } from './formatters/claude.js';
@@ -108,28 +107,12 @@ import { AntigravityFormatter } from './formatters/antigravity.js';
 import { FactoryFormatter } from './formatters/factory.js';
 import { OpenCodeFormatter } from './formatters/opencode.js';
 import { GeminiFormatter } from './formatters/gemini.js';
-
-FormatterRegistry.register('github', () => new GitHubFormatter());
-FormatterRegistry.register('claude', () => new ClaudeFormatter());
-FormatterRegistry.register('cursor', () => new CursorFormatter());
-FormatterRegistry.register('antigravity', () => new AntigravityFormatter());
-FormatterRegistry.register('factory', () => new FactoryFormatter());
-FormatterRegistry.register('opencode', () => new OpenCodeFormatter());
-FormatterRegistry.register('gemini', () => new GeminiFormatter());
-
 // Tier 1
 import { WindsurfFormatter } from './formatters/windsurf.js';
 import { ClineFormatter } from './formatters/cline.js';
 import { RooFormatter } from './formatters/roo.js';
 import { CodexFormatter } from './formatters/codex.js';
 import { ContinueFormatter } from './formatters/continue.js';
-
-FormatterRegistry.register('windsurf', () => new WindsurfFormatter());
-FormatterRegistry.register('cline', () => new ClineFormatter());
-FormatterRegistry.register('roo', () => new RooFormatter());
-FormatterRegistry.register('codex', () => new CodexFormatter());
-FormatterRegistry.register('continue', () => new ContinueFormatter());
-
 // Tier 2
 import { AugmentFormatter } from './formatters/augment.js';
 import { GooseFormatter } from './formatters/goose.js';
@@ -138,15 +121,6 @@ import { AmpFormatter } from './formatters/amp.js';
 import { TraeFormatter } from './formatters/trae.js';
 import { JunieFormatter } from './formatters/junie.js';
 import { KiroFormatter } from './formatters/kiro.js';
-
-FormatterRegistry.register('augment', () => new AugmentFormatter());
-FormatterRegistry.register('goose', () => new GooseFormatter());
-FormatterRegistry.register('kilo', () => new KiloFormatter());
-FormatterRegistry.register('amp', () => new AmpFormatter());
-FormatterRegistry.register('trae', () => new TraeFormatter());
-FormatterRegistry.register('junie', () => new JunieFormatter());
-FormatterRegistry.register('kiro', () => new KiroFormatter());
-
 // Tier 3
 import { CortexFormatter } from './formatters/cortex.js';
 import { CrushFormatter } from './formatters/crush.js';
@@ -168,6 +142,29 @@ import { OpenClawFormatter } from './formatters/openclaw.js';
 import { CodeBuddyFormatter } from './formatters/codebuddy.js';
 import { DroidFormatter } from './formatters/droid.js';
 
+// Original 7
+FormatterRegistry.register('github', () => new GitHubFormatter());
+FormatterRegistry.register('claude', () => new ClaudeFormatter());
+FormatterRegistry.register('cursor', () => new CursorFormatter());
+FormatterRegistry.register('antigravity', () => new AntigravityFormatter());
+FormatterRegistry.register('factory', () => new FactoryFormatter());
+FormatterRegistry.register('opencode', () => new OpenCodeFormatter());
+FormatterRegistry.register('gemini', () => new GeminiFormatter());
+// Tier 1
+FormatterRegistry.register('windsurf', () => new WindsurfFormatter());
+FormatterRegistry.register('cline', () => new ClineFormatter());
+FormatterRegistry.register('roo', () => new RooFormatter());
+FormatterRegistry.register('codex', () => new CodexFormatter());
+FormatterRegistry.register('continue', () => new ContinueFormatter());
+// Tier 2
+FormatterRegistry.register('augment', () => new AugmentFormatter());
+FormatterRegistry.register('goose', () => new GooseFormatter());
+FormatterRegistry.register('kilo', () => new KiloFormatter());
+FormatterRegistry.register('amp', () => new AmpFormatter());
+FormatterRegistry.register('trae', () => new TraeFormatter());
+FormatterRegistry.register('junie', () => new JunieFormatter());
+FormatterRegistry.register('kiro', () => new KiroFormatter());
+// Tier 3
 FormatterRegistry.register('cortex', () => new CortexFormatter());
 FormatterRegistry.register('crush', () => new CrushFormatter());
 FormatterRegistry.register('command-code', () => new CommandCodeFormatter());

@@ -10,12 +10,12 @@ export const OPENHANDS_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.openhands/rules/project.md + .openhands/skills/<name>/SKILL.md',
+    description: 'Single .openhands/rules/project.md file (skills via full mode)',
     outputPath: '.openhands/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .openhands/skills/<name>/SKILL.md',
+    description: '.openhands/rules/project.md + .openhands/skills/<name>/SKILL.md',
     outputPath: '.openhands/rules/project.md',
   },
 } as const;

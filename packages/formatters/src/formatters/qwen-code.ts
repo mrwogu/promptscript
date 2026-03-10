@@ -10,12 +10,12 @@ export const QWEN_CODE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.qwen/rules/project.md + .qwen/skills/<name>/SKILL.md',
+    description: 'Single .qwen/rules/project.md file (skills via full mode)',
     outputPath: '.qwen/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .qwen/skills/<name>/SKILL.md',
+    description: '.qwen/rules/project.md + .qwen/skills/<name>/SKILL.md',
     outputPath: '.qwen/rules/project.md',
   },
 } as const;

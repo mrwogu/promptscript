@@ -16,12 +16,12 @@ export const CLINE_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.clinerules + .agents/skills/<name>/SKILL.md',
+    description: 'Single .clinerules file (skills via full mode)',
     outputPath: '.clinerules',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .agents/skills/<name>/SKILL.md',
+    description: '.clinerules + .agents/skills/<name>/SKILL.md',
     outputPath: '.clinerules',
   },
 } as const;
@@ -34,8 +34,8 @@ export const CLINE_VERSIONS = {
  *
  * Supports three versions:
  * - **simple** (default): Single `.clinerules` file
- * - **multifile**: Rules + skills
- * - **full**: Equivalent to multifile (Cline has no agent concept)
+ * - **multifile**: Single rules file (reserved for future expansion)
+ * - **full**: Rules + skills
  *
  * @example
  * ```yaml

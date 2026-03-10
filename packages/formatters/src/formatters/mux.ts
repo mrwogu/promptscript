@@ -10,12 +10,12 @@ export const MUX_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.mux/rules/project.md + .mux/skills/<name>/SKILL.md',
+    description: 'Single .mux/rules/project.md file (skills via full mode)',
     outputPath: '.mux/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .mux/skills/<name>/SKILL.md',
+    description: '.mux/rules/project.md + .mux/skills/<name>/SKILL.md',
     outputPath: '.mux/rules/project.md',
   },
 } as const;

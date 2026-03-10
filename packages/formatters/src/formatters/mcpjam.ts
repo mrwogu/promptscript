@@ -10,12 +10,12 @@ export const MCPJAM_VERSIONS = {
   },
   multifile: {
     name: 'multifile',
-    description: '.mcpjam/rules/project.md + .mcpjam/skills/<name>/SKILL.md',
+    description: 'Single .mcpjam/rules/project.md file (skills via full mode)',
     outputPath: '.mcpjam/rules/project.md',
   },
   full: {
     name: 'full',
-    description: 'Multifile + .mcpjam/skills/<name>/SKILL.md',
+    description: '.mcpjam/rules/project.md + .mcpjam/skills/<name>/SKILL.md',
     outputPath: '.mcpjam/rules/project.md',
   },
 } as const;
