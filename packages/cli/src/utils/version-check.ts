@@ -1,6 +1,6 @@
 import { homedir } from 'os';
 import { join } from 'path';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { readFile, writeFile, mkdir } from 'fs/promises';
 import { ConsoleOutput, isQuiet, isVerbose } from '../output/console.js';
 
 const NPM_REGISTRY_URL = 'https://registry.npmjs.org/@promptscript/cli/latest';
@@ -45,13 +45,10 @@ export function getCachePath(): string {
 /**
  * Read the version cache from disk.
  */
-function readCache(): VersionCache | null {
+async function readCache(): Promise<VersionCache | null> {
   try {
     const cachePath = getCachePath();
-    if (!existsSync(cachePath)) {
-      return null;
-    }
-    const content = readFileSync(cachePath, 'utf-8');
+    const content = await readFile(cachePath, 'utf-8');
     return JSON.parse(content) as VersionCache;
   } catch {
     return null;
@@ -61,14 +58,12 @@ function readCache(): VersionCache | null {
 /**
  * Write the version cache to disk.
  */
-function writeCache(cache: VersionCache): void {
+async function writeCache(cache: VersionCache): Promise<void> {
   try {
     const cacheDir = getCacheDir();
-    if (!existsSync(cacheDir)) {
-      mkdirSync(cacheDir, { recursive: true });
-    }
+    await mkdir(cacheDir, { recursive: true });
     const cachePath = getCachePath();
-    writeFileSync(cachePath, JSON.stringify(cache, null, 2), 'utf-8');
+    await writeFile(cachePath, JSON.stringify(cache, null, 2), 'utf-8');
   } catch {
     // Silently ignore cache write errors
   }
@@ -177,7 +172,7 @@ export async function checkForUpdates(currentVersion: string): Promise<UpdateInf
   }
 
   // Check cache first
-  const cache = readCache();
+  const cache = await readCache();
   if (cache && isCacheValid(cache) && cache.currentVersion === currentVersion) {
     // Use cached result
     if (isNewerVersion(currentVersion, cache.latestVersion)) {
@@ -197,7 +192,7 @@ export async function checkForUpdates(currentVersion: string): Promise<UpdateInf
   }
 
   // Update cache
-  writeCache({
+  await writeCache({
     lastCheck: new Date().toISOString(),
     latestVersion,
     currentVersion,
@@ -232,7 +227,7 @@ export async function forceCheckForUpdates(
   }
 
   // Update cache
-  writeCache({
+  await writeCache({
     lastCheck: new Date().toISOString(),
     latestVersion,
     currentVersion,

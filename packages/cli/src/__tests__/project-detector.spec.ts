@@ -14,8 +14,8 @@ vi.mock('path', () => ({
 describe('utils/project-detector', () => {
   let mockServices: CliServices;
   let mockFs: {
-    existsSync: any;
-    readFile: any;
+    existsSync: ReturnType<typeof vi.fn>;
+    readFile: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -25,8 +25,8 @@ describe('utils/project-detector', () => {
     };
 
     mockServices = {
-      fs: mockFs as any,
-      prompts: {} as any,
+      fs: mockFs as unknown as CliServices['fs'],
+      prompts: {} as unknown as CliServices['prompts'],
       cwd: '/test',
     };
   });

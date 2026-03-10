@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CstNode, IToken } from 'chevrotain';
 import { parser } from './parser.js';
 import type {
@@ -20,6 +19,152 @@ import type {
   ParamType,
   TemplateExpression,
 } from '@promptscript/core';
+
+// ============================================================
+// CST Context Types
+//
+// Each interface models the CST context object that Chevrotain
+// passes to the corresponding visitor method. Properties are
+// optional arrays because the grammar allows alternatives;
+// required arrays (e.g. At: IToken[]) appear in every parse path.
+// ============================================================
+
+interface ProgramCstCtx {
+  metaBlock?: CstNode[];
+  inheritDecl?: CstNode[];
+  useDecl?: CstNode[];
+  block?: CstNode[];
+  extendBlock?: CstNode[];
+}
+
+interface MetaBlockCstCtx {
+  At: IToken[];
+  field?: CstNode[];
+}
+
+interface InheritDeclCstCtx {
+  At: IToken[];
+  pathRef: CstNode[];
+  paramCallList?: CstNode[];
+}
+
+interface UseDeclCstCtx {
+  At: IToken[];
+  pathRef: CstNode[];
+  paramCallList?: CstNode[];
+  Identifier?: IToken[];
+}
+
+interface BlockCstCtx {
+  At: IToken[];
+  Identifier: IToken[];
+  blockContent: CstNode[];
+}
+
+interface ExtendBlockCstCtx {
+  At: IToken[];
+  dotPath: CstNode[];
+  blockContent: CstNode[];
+}
+
+interface BlockContentCstCtx {
+  TextBlock?: IToken[];
+  field?: CstNode[];
+  restrictionItem?: CstNode[];
+}
+
+interface RestrictionItemCstCtx {
+  StringLiteral: IToken[];
+}
+
+interface FieldCstCtx {
+  Identifier?: IToken[];
+  StringLiteral?: IToken[];
+  StringType?: IToken[];
+  NumberType?: IToken[];
+  BooleanType?: IToken[];
+  Question?: IToken[];
+  value: CstNode[];
+}
+
+interface ValueCstCtx {
+  StringLiteral?: IToken[];
+  NumberLiteral?: IToken[];
+  True?: IToken[];
+  False?: IToken[];
+  Null?: IToken[];
+  TextBlock?: IToken[];
+  array?: CstNode[];
+  paramDefList?: CstNode[];
+  object?: CstNode[];
+  typeExpr?: CstNode[];
+  templateExpr?: CstNode[];
+  Identifier?: IToken[];
+}
+
+interface ArrayCstCtx {
+  value?: CstNode[];
+}
+
+interface ObjectCstCtx {
+  field?: CstNode[];
+}
+
+interface TypeExprCstCtx {
+  rangeType?: CstNode[];
+  enumType?: CstNode[];
+}
+
+interface RangeTypeCstCtx {
+  NumberLiteral: [IToken, IToken, ...IToken[]];
+  Range: IToken[];
+}
+
+interface EnumTypeCstCtx {
+  StringLiteral: IToken[];
+  Enum: IToken[];
+}
+
+interface PathRefCstCtx {
+  PathReference?: IToken[];
+  RelativePath?: IToken[];
+}
+
+interface DotPathCstCtx {
+  Identifier: IToken[];
+}
+
+interface ParamCallListCstCtx {
+  paramArg?: CstNode[];
+}
+
+interface ParamArgCstCtx {
+  Identifier: IToken[];
+  value: CstNode[];
+}
+
+interface ParamDefListCstCtx {
+  paramDef?: CstNode[];
+}
+
+interface ParamDefCstCtx {
+  Identifier: IToken[];
+  Question?: IToken[];
+  paramType: CstNode[];
+  value?: CstNode[];
+}
+
+interface ParamTypeCstCtx {
+  StringType?: IToken[];
+  NumberType?: IToken[];
+  BooleanType?: IToken[];
+  enumType?: CstNode[];
+}
+
+interface TemplateExprCstCtx {
+  Identifier: IToken[];
+  TemplateOpen: IToken[];
+}
 
 // Get the base visitor class from the parser
 const BaseVisitor = parser.getBaseCstVisitorConstructor();
@@ -94,7 +239,7 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * program → Program
    */
-  program(ctx: any, filename: string = '<unknown>'): Program {
+  program(ctx: ProgramCstCtx, filename: string = '<unknown>'): Program {
     this.filename = filename;
 
     const program: Program = {
@@ -106,11 +251,11 @@ class PromptScriptVisitor extends BaseVisitor {
     };
 
     if (ctx.metaBlock) {
-      program.meta = this.visit(ctx.metaBlock[0]);
+      program.meta = this.visit(ctx.metaBlock[0]!);
     }
 
     if (ctx.inheritDecl) {
-      program.inherit = this.visit(ctx.inheritDecl[0]);
+      program.inherit = this.visit(ctx.inheritDecl[0]!);
     }
 
     if (ctx.useDecl) {
@@ -131,7 +276,7 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * metaBlock → MetaBlock
    */
-  metaBlock(ctx: any): MetaBlock {
+  metaBlock(ctx: MetaBlockCstCtx): MetaBlock {
     const fields: Record<string, Value> = {};
     let params: ParamDefinition[] | undefined;
 
@@ -149,7 +294,7 @@ class PromptScriptVisitor extends BaseVisitor {
     const meta: MetaBlock = {
       type: 'MetaBlock',
       fields,
-      loc: this.loc(ctx.At[0]),
+      loc: this.loc(ctx.At[0]!),
     };
 
     if (params) {
@@ -162,15 +307,15 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * inheritDecl → InheritDeclaration
    */
-  inheritDecl(ctx: any): InheritDeclaration {
+  inheritDecl(ctx: InheritDeclCstCtx): InheritDeclaration {
     const inherit: InheritDeclaration = {
       type: 'InheritDeclaration',
-      path: this.visit(ctx.pathRef[0]),
-      loc: this.loc(ctx.At[0]),
+      path: this.visit(ctx.pathRef[0]!),
+      loc: this.loc(ctx.At[0]!),
     };
 
     if (ctx.paramCallList) {
-      inherit.params = this.visit(ctx.paramCallList[0]);
+      inherit.params = this.visit(ctx.paramCallList[0]!);
     }
 
     return inherit;
@@ -179,19 +324,19 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * useDecl → UseDeclaration
    */
-  useDecl(ctx: any): UseDeclaration {
+  useDecl(ctx: UseDeclCstCtx): UseDeclaration {
     const use: UseDeclaration = {
       type: 'UseDeclaration',
-      path: this.visit(ctx.pathRef[0]),
-      loc: this.loc(ctx.At[0]),
+      path: this.visit(ctx.pathRef[0]!),
+      loc: this.loc(ctx.At[0]!),
     };
 
     if (ctx.paramCallList) {
-      use.params = this.visit(ctx.paramCallList[0]);
+      use.params = this.visit(ctx.paramCallList[0]!);
     }
 
     if (ctx.Identifier) {
-      use.alias = ctx.Identifier[0].image;
+      use.alias = ctx.Identifier[0]!.image;
     }
 
     return use;
@@ -200,48 +345,48 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * block → Block
    */
-  block(ctx: any): Block {
-    const name = ctx.Identifier[0].image;
-    const content = this.visit(ctx.blockContent[0]);
+  block(ctx: BlockCstCtx): Block {
+    const name = ctx.Identifier[0]!.image;
+    const content = this.visit(ctx.blockContent[0]!);
 
     return {
       type: 'Block',
       name,
       content,
-      loc: this.loc(ctx.At[0]),
+      loc: this.loc(ctx.At[0]!),
     };
   }
 
   /**
    * extendBlock → ExtendBlock
    */
-  extendBlock(ctx: any): ExtendBlock {
-    const targetPath = this.visit(ctx.dotPath[0]) as string;
-    const content = this.visit(ctx.blockContent[0]);
+  extendBlock(ctx: ExtendBlockCstCtx): ExtendBlock {
+    const targetPath = this.visit(ctx.dotPath[0]!) as string;
+    const content = this.visit(ctx.blockContent[0]!);
 
     return {
       type: 'ExtendBlock',
       targetPath,
       content,
-      loc: this.loc(ctx.At[0]),
+      loc: this.loc(ctx.At[0]!),
     };
   }
 
   /**
    * blockContent → BlockContent
    */
-  blockContent(ctx: any): BlockContent {
-    const hasText = ctx.TextBlock?.length > 0;
-    const hasFields = ctx.field?.length > 0;
-    const hasRestrictions = ctx.restrictionItem?.length > 0;
+  blockContent(ctx: BlockContentCstCtx): BlockContent {
+    const hasText = ctx.TextBlock !== undefined && ctx.TextBlock.length > 0;
+    const hasFields = ctx.field !== undefined && ctx.field.length > 0;
+    const hasRestrictions = ctx.restrictionItem !== undefined && ctx.restrictionItem.length > 0;
 
     // Collect restrictions (array of strings)
     if (hasRestrictions) {
       return this.buildRestrictionContent(ctx);
     }
 
-    const textContent = hasText ? this.buildTextContent(ctx.TextBlock[0]) : undefined;
-    const properties = hasFields ? this.buildProperties(ctx.field) : {};
+    const textContent = hasText ? this.buildTextContent(ctx.TextBlock![0]!) : undefined;
+    const properties = hasFields ? this.buildProperties(ctx.field!) : {};
 
     return this.resolveBlockContent(textContent, properties, hasText, hasFields);
   }
@@ -249,9 +394,9 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * Build restriction content from context.
    */
-  private buildRestrictionContent(ctx: any): ObjectContent {
+  private buildRestrictionContent(ctx: BlockContentCstCtx): ObjectContent {
     const restrictions: string[] = [];
-    for (const restrictionNode of ctx.restrictionItem) {
+    for (const restrictionNode of ctx.restrictionItem!) {
       restrictions.push(this.visit(restrictionNode));
     }
     return {
@@ -336,15 +481,15 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * restrictionItem → string
    */
-  restrictionItem(ctx: any): string {
-    const token = ctx.StringLiteral[0];
+  restrictionItem(ctx: RestrictionItemCstCtx): string {
+    const token = ctx.StringLiteral[0]!;
     return this.parseStringLiteral(token.image);
   }
 
   /**
    * field → { name, value, optional, defaultValue, isParamsDef?, paramsDefs? }
    */
-  field(ctx: any): {
+  field(ctx: FieldCstCtx): {
     name: string;
     value: Value;
     optional?: boolean;
@@ -355,9 +500,9 @@ class PromptScriptVisitor extends BaseVisitor {
     // Field key can be Identifier, StringLiteral, or type keywords (string, number, boolean)
     let name: string;
     if (ctx.Identifier) {
-      name = ctx.Identifier[0].image;
+      name = ctx.Identifier[0]!.image;
     } else if (ctx.StringLiteral) {
-      name = this.parseStringLiteral(ctx.StringLiteral[0].image);
+      name = this.parseStringLiteral(ctx.StringLiteral[0]!.image);
     } else if (ctx.StringType) {
       name = 'string';
     } else if (ctx.NumberType) {
@@ -369,8 +514,8 @@ class PromptScriptVisitor extends BaseVisitor {
     }
     const optional = ctx.Question ? true : undefined;
     const values = ctx.value;
-    const valueResult = this.visit(values[0]);
-    const defaultValue = values.length > 1 ? this.visit(values[1]) : undefined;
+    const valueResult = this.visit(values[0]!);
+    const defaultValue = values.length > 1 ? this.visit(values[1]!) : undefined;
 
     // Special handling for 'params' field in @meta block
     // Check if the value was parsed as a paramDefList (returns ParamDefinition[])
@@ -389,13 +534,13 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * value → Value
    */
-  value(ctx: any): Value {
+  value(ctx: ValueCstCtx): Value {
     if (ctx.StringLiteral) {
-      return this.parseStringLiteral(ctx.StringLiteral[0].image);
+      return this.parseStringLiteral(ctx.StringLiteral[0]!.image);
     }
 
     if (ctx.NumberLiteral) {
-      return parseFloat(ctx.NumberLiteral[0].image);
+      return parseFloat(ctx.NumberLiteral[0]!.image);
     }
 
     if (ctx.True) {
@@ -411,7 +556,7 @@ class PromptScriptVisitor extends BaseVisitor {
     }
 
     if (ctx.TextBlock) {
-      const token = ctx.TextBlock[0];
+      const token = ctx.TextBlock[0]!;
       const raw = token.image;
       let value = raw.slice(3, -3).trim();
 
@@ -428,28 +573,28 @@ class PromptScriptVisitor extends BaseVisitor {
     }
 
     if (ctx.array) {
-      return this.visit(ctx.array[0]);
+      return this.visit(ctx.array[0]!);
     }
 
     if (ctx.paramDefList) {
       // paramDefList returns ParamDefinition[] which is handled specially by field()
-      return this.visit(ctx.paramDefList[0]);
+      return this.visit(ctx.paramDefList[0]!);
     }
 
     if (ctx.object) {
-      return this.visit(ctx.object[0]);
+      return this.visit(ctx.object[0]!);
     }
 
     if (ctx.typeExpr) {
-      return this.visit(ctx.typeExpr[0]);
+      return this.visit(ctx.typeExpr[0]!);
     }
 
     if (ctx.templateExpr) {
-      return this.visit(ctx.templateExpr[0]);
+      return this.visit(ctx.templateExpr[0]!);
     }
 
     if (ctx.Identifier) {
-      return ctx.Identifier[0].image;
+      return ctx.Identifier[0]!.image;
     }
 
     throw new Error('Unknown value type');
@@ -458,7 +603,7 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * array → Value[]
    */
-  array(ctx: any): Value[] {
+  array(ctx: ArrayCstCtx): Value[] {
     if (!ctx.value) {
       return [];
     }
@@ -468,7 +613,7 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * object → Record<string, Value>
    */
-  object(ctx: any): Record<string, Value> {
+  object(ctx: ObjectCstCtx): Record<string, Value> {
     const result: Record<string, Value> = {};
 
     if (ctx.field) {
@@ -484,20 +629,20 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * typeExpr → TypeExpression
    */
-  typeExpr(ctx: any): TypeExpression {
+  typeExpr(ctx: TypeExprCstCtx): TypeExpression {
     // Grammar ensures only rangeType or enumType can appear here
     if (ctx.rangeType) {
-      return this.visit(ctx.rangeType[0]);
+      return this.visit(ctx.rangeType[0]!);
     }
 
     // Must be enumType (grammar guarantees one of the two)
-    return this.visit(ctx.enumType[0]);
+    return this.visit(ctx.enumType![0]!);
   }
 
   /**
    * rangeType → TypeExpression
    */
-  rangeType(ctx: any): TypeExpression {
+  rangeType(ctx: RangeTypeCstCtx): TypeExpression {
     const [minToken, maxToken] = ctx.NumberLiteral;
     const min = parseFloat(minToken.image);
     const max = parseFloat(maxToken.image);
@@ -506,41 +651,41 @@ class PromptScriptVisitor extends BaseVisitor {
       type: 'TypeExpression',
       kind: 'range',
       constraints: { min, max },
-      loc: this.loc(ctx.Range[0]),
+      loc: this.loc(ctx.Range[0]!),
     };
   }
 
   /**
    * enumType → TypeExpression
    */
-  enumType(ctx: any): TypeExpression {
+  enumType(ctx: EnumTypeCstCtx): TypeExpression {
     const options = ctx.StringLiteral.map((token: IToken) => this.parseStringLiteral(token.image));
 
     return {
       type: 'TypeExpression',
       kind: 'enum',
       constraints: { options },
-      loc: this.loc(ctx.Enum[0]),
+      loc: this.loc(ctx.Enum[0]!),
     };
   }
 
   /**
    * pathRef → PathReference
    */
-  pathRef(ctx: any): PathReference {
+  pathRef(ctx: PathRefCstCtx): PathReference {
     // Grammar ensures only PathReference or RelativePath can appear here
     if (ctx.PathReference) {
-      return this.parsePathReference(ctx.PathReference[0]);
+      return this.parsePathReference(ctx.PathReference[0]!);
     }
 
     // Must be RelativePath (grammar guarantees one of the two)
-    return this.parseRelativePath(ctx.RelativePath[0]);
+    return this.parseRelativePath(ctx.RelativePath![0]!);
   }
 
   /**
    * dotPath → string (dot-separated path)
    */
-  dotPath(ctx: any): string {
+  dotPath(ctx: DotPathCstCtx): string {
     return ctx.Identifier.map((token: IToken) => token.image).join('.');
   }
 
@@ -551,7 +696,7 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * paramCallList → ParamArgument[]
    */
-  paramCallList(ctx: any): ParamArgument[] {
+  paramCallList(ctx: ParamCallListCstCtx): ParamArgument[] {
     if (!ctx.paramArg) {
       return [];
     }
@@ -561,19 +706,19 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * paramArg → ParamArgument
    */
-  paramArg(ctx: any): ParamArgument {
+  paramArg(ctx: ParamArgCstCtx): ParamArgument {
     return {
       type: 'ParamArgument',
-      name: ctx.Identifier[0].image,
-      value: this.visit(ctx.value[0]),
-      loc: this.loc(ctx.Identifier[0]),
+      name: ctx.Identifier[0]!.image,
+      value: this.visit(ctx.value[0]!),
+      loc: this.loc(ctx.Identifier[0]!),
     };
   }
 
   /**
    * paramDefList → ParamDefinition[]
    */
-  paramDefList(ctx: any): ParamDefinition[] {
+  paramDefList(ctx: ParamDefListCstCtx): ParamDefinition[] {
     if (!ctx.paramDef) {
       return [];
     }
@@ -583,11 +728,11 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * paramDef → ParamDefinition
    */
-  paramDef(ctx: any): ParamDefinition {
-    const name = ctx.Identifier[0].image;
+  paramDef(ctx: ParamDefCstCtx): ParamDefinition {
+    const name = ctx.Identifier[0]!.image;
     const optional = ctx.Question !== undefined;
-    const paramType = this.visit(ctx.paramType[0]);
-    const defaultValue = ctx.value ? this.visit(ctx.value[0]) : undefined;
+    const paramType = this.visit(ctx.paramType[0]!);
+    const defaultValue = ctx.value ? this.visit(ctx.value[0]!) : undefined;
 
     return {
       type: 'ParamDefinition',
@@ -595,14 +740,14 @@ class PromptScriptVisitor extends BaseVisitor {
       paramType,
       optional: optional || defaultValue !== undefined,
       defaultValue,
-      loc: this.loc(ctx.Identifier[0]),
+      loc: this.loc(ctx.Identifier[0]!),
     };
   }
 
   /**
    * paramType → ParamType
    */
-  paramType(ctx: any): ParamType {
+  paramType(ctx: ParamTypeCstCtx): ParamType {
     if (ctx.StringType) {
       return { kind: 'string' };
     }
@@ -613,7 +758,7 @@ class PromptScriptVisitor extends BaseVisitor {
       return { kind: 'boolean' };
     }
     if (ctx.enumType) {
-      const enumExpr = this.visit(ctx.enumType[0]) as { constraints?: { options?: string[] } };
+      const enumExpr = this.visit(ctx.enumType[0]!) as { constraints?: { options?: string[] } };
       return {
         kind: 'enum',
         options: enumExpr.constraints?.options ?? [],
@@ -625,11 +770,11 @@ class PromptScriptVisitor extends BaseVisitor {
   /**
    * templateExpr → TemplateExpression
    */
-  templateExpr(ctx: any): TemplateExpression {
+  templateExpr(ctx: TemplateExprCstCtx): TemplateExpression {
     return {
       type: 'TemplateExpression',
-      name: ctx.Identifier[0].image,
-      loc: this.loc(ctx.TemplateOpen[0]),
+      name: ctx.Identifier[0]!.image,
+      loc: this.loc(ctx.TemplateOpen[0]!),
     };
   }
 

@@ -151,7 +151,15 @@ export class Compiler {
       return {
         success: false,
         outputs: new Map(),
-        errors: [this.toCompileError(err as Error)],
+        errors: [
+          this.toCompileError(
+            err instanceof Error
+              ? err
+              : this.isPSErrorLike(err)
+                ? (err as PSError)
+                : new Error(String(err))
+          ),
+        ],
         warnings: [],
         stats,
       };
@@ -247,7 +255,7 @@ export class Compiler {
         formatErrors.push({
           name: 'FormatterError',
           code: 'PS4000',
-          message: `Formatter '${formatter.name}' failed: ${(err as Error).message}`,
+          message: `Formatter '${formatter.name}' failed: ${err instanceof Error ? err.message : String(err)}`,
         });
       }
     }
@@ -357,7 +365,7 @@ export class Compiler {
         const result = await this.compile(entryPath);
         options.onCompile?.(result, changedFiles);
       } catch (error) {
-        options.onError?.(error as Error);
+        options.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
     };
 
@@ -367,7 +375,7 @@ export class Compiler {
       ignoreInitial: true,
     });
 
-    watcher.on('change', (path: string) => {
+    const scheduleRecompile = (path: string): void => {
       pendingChanges.push(path);
 
       if (debounceTimer) {
@@ -379,21 +387,10 @@ export class Compiler {
         pendingChanges = [];
         handleChange(files);
       }, debounceMs);
-    });
+    };
 
-    watcher.on('add', (path: string) => {
-      pendingChanges.push(path);
-
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-
-      debounceTimer = setTimeout(() => {
-        const files = [...pendingChanges];
-        pendingChanges = [];
-        handleChange(files);
-      }, debounceMs);
-    });
+    watcher.on('change', scheduleRecompile);
+    watcher.on('add', scheduleRecompile);
 
     watcher.on('error', (error: unknown) => {
       options.onError?.(error instanceof Error ? error : new Error(String(error)));
@@ -449,7 +446,8 @@ export class Compiler {
 
       // Check if it's a constructor (function)
       if (typeof f === 'function') {
-        return { formatter: new (f as unknown as FormatterConstructor)() };
+        const Ctor = f as FormatterConstructor;
+        return { formatter: new Ctor() };
       }
 
       // Object with name and config (not a Formatter instance)
@@ -478,6 +476,19 @@ export class Compiler {
     }
     throw new Error(
       `Unknown formatter: '${name}'. Available formatters: ${FormatterRegistry.list().join(', ')}`
+    );
+  }
+
+  /**
+   * Check if a value looks like a PSError (has code, message, and format).
+   */
+  private isPSErrorLike(err: unknown): err is PSError {
+    return (
+      typeof err === 'object' &&
+      err !== null &&
+      'message' in err &&
+      'code' in err &&
+      typeof (err as PSError).message === 'string'
     );
   }
 

@@ -46,11 +46,6 @@ vi.mock('chalk', () => ({
   },
 }));
 
-// Mock process.exit
-const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
-  throw new Error('process.exit called');
-});
-
 // Mock process.cwd
 vi.spyOn(process, 'cwd').mockReturnValue('/mock/project');
 
@@ -58,21 +53,22 @@ describe('commands/init', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
   let mockServices: CliServices;
   let mockFs: {
-    existsSync: any;
-    writeFile: any;
-    mkdir: any;
-    readFile: any;
-    readdir: any;
+    existsSync: ReturnType<typeof vi.fn>;
+    writeFile: ReturnType<typeof vi.fn>;
+    mkdir: ReturnType<typeof vi.fn>;
+    readFile: ReturnType<typeof vi.fn>;
+    readdir: ReturnType<typeof vi.fn>;
   };
   let mockPrompts: {
-    input: any;
-    confirm: any;
-    checkbox: any;
-    select: any;
+    input: ReturnType<typeof vi.fn>;
+    confirm: ReturnType<typeof vi.fn>;
+    checkbox: ReturnType<typeof vi.fn>;
+    select: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    process.exitCode = undefined;
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     // Default: no Prettier config found
     mockFindPrettierConfig.mockReturnValue(null);
@@ -97,8 +93,8 @@ describe('commands/init', () => {
     };
 
     mockServices = {
-      fs: mockFs as any,
-      prompts: mockPrompts as any,
+      fs: mockFs as unknown as CliServices['fs'],
+      prompts: mockPrompts as unknown as CliServices['prompts'],
       cwd: '/mock/project',
     };
   });
@@ -186,8 +182,8 @@ describe('commands/init', () => {
     it('should exit with error when write fails', async () => {
       mockFs.mkdir.mockRejectedValue(new Error('Permission denied'));
 
-      await expect(initCommand({ yes: true }, mockServices)).rejects.toThrow('process.exit called');
-      expect(mockExit).toHaveBeenCalledWith(1);
+      await initCommand({ yes: true }, mockServices);
+      expect(process.exitCode).toBe(1);
     });
 
     it('should include team when provided', async () => {
@@ -332,7 +328,7 @@ describe('commands/init', () => {
       await initCommand({ interactive: true }, mockServices);
 
       expect(mockFs.writeFile).not.toHaveBeenCalled();
-      expect(mockExit).not.toHaveBeenCalled();
+      expect(process.exitCode).toBeUndefined();
     });
 
     it('should skip registry and suggestions in --yes mode without local manifest', async () => {

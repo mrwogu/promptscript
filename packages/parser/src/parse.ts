@@ -134,7 +134,7 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     return { ast, errors };
   } catch (err) {
     errors.push(
-      new ParseError(`AST transformation: ${(err as Error).message}`, {
+      new ParseError(`AST transformation: ${err instanceof Error ? err.message : String(err)}`, {
         file: filename,
         line: 1,
         column: 1,

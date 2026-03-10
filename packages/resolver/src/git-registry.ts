@@ -294,7 +294,7 @@ export class GitRegistry implements Registry {
       // Clone with shallow depth for efficiency
       await git.clone(cloneUrl, targetPath, ['--depth=1', `--branch=${ref}`, '--single-branch']);
     } catch (err) {
-      const error = err as Error;
+      const error = err instanceof Error ? err : new Error(String(err));
 
       // Check if ref doesn't exist first (more specific than auth errors)
       // A "branch not found" can sometimes look like an auth error to git
@@ -306,7 +306,7 @@ export class GitRegistry implements Registry {
           await repoGit.fetch(['origin', ref, '--depth=1']);
           await repoGit.checkout(ref);
         } catch (fetchErr) {
-          const fetchError = fetchErr as Error;
+          const fetchError = fetchErr instanceof Error ? fetchErr : new Error(String(fetchErr));
           if (this.isRefError(fetchError)) {
             throw new GitRefNotFoundError(ref, this.url);
           }
@@ -339,7 +339,7 @@ export class GitRegistry implements Registry {
       await git.checkout(ref);
       await git.reset(['--hard', `origin/${ref}`]);
     } catch (err) {
-      const error = err as Error;
+      const error = err instanceof Error ? err : new Error(String(err));
 
       // If ref is a tag or commit, try direct checkout
       if (this.isRefError(error)) {

@@ -389,7 +389,8 @@ export async function compileCommand(
       spinner.fail('Entry file not found');
       ConsoleOutput.error(`File not found: ${entryPath}`);
       ConsoleOutput.muted('Run: prs init');
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     const result = await compiler.compile(entryPath);
@@ -398,7 +399,8 @@ export async function compileCommand(
       spinner.fail('Compilation failed');
       ConsoleOutput.newline();
       printErrors(result.errors);
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     spinner.succeed('Compilation successful');
@@ -425,7 +427,7 @@ export async function compileCommand(
       );
     }
   } catch (error) {
-    if ((error as Error).name === 'ExitPromptError') {
+    if (error instanceof Error && error.name === 'ExitPromptError') {
       // User cancelled with Ctrl+C during prompt
       spinner.stop();
       ConsoleOutput.newline();
@@ -433,8 +435,8 @@ export async function compileCommand(
       return;
     }
     spinner.fail('Error');
-    ConsoleOutput.error((error as Error).message);
-    process.exit(1);
+    ConsoleOutput.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
   }
 }
 
