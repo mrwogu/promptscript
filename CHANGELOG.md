@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0](https://github.com/mrwogu/promptscript/compare/v1.1.0...v1.2.0) (2026-03-11)
+
+
+### Features
+
+* **formatters:** add Factory AI droids support (.factory/droids/) ([#94](https://github.com/mrwogu/promptscript/issues/94)) ([e7f9292](https://github.com/mrwogu/promptscript/commit/e7f929273254738b2de5334f26136c8374aedc7b))
+
+
+### Bug Fixes
+
+* **cli:** handle skill resource files without PromptScript markers ([#92](https://github.com/mrwogu/promptscript/issues/92)) ([3153498](https://github.com/mrwogu/promptscript/commit/315349865335cc1013b5c60d5c418885bf6467f8))
+
 ## [1.1.0](https://github.com/mrwogu/promptscript/compare/v1.0.0...v1.1.0) (2026-03-11)
 
 
