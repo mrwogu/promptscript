@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePlaygroundStore } from '../store';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 /**
  * Regex pattern for valid environment variable names.
@@ -20,6 +21,18 @@ export function EnvVarsPanel() {
   const [newName, setNewName] = useState('');
   const [newValue, setNewValue] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(modalRef, showEnvVars);
+
+  useEffect(() => {
+    if (!showEnvVars) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowEnvVars(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showEnvVars, setShowEnvVars]);
 
   if (!showEnvVars) return null;
 
@@ -57,11 +70,23 @@ export function EnvVarsPanel() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-ps-surface border border-ps-border rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={() => setShowEnvVars(false)}
+    >
+      <div
+        ref={modalRef}
+        className="bg-ps-surface border border-ps-border rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="envvars-title"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-ps-border">
-          <h2 className="text-lg font-semibold text-white">Environment Variables</h2>
+          <h2 id="envvars-title" className="text-lg font-semibold text-white">
+            Environment Variables
+          </h2>
           <button
             onClick={() => setShowEnvVars(false)}
             className="text-gray-400 hover:text-white p-1"

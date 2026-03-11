@@ -90,11 +90,7 @@
 
 ### VS Code Extension
 
-**Goal:** First-class editing experience in VS Code.
-
-- [ ] **Syntax highlighting** for `.prs` files
-- [ ] **Snippets** for common patterns
-- [ ] **Preview pane** — See compiled output side-by-side
+See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 
 ---
 
@@ -352,7 +348,7 @@ _These features are being evaluated based on community interest. Vote with 👍 
 - [ ] **Conditional compilation** — `@if env.production` blocks
 - [ ] **Monorepo support** — Per-package configurations with shared base
 - [ ] **Import from URL** — `@inherit https://example.com/rules.prs`
-- [ ] **Docker container** — Pre-built image with PromptScript CLI, no Node.js/npm installation required
+- [x] **Docker container** — Pre-built image with PromptScript CLI (see [Docker guide](docs/guides/docker.md))
 
 ---
 

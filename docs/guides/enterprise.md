@@ -5,6 +5,9 @@ description: Deploying PromptScript across your organization
 
 # Enterprise Setup
 
+!!! tip "Need help with enterprise deployment?"
+**Questions?** Open a [GitHub Issue](https://github.com/mrwogu/promptscript/issues) or start a conversation in [GitHub Discussions](https://github.com/mrwogu/promptscript/discussions). We're happy to help teams get set up.
+
 This guide covers deploying PromptScript across an enterprise organization.
 
 ## Architecture Overview

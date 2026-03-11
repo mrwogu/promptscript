@@ -1,4 +1,6 @@
+import { useState, useEffect, useRef } from 'react';
 import { usePlaygroundStore, type FormatterName, type ConventionType } from '../store';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const TARGET_INFO: Record<
   FormatterName,
@@ -191,6 +193,17 @@ const TARGET_INFO: Record<
   },
 };
 
+const POPULAR_TARGETS: FormatterName[] = [
+  'github',
+  'claude',
+  'cursor',
+  'windsurf',
+  'cline',
+  'codex',
+  'gemini',
+  'antigravity',
+];
+
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [
   { value: 'markdown', label: 'Markdown' },
   { value: 'xml', label: 'XML' },
@@ -207,15 +220,48 @@ export function ConfigPanel() {
   const setFormatting = usePlaygroundStore((s) => s.setFormatting);
   const showConfig = usePlaygroundStore((s) => s.showConfig);
   const setShowConfig = usePlaygroundStore((s) => s.setShowConfig);
+  const [showAll, setShowAll] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(modalRef, showConfig);
+
+  useEffect(() => {
+    if (!showConfig) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowConfig(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showConfig, setShowConfig]);
 
   if (!showConfig) return null;
 
+  const allTargets = Object.entries(TARGET_INFO) as [
+    FormatterName,
+    (typeof TARGET_INFO)[FormatterName],
+  ][];
+  const visibleTargets = showAll
+    ? allTargets
+    : allTargets.filter(([target]) => POPULAR_TARGETS.includes(target));
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-ps-surface border border-ps-border rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={() => setShowConfig(false)}
+    >
+      <div
+        ref={modalRef}
+        className="bg-ps-surface border border-ps-border rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="config-title"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-ps-border">
-          <h2 className="text-lg font-semibold text-white">Configuration</h2>
+          <h2 id="config-title" className="text-lg font-semibold text-white">
+            Configuration
+          </h2>
           <button
             onClick={() => setShowConfig(false)}
             className="text-gray-400 hover:text-white p-1"
@@ -296,14 +342,33 @@ export function ConfigPanel() {
 
           {/* Targets Section */}
           <section>
-            <h3 className="text-sm font-medium text-gray-300 mb-3">Targets</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-300">Targets</h3>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setShowAll(false)}
+                  className={`px-2 py-0.5 text-xs rounded ${
+                    !showAll
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  Popular ({POPULAR_TARGETS.length})
+                </button>
+                <button
+                  onClick={() => setShowAll(true)}
+                  className={`px-2 py-0.5 text-xs rounded ${
+                    showAll
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  All ({allTargets.length})
+                </button>
+              </div>
+            </div>
             <div className="space-y-3">
-              {(
-                Object.entries(TARGET_INFO) as [
-                  FormatterName,
-                  (typeof TARGET_INFO)[FormatterName],
-                ][]
-              ).map(([target, info]) => {
+              {visibleTargets.map(([target, info]) => {
                 const settings = config.targets[target] ?? {
                   enabled: false,
                   version: info.versions[0],

@@ -69,17 +69,33 @@ describe('ConfigPanel', () => {
     expect(screen.getByText('Configuration')).toBeInTheDocument();
   });
 
-  it('should display all target options', () => {
+  it('should display popular target options by default', () => {
     usePlaygroundStore.setState({ showConfig: true });
     render(<ConfigPanel />);
 
+    // Popular targets visible by default
     expect(screen.getByText('GitHub Copilot')).toBeInTheDocument();
     expect(screen.getByText('Claude Code')).toBeInTheDocument();
     expect(screen.getByText('Cursor')).toBeInTheDocument();
     expect(screen.getByText('Antigravity')).toBeInTheDocument();
+    expect(screen.getByText('Windsurf')).toBeInTheDocument();
+    expect(screen.getByText('Cline')).toBeInTheDocument();
+    expect(screen.getByText('Gemini CLI')).toBeInTheDocument();
+    expect(screen.getByText('Codex')).toBeInTheDocument();
+
+    // Non-popular targets hidden by default
+    expect(screen.queryByText('Factory AI')).not.toBeInTheDocument();
+  });
+
+  it('should display all target options when All tab is clicked', () => {
+    usePlaygroundStore.setState({ showConfig: true });
+    render(<ConfigPanel />);
+
+    fireEvent.click(screen.getByText(/^All/));
+
     expect(screen.getByText('Factory AI')).toBeInTheDocument();
     expect(screen.getByText('OpenCode')).toBeInTheDocument();
-    expect(screen.getByText('Gemini CLI')).toBeInTheDocument();
+    expect(screen.getByText('Roo Code')).toBeInTheDocument();
   });
 
   it('should display formatting options', () => {

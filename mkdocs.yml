@@ -175,6 +175,8 @@ nav:
       - Multi-File Organization: guides/multi-file.md
       - Enterprise Setup: guides/enterprise.md
       - Migration: guides/migration.md
+      - FAQ: guides/faq.md
+      - Comparison: guides/vs-manual.md
   - API:
       - api-reference/README.md
       - Core: api-reference/core/src/README.md
