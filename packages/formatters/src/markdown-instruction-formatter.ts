@@ -489,6 +489,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     this.addSection(sections, this.postWork(ast, renderer));
     this.addSection(sections, this.documentation(ast, renderer));
     this.addSection(sections, this.diagrams(ast, renderer));
+    this.addSection(sections, this.knowledgeContent(ast, renderer));
     this.addSection(sections, this.restrictions(ast, renderer));
   }
 
@@ -728,6 +729,48 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection('Diagrams', content) + '\n';
+  }
+
+  /**
+   * Render remaining @knowledge text content that isn't consumed by other sections.
+   * Strips "## Development Commands" and "## Post-Work Verification" sub-sections
+   * since those are already rendered by commands() and postWork().
+   */
+  protected knowledgeContent(ast: Program, _renderer: ConventionRenderer): string | null {
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
+
+    const text = this.extractText(knowledge.content);
+    if (!text) return null;
+
+    // Remove sections already consumed by other methods
+    const consumedHeaders = ['## Development Commands', '## Post-Work Verification'];
+    let remaining = text;
+
+    for (const header of consumedHeaders) {
+      const headerIndex = remaining.indexOf(header);
+      if (headerIndex === -1) continue;
+
+      // Find the end of this section (next ## header or end of text)
+      const afterHeader = remaining.indexOf('\n', headerIndex);
+      if (afterHeader === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+        continue;
+      }
+
+      const nextSection = remaining.indexOf('\n## ', afterHeader);
+      if (nextSection === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+      } else {
+        remaining = remaining.substring(0, headerIndex) + remaining.substring(nextSection + 1);
+      }
+    }
+
+    remaining = remaining.trim();
+    if (!remaining) return null;
+
+    const normalizedContent = this.stripAllIndent(remaining);
+    return normalizedContent + '\n';
   }
 
   protected restrictions(ast: Program, renderer: ConventionRenderer): string | null {
