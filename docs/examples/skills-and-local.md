@@ -372,17 +372,17 @@ With `version: full`, formatters generate separate files for skills, agents, and
 
 ## Skill Properties Reference
 
-| Property                 | Type     | GitHub | Claude | Description                              |
-| ------------------------ | -------- | :----: | :----: | ---------------------------------------- |
-| `description`            | string   |  Yes   |  Yes   | Human-readable description               |
-| `content`                | string   |  Yes   |  Yes   | Detailed skill instructions              |
-| `disableModelInvocation` | boolean  |  Yes   |   No   | Prevent model from auto-invoking         |
-| `userInvocable`          | boolean  |   No   |  Yes   | Allow user to manually invoke            |
-| `context`                | string   |   No   |  Yes   | Context mode: `"fork"` or `"inherit"`    |
-| `agent`                  | string   |   No   |  Yes   | Agent type for execution                 |
-| `allowedTools`           | string[] |   No   |  Yes   | Tools the skill can use                  |
-| `steps`                  | string[] |  Yes   |   No   | Workflow steps (generates workflow file) |
-| `prompt`                 | boolean  |  Yes   |   No   | Generate as prompt file instead          |
+| Property                 | Type     | GitHub | Claude | Factory | Description                              |
+| ------------------------ | -------- | :----: | :----: | :-----: | ---------------------------------------- |
+| `description`            | string   |  Yes   |  Yes   |   Yes   | Human-readable description               |
+| `content`                | string   |  Yes   |  Yes   |   Yes   | Detailed skill instructions              |
+| `disableModelInvocation` | boolean  |  Yes   |   No   |   Yes   | Prevent model from auto-invoking         |
+| `userInvocable`          | boolean  |   No   |  Yes   |   Yes   | Allow user to manually invoke            |
+| `context`                | string   |   No   |  Yes   |   No    | Context mode: `"fork"` or `"inherit"`    |
+| `agent`                  | string   |   No   |  Yes   |   No    | Agent type for execution                 |
+| `allowedTools`           | string[] |   No   |  Yes   |   Yes   | Tools the skill can use                  |
+| `steps`                  | string[] |  Yes   |   No   |   No    | Workflow steps (generates workflow file) |
+| `prompt`                 | boolean  |  Yes   |   No   |   No    | Generate as prompt file instead          |
 
 ## Best Practices
 

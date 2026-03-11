@@ -287,6 +287,22 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     lines.push('---');
     lines.push(`name: ${skillName}`);
     lines.push(`description: ${this.yamlString(factoryConfig.description)}`);
+
+    // Only emit non-default values (user-invocable defaults to true)
+    if (factoryConfig.userInvocable === false) {
+      lines.push('user-invocable: false');
+    }
+
+    // Only emit non-default values (disable-model-invocation defaults to false)
+    if (factoryConfig.disableModelInvocation === true) {
+      lines.push('disable-model-invocation: true');
+    }
+
+    if (factoryConfig.allowedTools && factoryConfig.allowedTools.length > 0) {
+      const toolsArray = factoryConfig.allowedTools.map((t) => `"${t}"`).join(', ');
+      lines.push(`allowed-tools: [${toolsArray}]`);
+    }
+
     lines.push('---');
     lines.push('');
 

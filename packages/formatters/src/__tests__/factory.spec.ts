@@ -289,7 +289,12 @@ describe('FactoryFormatter', () => {
       expect(commitSkill?.content).toContain('description: Create git commits');
       expect(commitSkill?.content).not.toContain('user-invocable');
       expect(commitSkill?.content).not.toContain('disable-model-invocation');
+      expect(commitSkill?.content).not.toContain('allowed-tools');
       expect(commitSkill?.content).toContain('Use Conventional Commits format.');
+
+      const reviewSkill = result.additionalFiles?.find((f) => f.path.includes('review'));
+      expect(reviewSkill).toBeDefined();
+      expect(reviewSkill?.content).toContain('allowed-tools: ["Read", "Grep"]');
     });
 
     it('should not generate additional files when no skills', () => {
@@ -707,8 +712,98 @@ describe('FactoryFormatter', () => {
 
       expect(skill?.content).toContain('name: test-skill');
       expect(skill?.content).toContain('description: A test skill');
+      expect(skill?.content).toContain('user-invocable: false');
+      expect(skill?.content).toContain('disable-model-invocation: true');
+    });
+
+    it('should not emit default values for user-invocable and disable-model-invocation', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'default-skill': {
+                  description: 'A skill with defaults',
+                  userInvocable: true,
+                  disableModelInvocation: false,
+                  content: 'Default values.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.[0];
+
+      expect(skill?.content).toContain('name: default-skill');
       expect(skill?.content).not.toContain('user-invocable');
       expect(skill?.content).not.toContain('disable-model-invocation');
+    });
+
+    it('should emit allowed-tools in YAML frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'tooled-skill': {
+                  description: 'A skill with tools',
+                  allowedTools: ['Read', 'Grep', 'Glob'],
+                  content: 'Skill with tools.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.[0];
+
+      expect(skill?.content).toContain('allowed-tools: ["Read", "Grep", "Glob"]');
+    });
+
+    it('should not emit allowed-tools when empty', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'no-tools-skill': {
+                  description: 'A skill without tools',
+                  allowedTools: [],
+                  content: 'No tools.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.[0];
+
+      expect(skill?.content).not.toContain('allowed-tools');
     });
 
     it('should use double quotes for descriptions containing apostrophes', () => {
