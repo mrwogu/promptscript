@@ -215,7 +215,8 @@ userInvocable, allowedTools, context ("fork" or "inherit"), agent.
 
 ### @agents
 
-Custom subagent definitions:
+Custom subagent definitions. Compiles to `.claude/agents/` for Claude Code,
+`.github/agents/` for GitHub Copilot, `.factory/droids/` for Factory AI, etc.
 
 ```
 @agents {
@@ -228,6 +229,10 @@ Custom subagent definitions:
   }
 }
 ```
+
+Factory AI droids support additional properties: `model` (any model ID or "inherit"),
+`reasoningEffort` ("low", "medium", "high"), and `tools` (category name like "read-only"
+or array of tool IDs).
 
 ### @knowledge
 
@@ -331,21 +336,21 @@ prs diff --target claude    # Show compilation diff
 
 38 supported targets. Key examples:
 
-| Target      | Main File                       | Skills                         |
-| ----------- | ------------------------------- | ------------------------------ |
-| GitHub      | .github/copilot-instructions.md | .github/skills/\*/SKILL.md     |
-| Claude      | CLAUDE.md                       | .claude/skills/\*/SKILL.md     |
-| Cursor      | .cursor/rules/project.mdc       | .cursor/commands/\*.md         |
-| Antigravity | .agent/rules/project.md         | .agent/rules/\*.md             |
-| Factory     | AGENTS.md                       | .factory/skills/\*/SKILL.md    |
-| OpenCode    | OPENCODE.md                     | .opencode/skills/\*/SKILL.md   |
-| Gemini      | GEMINI.md                       | .gemini/skills/\*/skill.md     |
-| Windsurf    | .windsurf/rules/project.md      | .windsurf/skills/\*/SKILL.md   |
-| Cline       | .clinerules                     | .agents/skills/\*/SKILL.md     |
-| Roo Code    | .roorules                       | .roo/skills/\*/SKILL.md        |
-| Codex       | AGENTS.md                       | .agents/skills/\*/SKILL.md     |
-| Continue    | .continue/rules/project.md      | .continue/skills/\*/SKILL.md   |
-| + 26 more   |                                 | See full list in documentation |
+| Target      | Main File                       | Skills                                             |
+| ----------- | ------------------------------- | -------------------------------------------------- |
+| GitHub      | .github/copilot-instructions.md | .github/skills/\*/SKILL.md                         |
+| Claude      | CLAUDE.md                       | .claude/skills/\*/SKILL.md                         |
+| Cursor      | .cursor/rules/project.mdc       | .cursor/commands/\*.md                             |
+| Antigravity | .agent/rules/project.md         | .agent/rules/\*.md                                 |
+| Factory     | AGENTS.md                       | .factory/skills/\*/SKILL.md, .factory/droids/\*.md |
+| OpenCode    | OPENCODE.md                     | .opencode/skills/\*/SKILL.md                       |
+| Gemini      | GEMINI.md                       | .gemini/skills/\*/skill.md                         |
+| Windsurf    | .windsurf/rules/project.md      | .windsurf/skills/\*/SKILL.md                       |
+| Cline       | .clinerules                     | .agents/skills/\*/SKILL.md                         |
+| Roo Code    | .roorules                       | .roo/skills/\*/SKILL.md                            |
+| Codex       | AGENTS.md                       | .agents/skills/\*/SKILL.md                         |
+| Continue    | .continue/rules/project.md      | .continue/skills/\*/SKILL.md                       |
+| + 26 more   |                                 | See full list in documentation                     |
 
 ## Project Organization
 
