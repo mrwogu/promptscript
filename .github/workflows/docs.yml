@@ -19,12 +19,11 @@ permissions:
   id-token: write
 
 concurrency:
-  # Separate groups for tag vs dev deployments to prevent tag deploys from being
-  # cancelled when release-please pushes main + tag simultaneously.
-  # Tag deploys (releases) get their own group so they always run.
-  # Main/dispatch deploys share a group — newer dev deploys cancel stale ones.
-  group: ${{ startsWith(github.ref, 'refs/tags/v') && format('pages-release-{0}', github.ref) || 'pages-dev' }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+  # Separate groups for versioned vs dev deployments to prevent version deploys
+  # from being cancelled. Versioned deploys (tag push or dispatch with v* input)
+  # each get a unique group. Dev deploys share a group with cancel-in-progress.
+  group: ${{ (startsWith(github.ref, 'refs/tags/v') && format('pages-release-{0}', github.ref)) || (github.event.inputs.version != '' && github.event.inputs.version != 'dev' && format('pages-release-{0}', github.event.inputs.version)) || 'pages-dev' }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') && (github.event.inputs.version == '' || github.event.inputs.version == 'dev') }}
 
 jobs:
   build:
