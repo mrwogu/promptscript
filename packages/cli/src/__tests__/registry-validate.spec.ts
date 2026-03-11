@@ -24,10 +24,6 @@ vi.mock('chalk', () => ({
   },
 }));
 
-const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
-  throw new Error('process.exit called');
-});
-
 describe('commands/registry/validate', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
   let mockServices: CliServices;
@@ -61,6 +57,7 @@ catalog:
 
   beforeEach(() => {
     vi.clearAllMocks();
+    process.exitCode = undefined;
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     mockFs = {
@@ -80,22 +77,21 @@ catalog:
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    process.exitCode = undefined;
   });
 
   it('should succeed for valid registry', async () => {
     await registryValidateCommand('.', { format: 'text' }, mockServices);
 
-    expect(mockExit).not.toHaveBeenCalled();
+    expect(process.exitCode).toBeUndefined();
   });
 
   it('should exit with code 1 for invalid registry', async () => {
     mockFs.existsSync.mockReturnValue(false);
 
-    await expect(registryValidateCommand('.', { format: 'text' }, mockServices)).rejects.toThrow(
-      'process.exit called'
-    );
+    await registryValidateCommand('.', { format: 'text' }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 
   it('should output JSON when format is json', async () => {
@@ -108,30 +104,24 @@ catalog:
     // Add an orphaned file to trigger a warning
     mockFs.readdir.mockResolvedValue(['base.prs', 'orphan.prs']);
 
-    await expect(
-      registryValidateCommand('.', { strict: true, format: 'text' }, mockServices)
-    ).rejects.toThrow('process.exit called');
+    await registryValidateCommand('.', { strict: true, format: 'text' }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 
   it('should exit with code 1 in strict mode with warnings in JSON format', async () => {
     mockFs.readdir.mockResolvedValue(['base.prs', 'orphan.prs']);
 
-    await expect(
-      registryValidateCommand('.', { strict: true, format: 'json' }, mockServices)
-    ).rejects.toThrow('process.exit called');
+    await registryValidateCommand('.', { strict: true, format: 'json' }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 
   it('should handle unexpected validation errors', async () => {
     mockFs.readFile.mockRejectedValue(new Error('disk failure'));
 
-    await expect(registryValidateCommand('.', { format: 'text' }, mockServices)).rejects.toThrow(
-      'process.exit called'
-    );
+    await registryValidateCommand('.', { format: 'text' }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 });

@@ -12,13 +12,47 @@
  * Formatter names that are subject to parity testing.
  */
 export type FormatterName =
+  // Original 7
   | 'github'
   | 'cursor'
   | 'claude'
   | 'antigravity'
   | 'factory'
   | 'opencode'
-  | 'gemini';
+  | 'gemini'
+  // Tier 1
+  | 'windsurf'
+  | 'cline'
+  | 'roo'
+  | 'codex'
+  | 'continue'
+  // Tier 2
+  | 'augment'
+  | 'goose'
+  | 'kilo'
+  | 'amp'
+  | 'trae'
+  | 'junie'
+  | 'kiro'
+  // Tier 3
+  | 'cortex'
+  | 'crush'
+  | 'command-code'
+  | 'kode'
+  | 'mcpjam'
+  | 'mistral-vibe'
+  | 'mux'
+  | 'openhands'
+  | 'pi'
+  | 'qoder'
+  | 'qwen-code'
+  | 'zencoder'
+  | 'neovate'
+  | 'pochi'
+  | 'adal'
+  | 'iflow'
+  | 'openclaw'
+  | 'codebuddy';
 
 /**
  * Source block configuration for section extraction.
@@ -51,7 +85,7 @@ export interface SectionSpec {
   /** Expected content patterns (regex) to validate output */
   contentPatterns?: RegExp[];
   /** Section header variations across formatters */
-  headerVariations: Record<FormatterName, string | string[]>;
+  headerVariations: Partial<Record<FormatterName, string | string[]>>;
 }
 
 /**

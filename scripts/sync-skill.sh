@@ -7,11 +7,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SOURCE="$ROOT/SKILL.md"
+SOURCE="$ROOT/skills/promptscript/SKILL.md"
 
 DESTINATIONS=(
   "$ROOT/packages/cli/skills/promptscript/SKILL.md"
   "$ROOT/.promptscript/skills/promptscript/SKILL.md"
+  "$ROOT/.claude/skills/promptscript/SKILL.md"
 )
 
 if [ ! -f "$SOURCE" ]; then

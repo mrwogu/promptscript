@@ -1,5 +1,5 @@
 import type { ValidationRule } from '../types.js';
-import { walkText } from '../walker.js';
+import { walkText, offsetLocation } from '../walker.js';
 
 /**
  * Bidirectional text control characters that can be used to reverse
@@ -116,37 +116,67 @@ const GREEK_LOOKALIKES: Map<string, string> = new Map([
 const EXCESSIVE_COMBINING_PATTERN = /[\u0300-\u036F\u0483-\u0489\u0591-\u05BD\u064B-\u065F]{4,}/;
 
 /**
- * Latin character ranges for script mixing detection.
+ * Latin character pattern.
  */
-const LATIN_PATTERN = /[a-zA-Z]/;
+const LATIN_CHAR = /[a-zA-Z]/;
 
 /**
- * Check if text contains a mix of Latin with Cyrillic/Greek lookalikes.
- * This is a sign of a homograph attack.
+ * Cyrillic character pattern (full range, not just lookalikes).
+ */
+const CYRILLIC_CHAR = /[\u0400-\u04FF]/;
+
+/**
+ * Greek character pattern (full range, not just lookalikes).
+ */
+const GREEK_CHAR = /[\u0370-\u03FF]/;
+
+/**
+ * Word boundary-aware pattern to extract "words" (sequences of letters).
+ * Matches sequences of Latin, Cyrillic, and/or Greek characters.
+ */
+const WORD_PATTERN = /[a-zA-Z\u0370-\u03FF\u0400-\u04FF]+/g;
+
+/**
+ * Check if a single word mixes Latin with Cyrillic/Greek lookalike characters.
+ * This is the signature of a homograph attack - individual characters from
+ * one script substituted into a word of another script.
+ *
+ * Pure Latin words, pure Cyrillic words, and pure Greek words are NOT flagged.
+ * Only words that mix scripts are suspicious.
  */
 function findHomographAttacks(
   text: string
 ): Array<{ char: string; description: string; index: number }> {
   const results: Array<{ char: string; description: string; index: number }> = [];
 
-  // First check if the text contains Latin characters
-  const hasLatin = LATIN_PATTERN.test(text);
-  if (!hasLatin) {
-    // Pure non-Latin text is fine (e.g., Russian, Greek documents)
-    return results;
-  }
+  let wordMatch: RegExpExecArray | null;
+  const wordPattern = new RegExp(WORD_PATTERN.source, WORD_PATTERN.flags);
 
-  // Check for Cyrillic lookalikes mixed with Latin
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i]!;
-    const cyrillicDesc = CYRILLIC_LOOKALIKES.get(char);
-    if (cyrillicDesc) {
-      results.push({ char, description: cyrillicDesc, index: i });
-    }
+  while ((wordMatch = wordPattern.exec(text)) !== null) {
+    const word = wordMatch[0];
+    const wordStart = wordMatch.index;
 
-    const greekDesc = GREEK_LOOKALIKES.get(char);
-    if (greekDesc) {
-      results.push({ char, description: greekDesc, index: i });
+    // Check if this word mixes scripts
+    const hasLatin = LATIN_CHAR.test(word);
+    const hasCyrillic = CYRILLIC_CHAR.test(word);
+    const hasGreek = GREEK_CHAR.test(word);
+
+    // Only flag words that actually mix scripts
+    if (!hasLatin) continue;
+    if (!hasCyrillic && !hasGreek) continue;
+
+    // Found a mixed-script word - report the lookalike characters
+    for (let i = 0; i < word.length; i++) {
+      const char = word[i]!;
+      const cyrillicDesc = CYRILLIC_LOOKALIKES.get(char);
+      if (cyrillicDesc) {
+        results.push({ char, description: cyrillicDesc, index: wordStart + i });
+      }
+
+      const greekDesc = GREEK_LOOKALIKES.get(char);
+      if (greekDesc) {
+        results.push({ char, description: greekDesc, index: wordStart + i });
+      }
     }
   }
 
@@ -209,67 +239,70 @@ export const unicodeSecurity: ValidationRule = {
   description: 'Detect Unicode-based attacks (bidi overrides, zero-width, homoglyphs)',
   defaultSeverity: 'error',
   validate: (ctx) => {
-    walkText(ctx.ast, (text, loc) => {
-      // Check for bidirectional control characters
-      const bidiChars = findBidiChars(text);
-      if (bidiChars.length > 0) {
-        const descriptions = bidiChars
-          .slice(0, 3) // Limit to first 3 to avoid message explosion
-          .map((b) => b.description)
-          .join(', ');
-        const suffix = bidiChars.length > 3 ? ` and ${bidiChars.length - 3} more` : '';
-        ctx.report({
-          message: `Bidirectional text override detected: ${descriptions}${suffix}`,
-          location: loc,
-          suggestion: 'Remove bidirectional override characters that may hide malicious content',
-        });
-      }
+    // Exclude skill resource files (bundled source code, not prompt instructions).
+    walkText(
+      ctx.ast,
+      (text, loc) => {
+        // Check for bidirectional control characters
+        const bidiChars = findBidiChars(text);
+        if (bidiChars.length > 0) {
+          const descriptions = bidiChars
+            .slice(0, 3) // Limit to first 3 to avoid message explosion
+            .map((b) => b.description)
+            .join(', ');
+          const suffix = bidiChars.length > 3 ? ` and ${bidiChars.length - 3} more` : '';
+          ctx.report({
+            message: `Bidirectional text override detected: ${descriptions}${suffix}`,
+            location: offsetLocation(loc, text, bidiChars[0]!.index),
+            suggestion: 'Remove bidirectional override characters that may hide malicious content',
+          });
+        }
 
-      // Check for zero-width characters
-      const zeroWidthChars = findZeroWidthChars(text);
-      if (zeroWidthChars.length > 0) {
-        const descriptions = zeroWidthChars
-          .slice(0, 3)
-          .map((z) => z.description)
-          .join(', ');
-        const suffix = zeroWidthChars.length > 3 ? ` and ${zeroWidthChars.length - 3} more` : '';
-        ctx.report({
-          message: `Zero-width characters detected: ${descriptions}${suffix}`,
-          location: loc,
-          suggestion: 'Remove zero-width characters that may be used to evade pattern matching',
-        });
-      }
+        // Check for zero-width characters
+        const zeroWidthChars = findZeroWidthChars(text);
+        if (zeroWidthChars.length > 0) {
+          const descriptions = zeroWidthChars
+            .slice(0, 3)
+            .map((z) => z.description)
+            .join(', ');
+          const suffix = zeroWidthChars.length > 3 ? ` and ${zeroWidthChars.length - 3} more` : '';
+          ctx.report({
+            message: `Zero-width characters detected: ${descriptions}${suffix}`,
+            location: offsetLocation(loc, text, zeroWidthChars[0]!.index),
+            suggestion: 'Remove zero-width characters that may be used to evade pattern matching',
+          });
+        }
 
-      // Check for homograph attacks (mixed scripts with lookalikes)
-      const homographs = findHomographAttacks(text);
-      if (homographs.length > 0) {
-        const descriptions = homographs
-          .slice(0, 3)
-          .map((h) => h.description)
-          .join(', ');
-        const suffix = homographs.length > 3 ? ` and ${homographs.length - 3} more` : '';
-        ctx.report({
-          message: `Potential homograph attack: ${descriptions}${suffix}`,
-          location: loc,
-          suggestion: 'Replace lookalike Cyrillic/Greek characters with Latin equivalents',
-        });
-      }
+        // Check for homograph attacks (mixed scripts within words)
+        const homographs = findHomographAttacks(text);
+        if (homographs.length > 0) {
+          const descriptions = homographs
+            .slice(0, 3)
+            .map((h) => h.description)
+            .join(', ');
+          const suffix = homographs.length > 3 ? ` and ${homographs.length - 3} more` : '';
+          ctx.report({
+            message: `Potential homograph attack: ${descriptions}${suffix}`,
+            location: offsetLocation(loc, text, homographs[0]!.index),
+            suggestion: 'Replace lookalike Cyrillic/Greek characters with Latin equivalents',
+          });
+        }
 
-      // Check for excessive combining characters (Zalgo text)
-      if (EXCESSIVE_COMBINING_PATTERN.test(text)) {
-        const match = text.match(EXCESSIVE_COMBINING_PATTERN);
-        const charCodes = match
-          ? Array.from(match[0])
-              .slice(0, 4)
-              .map((c) => `U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`)
-              .join(', ')
-          : 'unknown';
-        ctx.report({
-          message: `Excessive combining characters (Zalgo text) detected: ${charCodes}...`,
-          location: loc,
-          suggestion: 'Remove excessive diacritical marks that may be used to obscure content',
-        });
-      }
-    });
+        // Check for excessive combining characters (Zalgo text)
+        const combiningMatch = EXCESSIVE_COMBINING_PATTERN.exec(text);
+        if (combiningMatch) {
+          const charCodes = Array.from(combiningMatch[0])
+            .slice(0, 4)
+            .map((c) => `U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`)
+            .join(', ');
+          ctx.report({
+            message: `Excessive combining characters (Zalgo text) detected: ${charCodes}...`,
+            location: offsetLocation(loc, text, combiningMatch.index),
+            suggestion: 'Remove excessive diacritical marks that may be used to obscure content',
+          });
+        }
+      },
+      { excludeProperties: ['resources'] }
+    );
   },
 };

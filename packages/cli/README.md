@@ -15,7 +15,7 @@ Write AI instructions once in PromptScript, compile to GitHub Copilot, Claude Co
 Every AI coding tool uses a different config format. As your organization grows, so does the chaos:
 
 ```
-50 repos x 7 AI tools = 350 files to maintain
+50 repos x 37 AI agents = 1850 files to maintain
 
 repo-1/CLAUDE.md          repo-1/.cursorrules      repo-1/.github/copilot-instructions.md
 repo-2/CLAUDE.md          repo-2/.cursorrules      repo-2/.github/copilot-instructions.md

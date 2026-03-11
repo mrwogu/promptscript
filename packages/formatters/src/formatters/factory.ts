@@ -1,6 +1,7 @@
 import type { Program, Value } from '@promptscript/core';
 import {
   MarkdownInstructionFormatter,
+  type MarkdownAgentConfig,
   type MarkdownCommandConfig,
   type MarkdownSkillConfig,
 } from '../markdown-instruction-formatter.js';
@@ -27,7 +28,7 @@ export const FACTORY_VERSIONS = {
   },
   full: {
     name: 'full',
-    description: 'Multifile + additional skill supporting files',
+    description: 'Multifile + droids + additional supporting files',
     outputPath: 'AGENTS.md',
   },
 } as const;
@@ -71,7 +72,28 @@ interface FactorySkillConfig extends MarkdownSkillConfig {
 }
 
 /**
- * Formatter for Factory AI (droid) instructions.
+ * Valid reasoning effort levels for Factory AI droids.
+ */
+type FactoryReasoningEffort = 'low' | 'medium' | 'high';
+
+/**
+ * Configuration for a Factory AI droid (subagent).
+ */
+interface FactoryDroidConfig extends MarkdownAgentConfig {
+  /** Model to use (e.g., 'inherit', 'claude-sonnet-4-5-20250929') */
+  model?: string;
+  /** Reasoning effort level */
+  reasoningEffort?: FactoryReasoningEffort;
+  /** Model for Specification Mode planning (mixed models) */
+  specModel?: string;
+  /** Reasoning effort for Specification Mode model */
+  specReasoningEffort?: FactoryReasoningEffort;
+  /** Tool access: category name or array of tool IDs */
+  tools?: string | string[];
+}
+
+/**
+ * Formatter for Factory AI instructions.
  *
  * Factory AI uses AGENTS.md as its main configuration file and
  * .factory/skills/<name>/SKILL.md for reusable skills.
@@ -103,7 +125,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       mainFileHeader: '# AGENTS.md',
       dotDir: '.factory',
       skillFileName: 'SKILL.md',
-      hasAgents: false,
+      hasAgents: true,
       hasCommands: true,
       hasSkills: true,
       skillsInMultifile: true,
@@ -282,6 +304,109 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       content: lines.join('\n') + '\n',
       additionalFiles: resourceFiles.length > 0 ? resourceFiles : undefined,
     };
+  }
+
+  // ============================================================
+  // Droid File Generation (Factory-specific)
+  // ============================================================
+
+  protected override extractAgents(ast: Program): FactoryDroidConfig[] {
+    const agentsBlock = this.findBlock(ast, 'agents');
+    if (!agentsBlock) return [];
+
+    const droids: FactoryDroidConfig[] = [];
+    const props = this.getProps(agentsBlock.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        const description = obj['description'] ? this.valueToString(obj['description']) : '';
+        if (!description) continue; // description is required
+
+        droids.push({
+          name: name.replace(/\./g, '-'),
+          description,
+          content: obj['content'] ? this.valueToString(obj['content']) : '',
+          model: obj['model'] ? this.valueToString(obj['model']) : undefined,
+          reasoningEffort: this.parseReasoningEffort(obj['reasoningEffort']),
+          specModel: obj['specModel'] ? this.valueToString(obj['specModel']) : undefined,
+          specReasoningEffort: this.parseReasoningEffort(obj['specReasoningEffort']),
+          tools: this.parseDroidTools(obj['tools']),
+        });
+      }
+    }
+
+    return droids;
+  }
+
+  protected override generateAgentFile(config: MarkdownAgentConfig): FormatterOutput {
+    const droidConfig = config as FactoryDroidConfig;
+    const lines: string[] = [];
+
+    // YAML frontmatter
+    lines.push('---');
+    lines.push(`name: ${droidConfig.name}`);
+
+    if (droidConfig.description) {
+      lines.push(`description: ${this.yamlString(droidConfig.description)}`);
+    }
+
+    if (droidConfig.model) {
+      lines.push(`model: ${droidConfig.model}`);
+    }
+
+    if (droidConfig.reasoningEffort) {
+      lines.push(`reasoningEffort: ${droidConfig.reasoningEffort}`);
+    }
+
+    if (droidConfig.specModel) {
+      lines.push(`specModel: ${droidConfig.specModel}`);
+    }
+
+    if (droidConfig.specReasoningEffort) {
+      lines.push(`specReasoningEffort: ${droidConfig.specReasoningEffort}`);
+    }
+
+    if (droidConfig.tools) {
+      if (typeof droidConfig.tools === 'string') {
+        lines.push(`tools: ${droidConfig.tools}`);
+      } else if (Array.isArray(droidConfig.tools) && droidConfig.tools.length > 0) {
+        const toolsArray = droidConfig.tools.map((t) => `"${t}"`).join(', ');
+        lines.push(`tools: [${toolsArray}]`);
+      }
+    }
+
+    lines.push('---');
+    lines.push('');
+
+    if (droidConfig.content) {
+      const dedentedContent = this.dedent(droidConfig.content);
+      lines.push(dedentedContent);
+    }
+
+    return {
+      path: `.factory/droids/${droidConfig.name}.md`,
+      content: lines.join('\n') + '\n',
+    };
+  }
+
+  private parseReasoningEffort(value: Value | undefined): FactoryReasoningEffort | undefined {
+    if (!value) return undefined;
+    const str = this.valueToString(value);
+    const valid: FactoryReasoningEffort[] = ['low', 'medium', 'high'];
+    return valid.includes(str as FactoryReasoningEffort)
+      ? (str as FactoryReasoningEffort)
+      : undefined;
+  }
+
+  private parseDroidTools(value: Value | undefined): string | string[] | undefined {
+    if (!value) return undefined;
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) {
+      const arr = value.map((v) => this.valueToString(v)).filter((s) => s.length > 0);
+      return arr.length > 0 ? arr : undefined;
+    }
+    return this.valueToString(value);
   }
 
   // ============================================================

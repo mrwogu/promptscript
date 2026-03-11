@@ -227,14 +227,16 @@ export async function initCommand(
       }
     }
   } catch (error) {
-    if ((error as Error).name === 'ExitPromptError') {
+    if (error instanceof Error && error.name === 'ExitPromptError') {
       // User cancelled with Ctrl+C
       ConsoleOutput.newline();
       ConsoleOutput.muted('Initialization cancelled');
       return;
     }
-    ConsoleOutput.error(`Initialization failed: ${(error as Error).message}`);
-    process.exit(1);
+    ConsoleOutput.error(
+      `Initialization failed: ${error instanceof Error ? error.message : String(error)}`
+    );
+    process.exitCode = 1;
   }
 }
 

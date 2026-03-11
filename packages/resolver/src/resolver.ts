@@ -258,7 +258,9 @@ export class Resolver {
               this.logger.debug(`Interpolated ${params.size} parameter(s)`);
             }
           } catch (err) {
-            errors.push(new ResolveError((err as Error).message, ast.inherit.loc));
+            errors.push(
+              new ResolveError(err instanceof Error ? err.message : String(err), ast.inherit.loc)
+            );
             return ast;
           }
         }
@@ -270,7 +272,11 @@ export class Resolver {
       if (err instanceof CircularDependencyError) {
         throw err;
       }
-      errors.push(new ResolveError(`Failed to resolve parent: ${(err as Error).message}`));
+      errors.push(
+        new ResolveError(
+          `Failed to resolve parent: ${err instanceof Error ? err.message : String(err)}`
+        )
+      );
     }
 
     return ast;
@@ -311,7 +317,9 @@ export class Resolver {
                 this.logger.debug(`Interpolated ${params.size} parameter(s)`);
               }
             } catch (err) {
-              errors.push(new ResolveError((err as Error).message, use.loc));
+              errors.push(
+                new ResolveError(err instanceof Error ? err.message : String(err), use.loc)
+              );
               continue;
             }
           }
@@ -323,7 +331,11 @@ export class Resolver {
         if (err instanceof CircularDependencyError) {
           throw err;
         }
-        errors.push(new ResolveError(`Failed to resolve import: ${(err as Error).message}`));
+        errors.push(
+          new ResolveError(
+            `Failed to resolve import: ${err instanceof Error ? err.message : String(err)}`
+          )
+        );
       }
     }
 

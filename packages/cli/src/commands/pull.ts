@@ -47,7 +47,8 @@ export async function pullCommand(options: PullOptions): Promise<void> {
       spinner.fail('Inheritance source not found');
       ConsoleOutput.error(`Not found in registry: ${config.inherit}`);
       ConsoleOutput.muted('Make sure the registry is configured correctly and the file exists');
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     // Fetch the file content
@@ -84,7 +85,7 @@ export async function pullCommand(options: PullOptions): Promise<void> {
     ConsoleOutput.success(destPath);
   } catch (error) {
     handlePullError(error, spinner);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
@@ -212,5 +213,5 @@ function handlePullError(error: unknown, spinner: ReturnType<typeof createSpinne
 
   // Generic error
   spinner.fail('Error');
-  ConsoleOutput.error((error as Error).message);
+  ConsoleOutput.error(error instanceof Error ? error.message : String(error));
 }

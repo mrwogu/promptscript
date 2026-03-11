@@ -24,18 +24,31 @@ export type BlockCallback = (block: Block | ExtendBlock) => void;
 export type UseCallback = (use: UseDeclaration) => void;
 
 /**
+ * Options for walkText.
+ */
+export interface WalkTextOptions {
+  /**
+   * Property names to exclude from walking.
+   * Useful for skipping non-instructional content like skill resource files.
+   */
+  excludeProperties?: string[];
+}
+
+/**
  * Walk all text content in the AST.
  * Visits text in blocks, extend blocks, and nested content.
  */
-export function walkText(ast: Program, callback: TextCallback): void {
+export function walkText(ast: Program, callback: TextCallback, options?: WalkTextOptions): void {
+  const exclude = options?.excludeProperties ? new Set(options.excludeProperties) : undefined;
+
   // Walk blocks
   for (const block of ast.blocks) {
-    walkBlockContent(block.content, block.loc, callback);
+    walkBlockContent(block.content, block.loc, callback, exclude);
   }
 
   // Walk extend blocks
   for (const ext of ast.extends) {
-    walkBlockContent(ext.content, ext.loc, callback);
+    walkBlockContent(ext.content, ext.loc, callback, exclude);
   }
 }
 
@@ -66,23 +79,24 @@ export function walkUses(ast: Program, callback: UseCallback): void {
 function walkBlockContent(
   content: BlockContent,
   fallbackLoc: SourceLocation,
-  callback: TextCallback
+  callback: TextCallback,
+  exclude?: Set<string>
 ): void {
   switch (content.type) {
     case 'TextContent':
       callback(content.value, content.loc ?? fallbackLoc);
       break;
     case 'ObjectContent':
-      walkObjectProperties(content.properties, content.loc ?? fallbackLoc, callback);
+      walkObjectProperties(content.properties, content.loc ?? fallbackLoc, callback, exclude);
       break;
     case 'ArrayContent':
-      walkArrayElements(content.elements, content.loc ?? fallbackLoc, callback);
+      walkArrayElements(content.elements, content.loc ?? fallbackLoc, callback, exclude);
       break;
     case 'MixedContent':
       if (content.text) {
         callback(content.text.value, content.text.loc ?? fallbackLoc);
       }
-      walkObjectProperties(content.properties, content.loc ?? fallbackLoc, callback);
+      walkObjectProperties(content.properties, content.loc ?? fallbackLoc, callback, exclude);
       break;
   }
 }
@@ -93,30 +107,42 @@ function walkBlockContent(
 function walkObjectProperties(
   properties: Record<string, Value>,
   loc: SourceLocation,
-  callback: TextCallback
+  callback: TextCallback,
+  exclude?: Set<string>
 ): void {
-  for (const value of Object.values(properties)) {
-    walkValue(value, loc, callback);
+  for (const [key, value] of Object.entries(properties)) {
+    if (exclude?.has(key)) continue;
+    walkValue(value, loc, callback, exclude);
   }
 }
 
 /**
  * Walk array elements looking for text content.
  */
-function walkArrayElements(elements: Value[], loc: SourceLocation, callback: TextCallback): void {
+function walkArrayElements(
+  elements: Value[],
+  loc: SourceLocation,
+  callback: TextCallback,
+  exclude?: Set<string>
+): void {
   for (const element of elements) {
-    walkValue(element, loc, callback);
+    walkValue(element, loc, callback, exclude);
   }
 }
 
 /**
  * Walk a value looking for text content.
  */
-function walkValue(value: Value, loc: SourceLocation, callback: TextCallback): void {
+function walkValue(
+  value: Value,
+  loc: SourceLocation,
+  callback: TextCallback,
+  exclude?: Set<string>
+): void {
   if (typeof value === 'string') {
     callback(value, loc);
   } else if (Array.isArray(value)) {
-    walkArrayElements(value, loc, callback);
+    walkArrayElements(value, loc, callback, exclude);
   } else if (value !== null && typeof value === 'object') {
     // Check if it's a TextContent node
     if ('type' in value) {
@@ -126,9 +152,39 @@ function walkValue(value: Value, loc: SourceLocation, callback: TextCallback): v
       }
     } else {
       // Regular object - walk its properties
-      walkObjectProperties(value as Record<string, Value>, loc, callback);
+      walkObjectProperties(value as Record<string, Value>, loc, callback, exclude);
     }
   }
+}
+
+/**
+ * Compute the actual source location of a character offset within a text block.
+ * Given the text block's starting location and a character index within the text,
+ * returns the adjusted SourceLocation pointing to the exact line and column.
+ */
+export function offsetLocation(
+  baseLoc: SourceLocation,
+  text: string,
+  charIndex: number
+): SourceLocation {
+  let line = baseLoc.line;
+  let column = baseLoc.column;
+
+  for (let i = 0; i < charIndex && i < text.length; i++) {
+    if (text[i] === '\n') {
+      line++;
+      column = 1;
+    } else {
+      column++;
+    }
+  }
+
+  return {
+    file: baseLoc.file,
+    line,
+    column,
+    offset: baseLoc.offset !== undefined ? baseLoc.offset + charIndex : undefined,
+  };
 }
 
 /**

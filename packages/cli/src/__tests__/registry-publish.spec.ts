@@ -29,10 +29,6 @@ vi.mock('chalk', () => ({
   },
 }));
 
-const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
-  throw new Error('process.exit called');
-});
-
 import { execFileSync } from 'child_process';
 
 const mockExecFileSync = vi.mocked(execFileSync);
@@ -69,6 +65,7 @@ catalog:
 
   beforeEach(() => {
     vi.clearAllMocks();
+    process.exitCode = undefined;
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     mockFs = {
@@ -124,11 +121,9 @@ catalog:
       return false;
     });
 
-    await expect(registryPublishCommand('.', {}, mockServices)).rejects.toThrow(
-      'process.exit called'
-    );
+    await registryPublishCommand('.', {}, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 
   it('should update lastUpdated in manifest', async () => {
@@ -165,11 +160,9 @@ catalog:
       return '' as unknown as ReturnType<typeof execFileSync>;
     });
 
-    await expect(registryPublishCommand('.', { force: true }, mockServices)).rejects.toThrow(
-      'process.exit called'
-    );
+    await registryPublishCommand('.', { force: true }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 
   it('should succeed with full git publish flow', async () => {
@@ -203,7 +196,7 @@ catalog:
     await registryPublishCommand('.', { force: true }, mockServices);
 
     // Should not exit with error - just warn
-    expect(mockExit).not.toHaveBeenCalled();
+    expect(process.exitCode).toBeUndefined();
   });
 
   it('should fail when push fails', async () => {
@@ -214,11 +207,9 @@ catalog:
       return '' as unknown as ReturnType<typeof execFileSync>;
     });
 
-    await expect(registryPublishCommand('.', { force: true }, mockServices)).rejects.toThrow(
-      'process.exit called'
-    );
+    await registryPublishCommand('.', { force: true }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 
   it('should create and push tag when --tag is provided', async () => {
@@ -251,10 +242,8 @@ catalog:
       throw new Error('filesystem error');
     });
 
-    await expect(registryPublishCommand('.', { force: true }, mockServices)).rejects.toThrow(
-      'process.exit called'
-    );
+    await registryPublishCommand('.', { force: true }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 });

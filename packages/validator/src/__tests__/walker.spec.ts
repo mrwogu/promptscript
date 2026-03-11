@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
-import { walkText, walkBlocks, walkUses, hasContent } from '../walker.js';
+import { walkText, walkBlocks, walkUses, hasContent, offsetLocation } from '../walker.js';
 
 /**
  * Create a minimal test AST.
@@ -370,5 +370,57 @@ describe('walker', () => {
         })
       ).toBe(false);
     });
+  });
+});
+
+describe('offsetLocation', () => {
+  it('should return base location for index 0', () => {
+    const base: SourceLocation = { file: 'test.prs', line: 10, column: 5 };
+    const result = offsetLocation(base, 'hello', 0);
+
+    expect(result.line).toBe(10);
+    expect(result.column).toBe(5);
+    expect(result.file).toBe('test.prs');
+  });
+
+  it('should advance column for same-line offset', () => {
+    const base: SourceLocation = { file: 'test.prs', line: 10, column: 5 };
+    const result = offsetLocation(base, 'hello world', 6);
+
+    expect(result.line).toBe(10);
+    expect(result.column).toBe(11); // 5 + 6
+  });
+
+  it('should advance line on newlines', () => {
+    const base: SourceLocation = { file: 'test.prs', line: 10, column: 5 };
+    const result = offsetLocation(base, 'line1\nline2\nline3', 12);
+
+    expect(result.line).toBe(12); // 10 + 2 newlines
+    expect(result.column).toBe(1 + (12 - 'line1\nline2\n'.length)); // column within line3
+  });
+
+  it('should reset column after newline', () => {
+    const base: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    // 'abc\ndef' → process indices 0-4 to reach index 5
+    // a→col2, b→col3, c→col4, \n→line2/col1, d→col2
+    // Character at index 5 ('e') is at line 2, column 2
+    const result = offsetLocation(base, 'abc\ndef', 5);
+
+    expect(result.line).toBe(2);
+    expect(result.column).toBe(2);
+  });
+
+  it('should handle offset property', () => {
+    const base: SourceLocation = { file: 'test.prs', line: 1, column: 1, offset: 100 };
+    const result = offsetLocation(base, 'hello', 3);
+
+    expect(result.offset).toBe(103);
+  });
+
+  it('should return undefined offset when base has no offset', () => {
+    const base: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const result = offsetLocation(base, 'hello', 3);
+
+    expect(result.offset).toBeUndefined();
   });
 });

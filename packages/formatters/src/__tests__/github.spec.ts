@@ -742,6 +742,103 @@ describe('GitHubFormatter', () => {
       expect(agentFile?.content).toContain('model: Gemini 2.5 Pro');
     });
 
+    it('should generate agent file with specModel (mixed models)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                planner: {
+                  description: 'Planning agent with mixed models',
+                  model: 'sonnet',
+                  specModel: 'opus',
+                  content: 'Plan features.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/planner.md')
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile?.content).toContain('model: Claude Sonnet 4.5');
+      expect(agentFile?.content).toContain('specModel: Claude Opus 4.5');
+    });
+
+    it('should map specModel names to GitHub Copilot format', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                planner: {
+                  description: 'Agent with GPT spec model',
+                  model: 'sonnet',
+                  specModel: 'gpt-4o',
+                  content: 'Plan things.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/planner.md')
+      );
+      expect(agentFile?.content).toContain('model: Claude Sonnet 4.5');
+      expect(agentFile?.content).toContain('specModel: GPT-4o');
+    });
+
+    it('should omit specModel when set to inherit', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                planner: {
+                  description: 'Agent with inherit spec model',
+                  model: 'opus',
+                  specModel: 'inherit',
+                  content: 'Plan things.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/agents/planner.md')
+      );
+      expect(agentFile?.content).toContain('model: Claude Opus 4.5');
+      expect(agentFile?.content).not.toContain('specModel:');
+    });
+
     it('should handle multiple agents', () => {
       const ast: Program = {
         ...createMinimalProgram(),

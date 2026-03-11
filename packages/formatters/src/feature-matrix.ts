@@ -14,13 +14,47 @@
  * Tool/Formatter names.
  */
 export type ToolName =
+  // Original 7
   | 'github'
   | 'cursor'
   | 'claude'
   | 'antigravity'
   | 'factory'
   | 'opencode'
-  | 'gemini';
+  | 'gemini'
+  // Tier 1
+  | 'windsurf'
+  | 'cline'
+  | 'roo'
+  | 'codex'
+  | 'continue'
+  // Tier 2
+  | 'augment'
+  | 'goose'
+  | 'kilo'
+  | 'amp'
+  | 'trae'
+  | 'junie'
+  | 'kiro'
+  // Tier 3
+  | 'cortex'
+  | 'crush'
+  | 'command-code'
+  | 'kode'
+  | 'mcpjam'
+  | 'mistral-vibe'
+  | 'mux'
+  | 'openhands'
+  | 'pi'
+  | 'qoder'
+  | 'qwen-code'
+  | 'zencoder'
+  | 'neovate'
+  | 'pochi'
+  | 'adal'
+  | 'iflow'
+  | 'openclaw'
+  | 'codebuddy';
 
 /**
  * Feature implementation status.
@@ -43,8 +77,8 @@ export interface FeatureSpec {
   description: string;
   /** Category for grouping */
   category: FeatureCategory;
-  /** Support status per tool */
-  tools: Record<ToolName, FeatureStatus>;
+  /** Support status per tool (only tracked tools need entries) */
+  tools: Partial<Record<ToolName, FeatureStatus>>;
   /** How to test this feature */
   testStrategy?: string;
   /** Link to tool documentation */
@@ -483,11 +517,12 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported',
       claude: 'supported', // .claude/agents/<name>.md
       antigravity: 'not-supported',
-      factory: 'not-supported',
+      factory: 'supported', // .factory/droids/<name>.md
       opencode: 'supported', // .opencode/agents/<name>.md
       gemini: 'not-supported',
     },
-    testStrategy: 'Check for AGENTS.md, .github/agents/ or .claude/agents/ files',
+    testStrategy:
+      'Check for AGENTS.md, .github/agents/, .claude/agents/, or .factory/droids/ files',
   },
   {
     id: 'local-memory',
@@ -587,8 +622,8 @@ export function getFeatureCoverage(tool: ToolName): FeatureCoverageSummary {
 /**
  * Get comparison matrix between tools.
  */
-export function getToolComparison(): Record<string, Record<ToolName, FeatureStatus>> {
-  const comparison: Record<string, Record<ToolName, FeatureStatus>> = {};
+export function getToolComparison(): Record<string, Partial<Record<ToolName, FeatureStatus>>> {
+  const comparison: Record<string, Partial<Record<ToolName, FeatureStatus>>> = {};
 
   for (const feature of FEATURE_MATRIX) {
     comparison[feature.id] = { ...feature.tools };
@@ -616,7 +651,7 @@ export function generateFeatureMatrixReport(): string {
   ];
 
   for (const feature of FEATURE_MATRIX) {
-    const statusEmoji = (status: FeatureStatus): string => {
+    const statusEmoji = (status: FeatureStatus | undefined): string => {
       switch (status) {
         case 'supported':
           return '✅';
@@ -626,6 +661,8 @@ export function generateFeatureMatrixReport(): string {
           return '📋';
         case 'not-supported':
           return '❌';
+        default:
+          return '—';
       }
     };
 

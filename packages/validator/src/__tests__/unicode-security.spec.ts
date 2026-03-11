@@ -545,6 +545,46 @@ describe('unicode-security rule (PS014)', () => {
       expect(messages).toHaveLength(0);
     });
 
+    it('should allow mixed Latin and Cyrillic at sentence level (bilingual content)', () => {
+      // Arrange - English instructions mixed with Russian text (separate words, no script mixing within words)
+      const ast = createTestProgram({
+        blocks: [
+          createTextBlock(
+            '@skills',
+            'Follow the rules below. Следуйте правилам ниже. Use the API correctly.'
+          ),
+        ],
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      // Act
+      unicodeSecurity.validate(ctx);
+
+      // Assert - no homograph because scripts are not mixed within individual words
+      const homographMessages = messages.filter((m) => m.message.includes('homograph'));
+      expect(homographMessages).toHaveLength(0);
+    });
+
+    it('should allow mixed Latin and Ukrainian text (bilingual documentation)', () => {
+      // Arrange - Technical docs with Ukrainian translations
+      const ast = createTestProgram({
+        blocks: [
+          createTextBlock(
+            '@skills',
+            'Configuration (Конфігурація): Set the ENVIRONMENT variable. Встановіть змінну оточення.'
+          ),
+        ],
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      // Act
+      unicodeSecurity.validate(ctx);
+
+      // Assert - no homograph flags for legitimate bilingual content
+      const homographMessages = messages.filter((m) => m.message.includes('homograph'));
+      expect(homographMessages).toHaveLength(0);
+    });
+
     it('should allow European languages with accents', () => {
       // Arrange - French, German, Spanish accented characters
       const ast = createTestProgram({

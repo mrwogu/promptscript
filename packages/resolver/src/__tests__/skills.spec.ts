@@ -1053,7 +1053,10 @@ Content.
   });
 
   describe('unreadable files', () => {
-    it('should skip files that cannot be read', async () => {
+    // Root bypasses POSIX file permission checks, so chmod 0o000 has no effect
+    const isRoot = process.getuid?.() === 0;
+
+    it.skipIf(isRoot)('should skip files that cannot be read', async () => {
       const localPath = join(testDir, '.promptscript');
       const skillDir = join(localPath, 'skills', 'perm-skill');
       await mkdir(skillDir, { recursive: true });
@@ -1422,7 +1425,10 @@ describe('resolveNativeCommands', () => {
     expect(result).toBe(ast);
   });
 
-  it('should skip unreadable command files', async () => {
+  // Root bypasses POSIX file permission checks, so chmod 0o000 has no effect
+  const isRoot = process.getuid?.() === 0;
+
+  it.skipIf(isRoot)('should skip unreadable command files', async () => {
     const localPath = join(testDir, '.promptscript');
     const commandsDir = join(localPath, 'commands');
     await mkdir(commandsDir, { recursive: true });
@@ -1459,5 +1465,472 @@ describe('resolveNativeCommands', () => {
     expect(props['/existing']).toBe('Existing shortcut');
     expect(props['/new-cmd']).toBeDefined();
     expect((props['/new-cmd'] as TextContent).value).toContain('New command');
+  });
+});
+
+describe('.skillignore support', () => {
+  let testDir: string;
+  let registryPath: string;
+
+  beforeEach(async () => {
+    testDir = join(
+      tmpdir(),
+      `skillignore-test-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    );
+    registryPath = join(testDir, 'registry');
+    await mkdir(registryPath, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await rm(testDir, { recursive: true, force: true });
+  });
+
+  const createProgram = (blocks: Block[]): Program => ({
+    type: 'Program',
+    loc: { file: 'test.prs', line: 1, column: 1, offset: 0 },
+    blocks,
+    uses: [],
+    extends: [],
+  });
+
+  const createSkillsBlock = (properties: Record<string, unknown>): Block => ({
+    type: 'Block',
+    name: 'skills',
+    content: {
+      type: 'ObjectContent',
+      properties,
+      loc: { file: 'test.prs', line: 1, column: 1, offset: 0 },
+    } as ObjectContent,
+    loc: { file: 'test.prs', line: 1, column: 1, offset: 0 },
+  });
+
+  it('should respect .skillignore patterns and exclude matching files', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test skill\n---\nSkill content'
+    );
+    await writeFile(join(skillDir, 'README.txt'), 'Useful readme');
+    await writeFile(join(skillDir, 'helper.ts'), 'export const x = 1;');
+    await writeFile(join(skillDir, 'data.csv'), 'a,b,c');
+    await writeFile(join(skillDir, '.skillignore'), '# Ignore TypeScript files\n*.ts\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const sourceFile = join(localPath, 'test.prs');
+    const result = await resolveNativeSkills(ast, registryPath, sourceFile, localPath);
+
+    const skillsContent = result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent;
+    const skill = skillsContent.properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+
+    expect(resources).toBeDefined();
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toContain('README.txt');
+    expect(paths).toContain('data.csv');
+    expect(paths).not.toContain('helper.ts');
+  });
+
+  it('should support negation patterns (! re-include)', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'a.txt'), 'file a');
+    await writeFile(join(skillDir, 'b.txt'), 'file b');
+    await writeFile(join(skillDir, 'important.txt'), 'keep this');
+    // Ignore all .txt but re-include important.txt
+    await writeFile(join(skillDir, '.skillignore'), '*.txt\n!important.txt\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).not.toContain('a.txt');
+    expect(paths).not.toContain('b.txt');
+    expect(paths).toContain('important.txt');
+  });
+
+  it('should support directory patterns (trailing /)', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    const subDir = join(skillDir, 'src', 'internal');
+    await mkdir(subDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'data.md'), 'keep');
+    await writeFile(join(skillDir, 'src', 'index.ts'), 'code');
+    await writeFile(join(subDir, 'deep.ts'), 'deep code');
+    await writeFile(join(skillDir, '.skillignore'), 'src/\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toContain('data.md');
+    expect(paths).not.toContain(join('src', 'index.ts'));
+    expect(paths).not.toContain(join('src', 'internal', 'deep.ts'));
+  });
+
+  it('should support ** glob patterns', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    const nested = join(skillDir, 'a', 'b');
+    await mkdir(nested, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'top.txt'), 'top');
+    await writeFile(join(skillDir, 'a', 'mid.spec.ts'), 'test');
+    await writeFile(join(nested, 'deep.spec.ts'), 'deep test');
+    await writeFile(join(nested, 'keep.md'), 'keep');
+    // Ignore all spec files anywhere
+    await writeFile(join(skillDir, '.skillignore'), '*.spec.ts\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toContain('top.txt');
+    expect(paths).toContain(join('a', 'b', 'keep.md'));
+    // *.spec.ts matches basename, so all spec files anywhere should be ignored
+    expect(paths).not.toContain(join('a', 'mid.spec.ts'));
+    expect(paths).not.toContain(join('a', 'b', 'deep.spec.ts'));
+  });
+
+  it('should support ? single char wildcard', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'a1.txt'), 'a1');
+    await writeFile(join(skillDir, 'ab.txt'), 'ab');
+    await writeFile(join(skillDir, 'abc.txt'), 'abc');
+    // ? matches exactly one char
+    await writeFile(join(skillDir, '.skillignore'), 'a?.txt\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).not.toContain('a1.txt');
+    expect(paths).not.toContain('ab.txt');
+    expect(paths).toContain('abc.txt');
+  });
+
+  it('should support character class [abc] patterns', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'a.log'), 'a');
+    await writeFile(join(skillDir, 'b.log'), 'b');
+    await writeFile(join(skillDir, 'c.log'), 'c');
+    await writeFile(join(skillDir, '.skillignore'), '[ab].log\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).not.toContain('a.log');
+    expect(paths).not.toContain('b.log');
+    expect(paths).toContain('c.log');
+  });
+
+  it('should handle unclosed character class as literal [', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'file.txt'), 'keep');
+    // Pattern with unclosed [ should not crash
+    await writeFile(join(skillDir, '.skillignore'), '[unclosed\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    expect(resources).toBeDefined();
+    expect(resources.map((r) => r.relativePath)).toContain('file.txt');
+  });
+
+  it('should ignore comments and empty lines in .skillignore', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'keep.txt'), 'keep');
+    await writeFile(join(skillDir, 'drop.log'), 'drop');
+    await writeFile(
+      join(skillDir, '.skillignore'),
+      '# This is a comment\n\n# Another comment\n*.log\n\n'
+    );
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toContain('keep.txt');
+    expect(paths).not.toContain('drop.log');
+  });
+
+  it('should support path-based patterns (with /)', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    const dataDir = join(skillDir, 'data');
+    const srcDir = join(skillDir, 'src');
+    await mkdir(dataDir, { recursive: true });
+    await mkdir(srcDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(dataDir, 'info.csv'), 'data');
+    await writeFile(join(srcDir, 'info.csv'), 'code pretending to be csv');
+    // Only ignore csv in src/ path, not in data/
+    await writeFile(join(skillDir, '.skillignore'), 'src/*.csv\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toContain(join('data', 'info.csv'));
+    expect(paths).not.toContain(join('src', 'info.csv'));
+  });
+
+  it('should support **/pattern for deep matching', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    const deepDir = join(skillDir, 'a', 'b', 'c');
+    await mkdir(deepDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'top.tmp'), 'top temp');
+    await writeFile(join(deepDir, 'deep.tmp'), 'deep temp');
+    await writeFile(join(deepDir, 'keep.md'), 'keep');
+    await writeFile(join(skillDir, '.skillignore'), '**/*.tmp\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toContain(join('a', 'b', 'c', 'keep.md'));
+    expect(paths).not.toContain(join('a', 'b', 'c', 'deep.tmp'));
+    expect(paths).not.toContain('top.tmp');
+  });
+
+  it('should skip files matching expanded SKIP_FILES list', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'data.csv'), 'useful data');
+    // These should all be skipped by default SKIP_FILES
+    await writeFile(join(skillDir, 'package.json'), '{}');
+    await writeFile(join(skillDir, 'tsconfig.json'), '{}');
+    await writeFile(join(skillDir, 'LICENSE'), 'MIT');
+    await writeFile(join(skillDir, 'CHANGELOG.md'), '# Changelog');
+    await writeFile(join(skillDir, 'vitest.config.ts'), 'export default {}');
+    await writeFile(join(skillDir, '.editorconfig'), 'root = true');
+    await writeFile(join(skillDir, 'pnpm-lock.yaml'), 'lockfile: 1');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toEqual(['data.csv']);
+  });
+
+  it('should skip expanded SKIP_DIRS', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(join(skillDir, 'data'), { recursive: true });
+    await mkdir(join(skillDir, 'coverage', 'lcov'), { recursive: true });
+    await mkdir(join(skillDir, '.github', 'workflows'), { recursive: true });
+    await mkdir(join(skillDir, '__tests__'), { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'data', 'useful.csv'), 'keep');
+    await writeFile(join(skillDir, 'coverage', 'lcov', 'report.info'), 'skip');
+    await writeFile(join(skillDir, '.github', 'workflows', 'ci.yml'), 'skip');
+    await writeFile(join(skillDir, '__tests__', 'foo.spec.ts'), 'skip');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toEqual([join('data', 'useful.csv')]);
+  });
+
+  it('should work without .skillignore (no file present)', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'resource.txt'), 'data');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    expect(resources).toBeDefined();
+    expect(resources.map((r) => r.relativePath)).toContain('resource.txt');
+  });
+
+  it('should handle regex special characters in patterns', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const skillDir = join(localPath, 'skills', 'myskill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: myskill\ndescription: Test\n---\nContent'
+    );
+    await writeFile(join(skillDir, 'file.backup.txt'), 'backup');
+    await writeFile(join(skillDir, 'data.txt'), 'data');
+    // Pattern with dots (regex special char) should be escaped
+    await writeFile(join(skillDir, '.skillignore'), '*.backup.txt\n');
+
+    const ast = createProgram([createSkillsBlock({ myskill: {} })]);
+    const result = await resolveNativeSkills(
+      ast,
+      registryPath,
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    const skill = (result.blocks.find((b) => b.name === 'skills')!.content as ObjectContent)
+      .properties['myskill'] as Record<string, unknown>;
+    const resources = skill['resources'] as Array<{ relativePath: string; content: string }>;
+    const paths = resources.map((r) => r.relativePath);
+    expect(paths).toContain('data.txt');
+    expect(paths).not.toContain('file.backup.txt');
   });
 });

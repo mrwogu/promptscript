@@ -576,33 +576,37 @@ export const obfuscatedContent: ValidationRule = {
     'Detect obfuscated content using sanitization pipeline (decode and check all encodings)',
   defaultSeverity: 'warning',
   validate: (ctx) => {
-    walkText(ctx.ast, (text, loc) => {
-      // Run the sanitization pipeline
-      const encodedMatches = detectAndDecodeEncodings(text);
+    walkText(
+      ctx.ast,
+      (text, loc) => {
+        // Run the sanitization pipeline
+        const encodedMatches = detectAndDecodeEncodings(text);
 
-      // Report all detected malicious encoded content
-      for (const match of encodedMatches) {
-        ctx.report({
-          message: `Malicious content detected in ${match.type}: ${match.issues.join(', ')}. Decoded: "${match.decoded.substring(0, 50)}${match.decoded.length > 50 ? '...' : ''}"`,
-          location: loc,
-          suggestion:
-            'Encoded content is automatically decoded and checked for security patterns. Remove the malicious payload or use plain text.',
-        });
-      }
+        // Report all detected malicious encoded content
+        for (const match of encodedMatches) {
+          ctx.report({
+            message: `Malicious content detected in ${match.type}: ${match.issues.join(', ')}. Decoded: "${match.decoded.substring(0, 50)}${match.decoded.length > 50 ? '...' : ''}"`,
+            location: loc,
+            suggestion:
+              'Encoded content is automatically decoded and checked for security patterns. Remove the malicious payload or use plain text.',
+          });
+        }
 
-      // Also flag suspicious encoding patterns even if no malicious content detected
-      const hasLongBase64 = (text.match(BASE64_PATTERN) || []).some(
-        (m) => m.length >= MIN_ENCODED_LENGTH * 2 && !isLikelyLegitimateBase64(text, m)
-      );
+        // Also flag suspicious encoding patterns even if no malicious content detected
+        const hasLongBase64 = (text.match(BASE64_PATTERN) || []).some(
+          (m) => m.length >= MIN_ENCODED_LENGTH * 2 && !isLikelyLegitimateBase64(text, m)
+        );
 
-      if (hasLongBase64 && encodedMatches.length === 0) {
-        ctx.report({
-          message: 'Long Base64-encoded content detected that may hide payloads',
-          location: loc,
-          suggestion:
-            'If this is intentional, consider using plain text or documenting the purpose',
-        });
-      }
-    });
+        if (hasLongBase64 && encodedMatches.length === 0) {
+          ctx.report({
+            message: 'Long Base64-encoded content detected that may hide payloads',
+            location: loc,
+            suggestion:
+              'If this is intentional, consider using plain text or documenting the purpose',
+          });
+        }
+      },
+      { excludeProperties: ['resources'] }
+    );
   },
 };

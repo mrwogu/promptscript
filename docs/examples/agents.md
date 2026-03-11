@@ -165,13 +165,15 @@ Benefits of using subagents:
 
 ### Optional Fields
 
-| Field             | Type     | Platform | Description                                       |
-| ----------------- | -------- | -------- | ------------------------------------------------- |
-| `tools`           | string[] | Both     | Tools the agent can use (inherits all if omitted) |
-| `model`           | string   | Both     | AI model to use (platform-specific values)        |
-| `disallowedTools` | string[] | Claude   | Tools to deny, removed from inherited list        |
-| `permissionMode`  | string   | Claude   | How to handle permission prompts                  |
-| `skills`          | string[] | Claude   | Skills to preload into subagent context           |
+| Field                 | Type     | Platform        | Description                                              |
+| --------------------- | -------- | --------------- | -------------------------------------------------------- |
+| `tools`               | string[] | Both            | Tools the agent can use (inherits all if omitted)        |
+| `model`               | string   | Both            | AI model to use (platform-specific values)               |
+| `specModel`           | string   | GitHub, Factory | Model for Specification/planning mode (mixed models)     |
+| `specReasoningEffort` | string   | Factory         | Reasoning effort for spec mode (`low`, `medium`, `high`) |
+| `disallowedTools`     | string[] | Claude          | Tools to deny, removed from inherited list               |
+| `permissionMode`      | string   | Claude          | How to handle permission prompts                         |
+| `skills`              | string[] | Claude          | Skills to preload into subagent context                  |
 
 ### Model Options
 

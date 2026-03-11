@@ -187,6 +187,34 @@ describe('EnvVarsPanel', () => {
     expect(usePlaygroundStore.getState().config.envVars.TO_DELETE).toBeUndefined();
   });
 
+  it('should close when pressing Escape key', () => {
+    usePlaygroundStore.setState({ showEnvVars: true });
+    render(<EnvVarsPanel />);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(usePlaygroundStore.getState().showEnvVars).toBe(false);
+  });
+
+  it('should close when clicking the backdrop', () => {
+    usePlaygroundStore.setState({ showEnvVars: true });
+    const { container } = render(<EnvVarsPanel />);
+
+    const backdrop = container.querySelector('.fixed');
+    fireEvent.click(backdrop!);
+
+    expect(usePlaygroundStore.getState().showEnvVars).toBe(false);
+  });
+
+  it('should not close when clicking inside the modal content', () => {
+    usePlaygroundStore.setState({ showEnvVars: true });
+    render(<EnvVarsPanel />);
+
+    fireEvent.click(screen.getByText('Environment Variables'));
+
+    expect(usePlaygroundStore.getState().showEnvVars).toBe(true);
+  });
+
   it('should close when clicking the close button', () => {
     usePlaygroundStore.setState({ showEnvVars: true });
     render(<EnvVarsPanel />);

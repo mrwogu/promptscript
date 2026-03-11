@@ -239,7 +239,9 @@ export class HttpRegistry implements Registry {
 
         return this.handleResponse(response);
       } catch (err) {
-        const error = err as Error & { isClientError?: boolean };
+        const error = (err instanceof Error ? err : new Error(String(err))) as Error & {
+          isClientError?: boolean;
+        };
 
         if (this.isNonRetryableError(error)) {
           if (error.name === 'AbortError') {
@@ -293,11 +295,11 @@ export class HttpRegistry implements Registry {
 
       return content;
     } catch (err) {
-      const error = err as Error;
-      if (error.message.includes('404')) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes('404')) {
         throw new FileNotFoundError(path);
       }
-      throw new Error(`Failed to fetch ${path}: ${error.message}`);
+      throw new Error(`Failed to fetch ${path}: ${message}`);
     }
   }
 
@@ -369,7 +371,7 @@ export class CompositeRegistry implements Registry {
       try {
         return await registry.fetch(path);
       } catch (err) {
-        lastError = err as Error;
+        lastError = err instanceof Error ? err : new Error(String(err));
         // Continue to next registry
       }
     }

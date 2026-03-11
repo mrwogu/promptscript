@@ -1,4 +1,6 @@
+import { useState, useEffect, useRef } from 'react';
 import { usePlaygroundStore, type FormatterName, type ConventionType } from '../store';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const TARGET_INFO: Record<
   FormatterName,
@@ -39,7 +41,168 @@ const TARGET_INFO: Record<
     versions: ['simple', 'multifile', 'full'],
     supportsXml: true,
   },
+  windsurf: {
+    label: 'Windsurf',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  cline: {
+    label: 'Cline',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  roo: {
+    label: 'Roo Code',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  codex: {
+    label: 'Codex',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  continue: {
+    label: 'Continue',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  augment: {
+    label: 'Augment',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  goose: {
+    label: 'Goose',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  kilo: {
+    label: 'Kilo Code',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  amp: {
+    label: 'Amp',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  trae: {
+    label: 'Trae',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  junie: {
+    label: 'Junie',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  kiro: {
+    label: 'Kiro CLI',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  cortex: {
+    label: 'Cortex Code',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  crush: {
+    label: 'Crush',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  'command-code': {
+    label: 'Command Code',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  kode: {
+    label: 'Kode',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  mcpjam: {
+    label: 'MCPJam',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  'mistral-vibe': {
+    label: 'Mistral Vibe',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  mux: {
+    label: 'Mux',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  openhands: {
+    label: 'OpenHands',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  pi: {
+    label: 'Pi',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  qoder: {
+    label: 'Qoder',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  'qwen-code': {
+    label: 'Qwen Code',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  zencoder: {
+    label: 'Zencoder',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  neovate: {
+    label: 'Neovate',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  pochi: {
+    label: 'Pochi',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  adal: {
+    label: 'AdaL',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  iflow: {
+    label: 'iFlow CLI',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  openclaw: {
+    label: 'OpenClaw',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  codebuddy: {
+    label: 'CodeBuddy',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
 };
+
+const POPULAR_TARGETS: FormatterName[] = [
+  'github',
+  'claude',
+  'cursor',
+  'windsurf',
+  'cline',
+  'codex',
+  'gemini',
+  'antigravity',
+];
 
 const CONVENTION_OPTIONS: { value: ConventionType; label: string }[] = [
   { value: 'markdown', label: 'Markdown' },
@@ -57,15 +220,48 @@ export function ConfigPanel() {
   const setFormatting = usePlaygroundStore((s) => s.setFormatting);
   const showConfig = usePlaygroundStore((s) => s.showConfig);
   const setShowConfig = usePlaygroundStore((s) => s.setShowConfig);
+  const [showAll, setShowAll] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(modalRef, showConfig);
+
+  useEffect(() => {
+    if (!showConfig) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowConfig(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showConfig, setShowConfig]);
 
   if (!showConfig) return null;
 
+  const allTargets = Object.entries(TARGET_INFO) as [
+    FormatterName,
+    (typeof TARGET_INFO)[FormatterName],
+  ][];
+  const visibleTargets = showAll
+    ? allTargets
+    : allTargets.filter(([target]) => POPULAR_TARGETS.includes(target));
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-ps-surface border border-ps-border rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={() => setShowConfig(false)}
+    >
+      <div
+        ref={modalRef}
+        className="bg-ps-surface border border-ps-border rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="config-title"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-ps-border">
-          <h2 className="text-lg font-semibold text-white">Configuration</h2>
+          <h2 id="config-title" className="text-lg font-semibold text-white">
+            Configuration
+          </h2>
           <button
             onClick={() => setShowConfig(false)}
             className="text-gray-400 hover:text-white p-1"
@@ -83,75 +279,6 @@ export function ConfigPanel() {
         </div>
 
         <div className="p-4 space-y-6">
-          {/* Targets Section */}
-          <section>
-            <h3 className="text-sm font-medium text-gray-300 mb-3">Targets</h3>
-            <div className="space-y-3">
-              {(
-                Object.entries(TARGET_INFO) as [
-                  FormatterName,
-                  (typeof TARGET_INFO)[FormatterName],
-                ][]
-              ).map(([target, info]) => {
-                const settings = config.targets[target];
-                return (
-                  <div key={target} className="flex items-center gap-3">
-                    {/* Enable checkbox */}
-                    <label className="flex items-center gap-2 min-w-[140px]">
-                      <input
-                        type="checkbox"
-                        checked={settings.enabled}
-                        onChange={(e) => setTargetEnabled(target, e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
-                      />
-                      <span className="text-sm text-gray-200">{info.label}</span>
-                    </label>
-
-                    {/* Version select */}
-                    <select
-                      value={settings.version ?? info.versions[0]}
-                      onChange={(e) => setTargetVersion(target, e.target.value)}
-                      disabled={!settings.enabled}
-                      className="flex-1 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
-                    >
-                      {info.versions.map((v) => (
-                        <option key={v} value={v}>
-                          {v}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Convention select */}
-                    <select
-                      value={settings.convention ?? 'markdown'}
-                      onChange={(e) =>
-                        setTargetConvention(
-                          target,
-                          e.target.value === 'markdown'
-                            ? undefined
-                            : (e.target.value as ConventionType)
-                        )
-                      }
-                      disabled={!settings.enabled || !info.supportsXml}
-                      title={!info.supportsXml ? `${info.label} only supports markdown` : undefined}
-                      className="w-24 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
-                    >
-                      {CONVENTION_OPTIONS.map((opt) => (
-                        <option
-                          key={opt.value}
-                          value={opt.value}
-                          disabled={opt.value === 'xml' && !info.supportsXml}
-                        >
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
           {/* Formatting Section */}
           <section>
             <h3 className="text-sm font-medium text-gray-300 mb-3">Formatting</h3>
@@ -210,6 +337,97 @@ export function ConfigPanel() {
                   className="w-20 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 focus:outline-none focus:border-indigo-500"
                 />
               </div>
+            </div>
+          </section>
+
+          {/* Targets Section */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-300">Targets</h3>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setShowAll(false)}
+                  className={`px-2 py-0.5 text-xs rounded ${
+                    !showAll
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  Popular ({POPULAR_TARGETS.length})
+                </button>
+                <button
+                  onClick={() => setShowAll(true)}
+                  className={`px-2 py-0.5 text-xs rounded ${
+                    showAll
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  All ({allTargets.length})
+                </button>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {visibleTargets.map(([target, info]) => {
+                const settings = config.targets[target] ?? {
+                  enabled: false,
+                  version: info.versions[0],
+                };
+                return (
+                  <div key={target} className="flex items-center gap-3">
+                    {/* Enable checkbox */}
+                    <label className="flex items-center gap-2 min-w-[140px]">
+                      <input
+                        type="checkbox"
+                        checked={settings.enabled}
+                        onChange={(e) => setTargetEnabled(target, e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+                      />
+                      <span className="text-sm text-gray-200">{info.label}</span>
+                    </label>
+
+                    {/* Version select */}
+                    <select
+                      value={settings.version ?? info.versions[0]}
+                      onChange={(e) => setTargetVersion(target, e.target.value)}
+                      disabled={!settings.enabled}
+                      className="flex-1 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
+                    >
+                      {info.versions.map((v) => (
+                        <option key={v} value={v}>
+                          {v}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Convention select */}
+                    <select
+                      value={settings.convention ?? 'markdown'}
+                      onChange={(e) =>
+                        setTargetConvention(
+                          target,
+                          e.target.value === 'markdown'
+                            ? undefined
+                            : (e.target.value as ConventionType)
+                        )
+                      }
+                      disabled={!settings.enabled || !info.supportsXml}
+                      title={!info.supportsXml ? `${info.label} only supports markdown` : undefined}
+                      className="w-24 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
+                    >
+                      {CONVENTION_OPTIONS.map((opt) => (
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          disabled={opt.value === 'xml' && !info.supportsXml}
+                        >
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
             </div>
           </section>
         </div>

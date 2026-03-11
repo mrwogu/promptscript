@@ -24,10 +24,6 @@ vi.mock('chalk', () => ({
   },
 }));
 
-const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
-  throw new Error('process.exit called');
-});
-
 describe('commands/registry/init', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
   let mockServices: CliServices;
@@ -69,10 +65,13 @@ describe('commands/registry/init', () => {
       prompts: mockPrompts as unknown as CliServices['prompts'],
       cwd: '/test',
     };
+
+    process.exitCode = undefined;
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    process.exitCode = undefined;
   });
 
   it('should create registry with --yes flag and defaults', async () => {
@@ -191,16 +190,13 @@ describe('commands/registry/init', () => {
     await registryInitCommand('test-registry', {}, mockServices);
 
     expect(mockFs.writeFile).not.toHaveBeenCalled();
-    expect(mockExit).not.toHaveBeenCalled();
   });
 
   it('should exit with code 1 when scaffolding fails', async () => {
     mockFs.mkdir.mockRejectedValue(new Error('Permission denied'));
 
-    await expect(registryInitCommand('test-registry', { yes: true }, mockServices)).rejects.toThrow(
-      'process.exit called'
-    );
+    await registryInitCommand('test-registry', { yes: true }, mockServices);
 
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(process.exitCode).toBe(1);
   });
 });

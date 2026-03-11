@@ -803,21 +803,23 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 </a>
 <!-- playground-link-end -->
 
-| Property          | Type     | Required | Description                                                                    |
-| ----------------- | -------- | -------- | ------------------------------------------------------------------------------ |
-| `description`     | string   | Yes      | When the agent should be invoked                                               |
-| `content`         | string   | Yes      | System prompt for the subagent                                                 |
-| `tools`           | string[] | No       | Allowed tools (inherits all if omitted)                                        |
-| `model`           | string   | No       | AI model to use (platform-specific values)                                     |
-| `disallowedTools` | string[] | No       | Tools to deny (Claude only)                                                    |
-| `permissionMode`  | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude only) |
-| `skills`          | string[] | No       | Skills to preload into subagent context (Claude only)                          |
+| Property              | Type     | Required | Description                                                                    |
+| --------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
+| `description`         | string   | Yes      | When the agent should be invoked                                               |
+| `content`             | string   | Yes      | System prompt for the subagent                                                 |
+| `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                        |
+| `model`               | string   | No       | AI model to use (platform-specific values)                                     |
+| `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                   |
+| `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)         |
+| `disallowedTools`     | string[] | No       | Tools to deny (Claude only)                                                    |
+| `permissionMode`      | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude only) |
+| `skills`              | string[] | No       | Skills to preload into subagent context (Claude only)                          |
 
 Agents output by platform:
 
 **GitHub Output** (`.github/agents/code-reviewer.md`, version: full)
 
-Supports: `name`, `description`, `tools`, `model`. Tool and model names are automatically mapped to GitHub Copilot's format:
+Supports: `name`, `description`, `tools`, `model`, `specModel`. Tool and model names are automatically mapped to GitHub Copilot's format:
 
 - Tools: `Read` → `read`, `Grep`/`Glob` → `search`, `Bash` → `execute`
 - Models: `sonnet` → `Claude Sonnet 4.5`, `opus` → `Claude Opus 4.5`, `haiku` → `Claude Haiku 4.5`

@@ -1,9 +1,46 @@
 ---
-name: 'promptscript'
-description: '>-'
+name: promptscript
+description: >-
+  PromptScript language expert for reading, writing, modifying, and
+  troubleshooting .prs files. Use when working with PromptScript syntax,
+  creating or editing .prs files, adding blocks like @identity, @standards,
+  @restrictions, @shortcuts, @skills, or @agents, configuring
+  promptscript.yaml, resolving compilation errors, understanding inheritance
+  (@inherit) and composition (@use, @extend), or migrating AI instructions
+  to PromptScript. Also use when asked about compilation targets (GitHub
+  Copilot, Claude Code, Cursor, Antigravity, Factory AI, and 30+ other
+  AI coding agents).
+license: MIT
+metadata:
+  author: PromptScript
+  homepage: https://getpromptscript.dev
+compatibility:
+  - claude-code
+  - github-copilot
+  - cursor
+  - factory-ai
+  - gemini-cli
+  - opencode
+  - windsurf
+  - cline
+  - roo
+  - codex
+  - continue
+  - augment
+  - goose
+  - kilo
+  - amp
+  - trae
+  - junie
+  - kiro-cli
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - Bash
+user-invocable: true
 ---
-
-<!-- PromptScript 2026-03-06T22:37:48.627Z - do not edit -->
 
 # PromptScript Language Guide
 
@@ -178,7 +215,8 @@ userInvocable, allowedTools, context ("fork" or "inherit"), agent.
 
 ### @agents
 
-Custom subagent definitions:
+Custom subagent definitions. Compiles to `.claude/agents/` for Claude Code,
+`.github/agents/` for GitHub Copilot, `.factory/droids/` for Factory AI, etc.
 
 ```
 @agents {
@@ -191,6 +229,14 @@ Custom subagent definitions:
   }
 }
 ```
+
+Supports mixed models per agent: `specModel` sets a different model for
+Specification/planning mode (GitHub, Factory), `specReasoningEffort` sets reasoning
+effort for the spec model (Factory only, values: "low", "medium", "high").
+
+Factory AI droids support additional properties: `model` (any model ID or "inherit"),
+`reasoningEffort` ("low", "medium", "high"), and `tools` (category name like "read-only"
+or array of tool IDs).
 
 ### @knowledge
 
@@ -269,6 +315,10 @@ targets:
     version: frontmatter
   factory:
     version: full
+  windsurf:             # 31 additional agents supported
+    version: simple
+  cline:
+    version: simple
 registry:
   git: https://github.com/org/registry.git
   ref: main
@@ -288,15 +338,23 @@ prs diff --target claude    # Show compilation diff
 
 ## Output Targets
 
-| Target      | Main File                       | Skills                      |
-| ----------- | ------------------------------- | --------------------------- |
-| GitHub      | .github/copilot-instructions.md | .github/skills/\*/SKILL.md  |
-| Claude      | CLAUDE.md                       | .claude/skills/\*/SKILL.md  |
-| Cursor      | .cursor/rules/project.mdc       | .cursor/commands/\*.md      |
-| Antigravity | .agent/rules/project.md         | .agent/rules/\*.md          |
-| Factory     | AGENTS.md                       | .factory/skills/\*/SKILL.md |
-| OpenCode    | agents.yaml                     | --------------------------- |
-| Gemini      | GEMINI.md                       | --------------------------- |
+38 supported targets. Key examples:
+
+| Target      | Main File                       | Skills                                             |
+| ----------- | ------------------------------- | -------------------------------------------------- |
+| GitHub      | .github/copilot-instructions.md | .github/skills/\*/SKILL.md                         |
+| Claude      | CLAUDE.md                       | .claude/skills/\*/SKILL.md                         |
+| Cursor      | .cursor/rules/project.mdc       | .cursor/commands/\*.md                             |
+| Antigravity | .agent/rules/project.md         | .agent/rules/\*.md                                 |
+| Factory     | AGENTS.md                       | .factory/skills/\*/SKILL.md, .factory/droids/\*.md |
+| OpenCode    | OPENCODE.md                     | .opencode/skills/\*/SKILL.md                       |
+| Gemini      | GEMINI.md                       | .gemini/skills/\*/skill.md                         |
+| Windsurf    | .windsurf/rules/project.md      | .windsurf/skills/\*/SKILL.md                       |
+| Cline       | .clinerules                     | .agents/skills/\*/SKILL.md                         |
+| Roo Code    | .roorules                       | .roo/skills/\*/SKILL.md                            |
+| Codex       | AGENTS.md                       | .agents/skills/\*/SKILL.md                         |
+| Continue    | .continue/rules/project.md      | .continue/skills/\*/SKILL.md                       |
+| + 26 more   |                                 | See full list in documentation                     |
 
 ## Project Organization
 

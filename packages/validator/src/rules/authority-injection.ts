@@ -56,17 +56,22 @@ export const authorityInjection: ValidationRule = {
   description: 'Detect authoritative override phrases that may indicate prompt injection',
   defaultSeverity: 'error',
   validate: (ctx) => {
-    walkText(ctx.ast, (text, loc) => {
-      for (const pattern of AUTHORITY_PATTERNS) {
-        if (pattern.test(text)) {
-          ctx.report({
-            message: `Authority injection pattern detected: ${pattern.source}`,
-            location: loc,
-            suggestion:
-              'Remove authoritative override language that could be used for prompt injection',
-          });
+    // Exclude skill resource files (bundled source code, not prompt instructions).
+    walkText(
+      ctx.ast,
+      (text, loc) => {
+        for (const pattern of AUTHORITY_PATTERNS) {
+          if (pattern.test(text)) {
+            ctx.report({
+              message: `Authority injection pattern detected: ${pattern.source}`,
+              location: loc,
+              suggestion:
+                'Remove authoritative override language that could be used for prompt injection',
+            });
+          }
         }
-      }
-    });
+      },
+      { excludeProperties: ['resources'] }
+    );
   },
 };
