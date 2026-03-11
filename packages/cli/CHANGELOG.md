@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/mrwogu/promptscript/compare/v1.2.0...v1.3.0) (2026-03-11)
+
+
+### Features
+
+* **formatters:** add mixed models support per agent/droid ([939f75a](https://github.com/mrwogu/promptscript/commit/939f75ac4d8beb2e823007826c2e266ab5c7380b))
+
 ## [1.2.0](https://github.com/mrwogu/promptscript/compare/v1.1.0...v1.2.0) (2026-03-11)
 
 
