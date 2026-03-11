@@ -698,15 +698,15 @@ Define reusable skills that AI assistants can invoke:
 </a>
 <!-- playground-link-end -->
 
-| Property                 | Type     | Formatter | Description                            |
-| ------------------------ | -------- | --------- | -------------------------------------- |
-| `description`            | string   | All       | Human-readable description             |
-| `content`                | string   | All       | Detailed skill instructions            |
-| `disableModelInvocation` | boolean  | GitHub    | Prevent model from auto-invoking skill |
-| `userInvocable`          | boolean  | Claude    | Allow user to manually invoke skill    |
-| `context`                | string   | Claude    | Context mode: `"fork"` or `"inherit"`  |
-| `agent`                  | string   | Claude    | Agent type: `"general-purpose"`, etc.  |
-| `allowedTools`           | string[] | Claude    | Tools the skill can use                |
+| Property                 | Type     | Formatter       | Description                            |
+| ------------------------ | -------- | --------------- | -------------------------------------- |
+| `description`            | string   | All             | Human-readable description             |
+| `content`                | string   | All             | Detailed skill instructions            |
+| `disableModelInvocation` | boolean  | GitHub, Factory | Prevent model from auto-invoking skill |
+| `userInvocable`          | boolean  | Claude, Factory | Allow user to manually invoke skill    |
+| `context`                | string   | Claude          | Context mode: `"fork"` or `"inherit"`  |
+| `agent`                  | string   | Claude          | Agent type: `"general-purpose"`, etc.  |
+| `allowedTools`           | string[] | Claude, Factory | Tools the skill can use                |
 
 Skills are output differently based on the formatter:
 
