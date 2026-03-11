@@ -230,6 +230,10 @@ Custom subagent definitions. Compiles to `.claude/agents/` for Claude Code,
 }
 ```
 
+Supports mixed models per agent: `specModel` sets a different model for
+Specification/planning mode (GitHub, Factory), `specReasoningEffort` sets reasoning
+effort for the spec model (Factory only, values: "low", "medium", "high").
+
 Factory AI droids support additional properties: `model` (any model ID or "inherit"),
 `reasoningEffort` ("low", "medium", "high"), and `tools` (category name like "read-only"
 or array of tool IDs).

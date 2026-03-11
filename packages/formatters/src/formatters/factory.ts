@@ -84,6 +84,10 @@ interface FactoryDroidConfig extends MarkdownAgentConfig {
   model?: string;
   /** Reasoning effort level */
   reasoningEffort?: FactoryReasoningEffort;
+  /** Model for Specification Mode planning (mixed models) */
+  specModel?: string;
+  /** Reasoning effort for Specification Mode model */
+  specReasoningEffort?: FactoryReasoningEffort;
   /** Tool access: category name or array of tool IDs */
   tools?: string | string[];
 }
@@ -325,6 +329,8 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
           content: obj['content'] ? this.valueToString(obj['content']) : '',
           model: obj['model'] ? this.valueToString(obj['model']) : undefined,
           reasoningEffort: this.parseReasoningEffort(obj['reasoningEffort']),
+          specModel: obj['specModel'] ? this.valueToString(obj['specModel']) : undefined,
+          specReasoningEffort: this.parseReasoningEffort(obj['specReasoningEffort']),
           tools: this.parseDroidTools(obj['tools']),
         });
       }
@@ -351,6 +357,14 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
     if (droidConfig.reasoningEffort) {
       lines.push(`reasoningEffort: ${droidConfig.reasoningEffort}`);
+    }
+
+    if (droidConfig.specModel) {
+      lines.push(`specModel: ${droidConfig.specModel}`);
+    }
+
+    if (droidConfig.specReasoningEffort) {
+      lines.push(`specReasoningEffort: ${droidConfig.specReasoningEffort}`);
     }
 
     if (droidConfig.tools) {
