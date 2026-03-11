@@ -137,7 +137,8 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       spinner.fail('Entry file not found');
       ConsoleOutput.error(`File not found: ${entryPath}`);
       ConsoleOutput.muted('Run: prs init');
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     const result = await compiler.compile(entryPath);
@@ -150,7 +151,8 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
         ConsoleOutput.error(err.message);
       }
 
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     spinner.succeed('Diff computed');
@@ -178,8 +180,8 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     await pager.flush();
   } catch (error) {
     spinner.fail('Error');
-    ConsoleOutput.error((error as Error).message);
-    process.exit(1);
+    ConsoleOutput.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
   }
 }
 

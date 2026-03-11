@@ -11,8 +11,8 @@ import { type CliServices } from '../services.js';
 describe('utils/ai-tools-detector', () => {
   let mockServices: CliServices;
   let mockFs: {
-    existsSync: any;
-    readdir: any;
+    existsSync: ReturnType<typeof vi.fn>;
+    readdir: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -22,8 +22,8 @@ describe('utils/ai-tools-detector', () => {
     };
 
     mockServices = {
-      fs: mockFs as any,
-      prompts: {} as any,
+      fs: mockFs as unknown as CliServices['fs'],
+      prompts: {} as unknown as CliServices['prompts'],
       cwd: '/test',
     };
   });

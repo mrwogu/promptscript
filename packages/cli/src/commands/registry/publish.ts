@@ -29,7 +29,7 @@ export async function registryPublishCommand(
         }
         ConsoleOutput.newline();
         ConsoleOutput.muted('Use --force to skip validation');
-        process.exit(1);
+        process.exitCode = 1;
         return;
       }
       spinner.succeed(
@@ -77,7 +77,7 @@ export async function registryPublishCommand(
     } catch {
       spinner.fail('Not a git repository');
       ConsoleOutput.muted('Initialize with: git init');
-      process.exit(1);
+      process.exitCode = 1;
       return;
     }
 
@@ -97,7 +97,7 @@ export async function registryPublishCommand(
       git('push');
     } catch {
       spinner.fail('Push failed - check your remote configuration');
-      process.exit(1);
+      process.exitCode = 1;
       return;
     }
 
@@ -115,7 +115,9 @@ export async function registryPublishCommand(
       ConsoleOutput.muted(`Tag: ${options.tag}`);
     }
   } catch (error) {
-    ConsoleOutput.error(`Publish failed: ${(error as Error).message}`);
-    process.exit(1);
+    ConsoleOutput.error(
+      `Publish failed: ${error instanceof Error ? error.message : String(error)}`
+    );
+    process.exitCode = 1;
   }
 }

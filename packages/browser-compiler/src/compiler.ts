@@ -194,7 +194,7 @@ export class BrowserCompiler {
       return {
         success: false,
         outputs: new Map(),
-        errors: [this.toCompileError(err as Error)],
+        errors: [this.toCompileError(err instanceof Error ? err : new Error(String(err)))],
         warnings: [],
         stats,
       };
@@ -268,7 +268,7 @@ export class BrowserCompiler {
         formatErrors.push({
           name: 'FormatterError',
           code: 'PS4000',
-          message: `Formatter '${formatter.name}' failed: ${(err as Error).message}`,
+          message: `Formatter '${formatter.name}' failed: ${err instanceof Error ? err.message : String(err)}`,
         });
       }
     }

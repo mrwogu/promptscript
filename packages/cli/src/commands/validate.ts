@@ -74,7 +74,7 @@ function handleEntryNotFound(
   entryPath: string,
   isJsonFormat: boolean,
   spinner: ReturnType<typeof createSpinner>
-): never {
+): void {
   if (isJsonFormat) {
     outputJsonResult({
       success: false,
@@ -87,7 +87,7 @@ function handleEntryNotFound(
     ConsoleOutput.error(`File not found: ${entryPath}`);
     ConsoleOutput.muted('Run: prs init');
   }
-  process.exit(1);
+  process.exitCode = 1;
 }
 
 /**
@@ -170,6 +170,7 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
 
     if (!existsSync(entryPath)) {
       handleEntryNotFound(entryPath, isJsonFormat, spinner);
+      return;
     }
 
     const result = await compiler.compile(entryPath);
@@ -186,10 +187,14 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
     }
 
     if (failed) {
-      process.exit(1);
+      process.exitCode = 1;
     }
   } catch (error) {
-    handleValidationError(error as Error, isJsonFormat, spinner);
+    handleValidationError(
+      error instanceof Error ? error : new Error(String(error)),
+      isJsonFormat,
+      spinner
+    );
   }
 }
 
@@ -200,7 +205,7 @@ function handleValidationError(
   error: Error,
   isJsonFormat: boolean,
   spinner: ReturnType<typeof createSpinner>
-): never {
+): void {
   if (isJsonFormat) {
     outputJsonResult({
       success: false,
@@ -212,7 +217,7 @@ function handleValidationError(
     spinner.fail('Error');
     ConsoleOutput.error(error.message);
   }
-  process.exit(1);
+  process.exitCode = 1;
 }
 
 /**

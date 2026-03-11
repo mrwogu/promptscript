@@ -90,11 +90,7 @@
 
 ### VS Code Extension
 
-**Goal:** First-class editing experience in VS Code.
-
-- [ ] **Syntax highlighting** for `.prs` files
-- [ ] **Snippets** for common patterns
-- [ ] **Preview pane** — See compiled output side-by-side
+See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 
 ---
 
@@ -104,18 +100,45 @@
 
 **Goal:** Support all major AI coding assistants.
 
-| Tool               | Status     | Output Format                     | Priority |
-| ------------------ | ---------- | --------------------------------- | -------- |
-| GitHub Copilot     | ✅ Done    | `.github/copilot-instructions.md` | —        |
-| Claude Code        | ✅ Done    | `CLAUDE.md`                       | —        |
-| Cursor             | ✅ Done    | `.cursor/rules/*.mdc`             | —        |
-| Google Antigravity | ✅ Done    | `.agent/rules/*.md`               | —        |
-| **Windsurf**       | ⬜ Planned | `.windsurfrules`                  | High     |
-| **Aider**          | ⬜ Planned | `.aider.conf.yml`                 | High     |
-| **Continue**       | ⬜ Planned | `.continue/config.json`           | Medium   |
-| **Cline**          | ⬜ Planned | `.cline/cline_rules`              | Medium   |
-| **Zed**            | ⬜ Planned | `.zed/assistant.json`             | Medium   |
-| **JetBrains AI**   | ⬜ Planned | `.idea/ai-assistant.xml`          | Low      |
+| Tool               | Status  | Output Format                     | Priority |
+| ------------------ | ------- | --------------------------------- | -------- |
+| GitHub Copilot     | ✅ Done | `.github/copilot-instructions.md` | —        |
+| Claude Code        | ✅ Done | `CLAUDE.md`                       | —        |
+| Cursor             | ✅ Done | `.cursor/rules/*.mdc`             | —        |
+| Google Antigravity | ✅ Done | `.agent/rules/*.md`               | —        |
+| Factory AI         | ✅ Done | `AGENTS.md`                       | —        |
+| OpenCode           | ✅ Done | `OPENCODE.md`                     | —        |
+| Gemini CLI         | ✅ Done | `GEMINI.md`                       | —        |
+| Windsurf           | ✅ Done | `.windsurf/rules/project.md`      | —        |
+| Cline              | ✅ Done | `.clinerules`                     | —        |
+| Roo Code           | ✅ Done | `.roorules`                       | —        |
+| Codex              | ✅ Done | `AGENTS.md`                       | —        |
+| Continue           | ✅ Done | `.continue/rules/project.md`      | —        |
+| Augment            | ✅ Done | `.augment/rules/project.md`       | —        |
+| Goose              | ✅ Done | `.goose/rules/project.md`         | —        |
+| Kilo Code          | ✅ Done | `.kilocode/rules/project.md`      | —        |
+| Amp                | ✅ Done | `AGENTS.md`                       | —        |
+| Trae               | ✅ Done | `.trae/rules/project.md`          | —        |
+| Junie              | ✅ Done | `.junie/rules/project.md`         | —        |
+| Kiro CLI           | ✅ Done | `.kiro/rules/project.md`          | —        |
+| Cortex             | ✅ Done | `.cortex/rules/project.md`        | —        |
+| Crush              | ✅ Done | `.crush/rules/project.md`         | —        |
+| Command Code       | ✅ Done | `.commandcode/rules/project.md`   | —        |
+| Kode               | ✅ Done | `.kode/rules/project.md`          | —        |
+| MCPJam             | ✅ Done | `.mcpjam/rules/project.md`        | —        |
+| Mistral Vibe       | ✅ Done | `.vibe/rules/project.md`          | —        |
+| Mux                | ✅ Done | `.mux/rules/project.md`           | —        |
+| OpenHands          | ✅ Done | `.openhands/rules/project.md`     | —        |
+| Pi                 | ✅ Done | `.pi/rules/project.md`            | —        |
+| Qoder              | ✅ Done | `.qoder/rules/project.md`         | —        |
+| Qwen Code          | ✅ Done | `.qwen/rules/project.md`          | —        |
+| Zencoder           | ✅ Done | `.zencoder/rules/project.md`      | —        |
+| Neovate            | ✅ Done | `.neovate/rules/project.md`       | —        |
+| Pochi              | ✅ Done | `.pochi/rules/project.md`         | —        |
+| AdaL               | ✅ Done | `.adal/rules/project.md`          | —        |
+| iFlow              | ✅ Done | `.iflow/rules/project.md`         | —        |
+| OpenClaw           | ✅ Done | `INSTRUCTIONS.md`                 | —        |
+| CodeBuddy          | ✅ Done | `.codebuddy/rules/project.md`     | —        |
 
 ### 2. CI/CD Integration
 
@@ -325,7 +348,7 @@ _These features are being evaluated based on community interest. Vote with 👍 
 - [ ] **Conditional compilation** — `@if env.production` blocks
 - [ ] **Monorepo support** — Per-package configurations with shared base
 - [ ] **Import from URL** — `@inherit https://example.com/rules.prs`
-- [ ] **Docker container** — Pre-built image with PromptScript CLI, no Node.js/npm installation required
+- [x] **Docker container** — Pre-built image with PromptScript CLI (see [Docker guide](docs/guides/docker.md))
 
 ---
 

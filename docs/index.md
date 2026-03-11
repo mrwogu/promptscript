@@ -1,21 +1,21 @@
 ---
-title: 'PromptScript — One Source, 7 AI Tools | Enterprise AI Standards'
-description: 'Write AI instructions once, compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, and 3 more targets. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
+title: 'PromptScript — One Source, 37 AI Agents | Enterprise AI Standards'
+description: 'Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
 meta:
   - name: keywords
-    content: PromptScript, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
+    content: PromptScript, PromptOps, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
   - name: robots
     content: index, follow
   - property: og:title
-    content: PromptScript — One Source, 7 AI Tools
+    content: PromptScript — One Source, 37 AI Agents
   - property: og:description
-    content: Write AI instructions once, compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, and 3 more targets. Enterprise prompt standardization with inheritance, validation, and CI/CD.
+    content: Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.
   - property: og:type
     content: website
   - name: twitter:card
     content: summary_large_image
   - name: twitter:title
-    content: PromptScript — One Source, 7 AI Tools
+    content: PromptScript — One Source, 37 AI Agents
 hide:
   - navigation
   - toc
@@ -27,13 +27,24 @@ hide:
 
 # PromptScript
 
-**One Prompt Codebase. Seven AI Tools. Zero Drift.**
+**Write once. Deploy to 37 agents. Update everywhere instantly.**
 
-_Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, and 4 more targets._
+_Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and 32 more._
 
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
 [:material-book-open-variant: See Enterprise Guide](guides/enterprise.md){ .md-button .md-button--secondary }
 [:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
+
+<div class="hero-badges" markdown>
+[![GitHub stars](https://img.shields.io/github/stars/mrwogu/promptscript?style=flat-square&logo=github)](https://github.com/mrwogu/promptscript)
+[![npm downloads](https://img.shields.io/npm/dm/@promptscript/cli?style=flat-square&logo=npm)](https://www.npmjs.com/package/@promptscript/cli)
+</div>
+
+<div class="hero-install" markdown>
+```
+npm install -g @promptscript/cli
+```
+</div>
 
 </div>
 
@@ -556,8 +567,9 @@ Expert Fullstack Engineer.
   <div class="feature-card__icon feature-card__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
   </div>
-  <h3>Write Once, Compile to 7 AI Tools</h3>
-  <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Gemini CLI, Antigravity, Factory AI, and OpenCode. Add new tools without rewriting.</p>
+  <h3>Write Once, Compile to 37 AI Agents</h3>
+  <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, Roo Code, and 31 more. Add new agents without rewriting.</p>
+  <p class="feature-card__note">37 agents and counting — every new tool means more config to manage</p>
 </div>
 
 <div class="feature-card">
@@ -665,7 +677,7 @@ Expert Fullstack Engineer.
 </div>
 
 <h2 class="section-title">The Solution: PromptOps</h2>
-<p class="section-subtitle">Treat your AI instructions as managed infrastructure — compiled, validated, and deployed</p>
+<p class="section-subtitle">PromptOps is the practice of managing AI instructions as versioned, auditable infrastructure. Treat your AI instructions as managed infrastructure — compiled, validated, and deployed.</p>
 
 ```mermaid
 flowchart TB
@@ -1000,11 +1012,96 @@ flowchart TB
     Check for: SQL injection, XSS, IDOR, PII leaks.
     ```
 
+<!-- Before/After Comparison -->
+<div class="section-divider">
+  <div class="section-divider__line"></div>
+  <div class="section-divider__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
+  </div>
+  <div class="section-divider__line"></div>
+</div>
+
+<h2 class="section-title">Before & After</h2>
+<p class="section-subtitle">See the difference PromptScript makes</p>
+
+=== "Without PromptScript"
+
+    Manually maintain **5+ separate config files** per repo, per tool:
+
+    ```
+    .github/copilot-instructions.md   # GitHub Copilot
+    CLAUDE.md                          # Claude Code
+    .cursor/rules/project.mdc         # Cursor
+    AGENTS.md                          # Codex / Factory
+    GEMINI.md                          # Gemini CLI
+    ```
+
+    - No validation — instructions drift silently
+    - No inheritance — copy-paste across repos
+    - No audit trail — who changed what?
+    - Adding a new tool = rewrite everything
+
+=== "With PromptScript"
+
+    Write **one `.prs` file**, compile to all 37 agents:
+
+    ```promptscript
+    @meta { id: "my-project" syntax: "1.0.0" }
+    @inherit @company/standards
+    @identity { """You are an expert developer.""" }
+    ```
+
+    ```bash
+    prs compile  # Generates all 37 output files
+    ```
+
+    - Validated at compile time and in CI/CD
+    - Hierarchical inheritance from org → team → project
+    - Full audit trail via Git
+    - New tools supported automatically
+
+<!-- Video/Demo Placeholder -->
+<div class="section-divider">
+  <div class="section-divider__line"></div>
+  <div class="section-divider__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+  </div>
+  <div class="section-divider__line"></div>
+</div>
+
+<h2 class="section-title">See It Live</h2>
+<p class="section-subtitle">Try PromptScript right in your browser — no installation needed</p>
+
+<div style="text-align: center; margin: 2rem 0;">
+  <a href="/playground/" class="md-button md-button--primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;">Open the Playground</a>
+  <p style="margin-top: 1rem; color: var(--md-default-fg-color--lighter); font-size: 0.9rem;">Video walkthrough coming soon</p>
+</div>
+
+<!-- Community -->
+<div class="section-divider">
+  <div class="section-divider__line"></div>
+  <div class="section-divider__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3m-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3m0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5m8 0c-.29 0-.62.02-.97.05c1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5"/></svg>
+  </div>
+  <div class="section-divider__line"></div>
+</div>
+
+<h2 class="section-title">Join the Community</h2>
+<p class="section-subtitle">PromptScript is open source and early-adopter friendly</p>
+
+<div style="text-align: center; margin: 2rem 0;">
+  <p style="font-size: 1.1rem; color: var(--md-default-fg-color--light);">We're building the future of AI instruction management in the open.</p>
+  <p style="margin-top: 0.5rem;">
+    <a href="https://github.com/mrwogu/promptscript" class="md-button">Star us on GitHub</a>
+    <a href="https://github.com/mrwogu/promptscript/issues" class="md-button md-button--secondary">Report Issues</a>
+  </p>
+</div>
+
 <!-- CTA Section -->
 <div class="cta-section">
   <h2 class="cta-section__title">Ready to Standardize Your AI Instructions?</h2>
   <p class="cta-section__subtitle">Join engineering teams using PromptScript to manage AI context at scale</p>
   <a href="getting-started/" class="md-button md-button--primary">Get Started in 5 Minutes</a>
-  <a href="guides/enterprise/" class="md-button md-button--secondary">See Enterprise Guide</a>
+  <a href="guides/enterprise/" class="md-button md-button--secondary">Enterprise? Let's Talk</a>
   <a href="https://github.com/mrwogu/promptscript" class="md-button">View on GitHub</a>
 </div>

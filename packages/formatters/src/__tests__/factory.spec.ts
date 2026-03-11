@@ -530,6 +530,67 @@ describe('FactoryFormatter', () => {
       expect(cmdFile?.content).toContain("tools: ['github/github-mcp-server/issue_write']");
     });
 
+    it('should generate command files from TextContent shortcuts with multiline content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/deploy': {
+                  type: 'TextContent',
+                  value: 'Step 1: Build\nStep 2: Deploy',
+                  loc: createLoc(),
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const cmdFile = result.additionalFiles?.find((f) => f.path.includes('commands/deploy'));
+      expect(cmdFile).toBeDefined();
+      expect(cmdFile?.path).toBe('.factory/commands/deploy.md');
+      expect(cmdFile?.content).toContain('Step 1: Build');
+      expect(cmdFile?.content).toContain('Step 2: Deploy');
+    });
+
+    it('should skip TextContent shortcuts with single-line content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/simple': {
+                  type: 'TextContent',
+                  value: 'Just a single line',
+                  loc: createLoc(),
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const commandFiles = result.additionalFiles?.filter((f) => f.path.includes('commands/'));
+      expect(commandFiles ?? []).toHaveLength(0);
+    });
+
     it('should not generate command files for simple string shortcuts', () => {
       const ast: Program = {
         ...createMinimalProgram(),

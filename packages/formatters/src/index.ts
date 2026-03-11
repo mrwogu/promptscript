@@ -94,45 +94,12 @@ export type {
   FeatureCoverageSummary,
 } from './feature-matrix.js';
 
-// Built-in formatters
-export {
-  GitHubFormatter,
-  ClaudeFormatter,
-  CursorFormatter,
-  AntigravityFormatter,
-  FactoryFormatter,
-  OpenCodeFormatter,
-  GeminiFormatter,
-} from './formatters/index.js';
-
-// GitHub version support
-export { GITHUB_VERSIONS } from './formatters/github.js';
-
-// Claude version support
-export { CLAUDE_VERSIONS } from './formatters/claude.js';
-
-// Cursor version support
-export { CURSOR_VERSIONS } from './formatters/cursor.js';
-export type { CursorVersion } from './formatters/cursor.js';
-
-// Antigravity version support
-export { ANTIGRAVITY_VERSIONS } from './formatters/antigravity.js';
-export type { AntigravityVersion, ActivationType } from './formatters/antigravity.js';
-
-// Factory version support
-export { FACTORY_VERSIONS } from './formatters/factory.js';
-export type { FactoryVersion } from './formatters/factory.js';
-
-// OpenCode version support
-export { OPENCODE_VERSIONS } from './formatters/opencode.js';
-export type { OpenCodeVersion } from './formatters/opencode.js';
-
-// Gemini version support
-export { GEMINI_VERSIONS } from './formatters/gemini.js';
-export type { GeminiVersion } from './formatters/gemini.js';
+// All formatter classes, version constants, and version types
+export * from './formatters/index.js';
 
 // Register built-in formatters
 import { FormatterRegistry } from './registry.js';
+// Original 7
 import { GitHubFormatter } from './formatters/github.js';
 import { ClaudeFormatter } from './formatters/claude.js';
 import { CursorFormatter } from './formatters/cursor.js';
@@ -140,7 +107,41 @@ import { AntigravityFormatter } from './formatters/antigravity.js';
 import { FactoryFormatter } from './formatters/factory.js';
 import { OpenCodeFormatter } from './formatters/opencode.js';
 import { GeminiFormatter } from './formatters/gemini.js';
+// Tier 1
+import { WindsurfFormatter } from './formatters/windsurf.js';
+import { ClineFormatter } from './formatters/cline.js';
+import { RooFormatter } from './formatters/roo.js';
+import { CodexFormatter } from './formatters/codex.js';
+import { ContinueFormatter } from './formatters/continue.js';
+// Tier 2
+import { AugmentFormatter } from './formatters/augment.js';
+import { GooseFormatter } from './formatters/goose.js';
+import { KiloFormatter } from './formatters/kilo.js';
+import { AmpFormatter } from './formatters/amp.js';
+import { TraeFormatter } from './formatters/trae.js';
+import { JunieFormatter } from './formatters/junie.js';
+import { KiroFormatter } from './formatters/kiro.js';
+// Tier 3
+import { CortexFormatter } from './formatters/cortex.js';
+import { CrushFormatter } from './formatters/crush.js';
+import { CommandCodeFormatter } from './formatters/command-code.js';
+import { KodeFormatter } from './formatters/kode.js';
+import { McpjamFormatter } from './formatters/mcpjam.js';
+import { MistralVibeFormatter } from './formatters/mistral-vibe.js';
+import { MuxFormatter } from './formatters/mux.js';
+import { OpenHandsFormatter } from './formatters/openhands.js';
+import { PiFormatter } from './formatters/pi.js';
+import { QoderFormatter } from './formatters/qoder.js';
+import { QwenCodeFormatter } from './formatters/qwen-code.js';
+import { ZencoderFormatter } from './formatters/zencoder.js';
+import { NeovateFormatter } from './formatters/neovate.js';
+import { PochiFormatter } from './formatters/pochi.js';
+import { AdalFormatter } from './formatters/adal.js';
+import { IflowFormatter } from './formatters/iflow.js';
+import { OpenClawFormatter } from './formatters/openclaw.js';
+import { CodeBuddyFormatter } from './formatters/codebuddy.js';
 
+// Original 7
 FormatterRegistry.register('github', () => new GitHubFormatter());
 FormatterRegistry.register('claude', () => new ClaudeFormatter());
 FormatterRegistry.register('cursor', () => new CursorFormatter());
@@ -148,3 +149,36 @@ FormatterRegistry.register('antigravity', () => new AntigravityFormatter());
 FormatterRegistry.register('factory', () => new FactoryFormatter());
 FormatterRegistry.register('opencode', () => new OpenCodeFormatter());
 FormatterRegistry.register('gemini', () => new GeminiFormatter());
+// Tier 1
+FormatterRegistry.register('windsurf', () => new WindsurfFormatter());
+FormatterRegistry.register('cline', () => new ClineFormatter());
+FormatterRegistry.register('roo', () => new RooFormatter());
+FormatterRegistry.register('codex', () => new CodexFormatter());
+FormatterRegistry.register('continue', () => new ContinueFormatter());
+// Tier 2
+FormatterRegistry.register('augment', () => new AugmentFormatter());
+FormatterRegistry.register('goose', () => new GooseFormatter());
+FormatterRegistry.register('kilo', () => new KiloFormatter());
+FormatterRegistry.register('amp', () => new AmpFormatter());
+FormatterRegistry.register('trae', () => new TraeFormatter());
+FormatterRegistry.register('junie', () => new JunieFormatter());
+FormatterRegistry.register('kiro', () => new KiroFormatter());
+// Tier 3
+FormatterRegistry.register('cortex', () => new CortexFormatter());
+FormatterRegistry.register('crush', () => new CrushFormatter());
+FormatterRegistry.register('command-code', () => new CommandCodeFormatter());
+FormatterRegistry.register('kode', () => new KodeFormatter());
+FormatterRegistry.register('mcpjam', () => new McpjamFormatter());
+FormatterRegistry.register('mistral-vibe', () => new MistralVibeFormatter());
+FormatterRegistry.register('mux', () => new MuxFormatter());
+FormatterRegistry.register('openhands', () => new OpenHandsFormatter());
+FormatterRegistry.register('pi', () => new PiFormatter());
+FormatterRegistry.register('qoder', () => new QoderFormatter());
+FormatterRegistry.register('qwen-code', () => new QwenCodeFormatter());
+FormatterRegistry.register('zencoder', () => new ZencoderFormatter());
+FormatterRegistry.register('neovate', () => new NeovateFormatter());
+FormatterRegistry.register('pochi', () => new PochiFormatter());
+FormatterRegistry.register('adal', () => new AdalFormatter());
+FormatterRegistry.register('iflow', () => new IflowFormatter());
+FormatterRegistry.register('openclaw', () => new OpenClawFormatter());
+FormatterRegistry.register('codebuddy', () => new CodeBuddyFormatter());

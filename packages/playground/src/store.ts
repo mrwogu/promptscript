@@ -9,7 +9,37 @@ export type FormatterName =
   | 'antigravity'
   | 'factory'
   | 'opencode'
-  | 'gemini';
+  | 'gemini'
+  | 'windsurf'
+  | 'cline'
+  | 'roo'
+  | 'codex'
+  | 'continue'
+  | 'augment'
+  | 'goose'
+  | 'kilo'
+  | 'amp'
+  | 'trae'
+  | 'junie'
+  | 'kiro'
+  | 'cortex'
+  | 'crush'
+  | 'command-code'
+  | 'kode'
+  | 'mcpjam'
+  | 'mistral-vibe'
+  | 'mux'
+  | 'openhands'
+  | 'pi'
+  | 'qoder'
+  | 'qwen-code'
+  | 'zencoder'
+  | 'neovate'
+  | 'pochi'
+  | 'adal'
+  | 'iflow'
+  | 'openclaw'
+  | 'codebuddy';
 
 export interface FileState {
   path: string;
@@ -186,9 +216,39 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     claude: { enabled: true, version: 'full' },
     cursor: { enabled: true, version: 'standard' },
     antigravity: { enabled: true, version: 'frontmatter' },
-    factory: { enabled: false, version: 'simple' },
+    factory: { enabled: false, version: 'full' },
     opencode: { enabled: false, version: 'full' },
     gemini: { enabled: false, version: 'full' },
+    windsurf: { enabled: false, version: 'full' },
+    cline: { enabled: false, version: 'full' },
+    roo: { enabled: false, version: 'full' },
+    codex: { enabled: false, version: 'full' },
+    continue: { enabled: false, version: 'full' },
+    augment: { enabled: false, version: 'full' },
+    goose: { enabled: false, version: 'full' },
+    kilo: { enabled: false, version: 'full' },
+    amp: { enabled: false, version: 'full' },
+    trae: { enabled: false, version: 'full' },
+    junie: { enabled: false, version: 'full' },
+    kiro: { enabled: false, version: 'full' },
+    cortex: { enabled: false, version: 'full' },
+    crush: { enabled: false, version: 'full' },
+    'command-code': { enabled: false, version: 'full' },
+    kode: { enabled: false, version: 'full' },
+    mcpjam: { enabled: false, version: 'full' },
+    'mistral-vibe': { enabled: false, version: 'full' },
+    mux: { enabled: false, version: 'full' },
+    openhands: { enabled: false, version: 'full' },
+    pi: { enabled: false, version: 'full' },
+    qoder: { enabled: false, version: 'full' },
+    'qwen-code': { enabled: false, version: 'full' },
+    zencoder: { enabled: false, version: 'full' },
+    neovate: { enabled: false, version: 'full' },
+    pochi: { enabled: false, version: 'full' },
+    adal: { enabled: false, version: 'full' },
+    iflow: { enabled: false, version: 'full' },
+    openclaw: { enabled: false, version: 'full' },
+    codebuddy: { enabled: false, version: 'full' },
   },
   formatting: {
     tabWidth: 2,
@@ -389,6 +449,36 @@ export const selectOutputsForFormatter = (
       /\.opencode\/agents\/.*\.md$/,
     ],
     gemini: [/^GEMINI\.md$/, /\.gemini\/commands\/.*\.toml$/, /\.gemini\/skills\/.*\/skill\.md$/],
+    windsurf: [/^\.windsurf\/rules\/.*\.md$/, /^\.windsurf\/skills\/.*\.md$/],
+    cline: [/^\.clinerules$/, /^\.agents\/skills\/.*\.md$/],
+    roo: [/^\.roorules$/, /^\.roo\/skills\/.*\.md$/],
+    codex: [/^AGENTS\.md$/, /^\.agents\/skills\/.*\.md$/],
+    continue: [/^\.continue\/rules\/.*\.md$/, /^\.continue\/skills\/.*\.md$/],
+    augment: [/^\.augment\/rules\/.*\.md$/, /^\.augment\/skills\/.*\.md$/],
+    goose: [/^\.goose\/rules\/.*\.md$/, /^\.goose\/skills\/.*\.md$/],
+    kilo: [/^\.kilocode\/rules\/.*\.md$/, /^\.kilocode\/skills\/.*\.md$/],
+    amp: [/^AGENTS\.md$/, /^\.agents\/skills\/.*\.md$/],
+    trae: [/^\.trae\/rules\/.*\.md$/, /^\.trae\/skills\/.*\.md$/],
+    junie: [/^\.junie\/rules\/.*\.md$/, /^\.junie\/skills\/.*\.md$/],
+    kiro: [/^\.kiro\/rules\/.*\.md$/, /^\.kiro\/skills\/.*\.md$/],
+    cortex: [/^\.cortex\/rules\/.*\.md$/, /^\.cortex\/skills\/.*\.md$/],
+    crush: [/^\.crush\/rules\/.*\.md$/, /^\.crush\/skills\/.*\.md$/],
+    'command-code': [/^\.commandcode\/rules\/.*\.md$/, /^\.commandcode\/skills\/.*\.md$/],
+    kode: [/^\.kode\/rules\/.*\.md$/, /^\.kode\/skills\/.*\.md$/],
+    mcpjam: [/^\.mcpjam\/rules\/.*\.md$/, /^\.mcpjam\/skills\/.*\.md$/],
+    'mistral-vibe': [/^\.vibe\/rules\/.*\.md$/, /^\.vibe\/skills\/.*\.md$/],
+    mux: [/^\.mux\/rules\/.*\.md$/, /^\.mux\/skills\/.*\.md$/],
+    openhands: [/^\.openhands\/rules\/.*\.md$/, /^\.openhands\/skills\/.*\.md$/],
+    pi: [/^\.pi\/rules\/.*\.md$/, /^\.pi\/skills\/.*\.md$/],
+    qoder: [/^\.qoder\/rules\/.*\.md$/, /^\.qoder\/skills\/.*\.md$/],
+    'qwen-code': [/^\.qwen\/rules\/.*\.md$/, /^\.qwen\/skills\/.*\.md$/],
+    zencoder: [/^\.zencoder\/rules\/.*\.md$/, /^\.zencoder\/skills\/.*\.md$/],
+    neovate: [/^\.neovate\/rules\/.*\.md$/, /^\.neovate\/skills\/.*\.md$/],
+    pochi: [/^\.pochi\/rules\/.*\.md$/, /^\.pochi\/skills\/.*\.md$/],
+    adal: [/^\.adal\/rules\/.*\.md$/, /^\.adal\/skills\/.*\.md$/],
+    iflow: [/^\.iflow\/rules\/.*\.md$/, /^\.iflow\/skills\/.*\.md$/],
+    openclaw: [/^INSTRUCTIONS\.md$/, /^skills\/.*\.md$/],
+    codebuddy: [/^\.codebuddy\/rules\/.*\.md$/, /^\.codebuddy\/skills\/.*\.md$/],
   };
 
   const patterns = formatterPatterns[formatter];
@@ -407,6 +497,36 @@ export const selectOutputsForFormatter = (
     factory: 'AGENTS.md',
     opencode: 'OPENCODE.md',
     gemini: 'GEMINI.md',
+    windsurf: 'project.md',
+    cline: '.clinerules',
+    roo: '.roorules',
+    codex: 'AGENTS.md',
+    continue: 'project.md',
+    augment: 'project.md',
+    goose: 'project.md',
+    kilo: 'project.md',
+    amp: 'AGENTS.md',
+    trae: 'project.md',
+    junie: 'project.md',
+    kiro: 'project.md',
+    cortex: 'project.md',
+    crush: 'project.md',
+    'command-code': 'project.md',
+    kode: 'project.md',
+    mcpjam: 'project.md',
+    'mistral-vibe': 'project.md',
+    mux: 'project.md',
+    openhands: 'project.md',
+    pi: 'project.md',
+    qoder: 'project.md',
+    'qwen-code': 'project.md',
+    zencoder: 'project.md',
+    neovate: 'project.md',
+    pochi: 'project.md',
+    adal: 'project.md',
+    iflow: 'project.md',
+    openclaw: 'INSTRUCTIONS.md',
+    codebuddy: 'project.md',
   };
 
   const mainPattern = mainFilePatterns[formatter];

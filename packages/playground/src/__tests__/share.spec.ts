@@ -170,7 +170,7 @@ describe('share utilities', () => {
         claude: { enabled: true, version: 'full' },
         cursor: { enabled: true, version: 'standard' },
         antigravity: { enabled: true, version: 'frontmatter' },
-        factory: { enabled: false, version: 'simple' },
+        factory: { enabled: false, version: 'full' },
         opencode: { enabled: false, version: 'full' },
         gemini: { enabled: false, version: 'full' },
       },

@@ -15,6 +15,36 @@ const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'factory', label: 'Factory', icon: '🏭' },
   { name: 'opencode', label: 'OpenCode', icon: '💻' },
   { name: 'gemini', label: 'Gemini', icon: '♊' },
+  { name: 'windsurf', label: 'Windsurf', icon: '🏄' },
+  { name: 'cline', label: 'Cline', icon: '⌨' },
+  { name: 'roo', label: 'Roo Code', icon: '🦘' },
+  { name: 'codex', label: 'Codex', icon: '📜' },
+  { name: 'continue', label: 'Continue', icon: '▶' },
+  { name: 'augment', label: 'Augment', icon: '➕' },
+  { name: 'goose', label: 'Goose', icon: '🪿' },
+  { name: 'kilo', label: 'Kilo Code', icon: '⚖' },
+  { name: 'amp', label: 'Amp', icon: '⚡' },
+  { name: 'trae', label: 'Trae', icon: '🌲' },
+  { name: 'junie', label: 'Junie', icon: '🌸' },
+  { name: 'kiro', label: 'Kiro CLI', icon: '🔮' },
+  { name: 'cortex', label: 'Cortex Code', icon: '🧠' },
+  { name: 'crush', label: 'Crush', icon: '💎' },
+  { name: 'command-code', label: 'Command Code', icon: '⌘' },
+  { name: 'kode', label: 'Kode', icon: '🔷' },
+  { name: 'mcpjam', label: 'MCPJam', icon: '🎵' },
+  { name: 'mistral-vibe', label: 'Mistral Vibe', icon: '🌊' },
+  { name: 'mux', label: 'Mux', icon: '🔀' },
+  { name: 'openhands', label: 'OpenHands', icon: '🤲' },
+  { name: 'pi', label: 'Pi', icon: '🥧' },
+  { name: 'qoder', label: 'Qoder', icon: '🔢' },
+  { name: 'qwen-code', label: 'Qwen Code', icon: '🐦' },
+  { name: 'zencoder', label: 'Zencoder', icon: '🧘' },
+  { name: 'neovate', label: 'Neovate', icon: '✨' },
+  { name: 'pochi', label: 'Pochi', icon: '🐕' },
+  { name: 'adal', label: 'AdaL', icon: '🔬' },
+  { name: 'iflow', label: 'iFlow CLI', icon: '🌀' },
+  { name: 'openclaw', label: 'OpenClaw', icon: '🦀' },
+  { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
 ];
 
 /**
@@ -57,6 +87,26 @@ function getDisplayNames(paths: string[]): Map<string, string> {
   return result;
 }
 
+function CopyButton({ content }: { content: string }) {
+  const [showCopied, setShowCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content).then(() => {
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 2000);
+    });
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="text-xs text-gray-400 hover:text-white px-2 py-1 rounded bg-ps-bg"
+    >
+      {showCopied ? 'Copied!' : 'Copy'}
+    </button>
+  );
+}
+
 export function OutputPanel() {
   const activeFormatter = usePlaygroundStore((s) => s.activeFormatter);
   const setActiveFormatter = usePlaygroundStore((s) => s.setActiveFormatter);
@@ -92,31 +142,32 @@ export function OutputPanel() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Formatter tabs */}
-      <div className="flex border-b border-ps-border bg-ps-bg">
-        {FORMATTERS.map((formatter) => {
-          const isEnabled = enabledTargets.includes(formatter.name);
-          const isActive = activeFormatter === formatter.name;
+      {/* Formatter tabs — only show enabled targets */}
+      <div
+        className="flex border-b border-ps-border bg-ps-bg overflow-x-auto"
+        role="tablist"
+        aria-label="Output formatters"
+      >
+        {FORMATTERS.filter((formatter) => enabledTargets.includes(formatter.name)).map(
+          (formatter) => {
+            const isActive = activeFormatter === formatter.name;
 
-          return (
-            <button
-              key={formatter.name}
-              onClick={() => isEnabled && setActiveFormatter(formatter.name)}
-              disabled={!isEnabled}
-              className={`px-4 py-2 text-sm flex items-center gap-2 ${
-                !isEnabled
-                  ? 'opacity-30 cursor-not-allowed text-gray-500'
-                  : isActive
-                    ? 'tab-active text-white'
-                    : 'tab-inactive text-gray-400'
-              }`}
-              title={!isEnabled ? `${formatter.label} is disabled in config` : undefined}
-            >
-              <span>{formatter.icon}</span>
-              <span>{formatter.label}</span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={formatter.name}
+                onClick={() => setActiveFormatter(formatter.name)}
+                role="tab"
+                aria-selected={isActive}
+                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap ${
+                  isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
+                }`}
+              >
+                <span>{formatter.icon}</span>
+                <span>{formatter.label}</span>
+              </button>
+            );
+          }
+        )}
       </div>
 
       {/* Output content */}
@@ -173,14 +224,7 @@ export function OutputPanel() {
               <div className="flex-1 overflow-auto p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(currentOutput.content);
-                    }}
-                    className="text-xs text-gray-400 hover:text-white px-2 py-1 rounded bg-ps-bg"
-                  >
-                    Copy
-                  </button>
+                  <CopyButton content={currentOutput.content} />
                 </div>
                 <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
                   {currentOutput.content}

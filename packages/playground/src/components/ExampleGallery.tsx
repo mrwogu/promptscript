@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { usePlaygroundStore, type FileState } from '../store';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface Example {
   id: string;
@@ -756,6 +758,17 @@ export function ExampleGallery() {
   const setFiles = usePlaygroundStore((s) => s.setFiles);
   const setShowExamples = usePlaygroundStore((s) => s.setShowExamples);
   const setEnvVars = usePlaygroundStore((s) => s.setEnvVars);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(modalRef, true);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowExamples(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [setShowExamples]);
 
   const loadExample = (example: Example) => {
     setFiles(example.files);
@@ -820,11 +833,27 @@ export function ExampleGallery() {
   );
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-ps-surface rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[85vh] overflow-hidden">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      onClick={() => setShowExamples(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="gallery-title"
+    >
+      <div
+        ref={modalRef}
+        className="bg-ps-surface rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[85vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-4 border-b border-ps-border">
-          <h2 className="text-lg font-semibold">Example Gallery</h2>
-          <button onClick={() => setShowExamples(false)} className="text-gray-400 hover:text-white">
+          <h2 id="gallery-title" className="text-lg font-semibold">
+            Example Gallery
+          </h2>
+          <button
+            onClick={() => setShowExamples(false)}
+            className="text-gray-400 hover:text-white"
+            aria-label="Close"
+          >
             ✕
           </button>
         </div>

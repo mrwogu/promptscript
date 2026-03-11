@@ -301,6 +301,7 @@ export interface UserConfig {
  * Supported output targets.
  */
 export type TargetName =
+  // Original 7
   | 'github'
   | 'claude'
   | 'cursor'
@@ -308,12 +309,46 @@ export type TargetName =
   | 'factory'
   | 'opencode'
   | 'gemini'
+  // Tier 1
+  | 'windsurf'
+  | 'cline'
+  | 'roo'
+  | 'codex'
+  | 'continue'
+  // Tier 2
+  | 'augment'
+  | 'goose'
+  | 'kilo'
+  | 'amp'
+  | 'trae'
+  | 'junie'
+  | 'kiro'
+  // Tier 3
+  | 'cortex'
+  | 'crush'
+  | 'command-code'
+  | 'kode'
+  | 'mcpjam'
+  | 'mistral-vibe'
+  | 'mux'
+  | 'openhands'
+  | 'pi'
+  | 'qoder'
+  | 'qwen-code'
+  | 'zencoder'
+  | 'neovate'
+  | 'pochi'
+  | 'adal'
+  | 'iflow'
+  | 'openclaw'
+  | 'codebuddy'
   | string;
 
 /**
  * Default output paths for each target.
  */
 export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
+  // Original 7
   github: '.github/copilot-instructions.md',
   claude: 'CLAUDE.md',
   cursor: '.cursor/rules/project.mdc',
@@ -321,4 +356,37 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   factory: 'AGENTS.md',
   opencode: 'OPENCODE.md',
   gemini: 'GEMINI.md',
+  // Tier 1
+  windsurf: '.windsurf/rules/project.md',
+  cline: '.clinerules',
+  roo: '.roorules',
+  codex: 'AGENTS.md',
+  continue: '.continue/rules/project.md',
+  // Tier 2
+  augment: '.augment/rules/project.md',
+  goose: '.goose/rules/project.md',
+  kilo: '.kilocode/rules/project.md',
+  amp: 'AGENTS.md',
+  trae: '.trae/rules/project.md',
+  junie: '.junie/rules/project.md',
+  kiro: '.kiro/rules/project.md',
+  // Tier 3
+  cortex: '.cortex/rules/project.md',
+  crush: '.crush/rules/project.md',
+  'command-code': '.commandcode/rules/project.md',
+  kode: '.kode/rules/project.md',
+  mcpjam: '.mcpjam/rules/project.md',
+  'mistral-vibe': '.vibe/rules/project.md',
+  mux: '.mux/rules/project.md',
+  openhands: '.openhands/rules/project.md',
+  pi: '.pi/rules/project.md',
+  qoder: '.qoder/rules/project.md',
+  'qwen-code': '.qwen/rules/project.md',
+  zencoder: '.zencoder/rules/project.md',
+  neovate: '.neovate/rules/project.md',
+  pochi: '.pochi/rules/project.md',
+  adal: '.adal/rules/project.md',
+  iflow: '.iflow/rules/project.md',
+  openclaw: 'INSTRUCTIONS.md',
+  codebuddy: '.codebuddy/rules/project.md',
 };

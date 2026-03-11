@@ -30,7 +30,7 @@ export async function registryValidateCommand(
     if (options.format === 'json') {
       console.log(JSON.stringify(result, null, 2));
       if (!result.valid || (options.strict && result.issues.length > 0)) {
-        process.exit(1);
+        process.exitCode = 1;
       }
       return;
     }
@@ -65,11 +65,11 @@ export async function registryValidateCommand(
     }
 
     if (!result.valid || (options.strict && result.issues.length > 0)) {
-      process.exit(1);
+      process.exitCode = 1;
     }
   } catch (error) {
     spinner.fail('Validation failed');
-    ConsoleOutput.error((error as Error).message);
-    process.exit(1);
+    ConsoleOutput.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
   }
 }

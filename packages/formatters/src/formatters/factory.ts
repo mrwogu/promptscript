@@ -71,7 +71,7 @@ interface FactorySkillConfig extends MarkdownSkillConfig {
 }
 
 /**
- * Formatter for Factory AI (droid) instructions.
+ * Formatter for Factory AI instructions.
  *
  * Factory AI uses AGENTS.md as its main configuration file and
  * .factory/skills/<name>/SKILL.md for reusable skills.

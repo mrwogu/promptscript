@@ -52,12 +52,13 @@ program
       return;
     }
 
-    // Check for updates (non-blocking, respects cache and quiet mode)
+    // Check for updates (fire-and-forget, respects cache and quiet mode)
     const currentVersion = getPackageVersion(__dirname, '../package.json');
-    const updateInfo = await checkForUpdates(currentVersion);
-    if (updateInfo) {
-      printUpdateNotification(updateInfo);
-    }
+    checkForUpdates(currentVersion).then((updateInfo) => {
+      if (updateInfo) {
+        printUpdateNotification(updateInfo);
+      }
+    });
   });
 
 program

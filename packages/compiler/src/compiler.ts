@@ -1,7 +1,7 @@
 import { noopLogger, type Logger, type PSError } from '@promptscript/core';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { Resolver, type ResolvedAST } from '@promptscript/resolver';
-import { Validator, type ValidatorConfig } from '@promptscript/validator';
+import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
 import type {
   CompilerOptions,
   CompileResult,
@@ -151,7 +151,15 @@ export class Compiler {
       return {
         success: false,
         outputs: new Map(),
-        errors: [this.toCompileError(err as Error)],
+        errors: [
+          this.toCompileError(
+            err instanceof Error
+              ? err
+              : this.isPSErrorLike(err)
+                ? (err as PSError)
+                : new Error(String(err))
+          ),
+        ],
         warnings: [],
         stats,
       };
@@ -198,6 +206,8 @@ export class Compiler {
     const startFormat = Date.now();
     const outputs = new Map<string, FormatterOutput>();
     const formatErrors: CompileError[] = [];
+    const formatWarnings: ValidationMessage[] = [];
+    const outputPathOwners = new Map<string, string>();
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
@@ -212,8 +222,19 @@ export class Compiler {
 
         this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
 
-        // Use output path as key to support multiple targets with same formatter
-        // (e.g., cursor modern + cursor legacy)
+        // Warn if multiple formatters target the same output path
+        const existingOwner = outputPathOwners.get(output.path);
+        if (existingOwner) {
+          formatWarnings.push({
+            ruleId: 'PS4001',
+            ruleName: 'output-path-collision',
+            severity: 'warning',
+            message: `Output path '${output.path}' is written by both '${existingOwner}' and '${formatter.name}'. The latter will overwrite the former.`,
+            suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+          });
+        }
+        outputPathOwners.set(output.path, formatter.name);
+
         // Add PromptScript marker to all outputs for overwrite detection
         outputs.set(output.path, addMarkerToOutput(output));
 
@@ -234,7 +255,7 @@ export class Compiler {
         formatErrors.push({
           name: 'FormatterError',
           code: 'PS4000',
-          message: `Formatter '${formatter.name}' failed: ${(err as Error).message}`,
+          message: `Formatter '${formatter.name}' failed: ${err instanceof Error ? err.message : String(err)}`,
         });
       }
     }
@@ -243,12 +264,14 @@ export class Compiler {
     stats.totalTime = Date.now() - startTotal;
     this.logger.verbose(`Format completed (${stats.formatTime}ms)`);
 
+    const allWarnings = [...validation.warnings, ...formatWarnings];
+
     if (formatErrors.length > 0) {
       return {
         success: false,
         outputs,
         errors: formatErrors,
-        warnings: validation.warnings,
+        warnings: allWarnings,
         stats,
       };
     }
@@ -257,7 +280,7 @@ export class Compiler {
       success: true,
       outputs,
       errors: [],
-      warnings: validation.warnings,
+      warnings: allWarnings,
       stats,
     };
   }
@@ -342,7 +365,7 @@ export class Compiler {
         const result = await this.compile(entryPath);
         options.onCompile?.(result, changedFiles);
       } catch (error) {
-        options.onError?.(error as Error);
+        options.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
     };
 
@@ -352,7 +375,7 @@ export class Compiler {
       ignoreInitial: true,
     });
 
-    watcher.on('change', (path: string) => {
+    const scheduleRecompile = (path: string): void => {
       pendingChanges.push(path);
 
       if (debounceTimer) {
@@ -364,21 +387,10 @@ export class Compiler {
         pendingChanges = [];
         handleChange(files);
       }, debounceMs);
-    });
+    };
 
-    watcher.on('add', (path: string) => {
-      pendingChanges.push(path);
-
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-
-      debounceTimer = setTimeout(() => {
-        const files = [...pendingChanges];
-        pendingChanges = [];
-        handleChange(files);
-      }, debounceMs);
-    });
+    watcher.on('change', scheduleRecompile);
+    watcher.on('add', scheduleRecompile);
 
     watcher.on('error', (error: unknown) => {
       options.onError?.(error instanceof Error ? error : new Error(String(error)));
@@ -434,7 +446,8 @@ export class Compiler {
 
       // Check if it's a constructor (function)
       if (typeof f === 'function') {
-        return { formatter: new (f as unknown as FormatterConstructor)() };
+        const Ctor = f as FormatterConstructor;
+        return { formatter: new Ctor() };
       }
 
       // Object with name and config (not a Formatter instance)
@@ -463,6 +476,19 @@ export class Compiler {
     }
     throw new Error(
       `Unknown formatter: '${name}'. Available formatters: ${FormatterRegistry.list().join(', ')}`
+    );
+  }
+
+  /**
+   * Check if a value looks like a PSError (has code, message, and format).
+   */
+  private isPSErrorLike(err: unknown): err is PSError {
+    return (
+      typeof err === 'object' &&
+      err !== null &&
+      'message' in err &&
+      'code' in err &&
+      typeof (err as PSError).message === 'string'
     );
   }
 

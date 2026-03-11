@@ -386,34 +386,31 @@ describe('version-check', () => {
   });
 
   describe('checkForUpdates with cache', () => {
-    let mockFsModule: {
-      existsSync: ReturnType<typeof vi.fn>;
-      readFileSync: ReturnType<typeof vi.fn>;
-      writeFileSync: ReturnType<typeof vi.fn>;
-      mkdirSync: ReturnType<typeof vi.fn>;
+    let mockFsPromisesModule: {
+      readFile: ReturnType<typeof vi.fn>;
+      writeFile: ReturnType<typeof vi.fn>;
+      mkdir: ReturnType<typeof vi.fn>;
     };
 
     beforeEach(() => {
       vi.stubGlobal('fetch', vi.fn());
 
-      mockFsModule = {
-        existsSync: vi.fn().mockReturnValue(false),
-        readFileSync: vi.fn(),
-        writeFileSync: vi.fn(),
-        mkdirSync: vi.fn(),
+      mockFsPromisesModule = {
+        readFile: vi.fn().mockRejectedValue(new Error('ENOENT')),
+        writeFile: vi.fn().mockResolvedValue(undefined),
+        mkdir: vi.fn().mockResolvedValue(undefined),
       };
 
-      vi.doMock('fs', () => mockFsModule);
+      vi.doMock('fs/promises', () => mockFsPromisesModule);
     });
 
     afterEach(() => {
       vi.unstubAllGlobals();
-      vi.doUnmock('fs');
+      vi.doUnmock('fs/promises');
     });
 
     it('should use cached result when valid', async () => {
-      mockFsModule.existsSync.mockReturnValue(true);
-      mockFsModule.readFileSync.mockReturnValue(
+      mockFsPromisesModule.readFile.mockResolvedValue(
         JSON.stringify({
           lastCheck: new Date().toISOString(),
           latestVersion: '2.0.0',
@@ -436,8 +433,7 @@ describe('version-check', () => {
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 2); // 2 days ago
 
-      mockFsModule.existsSync.mockReturnValue(true);
-      mockFsModule.readFileSync.mockReturnValue(
+      mockFsPromisesModule.readFile.mockResolvedValue(
         JSON.stringify({
           lastCheck: oldDate.toISOString(),
           latestVersion: '1.5.0',
@@ -458,8 +454,7 @@ describe('version-check', () => {
     });
 
     it('should fetch when current version changed', async () => {
-      mockFsModule.existsSync.mockReturnValue(true);
-      mockFsModule.readFileSync.mockReturnValue(
+      mockFsPromisesModule.readFile.mockResolvedValue(
         JSON.stringify({
           lastCheck: new Date().toISOString(),
           latestVersion: '2.0.0',
@@ -480,10 +475,7 @@ describe('version-check', () => {
     });
 
     it('should handle cache read error gracefully', async () => {
-      mockFsModule.existsSync.mockReturnValue(true);
-      mockFsModule.readFileSync.mockImplementation(() => {
-        throw new Error('Permission denied');
-      });
+      mockFsPromisesModule.readFile.mockRejectedValue(new Error('Permission denied'));
 
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -499,8 +491,7 @@ describe('version-check', () => {
     });
 
     it('should handle invalid cache JSON gracefully', async () => {
-      mockFsModule.existsSync.mockReturnValue(true);
-      mockFsModule.readFileSync.mockReturnValue('invalid json {{{');
+      mockFsPromisesModule.readFile.mockResolvedValue('invalid json {{{');
 
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -516,8 +507,7 @@ describe('version-check', () => {
     });
 
     it('should handle invalid cache date gracefully', async () => {
-      mockFsModule.existsSync.mockReturnValue(true);
-      mockFsModule.readFileSync.mockReturnValue(
+      mockFsPromisesModule.readFile.mockResolvedValue(
         JSON.stringify({
           lastCheck: 'invalid-date',
           latestVersion: '2.0.0',
@@ -538,8 +528,7 @@ describe('version-check', () => {
     });
 
     it('should return null when cached version shows no update available', async () => {
-      mockFsModule.existsSync.mockReturnValue(true);
-      mockFsModule.readFileSync.mockReturnValue(
+      mockFsPromisesModule.readFile.mockResolvedValue(
         JSON.stringify({
           lastCheck: new Date().toISOString(),
           latestVersion: '1.0.0', // Same as current
@@ -559,7 +548,7 @@ describe('version-check', () => {
     });
 
     it('should return null when fetch fails to get latest version', async () => {
-      mockFsModule.existsSync.mockReturnValue(false); // No cache
+      mockFsPromisesModule.readFile.mockRejectedValue(new Error('ENOENT')); // No cache
 
       const mockFetch = vi.fn().mockResolvedValue({
         ok: false,
@@ -574,7 +563,7 @@ describe('version-check', () => {
     });
 
     it('should return null when current version is already latest', async () => {
-      mockFsModule.existsSync.mockReturnValue(false); // No cache
+      mockFsPromisesModule.readFile.mockRejectedValue(new Error('ENOENT')); // No cache
 
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,

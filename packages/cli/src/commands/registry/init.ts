@@ -92,12 +92,14 @@ export async function registryInitCommand(
     ConsoleOutput.muted('3. Initialize git: git init && git add . && git commit');
     ConsoleOutput.muted('4. Push to your git host and configure in promptscript.yaml');
   } catch (error) {
-    if ((error as Error).name === 'ExitPromptError') {
+    if (error instanceof Error && error.name === 'ExitPromptError') {
       ConsoleOutput.newline();
       ConsoleOutput.muted('Registry creation cancelled');
       return;
     }
-    ConsoleOutput.error(`Registry creation failed: ${(error as Error).message}`);
-    process.exit(1);
+    ConsoleOutput.error(
+      `Registry creation failed: ${error instanceof Error ? error.message : String(error)}`
+    );
+    process.exitCode = 1;
   }
 }

@@ -623,6 +623,55 @@ describe('Compiler', () => {
     });
   });
 
+  describe('compile - output path collision warning', () => {
+    it('should warn when multiple formatters target the same output path (PS4001)', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('codex', 'AGENTS.md');
+      const formatter2 = createMockFormatter('amp', 'AGENTS.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.warnings).toBeDefined();
+      expect(result.warnings.length).toBeGreaterThanOrEqual(1);
+
+      const collisionWarning = result.warnings.find((w) => w.ruleId === 'PS4001');
+      expect(collisionWarning).toBeDefined();
+      expect(collisionWarning?.ruleName).toBe('output-path-collision');
+      expect(collisionWarning?.message).toContain('AGENTS.md');
+      expect(collisionWarning?.message).toContain('codex');
+      expect(collisionWarning?.message).toContain('amp');
+    });
+
+    it('should not warn when formatters target different output paths', async () => {
+      const ast = createTestProgram();
+      const formatter1 = createMockFormatter('github', '.github/copilot-instructions.md');
+      const formatter2 = createMockFormatter('claude', 'CLAUDE.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      const collisionWarning = result.warnings?.find((w) => w.ruleId === 'PS4001');
+      expect(collisionWarning).toBeUndefined();
+    });
+  });
+
   describe('getFormatters', () => {
     it('should return readonly array of formatters', () => {
       const formatter1 = createMockFormatter('f1');
