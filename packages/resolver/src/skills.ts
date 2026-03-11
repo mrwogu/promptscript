@@ -79,21 +79,228 @@ function parseSkillMd(content: string): ParsedSkillMd {
   return { name, description, content: bodyContent };
 }
 
-/** Files and directories to skip when discovering skill resources. */
+/** Files to skip when discovering skill resources. */
 const SKIP_FILES = new Set([
   'SKILL.md',
+  '.skillignore',
   '.DS_Store',
   'Thumbs.db',
   '.gitignore',
   '.gitkeep',
   '.npmrc',
+  '.npmignore',
   '.env',
   '.env.local',
   '.env.production',
+  '.editorconfig',
+  '.prettierrc',
+  '.prettierrc.json',
+  '.prettierrc.yaml',
+  '.prettierrc.yml',
+  '.prettierignore',
+  '.eslintrc',
+  '.eslintrc.js',
+  '.eslintrc.cjs',
+  '.eslintrc.json',
+  '.eslintrc.yaml',
+  '.eslintrc.yml',
+  'eslint.config.js',
+  'eslint.config.cjs',
+  'eslint.config.mjs',
+  'eslint.base.config.cjs',
+  '.release-please-manifest.json',
+  'release-please-config.json',
+  'package-lock.json',
+  'pnpm-lock.yaml',
+  'pnpm-workspace.yaml',
+  'yarn.lock',
+  'tsconfig.json',
+  'tsconfig.base.json',
+  'tsconfig.build.json',
+  'tsconfig.spec.json',
+  'jest.config.ts',
+  'jest.config.js',
+  'vitest.config.ts',
+  'vitest.config.js',
+  'vite.config.ts',
+  'vite.config.js',
+  'nx.json',
+  'project.json',
+  'package.json',
+  'Makefile',
+  'Dockerfile',
+  'docker-compose.yml',
+  'docker-compose.yaml',
+  '.dockerignore',
+  'LICENSE',
+  'LICENSE.md',
+  'CHANGELOG.md',
+  'CONTRIBUTING.md',
+  'CODE_OF_CONDUCT.md',
+  'ROADMAP.md',
 ]);
 
 /** Directory names to skip entirely. */
-const SKIP_DIRS = new Set(['node_modules', '__pycache__', '.git', '.svn']);
+const SKIP_DIRS = new Set([
+  'node_modules',
+  '__pycache__',
+  '.git',
+  '.svn',
+  '.github',
+  '.husky',
+  '.vscode',
+  '.idea',
+  '.verdaccio',
+  '.nx',
+  '.cache',
+  '.turbo',
+  'dist',
+  'build',
+  'out',
+  'coverage',
+  'tmp',
+  '.tmp',
+  'e2e',
+  '__tests__',
+  '__mocks__',
+  '__fixtures__',
+  'test',
+  'tests',
+  'spec',
+  'fixtures',
+]);
+
+/**
+ * Convert a simple gitignore-style glob pattern to a RegExp.
+ *
+ * Supports: `*` (any non-slash chars), `**` (any path), `?` (single char),
+ * trailing `/` (directory match), and character classes `[abc]`.
+ *
+ * Patterns without a `/` match against the basename only.
+ * Patterns with a `/` match against the full relative path.
+ */
+function globToRegex(pattern: string): { regex: RegExp; matchPath: boolean } {
+  // If pattern ends with /, it matches directories (we match path prefixes)
+  const isDirPattern = pattern.endsWith('/');
+  const cleanPattern = isDirPattern ? pattern.slice(0, -1) : pattern;
+
+  // Determine if pattern should match against full path or just basename
+  const matchPath = cleanPattern.includes('/');
+
+  let regexStr = '';
+  let i = 0;
+  while (i < cleanPattern.length) {
+    const char = cleanPattern[i]!;
+    if (char === '*') {
+      if (cleanPattern[i + 1] === '*') {
+        // ** matches any path segment(s)
+        if (cleanPattern[i + 2] === '/') {
+          regexStr += '(?:.+/)?';
+          i += 3;
+        } else {
+          regexStr += '.*';
+          i += 2;
+        }
+      } else {
+        // * matches anything except /
+        regexStr += '[^/]*';
+        i++;
+      }
+    } else if (char === '?') {
+      regexStr += '[^/]';
+      i++;
+    } else if (char === '[') {
+      // Character class - pass through until ]
+      const closeIdx = cleanPattern.indexOf(']', i + 1);
+      if (closeIdx > i) {
+        regexStr += cleanPattern.slice(i, closeIdx + 1);
+        i = closeIdx + 1;
+      } else {
+        regexStr += '\\[';
+        i++;
+      }
+    } else if ('.+^${}()|\\'.includes(char)) {
+      regexStr += '\\' + char;
+      i++;
+    } else {
+      regexStr += char;
+      i++;
+    }
+  }
+
+  if (isDirPattern) {
+    // Directory pattern matches the dir name or anything under it
+    return { regex: new RegExp(`^${regexStr}(?:/|$)`), matchPath: true };
+  }
+
+  return { regex: new RegExp(`^${regexStr}$`), matchPath };
+}
+
+/**
+ * A compiled set of .skillignore rules for matching relative paths.
+ */
+interface SkillIgnoreRules {
+  patterns: Array<{ regex: RegExp; matchPath: boolean; negated: boolean }>;
+}
+
+/**
+ * Parse a .skillignore file content into compiled rules.
+ * Format follows gitignore conventions:
+ * - Lines starting with # are comments
+ * - Empty lines are ignored
+ * - Lines starting with ! are negation (re-include)
+ * - Trailing / matches directories
+ * - Patterns without / match basename; with / match full path
+ */
+function parseSkillIgnore(content: string): SkillIgnoreRules {
+  const patterns: SkillIgnoreRules['patterns'] = [];
+
+  for (const rawLine of content.split('\n')) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    const negated = line.startsWith('!');
+    const pattern = negated ? line.slice(1) : line;
+    if (!pattern) continue;
+
+    const { regex, matchPath } = globToRegex(pattern);
+    patterns.push({ regex, matchPath, negated });
+  }
+
+  return { patterns };
+}
+
+/**
+ * Check if a relative path is ignored by .skillignore rules.
+ * Uses gitignore semantics: last matching pattern wins.
+ */
+function isIgnoredByRules(relPath: string, rules: SkillIgnoreRules): boolean {
+  const basename = relPath.split('/').pop() ?? relPath;
+  let ignored = false;
+
+  for (const { regex, matchPath, negated } of rules.patterns) {
+    const target = matchPath ? relPath : basename;
+    if (regex.test(target)) {
+      ignored = !negated;
+    }
+  }
+
+  return ignored;
+}
+
+/**
+ * Load and parse a .skillignore file from a skill directory.
+ * Returns null if no .skillignore exists.
+ */
+async function loadSkillIgnore(skillDir: string): Promise<SkillIgnoreRules | null> {
+  const ignorePath = resolve(skillDir, '.skillignore');
+  try {
+    const content = await readFile(ignorePath, 'utf-8');
+    return parseSkillIgnore(content);
+  } catch {
+    return null;
+  }
+}
 
 /** Maximum size (in bytes) for a single resource file. */
 const MAX_RESOURCE_SIZE = 1_048_576; // 1 MB
@@ -141,6 +348,9 @@ async function discoverSkillResources(
   skillDir: string,
   logger: Logger = noopLogger
 ): Promise<SkillResource[]> {
+  // Load .skillignore rules if present
+  const ignoreRules = await loadSkillIgnore(skillDir);
+
   const entries = await readdir(skillDir, { recursive: true, withFileTypes: true });
   const resources: SkillResource[] = [];
   let totalSize = 0;
@@ -169,9 +379,18 @@ async function discoverSkillResources(
     const fullPath = resolve(entry.parentPath, entry.name);
     const relPath = relative(skillDir, fullPath);
 
+    // Use forward slashes for consistent pattern matching
+    const relPathNormalized = relPath.split(sep).join('/');
+
     // Skip files inside skipped directories
     const pathSegments = relPath.split(sep);
     if (pathSegments.some((s) => SKIP_DIRS.has(s))) continue;
+
+    // Apply .skillignore rules
+    if (ignoreRules && isIgnoredByRules(relPathNormalized, ignoreRules)) {
+      logger.debug(`Skipping resource ignored by .skillignore: ${relPath}`);
+      continue;
+    }
 
     // Validate no path traversal
     if (!isSafeRelativePath(relPath)) {

@@ -99,7 +99,14 @@ export {
 } from './presets.js';
 
 // Walker utilities
-export { walkText, walkBlocks, walkUses, hasContent } from './walker.js';
+export {
+  walkText,
+  walkBlocks,
+  walkUses,
+  hasContent,
+  offsetLocation,
+  type WalkTextOptions,
+} from './walker.js';
 
 // Formatting utilities
 export {
