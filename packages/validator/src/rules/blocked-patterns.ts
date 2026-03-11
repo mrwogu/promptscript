@@ -1,5 +1,5 @@
 import type { ValidationRule } from '../types.js';
-import { walkText } from '../walker.js';
+import { walkText, offsetLocation } from '../walker.js';
 
 /**
  * Default blocked patterns that indicate prompt injection attempts.
@@ -501,6 +501,24 @@ export const BLOCKED_PATTERNS_ALL_LANGUAGES: RegExp[] = [
 ];
 
 /**
+ * Negation prefixes that indicate defensive/legitimate usage.
+ * E.g., "prevent jailbreak", "anti-jailbreak", "don't disregard previous".
+ */
+const NEGATION_PREFIX =
+  /(?:prevent|avoid|block|detect|flag|report|stop|prohibit|anti[- ]|against|don['']?t|do\s+not|never|must\s+not|should\s+not|cannot|warning.*about|protection\s+(?:from|against))\s+/i;
+
+/**
+ * Check if a pattern match is preceded by a negation prefix,
+ * indicating defensive/legitimate usage rather than an attack.
+ */
+function isNegatedMatch(text: string, matchIndex: number): boolean {
+  // Look back up to 60 characters for a negation prefix
+  const lookbackStart = Math.max(0, matchIndex - 60);
+  const prefix = text.slice(lookbackStart, matchIndex);
+  return NEGATION_PREFIX.test(prefix);
+}
+
+/**
  * PS005: Content must not contain blocked patterns
  */
 export const blockedPatterns: ValidationRule = {
@@ -517,17 +535,37 @@ export const blockedPatterns: ValidationRule = {
       ),
     ];
 
-    // Walk all text content and check against patterns
-    walkText(ctx.ast, (text, loc) => {
-      for (const pattern of patterns) {
-        if (pattern.test(text)) {
-          ctx.report({
-            message: `Blocked pattern detected: ${pattern.source}`,
-            location: loc,
-            suggestion: 'Remove or rephrase the flagged content',
-          });
+    // Walk all text content and check against patterns.
+    // Exclude skill resource files (bundled source code, not prompt instructions).
+    walkText(
+      ctx.ast,
+      (text, loc) => {
+        for (const pattern of patterns) {
+          // Use a global copy to find all matches with their positions
+          const globalPattern = new RegExp(
+            pattern.source,
+            pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g'
+          );
+          let match: RegExpExecArray | null;
+
+          while ((match = globalPattern.exec(text)) !== null) {
+            // Skip matches preceded by negation (defensive context)
+            if (isNegatedMatch(text, match.index)) {
+              continue;
+            }
+
+            ctx.report({
+              message: `Blocked pattern detected: ${pattern.source}`,
+              location: offsetLocation(loc, text, match.index),
+              suggestion: 'Remove or rephrase the flagged content',
+            });
+
+            // Only report first match per pattern per text block
+            break;
+          }
         }
-      }
-    });
+      },
+      { excludeProperties: ['resources'] }
+    );
   },
 };

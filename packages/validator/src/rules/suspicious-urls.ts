@@ -292,101 +292,106 @@ export const suspiciousUrls: ValidationRule = {
     'Detect suspicious URLs (HTTP, shorteners, credential parameters, IDN homograph attacks)',
   defaultSeverity: 'warning',
   validate: (ctx) => {
-    walkText(ctx.ast, (text, loc) => {
-      // Check for HTTP URLs (non-HTTPS)
-      const httpMatches = text.match(HTTP_URL_PATTERN);
-      if (httpMatches) {
-        for (const match of httpMatches) {
-          ctx.report({
-            message: `Insecure HTTP URL detected: ${match}`,
-            location: loc,
-            suggestion: 'Use HTTPS instead of HTTP for secure communication',
-          });
-        }
-      }
-
-      // Check for URL shorteners
-      for (const pattern of URL_SHORTENER_PATTERNS) {
-        // Reset lastIndex for global patterns
-        pattern.lastIndex = 0;
-        const shortenerMatches = text.match(pattern);
-        if (shortenerMatches) {
-          for (const match of shortenerMatches) {
+    walkText(
+      ctx.ast,
+      (text, loc) => {
+        // Check for HTTP URLs (non-HTTPS)
+        const httpMatches = text.match(HTTP_URL_PATTERN);
+        if (httpMatches) {
+          for (const match of httpMatches) {
             ctx.report({
-              message: `URL shortener detected: ${match}`,
+              message: `Insecure HTTP URL detected: ${match}`,
               location: loc,
-              suggestion: 'Use full URLs instead of shorteners to ensure destination transparency',
+              suggestion: 'Use HTTPS instead of HTTP for secure communication',
             });
           }
         }
-      }
 
-      // Check for suspicious query parameters
-      const paramMatches = text.match(SUSPICIOUS_PARAM_PATTERN);
-      if (paramMatches) {
-        for (const match of paramMatches) {
-          ctx.report({
-            message: `URL with suspicious credential parameter detected: ${match}`,
-            location: loc,
-            suggestion: 'Avoid embedding credentials or tokens in URLs',
-          });
-        }
-      }
-
-      // Check for punycode URLs (potential IDN homograph attacks)
-      PUNYCODE_URL_PATTERN.lastIndex = 0;
-      const punycodeMatches = text.match(PUNYCODE_URL_PATTERN);
-      if (punycodeMatches) {
-        for (const match of punycodeMatches) {
-          const domain = extractDomain(match);
-          if (domain) {
-            const impersonatedService = detectImpersonatedService(domain);
-            if (impersonatedService) {
+        // Check for URL shorteners
+        for (const pattern of URL_SHORTENER_PATTERNS) {
+          // Reset lastIndex for global patterns
+          pattern.lastIndex = 0;
+          const shortenerMatches = text.match(pattern);
+          if (shortenerMatches) {
+            for (const match of shortenerMatches) {
               ctx.report({
-                message: `Potential IDN homograph attack detected: ${match} may be impersonating "${impersonatedService}"`,
+                message: `URL shortener detected: ${match}`,
                 location: loc,
                 suggestion:
-                  'Punycode domains (xn--) can visually impersonate legitimate sites. Verify the actual domain carefully.',
-              });
-            } else {
-              // Flag all punycode with a lower-priority warning
-              ctx.report({
-                message: `Punycode domain detected: ${match}`,
-                location: loc,
-                suggestion:
-                  'Punycode domains (xn--) can be legitimate international domains, but may also be used for homograph attacks. Verify the domain is intentional.',
+                  'Use full URLs instead of shorteners to ensure destination transparency',
               });
             }
           }
         }
-      }
 
-      // Check for mixed script domains and homoglyph attacks
-      ALL_URLS_PATTERN.lastIndex = 0;
-      const allUrls = text.match(ALL_URLS_PATTERN);
-      if (allUrls) {
-        for (const url of allUrls) {
-          const domain = extractDomain(url);
-          if (domain) {
-            const { isAttack, impersonatedService, mixedScripts } = checkHomographAttack(domain);
-            if (isAttack && impersonatedService) {
-              ctx.report({
-                message: `IDN homograph attack detected: "${domain}" uses deceptive characters to impersonate "${impersonatedService}"`,
-                location: loc,
-                suggestion: `This domain uses ${mixedScripts ? `mixed scripts (${mixedScripts.join('+')})` : 'homoglyph characters'} to visually mimic a legitimate service. Do not trust this URL.`,
-              });
-            } else if (mixedScripts && mixedScripts.length > 1) {
-              // Mixed scripts without impersonation is still suspicious
-              ctx.report({
-                message: `Mixed script domain detected: "${domain}" uses ${mixedScripts.join(' + ')} characters`,
-                location: loc,
-                suggestion:
-                  'Domains mixing different character scripts (e.g., Latin + Cyrillic) may be attempts to deceive users. Verify this is intentional.',
-              });
+        // Check for suspicious query parameters
+        const paramMatches = text.match(SUSPICIOUS_PARAM_PATTERN);
+        if (paramMatches) {
+          for (const match of paramMatches) {
+            ctx.report({
+              message: `URL with suspicious credential parameter detected: ${match}`,
+              location: loc,
+              suggestion: 'Avoid embedding credentials or tokens in URLs',
+            });
+          }
+        }
+
+        // Check for punycode URLs (potential IDN homograph attacks)
+        PUNYCODE_URL_PATTERN.lastIndex = 0;
+        const punycodeMatches = text.match(PUNYCODE_URL_PATTERN);
+        if (punycodeMatches) {
+          for (const match of punycodeMatches) {
+            const domain = extractDomain(match);
+            if (domain) {
+              const impersonatedService = detectImpersonatedService(domain);
+              if (impersonatedService) {
+                ctx.report({
+                  message: `Potential IDN homograph attack detected: ${match} may be impersonating "${impersonatedService}"`,
+                  location: loc,
+                  suggestion:
+                    'Punycode domains (xn--) can visually impersonate legitimate sites. Verify the actual domain carefully.',
+                });
+              } else {
+                // Flag all punycode with a lower-priority warning
+                ctx.report({
+                  message: `Punycode domain detected: ${match}`,
+                  location: loc,
+                  suggestion:
+                    'Punycode domains (xn--) can be legitimate international domains, but may also be used for homograph attacks. Verify the domain is intentional.',
+                });
+              }
             }
           }
         }
-      }
-    });
+
+        // Check for mixed script domains and homoglyph attacks
+        ALL_URLS_PATTERN.lastIndex = 0;
+        const allUrls = text.match(ALL_URLS_PATTERN);
+        if (allUrls) {
+          for (const url of allUrls) {
+            const domain = extractDomain(url);
+            if (domain) {
+              const { isAttack, impersonatedService, mixedScripts } = checkHomographAttack(domain);
+              if (isAttack && impersonatedService) {
+                ctx.report({
+                  message: `IDN homograph attack detected: "${domain}" uses deceptive characters to impersonate "${impersonatedService}"`,
+                  location: loc,
+                  suggestion: `This domain uses ${mixedScripts ? `mixed scripts (${mixedScripts.join('+')})` : 'homoglyph characters'} to visually mimic a legitimate service. Do not trust this URL.`,
+                });
+              } else if (mixedScripts && mixedScripts.length > 1) {
+                // Mixed scripts without impersonation is still suspicious
+                ctx.report({
+                  message: `Mixed script domain detected: "${domain}" uses ${mixedScripts.join(' + ')} characters`,
+                  location: loc,
+                  suggestion:
+                    'Domains mixing different character scripts (e.g., Latin + Cyrillic) may be attempts to deceive users. Verify this is intentional.',
+                });
+              }
+            }
+          }
+        }
+      },
+      { excludeProperties: ['resources'] }
+    );
   },
 };
