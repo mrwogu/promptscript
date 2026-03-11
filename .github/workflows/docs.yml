@@ -19,10 +19,12 @@ permissions:
   id-token: write
 
 concurrency:
-  # All docs deployments share same group to prevent gh-pages push conflicts
-  # Never cancel - runs queue sequentially to avoid conflicts
-  group: pages-deploy
-  cancel-in-progress: false
+  # Separate groups for tag vs dev deployments to prevent tag deploys from being
+  # cancelled when release-please pushes main + tag simultaneously.
+  # Tag deploys (releases) get their own group so they always run.
+  # Main/dispatch deploys share a group — newer dev deploys cancel stale ones.
+  group: ${{ startsWith(github.ref, 'refs/tags/v') && format('pages-release-{0}', github.ref) || 'pages-dev' }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
   build:
@@ -124,12 +126,23 @@ jobs:
           # Fetch latest gh-pages to avoid push conflicts
           git fetch origin gh-pages --depth=1 || true
 
-          if [[ -n "$ALIAS" ]]; then
-            mike deploy --push --update-aliases "$VERSION" "$ALIAS"
-            mike set-default --push latest
-          else
-            mike deploy --push "$VERSION"
-          fi
+          # Retry mike deploy up to 3 times to handle concurrent gh-pages pushes
+          for attempt in 1 2 3; do
+            echo "Attempt $attempt: deploying docs version=$VERSION"
+            if [[ -n "$ALIAS" ]]; then
+              if mike deploy --push --update-aliases "$VERSION" "$ALIAS"; then
+                mike set-default --push latest
+                break
+              fi
+            else
+              if mike deploy --push "$VERSION"; then
+                break
+              fi
+            fi
+            echo "Push failed, retrying after rebase..."
+            git fetch origin gh-pages --depth=1
+            sleep 5
+          done
         env:
           MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.MKDOCS_GIT_COMMITTERS_APIKEY }}
           PYTHONPATH: ${{ github.workspace }}
@@ -232,7 +245,16 @@ jobs:
           # Commit playground to gh-pages so it persists across deployments
           git add playground playground-dev 2>/dev/null || true
           git commit -m "Deploy playground ($VERSION)" || echo "No playground changes to commit"
-          git push origin gh-pages
+
+          # Retry push up to 3 times to handle concurrent gh-pages pushes
+          for attempt in 1 2 3; do
+            if git push origin gh-pages; then
+              break
+            fi
+            echo "Push failed (attempt $attempt), rebasing and retrying..."
+            git pull --rebase origin gh-pages
+            sleep 5
+          done
 
       - name: Prepare artifact (resolve symlinks)
         run: |
