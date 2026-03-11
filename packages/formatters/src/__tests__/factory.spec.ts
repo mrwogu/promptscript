@@ -48,6 +48,7 @@ describe('FactoryFormatter', () => {
       expect(versions.simple.description).toBe('Single AGENTS.md file');
       expect(versions.multifile.name).toBe('multifile');
       expect(versions.full.name).toBe('full');
+      expect(versions.full.description).toContain('droids');
     });
   });
 
@@ -1111,6 +1112,372 @@ describe('FactoryFormatter', () => {
       const result = formatter.format(ast);
       expect(result.content).toContain('No any type');
       expect(result.content).toContain('No default exports');
+    });
+  });
+
+  describe('droid file generation', () => {
+    it('should generate droid files from @agents block in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'code-reviewer': {
+                  description: 'Focused reviewer for diffs',
+                  model: 'inherit',
+                  tools: 'read-only',
+                  content: 'You are the team senior reviewer.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid).toBeDefined();
+      expect(droid?.path).toBe('.factory/droids/code-reviewer.md');
+      expect(droid?.content).toContain('name: code-reviewer');
+      expect(droid?.content).toContain('description: Focused reviewer for diffs');
+      expect(droid?.content).toContain('model: inherit');
+      expect(droid?.content).toContain('tools: read-only');
+      expect(droid?.content).toContain('You are the team senior reviewer.');
+    });
+
+    it('should generate droid with all supported fields', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'deep-analyzer': {
+                  description: 'Thorough analysis with extended thinking',
+                  model: 'claude-sonnet-4-5-20250929',
+                  reasoningEffort: 'high',
+                  tools: ['Read', 'Grep', 'Glob', 'WebSearch'],
+                  content: 'Perform deep analysis of the code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid).toBeDefined();
+      expect(droid?.path).toBe('.factory/droids/deep-analyzer.md');
+      expect(droid?.content).toContain('name: deep-analyzer');
+      expect(droid?.content).toContain('description: Thorough analysis with extended thinking');
+      expect(droid?.content).toContain('model: claude-sonnet-4-5-20250929');
+      expect(droid?.content).toContain('reasoningEffort: high');
+      expect(droid?.content).toContain('tools: ["Read", "Grep", "Glob", "WebSearch"]');
+      expect(droid?.content).toContain('Perform deep analysis of the code.');
+    });
+
+    it('should generate multiple droid files', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviews code',
+                  content: 'Review the code.',
+                },
+                debugger: {
+                  description: 'Debugs issues',
+                  content: 'Debug the issue.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/'));
+      expect(droids).toHaveLength(2);
+      expect(droids?.find((f) => f.path === '.factory/droids/reviewer.md')).toBeDefined();
+      expect(droids?.find((f) => f.path === '.factory/droids/debugger.md')).toBeDefined();
+    });
+
+    it('should not generate droid files in simple mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviews code',
+                  content: 'Review the code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/'));
+      expect(droids ?? []).toHaveLength(0);
+    });
+
+    it('should not generate droid files in multifile mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviews code',
+                  content: 'Review the code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/'));
+      expect(droids ?? []).toHaveLength(0);
+    });
+
+    it('should skip agents without description', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'no-desc': {
+                  content: 'Some content.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/'));
+      expect(droids ?? []).toHaveLength(0);
+    });
+
+    it('should convert dots to hyphens in droid names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'speckit.review': {
+                  description: 'Reviews specs',
+                  content: 'Review the spec.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid?.path).toBe('.factory/droids/speckit-review.md');
+      expect(droid?.content).toContain('name: speckit-review');
+    });
+
+    it('should generate minimal droid with only name and description', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                helper: {
+                  description: 'A simple helper',
+                  content: 'Help with tasks.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid?.content).toContain('name: helper');
+      expect(droid?.content).toContain('description: A simple helper');
+      expect(droid?.content).not.toContain('model:');
+      expect(droid?.content).not.toContain('reasoningEffort:');
+      expect(droid?.content).not.toContain('tools:');
+    });
+
+    it('should generate droid without content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                empty: {
+                  description: 'Empty droid',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid).toBeDefined();
+      expect(droid?.content).toContain('name: empty');
+      expect(droid?.content).toContain('description: Empty droid');
+      // Should end with frontmatter close + newline, no body content
+      expect(droid?.content).toMatch(/---\n\n$/);
+    });
+
+    it('should handle empty tools array', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                tester: {
+                  description: 'Tester droid',
+                  tools: [],
+                  content: 'Test things.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid).toBeDefined();
+      expect(droid?.content).not.toContain('tools:');
+    });
+
+    it('should handle non-array non-string tools value', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                tester: {
+                  description: 'Tester droid',
+                  tools: true,
+                  content: 'Test things.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid).toBeDefined();
+      expect(droid?.content).toContain('tools: true');
+    });
+
+    it('should ignore invalid reasoningEffort values', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                tester: {
+                  description: 'Tester droid',
+                  reasoningEffort: 'ultra',
+                  content: 'Test things.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid?.content).not.toContain('reasoningEffort:');
     });
   });
 

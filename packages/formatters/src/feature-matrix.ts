@@ -517,11 +517,12 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'not-supported',
       claude: 'supported', // .claude/agents/<name>.md
       antigravity: 'not-supported',
-      factory: 'not-supported',
+      factory: 'supported', // .factory/droids/<name>.md
       opencode: 'supported', // .opencode/agents/<name>.md
       gemini: 'not-supported',
     },
-    testStrategy: 'Check for AGENTS.md, .github/agents/ or .claude/agents/ files',
+    testStrategy:
+      'Check for AGENTS.md, .github/agents/, .claude/agents/, or .factory/droids/ files',
   },
   {
     id: 'local-memory',
