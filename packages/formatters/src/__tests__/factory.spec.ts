@@ -1452,6 +1452,107 @@ describe('FactoryFormatter', () => {
       expect(droid?.content).toContain('tools: true');
     });
 
+    it('should generate droid with mixed models (specModel + specReasoningEffort)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                planner: {
+                  description: 'Planning specialist with mixed models',
+                  model: 'claude-sonnet-4-5-20250929',
+                  reasoningEffort: 'medium',
+                  specModel: 'claude-opus-4-5-20250929',
+                  specReasoningEffort: 'high',
+                  tools: ['Read', 'Grep'],
+                  content: 'You plan features using spec mode.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid).toBeDefined();
+      expect(droid?.path).toBe('.factory/droids/planner.md');
+      expect(droid?.content).toContain('model: claude-sonnet-4-5-20250929');
+      expect(droid?.content).toContain('reasoningEffort: medium');
+      expect(droid?.content).toContain('specModel: claude-opus-4-5-20250929');
+      expect(droid?.content).toContain('specReasoningEffort: high');
+    });
+
+    it('should generate droid with specModel only (no specReasoningEffort)', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                planner: {
+                  description: 'Mixed model droid',
+                  model: 'inherit',
+                  specModel: 'claude-opus-4-5-20250929',
+                  content: 'Plan things.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid?.content).toContain('model: inherit');
+      expect(droid?.content).toContain('specModel: claude-opus-4-5-20250929');
+      expect(droid?.content).not.toContain('specReasoningEffort:');
+    });
+
+    it('should ignore invalid specReasoningEffort values', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                planner: {
+                  description: 'Mixed model droid',
+                  specModel: 'opus',
+                  specReasoningEffort: 'ultra',
+                  content: 'Plan things.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const droid = result.additionalFiles?.find((f) => f.path.includes('droids/'));
+      expect(droid?.content).toContain('specModel: opus');
+      expect(droid?.content).not.toContain('specReasoningEffort:');
+    });
+
     it('should ignore invalid reasoningEffort values', () => {
       const ast: Program = {
         ...createMinimalProgram(),

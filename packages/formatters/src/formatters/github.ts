@@ -86,6 +86,8 @@ interface GitHubAgentConfig {
   tools?: string[];
   /** AI model to use (e.g., 'gpt-4o', 'claude-3.5-sonnet') */
   model?: string;
+  /** Model for Specification/planning mode (mixed models) */
+  specModel?: string;
   /** System prompt content */
   content: string;
   /** Handoff definitions for delegation to other agents */
@@ -745,6 +747,7 @@ export class GitHubFormatter extends BaseFormatter {
           description,
           tools: this.parseToolsArray(obj['tools']),
           model: obj['model'] ? this.valueToString(obj['model']) : undefined,
+          specModel: obj['specModel'] ? this.valueToString(obj['specModel']) : undefined,
           handoffs: handoffs.length > 0 ? handoffs : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
         });
@@ -864,6 +867,12 @@ export class GitHubFormatter extends BaseFormatter {
     const mappedModel = this.mapModelName(config.model);
     if (mappedModel) {
       lines.push(`model: ${mappedModel}`);
+    }
+
+    // Map spec mode model name (mixed models)
+    const mappedSpecModel = this.mapModelName(config.specModel);
+    if (mappedSpecModel) {
+      lines.push(`specModel: ${mappedSpecModel}`);
     }
 
     if (config.handoffs && config.handoffs.length > 0) {
