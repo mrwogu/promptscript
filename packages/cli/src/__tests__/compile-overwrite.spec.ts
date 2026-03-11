@@ -856,6 +856,67 @@ describe('compile command - overwrite protection', () => {
     });
   });
 
+  describe('non-marker file unchanged detection', () => {
+    it('should report unchanged when resource file content matches', async () => {
+      const resourceContent = 'import os\nprint("hello")\n';
+      const outputs = new Map([
+        ['skills/myskill/helper.py', createMockOutput('skills/myskill/helper.py', resourceContent)],
+      ]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('project.prs')) return true;
+        if (path.includes('helper.py')) return true;
+        return false;
+      });
+
+      // Existing file has identical content (no PromptScript marker)
+      mockReadFile.mockResolvedValue(resourceContent);
+
+      await compileCommand({}, mockServices);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('○'));
+    });
+
+    it('should report unchanged in dry-run for non-marker files with matching content', async () => {
+      const csvContent = 'a,b,c\n1,2,3\n';
+      const outputs = new Map([
+        ['skills/myskill/data.csv', createMockOutput('skills/myskill/data.csv', csvContent)],
+      ]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('project.prs')) return true;
+        if (path.includes('data.csv')) return true;
+        return false;
+      });
+
+      // Same content, no marker
+      mockReadFile.mockResolvedValue(csvContent);
+
+      await compileCommand({ dryRun: true }, mockServices);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Unchanged:'));
+    });
+  });
+
   describe('output directory option', () => {
     it('should write files to custom output directory', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
