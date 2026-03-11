@@ -227,8 +227,8 @@
     var arrowRect = compileBtn.getBoundingClientRect();
     var windowHeight = window.innerHeight;
 
-    // If user has scrolled past the demo (arrow is above viewport), hide everything
-    if (arrowRect.bottom < 0) {
+    // If user has scrolled past the demo (arrow top is above viewport), hide everything
+    if (arrowRect.top < 0) {
       scrollHint.classList.remove('compile-demo__scroll-hint--visible');
       compileBtn.classList.remove('compile-demo__arrow-icon--bounce');
       if (clickTooltip) clickTooltip.classList.remove('compile-demo__click-tooltip--visible');
@@ -248,8 +248,9 @@
       outputSufficientlyVisible = outputRect.top < windowHeight * 0.8;
     }
 
-    // Show hint if the compile arrow is less than 50% visible (and below viewport)
-    var arrowNotSufficientlyVisible = visibilityRatio < 0.5;
+    // Show hint only if arrow is below the viewport (not above it) and less than 50% visible
+    var arrowBelowViewport = arrowRect.top > windowHeight * 0.5;
+    var arrowNotSufficientlyVisible = visibilityRatio < 0.5 && arrowBelowViewport;
 
     if (arrowNotSufficientlyVisible) {
       scrollHint.classList.add('compile-demo__scroll-hint--visible');
