@@ -180,6 +180,53 @@ describe('ConfigPanel', () => {
     expect(usePlaygroundStore.getState().showConfig).toBe(false);
   });
 
+  it('should close when pressing Escape key', () => {
+    usePlaygroundStore.setState({ showConfig: true });
+    render(<ConfigPanel />);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(usePlaygroundStore.getState().showConfig).toBe(false);
+  });
+
+  it('should close when clicking the backdrop', () => {
+    usePlaygroundStore.setState({ showConfig: true });
+    const { container } = render(<ConfigPanel />);
+
+    // The backdrop is the outermost fixed div
+    const backdrop = container.querySelector('.fixed');
+    fireEvent.click(backdrop!);
+
+    expect(usePlaygroundStore.getState().showConfig).toBe(false);
+  });
+
+  it('should not close when clicking inside the modal content', () => {
+    usePlaygroundStore.setState({ showConfig: true });
+    render(<ConfigPanel />);
+
+    fireEvent.click(screen.getByText('Configuration'));
+
+    expect(usePlaygroundStore.getState().showConfig).toBe(true);
+  });
+
+  it('should change target convention', () => {
+    usePlaygroundStore.setState({ showConfig: true });
+    render(<ConfigPanel />);
+
+    // Get all comboboxes — find xml convention select for GitHub (which supports XML)
+    const selects = screen.getAllByRole('combobox');
+    // Convention selects are the 3rd select per target row (version, convention)
+    // ProseWrap(0), GitHub version(1), GitHub convention(2)
+    const githubConventionSelect = selects[2];
+
+    fireEvent.change(githubConventionSelect!, { target: { value: 'xml' } });
+    expect(usePlaygroundStore.getState().config.targets.github.convention).toBe('xml');
+
+    // Change back to markdown — should set convention to undefined
+    fireEvent.change(githubConventionSelect!, { target: { value: 'markdown' } });
+    expect(usePlaygroundStore.getState().config.targets.github.convention).toBeUndefined();
+  });
+
   it('should disable version select when target is disabled', () => {
     usePlaygroundStore.setState({
       showConfig: true,
