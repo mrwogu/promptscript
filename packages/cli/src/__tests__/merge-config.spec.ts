@@ -4,8 +4,8 @@ import type { PromptScriptConfig, UserConfig } from '@promptscript/core';
 
 describe('config/merge-config', () => {
   const baseProjectConfig: PromptScriptConfig = {
-    version: '1',
-    project: { id: 'test-project' },
+    id: 'test-project',
+    syntax: '1.0.0',
     targets: ['github'],
   };
 
@@ -14,7 +14,7 @@ describe('config/merge-config', () => {
   it('should return project config when no overrides', () => {
     const result = mergeConfigs(emptyUserConfig, baseProjectConfig, {});
 
-    expect(result.project.id).toBe('test-project');
+    expect(result.id).toBe('test-project');
     expect(result.targets).toEqual(['github']);
   });
 
@@ -129,13 +129,13 @@ describe('config/merge-config', () => {
   it('should preserve project config fields not in overrides', () => {
     const projectConfig: PromptScriptConfig = {
       ...baseProjectConfig,
-      project: { id: 'test', team: 'frontend' },
+      description: 'Test project',
       validation: { rules: { 'empty-block': 'warning' } },
     };
 
     const result = mergeConfigs(emptyUserConfig, projectConfig, {});
 
-    expect(result.project.team).toBe('frontend');
+    expect(result.description).toBe('Test project');
     expect(result.validation?.rules?.['empty-block']).toBe('warning');
   });
 

@@ -125,10 +125,8 @@ describe('config/loader', () => {
     it('should parse valid YAML config', async () => {
       vi.mocked(existsSync).mockReturnValueOnce(true);
       vi.mocked(readFile).mockResolvedValueOnce(`
-version: '1'
-project:
-  id: "test-project"
-  team: "frontend"
+id: test-project
+syntax: "1.1.0"
 targets:
   - github
   - claude
@@ -138,9 +136,8 @@ registry:
 
       const config = await loadConfig();
 
-      expect(config.version).toBe('1');
-      expect(config.project.id).toBe('test-project');
-      expect(config.project.team).toBe('frontend');
+      expect(config.id).toBe('test-project');
+      expect(config.syntax).toBe('1.1.0');
       expect(config.targets).toEqual(['github', 'claude']);
       expect(config.registry?.path).toBe('./registry');
     });
@@ -167,28 +164,26 @@ invalid yaml:
       process.env['TEST_PROJECT_ID'] = 'my-project-from-env';
       vi.mocked(existsSync).mockReturnValueOnce(true);
       vi.mocked(readFile).mockResolvedValueOnce(`
-version: '1'
-project:
-  id: "\${TEST_PROJECT_ID}"
+id: "\${TEST_PROJECT_ID}"
+syntax: "1.0.0"
 `);
 
       const config = await loadConfig();
 
-      expect(config.project.id).toBe('my-project-from-env');
+      expect(config.id).toBe('my-project-from-env');
     });
 
     it('should use default value for missing environment variable', async () => {
       delete process.env['MISSING_VAR'];
       vi.mocked(existsSync).mockReturnValueOnce(true);
       vi.mocked(readFile).mockResolvedValueOnce(`
-version: '1'
-project:
-  id: "\${MISSING_VAR:-default-id}"
+id: "\${MISSING_VAR:-default-id}"
+syntax: "1.0.0"
 `);
 
       const config = await loadConfig();
 
-      expect(config.project.id).toBe('default-id');
+      expect(config.id).toBe('default-id');
     });
 
     it('should warn and use empty string for missing env var without default', async () => {
@@ -196,14 +191,13 @@ project:
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       vi.mocked(existsSync).mockReturnValueOnce(true);
       vi.mocked(readFile).mockResolvedValueOnce(`
-version: '1'
-project:
-  id: "\${MISSING_VAR}"
+id: "\${MISSING_VAR}"
+syntax: "1.0.0"
 `);
 
       const config = await loadConfig();
 
-      expect(config.project.id).toBe('');
+      expect(config.id).toBe('');
       expect(warnSpy).toHaveBeenCalledWith(
         expect.stringContaining("Environment variable 'MISSING_VAR' is not set")
       );
@@ -227,9 +221,8 @@ project:
 
       vi.mocked(existsSync).mockReturnValueOnce(true);
       vi.mocked(readFile).mockResolvedValueOnce(`
-version: '1'
-project:
-  id: "test-project"
+id: test-project
+syntax: "1.0.0"
 targets:
   - github
 `);
@@ -238,7 +231,7 @@ targets:
         targets: ['claude'],
       });
 
-      expect(result.project.id).toBe('test-project');
+      expect(result.id).toBe('test-project');
       expect(result.targets).toEqual(['claude']);
       expect(result.registry?.git?.url).toBe('https://github.com/user/reg.git');
       expect(result.registry?.cache?.enabled).toBe(true);

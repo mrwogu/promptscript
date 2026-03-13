@@ -332,7 +332,8 @@ describe('prettier/loader', () => {
 
     it('should return defaults when config has no formatting', async () => {
       const result = await resolvePrettierOptions({
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
       } as Partial<PromptScriptConfig>);
 
       expect(result).toEqual({
