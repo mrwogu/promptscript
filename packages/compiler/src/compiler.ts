@@ -245,6 +245,25 @@ export class Compiler {
           while (queue.length > 0) {
             const additionalFile = queue.shift()!;
             this.logger.verbose(`  → ${additionalFile.path} (additional)`);
+
+            // Check for path collisions with previously written outputs
+            const existingAdditionalOwner = outputPathOwners.get(additionalFile.path);
+            if (existingAdditionalOwner) {
+              formatWarnings.push({
+                ruleId: 'PS4001',
+                ruleName: 'output-path-collision',
+                severity: 'warning',
+                message: `Output path '${additionalFile.path}' is written by both '${existingAdditionalOwner}' and '${formatter.name}'. The latter will overwrite the former.`,
+                suggestion: `Configure distinct output paths for these formatters, or disable one of them.`,
+              });
+              // Skip writing this additional file — preserve the original owner's output
+              if (additionalFile.additionalFiles) {
+                queue.push(...additionalFile.additionalFiles);
+              }
+              continue;
+            }
+            outputPathOwners.set(additionalFile.path, formatter.name);
+
             outputs.set(additionalFile.path, addMarkerToOutput(additionalFile));
             if (additionalFile.additionalFiles) {
               queue.push(...additionalFile.additionalFiles);
