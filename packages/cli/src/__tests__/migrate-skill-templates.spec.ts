@@ -4,59 +4,9 @@ import { resolve } from 'path';
 
 const SKILLS_DIR = resolve(__dirname, '..', '..', 'skills');
 
-const MIGRATE_SKILL = readFileSync(
-  resolve(SKILLS_DIR, 'migrate-to-promptscript', 'SKILL.md'),
-  'utf-8'
-);
-
 const PROMPTSCRIPT_SKILL = readFileSync(resolve(SKILLS_DIR, 'promptscript', 'SKILL.md'), 'utf-8');
 
 describe('bundled SKILL.md files', () => {
-  describe('migrate-to-promptscript', () => {
-    it('should have valid YAML frontmatter', () => {
-      expect(MIGRATE_SKILL).toMatch(/^---\n/);
-      expect(MIGRATE_SKILL).toMatch(/\n---\n/);
-    });
-
-    it('should have required OpenSkill frontmatter fields', () => {
-      expect(MIGRATE_SKILL).toContain('name: migrate-to-promptscript');
-      expect(MIGRATE_SKILL).toContain('description:');
-    });
-
-    it('should contain migration steps', () => {
-      expect(MIGRATE_SKILL).toContain('Step 1: Discovery');
-      expect(MIGRATE_SKILL).toContain('Step 2: Read and Analyze');
-      expect(MIGRATE_SKILL).toContain('Step 3: Content Mapping');
-      expect(MIGRATE_SKILL).toContain('Step 4: Generate PromptScript');
-      expect(MIGRATE_SKILL).toContain('Step 5: File Organization');
-      expect(MIGRATE_SKILL).toContain('Step 6: Configuration');
-      expect(MIGRATE_SKILL).toContain('Step 7: Validation');
-    });
-
-    it('should contain content mapping table', () => {
-      expect(MIGRATE_SKILL).toContain('@identity');
-      expect(MIGRATE_SKILL).toContain('@context');
-      expect(MIGRATE_SKILL).toContain('@standards');
-      expect(MIGRATE_SKILL).toContain('@restrictions');
-      expect(MIGRATE_SKILL).toContain('@shortcuts');
-    });
-
-    it('should contain quality checklist', () => {
-      expect(MIGRATE_SKILL).toContain('Quality Checklist');
-      expect(MIGRATE_SKILL).toContain('prs validate');
-    });
-
-    it('should mention file discovery patterns', () => {
-      expect(MIGRATE_SKILL).toContain('CLAUDE.md');
-      expect(MIGRATE_SKILL).toContain('.cursorrules');
-      expect(MIGRATE_SKILL).toContain('copilot-instructions.md');
-    });
-
-    it('should mention prs compile', () => {
-      expect(MIGRATE_SKILL).toContain('prs compile');
-    });
-  });
-
   describe('promptscript', () => {
     it('should have valid YAML frontmatter', () => {
       expect(PROMPTSCRIPT_SKILL).toMatch(/^---\n/);
@@ -99,6 +49,27 @@ describe('bundled SKILL.md files', () => {
 
     it('should contain configuration reference', () => {
       expect(PROMPTSCRIPT_SKILL).toContain('promptscript.yaml');
+    });
+
+    it('should contain migration steps', () => {
+      expect(PROMPTSCRIPT_SKILL).toContain('Step 1: Discovery');
+      expect(PROMPTSCRIPT_SKILL).toContain('Step 2: Read and Analyze');
+      expect(PROMPTSCRIPT_SKILL).toContain('Step 3: Content Mapping');
+      expect(PROMPTSCRIPT_SKILL).toContain('Step 4: Generate PromptScript');
+      expect(PROMPTSCRIPT_SKILL).toContain('Step 5: File Organization');
+      expect(PROMPTSCRIPT_SKILL).toContain('Step 6: Configuration');
+      expect(PROMPTSCRIPT_SKILL).toContain('Step 7: Validation');
+    });
+
+    it('should contain content mapping table for migration', () => {
+      expect(PROMPTSCRIPT_SKILL).toContain('Source Pattern');
+      expect(PROMPTSCRIPT_SKILL).toContain('PromptScript Block');
+    });
+
+    it('should mention file discovery patterns for migration', () => {
+      expect(PROMPTSCRIPT_SKILL).toContain('CLAUDE.md');
+      expect(PROMPTSCRIPT_SKILL).toContain('.cursorrules');
+      expect(PROMPTSCRIPT_SKILL).toContain('copilot-instructions.md');
     });
   });
 });

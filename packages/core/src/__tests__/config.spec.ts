@@ -5,34 +5,34 @@ describe('PromptScriptConfig', () => {
   describe('base config', () => {
     it('should accept minimal valid config', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test-project' },
-        registry: { path: './registry' },
+        id: 'test-project',
+        syntax: '1.1.0',
         targets: ['github'],
       };
 
-      expect(config.version).toBe('1');
-      expect(config.project.id).toBe('test-project');
+      expect(config.id).toBe('test-project');
+      expect(config.syntax).toBe('1.1.0');
     });
 
-    it('should accept full project config', () => {
+    it('should accept full config with description', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test', team: 'frontend' },
+        id: 'test',
+        syntax: '1.1.0',
+        description: 'Test project',
         registry: { path: './registry' },
         targets: ['github'],
       };
 
-      expect(config.project.team).toBe('frontend');
+      expect(config.description).toBe('Test project');
     });
   });
 
   describe('extends', () => {
     it('should accept extends field', () => {
       const config: PromptScriptConfig = {
-        version: '1',
+        id: 'test',
+        syntax: '1.1.0',
         extends: '../base-config.yaml',
-        project: { id: 'test' },
         registry: {},
         targets: [],
       };
@@ -44,8 +44,8 @@ describe('PromptScriptConfig', () => {
   describe('input section', () => {
     it('should accept entry file', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.1.0',
         registry: {},
         targets: [],
         input: {
@@ -58,8 +58,8 @@ describe('PromptScriptConfig', () => {
 
     it('should accept include/exclude patterns', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.1.0',
         registry: {},
         targets: [],
         input: {
@@ -76,8 +76,8 @@ describe('PromptScriptConfig', () => {
   describe('registry section', () => {
     it('should accept cache settings', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.1.0',
         registry: {
           cache: {
             enabled: true,
@@ -93,8 +93,8 @@ describe('PromptScriptConfig', () => {
 
     it('should accept auth settings with token', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.1.0',
         registry: {
           url: 'https://registry.example.com',
           auth: {
@@ -111,8 +111,8 @@ describe('PromptScriptConfig', () => {
 
     it('should accept auth settings with env var', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.1.0',
         registry: {
           auth: {
             type: 'basic',
@@ -129,8 +129,8 @@ describe('PromptScriptConfig', () => {
   describe('watch section', () => {
     it('should accept watch settings', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.1.0',
         registry: {},
         targets: [],
         watch: {
@@ -150,8 +150,8 @@ describe('PromptScriptConfig', () => {
   describe('output section', () => {
     it('should accept output settings', () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.1.0',
         registry: {},
         targets: [],
         output: {

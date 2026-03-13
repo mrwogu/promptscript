@@ -300,7 +300,9 @@ Requires an aliased @use:
 ## Configuration: promptscript.yaml
 
 ```
-version: '1'
+id: my-project
+syntax: "1.1.0"
+description: "My project description"
 input:
   entry: .promptscript/project.prs
   include: ['.promptscript/**/*.prs']
@@ -379,3 +381,79 @@ The entry file uses `@use ./context`, `@use ./standards`, etc. to compose them.
 4. Unquoted strings with special chars - quote strings containing `:`, `#`, `{`, `}`
 5. Forgetting to compile - `.prs` changes need `prs compile` to take effect
 6. Triple quotes inside triple quotes - not supported; describe content textually instead
+
+## Migrating Existing AI Instructions to PromptScript
+
+Use this workflow when converting existing AI instruction files (CLAUDE.md, .cursorrules, copilot-instructions.md, etc.) to PromptScript `.prs` format.
+
+### Step 1: Discovery
+
+Find all existing AI instruction files in the project:
+
+- `CLAUDE.md` (Claude Code)
+- `.github/copilot-instructions.md` (GitHub Copilot)
+- `.cursorrules` or `.cursor/rules/*.mdc` (Cursor)
+- `.agent/rules/*.md` (Antigravity)
+- `AGENTS.md` (Factory AI / Codex)
+- `.clinerules` (Cline)
+- `.roorules` (Roo Code)
+- `.windsurf/rules/*.md` (Windsurf)
+- Any other AI instruction files
+
+### Step 2: Read and Analyze
+
+Read each discovered file and identify:
+
+- Identity/persona instructions ("You are...")
+- Project context (tech stack, architecture)
+- Coding standards and conventions
+- Hard restrictions and rules
+- Command shortcuts or slash commands
+- Skill definitions
+- Agent/subagent definitions
+
+### Step 3: Content Mapping
+
+Map content from source files to PromptScript blocks:
+
+| Source Pattern                      | PromptScript Block |
+| ----------------------------------- | ------------------ |
+| "You are..." persona text           | `@identity`        |
+| Project description, tech stack     | `@context`         |
+| Coding conventions, style rules     | `@standards`       |
+| "Never...", "Always...", hard rules | `@restrictions`    |
+| `/command` definitions              | `@shortcuts`       |
+| Skill/tool definitions              | `@skills`          |
+| Agent/subagent configs              | `@agents`          |
+| Reference docs, API specs           | `@knowledge`       |
+
+### Step 4: Generate PromptScript
+
+Create `.prs` files in `.promptscript/` directory using the mapped content. Start with `project.prs` containing `@meta` with project id and syntax version.
+
+### Step 5: File Organization
+
+Split content into logical files:
+
+- `project.prs` - entry point with `@meta`, `@inherit`, `@use`, `@identity`
+- `context.prs` - `@context` block
+- `standards.prs` - `@standards` block
+- `restrictions.prs` - `@restrictions` block
+- `commands.prs` - `@shortcuts` and `@knowledge` blocks
+
+Use `@use ./context`, `@use ./standards`, etc. in `project.prs` to compose them.
+
+### Step 6: Configuration
+
+Create or update `promptscript.yaml` with appropriate targets matching the original AI tools being used.
+
+### Step 7: Validation
+
+Run `prs validate --strict` to check syntax, then `prs compile` to generate output files. Compare compiled output with original files to verify content was preserved.
+
+### Migration Tips
+
+- Preserve the original intent and tone of instructions
+- Don't lose any rules or restrictions during mapping
+- Use `@knowledge` for large reference sections that don't fit other blocks
+- Back up original files before overwriting with compiled output

@@ -93,8 +93,14 @@ export type TargetEntry = TargetName | { [key in TargetName]?: TargetConfig };
  * PromptScript configuration file (promptscript.yaml).
  */
 export interface PromptScriptConfig {
-  /** Config version */
-  version: '1';
+  /** Project identifier */
+  id: string;
+
+  /** PromptScript syntax version */
+  syntax: string;
+
+  /** Project description */
+  description?: string;
 
   /**
    * Extend another configuration file.
@@ -102,12 +108,6 @@ export interface PromptScriptConfig {
    * @example extends: '../base-config.yaml'
    */
   extends?: string;
-
-  /** Project identification */
-  project: {
-    id: string;
-    team?: string;
-  };
 
   /** Inheritance path */
   inherit?: string;

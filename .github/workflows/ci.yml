@@ -177,8 +177,8 @@ jobs:
           test -f .promptscript/project.prs
 
           # Verify migration skill installed to .promptscript/skills/
-          test -f .promptscript/skills/migrate-to-promptscript/SKILL.md
-          grep -q "migrate-to-promptscript" .promptscript/skills/migrate-to-promptscript/SKILL.md
+          test -f .promptscript/skills/promptscript/SKILL.md
+          grep -q "promptscript" .promptscript/skills/promptscript/SKILL.md
 
           # Verify compilation still works after --migrate
           node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate
@@ -196,8 +196,8 @@ jobs:
           test -f promptscript.yaml
           test -f .promptscript/project.prs
 
-          # Verify migration skill does NOT exist
-          test ! -f .promptscript/skills/migrate-to-promptscript/SKILL.md
+          # Verify migration skill does NOT exist when --migrate is not used
+          test ! -f .promptscript/skills/promptscript/SKILL.md
 
       - name: Smoke test - all targets compilation
         run: |
