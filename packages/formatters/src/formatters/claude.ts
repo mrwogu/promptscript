@@ -145,6 +145,14 @@ export class ClaudeFormatter extends BaseFormatter {
     return CLAUDE_VERSIONS;
   }
 
+  override getSkillBasePath(): string | null {
+    return '.claude/skills';
+  }
+
+  override getSkillFileName(): string | null {
+    return 'SKILL.md';
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
 

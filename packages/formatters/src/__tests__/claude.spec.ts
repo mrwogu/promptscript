@@ -1333,4 +1333,18 @@ describe('ClaudeFormatter', () => {
       expect(commandFile?.content).toContain('You are the CI monitor orchestrator.');
     });
   });
+
+  describe('getSkillBasePath', () => {
+    it('should return .claude/skills', () => {
+      const formatter = new ClaudeFormatter();
+      expect(formatter.getSkillBasePath()).toBe('.claude/skills');
+    });
+  });
+
+  describe('getSkillFileName', () => {
+    it('should return SKILL.md', () => {
+      const formatter = new ClaudeFormatter();
+      expect(formatter.getSkillFileName()).toBe('SKILL.md');
+    });
+  });
 });

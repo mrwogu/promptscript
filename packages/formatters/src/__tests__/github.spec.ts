@@ -1857,4 +1857,18 @@ describe('GitHubFormatter', () => {
       expect(result.content).toContain('skip error handling');
     });
   });
+
+  describe('getSkillBasePath', () => {
+    it('should return .github/skills', () => {
+      const formatter = new GitHubFormatter();
+      expect(formatter.getSkillBasePath()).toBe('.github/skills');
+    });
+  });
+
+  describe('getSkillFileName', () => {
+    it('should return SKILL.md', () => {
+      const formatter = new GitHubFormatter();
+      expect(formatter.getSkillFileName()).toBe('SKILL.md');
+    });
+  });
 });
