@@ -33,8 +33,8 @@ import type { PromptScriptConfig } from '@promptscript/core';
 
 // Minimal config for testing - only the fields we care about
 type TestConfig = {
-  version: '1';
-  project?: { id: string };
+  id?: string;
+  syntax?: string;
   targets?: string[];
   registry?: {
     git?: {
@@ -99,7 +99,8 @@ describe('utils/registry-resolver', () => {
   describe('hasRegistryConfig', () => {
     it('should return true for git registry', () => {
       const config: TestConfig = {
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         registry: {
           git: {
             url: 'https://github.com/org/registry.git',
@@ -112,7 +113,8 @@ describe('utils/registry-resolver', () => {
 
     it('should return true for HTTP registry', () => {
       const config: TestConfig = {
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         registry: {
           url: 'https://registry.example.com',
         },
@@ -123,7 +125,8 @@ describe('utils/registry-resolver', () => {
 
     it('should return true for local path registry', () => {
       const config: TestConfig = {
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         registry: {
           path: './registry',
         },
@@ -134,7 +137,8 @@ describe('utils/registry-resolver', () => {
 
     it('should return false when no registry configured', () => {
       const config: TestConfig = {
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
       };
 
       expect(hasRegistryConfig(config)).toBe(false);
@@ -142,7 +146,8 @@ describe('utils/registry-resolver', () => {
 
     it('should return false for empty registry object', () => {
       const config: TestConfig = {
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         registry: {},
       };
 
@@ -151,7 +156,8 @@ describe('utils/registry-resolver', () => {
 
     it('should return true for git registry with all options', () => {
       const config: TestConfig = {
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         registry: {
           git: {
             url: 'https://github.com/org/registry.git',
@@ -178,8 +184,8 @@ describe('utils/registry-resolver', () => {
       mockCacheManager.isValid.mockResolvedValue(true);
 
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           git: { url: 'https://github.com/org/registry.git' },
@@ -197,8 +203,8 @@ describe('utils/registry-resolver', () => {
       mockCacheManager.isValid.mockResolvedValue(false);
 
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           git: { url: 'https://github.com/org/registry.git' },
@@ -217,8 +223,8 @@ describe('utils/registry-resolver', () => {
       mockCacheManager.getCachePath.mockReturnValue('/cache/git/registry');
 
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           git: {
@@ -235,8 +241,8 @@ describe('utils/registry-resolver', () => {
 
     it('should resolve HTTP registry with fallback path', async () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           url: 'https://registry.example.com',
@@ -253,8 +259,8 @@ describe('utils/registry-resolver', () => {
 
     it('should use default path for HTTP registry without path', async () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           url: 'https://registry.example.com',
@@ -269,8 +275,8 @@ describe('utils/registry-resolver', () => {
 
     it('should resolve local path registry', async () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           path: '../my-registry',
@@ -286,8 +292,8 @@ describe('utils/registry-resolver', () => {
 
     it('should use default path when no registry configured', async () => {
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
       };
 
@@ -302,8 +308,8 @@ describe('utils/registry-resolver', () => {
       mockCacheManager.isValid.mockResolvedValue(true);
 
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           git: { url: 'https://github.com/org/registry.git' },
@@ -322,8 +328,8 @@ describe('utils/registry-resolver', () => {
       mockGitRegistry.fetch.mockRejectedValue(new Error('Network timeout'));
 
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           git: { url: 'https://github.com/org/registry.git' },
@@ -341,8 +347,8 @@ describe('utils/registry-resolver', () => {
       mockGitRegistry.fetch.mockRejectedValue(new Error('File not found'));
 
       const config: PromptScriptConfig = {
-        version: '1',
-        project: { id: 'test' },
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
         registry: {
           git: { url: 'https://github.com/org/registry.git' },

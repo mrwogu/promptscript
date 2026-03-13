@@ -122,7 +122,7 @@ describe('commands/init', () => {
       expect(mockFs.writeFile).toHaveBeenCalledTimes(2);
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining("version: '1'"),
+        expect.stringContaining('syntax:'),
         'utf-8'
       );
     });
@@ -134,7 +134,7 @@ describe('commands/init', () => {
       expect(mockFs.writeFile).toHaveBeenCalledTimes(2);
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining("version: '1'"),
+        expect.stringContaining('syntax:'),
         'utf-8'
       );
       expect(mockFs.writeFile).toHaveBeenCalledWith(
@@ -149,7 +149,7 @@ describe('commands/init', () => {
 
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining("id: 'custom-project'"),
+        expect.stringContaining('id: custom-project'),
         'utf-8'
       );
     });
@@ -186,12 +186,13 @@ describe('commands/init', () => {
       expect(process.exitCode).toBe(1);
     });
 
-    it('should include team when provided', async () => {
+    it('should accept team option without error', async () => {
       await initCommand({ yes: true, team: 'myteam' }, mockServices);
 
+      // Team is used internally but not output to promptscript.yaml
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining("team: 'myteam'"),
+        expect.any(String),
         'utf-8'
       );
     });
@@ -307,12 +308,7 @@ describe('commands/init', () => {
 
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining("id: 'my-project'"),
-        'utf-8'
-      );
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("team: 'frontend'"),
+        expect.stringContaining('id: my-project'),
         'utf-8'
       );
       // Should not call inquirer prompts in non-interactive mode
@@ -357,7 +353,7 @@ describe('commands/init', () => {
       expect(mockPrompts.checkbox).toHaveBeenCalled();
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
-        expect.stringContaining("id: 'interactive-project'"),
+        expect.stringContaining('id: interactive-project'),
         'utf-8'
       );
     });
@@ -376,12 +372,6 @@ describe('commands/init', () => {
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
         expect.stringContaining("inherit: '@company/team'"),
-        'utf-8'
-      );
-      // Team should be extracted from inherit path
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("team: 'company'"),
         'utf-8'
       );
     });
@@ -538,12 +528,12 @@ describe('commands/init', () => {
     it('should install migration skill to .promptscript/skills when --migrate is used', async () => {
       await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
 
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/migrate-to-promptscript', {
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
       });
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.promptscript/skills/migrate-to-promptscript/SKILL.md',
-        expect.stringContaining('migrate-to-promptscript'),
+        '.promptscript/skills/promptscript/SKILL.md',
+        expect.stringContaining('promptscript'),
         'utf-8'
       );
     });
@@ -559,12 +549,12 @@ describe('commands/init', () => {
       );
 
       // Only one skill installed to .promptscript/skills/ (auto-discovery handles targets)
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/migrate-to-promptscript', {
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
       });
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.promptscript/skills/migrate-to-promptscript/SKILL.md',
-        expect.stringContaining('migrate-to-promptscript'),
+        '.promptscript/skills/promptscript/SKILL.md',
+        expect.stringContaining('promptscript'),
         'utf-8'
       );
     });
@@ -572,24 +562,23 @@ describe('commands/init', () => {
     it('should not install migration skill when --migrate is not used', async () => {
       await initCommand({ yes: true, targets: ['github', 'claude'] }, mockServices);
 
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith(
-        '.promptscript/skills/migrate-to-promptscript',
-        { recursive: true }
-      );
+      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.promptscript/skills/promptscript', {
+        recursive: true,
+      });
     });
 
     it('should show migration skill path in output when --migrate is used', async () => {
       await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('.promptscript/skills/migrate-to-promptscript/SKILL.md')
+        expect.stringContaining('.promptscript/skills/promptscript/SKILL.md')
       );
     });
 
     it('should show migration-specific next steps when --migrate is used', async () => {
       await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('/migrate'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('/promptscript'));
     });
   });
 

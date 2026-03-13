@@ -72,7 +72,8 @@ describe('commands/check', () => {
     it('should pass when valid config and entry file exist', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         input: { entry: './project.prs' },
         targets: ['github'],
       });
@@ -84,7 +85,7 @@ describe('commands/check', () => {
       expect(process.exitCode).toBeUndefined();
     });
 
-    it('should warn when version field is missing', async () => {
+    it('should warn when syntax field is missing', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
         input: { entry: './project.prs' },
@@ -102,7 +103,8 @@ describe('commands/check', () => {
     it('should fail when entry file does not exist', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         input: { entry: './missing.prs' },
         targets: ['github'],
       });
@@ -117,7 +119,8 @@ describe('commands/check', () => {
     it('should warn when no targets are configured', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         input: { entry: './project.prs' },
         targets: [],
       });
@@ -133,7 +136,8 @@ describe('commands/check', () => {
     it('should handle registry path configuration', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         input: { entry: './project.prs' },
         registry: { path: './registry' },
         targets: ['github'],
@@ -149,7 +153,8 @@ describe('commands/check', () => {
     it('should warn when registry path does not exist', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         input: { entry: './project.prs' },
         registry: { path: './missing-registry' },
         targets: ['github'],
@@ -174,7 +179,8 @@ describe('commands/check', () => {
     it('should handle registry URL configuration', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         input: { entry: './project.prs' },
         registry: { url: 'https://registry.example.com' },
         targets: ['github'],
@@ -190,7 +196,8 @@ describe('commands/check', () => {
     it('should handle inherit configuration', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         input: { entry: './project.prs' },
         inherit: './base.prs',
         targets: ['github'],
@@ -216,7 +223,8 @@ describe('commands/check', () => {
     it('should use default entry path when not specified', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
-        version: '1',
+        id: 'test',
+        syntax: '1.0.0',
         targets: ['github'],
       });
       mockExistsSync.mockImplementation((path: string) => {

@@ -68,13 +68,13 @@ describe('initCommand', () => {
     expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
     expect(mockFs.writeFile).toHaveBeenCalledWith(
       'promptscript.yaml',
-      expect.stringContaining("id: 'test-project'"),
+      expect.stringContaining('id: test-project'),
       'utf-8'
     );
   });
 
   describe('--migrate flag', () => {
-    it('should install migration skill to .promptscript/skills when --migrate is used', async () => {
+    it('should install migration skill to .promptscript/skills and target dirs when --migrate is used', async () => {
       vi.mocked(mockFs.existsSync).mockReturnValue(false);
       const options: InitOptions = {
         ...defaultOptions,
@@ -86,12 +86,22 @@ describe('initCommand', () => {
 
       await initCommand(options, mockServices);
 
-      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/migrate-to-promptscript', {
+      // Source copy
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
       });
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.promptscript/skills/migrate-to-promptscript/SKILL.md',
-        expect.stringContaining('migrate-to-promptscript'),
+        '.promptscript/skills/promptscript/SKILL.md',
+        expect.stringContaining('promptscript'),
+        'utf-8'
+      );
+      // Target copy for claude
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.claude/skills/promptscript', {
+        recursive: true,
+      });
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        '.claude/skills/promptscript/SKILL.md',
+        expect.stringContaining('promptscript'),
         'utf-8'
       );
     });
@@ -112,10 +122,9 @@ describe('initCommand', () => {
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
 
       // Should NOT create migration skill
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith(
-        '.promptscript/skills/migrate-to-promptscript',
-        { recursive: true }
-      );
+      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.promptscript/skills/promptscript', {
+        recursive: true,
+      });
     });
   });
 });

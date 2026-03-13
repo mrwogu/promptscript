@@ -73,19 +73,19 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       return;
     }
 
-    // Check 3: Version field
-    if (!config.version) {
+    // Check 3: Syntax version field
+    if (!config.syntax) {
       results.push({
-        name: 'Schema version',
+        name: 'Syntax version',
         status: 'warning',
-        message: 'Missing "version" field. Add version: \'1\' to config',
+        message: 'Missing "syntax" field. Add syntax: "<version>" to config',
       });
       hasWarnings = true;
     } else {
       results.push({
-        name: 'Schema version',
+        name: 'Syntax version',
         status: 'ok',
-        message: `v${config.version}`,
+        message: `v${config.syntax}`,
       });
     }
 

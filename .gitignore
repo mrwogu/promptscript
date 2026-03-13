@@ -64,6 +64,10 @@ temp/
 .claude/plans
 .claude/*.local.*
 
+# Claude-mem context files (subdirectory CLAUDE.md, not root)
+**/CLAUDE.md
+!/CLAUDE.md
+
 vitest.config.*.timestamp*
 
 # MkDocs
