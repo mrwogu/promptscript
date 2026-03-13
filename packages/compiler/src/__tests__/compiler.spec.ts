@@ -651,6 +651,156 @@ describe('Compiler', () => {
       expect(collisionWarning?.message).toContain('amp');
     });
 
+    it('should warn and skip when additional file collides with existing output (PS4001)', async () => {
+      const ast = createTestProgram();
+
+      // Factory formatter produces AGENTS.md as main output
+      const factoryFormatter: Formatter = {
+        name: 'factory',
+        outputPath: 'AGENTS.md',
+        description: 'Factory formatter',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({
+          path: 'AGENTS.md',
+          content: '# Full factory output with all sections\n'.repeat(20),
+        })),
+      };
+
+      // GitHub formatter produces AGENTS.md as an additional file
+      const githubFormatter: Formatter = {
+        name: 'github',
+        outputPath: '.github/copilot-instructions.md',
+        description: 'GitHub formatter',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({
+          path: '.github/copilot-instructions.md',
+          content: '# GitHub main output',
+          additionalFiles: [{ path: 'AGENTS.md', content: '# Minimal agents\n' }],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [factoryFormatter, githubFormatter],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+
+      // Factory's full output should be preserved (first writer wins)
+      const agentsOutput = result.outputs.get('AGENTS.md');
+      expect(agentsOutput?.content).toContain('Full factory output');
+
+      // GitHub's main output should also exist
+      expect(result.outputs.has('.github/copilot-instructions.md')).toBe(true);
+
+      // Collision warning should be present
+      const collisionWarning = result.warnings.find((w) => w.ruleId === 'PS4001');
+      expect(collisionWarning).toBeDefined();
+      expect(collisionWarning?.message).toContain('AGENTS.md');
+      expect(collisionWarning?.message).toContain('factory');
+      expect(collisionWarning?.message).toContain('github');
+    });
+
+    it('should warn and skip when additional file collides with another additional file', async () => {
+      const ast = createTestProgram();
+
+      const formatter1: Formatter = {
+        name: 'formatter-a',
+        outputPath: 'a/main.md',
+        description: 'Formatter A',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({
+          path: 'a/main.md',
+          content: '# A main',
+          additionalFiles: [{ path: 'shared/resource.md', content: '# From formatter A' }],
+        })),
+      };
+
+      const formatter2: Formatter = {
+        name: 'formatter-b',
+        outputPath: 'b/main.md',
+        description: 'Formatter B',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({
+          path: 'b/main.md',
+          content: '# B main',
+          additionalFiles: [{ path: 'shared/resource.md', content: '# From formatter B' }],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+
+      // First writer (formatter-a) should win
+      const shared = result.outputs.get('shared/resource.md');
+      expect(shared?.content).toContain('From formatter A');
+
+      // Collision warning
+      const collisionWarning = result.warnings.find((w) => w.ruleId === 'PS4001');
+      expect(collisionWarning).toBeDefined();
+      expect(collisionWarning?.message).toContain('formatter-a');
+      expect(collisionWarning?.message).toContain('formatter-b');
+    });
+
+    it('should still process nested additionalFiles of skipped colliding files', async () => {
+      const ast = createTestProgram();
+
+      // First formatter claims AGENTS.md
+      const formatter1 = createMockFormatter('first', 'AGENTS.md');
+
+      // Second formatter has AGENTS.md as additional with its own nested files
+      const formatter2: Formatter = {
+        name: 'second',
+        outputPath: 'second/main.md',
+        description: 'Second formatter',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({
+          path: 'second/main.md',
+          content: '# Second main',
+          additionalFiles: [
+            {
+              path: 'AGENTS.md',
+              content: '# Should be skipped',
+              additionalFiles: [{ path: 'nested/file.md', content: '# Nested file from second' }],
+            },
+          ],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter1, formatter2],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+
+      // First formatter's AGENTS.md preserved
+      const agents = result.outputs.get('AGENTS.md');
+      expect(agents?.content).toContain('first output');
+
+      // Nested file from skipped additional should still be processed
+      expect(result.outputs.has('nested/file.md')).toBe(true);
+    });
+
     it('should not warn when formatters target different output paths', async () => {
       const ast = createTestProgram();
       const formatter1 = createMockFormatter('github', '.github/copilot-instructions.md');
