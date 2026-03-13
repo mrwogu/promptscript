@@ -78,11 +78,68 @@ interface Formatter {
 | Cursor      | `null`               | `null`               | No skill support (uses .mdc files) |
 | Antigravity | `null`               | `null`               | No skill support                   |
 
-**Notable edge cases in MarkdownInstructionFormatter subclasses:**
+### Complete formatter inventory (37 targets)
 
-- **Gemini**: `skillFileName: 'skill.md'` (lowercase) — handled automatically
-- **OpenClaw**: `dotDir: 'skills'` (no dot prefix) — handled automatically
-- **Cline, Codex, Amp**: shared `dotDir: '.agents'` — if multiple are targets, collision detection handles the overlap
+Every formatter must be verified during implementation. The table below is the source of truth for expected injection paths.
+
+**4 BaseFormatter subclasses** (require individual handling):
+
+| #   | Formatter   | Base class    | `getSkillBasePath()` | `getSkillFileName()` | Injected path                          | Notes                              |
+| --- | ----------- | ------------- | -------------------- | -------------------- | -------------------------------------- | ---------------------------------- |
+| 1   | Claude      | BaseFormatter | `.claude/skills`     | `SKILL.md`           | `.claude/skills/promptscript/SKILL.md` | Override needed                    |
+| 2   | GitHub      | BaseFormatter | `.github/skills`     | `SKILL.md`           | `.github/skills/promptscript/SKILL.md` | Override needed                    |
+| 3   | Cursor      | BaseFormatter | `null`               | `null`               | _(skipped)_                            | No skill support (uses .mdc files) |
+| 4   | Antigravity | BaseFormatter | `null`               | `null`               | _(skipped)_                            | No skill support                   |
+
+**33 MarkdownInstructionFormatter subclasses** (handled automatically via `config.dotDir` + `config.skillFileName`):
+
+| #   | Formatter   | `dotDir`       | `skillFileName` | Injected path                               | Notes                       |
+| --- | ----------- | -------------- | --------------- | ------------------------------------------- | --------------------------- |
+| 5   | Adal        | `.adal`        | `SKILL.md`      | `.adal/skills/promptscript/SKILL.md`        |                             |
+| 6   | Amp         | `.agents`      | `SKILL.md`      | `.agents/skills/promptscript/SKILL.md`      | Shared dotDir with #12, #13 |
+| 7   | Augment     | `.augment`     | `SKILL.md`      | `.augment/skills/promptscript/SKILL.md`     |                             |
+| 8   | Cline       | `.agents`      | `SKILL.md`      | `.agents/skills/promptscript/SKILL.md`      | Shared dotDir with #6, #13  |
+| 9   | CodeBuddy   | `.codebuddy`   | `SKILL.md`      | `.codebuddy/skills/promptscript/SKILL.md`   |                             |
+| 10  | Codex       | `.agents`      | `SKILL.md`      | `.agents/skills/promptscript/SKILL.md`      | Shared dotDir with #6, #8   |
+| 11  | CommandCode | `.commandcode` | `SKILL.md`      | `.commandcode/skills/promptscript/SKILL.md` |                             |
+| 12  | Continue    | `.continue`    | `SKILL.md`      | `.continue/skills/promptscript/SKILL.md`    |                             |
+| 13  | Cortex      | `.cortex`      | `SKILL.md`      | `.cortex/skills/promptscript/SKILL.md`      |                             |
+| 14  | Crush       | `.crush`       | `SKILL.md`      | `.crush/skills/promptscript/SKILL.md`       |                             |
+| 15  | Factory     | `.factory`     | `SKILL.md`      | `.factory/skills/promptscript/SKILL.md`     |                             |
+| 16  | Gemini      | `.gemini`      | `skill.md`      | `.gemini/skills/promptscript/skill.md`      | Lowercase file name         |
+| 17  | Goose       | `.goose`       | `SKILL.md`      | `.goose/skills/promptscript/SKILL.md`       |                             |
+| 18  | Iflow       | `.iflow`       | `SKILL.md`      | `.iflow/skills/promptscript/SKILL.md`       |                             |
+| 19  | Junie       | `.junie`       | `SKILL.md`      | `.junie/skills/promptscript/SKILL.md`       |                             |
+| 20  | Kilo        | `.kilocode`    | `SKILL.md`      | `.kilocode/skills/promptscript/SKILL.md`    |                             |
+| 21  | Kiro        | `.kiro`        | `SKILL.md`      | `.kiro/skills/promptscript/SKILL.md`        |                             |
+| 22  | Kode        | `.kode`        | `SKILL.md`      | `.kode/skills/promptscript/SKILL.md`        |                             |
+| 23  | McpJam      | `.mcpjam`      | `SKILL.md`      | `.mcpjam/skills/promptscript/SKILL.md`      |                             |
+| 24  | MistralVibe | `.vibe`        | `SKILL.md`      | `.vibe/skills/promptscript/SKILL.md`        |                             |
+| 25  | Mux         | `.mux`         | `SKILL.md`      | `.mux/skills/promptscript/SKILL.md`         |                             |
+| 26  | Neovate     | `.neovate`     | `SKILL.md`      | `.neovate/skills/promptscript/SKILL.md`     |                             |
+| 27  | OpenClaw    | `skills`       | `SKILL.md`      | `skills/skills/promptscript/SKILL.md`       | No dot prefix on dotDir     |
+| 28  | OpenCode    | `.opencode`    | `SKILL.md`      | `.opencode/skills/promptscript/SKILL.md`    |                             |
+| 29  | OpenHands   | `.openhands`   | `SKILL.md`      | `.openhands/skills/promptscript/SKILL.md`   |                             |
+| 30  | Pi          | `.pi`          | `SKILL.md`      | `.pi/skills/promptscript/SKILL.md`          |                             |
+| 31  | Pochi       | `.pochi`       | `SKILL.md`      | `.pochi/skills/promptscript/SKILL.md`       |                             |
+| 32  | Qoder       | `.qoder`       | `SKILL.md`      | `.qoder/skills/promptscript/SKILL.md`       |                             |
+| 33  | QwenCode    | `.qwen`        | `SKILL.md`      | `.qwen/skills/promptscript/SKILL.md`        |                             |
+| 34  | Roo         | `.roo`         | `SKILL.md`      | `.roo/skills/promptscript/SKILL.md`         |                             |
+| 35  | Trae        | `.trae`        | `SKILL.md`      | `.trae/skills/promptscript/SKILL.md`        |                             |
+| 36  | Windsurf    | `.windsurf`    | `SKILL.md`      | `.windsurf/skills/promptscript/SKILL.md`    |                             |
+| 37  | Zencoder    | `.zencoder`    | `SKILL.md`      | `.zencoder/skills/promptscript/SKILL.md`    |                             |
+
+**Implementation change coverage:**
+
+| Layer                          | Code change                                                  | Formatters covered      |
+| ------------------------------ | ------------------------------------------------------------ | ----------------------- |
+| `BaseFormatter`                | Default `getSkillBasePath()` / `getSkillFileName()` → `null` | Cursor, Antigravity (2) |
+| `MarkdownInstructionFormatter` | Implement from `config.dotDir` / `config.skillFileName`      | 33 formatters           |
+| `ClaudeFormatter`              | Override with `.claude/skills` / `SKILL.md`                  | 1                       |
+| `GitHubFormatter`              | Override with `.github/skills` / `SKILL.md`                  | 1                       |
+| **Total**                      | **4 code changes**                                           | **37 formatters**       |
+
+**Verification requirement:** During implementation, each of the 37 formatters must be verified against this table to confirm the injected path is correct. Any new formatter added before implementation must also be added to this table.
 
 ### SKILL.md resolution
 
