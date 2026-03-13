@@ -106,18 +106,19 @@ Uses the existing `outputPathOwners` collision detection (rule PS4001). If a use
 
 ## Files to modify
 
-| Package    | File                                    | Change                                                                                                                       |
-| ---------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| core       | `src/types/config.ts`                   | Add `includePromptScriptSkill?: boolean` to `PromptScriptConfig`                                                             |
-| root       | `schema/config.json`                    | Add field to JSON schema (auto-generated from types)                                                                         |
-| compiler   | `src/types.ts`                          | Add `skillContent?: string` to `CompilerOptions`; add `getSkillBasePath()` and `getSkillFileName()` to `Formatter` interface |
-| compiler   | `src/compiler.ts`                       | Add injection logic after formatting; update standalone `compile()` and `compileAll()` to propagate `skillContent`           |
-| formatters | `src/base-formatter.ts`                 | Default `getSkillBasePath()` and `getSkillFileName()` returning `null`                                                       |
-| formatters | `src/markdown-instruction-formatter.ts` | Implement `getSkillBasePath()` and `getSkillFileName()` from config                                                          |
-| formatters | `src/formatters/claude.ts`              | Override `getSkillBasePath()` → `.claude/skills`, `getSkillFileName()` → `SKILL.md`                                          |
-| formatters | `src/formatters/github.ts`              | Override `getSkillBasePath()` → `.github/skills`, `getSkillFileName()` → `SKILL.md`                                          |
-| cli        | `src/commands/compile.ts`               | Resolve and read SKILL.md, pass content via options, respect config flag                                                     |
-| compiler   | `src/__tests__/compiler.spec.ts`        | Tests (see testing strategy below)                                                                                           |
+| Package    | File                                    | Change                                                                                                                                                                 |
+| ---------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| core       | `src/types/config.ts`                   | Add `includePromptScriptSkill?: boolean` to `PromptScriptConfig`                                                                                                       |
+| root       | `schema/config.json`                    | Add field to JSON schema (auto-generated from types)                                                                                                                   |
+| compiler   | `src/types.ts`                          | Add `skillContent?: string` to `CompilerOptions`; add `getSkillBasePath()` and `getSkillFileName()` to `Formatter` interface                                           |
+| formatters | `src/types.ts`                          | Add `getSkillBasePath()` and `getSkillFileName()` to formatters `Formatter` interface (mirrors compiler's)                                                             |
+| compiler   | `src/compiler.ts`                       | Add injection logic after formatting; update standalone `compile()` to propagate `skillContent` (`compileAll()` propagates automatically via `...this.options` spread) |
+| formatters | `src/base-formatter.ts`                 | Default `getSkillBasePath()` and `getSkillFileName()` returning `null`                                                                                                 |
+| formatters | `src/markdown-instruction-formatter.ts` | Implement `getSkillBasePath()` and `getSkillFileName()` from config                                                                                                    |
+| formatters | `src/formatters/claude.ts`              | Override `getSkillBasePath()` → `.claude/skills`, `getSkillFileName()` → `SKILL.md`                                                                                    |
+| formatters | `src/formatters/github.ts`              | Override `getSkillBasePath()` → `.github/skills`, `getSkillFileName()` → `SKILL.md`                                                                                    |
+| cli        | `src/commands/compile.ts`               | Resolve and read SKILL.md, pass content via options, respect config flag                                                                                               |
+| compiler   | `src/__tests__/compiler.spec.ts`        | Tests (see testing strategy below)                                                                                                                                     |
 
 ## What this does NOT change
 
