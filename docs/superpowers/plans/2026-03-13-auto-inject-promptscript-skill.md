@@ -752,17 +752,13 @@ git commit -m "feat(compiler): implement PromptScript SKILL.md injection after f
 Add to `packages/compiler/src/__tests__/compiler.spec.ts`, inside the `skill injection` describe:
 
 ```typescript
-it('should propagate skillContent through compileAll()', async () => {
-  // compileAll() spreads ...this.options when creating per-formatter Compiler instances,
-  // so skillContent propagates automatically. We verify by checking that compileAll
-  // produces skill outputs for formatters that support skills.
-  // Note: compileAll() uses FormatterRegistry internally, so this test may need
-  // integration-level setup. If mocking FormatterRegistry is complex, verify
-  // propagation indirectly via the standalone compile() test below instead.
+it('should include skillContent in compiler options for downstream propagation', async () => {
+  // compileAll() spreads ...this.options into per-formatter Compiler instances,
+  // so skillContent propagates automatically. We verify the injection works
+  // via compile() since both code paths share the same injection logic.
   const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
   const compiler = createTestCompiler({ formatters: [formatter], skillContent });
 
-  // Use compile() (not compileAll) since both share the same injection code path
   const result = await compiler.compile('test.prs');
   expect(result.success).toBe(true);
   expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
