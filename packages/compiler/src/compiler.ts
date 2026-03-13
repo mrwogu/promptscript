@@ -595,6 +595,10 @@ export interface CompileOptions {
    * Prettier formatting options for markdown output.
    */
   prettier?: CompilerOptions['prettier'];
+  /**
+   * Content of the PromptScript SKILL.md to inject into compilation output.
+   */
+  skillContent?: string;
 }
 
 /**
@@ -648,6 +652,7 @@ export async function compile(
     formatters,
     customConventions: options.customConventions,
     prettier: options.prettier,
+    skillContent: options.skillContent,
   });
 
   return compiler.compile(entryPath);

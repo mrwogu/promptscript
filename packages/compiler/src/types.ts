@@ -98,6 +98,12 @@ export interface CompilerOptions {
   prettier?: PrettierMarkdownOptions;
   /** Logger for verbose/debug output */
   logger?: Logger;
+  /**
+   * Content of the PromptScript SKILL.md to inject into compilation output.
+   * When provided (and config doesn't disable it), this content is added
+   * to each formatter's native skill directory.
+   */
+  skillContent?: string;
 }
 
 /**
