@@ -61,6 +61,8 @@ function createMockFormatter(name: string, outputPath: string = `./${name}/outpu
         content: `# ${name} output\nID: ${id ?? 'unknown'}`,
       };
     }),
+    getSkillBasePath: () => null,
+    getSkillFileName: () => null,
   };
 }
 
@@ -76,6 +78,8 @@ function createFailingFormatter(name: string, error: string): Formatter {
     format: vi.fn(() => {
       throw new Error(error);
     }),
+    getSkillBasePath: () => null,
+    getSkillFileName: () => null,
   };
 }
 
@@ -152,6 +156,12 @@ describe('Compiler', () => {
         format(ast: Program) {
           const id = ast.meta?.fields?.['id'] as string | undefined;
           return { path: this.outputPath, content: `ID: ${id ?? 'unknown'}` };
+        }
+        getSkillBasePath() {
+          return null;
+        }
+        getSkillFileName() {
+          return null;
         }
       }
 
@@ -332,6 +342,8 @@ describe('Compiler', () => {
             { path: '.cursor/commands/build.md', content: 'Build command content' },
           ],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -664,6 +676,8 @@ describe('Compiler', () => {
           path: 'AGENTS.md',
           content: '# Full factory output with all sections\n'.repeat(20),
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       // GitHub formatter produces AGENTS.md as an additional file
@@ -677,6 +691,8 @@ describe('Compiler', () => {
           content: '# GitHub main output',
           additionalFiles: [{ path: 'AGENTS.md', content: '# Minimal agents\n' }],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -719,6 +735,8 @@ describe('Compiler', () => {
           content: '# A main',
           additionalFiles: [{ path: 'shared/resource.md', content: '# From formatter A' }],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       const formatter2: Formatter = {
@@ -731,6 +749,8 @@ describe('Compiler', () => {
           content: '# B main',
           additionalFiles: [{ path: 'shared/resource.md', content: '# From formatter B' }],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -779,6 +799,8 @@ describe('Compiler', () => {
             },
           ],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));

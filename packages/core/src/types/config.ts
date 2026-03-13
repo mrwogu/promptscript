@@ -261,6 +261,14 @@ export interface PromptScriptConfig {
    */
   universalDir?: string | boolean;
 
+  /**
+   * Include the bundled PromptScript language skill in compilation output.
+   * When enabled, the SKILL.md that teaches AI agents how to work with .prs files
+   * is automatically added to each target's native skill directory.
+   * @default true
+   */
+  includePromptScriptSkill?: boolean;
+
   /** Validation settings */
   validation?: {
     requiredGuards?: string[];
