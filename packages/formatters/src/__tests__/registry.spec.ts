@@ -15,6 +15,14 @@ class MockFormatter implements Formatter {
   format(): FormatterOutput {
     return { path: this.outputPath, content: 'mock content' };
   }
+
+  getSkillBasePath(): string | null {
+    return null;
+  }
+
+  getSkillFileName(): string | null {
+    return null;
+  }
 }
 
 describe('FormatterRegistry', () => {
