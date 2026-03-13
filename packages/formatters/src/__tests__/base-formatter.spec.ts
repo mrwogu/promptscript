@@ -649,6 +649,18 @@ describe('BaseFormatter', () => {
     });
   });
 
+  describe('getSkillBasePath', () => {
+    it('should return null by default', () => {
+      expect(formatter.getSkillBasePath()).toBeNull();
+    });
+  });
+
+  describe('getSkillFileName', () => {
+    it('should return null by default', () => {
+      expect(formatter.getSkillFileName()).toBeNull();
+    });
+  });
+
   describe('stripAllIndent', () => {
     it('should strip all leading whitespace', () => {
       const content = '    Line 1\n        Line 2\n    Line 3';

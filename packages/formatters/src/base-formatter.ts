@@ -499,6 +499,16 @@ export abstract class BaseFormatter implements Formatter {
       }));
   }
 
+  /** Base path for skills, or null if formatter has no skill support. */
+  getSkillBasePath(): string | null {
+    return null;
+  }
+
+  /** Skill file name, or null if formatter has no skill support. */
+  getSkillFileName(): string | null {
+    return null;
+  }
+
   /**
    * Check if a skill name is safe for use in file paths.
    */
