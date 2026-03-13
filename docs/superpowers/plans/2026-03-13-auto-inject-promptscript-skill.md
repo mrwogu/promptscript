@@ -502,7 +502,12 @@ git commit -m "feat(compiler): add skillContent to CompilerOptions and CompileOp
 
 Add to `packages/compiler/src/__tests__/compiler.spec.ts`. First, update `createMockFormatter` to support skill path methods. Replace the existing `createMockFormatter` function:
 
-> **IMPORTANT:** After updating `createMockFormatter` and `createFailingFormatter`, search for ALL inline `Formatter` object literals in the test file (look for `{ name:` patterns that satisfy the `Formatter` interface). There are approximately 6 such objects. Each one MUST be updated to include `getSkillBasePath: () => null` and `getSkillFileName: () => null` — otherwise TypeScript will error because they no longer satisfy the `Formatter` interface.
+> **IMPORTANT:** After updating `createMockFormatter` and `createFailingFormatter`, you MUST also update ALL other places in the test file that create `Formatter`-conforming values:
+>
+> 1. **`class TestFormatter implements Formatter`** (around line 147): Add methods `getSkillBasePath(): string | null { return null; }` and `getSkillFileName(): string | null { return null; }` to the class body.
+> 2. **Inline `Formatter` object literals** (around lines 322, 658, 670, 712, 724, 766 — 6 total): Add `getSkillBasePath: () => null` and `getSkillFileName: () => null` to each.
+>
+> Without these updates, TypeScript will error because these no longer satisfy the `Formatter` interface.
 
 ```typescript
 function createMockFormatter(
@@ -805,9 +810,18 @@ git commit -m "test(compiler): add tests for compileAll and standalone compile s
 
 In `packages/cli/src/commands/compile.ts`, add a helper function near the top (after imports, around line 15):
 
-```typescript
-import { existsSync } from 'fs';
+First, add the `__dirname` setup near the top of the file (after existing imports). Note: `compile.ts` already imports `{ existsSync } from 'fs'`, `{ readFile } from 'fs/promises'`, and `{ resolve, dirname } from 'path'` — do NOT duplicate those. Only add:
 
+```typescript
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+```
+
+Then add the helper function:
+
+```typescript
 /**
  * Resolve and read the bundled PromptScript SKILL.md.
  * Uses the same dual-candidate pattern as init.ts to handle both
