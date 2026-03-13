@@ -5,31 +5,22 @@
   "description": "PromptScript configuration file (promptscript.yaml).",
   "type": "object",
   "properties": {
-    "version": {
+    "id": {
       "type": "string",
-      "const": "1",
-      "description": "Config version"
+      "description": "Project identifier"
+    },
+    "syntax": {
+      "type": "string",
+      "description": "PromptScript syntax version"
+    },
+    "description": {
+      "type": "string",
+      "description": "Project description"
     },
     "extends": {
       "type": "string",
       "description": "Extend another configuration file. Paths are resolved relative to the current config file.",
       "example": "extends: '../base-config.yaml'"
-    },
-    "project": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "team": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id"
-      ],
-      "additionalProperties": false,
-      "description": "Project identification"
     },
     "inherit": {
       "type": "string",
@@ -277,8 +268,8 @@
     }
   },
   "required": [
-    "version",
-    "project",
+    "id",
+    "syntax",
     "targets"
   ],
   "additionalProperties": false,
