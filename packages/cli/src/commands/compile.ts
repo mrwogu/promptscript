@@ -6,8 +6,6 @@ import chokidar from 'chokidar';
 import type { CompileOptions } from '../types.js';
 import type { Logger, PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadConfig, CONFIG_FILES } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
@@ -16,6 +14,9 @@ import { Compiler } from '@promptscript/compiler';
 import { isTTY } from '../output/pager.js';
 import { type CliServices, createDefaultServices } from '../services.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Resolve and read the bundled PromptScript SKILL.md.
@@ -26,8 +27,8 @@ import { resolveRegistryPath } from '../utils/registry-resolver.js';
 async function loadBundledSkillContent(logger: Logger): Promise<string | undefined> {
   const skillRelPath = 'skills/promptscript/SKILL.md';
   const candidates = [
-    resolve(__dirname, '..', '..', skillRelPath), // dev: packages/cli/skills/...
     resolve(__dirname, skillRelPath), // bundled: dist/packages/cli/skills/...
+    resolve(__dirname, '..', '..', skillRelPath), // dev: packages/cli/skills/...
   ];
 
   for (const candidate of candidates) {
