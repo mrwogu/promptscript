@@ -137,18 +137,32 @@ export async function initCommand(
     await fs.writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
 
     // Install migration skill if requested
-    // Copies bundled SKILL.md to .promptscript/skills/ so that
-    // `prs compile` auto-discovers and outputs to all target directories
+    // Copies bundled SKILL.md to both .promptscript/skills/ (source) AND
+    // directly to each target's skill directory so AI tools can discover
+    // the skill without running `prs compile` first (which would overwrite
+    // existing instruction files before they can be migrated).
     const installedSkillPaths: string[] = [];
     if (options.migrate) {
-      const skillName = 'migrate-to-promptscript';
+      const skillName = 'promptscript';
       const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
-      const skillDest = `.promptscript/skills/${skillName}`;
       try {
         const skillContent = readFileSync(skillSource, 'utf-8');
+
+        // Install to .promptscript/skills/ (canonical source)
+        const skillDest = `.promptscript/skills/${skillName}`;
         await fs.mkdir(skillDest, { recursive: true });
         await fs.writeFile(`${skillDest}/SKILL.md`, skillContent, 'utf-8');
         installedSkillPaths.push(`${skillDest}/SKILL.md`);
+
+        // Install directly to each target's skill directory
+        for (const target of config.targets) {
+          const targetSkillDir = getTargetSkillDir(target, skillName);
+          if (targetSkillDir) {
+            await fs.mkdir(targetSkillDir.dir, { recursive: true });
+            await fs.writeFile(targetSkillDir.path, skillContent, 'utf-8');
+            installedSkillPaths.push(targetSkillDir.path);
+          }
+        }
       } catch {
         ConsoleOutput.warn(`Could not install migration skill from ${skillSource}`);
       }
@@ -197,12 +211,13 @@ export async function initCommand(
 
     // Show migration-specific instructions if --migrate was used
     if (options.migrate && installedSkillPaths.length > 0) {
-      ConsoleOutput.muted('1. Run: prs compile');
-      ConsoleOutput.muted('2. Use the migration skill in your AI tool:');
-      ConsoleOutput.muted('   Claude Code / Factory AI: /migrate-to-promptscript');
-      ConsoleOutput.muted('   GitHub Copilot: @workspace /migrate-to-promptscript');
-      ConsoleOutput.muted('   Cursor: /migrate-to-promptscript');
-      ConsoleOutput.muted('3. Review generated .promptscript/project.prs');
+      ConsoleOutput.muted('1. Use the migration skill in your AI tool:');
+      const skillInvocations = getSkillInvocationHints(config.targets);
+      for (const hint of skillInvocations) {
+        ConsoleOutput.muted(`   ${hint}`);
+      }
+      ConsoleOutput.muted('2. Review generated .promptscript/project.prs');
+      ConsoleOutput.muted('3. Run: prs compile');
     } else {
       ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
       ConsoleOutput.muted('2. Run: prs compile');
@@ -557,14 +572,62 @@ function formatTargetName(target: AIToolTarget): string {
 }
 
 /**
+ * Get the skill directory path for a target.
+ * Returns null if the target doesn't support skills.
+ */
+function getTargetSkillDir(
+  target: AIToolTarget,
+  skillName: string
+): { dir: string; path: string } | null {
+  const skillDirs: Partial<Record<AIToolTarget, { dotDir: string; fileName: string }>> = {
+    claude: { dotDir: '.claude', fileName: 'SKILL.md' },
+    factory: { dotDir: '.factory', fileName: 'SKILL.md' },
+    github: { dotDir: '.github', fileName: 'SKILL.md' },
+    opencode: { dotDir: '.opencode', fileName: 'SKILL.md' },
+    gemini: { dotDir: '.gemini', fileName: 'skill.md' },
+  };
+
+  const config = skillDirs[target];
+  if (!config) return null;
+
+  const dir = `${config.dotDir}/skills/${skillName}`;
+  return { dir, path: `${dir}/${config.fileName}` };
+}
+
+/**
+ * Get skill invocation hints for the selected targets.
+ * Only shows tools that support skills (SKILL.md discovery).
+ */
+function getSkillInvocationHints(targets: AIToolTarget[]): string[] {
+  const hints: string[] = [];
+
+  // Tools that support skills and their invocation format
+  const skillSupport: Partial<Record<AIToolTarget, string>> = {
+    claude: 'Claude Code: /promptscript',
+    factory: 'Factory AI: /promptscript',
+    opencode: 'OpenCode: /promptscript',
+    gemini: 'Gemini CLI: /promptscript',
+    github: 'GitHub Copilot: /promptscript',
+  };
+
+  for (const target of targets) {
+    const hint = skillSupport[target];
+    if (hint) {
+      hints.push(hint);
+    }
+  }
+
+  return hints;
+}
+
+/**
  * Generate the config file content.
  */
 function generateConfig(config: ResolvedConfig): string {
-  const lines: string[] = ["version: '1'", '', 'project:', `  id: '${config.projectId}'`];
+  // Get PromptScript syntax version for the config
+  const syntaxVersion = getPackageVersion(__dirname, './package.json');
 
-  if (config.team) {
-    lines.push(`  team: '${config.team}'`);
-  }
+  const lines: string[] = [`id: ${config.projectId}`, `syntax: "${syntaxVersion}"`];
 
   lines.push('');
 
@@ -611,7 +674,7 @@ function generateConfig(config: ResolvedConfig): string {
     lines.push(`  - ${target}`);
   }
 
-  lines.push('', 'validation:', '  rules:', '    empty-block: warn');
+  lines.push('', 'validation:', '  rules:', '    empty-block: warning');
 
   // Add formatting configuration
   lines.push('');
