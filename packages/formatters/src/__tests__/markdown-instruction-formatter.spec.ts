@@ -543,6 +543,23 @@ describe('MarkdownInstructionFormatter', () => {
     });
   });
 
+  describe('getSkillBasePath', () => {
+    it('should return dotDir/skills from config', () => {
+      expect(formatter.getSkillBasePath()).toBe('.test/skills');
+    });
+  });
+
+  describe('getSkillFileName', () => {
+    it('should return skillFileName from config', () => {
+      expect(formatter.getSkillFileName()).toBe('SKILL.md');
+    });
+
+    it('should return lowercase skill.md when configured', () => {
+      const lowercaseFormatter = new TestFormatter({ skillFileName: 'skill.md' });
+      expect(lowercaseFormatter.getSkillFileName()).toBe('skill.md');
+    });
+  });
+
   describe('dotDir configuration', () => {
     it('should use configured dotDir for file paths', () => {
       const customFormatter = new TestFormatter({ dotDir: '.custom' });
