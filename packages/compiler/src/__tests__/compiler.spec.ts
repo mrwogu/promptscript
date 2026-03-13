@@ -995,6 +995,35 @@ describe('Compiler', () => {
       const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
       expect(skillOutput?.content).toContain('<!-- PromptScript');
     });
+
+    it('should include skillContent in compiler options for downstream propagation', async () => {
+      // compileAll() spreads ...this.options into per-formatter Compiler instances,
+      // so skillContent propagates automatically. We verify the injection works
+      // via compile() since both code paths share the same injection logic.
+      const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
+    });
+
+    it('should support skillContent in standalone compile()', async () => {
+      mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const result = await compile('test.prs', {
+        formatters: [createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md')],
+        skillContent,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
+    });
   });
 
   describe('getFormatters', () => {
