@@ -146,6 +146,9 @@ importers:
       '@promptscript/resolver':
         specifier: workspace:^
         version: link:../resolver
+      '@promptscript/server':
+        specifier: workspace:^
+        version: link:../server
       '@promptscript/validator':
         specifier: workspace:^
         version: link:../validator
