@@ -473,8 +473,62 @@
       "description": "Target can be a simple string name or a full configuration object."
     },
     "TargetName": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/KnownTarget"
+        },
+        {
+          "$ref": "#/definitions/CustomTarget"
+        }
+      ],
+      "description": "Supported output targets. Includes all known built-in targets plus custom targets registered via `registerFormatter`.\n\n- Use `KnownTarget` when you need exhaustiveness checks in switch/if-else.\n- Use `TargetName` when you need to accept both known and custom targets.\n- Use `isKnownTarget()` to narrow a `TargetName` to `KnownTarget` at runtime.\n- Use `customTarget()` to create a `CustomTarget` from a plain string."
+    },
+    "KnownTarget": {
       "type": "string",
-      "description": "Supported output targets."
+      "enum": [
+        "github",
+        "claude",
+        "cursor",
+        "antigravity",
+        "factory",
+        "opencode",
+        "gemini",
+        "windsurf",
+        "cline",
+        "roo",
+        "codex",
+        "continue",
+        "augment",
+        "goose",
+        "kilo",
+        "amp",
+        "trae",
+        "junie",
+        "kiro",
+        "cortex",
+        "crush",
+        "command-code",
+        "kode",
+        "mcpjam",
+        "mistral-vibe",
+        "mux",
+        "openhands",
+        "pi",
+        "qoder",
+        "qwen-code",
+        "zencoder",
+        "neovate",
+        "pochi",
+        "adal",
+        "iflow",
+        "openclaw",
+        "codebuddy"
+      ],
+      "description": "Known built-in output targets. These are the targets with first-class formatter support."
+    },
+    "CustomTarget": {
+      "type": "string",
+      "description": "Branded type for custom (user-registered) target names. Use `customTarget()` to create values of this type."
     },
     "TargetConfig": {
       "type": "object",
