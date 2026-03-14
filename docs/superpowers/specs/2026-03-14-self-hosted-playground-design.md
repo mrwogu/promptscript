@@ -10,59 +10,68 @@ The PromptScript playground is browser-only with no way to work against real fil
 
 ## Solution
 
-A Docker-based self-hosted playground that mounts a local repo and serves the existing playground SPA backed by a thin file I/O server. No git operations inside the container — files are volume-mounted and git stays on the host.
+A `prs serve` CLI command that starts a local API server against the current working directory. The existing online playground at `getpromptscript.dev` auto-detects the running server and switches to local mode — connecting to the developer's real files. No SPA bundling in the CLI. Docker runs the same `prs serve` command.
 
 ## Architecture
 
 ```
-+---------------------------------------------+
-|              Docker Container                |
-|                                              |
-|  +---------------------------------------+   |
-|  |      playground-server (Fastify)      |   |
-|  |                                       |   |
-|  |  Static Files -- Playground SPA       |   |
-|  |  REST API ---- File CRUD              |   |
-|  |  WebSocket --- File Watch Events      |   |
-|  +----------------+----------------------+   |
-|                   |                           |
-|              /workspace (volume mount)        |
-+-------------------+---------------------------+
-                    |
-          +---------+---------+
-          |  Host filesystem  |
-          |  (user's repo)    |
-          +-------------------+
++---------------------------+          +---------------------------+
+|  getpromptscript.dev      |          |  Developer's machine      |
+|  (Online Playground SPA)  |   CORS   |  or Docker container      |
+|                           | <------> |                           |
+|  - Monaco editor          |          |  prs serve (Fastify)      |
+|  - browser-compiler       |          |  - REST API (File CRUD)   |
+|  - auto-detects server    |          |  - WebSocket (File Watch) |
++---------------------------+          +-------------+-------------+
+                                                     |
+                                            CWD or /workspace
+                                                     |
+                                          +----------+----------+
+                                          |  Local filesystem   |
+                                          |  (user's repo)      |
+                                          +---------------------+
 ```
 
-### New Package: `packages/playground-server`
+### New Package: `packages/server`
 
 A Fastify server (~200-300 lines) that:
 
-- Serves the built playground SPA as static files
-- Provides REST endpoints for file operations (scoped to `/workspace`)
+- Provides REST endpoints for file operations (scoped to CWD or configured workspace root)
 - Runs a chokidar file watcher (watching `**/*.prs` and `**/promptscript.yaml` only) and pushes change events over WebSocket
-- Binds to `0.0.0.0` inside the container (required for Docker port forwarding)
+- Sets CORS headers allowing `getpromptscript.dev` origin (configurable via `--cors-origin`)
+- Binds to `127.0.0.1` by default (local use), `0.0.0.0` when `--host 0.0.0.0` is passed (Docker use)
+- Handles SIGINT/SIGTERM for graceful shutdown (closes server, file watcher, and WebSocket connections)
+
+### Modified Package: `packages/cli`
+
+New `prs serve` subcommand that:
+
+- Imports and starts the server from `@promptscript/server`
+- Accepts options: `--port` (default `3000`), `--host` (default `127.0.0.1`), `--read-only`, `--cors-origin`
+- Prints the local URL and the playground URL with connection parameter on startup
+- If the port is in use, exits with an error message suggesting `--port <alternative>`
 
 ### Modified Package: `packages/playground`
 
 Gains a "local mode" by introducing a file provider abstraction:
 
 - `FileProvider` interface with two implementations:
-  - `MemoryFileProvider` — existing behavior for the web playground
-  - `LocalFileProvider` — talks to playground-server REST API
-- Local mode detected via `window.__PLAYGROUND_CONFIG__` injected into the HTML template by the server
+  - `MemoryFileProvider` — existing behavior when no server is detected
+  - `LocalFileProvider` — talks to the local `prs serve` API
+- Local mode activated via URL parameter (e.g., `?server=localhost:3000`) or a "Connect to local server" UI button
+- The `server` parameter is persisted in the URL. Refreshing the page retains the connection. Clicking "Disconnect" removes the parameter.
+- On activation, playground probes `GET /api/health` to verify the server is reachable
 - Compilation remains client-side via `browser-compiler` (unchanged)
 
-### Docker Integration
+### Server Parameter Format
 
-New `playground` service in `docker-compose.yaml`. The Dockerfile entrypoint is changed to a shell script that dispatches between the CLI (`prs`) and the playground server based on the first argument.
+The `?server=` URL parameter accepts `host:port` (e.g., `localhost:3000`). The playground uses `http://` for connections to non-443 ports and `https://` for port 443.
 
 ## API Design
 
 ### REST Endpoints
 
-All paths scoped to `/workspace`. Path traversal (`../`) rejected with 403. PUT body limited to 1MB.
+All paths scoped to the workspace root. Path traversal (`../`) rejected with 403. PUT body limited to 1MB.
 
 | Method   | Endpoint         | Description                                          |
 |----------|------------------|------------------------------------------------------|
@@ -81,11 +90,9 @@ All paths scoped to `/workspace`. Path traversal (`../`) rejected with 403. PUT 
 ```json
 {
   "mode": "readwrite",
-  "workspace": "/workspace"
+  "workspace": "/Users/dev/my-project"
 }
 ```
-
-This is also injected into the HTML as `window.__PLAYGROUND_CONFIG__` so the SPA can detect local mode without an extra API call on startup.
 
 **`GET /api/files`:**
 
@@ -119,12 +126,25 @@ This is also injected into the HTML as `window.__PLAYGROUND_CONFIG__` so the SPA
 
 ### Security
 
-- All file paths resolved relative to `/workspace` — traversal attempts return 403
-- In read-only mode, mutating endpoints return 403
-- Mode controlled via `PLAYGROUND_MODE=readonly|readwrite` (default: `readwrite`)
-- CORS not required — SPA and API are same-origin (served from the same Fastify instance)
+- All file paths resolved relative to workspace root — traversal attempts return 403
+- In read-only mode (`--read-only`), mutating endpoints return 403
+- CORS: Server allows requests from `https://getpromptscript.dev` only by default. Configurable via `--cors-origin` for self-hosted playground instances.
+- Default bind to `127.0.0.1` — only accessible locally unless explicitly changed with `--host`
 
 ## Playground SPA Changes
+
+### Connection Flow
+
+1. User runs `prs serve` — CLI prints:
+   ```
+   PromptScript server running at http://localhost:3000
+   Open playground: https://getpromptscript.dev/playground/?server=localhost:3000
+   ```
+2. User opens the URL (or clicks it in their terminal)
+3. Playground detects `?server=` parameter, probes `GET /api/health`
+4. If reachable, switches to local mode. If not, shows connection error with retry option.
+
+Alternatively, users can open `getpromptscript.dev/playground/` and click "Connect to local server" to enter the server address manually.
 
 ### Local Mode Behavior
 
@@ -132,8 +152,9 @@ This is also injected into the HTML as `window.__PLAYGROUND_CONFIG__` so the SPA
 - Opening a tab fetches content via `GET /api/files/*`
 - Cmd+S saves to disk via `PUT` AND recompiles
 - WebSocket connection listens for external changes
-- "Share" and "Examples" features hidden
+- "Share" and "Examples" features hidden; "Disconnect" button shown instead
 - New file creation UI available in read-write mode
+- Connection status indicator in the toolbar (connected/disconnected/reconnecting)
 
 ### Conflict Handling
 
@@ -151,6 +172,7 @@ Listed in the file tree and openable in the editor for viewing/editing, but trea
 - All formatter targets
 - Config/environment panels
 - Keyboard shortcuts (Cmd+S gains save-to-disk behavior)
+- The playground works exactly as before when no server is connected
 
 ## Docker Configuration
 
@@ -159,14 +181,12 @@ Listed in the file tree and openable in the editor for viewing/editing, but trea
 ```yaml
 playground:
   image: ghcr.io/mrwogu/promptscript:latest
-  command: ["playground"]
+  command: ["serve", "--host", "0.0.0.0"]
   ports:
     - "3000:3000"
   volumes:
     - .:/workspace:rw
-  environment:
-    - PLAYGROUND_MODE=readwrite
-    - PLAYGROUND_PORT=3000
+  working_dir: /workspace
   healthcheck:
     test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
     interval: 10s
@@ -179,13 +199,12 @@ playground:
 ```yaml
 playground-readonly:
   image: ghcr.io/mrwogu/promptscript:latest
-  command: ["playground"]
+  command: ["serve", "--host", "0.0.0.0", "--read-only"]
   ports:
     - "3000:3000"
   volumes:
     - .:/workspace:ro
-  environment:
-    - PLAYGROUND_MODE=readonly
+  working_dir: /workspace
   healthcheck:
     test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
     interval: 10s
@@ -193,46 +212,78 @@ playground-readonly:
     retries: 3
 ```
 
+### Self-Hosted with Custom CORS
+
+For environments where the playground is self-hosted at a different origin:
+
+```yaml
+playground-custom:
+  image: ghcr.io/mrwogu/promptscript:latest
+  command: ["serve", "--host", "0.0.0.0", "--cors-origin", "https://promptscript.internal.company.com"]
+  ports:
+    - "3000:3000"
+  volumes:
+    - .:/workspace:rw
+  working_dir: /workspace
+```
+
 ### Dockerfile Changes
 
-- Playground SPA build output and playground-server included in the final image
-- Entrypoint changed from `ENTRYPOINT ["node", "/app/bin/prs.js"]` to a dispatcher script (`/app/entrypoint.sh`) that:
-  - If first argument is `playground`: starts the Fastify server via `node /app/packages/playground-server/dist/main.js`
-  - Otherwise: passes arguments to the CLI via `node /app/bin/prs.js "$@"`
-- This keeps backward compatibility — existing `docker run ghcr.io/mrwogu/promptscript compile` still works
-
-### Image Size Considerations
-
-Adding the playground SPA (~5-10MB gzipped) and Fastify server will increase the image size. If this becomes a concern, a separate image tag (e.g., `ghcr.io/mrwogu/promptscript:playground`) could be published to keep the CLI-only image lean. For now, a single image simplifies distribution.
+- Add `COPY packages/server/package.json packages/server/` to the builder stage for layer caching
+- Ensure `@promptscript/server` dist output is included in the runtime stage (either bundled into CLI dist or copied separately)
+- No entrypoint changes — `prs serve` is a standard CLI subcommand handled by the existing entrypoint
 
 ### Developer Workflow
+
+**Without Docker (Node.js installed):**
+
+```bash
+cd my-promptscript-repo
+prs serve
+# → PromptScript server running at http://localhost:3000
+# → Open playground: https://getpromptscript.dev/playground/?server=localhost:3000
+```
+
+**With Docker:**
 
 ```bash
 cd my-promptscript-repo
 docker compose up playground
-# Browser opens at http://localhost:3000
-# Edit .prs files in browser or IDE, see live compilation
+# → Same output, open the playground URL in browser
 ```
+
+## Known Limitations
+
+### Mixed Content (HTTPS playground → HTTP server)
+
+The playground at `https://getpromptscript.dev` is served over HTTPS. The local server runs on HTTP. Modern browsers exempt `localhost`/`127.0.0.1` from mixed-content blocking, so **local development works without issues**.
+
+However, connecting to a **remote** non-HTTPS server (e.g., `http://192.168.1.50:3000`) from the HTTPS playground **will be blocked** by browsers. Solutions for remote use:
+
+1. Place the server behind a reverse proxy with TLS (e.g., nginx, caddy)
+2. Self-host the playground SPA on HTTP alongside the server (same origin, no mixed content)
 
 ## Testing Strategy
 
-### playground-server (new package)
+### server (new package)
 
-- **Unit tests:** File path validation (traversal rejection), config parsing, route handlers with mocked filesystem, file size limits
-- **Integration tests:** Fastify server against a temp directory — full CRUD lifecycle, WebSocket events on file changes, read-only mode enforcement, health check endpoint
+- **Unit tests:** File path validation (traversal rejection), config parsing, route handlers with mocked filesystem, file size limits, CORS header validation, graceful shutdown
+- **Integration tests:** Fastify server against a temp directory — full CRUD lifecycle, WebSocket events on file changes, read-only mode enforcement, health check endpoint, port conflict error
 - **Target:** >90% coverage
+
+### cli (modifications)
+
+- **Unit tests:** `serve` command option parsing and server startup (mocked server)
 
 ### playground (modifications)
 
-- **Unit tests:** `FileProvider` interface, `LocalFileProvider` API calls (mocked fetch), config detection logic, conflict notification logic, WebSocket reconnection
+- **Unit tests:** `FileProvider` interface, `LocalFileProvider` API calls (mocked fetch), server detection logic, conflict notification logic, WebSocket reconnection, connection status UI, URL parameter persistence
 - **Existing tests** remain unchanged — `MemoryFileProvider` path is the default
 
 ### E2E (stretch goal)
 
-- Docker-based test: build image, mount a fixture repo, verify the playground serves and files are accessible via API
+- Start `prs serve` against a fixture directory, open playground, verify file operations end-to-end
 
 ## Packages Not Affected
 
 core, parser, resolver, validator, compiler, formatters, browser-compiler — no changes needed.
-
-Note: The CLI package itself is not modified. The Docker entrypoint dispatcher script handles routing to the playground-server, keeping the CLI decoupled.
