@@ -797,19 +797,7 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/AdalFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/AmpFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/AntigravityFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/AugmentFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -821,35 +809,7 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/ClineFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/CodeBuddyFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/CodexFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/CommandCodeFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/ContinueFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/ConventionRenderer/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/CortexFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/CrushFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -873,91 +833,7 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/GooseFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/IflowFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/JunieFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/KiloFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/KiroFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/KodeFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/MarkdownInstructionFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/McpjamFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/MistralVibeFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/MuxFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/NeovateFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/OpenClawFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/OpenCodeFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/OpenHandsFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/PiFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/PochiFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/QoderFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/QwenCodeFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/RooFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/TraeFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/WindsurfFormatter/</loc>
-         <lastmod>2026-03-14</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/classes/ZencoderFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -966,6 +842,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/createConventionRenderer/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/createSimpleMarkdownFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -1129,11 +1009,27 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/SimpleFormatterOptions/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/SimpleFormatterResult/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/SourceBlockConfig/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/StandaloneFormatOptions/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/VersionEntry/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -1321,6 +1217,18 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/AdalFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/AmpFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/AugmentFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/CLAUDE_VERSIONS/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
@@ -1353,6 +1261,34 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/ClineFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/CodeBuddyFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/CodexFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/CommandCodeFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/ContinueFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/CortexFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/CrushFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/EXTRACTION_RULES/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
@@ -1377,11 +1313,23 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/GooseFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/IFLOW_VERSIONS/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/IflowFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/JUNIE_VERSIONS/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/JunieFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -1401,6 +1349,18 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/KiloFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/KiroFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/KodeFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/MCPJAM_VERSIONS/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
@@ -1413,7 +1373,23 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/McpjamFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/MistralVibeFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/MuxFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/NEOVATE_VERSIONS/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/NeovateFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -1429,6 +1405,18 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OpenClawFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OpenCodeFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/OpenHandsFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/PARITY_MATRIX/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
@@ -1441,6 +1429,14 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/PiFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/PochiFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/QODER_VERSIONS/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
@@ -1449,7 +1445,19 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/QoderFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/QwenCodeFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/ROO_VERSIONS/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/RooFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -1457,11 +1465,23 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/TraeFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/WINDSURF_VERSIONS/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/WindsurfFormatter/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/ZENCODER_VERSIONS/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/variables/ZencoderFormatter/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
