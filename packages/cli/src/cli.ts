@@ -12,6 +12,7 @@ import { compileCommand } from './commands/compile.js';
 import { validateCommand } from './commands/validate.js';
 import { pullCommand } from './commands/pull.js';
 import { diffCommand } from './commands/diff.js';
+import { serveCommand } from './commands/serve.js';
 import { checkCommand } from './commands/check.js';
 import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
@@ -125,6 +126,15 @@ program
   .action(checkCommand);
 
 program.command('update-check').description('Check for CLI updates').action(updateCheckCommand);
+
+program
+  .command('serve')
+  .description('Start local development server for playground')
+  .option('-p, --port <port>', 'Port to listen on', '3000')
+  .option('--host <host>', 'Host to bind to', '127.0.0.1')
+  .option('--read-only', 'Disable file modifications')
+  .option('--cors-origin <origin>', 'Allowed CORS origin', 'https://getpromptscript.dev')
+  .action((opts) => serveCommand(opts));
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);

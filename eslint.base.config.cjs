@@ -80,6 +80,7 @@ const moduleBoundaryRules = [
       'scope:compiler',
       'scope:formatters',
       'scope:browser-compiler',
+      'scope:server',
     ],
   },
   // Browser compiler depends on core, parser, validator, formatters
