@@ -64,3 +64,45 @@ export interface Formatter {
  * Factory function type for creating formatter instances.
  */
 export type FormatterFactory = () => Formatter;
+
+/**
+ * Version information for a single formatter version.
+ */
+export interface FormatterVersionInfo {
+  /** Version identifier (e.g. 'simple', 'multifile', 'full') */
+  readonly name: string;
+  /** Human-readable description */
+  readonly description: string;
+  /** Default output file path for this version */
+  readonly outputPath: string;
+}
+
+/**
+ * Version configuration map returned by getSupportedVersions().
+ * Maps version name to its configuration.
+ */
+export type FormatterVersionMap = Readonly<Record<string, FormatterVersionInfo>>;
+
+/**
+ * Static interface for formatter classes.
+ *
+ * Enforces that every formatter class provides a static `getSupportedVersions()`
+ * method returning its version configuration. TypeScript cannot enforce static
+ * methods via `implements`, so this type is used at registration time to
+ * provide compile-time safety.
+ *
+ * @example
+ * ```ts
+ * // This will type-check:
+ * FormatterRegistry.register('claude', ClaudeFormatter);
+ *
+ * // This will fail at compile time if MissingFormatter lacks getSupportedVersions():
+ * FormatterRegistry.register('missing', MissingFormatter);
+ * ```
+ */
+export interface FormatterClass {
+  /** Create a new formatter instance */
+  new (): Formatter;
+  /** Return version configuration for this formatter */
+  getSupportedVersions(): FormatterVersionMap;
+}
