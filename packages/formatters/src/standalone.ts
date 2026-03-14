@@ -1,6 +1,12 @@
 import type { Program } from '@promptscript/core';
 import { FormatterRegistry } from './registry.js';
-import type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types.js';
+import type {
+  Formatter,
+  FormatterClass,
+  FormatterFactory,
+  FormatterOutput,
+  FormatOptions,
+} from './types.js';
 
 /**
  * Options for the standalone format function.
@@ -105,7 +111,7 @@ export function getFormatter(name: string): Formatter {
  * Use this to add custom formatters that can be referenced by name.
  *
  * @param name - Unique identifier for the formatter
- * @param factory - Factory function that creates formatter instances
+ * @param ctorOrFactory - Formatter class (preferred) or factory function
  * @throws Error if a formatter with the same name is already registered
  *
  * @example
@@ -117,16 +123,32 @@ export function getFormatter(name: string): Formatter {
  *   outputPath = '.my-tool/config.md';
  *   description = 'My custom formatter';
  *   defaultConvention = 'markdown';
+ *   static getSupportedVersions() { return { simple: { name: 'simple', description: '...', outputPath: '...' } }; }
  * }
  *
- * registerFormatter('my-tool', () => new MyFormatter());
+ * registerFormatter('my-tool', MyFormatter);
  *
  * // Now it can be used by name
  * const formatter = getFormatter('my-tool');
  * ```
  */
-export function registerFormatter(name: string, factory: FormatterFactory): void {
-  FormatterRegistry.register(name, factory);
+export function registerFormatter(
+  name: string,
+  ctorOrFactory: FormatterClass | FormatterFactory
+): void {
+  // Disambiguate for the overloaded register() method
+  if (isFormatterClassArg(ctorOrFactory)) {
+    FormatterRegistry.register(name, ctorOrFactory);
+  } else {
+    FormatterRegistry.register(name, ctorOrFactory);
+  }
+}
+
+/**
+ * Check if a value is a FormatterClass (constructor) vs a FormatterFactory (plain function).
+ */
+function isFormatterClassArg(value: FormatterClass | FormatterFactory): value is FormatterClass {
+  return value.prototype !== undefined && value.prototype.constructor === value;
 }
 
 /**

@@ -306,9 +306,10 @@ export interface UserConfig {
 }
 
 /**
- * Supported output targets.
+ * Known built-in output targets.
+ * These are the targets with first-class formatter support.
  */
-export type TargetName =
+export type KnownTarget =
   // Original 7
   | 'github'
   | 'claude'
@@ -349,8 +350,95 @@ export type TargetName =
   | 'adal'
   | 'iflow'
   | 'openclaw'
-  | 'codebuddy'
-  | string;
+  | 'codebuddy';
+
+/**
+ * Branded type for custom (user-registered) target names.
+ * Use `customTarget()` to create values of this type.
+ */
+export type CustomTarget = string & { readonly __brand?: 'CustomTarget' };
+
+/**
+ * Supported output targets.
+ * Includes all known built-in targets plus custom targets registered via `registerFormatter`.
+ *
+ * - Use `KnownTarget` when you need exhaustiveness checks in switch/if-else.
+ * - Use `TargetName` when you need to accept both known and custom targets.
+ * - Use `isKnownTarget()` to narrow a `TargetName` to `KnownTarget` at runtime.
+ * - Use `customTarget()` to create a `CustomTarget` from a plain string.
+ */
+export type TargetName = KnownTarget | CustomTarget;
+
+/**
+ * Runtime array of all known target names.
+ * Useful for validation and iteration.
+ */
+export const KNOWN_TARGETS: readonly KnownTarget[] = [
+  // Original 7
+  'github',
+  'claude',
+  'cursor',
+  'antigravity',
+  'factory',
+  'opencode',
+  'gemini',
+  // Tier 1
+  'windsurf',
+  'cline',
+  'roo',
+  'codex',
+  'continue',
+  // Tier 2
+  'augment',
+  'goose',
+  'kilo',
+  'amp',
+  'trae',
+  'junie',
+  'kiro',
+  // Tier 3
+  'cortex',
+  'crush',
+  'command-code',
+  'kode',
+  'mcpjam',
+  'mistral-vibe',
+  'mux',
+  'openhands',
+  'pi',
+  'qoder',
+  'qwen-code',
+  'zencoder',
+  'neovate',
+  'pochi',
+  'adal',
+  'iflow',
+  'openclaw',
+  'codebuddy',
+] as const;
+
+/**
+ * Type guard to check if a target name is a known built-in target.
+ * Useful for narrowing `TargetName` to `KnownTarget` in switch statements
+ * and enabling exhaustiveness checks.
+ *
+ * @param name - The target name to check
+ * @returns True if the name is a known built-in target
+ */
+export function isKnownTarget(name: string): name is KnownTarget {
+  return (KNOWN_TARGETS as readonly string[]).includes(name);
+}
+
+/**
+ * Create a `CustomTarget` value from a plain string.
+ * Use this when registering custom formatters to get proper typing.
+ *
+ * @param name - The custom target name
+ * @returns The name typed as `CustomTarget`
+ */
+export function customTarget(name: string): CustomTarget {
+  return name as CustomTarget;
+}
 
 /**
  * Default output paths for each target.
