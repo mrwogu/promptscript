@@ -13,6 +13,7 @@ export interface VersionEntry {
  * Standard three-version map returned by `getSupportedVersions()`.
  */
 export interface SimpleFormatterVersions {
+  readonly [key: string]: VersionEntry;
   readonly simple: VersionEntry;
   readonly multifile: VersionEntry;
   readonly full: VersionEntry;
