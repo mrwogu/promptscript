@@ -30,7 +30,7 @@ describe('useLocalFiles', () => {
   });
 
   it('loads files from server when connected', async () => {
-    const { result } = renderHook(() => useLocalFiles('localhost:3000', mockOnFileEvent));
+    renderHook(() => useLocalFiles('localhost:3000', mockOnFileEvent));
 
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
