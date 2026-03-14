@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+const mockStartServer = vi.fn().mockResolvedValue(undefined);
+
 vi.mock('@promptscript/server', () => ({
-  startServer: vi.fn().mockResolvedValue(undefined),
+  startServer: mockStartServer,
 }));
 
 import { serveCommand } from '../serve.js';
-import { startServer } from '@promptscript/server';
 
 describe('serveCommand', () => {
   beforeEach(() => {
@@ -14,7 +15,7 @@ describe('serveCommand', () => {
 
   it('calls startServer with default options', async () => {
     await serveCommand({});
-    expect(startServer).toHaveBeenCalledWith(
+    expect(mockStartServer).toHaveBeenCalledWith(
       expect.objectContaining({
         port: 3000,
         host: '127.0.0.1',
@@ -26,28 +27,30 @@ describe('serveCommand', () => {
 
   it('passes custom port', async () => {
     await serveCommand({ port: '8080' });
-    expect(startServer).toHaveBeenCalledWith(expect.objectContaining({ port: 8080 }));
+    expect(mockStartServer).toHaveBeenCalledWith(expect.objectContaining({ port: 8080 }));
   });
 
   it('passes host option', async () => {
     await serveCommand({ host: '0.0.0.0' });
-    expect(startServer).toHaveBeenCalledWith(expect.objectContaining({ host: '0.0.0.0' }));
+    expect(mockStartServer).toHaveBeenCalledWith(expect.objectContaining({ host: '0.0.0.0' }));
   });
 
   it('passes read-only flag', async () => {
     await serveCommand({ readOnly: true });
-    expect(startServer).toHaveBeenCalledWith(expect.objectContaining({ readOnly: true }));
+    expect(mockStartServer).toHaveBeenCalledWith(expect.objectContaining({ readOnly: true }));
   });
 
   it('passes custom CORS origin', async () => {
     await serveCommand({ corsOrigin: 'https://custom.example.com' });
-    expect(startServer).toHaveBeenCalledWith(
+    expect(mockStartServer).toHaveBeenCalledWith(
       expect.objectContaining({ corsOrigin: 'https://custom.example.com' })
     );
   });
 
   it('uses process.cwd() as workspace', async () => {
     await serveCommand({});
-    expect(startServer).toHaveBeenCalledWith(expect.objectContaining({ workspace: process.cwd() }));
+    expect(mockStartServer).toHaveBeenCalledWith(
+      expect.objectContaining({ workspace: process.cwd() })
+    );
   });
 });

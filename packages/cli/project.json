@@ -35,7 +35,8 @@
           "chalk",
           "chokidar",
           "yaml",
-          "simple-git"
+          "simple-git",
+          "@promptscript/server"
         ],
         "generatePackageJson": false
       }

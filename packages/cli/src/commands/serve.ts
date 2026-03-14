@@ -1,5 +1,3 @@
-import { startServer } from '@promptscript/server';
-
 interface ServeOptions {
   port?: string;
   host?: string;
@@ -8,6 +6,7 @@ interface ServeOptions {
 }
 
 export async function serveCommand(options: ServeOptions): Promise<void> {
+  const { startServer } = await import('@promptscript/server');
   await startServer({
     port: options.port ? parseInt(options.port, 10) : 3000,
     host: options.host ?? '127.0.0.1',
