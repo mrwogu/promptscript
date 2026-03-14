@@ -7,11 +7,13 @@
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@swc/helpers": "~0.5.19",
-    "fastify": "^5.0.0",
     "@fastify/cors": "^11.0.0",
     "@fastify/websocket": "^11.0.0",
+    "@swc/helpers": "~0.5.19",
+    "@types/ws": "^8.18.1",
     "chokidar": "^4.0.0",
-    "fast-glob": "^3.3.0"
+    "fast-glob": "^3.3.0",
+    "fastify": "^5.0.0",
+    "ws": "^8.19.0"
   }
 }
