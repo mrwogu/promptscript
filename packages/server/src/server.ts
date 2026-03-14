@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
+import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyWebsocket from '@fastify/websocket';
 import type { FastifyInstance } from 'fastify';
 import { registerHealthRoute } from './routes/health.js';
@@ -15,6 +16,7 @@ export async function createServer(options: ServerOptions): Promise<FastifyInsta
     origin: options.corsOrigin,
   });
 
+  await app.register(fastifyRateLimit, { max: 100, timeWindow: '1 minute' });
   await app.register(fastifyWebsocket);
 
   registerHealthRoute(app);
