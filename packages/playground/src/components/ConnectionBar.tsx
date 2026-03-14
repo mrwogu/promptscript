@@ -1,7 +1,5 @@
 import { useState } from 'react';
-
-// Define ConnectionStatus locally to avoid circular dependency
-type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+import type { ConnectionStatus } from '../hooks/useServerConnection';
 
 interface ConnectionBarProps {
   status: ConnectionStatus;
@@ -24,12 +22,7 @@ const STATUS_LABELS: Record<ConnectionStatus, string> = {
   reconnecting: 'Reconnecting...',
 };
 
-export function ConnectionBar({
-  status,
-  serverHost,
-  onConnect,
-  onDisconnect,
-}: ConnectionBarProps): JSX.Element {
+export function ConnectionBar({ status, serverHost, onConnect, onDisconnect }: ConnectionBarProps) {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState('localhost:3000');
 

@@ -30,7 +30,12 @@ export function FileTabs() {
 
   const handleRenameSubmit = (oldPath: string) => {
     if (editValue && editValue !== oldPath) {
-      const newPath = editValue.endsWith('.prs') ? editValue : `${editValue}.prs`;
+      const isYaml = editValue.endsWith('.yaml') || editValue.endsWith('.yml');
+      const newPath = isYaml
+        ? editValue
+        : editValue.endsWith('.prs')
+          ? editValue
+          : `${editValue}.prs`;
       if (!files.some((f) => f.path === newPath)) {
         renameFile(oldPath, newPath);
       }
