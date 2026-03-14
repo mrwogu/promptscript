@@ -30,6 +30,15 @@ export type {
   SectionNameKey,
 } from './markdown-instruction-formatter.js';
 
+// Factory for simple markdown formatters
+export { createSimpleMarkdownFormatter } from './create-simple-formatter.js';
+export type {
+  SimpleFormatterOptions,
+  SimpleFormatterResult,
+  SimpleFormatterVersions,
+  VersionEntry,
+} from './create-simple-formatter.js';
+
 // Registry
 export { FormatterRegistry } from './registry.js';
 

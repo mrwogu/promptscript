@@ -17,7 +17,7 @@ const createMinimalProgram = (): Program => ({
 });
 
 describe('OpenCodeFormatter', () => {
-  let formatter: OpenCodeFormatter;
+  let formatter: InstanceType<typeof OpenCodeFormatter>;
 
   beforeEach(() => {
     formatter = new OpenCodeFormatter();
