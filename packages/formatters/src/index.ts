@@ -8,7 +8,15 @@
  */
 
 // Types
-export type { Formatter, FormatterFactory, FormatterOutput, FormatOptions } from './types.js';
+export type {
+  Formatter,
+  FormatterClass,
+  FormatterFactory,
+  FormatterOutput,
+  FormatterVersionInfo,
+  FormatterVersionMap,
+  FormatOptions,
+} from './types.js';
 
 // Base classes
 export { BaseFormatter } from './base-formatter.js';
@@ -21,6 +29,15 @@ export type {
   MarkdownVersion,
   SectionNameKey,
 } from './markdown-instruction-formatter.js';
+
+// Factory for simple markdown formatters
+export { createSimpleMarkdownFormatter } from './create-simple-formatter.js';
+export type {
+  SimpleFormatterOptions,
+  SimpleFormatterResult,
+  SimpleFormatterVersions,
+  VersionEntry,
+} from './create-simple-formatter.js';
 
 // Registry
 export { FormatterRegistry } from './registry.js';
@@ -142,43 +159,43 @@ import { OpenClawFormatter } from './formatters/openclaw.js';
 import { CodeBuddyFormatter } from './formatters/codebuddy.js';
 
 // Original 7
-FormatterRegistry.register('github', () => new GitHubFormatter());
-FormatterRegistry.register('claude', () => new ClaudeFormatter());
-FormatterRegistry.register('cursor', () => new CursorFormatter());
-FormatterRegistry.register('antigravity', () => new AntigravityFormatter());
-FormatterRegistry.register('factory', () => new FactoryFormatter());
-FormatterRegistry.register('opencode', () => new OpenCodeFormatter());
-FormatterRegistry.register('gemini', () => new GeminiFormatter());
+FormatterRegistry.register('github', GitHubFormatter);
+FormatterRegistry.register('claude', ClaudeFormatter);
+FormatterRegistry.register('cursor', CursorFormatter);
+FormatterRegistry.register('antigravity', AntigravityFormatter);
+FormatterRegistry.register('factory', FactoryFormatter);
+FormatterRegistry.register('opencode', OpenCodeFormatter);
+FormatterRegistry.register('gemini', GeminiFormatter);
 // Tier 1
-FormatterRegistry.register('windsurf', () => new WindsurfFormatter());
-FormatterRegistry.register('cline', () => new ClineFormatter());
-FormatterRegistry.register('roo', () => new RooFormatter());
-FormatterRegistry.register('codex', () => new CodexFormatter());
-FormatterRegistry.register('continue', () => new ContinueFormatter());
+FormatterRegistry.register('windsurf', WindsurfFormatter);
+FormatterRegistry.register('cline', ClineFormatter);
+FormatterRegistry.register('roo', RooFormatter);
+FormatterRegistry.register('codex', CodexFormatter);
+FormatterRegistry.register('continue', ContinueFormatter);
 // Tier 2
-FormatterRegistry.register('augment', () => new AugmentFormatter());
-FormatterRegistry.register('goose', () => new GooseFormatter());
-FormatterRegistry.register('kilo', () => new KiloFormatter());
-FormatterRegistry.register('amp', () => new AmpFormatter());
-FormatterRegistry.register('trae', () => new TraeFormatter());
-FormatterRegistry.register('junie', () => new JunieFormatter());
-FormatterRegistry.register('kiro', () => new KiroFormatter());
+FormatterRegistry.register('augment', AugmentFormatter);
+FormatterRegistry.register('goose', GooseFormatter);
+FormatterRegistry.register('kilo', KiloFormatter);
+FormatterRegistry.register('amp', AmpFormatter);
+FormatterRegistry.register('trae', TraeFormatter);
+FormatterRegistry.register('junie', JunieFormatter);
+FormatterRegistry.register('kiro', KiroFormatter);
 // Tier 3
-FormatterRegistry.register('cortex', () => new CortexFormatter());
-FormatterRegistry.register('crush', () => new CrushFormatter());
-FormatterRegistry.register('command-code', () => new CommandCodeFormatter());
-FormatterRegistry.register('kode', () => new KodeFormatter());
-FormatterRegistry.register('mcpjam', () => new McpjamFormatter());
-FormatterRegistry.register('mistral-vibe', () => new MistralVibeFormatter());
-FormatterRegistry.register('mux', () => new MuxFormatter());
-FormatterRegistry.register('openhands', () => new OpenHandsFormatter());
-FormatterRegistry.register('pi', () => new PiFormatter());
-FormatterRegistry.register('qoder', () => new QoderFormatter());
-FormatterRegistry.register('qwen-code', () => new QwenCodeFormatter());
-FormatterRegistry.register('zencoder', () => new ZencoderFormatter());
-FormatterRegistry.register('neovate', () => new NeovateFormatter());
-FormatterRegistry.register('pochi', () => new PochiFormatter());
-FormatterRegistry.register('adal', () => new AdalFormatter());
-FormatterRegistry.register('iflow', () => new IflowFormatter());
-FormatterRegistry.register('openclaw', () => new OpenClawFormatter());
-FormatterRegistry.register('codebuddy', () => new CodeBuddyFormatter());
+FormatterRegistry.register('cortex', CortexFormatter);
+FormatterRegistry.register('crush', CrushFormatter);
+FormatterRegistry.register('command-code', CommandCodeFormatter);
+FormatterRegistry.register('kode', KodeFormatter);
+FormatterRegistry.register('mcpjam', McpjamFormatter);
+FormatterRegistry.register('mistral-vibe', MistralVibeFormatter);
+FormatterRegistry.register('mux', MuxFormatter);
+FormatterRegistry.register('openhands', OpenHandsFormatter);
+FormatterRegistry.register('pi', PiFormatter);
+FormatterRegistry.register('qoder', QoderFormatter);
+FormatterRegistry.register('qwen-code', QwenCodeFormatter);
+FormatterRegistry.register('zencoder', ZencoderFormatter);
+FormatterRegistry.register('neovate', NeovateFormatter);
+FormatterRegistry.register('pochi', PochiFormatter);
+FormatterRegistry.register('adal', AdalFormatter);
+FormatterRegistry.register('iflow', IflowFormatter);
+FormatterRegistry.register('openclaw', OpenClawFormatter);
+FormatterRegistry.register('codebuddy', CodeBuddyFormatter);

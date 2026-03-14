@@ -1,54 +1,12 @@
-import { MarkdownInstructionFormatter } from '../markdown-instruction-formatter.js';
+import { createSimpleMarkdownFormatter } from '../create-simple-formatter.js';
 
 export type QoderVersion = 'simple' | 'multifile' | 'full';
 
-export const QODER_VERSIONS = {
-  simple: {
-    name: 'simple',
-    description: 'Single .qoder/rules/project.md file',
+export const { Formatter: QoderFormatter, VERSIONS: QODER_VERSIONS } =
+  createSimpleMarkdownFormatter({
+    name: 'qoder',
     outputPath: '.qoder/rules/project.md',
-  },
-  multifile: {
-    name: 'multifile',
-    description: 'Single .qoder/rules/project.md file (skills via full mode)',
-    outputPath: '.qoder/rules/project.md',
-  },
-  full: {
-    name: 'full',
-    description: '.qoder/rules/project.md + .qoder/skills/<name>/SKILL.md',
-    outputPath: '.qoder/rules/project.md',
-  },
-} as const;
-
-/**
- * Formatter for Qoder instructions.
- *
- * Qoder uses `.qoder/rules/project.md` as its main rules file
- * and `.qoder/skills/<name>/SKILL.md` for skills.
- *
- * @example
- * ```yaml
- * targets:
- *   - qoder
- * ```
- */
-export class QoderFormatter extends MarkdownInstructionFormatter {
-  constructor() {
-    super({
-      name: 'qoder',
-      outputPath: '.qoder/rules/project.md',
-      description: 'Qoder rules (Markdown)',
-      defaultConvention: 'markdown',
-      mainFileHeader: '# Project Rules',
-      dotDir: '.qoder',
-      skillFileName: 'SKILL.md',
-      hasAgents: false,
-      hasCommands: false,
-      hasSkills: true,
-    });
-  }
-
-  static getSupportedVersions(): typeof QODER_VERSIONS {
-    return QODER_VERSIONS;
-  }
-}
+    description: 'Qoder rules (Markdown)',
+    mainFileHeader: '# Project Rules',
+    dotDir: '.qoder',
+  });
