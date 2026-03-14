@@ -385,6 +385,10 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/customTarget/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/deepClone/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
@@ -450,6 +454,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/isBuiltInConvention/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/isKnownTarget/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -697,11 +705,19 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/CustomTarget/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/DiagnosticSeverity/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/GithubVersion/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/KnownTarget/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -754,6 +770,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/DEFAULT_PRETTIER_OPTIONS/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/KNOWN_TARGETS/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -1069,7 +1089,15 @@
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/FormatterClass/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/FormatterOutput/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/FormatterVersionInfo/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
@@ -1170,6 +1198,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/FormatterFactory/</loc>
+         <lastmod>2026-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/type-aliases/FormatterVersionMap/</loc>
          <lastmod>2026-03-14</lastmod>
     </url>
     <url>
