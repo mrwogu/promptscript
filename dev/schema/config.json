@@ -242,6 +242,11 @@
       "default": ".agents",
       "example": "universalDir: true           # Use .agents/ (default)\nuniversalDir: '.my-agents'   # Custom directory\nuniversalDir: false          # Disable"
     },
+    "includePromptScriptSkill": {
+      "type": "boolean",
+      "description": "Include the bundled PromptScript language skill in compilation output. When enabled, the SKILL.md that teaches AI agents how to work with .prs files is automatically added to each target's native skill directory.",
+      "default": true
+    },
     "validation": {
       "type": "object",
       "properties": {
