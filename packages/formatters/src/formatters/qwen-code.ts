@@ -1,54 +1,12 @@
-import { MarkdownInstructionFormatter } from '../markdown-instruction-formatter.js';
+import { createSimpleMarkdownFormatter } from '../create-simple-formatter.js';
 
 export type QwenCodeVersion = 'simple' | 'multifile' | 'full';
 
-export const QWEN_CODE_VERSIONS = {
-  simple: {
-    name: 'simple',
-    description: 'Single .qwen/rules/project.md file',
+export const { Formatter: QwenCodeFormatter, VERSIONS: QWEN_CODE_VERSIONS } =
+  createSimpleMarkdownFormatter({
+    name: 'qwen-code',
     outputPath: '.qwen/rules/project.md',
-  },
-  multifile: {
-    name: 'multifile',
-    description: 'Single .qwen/rules/project.md file (skills via full mode)',
-    outputPath: '.qwen/rules/project.md',
-  },
-  full: {
-    name: 'full',
-    description: '.qwen/rules/project.md + .qwen/skills/<name>/SKILL.md',
-    outputPath: '.qwen/rules/project.md',
-  },
-} as const;
-
-/**
- * Formatter for Qwen Code instructions.
- *
- * Qwen Code uses `.qwen/rules/project.md` as its main rules file
- * and `.qwen/skills/<name>/SKILL.md` for skills.
- *
- * @example
- * ```yaml
- * targets:
- *   - qwen-code
- * ```
- */
-export class QwenCodeFormatter extends MarkdownInstructionFormatter {
-  constructor() {
-    super({
-      name: 'qwen-code',
-      outputPath: '.qwen/rules/project.md',
-      description: 'Qwen Code rules (Markdown)',
-      defaultConvention: 'markdown',
-      mainFileHeader: '# Project Rules',
-      dotDir: '.qwen',
-      skillFileName: 'SKILL.md',
-      hasAgents: false,
-      hasCommands: false,
-      hasSkills: true,
-    });
-  }
-
-  static getSupportedVersions(): typeof QWEN_CODE_VERSIONS {
-    return QWEN_CODE_VERSIONS;
-  }
-}
+    description: 'Qwen Code rules (Markdown)',
+    mainFileHeader: '# Project Rules',
+    dotDir: '.qwen',
+  });
