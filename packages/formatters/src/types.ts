@@ -54,6 +54,10 @@ export interface Formatter {
   readonly defaultConvention: string;
   /** Transform AST to tool-specific format */
   format(ast: Program, options?: FormatOptions): FormatterOutput;
+  /** Base path for skills (e.g., '.claude/skills'), or null if no skill support */
+  getSkillBasePath(): string | null;
+  /** Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support */
+  getSkillFileName(): string | null;
 }
 
 /**

@@ -299,6 +299,11 @@ Requires an aliased @use:
 
 ## Configuration: promptscript.yaml
 
+### Auto-injection
+
+This skill is automatically included when compiling with `prs compile`. No manual copying needed.
+To disable, set `includePromptScriptSkill: false` in your `promptscript.yaml`.
+
 ```
 id: my-project
 syntax: "1.1.0"

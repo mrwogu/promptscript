@@ -146,7 +146,12 @@ export async function initCommand(
       const skillName = 'promptscript';
       const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
       try {
-        const skillContent = readFileSync(skillSource, 'utf-8');
+        const rawSkillContent = readFileSync(skillSource, 'utf-8');
+        // Add PromptScript marker so `prs compile` can safely overwrite these files
+        const marker = `<!-- PromptScript ${new Date().toISOString()} - do not edit -->`;
+        const skillContent = rawSkillContent.includes('<!-- PromptScript')
+          ? rawSkillContent
+          : `${marker}\n${rawSkillContent}`;
 
         // Install to .promptscript/skills/ (canonical source)
         const skillDest = `.promptscript/skills/${skillName}`;

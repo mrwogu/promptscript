@@ -201,6 +201,14 @@ export class GitHubFormatter extends BaseFormatter {
     return GITHUB_VERSIONS;
   }
 
+  override getSkillBasePath(): string | null {
+    return '.github/skills';
+  }
+
+  override getSkillFileName(): string | null {
+    return 'SKILL.md';
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
 

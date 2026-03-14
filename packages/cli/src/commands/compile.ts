@@ -1,9 +1,11 @@
 import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { writeFile, mkdir, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import chokidar from 'chokidar';
 import type { CompileOptions } from '../types.js';
 import type { Logger, PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
+
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadConfig, CONFIG_FILES } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
@@ -12,6 +14,40 @@ import { Compiler } from '@promptscript/compiler';
 import { isTTY } from '../output/pager.js';
 import { type CliServices, createDefaultServices } from '../services.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+/**
+ * Resolve and read the bundled PromptScript SKILL.md.
+ * Uses the same dual-candidate pattern as init.ts to handle both
+ * development (packages/cli/skills/...) and bundled (dist/packages/cli/skills/...) modes.
+ * Returns the content string, or undefined if the file is missing.
+ */
+async function loadBundledSkillContent(logger: Logger): Promise<string | undefined> {
+  const skillRelPath = 'skills/promptscript/SKILL.md';
+  const candidates = [
+    resolve(__dirname, skillRelPath), // bundled: dist/packages/cli/skills/...
+    resolve(__dirname, '..', '..', skillRelPath), // dev: packages/cli/skills/...
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      try {
+        const content = await readFile(candidate, 'utf-8');
+        logger.debug(
+          `Loaded bundled PromptScript skill from ${candidate} (${content.length} bytes)`
+        );
+        return content;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  logger.verbose('Warning: Could not load bundled PromptScript SKILL.md — skill injection skipped');
+  return undefined;
+}
 
 /**
  * Find a config file in the given directory by checking all known config file names.
@@ -393,6 +429,15 @@ export async function compileCommand(
     // Resolve Prettier options from config
     const prettierOptions = await resolvePrettierOptions(config, projectRoot);
 
+    // Load bundled PromptScript skill if not disabled.
+    // Design decision: The CLI checks the config flag and decides whether to pass skillContent.
+    // The Compiler simply checks if skillContent was provided — it does NOT read config.
+    // This keeps the Compiler's API clean (provide content = inject, omit = skip).
+    let skillContent: string | undefined;
+    if (config.includePromptScriptSkill !== false) {
+      skillContent = await loadBundledSkillContent(logger);
+    }
+
     const localPath = resolve(projectRoot, '.promptscript');
     const compiler = new Compiler({
       resolver: {
@@ -405,6 +450,7 @@ export async function compileCommand(
       customConventions: config.customConventions,
       prettier: prettierOptions,
       logger,
+      skillContent,
     });
 
     const entryPath = resolve(localPath, 'project.prs');

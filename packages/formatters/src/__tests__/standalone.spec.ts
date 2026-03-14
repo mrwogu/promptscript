@@ -74,6 +74,8 @@ describe('format (standalone)', () => {
         path: './mock/output.md',
         content: 'mock content',
       })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
     };
 
     const output = format(ast, { formatter: mockFormatter });
@@ -94,6 +96,8 @@ describe('format (standalone)', () => {
         path: './factory/output.md',
         content: 'factory content',
       })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
     };
     const factory = () => mockFormatter;
 
@@ -114,6 +118,8 @@ describe('format (standalone)', () => {
         path: './custom/path.md',
         content: 'content',
       })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
     };
 
     format(ast, {
@@ -176,6 +182,8 @@ describe('registerFormatter', () => {
       description: 'Test formatter',
       defaultConvention: 'markdown',
       format: () => ({ path: './test/output.md', content: 'test' }),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
     };
 
     registerFormatter(testFormatterName, () => mockFormatter);
@@ -194,6 +202,8 @@ describe('registerFormatter', () => {
       description: 'Dup formatter',
       defaultConvention: 'markdown',
       format: () => ({ path: './dup/output.md', content: '' }),
+      getSkillBasePath: () => null as string | null,
+      getSkillFileName: () => null as string | null,
     });
 
     FormatterRegistry.unregister('duplicate-test');
@@ -249,6 +259,8 @@ describe('unregisterFormatter', () => {
       description: 'Temp formatter',
       defaultConvention: 'markdown',
       format: () => ({ path: './temp/output.md', content: '' }),
+      getSkillBasePath: () => null as string | null,
+      getSkillFileName: () => null as string | null,
     });
 
     registerFormatter(name, factory);

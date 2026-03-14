@@ -48,7 +48,12 @@ function createTestProgram(overrides: Partial<Program> = {}): Program {
 /**
  * Create a mock formatter for testing.
  */
-function createMockFormatter(name: string, outputPath: string = `./${name}/output.md`): Formatter {
+function createMockFormatter(
+  name: string,
+  outputPath: string = `./${name}/output.md`,
+  skillBasePath: string | null = null,
+  skillFileName: string | null = null
+): Formatter {
   return {
     name,
     outputPath,
@@ -61,7 +66,20 @@ function createMockFormatter(name: string, outputPath: string = `./${name}/outpu
         content: `# ${name} output\nID: ${id ?? 'unknown'}`,
       };
     }),
+    getSkillBasePath: () => skillBasePath,
+    getSkillFileName: () => skillFileName,
   };
+}
+
+/**
+ * Create a test compiler with sensible defaults.
+ */
+function createTestCompiler(overrides: Partial<CompilerOptions> = {}): Compiler {
+  return new Compiler({
+    resolver: { registryPath: '/registry' },
+    formatters: [],
+    ...overrides,
+  });
 }
 
 /**
@@ -76,6 +94,8 @@ function createFailingFormatter(name: string, error: string): Formatter {
     format: vi.fn(() => {
       throw new Error(error);
     }),
+    getSkillBasePath: () => null,
+    getSkillFileName: () => null,
   };
 }
 
@@ -152,6 +172,12 @@ describe('Compiler', () => {
         format(ast: Program) {
           const id = ast.meta?.fields?.['id'] as string | undefined;
           return { path: this.outputPath, content: `ID: ${id ?? 'unknown'}` };
+        }
+        getSkillBasePath() {
+          return null;
+        }
+        getSkillFileName() {
+          return null;
         }
       }
 
@@ -332,6 +358,8 @@ describe('Compiler', () => {
             { path: '.cursor/commands/build.md', content: 'Build command content' },
           ],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -664,6 +692,8 @@ describe('Compiler', () => {
           path: 'AGENTS.md',
           content: '# Full factory output with all sections\n'.repeat(20),
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       // GitHub formatter produces AGENTS.md as an additional file
@@ -677,6 +707,8 @@ describe('Compiler', () => {
           content: '# GitHub main output',
           additionalFiles: [{ path: 'AGENTS.md', content: '# Minimal agents\n' }],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -719,6 +751,8 @@ describe('Compiler', () => {
           content: '# A main',
           additionalFiles: [{ path: 'shared/resource.md', content: '# From formatter A' }],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       const formatter2: Formatter = {
@@ -731,6 +765,8 @@ describe('Compiler', () => {
           content: '# B main',
           additionalFiles: [{ path: 'shared/resource.md', content: '# From formatter B' }],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -779,6 +815,8 @@ describe('Compiler', () => {
             },
           ],
         })),
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -819,6 +857,172 @@ describe('Compiler', () => {
       expect(result.success).toBe(true);
       const collisionWarning = result.warnings?.find((w) => w.ruleId === 'PS4001');
       expect(collisionWarning).toBeUndefined();
+    });
+  });
+
+  describe('skill injection', () => {
+    const skillContent = '# PromptScript Language Skill\nThis teaches .prs syntax.';
+
+    it('should inject skill when skillContent provided and formatter supports skills', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
+      const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
+      expect(skillOutput?.content).toContain('PromptScript Language Skill');
+    });
+
+    it('should skip injection when skillContent is not provided', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter] });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(false);
+    });
+
+    it('should skip injection when formatter returns null skill path', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('cursor', '.cursor/rules/project.mdc', null, null);
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      expect(
+        Array.from(result.outputs.keys()).filter((k) => k.includes('promptscript/SKILL'))
+      ).toHaveLength(0);
+    });
+
+    it('should use correct skill file name per formatter (e.g., lowercase skill.md)', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('gemini', 'GEMINI.md', '.gemini/skills', 'skill.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.outputs.has('.gemini/skills/promptscript/skill.md')).toBe(true);
+      expect(result.outputs.has('.gemini/skills/promptscript/SKILL.md')).toBe(false);
+    });
+
+    it('should warn and skip when collision with user-defined skill at same path', async () => {
+      const ast = createTestProgram();
+      const formatter: Formatter = {
+        ...createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md'),
+        format: vi.fn(() => ({
+          path: 'CLAUDE.md',
+          content: '# Claude',
+          additionalFiles: [
+            {
+              path: '.claude/skills/promptscript/SKILL.md',
+              content: '# User-defined promptscript skill',
+            },
+          ],
+        })),
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
+      expect(skillOutput?.content).toContain('User-defined promptscript skill');
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
+    });
+
+    it('should produce collision warning when two formatters share dotDir', async () => {
+      const ast = createTestProgram();
+      const cline = createMockFormatter('cline', '.clinerules', '.agents/skills', 'SKILL.md');
+      const codex = createMockFormatter('codex', 'AGENTS.md', '.agents/skills', 'SKILL.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [cline, codex], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.agents/skills/promptscript/SKILL.md')).toBe(true);
+      const collisionWarnings = result.warnings.filter(
+        (w) => w.ruleId === 'PS4001' && w.message.includes('.agents/skills/promptscript/SKILL.md')
+      );
+      expect(collisionWarnings.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should inject skill for multiple formatters with different paths', async () => {
+      const ast = createTestProgram();
+      const claude = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+      const github = createMockFormatter(
+        'github',
+        '.github/copilot-instructions.md',
+        '.github/skills',
+        'SKILL.md'
+      );
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [claude, github], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
+      expect(result.outputs.has('.github/skills/promptscript/SKILL.md')).toBe(true);
+    });
+
+    it('should add PromptScript marker to injected skill', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+      const result = await compiler.compile('test.prs');
+      const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
+      expect(skillOutput?.content).toContain('<!-- PromptScript');
+    });
+
+    it('should include skillContent in compiler options for downstream propagation', async () => {
+      // compileAll() spreads ...this.options into per-formatter Compiler instances,
+      // so skillContent propagates automatically. We verify the injection works
+      // via compile() since both code paths share the same injection logic.
+      const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
+    });
+
+    it('should support skillContent in standalone compile()', async () => {
+      mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const result = await compile('test.prs', {
+        formatters: [createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md')],
+        skillContent,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.claude/skills/promptscript/SKILL.md')).toBe(true);
     });
   });
 

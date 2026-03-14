@@ -182,6 +182,18 @@ By default, this generates:
 - `CLAUDE.md` (for Claude Code)
 - `.cursor/rules/project.mdc` (for Cursor)
 
+#### Bundled PromptScript Skill
+
+When you compile, PromptScript automatically includes a language skill in each target's output.
+This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files — so your
+AI tools understand PromptScript syntax without any extra setup.
+
+To disable this behavior, add to `promptscript.yaml`:
+
+```yaml
+includePromptScriptSkill: false
+```
+
 ### 4. Commit to Git
 
 Commit your configuration and the generated files. Your AI context is now version-controlled infrastructure.

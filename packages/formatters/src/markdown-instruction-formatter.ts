@@ -128,6 +128,14 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     this.defaultConvention = config.defaultConvention;
   }
 
+  override getSkillBasePath(): string | null {
+    return `${this.config.dotDir}/skills`;
+  }
+
+  override getSkillFileName(): string | null {
+    return this.config.skillFileName;
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
 

@@ -214,6 +214,10 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate
 
 **Usage:** `@inherit @stacks/typescript-service(projectName: "checkout", port: 8080)`
 
+### Bundled Language Skill
+
+- **Bundled language skill** — AI agents automatically learn PromptScript syntax via injected SKILL.md
+
 ### AI-Assisted Migration
 
 Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`?

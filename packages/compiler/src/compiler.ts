@@ -279,6 +279,39 @@ export class Compiler {
       }
     }
 
+    // Inject PromptScript SKILL.md into each formatter's skill directory
+    if (this.options.skillContent) {
+      for (const { formatter } of this.loadedFormatters) {
+        const skillBasePath = formatter.getSkillBasePath();
+        const skillFileName = formatter.getSkillFileName();
+        if (!skillBasePath || !skillFileName) {
+          this.logger.debug(`  Skipping skill injection for ${formatter.name} (no skill support)`);
+          continue;
+        }
+
+        const skillPath = `${skillBasePath}/promptscript/${skillFileName}`;
+        const existingOwner = outputPathOwners.get(skillPath);
+        if (existingOwner) {
+          formatWarnings.push({
+            ruleId: 'PS4001',
+            ruleName: 'output-path-collision',
+            severity: 'warning',
+            message: `Output path '${skillPath}' is already written by '${existingOwner}'. Skipping auto-injected PromptScript skill for '${formatter.name}'.`,
+            suggestion: `The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.`,
+          });
+          continue;
+        }
+        outputPathOwners.set(skillPath, `${formatter.name}:promptscript-skill`);
+
+        const skillOutput: FormatterOutput = {
+          path: skillPath,
+          content: this.options.skillContent,
+        };
+        outputs.set(skillPath, addMarkerToOutput(skillOutput));
+        this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);
+      }
+    }
+
     stats.formatTime = Date.now() - startFormat;
     stats.totalTime = Date.now() - startTotal;
     this.logger.verbose(`Format completed (${stats.formatTime}ms)`);
@@ -595,6 +628,10 @@ export interface CompileOptions {
    * Prettier formatting options for markdown output.
    */
   prettier?: CompilerOptions['prettier'];
+  /**
+   * Content of the PromptScript SKILL.md to inject into compilation output.
+   */
+  skillContent?: string;
 }
 
 /**
@@ -648,6 +685,7 @@ export async function compile(
     formatters,
     customConventions: options.customConventions,
     prettier: options.prettier,
+    skillContent: options.skillContent,
   });
 
   return compiler.compile(entryPath);
