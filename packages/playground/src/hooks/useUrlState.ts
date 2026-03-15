@@ -2,7 +2,7 @@
  * Hook for managing URL state synchronization.
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { usePlaygroundStore } from '../store';
 import {
   loadStateFromUrl,
@@ -11,6 +11,11 @@ import {
   getExampleIdFromUrl,
   mergeConfigWithDefaults,
 } from '../utils/share';
+
+function getServerParam(): string | null {
+  const url = new URL(window.location.href);
+  return url.searchParams.get('server');
+}
 
 /**
  * Hook that loads state from URL on mount and syncs changes back.
@@ -23,21 +28,15 @@ export function useUrlState() {
   const setActiveFormatter = usePlaygroundStore((s) => s.setActiveFormatter);
   const setConfig = usePlaygroundStore((s) => s.setConfig);
 
+  const [serverParam] = useState(getServerParam);
   const initialLoadRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const serverParamRef = useRef<string | null>(null);
-  const isLocalModeRef = useRef(false);
-
   // Load state from URL on mount
   useEffect(() => {
     if (initialLoadRef.current) return;
     initialLoadRef.current = true;
 
-    const url = new URL(window.location.href);
-    serverParamRef.current = url.searchParams.get('server');
-    isLocalModeRef.current = serverParamRef.current !== null;
-
-    if (isLocalModeRef.current) return;
+    if (serverParam) return;
 
     // Check for example ID first
     const exampleId = getExampleIdFromUrl();
@@ -62,7 +61,7 @@ export function useUrlState() {
   // Sync state to URL (debounced)
   useEffect(() => {
     if (!initialLoadRef.current) return;
-    if (isLocalModeRef.current) return;
+    if (serverParam) return;
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -85,5 +84,5 @@ export function useUrlState() {
     return success;
   }, [files, activeFormatter, config]);
 
-  return { handleShare, serverParam: serverParamRef.current };
+  return { handleShare, serverParam };
 }
