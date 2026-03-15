@@ -51,7 +51,7 @@ export function ConnectionBar({
         )}
         <button
           onClick={() => setShowInput(true)}
-          className="ml-auto px-2 py-0.5 text-xs bg-ps-primary hover:bg-ps-secondary rounded text-white"
+          className="ml-auto px-2 py-0.5 text-xs bg-ps-primary hover:bg-ps-secondary rounded text-white cursor-pointer"
         >
           {error ? 'Retry' : 'Connect to local server'}
         </button>
@@ -77,13 +77,13 @@ export function ConnectionBar({
         />
         <button
           onClick={handleSubmit}
-          className="px-2 py-0.5 text-xs bg-ps-primary hover:bg-ps-secondary rounded text-white"
+          className="px-2 py-0.5 text-xs bg-ps-primary hover:bg-ps-secondary rounded text-white cursor-pointer"
         >
           Connect
         </button>
         <button
           onClick={() => setShowInput(false)}
-          className="px-2 py-0.5 text-xs text-gray-400 hover:text-white"
+          className="px-2 py-0.5 text-xs text-gray-400 hover:text-white cursor-pointer"
         >
           Cancel
         </button>
