@@ -47,46 +47,6 @@ const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
 ];
 
-/**
- * Get display names for output file paths, adding parent folder prefix when names are duplicated.
- * Example: If there are multiple SKILL.md files, they become "refactoring/SKILL.md", "commit/SKILL.md"
- */
-function getDisplayNames(paths: string[]): Map<string, string> {
-  const result = new Map<string, string>();
-
-  // First pass: extract simple filenames
-  const simpleNames = paths.map((path) => {
-    const parts = path.split('/');
-    return parts[parts.length - 1] ?? path;
-  });
-
-  // Count occurrences of each simple name
-  const nameCounts = new Map<string, number>();
-  for (const name of simpleNames) {
-    nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
-  }
-
-  // Second pass: add parent folder prefix for duplicates
-  for (const [i, path] of paths.entries()) {
-    const simpleName = simpleNames[i] ?? path;
-
-    if ((nameCounts.get(simpleName) ?? 0) > 1) {
-      // Get parent folder name
-      const parts = path.split('/');
-      if (parts.length >= 2) {
-        const parentFolder = parts[parts.length - 2] ?? '';
-        result.set(path, `${parentFolder}/${simpleName}`);
-      } else {
-        result.set(path, simpleName);
-      }
-    } else {
-      result.set(path, simpleName);
-    }
-  }
-
-  return result;
-}
-
 function CopyButton({ content }: { content: string }) {
   const [showCopied, setShowCopied] = useState(false);
 
@@ -104,6 +64,67 @@ function CopyButton({ content }: { content: string }) {
     >
       {showCopied ? 'Copied!' : 'Copy'}
     </button>
+  );
+}
+
+function OutputFileTree({
+  outputs,
+  activeIndex,
+  onSelect,
+}: {
+  outputs: { path: string; content: string }[];
+  activeIndex: number;
+  onSelect: (index: number) => void;
+}) {
+  // Group by directory
+  const tree = useMemo(() => {
+    const map = new Map<string, { index: number; path: string; fileName: string }[]>();
+    for (let i = 0; i < outputs.length; i++) {
+      const output = outputs[i]!;
+      const parts = output.path.split('/');
+      const fileName = parts.pop() ?? output.path;
+      const dir = parts.join('/') || '';
+      const existing = map.get(dir) ?? [];
+      existing.push({ index: i, path: output.path, fileName });
+      map.set(dir, existing);
+    }
+    return map;
+  }, [outputs]);
+
+  const sortedDirs = useMemo(() => [...tree.keys()].sort(), [tree]);
+
+  return (
+    <div className="w-52 flex-shrink-0 bg-ps-bg border-r border-ps-border overflow-y-auto text-xs">
+      <div className="px-3 py-2 text-xs text-gray-500 uppercase tracking-wider">
+        Output ({outputs.length})
+      </div>
+      {sortedDirs.map((dir) => (
+        <div key={dir || '__root'}>
+          {dir && (
+            <div className="px-3 py-1 text-gray-500 flex items-center gap-1 font-mono">
+              <span className="text-gray-600">/</span>
+              <span>{dir}</span>
+            </div>
+          )}
+          {(tree.get(dir) ?? []).map(({ index, path, fileName }) => (
+            <button
+              key={path}
+              onClick={() => onSelect(index)}
+              className={`w-full text-left px-3 py-1 truncate cursor-pointer font-mono ${
+                dir ? 'pl-5' : ''
+              } ${
+                index === activeIndex
+                  ? 'bg-ps-surface text-white'
+                  : 'text-gray-400 hover:bg-ps-surface/50 hover:text-gray-300'
+              }`}
+              title={path}
+            >
+              {fileName}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -132,11 +153,6 @@ export function OutputPanel() {
       setActiveFormatter(enabledTargets[0]!);
     }
   }, [activeFormatter, enabledTargets, setActiveFormatter]);
-
-  // Compute display names with parent folder prefix for duplicates
-  const displayNames = useMemo(() => {
-    return getDisplayNames(outputs.map((o) => o.path));
-  }, [outputs]);
 
   const currentOutput = outputs[activeOutputIndex];
 
@@ -198,26 +214,13 @@ export function OutputPanel() {
             </ul>
           </div>
         ) : outputs.length > 0 ? (
-          <>
-            {/* Output file tabs (only show if multiple files) */}
-            {outputs.length > 1 && (
-              <div className="flex border-b border-ps-border bg-ps-bg overflow-x-auto">
-                {outputs.map((output, index) => (
-                  <button
-                    key={output.path}
-                    onClick={() => setActiveOutputIndex(index)}
-                    className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap ${
-                      index === activeOutputIndex
-                        ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
-                        : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
-                    }`}
-                    title={output.path}
-                  >
-                    {displayNames.get(output.path) || output.path}
-                  </button>
-                ))}
-              </div>
-            )}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Output file tree */}
+            <OutputFileTree
+              outputs={outputs}
+              activeIndex={activeOutputIndex}
+              onSelect={setActiveOutputIndex}
+            />
 
             {/* File content */}
             {currentOutput && (
@@ -231,7 +234,7 @@ export function OutputPanel() {
                 </pre>
               </div>
             )}
-          </>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
             No output available
