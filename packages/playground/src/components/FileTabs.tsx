@@ -39,8 +39,11 @@ export function FileTabs() {
       name = `${existingDir}${baseName}-${counter}.prs`;
       counter++;
     }
+    // Only add @meta boilerplate for the first file (entry point)
+    const isFirstFile = files.length === 0;
     const id = name.replace(/^.*\//, '').replace('.prs', '');
-    addFile(name, '@meta {\n  id: "' + id + '"\n  syntax: "1.0.0"\n}\n');
+    const content = isFirstFile ? '@meta {\n  id: "' + id + '"\n  syntax: "1.0.0"\n}\n' : '';
+    addFile(name, content);
   };
 
   const handleDoubleClick = (path: string) => {
