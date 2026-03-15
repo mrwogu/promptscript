@@ -19,7 +19,7 @@ describe('ConnectionBar', () => {
   it('shows input field after clicking connect', () => {
     render(<ConnectionBar {...defaultProps} />);
     fireEvent.click(screen.getByText('Connect to local server'));
-    expect(screen.getByPlaceholderText('localhost:3000')).toBeTruthy();
+    expect(screen.getByPlaceholderText('127.0.0.1:3000')).toBeTruthy();
   });
 
   it('calls onConnect when submitting host', () => {
@@ -27,13 +27,13 @@ describe('ConnectionBar', () => {
     render(<ConnectionBar {...defaultProps} onConnect={onConnect} />);
     fireEvent.click(screen.getByText('Connect to local server'));
     fireEvent.click(screen.getByText('Connect'));
-    expect(onConnect).toHaveBeenCalledWith('localhost:3000');
+    expect(onConnect).toHaveBeenCalledWith('127.0.0.1:3000');
   });
 
   it('shows connected state with disconnect button', () => {
-    render(<ConnectionBar {...defaultProps} status="connected" serverHost="localhost:3000" />);
+    render(<ConnectionBar {...defaultProps} status="connected" serverHost="127.0.0.1:3000" />);
     expect(screen.getByText('Connected')).toBeTruthy();
-    expect(screen.getByText('localhost:3000')).toBeTruthy();
+    expect(screen.getByText('127.0.0.1:3000')).toBeTruthy();
     expect(screen.getByText('Disconnect')).toBeTruthy();
   });
 
@@ -43,7 +43,7 @@ describe('ConnectionBar', () => {
       <ConnectionBar
         {...defaultProps}
         status="connected"
-        serverHost="localhost:3000"
+        serverHost="127.0.0.1:3000"
         onDisconnect={onDisconnect}
       />
     );
@@ -55,7 +55,7 @@ describe('ConnectionBar', () => {
     render(
       <ConnectionBar
         {...defaultProps}
-        error="Could not connect to localhost:3000. Is the server running?"
+        error="Could not connect to 127.0.0.1:3000. Is the server running?"
       />
     );
     expect(screen.getByText(/Could not connect/)).toBeTruthy();
@@ -71,7 +71,7 @@ describe('ConnectionBar', () => {
     const onConnect = vi.fn();
     render(<ConnectionBar {...defaultProps} onConnect={onConnect} />);
     fireEvent.click(screen.getByText('Connect to local server'));
-    const input = screen.getByPlaceholderText('localhost:3000');
+    const input = screen.getByPlaceholderText('127.0.0.1:3000');
     fireEvent.change(input, { target: { value: '   ' } });
     fireEvent.click(screen.getByText('Connect'));
     expect(onConnect).not.toHaveBeenCalled();
@@ -87,12 +87,12 @@ describe('ConnectionBar', () => {
     fireEvent.click(screen.getByText('Connect to local server'));
     // Reset after the button click propagated
     parentClick.mockClear();
-    fireEvent.click(screen.getByPlaceholderText('localhost:3000'));
+    fireEvent.click(screen.getByPlaceholderText('127.0.0.1:3000'));
     expect(parentClick).not.toHaveBeenCalled();
   });
 
   it('shows reconnecting state', () => {
-    render(<ConnectionBar {...defaultProps} status="reconnecting" serverHost="localhost:3000" />);
+    render(<ConnectionBar {...defaultProps} status="reconnecting" serverHost="127.0.0.1:3000" />);
     expect(screen.getByText('Reconnecting...')).toBeTruthy();
   });
 
@@ -100,15 +100,15 @@ describe('ConnectionBar', () => {
     const onConnect = vi.fn();
     render(<ConnectionBar {...defaultProps} onConnect={onConnect} />);
     fireEvent.click(screen.getByText('Connect to local server'));
-    fireEvent.keyDown(screen.getByPlaceholderText('localhost:3000'), { key: 'Enter' });
-    expect(onConnect).toHaveBeenCalledWith('localhost:3000');
+    fireEvent.keyDown(screen.getByPlaceholderText('127.0.0.1:3000'), { key: 'Enter' });
+    expect(onConnect).toHaveBeenCalledWith('127.0.0.1:3000');
   });
 
   it('cancels on Escape key', () => {
     render(<ConnectionBar {...defaultProps} />);
     fireEvent.click(screen.getByText('Connect to local server'));
-    expect(screen.getByPlaceholderText('localhost:3000')).toBeTruthy();
-    fireEvent.keyDown(screen.getByPlaceholderText('localhost:3000'), { key: 'Escape' });
+    expect(screen.getByPlaceholderText('127.0.0.1:3000')).toBeTruthy();
+    fireEvent.keyDown(screen.getByPlaceholderText('127.0.0.1:3000'), { key: 'Escape' });
     expect(screen.getByText('Connect to local server')).toBeTruthy();
   });
 });

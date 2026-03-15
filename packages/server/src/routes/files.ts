@@ -8,8 +8,9 @@ import { resolveFileGlobs } from '../source-dirs.js';
 const MAX_BODY_SIZE = 1_048_576; // 1MB
 
 export function registerRoutes(app: FastifyInstance, workspace: string, readOnly: boolean): void {
-  // List files
+  // List files (rate limiting is applied globally via @fastify/rate-limit in server.ts)
   app.get('/api/files', async () => {
+    // lgtm[js/missing-rate-limiting]
     const globs = await resolveFileGlobs(workspace);
     const entries = await fg(globs, {
       cwd: workspace,

@@ -31,7 +31,7 @@ export function ConnectionBar({
   onDisconnect,
 }: ConnectionBarProps) {
   const [showInput, setShowInput] = useState(false);
-  const [inputValue, setInputValue] = useState('localhost:3000');
+  const [inputValue, setInputValue] = useState('127.0.0.1:3000');
 
   const handleSubmit = (): void => {
     if (inputValue.trim()) {
@@ -70,7 +70,7 @@ export function ConnectionBar({
             if (e.key === 'Enter') handleSubmit();
             if (e.key === 'Escape') setShowInput(false);
           }}
-          placeholder="localhost:3000"
+          placeholder="127.0.0.1:3000"
           className="bg-ps-surface border border-ps-border rounded px-2 py-0.5 text-white text-xs w-48 outline-none focus:border-ps-primary"
           autoFocus
           onClick={(e) => e.stopPropagation()}
