@@ -177,7 +177,7 @@ export function OutputPanel() {
                 onClick={() => setActiveFormatter(formatter.name)}
                 role="tab"
                 aria-selected={isActive}
-                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap ${
+                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
                 }`}
               >
@@ -223,20 +223,26 @@ export function OutputPanel() {
               <div className="flex items-center border-b border-ps-border bg-ps-bg">
                 <button
                   onClick={() => setOutputViewMode(outputViewMode === 'tree' ? 'tabs' : 'tree')}
-                  className={`px-2 py-1.5 text-gray-500 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer ${outputViewMode === 'tree' ? 'text-white bg-ps-surface/50' : ''}`}
+                  className="px-2 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer flex items-center gap-1"
                   title={outputViewMode === 'tree' ? 'Switch to tabs' : 'Switch to tree'}
                 >
                   {outputViewMode === 'tree' ? (
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
-                      <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
-                    </svg>
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
+                        <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
+                      </svg>
+                      <span>Tree</span>
+                    </>
                   ) : (
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                      <rect x="1" y="1" width="4" height="3" rx="0.5" />
-                      <rect x="6" y="1" width="4" height="3" rx="0.5" />
-                      <rect x="11" y="1" width="4" height="3" rx="0.5" />
-                    </svg>
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="1" y="2" width="4" height="3" rx="0.5" />
+                        <rect x="6" y="2" width="4" height="3" rx="0.5" />
+                        <rect x="11" y="2" width="4" height="3" rx="0.5" />
+                      </svg>
+                      <span>Tabs</span>
+                    </>
                   )}
                 </button>
                 {outputViewMode === 'tabs' && (
