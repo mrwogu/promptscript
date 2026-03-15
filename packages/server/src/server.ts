@@ -86,6 +86,9 @@ export async function startServer(options: ServerOptions): Promise<void> {
   const displayHost = options.host === '0.0.0.0' ? 'localhost' : options.host;
   const playgroundUrl = `https://getpromptscript.dev/playground/?server=${displayHost}:${options.port}`;
 
-  console.log(`PromptScript server running at http://${displayHost}:${options.port}`);
+  console.log(`\nPromptScript server running at http://${displayHost}:${options.port}`);
   console.log(`Open playground: ${playgroundUrl}`);
+  console.log(
+    `\nAll compilation happens locally in your browser — no data is sent to any external server.`
+  );
 }
