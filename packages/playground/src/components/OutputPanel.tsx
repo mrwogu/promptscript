@@ -110,7 +110,7 @@ function OutputFileTree({
             <button
               key={path}
               onClick={() => onSelect(index)}
-              className={`w-full text-left px-3 py-1 truncate cursor-pointer font-mono ${
+              className={`w-full text-left px-3 py-1 truncate font-mono cursor-pointer ${
                 dir ? 'pl-5' : ''
               } ${
                 index === activeIndex
@@ -128,12 +128,15 @@ function OutputFileTree({
   );
 }
 
+type OutputViewMode = 'tree' | 'tabs';
+
 export function OutputPanel() {
   const activeFormatter = usePlaygroundStore((s) => s.activeFormatter);
   const setActiveFormatter = usePlaygroundStore((s) => s.setActiveFormatter);
   const compileResult = usePlaygroundStore((s) => s.compileResult);
   const isCompiling = usePlaygroundStore((s) => s.isCompiling);
   const enabledTargets = usePlaygroundStore(useShallow(selectEnabledTargets));
+  const [outputViewMode, setOutputViewMode] = useState<OutputViewMode>('tree');
 
   const outputs = usePlaygroundStore(
     useShallow((state) => selectOutputsForFormatter(state, activeFormatter))
@@ -214,26 +217,72 @@ export function OutputPanel() {
             </ul>
           </div>
         ) : outputs.length > 0 ? (
-          <div className="flex-1 flex overflow-hidden">
-            {/* Output file tree */}
-            <OutputFileTree
-              outputs={outputs}
-              activeIndex={activeOutputIndex}
-              onSelect={setActiveOutputIndex}
-            />
-
-            {/* File content */}
-            {currentOutput && (
-              <div className="flex-1 overflow-auto p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
-                  <CopyButton content={currentOutput.content} />
-                </div>
-                <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
-                  {currentOutput.content}
-                </pre>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* View mode toggle + tabs view */}
+            {outputs.length > 1 && (
+              <div className="flex items-center border-b border-ps-border bg-ps-bg">
+                <button
+                  onClick={() => setOutputViewMode(outputViewMode === 'tree' ? 'tabs' : 'tree')}
+                  className={`px-2 py-1.5 text-gray-500 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer ${outputViewMode === 'tree' ? 'text-white bg-ps-surface/50' : ''}`}
+                  title={outputViewMode === 'tree' ? 'Switch to tabs' : 'Switch to tree'}
+                >
+                  {outputViewMode === 'tree' ? (
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
+                      <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <rect x="1" y="1" width="4" height="3" rx="0.5" />
+                      <rect x="6" y="1" width="4" height="3" rx="0.5" />
+                      <rect x="11" y="1" width="4" height="3" rx="0.5" />
+                    </svg>
+                  )}
+                </button>
+                {outputViewMode === 'tabs' && (
+                  <div className="flex overflow-x-auto">
+                    {outputs.map((output, index) => (
+                      <button
+                        key={output.path}
+                        onClick={() => setActiveOutputIndex(index)}
+                        className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap cursor-pointer ${
+                          index === activeOutputIndex
+                            ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
+                            : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
+                        }`}
+                        title={output.path}
+                      >
+                        {output.path.split('/').pop()}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
+
+            <div className="flex-1 flex overflow-hidden">
+              {/* Output file tree (when in tree mode) */}
+              {outputViewMode === 'tree' && outputs.length > 1 && (
+                <OutputFileTree
+                  outputs={outputs}
+                  activeIndex={activeOutputIndex}
+                  onSelect={setActiveOutputIndex}
+                />
+              )}
+
+              {/* File content */}
+              {currentOutput && (
+                <div className="flex-1 overflow-auto p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
+                    <CopyButton content={currentOutput.content} />
+                  </div>
+                  <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
+                    {currentOutput.content}
+                  </pre>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
