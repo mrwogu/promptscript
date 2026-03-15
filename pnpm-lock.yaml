@@ -334,6 +334,9 @@ importers:
       ws:
         specifier: ^8.19.0
         version: 8.19.0
+      yaml:
+        specifier: ^2.8.2
+        version: 2.8.2
     devDependencies:
       '@fastify/rate-limit':
         specifier: ^10.3.0

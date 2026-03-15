@@ -7,6 +7,7 @@ import { registerHealthRoute } from './routes/health.js';
 import { registerConfigRoute } from './routes/config.js';
 import { registerRoutes } from './routes/files.js';
 import { createFileWatcher, type FileWatchEvent } from './watcher.js';
+import { resolveWatchPaths } from './source-dirs.js';
 import type { ServerOptions } from './types.js';
 
 export async function createServer(options: ServerOptions): Promise<FastifyInstance> {
@@ -33,7 +34,8 @@ export async function createServer(options: ServerOptions): Promise<FastifyInsta
     socket.on('close', () => clients.delete(socket));
   });
 
-  const watcher = createFileWatcher(options.workspace, (event: FileWatchEvent) => {
+  const watchPaths = await resolveWatchPaths(options.workspace);
+  const watcher = createFileWatcher(options.workspace, watchPaths, (event: FileWatchEvent) => {
     const message = JSON.stringify(event);
     for (const client of clients) {
       if (client.readyState === 1) {

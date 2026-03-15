@@ -3,13 +3,15 @@ import { readFile, writeFile, unlink, stat, mkdir } from 'fs/promises';
 import { dirname } from 'path';
 import fg from 'fast-glob';
 import { resolveSafePath, PathTraversalError } from '../path-guard.js';
+import { resolveFileGlobs } from '../source-dirs.js';
 
 const MAX_BODY_SIZE = 1_048_576; // 1MB
 
 export function registerRoutes(app: FastifyInstance, workspace: string, readOnly: boolean): void {
   // List files
   app.get('/api/files', async () => {
-    const entries = await fg(['.promptscript/**/*.prs', 'promptscript.yaml', 'promptscript.yml'], {
+    const globs = await resolveFileGlobs(workspace);
+    const entries = await fg(globs, {
       cwd: workspace,
       stats: true,
     });

@@ -1,5 +1,5 @@
 import { watch, type FSWatcher } from 'chokidar';
-import { join, relative } from 'path';
+import { relative } from 'path';
 
 export interface FileWatchEvent {
   type: 'file:changed' | 'file:created' | 'file:deleted';
@@ -16,19 +16,12 @@ function isWatchedFile(filePath: string): boolean {
 
 export function createFileWatcher(
   workspace: string,
+  watchPaths: string[],
   onEvent: (event: FileWatchEvent) => void
 ): FSWatcher {
   let ready = false;
 
-  // Only watch .promptscript/ dir and config files at workspace root
-  const watcher = watch(
-    [
-      join(workspace, '.promptscript'),
-      join(workspace, 'promptscript.yaml'),
-      join(workspace, 'promptscript.yml'),
-    ],
-    { ignoreInitial: true }
-  );
+  const watcher = watch(watchPaths, { ignoreInitial: true });
 
   watcher.on('ready', () => {
     // Small grace period to let any delayed initial-scan events drain before

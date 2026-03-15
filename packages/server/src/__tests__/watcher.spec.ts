@@ -20,7 +20,7 @@ describe('createFileWatcher', () => {
 
   it('emits file:changed when a .prs file is modified', async () => {
     const events: FileWatchEvent[] = [];
-    const watcher = createFileWatcher(workspace, (event) => events.push(event));
+    const watcher = createFileWatcher(workspace, [prsDir], (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
     await writeFile(join(prsDir, 'test.prs'), 'updated');
@@ -34,7 +34,7 @@ describe('createFileWatcher', () => {
 
   it('emits file:created when a new .prs file is added', async () => {
     const events: FileWatchEvent[] = [];
-    const watcher = createFileWatcher(workspace, (event) => events.push(event));
+    const watcher = createFileWatcher(workspace, [prsDir], (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
     await writeFile(join(prsDir, 'new.prs'), 'new file');
@@ -48,7 +48,7 @@ describe('createFileWatcher', () => {
 
   it('emits file:deleted when a .prs file is removed', async () => {
     const events: FileWatchEvent[] = [];
-    const watcher = createFileWatcher(workspace, (event) => events.push(event));
+    const watcher = createFileWatcher(workspace, [prsDir], (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
     await unlink(join(prsDir, 'test.prs'));
@@ -62,7 +62,7 @@ describe('createFileWatcher', () => {
 
   it('ignores non-.prs files', async () => {
     const events: FileWatchEvent[] = [];
-    const watcher = createFileWatcher(workspace, (event) => events.push(event));
+    const watcher = createFileWatcher(workspace, [prsDir], (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
     await writeFile(join(prsDir, 'readme.md'), 'ignored');
