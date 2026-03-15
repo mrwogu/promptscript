@@ -77,7 +77,6 @@ export function useCompiler() {
     }
 
     const entryFile = findEntryFile(files);
-    console.log('[compiler] entry:', entryFile, 'files:', [...files.keys()]);
     setCompiling(true);
     try {
       const result = await compile(files, entryFile, {
@@ -90,14 +89,6 @@ export function useCompiler() {
         },
         envVars: config.envVars,
       });
-      console.log(
-        '[compiler] result:',
-        result.success,
-        'outputs:',
-        [...result.outputs.keys()],
-        'errors:',
-        result.errors
-      );
       setCompileResult(result);
     } catch (error) {
       console.error('Compilation error:', error);
