@@ -30,14 +30,20 @@ export function useLocalFiles(
     providerRef.current = provider;
 
     const loadFiles = async (): Promise<void> => {
-      const entries = await provider.listFiles();
-      const files = await Promise.all(
-        entries.map(async (entry) => ({
-          path: entry.path,
-          content: await provider.readFile(entry.path),
-        }))
-      );
-      setFiles(files);
+      try {
+        const entries = await provider.listFiles();
+        const files = await Promise.all(
+          entries.map(async (entry) => ({
+            path: entry.path,
+            content: await provider.readFile(entry.path),
+          }))
+        );
+        if (files.length > 0) {
+          setFiles(files);
+        }
+      } catch (err) {
+        console.error('Failed to load files from server:', err);
+      }
     };
 
     loadFiles();

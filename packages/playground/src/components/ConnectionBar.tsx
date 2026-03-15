@@ -99,7 +99,7 @@ export function ConnectionBar({
       {status === 'connected' && (
         <button
           onClick={onDisconnect}
-          className="ml-auto px-2 py-0.5 text-xs text-gray-400 hover:text-red-400"
+          className="ml-auto px-2 py-0.5 text-xs text-gray-400 hover:text-red-400 cursor-pointer"
         >
           Disconnect
         </button>

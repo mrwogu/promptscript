@@ -55,9 +55,14 @@ export async function createServer(options: ServerOptions): Promise<FastifyInsta
 export async function startServer(options: ServerOptions): Promise<void> {
   const app = await createServer(options);
 
-  const shutdown = async (): Promise<void> => {
-    await app.close();
-    process.exit(0);
+  const shutdown = (): void => {
+    // Force exit after 3s if graceful close hangs (e.g. polling watcher)
+    const forceTimer = setTimeout(() => process.exit(0), 3000);
+    forceTimer.unref();
+    app.close().then(
+      () => process.exit(0),
+      () => process.exit(1)
+    );
   };
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
