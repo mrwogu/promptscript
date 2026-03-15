@@ -99,4 +99,122 @@ describe('useServerConnection', () => {
 
     expect(result.current.status).toBe('disconnected');
   });
+
+  it('handles incoming WebSocket messages', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ mode: 'readwrite', workspace: '/test' }),
+        } as Response)
+    );
+
+    const mockWs = {
+      onopen: null as null | (() => void),
+      onmessage: null as null | ((e: { data: string }) => void),
+      onclose: null as null | (() => void),
+      close: vi.fn(),
+    };
+    function MockWebSocket() {
+      return mockWs;
+    }
+    vi.stubGlobal('WebSocket', MockWebSocket);
+
+    const { result } = renderHook(() => useServerConnection());
+
+    const handler = vi.fn();
+    act(() => {
+      result.current.onFileEvent(handler);
+    });
+
+    await act(async () => {
+      await result.current.connect('localhost:3000');
+    });
+
+    await act(async () => {
+      mockWs.onopen?.();
+    });
+
+    act(() => {
+      mockWs.onmessage?.({ data: JSON.stringify({ type: 'file:changed', path: 'test.prs' }) });
+    });
+
+    expect(handler).toHaveBeenCalledWith({ type: 'file:changed', path: 'test.prs' });
+  });
+
+  it('ignores malformed WebSocket messages', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ mode: 'readwrite', workspace: '/test' }),
+        } as Response)
+    );
+
+    const mockWs = {
+      onopen: null as null | (() => void),
+      onmessage: null as null | ((e: { data: string }) => void),
+      onclose: null as null | (() => void),
+      close: vi.fn(),
+    };
+    function MockWebSocket() {
+      return mockWs;
+    }
+    vi.stubGlobal('WebSocket', MockWebSocket);
+
+    const { result } = renderHook(() => useServerConnection());
+
+    await act(async () => {
+      await result.current.connect('localhost:3000');
+    });
+
+    await act(async () => {
+      mockWs.onopen?.();
+    });
+
+    // Should not throw
+    act(() => {
+      mockWs.onmessage?.({ data: 'not-json' });
+    });
+
+    expect(result.current.status).toBe('connected');
+  });
+
+  it('uses wss protocol for port 443', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ mode: 'readwrite', workspace: '/test' }),
+        } as Response)
+    );
+
+    const mockWs = {
+      onopen: null as null | (() => void),
+      onmessage: null as null | (() => void),
+      onclose: null as null | (() => void),
+      close: vi.fn(),
+    };
+    const MockWebSocket = vi.fn(function () {
+      return mockWs;
+    });
+    vi.stubGlobal('WebSocket', MockWebSocket);
+
+    const { result } = renderHook(() => useServerConnection());
+
+    await act(async () => {
+      await result.current.connect('example.com:443');
+    });
+
+    expect(MockWebSocket).toHaveBeenCalledWith('wss://example.com:443/ws');
+  });
 });

@@ -57,4 +57,91 @@ describe('useLocalFiles', () => {
 
     expect(result.current.saveFile).toBeInstanceOf(Function);
   });
+
+  it('handles file:changed event by updating store', async () => {
+    usePlaygroundStore.setState({
+      files: [{ path: 'test.prs', content: 'original' }],
+      activeFile: 'test.prs',
+    });
+
+    let capturedHandler: ((event: { type: string; path: string }) => void) | null = null;
+    const mockOnFileEventCapture = vi.fn((handler) => {
+      capturedHandler = handler;
+    });
+
+    renderHook(() => useLocalFiles('localhost:3000', mockOnFileEventCapture));
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    await act(async () => {
+      capturedHandler?.({ type: 'file:changed', path: 'test.prs' });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    const state = usePlaygroundStore.getState();
+    expect(state.files.some((f) => f.path === 'test.prs')).toBe(true);
+  });
+
+  it('handles file:created event by adding to store', async () => {
+    let capturedHandler: ((event: { type: string; path: string }) => void) | null = null;
+    const mockOnFileEventCapture = vi.fn((handler) => {
+      capturedHandler = handler;
+    });
+
+    renderHook(() => useLocalFiles('localhost:3000', mockOnFileEventCapture));
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    await act(async () => {
+      capturedHandler?.({ type: 'file:created', path: 'new.prs' });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    const state = usePlaygroundStore.getState();
+    expect(state.files.some((f) => f.path === 'new.prs')).toBe(true);
+  });
+
+  it('handles file:deleted event by removing from store', async () => {
+    usePlaygroundStore.setState({
+      files: [{ path: 'test.prs', content: 'content' }],
+      activeFile: 'test.prs',
+    });
+
+    let capturedHandler: ((event: { type: string; path: string }) => void) | null = null;
+    const mockOnFileEventCapture = vi.fn((handler) => {
+      capturedHandler = handler;
+    });
+
+    renderHook(() => useLocalFiles('localhost:3000', mockOnFileEventCapture));
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    await act(async () => {
+      capturedHandler?.({ type: 'file:deleted', path: 'test.prs' });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    const state = usePlaygroundStore.getState();
+    expect(state.files.some((f) => f.path === 'test.prs')).toBe(false);
+  });
+
+  it('saveFile writes to provider and suppresses echo', async () => {
+    const { result } = renderHook(() => useLocalFiles('localhost:3000', mockOnFileEvent));
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    await act(async () => {
+      await result.current.saveFile('test.prs', 'updated content');
+    });
+
+    expect(mockWriteFile).toHaveBeenCalledWith('test.prs', 'updated content');
+  });
 });

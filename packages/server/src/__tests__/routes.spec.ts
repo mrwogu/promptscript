@@ -126,6 +126,38 @@ describe('server routes', () => {
     });
   });
 
+  describe('PUT /api/files/* with traversal', () => {
+    it('returns 403 for path traversal', async () => {
+      const res = await app.inject({
+        method: 'PUT',
+        url: '/api/files/..%2F..%2Fetc%2Fpasswd',
+        payload: { content: 'nope' },
+      });
+      expect(res.statusCode).toBe(403);
+    });
+  });
+
+  describe('POST /api/files/* with traversal', () => {
+    it('returns 403 for path traversal', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/files/..%2F..%2Fetc%2Fpasswd',
+        payload: { content: 'nope' },
+      });
+      expect(res.statusCode).toBe(403);
+    });
+  });
+
+  describe('DELETE /api/files/* with traversal', () => {
+    it('returns 403 for path traversal', async () => {
+      const res = await app.inject({
+        method: 'DELETE',
+        url: '/api/files/..%2F..%2Fetc%2Fpasswd',
+      });
+      expect(res.statusCode).toBe(403);
+    });
+  });
+
   describe('read-only mode', () => {
     let roApp: FastifyInstance;
 

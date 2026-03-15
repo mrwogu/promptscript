@@ -1,7 +1,8 @@
 import { mkdtemp, writeFile, mkdir, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { createServer } from '../server.js';
+import { vi } from 'vitest';
+import { createServer, startServer } from '../server.js';
 import type { FastifyInstance } from 'fastify';
 
 describe('createServer', () => {
@@ -81,6 +82,54 @@ describe('createServer', () => {
       },
     });
     expect(res.headers['access-control-allow-origin']).not.toBe('https://evil.example.com');
+  });
+
+  it('startServer listens and can be stopped', async () => {
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    // Start server on random port
+    const serverPromise = startServer({
+      port: 0,
+      host: '127.0.0.1',
+      workspace,
+      readOnly: false,
+      corsOrigin: 'https://getpromptscript.dev',
+    });
+
+    // Give it time to start
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Verify it logged startup messages
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('PromptScript server running'));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Open playground:'));
+
+    consoleSpy.mockRestore();
+
+    // Trigger shutdown via SIGINT handler
+    process.emit('SIGINT');
+    await serverPromise.catch(() => {});
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  });
+
+  it('startServer uses localhost display for 0.0.0.0 host', async () => {
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const serverPromise = startServer({
+      port: 0,
+      host: '0.0.0.0',
+      workspace,
+      readOnly: false,
+      corsOrigin: 'https://getpromptscript.dev',
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('http://localhost:'));
+
+    consoleSpy.mockRestore();
+    process.emit('SIGINT');
+    await serverPromise.catch(() => {});
+    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 
   it('creates server in read-only mode', async () => {

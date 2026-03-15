@@ -54,4 +54,20 @@ describe('ConnectionBar', () => {
     render(<ConnectionBar {...defaultProps} status="reconnecting" serverHost="localhost:3000" />);
     expect(screen.getByText('Reconnecting...')).toBeTruthy();
   });
+
+  it('submits on Enter key', () => {
+    const onConnect = vi.fn();
+    render(<ConnectionBar {...defaultProps} onConnect={onConnect} />);
+    fireEvent.click(screen.getByText('Connect to local server'));
+    fireEvent.keyDown(screen.getByPlaceholderText('localhost:3000'), { key: 'Enter' });
+    expect(onConnect).toHaveBeenCalledWith('localhost:3000');
+  });
+
+  it('cancels on Escape key', () => {
+    render(<ConnectionBar {...defaultProps} />);
+    fireEvent.click(screen.getByText('Connect to local server'));
+    expect(screen.getByPlaceholderText('localhost:3000')).toBeTruthy();
+    fireEvent.keyDown(screen.getByPlaceholderText('localhost:3000'), { key: 'Escape' });
+    expect(screen.getByText('Connect to local server')).toBeTruthy();
+  });
 });
