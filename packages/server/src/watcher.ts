@@ -17,6 +17,18 @@ function isWatchedFile(filePath: string): boolean {
   return WATCHED_EXTENSIONS.has(base.slice(dot));
 }
 
+const IGNORED_DIRS = [
+  '**/node_modules/**',
+  '**/.git/**',
+  '**/dist/**',
+  '**/build/**',
+  '**/.nx/**',
+  '**/coverage/**',
+  '**/.next/**',
+  '**/.turbo/**',
+  '**/.cache/**',
+];
+
 export function createFileWatcher(
   workspace: string,
   onEvent: (event: FileWatchEvent) => void
@@ -25,13 +37,10 @@ export function createFileWatcher(
 
   const watcher = watch(workspace, {
     ignoreInitial: true,
-    ignored: (filePath: string) => {
-      const rel = relative(workspace, filePath);
-      if (rel === '') return false; // workspace root itself
-      const parts = rel.split('/');
-      if (parts.includes('node_modules') || parts.includes('.git')) return true;
-      return false;
-    },
+    ignored: IGNORED_DIRS,
+    depth: 10,
+    usePolling: true,
+    interval: 500,
   });
 
   watcher.on('ready', () => {
