@@ -3,6 +3,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Header } from './components/Header';
 import { ConnectionBar } from './components/ConnectionBar';
 import { FileTabs } from './components/FileTabs';
+import { FileTree } from './components/FileTree';
 import { Editor } from './components/Editor';
 import { OutputPanel } from './components/OutputPanel';
 import { ExampleGallery } from './components/ExampleGallery';
@@ -25,6 +26,7 @@ function PlaygroundLayout() {
 
   const showExamples = usePlaygroundStore((s) => s.showExamples);
   const setShowExamples = usePlaygroundStore((s) => s.setShowExamples);
+  const showFileTree = usePlaygroundStore((s) => s.showFileTree);
 
   const [leftWidth, setLeftWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -161,6 +163,9 @@ function PlaygroundLayout() {
       )}
 
       <main className="flex-1 flex overflow-hidden">
+        {/* File tree */}
+        {showFileTree && <FileTree />}
+
         {/* Editor panel */}
         <div className="flex flex-col border-r border-ps-border" style={{ width: `${leftWidth}%` }}>
           <FileTabs />

@@ -86,6 +86,7 @@ export interface PlaygroundState {
   // Files
   files: FileState[];
   activeFile: string;
+  openTabs: string[];
 
   // Compilation
   isCompiling: boolean;
@@ -101,6 +102,7 @@ export interface PlaygroundState {
   showExamples: boolean;
   showConfig: boolean;
   showEnvVars: boolean;
+  showFileTree: boolean;
 
   // File actions
   setActiveFile: (path: string) => void;
@@ -109,6 +111,8 @@ export interface PlaygroundState {
   deleteFile: (path: string) => void;
   renameFile: (oldPath: string, newPath: string) => void;
   setFiles: (files: FileState[]) => void;
+  openFile: (path: string) => void;
+  closeTab: (path: string) => void;
 
   // Compile actions
   setCompiling: (isCompiling: boolean) => void;
@@ -132,6 +136,7 @@ export interface PlaygroundState {
   setShowExamples: (show: boolean) => void;
   setShowConfig: (show: boolean) => void;
   setShowEnvVars: (show: boolean) => void;
+  setShowFileTree: (show: boolean) => void;
 }
 
 const DEFAULT_FILE = `@meta {
@@ -262,6 +267,7 @@ export const usePlaygroundStore = create<PlaygroundState>((set) => ({
   // Initial state
   files: [{ path: 'project.prs', content: DEFAULT_FILE }],
   activeFile: 'project.prs',
+  openTabs: ['project.prs'],
   isCompiling: false,
   compileResult: null,
   lastCompileTime: null,
@@ -271,6 +277,7 @@ export const usePlaygroundStore = create<PlaygroundState>((set) => ({
   showExamples: false,
   showConfig: false,
   showEnvVars: false,
+  showFileTree: false,
 
   // File actions
   setActiveFile: (path) => set({ activeFile: path }),
@@ -283,27 +290,49 @@ export const usePlaygroundStore = create<PlaygroundState>((set) => ({
   addFile: (path, content) =>
     set((state) => ({
       files: [...state.files, { path, content }],
+      openTabs: [...state.openTabs, path],
       activeFile: path,
     })),
 
   deleteFile: (path) =>
     set((state) => {
       const newFiles = state.files.filter((f) => f.path !== path);
+      const newTabs = state.openTabs.filter((t) => t !== path);
       const newActiveFile =
-        state.activeFile === path ? (newFiles[0]?.path ?? 'project.prs') : state.activeFile;
-      return { files: newFiles, activeFile: newActiveFile };
+        state.activeFile === path
+          ? (newTabs[newTabs.length - 1] ?? newFiles[0]?.path ?? 'project.prs')
+          : state.activeFile;
+      return { files: newFiles, openTabs: newTabs, activeFile: newActiveFile };
     }),
 
   renameFile: (oldPath, newPath) =>
     set((state) => ({
       files: state.files.map((f) => (f.path === oldPath ? { ...f, path: newPath } : f)),
+      openTabs: state.openTabs.map((t) => (t === oldPath ? newPath : t)),
       activeFile: state.activeFile === oldPath ? newPath : state.activeFile,
     })),
 
   setFiles: (files) =>
     set({
       files,
+      openTabs: files.map((f) => f.path),
       activeFile: files[0]?.path ?? 'project.prs',
+    }),
+
+  openFile: (path) =>
+    set((state) => ({
+      openTabs: state.openTabs.includes(path) ? state.openTabs : [...state.openTabs, path],
+      activeFile: path,
+    })),
+
+  closeTab: (path) =>
+    set((state) => {
+      const newTabs = state.openTabs.filter((t) => t !== path);
+      const newActiveFile =
+        state.activeFile === path
+          ? (newTabs[newTabs.length - 1] ?? state.files[0]?.path ?? 'project.prs')
+          : state.activeFile;
+      return { openTabs: newTabs, activeFile: newActiveFile };
     }),
 
   // Compile actions
@@ -395,6 +424,7 @@ export const usePlaygroundStore = create<PlaygroundState>((set) => ({
   setShowExamples: (show) => set({ showExamples: show }),
   setShowConfig: (show) => set({ showConfig: show }),
   setShowEnvVars: (show) => set({ showEnvVars: show }),
+  setShowFileTree: (show) => set({ showFileTree: show }),
 }));
 
 // Selectors

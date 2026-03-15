@@ -3,14 +3,19 @@ import { usePlaygroundStore } from '../store';
 
 export function FileTabs() {
   const files = usePlaygroundStore((s) => s.files);
+  const openTabs = usePlaygroundStore((s) => s.openTabs);
   const activeFile = usePlaygroundStore((s) => s.activeFile);
   const setActiveFile = usePlaygroundStore((s) => s.setActiveFile);
   const addFile = usePlaygroundStore((s) => s.addFile);
-  const deleteFile = usePlaygroundStore((s) => s.deleteFile);
+  const closeTab = usePlaygroundStore((s) => s.closeTab);
   const renameFile = usePlaygroundStore((s) => s.renameFile);
+  const showFileTree = usePlaygroundStore((s) => s.showFileTree);
+  const setShowFileTree = usePlaygroundStore((s) => s.setShowFileTree);
 
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+
+  const tabFiles = files.filter((f) => openTabs.includes(f.path));
 
   const handleAddFile = () => {
     const baseName = 'new-file';
@@ -45,7 +50,18 @@ export function FileTabs() {
 
   return (
     <div className="flex items-center bg-ps-bg border-b border-ps-border overflow-x-auto">
-      {files.map((file) => (
+      <button
+        onClick={() => setShowFileTree(!showFileTree)}
+        className={`px-2 py-2 text-gray-500 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 ${showFileTree ? 'text-white bg-ps-surface/50' : ''}`}
+        title="Toggle file tree"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
+          <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
+        </svg>
+      </button>
+
+      {tabFiles.map((file) => (
         <div
           key={file.path}
           className={`group flex items-center px-3 py-2 text-sm cursor-pointer border-r border-ps-border ${
@@ -72,12 +88,12 @@ export function FileTabs() {
             />
           ) : (
             <>
-              <span className="truncate max-w-[120px]">{file.path}</span>
-              {files.length > 1 && (
+              <span className="truncate max-w-[120px]">{file.path.split('/').pop()}</span>
+              {openTabs.length > 1 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteFile(file.path);
+                    closeTab(file.path);
                   }}
                   className="ml-2 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400"
                 >

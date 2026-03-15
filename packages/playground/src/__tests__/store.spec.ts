@@ -34,7 +34,9 @@ describe('PlaygroundStore', () => {
     // Reset store to initial state
     usePlaygroundStore.setState({
       files: [{ path: 'project.prs', content: 'initial content' }],
+      openTabs: ['project.prs'],
       activeFile: 'project.prs',
+      showFileTree: false,
       isCompiling: false,
       compileResult: null,
       lastCompileTime: null,
