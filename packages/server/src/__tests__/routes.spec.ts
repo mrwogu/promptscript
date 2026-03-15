@@ -13,8 +13,8 @@ describe('server routes', () => {
 
   beforeEach(async () => {
     workspace = await mkdtemp(join(tmpdir(), 'prs-test-'));
-    await mkdir(join(workspace, 'src'), { recursive: true });
-    await writeFile(join(workspace, 'src/team.prs'), '@identity Team Lead');
+    await mkdir(join(workspace, '.promptscript'), { recursive: true });
+    await writeFile(join(workspace, '.promptscript/team.prs'), '@identity Team Lead');
     await writeFile(join(workspace, 'promptscript.yaml'), 'targets: [claude]');
 
     app = Fastify();
@@ -53,13 +53,13 @@ describe('server routes', () => {
       const body = res.json();
       expect(body.files).toHaveLength(2);
       const paths = body.files.map((f: { path: string }) => f.path).sort();
-      expect(paths).toEqual(['promptscript.yaml', 'src/team.prs']);
+      expect(paths).toEqual(['.promptscript/team.prs', 'promptscript.yaml']);
     });
   });
 
   describe('GET /api/files/*', () => {
     it('reads a file', async () => {
-      const res = await app.inject({ method: 'GET', url: '/api/files/src/team.prs' });
+      const res = await app.inject({ method: 'GET', url: '/api/files/.promptscript/team.prs' });
       expect(res.statusCode).toBe(200);
       const body = res.json();
       expect(body.content).toBe('@identity Team Lead');
@@ -86,12 +86,12 @@ describe('server routes', () => {
     it('updates a file', async () => {
       const res = await app.inject({
         method: 'PUT',
-        url: '/api/files/src/team.prs',
+        url: '/api/files/.promptscript/team.prs',
         payload: { content: '@identity Updated' },
       });
       expect(res.statusCode).toBe(200);
 
-      const read = await app.inject({ method: 'GET', url: '/api/files/src/team.prs' });
+      const read = await app.inject({ method: 'GET', url: '/api/files/.promptscript/team.prs' });
       expect(read.json().content).toBe('@identity Updated');
     });
   });
@@ -109,7 +109,7 @@ describe('server routes', () => {
     it('returns 409 if file already exists', async () => {
       const res = await app.inject({
         method: 'POST',
-        url: '/api/files/src/team.prs',
+        url: '/api/files/.promptscript/team.prs',
         payload: { content: 'conflict' },
       });
       expect(res.statusCode).toBe(409);
@@ -118,10 +118,10 @@ describe('server routes', () => {
 
   describe('DELETE /api/files/*', () => {
     it('deletes a file', async () => {
-      const res = await app.inject({ method: 'DELETE', url: '/api/files/src/team.prs' });
+      const res = await app.inject({ method: 'DELETE', url: '/api/files/.promptscript/team.prs' });
       expect(res.statusCode).toBe(200);
 
-      const read = await app.inject({ method: 'GET', url: '/api/files/src/team.prs' });
+      const read = await app.inject({ method: 'GET', url: '/api/files/.promptscript/team.prs' });
       expect(read.statusCode).toBe(404);
     });
   });
@@ -168,10 +168,10 @@ describe('server routes', () => {
   describe('PUT /api/files/* write error', () => {
     it('returns 500 when write fails on valid path', async () => {
       // Try to write to a path that is a directory, causing EISDIR
-      await mkdir(join(workspace, 'src/isdir'), { recursive: true });
+      await mkdir(join(workspace, '.promptscript/isdir'), { recursive: true });
       const res = await app.inject({
         method: 'PUT',
-        url: '/api/files/src/isdir',
+        url: '/api/files/.promptscript/isdir',
         payload: { content: 'content' },
       });
       expect(res.statusCode).toBe(500);
@@ -183,7 +183,7 @@ describe('server routes', () => {
       // Write to a path where the parent is a file, causing ENOTDIR
       const res = await app.inject({
         method: 'POST',
-        url: '/api/files/src/team.prs/child.prs',
+        url: '/api/files/.promptscript/team.prs/child.prs',
         payload: { content: 'content' },
       });
       expect(res.statusCode).toBe(500);
@@ -206,7 +206,7 @@ describe('server routes', () => {
     it('rejects PUT', async () => {
       const res = await roApp.inject({
         method: 'PUT',
-        url: '/api/files/src/team.prs',
+        url: '/api/files/.promptscript/team.prs',
         payload: { content: 'nope' },
       });
       expect(res.statusCode).toBe(403);
@@ -222,7 +222,10 @@ describe('server routes', () => {
     });
 
     it('rejects DELETE', async () => {
-      const res = await roApp.inject({ method: 'DELETE', url: '/api/files/src/team.prs' });
+      const res = await roApp.inject({
+        method: 'DELETE',
+        url: '/api/files/.promptscript/team.prs',
+      });
       expect(res.statusCode).toBe(403);
     });
   });

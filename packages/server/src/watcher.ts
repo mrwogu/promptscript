@@ -1,33 +1,18 @@
 import { watch, type FSWatcher } from 'chokidar';
-import { relative } from 'path';
+import { join, relative } from 'path';
 
 export interface FileWatchEvent {
   type: 'file:changed' | 'file:created' | 'file:deleted';
   path: string;
 }
 
-const WATCHED_EXTENSIONS = new Set(['.prs']);
-const WATCHED_FILENAMES = new Set(['promptscript.yaml']);
+const CONFIG_FILENAMES = new Set(['promptscript.yaml', 'promptscript.yml']);
 
 function isWatchedFile(filePath: string): boolean {
   const base = filePath.split('/').pop() ?? '';
-  if (WATCHED_FILENAMES.has(base)) return true;
-  const dot = base.lastIndexOf('.');
-  if (dot === -1) return false;
-  return WATCHED_EXTENSIONS.has(base.slice(dot));
+  if (CONFIG_FILENAMES.has(base)) return true;
+  return base.endsWith('.prs');
 }
-
-const IGNORED_DIRS = [
-  '**/node_modules/**',
-  '**/.git/**',
-  '**/dist/**',
-  '**/build/**',
-  '**/.nx/**',
-  '**/coverage/**',
-  '**/.next/**',
-  '**/.turbo/**',
-  '**/.cache/**',
-];
 
 export function createFileWatcher(
   workspace: string,
@@ -35,13 +20,15 @@ export function createFileWatcher(
 ): FSWatcher {
   let ready = false;
 
-  const watcher = watch(workspace, {
-    ignoreInitial: true,
-    ignored: IGNORED_DIRS,
-    depth: 10,
-    usePolling: true,
-    interval: 500,
-  });
+  // Only watch .promptscript/ dir and config files at workspace root
+  const watcher = watch(
+    [
+      join(workspace, '.promptscript'),
+      join(workspace, 'promptscript.yaml'),
+      join(workspace, 'promptscript.yml'),
+    ],
+    { ignoreInitial: true }
+  );
 
   watcher.on('ready', () => {
     // Small grace period to let any delayed initial-scan events drain before

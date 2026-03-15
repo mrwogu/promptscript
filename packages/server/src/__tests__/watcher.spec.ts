@@ -1,14 +1,17 @@
-import { mkdtemp, writeFile, unlink, rm } from 'fs/promises';
+import { mkdtemp, writeFile, unlink, mkdir, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { createFileWatcher, type FileWatchEvent } from '../watcher.js';
 
 describe('createFileWatcher', () => {
   let workspace: string;
+  let prsDir: string;
 
   beforeEach(async () => {
     workspace = await mkdtemp(join(tmpdir(), 'prs-watch-'));
-    await writeFile(join(workspace, 'test.prs'), 'initial');
+    prsDir = join(workspace, '.promptscript');
+    await mkdir(prsDir, { recursive: true });
+    await writeFile(join(prsDir, 'test.prs'), 'initial');
   });
 
   afterEach(async () => {
@@ -20,11 +23,13 @@ describe('createFileWatcher', () => {
     const watcher = createFileWatcher(workspace, (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await writeFile(join(workspace, 'test.prs'), 'updated');
+    await writeFile(join(prsDir, 'test.prs'), 'updated');
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await watcher.close();
 
-    expect(events.some((e) => e.type === 'file:changed' && e.path === 'test.prs')).toBe(true);
+    expect(
+      events.some((e) => e.type === 'file:changed' && e.path === '.promptscript/test.prs')
+    ).toBe(true);
   });
 
   it('emits file:created when a new .prs file is added', async () => {
@@ -32,11 +37,13 @@ describe('createFileWatcher', () => {
     const watcher = createFileWatcher(workspace, (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await writeFile(join(workspace, 'new.prs'), 'new file');
+    await writeFile(join(prsDir, 'new.prs'), 'new file');
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await watcher.close();
 
-    expect(events.some((e) => e.type === 'file:created' && e.path === 'new.prs')).toBe(true);
+    expect(
+      events.some((e) => e.type === 'file:created' && e.path === '.promptscript/new.prs')
+    ).toBe(true);
   });
 
   it('emits file:deleted when a .prs file is removed', async () => {
@@ -44,11 +51,13 @@ describe('createFileWatcher', () => {
     const watcher = createFileWatcher(workspace, (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await unlink(join(workspace, 'test.prs'));
+    await unlink(join(prsDir, 'test.prs'));
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await watcher.close();
 
-    expect(events.some((e) => e.type === 'file:deleted' && e.path === 'test.prs')).toBe(true);
+    expect(
+      events.some((e) => e.type === 'file:deleted' && e.path === '.promptscript/test.prs')
+    ).toBe(true);
   });
 
   it('ignores non-.prs files', async () => {
@@ -56,7 +65,7 @@ describe('createFileWatcher', () => {
     const watcher = createFileWatcher(workspace, (event) => events.push(event));
 
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await writeFile(join(workspace, 'readme.md'), 'ignored');
+    await writeFile(join(prsDir, 'readme.md'), 'ignored');
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await watcher.close();
 

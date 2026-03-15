@@ -11,8 +11,8 @@ describe('createServer', () => {
 
   beforeEach(async () => {
     workspace = await mkdtemp(join(tmpdir(), 'prs-server-'));
-    await mkdir(join(workspace, 'src'), { recursive: true });
-    await writeFile(join(workspace, 'src/test.prs'), '@identity Test');
+    await mkdir(join(workspace, '.promptscript'), { recursive: true });
+    await writeFile(join(workspace, '.promptscript/test.prs'), '@identity Test');
   });
 
   afterEach(async () => {
@@ -231,7 +231,7 @@ describe('createServer', () => {
 
     const put = await server.inject({
       method: 'PUT',
-      url: '/api/files/src/test.prs',
+      url: '/api/files/.promptscript/test.prs',
       payload: { content: 'nope' },
     });
     expect(put.statusCode).toBe(403);

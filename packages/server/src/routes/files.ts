@@ -9,9 +9,8 @@ const MAX_BODY_SIZE = 1_048_576; // 1MB
 export function registerRoutes(app: FastifyInstance, workspace: string, readOnly: boolean): void {
   // List files
   app.get('/api/files', async () => {
-    const entries = await fg(['**/*.prs', '**/promptscript.yaml'], {
+    const entries = await fg(['.promptscript/**/*.prs', 'promptscript.yaml', 'promptscript.yml'], {
       cwd: workspace,
-      ignore: ['**/node_modules/**', '**/.git/**'],
       stats: true,
     });
 
