@@ -12,6 +12,7 @@ interface UseServerConnectionResult {
   status: ConnectionStatus;
   serverHost: string | null;
   config: ServerConfig | null;
+  error: string | null;
   connect: (host: string) => Promise<void>;
   disconnect: () => void;
   onFileEvent: (handler: (event: FileWatchEvent) => void) => void;
@@ -21,6 +22,7 @@ export function useServerConnection(): UseServerConnectionResult {
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [serverHost, setServerHost] = useState<string | null>(null);
   const [config, setConfig] = useState<ServerConfig | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
   const fileEventHandlerRef = useRef<((event: FileWatchEvent) => void) | null>(null);
@@ -75,6 +77,7 @@ export function useServerConnection(): UseServerConnectionResult {
     async (host: string) => {
       cleanup();
       setStatus('connecting');
+      setError(null);
       hostRef.current = host;
       setServerHost(host);
 
@@ -94,6 +97,7 @@ export function useServerConnection(): UseServerConnectionResult {
         setServerHost(null);
         hostRef.current = null;
         setConfig(null);
+        setError(`Could not connect to ${host}. Is the server running?`);
       }
     },
     [cleanup, connectWebSocket]
@@ -105,6 +109,7 @@ export function useServerConnection(): UseServerConnectionResult {
     setStatus('disconnected');
     setServerHost(null);
     setConfig(null);
+    setError(null);
   }, [cleanup]);
 
   const onFileEvent = useCallback((handler: (event: FileWatchEvent) => void) => {
@@ -115,5 +120,5 @@ export function useServerConnection(): UseServerConnectionResult {
     return cleanup;
   }, [cleanup]);
 
-  return { status, serverHost, config, connect, disconnect, onFileEvent };
+  return { status, serverHost, config, error, connect, disconnect, onFileEvent };
 }

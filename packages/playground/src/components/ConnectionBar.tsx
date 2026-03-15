@@ -4,6 +4,7 @@ import type { ConnectionStatus } from '../hooks/useServerConnection';
 interface ConnectionBarProps {
   status: ConnectionStatus;
   serverHost: string | null;
+  error: string | null;
   onConnect: (host: string) => void;
   onDisconnect: () => void;
 }
@@ -22,7 +23,13 @@ const STATUS_LABELS: Record<ConnectionStatus, string> = {
   reconnecting: 'Reconnecting...',
 };
 
-export function ConnectionBar({ status, serverHost, onConnect, onDisconnect }: ConnectionBarProps) {
+export function ConnectionBar({
+  status,
+  serverHost,
+  error,
+  onConnect,
+  onDisconnect,
+}: ConnectionBarProps) {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState('localhost:3000');
 
@@ -36,13 +43,17 @@ export function ConnectionBar({ status, serverHost, onConnect, onDisconnect }: C
   if (status === 'disconnected' && !showInput) {
     return (
       <div className="flex items-center gap-2 px-4 py-1.5 bg-ps-bg border-b border-ps-border text-sm">
-        <div className={`w-2 h-2 rounded-full ${STATUS_COLORS[status]}`} />
-        <span className="text-gray-400">{STATUS_LABELS[status]}</span>
+        <div className={`w-2 h-2 rounded-full ${error ? 'bg-red-500' : STATUS_COLORS[status]}`} />
+        {error ? (
+          <span className="text-red-400">{error}</span>
+        ) : (
+          <span className="text-gray-400">{STATUS_LABELS[status]}</span>
+        )}
         <button
           onClick={() => setShowInput(true)}
           className="ml-auto px-2 py-0.5 text-xs bg-ps-primary hover:bg-ps-secondary rounded text-white"
         >
-          Connect to local server
+          {error ? 'Retry' : 'Connect to local server'}
         </button>
       </div>
     );

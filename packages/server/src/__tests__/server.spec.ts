@@ -86,6 +86,7 @@ describe('createServer', () => {
 
   it('startServer listens and can be stopped', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
     // Start server on random port
     const serverPromise = startServer({
@@ -105,14 +106,16 @@ describe('createServer', () => {
 
     consoleSpy.mockRestore();
 
-    // Trigger shutdown via SIGINT handler
+    // Trigger shutdown via SIGINT handler (exit mock must be active)
     process.emit('SIGINT');
     await serverPromise.catch(() => {});
     await new Promise((resolve) => setTimeout(resolve, 500));
+    exitSpy.mockRestore();
   });
 
   it('startServer uses localhost display for 0.0.0.0 host', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
     const serverPromise = startServer({
       port: 0,
@@ -130,6 +133,7 @@ describe('createServer', () => {
     process.emit('SIGINT');
     await serverPromise.catch(() => {});
     await new Promise((resolve) => setTimeout(resolve, 500));
+    exitSpy.mockRestore();
   });
 
   it('startServer handles EADDRINUSE error', async () => {

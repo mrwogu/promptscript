@@ -19,7 +19,7 @@ function PlaygroundLayout() {
   const { compile: doCompile } = useCompiler();
   const { handleShare, serverParam } = useUrlState();
 
-  const { status, serverHost, connect, disconnect, onFileEvent } = useServerConnection();
+  const { status, serverHost, error, connect, disconnect, onFileEvent } = useServerConnection();
   const { saveFile } = useLocalFiles(serverHost, onFileEvent);
   const isLocalMode = status === 'connected';
 
@@ -137,6 +137,7 @@ function PlaygroundLayout() {
       <ConnectionBar
         status={status}
         serverHost={serverHost}
+        error={error}
         onConnect={connect}
         onDisconnect={handleDisconnect}
       />

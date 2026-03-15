@@ -6,6 +6,7 @@ describe('ConnectionBar', () => {
   const defaultProps = {
     status: 'disconnected' as const,
     serverHost: null,
+    error: null,
     onConnect: vi.fn(),
     onDisconnect: vi.fn(),
   };
@@ -48,6 +49,17 @@ describe('ConnectionBar', () => {
     );
     fireEvent.click(screen.getByText('Disconnect'));
     expect(onDisconnect).toHaveBeenCalled();
+  });
+
+  it('shows error message when connection fails', () => {
+    render(
+      <ConnectionBar
+        {...defaultProps}
+        error="Could not connect to localhost:3000. Is the server running?"
+      />
+    );
+    expect(screen.getByText(/Could not connect/)).toBeTruthy();
+    expect(screen.getByText('Retry')).toBeTruthy();
   });
 
   it('shows connecting state', () => {

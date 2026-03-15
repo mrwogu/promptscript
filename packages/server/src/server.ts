@@ -16,7 +16,7 @@ export async function createServer(options: ServerOptions): Promise<FastifyInsta
     origin: options.corsOrigin,
   });
 
-  await app.register(fastifyRateLimit, { max: 100, timeWindow: '1 minute' });
+  await app.register(fastifyRateLimit, { max: 1000, timeWindow: '1 minute' });
   await app.register(fastifyWebsocket);
 
   registerHealthRoute(app);
@@ -57,6 +57,7 @@ export async function startServer(options: ServerOptions): Promise<void> {
 
   const shutdown = async (): Promise<void> => {
     await app.close();
+    process.exit(0);
   };
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
