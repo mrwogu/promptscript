@@ -125,6 +125,18 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate
 
 **[Open Playground](https://getpromptscript.dev/playground/)** — no installation needed.
 
+### Option 4: Playground with Local Files
+
+```bash
+# Start the server in your project directory
+prs serve
+
+# Then open the printed URL in your browser:
+# https://getpromptscript.dev/playground/?server=localhost:3000
+```
+
+Edit `.prs` files in the playground or your editor — changes sync both ways in real time.
+
 ---
 
 ## Code Example
