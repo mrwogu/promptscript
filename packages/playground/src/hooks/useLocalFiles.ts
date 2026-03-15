@@ -32,8 +32,9 @@ export function useLocalFiles(
     const loadFiles = async (): Promise<void> => {
       try {
         const entries = await provider.listFiles();
+        const prsEntries = entries.filter((e) => e.path.endsWith('.prs'));
         const files = await Promise.all(
-          entries.map(async (entry) => ({
+          prsEntries.map(async (entry) => ({
             path: entry.path,
             content: await provider.readFile(entry.path),
           }))
