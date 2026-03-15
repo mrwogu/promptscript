@@ -49,7 +49,33 @@ export class LocalFileProvider implements FileProvider {
     if (!res.ok) throw new Error(`Failed to delete file: ${res.statusText}`);
   }
 
+  async fetchConfig(): Promise<ProjectConfig | null> {
+    try {
+      const res = await fetch(`${this.baseUrl}/api/config`);
+      if (!res.ok) return null;
+      const data = (await res.json()) as { project: ProjectConfig | null };
+      return data.project ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   get serverUrl(): string {
     return this.baseUrl;
   }
+}
+
+export interface ProjectTargetConfig {
+  enabled?: boolean;
+  version?: string;
+  convention?: string;
+}
+
+export interface ProjectConfig {
+  targets?: (string | Record<string, ProjectTargetConfig | undefined>)[];
+  formatting?: {
+    tabWidth?: number;
+    proseWrap?: string;
+    printWidth?: number;
+  };
 }

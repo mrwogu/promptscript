@@ -21,10 +21,14 @@ export async function createServer(options: ServerOptions): Promise<FastifyInsta
   await app.register(fastifyWebsocket);
 
   registerHealthRoute(app);
-  registerConfigRoute(app, {
-    mode: options.readOnly ? 'readonly' : 'readwrite',
-    workspace: options.workspace,
-  });
+  registerConfigRoute(
+    app,
+    {
+      mode: options.readOnly ? 'readonly' : 'readwrite',
+      workspace: options.workspace,
+    },
+    options.workspace
+  );
   registerRoutes(app, options.workspace, options.readOnly);
 
   const clients = new Set<import('ws').WebSocket>();

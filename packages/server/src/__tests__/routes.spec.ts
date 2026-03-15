@@ -19,7 +19,7 @@ describe('server routes', () => {
 
     app = Fastify();
     registerHealthRoute(app);
-    registerConfigRoute(app, { mode: 'readwrite', workspace });
+    registerConfigRoute(app, { mode: 'readwrite', workspace }, workspace);
     registerRoutes(app, workspace, false);
     await app.ready();
   });
@@ -37,12 +37,13 @@ describe('server routes', () => {
   });
 
   describe('GET /api/config', () => {
-    it('returns server config', async () => {
+    it('returns server config with project config', async () => {
       const res = await app.inject({ method: 'GET', url: '/api/config' });
       expect(res.statusCode).toBe(200);
       const body = res.json();
       expect(body.mode).toBe('readwrite');
       expect(body.workspace).toBe(workspace);
+      expect(body.project).toEqual({ targets: ['claude'] });
     });
   });
 
