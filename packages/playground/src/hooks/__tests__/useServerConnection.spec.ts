@@ -241,6 +241,64 @@ describe('useServerConnection', () => {
     vi.useRealTimers();
   });
 
+  it('gives up reconnecting after 5 attempts', async () => {
+    vi.useFakeTimers();
+
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ mode: 'readwrite', workspace: '/test' }),
+        } as Response)
+    );
+
+    const mockWs = {
+      onopen: null as null | (() => void),
+      onmessage: null as null | ((e: { data: string }) => void),
+      onclose: null as null | (() => void),
+      close: vi.fn(),
+    };
+    const MockWebSocket = vi.fn(function () {
+      return mockWs;
+    });
+    vi.stubGlobal('WebSocket', MockWebSocket);
+
+    const { result } = renderHook(() => useServerConnection());
+
+    await act(async () => {
+      await result.current.connect('localhost:3000');
+    });
+
+    await act(async () => {
+      mockWs.onopen?.();
+    });
+
+    expect(result.current.status).toBe('connected');
+
+    // Simulate 5 WebSocket close events (exhaust reconnect attempts)
+    for (let i = 0; i < 5; i++) {
+      await act(async () => {
+        mockWs.onclose?.();
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(30000);
+      });
+    }
+
+    // 6th close should give up
+    await act(async () => {
+      mockWs.onclose?.();
+    });
+
+    expect(result.current.status).toBe('disconnected');
+    expect(result.current.error).toContain('Lost connection');
+
+    vi.useRealTimers();
+  });
+
   it('sets disconnected state when connect fetch throws', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('Network error')));
 

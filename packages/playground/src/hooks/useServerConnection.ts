@@ -61,6 +61,14 @@ export function useServerConnection(): UseServerConnectionResult {
 
     ws.onclose = () => {
       if (hostRef.current) {
+        if (reconnectAttemptRef.current >= 5) {
+          hostRef.current = null;
+          setStatus('disconnected');
+          setServerHost(null);
+          setConfig(null);
+          setError(`Lost connection to ${host}. Server may be down.`);
+          return;
+        }
         setStatus('reconnecting');
         const delay = Math.min(1000 * Math.pow(2, reconnectAttemptRef.current), 30000);
         reconnectAttemptRef.current++;
