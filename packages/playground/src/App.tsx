@@ -18,7 +18,7 @@ import { usePlaygroundStore } from './store';
 function PlaygroundLayout() {
   // Initialize compiler hook
   const { compile: doCompile } = useCompiler();
-  const { handleShare, serverParam } = useUrlState();
+  const { handleShare, serverParam, clearServerParam } = useUrlState();
 
   const { status, serverHost, error, connect, disconnect, onFileEvent } = useServerConnection();
   const { saveFile } = useLocalFiles(serverHost, onFileEvent);
@@ -75,10 +75,11 @@ function PlaygroundLayout() {
 
   const handleDisconnect = useCallback(() => {
     disconnect();
+    clearServerParam();
     const url = new URL(window.location.href);
     url.searchParams.delete('server');
     window.history.replaceState(null, '', url.toString());
-  }, [disconnect]);
+  }, [disconnect, clearServerParam]);
 
   // Keyboard shortcuts
   useEffect(() => {

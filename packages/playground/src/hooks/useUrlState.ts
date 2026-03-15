@@ -28,7 +28,7 @@ export function useUrlState() {
   const setActiveFormatter = usePlaygroundStore((s) => s.setActiveFormatter);
   const setConfig = usePlaygroundStore((s) => s.setConfig);
 
-  const [serverParam] = useState(getServerParam);
+  const [serverParam, setServerParam] = useState(getServerParam);
   const initialLoadRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Load state from URL on mount
@@ -84,5 +84,9 @@ export function useUrlState() {
     return success;
   }, [files, activeFormatter, config]);
 
-  return { handleShare, serverParam };
+  const clearServerParam = useCallback(() => {
+    setServerParam(null);
+  }, []);
+
+  return { handleShare, serverParam, clearServerParam };
 }
