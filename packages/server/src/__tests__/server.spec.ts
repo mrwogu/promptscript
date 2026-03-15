@@ -199,6 +199,19 @@ describe('createServer', () => {
     server = undefined as unknown as FastifyInstance;
   });
 
+  it('startServer re-throws non-EADDRINUSE listen errors', async () => {
+    // Binding to an invalid host triggers EADDRNOTAVAIL, not EADDRINUSE
+    await expect(
+      startServer({
+        port: 0,
+        host: '192.0.2.1', // TEST-NET-1, not assignable locally
+        workspace,
+        readOnly: false,
+        corsOrigin: 'https://getpromptscript.dev',
+      })
+    ).rejects.toThrow();
+  });
+
   it('creates server in read-only mode', async () => {
     server = await createServer({
       port: 0,

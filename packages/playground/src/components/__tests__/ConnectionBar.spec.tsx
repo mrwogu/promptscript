@@ -65,14 +65,18 @@ describe('ConnectionBar', () => {
     expect(onConnect).not.toHaveBeenCalled();
   });
 
-  it('stops propagation on input click', () => {
-    render(<ConnectionBar {...defaultProps} />);
+  it('input click does not propagate to parent', () => {
+    const parentClick = vi.fn();
+    render(
+      <div onClick={parentClick}>
+        <ConnectionBar {...defaultProps} />
+      </div>
+    );
     fireEvent.click(screen.getByText('Connect to local server'));
-    const input = screen.getByPlaceholderText('localhost:3000');
-    const clickEvent = new MouseEvent('click', { bubbles: true });
-    const stopPropSpy = vi.spyOn(clickEvent, 'stopPropagation');
-    input.dispatchEvent(clickEvent);
-    expect(stopPropSpy).toHaveBeenCalled();
+    // Reset after the button click propagated
+    parentClick.mockClear();
+    fireEvent.click(screen.getByPlaceholderText('localhost:3000'));
+    expect(parentClick).not.toHaveBeenCalled();
   });
 
   it('shows reconnecting state', () => {
