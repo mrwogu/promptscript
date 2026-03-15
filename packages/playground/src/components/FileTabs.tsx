@@ -18,14 +18,25 @@ export function FileTabs() {
   const tabFiles = files.filter((f) => openTabs.includes(f.path));
 
   const handleAddFile = () => {
+    // Detect source directory from existing files (e.g. '.promptscript/')
+    const existingDir =
+      files.length > 0
+        ? (() => {
+            const firstPath = files[0]!.path;
+            const slashIdx = firstPath.lastIndexOf('/');
+            return slashIdx !== -1 ? firstPath.slice(0, slashIdx + 1) : '';
+          })()
+        : '';
+
     const baseName = 'new-file';
-    let name = `${baseName}.prs`;
+    let name = `${existingDir}${baseName}.prs`;
     let counter = 1;
     while (files.some((f) => f.path === name)) {
-      name = `${baseName}-${counter}.prs`;
+      name = `${existingDir}${baseName}-${counter}.prs`;
       counter++;
     }
-    addFile(name, '@meta {\n  id: "' + name.replace('.prs', '') + '"\n  syntax: "1.0.0"\n}\n');
+    const id = name.replace(/^.*\//, '').replace('.prs', '');
+    addFile(name, '@meta {\n  id: "' + id + '"\n  syntax: "1.0.0"\n}\n');
   };
 
   const handleDoubleClick = (path: string) => {
