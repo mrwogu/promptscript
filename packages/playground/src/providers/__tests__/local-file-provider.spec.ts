@@ -99,4 +99,42 @@ describe('LocalFileProvider', () => {
 
     await expect(provider.readFile('nope.prs')).rejects.toThrow('Not Found');
   });
+
+  it('fetchConfig returns project config from /api/config', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ project: { targets: ['claude'] } }),
+    } as Response);
+
+    const result = await provider.fetchConfig();
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/config');
+    expect(result).toEqual({ targets: ['claude'] });
+  });
+
+  it('fetchConfig returns null when project is null', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ project: null }),
+    } as Response);
+
+    const result = await provider.fetchConfig();
+    expect(result).toBeNull();
+  });
+
+  it('fetchConfig returns null on fetch error', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
+
+    const result = await provider.fetchConfig();
+    expect(result).toBeNull();
+  });
+
+  it('fetchConfig returns null on non-ok response', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+    } as Response);
+
+    const result = await provider.fetchConfig();
+    expect(result).toBeNull();
+  });
 });

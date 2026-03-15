@@ -1,7 +1,53 @@
 import { mkdtemp, writeFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { resolveSourceDir, resolveFileGlobs, resolveWatchPaths } from '../source-dirs.js';
+import {
+  resolveSourceDir,
+  resolveFileGlobs,
+  resolveWatchPaths,
+  readProjectConfig,
+} from '../source-dirs.js';
+
+describe('readProjectConfig', () => {
+  let workspace: string;
+
+  beforeEach(async () => {
+    workspace = await mkdtemp(join(tmpdir(), 'prs-config-'));
+  });
+
+  afterEach(async () => {
+    await rm(workspace, { recursive: true, force: true });
+  });
+
+  it('returns parsed config from promptscript.yaml', async () => {
+    await writeFile(
+      join(workspace, 'promptscript.yaml'),
+      'targets:\n  - claude\nformatting:\n  tabWidth: 4\n'
+    );
+    const config = await readProjectConfig(workspace);
+    expect(config).toEqual({ targets: ['claude'], formatting: { tabWidth: 4 } });
+  });
+
+  it('returns null when no config file exists', async () => {
+    const config = await readProjectConfig(workspace);
+    expect(config).toBeNull();
+  });
+
+  it('falls back to promptscript.yml', async () => {
+    await writeFile(
+      join(workspace, 'promptscript.yml'),
+      'targets:\n  - cursor\nformatting:\n  tabWidth: 2\n'
+    );
+    const config = await readProjectConfig(workspace);
+    expect(config).toEqual({ targets: ['cursor'], formatting: { tabWidth: 2 } });
+  });
+
+  it('returns null for invalid YAML', async () => {
+    await writeFile(join(workspace, 'promptscript.yaml'), ': :\n  bad: [unclosed\n');
+    const config = await readProjectConfig(workspace);
+    expect(config).toBeNull();
+  });
+});
 
 describe('resolveSourceDir', () => {
   let workspace: string;

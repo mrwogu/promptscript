@@ -7,7 +7,7 @@ import type { FileWatchEvent } from './types';
  * Map project config targets to playground config.
  * Enables only the targets listed in promptscript.yaml, with their settings.
  */
-function applyProjectConfig(
+export function applyProjectConfig(
   current: PlaygroundConfig,
   projectConfig: ProjectConfig
 ): PlaygroundConfig {

@@ -708,4 +708,54 @@ describe('PlaygroundStore', () => {
       expect(selectHasErrors(usePlaygroundStore.getState())).toBe(false);
     });
   });
+
+  describe('tab operations', () => {
+    it('should open a file and add to tabs', () => {
+      const { addFile, openFile } = usePlaygroundStore.getState();
+      addFile('second.prs', 'content');
+      openFile('second.prs');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.openTabs).toContain('second.prs');
+      expect(state.activeFile).toBe('second.prs');
+    });
+
+    it('should not duplicate tabs', () => {
+      const { addFile, openFile } = usePlaygroundStore.getState();
+      addFile('second.prs', 'content');
+      openFile('second.prs');
+      openFile('second.prs');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.openTabs.filter((t) => t === 'second.prs')).toHaveLength(1);
+    });
+
+    it('should close a tab without deleting the file', () => {
+      const { addFile, openFile, closeTab } = usePlaygroundStore.getState();
+      addFile('second.prs', 'content');
+      openFile('second.prs');
+      closeTab('second.prs');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.openTabs).not.toContain('second.prs');
+      expect(state.files.find((f) => f.path === 'second.prs')).toBeDefined();
+    });
+
+    it('should switch active file when closing active tab', () => {
+      const { addFile, openFile, closeTab } = usePlaygroundStore.getState();
+      addFile('second.prs', 'content');
+      openFile('second.prs');
+      closeTab('second.prs');
+
+      const state = usePlaygroundStore.getState();
+      expect(state.activeFile).toBe('project.prs');
+    });
+
+    it('should toggle file tree visibility', () => {
+      const { setShowFileTree } = usePlaygroundStore.getState();
+      setShowFileTree(true);
+
+      expect(usePlaygroundStore.getState().showFileTree).toBe(true);
+    });
+  });
 });
