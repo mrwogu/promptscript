@@ -18,13 +18,17 @@ export function FileTabs() {
   const tabFiles = files.filter((f) => openTabs.includes(f.path));
 
   const handleAddFile = () => {
-    // Detect source directory from existing files (e.g. '.promptscript/')
+    // Find common root directory across all files (handles subfolders)
     const existingDir =
       files.length > 0
         ? (() => {
-            const firstPath = files[0]!.path;
-            const slashIdx = firstPath.lastIndexOf('/');
-            return slashIdx !== -1 ? firstPath.slice(0, slashIdx + 1) : '';
+            const dirs = files.map((f) => {
+              const idx = f.path.indexOf('/');
+              return idx !== -1 ? f.path.slice(0, idx + 1) : '';
+            });
+            // Use first path segment if all files share it
+            const first = dirs[0] ?? '';
+            return first && dirs.every((d) => d === first) ? first : '';
           })()
         : '';
 
