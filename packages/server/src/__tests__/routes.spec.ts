@@ -158,6 +158,38 @@ describe('server routes', () => {
     });
   });
 
+  describe('DELETE /api/files/* nonexistent', () => {
+    it('returns 404 for nonexistent file', async () => {
+      const res = await app.inject({ method: 'DELETE', url: '/api/files/nonexistent.prs' });
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('PUT /api/files/* write error', () => {
+    it('returns 500 when write fails on valid path', async () => {
+      // Try to write to a path that is a directory, causing EISDIR
+      await mkdir(join(workspace, 'src/isdir'), { recursive: true });
+      const res = await app.inject({
+        method: 'PUT',
+        url: '/api/files/src/isdir',
+        payload: { content: 'content' },
+      });
+      expect(res.statusCode).toBe(500);
+    });
+  });
+
+  describe('POST /api/files/* create error', () => {
+    it('returns 500 when create fails on valid path', async () => {
+      // Write to a path where the parent is a file, causing ENOTDIR
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/files/src/team.prs/child.prs',
+        payload: { content: 'content' },
+      });
+      expect(res.statusCode).toBe(500);
+    });
+  });
+
   describe('read-only mode', () => {
     let roApp: FastifyInstance;
 

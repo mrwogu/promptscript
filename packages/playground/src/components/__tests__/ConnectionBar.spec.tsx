@@ -50,6 +50,31 @@ describe('ConnectionBar', () => {
     expect(onDisconnect).toHaveBeenCalled();
   });
 
+  it('shows connecting state', () => {
+    render(<ConnectionBar {...defaultProps} status="connecting" />);
+    expect(screen.getByText('Connecting...')).toBeTruthy();
+  });
+
+  it('does not submit when input is empty', () => {
+    const onConnect = vi.fn();
+    render(<ConnectionBar {...defaultProps} onConnect={onConnect} />);
+    fireEvent.click(screen.getByText('Connect to local server'));
+    const input = screen.getByPlaceholderText('localhost:3000');
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.click(screen.getByText('Connect'));
+    expect(onConnect).not.toHaveBeenCalled();
+  });
+
+  it('stops propagation on input click', () => {
+    render(<ConnectionBar {...defaultProps} />);
+    fireEvent.click(screen.getByText('Connect to local server'));
+    const input = screen.getByPlaceholderText('localhost:3000');
+    const clickEvent = new MouseEvent('click', { bubbles: true });
+    const stopPropSpy = vi.spyOn(clickEvent, 'stopPropagation');
+    input.dispatchEvent(clickEvent);
+    expect(stopPropSpy).toHaveBeenCalled();
+  });
+
   it('shows reconnecting state', () => {
     render(<ConnectionBar {...defaultProps} status="reconnecting" serverHost="localhost:3000" />);
     expect(screen.getByText('Reconnecting...')).toBeTruthy();

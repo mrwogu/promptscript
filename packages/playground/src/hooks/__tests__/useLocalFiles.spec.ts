@@ -131,6 +131,16 @@ describe('useLocalFiles', () => {
     expect(state.files.some((f) => f.path === 'test.prs')).toBe(false);
   });
 
+  it('saveFile is a no-op when provider is null', async () => {
+    const { result } = renderHook(() => useLocalFiles(null, mockOnFileEvent));
+
+    await act(async () => {
+      await result.current.saveFile('test.prs', 'content');
+    });
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
   it('saveFile writes to provider and suppresses echo', async () => {
     const { result } = renderHook(() => useLocalFiles('localhost:3000', mockOnFileEvent));
 

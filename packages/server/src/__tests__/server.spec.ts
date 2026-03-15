@@ -132,6 +132,73 @@ describe('createServer', () => {
     await new Promise((resolve) => setTimeout(resolve, 500));
   });
 
+  it('startServer handles EADDRINUSE error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+    // Occupy a port with a raw TCP server
+    const net = await import('net');
+    const blocker = net.createServer();
+    const usedPort = await new Promise<number>((resolve) => {
+      blocker.listen(0, '127.0.0.1', () => {
+        const addr = blocker.address();
+        resolve(typeof addr === 'object' && addr ? addr.port : 0);
+      });
+    });
+
+    try {
+      // startServer will hit EADDRINUSE and call process.exit(1)
+      await startServer({
+        port: usedPort,
+        host: '127.0.0.1',
+        workspace,
+        readOnly: false,
+        corsOrigin: 'https://getpromptscript.dev',
+      });
+    } catch {
+      // startServer may throw after mocked process.exit returns
+    }
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('already in use'));
+    expect(exitSpy).toHaveBeenCalledWith(1);
+
+    consoleSpy.mockRestore();
+    exitSpy.mockRestore();
+    blocker.close();
+  });
+
+  it('onClose hook cleans up WebSocket clients', async () => {
+    server = await createServer({
+      port: 0,
+      host: '127.0.0.1',
+      workspace,
+      readOnly: false,
+      corsOrigin: '*',
+    });
+    await server.listen({ port: 0, host: '127.0.0.1' });
+    const address = server.server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+
+    // Connect a WebSocket client
+    const { default: WebSocket } = await import('ws');
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
+
+    await new Promise<void>((resolve) => {
+      ws.on('open', resolve);
+    });
+
+    // Close server should close ws clients too
+    const closePromise = new Promise<void>((resolve) => {
+      ws.on('close', resolve);
+    });
+    await server.close();
+    await closePromise;
+
+    expect(ws.readyState).toBe(WebSocket.CLOSED);
+    // Prevent afterEach from double-closing
+    server = undefined as unknown as FastifyInstance;
+  });
+
   it('creates server in read-only mode', async () => {
     server = await createServer({
       port: 0,
