@@ -9,25 +9,23 @@ const DEBOUNCE_MS = 300;
  * Find the entry file for compilation.
  * The entry file is the one containing @meta block, or 'project.prs' as fallback.
  */
-function findEntryFile(files: Map<string, string>): string {
+function findEntryFile(files: Record<string, string>): string {
+  const paths = Object.keys(files);
+
   // Check for project.prs (exact or in subdirectory)
-  for (const path of files.keys()) {
-    if (path === 'project.prs' || path.endsWith('/project.prs')) {
-      return path;
-    }
-  }
+  const projectFile = paths.find((p) => p === 'project.prs' || p.endsWith('/project.prs'));
+  if (projectFile) return projectFile;
 
   // Look for any file with @meta block
-  for (const [path, content] of files) {
-    if (path.endsWith('.prs') && content.includes('@meta')) {
+  for (const path of paths) {
+    if (path.endsWith('.prs') && files[path]?.includes('@meta')) {
       return path;
     }
   }
 
   // Fallback to first .prs file
-  for (const path of files.keys()) {
-    if (path.endsWith('.prs')) return path;
-  }
+  const firstPrs = paths.find((p) => p.endsWith('.prs'));
+  if (firstPrs) return firstPrs;
 
   return 'project.prs';
 }
@@ -79,6 +77,7 @@ export function useCompiler() {
     }
 
     const entryFile = findEntryFile(files);
+    console.log('[compiler] entry:', entryFile, 'files:', [...files.keys()]);
     setCompiling(true);
     try {
       const result = await compile(files, entryFile, {
@@ -91,6 +90,14 @@ export function useCompiler() {
         },
         envVars: config.envVars,
       });
+      console.log(
+        '[compiler] result:',
+        result.success,
+        'outputs:',
+        [...result.outputs.keys()],
+        'errors:',
+        result.errors
+      );
       setCompileResult(result);
     } catch (error) {
       console.error('Compilation error:', error);
