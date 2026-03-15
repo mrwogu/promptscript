@@ -321,6 +321,61 @@ prs check
 
 ---
 
+### prs serve
+
+Start a local development server that connects the [online playground](https://getpromptscript.dev/playground/) to your local `.prs` files.
+
+```bash
+prs serve [options]
+```
+
+**Options:**
+
+| Option                   | Description                                | Default                       |
+| ------------------------ | ------------------------------------------ | ----------------------------- |
+| `-p, --port <port>`      | Port to listen on                          | `3000`                        |
+| `--host <host>`          | Host to bind to                            | `127.0.0.1`                   |
+| `--read-only`            | Disable file modifications from playground | `false`                       |
+| `--cors-origin <origin>` | Allowed CORS origin                        | `https://getpromptscript.dev` |
+
+**Examples:**
+
+```bash
+# Start server with defaults (localhost:3000)
+prs serve
+
+# Custom port
+prs serve --port 8080
+
+# Expose on all interfaces (e.g. Docker, remote access)
+prs serve --host 0.0.0.0
+
+# Read-only mode (safe for shared environments)
+prs serve --read-only
+```
+
+**How it works:**
+
+1. Run `prs serve` in your project directory
+2. The CLI prints a playground URL: `https://getpromptscript.dev/playground/?server=localhost:3000`
+3. Open the URL — the playground loads your local `.prs` files
+4. Edit in the playground or your editor — changes sync both ways via WebSocket
+
+**API endpoints** (used by the playground):
+
+| Endpoint       | Method              | Description                        |
+| -------------- | ------------------- | ---------------------------------- |
+| `/api/health`  | GET                 | Health check                       |
+| `/api/config`  | GET                 | Server mode and workspace          |
+| `/api/files`   | GET                 | List `.prs` and config files       |
+| `/api/files/*` | GET/PUT/POST/DELETE | Read, update, create, delete files |
+| `/ws`          | WebSocket           | Real-time file change events       |
+
+!!! note "Security"
+The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications.
+
+---
+
 ### prs update-check
 
 Check for CLI updates.

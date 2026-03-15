@@ -244,6 +244,34 @@ For CI/CD, use secrets:
       ghcr.io/mrwogu/promptscript:latest compile
 ```
 
+## Playground Server
+
+Run the PromptScript playground connected to your local files using Docker:
+
+```bash
+# Using docker compose
+docker compose up playground
+
+# Or directly
+docker run --rm -p 3000:3000 -v $(pwd):/workspace \
+  ghcr.io/mrwogu/promptscript:latest \
+  serve --host 0.0.0.0
+```
+
+Then open: `https://getpromptscript.dev/playground/?server=localhost:3000`
+
+The playground will load your local `.prs` files and sync changes in real time. See [`prs serve`](../reference/cli.md#prs-serve) for all options.
+
+For read-only access (e.g. demos or shared environments):
+
+```bash
+docker run --rm -p 3000:3000 -v $(pwd):/workspace:ro \
+  ghcr.io/mrwogu/promptscript:latest \
+  serve --host 0.0.0.0 --read-only
+```
+
+---
+
 ## Building Locally
 
 Build the Docker image from source:

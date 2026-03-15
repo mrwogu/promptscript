@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Header } from './components/Header';
+import { ConnectionBar } from './components/ConnectionBar';
 import { FileTabs } from './components/FileTabs';
 import { Editor } from './components/Editor';
 import { OutputPanel } from './components/OutputPanel';
@@ -9,12 +10,18 @@ import { ConfigPanel } from './components/ConfigPanel';
 import { EnvVarsPanel } from './components/EnvVarsPanel';
 import { useCompiler } from './hooks/useCompiler';
 import { useUrlState } from './hooks/useUrlState';
+import { useServerConnection } from './hooks/useServerConnection';
+import { useLocalFiles } from './hooks/useLocalFiles';
 import { usePlaygroundStore } from './store';
 
 function PlaygroundLayout() {
   // Initialize compiler hook
   const { compile: doCompile } = useCompiler();
-  const { handleShare } = useUrlState();
+  const { handleShare, serverParam } = useUrlState();
+
+  const { status, serverHost, error, connect, disconnect, onFileEvent } = useServerConnection();
+  const { saveFile } = useLocalFiles(serverHost, onFileEvent);
+  const isLocalMode = status === 'connected';
 
   const showExamples = usePlaygroundStore((s) => s.showExamples);
   const setShowExamples = usePlaygroundStore((s) => s.setShowExamples);
@@ -48,6 +55,29 @@ function PlaygroundLayout() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Auto-connect from URL param
+  useEffect(() => {
+    if (serverParam && status === 'disconnected') {
+      connect(serverParam);
+    }
+  }, [serverParam, status, connect]);
+
+  // Sync server host into URL
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (serverHost && status === 'connected') {
+      url.searchParams.set('server', serverHost);
+      window.history.replaceState(null, '', url.toString());
+    }
+  }, [serverHost, status]);
+
+  const handleDisconnect = useCallback(() => {
+    disconnect();
+    const url = new URL(window.location.href);
+    url.searchParams.delete('server');
+    window.history.replaceState(null, '', url.toString());
+  }, [disconnect]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,6 +85,13 @@ function PlaygroundLayout() {
       if (mod && e.key === 's' && !e.shiftKey) {
         e.preventDefault();
         doCompile();
+        if (isLocalMode) {
+          const state = usePlaygroundStore.getState();
+          const content = state.files.find((f) => f.path === state.activeFile)?.content;
+          if (content !== undefined) {
+            saveFile(state.activeFile, content);
+          }
+        }
       } else if (mod && e.key === 's' && e.shiftKey) {
         e.preventDefault();
         handleShare();
@@ -62,7 +99,7 @@ function PlaygroundLayout() {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [doCompile, handleShare]);
+  }, [doCompile, handleShare, isLocalMode, saveFile]);
 
   // Resizable panel drag handling
   const handleMouseDown = useCallback(() => {
@@ -97,6 +134,13 @@ function PlaygroundLayout() {
   return (
     <div className="h-screen flex flex-col bg-ps-bg">
       <Header />
+      <ConnectionBar
+        status={status}
+        serverHost={serverHost}
+        error={error}
+        onConnect={connect}
+        onDisconnect={handleDisconnect}
+      />
 
       {/* Mobile overlay */}
       {showMobileBanner && (

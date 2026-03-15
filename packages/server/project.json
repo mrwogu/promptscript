@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/server/src",
+  "projectType": "library",
+  "tags": ["scope:server", "type:lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/server",
+        "main": "packages/server/src/index.ts",
+        "tsConfig": "packages/server/tsconfig.lib.json",
+        "assets": ["packages/server/*.md"]
+      }
+    }
+  }
+}

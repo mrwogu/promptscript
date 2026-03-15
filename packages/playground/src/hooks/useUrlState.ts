@@ -25,11 +25,19 @@ export function useUrlState() {
 
   const initialLoadRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const serverParamRef = useRef<string | null>(null);
+  const isLocalModeRef = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
     if (initialLoadRef.current) return;
     initialLoadRef.current = true;
+
+    const url = new URL(window.location.href);
+    serverParamRef.current = url.searchParams.get('server');
+    isLocalModeRef.current = serverParamRef.current !== null;
+
+    if (isLocalModeRef.current) return;
 
     // Check for example ID first
     const exampleId = getExampleIdFromUrl();
@@ -54,6 +62,7 @@ export function useUrlState() {
   // Sync state to URL (debounced)
   useEffect(() => {
     if (!initialLoadRef.current) return;
+    if (isLocalModeRef.current) return;
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -76,5 +85,5 @@ export function useUrlState() {
     return success;
   }, [files, activeFormatter, config]);
 
-  return { handleShare };
+  return { handleShare, serverParam: serverParamRef.current };
 }

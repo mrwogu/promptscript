@@ -74,3 +74,24 @@ services:
       - NO_COLOR=${NO_COLOR:-}
       - PROMPTSCRIPT_VERBOSE=${PROMPTSCRIPT_VERBOSE:-}
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+
+  # ---------------------------------------------------------------------------
+  # Playground server - connect online playground to local files
+  # ---------------------------------------------------------------------------
+  # Usage: docker compose up playground
+  # Then open: https://getpromptscript.dev/playground/?server=localhost:3000
+  playground:
+    image: ghcr.io/mrwogu/promptscript:latest
+    command: ['serve', '--host', '0.0.0.0']
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
+    environment:
+      - PROMPTSCRIPT_VERBOSE=${PROMPTSCRIPT_VERBOSE:-}
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3000/api/health']
+      interval: 10s
+      timeout: 3s
+      retries: 3
