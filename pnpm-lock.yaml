@@ -143,6 +143,9 @@ importers:
       '@promptscript/formatters':
         specifier: workspace:^
         version: link:../formatters
+      '@promptscript/importer':
+        specifier: workspace:^
+        version: link:../importer
       '@promptscript/parser':
         specifier: workspace:^
         version: link:../parser
