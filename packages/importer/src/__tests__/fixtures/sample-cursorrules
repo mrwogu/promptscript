@@ -1,0 +1,11 @@
+You are an AI assistant for a Python Flask project.
+
+## Standards
+
+- Use type hints everywhere
+- Follow PEP 8
+
+## Restrictions
+
+- Never use print() for logging
+- Always use the logging module
