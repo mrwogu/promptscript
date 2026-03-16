@@ -1933,4 +1933,158 @@ describe('.skillignore support', () => {
     expect(paths).toContain('data.txt');
     expect(paths).not.toContain('file.backup.txt');
   });
+
+  describe('parameterized skills integration', () => {
+    it('should interpolate SKILL.md content with params from .prs args', async () => {
+      const skillDir = join(registryPath, '@skills', 'param-skill');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: param-skill
+description: Review {{language}} code with {{strictness}} rules
+params:
+  language:
+    type: string
+    default: typescript
+  strictness:
+    type: enum
+    options: [relaxed, standard, strict]
+    default: standard
+---
+
+You are a {{language}} code reviewer.
+Apply {{strictness}} review rules.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'param-skill': {
+            language: 'python',
+            strictness: 'strict',
+          },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['param-skill'] as Record<string, unknown>;
+
+      const content = skill['content'] as TextContent;
+      expect(content.value).toContain('You are a python code reviewer.');
+      expect(content.value).toContain('Apply strict review rules.');
+      expect(content.value).not.toContain('{{language}}');
+      expect(content.value).not.toContain('{{strictness}}');
+    });
+
+    it('should use default param values when args not provided in .prs', async () => {
+      const skillDir = join(registryPath, '@skills', 'default-param');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: default-param
+description: Analyze {{language}} code
+params:
+  language:
+    type: string
+    default: typescript
+---
+
+Analyzing {{language}} source files.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'default-param': {
+            description: 'Custom desc',
+          },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['default-param'] as Record<string, unknown>;
+
+      const content = skill['content'] as TextContent;
+      expect(content.value).toContain('Analyzing typescript source files.');
+    });
+
+    it('should interpolate description when not set in .prs', async () => {
+      const skillDir = join(registryPath, '@skills', 'desc-interp');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: desc-interp
+description: Review {{language}} code
+params:
+  language:
+    type: string
+    default: go
+---
+
+Content for {{language}}.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'desc-interp': {
+            language: 'rust',
+          },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['desc-interp'] as Record<string, unknown>;
+
+      // Description should be interpolated with provided arg
+      expect(skill['description']).toBe('Review rust code');
+
+      const content = skill['content'] as TextContent;
+      expect(content.value).toContain('Content for rust.');
+    });
+
+    it('should not interpolate when SKILL.md has no params defined', async () => {
+      const skillDir = join(registryPath, '@skills', 'no-params');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: no-params
+description: A simple skill
+---
+
+Content with {{braces}} that should stay as-is.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'no-params': {
+            description: 'Override desc',
+          },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['no-params'] as Record<string, unknown>;
+
+      const content = skill['content'] as TextContent;
+      expect(content.value).toContain('{{braces}}');
+    });
+  });
 });

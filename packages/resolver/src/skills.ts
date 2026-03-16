@@ -268,6 +268,21 @@ export function interpolateSkillContent(
  * Extract skill argument values from a .prs skill object.
  * Arguments can be in a nested `params` object or as top-level properties.
  */
+const SKILL_RESERVED_KEYS = new Set([
+  'description',
+  'content',
+  'trigger',
+  'userInvocable',
+  'allowedTools',
+  'disableModelInvocation',
+  'context',
+  'agent',
+  'params',
+  'type',
+  'loc',
+  'resources',
+]);
+
 function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value> {
   const args: Record<string, Value> = {};
 
@@ -279,6 +294,13 @@ function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value
       if (key !== 'type' && key !== 'loc') {
         args[key] = value;
       }
+    }
+  }
+
+  // Also extract top-level non-reserved properties as potential args
+  for (const [key, value] of Object.entries(skillObj)) {
+    if (!SKILL_RESERVED_KEYS.has(key) && !(key in args)) {
+      args[key] = value;
     }
   }
 
