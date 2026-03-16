@@ -99,14 +99,14 @@ interface FactoryDroidConfig extends MarkdownAgentConfig {
  * .factory/skills/<name>/SKILL.md for reusable skills.
  *
  * Supports three versions:
- * - **simple** (default): Single `AGENTS.md` file
+ * - **simple**: Single `AGENTS.md` file
  * - **multifile**: AGENTS.md + `.factory/skills/<name>/SKILL.md` for each skill
- * - **full**: Multifile + additional supporting files for skills
+ * - **full** (default): Multifile + additional supporting files for skills
  *
  * @example
  * ```yaml
  * targets:
- *   - factory  # uses simple mode
+ *   - factory  # uses full mode (default)
  *   - factory:
  *       version: multifile
  *   - factory:

@@ -1342,7 +1342,7 @@ describe('FactoryFormatter', () => {
         ],
       };
 
-      const result = formatter.format(ast);
+      const result = formatter.format(ast, { version: 'simple' });
       const droids = result.additionalFiles?.filter((f) => f.path.includes('droids/'));
       expect(droids ?? []).toHaveLength(0);
     });

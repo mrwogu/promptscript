@@ -155,9 +155,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   // ============================================================
 
   protected resolveVersion(version?: string): MarkdownVersion {
+    if (version === 'simple') return 'simple';
     if (version === 'multifile') return 'multifile';
-    if (version === 'full') return 'full';
-    return 'simple';
+    return 'full';
   }
 
   // ============================================================

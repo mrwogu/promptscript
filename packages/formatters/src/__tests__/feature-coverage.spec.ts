@@ -359,7 +359,8 @@ describe('Feature Implementation Tests', () => {
       const formatter = formatters.get('github')!;
       const result = formatter.format(createTestAST());
 
-      expect(result.additionalFiles).toBeUndefined();
+      const workflows = result.additionalFiles?.filter((f) => f.path.includes('workflows'));
+      expect(workflows ?? []).toHaveLength(0);
     });
   });
 

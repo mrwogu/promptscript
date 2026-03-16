@@ -324,17 +324,60 @@ describe('GitHubFormatter', () => {
       expect(GitHubFormatter.getSupportedVersions()).toBe(GITHUB_VERSIONS);
     });
 
-    it('should use simple mode by default', () => {
-      const ast = createMinimalProgram();
+    it('should use full mode by default', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commit: {
+                  description: 'Create git commits',
+                  content: 'Instructions for commit skill...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
       const result = formatter.format(ast);
-      expect(result.additionalFiles).toBeUndefined();
+      // Full mode produces skill files; simple mode would not
+      expect(result.additionalFiles).toBeDefined();
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('skills/'));
+      expect(skillFile).toBeDefined();
     });
 
-    it('should default to simple mode for unknown version', () => {
-      const ast = createMinimalProgram();
+    it('should default to full mode for unknown version', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commit: {
+                  description: 'Create git commits',
+                  content: 'Instructions for commit skill...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
       const result = formatter.format(ast, { version: 'unknown-version' });
-      expect(result.additionalFiles).toBeUndefined();
-      expect(result.content).toContain('# GitHub Copilot Instructions');
+      // Unknown versions fall back to full mode, which produces skill files
+      expect(result.additionalFiles).toBeDefined();
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('skills/'));
+      expect(skillFile).toBeDefined();
     });
 
     it('should skip markdown header with XML convention in multifile mode', () => {

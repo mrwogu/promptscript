@@ -63,10 +63,32 @@ describe('MarkdownInstructionFormatter', () => {
       expect(result.content).toContain('# TEST.md');
     });
 
-    it('should default to simple mode', () => {
-      const ast = createMinimalProgram();
+    it('should default to full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commit: {
+                  description: 'Create git commits',
+                  content: 'Instructions for commit skill...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
       const result = formatter.format(ast);
-      expect(result.additionalFiles).toBeUndefined();
+      // Full mode produces skill files; simple mode would not
+      expect(result.additionalFiles).toBeDefined();
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('skills/'));
+      expect(skillFile).toBeDefined();
     });
 
     it('should support multifile mode', () => {

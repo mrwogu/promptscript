@@ -172,14 +172,14 @@ const MODEL_NAME_MAPPING: Record<string, string> = {
  * Formatter for GitHub Copilot instructions.
  *
  * Supports three versions:
- * - **simple** (default): Single `.github/copilot-instructions.md` file
+ * - **simple**: Single `.github/copilot-instructions.md` file
  * - **multifile**: Main + `.github/instructions/*.instructions.md` + `.github/prompts/*.prompt.md`
- * - **full**: Multifile + `.github/skills/<name>/SKILL.md` + `AGENTS.md`
+ * - **full** (default): Multifile + `.github/skills/<name>/SKILL.md` + `AGENTS.md`
  *
  * @example
  * ```yaml
  * targets:
- *   - github  # uses simple mode
+ *   - github  # uses full mode (default)
  *   - github:
  *       version: multifile
  *   - github:
@@ -227,9 +227,9 @@ export class GitHubFormatter extends BaseFormatter {
    * Resolve version string to GithubVersion.
    */
   private resolveVersion(version?: string): GithubVersion {
+    if (version === 'simple') return 'simple';
     if (version === 'multifile') return 'multifile';
-    if (version === 'full') return 'full';
-    return 'simple';
+    return 'full';
   }
 
   // ============================================================

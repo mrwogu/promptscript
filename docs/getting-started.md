@@ -474,12 +474,12 @@ PromptScript supports multiple format versions for tools that have evolved their
 
 | Tool           | Version     | Output Path                                | When to Use                        |
 | -------------- | ----------- | ------------------------------------------ | ---------------------------------- |
-| GitHub Copilot | simple      | `.github/copilot-instructions.md`          | Single file (default)              |
+| GitHub Copilot | simple      | `.github/copilot-instructions.md`          | Single file                        |
 | GitHub Copilot | multifile   | + `.github/instructions/*.instructions.md` | Path-specific rules with `applyTo` |
-| GitHub Copilot | full        | + `.github/skills/`, `AGENTS.md`           | Skills and custom agents           |
-| Claude Code    | simple      | `CLAUDE.md`                                | Single file (default)              |
+| GitHub Copilot | full        | + `.github/skills/`, `AGENTS.md`           | Skills and custom agents (default) |
+| Claude Code    | simple      | `CLAUDE.md`                                | Single file                        |
 | Claude Code    | multifile   | + `.claude/rules/*.md`                     | Path-specific rules                |
-| Claude Code    | full        | + `.claude/skills/`, `CLAUDE.local.md`     | Skills and local config            |
+| Claude Code    | full        | + `.claude/skills/`, `CLAUDE.local.md`     | Skills and local config (default)  |
 | Cursor         | (modern)    | `.cursor/rules/project.mdc`                | Cursor 0.45+ (default)             |
 | Cursor         | legacy      | `.cursorrules`                             | Older Cursor versions              |
 | Antigravity    | simple      | `.agent/rules/project.md`                  | Plain Markdown (default)           |
