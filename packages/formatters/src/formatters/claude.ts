@@ -116,14 +116,14 @@ interface ClaudeAgentConfig {
  * Formatter for Claude Code instructions.
  *
  * Supports three versions:
- * - **simple** (default): Single `CLAUDE.md` file
+ * - **simple**: Single `CLAUDE.md` file
  * - **multifile**: Main + `.claude/rules/*.md` with path-specific rules
- * - **full**: Multifile + `.claude/skills/<name>/SKILL.md` + `CLAUDE.local.md`
+ * - **full** (default): Multifile + `.claude/skills/<name>/SKILL.md` + `CLAUDE.local.md`
  *
  * @example
  * ```yaml
  * targets:
- *   - claude  # uses simple mode
+ *   - claude  # uses full mode (default)
  *   - claude:
  *       version: multifile
  *   - claude:
@@ -171,9 +171,9 @@ export class ClaudeFormatter extends BaseFormatter {
    * Resolve version string to ClaudeVersion.
    */
   private resolveVersion(version?: string): ClaudeVersion {
+    if (version === 'simple') return 'simple';
     if (version === 'multifile') return 'multifile';
-    if (version === 'full') return 'full';
-    return 'simple';
+    return 'full';
   }
 
   // ============================================================

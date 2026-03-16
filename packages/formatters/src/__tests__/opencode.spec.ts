@@ -216,11 +216,32 @@ describe('OpenCodeFormatter', () => {
       expect(result.additionalFiles).toBeUndefined();
     });
 
-    it('should default to simple mode for unknown version', () => {
-      const ast = createMinimalProgram();
+    it('should default to full mode for unknown version', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commit: {
+                  description: 'Create git commits',
+                  content: 'Instructions for commit skill...',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
       const result = formatter.format(ast, { version: 'unknown-version' });
-      expect(result.additionalFiles).toBeUndefined();
-      expect(result.content.startsWith('# OPENCODE.md\n')).toBe(true);
+      // Unknown versions fall back to full mode, which produces skill files
+      expect(result.additionalFiles).toBeDefined();
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('skills/'));
+      expect(skillFile).toBeDefined();
     });
   });
 

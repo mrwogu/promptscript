@@ -348,19 +348,19 @@ targets:
 
   # GitHub Copilot versions
   - github:
-      version: simple # Single file (default)
+      version: simple # Single file
   - github:
       version: multifile # Main + path-specific instructions + prompts
   - github:
-      version: full # Multifile + skills + AGENTS.md
+      version: full # Multifile + skills + AGENTS.md (default)
 
   # Claude Code versions
   - claude:
-      version: simple # Single CLAUDE.md (default)
+      version: simple # Single CLAUDE.md
   - claude:
       version: multifile # Main + modular rules in .claude/rules/
   - claude:
-      version: full # Multifile + skills + CLAUDE.local.md
+      version: full # Multifile + skills + CLAUDE.local.md (default)
 
   # OpenCode versions
   - opencode:
@@ -413,12 +413,12 @@ targets:
 
 **Target Options:**
 
-| Field        | Type    | Default     | Description                              |
-| ------------ | ------- | ----------- | ---------------------------------------- |
-| `enabled`    | boolean | `true`      | Whether target is enabled                |
-| `output`     | string  | (see above) | Custom output path                       |
-| `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown')  |
-| `version`    | string  | (default)   | Format version ('legacy' for deprecated) |
+| Field        | Type    | Default     | Description                                  |
+| ------------ | ------- | ----------- | -------------------------------------------- |
+| `enabled`    | boolean | `true`      | Whether target is enabled                    |
+| `output`     | string  | (see above) | Custom output path                           |
+| `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown')      |
+| `version`    | string  | `full`      | Format version (varies by target, see below) |
 
 !!! tip "Disabling Targets"
 Setting `enabled: false` skips the target during compilation.

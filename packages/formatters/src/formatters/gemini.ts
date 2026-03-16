@@ -41,16 +41,17 @@ export const GEMINI_VERSIONS = {
  *
  * Gemini has no agent concept.
  *
- * Supports two versions:
- * - **simple** (default): Single `GEMINI.md` file
+ * Supports three versions:
+ * - **simple**: Single `GEMINI.md` file
  * - **multifile**: GEMINI.md + commands (TOML) + skills
+ * - **full** (default): Multifile + skills
  *
  * @example
  * ```yaml
  * targets:
- *   - gemini  # uses simple mode
+ *   - gemini  # uses full mode (default)
  *   - gemini:
- *       version: multifile
+ *       version: simple
  * ```
  */
 export class GeminiFormatter extends MarkdownInstructionFormatter {
@@ -109,8 +110,8 @@ export class GeminiFormatter extends MarkdownInstructionFormatter {
    * Override version resolution: full maps to multifile for Gemini.
    */
   protected override resolveVersion(version?: string): MarkdownVersion {
+    if (version === 'simple') return 'simple';
     if (version === 'multifile') return 'multifile';
-    if (version === 'full') return 'full';
-    return 'simple';
+    return 'full';
   }
 }
