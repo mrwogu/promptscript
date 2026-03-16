@@ -39,6 +39,7 @@ COPY packages/formatters/package.json packages/formatters/
 COPY packages/browser-compiler/package.json packages/browser-compiler/
 COPY packages/playground/package.json packages/playground/
 COPY packages/cli/package.json packages/cli/
+COPY packages/server/package.json packages/server/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -73,6 +74,7 @@ WORKDIR /app
 
 # Copy built CLI from builder stage
 COPY --from=builder /build/dist/packages/cli/ ./
+COPY --from=builder /build/dist/packages/server/ ./node_modules/@promptscript/server/
 
 # Install production dependencies only
 RUN npm install --omit=dev && \

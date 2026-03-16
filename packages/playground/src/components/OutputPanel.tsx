@@ -47,46 +47,6 @@ const FORMATTERS: { name: FormatterName; label: string; icon: string }[] = [
   { name: 'codebuddy', label: 'CodeBuddy', icon: '👥' },
 ];
 
-/**
- * Get display names for output file paths, adding parent folder prefix when names are duplicated.
- * Example: If there are multiple SKILL.md files, they become "refactoring/SKILL.md", "commit/SKILL.md"
- */
-function getDisplayNames(paths: string[]): Map<string, string> {
-  const result = new Map<string, string>();
-
-  // First pass: extract simple filenames
-  const simpleNames = paths.map((path) => {
-    const parts = path.split('/');
-    return parts[parts.length - 1] ?? path;
-  });
-
-  // Count occurrences of each simple name
-  const nameCounts = new Map<string, number>();
-  for (const name of simpleNames) {
-    nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
-  }
-
-  // Second pass: add parent folder prefix for duplicates
-  for (const [i, path] of paths.entries()) {
-    const simpleName = simpleNames[i] ?? path;
-
-    if ((nameCounts.get(simpleName) ?? 0) > 1) {
-      // Get parent folder name
-      const parts = path.split('/');
-      if (parts.length >= 2) {
-        const parentFolder = parts[parts.length - 2] ?? '';
-        result.set(path, `${parentFolder}/${simpleName}`);
-      } else {
-        result.set(path, simpleName);
-      }
-    } else {
-      result.set(path, simpleName);
-    }
-  }
-
-  return result;
-}
-
 function CopyButton({ content }: { content: string }) {
   const [showCopied, setShowCopied] = useState(false);
 
@@ -107,12 +67,76 @@ function CopyButton({ content }: { content: string }) {
   );
 }
 
+function OutputFileTree({
+  outputs,
+  activeIndex,
+  onSelect,
+}: {
+  outputs: { path: string; content: string }[];
+  activeIndex: number;
+  onSelect: (index: number) => void;
+}) {
+  // Group by directory
+  const tree = useMemo(() => {
+    const map = new Map<string, { index: number; path: string; fileName: string }[]>();
+    for (let i = 0; i < outputs.length; i++) {
+      const output = outputs[i]!;
+      const parts = output.path.split('/');
+      const fileName = parts.pop() ?? output.path;
+      const dir = parts.join('/') || '';
+      const existing = map.get(dir) ?? [];
+      existing.push({ index: i, path: output.path, fileName });
+      map.set(dir, existing);
+    }
+    return map;
+  }, [outputs]);
+
+  const sortedDirs = useMemo(() => [...tree.keys()].sort(), [tree]);
+
+  return (
+    <div className="w-52 flex-shrink-0 bg-ps-bg border-r border-ps-border overflow-y-auto text-xs">
+      <div className="px-3 py-2 text-xs text-gray-500 uppercase tracking-wider">
+        Output ({outputs.length})
+      </div>
+      {sortedDirs.map((dir) => (
+        <div key={dir || '__root'}>
+          {dir && (
+            <div className="px-3 py-1 text-gray-500 flex items-center gap-1 font-mono">
+              <span className="text-gray-600">/</span>
+              <span>{dir}</span>
+            </div>
+          )}
+          {(tree.get(dir) ?? []).map(({ index, path, fileName }) => (
+            <button
+              key={path}
+              onClick={() => onSelect(index)}
+              className={`w-full text-left px-3 py-1 truncate font-mono cursor-pointer ${
+                dir ? 'pl-5' : ''
+              } ${
+                index === activeIndex
+                  ? 'bg-ps-surface text-white'
+                  : 'text-gray-400 hover:bg-ps-surface/50 hover:text-gray-300'
+              }`}
+              title={path}
+            >
+              {fileName}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+type OutputViewMode = 'tree' | 'tabs';
+
 export function OutputPanel() {
   const activeFormatter = usePlaygroundStore((s) => s.activeFormatter);
   const setActiveFormatter = usePlaygroundStore((s) => s.setActiveFormatter);
   const compileResult = usePlaygroundStore((s) => s.compileResult);
   const isCompiling = usePlaygroundStore((s) => s.isCompiling);
   const enabledTargets = usePlaygroundStore(useShallow(selectEnabledTargets));
+  const [outputViewMode, setOutputViewMode] = useState<OutputViewMode>('tree');
 
   const outputs = usePlaygroundStore(
     useShallow((state) => selectOutputsForFormatter(state, activeFormatter))
@@ -132,11 +156,6 @@ export function OutputPanel() {
       setActiveFormatter(enabledTargets[0]!);
     }
   }, [activeFormatter, enabledTargets, setActiveFormatter]);
-
-  // Compute display names with parent folder prefix for duplicates
-  const displayNames = useMemo(() => {
-    return getDisplayNames(outputs.map((o) => o.path));
-  }, [outputs]);
 
   const currentOutput = outputs[activeOutputIndex];
 
@@ -158,7 +177,7 @@ export function OutputPanel() {
                 onClick={() => setActiveFormatter(formatter.name)}
                 role="tab"
                 aria-selected={isActive}
-                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap ${
+                className={`px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   isActive ? 'tab-active text-white' : 'tab-inactive text-gray-400'
                 }`}
               >
@@ -198,40 +217,79 @@ export function OutputPanel() {
             </ul>
           </div>
         ) : outputs.length > 0 ? (
-          <>
-            {/* Output file tabs (only show if multiple files) */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* View mode toggle + tabs view */}
             {outputs.length > 1 && (
-              <div className="flex border-b border-ps-border bg-ps-bg overflow-x-auto">
-                {outputs.map((output, index) => (
-                  <button
-                    key={output.path}
-                    onClick={() => setActiveOutputIndex(index)}
-                    className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap ${
-                      index === activeOutputIndex
-                        ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
-                        : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
-                    }`}
-                    title={output.path}
-                  >
-                    {displayNames.get(output.path) || output.path}
-                  </button>
-                ))}
+              <div className="flex items-center border-b border-ps-border bg-ps-bg">
+                <button
+                  onClick={() => setOutputViewMode(outputViewMode === 'tree' ? 'tabs' : 'tree')}
+                  className="px-2 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 cursor-pointer flex items-center gap-1"
+                  title={outputViewMode === 'tree' ? 'Switch to tabs' : 'Switch to tree'}
+                >
+                  {outputViewMode === 'tree' ? (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
+                        <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
+                      </svg>
+                      <span>Tree</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="1" y="2" width="4" height="3" rx="0.5" />
+                        <rect x="6" y="2" width="4" height="3" rx="0.5" />
+                        <rect x="11" y="2" width="4" height="3" rx="0.5" />
+                      </svg>
+                      <span>Tabs</span>
+                    </>
+                  )}
+                </button>
+                {outputViewMode === 'tabs' && (
+                  <div className="flex overflow-x-auto">
+                    {outputs.map((output, index) => (
+                      <button
+                        key={output.path}
+                        onClick={() => setActiveOutputIndex(index)}
+                        className={`px-3 py-1.5 text-xs font-mono whitespace-nowrap cursor-pointer ${
+                          index === activeOutputIndex
+                            ? 'bg-ps-surface text-white border-b-2 border-ps-primary'
+                            : 'text-gray-400 hover:text-gray-300 hover:bg-ps-surface/50'
+                        }`}
+                        title={output.path}
+                      >
+                        {output.path.split('/').pop()}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* File content */}
-            {currentOutput && (
-              <div className="flex-1 overflow-auto p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
-                  <CopyButton content={currentOutput.content} />
+            <div className="flex-1 flex overflow-hidden">
+              {/* Output file tree (when in tree mode) */}
+              {outputViewMode === 'tree' && outputs.length > 1 && (
+                <OutputFileTree
+                  outputs={outputs}
+                  activeIndex={activeOutputIndex}
+                  onSelect={setActiveOutputIndex}
+                />
+              )}
+
+              {/* File content */}
+              {currentOutput && (
+                <div className="flex-1 overflow-auto p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500 font-mono">{currentOutput.path}</span>
+                    <CopyButton content={currentOutput.content} />
+                  </div>
+                  <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
+                    {currentOutput.content}
+                  </pre>
                 </div>
-                <pre className="text-sm font-mono whitespace-pre-wrap text-gray-300 bg-ps-bg p-4 rounded overflow-auto">
-                  {currentOutput.content}
-                </pre>
-              </div>
-            )}
-          </>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
             No output available

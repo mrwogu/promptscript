@@ -3,24 +3,47 @@ import { usePlaygroundStore } from '../store';
 
 export function FileTabs() {
   const files = usePlaygroundStore((s) => s.files);
+  const openTabs = usePlaygroundStore((s) => s.openTabs);
   const activeFile = usePlaygroundStore((s) => s.activeFile);
   const setActiveFile = usePlaygroundStore((s) => s.setActiveFile);
   const addFile = usePlaygroundStore((s) => s.addFile);
-  const deleteFile = usePlaygroundStore((s) => s.deleteFile);
+  const closeTab = usePlaygroundStore((s) => s.closeTab);
   const renameFile = usePlaygroundStore((s) => s.renameFile);
+  const showFileTree = usePlaygroundStore((s) => s.showFileTree);
+  const setShowFileTree = usePlaygroundStore((s) => s.setShowFileTree);
 
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
 
+  const tabFiles = files.filter((f) => openTabs.includes(f.path));
+
   const handleAddFile = () => {
+    // Find common root directory across all files (handles subfolders)
+    const existingDir =
+      files.length > 0
+        ? (() => {
+            const dirs = files.map((f) => {
+              const idx = f.path.indexOf('/');
+              return idx !== -1 ? f.path.slice(0, idx + 1) : '';
+            });
+            // Use first path segment if all files share it
+            const first = dirs[0] ?? '';
+            return first && dirs.every((d) => d === first) ? first : '';
+          })()
+        : '';
+
     const baseName = 'new-file';
-    let name = `${baseName}.prs`;
+    let name = `${existingDir}${baseName}.prs`;
     let counter = 1;
     while (files.some((f) => f.path === name)) {
-      name = `${baseName}-${counter}.prs`;
+      name = `${existingDir}${baseName}-${counter}.prs`;
       counter++;
     }
-    addFile(name, '@meta {\n  id: "' + name.replace('.prs', '') + '"\n  syntax: "1.0.0"\n}\n');
+    // Only add @meta boilerplate for the first file (entry point)
+    const isFirstFile = files.length === 0;
+    const id = name.replace(/^.*\//, '').replace('.prs', '');
+    const content = isFirstFile ? '@meta {\n  id: "' + id + '"\n  syntax: "1.0.0"\n}\n' : '';
+    addFile(name, content);
   };
 
   const handleDoubleClick = (path: string) => {
@@ -30,7 +53,12 @@ export function FileTabs() {
 
   const handleRenameSubmit = (oldPath: string) => {
     if (editValue && editValue !== oldPath) {
-      const newPath = editValue.endsWith('.prs') ? editValue : `${editValue}.prs`;
+      const isYaml = editValue.endsWith('.yaml') || editValue.endsWith('.yml');
+      const newPath = isYaml
+        ? editValue
+        : editValue.endsWith('.prs')
+          ? editValue
+          : `${editValue}.prs`;
       if (!files.some((f) => f.path === newPath)) {
         renameFile(oldPath, newPath);
       }
@@ -40,7 +68,18 @@ export function FileTabs() {
 
   return (
     <div className="flex items-center bg-ps-bg border-b border-ps-border overflow-x-auto">
-      {files.map((file) => (
+      <button
+        onClick={() => setShowFileTree(!showFileTree)}
+        className={`px-2 py-2 text-gray-500 hover:text-white hover:bg-ps-surface/50 flex-shrink-0 ${showFileTree ? 'text-white bg-ps-surface/50' : ''}`}
+        title="Toggle file tree"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1 2h5l1 1h7v1H6.5L5.5 3H2v9h4v1H1V2z" />
+          <path d="M7 6h8v8H7V6zm1 1v6h6V7H8z" />
+        </svg>
+      </button>
+
+      {tabFiles.map((file) => (
         <div
           key={file.path}
           className={`group flex items-center px-3 py-2 text-sm cursor-pointer border-r border-ps-border ${
@@ -67,12 +106,12 @@ export function FileTabs() {
             />
           ) : (
             <>
-              <span className="truncate max-w-[120px]">{file.path}</span>
-              {files.length > 1 && (
+              <span className="truncate max-w-[120px]">{file.path.split('/').pop()}</span>
+              {openTabs.length > 1 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteFile(file.path);
+                    closeTab(file.path);
                   }}
                   className="ml-2 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400"
                 >

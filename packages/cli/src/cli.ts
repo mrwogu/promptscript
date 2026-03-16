@@ -126,6 +126,18 @@ program
 
 program.command('update-check').description('Check for CLI updates').action(updateCheckCommand);
 
+program
+  .command('serve')
+  .description('Start local development server for playground')
+  .option('-p, --port <port>', 'Port to listen on', '3000')
+  .option('--host <host>', 'Host to bind to', '127.0.0.1')
+  .option('--read-only', 'Disable file modifications')
+  .option('--cors-origin <origin>', 'Allowed CORS origin', 'https://getpromptscript.dev')
+  .action(async (opts) => {
+    const { serveCommand } = await import('./commands/serve.js');
+    await serveCommand(opts);
+  });
+
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);
 

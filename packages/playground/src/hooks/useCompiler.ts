@@ -5,9 +5,33 @@ import { usePlaygroundStore, selectFilesAsMap, type FormatterName } from '../sto
 
 const DEBOUNCE_MS = 300;
 
+/**
+ * Find the entry file for compilation.
+ * The entry file is the one containing @meta block, or 'project.prs' as fallback.
+ */
+function findEntryFile(files: Record<string, string>): string {
+  const paths = Object.keys(files);
+
+  // Check for project.prs (exact or in subdirectory)
+  const projectFile = paths.find((p) => p === 'project.prs' || p.endsWith('/project.prs'));
+  if (projectFile) return projectFile;
+
+  // Look for any file with @meta block
+  for (const path of paths) {
+    if (path.endsWith('.prs') && files[path]?.includes('@meta')) {
+      return path;
+    }
+  }
+
+  // Fallback to first .prs file
+  const firstPrs = paths.find((p) => p.endsWith('.prs'));
+  if (firstPrs) return firstPrs;
+
+  return 'project.prs';
+}
+
 export function useCompiler() {
   const files = usePlaygroundStore(useShallow(selectFilesAsMap));
-  const activeFile = usePlaygroundStore((s) => s.activeFile);
   const config = usePlaygroundStore((s) => s.config);
   const setCompiling = usePlaygroundStore((s) => s.setCompiling);
   const setCompileResult = usePlaygroundStore((s) => s.setCompileResult);
@@ -52,9 +76,10 @@ export function useCompiler() {
       return;
     }
 
+    const entryFile = findEntryFile(files);
     setCompiling(true);
     try {
-      const result = await compile(files, activeFile, {
+      const result = await compile(files, entryFile, {
         bundledRegistry: true,
         formatters: enabledFormatters,
         prettier: {
@@ -88,7 +113,7 @@ export function useCompiler() {
     } finally {
       setCompiling(false);
     }
-  }, [files, activeFile, config, setCompiling, setCompileResult]);
+  }, [files, config, setCompiling, setCompileResult]);
 
   // Debounced compile on file changes
   useEffect(() => {

@@ -38,6 +38,7 @@
   "dependencies": {
     "@inquirer/prompts": "^8.3.0",
     "@promptscript/compiler": "workspace:^",
+    "@promptscript/server": "workspace:^",
     "@promptscript/core": "workspace:^",
     "@promptscript/parser": "workspace:^",
     "@promptscript/resolver": "workspace:^",

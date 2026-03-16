@@ -15,6 +15,8 @@ export function Header() {
   const envVarsCount = Object.keys(usePlaygroundStore((s) => s.config.envVars)).length;
   const { handleShare } = useUrlState();
 
+  const isLocalMode = window.location.search.includes('server=');
+
   const [showCopied, setShowCopied] = useState(false);
 
   const hasErrors = compileResult && !compileResult.success;
@@ -112,22 +114,28 @@ export function Header() {
         </button>
 
         {/* Examples button */}
-        <button
-          onClick={() => setShowExamples(!showExamples)}
-          className={`px-3 py-1 text-sm rounded ${
-            showExamples ? 'bg-ps-primary text-white' : 'bg-ps-bg hover:bg-ps-surface text-gray-300'
-          }`}
-        >
-          Examples
-        </button>
+        {!isLocalMode && (
+          <button
+            onClick={() => setShowExamples(!showExamples)}
+            className={`px-3 py-1 text-sm rounded ${
+              showExamples
+                ? 'bg-ps-primary text-white'
+                : 'bg-ps-bg hover:bg-ps-surface text-gray-300'
+            }`}
+          >
+            Examples
+          </button>
+        )}
 
         {/* Share button */}
-        <button
-          onClick={onShare}
-          className="px-3 py-1 text-sm bg-ps-primary hover:bg-ps-secondary rounded text-white relative"
-        >
-          {showCopied ? 'Copied!' : 'Share'}
-        </button>
+        {!isLocalMode && (
+          <button
+            onClick={onShare}
+            className="px-3 py-1 text-sm bg-ps-primary hover:bg-ps-secondary rounded text-white relative"
+          >
+            {showCopied ? 'Copied!' : 'Share'}
+          </button>
+        )}
 
         {/* GitHub link */}
         <a
