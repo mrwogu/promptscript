@@ -795,6 +795,22 @@ export async function resolveNativeSkills(
     return ast;
   }
 
+  // Discover shared resources from .promptscript/shared/ directory
+  let sharedResources: SkillResource[] = [];
+  if (localPath) {
+    const sharedDir = resolve(localPath, 'shared');
+    if (await fileExists(sharedDir)) {
+      try {
+        sharedResources = await discoverSkillResources(sharedDir, logger);
+        if (sharedResources.length > 0) {
+          logger.verbose(`Discovered ${sharedResources.length} shared resources from ${sharedDir}`);
+        }
+      } catch {
+        logger.verbose(`Failed to discover shared resources from ${sharedDir}`);
+      }
+    }
+  }
+
   // Resolve each skill's SKILL.md content and resources
   for (const [skillName, skillValue] of Object.entries(updatedProperties)) {
     if (typeof skillValue !== 'object' || skillValue === null || Array.isArray(skillValue)) {
@@ -869,9 +885,18 @@ export async function resolveNativeSkills(
         // Discover resource files alongside SKILL.md
         const skillDir = dirname(skillMdPath);
         const resources = await discoverSkillResources(skillDir, logger);
-        if (resources.length > 0) {
-          // Each resource is { relativePath: string, content: string } which satisfies { [key: string]: Value }
-          const resourceValues: Value[] = resources.map((r) => ({
+
+        // Merge skill-specific resources with shared resources
+        const allResources: SkillResource[] = [...resources];
+        for (const shared of sharedResources) {
+          allResources.push({
+            relativePath: `@shared/${shared.relativePath}`,
+            content: shared.content,
+          });
+        }
+
+        if (allResources.length > 0) {
+          const resourceValues: Value[] = allResources.map((r) => ({
             relativePath: r.relativePath,
             content: r.content,
           }));
