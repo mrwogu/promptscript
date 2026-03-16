@@ -564,7 +564,7 @@ async function runInteractivePrompts(
 /**
  * Format target name for display using the formatter's description.
  */
-function formatTargetName(target: AIToolTarget): string {
+export function formatTargetName(target: AIToolTarget): string {
   const formatter = FormatterRegistry.get(target);
   if (formatter) {
     return formatter.description;

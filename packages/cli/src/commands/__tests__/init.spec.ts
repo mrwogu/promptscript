@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initCommand } from '../init.js';
+import { initCommand, formatTargetName } from '../init.js';
 import { type CliServices, type FileSystem, type PromptSystem } from '../../services.js';
 import type { InitOptions } from '../../types.js';
 
@@ -125,6 +125,20 @@ describe('initCommand', () => {
       expect(mockFs.mkdir).not.toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
       });
+    });
+  });
+
+  describe('formatTargetName', () => {
+    it('should return formatter description for known targets', () => {
+      const name = formatTargetName('claude');
+
+      expect(name).toBe('Claude Code instructions (concise Markdown)');
+    });
+
+    it('should return target string as-is for unknown targets', () => {
+      const name = formatTargetName('nonexistent-tool');
+
+      expect(name).toBe('nonexistent-tool');
     });
   });
 });
