@@ -33,6 +33,7 @@ import {
   hasMigrationCandidates,
   type AIToolTarget,
 } from '../utils/ai-tools-detector.js';
+import { FormatterRegistry } from '@promptscript/formatters';
 import { findPrettierConfig } from '../prettier/loader.js';
 import {
   loadManifest,
@@ -561,42 +562,34 @@ async function runInteractivePrompts(
 }
 
 /**
- * Format target name for display.
+ * Format target name for display using the formatter's description.
  */
 function formatTargetName(target: AIToolTarget): string {
-  const names: Record<AIToolTarget, string> = {
-    github: 'GitHub Copilot',
-    claude: 'Claude (Anthropic)',
-    cursor: 'Cursor',
-    antigravity: 'Antigravity (Google)',
-    factory: 'Factory AI',
-    opencode: 'OpenCode',
-    gemini: 'Gemini CLI',
-  };
-  return names[target] ?? target;
+  const formatter = FormatterRegistry.get(target);
+  if (formatter) {
+    return formatter.description;
+  }
+  return target;
 }
 
 /**
  * Get the skill directory path for a target.
+ * Uses the formatter's getSkillBasePath() and getSkillFileName() methods.
  * Returns null if the target doesn't support skills.
  */
 function getTargetSkillDir(
   target: AIToolTarget,
   skillName: string
 ): { dir: string; path: string } | null {
-  const skillDirs: Partial<Record<AIToolTarget, { dotDir: string; fileName: string }>> = {
-    claude: { dotDir: '.claude', fileName: 'SKILL.md' },
-    factory: { dotDir: '.factory', fileName: 'SKILL.md' },
-    github: { dotDir: '.github', fileName: 'SKILL.md' },
-    opencode: { dotDir: '.opencode', fileName: 'SKILL.md' },
-    gemini: { dotDir: '.gemini', fileName: 'skill.md' },
-  };
+  const formatter = FormatterRegistry.get(target);
+  if (!formatter) return null;
 
-  const config = skillDirs[target];
-  if (!config) return null;
+  const basePath = formatter.getSkillBasePath();
+  const fileName = formatter.getSkillFileName();
+  if (!basePath || !fileName) return null;
 
-  const dir = `${config.dotDir}/skills/${skillName}`;
-  return { dir, path: `${dir}/${config.fileName}` };
+  const dir = `${basePath}/${skillName}`;
+  return { dir, path: `${dir}/${fileName}` };
 }
 
 /**
@@ -606,19 +599,10 @@ function getTargetSkillDir(
 function getSkillInvocationHints(targets: AIToolTarget[]): string[] {
   const hints: string[] = [];
 
-  // Tools that support skills and their invocation format
-  const skillSupport: Partial<Record<AIToolTarget, string>> = {
-    claude: 'Claude Code: /promptscript',
-    factory: 'Factory AI: /promptscript',
-    opencode: 'OpenCode: /promptscript',
-    gemini: 'Gemini CLI: /promptscript',
-    github: 'GitHub Copilot: /promptscript',
-  };
-
   for (const target of targets) {
-    const hint = skillSupport[target];
-    if (hint) {
-      hints.push(hint);
+    const formatter = FormatterRegistry.get(target);
+    if (formatter && formatter.getSkillBasePath()) {
+      hints.push(`${formatter.description}: /promptscript`);
     }
   }
 

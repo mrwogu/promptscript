@@ -37,7 +37,7 @@ describe('utils/ai-tools-detector', () => {
       const result = await detectAITools(mockServices);
 
       expect(result.detected).toContain('github');
-      expect(result.details.github).toContain('.github/copilot-instructions.md');
+      expect(result.details['github']).toContain('.github/copilot-instructions.md');
     });
 
     it('should detect Claude configuration', async () => {
@@ -46,7 +46,7 @@ describe('utils/ai-tools-detector', () => {
       const result = await detectAITools(mockServices);
 
       expect(result.detected).toContain('claude');
-      expect(result.details.claude).toContain('CLAUDE.md');
+      expect(result.details['claude']).toContain('CLAUDE.md');
     });
 
     it('should detect Cursor configuration', async () => {
@@ -55,7 +55,7 @@ describe('utils/ai-tools-detector', () => {
       const result = await detectAITools(mockServices);
 
       expect(result.detected).toContain('cursor');
-      expect(result.details.cursor).toContain('.cursor/rules/project.mdc');
+      expect(result.details['cursor']).toContain('.cursor/rules/project.mdc');
     });
 
     it('should detect .claude directory with content', async () => {
@@ -65,7 +65,7 @@ describe('utils/ai-tools-detector', () => {
       const result = await detectAITools(mockServices);
 
       expect(result.detected).toContain('claude');
-      expect(result.details.claude).toContain('.claude/');
+      expect(result.details['claude']).toContain('.claude/');
     });
 
     it('should detect multiple AI tools', async () => {
@@ -90,7 +90,7 @@ describe('utils/ai-tools-detector', () => {
       const result = await detectAITools(mockServices);
 
       expect(result.detected).toContain('factory');
-      expect(result.details.factory).toContain('AGENTS.md');
+      expect(result.details['factory']).toContain('AGENTS.md');
     });
 
     it('should detect Factory AI via .factory directory', async () => {
@@ -110,21 +110,46 @@ describe('utils/ai-tools-detector', () => {
 
       expect(result.detected).toHaveLength(0);
     });
+
+    it('should detect Windsurf configuration', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === '.windsurfrules');
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.detected).toContain('windsurf');
+      expect(result.details['windsurf']).toContain('.windsurfrules');
+    });
+
+    it('should detect Cline configuration', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === '.clinerules');
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.detected).toContain('cline');
+      expect(result.details['cline']).toContain('.clinerules');
+    });
   });
 
   describe('getAllTargets', () => {
-    it('should return all available targets', () => {
+    it('should return all registered formatters', () => {
       const targets = getAllTargets();
 
-      expect(targets).toEqual([
-        'github',
-        'claude',
-        'cursor',
-        'antigravity',
-        'factory',
-        'opencode',
-        'gemini',
-      ]);
+      // Should include the original 7 plus all additional formatters
+      expect(targets).toContain('github');
+      expect(targets).toContain('claude');
+      expect(targets).toContain('cursor');
+      expect(targets).toContain('antigravity');
+      expect(targets).toContain('factory');
+      expect(targets).toContain('opencode');
+      expect(targets).toContain('gemini');
+      // Tier 1
+      expect(targets).toContain('windsurf');
+      expect(targets).toContain('cline');
+      expect(targets).toContain('roo');
+      expect(targets).toContain('codex');
+      expect(targets).toContain('continue');
+      // Should have many more than the original 7
+      expect(targets.length).toBeGreaterThan(7);
     });
   });
 
@@ -132,15 +157,7 @@ describe('utils/ai-tools-detector', () => {
     it('should return detected targets when some exist', () => {
       const detection: AIToolsDetection = {
         detected: ['github', 'claude'],
-        details: {
-          github: [],
-          claude: [],
-          cursor: [],
-          antigravity: [],
-          factory: [],
-          opencode: [],
-          gemini: [],
-        },
+        details: {},
         migrationCandidates: [],
       };
 
@@ -149,32 +166,16 @@ describe('utils/ai-tools-detector', () => {
       expect(suggested).toEqual(['github', 'claude']);
     });
 
-    it('should return all targets when none detected', () => {
+    it('should return common defaults when none detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: {
-          github: [],
-          claude: [],
-          cursor: [],
-          antigravity: [],
-          factory: [],
-          opencode: [],
-          gemini: [],
-        },
+        details: {},
         migrationCandidates: [],
       };
 
       const suggested = getSuggestedTargets(detection);
 
-      expect(suggested).toEqual([
-        'github',
-        'claude',
-        'cursor',
-        'antigravity',
-        'factory',
-        'opencode',
-        'gemini',
-      ]);
+      expect(suggested).toEqual(['github', 'claude', 'cursor']);
     });
   });
 
@@ -184,12 +185,6 @@ describe('utils/ai-tools-detector', () => {
         detected: ['github'],
         details: {
           github: ['.github/copilot-instructions.md'],
-          claude: [],
-          cursor: [],
-          antigravity: [],
-          factory: [],
-          opencode: [],
-          gemini: [],
         },
         migrationCandidates: [],
       };
@@ -203,15 +198,7 @@ describe('utils/ai-tools-detector', () => {
     it('should show message when no tools detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
-        details: {
-          github: [],
-          claude: [],
-          cursor: [],
-          antigravity: [],
-          factory: [],
-          opencode: [],
-          gemini: [],
-        },
+        details: {},
         migrationCandidates: [],
       };
 
@@ -224,13 +211,7 @@ describe('utils/ai-tools-detector', () => {
       const detection: AIToolsDetection = {
         detected: ['antigravity'],
         details: {
-          github: [],
-          claude: [],
-          cursor: [],
           antigravity: ['.agent/rules/project.md'],
-          factory: [],
-          opencode: [],
-          gemini: [],
         },
         migrationCandidates: [],
       };
