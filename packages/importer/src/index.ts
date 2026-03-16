@@ -16,3 +16,5 @@ export type { ScoredSection } from './confidence.js';
 export { mapSections } from './mapper.js';
 export { emitPrs } from './emitter.js';
 export type { EmitOptions } from './emitter.js';
+export { validateRoundtrip } from './roundtrip.js';
+export type { RoundtripResult } from './roundtrip.js';

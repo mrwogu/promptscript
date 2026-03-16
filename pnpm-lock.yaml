@@ -216,6 +216,9 @@ importers:
 
   packages/importer:
     dependencies:
+      '@promptscript/parser':
+        specifier: workspace:*
+        version: link:../parser
       '@swc/helpers':
         specifier: ~0.5.19
         version: 0.5.19
