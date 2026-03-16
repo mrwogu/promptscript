@@ -29,6 +29,15 @@ describe('SkillDefinition', () => {
     expect(skill.params).toBeUndefined();
   });
 
+  it('can represent a skill with requires', () => {
+    const skill: SkillDefinition = {
+      description: 'Full review',
+      content: 'Run all checks',
+      requires: ['lint-check', 'security-scan'],
+    };
+    expect(skill.requires).toEqual(['lint-check', 'security-scan']);
+  });
+
   it('can represent a skill with trigger and allowedTools', () => {
     const skill: SkillDefinition = {
       description: 'Security review',

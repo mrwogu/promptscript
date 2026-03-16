@@ -376,4 +376,6 @@ export interface SkillDefinition {
   context?: string;
   /** Agent to use */
   agent?: string;
+  /** Skills that must exist for this skill to work */
+  requires?: string[];
 }
