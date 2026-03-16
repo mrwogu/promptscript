@@ -82,7 +82,12 @@ export { normalizeBlockAliases } from './normalize.js';
 export { applyExtends } from './extensions.js';
 
 // Skill resolution
-export { resolveNativeSkills, resolveNativeCommands, parseSkillMd } from './skills.js';
+export {
+  resolveNativeSkills,
+  resolveNativeCommands,
+  parseSkillMd,
+  interpolateSkillContent,
+} from './skills.js';
 export type { NativeSkillOptions, ParsedSkillMd } from './skills.js';
 
 // Template interpolation (re-export from core for backwards compatibility)

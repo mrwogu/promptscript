@@ -219,6 +219,72 @@ function parseDefaultValue(valueStr: string, paramType: ParamType): Value {
   }
 }
 
+/**
+ * Interpolate skill content with parameter values.
+ *
+ * Binds provided arguments and defaults to {{variable}} placeholders
+ * in the skill content string.
+ *
+ * @param content - Skill content with {{variable}} placeholders
+ * @param params - Parameter definitions from SKILL.md frontmatter
+ * @param args - Argument values provided at the call site
+ * @returns Interpolated content string
+ */
+export function interpolateSkillContent(
+  content: string,
+  params: ParamDefinition[] | undefined,
+  args: Record<string, Value>
+): string {
+  if (!params || params.length === 0) {
+    return content;
+  }
+
+  // Build bound values map: args override defaults
+  const bound = new Map<string, Value>();
+  for (const param of params) {
+    const argValue = args[param.name];
+    if (argValue !== undefined) {
+      bound.set(param.name, argValue);
+    } else if (param.defaultValue !== undefined) {
+      bound.set(param.name, param.defaultValue);
+    } else if (!param.optional) {
+      throw new Error(`Missing required skill parameter: ${param.name}`);
+    }
+  }
+
+  // Replace {{variable}} patterns
+  return content.replace(/\{\{(\w+)\}\}/g, (_match, varName: string) => {
+    const value = bound.get(varName);
+    if (value === undefined) {
+      return _match; // Leave unresolved vars as-is
+    }
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    return JSON.stringify(value);
+  });
+}
+
+/**
+ * Extract skill argument values from a .prs skill object.
+ * Arguments can be in a nested `params` object or as top-level properties.
+ */
+function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value> {
+  const args: Record<string, Value> = {};
+
+  // Check for params object (nested arguments)
+  const paramsVal = skillObj['params'];
+  if (paramsVal && typeof paramsVal === 'object' && !Array.isArray(paramsVal)) {
+    const paramsObj = paramsVal as Record<string, Value>;
+    for (const [key, value] of Object.entries(paramsObj)) {
+      if (key !== 'type' && key !== 'loc') {
+        args[key] = value;
+      }
+    }
+  }
+
+  return args;
+}
+
 /** Files to skip when discovering skill resources. */
 const SKIP_FILES = new Set([
   'SKILL.md',
@@ -755,19 +821,27 @@ export async function resolveNativeSkills(
         // Update skill with native content
         const updatedSkill: Record<string, Value> = { ...skillObj };
 
-        // Use native content
+        // Extract skill arguments from .prs for interpolation
+        const skillArgs = extractSkillArgs(skillObj);
+
+        // Use native content (with interpolation if params defined)
         if (parsed.content) {
-          // Create TextContent with synthetic location (loaded from file, not parsed)
+          const interpolated = parsed.params
+            ? interpolateSkillContent(parsed.content, parsed.params, skillArgs)
+            : parsed.content;
           updatedSkill['content'] = {
             type: 'TextContent',
-            value: parsed.content,
+            value: interpolated,
             loc: { file: skillMdPath, line: 1, column: 1, offset: 0 },
           } as TextContent;
         }
 
         // Use native description only as fallback when not set in .prs
+        // Also interpolate description if it has template vars
         if (parsed.description && !skillObj['description']) {
-          updatedSkill['description'] = parsed.description;
+          updatedSkill['description'] = parsed.params
+            ? interpolateSkillContent(parsed.description, parsed.params, skillArgs)
+            : parsed.description;
         }
 
         // Discover resource files alongside SKILL.md
