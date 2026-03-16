@@ -182,6 +182,53 @@ universalDir: false
 
 Skills from `.agents/skills/` are used as a fallback after `.promptscript/skills/` but before the registry. Commands from `.agents/commands/` are merged into `@shortcuts` (explicit declarations take precedence).
 
+## Parameterized Skills
+
+Skills can define parameters in their YAML frontmatter, making them reusable with different configurations. Parameters use `{{variable}}` syntax for interpolation.
+
+### Defining parameters in SKILL.md
+
+```text
+---
+name: code-review
+description: Review {{language}} code with {{strictness}} rules
+params:
+  language:
+    type: string
+    default: typescript
+  strictness:
+    type: enum
+    options: [relaxed, standard, strict]
+    default: standard
+---
+
+You are a {{language}} code reviewer.
+Apply {{strictness}} review rules.
+```
+
+Supported parameter types: `string`, `number`, `boolean`, `enum`.
+
+### Passing arguments in .prs
+
+```text
+@skills {
+  code-review: {
+    language: "python"
+    strictness: "strict"
+  }
+}
+```
+
+When compiled, `{{language}}` becomes `python` and `{{strictness}}` becomes `strict`. Parameters not provided in `.prs` use their default values from the frontmatter.
+
+### Validation
+
+The PS015 validation rule checks parameter definitions:
+
+- Parameter types must be one of: `string`, `number`, `boolean`, `enum`
+- `enum` parameters must include an `options` array
+- Duplicate parameter names are flagged
+
 ## Resource Files
 
 Any text file next to `SKILL.md` is treated as a resource file and copied to all compilation targets. This includes:
