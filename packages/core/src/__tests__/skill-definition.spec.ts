@@ -38,6 +38,28 @@ describe('SkillDefinition', () => {
     expect(skill.requires).toEqual(['lint-check', 'security-scan']);
   });
 
+  it('can represent a skill with inputs and outputs', () => {
+    const skill: SkillDefinition = {
+      description: 'Security scan',
+      content: 'Scan files',
+      inputs: {
+        files: { description: 'List of file paths', type: 'string' },
+        severity: {
+          description: 'Minimum severity',
+          type: 'enum',
+          options: ['low', 'medium', 'high'],
+          default: 'medium',
+        },
+      },
+      outputs: {
+        report: { description: 'Scan report', type: 'string' },
+        passed: { description: 'Whether scan passed', type: 'boolean' },
+      },
+    };
+    expect(Object.keys(skill.inputs!)).toEqual(['files', 'severity']);
+    expect(Object.keys(skill.outputs!)).toEqual(['report', 'passed']);
+  });
+
   it('can represent a skill with trigger and allowedTools', () => {
     const skill: SkillDefinition = {
       description: 'Security review',
