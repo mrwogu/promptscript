@@ -346,3 +346,34 @@ export interface TypeExpression extends BaseNode {
     options?: Value[];
   };
 }
+
+// ============================================================
+// Skill Definition
+// ============================================================
+
+/**
+ * Typed representation of a skill in the @skills block.
+ *
+ * Currently skills are stored as Record<string, Value> in ObjectContent.
+ * This interface provides typed access for skill-specific properties.
+ */
+export interface SkillDefinition {
+  /** Skill description (required) */
+  description: string;
+  /** Skill content/instructions */
+  content?: string | TextContent;
+  /** Template parameters for parameterization */
+  params?: ParamDefinition[];
+  /** Trigger phrases */
+  trigger?: string;
+  /** Whether user can invoke directly */
+  userInvocable?: boolean;
+  /** Allowed tools */
+  allowedTools?: string[];
+  /** Disable model invocation */
+  disableModelInvocation?: boolean;
+  /** Context mode */
+  context?: string;
+  /** Agent to use */
+  agent?: string;
+}
