@@ -53,20 +53,20 @@ description: PromptScript output format for Cursor
 | Activation Type            | Yes       |
 | Glob Pattern Targeting     | Yes       |
 | Always Apply Rules         | Yes       |
-| Manual Activation          | Yes       |
-| Auto/Model Activation      | Yes       |
+| Manual Activation          | Partial   |
+| Auto/Model Activation      | Partial   |
 | Character Limit Validation | No        |
 | Content Section Splitting  | Yes       |
 | Context File Inclusion     | Yes       |
-| @-Mentions                 | Yes       |
+| @-Mentions                 | Planned   |
 | Tool Integration           | Partial   |
 | Path-Specific Rules        | Yes       |
 | Prompt Files               | No        |
 | Slash Commands             | Yes       |
-| Skills                     | No        |
-| Agent Instructions         | No        |
+| Skills                     | Planned   |
+| Agent Instructions         | Planned   |
 | Local Memory               | No        |
-| Nested Memory              | Yes       |
+| Nested Memory              | Planned   |
 
 <!-- generated:end:features -->
 

@@ -45,7 +45,7 @@ description: PromptScript output format for Antigravity
 | Single File Output         | Yes       |
 | Multiple Rule Files        | Yes       |
 | Workflow Files             | Yes       |
-| Nested Directory Structure | Yes       |
+| Nested Directory Structure | Planned   |
 | YAML Frontmatter           | Yes       |
 | Description in Frontmatter | Yes       |
 | Globs in Frontmatter       | Yes       |
@@ -65,7 +65,7 @@ description: PromptScript output format for Antigravity
 | Skills                     | No        |
 | Agent Instructions         | No        |
 | Local Memory               | No        |
-| Nested Memory              | Yes       |
+| Nested Memory              | Planned   |
 
 <!-- generated:end:features -->
 

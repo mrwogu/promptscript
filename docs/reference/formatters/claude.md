@@ -59,16 +59,16 @@ description: PromptScript output format for Claude Code
 | Auto/Model Activation | No |
 | Character Limit Validation | No |
 | Content Section Splitting | Yes |
-| Context File Inclusion | No |
+| Context File Inclusion | Planned |
 | @-Mentions | No |
-| Tool Integration | No |
+| Tool Integration | Yes |
 | Path-Specific Rules | Yes |
 | Prompt Files | No |
 | Slash Commands | Yes |
 | Skills | Yes |
 | Agent Instructions | Yes |
-| Local Memory | Yes |
-| Nested Memory | Yes |
+| Local Memory | Partial |
+| Nested Memory | Planned |
 
 <!-- generated:end:features -->
 
