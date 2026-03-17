@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { resolveTargetDirectory } from '../resolve-target-directory.js';
+import type { FileSystem, PromptSystem } from '../../services.js';
 
 describe('utils/resolve-target-directory', () => {
   let mockReaddir: ReturnType<typeof vi.fn>;
@@ -25,8 +26,8 @@ describe('utils/resolve-target-directory', () => {
         nonInteractive: overrides.nonInteractive ?? false,
       },
       {
-        fs: { readdir: mockReaddir },
-        prompts: { select: mockSelect },
+        fs: { readdir: mockReaddir as unknown as FileSystem['readdir'] },
+        prompts: { select: mockSelect as unknown as PromptSystem['select'] },
       }
     );
   }
