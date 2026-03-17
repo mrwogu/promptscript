@@ -405,6 +405,15 @@ describe('New Agent Formatters', () => {
         expect(result.content).toContain('You are an expert developer.');
       });
 
+      it('should format multifile version with correct header', () => {
+        const ast = createProgramWithIdentity();
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.path).toBe(outputPath);
+        expect(result.content).toContain(mainHeader);
+        expect(result.content).toContain('You are an expert developer.');
+      });
+
       it.skipIf(!hasSkills)('should generate skill files in full mode', () => {
         const ast: Program = {
           ...createMinimalProgram(),
