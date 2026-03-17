@@ -74,7 +74,7 @@ description: PromptScript output format for Factory AI
 
 ## Limitations & Quirks
 
-- Uses `.factory/instructions.md` as the main file (extends MarkdownInstructionFormatter)
+- Uses `AGENTS.md` as the main file (extends MarkdownInstructionFormatter)
 - Skills go to `.factory/skills/<name>/SKILL.md`
 - Agents are called "droids" — output to `.factory/droids/<name>.md`
 - Three output modes: `simple`, `multifile`, `full`
@@ -84,8 +84,8 @@ description: PromptScript output format for Factory AI
 
 ```
 project-root/
+├── AGENTS.md                          # Main instructions
 └── .factory/
-    ├── instructions.md                # Main instructions
     ├── skills/
     │   └── my-skill/
     │       └── SKILL.md               # Skill definition
