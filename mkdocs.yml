@@ -209,6 +209,15 @@ nav:
       - Language: reference/language.md
       - CLI: reference/cli.md
       - Configuration: reference/config.md
+      - Formatters:
+          - reference/formatters/index.md
+          - Claude Code: reference/formatters/claude.md
+          - GitHub Copilot: reference/formatters/github.md
+          - Cursor: reference/formatters/cursor.md
+          - Antigravity: reference/formatters/antigravity.md
+          - Factory AI: reference/formatters/factory.md
+          - Gemini CLI: reference/formatters/gemini.md
+          - OpenCode: reference/formatters/opencode.md
   - Guides:
       - guides/index.md
       - Build Your Registry: guides/registry.md
