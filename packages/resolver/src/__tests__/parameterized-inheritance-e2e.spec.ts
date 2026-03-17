@@ -56,11 +56,12 @@ describe('Parameterized Inheritance E2E', () => {
 `
     );
 
-    const resolver = new Resolver({ localPath: dir });
+    const resolver = new Resolver({ localPath: dir, registryPath: dir });
     const result = await resolver.resolve(join(dir, 'project.prs'));
     expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
 
-    const identity = result.ast.blocks.find((b) => b.name === 'identity');
+    const identity = result.ast!.blocks.find((b) => b.name === 'identity');
     expect(identity).toBeDefined();
     expect(identity!.content.type).toBe('TextContent');
     if (identity!.content.type === 'TextContent') {
@@ -103,11 +104,12 @@ describe('Parameterized Inheritance E2E', () => {
 `
     );
 
-    const resolver = new Resolver({ localPath: dir });
+    const resolver = new Resolver({ localPath: dir, registryPath: dir });
     const result = await resolver.resolve(join(dir, 'obj-project.prs'));
     expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
 
-    const context = result.ast.blocks.find((b) => b.name === 'context');
+    const context = result.ast!.blocks.find((b) => b.name === 'context');
     expect(context).toBeDefined();
     expect(context!.content.type).toBe('ObjectContent');
     if (context!.content.type === 'ObjectContent') {
@@ -149,11 +151,12 @@ describe('Parameterized Inheritance E2E', () => {
 `
     );
 
-    const resolver = new Resolver({ localPath: dir });
+    const resolver = new Resolver({ localPath: dir, registryPath: dir });
     const result = await resolver.resolve(join(dir, 'defaults-project.prs'));
     expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
 
-    const identity = result.ast.blocks.find((b) => b.name === 'identity');
+    const identity = result.ast!.blocks.find((b) => b.name === 'identity');
     expect(identity).toBeDefined();
     expect(identity!.content.type).toBe('TextContent');
     if (identity!.content.type === 'TextContent') {
@@ -200,11 +203,12 @@ describe('Parameterized Inheritance E2E', () => {
 `
     );
 
-    const resolver = new Resolver({ localPath: dir });
+    const resolver = new Resolver({ localPath: dir, registryPath: dir });
     const result = await resolver.resolve(join(dir, 'use-project.prs'));
     expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
 
-    const standards = result.ast.blocks.find((b) => b.name === 'standards');
+    const standards = result.ast!.blocks.find((b) => b.name === 'standards');
     expect(standards).toBeDefined();
     if (standards!.content.type === 'TextContent') {
       expect(standards!.content.value).toContain('vitest');
@@ -244,7 +248,7 @@ describe('Parameterized Inheritance E2E', () => {
 `
     );
 
-    const resolver = new Resolver({ localPath: dir });
+    const resolver = new Resolver({ localPath: dir, registryPath: dir });
     const result = await resolver.resolve(join(dir, 'missing-param.prs'));
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]!.message).toContain('name');

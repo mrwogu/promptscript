@@ -51,14 +51,9 @@ describe('bundled SKILL.md files', () => {
       expect(PROMPTSCRIPT_SKILL).toContain('promptscript.yaml');
     });
 
-    it('should contain migration steps', () => {
-      expect(PROMPTSCRIPT_SKILL).toContain('Step 1: Discovery');
-      expect(PROMPTSCRIPT_SKILL).toContain('Step 2: Read and Analyze');
-      expect(PROMPTSCRIPT_SKILL).toContain('Step 3: Content Mapping');
-      expect(PROMPTSCRIPT_SKILL).toContain('Step 4: Generate PromptScript');
-      expect(PROMPTSCRIPT_SKILL).toContain('Step 5: File Organization');
-      expect(PROMPTSCRIPT_SKILL).toContain('Step 6: Configuration');
-      expect(PROMPTSCRIPT_SKILL).toContain('Step 7: Validation');
+    it('should contain migration guidance', () => {
+      expect(PROMPTSCRIPT_SKILL).toContain('prs import');
+      expect(PROMPTSCRIPT_SKILL).toContain('Manual Migration');
     });
 
     it('should contain content mapping table for migration', () => {

@@ -211,7 +211,108 @@ Reusable skill definitions with metadata:
 ```
 
 Properties: description (required), content (required), trigger, disableModelInvocation,
-userInvocable, allowedTools, context ("fork" or "inherit"), agent.
+userInvocable, allowedTools, context ("fork" or "inherit"), agent, requires, inputs, outputs.
+
+### Parameterized Skills
+
+Skills in `.promptscript/skills/<name>/SKILL.md` support template parameters via
+YAML frontmatter. Define `params` in frontmatter and use `{{variable}}` in content:
+
+```yaml
+---
+name: review
+description: 'Review {{language}} code for {{standard}}'
+params:
+  language:
+    type: string
+  standard:
+    type: string
+    default: 'best practices'
+---
+Review the code using {{language}} conventions following {{standard}}.
+```
+
+Pass values in `@skills` block:
+
+```
+@skills {
+  review: {
+    description: "Review code"
+    language: "typescript"
+    standard: "strict mode"
+  }
+}
+```
+
+Non-reserved properties (anything other than description, content, trigger,
+userInvocable, allowedTools, disableModelInvocation, context, agent, requires,
+inputs, outputs) are treated as skill parameter arguments.
+
+### Skill Dependencies
+
+Skills can declare dependencies on other skills via `requires`:
+
+```
+@skills {
+  deploy: {
+    description: "Deploy service"
+    requires: ["lint-check", "test-suite"]
+    content: (triple-quoted text)
+  }
+}
+```
+
+The validator (PS016) checks that required skills exist, detects self-references,
+and catches circular dependency chains.
+
+### Skill Contracts (Inputs/Outputs)
+
+Skills can declare typed inputs and outputs in SKILL.md frontmatter:
+
+```yaml
+---
+name: security-scan
+description: 'Scan for vulnerabilities'
+inputs:
+  files:
+    description: 'Files to scan'
+    type: string
+  severity:
+    description: 'Minimum severity'
+    type: enum
+    options: [low, medium, high]
+    default: medium
+outputs:
+  report:
+    description: 'Scan report'
+    type: string
+  passed:
+    description: 'Whether scan passed'
+    type: boolean
+---
+```
+
+Field types: `string`, `number`, `boolean`, `enum` (with `options` list).
+The validator (PS017) checks field types, ensures enum fields have options,
+and warns if param names collide with input names.
+
+### Shared Resources
+
+Skills in a folder can share common resources via `.promptscript/shared/`:
+
+```
+.promptscript/
+  shared/
+    templates.md         # Shared across all skills
+    style-guide.md
+  skills/
+    review/
+      SKILL.md           # Gets @shared/templates.md, @shared/style-guide.md
+    deploy/
+      SKILL.md           # Also gets shared resources
+```
+
+Files in `shared/` are automatically included in every skill with `@shared/` prefix.
 
 ### @agents
 
@@ -295,6 +396,68 @@ Requires an aliased @use:
 @extend ts.standards {
   testing: { coverage: 95 }
 }
+```
+
+### Parameterized Inheritance (Template Variables)
+
+Use `{{variable}}` placeholders in a **parent/template** file, and pass values
+from the **child** file via `@inherit` or `@use` with `(key: value)` syntax.
+
+**IMPORTANT:** Variables are NOT set from `promptscript.yaml` or CLI. They are
+passed from one `.prs` file to another through `@inherit` or `@use`.
+
+**Step 1: Create the template** (parent file with `params` in `@meta`):
+
+```
+# base.prs — reusable template
+@meta {
+  id: "service-template"
+  syntax: "1.0.0"
+  params: {
+    serviceName: string
+    port?: number = 3000
+  }
+}
+
+@identity {
+  """
+  You are working on {{serviceName}} running on port {{port}}.
+  """
+}
+```
+
+**Step 2: Inherit with values** (child file passes params):
+
+```
+# project.prs — concrete project
+@meta { id: "user-api" syntax: "1.0.0" }
+
+@inherit ./base(serviceName: "user-api", port: 8080)
+```
+
+After compilation, `{{serviceName}}` becomes `user-api` and `{{port}}` becomes `8080`.
+
+The same works with `@use`:
+
+```
+@use ./base(serviceName: "auth-service") as auth
+```
+
+**Parameter types:** `string`, `number`, `boolean`, `enum("a", "b")`.
+Optional params use `?` suffix. Defaults use `= value`.
+Missing required params produce a compile error.
+
+**Multi-service pattern** — reuse one template across many projects:
+
+```
+services/
+  base.prs                          # template with params
+  user-api/
+    promptscript.yaml               # source: project.prs
+    project.prs                     # @inherit ../base(serviceName: "user-api")
+  auth-service/
+    promptscript.yaml
+    project.prs                     # @inherit ../base(serviceName: "auth-service")
 ```
 
 ## Configuration: promptscript.yaml
@@ -388,40 +551,44 @@ The entry file uses `@use ./context`, `@use ./standards`, etc. to compose them.
 4. Unquoted strings with special chars - quote strings containing `:`, `#`, `{`, `}`
 5. Forgetting to compile - `.prs` changes need `prs compile` to take effect
 6. Triple quotes inside triple quotes - not supported; describe content textually instead
+7. Using `{{var}}` in the root file without `@inherit` - template variables only work
+   in a parent file that defines `params` in `@meta`, with values passed by the child
+   via `@inherit ./parent(key: value)` or `@use ./fragment(key: value)`. They are NOT
+   set from `promptscript.yaml` or CLI flags
 
 ## Migrating Existing AI Instructions to PromptScript
 
-Use this workflow when converting existing AI instruction files (CLAUDE.md, .cursorrules, copilot-instructions.md, etc.) to PromptScript `.prs` format.
+### Automated: `prs import`
 
-### Step 1: Discovery
+The fastest way to convert existing AI instructions to PromptScript:
 
-Find all existing AI instruction files in the project:
+```
+prs import CLAUDE.md                    # Convert a single file
+prs import .github/copilot-instructions.md
+prs import AGENTS.md --output ./imported.prs
+prs import --dry-run CLAUDE.md          # Preview without writing
+```
+
+`prs import` automatically:
+
+- Detects the source format (Claude, GitHub Copilot, Cursor, Factory, etc.)
+- Maps content to appropriate PromptScript blocks (@identity, @standards, etc.)
+- Generates a valid `.prs` file with `@meta` block
+- Preserves the original intent and structure
+
+Supported source formats:
 
 - `CLAUDE.md` (Claude Code)
 - `.github/copilot-instructions.md` (GitHub Copilot)
 - `.cursorrules` or `.cursor/rules/*.mdc` (Cursor)
-- `.agent/rules/*.md` (Antigravity)
 - `AGENTS.md` (Factory AI / Codex)
-- `.clinerules` (Cline)
-- `.roorules` (Roo Code)
+- `.clinerules` (Cline), `.roorules` (Roo Code)
 - `.windsurf/rules/*.md` (Windsurf)
-- Any other AI instruction files
+- Any Markdown-based AI instruction file
 
-### Step 2: Read and Analyze
+### Manual Migration
 
-Read each discovered file and identify:
-
-- Identity/persona instructions ("You are...")
-- Project context (tech stack, architecture)
-- Coding standards and conventions
-- Hard restrictions and rules
-- Command shortcuts or slash commands
-- Skill definitions
-- Agent/subagent definitions
-
-### Step 3: Content Mapping
-
-Map content from source files to PromptScript blocks:
+For complex migrations or when `prs import` needs refinement:
 
 | Source Pattern                      | PromptScript Block |
 | ----------------------------------- | ------------------ |
@@ -434,33 +601,6 @@ Map content from source files to PromptScript blocks:
 | Agent/subagent configs              | `@agents`          |
 | Reference docs, API specs           | `@knowledge`       |
 
-### Step 4: Generate PromptScript
-
-Create `.prs` files in `.promptscript/` directory using the mapped content. Start with `project.prs` containing `@meta` with project id and syntax version.
-
-### Step 5: File Organization
-
-Split content into logical files:
-
-- `project.prs` - entry point with `@meta`, `@inherit`, `@use`, `@identity`
-- `context.prs` - `@context` block
-- `standards.prs` - `@standards` block
-- `restrictions.prs` - `@restrictions` block
-- `commands.prs` - `@shortcuts` and `@knowledge` blocks
-
-Use `@use ./context`, `@use ./standards`, etc. in `project.prs` to compose them.
-
-### Step 6: Configuration
-
-Create or update `promptscript.yaml` with appropriate targets matching the original AI tools being used.
-
-### Step 7: Validation
-
-Run `prs validate --strict` to check syntax, then `prs compile` to generate output files. Compare compiled output with original files to verify content was preserved.
-
-### Migration Tips
-
-- Preserve the original intent and tone of instructions
-- Don't lose any rules or restrictions during mapping
-- Use `@knowledge` for large reference sections that don't fit other blocks
-- Back up original files before overwriting with compiled output
+After import, split into modular files (`context.prs`, `standards.prs`, etc.)
+and compose with `@use` in `project.prs`. Run `prs validate --strict` then
+`prs compile` to verify output matches the original.
