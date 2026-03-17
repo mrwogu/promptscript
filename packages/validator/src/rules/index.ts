@@ -15,6 +15,8 @@ import { obfuscatedContent } from './obfuscated-content.js';
 import { pathTraversal } from './path-traversal.js';
 import { unicodeSecurity } from './unicode-security.js';
 import { skillParams } from './skill-params.js';
+import { skillDependencies } from './skill-dependencies.js';
+import { skillContracts } from './skill-contracts.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -61,6 +63,8 @@ export { obfuscatedContent } from './obfuscated-content.js';
 export { pathTraversal, hasPathTraversal } from './path-traversal.js';
 export { unicodeSecurity } from './unicode-security.js';
 export { skillParams } from './skill-params.js';
+export { skillDependencies } from './skill-dependencies.js';
+export { skillContracts } from './skill-contracts.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -85,6 +89,10 @@ export const allRules: ValidationRule[] = [
   validParams,
   // Skill params (PS015)
   skillParams,
+  // Skill dependencies (PS016)
+  skillDependencies,
+  // Skill contracts (PS017)
+  skillContracts,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

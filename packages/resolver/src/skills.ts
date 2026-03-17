@@ -9,6 +9,7 @@ import type {
   TextContent,
   ParamDefinition,
   ParamType,
+  SkillContractField,
 } from '@promptscript/core';
 
 /**
@@ -29,6 +30,8 @@ export interface ParsedSkillMd {
   description?: string;
   content: string;
   params?: ParamDefinition[];
+  inputs?: Record<string, SkillContractField>;
+  outputs?: Record<string, SkillContractField>;
 }
 
 /**
@@ -59,6 +62,8 @@ export function parseSkillMd(content: string): ParsedSkillMd {
   let name: string | undefined;
   let description: string | undefined;
   let params: ParamDefinition[] | undefined;
+  let inputs: Record<string, SkillContractField> | undefined;
+  let outputs: Record<string, SkillContractField> | undefined;
   let bodyContent: string;
 
   if (frontmatterStart >= 0 && frontmatterEnd > frontmatterStart) {
@@ -67,6 +72,8 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     name = parsed.name;
     description = parsed.description;
     params = parsed.params;
+    inputs = parsed.inputs;
+    outputs = parsed.outputs;
 
     bodyContent = lines
       .slice(frontmatterEnd + 1)
@@ -76,7 +83,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     bodyContent = content.trim();
   }
 
-  return { name, description, content: bodyContent, params };
+  return { name, description, content: bodyContent, params, inputs, outputs };
 }
 
 /**
@@ -86,10 +93,14 @@ function parseFrontmatterFields(lines: string[]): {
   name?: string;
   description?: string;
   params?: ParamDefinition[];
+  inputs?: Record<string, SkillContractField>;
+  outputs?: Record<string, SkillContractField>;
 } {
   let name: string | undefined;
   let description: string | undefined;
   let params: ParamDefinition[] | undefined;
+  let inputs: Record<string, SkillContractField> | undefined;
+  let outputs: Record<string, SkillContractField> | undefined;
 
   let i = 0;
   while (i < lines.length) {
@@ -117,10 +128,26 @@ function parseFrontmatterFields(lines: string[]): {
       continue;
     }
 
+    if (line.match(/^inputs:\s*$/)) {
+      i++;
+      const result = parseContractFieldsBlock(lines, i);
+      inputs = result.fields;
+      i = result.nextIndex;
+      continue;
+    }
+
+    if (line.match(/^outputs:\s*$/)) {
+      i++;
+      const result = parseContractFieldsBlock(lines, i);
+      outputs = result.fields;
+      i = result.nextIndex;
+      continue;
+    }
+
     i++;
   }
 
-  return { name, description, params };
+  return { name, description, params, inputs, outputs };
 }
 
 /**
@@ -217,6 +244,81 @@ function parseDefaultValue(valueStr: string, paramType: ParamType): Value {
     default:
       return valueStr;
   }
+}
+
+/**
+ * Parse a contract fields block (inputs or outputs) from YAML frontmatter.
+ */
+function parseContractFieldsBlock(
+  lines: string[],
+  startIndex: number
+): { fields: Record<string, SkillContractField>; nextIndex: number } {
+  const fields: Record<string, SkillContractField> = {};
+  let i = startIndex;
+
+  while (i < lines.length) {
+    const line = lines[i] ?? '';
+
+    // A field name line is indented with 2 spaces and ends with ':'
+    const fieldNameMatch = line.match(/^ {2}(\w+):\s*$/);
+    if (!fieldNameMatch) break;
+
+    const fieldName = fieldNameMatch[1]!;
+    i++;
+
+    let description = '';
+    let type: 'string' | 'number' | 'boolean' | 'enum' = 'string';
+    let options: string[] | undefined;
+    let defaultValue: Value | undefined;
+
+    // Read field properties (indented with 4+ spaces)
+    while (i < lines.length) {
+      const propLine = lines[i] ?? '';
+      if (!propLine.match(/^ {4}/)) break;
+      const trimmed = propLine.trim();
+
+      const descMatch = trimmed.match(/^description:\s*(?:"([^"]+)"|'([^']+)'|(.+))$/);
+      if (descMatch) {
+        description = (descMatch[1] ?? descMatch[2] ?? descMatch[3] ?? '').trim();
+        i++;
+        continue;
+      }
+
+      const typeMatch = trimmed.match(/^type:\s*(.+)$/);
+      if (typeMatch) {
+        const typeStr = typeMatch[1]!.trim();
+        if (['string', 'number', 'boolean', 'enum'].includes(typeStr)) {
+          type = typeStr as 'string' | 'number' | 'boolean' | 'enum';
+        }
+        i++;
+        continue;
+      }
+
+      const optionsMatch = trimmed.match(/^options:\s*\[(.+)\]$/);
+      if (optionsMatch) {
+        options = optionsMatch[1]!.split(',').map((o) => o.trim());
+        i++;
+        continue;
+      }
+
+      const defaultMatch = trimmed.match(/^default:\s*(.+)$/);
+      if (defaultMatch) {
+        const pt = parseParamType(type);
+        defaultValue = parseDefaultValue(defaultMatch[1]!.trim(), pt);
+        i++;
+        continue;
+      }
+
+      i++;
+    }
+
+    const field: SkillContractField = { description, type };
+    if (options) field.options = options;
+    if (defaultValue !== undefined) field.default = defaultValue;
+    fields[fieldName] = field;
+  }
+
+  return { fields, nextIndex: i };
 }
 
 /**
@@ -795,6 +897,22 @@ export async function resolveNativeSkills(
     return ast;
   }
 
+  // Discover shared resources from .promptscript/shared/ directory
+  let sharedResources: SkillResource[] = [];
+  if (localPath) {
+    const sharedDir = resolve(localPath, 'shared');
+    if (await fileExists(sharedDir)) {
+      try {
+        sharedResources = await discoverSkillResources(sharedDir, logger);
+        if (sharedResources.length > 0) {
+          logger.verbose(`Discovered ${sharedResources.length} shared resources from ${sharedDir}`);
+        }
+      } catch {
+        logger.verbose(`Failed to discover shared resources from ${sharedDir}`);
+      }
+    }
+  }
+
   // Resolve each skill's SKILL.md content and resources
   for (const [skillName, skillValue] of Object.entries(updatedProperties)) {
     if (typeof skillValue !== 'object' || skillValue === null || Array.isArray(skillValue)) {
@@ -869,9 +987,18 @@ export async function resolveNativeSkills(
         // Discover resource files alongside SKILL.md
         const skillDir = dirname(skillMdPath);
         const resources = await discoverSkillResources(skillDir, logger);
-        if (resources.length > 0) {
-          // Each resource is { relativePath: string, content: string } which satisfies { [key: string]: Value }
-          const resourceValues: Value[] = resources.map((r) => ({
+
+        // Merge skill-specific resources with shared resources
+        const allResources: SkillResource[] = [...resources];
+        for (const shared of sharedResources) {
+          allResources.push({
+            relativePath: `@shared/${shared.relativePath}`,
+            content: shared.content,
+          });
+        }
+
+        if (allResources.length > 0) {
+          const resourceValues: Value[] = allResources.map((r) => ({
             relativePath: r.relativePath,
             content: r.content,
           }));
