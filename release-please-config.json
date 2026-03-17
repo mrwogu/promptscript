@@ -4,6 +4,7 @@
   "packages": {
     ".": {
       "package-name": "promptscript",
+      "include-component-in-tag": false,
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "extra-files": ["packages/cli/package.json"]
