@@ -31,6 +31,8 @@ export const ANTIGRAVITY_VERSIONS = {
 
 /**
  * Maximum character limit for Antigravity rules.
+ * Community-observed limit (not officially documented by Google as of 2026-03-17).
+ * Re-verify at https://antigravity.google/docs if a formal spec is published.
  */
 const MAX_CHARS = 12000;
 
@@ -48,8 +50,13 @@ const MAX_CHARS = 12000;
  * Supports output convention:
  * - 'markdown': Uses Markdown headers and formatting (default, only supported convention)
  *
+ * @remarks
+ * Targets the **Antigravity IDE** (`.agent/rules/`).
+ * Do NOT confuse with Firebase Studio (`.idx/airules.md`) or Gemini CLI (`~/.gemini/GEMINI.md`).
+ * These are distinct products. See: https://atamel.dev/posts/2025/11-25_customize_antigravity_rules_workflows/
+ *
  * @example
- * ```yaml
+ * \`\`\`yaml
  * # Simple format (default)
  * targets:
  *   - antigravity
@@ -58,7 +65,7 @@ const MAX_CHARS = 12000;
  * targets:
  *   - antigravity:
  *       version: frontmatter
- * ```
+ * \`\`\`
  */
 export class AntigravityFormatter extends BaseFormatter {
   readonly name = 'antigravity';
@@ -176,10 +183,16 @@ export class AntigravityFormatter extends BaseFormatter {
    * Defaults to 'always' for most rules.
    */
   private determineActivationType(ast: Program): ActivationType {
-    // Check if guards block has glob patterns
     const guards = this.findBlock(ast, 'guards');
     if (guards) {
       const props = this.getProps(guards.content);
+
+      // Check for explicit activation property first
+      const explicitActivation = props['activation'];
+      if (explicitActivation === 'model') return 'model';
+      if (explicitActivation === 'manual') return 'manual';
+
+      // Check if guards block has glob patterns
       if (props['globs'] || props['glob'] || props['files']) {
         return 'glob';
       }
@@ -196,13 +209,22 @@ export class AntigravityFormatter extends BaseFormatter {
     const title = this.getMetaField(ast, 'name') ?? 'Project Rules';
     const description = this.extractProjectDescription(ast);
 
-    const lines = [
-      '---',
-      `title: "${title}"`,
-      `activation: "${activation}"`,
-      `description: "${description}"`,
-      '---',
-    ];
+    const lines = ['---', `title: "${title}"`, `activation: "${activation}"`];
+
+    // Emit globs field when activation is glob — required for Antigravity to match files
+    if (activation === 'glob') {
+      const guards = this.findBlock(ast, 'guards');
+      if (guards) {
+        const props = this.getProps(guards.content);
+        const raw = props['globs'] ?? props['glob'] ?? props['files'];
+        const globArray = Array.isArray(raw) ? raw.map(String) : raw ? [String(raw)] : [];
+        if (globArray.length > 0) {
+          lines.push(`globs: [${globArray.map((g) => `"${g}"`).join(', ')}]`);
+        }
+      }
+    }
+
+    lines.push(`description: "${description}"`, '---');
 
     return lines.join('\n');
   }

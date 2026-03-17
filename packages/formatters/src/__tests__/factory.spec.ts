@@ -1719,4 +1719,69 @@ describe('FactoryFormatter', () => {
       expect(result.content).toContain('</project>');
     });
   });
+
+  describe('regression: skill YAML key spelling', () => {
+    it('should emit user-invocable (hyphenated) not userInvocable (camelCase) when userInvocable is false', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-skill': {
+                  description: 'A test skill',
+                  userInvocable: false,
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.factory/skills/my-skill/SKILL.md')
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).toContain('user-invocable: false');
+      expect(skillFile?.content).not.toContain('userInvocable:');
+    });
+  });
+
+  describe('regression: droid specModel and specReasoningEffort emission', () => {
+    it('should emit specModel and specReasoningEffort keys when set', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                planner: {
+                  description: 'Planning droid',
+                  specModel: 'claude-opus-4-1',
+                  specReasoningEffort: 'high',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const droidFile = result.additionalFiles?.find(
+        (f) => f.path === '.factory/droids/planner.md'
+      );
+      expect(droidFile).toBeDefined();
+      expect(droidFile?.content).toContain('specModel: claude-opus-4-1');
+      expect(droidFile?.content).toContain('specReasoningEffort: high');
+    });
+  });
 });

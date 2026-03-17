@@ -757,6 +757,94 @@ Never leave TODO without issue reference`,
       const result = formatter.format(ast, { version: 'frontmatter' });
       expect(result.content).toContain('activation: "glob"');
     });
+
+    it('should emit globs field in frontmatter when activation is glob', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: { globs: ['*.ts', 'src/**/*.tsx'] },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'frontmatter' });
+      expect(result.content).toContain('activation: "glob"');
+      expect(result.content).toContain('globs: ["*.ts", "src/**/*.tsx"]');
+    });
+
+    it('should emit globs field from guards.files in frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: { files: ['src/**/*.ts'] },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'frontmatter' });
+      expect(result.content).toContain('activation: "glob"');
+      expect(result.content).toContain('globs: ["src/**/*.ts"]');
+    });
+
+    it('should use model activation when guards.activation is model', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: { activation: 'model' },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'frontmatter' });
+      expect(result.content).toContain('activation: "model"');
+      expect(result.content).not.toContain('globs:');
+    });
+
+    it('should use manual activation when guards.activation is manual', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: { activation: 'manual' },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'frontmatter' });
+      expect(result.content).toContain('activation: "manual"');
+      expect(result.content).not.toContain('globs:');
+    });
   });
 
   describe('character limit validation', () => {

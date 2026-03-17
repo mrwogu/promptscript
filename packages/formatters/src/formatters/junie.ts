@@ -5,8 +5,8 @@ export type JunieVersion = 'simple' | 'multifile' | 'full';
 export const { Formatter: JunieFormatter, VERSIONS: JUNIE_VERSIONS } =
   createSimpleMarkdownFormatter({
     name: 'junie',
-    outputPath: '.junie/rules/project.md',
+    outputPath: '.junie/guidelines.md',
     description: 'Junie rules (Markdown)',
-    mainFileHeader: '# Project Rules',
+    mainFileHeader: '# Project Guidelines',
     dotDir: '.junie',
   });

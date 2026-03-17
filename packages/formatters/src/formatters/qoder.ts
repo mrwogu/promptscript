@@ -9,4 +9,5 @@ export const { Formatter: QoderFormatter, VERSIONS: QODER_VERSIONS } =
     description: 'Qoder rules (Markdown)',
     mainFileHeader: '# Project Rules',
     dotDir: '.qoder',
+    hasSkills: false,
   });

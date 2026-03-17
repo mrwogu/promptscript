@@ -5,8 +5,8 @@ export type GooseVersion = 'simple' | 'multifile' | 'full';
 export const { Formatter: GooseFormatter, VERSIONS: GOOSE_VERSIONS } =
   createSimpleMarkdownFormatter({
     name: 'goose',
-    outputPath: '.goose/rules/project.md',
+    outputPath: '.goosehints',
     description: 'Goose rules (Markdown)',
-    mainFileHeader: '# Project Rules',
+    mainFileHeader: '# .goosehints',
     dotDir: '.goose',
   });

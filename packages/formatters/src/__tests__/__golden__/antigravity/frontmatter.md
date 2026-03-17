@@ -1,6 +1,7 @@
 ---
 title: "Project Rules"
 activation: "glob"
+globs: ["**/*.ts", "**/*.tsx"]
 description: "You are an expert TypeScript developer working on PromptScript - a language
 and toolchain for standa..."
 ---

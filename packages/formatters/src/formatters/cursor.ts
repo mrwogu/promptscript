@@ -4,8 +4,17 @@ import type { FormatOptions, FormatterOutput } from '../types.js';
 
 /**
  * Supported Cursor format versions.
+ *
+ * - `modern`: MDC format with YAML frontmatter (`.cursor/rules/project.mdc`)
+ * - `multifile`: Multiple MDC files with glob-based targeting
+ * - `legacy`: Plain text (`.cursorrules`) — deprecated
+ * - `agents-md`: Plain markdown at `AGENTS.md` (Cursor 2.4+)
+ *
+ * @note The `frontmatter` alias has been removed from this type. It is still
+ * accepted by the formatter as a silent fallback to `modern` for backward
+ * compatibility, but it no longer appears in autocomplete.
  */
-export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'frontmatter';
+export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'agents-md';
 
 /**
  * Cursor formatter version information.
@@ -19,12 +28,12 @@ export const CURSOR_VERSIONS = {
     cursorVersion: '0.45+',
     introduced: '2024-12',
   },
-  frontmatter: {
-    name: 'frontmatter',
-    description: 'Alias for modern format (MDC with YAML frontmatter + slash commands)',
-    outputPath: '.cursor/rules/project.mdc',
-    cursorVersion: '0.45+',
-    introduced: '2024-12',
+  'agents-md': {
+    name: 'agents-md',
+    description: 'Plain markdown at AGENTS.md (Cursor 2.4+) — no frontmatter required',
+    outputPath: 'AGENTS.md',
+    cursorVersion: '2.4+',
+    introduced: '2025-06',
   },
   multifile: {
     name: 'multifile',
@@ -58,11 +67,12 @@ interface GlobConfig {
 /**
  * Formatter for Cursor rules and commands.
  *
- * Supports three versions:
+ * Supports four versions:
  * - **modern** (default): `.cursor/rules/project.mdc` with YAML frontmatter
  *   + `.cursor/commands/*.md` for multi-line shortcuts
  * - **multifile**: Multiple MDC files with glob-based targeting + commands
  * - **legacy**: `.cursorrules` plain text (deprecated, no commands)
+ * - **agents-md**: Plain markdown at `AGENTS.md` (Cursor 2.4+) — no frontmatter
  *
  * ## Slash Commands (Cursor 1.6+)
  *
@@ -132,11 +142,19 @@ export class CursorFormatter extends BaseFormatter {
       return this.formatMultifile(ast, options);
     }
 
+    if (version === 'agents-md') {
+      return this.formatAgentsMd(ast, options);
+    }
+
     return this.formatModern(ast, options);
   }
 
   /**
    * Resolve version string to CursorVersion.
+   *
+   * The `'frontmatter'` string is accepted as a silent alias for `'modern'`
+   * for backward compatibility. It no longer appears in the exported
+   * `CursorVersion` type or `CURSOR_VERSIONS` map.
    */
   private resolveVersion(version?: string): CursorVersion {
     if (version === 'legacy') {
@@ -145,6 +163,10 @@ export class CursorFormatter extends BaseFormatter {
     if (version === 'multifile') {
       return 'multifile';
     }
+    if (version === 'agents-md') {
+      return 'agents-md';
+    }
+    // 'frontmatter' is kept as a silent backward-compat alias for 'modern'
     if (version === 'frontmatter') {
       return 'modern';
     }
@@ -190,6 +212,28 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   /**
+   * Format for Cursor 2.4+ `AGENTS.md` plain markdown output.
+   *
+   * `AGENTS.md` at the project root is a first-class, frontmatter-free
+   * alternative to `.cursor/rules/`. Cursor reads it automatically when the
+   * project is opened. No slash commands are generated for this version —
+   * use `modern` if slash commands are required.
+   *
+   * @see https://cursor.com/changelog/2-4
+   */
+  private formatAgentsMd(ast: Program, options?: FormatOptions): FormatterOutput {
+    const sections: string[] = [];
+
+    // No frontmatter — plain markdown only
+    this.addCommonSections(ast, sections);
+
+    return {
+      path: options?.outputPath ?? CURSOR_VERSIONS['agents-md'].outputPath,
+      content: sections.join('\n\n') + '\n',
+    };
+  }
+
+  /**
    * Format for multifile Cursor with glob-based targeting.
    * Generates separate .mdc files for different glob patterns.
    */
@@ -205,12 +249,6 @@ export class CursorFormatter extends BaseFormatter {
       if (globFile) {
         additionalFiles.push(globFile);
       }
-    }
-
-    // Generate shortcuts/commands file if shortcuts exist
-    const shortcutsFile = this.generateShortcutsFile(ast);
-    if (shortcutsFile) {
-      additionalFiles.push(shortcutsFile);
     }
 
     // Generate command files for multi-line shortcuts
@@ -258,6 +296,13 @@ export class CursorFormatter extends BaseFormatter {
 
   /**
    * Extract glob patterns from @guards block.
+   *
+   * **Known limitation**: Glob patterns are re-categorized into `typescript`,
+   * `testing`, and `files` buckets using hard-coded string matching
+   * (`.ts`/`.tsx` → typescript, `test`/`spec`/`__tests__` → testing, other →
+   * files). User-defined globs that do not match these heuristics may produce
+   * confusing output. This is a medium-priority improvement tracked in
+   * docs/agent-compat/cursor-plan.md.
    */
   private extractGlobs(ast: Program): GlobConfig[] {
     const guards = this.findBlock(ast, 'guards');
@@ -342,53 +387,6 @@ export class CursorFormatter extends BaseFormatter {
 
     return {
       path: `.cursor/rules/${config.name}.mdc`,
-      content: sections.join('\n\n') + '\n',
-    };
-  }
-
-  /**
-   * Generate shortcuts/commands file for manual activation.
-   */
-  private generateShortcutsFile(ast: Program): FormatterOutput | null {
-    const block = this.findBlock(ast, 'shortcuts');
-    if (!block) return null;
-
-    const props = this.getProps(block.content);
-    if (Object.keys(props).length === 0) return null;
-
-    const sections: string[] = [];
-
-    // Frontmatter for manual activation (via @mention)
-    sections.push(
-      ['---', 'description: "Project shortcuts and commands"', 'alwaysApply: false', '---'].join(
-        '\n'
-      )
-    );
-
-    const lines: string[] = ['## Commands'];
-    for (const [cmd, desc] of Object.entries(props)) {
-      const descStr = this.valueToString(desc);
-      if (typeof desc === 'object' && !Array.isArray(desc)) {
-        // Complex shortcut with steps
-        const descObj = desc as Record<string, Value>;
-        lines.push(`\n### ${cmd}`);
-        if (descObj['description']) {
-          lines.push(this.valueToString(descObj['description']));
-        }
-        if (Array.isArray(descObj['steps'])) {
-          lines.push('\n**Steps:**');
-          descObj['steps'].forEach((step, i) => {
-            lines.push(`${i + 1}. ${this.valueToString(step)}`);
-          });
-        }
-      } else {
-        lines.push(`- **${cmd}**: ${descStr.split('\n')[0]}`);
-      }
-    }
-    sections.push(lines.join('\n'));
-
-    return {
-      path: '.cursor/rules/shortcuts.mdc',
       content: sections.join('\n\n') + '\n',
     };
   }
@@ -503,6 +501,13 @@ export class CursorFormatter extends BaseFormatter {
 
   /**
    * Generate YAML frontmatter for Cursor MDC format.
+   *
+   * **Known limitation**: `alwaysApply` is always emitted as `true`, meaning
+   * this formatter can only produce "Always" rules. "Agent Requested" rules
+   * (description-only, no `alwaysApply`) and "Auto Attached" rules
+   * (globs-only) are not currently supported. This is a medium-priority
+   * improvement tracked in docs/agent-compat/cursor-plan.md.
+   *
    * @see https://cursor.com/docs/context/rules
    */
   private frontmatter(ast: Program): string {

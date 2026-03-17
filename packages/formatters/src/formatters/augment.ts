@@ -9,4 +9,5 @@ export const { Formatter: AugmentFormatter, VERSIONS: AUGMENT_VERSIONS } =
     description: 'Augment rules (Markdown)',
     mainFileHeader: '# Project Rules',
     dotDir: '.augment',
+    hasSkills: false,
   });

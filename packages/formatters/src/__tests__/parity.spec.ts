@@ -3,6 +3,43 @@ import type { Program, SourceLocation } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 import { ClaudeFormatter } from '../formatters/claude.js';
 import { CursorFormatter } from '../formatters/cursor.js';
+import { AntigravityFormatter } from '../formatters/antigravity.js';
+import { FactoryFormatter } from '../formatters/factory.js';
+import { OpenCodeFormatter } from '../formatters/opencode.js';
+import { GeminiFormatter } from '../formatters/gemini.js';
+// Tier 1
+import { WindsurfFormatter } from '../formatters/windsurf.js';
+import { ClineFormatter } from '../formatters/cline.js';
+import { RooFormatter } from '../formatters/roo.js';
+import { CodexFormatter } from '../formatters/codex.js';
+import { ContinueFormatter } from '../formatters/continue.js';
+// Tier 2
+import { AugmentFormatter } from '../formatters/augment.js';
+import { GooseFormatter } from '../formatters/goose.js';
+import { KiloFormatter } from '../formatters/kilo.js';
+import { AmpFormatter } from '../formatters/amp.js';
+import { TraeFormatter } from '../formatters/trae.js';
+import { JunieFormatter } from '../formatters/junie.js';
+import { KiroFormatter } from '../formatters/kiro.js';
+// Tier 3
+import { CortexFormatter } from '../formatters/cortex.js';
+import { CrushFormatter } from '../formatters/crush.js';
+import { CommandCodeFormatter } from '../formatters/command-code.js';
+import { KodeFormatter } from '../formatters/kode.js';
+import { McpjamFormatter } from '../formatters/mcpjam.js';
+import { MistralVibeFormatter } from '../formatters/mistral-vibe.js';
+import { MuxFormatter } from '../formatters/mux.js';
+import { OpenHandsFormatter } from '../formatters/openhands.js';
+import { PiFormatter } from '../formatters/pi.js';
+import { QoderFormatter } from '../formatters/qoder.js';
+import { QwenCodeFormatter } from '../formatters/qwen-code.js';
+import { ZencoderFormatter } from '../formatters/zencoder.js';
+import { NeovateFormatter } from '../formatters/neovate.js';
+import { PochiFormatter } from '../formatters/pochi.js';
+import { AdalFormatter } from '../formatters/adal.js';
+import { IflowFormatter } from '../formatters/iflow.js';
+import { OpenClawFormatter } from '../formatters/openclaw.js';
+import { CodeBuddyFormatter } from '../formatters/codebuddy.js';
 import {
   extractSectionsFromOutput,
   normalizeSectionName,
@@ -178,18 +215,78 @@ pnpm lint
   };
 }
 
+/**
+ * Build the full list of all 37 formatters.
+ */
+function buildAllFormatters(): Formatter[] {
+  return [
+    // Tier 0 — original formatters
+    new GitHubFormatter(),
+    new ClaudeFormatter(),
+    new CursorFormatter(),
+    new AntigravityFormatter(),
+    new FactoryFormatter(),
+    new OpenCodeFormatter(),
+    new GeminiFormatter(),
+    // Tier 1
+    new WindsurfFormatter(),
+    new ClineFormatter(),
+    new RooFormatter(),
+    new CodexFormatter(),
+    new ContinueFormatter(),
+    // Tier 2
+    new AugmentFormatter(),
+    new GooseFormatter(),
+    new KiloFormatter(),
+    new AmpFormatter(),
+    new TraeFormatter(),
+    new JunieFormatter(),
+    new KiroFormatter(),
+    // Tier 3
+    new CortexFormatter(),
+    new CrushFormatter(),
+    new CommandCodeFormatter(),
+    new KodeFormatter(),
+    new McpjamFormatter(),
+    new MistralVibeFormatter(),
+    new MuxFormatter(),
+    new OpenHandsFormatter(),
+    new PiFormatter(),
+    new QoderFormatter(),
+    new QwenCodeFormatter(),
+    new ZencoderFormatter(),
+    new NeovateFormatter(),
+    new PochiFormatter(),
+    new AdalFormatter(),
+    new IflowFormatter(),
+    new OpenClawFormatter(),
+    new CodeBuddyFormatter(),
+  ];
+}
+
 describe('Formatter Parity Tests', () => {
-  const formatters: Formatter[] = [];
+  let formatters: Formatter[] = [];
 
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
-    formatters.length = 0;
-    formatters.push(new GitHubFormatter(), new ClaudeFormatter(), new CursorFormatter());
+    formatters = buildAllFormatters();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  describe('Formatter Count', () => {
+    it('should have all 37 formatters registered', () => {
+      expect(formatters.length).toBe(37);
+    });
+
+    it('all formatters should have unique names', () => {
+      const names = formatters.map((f) => f.name);
+      const uniqueNames = new Set(names);
+      expect(uniqueNames.size).toBe(formatters.length);
+    });
   });
 
   describe('Section Coverage', () => {
@@ -263,7 +360,7 @@ describe('Formatter Parity Tests', () => {
     it('markdown formatters should generate tech-stack section when context has tech info', () => {
       const ast = createComprehensiveAST();
 
-      // Only check markdown-based formatters
+      // Only check markdown-based formatters (all except cursor)
       const mdFormatters = formatters.filter((f) => f.name !== 'cursor');
 
       for (const formatter of mdFormatters) {
@@ -326,6 +423,126 @@ describe('Formatter Parity Tests', () => {
           `${formatter.name} should include restrictions in some format`
         ).toBe(true);
       }
+    });
+
+    it('all formatters should produce non-empty output', () => {
+      const ast = createComprehensiveAST();
+
+      for (const formatter of formatters) {
+        const result = formatter.format(ast);
+        expect(
+          result.content.length,
+          `${formatter.name} should produce non-empty output`
+        ).toBeGreaterThan(50);
+        expect(result.path, `${formatter.name} should have an output path`).toBeTruthy();
+      }
+    });
+  });
+
+  describe('Required Sections per Formatter', () => {
+    it.each([
+      ['github'],
+      ['claude'],
+      ['cursor'],
+      ['antigravity'],
+      ['factory'],
+      ['opencode'],
+      ['gemini'],
+      ['windsurf'],
+      ['cline'],
+      ['roo'],
+      ['codex'],
+      ['continue'],
+      ['augment'],
+      ['goose'],
+      ['kilo'],
+      ['amp'],
+      ['trae'],
+      ['junie'],
+      ['kiro'],
+      ['cortex'],
+      ['crush'],
+      ['command-code'],
+      ['kode'],
+      ['mcpjam'],
+      ['mistral-vibe'],
+      ['mux'],
+      ['openhands'],
+      ['pi'],
+      ['qoder'],
+      ['qwen-code'],
+      ['zencoder'],
+      ['neovate'],
+      ['pochi'],
+      ['adal'],
+      ['iflow'],
+      ['openclaw'],
+      ['codebuddy'],
+    ])('%s formatter should produce identity content', (formatterName) => {
+      const ast = createComprehensiveAST();
+      const formatter = formatters.find((f) => f.name === formatterName)!;
+      expect(formatter, `Formatter ${formatterName} should exist`).toBeDefined();
+
+      const result = formatter.format(ast);
+      const hasIdentity =
+        result.content.includes('You are') ||
+        result.content.includes('developer') ||
+        result.content.includes('expert');
+
+      expect(hasIdentity, `${formatterName} should include identity content`).toBe(true);
+    });
+
+    it.each([
+      ['github'],
+      ['claude'],
+      ['cursor'],
+      ['antigravity'],
+      ['factory'],
+      ['opencode'],
+      ['gemini'],
+      ['windsurf'],
+      ['cline'],
+      ['roo'],
+      ['codex'],
+      ['continue'],
+      ['augment'],
+      ['goose'],
+      ['kilo'],
+      ['amp'],
+      ['trae'],
+      ['junie'],
+      ['kiro'],
+      ['cortex'],
+      ['crush'],
+      ['command-code'],
+      ['kode'],
+      ['mcpjam'],
+      ['mistral-vibe'],
+      ['mux'],
+      ['openhands'],
+      ['pi'],
+      ['qoder'],
+      ['qwen-code'],
+      ['zencoder'],
+      ['neovate'],
+      ['pochi'],
+      ['adal'],
+      ['iflow'],
+      ['openclaw'],
+      ['codebuddy'],
+    ])('%s formatter should produce restrictions content', (formatterName) => {
+      const ast = createComprehensiveAST();
+      const formatter = formatters.find((f) => f.name === formatterName)!;
+      expect(formatter, `Formatter ${formatterName} should exist`).toBeDefined();
+
+      const result = formatter.format(ast);
+      const hasRestrictions =
+        result.content.includes("Don't") ||
+        result.content.includes('Never') ||
+        result.content.includes('never') ||
+        result.content.includes('avoid');
+
+      expect(hasRestrictions, `${formatterName} should include restrictions`).toBe(true);
     });
   });
 

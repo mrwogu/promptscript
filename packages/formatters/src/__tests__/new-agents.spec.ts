@@ -90,7 +90,8 @@ const NEW_FORMATTERS = [
     outputPath: '.clinerules',
     description: 'Cline rules (Markdown)',
     mainHeader: '# Project Rules',
-    dotDir: '.agents',
+    dotDir: '.clinerules',
+    hasSkills: false as const,
   },
   {
     name: 'roo',
@@ -100,6 +101,7 @@ const NEW_FORMATTERS = [
     description: 'Roo Code rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.roo',
+    hasSkills: false as const,
   },
   {
     name: 'codex',
@@ -107,7 +109,7 @@ const NEW_FORMATTERS = [
     VERSIONS: CODEX_VERSIONS,
     outputPath: 'AGENTS.md',
     description: 'Codex instructions (Markdown)',
-    mainHeader: '# AGENTS.md',
+    mainHeader: '',
     dotDir: '.agents',
   },
   {
@@ -118,6 +120,7 @@ const NEW_FORMATTERS = [
     description: 'Continue rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.continue',
+    hasSkills: false as const,
   },
   // Tier 2
   {
@@ -128,14 +131,15 @@ const NEW_FORMATTERS = [
     description: 'Augment rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.augment',
+    hasSkills: false as const,
   },
   {
     name: 'goose',
     Formatter: GooseFormatter,
     VERSIONS: GOOSE_VERSIONS,
-    outputPath: '.goose/rules/project.md',
+    outputPath: '.goosehints',
     description: 'Goose rules (Markdown)',
-    mainHeader: '# Project Rules',
+    mainHeader: '# .goosehints',
     dotDir: '.goose',
   },
   {
@@ -160,7 +164,7 @@ const NEW_FORMATTERS = [
     name: 'trae',
     Formatter: TraeFormatter,
     VERSIONS: TRAE_VERSIONS,
-    outputPath: '.trae/rules/project.md',
+    outputPath: '.trae/rules/project_rules.md',
     description: 'Trae rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.trae',
@@ -169,17 +173,17 @@ const NEW_FORMATTERS = [
     name: 'junie',
     Formatter: JunieFormatter,
     VERSIONS: JUNIE_VERSIONS,
-    outputPath: '.junie/rules/project.md',
+    outputPath: '.junie/guidelines.md',
     description: 'Junie rules (Markdown)',
-    mainHeader: '# Project Rules',
+    mainHeader: '# Project Guidelines',
     dotDir: '.junie',
   },
   {
     name: 'kiro',
     Formatter: KiroFormatter,
     VERSIONS: KIRO_VERSIONS,
-    outputPath: '.kiro/rules/project.md',
-    description: 'Kiro CLI rules (Markdown)',
+    outputPath: '.kiro/steering/project.md',
+    description: 'Kiro steering file (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.kiro',
   },
@@ -197,9 +201,9 @@ const NEW_FORMATTERS = [
     name: 'crush',
     Formatter: CrushFormatter,
     VERSIONS: CRUSH_VERSIONS,
-    outputPath: '.crush/rules/project.md',
-    description: 'Crush rules (Markdown)',
-    mainHeader: '# Project Rules',
+    outputPath: 'AGENTS.md',
+    description: 'Crush instructions (Markdown)',
+    mainHeader: '# AGENTS.md',
     dotDir: '.crush',
   },
   {
@@ -246,6 +250,7 @@ const NEW_FORMATTERS = [
     description: 'Mux rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.mux',
+    hasSkills: false as const,
   },
   {
     name: 'openhands',
@@ -273,6 +278,7 @@ const NEW_FORMATTERS = [
     description: 'Qoder rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.qoder',
+    hasSkills: false as const,
   },
   {
     name: 'qwen-code',
@@ -300,6 +306,7 @@ const NEW_FORMATTERS = [
     description: 'Neovate rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.neovate',
+    hasSkills: false as const,
   },
   {
     name: 'pochi',
@@ -335,7 +342,7 @@ const NEW_FORMATTERS = [
     outputPath: 'INSTRUCTIONS.md',
     description: 'OpenClaw instructions (Markdown)',
     mainHeader: '# INSTRUCTIONS.md',
-    dotDir: 'skills',
+    dotDir: '.openclaw',
   },
   {
     name: 'codebuddy',
@@ -346,12 +353,12 @@ const NEW_FORMATTERS = [
     mainHeader: '# Project Rules',
     dotDir: '.codebuddy',
   },
-] as const;
+];
 
 describe('New Agent Formatters', () => {
   describe.each(NEW_FORMATTERS)(
     '$name formatter',
-    ({ name, Formatter, VERSIONS, outputPath, description, mainHeader }) => {
+    ({ name, Formatter, VERSIONS, outputPath, description, mainHeader, hasSkills = true }) => {
       let formatter: InstanceType<typeof Formatter>;
 
       beforeEach(() => {
@@ -398,7 +405,16 @@ describe('New Agent Formatters', () => {
         expect(result.content).toContain('You are an expert developer.');
       });
 
-      it('should generate skill files in full mode', () => {
+      it('should format multifile version with correct header', () => {
+        const ast = createProgramWithIdentity();
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.path).toBe(outputPath);
+        expect(result.content).toContain(mainHeader);
+        expect(result.content).toContain('You are an expert developer.');
+      });
+
+      it.skipIf(!hasSkills)('should generate skill files in full mode', () => {
         const ast: Program = {
           ...createMinimalProgram(),
           blocks: [
@@ -432,6 +448,16 @@ describe('New Agent Formatters', () => {
       });
     }
   );
+
+  describe('Codex-specific behavior', () => {
+    it('should not start with # AGENTS.md heading', () => {
+      const formatter = new CodexFormatter();
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+
+      expect(result.content).not.toMatch(/^# AGENTS\.md/);
+    });
+  });
 
   describe('Registry integration', () => {
     it.each(NEW_FORMATTERS.map((f) => f.name))(

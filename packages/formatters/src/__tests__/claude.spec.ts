@@ -593,6 +593,41 @@ describe('ClaudeFormatter', () => {
       expect(skillFile?.content).toContain('agent: general-purpose');
     });
 
+    it('should emit disableModelInvocation, argumentHint and model in skill frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy to production',
+                  disableModelInvocation: true,
+                  argumentHint: '<environment>',
+                  model: 'opus',
+                  content: 'Deploy instructions.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/deploy/SKILL.md')
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).toContain('disable-model-invocation: true');
+      expect(skillFile?.content).toContain("argument-hint: '<environment>'");
+      expect(skillFile?.content).toContain('model: opus');
+    });
+
     it('should emit resource files alongside skill SKILL.md in full mode', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -672,6 +707,9 @@ describe('ClaudeFormatter', () => {
       expect(localFile?.content).toContain('# CLAUDE.local.md');
       expect(localFile?.content).toContain('Private instructions');
       expect(localFile?.content).toContain('Private instructions for local development.');
+
+      // Main file must include the @import directive so Claude Code loads the local file
+      expect(result.content).toContain('@CLAUDE.local.md');
     });
 
     it('should not generate local file when @local block is missing', () => {
@@ -694,6 +732,7 @@ describe('ClaudeFormatter', () => {
       const result = formatter.format(ast, { version: 'full' });
       const localFile = result.additionalFiles?.find((f) => f.path === 'CLAUDE.local.md');
       expect(localFile).toBeUndefined();
+      expect(result.content).not.toContain('@CLAUDE.local.md');
     });
 
     describe('agent file generation', () => {
@@ -786,6 +825,45 @@ describe('ClaudeFormatter', () => {
         expect(agentFile?.content).toContain('skills:');
         expect(agentFile?.content).toContain('  - sql-patterns');
         expect(agentFile?.content).toContain('  - data-analysis');
+      });
+
+      it('should emit maxTurns, memory, mcpServers, background and isolation in agent frontmatter', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'bg-worker': {
+                    description: 'Background data processor',
+                    maxTurns: 50,
+                    memory: 'project',
+                    mcpServers: ['postgres', 'redis'],
+                    background: true,
+                    isolation: 'worktree',
+                    content: 'Process data in the background.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/bg-worker.md'
+        );
+        expect(agentFile).toBeDefined();
+        expect(agentFile?.content).toContain('maxTurns: 50');
+        expect(agentFile?.content).toContain('memory: project');
+        expect(agentFile?.content).toContain('mcpServers: postgres, redis');
+        expect(agentFile?.content).toContain('background: true');
+        expect(agentFile?.content).toContain('isolation: worktree');
       });
 
       it('should generate multiple agent files', () => {

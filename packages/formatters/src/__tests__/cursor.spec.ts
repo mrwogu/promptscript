@@ -715,7 +715,7 @@ describe('CursorFormatter', () => {
         expect(testFile?.content).toContain('Testing-specific rules');
       });
 
-      it('should generate shortcuts file for manual activation', () => {
+      it('should not generate shortcuts.mdc in multifile mode (removed in favor of Commands section)', () => {
         const ast: Program = {
           ...createMinimalProgram(),
           blocks: [
@@ -740,16 +740,10 @@ describe('CursorFormatter', () => {
 
         const result = formatter.format(ast, { version: 'multifile' });
 
-        expect(result.additionalFiles).toBeDefined();
-
+        // shortcuts.mdc is no longer generated — shortcuts appear in the main
+        // file's Commands: section and multi-line ones become .cursor/commands/*.md
         const shortcutsFile = result.additionalFiles?.find((f) => f.path.includes('shortcuts.mdc'));
-        expect(shortcutsFile).toBeDefined();
-        expect(shortcutsFile?.content).toContain('alwaysApply: false');
-        expect(shortcutsFile?.content).toContain('## Commands');
-        expect(shortcutsFile?.content).toContain('/test');
-        expect(shortcutsFile?.content).toContain('/deploy');
-        expect(shortcutsFile?.content).toContain('**Steps:**');
-        expect(shortcutsFile?.content).toContain('1. Build');
+        expect(shortcutsFile).toBeUndefined();
       });
 
       it('should not generate additional files when no guards or shortcuts', () => {
@@ -768,10 +762,46 @@ describe('CursorFormatter', () => {
         expect(result.additionalFiles).toBeUndefined();
       });
 
-      it('should have multifile version in CURSOR_VERSIONS', () => {
+      it('should have multifile and agents-md versions in CURSOR_VERSIONS', () => {
         expect(CURSOR_VERSIONS.multifile).toBeDefined();
         expect(CURSOR_VERSIONS.multifile.name).toBe('multifile');
-        expect(CURSOR_VERSIONS.frontmatter).toBeDefined();
+        expect(CURSOR_VERSIONS['agents-md']).toBeDefined();
+        expect(CURSOR_VERSIONS['agents-md'].outputPath).toBe('AGENTS.md');
+        // frontmatter alias has been removed from CURSOR_VERSIONS
+        expect('frontmatter' in CURSOR_VERSIONS).toBe(false);
+      });
+    });
+
+    describe('agents-md format (Cursor 2.4+)', () => {
+      it('should output AGENTS.md path', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'agents-md' });
+
+        expect(result.path).toBe('AGENTS.md');
+      });
+
+      it('should produce plain markdown with no YAML frontmatter', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'agents-md' });
+
+        expect(result.content).not.toContain('---');
+        expect(result.content).not.toContain('alwaysApply');
+        expect(result.content).not.toContain('description:');
+      });
+
+      it('should not generate additional files', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'agents-md' });
+
+        expect(result.additionalFiles).toBeUndefined();
+      });
+
+      it('should include common sections in plain markdown format', () => {
+        const ast = createMinimalProgram();
+        const result = formatter.format(ast, { version: 'agents-md' });
+
+        expect(result.content).toContain('You are working on');
+        expect(result.content.endsWith('\n')).toBe(true);
       });
     });
   });
