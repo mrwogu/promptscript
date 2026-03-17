@@ -1284,9 +1284,7 @@ describe('Golden Files Tests', () => {
       const formatter = new FactoryFormatter();
       const result = formatter.format(ast, { version: 'full' });
 
-      const skillFiles = result.additionalFiles?.filter((f) =>
-        f.path.includes('.factory/skills/')
-      );
+      const skillFiles = result.additionalFiles?.filter((f) => f.path.includes('.factory/skills/'));
       expect(skillFiles?.length).toBeGreaterThan(0);
 
       for (const skillFile of skillFiles ?? []) {
