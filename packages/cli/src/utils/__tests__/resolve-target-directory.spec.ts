@@ -12,12 +12,14 @@ describe('utils/resolve-target-directory', () => {
     mockSelect = vi.fn();
   });
 
-  function callResolve(overrides: {
-    cwd?: string;
-    directoryArg?: string;
-    registryName?: string;
-    nonInteractive?: boolean;
-  } = {}): Promise<string> {
+  function callResolve(
+    overrides: {
+      cwd?: string;
+      directoryArg?: string;
+      registryName?: string;
+      nonInteractive?: boolean;
+    } = {}
+  ): Promise<string> {
     return resolveTargetDirectory(
       {
         cwd: overrides.cwd ?? '/test/empty-dir',

@@ -55,10 +55,7 @@ export async function resolveTargetDirectory(
 /**
  * Check if a directory is empty (ignoring hidden files like .git, .gitkeep).
  */
-async function isDirectoryEmpty(
-  dir: string,
-  fs: Pick<FileSystem, 'readdir'>
-): Promise<boolean> {
+async function isDirectoryEmpty(dir: string, fs: Pick<FileSystem, 'readdir'>): Promise<boolean> {
   const entries = await fs.readdir(dir);
   return entries.every((entry) => (entry as string).startsWith('.'));
 }
