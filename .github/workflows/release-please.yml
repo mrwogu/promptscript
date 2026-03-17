@@ -15,8 +15,8 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs['packages/cli--release_created'] }}
-      tag_name: ${{ steps.release.outputs['packages/cli--tag_name'] }}
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
@@ -24,24 +24,6 @@ jobs:
           token: ${{ secrets.RELEASE_PAT }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-
-  sync-changelog:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.RELEASE_PAT }}
-
-      - name: Sync root changelog
-        run: |
-          cp packages/cli/CHANGELOG.md CHANGELOG.md
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git diff --staged --quiet || git commit -m "chore: sync root changelog"
-          git push
 
   # Note: Publishing is handled by .github/workflows/publish.yml
   # which triggers on tag push (created by release-please above)
