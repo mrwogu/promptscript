@@ -1,4 +1,4 @@
-# Project Rules
+# AGENTS.md
 
 ## Project
 

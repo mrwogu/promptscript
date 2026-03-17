@@ -1,4 +1,4 @@
-# Project Rules
+# Project Guidelines
 
 ## Project
 
