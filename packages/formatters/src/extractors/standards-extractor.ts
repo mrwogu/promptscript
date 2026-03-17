@@ -166,12 +166,13 @@ export class StandardsExtractor {
     if (!git || typeof git !== 'object' || Array.isArray(git)) return undefined;
 
     const g = git as Record<string, Value>;
-    const result: { format?: string; types?: string[]; example?: string } = {};
+    const result: { format?: string; types?: string[]; scope?: string; example?: string } = {};
 
     if (g['format']) result.format = this.valueToString(g['format']);
     if (Array.isArray(g['types'])) {
       result.types = g['types'].map((t) => this.valueToString(t)).filter(Boolean);
     }
+    if (g['scope']) result.scope = this.valueToString(g['scope']);
     if (g['example']) result.example = this.valueToString(g['example']);
 
     return Object.keys(result).length > 0 ? result : undefined;

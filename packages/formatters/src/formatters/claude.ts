@@ -910,6 +910,7 @@ export class ClaudeFormatter extends BaseFormatter {
     if (g['types'] && Array.isArray(g['types'])) {
       items.push(`Types: ${g['types'].map(String).join(', ')}`);
     }
+    if (g['scope']) items.push(`Scope: ${this.valueToString(g['scope'])}`);
     if (g['example']) items.push(`Example: \`${this.valueToString(g['example'])}\``);
 
     if (items.length === 0) return null;

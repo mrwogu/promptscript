@@ -23,6 +23,7 @@ export interface StandardsEntry {
 export interface GitStandards {
   readonly format?: string;
   readonly types?: string[];
+  readonly scope?: string;
   readonly example?: string;
 }
 

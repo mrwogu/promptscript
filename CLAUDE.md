@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-03-06T22:55:23.651Z - do not edit -->
+<!-- PromptScript 2026-03-17T10:20:20.332Z - do not edit -->
 
 ## Project
 
@@ -75,6 +75,7 @@ flowchart TB
 
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 
 ## Config Files

@@ -509,6 +509,11 @@ ${this.stripAllIndent(content)}`;
       items.push(`Types: \`${types.map(String).join('`, `')}\``);
     }
 
+    const scope = gitObj['scope'];
+    if (scope) {
+      items.push(`Scope: ${this.valueToString(scope)}`);
+    }
+
     const example = gitObj['example'];
     if (example) {
       items.push(`Example: \`${this.valueToString(example)}\``);
