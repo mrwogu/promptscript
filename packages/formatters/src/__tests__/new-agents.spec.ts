@@ -90,7 +90,8 @@ const NEW_FORMATTERS = [
     outputPath: '.clinerules',
     description: 'Cline rules (Markdown)',
     mainHeader: '# Project Rules',
-    dotDir: '.agents',
+    dotDir: '.clinerules',
+    hasSkills: false as const,
   },
   {
     name: 'roo',
@@ -119,6 +120,7 @@ const NEW_FORMATTERS = [
     description: 'Continue rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.continue',
+    hasSkills: false as const,
   },
   // Tier 2
   {

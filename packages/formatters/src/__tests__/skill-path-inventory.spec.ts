@@ -16,7 +16,7 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   adal: { basePath: '.adal/skills', fileName: 'SKILL.md' },
   amp: { basePath: '.agents/skills', fileName: 'SKILL.md' },
   augment: { basePath: '.augment/skills', fileName: 'SKILL.md' },
-  cline: { basePath: '.agents/skills', fileName: 'SKILL.md' },
+  cline: { basePath: '.clinerules/skills', fileName: 'SKILL.md' },
   codebuddy: { basePath: '.codebuddy/skills', fileName: 'SKILL.md' },
   codex: { basePath: '.agents/skills', fileName: 'SKILL.md' },
   'command-code': { basePath: '.commandcode/skills', fileName: 'SKILL.md' },

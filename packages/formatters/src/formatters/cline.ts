@@ -8,5 +8,6 @@ export const { Formatter: ClineFormatter, VERSIONS: CLINE_VERSIONS } =
     outputPath: '.clinerules',
     description: 'Cline rules (Markdown)',
     mainFileHeader: '# Project Rules',
-    dotDir: '.agents',
+    dotDir: '.clinerules',
+    hasSkills: false,
   });
