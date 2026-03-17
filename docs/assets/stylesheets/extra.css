@@ -2541,13 +2541,27 @@ pre.init-demo__file-preview-content {
   animation: formatter-card-in 0.4s ease forwards;
 }
 
-.md-typeset .formatter-card:nth-child(1) { animation-delay: 0s; }
-.md-typeset .formatter-card:nth-child(2) { animation-delay: 0.04s; }
-.md-typeset .formatter-card:nth-child(3) { animation-delay: 0.08s; }
-.md-typeset .formatter-card:nth-child(4) { animation-delay: 0.12s; }
-.md-typeset .formatter-card:nth-child(5) { animation-delay: 0.16s; }
-.md-typeset .formatter-card:nth-child(6) { animation-delay: 0.2s; }
-.md-typeset .formatter-card:nth-child(7) { animation-delay: 0.24s; }
+.md-typeset .formatter-card:nth-child(1) {
+  animation-delay: 0s;
+}
+.md-typeset .formatter-card:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.md-typeset .formatter-card:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.md-typeset .formatter-card:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.md-typeset .formatter-card:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.md-typeset .formatter-card:nth-child(6) {
+  animation-delay: 0.2s;
+}
+.md-typeset .formatter-card:nth-child(7) {
+  animation-delay: 0.24s;
+}
 
 @keyframes formatter-card-in {
   to {
@@ -2657,4 +2671,151 @@ pre.init-demo__file-preview-content {
 [data-md-color-scheme='slate'] .md-typeset .formatter-card__tag--special {
   background: rgba(96, 165, 250, 0.15);
   color: #93c5fd;
+}
+
+/* Hero ticker — scrolling agent names */
+@keyframes hero-ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.hero-ticker {
+  position: relative;
+  overflow: hidden;
+  margin: 0.75rem auto 0;
+  max-width: 100vw;
+}
+
+.hero-ticker::before,
+.hero-ticker::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-ticker::before {
+  left: 0;
+  background: linear-gradient(to right, var(--md-default-bg-color), transparent);
+}
+
+.hero-ticker::after {
+  right: 0;
+  background: linear-gradient(to left, var(--md-default-bg-color), transparent);
+}
+
+.hero-ticker__track {
+  display: flex;
+  gap: 0.75rem;
+  width: max-content;
+  animation: hero-ticker-scroll 35s linear infinite;
+  will-change: transform;
+}
+
+.hero-ticker:hover .hero-ticker__track {
+  animation-play-state: paused;
+}
+
+.hero-ticker__chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.hero-ticker__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hero-ticker__chip--custom {
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+.hero-ticker__chip--custom .hero-ticker__dot {
+  background: #8b5cf6;
+}
+
+.hero-ticker__chip--t1 {
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+.hero-ticker__chip--t1 .hero-ticker__dot {
+  background: #2563eb;
+}
+
+.hero-ticker__chip--t2 {
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+.hero-ticker__chip--t2 .hero-ticker__dot {
+  background: #06b6d4;
+}
+
+.hero-ticker__chip--t3 {
+  background: rgba(71, 85, 105, 0.15);
+  border: 1px solid rgba(71, 85, 105, 0.25);
+}
+.hero-ticker__chip--t3 .hero-ticker__dot {
+  background: #475569;
+}
+
+@media screen and (max-width: 768px) {
+  .hero-ticker::before,
+  .hero-ticker::after {
+    width: 40px;
+  }
+  .hero-ticker__track {
+    gap: 0.6rem;
+    animation-duration: 30s;
+  }
+  .hero-ticker__chip {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .hero-ticker::before,
+  .hero-ticker::after {
+    width: 30px;
+  }
+  .hero-ticker__track {
+    gap: 0.5rem;
+    animation-duration: 25s;
+  }
+  .hero-ticker__chip {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  .hero-ticker__dot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ticker__track {
+    animation: none;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .hero-ticker__chip:nth-child(n + 38) {
+    display: none;
+  }
 }

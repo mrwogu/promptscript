@@ -1,21 +1,21 @@
 ---
-title: 'PromptScript — One Source, 37 AI Agents | Enterprise AI Standards'
-description: 'Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
+title: 'PromptScript — One Source, Every AI Agent | Enterprise AI Standards'
+description: 'Write AI instructions once, compile to 37 AI coding agents. One source for GitHub Copilot, Claude Code, Cursor, Windsurf, and 33 more. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
 meta:
   - name: keywords
     content: PromptScript, PromptOps, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
   - name: robots
     content: index, follow
   - property: og:title
-    content: PromptScript — One Source, 37 AI Agents
+    content: PromptScript — One Source, Every AI Agent
   - property: og:description
-    content: Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.
+    content: Write AI instructions once, compile to 37 AI coding agents. One source for GitHub Copilot, Claude Code, Cursor, Windsurf, and 33 more. Enterprise prompt standardization with inheritance, validation, and CI/CD.
   - property: og:type
     content: website
   - name: twitter:card
     content: summary_large_image
   - name: twitter:title
-    content: PromptScript — One Source, 37 AI Agents
+    content: PromptScript — One Source, Every AI Agent
 hide:
   - navigation
   - toc
@@ -27,9 +27,87 @@ hide:
 
 # PromptScript
 
-**Write once. Deploy to 37 agents. Update everywhere instantly.**
+**One source. Every AI agent.**
 
-_Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and 32 more._
+<div class="hero-ticker" aria-hidden="true">
+  <div class="hero-ticker__track">
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Cline</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Codex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Roo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Cline</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Codex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Roo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
+  </div>
+</div>
 
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
 [:material-format-list-checks: See All 37 Formatters](reference/formatters/index.md){ .md-button .md-button--secondary }
