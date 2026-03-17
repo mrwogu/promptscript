@@ -1,3 +1,8 @@
+---
+name: Project Rules
+alwaysApply: true
+---
+
 # Project Rules
 
 ## Project
