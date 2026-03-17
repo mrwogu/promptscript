@@ -127,6 +127,7 @@ pnpm run test             # 4. Run all tests
 pnpm prs validate --strict  # 5. Validate .prs files
 pnpm schema:check         # 6. Verify JSON schemas are current
 pnpm skill:check          # 7. Verify SKILL.md copies are in sync
+pnpm docs:formatters:check  # 8. Verify formatter docs are current
 ```
 
 ## Documentation

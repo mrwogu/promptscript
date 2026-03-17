@@ -82,6 +82,49 @@ plugins:
       minify_html: true
       minify_html_opts:
         remove_optional_attribute_quotes: false
+  - llmstxt:
+      full_output: llms-full.txt
+      markdown_description: |
+        PromptScript is a language and toolchain for standardizing AI coding
+        assistant instructions across enterprise organizations. It compiles
+        .prs files to native formats for 37 AI agent platforms including
+        GitHub Copilot, Claude Code, Cursor, Windsurf, and more.
+      sections:
+        Getting Started:
+          - getting-started.md
+          - tutorial.md
+        Reference:
+          - reference/language.md: Complete PromptScript language specification
+          - reference/cli.md: CLI commands and options
+          - reference/config.md: Configuration file format
+        Formatters:
+          - reference/formatters/index.md: All 37 supported AI agent formatters
+          - reference/formatters/claude.md: Claude Code output format, skills, agents, local files
+          - reference/formatters/github.md: GitHub Copilot output format, instructions, prompts, skills
+          - reference/formatters/cursor.md: Cursor output format, MDC frontmatter, commands
+          - reference/formatters/antigravity.md: Antigravity output format, workflows, activation types
+          - reference/formatters/factory.md: Factory AI output format, droids, skills
+          - reference/formatters/gemini.md: Gemini CLI output format, commands, skills
+          - reference/formatters/opencode.md: OpenCode output format, commands, skills, agents
+        Guides:
+          - guides/formatter-architecture.md: Internal architecture of formatters
+          - guides/inheritance.md: PromptScript inheritance system
+          - guides/multi-file.md: Multi-file organization
+          - guides/ci.md: CI/CD integration
+          - guides/registry.md: Building a PromptScript registry
+          - guides/enterprise.md: Enterprise setup
+          - guides/migration.md: Migration guide
+        Examples:
+          - examples/minimal.md: Minimal project setup
+          - examples/team-setup.md: Team configuration
+          - examples/enterprise.md: Enterprise example
+          - examples/skills-and-local.md: Skills and local overrides
+          - examples/agents.md: Claude agent configuration
+        Optional:
+          - guides/faq.md: Frequently asked questions
+          - guides/vs-manual.md: Comparison with manual configuration
+          - testing/parity-testing.md: Formatter parity testing
+          - testing/feature-coverage.md: Feature coverage matrix
 
 markdown_extensions:
   # Python Markdown
@@ -166,6 +209,15 @@ nav:
       - Language: reference/language.md
       - CLI: reference/cli.md
       - Configuration: reference/config.md
+      - Formatters:
+          - reference/formatters/index.md
+          - Claude Code: reference/formatters/claude.md
+          - GitHub Copilot: reference/formatters/github.md
+          - Cursor: reference/formatters/cursor.md
+          - Antigravity: reference/formatters/antigravity.md
+          - Factory AI: reference/formatters/factory.md
+          - Gemini CLI: reference/formatters/gemini.md
+          - OpenCode: reference/formatters/opencode.md
   - Guides:
       - guides/index.md
       - Build Your Registry: guides/registry.md

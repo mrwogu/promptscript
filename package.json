@@ -19,6 +19,8 @@
     "playground:links": "ts-node --esm scripts/add-playground-links.mts",
     "docs:validate": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts",
     "docs:validate:check": "node --import @swc-node/register/esm-register scripts/validate-docs-examples.mts --check",
+    "docs:formatters": "node --import @swc-node/register/esm-register scripts/generate-formatter-docs.mts && npx prettier --write docs/reference/formatters/*.md",
+    "docs:formatters:check": "node --import @swc-node/register/esm-register scripts/generate-formatter-docs.mts && npx prettier --write docs/reference/formatters/*.md && git diff --exit-code docs/reference/formatters/",
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
