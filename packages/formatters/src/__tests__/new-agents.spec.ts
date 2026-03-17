@@ -108,7 +108,7 @@ const NEW_FORMATTERS = [
     VERSIONS: CODEX_VERSIONS,
     outputPath: 'AGENTS.md',
     description: 'Codex instructions (Markdown)',
-    mainHeader: '# AGENTS.md',
+    mainHeader: '',
     dotDir: '.agents',
   },
   {
@@ -433,6 +433,16 @@ describe('New Agent Formatters', () => {
       });
     }
   );
+
+  describe('Codex-specific behavior', () => {
+    it('should not start with # AGENTS.md heading', () => {
+      const formatter = new CodexFormatter();
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+
+      expect(result.content).not.toMatch(/^# AGENTS\.md/);
+    });
+  });
 
   describe('Registry integration', () => {
     it.each(NEW_FORMATTERS.map((f) => f.name))(

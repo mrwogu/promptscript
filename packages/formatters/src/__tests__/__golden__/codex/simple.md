@@ -1,5 +1,3 @@
-# AGENTS.md
-
 ## Project
 
 You are an expert TypeScript developer working on PromptScript - a language
