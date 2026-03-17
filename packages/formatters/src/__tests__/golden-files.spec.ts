@@ -10,6 +10,43 @@ const __dirname = dirname(__filename);
 import { ClaudeFormatter } from '../formatters/claude.js';
 import { CursorFormatter } from '../formatters/cursor.js';
 import { AntigravityFormatter } from '../formatters/antigravity.js';
+// Tier 0 additional
+import { FactoryFormatter } from '../formatters/factory.js';
+import { OpenCodeFormatter } from '../formatters/opencode.js';
+import { GeminiFormatter } from '../formatters/gemini.js';
+// Tier 1
+import { WindsurfFormatter } from '../formatters/windsurf.js';
+import { ClineFormatter } from '../formatters/cline.js';
+import { RooFormatter } from '../formatters/roo.js';
+import { CodexFormatter } from '../formatters/codex.js';
+import { ContinueFormatter } from '../formatters/continue.js';
+// Tier 2
+import { AugmentFormatter } from '../formatters/augment.js';
+import { GooseFormatter } from '../formatters/goose.js';
+import { KiloFormatter } from '../formatters/kilo.js';
+import { AmpFormatter } from '../formatters/amp.js';
+import { TraeFormatter } from '../formatters/trae.js';
+import { JunieFormatter } from '../formatters/junie.js';
+import { KiroFormatter } from '../formatters/kiro.js';
+// Tier 3
+import { CortexFormatter } from '../formatters/cortex.js';
+import { CrushFormatter } from '../formatters/crush.js';
+import { CommandCodeFormatter } from '../formatters/command-code.js';
+import { KodeFormatter } from '../formatters/kode.js';
+import { McpjamFormatter } from '../formatters/mcpjam.js';
+import { MistralVibeFormatter } from '../formatters/mistral-vibe.js';
+import { MuxFormatter } from '../formatters/mux.js';
+import { OpenHandsFormatter } from '../formatters/openhands.js';
+import { PiFormatter } from '../formatters/pi.js';
+import { QoderFormatter } from '../formatters/qoder.js';
+import { QwenCodeFormatter } from '../formatters/qwen-code.js';
+import { ZencoderFormatter } from '../formatters/zencoder.js';
+import { NeovateFormatter } from '../formatters/neovate.js';
+import { PochiFormatter } from '../formatters/pochi.js';
+import { AdalFormatter } from '../formatters/adal.js';
+import { IflowFormatter } from '../formatters/iflow.js';
+import { OpenClawFormatter } from '../formatters/openclaw.js';
+import { CodeBuddyFormatter } from '../formatters/codebuddy.js';
 import type { Formatter, FormatOptions } from '../types.js';
 
 /**
@@ -27,6 +64,7 @@ import type { Formatter, FormatOptions } from '../types.js';
  * - Claude: simple, multifile, full
  * - Cursor: modern, multifile, legacy
  * - Antigravity: simple, frontmatter
+ * - All 30 additional formatters: simple
  */
 
 const GOLDEN_DIR = join(__dirname, '__golden__');
@@ -477,7 +515,7 @@ function generateDiffSummary(expected: string, actual: string): string {
 }
 
 describe('Golden Files Tests', () => {
-  // All formatter versions to test
+  // All formatter versions to test — Tier 0 formatters with multiple versions
   const versionedConfigs: VersionedFormatterConfig[] = [
     // GitHub versions
     {
@@ -571,9 +609,279 @@ describe('Golden Files Tests', () => {
       extension: 'md',
       options: { version: 'frontmatter' },
     },
+    // Factory versions
+    {
+      name: 'factory',
+      formatter: new FactoryFormatter(),
+      version: 'simple',
+      goldenFile: 'factory/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    // OpenCode versions
+    {
+      name: 'opencode',
+      formatter: new OpenCodeFormatter(),
+      version: 'simple',
+      goldenFile: 'opencode/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    // Gemini versions
+    {
+      name: 'gemini',
+      formatter: new GeminiFormatter(),
+      version: 'simple',
+      goldenFile: 'gemini/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    // Tier 1 — simple versions
+    {
+      name: 'windsurf',
+      formatter: new WindsurfFormatter(),
+      version: 'simple',
+      goldenFile: 'windsurf/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'cline',
+      formatter: new ClineFormatter(),
+      version: 'simple',
+      goldenFile: 'cline/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'roo',
+      formatter: new RooFormatter(),
+      version: 'simple',
+      goldenFile: 'roo/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'codex',
+      formatter: new CodexFormatter(),
+      version: 'simple',
+      goldenFile: 'codex/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'continue',
+      formatter: new ContinueFormatter(),
+      version: 'simple',
+      goldenFile: 'continue/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    // Tier 2 — simple versions
+    {
+      name: 'augment',
+      formatter: new AugmentFormatter(),
+      version: 'simple',
+      goldenFile: 'augment/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'goose',
+      formatter: new GooseFormatter(),
+      version: 'simple',
+      goldenFile: 'goose/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'kilo',
+      formatter: new KiloFormatter(),
+      version: 'simple',
+      goldenFile: 'kilo/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'amp',
+      formatter: new AmpFormatter(),
+      version: 'simple',
+      goldenFile: 'amp/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'trae',
+      formatter: new TraeFormatter(),
+      version: 'simple',
+      goldenFile: 'trae/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'junie',
+      formatter: new JunieFormatter(),
+      version: 'simple',
+      goldenFile: 'junie/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'kiro',
+      formatter: new KiroFormatter(),
+      version: 'simple',
+      goldenFile: 'kiro/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    // Tier 3 — simple versions
+    {
+      name: 'cortex',
+      formatter: new CortexFormatter(),
+      version: 'simple',
+      goldenFile: 'cortex/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'crush',
+      formatter: new CrushFormatter(),
+      version: 'simple',
+      goldenFile: 'crush/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'command-code',
+      formatter: new CommandCodeFormatter(),
+      version: 'simple',
+      goldenFile: 'command-code/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'kode',
+      formatter: new KodeFormatter(),
+      version: 'simple',
+      goldenFile: 'kode/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'mcpjam',
+      formatter: new McpjamFormatter(),
+      version: 'simple',
+      goldenFile: 'mcpjam/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'mistral-vibe',
+      formatter: new MistralVibeFormatter(),
+      version: 'simple',
+      goldenFile: 'mistral-vibe/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'mux',
+      formatter: new MuxFormatter(),
+      version: 'simple',
+      goldenFile: 'mux/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'openhands',
+      formatter: new OpenHandsFormatter(),
+      version: 'simple',
+      goldenFile: 'openhands/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'pi',
+      formatter: new PiFormatter(),
+      version: 'simple',
+      goldenFile: 'pi/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'qoder',
+      formatter: new QoderFormatter(),
+      version: 'simple',
+      goldenFile: 'qoder/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'qwen-code',
+      formatter: new QwenCodeFormatter(),
+      version: 'simple',
+      goldenFile: 'qwen-code/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'zencoder',
+      formatter: new ZencoderFormatter(),
+      version: 'simple',
+      goldenFile: 'zencoder/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'neovate',
+      formatter: new NeovateFormatter(),
+      version: 'simple',
+      goldenFile: 'neovate/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'pochi',
+      formatter: new PochiFormatter(),
+      version: 'simple',
+      goldenFile: 'pochi/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'adal',
+      formatter: new AdalFormatter(),
+      version: 'simple',
+      goldenFile: 'adal/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'iflow',
+      formatter: new IflowFormatter(),
+      version: 'simple',
+      goldenFile: 'iflow/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'openclaw',
+      formatter: new OpenClawFormatter(),
+      version: 'simple',
+      goldenFile: 'openclaw/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
+    {
+      name: 'codebuddy',
+      formatter: new CodeBuddyFormatter(),
+      version: 'simple',
+      goldenFile: 'codebuddy/simple.md',
+      extension: 'md',
+      options: { version: 'simple' },
+    },
   ];
 
-  // Legacy configs for backward compatibility tests
+  // Legacy configs for backward compatibility tests (Tier 0 only)
   const legacyConfigs = [
     {
       name: 'github',
@@ -988,5 +1296,60 @@ describe('Golden Files Tests', () => {
         );
       }
     );
+
+    it('all 37 formatters should produce output with a valid path', () => {
+      const ast = createCanonicalAST();
+
+      const allFormatters = [
+        new GitHubFormatter(),
+        new ClaudeFormatter(),
+        new CursorFormatter(),
+        new AntigravityFormatter(),
+        new FactoryFormatter(),
+        new OpenCodeFormatter(),
+        new GeminiFormatter(),
+        new WindsurfFormatter(),
+        new ClineFormatter(),
+        new RooFormatter(),
+        new CodexFormatter(),
+        new ContinueFormatter(),
+        new AugmentFormatter(),
+        new GooseFormatter(),
+        new KiloFormatter(),
+        new AmpFormatter(),
+        new TraeFormatter(),
+        new JunieFormatter(),
+        new KiroFormatter(),
+        new CortexFormatter(),
+        new CrushFormatter(),
+        new CommandCodeFormatter(),
+        new KodeFormatter(),
+        new McpjamFormatter(),
+        new MistralVibeFormatter(),
+        new MuxFormatter(),
+        new OpenHandsFormatter(),
+        new PiFormatter(),
+        new QoderFormatter(),
+        new QwenCodeFormatter(),
+        new ZencoderFormatter(),
+        new NeovateFormatter(),
+        new PochiFormatter(),
+        new AdalFormatter(),
+        new IflowFormatter(),
+        new OpenClawFormatter(),
+        new CodeBuddyFormatter(),
+      ];
+
+      expect(allFormatters.length).toBe(37);
+
+      for (const formatter of allFormatters) {
+        const result = formatter.format(ast);
+        expect(result.path, `${formatter.name} should have an output path`).toBeTruthy();
+        expect(
+          result.content.length,
+          `${formatter.name} should have non-empty content`
+        ).toBeGreaterThan(50);
+      }
+    });
   });
 });
