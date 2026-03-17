@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://github.com/mrwogu/promptscript/compare/v1.3.1...v1.4.0) (2026-03-17)
+
+
+### Features
+
+* add prs import command for reverse-parsing AI instructions ([#113](https://github.com/mrwogu/promptscript/issues/113)) ([fae14fd](https://github.com/mrwogu/promptscript/commit/fae14fdd9a5915ac55f97bea7a5c72bde5471f13))
+* auto-inject PromptScript SKILL.md during compilation ([#103](https://github.com/mrwogu/promptscript/issues/103)) ([6350741](https://github.com/mrwogu/promptscript/commit/6350741f0b9d40b2d3656688d98ad64c4655c840))
+* self-hosted playground via prs serve command ([#108](https://github.com/mrwogu/promptscript/issues/108)) ([396e5ab](https://github.com/mrwogu/promptscript/commit/396e5ab17b47bce67343aad37a5a423587cf2184))
+
+
+### Bug Fixes
+
+* **cli:** show all supported targets in prs init ([#112](https://github.com/mrwogu/promptscript/issues/112)) ([620097c](https://github.com/mrwogu/promptscript/commit/620097ce698946dc17fd26c2a6f8a92d111be33d))
+
 ## [1.3.1](https://github.com/mrwogu/promptscript/compare/v1.3.0...v1.3.1) (2026-03-13)
 
 
