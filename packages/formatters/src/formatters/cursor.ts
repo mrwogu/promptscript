@@ -392,61 +392,6 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   /**
-   * Generate shortcuts/commands file for manual activation.
-   *
-   * @deprecated This method is no longer called from `formatMultifile`.
-   * Shortcuts belong either in the main rule's `Commands:` section (handled
-   * by `addCommonSections`) or as `.cursor/commands/*.md` files (handled by
-   * `generateCommandFiles`). The shortcuts.mdc file was a redundant third
-   * output that could confuse users.
-   *
-   * Retained for potential future use (e.g., opt-in via a flag).
-   */
-  private generateShortcutsFile(ast: Program): FormatterOutput | null {
-    const block = this.findBlock(ast, 'shortcuts');
-    if (!block) return null;
-
-    const props = this.getProps(block.content);
-    if (Object.keys(props).length === 0) return null;
-
-    const sections: string[] = [];
-
-    // Frontmatter for manual activation (via @mention)
-    sections.push(
-      ['---', 'description: "Project shortcuts and commands"', 'alwaysApply: false', '---'].join(
-        '\n'
-      )
-    );
-
-    const lines: string[] = ['## Commands'];
-    for (const [cmd, desc] of Object.entries(props)) {
-      const descStr = this.valueToString(desc);
-      if (typeof desc === 'object' && !Array.isArray(desc)) {
-        // Complex shortcut with steps
-        const descObj = desc as Record<string, Value>;
-        lines.push(`\n### ${cmd}`);
-        if (descObj['description']) {
-          lines.push(this.valueToString(descObj['description']));
-        }
-        if (Array.isArray(descObj['steps'])) {
-          lines.push('\n**Steps:**');
-          descObj['steps'].forEach((step, i) => {
-            lines.push(`${i + 1}. ${this.valueToString(step)}`);
-          });
-        }
-      } else {
-        lines.push(`- **${cmd}**: ${descStr.split('\n')[0]}`);
-      }
-    }
-    sections.push(lines.join('\n'));
-
-    return {
-      path: '.cursor/rules/shortcuts.mdc',
-      content: sections.join('\n\n') + '\n',
-    };
-  }
-
-  /**
    * Generate command files for multi-line shortcuts.
    *
    * Shortcuts with multi-line content (containing newlines) are converted
