@@ -1,0 +1,78 @@
+# Factory AI Formatter
+
+| Property          | Value                                   |
+| ----------------- | --------------------------------------- |
+| **Tier**          | Custom                                  |
+| **Main output**   | `AGENTS.md`                             |
+| **Dot directory** | `.factory/`                             |
+| **Skills**        | Yes (`.factory/skills/<name>/SKILL.md`) |
+| **Agents**        | Yes (`.factory/droids/<name>.md`)       |
+| **Commands**      | Yes (`.factory/commands/<name>.md`)     |
+| **Local files**   | No                                      |
+
+## Output Files
+
+| File              | Path                              | Purpose                    |
+| ----------------- | --------------------------------- | -------------------------- |
+| Main instructions | `AGENTS.md`                       | Primary rule file          |
+| Skills            | `.factory/skills/<name>/SKILL.md` | Reusable skill definitions |
+| Commands          | `.factory/commands/<name>.md`     | Slash commands             |
+| Agents            | `.factory/droids/<name>.md`       | Agent configurations       |
+
+## Supported Features
+
+| Feature                    | Supported |
+| -------------------------- | --------- |
+| Markdown Output            | Yes       |
+| MDC Format                 | No        |
+| Code Blocks                | Yes       |
+| Mermaid Diagrams           | Yes       |
+| Single File Output         | Yes       |
+| Multiple Rule Files        | Yes       |
+| Workflow Files             | No        |
+| Nested Directory Structure | No        |
+| YAML Frontmatter           | Yes       |
+| Description in Frontmatter | Yes       |
+| Globs in Frontmatter       | No        |
+| Activation Type            | No        |
+| Glob Pattern Targeting     | No        |
+| Always Apply Rules         | Yes       |
+| Manual Activation          | No        |
+| Auto/Model Activation      | No        |
+| Character Limit Validation | No        |
+| Content Section Splitting  | Yes       |
+| Context File Inclusion     | No        |
+| @-Mentions                 | No        |
+| Tool Integration           | No        |
+| Path-Specific Rules        | No        |
+| Prompt Files               | No        |
+| Slash Commands             | Yes       |
+| Skills                     | Yes       |
+| Agent Instructions         | Yes       |
+| Local Memory               | No        |
+| Nested Memory              | No        |
+
+## Limitations & Quirks
+
+- Uses `AGENTS.md` as the main file (extends MarkdownInstructionFormatter)
+- Skills go to `.factory/skills/<name>/SKILL.md`
+- Agents are called "droids" — output to `.factory/droids/<name>.md`
+- Three output modes: `simple`, `multifile`, `full`
+- Knowledge blocks render as inline sections within the main instructions file
+
+## Example Output
+
+```text
+project-root/
+├── AGENTS.md                          # Main instructions
+└── .factory/
+    ├── skills/
+    │   └── my-skill/
+    │       └── SKILL.md               # Skill definition
+    └── droids/
+        └── reviewer.md                # Droid (agent) config
+```
+
+## Official Documentation
+
+- [Factory AI Documentation](https://docs.factory.ai/)
