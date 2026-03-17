@@ -32,3 +32,5 @@ typescript, Node.js 20+, Nx + pnpm
 - Don't use default exports - only named exports
 - Don't commit without tests
 - Don't skip error handling
+
+@CLAUDE.local.md

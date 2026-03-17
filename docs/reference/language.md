@@ -716,7 +716,7 @@ Skills are output differently based on the formatter:
 
 ```markdown
 ---
-name: 'commit'
+name: commit
 description: 'Create git commits'
 disable-model-invocation: true
 ---
@@ -744,6 +744,7 @@ allowed-tools:
   - Bash
   - Read
   - Write
+disable-model-invocation: true
 ---
 
 When creating commits:
