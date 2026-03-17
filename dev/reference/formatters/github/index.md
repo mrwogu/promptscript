@@ -39,7 +39,7 @@
 | Always Apply Rules         | Yes       |
 | Manual Activation          | No        |
 | Auto/Model Activation      | No        |
-| Character Limit Validation | No        |
+| Character Limit Validation | Planned   |
 | Content Section Splitting  | Yes       |
 | Context File Inclusion     | No        |
 | @-Mentions                 | No        |

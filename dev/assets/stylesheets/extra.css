@@ -2409,3 +2409,252 @@ pre.init-demo__file-preview-content {
 [data-md-color-scheme='default'] .init-demo__file-preview-content .cm {
   color: #64748b;
 }
+
+/* ==========================================================================
+   Formatter Reference Page
+   ========================================================================== */
+
+/* Subtitle */
+.md-typeset .formatter-page__subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-top: -0.5rem;
+  margin-bottom: 2rem;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-page__subtitle {
+  color: #94a3b8;
+}
+
+/* Tier badges row */
+.md-typeset .formatter-tiers {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.md-typeset .formatter-tier-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.md-typeset .formatter-tier-badge__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.md-typeset .formatter-tier-badge--custom {
+  background: rgba(109, 40, 217, 0.08);
+  border-color: rgba(109, 40, 217, 0.25);
+  color: #6d28d9;
+}
+.md-typeset .formatter-tier-badge--custom .formatter-tier-badge__count {
+  background: #6d28d9;
+  color: #fff;
+}
+
+.md-typeset .formatter-tier-badge--t1 {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.25);
+  color: #2563eb;
+}
+.md-typeset .formatter-tier-badge--t1 .formatter-tier-badge__count {
+  background: #2563eb;
+  color: #fff;
+}
+
+.md-typeset .formatter-tier-badge--t2 {
+  background: rgba(6, 182, 212, 0.08);
+  border-color: rgba(6, 182, 212, 0.25);
+  color: #0891b2;
+}
+.md-typeset .formatter-tier-badge--t2 .formatter-tier-badge__count {
+  background: #0891b2;
+  color: #fff;
+}
+
+.md-typeset .formatter-tier-badge--t3 {
+  background: rgba(100, 116, 139, 0.08);
+  border-color: rgba(100, 116, 139, 0.25);
+  color: #64748b;
+}
+.md-typeset .formatter-tier-badge--t3 .formatter-tier-badge__count {
+  background: #64748b;
+  color: #fff;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-tier-badge--custom {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
+}
+[data-md-color-scheme='slate'] .md-typeset .formatter-tier-badge--t1 {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93bbfd;
+}
+[data-md-color-scheme='slate'] .md-typeset .formatter-tier-badge--t2 {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: rgba(34, 211, 238, 0.3);
+  color: #67e8f9;
+}
+[data-md-color-scheme='slate'] .md-typeset .formatter-tier-badge--t3 {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+}
+
+/* Formatter cards grid */
+.md-typeset .formatter-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2.5rem;
+}
+
+.md-typeset .formatter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: formatter-card-in 0.4s ease forwards;
+}
+
+.md-typeset .formatter-card:nth-child(1) { animation-delay: 0s; }
+.md-typeset .formatter-card:nth-child(2) { animation-delay: 0.04s; }
+.md-typeset .formatter-card:nth-child(3) { animation-delay: 0.08s; }
+.md-typeset .formatter-card:nth-child(4) { animation-delay: 0.12s; }
+.md-typeset .formatter-card:nth-child(5) { animation-delay: 0.16s; }
+.md-typeset .formatter-card:nth-child(6) { animation-delay: 0.2s; }
+.md-typeset .formatter-card:nth-child(7) { animation-delay: 0.24s; }
+
+@keyframes formatter-card-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.md-typeset .formatter-card:hover {
+  border-color: #6d28d9;
+  box-shadow: 0 4px 16px rgba(109, 40, 217, 0.12);
+  transform: translateY(-2px);
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-card {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(71, 85, 105, 0.3);
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-card:hover {
+  border-color: #a78bfa;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+}
+
+.md-typeset .formatter-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.md-typeset .formatter-card__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-card__name {
+  color: #f1f5f9;
+}
+
+.md-typeset .formatter-card__tier {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.md-typeset .formatter-card__tier--custom {
+  background: rgba(109, 40, 217, 0.1);
+  color: #6d28d9;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-card__tier--custom {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+
+.md-typeset .formatter-card__output {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+  background: rgba(100, 116, 139, 0.08);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.375rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-card__output {
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.md-typeset .formatter-card__features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.125rem;
+}
+
+.md-typeset .formatter-card__tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.md-typeset .formatter-card__tag--yes {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.md-typeset .formatter-card__tag--special {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-card__tag--yes {
+  background: rgba(52, 211, 153, 0.15);
+  color: #6ee7b7;
+}
+
+[data-md-color-scheme='slate'] .md-typeset .formatter-card__tag--special {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}

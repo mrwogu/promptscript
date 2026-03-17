@@ -27,7 +27,7 @@
 | Single File Output         | Yes       |
 | Multiple Rule Files        | Yes       |
 | Workflow Files             | Yes       |
-| Nested Directory Structure | Yes       |
+| Nested Directory Structure | Planned   |
 | YAML Frontmatter           | Yes       |
 | Description in Frontmatter | Yes       |
 | Globs in Frontmatter       | Yes       |
@@ -47,7 +47,7 @@
 | Skills                     | No        |
 | Agent Instructions         | No        |
 | Local Memory               | No        |
-| Nested Memory              | Yes       |
+| Nested Memory              | Planned   |
 
 ## Limitations & Quirks
 
