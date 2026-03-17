@@ -38,6 +38,7 @@ COPY packages/compiler/package.json packages/compiler/
 COPY packages/formatters/package.json packages/formatters/
 COPY packages/browser-compiler/package.json packages/browser-compiler/
 COPY packages/playground/package.json packages/playground/
+COPY packages/importer/package.json packages/importer/
 COPY packages/cli/package.json packages/cli/
 COPY packages/server/package.json packages/server/
 
