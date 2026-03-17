@@ -603,7 +603,7 @@ export const PARITY_MATRIX: SectionSpec[] = [
       cortex: '## Config Files',
       crush: '## Config Files',
       cursor: 'Config:', // Label format
-      factory: '## Configuration Files',
+      factory: '## Configuration',
       gemini: '## Config Files',
       github: '## Config Files',
       goose: '## Config Files',

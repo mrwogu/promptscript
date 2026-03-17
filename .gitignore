@@ -88,3 +88,4 @@ docs/api-reference/
 
 # Superpowers docs (specs, plans - generated per session)
 docs/superpowers/
+.claude/worktrees/

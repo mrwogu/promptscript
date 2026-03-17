@@ -618,6 +618,22 @@ describe('Golden Files Tests', () => {
       extension: 'md',
       options: { version: 'simple' },
     },
+    {
+      name: 'factory',
+      formatter: new FactoryFormatter(),
+      version: 'multifile',
+      goldenFile: 'factory/multifile.md',
+      extension: 'md',
+      options: { version: 'multifile' },
+    },
+    {
+      name: 'factory',
+      formatter: new FactoryFormatter(),
+      version: 'full',
+      goldenFile: 'factory/full.md',
+      extension: 'md',
+      options: { version: 'full' },
+    },
     // OpenCode versions
     {
       name: 'opencode',
@@ -626,6 +642,22 @@ describe('Golden Files Tests', () => {
       goldenFile: 'opencode/simple.md',
       extension: 'md',
       options: { version: 'simple' },
+    },
+    {
+      name: 'opencode',
+      formatter: new OpenCodeFormatter(),
+      version: 'multifile',
+      goldenFile: 'opencode/multifile.md',
+      extension: 'md',
+      options: { version: 'multifile' },
+    },
+    {
+      name: 'opencode',
+      formatter: new OpenCodeFormatter(),
+      version: 'full',
+      goldenFile: 'opencode/full.md',
+      extension: 'md',
+      options: { version: 'full' },
     },
     // Gemini versions
     {
@@ -1157,6 +1189,111 @@ describe('Golden Files Tests', () => {
       expect(result.content).toContain('---');
       expect(result.content).toContain('activation:');
     });
+
+    it('opencode full should generate skill files at .opencode/skills/<name>/SKILL.md', () => {
+      const ast = createCanonicalAST();
+      const formatter = new OpenCodeFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      const commitSkill = result.additionalFiles?.find((f) =>
+        f.path.includes('.opencode/skills/commit/SKILL.md')
+      );
+      expect(commitSkill).toBeDefined();
+      expect(commitSkill?.content).toContain('name: commit');
+
+      const reviewSkill = result.additionalFiles?.find((f) =>
+        f.path.includes('.opencode/skills/review/SKILL.md')
+      );
+      expect(reviewSkill).toBeDefined();
+    });
+
+    it('opencode full should generate agent files at .opencode/agents/<name>.md with mode: subagent', () => {
+      const ast = createCanonicalAST();
+      const formatter = new OpenCodeFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      const codeReviewerAgent = result.additionalFiles?.find(
+        (f) => f.path === '.opencode/agents/code-reviewer.md'
+      );
+      expect(codeReviewerAgent).toBeDefined();
+      expect(codeReviewerAgent?.content).toContain(
+        'description: Reviews code for quality and best practices'
+      );
+      expect(codeReviewerAgent?.content).toContain('mode: subagent');
+    });
+
+    it('opencode multifile should NOT generate skill files (skills only in full mode)', () => {
+      const ast = createCanonicalAST();
+      const formatter = new OpenCodeFormatter();
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const skillFiles = result.additionalFiles?.filter((f) =>
+        f.path.includes('.opencode/skills/')
+      );
+      expect(skillFiles?.length ?? 0).toBe(0);
+    });
+
+    it('factory multifile should generate skill files (skillsInMultifile: true)', () => {
+      const ast = createCanonicalAST();
+      const formatter = new FactoryFormatter();
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      // Factory sets skillsInMultifile: true so skills are emitted in multifile mode too
+      const commitSkill = result.additionalFiles?.find((f) =>
+        f.path.includes('.factory/skills/commit/SKILL.md')
+      );
+      expect(commitSkill).toBeDefined();
+      // commit skill has disableModelInvocation: true — must use hyphenated key
+      expect(commitSkill?.content).toContain('disable-model-invocation: true');
+      expect(commitSkill?.content).not.toContain('disableModelInvocation:');
+      // user-invocable is only emitted when false; camelCase must never appear
+      expect(commitSkill?.content).not.toContain('userInvocable:');
+    });
+
+    it('factory full should generate droid files with correct YAML frontmatter', () => {
+      const ast = createCanonicalAST();
+      const formatter = new FactoryFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.additionalFiles).toBeDefined();
+
+      const codeReviewerDroid = result.additionalFiles?.find(
+        (f) => f.path === '.factory/droids/code-reviewer.md'
+      );
+      expect(codeReviewerDroid).toBeDefined();
+      expect(codeReviewerDroid?.content).toContain('name: code-reviewer');
+      expect(codeReviewerDroid?.content).toContain(
+        'description: Reviews code for quality and best practices'
+      );
+      expect(codeReviewerDroid?.content).toContain('model: sonnet');
+
+      const debuggerDroid = result.additionalFiles?.find(
+        (f) => f.path === '.factory/droids/debugger.md'
+      );
+      expect(debuggerDroid).toBeDefined();
+    });
+
+    it('factory full should emit hyphenated keys in skill YAML', () => {
+      const ast = createCanonicalAST();
+      const formatter = new FactoryFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+
+      const skillFiles = result.additionalFiles?.filter((f) =>
+        f.path.includes('.factory/skills/')
+      );
+      expect(skillFiles?.length).toBeGreaterThan(0);
+
+      for (const skillFile of skillFiles ?? []) {
+        expect(skillFile.content).not.toContain('userInvocable:');
+        expect(skillFile.content).not.toContain('disableModelInvocation:');
+      }
+    });
   });
 
   describe('Legacy Golden File Compatibility', () => {
@@ -1259,7 +1396,14 @@ describe('Golden Files Tests', () => {
     });
 
     it('multifile versions should generate additional files', () => {
-      const multifileConfigs = versionedConfigs.filter((c) => c.version === 'multifile');
+      // opencode multifile only generates command files when shortcuts use object
+      // syntax ({ prompt: true } or { content: ... }); the canonical AST uses plain
+      // string shortcuts so no additional files are produced in multifile mode.
+      // Skills appear only in full mode for opencode, matching the platform model.
+      const skipMultifileAdditional = new Set(['opencode']);
+      const multifileConfigs = versionedConfigs.filter(
+        (c) => c.version === 'multifile' && !skipMultifileAdditional.has(c.name)
+      );
 
       for (const config of multifileConfigs) {
         const ast = createCanonicalAST();
