@@ -143,6 +143,9 @@ importers:
       '@promptscript/formatters':
         specifier: workspace:^
         version: link:../formatters
+      '@promptscript/importer':
+        specifier: workspace:^
+        version: link:../importer
       '@promptscript/parser':
         specifier: workspace:^
         version: link:../parser
@@ -210,6 +213,15 @@ importers:
       '@promptscript/core':
         specifier: workspace:^
         version: link:../core
+      '@swc/helpers':
+        specifier: ~0.5.19
+        version: 0.5.19
+
+  packages/importer:
+    dependencies:
+      '@promptscript/parser':
+        specifier: workspace:*
+        version: link:../parser
       '@swc/helpers':
         specifier: ~0.5.19
         version: 0.5.19

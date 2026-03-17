@@ -54,6 +54,11 @@ const moduleBoundaryRules = [
     sourceTag: 'scope:validator',
     onlyDependOnLibsWithTags: ['scope:core'],
   },
+  // Importer depends on core and parser (for roundtrip validation)
+  {
+    sourceTag: 'scope:importer',
+    onlyDependOnLibsWithTags: ['scope:core', 'scope:parser'],
+  },
   // Formatters depends only on core
   {
     sourceTag: 'scope:formatters',
@@ -80,6 +85,7 @@ const moduleBoundaryRules = [
       'scope:compiler',
       'scope:formatters',
       'scope:browser-compiler',
+      'scope:importer',
       'scope:server',
     ],
   },

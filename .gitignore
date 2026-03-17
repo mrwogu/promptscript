@@ -85,3 +85,6 @@ __pycache__/
 docs/api-reference/
 .gitnexus
 .agents/
+
+# Superpowers docs (specs, plans - generated per session)
+docs/superpowers/

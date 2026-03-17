@@ -59,7 +59,13 @@ prs compile
 ### Already have CLAUDE.md or .cursorrules?
 
 ```bash
-# Auto-detect and migrate existing AI instruction files
+# Import existing AI instruction file to PromptScript
+prs import CLAUDE.md
+
+# Preview the conversion without writing files
+prs import .cursorrules --dry-run
+
+# Auto-detect and migrate during project init
 prs init --migrate
 ```
 
@@ -103,6 +109,7 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 | `prs compile --dry-run` | Preview changes without writing files        |
 | `prs validate`          | Validate `.prs` files with detailed errors   |
 | `prs diff`              | Show diff between source and compiled output |
+| `prs import`            | Import existing AI instruction files to .prs |
 | `prs pull`              | Pull updates from registry                   |
 | `prs update-check`      | Check for newer CLI versions                 |
 
@@ -201,6 +208,20 @@ Options:
 - **Non-interactive mode:** Compilation fails with a list of conflicting files
 
 Use `--force` to skip all prompts and overwrite everything. Use `--dry-run` to preview conflicts before writing.
+
+### Import
+
+```bash
+prs import <file> [options]
+
+Options:
+  -f, --format <format>   Source format (claude, github, cursor, generic)
+  -o, --output <dir>      Output directory (default: .promptscript)
+  --dry-run               Preview output without writing files
+  --validate              Run roundtrip validation after import
+```
+
+Imports existing AI instruction files (CLAUDE.md, .cursorrules, copilot-instructions.md) into PromptScript format. Uses heuristic classification to map sections to appropriate `@identity`, `@standards`, `@restrictions`, and `@knowledge` blocks with confidence scoring.
 
 ### Validate
 

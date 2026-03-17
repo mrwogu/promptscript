@@ -17,6 +17,7 @@ import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
 import { setContext, LogLevel } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
+import { importCommand } from './commands/import.js';
 
 const program = new Command();
 
@@ -137,6 +138,15 @@ program
     const { serveCommand } = await import('./commands/serve.js');
     await serveCommand(opts);
   });
+
+program
+  .command('import <file>')
+  .description('Import AI instruction file to PromptScript format')
+  .option('-f, --format <format>', 'Source format (claude, github, cursor, generic)')
+  .option('-o, --output <dir>', 'Output directory', '.promptscript')
+  .option('--dry-run', 'Preview output without writing files')
+  .option('--validate', 'Run roundtrip validation after import')
+  .action(importCommand);
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);

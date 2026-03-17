@@ -339,6 +339,8 @@ prs init --migrate          # Initialize + migration skills
 prs compile                 # Compile to all targets
 prs compile --watch         # Watch mode
 prs validate --strict       # Validate syntax
+prs import CLAUDE.md        # Import existing AI instructions
+prs import --dry-run        # Preview import conversion
 prs pull                    # Update registry
 prs diff --target claude    # Show compilation diff
 ```

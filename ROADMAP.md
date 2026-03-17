@@ -170,7 +170,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Links to documentation
 
 - [ ] **CLI enhancements**
-  - `prs migrate` — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
+  - ~~`prs migrate`~~ → Shipped as `prs import` — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
   - `prs doctor` — Diagnose common configuration issues
   - `prs upgrade` — Update syntax version with automatic migrations
 
