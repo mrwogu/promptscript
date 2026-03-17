@@ -1,7 +1,15 @@
 import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
 import { resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
 import type { Logger } from '@promptscript/core';
-import type { Program, Block, ObjectContent, Value, TextContent } from '@promptscript/core';
+import type {
+  Program,
+  Block,
+  ObjectContent,
+  Value,
+  TextContent,
+  ParamDefinition,
+  ParamType,
+} from '@promptscript/core';
 
 /**
  * A resource file discovered alongside a skill's SKILL.md.
@@ -16,10 +24,11 @@ interface SkillResource {
 /**
  * Result of parsing a native SKILL.md file.
  */
-interface ParsedSkillMd {
+export interface ParsedSkillMd {
   name?: string;
   description?: string;
   content: string;
+  params?: ParamDefinition[];
 }
 
 /**
@@ -28,7 +37,7 @@ interface ParsedSkillMd {
  * @param content - Raw SKILL.md file content
  * @returns Parsed skill metadata and content
  */
-function parseSkillMd(content: string): ParsedSkillMd {
+export function parseSkillMd(content: string): ParsedSkillMd {
   const lines = content.split('\n');
   let inFrontmatter = false;
   let frontmatterStart = -1;
@@ -49,34 +58,253 @@ function parseSkillMd(content: string): ParsedSkillMd {
 
   let name: string | undefined;
   let description: string | undefined;
+  let params: ParamDefinition[] | undefined;
   let bodyContent: string;
 
   if (frontmatterStart >= 0 && frontmatterEnd > frontmatterStart) {
-    // Parse frontmatter
     const frontmatterLines = lines.slice(frontmatterStart + 1, frontmatterEnd);
-    for (const line of frontmatterLines) {
-      // Match name: value (with or without quotes)
-      const nameMatch = line.match(/^name:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
-      if (nameMatch) {
-        name = (nameMatch[1] ?? nameMatch[2] ?? nameMatch[3])?.trim();
-      }
-      // Match description: value (with or without quotes)
-      const descMatch = line.match(/^description:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
-      if (descMatch) {
-        description = (descMatch[1] ?? descMatch[2] ?? descMatch[3])?.trim();
-      }
-    }
-    // Content is everything after frontmatter
+    const parsed = parseFrontmatterFields(frontmatterLines);
+    name = parsed.name;
+    description = parsed.description;
+    params = parsed.params;
+
     bodyContent = lines
       .slice(frontmatterEnd + 1)
       .join('\n')
       .trim();
   } else {
-    // No frontmatter, entire content is body
     bodyContent = content.trim();
   }
 
-  return { name, description, content: bodyContent };
+  return { name, description, content: bodyContent, params };
+}
+
+/**
+ * Parse frontmatter fields including nested params blocks.
+ */
+function parseFrontmatterFields(lines: string[]): {
+  name?: string;
+  description?: string;
+  params?: ParamDefinition[];
+} {
+  let name: string | undefined;
+  let description: string | undefined;
+  let params: ParamDefinition[] | undefined;
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? '';
+
+    const nameMatch = line.match(/^name:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
+    if (nameMatch) {
+      name = (nameMatch[1] ?? nameMatch[2] ?? nameMatch[3])?.trim();
+      i++;
+      continue;
+    }
+
+    const descMatch = line.match(/^description:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
+    if (descMatch) {
+      description = (descMatch[1] ?? descMatch[2] ?? descMatch[3])?.trim();
+      i++;
+      continue;
+    }
+
+    if (line.match(/^params:\s*$/)) {
+      i++;
+      const result = parseParamsBlock(lines, i);
+      params = result.params;
+      i = result.nextIndex;
+      continue;
+    }
+
+    i++;
+  }
+
+  return { name, description, params };
+}
+
+/**
+ * Parse a params block from YAML frontmatter lines.
+ */
+function parseParamsBlock(
+  lines: string[],
+  startIndex: number
+): { params: ParamDefinition[]; nextIndex: number } {
+  const params: ParamDefinition[] = [];
+  let i = startIndex;
+
+  while (i < lines.length) {
+    const line = lines[i] ?? '';
+
+    // A param name line is indented with 2 spaces and ends with ':'
+    const paramNameMatch = line.match(/^ {2}(\w+):\s*$/);
+    if (!paramNameMatch) break;
+
+    const paramName = paramNameMatch[1]!;
+    i++;
+
+    let paramType: ParamType = { kind: 'string' };
+    let defaultValue: Value | undefined;
+
+    // Read param properties (indented with 4+ spaces)
+    while (i < lines.length) {
+      const propLine = lines[i] ?? '';
+      if (!propLine.match(/^ {4}/)) break;
+      const trimmed = propLine.trim();
+
+      const typeMatch = trimmed.match(/^type:\s*(.+)$/);
+      if (typeMatch) {
+        paramType = parseParamType(typeMatch[1]!.trim());
+        i++;
+        continue;
+      }
+
+      const defaultMatch = trimmed.match(/^default:\s*(.+)$/);
+      if (defaultMatch) {
+        defaultValue = parseDefaultValue(defaultMatch[1]!.trim(), paramType);
+        i++;
+        continue;
+      }
+
+      const optionsMatch = trimmed.match(/^options:\s*\[(.+)\]$/);
+      if (optionsMatch && paramType.kind === 'enum') {
+        paramType = {
+          kind: 'enum',
+          options: optionsMatch[1]!.split(',').map((o) => o.trim()),
+        };
+        i++;
+        continue;
+      }
+
+      i++;
+    }
+
+    const hasDefault = defaultValue !== undefined;
+    params.push({
+      type: 'ParamDefinition',
+      name: paramName,
+      paramType,
+      optional: hasDefault,
+      defaultValue,
+      loc: { file: '<skill>', line: 0, column: 0, offset: 0 },
+    });
+  }
+
+  return { params, nextIndex: i };
+}
+
+function parseParamType(typeStr: string): ParamType {
+  switch (typeStr) {
+    case 'string':
+      return { kind: 'string' };
+    case 'number':
+      return { kind: 'number' };
+    case 'boolean':
+      return { kind: 'boolean' };
+    case 'enum':
+      return { kind: 'enum', options: [] };
+    default:
+      return { kind: 'string' };
+  }
+}
+
+function parseDefaultValue(valueStr: string, paramType: ParamType): Value {
+  switch (paramType.kind) {
+    case 'boolean':
+      return valueStr === 'true';
+    case 'number':
+      return Number(valueStr);
+    default:
+      return valueStr;
+  }
+}
+
+/**
+ * Interpolate skill content with parameter values.
+ *
+ * Binds provided arguments and defaults to {{variable}} placeholders
+ * in the skill content string.
+ *
+ * @param content - Skill content with {{variable}} placeholders
+ * @param params - Parameter definitions from SKILL.md frontmatter
+ * @param args - Argument values provided at the call site
+ * @returns Interpolated content string
+ */
+export function interpolateSkillContent(
+  content: string,
+  params: ParamDefinition[] | undefined,
+  args: Record<string, Value>
+): string {
+  if (!params || params.length === 0) {
+    return content;
+  }
+
+  // Build bound values map: args override defaults
+  const bound = new Map<string, Value>();
+  for (const param of params) {
+    const argValue = args[param.name];
+    if (argValue !== undefined) {
+      bound.set(param.name, argValue);
+    } else if (param.defaultValue !== undefined) {
+      bound.set(param.name, param.defaultValue);
+    } else if (!param.optional) {
+      throw new Error(`Missing required skill parameter: ${param.name}`);
+    }
+  }
+
+  // Replace {{variable}} patterns
+  return content.replace(/\{\{(\w+)\}\}/g, (_match, varName: string) => {
+    const value = bound.get(varName);
+    if (value === undefined) {
+      return _match; // Leave unresolved vars as-is
+    }
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    return JSON.stringify(value);
+  });
+}
+
+/**
+ * Extract skill argument values from a .prs skill object.
+ * Arguments can be in a nested `params` object or as top-level properties.
+ */
+const SKILL_RESERVED_KEYS = new Set([
+  'description',
+  'content',
+  'trigger',
+  'userInvocable',
+  'allowedTools',
+  'disableModelInvocation',
+  'context',
+  'agent',
+  'params',
+  'type',
+  'loc',
+  'resources',
+]);
+
+function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value> {
+  const args: Record<string, Value> = {};
+
+  // Check for params object (nested arguments)
+  const paramsVal = skillObj['params'];
+  if (paramsVal && typeof paramsVal === 'object' && !Array.isArray(paramsVal)) {
+    const paramsObj = paramsVal as Record<string, Value>;
+    for (const [key, value] of Object.entries(paramsObj)) {
+      if (key !== 'type' && key !== 'loc') {
+        args[key] = value;
+      }
+    }
+  }
+
+  // Also extract top-level non-reserved properties as potential args
+  for (const [key, value] of Object.entries(skillObj)) {
+    if (!SKILL_RESERVED_KEYS.has(key) && !(key in args)) {
+      args[key] = value;
+    }
+  }
+
+  return args;
 }
 
 /** Files to skip when discovering skill resources. */
@@ -615,19 +843,27 @@ export async function resolveNativeSkills(
         // Update skill with native content
         const updatedSkill: Record<string, Value> = { ...skillObj };
 
-        // Use native content
+        // Extract skill arguments from .prs for interpolation
+        const skillArgs = extractSkillArgs(skillObj);
+
+        // Use native content (with interpolation if params defined)
         if (parsed.content) {
-          // Create TextContent with synthetic location (loaded from file, not parsed)
+          const interpolated = parsed.params
+            ? interpolateSkillContent(parsed.content, parsed.params, skillArgs)
+            : parsed.content;
           updatedSkill['content'] = {
             type: 'TextContent',
-            value: parsed.content,
+            value: interpolated,
             loc: { file: skillMdPath, line: 1, column: 1, offset: 0 },
           } as TextContent;
         }
 
         // Use native description only as fallback when not set in .prs
+        // Also interpolate description if it has template vars
         if (parsed.description && !skillObj['description']) {
-          updatedSkill['description'] = parsed.description;
+          updatedSkill['description'] = parsed.params
+            ? interpolateSkillContent(parsed.description, parsed.params, skillArgs)
+            : parsed.description;
         }
 
         // Discover resource files alongside SKILL.md
