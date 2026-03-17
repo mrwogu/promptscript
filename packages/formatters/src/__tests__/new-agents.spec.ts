@@ -100,6 +100,7 @@ const NEW_FORMATTERS = [
     description: 'Roo Code rules (Markdown)',
     mainHeader: '# Project Rules',
     dotDir: '.roo',
+    hasSkills: false as const,
   },
   {
     name: 'codex',
@@ -351,7 +352,7 @@ const NEW_FORMATTERS = [
 describe('New Agent Formatters', () => {
   describe.each(NEW_FORMATTERS)(
     '$name formatter',
-    ({ name, Formatter, VERSIONS, outputPath, description, mainHeader }) => {
+    ({ name, Formatter, VERSIONS, outputPath, description, mainHeader, hasSkills = true }) => {
       let formatter: InstanceType<typeof Formatter>;
 
       beforeEach(() => {
@@ -398,7 +399,7 @@ describe('New Agent Formatters', () => {
         expect(result.content).toContain('You are an expert developer.');
       });
 
-      it('should generate skill files in full mode', () => {
+      it.skipIf(!hasSkills)('should generate skill files in full mode', () => {
         const ast: Program = {
           ...createMinimalProgram(),
           blocks: [
