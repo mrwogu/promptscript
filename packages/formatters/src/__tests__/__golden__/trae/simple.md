@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Project Rules
 
 ## Project

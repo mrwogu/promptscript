@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Project Rules
 
 ## Project
