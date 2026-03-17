@@ -55,6 +55,12 @@ interface ClaudeSkillConfig {
   allowedTools?: string[];
   /** Whether user can invoke this skill */
   userInvocable?: boolean;
+  /** Prevent Claude from auto-invoking this skill; keeps it user-only */
+  disableModelInvocation?: boolean;
+  /** Hint shown in autocomplete UI when invoking with arguments */
+  argumentHint?: string;
+  /** Model to use for this skill (e.g. sonnet, opus, haiku, or full model ID) */
+  model?: string;
   /** Skill content/instructions */
   content: string;
   /** Resource files to copy alongside SKILL.md */
@@ -108,6 +114,18 @@ interface ClaudeAgentConfig {
   permissionMode?: ClaudeAgentPermissionMode;
   /** Skills to preload into the subagent's context at startup */
   skills?: string[];
+  /** Maximum number of agentic turns before stopping */
+  maxTurns?: number;
+  /** Memory scope: user, project, or local */
+  memory?: 'user' | 'project' | 'local';
+  /** MCP server names this agent has access to */
+  mcpServers?: string[];
+  /** Lifecycle hooks for the agent */
+  hooks?: Record<string, unknown>;
+  /** Whether the agent runs as a background process */
+  background?: boolean;
+  /** Isolation mode for the agent */
+  isolation?: 'worktree';
   /** System prompt content */
   content: string;
 }
@@ -275,6 +293,11 @@ export class ClaudeFormatter extends BaseFormatter {
     }
     this.addCommonSections(ast, renderer, sections);
 
+    // Add @CLAUDE.local.md import so Claude Code actually loads it
+    if (localFile) {
+      sections.push('@CLAUDE.local.md\n');
+    }
+
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
@@ -358,9 +381,8 @@ export class ClaudeFormatter extends BaseFormatter {
   private generateRuleFile(config: RuleConfig): FormatterOutput {
     const lines: string[] = [];
 
-    // YAML frontmatter with paths
+    // YAML frontmatter with paths only (description is not documented for rules files)
     lines.push('---');
-    lines.push(`description: "${config.description}"`);
     lines.push(`paths:`);
     for (const pattern of config.paths) {
       lines.push(`  - "${pattern}"`);
@@ -460,6 +482,9 @@ export class ClaudeFormatter extends BaseFormatter {
               ? obj['allowedTools'].map((t) => this.valueToString(t))
               : undefined,
           userInvocable: obj['userInvocable'] === true,
+          disableModelInvocation: obj['disableModelInvocation'] === true,
+          argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
+          model: obj['model'] ? this.valueToString(obj['model']) : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
           resources:
             obj['resources'] && Array.isArray(obj['resources'])
@@ -501,6 +526,15 @@ export class ClaudeFormatter extends BaseFormatter {
     }
     if (config.userInvocable) {
       lines.push('user-invocable: true');
+    }
+    if (config.disableModelInvocation) {
+      lines.push('disable-model-invocation: true');
+    }
+    if (config.argumentHint) {
+      lines.push(`argument-hint: '${config.argumentHint}'`);
+    }
+    if (config.model) {
+      lines.push(`model: ${config.model}`);
     }
     lines.push('---');
     lines.push('');
@@ -636,6 +670,14 @@ export class ClaudeFormatter extends BaseFormatter {
       model: this.parseAgentModel(obj['model']),
       permissionMode: this.parsePermissionMode(obj['permissionMode']),
       skills: this.parseStringArray(obj['skills']),
+      maxTurns:
+        obj['maxTurns'] !== undefined && typeof obj['maxTurns'] === 'number'
+          ? obj['maxTurns']
+          : undefined,
+      memory: this.parseMemory(obj['memory']),
+      mcpServers: this.parseStringArray(obj['mcpServers']),
+      background: obj['background'] === true ? true : undefined,
+      isolation: obj['isolation'] === 'worktree' ? 'worktree' : undefined,
       content: obj['content'] ? this.valueToString(obj['content']) : '',
     };
   }
@@ -678,6 +720,18 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   /**
+   * Parse memory scope value.
+   */
+  private parseMemory(value: Value | undefined): 'user' | 'project' | 'local' | undefined {
+    if (!value) return undefined;
+    const str = this.valueToString(value);
+    const validScopes = ['user', 'project', 'local'] as const;
+    return validScopes.includes(str as 'user' | 'project' | 'local')
+      ? (str as 'user' | 'project' | 'local')
+      : undefined;
+  }
+
+  /**
    * Generate a .claude/agents/<name>.md file.
    *
    * @see https://code.claude.com/docs/en/sub-agents
@@ -711,6 +765,26 @@ export class ClaudeFormatter extends BaseFormatter {
       for (const skill of config.skills) {
         lines.push(`  - ${skill}`);
       }
+    }
+
+    if (config.maxTurns !== undefined) {
+      lines.push(`maxTurns: ${config.maxTurns}`);
+    }
+
+    if (config.memory) {
+      lines.push(`memory: ${config.memory}`);
+    }
+
+    if (config.mcpServers && config.mcpServers.length > 0) {
+      lines.push(`mcpServers: ${config.mcpServers.join(', ')}`);
+    }
+
+    if (config.background === true) {
+      lines.push('background: true');
+    }
+
+    if (config.isolation) {
+      lines.push(`isolation: ${config.isolation}`);
     }
 
     lines.push('---');

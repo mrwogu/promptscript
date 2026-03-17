@@ -127,3 +127,5 @@ pnpm run test       # Run all tests
 - Don't use ASCII art diagrams - always use Mermaid
 - Don't reference line numbers in test names or comments
 - Don't make code changes without verifying documentation consistency
+
+@CLAUDE.local.md
