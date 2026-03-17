@@ -989,7 +989,7 @@ describe('Golden Files Tests', () => {
         f.path.includes('.github/skills/commit/SKILL.md')
       );
       expect(commitSkill).toBeDefined();
-      expect(commitSkill?.content).toContain("name: 'commit'");
+      expect(commitSkill?.content).toContain('name: commit');
 
       const reviewSkill = result.additionalFiles?.find((f) =>
         f.path.includes('.github/skills/review/SKILL.md')

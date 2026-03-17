@@ -617,9 +617,9 @@ export class GitHubFormatter extends BaseFormatter {
   private generateSkillFile(config: SkillConfig): FormatterOutput {
     const lines: string[] = [];
 
-    // YAML frontmatter (use quotes compatible with Prettier)
+    // YAML frontmatter
     lines.push('---');
-    lines.push(`name: '${config.name}'`);
+    lines.push(`name: ${config.name}`);
     // Use double quotes if description contains apostrophe, single quotes otherwise
     const descQuote = config.description.includes("'") ? '"' : "'";
     lines.push(`description: ${descQuote}${config.description}${descQuote}`);
