@@ -611,7 +611,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       github: 'supported', // applyTo in .instructions.md
       cursor: 'supported',
       claude: 'supported', // paths in .claude/rules/*.md
-      antigravity: 'partial', // was 'supported', downgraded per antigravity-plan.md
+      antigravity: 'supported',
       factory: 'not-supported',
       opencode: 'not-supported',
       gemini: 'not-supported',
@@ -711,7 +711,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       github: 'supported', // applyTo in .instructions.md (multifile mode)
       cursor: 'supported',
       claude: 'supported', // paths in .claude/rules/*.md (multifile mode)
-      antigravity: 'partial', // was 'supported', downgraded per antigravity-plan.md
+      antigravity: 'supported',
       factory: 'not-supported',
       opencode: 'not-supported',
       gemini: 'not-supported',
@@ -810,7 +810,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       github: 'not-supported',
       cursor: 'partial', // was 'supported', downgraded per cursor-plan.md
       claude: 'not-supported',
-      antigravity: 'planned', // was 'supported', downgraded per antigravity-plan.md
+      antigravity: 'supported',
       factory: 'not-supported',
       opencode: 'not-supported',
       gemini: 'not-supported',
@@ -859,7 +859,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       github: 'not-supported',
       cursor: 'partial', // was 'supported', downgraded per cursor-plan.md
       claude: 'not-supported',
-      antigravity: 'planned', // was 'supported', downgraded per antigravity-plan.md
+      antigravity: 'supported',
       factory: 'not-supported',
       opencode: 'not-supported',
       gemini: 'not-supported',
@@ -1259,7 +1259,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       github: 'supported', // .github/prompts/*.prompt.md (shortcut with prompt: true)
       cursor: 'supported', // .cursor/commands/*.md (multi-line @shortcuts)
       claude: 'supported', // .claude/skills/<name>/SKILL.md (via @skills block)
-      antigravity: 'supported', // .agent/workflows/*.yaml (via @shortcuts with steps)
+      antigravity: 'supported', // .agent/workflows/*.md (via @shortcuts with steps)
       factory: 'supported', // .factory/skills/<name>/SKILL.md
       opencode: 'supported', // .opencode/commands/<name>.md
       gemini: 'supported', // .gemini/commands/<name>.toml
@@ -1298,12 +1298,13 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       codebuddy: 'not-supported',
     },
     testStrategy:
-      'Check for .cursor/commands/*.md, .github/prompts/*.prompt.md, .claude/skills/*/SKILL.md, or .agent/workflows/*.yaml',
+      'Check for .cursor/commands/*.md, .github/prompts/*.prompt.md, .claude/skills/*/SKILL.md, or .agent/workflows/*.md',
     docsUrl: {
       github: 'https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files',
       cursor: 'https://cursor.com/changelog/1-6',
       claude: 'https://code.claude.com/docs/en/skills',
       antigravity: 'https://atamel.dev/posts/2025/11-25_customize_antigravity_rules_workflows/',
+      factory: 'https://docs.factory.ai/cli/configuration',
     },
   },
   {
@@ -1355,6 +1356,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       codebuddy: 'not-supported',
     },
     testStrategy: 'Check for skills directory with SKILL.md files',
+    docsUrl: {
+      factory: 'https://docs.factory.ai/cli/configuration',
+    },
   },
   {
     id: 'agent-instructions',
@@ -1407,6 +1411,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     },
     testStrategy:
       'Check for AGENTS.md, .github/agents/, .claude/agents/, or .factory/droids/ files',
+    docsUrl: {
+      factory: 'https://docs.factory.ai/cli/configuration/custom-droids',
+    },
   },
   {
     id: 'local-memory',
