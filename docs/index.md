@@ -32,7 +32,8 @@ hide:
 _Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and 32 more._
 
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
-[:material-book-open-variant: See Enterprise Guide](guides/enterprise.md){ .md-button .md-button--secondary }
+[:material-format-list-checks: See All 37 Formatters](reference/formatters/index.md){ .md-button .md-button--secondary }
+[:material-book-open-variant: Enterprise Guide](guides/enterprise.md){ .md-button }
 [:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
 
 <div class="hero-badges" markdown>
@@ -567,9 +568,9 @@ Expert Fullstack Engineer.
   <div class="feature-card__icon feature-card__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
   </div>
-  <h3>Write Once, Compile to 37 AI Agents</h3>
+  <h3>Write Once, Compile to <a href="reference/formatters/">37 AI Agents</a></h3>
   <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, Roo Code, and 31 more. Add new agents without rewriting.</p>
-  <p class="feature-card__note">37 agents and counting — every new tool means more config to manage</p>
+  <p class="feature-card__note">37 agents and counting — <a href="reference/formatters/">see all supported formatters</a></p>
 </div>
 
 <div class="feature-card">
