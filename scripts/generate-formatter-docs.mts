@@ -12,10 +12,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import {
-  FEATURE_MATRIX,
-  type ToolName,
-} from '@promptscript/formatters';
+import { FEATURE_MATRIX, type ToolName } from '@promptscript/formatters';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -97,23 +94,23 @@ function parseTiersFromIndex(indexSource: string): Record<string, FormatterInfo[
 
 /** Display names for formatters that differ from auto-generated title case. */
 const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
-  'github': 'GitHub Copilot',
-  'claude': 'Claude Code',
-  'opencode': 'OpenCode',
-  'antigravity': 'Antigravity',
-  'factory': 'Factory AI',
-  'gemini': 'Gemini CLI',
-  'roo': 'Roo Code',
-  'kilo': 'Kilo Code',
-  'kiro': 'Kiro CLI',
+  github: 'GitHub Copilot',
+  claude: 'Claude Code',
+  opencode: 'OpenCode',
+  antigravity: 'Antigravity',
+  factory: 'Factory AI',
+  gemini: 'Gemini CLI',
+  roo: 'Roo Code',
+  kilo: 'Kilo Code',
+  kiro: 'Kiro CLI',
   'command-code': 'Command Code',
   'mistral-vibe': 'Mistral Vibe',
-  'openhands': 'OpenHands',
+  openhands: 'OpenHands',
   'qwen-code': 'Qwen Code',
-  'openclaw': 'OpenClaw',
-  'codebuddy': 'CodeBuddy',
-  'mcpjam': 'MCPJam',
-  'iflow': 'iFlow',
+  openclaw: 'OpenClaw',
+  codebuddy: 'CodeBuddy',
+  mcpjam: 'MCPJam',
+  iflow: 'iFlow',
 };
 
 /** Custom formatters with dedicated pages and hand-written overrides. */
@@ -157,7 +154,13 @@ const CUSTOM_OVERRIDES: Record<string, Partial<FormatterInfo>> = {
 };
 
 const DEDICATED_PAGES = new Set([
-  'claude', 'github', 'cursor', 'antigravity', 'factory', 'opencode', 'gemini',
+  'claude',
+  'github',
+  'cursor',
+  'antigravity',
+  'factory',
+  'opencode',
+  'gemini',
 ]);
 
 /**
@@ -169,8 +172,9 @@ function buildFormatterRegistry(): FormatterInfo[] {
   const formatters: FormatterInfo[] = [];
 
   // Get all .ts formatter files (excluding index, .d.ts)
-  const files = readdirSync(FORMATTERS_SRC)
-    .filter((f) => f.endsWith('.ts') && !f.endsWith('.d.ts') && f !== 'index.ts');
+  const files = readdirSync(FORMATTERS_SRC).filter(
+    (f) => f.endsWith('.ts') && !f.endsWith('.d.ts') && f !== 'index.ts'
+  );
 
   for (const file of files) {
     const source = readFileSync(join(FORMATTERS_SRC, file), 'utf-8');
@@ -184,7 +188,10 @@ function buildFormatterRegistry(): FormatterInfo[] {
 
     const displayName =
       DISPLAY_NAME_OVERRIDES[name] ??
-      name.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
+      name
+        .split('-')
+        .map((w) => w[0].toUpperCase() + w.slice(1))
+        .join(' ');
 
     formatters.push({
       name,
@@ -203,9 +210,7 @@ function buildFormatterRegistry(): FormatterInfo[] {
 
   // Sort: custom first, then tier-1, tier-2, tier-3; alphabetical within each tier
   const tierOrder = { custom: 0, 'tier-1': 1, 'tier-2': 2, 'tier-3': 3 };
-  formatters.sort(
-    (a, b) => tierOrder[a.tier] - tierOrder[b.tier] || a.name.localeCompare(b.name),
-  );
+  formatters.sort((a, b) => tierOrder[a.tier] - tierOrder[b.tier] || a.name.localeCompare(b.name));
 
   return formatters;
 }
@@ -228,13 +233,13 @@ function validateAgainstFeatureMatrix(formatters: FormatterInfo[]): void {
 
   if (missingFromRegistry.length > 0) {
     console.warn(
-      `Warning: These tools are in feature-matrix.ts but not in formatter source files: ${missingFromRegistry.join(', ')}`,
+      `Warning: These tools are in feature-matrix.ts but not in formatter source files: ${missingFromRegistry.join(', ')}`
     );
   }
   if (missingFromMatrix.length > 0) {
     // Not a warning — tier 2/3 formatters may not have feature matrix entries yet
     console.log(
-      `Note: These formatters have no feature-matrix entries: ${missingFromMatrix.join(', ')}`,
+      `Note: These formatters have no feature-matrix entries: ${missingFromMatrix.join(', ')}`
     );
   }
 }
@@ -250,10 +255,7 @@ function validateAgainstFeatureMatrix(formatters: FormatterInfo[]): void {
 function replaceGeneratedSection(content: string, id: string, replacement: string): string {
   const startMarker = `<!-- generated:start:${id} -->`;
   const endMarker = `<!-- generated:end:${id} -->`;
-  const pattern = new RegExp(
-    `${escapeRegex(startMarker)}[\\s\\S]*?${escapeRegex(endMarker)}`,
-    'g',
-  );
+  const pattern = new RegExp(`${escapeRegex(startMarker)}[\\s\\S]*?${escapeRegex(endMarker)}`, 'g');
 
   const newBlock = [
     startMarker,
@@ -306,7 +308,7 @@ function generateFormatterTable(formatters: FormatterInfo[]): string {
   for (const f of formatters) {
     const nameCell = f.hasDedicatedPage ? `[${f.displayName}](${f.name}.md)` : f.displayName;
     lines.push(
-      `| ${nameCell} | ${tierLabel(f.tier)} | \`${f.outputPath}\` | ${yn(f.hasSkills)} | ${yn(f.hasAgents)} | ${yn(f.hasLocal)} | ${yn(f.hasCommands)} |`,
+      `| ${nameCell} | ${tierLabel(f.tier)} | \`${f.outputPath}\` | ${yn(f.hasSkills)} | ${yn(f.hasAgents)} | ${yn(f.hasLocal)} | ${yn(f.hasCommands)} |`
     );
   }
 
@@ -367,17 +369,18 @@ function generateFeatures(f: FormatterInfo): string {
 
   const statusEmoji = (status: string | undefined): string => {
     switch (status) {
-      case 'supported': return 'Yes';
-      case 'partial': return 'Partial';
-      case 'planned': return 'Planned';
-      default: return 'No';
+      case 'supported':
+        return 'Yes';
+      case 'partial':
+        return 'Partial';
+      case 'planned':
+        return 'Planned';
+      default:
+        return 'No';
     }
   };
 
-  const lines = [
-    '| Feature | Supported |',
-    '|---------|-----------|',
-  ];
+  const lines = ['| Feature | Supported |', '|---------|-----------|'];
 
   for (const feature of FEATURE_MATRIX) {
     const status = feature.tools[toolName];
@@ -419,7 +422,11 @@ function main(): void {
     console.log('Generating: formatters/index.md');
     let content = readFileSync(indexPath, 'utf-8');
     const original = content;
-    content = replaceGeneratedSection(content, 'formatter-table', generateFormatterTable(FORMATTERS));
+    content = replaceGeneratedSection(
+      content,
+      'formatter-table',
+      generateFormatterTable(FORMATTERS)
+    );
 
     if (content !== original) {
       hasChanges = true;
