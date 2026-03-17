@@ -291,8 +291,32 @@ python3 .claude/skills/my-skill/scripts/search.py "query"
 
 For cross-target compatibility, consider parameterizing the path or documenting the convention.
 
+## Skill Dependencies
+
+Skills can declare dependencies on other skills using the `requires` field:
+
+```text
+@skills {
+  lint-check: {
+    description: "Run linting"
+  }
+
+  full-review: {
+    description: "Complete code review"
+    requires: ["lint-check"]
+  }
+}
+```
+
+The PS016 validation rule checks that:
+
+- Required skills exist in the same `@skills` block
+- No self-referencing requires
+- No circular dependencies
+
 ## See Also
 
+- [Shared Resources](shared-resources.md) — Share files across all skills
 - [Skills & Local Memory](../examples/skills-and-local.md) — Example of `@skills` with inline content
 - [Multi-File Organization](multi-file.md) — Organizing `.prs` files with `@use` imports
 - [Build Your Registry](registry.md) — Publishing and consuming registry packages

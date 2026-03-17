@@ -376,4 +376,24 @@ export interface SkillDefinition {
   context?: string;
   /** Agent to use */
   agent?: string;
+  /** Skills that must exist for this skill to work */
+  requires?: string[];
+  /** Runtime inputs the skill expects */
+  inputs?: Record<string, SkillContractField>;
+  /** Outputs the skill produces */
+  outputs?: Record<string, SkillContractField>;
+}
+
+/**
+ * A field in a skill contract (input or output).
+ */
+export interface SkillContractField {
+  /** Description of the field */
+  description: string;
+  /** Value type */
+  type: 'string' | 'number' | 'boolean' | 'enum';
+  /** Options for enum type */
+  options?: string[];
+  /** Default value */
+  default?: Value;
 }
