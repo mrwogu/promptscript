@@ -528,6 +528,15 @@ prs diff --target claude    # Show compilation diff
 | Continue    | .continue/rules/project.md      | .continue/skills/\*/SKILL.md                       |
 | + 26 more   |                                 | See full list in documentation                     |
 
+### Formatter Documentation
+
+For detailed information about each formatter's output paths, supported features, quirks, and example outputs:
+
+- **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 37)
+- **llms-full.txt:** Available at the docs site root — contains all documentation in a single file for LLM consumption
+- **Dedicated pages exist for:** Claude Code, GitHub Copilot, Cursor, Antigravity, Factory AI, Gemini CLI, OpenCode
+- **All 37 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
+
 ## Project Organization
 
 Typical modular structure:
