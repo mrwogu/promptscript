@@ -81,8 +81,8 @@
 
 **Implementation Phases:**
 
-- [x] **Phase 1: Basic parameters** — `(key: value)` syntax, string interpolation `{{var}}` _(implemented for `@skills` via SKILL.md frontmatter params)_
-- [x] **Phase 2: Type validation** — Validate param types at compile time _(PS015 validation rule)_
+- [x] **Phase 1: Basic parameters** — `(key: value)` syntax, string interpolation `{{var}}` in `@inherit`, `@use`, and `@skills`
+- [x] **Phase 2: Type validation** — Validate param types at compile time (PS009 for `@params`, PS015 for `@skills`)
 - [ ] **Phase 3: Conditionals** — `{{#if}}` / `{{#unless}}` blocks
 - [ ] **Phase 4: Loops** — `{{#each items}}` for dynamic lists
 
