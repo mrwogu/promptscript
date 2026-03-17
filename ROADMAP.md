@@ -4,6 +4,23 @@
 
 ## ✅ Recently Completed
 
+### Reverse Parser (`prs import`)
+
+**Goal:** Convert existing AI instructions back to PromptScript.
+
+- [x] **`prs import` command** — Converts `.md`, `.cursorrules`, `CLAUDE.md`, `AGENTS.md` etc. to `.prs` format
+- [x] **Intelligent block mapping** — Detects identity, context, standards, restrictions sections
+- [x] **Multi-format support** — Handles Markdown, YAML frontmatter, plain text
+
+### Skill System Enhancements
+
+**Goal:** Make skills more powerful and composable.
+
+- [x] **Parameterized skills** — Template parameters in SKILL.md frontmatter with `{{variable}}` interpolation
+- [x] **Skill folders with shared resources** — `.promptscript/shared/` directory for cross-skill resources with `@shared/` prefix
+- [x] **Skill dependencies** — `requires` field for declaring skill dependencies, PS016 validation (circular dep detection)
+- [x] **Skill contracts** — `inputs`/`outputs` typed fields (`string`, `number`, `boolean`, `enum`), PS017 validation
+
 ### Web Playground
 
 **Goal:** Try PromptScript without installing anything.
@@ -170,7 +187,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Links to documentation
 
 - [ ] **CLI enhancements**
-  - ~~`prs migrate`~~ → Shipped as `prs import` — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
+  - ~~`prs migrate`~~ → ✅ Shipped as `prs import` — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
   - `prs doctor` — Diagnose common configuration issues
   - `prs upgrade` — Update syntax version with automatic migrations
 
