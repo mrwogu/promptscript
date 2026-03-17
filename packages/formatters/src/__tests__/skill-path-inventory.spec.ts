@@ -35,7 +35,7 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   'mistral-vibe': { basePath: '.vibe/skills', fileName: 'SKILL.md' },
   mux: { basePath: '.mux/skills', fileName: 'SKILL.md' },
   neovate: { basePath: '.neovate/skills', fileName: 'SKILL.md' },
-  openclaw: { basePath: 'skills/skills', fileName: 'SKILL.md' },
+  openclaw: { basePath: '.openclaw/skills', fileName: 'SKILL.md' },
   opencode: { basePath: '.opencode/skills', fileName: 'SKILL.md' },
   openhands: { basePath: '.openhands/skills', fileName: 'SKILL.md' },
   pi: { basePath: '.pi/skills', fileName: 'SKILL.md' },

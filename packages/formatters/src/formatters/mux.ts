@@ -8,4 +8,5 @@ export const { Formatter: MuxFormatter, VERSIONS: MUX_VERSIONS } = createSimpleM
   description: 'Mux rules (Markdown)',
   mainFileHeader: '# Project Rules',
   dotDir: '.mux',
+  hasSkills: false,
 });

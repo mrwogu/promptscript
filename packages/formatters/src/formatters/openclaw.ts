@@ -8,5 +8,5 @@ export const { Formatter: OpenClawFormatter, VERSIONS: OPENCLAW_VERSIONS } =
     outputPath: 'INSTRUCTIONS.md',
     description: 'OpenClaw instructions (Markdown)',
     mainFileHeader: '# INSTRUCTIONS.md',
-    dotDir: 'skills',
+    dotDir: '.openclaw',
   });

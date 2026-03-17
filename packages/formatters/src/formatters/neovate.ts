@@ -9,4 +9,5 @@ export const { Formatter: NeovateFormatter, VERSIONS: NEOVATE_VERSIONS } =
     description: 'Neovate rules (Markdown)',
     mainFileHeader: '# Project Rules',
     dotDir: '.neovate',
+    hasSkills: false,
   });
