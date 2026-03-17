@@ -199,4 +199,63 @@ describe('commands/registry/init', () => {
 
     expect(process.exitCode).toBe(1);
   });
+
+  it('should scaffold in CWD when directory is empty and --yes', async () => {
+    mockFs.readdir.mockResolvedValue(['.git']);
+
+    await registryInitCommand(undefined, { yes: true }, mockServices);
+
+    // Should scaffold in CWD (/test), not create a subdirectory
+    expect(mockFs.mkdir).toHaveBeenCalledWith('/test', { recursive: true });
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      expect.stringContaining('/test/registry-manifest.yaml'),
+      expect.any(String),
+      'utf-8'
+    );
+  });
+
+  it('should create slugified subdirectory when CWD is not empty and --yes', async () => {
+    mockFs.readdir.mockResolvedValue(['package.json', 'src']);
+
+    await registryInitCommand(
+      undefined,
+      { yes: true, name: 'Comarch PromptScript Registry' },
+      mockServices
+    );
+
+    expect(mockFs.mkdir).toHaveBeenCalledWith(
+      expect.stringContaining('comarch-promptscript-registry'),
+      { recursive: true }
+    );
+  });
+
+  it('should use explicit directory arg without slugifying', async () => {
+    mockFs.readdir.mockResolvedValue(['package.json']);
+
+    await registryInitCommand('my-explicit-dir', { yes: true }, mockServices);
+
+    expect(mockFs.mkdir).toHaveBeenCalledWith(
+      expect.stringContaining('my-explicit-dir'),
+      { recursive: true }
+    );
+  });
+
+  it('should scaffold in CWD when interactive, empty dir, user picks here', async () => {
+    mockFs.readdir.mockResolvedValue(['.git']);
+    mockPrompts.input
+      .mockResolvedValueOnce('My Registry')    // name
+      .mockResolvedValueOnce('A registry');     // description
+    mockPrompts.checkbox.mockResolvedValueOnce(['@core']);
+    mockPrompts.confirm.mockResolvedValueOnce(false);  // no seed
+    mockPrompts.select.mockResolvedValueOnce('here');   // scaffold here
+
+    await registryInitCommand(undefined, {}, mockServices);
+
+    expect(mockFs.mkdir).toHaveBeenCalledWith('/test', { recursive: true });
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      expect.stringContaining('/test/registry-manifest.yaml'),
+      expect.stringContaining("name: 'My Registry'"),
+      'utf-8'
+    );
+  });
 });
