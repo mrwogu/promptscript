@@ -1,8 +1,8 @@
-import { basename, resolve } from 'path';
 import type { RegistryInitOptions } from '../../types.js';
 import { type CliServices, createDefaultServices } from '../../services.js';
 import { createSpinner, ConsoleOutput } from '../../output/console.js';
 import { scaffoldRegistry } from '../../utils/registry-scaffolder.js';
+import { resolveTargetDirectory } from '../../utils/resolve-target-directory.js';
 
 const DEFAULT_NAMESPACES = ['@core', '@stacks', '@fragments'];
 
@@ -14,9 +14,6 @@ export async function registryInitCommand(
   options: RegistryInitOptions,
   services: CliServices = createDefaultServices()
 ): Promise<void> {
-  const targetDir = resolve(directory ?? options.output ?? '.');
-  const dirName = basename(targetDir);
-
   try {
     let name: string;
     let description: string;
@@ -25,8 +22,8 @@ export async function registryInitCommand(
 
     if (options.yes) {
       // Non-interactive mode
-      name = options.name ?? `${dirName}-registry`;
-      description = options.description ?? `PromptScript registry for ${dirName}`;
+      name = options.name ?? 'my-registry';
+      description = options.description ?? 'PromptScript registry';
       namespaces = options.namespaces ?? DEFAULT_NAMESPACES;
       seed = options.seed !== false;
     } else {
@@ -39,12 +36,12 @@ export async function registryInitCommand(
 
       name = await prompts.input({
         message: 'Registry name:',
-        default: options.name ?? `${dirName}-registry`,
+        default: options.name ?? 'my-registry',
       });
 
       description = await prompts.input({
         message: 'Description:',
-        default: options.description ?? `PromptScript registry for ${dirName}`,
+        default: options.description ?? 'PromptScript registry',
       });
 
       const selectedNamespaces = await prompts.checkbox({
@@ -68,6 +65,17 @@ export async function registryInitCommand(
             })
           : false;
     }
+
+    // Resolve target directory AFTER collecting name
+    const targetDir = await resolveTargetDirectory(
+      {
+        cwd: services.cwd,
+        directoryArg: directory ?? options.output,
+        registryName: name,
+        nonInteractive: !!options.yes,
+      },
+      services
+    );
 
     const spinner = createSpinner('Creating registry...').start();
 

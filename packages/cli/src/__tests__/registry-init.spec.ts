@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { mkdtemp, rm, readdir, readFile } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import { registryInitCommand } from '../commands/registry/init.js';
-import { type CliServices } from '../services.js';
+import { type CliServices, createDefaultServices } from '../services.js';
 
 // Mock ora
 vi.mock('ora', () => ({
@@ -198,5 +201,135 @@ describe('commands/registry/init', () => {
     await registryInitCommand('test-registry', { yes: true }, mockServices);
 
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should scaffold in CWD when directory is empty and --yes', async () => {
+    mockFs.readdir.mockResolvedValue(['.git']);
+
+    await registryInitCommand(undefined, { yes: true }, mockServices);
+
+    // Should scaffold in CWD (/test), not create a subdirectory
+    expect(mockFs.mkdir).toHaveBeenCalledWith('/test', { recursive: true });
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      expect.stringContaining('/test/registry-manifest.yaml'),
+      expect.any(String),
+      'utf-8'
+    );
+  });
+
+  it('should create slugified subdirectory when CWD is not empty and --yes', async () => {
+    mockFs.readdir.mockResolvedValue(['package.json', 'src']);
+
+    await registryInitCommand(
+      undefined,
+      { yes: true, name: 'Comarch PromptScript Registry' },
+      mockServices
+    );
+
+    expect(mockFs.mkdir).toHaveBeenCalledWith(
+      expect.stringContaining('comarch-promptscript-registry'),
+      { recursive: true }
+    );
+  });
+
+  it('should use explicit directory arg without slugifying', async () => {
+    mockFs.readdir.mockResolvedValue(['package.json']);
+
+    await registryInitCommand('my-explicit-dir', { yes: true }, mockServices);
+
+    expect(mockFs.mkdir).toHaveBeenCalledWith(expect.stringContaining('my-explicit-dir'), {
+      recursive: true,
+    });
+  });
+
+  it('should scaffold in CWD when interactive, empty dir, user picks here', async () => {
+    mockFs.readdir.mockResolvedValue(['.git']);
+    mockPrompts.input
+      .mockResolvedValueOnce('My Registry') // name
+      .mockResolvedValueOnce('A registry'); // description
+    mockPrompts.checkbox.mockResolvedValueOnce(['@core']);
+    mockPrompts.confirm.mockResolvedValueOnce(false); // no seed
+    mockPrompts.select.mockResolvedValueOnce('here'); // scaffold here
+
+    await registryInitCommand(undefined, {}, mockServices);
+
+    expect(mockFs.mkdir).toHaveBeenCalledWith('/test', { recursive: true });
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      expect.stringContaining('/test/registry-manifest.yaml'),
+      expect.stringContaining("name: 'My Registry'"),
+      'utf-8'
+    );
+  });
+});
+
+describe('commands/registry/init (smoke)', () => {
+  let tempDir: string;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'prs-registry-init-'));
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
+  afterEach(async () => {
+    consoleSpy.mockRestore();
+    await rm(tempDir, { recursive: true, force: true });
+  });
+
+  it('should scaffold real files in a temp directory with --yes', async () => {
+    const services = createDefaultServices();
+    services.cwd = tempDir;
+
+    await registryInitCommand(undefined, { yes: true, name: 'Smoke Test Registry' }, services);
+
+    const entries = await readdir(tempDir);
+    expect(entries).toContain('registry-manifest.yaml');
+    expect(entries).toContain('README.md');
+    expect(entries).toContain('.gitignore');
+    expect(entries).toContain('@core');
+    expect(entries).toContain('@stacks');
+    expect(entries).toContain('@fragments');
+
+    const manifest = await readFile(join(tempDir, 'registry-manifest.yaml'), 'utf-8');
+    expect(manifest).toContain("name: 'Smoke Test Registry'");
+    expect(manifest).toContain("version: '1'");
+  });
+
+  it('should scaffold seed files in @core with real fs', async () => {
+    const services = createDefaultServices();
+    services.cwd = tempDir;
+
+    await registryInitCommand(undefined, { yes: true }, services);
+
+    const coreEntries = await readdir(join(tempDir, '@core'));
+    expect(coreEntries).toContain('base.prs');
+    expect(coreEntries).toContain('quality.prs');
+    expect(coreEntries).toContain('security.prs');
+
+    const basePrs = await readFile(join(tempDir, '@core', 'base.prs'), 'utf-8');
+    expect(basePrs).toContain('@meta');
+    expect(basePrs).toContain('@identity');
+  });
+
+  it('should create slugified subdirectory when temp dir has files', async () => {
+    const services = createDefaultServices();
+    services.cwd = tempDir;
+
+    // Make the temp dir non-empty
+    const { writeFile } = await import('fs/promises');
+    await writeFile(join(tempDir, 'existing-file.txt'), 'hello');
+
+    await registryInitCommand(
+      undefined,
+      { yes: true, name: 'Comarch PromptScript Registry' },
+      services
+    );
+
+    const entries = await readdir(tempDir);
+    expect(entries).toContain('comarch-promptscript-registry');
+
+    const subEntries = await readdir(join(tempDir, 'comarch-promptscript-registry'));
+    expect(subEntries).toContain('registry-manifest.yaml');
+    expect(subEntries).toContain('@core');
   });
 });
