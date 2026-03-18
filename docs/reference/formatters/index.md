@@ -41,6 +41,7 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
   <div class="formatter-card__features">
     <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
     <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Commands</span>
     <span class="formatter-card__tag formatter-card__tag--yes">Local</span>
   </div>
 </a>
@@ -53,7 +54,7 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
   <code class="formatter-card__output">.github/copilot-instructions.md</code>
   <div class="formatter-card__features">
     <span class="formatter-card__tag formatter-card__tag--yes">Skills</span>
-    <span class="formatter-card__tag formatter-card__tag--yes">Agents</span>
+    <span class="formatter-card__tag formatter-card__tag--yes">Prompts</span>
   </div>
 </a>
 
@@ -129,11 +130,11 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 | Formatter                     | Tier   | Output File                       | Skills | Agents | Local | Commands |
 | ----------------------------- | ------ | --------------------------------- | ------ | ------ | ----- | -------- |
 | [Antigravity](antigravity.md) | Custom | `.agent/rules/project.md`         | No     | No     | No    | No       |
-| [Claude Code](claude.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | No       |
+| [Claude Code](claude.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | Yes      |
 | [Cursor](cursor.md)           | Custom | `.cursor/rules/project.mdc`       | No     | No     | No    | Yes      |
 | [Factory AI](factory.md)      | Custom | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
 | [Gemini CLI](gemini.md)       | Custom | `GEMINI.md`                       | Yes    | No     | No    | Yes      |
-| [GitHub Copilot](github.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | No       |
+| [GitHub Copilot](github.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | Yes      |
 | [OpenCode](opencode.md)       | Custom | `OPENCODE.md`                     | Yes    | Yes    | No    | Yes      |
 | Cline                         | Tier 1 | `.clinerules`                     | No     | No     | No    | No       |
 | Codex                         | Tier 1 | `AGENTS.md`                       | Yes    | No     | No    | No       |

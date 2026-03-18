@@ -15,7 +15,7 @@ description: PromptScript output format for Claude Code
 | **Dot directory** | `.claude/` |
 | **Skills** | Yes (`.claude/skills/<name>/SKILL.md`) |
 | **Agents** | Yes (`.claude/agents/<name>.md`) |
-| **Commands** | No |
+| **Commands** | Yes (`.claude/commands/<name>.md`) |
 | **Local files** | Yes (`CLAUDE.local.md`) |
 
 <!-- generated:end:overview -->
@@ -30,6 +30,7 @@ description: PromptScript output format for Claude Code
 | Main instructions | `CLAUDE.md` | Primary rule file |
 | Local overrides | `CLAUDE.local.md` | Private instructions (gitignored) |
 | Skills | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions |
+| Commands | `.claude/commands/<name>.md` | Slash commands |
 | Agents | `.claude/agents/<name>.md` | Agent configurations |
 
 <!-- generated:end:output-files -->
@@ -98,8 +99,3 @@ project-root/
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
-
-
-<claude-mem-context>
-
-</claude-mem-context>

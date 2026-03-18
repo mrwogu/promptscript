@@ -120,7 +120,7 @@ const CUSTOM_OVERRIDES: Record<string, Partial<FormatterInfo>> = {
     dotDir: '.claude',
     hasSkills: true,
     hasAgents: true,
-    hasCommands: false,
+    hasCommands: true,
     hasLocal: true,
     skillFileName: 'SKILL.md',
   },
@@ -129,7 +129,7 @@ const CUSTOM_OVERRIDES: Record<string, Partial<FormatterInfo>> = {
     dotDir: '.github',
     hasSkills: true,
     hasAgents: true,
-    hasCommands: false,
+    hasCommands: true,
     hasLocal: false,
     skillFileName: 'SKILL.md',
   },
@@ -148,6 +148,33 @@ const CUSTOM_OVERRIDES: Record<string, Partial<FormatterInfo>> = {
     hasSkills: false,
     hasAgents: false,
     hasCommands: false,
+    hasLocal: false,
+    skillFileName: 'SKILL.md',
+  },
+  factory: {
+    outputPath: 'AGENTS.md',
+    dotDir: '.factory',
+    hasSkills: true,
+    hasAgents: true,
+    hasCommands: true,
+    hasLocal: false,
+    skillFileName: 'SKILL.md',
+  },
+  gemini: {
+    outputPath: 'GEMINI.md',
+    dotDir: '.gemini',
+    hasSkills: true,
+    hasAgents: false,
+    hasCommands: true,
+    hasLocal: false,
+    skillFileName: 'skill.md',
+  },
+  opencode: {
+    outputPath: 'OPENCODE.md',
+    dotDir: '.opencode',
+    hasSkills: true,
+    hasAgents: true,
+    hasCommands: true,
     hasLocal: false,
     skillFileName: 'SKILL.md',
   },
@@ -324,7 +351,7 @@ function generateOverview(f: FormatterInfo): string {
     `| **Dot directory** | \`${f.dotDir}/\` |`,
     `| **Skills** | ${yn(f.hasSkills)}${f.hasSkills ? ` (\`${f.dotDir}/skills/<name>/${f.skillFileName}\`)` : ''} |`,
     `| **Agents** | ${yn(f.hasAgents)}${f.hasAgents ? ` (\`${f.dotDir}/${f.name === 'factory' ? 'droids' : 'agents'}/<name>.md\`)` : ''} |`,
-    `| **Commands** | ${yn(f.hasCommands)}${f.hasCommands ? ` (\`${f.dotDir}/commands/<name>.${f.name === 'gemini' ? 'toml' : 'md'}\`)` : ''} |`,
+    `| **Commands** | ${yn(f.hasCommands)}${f.hasCommands ? ` (\`${f.name === 'github' ? '.github/prompts/<name>.prompt.md' : `${f.dotDir}/commands/<name>.${f.name === 'gemini' ? 'toml' : 'md'}`}\`)` : ''} |`,
     `| **Local files** | ${yn(f.hasLocal)}${f.hasLocal ? ' (`CLAUDE.local.md`)' : ''} |`,
   ];
   return lines.join('\n');
@@ -347,8 +374,12 @@ function generateOutputFiles(f: FormatterInfo): string {
   }
 
   if (f.hasCommands) {
-    const ext = f.name === 'gemini' ? 'toml' : 'md';
-    lines.push(`| Commands | \`${f.dotDir}/commands/<name>.${ext}\` | Slash commands |`);
+    if (f.name === 'github') {
+      lines.push(`| Prompts | \`.github/prompts/<name>.prompt.md\` | Slash commands |`);
+    } else {
+      const ext = f.name === 'gemini' ? 'toml' : 'md';
+      lines.push(`| Commands | \`${f.dotDir}/commands/<name>.${ext}\` | Slash commands |`);
+    }
   }
 
   if (f.hasAgents) {
