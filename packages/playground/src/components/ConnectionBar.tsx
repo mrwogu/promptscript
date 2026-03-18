@@ -49,9 +49,12 @@ export function ConnectionBar({
         ) : (
           <span className="text-gray-400">{STATUS_LABELS[status]}</span>
         )}
+        <span className="text-gray-600 text-xs ml-auto">
+          Start with: <code className="text-gray-500">prs serve</code>
+        </span>
         <button
           onClick={() => setShowInput(true)}
-          className="ml-auto px-2 py-0.5 text-xs bg-ps-primary hover:bg-ps-secondary rounded text-white cursor-pointer"
+          className="px-2 py-0.5 text-xs bg-ps-primary hover:bg-ps-secondary rounded text-white cursor-pointer"
         >
           {error ? 'Retry' : 'Connect to local server'}
         </button>
