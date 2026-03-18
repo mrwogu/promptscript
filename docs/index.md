@@ -31,78 +31,93 @@ hide:
 
 <div class="hero-ticker" aria-hidden="true">
   <div class="hero-ticker__track">
+    <!-- Half 1: 44 chips (each custom ×2, interspersed every 2-3 others) -->
     <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Cline</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Codex</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Roo Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
-    <!-- Duplicate for seamless loop -->
+    <!-- Half 2: identical copy for seamless loop -->
     <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Cline</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Codex</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Roo Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>

@@ -2714,9 +2714,9 @@ pre.init-demo__file-preview-content {
 
 .hero-ticker__track {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   width: max-content;
-  animation: hero-ticker-scroll 35s linear infinite;
+  animation: hero-ticker-scroll 45s linear infinite;
   will-change: transform;
 }
 
@@ -2727,18 +2727,18 @@ pre.init-demo__file-preview-content {
 .hero-ticker__chip {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 999px;
   white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: #334155;
   flex-shrink: 0;
 }
 
 .hero-ticker__dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -2814,12 +2814,12 @@ pre.init-demo__file-preview-content {
     width: 40px;
   }
   .hero-ticker__track {
-    gap: 0.75rem;
-    animation-duration: 30s;
+    gap: 0.4rem;
+    animation-duration: 38s;
   }
   .hero-ticker__chip {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.65rem;
   }
 }
 
@@ -2829,16 +2829,16 @@ pre.init-demo__file-preview-content {
     width: 30px;
   }
   .hero-ticker__track {
-    gap: 0.6rem;
-    animation-duration: 25s;
+    gap: 0.35rem;
+    animation-duration: 30s;
   }
   .hero-ticker__chip {
-    padding: 0.3rem 0.65rem;
-    font-size: 0.7rem;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.6rem;
   }
   .hero-ticker__dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
 }
 
@@ -2849,7 +2849,7 @@ pre.init-demo__file-preview-content {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  .hero-ticker__chip:nth-child(n + 38) {
+  .hero-ticker__chip:nth-child(n + 45) {
     display: none;
   }
 }
