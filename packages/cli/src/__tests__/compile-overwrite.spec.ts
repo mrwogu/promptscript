@@ -596,7 +596,7 @@ describe('compile command - overwrite protection', () => {
       expect(mockWriteFile).toHaveBeenCalled();
     });
 
-    it('should NOT detect marker after line 20', async () => {
+    it('should detect marker in extended YAML frontmatter (line 45)', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
 
       mockCompile.mockResolvedValue({
@@ -613,8 +613,37 @@ describe('compile command - overwrite protection', () => {
         return false;
       });
 
-      // Marker on line 25 (after first 20 lines)
-      const lines = Array(24).fill('# Some content');
+      // Marker on line 45 (after long YAML frontmatter, within first 50 lines)
+      const lines = Array(44).fill('# Some content');
+      lines.push(PROMPTSCRIPT_MARKER);
+      mockReadFile.mockResolvedValue(lines.join('\n'));
+
+      await compileCommand({}, mockServices);
+
+      // Should NOT prompt because marker is within first 50 lines
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalled();
+    });
+
+    it('should NOT detect marker after line 50', async () => {
+      const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('project.prs')) return true;
+        if (path.includes('CLAUDE.md')) return true;
+        return false;
+      });
+
+      // Marker on line 55 (after first 50 lines)
+      const lines = Array(54).fill('# Some content');
       lines.push(PROMPTSCRIPT_MARKER);
       mockReadFile.mockResolvedValue(lines.join('\n'));
 
@@ -622,7 +651,7 @@ describe('compile command - overwrite protection', () => {
 
       await compileCommand({}, mockServices);
 
-      // Should prompt because marker is not in first 20 lines
+      // Should prompt because marker is not in first 50 lines
       expect(mockPrompts.select).toHaveBeenCalled();
     });
   });
