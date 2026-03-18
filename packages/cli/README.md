@@ -2,7 +2,7 @@
 
 **One source of truth for all your AI coding assistants.**
 
-Write AI instructions once in PromptScript, compile to GitHub Copilot, Claude Code, Cursor, Antigravity, and more.
+Write AI instructions once in PromptScript, compile to 37 AI coding agents: GitHub Copilot, Claude Code, Cursor, and more.
 
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
@@ -12,34 +12,19 @@ Write AI instructions once in PromptScript, compile to GitHub Copilot, Claude Co
 
 ## The Problem
 
-Every AI coding tool uses a different config format. As your organization grows, so does the chaos:
+- ❌ 50 repos × 37 AI tools = **1,900 files** to keep in sync
+- ❌ Security policy update? Manual changes across every repo
+- ❌ Switching AI tools? Rewrite everything
+- ❌ No audit trail, no inheritance, no validation
 
-```
-50 repos x 37 AI agents = 1850 files to maintain
+## The Fix
 
-repo-1/CLAUDE.md          repo-1/.cursorrules      repo-1/.github/copilot-instructions.md
-repo-2/CLAUDE.md          repo-2/.cursorrules      repo-2/.github/copilot-instructions.md
-...
-repo-50/CLAUDE.md         repo-50/.cursorrules     repo-50/.github/copilot-instructions.md
-```
+PromptScript lets you **build prompts like code** - with inheritance, composition, parameterization, and compilation to any target format.
 
-- A security policy update means editing hundreds of files by hand
-- Standards drift across teams and repos
-- Switching AI tools means rewriting everything
-- No audit trail, no validation, no reuse
-
-## The Solution
-
-PromptScript lets you **build prompts like code** — with inheritance, composition, parameterization, and compilation to any target format:
-
-```
-.promptscript/project.prs  -->  prs compile  -->  CLAUDE.md
-                                              -->  .github/copilot-instructions.md
-                                              -->  .cursor/rules/project.mdc
-                                              -->  .agent/rules/project.md
-```
-
-Update once, propagate everywhere. Version-controlled, validated, vendor-independent.
+- ✅ Write once in `.prs`, compile to **all 37 agents**
+- ✅ Update the source, propagates everywhere automatically
+- ✅ Hierarchical inheritance like code, not copy-paste
+- ✅ Full validation, audit trail, and version pinning
 
 ---
 
@@ -93,6 +78,14 @@ prs init --migrate
   "/review": "Security-focused code review"
   "/test": "Write unit tests with Vitest"
 }
+
+@skills {
+  deploy: {
+    description: "Deploy service to production"
+    userInvocable: true
+    allowedTools: ["Bash", "Read"]
+  }
+}
 ```
 
 Run `prs compile` and get correctly formatted output for every AI tool your team uses.
@@ -105,7 +98,7 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 | :---------------------- | :------------------------------------------- |
 | `prs init`              | Initialize project with auto-detection       |
 | `prs compile`           | Compile to target AI tool formats            |
-| `prs compile -w`        | Watch mode — recompile on changes            |
+| `prs compile -w`        | Watch mode - recompile on changes            |
 | `prs compile --dry-run` | Preview changes without writing files        |
 | `prs validate`          | Validate `.prs` files with detailed errors   |
 | `prs diff`              | Show diff between source and compiled output |
@@ -115,27 +108,31 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 
 ## Key Features
 
-- **Inheritance** — build org-wide, team-level, and project-level configs that cascade like CSS
-- **Composition** — reuse fragments across projects with `@use`
-- **Parameterized templates** — `@inherit @stacks/node(port: 8080, db: "postgres")`
-- **Multi-target compilation** — one source, any number of AI tools
-- **Watch mode** — instant recompilation on file changes
-- **Overwrite protection** — never accidentally clobbers hand-written files
-- **Validation** — catch errors before they reach your AI tools
-- **Registry support** — share configs via Git registries (private or public)
-- **AI-assisted migration** — convert existing `CLAUDE.md`, `.cursorrules`, etc.
+- **Inheritance** - build org-wide, team-level, and project-level configs that cascade like CSS
+- **Composition** - reuse fragments across projects with `@use`
+- **Parameterized templates** - `@inherit @stacks/node(port: 8080, db: "postgres")`
+- **Skills** - define reusable AI skills with `SKILL.md` files, resource bundles, and tool permissions
+- **Multi-target compilation** - one source, any number of AI tools
+- **Watch mode** - instant recompilation on file changes
+- **Overwrite protection** - never accidentally clobbers hand-written files
+- **Validation** - catch errors before they reach your AI tools
+- **Registry support** - share configs via Git registries (private or public)
+- **AI-assisted migration** - convert existing `CLAUDE.md`, `.cursorrules`, etc.
+- **Bundled language skill** - AI agents learn PromptScript syntax via injected SKILL.md
 
 ## Supported Targets
 
 | AI Tool                | Output                                                |
 | :--------------------- | :---------------------------------------------------- |
 | **GitHub Copilot**     | `.github/copilot-instructions.md`, agents, prompts    |
-| **Claude Code**        | `CLAUDE.md`, skills, local memory                     |
+| **Claude Code**        | `CLAUDE.md`, `.claude/skills/*.md`                    |
 | **Cursor**             | `.cursor/rules/*.mdc`                                 |
 | **Google Antigravity** | `.agent/rules/*.md`                                   |
 | **Factory AI**         | `AGENTS.md`, `.factory/skills/`, `.factory/commands/` |
-| **OpenCode**           | `agents.yaml`                                         |
-| **Gemini CLI**         | `GEMINI.md`                                           |
+| **OpenCode**           | `OPENCODE.md`, `.opencode/commands/*.md`              |
+| **Gemini CLI**         | `GEMINI.md`, `.gemini/commands/*.toml`                |
+
+Plus **30 more** agents (Windsurf, Cline, Roo Code, Codex, Continue, Augment, and others). See the [full list](https://getpromptscript.dev/formatters/).
 
 ## Configuration
 
@@ -302,11 +299,10 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate
 
 ## Documentation
 
-- [Getting Started](https://getpromptscript.dev/getting-started/) — 5-minute quickstart
-- [Language Reference](https://getpromptscript.dev/reference/syntax/) — full syntax docs
-- [Inheritance Guide](https://getpromptscript.dev/guides/inheritance/) — composition patterns
-- [Migration Guide](https://getpromptscript.dev/guides/migration/) — converting existing files
-- [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/) — scaling across organizations
+- [Getting Started](https://getpromptscript.dev/getting-started/) - 5-minute quickstart
+- [Language Reference](https://getpromptscript.dev/reference/syntax/) - full syntax docs
+- [Guides](https://getpromptscript.dev/guides/) - inheritance, registry, migration, and more
+- [Enterprise](https://getpromptscript.dev/guides/enterprise/) - scaling across organizations
 
 ## License
 
