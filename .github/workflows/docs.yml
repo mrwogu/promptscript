@@ -28,6 +28,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Skip main-branch push when release-please just created a tag on the same commit.
+    # The tag-push run will deploy both the versioned docs AND dev, so the main run is redundant.
+    if: >-
+      github.event_name != 'push'
+      || !startsWith(github.ref, 'refs/heads/')
+      || !startsWith(github.event.head_commit.message, 'chore(main): release')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -121,27 +127,25 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           ALIAS="${{ steps.version.outputs.alias }}"
+          IS_TAG="${{ startsWith(github.ref, 'refs/tags/v') }}"
 
           # Fetch latest gh-pages to avoid push conflicts
           git fetch origin gh-pages --depth=1 || true
 
-          # Retry mike deploy up to 3 times to handle concurrent gh-pages pushes
-          for attempt in 1 2 3; do
-            echo "Attempt $attempt: deploying docs version=$VERSION"
-            if [[ -n "$ALIAS" ]]; then
-              if mike deploy --push --update-aliases "$VERSION" "$ALIAS"; then
-                mike set-default --push latest
-                break
-              fi
-            else
-              if mike deploy --push "$VERSION"; then
-                break
-              fi
-            fi
-            echo "Push failed, retrying after rebase..."
-            git fetch origin gh-pages --depth=1
-            sleep 5
-          done
+          # Deploy versioned docs
+          if [[ -n "$ALIAS" ]]; then
+            mike deploy --push --update-aliases "$VERSION" "$ALIAS"
+            mike set-default --push latest
+          else
+            mike deploy --push "$VERSION"
+          fi
+
+          # Tag runs also deploy dev so we don't need a separate main-push workflow run
+          if [[ "$IS_TAG" == "true" ]]; then
+            echo "Tag run: also deploying dev version"
+            git fetch origin gh-pages --depth=1 || true
+            mike deploy --push dev
+          fi
         env:
           MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.MKDOCS_GIT_COMMITTERS_APIKEY }}
           PYTHONPATH: ${{ github.workspace }}
@@ -236,6 +240,8 @@ jobs:
           # /playground-dev = dev version
           # Both directories are stored on gh-pages so they persist across deployments
 
+          IS_TAG="${{ startsWith(github.ref, 'refs/tags/v') }}"
+
           cd gh-pages-content
 
           if [[ "$VERSION" == "dev" ]]; then
@@ -247,6 +253,11 @@ jobs:
             if [[ "$ALIAS" == "latest" ]]; then
               rm -rf playground
               cp -r ../dist/packages/playground playground
+            fi
+            # Tag runs also update /playground-dev (same code, keeps dev in sync)
+            if [[ "$IS_TAG" == "true" ]]; then
+              rm -rf playground-dev
+              cp -r ../dist/packages/playground playground-dev
             fi
           fi
 
