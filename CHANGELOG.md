@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1](https://github.com/mrwogu/promptscript/compare/v1.4.0...v1.4.1) (2026-03-18)
+
+
+### Bug Fixes
+
+* **ci:** prevent docs deploy race by combining tag and dev deploys ([ec568af](https://github.com/mrwogu/promptscript/commit/ec568af031c6ced627ce34ae9d00751e7d121a34))
+* **cli:** increase marker scan window for SKILL.md detection ([8409dd6](https://github.com/mrwogu/promptscript/commit/8409dd650483a27dc21e3e5ad47eda86157340b2))
+
 ## [1.4.0](https://github.com/mrwogu/promptscript/compare/v1.3.1...v1.4.0) (2026-03-18)
 
 
