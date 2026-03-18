@@ -15,7 +15,7 @@ Real-world PromptScript configuration examples.
   </div>
   <div class="ref-item__content">
     <h3>Minimal</h3>
-    <p>The simplest possible PromptScript configuration — just the essentials.</p>
+    <p>The simplest possible PromptScript configuration - just the essentials.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>

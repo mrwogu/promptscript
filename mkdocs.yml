@@ -80,8 +80,6 @@ plugins:
       separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - minify:
       minify_html: true
-      minify_html_opts:
-        remove_optional_attribute_quotes: false
   - llmstxt:
       full_output: llms-full.txt
       markdown_description: |
@@ -220,6 +218,11 @@ nav:
           - OpenCode: reference/formatters/opencode.md
   - Guides:
       - guides/index.md
+      - Using npx skills: guides/npx-skills.md
+      - Building Skills: guides/building-skills.md
+      - Local Skills: guides/local-skills.md
+      - Skill Contracts: guides/skill-contracts.md
+      - Shared Resources: guides/shared-resources.md
       - Build Your Registry: guides/registry.md
       - CI/CD Integration: guides/ci.md
       - Docker: guides/docker.md

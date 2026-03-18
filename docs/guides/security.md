@@ -35,7 +35,7 @@ Template values (`{{variable}}`) are **never executed** as code. They are:
 }
 ```
 
-Even if `projectName` contains suspicious content like `"; rm -rf /`, it's treated as a literal string in the output markdown—never executed.
+Even if `projectName` contains suspicious content like `"; rm -rf /`, it's treated as a literal string in the output markdown-never executed.
 
 ### Output Is Static Markdown
 
@@ -67,7 +67,7 @@ While the template system itself is secure, you should still carefully evaluate 
 
 ### The Real Risk: Prompt Injection
 
-The primary concern with external stacks isn't code execution—it's **prompt injection**. A malicious stack could include instructions that manipulate the AI assistant's behavior:
+The primary concern with external stacks isn't code execution-it's **prompt injection**. A malicious stack could include instructions that manipulate the AI assistant's behavior:
 
 ```promptscript
 # Hypothetical malicious stack

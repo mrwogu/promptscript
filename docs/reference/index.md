@@ -15,7 +15,7 @@ Complete reference documentation for PromptScript.
   </div>
   <div class="ref-item__content">
     <h3>Language Reference</h3>
-    <p>Full specification of the PromptScript language syntax — blocks, directives, inheritance, and more.</p>
+    <p>Full specification of the PromptScript language syntax - blocks, directives, inheritance, and more.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>
@@ -26,7 +26,7 @@ Complete reference documentation for PromptScript.
   </div>
   <div class="ref-item__content">
     <h3>CLI Reference</h3>
-    <p>All commands and options for the PromptScript CLI — compile, validate, pull, and more.</p>
+    <p>All commands and options for the PromptScript CLI - compile, validate, pull, and more.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>
@@ -37,7 +37,7 @@ Complete reference documentation for PromptScript.
   </div>
   <div class="ref-item__content">
     <h3>Configuration</h3>
-    <p>Configuration file format and options — targets, registry, validation, and output settings.</p>
+    <p>Configuration file format and options - targets, registry, validation, and output settings.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>
@@ -48,7 +48,7 @@ Complete reference documentation for PromptScript.
   </div>
   <div class="ref-item__content">
     <h3>Formatters</h3>
-    <p>All 37 supported AI agent formatters — output paths, features, quirks, and examples.</p>
+    <p>All 37 supported AI agent formatters - output paths, features, quirks, and examples.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>

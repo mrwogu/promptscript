@@ -1,21 +1,21 @@
 ---
-title: 'PromptScript — One Source, 37 AI Agents | Enterprise AI Standards'
-description: 'Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
+title: 'PromptScript - One Source, Every AI Agent | Enterprise AI Standards'
+description: 'Write AI instructions once, compile to 37 AI coding agents. One source for GitHub Copilot, Claude Code, Cursor, Windsurf, and 33 more. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
 meta:
   - name: keywords
     content: PromptScript, PromptOps, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
   - name: robots
     content: index, follow
   - property: og:title
-    content: PromptScript — One Source, 37 AI Agents
+    content: PromptScript - One Source, Every AI Agent
   - property: og:description
-    content: Write AI instructions once, compile to 37 AI coding agents including GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more. Enterprise prompt standardization with inheritance, validation, and CI/CD.
+    content: Write AI instructions once, compile to 37 AI coding agents. One source for GitHub Copilot, Claude Code, Cursor, Windsurf, and 33 more. Enterprise prompt standardization with inheritance, validation, and CI/CD.
   - property: og:type
     content: website
   - name: twitter:card
     content: summary_large_image
   - name: twitter:title
-    content: PromptScript — One Source, 37 AI Agents
+    content: PromptScript - One Source, Every AI Agent
 hide:
   - navigation
   - toc
@@ -27,19 +27,114 @@ hide:
 
 # PromptScript
 
-**Write once. Deploy to 37 agents. Update everywhere instantly.**
+**One source. Every AI agent.**
 
-_Write AI instructions once. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and 32 more._
+_Prompt-as-code with inheritance, validation, and a versioned registry. Compiled to 37 targets._
+
+<div class="hero-ticker" aria-hidden="true">
+  <div class="hero-ticker__track">
+    <!-- Half 1: 44 chips (custom x2 interspersed, with SVG logos) -->
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4l5 4-5 4M9 12h5"/></svg>Cline</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8 1l5.66 3.27v6.46L8 14l-5.66-3.27V4.27L8 1z"/></svg>Codex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M4 2v12l5-6zm5 0v12l5-6z"/></svg>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 14V2h4.5a3.5 3.5 0 010 7H4m4.5-1L13 14"/></svg>Roo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M1 5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 8.5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 12c2.5-2 5-2 7.5 0s5 2 7.5 0"/></svg>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
+    <!-- Half 2: identical copy for seamless loop -->
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4l5 4-5 4M9 12h5"/></svg>Cline</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8 1l5.66 3.27v6.46L8 14l-5.66-3.27V4.27L8 1z"/></svg>Codex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M4 2v12l5-6zm5 0v12l5-6z"/></svg>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 14V2h4.5a3.5 3.5 0 010 7H4m4.5-1L13 14"/></svg>Roo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M1 5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 8.5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 12c2.5-2 5-2 7.5 0s5 2 7.5 0"/></svg>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
+  </div>
+</div>
 
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
 [:material-format-list-checks: See All 37 Formatters](reference/formatters/index.md){ .md-button .md-button--secondary }
 [:material-book-open-variant: Enterprise Guide](guides/enterprise.md){ .md-button }
 [:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
 
-<div class="hero-badges" markdown>
+<!-- <div class="hero-badges" markdown>
 [![GitHub stars](https://img.shields.io/github/stars/mrwogu/promptscript?style=flat-square&logo=github)](https://github.com/mrwogu/promptscript)
 [![npm downloads](https://img.shields.io/npm/dm/@promptscript/cli?style=flat-square&logo=npm)](https://www.npmjs.com/package/@promptscript/cli)
-</div>
+</div> -->
 
 <div class="hero-install" markdown>
 ```
@@ -59,7 +154,7 @@ npm install -g @promptscript/cli
     </div>
     <pre class="compile-demo__code"><code id="typewriter-target"></code></pre>
     <div class="compile-demo__cursor" id="typing-cursor"></div>
-    <div class="compile-demo__badge">Just 5 lines!</div>
+    <div class="compile-demo__badge">11 lines → 37 agents</div>
   </div>
 
   <div class="compile-demo__arrow">
@@ -81,8 +176,8 @@ npm install -g @promptscript/cli
         <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--cursor" title="Cursor">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>
         </span>
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--antigravity" title="Antigravity">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--codex" title="Codex">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
         </span>
         <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--factory" title="Factory AI">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM12 9.95L5 13v7h14v-9h-3l-1.04-4H14l-.96 4L12 11v-1.05zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>
@@ -97,44 +192,44 @@ npm install -g @promptscript/cli
       <div class="compile-demo__placeholder-text">Awaiting compilation...</div>
     </div>
     <div class="compile-demo__tabs">
-      <span class="compile-demo__tab compile-demo__tab--active" data-target="copilot">
+      <span class="compile-demo__tab compile-demo__tab--active" data-target="claude">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--claude">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>
+        </span> Claude <span class="compile-demo__tab-count">4 files</span>
+      </span>
+      <span class="compile-demo__tab" data-target="copilot">
         <span class="compile-demo__tab-icon compile-demo__tab-icon--copilot">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18v-5.5c0-.667.167-1.333.5-2"/><path d="M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2"/><path d="M20 18v-5.5c0-.667-.167-1.333-.5-2"/><path d="M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>
         </span> Copilot <span class="compile-demo__tab-count">4 files</span>
       </span>
-      <span class="compile-demo__tab" data-target="claude">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--claude">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>
-        </span> Claude <span class="compile-demo__tab-count">3 files</span>
+      <span class="compile-demo__tab" data-target="codex">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--codex">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </span> Codex <span class="compile-demo__tab-count">1 file</span>
       </span>
-      <span class="compile-demo__tab" data-target="cursor">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--cursor">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>
-        </span> Cursor <span class="compile-demo__tab-count">2 files</span>
+      <span class="compile-demo__tab" data-target="opencode">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--opencode">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+        </span> OpenCode <span class="compile-demo__tab-count">3 files</span>
       </span>
-      <span class="compile-demo__tab" data-target="antigravity">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--antigravity">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-        </span> Antigravity <span class="compile-demo__tab-count">2 files</span>
+      <span class="compile-demo__tab" data-target="gemini">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--gemini">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        </span> Gemini <span class="compile-demo__tab-count">3 files</span>
       </span>
       <span class="compile-demo__tab" data-target="factory">
         <span class="compile-demo__tab-icon compile-demo__tab-icon--factory">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM12 9.95L5 13v7h14v-9h-3l-1.04-4H14l-.96 4L12 11v-1.05zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>
         </span> Factory <span class="compile-demo__tab-count">2 files</span>
       </span>
-      <span class="compile-demo__tab" data-target="opencode">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--opencode">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-        </span> OpenCode <span class="compile-demo__tab-count">2 files</span>
-      </span>
-      <span class="compile-demo__tab" data-target="gemini">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--gemini">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
-        </span> Gemini <span class="compile-demo__tab-count">2 files</span>
+      <span class="compile-demo__tab" data-target="cursor">
+        <span class="compile-demo__tab-icon compile-demo__tab-icon--cursor">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>
+        </span> Cursor <span class="compile-demo__tab-count">2 files</span>
       </span>
     </div>
 
-    <div class="compile-demo__panel compile-demo__panel--active" data-panel="copilot">
+    <div class="compile-demo__panel" data-panel="copilot">
       <div class="compile-demo__subfiles">
         <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">instructions.md</span>
         <span class="compile-demo__subfile" data-file="1">review.prompt</span>
@@ -145,24 +240,36 @@ npm install -g @promptscript/cli
         <div class="compile-demo__header compile-demo__header--copilot">
           <span class="compile-demo__filename">.github/copilot-instructions.md</span>
         </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
 
-<span class="inherited">← inherited from @acme/platform-standards</span>
+<span class="inherited">← @acme/platform</span>
+<span class="inherited">← @stacks/node-typescript</span>
 
-<span class="hl">## Project</span>
-Expert Fullstack Engineer.
+<span class="hl">## Identity</span>
+Senior Engineer specializing in the
+Checkout Service.
 
 <span class="hl">## Tech Stack</span>
 TypeScript 5.x · Node 20+ · PostgreSQL
+Prisma ORM · Zod · Vitest
 
 <span class="hl">## Standards</span>
 <span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">✓</span> Zod for validation
-<span class="rule">✓</span> API: <span class="str">https://api.acme.io</span>
+<span class="rule">✓</span> Zod for all input validation
+<span class="rule">✓</span> 90% test coverage target
+<span class="rule">✓</span> Conventional Commits
 
 <span class="hl">## Security</span>
-<span class="warn">⛔</span> Never log PII/card data
-<span class="warn">⛔</span> Parameterized SQL only</code></pre>
+<span class="warn">⛔</span> Never log PII or card data
+<span class="warn">⛔</span> Parameterized SQL only
+<span class="warn">⛔</span> No secrets in source code
+
+<span class="hl">## Commands</span>
+<span class="str">/review</span> Security code review
+<span class="str">/migrate</span> Safe DB migration
+
+<span class="hl">## Skills</span>
+<span class="rule">►</span> <span class="str">security-audit</span> OWASP scan</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="1">
@@ -175,13 +282,15 @@ TypeScript 5.x · Node 20+ · PostgreSQL
 <span class="key">description:</span> <span class="str">Security code review</span>
 <span class="key">---</span>
 
-Perform security-focused code review.
+Perform security-focused code review
+on the Checkout Service.
 
 <span class="hl">Check for:</span>
 • SQL injection vulnerabilities
 • XSS attack vectors
-• Exposed secrets/API keys
-• Input validation gaps</code></pre>
+• Exposed secrets and API keys
+• Input validation gaps
+• IDOR vulnerabilities</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="2">
@@ -199,96 +308,120 @@ Generate Prisma migration safely.
 <span class="hl">Steps:</span>
 <span class="rule">1.</span> Analyze schema changes
 <span class="rule">2.</span> Generate migration file
-<span class="rule">3.</span> Review for data loss
-<span class="rule">4.</span> Create rollback plan</code></pre>
+<span class="rule">3.</span> Review for data loss risks
+<span class="rule">4.</span> Create rollback plan
+<span class="rule">5.</span> Validate with dry run</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="3">
 <div class="compile-demo__header compile-demo__header--copilot">
-<span class="compile-demo__filename">.github/copilot-skills/security.md</span>
+<span class="compile-demo__filename">.github/copilot-skills/security-audit.md</span>
 </div>
 <pre class="compile-demo__code"><code><span class="key">---</span>
 <span class="key">name:</span> <span class="str">security-audit</span>
-<span class="key">description:</span> <span class="str">Audit for vulnerabilities</span>
+<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
 <span class="key">---</span>
 
-<span class="cm"># Security Audit Skill</span>
+<span class="cm"># Security Audit</span>
+
+Run a comprehensive OWASP Top 10 scan.
 
 <span class="hl">Scan for:</span>
-• OWASP Top 10 issues
-• Hardcoded credentials
-• Insecure dependencies
-• Missing input sanitization</code></pre>
+• Injection (SQL, NoSQL, OS)
+• Broken authentication
+• Sensitive data exposure
+• Security misconfiguration
+• Insecure dependencies</code></pre>
 
 </div>
 </div>
 
-    <div class="compile-demo__panel" data-panel="claude">
+    <div class="compile-demo__panel compile-demo__panel--active" data-panel="claude">
       <div class="compile-demo__subfiles">
         <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">CLAUDE.md</span>
-        <span class="compile-demo__subfile" data-file="1">review.skill</span>
-        <span class="compile-demo__subfile" data-file="2">migrate.skill</span>
+        <span class="compile-demo__subfile" data-file="1">/review</span>
+        <span class="compile-demo__subfile" data-file="2">/migrate</span>
+        <span class="compile-demo__subfile" data-file="3">security.skill</span>
       </div>
       <div class="compile-demo__file compile-demo__file--active" data-file="0">
         <div class="compile-demo__header compile-demo__header--claude">
           <span class="compile-demo__filename">CLAUDE.md</span>
         </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
 
-<span class="inherited">← @acme/platform-standards</span>
+<span class="inherited">← @acme/platform</span>
+<span class="inherited">← @stacks/node-typescript</span>
 
-<span class="hl">## Project</span>
-Expert Fullstack Engineer.
+<span class="hl">## Identity</span>
+Senior Engineer specializing in the
+Checkout Service.
 
-<span class="hl">## Tech</span> TypeScript · Hexagonal · DDD
-
-<span class="hl">## API</span> <span class="str">https://api.acme.io</span>
+<span class="hl">## Tech</span>
+TypeScript 5.x · Node 20+ · Prisma
+Zod validation · Vitest
 
 <span class="hl">## Commands</span>
 <span class="str">/review</span> Security code review
-<span class="str">/test</span> Write vitest tests
-<span class="str">/migrate</span> DB migration helper
+<span class="str">/migrate</span> Safe DB migration
+
+<span class="hl">## Standards</span>
+<span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>
+<span class="rule">✓</span> Zod for all input validation
+<span class="rule">✓</span> Conventional Commits
 
 <span class="hl">## Don'ts</span>
-<span class="warn">✗</span> Don't use <span class="str">`any`</span> - use Zod
-<span class="warn">✗</span> Don't log payment data
-<span class="warn">✗</span> Don't skip validation</code></pre>
+<span class="warn">✗</span> Don't log PII or card data
+<span class="warn">✗</span> Don't use raw SQL queries
+<span class="warn">✗</span> Don't commit secrets</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="1">
 <div class="compile-demo__header compile-demo__header--claude">
-<span class="compile-demo__filename">.claude/skills/review.md</span>
+<span class="compile-demo__filename">.claude/commands/review.md</span>
 </div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">review</span>
-<span class="key">description:</span> <span class="str">Security code review</span>
-<span class="key">---</span>
+<pre class="compile-demo__code"><code>Perform security-focused code review
+on the Checkout Service.
 
-Perform security-focused review.
-
-<span class="hl">Focus areas:</span>
-• Authentication flows
-• Data validation
-• Error handling
-• Secrets management</code></pre>
+<span class="hl">Check for:</span>
+• SQL injection vulnerabilities
+• XSS attack vectors
+• Exposed secrets and API keys
+• Input validation gaps
+• IDOR vulnerabilities</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="2">
 <div class="compile-demo__header compile-demo__header--claude">
-<span class="compile-demo__filename">.claude/skills/migrate.md</span>
+<span class="compile-demo__filename">.claude/commands/migrate.md</span>
+</div>
+<pre class="compile-demo__code"><code>Generate Prisma migration safely.
+
+<span class="hl">Steps:</span>
+<span class="rule">1.</span> Analyze schema changes
+<span class="rule">2.</span> Generate migration file
+<span class="rule">3.</span> Review for data loss risks
+<span class="rule">4.</span> Create rollback plan
+<span class="rule">5.</span> Validate with dry run</code></pre>
+
+</div>
+<div class="compile-demo__file" data-file="3">
+<div class="compile-demo__header compile-demo__header--claude">
+<span class="compile-demo__filename">.claude/skills/security-audit/SKILL.md</span>
 </div>
 <pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">migrate</span>
-<span class="key">description:</span> <span class="str">Database migration</span>
+<span class="key">name:</span> <span class="str">security-audit</span>
+<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
 <span class="key">---</span>
 
-Help with Prisma migrations.
+<span class="cm"># Security Audit</span>
 
-<span class="hl">Capabilities:</span>
-• Schema diff analysis
-• Migration generation
-• Rollback scripts
-• Data preservation</code></pre>
+Run a comprehensive OWASP Top 10 scan.
+
+<span class="hl">Scan for:</span>
+• Injection (SQL, NoSQL, OS)
+• Broken authentication
+• Sensitive data exposure
+• Security misconfiguration</code></pre>
 
 </div>
 </div>
@@ -304,105 +437,87 @@ Help with Prisma migrations.
         </div>
         <pre class="compile-demo__code"><code><span class="key">---</span>
 
-<span class="key">description:</span> <span class="str">Checkout Service</span>
+<span class="key">description:</span> <span class="str">Checkout Service v2.1</span>
 <span class="key">globs:</span> <span class="str">["src/**/*.ts"]</span>
 <span class="key">alwaysApply:</span> <span class="bool">true</span>
 <span class="key">---</span>
 
 <span class="cm"># Checkout Service</span>
-<span class="inherited">← @acme/platform-standards</span>
+<span class="inherited">← @acme/platform</span>
+<span class="inherited">← @stacks/node-typescript</span>
 
-<span class="hl">## Project</span>
-Expert Fullstack Engineer.
+<span class="hl">## Identity</span>
+Senior Engineer specializing in the
+Checkout Service.
 
 <span class="hl">## Stack</span>
 TypeScript 5.x · Node 20+ · Prisma
+Zod validation · Vitest
 
-<span class="hl">## API</span> <span class="str">https://api.acme.io</span>
-
-<span class="hl">## Rules</span>
+<span class="hl">## Standards</span>
 <span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">✓</span> Zod validation on inputs
+<span class="rule">✓</span> Zod for all input validation
 <span class="rule">✓</span> 90% test coverage
 
 <span class="hl">## Security</span>
 <span class="warn">⛔</span> Never log PII or card data
-<span class="warn">⛔</span> Parameterized queries only</code></pre>
+<span class="warn">⛔</span> Parameterized queries only
+<span class="warn">⛔</span> No secrets in source code</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="1">
 <div class="compile-demo__header compile-demo__header--cursor">
-<span class="compile-demo__filename">.cursor/rules/security.mdc</span>
+<span class="compile-demo__filename">.cursor/rules/security-audit.mdc</span>
 </div>
 <pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">description:</span> <span class="str">Security audit skill</span>
+<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
 <span class="key">globs:</span> <span class="str">["src/**/*.ts"]</span>
 <span class="key">---</span>
 
 <span class="cm"># Security Audit</span>
 
-<span class="hl">Scan for vulnerabilities:</span>
+Run a comprehensive OWASP Top 10 scan.
 
-• SQL injection risks
-• XSS attack vectors
-• Hardcoded secrets
-• Missing input validation
-• Insecure dependencies
-• IDOR vulnerabilities</code></pre>
+<span class="hl">Scan for:</span>
+• Injection (SQL, NoSQL, OS)
+• Broken authentication
+• Sensitive data exposure
+• Security misconfiguration
+• Insecure dependencies</code></pre>
 
 </div>
 </div>
 
-    <div class="compile-demo__panel" data-panel="antigravity">
+    <div class="compile-demo__panel" data-panel="codex">
       <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">checkout.md</span>
-        <span class="compile-demo__subfile" data-file="1">security.md</span>
+        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">AGENTS.md</span>
       </div>
       <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--antigravity">
-          <span class="compile-demo__filename">.agent/rules/checkout.md</span>
+        <div class="compile-demo__header compile-demo__header--codex">
+          <span class="compile-demo__filename">AGENTS.md</span>
         </div>
-        <pre class="compile-demo__code"><code><span class="key">---</span>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
 
-<span class="key">description:</span> <span class="str">Checkout Service standards</span>
-<span class="key">activation:</span> <span class="str">always</span>
-<span class="key">---</span>
+<span class="inherited">&larr; @acme/platform</span>
+<span class="inherited">&larr; @stacks/node-typescript</span>
 
-<span class="cm"># Checkout Service</span>
-<span class="inherited">&larr; @acme/platform-standards</span>
+<span class="hl">## Identity</span>
+Senior Engineer specializing in the
+Checkout Service.
 
-<span class="hl">## Project</span>
-Expert Fullstack Engineer.
-
-<span class="hl">## Stack</span>
+<span class="hl">## Tech</span>
 TypeScript 5.x &middot; Node 20+ &middot; Prisma
+Zod validation &middot; Vitest
 
-<span class="hl">## Rules</span>
+<span class="hl">## Standards</span>
 <span class="rule">&#10003;</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">&#10003;</span> Zod validation on inputs
+<span class="rule">&#10003;</span> Zod for all input validation
+<span class="rule">&#10003;</span> Conventional Commits
 
 <span class="hl">## Security</span>
 <span class="warn">&#9940;</span> Never log PII or card data
-<span class="warn">&#9940;</span> Parameterized queries only</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="1">
-<div class="compile-demo__header compile-demo__header--antigravity">
-<span class="compile-demo__filename">.agent/rules/security.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">description:</span> <span class="str">Security audit skill</span>
-<span class="key">activation:</span> <span class="str">manual</span>
-<span class="key">---</span>
-
-<span class="cm"># Security Audit</span>
-
-<span class="hl">Scan for vulnerabilities:</span>
-
-&bull; SQL injection risks
-&bull; XSS attack vectors
-&bull; Hardcoded secrets
-&bull; Missing input validation</code></pre>
+<span class="warn">&#9940;</span> Parameterized queries only
+<span class="warn">&#9940;</span> No secrets in source code</code></pre>
 
 </div>
 </div>
@@ -410,45 +525,51 @@ TypeScript 5.x &middot; Node 20+ &middot; Prisma
     <div class="compile-demo__panel" data-panel="factory">
       <div class="compile-demo__subfiles">
         <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">AGENTS.md</span>
-        <span class="compile-demo__subfile" data-file="1">review.skill</span>
+        <span class="compile-demo__subfile" data-file="1">security.skill</span>
       </div>
       <div class="compile-demo__file compile-demo__file--active" data-file="0">
         <div class="compile-demo__header compile-demo__header--factory">
           <span class="compile-demo__filename">AGENTS.md</span>
         </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service Agent</span>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service Agent</span> <span class="inherited">v2.1</span>
 
-<span class="inherited">&larr; @acme/platform-standards</span>
+<span class="inherited">&larr; @acme/platform</span>
+<span class="inherited">&larr; @stacks/node-typescript</span>
 
 <span class="hl">## Role</span>
-Expert Fullstack Engineer working on
-the Checkout Service.
+Senior Engineer specializing in the
+Checkout Service.
 
 <span class="hl">## Commands</span>
 <span class="str">/review</span> Security code review
-<span class="str">/test</span> Write vitest tests
+<span class="str">/migrate</span> Safe DB migration
 
 <span class="hl">## Handoffs</span>
-<span class="rule">&#10140;</span> <span class="str">security-audit</span> for vulnerability scans
-<span class="rule">&#10140;</span> <span class="str">migration</span> for DB schema changes</code></pre>
+<span class="rule">&#10140;</span> <span class="str">security-audit</span> OWASP scan
+
+<span class="hl">## Standards</span>
+<span class="rule">&#10003;</span> Strict mode, no <span class="str">`any`</span>
+<span class="rule">&#10003;</span> Zod for all input validation</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="1">
 <div class="compile-demo__header compile-demo__header--factory">
-<span class="compile-demo__filename">.factory/skills/review.skill</span>
+<span class="compile-demo__filename">.factory/skills/security-audit/SKILL.md</span>
 </div>
 <pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">review</span>
-<span class="key">description:</span> <span class="str">Security code review</span>
+<span class="key">name:</span> <span class="str">security-audit</span>
+<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
 <span class="key">---</span>
 
-Perform security-focused review.
+<span class="cm"># Security Audit</span>
 
-<span class="hl">Focus areas:</span>
-&bull; Authentication flows
-&bull; Data validation
-&bull; Error handling
-&bull; Secrets management</code></pre>
+Run a comprehensive OWASP Top 10 scan.
+
+<span class="hl">Scan for:</span>
+&bull; Injection (SQL, NoSQL, OS)
+&bull; Broken authentication
+&bull; Sensitive data exposure
+&bull; Security misconfiguration</code></pre>
 
 </div>
 </div>
@@ -456,46 +577,69 @@ Perform security-focused review.
     <div class="compile-demo__panel" data-panel="opencode">
       <div class="compile-demo__subfiles">
         <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">OPENCODE.md</span>
-        <span class="compile-demo__subfile" data-file="1">review.md</span>
+        <span class="compile-demo__subfile" data-file="1">/review</span>
+        <span class="compile-demo__subfile" data-file="2">security.skill</span>
       </div>
       <div class="compile-demo__file compile-demo__file--active" data-file="0">
         <div class="compile-demo__header compile-demo__header--opencode">
           <span class="compile-demo__filename">OPENCODE.md</span>
         </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
 
-<span class="inherited">&larr; @acme/platform-standards</span>
+<span class="inherited">&larr; @acme/platform</span>
+<span class="inherited">&larr; @stacks/node-typescript</span>
 
-<span class="hl">## Project</span>
-Expert Fullstack Engineer.
+<span class="hl">## Identity</span>
+Senior Engineer specializing in the
+Checkout Service.
 
-<span class="hl">## Tech</span> TypeScript &middot; Hexagonal &middot; DDD
+<span class="hl">## Tech</span>
+TypeScript 5.x &middot; Node 20+ &middot; Prisma
 
 <span class="hl">## Commands</span>
 <span class="str">/review</span> Security code review
-<span class="str">/test</span> Write vitest tests
+<span class="str">/migrate</span> Safe DB migration
 
 <span class="hl">## Skills</span>
-<span class="rule">&#9654;</span> <span class="str">security-audit</span>
-<span class="rule">&#9654;</span> <span class="str">migration</span></code></pre>
+<span class="rule">&#9654;</span> <span class="str">security-audit</span> OWASP scan
+
+<span class="hl">## Standards</span>
+<span class="rule">&#10003;</span> Strict mode, no <span class="str">`any`</span>
+<span class="rule">&#10003;</span> Zod for all input validation</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="1">
 <div class="compile-demo__header compile-demo__header--opencode">
 <span class="compile-demo__filename">.opencode/commands/review.md</span>
 </div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">review</span>
-<span class="key">description:</span> <span class="str">Security code review</span>
-<span class="key">---</span>
-
-Perform security-focused review.
+<pre class="compile-demo__code"><code>Perform security-focused code review
+on the Checkout Service.
 
 <span class="hl">Check for:</span>
-&bull; SQL injection risks
+&bull; SQL injection vulnerabilities
 &bull; XSS attack vectors
-&bull; Hardcoded secrets
-&bull; Missing input validation</code></pre>
+&bull; Exposed secrets and API keys
+&bull; Input validation gaps
+&bull; IDOR vulnerabilities</code></pre>
+
+</div>
+<div class="compile-demo__file" data-file="2">
+<div class="compile-demo__header compile-demo__header--opencode">
+<span class="compile-demo__filename">.opencode/skills/security-audit/SKILL.md</span>
+</div>
+<pre class="compile-demo__code"><code><span class="key">---</span>
+<span class="key">name:</span> <span class="str">security-audit</span>
+<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
+<span class="key">---</span>
+
+<span class="cm"># Security Audit</span>
+
+Run a comprehensive OWASP Top 10 scan.
+
+<span class="hl">Scan for:</span>
+&bull; Injection (SQL, NoSQL, OS)
+&bull; Broken authentication
+&bull; Sensitive data exposure</code></pre>
 
 </div>
 </div>
@@ -504,27 +648,32 @@ Perform security-focused review.
       <div class="compile-demo__subfiles">
         <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">GEMINI.md</span>
         <span class="compile-demo__subfile" data-file="1">review.toml</span>
+        <span class="compile-demo__subfile" data-file="2">security.skill</span>
       </div>
       <div class="compile-demo__file compile-demo__file--active" data-file="0">
         <div class="compile-demo__header compile-demo__header--gemini">
           <span class="compile-demo__filename">GEMINI.md</span>
         </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span>
+        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
 
-<span class="inherited">&larr; @acme/platform-standards</span>
+<span class="inherited">&larr; @acme/platform</span>
+<span class="inherited">&larr; @stacks/node-typescript</span>
 
-<span class="hl">## Project</span>
-Expert Fullstack Engineer.
+<span class="hl">## Identity</span>
+Senior Engineer specializing in the
+Checkout Service.
 
-<span class="hl">## Tech</span> TypeScript &middot; Hexagonal &middot; DDD
+<span class="hl">## Tech</span>
+TypeScript 5.x &middot; Node 20+ &middot; Prisma
 
 <span class="hl">## Commands</span>
 <span class="str">/review</span> Security code review
-<span class="str">/test</span> Write vitest tests
+<span class="str">/migrate</span> Safe DB migration
 
 <span class="hl">## Don'ts</span>
-<span class="warn">&#10007;</span> Don't use <span class="str">`any`</span> - use Zod
-<span class="warn">&#10007;</span> Don't log payment data</code></pre>
+<span class="warn">&#10007;</span> Don't log PII or card data
+<span class="warn">&#10007;</span> Don't use raw SQL queries
+<span class="warn">&#10007;</span> Don't commit secrets</code></pre>
 
 </div>
 <div class="compile-demo__file" data-file="1">
@@ -538,11 +687,30 @@ Expert Fullstack Engineer.
 <span class="key">[command.steps]</span>
 <span class="key">action</span> = <span class="str">"review"</span>
 
-<span class="hl"># Focus areas:</span>
-<span class="cm"># SQL injection risks</span>
+<span class="hl"># Check for:</span>
+<span class="cm"># SQL injection vulnerabilities</span>
 <span class="cm"># XSS attack vectors</span>
-<span class="cm"># Hardcoded secrets</span>
-<span class="cm"># Missing input validation</span></code></pre>
+<span class="cm"># Exposed secrets/API keys</span>
+<span class="cm"># Input validation gaps</span></code></pre>
+
+</div>
+<div class="compile-demo__file" data-file="2">
+<div class="compile-demo__header compile-demo__header--gemini">
+<span class="compile-demo__filename">.gemini/skills/security-audit/skill.md</span>
+</div>
+<pre class="compile-demo__code"><code><span class="key">---</span>
+<span class="key">name:</span> <span class="str">security-audit</span>
+<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
+<span class="key">---</span>
+
+<span class="cm"># Security Audit</span>
+
+Run a comprehensive OWASP Top 10 scan.
+
+<span class="hl">Scan for:</span>
+&bull; Injection (SQL, NoSQL, OS)
+&bull; Broken authentication
+&bull; Sensitive data exposure</code></pre>
 
 </div>
 </div>
@@ -570,7 +738,7 @@ Expert Fullstack Engineer.
   </div>
   <h3>Write Once, Compile to <a href="reference/formatters/">37 AI Agents</a></h3>
   <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, Roo Code, and 31 more. Add new agents without rewriting.</p>
-  <p class="feature-card__note">37 agents and counting — <a href="reference/formatters/">see all supported formatters</a></p>
+  <p class="feature-card__note">37 agents and counting - <a href="reference/formatters/">see all supported formatters</a></p>
 </div>
 
 <div class="feature-card">
@@ -594,7 +762,7 @@ Expert Fullstack Engineer.
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 17.93c-3.95-.49-7-3.85-7-7.93c0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41c0 2.08-.8 3.97-2.1 5.39"/></svg>
   </div>
   <h3>Your Private Standards Registry</h3>
-  <p>Host standards in a private Git registry. Teams inherit from <code>@company/security</code>, <code>@company/react-app</code> — your standards, your control.</p>
+  <p>Host standards in a private Git registry. Teams inherit from <code>@company/security</code>, <code>@company/react-app</code> - your standards, your control.</p>
 </div>
 
 <div class="feature-card">
@@ -610,7 +778,7 @@ Expert Fullstack Engineer.
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M2 10.96a.985.985 0 0 1-.37-1.37L3.13 7c.11-.2.28-.34.47-.42l7.83-4.4c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.19.1.35.26.44.46l1.45 2.52c.28.48.11 1.09-.36 1.36l-1 .58v4.96c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.99.99 0 0 1 3 16.5v-5.54c-.3.17-.68.18-1 0M12 4.15L5 8.09l7 3.94l7-3.94zM5 15.91l6 3.38v-6.71L5 9.21zm14 0v-6.7l-6 3.37v6.71z"/></svg>
   </div>
   <h3>Zero-Touch Rollout to 100+ Repos</h3>
-  <p>Update a security policy once. Every repo gets the latest standards compiled to every AI tool — no manual PRs.</p>
+  <p>Update a security policy once. Every repo gets the latest standards compiled to every AI tool - no manual PRs.</p>
 </div>
 
 </div>
@@ -678,7 +846,7 @@ Expert Fullstack Engineer.
 </div>
 
 <h2 class="section-title">The Solution: PromptOps</h2>
-<p class="section-subtitle">PromptOps is the practice of managing AI instructions as versioned, auditable infrastructure. Treat your AI instructions as managed infrastructure — compiled, validated, and deployed.</p>
+<p class="section-subtitle">PromptOps is the practice of managing AI instructions as versioned, auditable infrastructure. Treat your AI instructions as managed infrastructure - compiled, validated, and deployed.</p>
 
 ```mermaid
 flowchart TB
@@ -1037,9 +1205,9 @@ flowchart TB
     GEMINI.md                          # Gemini CLI
     ```
 
-    - No validation — instructions drift silently
-    - No inheritance — copy-paste across repos
-    - No audit trail — who changed what?
+    - No validation - instructions drift silently
+    - No inheritance - copy-paste across repos
+    - No audit trail - who changed what?
     - Adding a new tool = rewrite everything
 
 === "With PromptScript"
@@ -1071,7 +1239,7 @@ flowchart TB
 </div>
 
 <h2 class="section-title">See It Live</h2>
-<p class="section-subtitle">Try PromptScript right in your browser — no installation needed</p>
+<p class="section-subtitle">Try PromptScript right in your browser - no installation needed</p>
 
 <div style="text-align: center; margin: 2rem 0;">
   <a href="/playground/" class="md-button md-button--primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;">Open the Playground</a>

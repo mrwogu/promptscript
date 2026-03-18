@@ -42,13 +42,35 @@ Learn best practices and patterns for using PromptScript effectively.
   <div class="ref-item__arrow">→</div>
 </a>
 
-<a href="local-skills/" class="ref-item">
+<a href="npx-skills/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--teal">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Using npx skills</h3>
+    <p>Install open-source skills from GitHub repositories with <code>npx skills</code> and compile them to all your AI agents.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
+
+<a href="building-skills/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--purple">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Building Skills</h3>
+    <p>Create custom skills from scratch - SKILL.md format, parameters, resource files, contracts, and publishing.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
+
+<a href="local-skills/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--cyan">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2m-6 10H6v-2h8v2m4-4H6v-2h12v2Z"/></svg>
   </div>
   <div class="ref-item__content">
     <h3>Local Skills</h3>
-    <p>Install and manage skills directly in your project. Drop in skills from Skills.sh, OpenSkills, or any source — with full resource file support.</p>
+    <p>Full reference for local skills - resolution order, resource files, parameterized skills, and dependencies.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>

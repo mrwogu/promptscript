@@ -29,19 +29,19 @@ prs import CLAUDE.md --output ./my-project
 
 ## How It Works
 
-1. **Detect Format** — Automatically identifies the source format from the filename
-2. **Parse Sections** — Extracts markdown headings and content blocks
-3. **Classify** — Heuristically maps sections to PromptScript blocks (`@identity`, `@standards`, `@restrictions`, `@knowledge`, `@context`)
-4. **Score** — Assigns a confidence score (0-100%) to each classification
-5. **Emit** — Generates `.prs` output with `# REVIEW:` comments on low-confidence sections
+1. **Detect Format** - Automatically identifies the source format from the filename
+2. **Parse Sections** - Extracts markdown headings and content blocks
+3. **Classify** - Heuristically maps sections to PromptScript blocks (`@identity`, `@standards`, `@restrictions`, `@knowledge`, `@context`)
+4. **Score** - Assigns a confidence score (0-100%) to each classification
+5. **Emit** - Generates `.prs` output with `# REVIEW:` comments on low-confidence sections
 
 ## Confidence Scoring
 
 Each section receives a confidence score:
 
-- **HIGH (>80%)** — Strong pattern match (e.g., "You are..." maps to `@identity`)
-- **MEDIUM (50-80%)** — Ambiguous patterns requiring review
-- **LOW (<50%)** — No clear match, classified as `@context`
+- **HIGH (>80%)** - Strong pattern match (e.g., "You are..." maps to `@identity`)
+- **MEDIUM (50-80%)** - Ambiguous patterns requiring review
+- **LOW (<50%)** - No clear match, classified as `@context`
 
 Sections below HIGH confidence include `# REVIEW:` comments in the generated output. Always review the imported file before using it in production.
 
