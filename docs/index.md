@@ -29,7 +29,7 @@ hide:
 
 **One source. Every AI agent.**
 
-_Prompt-as-code with inheritance, validation, and compilation to 37 targets._
+_Prompt-as-code with inheritance, validation, and a versioned registry — compiled to 37 targets._
 
 <div class="hero-ticker" aria-hidden="true">
   <div class="hero-ticker__track">
