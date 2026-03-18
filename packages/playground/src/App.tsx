@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Header } from './components/Header';
 import { ConnectionBar } from './components/ConnectionBar';
@@ -57,9 +57,11 @@ function PlaygroundLayout() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Auto-connect from URL param
+  // Auto-connect from URL param (only on initial load, not after disconnection)
+  const autoConnectAttemptedRef = useRef(false);
   useEffect(() => {
-    if (serverParam && status === 'disconnected') {
+    if (serverParam && status === 'disconnected' && !autoConnectAttemptedRef.current) {
+      autoConnectAttemptedRef.current = true;
       connect(serverParam);
     }
   }, [serverParam, status, connect]);
