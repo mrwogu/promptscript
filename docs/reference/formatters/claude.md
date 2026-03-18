@@ -75,7 +75,7 @@ description: PromptScript output format for Claude Code
 
 ## Limitations & Quirks
 
-- `CLAUDE.md` is gitignored by many project templates — you may need to `git add -f CLAUDE.md`
+- `CLAUDE.md` is gitignored by many project templates - you may need to `git add -f CLAUDE.md`
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
 - Agent files support: `name`, `description`, `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`, `skills`
@@ -99,3 +99,15 @@ project-root/
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
+
+
+<claude-mem-context>
+# Recent Activity
+
+### Mar 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2423 | 7:06 PM | 🔵 | All 37 Formatter Names Extracted for Homepage Display | ~324 |
+| #2422 | " | 🔵 | Complete 37 Formatter List Confirmed in Documentation | ~434 |
+</claude-mem-context>

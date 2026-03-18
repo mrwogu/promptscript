@@ -408,5 +408,5 @@ jobs:
 
 ## Next Steps
 
-- [Enterprise Setup](enterprise.md) — Scale PromptScript across your organization
-- [CI/CD Integration](ci.md) — Automate validation and compilation in your pipeline
+- [Enterprise Setup](enterprise.md) - Scale PromptScript across your organization
+- [CI/CD Integration](ci.md) - Automate validation and compilation in your pipeline

@@ -52,9 +52,9 @@ Each input or output field supports:
 
 A skill can have `params`, `inputs`, and `outputs` together:
 
-- **params** — Template variables interpolated at compile time (`{{var}}` syntax)
-- **inputs** — Runtime data the skill expects to receive
-- **outputs** — Runtime data the skill produces
+- **params** - Template variables interpolated at compile time (`{{var}}` syntax)
+- **inputs** - Runtime data the skill expects to receive
+- **outputs** - Runtime data the skill produces
 
 ```text
 ---
@@ -90,6 +90,6 @@ The PS017 validation rule checks contract definitions:
 
 ## See Also
 
-- [Local Skills](local-skills.md) — Managing skills in your project
-- [Parameterized Skills](local-skills.md#parameterized-skills) — Making skills configurable with `{{var}}` templates
-- [Shared Resources](shared-resources.md) — Share files across all skills
+- [Local Skills](local-skills.md) - Managing skills in your project
+- [Parameterized Skills](local-skills.md#parameterized-skills) - Making skills configurable with `{{var}}` templates
+- [Shared Resources](shared-resources.md) - Share files across all skills

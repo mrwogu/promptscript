@@ -71,7 +71,7 @@ description: PromptScript output format for Antigravity
 
 ## Limitations & Quirks
 
-- Has a 12,000 character limit per rule file — content validation warns when exceeded
+- Has a 12,000 character limit per rule file - content validation warns when exceeded
 - Three activation types: `always` (default), `auto` (model decides), `manual` (user invokes)
 - Supports workflows (`.agent/workflows/*.yaml`) generated from `@shortcuts` blocks with steps
 - Uses nested directory structure: `.agent/rules/` with glob-based file targeting

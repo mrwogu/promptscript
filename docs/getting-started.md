@@ -92,10 +92,10 @@ Generated Files
 
 **Key features:**
 
-- **Auto-detection** — Recognizes package.json, tsconfig, frameworks, and test runners
-- **Registry integration** — Browse and inherit from your organization's published standards
-- **Multi-target setup** — Select which AI tools you want to generate output for
-- **Pre-configured** — Generates ready-to-compile configuration based on your stack
+- **Auto-detection** - Recognizes package.json, tsconfig, frameworks, and test runners
+- **Registry integration** - Browse and inherit from your organization's published standards
+- **Multi-target setup** - Select which AI tools you want to generate output for
+- **Pre-configured** - Generates ready-to-compile configuration based on your stack
 
 ## Quick Start: From Zero to PromptOps
 
@@ -185,7 +185,7 @@ By default, this generates:
 #### Bundled PromptScript Skill
 
 When you compile, PromptScript automatically includes a language skill in each target's output.
-This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files — so your
+This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files - so your
 AI tools understand PromptScript syntax without any extra setup.
 
 To disable this behavior, add to `promptscript.yaml`:
@@ -225,9 +225,9 @@ Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`? Use AI-a
 
 **Key features:**
 
-- **Auto-discovery** — Finds all existing AI instruction files in your project
-- **Skill installation** — Installs migration skills for each enabled target
-- **Non-destructive** — Your existing files remain untouched until you compile
+- **Auto-discovery** - Finds all existing AI instruction files in your project
+- **Skill installation** - Installs migration skills for each enabled target
+- **Non-destructive** - Your existing files remain untouched until you compile
 
 ### 1. Initialize with Migration Support
 
@@ -525,7 +525,7 @@ targets:
   </div>
   <div class="ref-item__content">
     <h3>Language Reference</h3>
-    <p>Learn the full PromptScript syntax — blocks, directives, and inheritance.</p>
+    <p>Learn the full PromptScript syntax - blocks, directives, and inheritance.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>
@@ -536,7 +536,7 @@ targets:
   </div>
   <div class="ref-item__content">
     <h3>CLI Reference</h3>
-    <p>Explore all CLI commands — compile, validate, pull, and more.</p>
+    <p>Explore all CLI commands - compile, validate, pull, and more.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>

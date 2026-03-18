@@ -64,5 +64,5 @@ Shared resources follow the same security limits as skill resources:
 
 ## See Also
 
-- [Local Skills](local-skills.md) — Managing skills in your project
-- [Parameterized Skills](local-skills.md#parameterized-skills) — Making skills configurable
+- [Local Skills](local-skills.md) - Managing skills in your project
+- [Parameterized Skills](local-skills.md#parameterized-skills) - Making skills configurable

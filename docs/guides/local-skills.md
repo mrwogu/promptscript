@@ -5,7 +5,7 @@ description: Install and manage skills directly in your project without a regist
 
 # Local Skills
 
-Drop skills directly into your project's `.promptscript/skills/` directory. No registry configuration needed — PromptScript discovers them automatically and copies all resource files (CSV data, Python scripts, images) to every compilation target.
+Drop skills directly into your project's `.promptscript/skills/` directory. No registry configuration needed - PromptScript discovers them automatically and copies all resource files (CSV data, Python scripts, images) to every compilation target.
 
 ## Why Local Skills?
 
@@ -18,11 +18,11 @@ Local skills solve a real problem: skills from the open-source ecosystem come as
 
 ### Key advantages
 
-- **Zero config** — put a folder in `skills/`, reference it in `@skills {}`, done
-- **Resource files preserved** — CSV data, Python scripts, shell scripts, images — everything alongside `SKILL.md` gets copied to all targets automatically
-- **Works with any skill source** — [Skills.sh](https://github.com/anthropics/skills), [OpenSkills](https://github.com/numman-ali/openskills), [SkillKit](https://github.com/rohitg00/skillkit), manual downloads, or your own creations
-- **Multi-target** — one skill directory compiles to `.claude/skills/`, `.factory/skills/`, `.gemini/skills/`, `.opencode/skills/`, `.github/skills/` simultaneously
-- **No registry needed** — works alongside registry-based inheritance without conflicts
+- **Zero config** - put a folder in `skills/`, reference it in `@skills {}`, done
+- **Resource files preserved** - CSV data, Python scripts, shell scripts, images - everything alongside `SKILL.md` gets copied to all targets automatically
+- **Works with any skill source** - [Skills.sh](https://github.com/anthropics/skills), [OpenSkills](https://github.com/numman-ali/openskills), [SkillKit](https://github.com/rohitg00/skillkit), manual downloads, or your own creations
+- **Multi-target** - one skill directory compiles to `.claude/skills/`, `.factory/skills/`, `.gemini/skills/`, `.opencode/skills/`, `.github/skills/` simultaneously
+- **No registry needed** - works alongside registry-based inheritance without conflicts
 
 ## Directory Structure
 
@@ -126,7 +126,7 @@ You can add skills from multiple sources:
 }
 ```
 
-The `content` field is optional — if a matching `SKILL.md` exists in `.promptscript/skills/<name>/`, it's loaded automatically. You only need to declare the skill name and any metadata overrides.
+The `content` field is optional - if a matching `SKILL.md` exists in `.promptscript/skills/<name>/`, it's loaded automatically. You only need to declare the skill name and any metadata overrides.
 
 ### 4. Compile
 
@@ -157,9 +157,9 @@ PromptScript will:
 
 When PromptScript encounters a skill name in `@skills {}`, it looks for `SKILL.md` in this order:
 
-1. **Local skills** — `.promptscript/skills/<name>/SKILL.md`
-2. **Universal directory** — `.agents/skills/<name>/SKILL.md` _(enabled by default)_
-3. **Registry** — `<registry>/@skills/<name>/SKILL.md`
+1. **Local skills** - `.promptscript/skills/<name>/SKILL.md`
+2. **Universal directory** - `.agents/skills/<name>/SKILL.md` _(enabled by default)_
+3. **Registry** - `<registry>/@skills/<name>/SKILL.md`
 
 Local skills take priority over registry skills with the same name, letting you override or customize registry-provided skills per project.
 
@@ -170,7 +170,7 @@ Tools like [`npx skills add`](https://www.npmjs.com/package/skills) install skil
 The `universalDir` setting in `promptscript.yaml` controls this behavior:
 
 ```yaml
-# Default (can be omitted) — uses .agents/
+# Default (can be omitted) - uses .agents/
 universalDir: true
 
 # Custom directory
@@ -233,10 +233,10 @@ The PS015 validation rule checks parameter definitions:
 
 Any text file next to `SKILL.md` is treated as a resource file and copied to all compilation targets. This includes:
 
-- **Data files** — `.csv`, `.json`, `.yaml`, `.txt`
-- **Scripts** — `.py`, `.sh`, `.js`
-- **Nested directories** — `data/stacks/react.csv` preserves the full path
-- **Templates and configs** — any text-based file
+- **Data files** - `.csv`, `.json`, `.yaml`, `.txt`
+- **Scripts** - `.py`, `.sh`, `.js`
+- **Nested directories** - `data/stacks/react.csv` preserves the full path
+- **Templates and configs** - any text-based file
 
 Resource files maintain their relative paths. A skill that references `python3 .claude/skills/my-skill/scripts/search.py` will work because `scripts/search.py` is copied into the correct target directory.
 
@@ -257,17 +257,17 @@ Local skills in `.promptscript/skills/` should be committed to git. They're part
 
 ### Keep `.prs` declarations minimal
 
-When using local skills, the `.prs` file only needs metadata — the content comes from `SKILL.md`:
+When using local skills, the `.prs` file only needs metadata - the content comes from `SKILL.md`:
 
 ```promptscript
-# ✅ Good — content loaded from SKILL.md automatically
+# ✅ Good - content loaded from SKILL.md automatically
 @skills {
   my-skill: {
     description: "Does something useful"
   }
 }
 
-# ❌ Unnecessary — duplicates SKILL.md content
+# ❌ Unnecessary - duplicates SKILL.md content
 @skills {
   my-skill: {
     description: "Does something useful"
@@ -316,7 +316,7 @@ The PS016 validation rule checks that:
 
 ## See Also
 
-- [Shared Resources](shared-resources.md) — Share files across all skills
-- [Skills & Local Memory](../examples/skills-and-local.md) — Example of `@skills` with inline content
-- [Multi-File Organization](multi-file.md) — Organizing `.prs` files with `@use` imports
-- [Build Your Registry](registry.md) — Publishing and consuming registry packages
+- [Shared Resources](shared-resources.md) - Share files across all skills
+- [Skills & Local Memory](../examples/skills-and-local.md) - Example of `@skills` with inline content
+- [Multi-File Organization](multi-file.md) - Organizing `.prs` files with `@use` imports
+- [Build Your Registry](registry.md) - Publishing and consuming registry packages
