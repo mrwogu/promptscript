@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://github.com/mrwogu/promptscript/compare/v1.3.1...v1.4.0) (2026-03-18)
+
+
+### Features
+
+* add prs import command for reverse-parsing AI instructions ([#113](https://github.com/mrwogu/promptscript/issues/113)) ([fae14fd](https://github.com/mrwogu/promptscript/commit/fae14fdd9a5915ac55f97bea7a5c72bde5471f13))
+* auto-inject PromptScript SKILL.md during compilation ([#103](https://github.com/mrwogu/promptscript/issues/103)) ([6350741](https://github.com/mrwogu/promptscript/commit/6350741f0b9d40b2d3656688d98ad64c4655c840))
+* **docs:** add scrolling agent ticker to homepage hero ([#127](https://github.com/mrwogu/promptscript/issues/127)) ([d4c3361](https://github.com/mrwogu/promptscript/commit/d4c336180ed940d4c3a50852f02237957fb4d63c))
+* **formatters:** 37-platform AI agent compatibility ([#124](https://github.com/mrwogu/promptscript/issues/124)) ([97d3870](https://github.com/mrwogu/promptscript/commit/97d3870f7ceded9fb146d18d2dbeea020a28f0f6))
+* **formatters:** add git scope field to all formatters ([8788026](https://github.com/mrwogu/promptscript/commit/878802614508d426d80c0969821d4039e60ec84f))
+* **formatters:** add llms.txt generation and formatter documentation pages ([#125](https://github.com/mrwogu/promptscript/issues/125)) ([667f4c9](https://github.com/mrwogu/promptscript/commit/667f4c91ecb3a6031c9b24937f8db098cf3c651e))
+* **formatters:** change default version from simple to full ([#111](https://github.com/mrwogu/promptscript/issues/111)) ([57b98e7](https://github.com/mrwogu/promptscript/commit/57b98e7faf89c9ca7c85e44a2372a63b3b059c07))
+* parameterized skills with template interpolation ([#114](https://github.com/mrwogu/promptscript/issues/114)) ([cf8bb4c](https://github.com/mrwogu/promptscript/commit/cf8bb4c29d11655cb612a1258c8dba43591d0b5c))
+* self-hosted playground via prs serve command ([#108](https://github.com/mrwogu/promptscript/issues/108)) ([396e5ab](https://github.com/mrwogu/promptscript/commit/396e5ab17b47bce67343aad37a5a423587cf2184))
+* skill folders with shared resources and skill contracts ([#117](https://github.com/mrwogu/promptscript/issues/117)) ([12a30ac](https://github.com/mrwogu/promptscript/commit/12a30ac8fe065f90dab4f414e74ce10e39a1baa3))
+
+
+### Bug Fixes
+
+* **ci:** add include-component-in-tag to prevent tag mismatch ([0020c63](https://github.com/mrwogu/promptscript/commit/0020c639aca3b238a02e959b1a223ca00726864e))
+* **ci:** copy llms.txt from build output instead of deleted source file ([e1c3c4a](https://github.com/mrwogu/promptscript/commit/e1c3c4a8df9703b002075a4c6656e7af6e3806e7))
+* **cli:** sanitize registry init directory names and detect empty CWD ([#126](https://github.com/mrwogu/promptscript/issues/126)) ([a78c8a8](https://github.com/mrwogu/promptscript/commit/a78c8a838e5857a9247f38f6bf0d0d6695338844))
+* **cli:** show all supported targets in prs init ([#112](https://github.com/mrwogu/promptscript/issues/112)) ([620097c](https://github.com/mrwogu/promptscript/commit/620097ce698946dc17fd26c2a6f8a92d111be33d))
+* **docker:** add missing importer package to Dockerfile workspace setup ([43cc4ca](https://github.com/mrwogu/promptscript/commit/43cc4ca06567691e7048201c30354afe311fbe74))
+
 ## [Unreleased]
 
 ### Features
