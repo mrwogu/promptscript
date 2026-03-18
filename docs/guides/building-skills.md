@@ -52,13 +52,13 @@ description: Security-focused code review
 Instructions here...
 ```
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `name` | string | required | Skill identifier (matches directory name) |
-| `description` | string | required | What the skill does |
-| `params` | object | - | Parameter definitions for `{{variable}}` templates |
-| `inputs` | object | - | Runtime input contract (see [Skill Contracts](skill-contracts.md)) |
-| `outputs` | object | - | Runtime output contract (see [Skill Contracts](skill-contracts.md)) |
+| Property      | Type   | Default  | Description                                                         |
+| ------------- | ------ | -------- | ------------------------------------------------------------------- |
+| `name`        | string | required | Skill identifier (matches directory name)                           |
+| `description` | string | required | What the skill does                                                 |
+| `params`      | object | -        | Parameter definitions for `{{variable}}` templates                  |
+| `inputs`      | object | -        | Runtime input contract (see [Skill Contracts](skill-contracts.md))  |
+| `outputs`     | object | -        | Runtime output contract (see [Skill Contracts](skill-contracts.md)) |
 
 ## Behavior Properties (in .prs only)
 
@@ -76,13 +76,13 @@ Properties like `userInvocable`, `disableModelInvocation`, `context`, `agent`, a
 }
 ```
 
-| Property | Type | Default | Supported by |
-|---|---|---|---|
-| `userInvocable` | boolean | `false` | Claude, Factory |
-| `disableModelInvocation` | boolean | `false` | Claude, GitHub, Factory |
-| `context` | string | - | Claude (`"fork"` or `"inherit"`) |
-| `agent` | string | - | Claude |
-| `allowedTools` | string[] | - | Claude, Factory |
+| Property                 | Type     | Default | Supported by                     |
+| ------------------------ | -------- | ------- | -------------------------------- |
+| `userInvocable`          | boolean  | `false` | Claude, Factory                  |
+| `disableModelInvocation` | boolean  | `false` | Claude, GitHub, Factory          |
+| `context`                | string   | -       | Claude (`"fork"` or `"inherit"`) |
+| `agent`                  | string   | -       | Claude                           |
+| `allowedTools`           | string[] | -       | Claude, Factory                  |
 
 ## Writing Good Instructions
 
@@ -106,6 +106,7 @@ Scan the provided code for these vulnerability categories:
 ## Output Format
 
 For each finding:
+
 - Severity: Critical / High / Medium / Low
 - Location: file and line
 - Description: what the vulnerability is
@@ -152,26 +153,24 @@ All files are copied to every compilation target:
 .claude/skills/ui-design/scripts/search.py
 ```
 
-Reference resource files in your instructions using the target path:
+Reference resource files in your instructions using the target path. For example, in your `SKILL.md`:
 
-```markdown
----
+```yaml
+# SKILL.md frontmatter
 name: ui-design
 description: UI design with searchable databases
----
+```
 
-## Available Data
+Then in the body, reference the script with the compilation target path:
 
-Search the design database:
-
-```bash
+```text
 python3 .claude/skills/ui-design/scripts/search.py "query"
 ```
 
-Available data files:
+And list available data files:
+
 - `data/colors.csv` - Color palettes and accessibility info
 - `data/typography.csv` - Font pairings and sizing scales
-```
 
 ### Resource file limits
 
@@ -187,7 +186,7 @@ Available data files:
 
 Add a `.skillignore` file to any skill directory for custom exclusion rules (gitignore syntax):
 
-```
+```gitignore
 # .promptscript/skills/my-skill/.skillignore
 *.log
 tmp/
@@ -233,12 +232,12 @@ Pass values in the `.prs` file:
 
 ### Parameter types
 
-| Type | Description | Example |
-|---|---|---|
-| `string` | Free text | `"typescript"` |
-| `number` | Numeric value | `90` |
-| `boolean` | True/false | `true` |
-| `enum` | One of predefined options | `"strict"` (with `options: [relaxed, standard, strict]`) |
+| Type      | Description               | Example                                                  |
+| --------- | ------------------------- | -------------------------------------------------------- |
+| `string`  | Free text                 | `"typescript"`                                           |
+| `number`  | Numeric value             | `90`                                                     |
+| `boolean` | True/false                | `true`                                                   |
+| `enum`    | One of predefined options | `"strict"` (with `options: [relaxed, standard, strict]`) |
 
 ## Skill Contracts
 
@@ -312,6 +311,7 @@ prs validate --strict
 ```
 
 This checks:
+
 - Parameter types are valid (PS015)
 - Required skills exist (PS016)
 - Contract definitions are correct (PS017)
@@ -404,6 +404,7 @@ description: Code review with checklist
 Review the code changes using the checklist in `checklist.md`.
 
 For each item:
+
 - PASS: requirement met
 - FAIL: requirement not met, explain why
 - N/A: not applicable
@@ -435,26 +436,25 @@ Reference in `.prs` with behavior properties:
     └── compare.py
 ```
 
-```markdown
----
+```yaml
+# SKILL.md frontmatter
 name: stack-advisor
 description: Technology stack recommendations backed by data
----
+```
 
+The body references the script and data files:
+
+```text
 ## Available Tools
 
 Run comparisons:
-```bash
 python3 .claude/skills/stack-advisor/scripts/compare.py "react" "vue"
-```
 
 ## Data Sources
-
-- `data/frameworks.csv` - Framework comparison matrix
-- `data/benchmarks.json` - Performance benchmarks
+- data/frameworks.csv - Framework comparison matrix
+- data/benchmarks.json - Performance benchmarks
 
 ## Process
-
 1. Understand the requirements
 2. Search the data for matching frameworks
 3. Run comparisons if needed

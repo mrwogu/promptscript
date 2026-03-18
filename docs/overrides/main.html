@@ -1,12 +1,8 @@
-{% extends "base.html" %}
-
-{% block announce %}
-<span class="announce-new">NEW</span> Skill Contracts - define inputs, outputs, and parameters for your skills.
+{% extends "base.html" %} {% block announce %} <span class="announce-new">NEW</span> Skill Contracts
+- define inputs, outputs, and parameters for your skills.
 <a href="{{ 'guides/skill-contracts/' | url }}">Read the guide &rarr;</a>
-{% endblock %}
-
-{% block extrahead %} {{ super() }} {# Open Graph image - use
-page-specific or default #} {% if page.meta and page.meta.image %}
+{% endblock %} {% block extrahead %} {{ super() }} {# Open Graph image - use page-specific or
+default #} {% if page.meta and page.meta.image %}
 <meta property="og:image" content="{{ page.meta.image }}" />
 <meta name="twitter:image" content="{{ page.meta.image }}" />
 {% else %}

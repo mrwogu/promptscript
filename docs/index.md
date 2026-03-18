@@ -126,7 +126,6 @@ _Prompt-as-code with inheritance, validation, and a versioned registry. Compiled
   </div>
 </div>
 
-
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
 [:material-format-list-checks: See All 37 Formatters](reference/formatters/index.md){ .md-button .md-button--secondary }
 [:material-book-open-variant: Enterprise Guide](guides/enterprise.md){ .md-button }
@@ -266,7 +265,7 @@ Prisma ORM · Zod · Vitest
 <span class="warn">⛔</span> No secrets in source code
 
 <span class="hl">## Commands</span>
-<span class="str">/review</span>  Security code review
+<span class="str">/review</span> Security code review
 <span class="str">/migrate</span> Safe DB migration
 
 <span class="hl">## Skills</span>
@@ -437,6 +436,7 @@ Run a comprehensive OWASP Top 10 scan.
           <span class="compile-demo__filename">.cursor/rules/checkout.mdc</span>
         </div>
         <pre class="compile-demo__code"><code><span class="key">---</span>
+
 <span class="key">description:</span> <span class="str">Checkout Service v2.1</span>
 <span class="key">globs:</span> <span class="str">["src/**/*.ts"]</span>
 <span class="key">alwaysApply:</span> <span class="bool">true</span>

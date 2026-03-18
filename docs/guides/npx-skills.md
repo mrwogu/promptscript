@@ -122,9 +122,9 @@ universalDir: false
 
 ### Official repositories
 
-| Repository | Command |
-|---|---|
-| [Anthropic Skills](https://github.com/anthropics/skills) | `npx skills add anthropics/skills --list` |
+| Repository                                                         | Command                                          |
+| ------------------------------------------------------------------ | ------------------------------------------------ |
+| [Anthropic Skills](https://github.com/anthropics/skills)           | `npx skills add anthropics/skills --list`        |
 | [Vercel Agent Skills](https://github.com/vercel-labs/agent-skills) | `npx skills add vercel-labs/agent-skills --list` |
 
 ### Community skills
