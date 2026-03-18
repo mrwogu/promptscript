@@ -13,7 +13,7 @@ import { walkText } from '../walker.js';
 const AUTHORITY_PATTERNS: RegExp[] = [
   // Mandatory/strict mode indicators
   /\[?\s{0,10}MANDATORY\s{0,10}(?:POLICY|UPDATE|FOOTER|INSTRUCTION|DIRECTIVE)\s{0,10}\]?/i,
-  /\[?\s{0,10}OVERRIDE\s{0,10}\]?/i,
+  /\[\s{0,10}OVERRIDE\s{0,10}\]/i,
   /\[?\s{0,10}STRICT[_\s]{0,10}MODE\s{0,10}[:\s]{1,10}ON\s{0,10}\]?/i,
   /\[?\s{0,10}SYSTEM\s{0,10}(?:OVERRIDE|UPDATE|DIRECTIVE)\s{0,10}\]?/i,
   /\[?\s{0,10}ADMIN(?:ISTRATOR)?\s{0,10}(?:MODE|OVERRIDE|ACCESS)\s{0,10}\]?/i,

@@ -20,7 +20,7 @@ const DECODED_CONTENT_SECURITY_PATTERNS: Array<{ pattern: RegExp; description: s
     description: 'Mandatory/policy override directive',
   },
   {
-    pattern: /\[?\s{0,10}OVERRIDE\s{0,10}\]?/i,
+    pattern: /\[\s{0,10}OVERRIDE\s{0,10}\]/i,
     description: 'Override directive',
   },
   {
