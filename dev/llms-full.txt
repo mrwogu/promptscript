@@ -77,10 +77,10 @@ targets:
 
 **Key features:**
 
-- **Auto-detection** — Recognizes package.json, tsconfig, frameworks, and test runners
-- **Registry integration** — Browse and inherit from your organization's published standards
-- **Multi-target setup** — Select which AI tools you want to generate output for
-- **Pre-configured** — Generates ready-to-compile configuration based on your stack
+- **Auto-detection** - Recognizes package.json, tsconfig, frameworks, and test runners
+- **Registry integration** - Browse and inherit from your organization's published standards
+- **Multi-target setup** - Select which AI tools you want to generate output for
+- **Pre-configured** - Generates ready-to-compile configuration based on your stack
 
 ## Quick Start: From Zero to PromptOps
 
@@ -162,7 +162,7 @@ By default, this generates:
 
 #### Bundled PromptScript Skill
 
-When you compile, PromptScript automatically includes a language skill in each target's output. This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files — so your AI tools understand PromptScript syntax without any extra setup.
+When you compile, PromptScript automatically includes a language skill in each target's output. This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files - so your AI tools understand PromptScript syntax without any extra setup.
 
 To disable this behavior, add to `promptscript.yaml`:
 
@@ -187,9 +187,9 @@ Terminal ↻ Replay
 
 **Key features:**
 
-- **Auto-discovery** — Finds all existing AI instruction files in your project
-- **Skill installation** — Installs migration skills for each enabled target
-- **Non-destructive** — Your existing files remain untouched until you compile
+- **Auto-discovery** - Finds all existing AI instruction files in your project
+- **Skill installation** - Installs migration skills for each enabled target
+- **Non-destructive** - Your existing files remain untouched until you compile
 
 ### 1. Initialize with Migration Support
 
@@ -458,11 +458,11 @@ Follow the complete tutorial for a deeper understanding of PromptScript.
 
 →\](https://getpromptscript.dev/dev/tutorial/index.md) \[### Language Reference
 
-Learn the full PromptScript syntax — blocks, directives, and inheritance.
+Learn the full PromptScript syntax - blocks, directives, and inheritance.
 
 →\](https://getpromptscript.dev/dev/reference/language/index.md) \[### CLI Reference
 
-Explore all CLI commands — compile, validate, pull, and more.
+Explore all CLI commands - compile, validate, pull, and more.
 
 →\](https://getpromptscript.dev/dev/reference/cli/index.md) \[### Examples
 
@@ -472,7 +472,7 @@ Browse real-world configuration examples for various use cases.
 
 # Tutorial: Building Enterprise AI Infrastructure
 
-In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt—you will build a **hierarchical context system** that scales.
+In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt-you will build a **hierarchical context system** that scales.
 
 ## Learning Objectives
 
@@ -2292,11 +2292,11 @@ prs serve --read-only
 
 1. Run `prs serve` in your project directory
 1. The CLI prints a playground URL: `https://getpromptscript.dev/playground/?server=127.0.0.1:3000`
-1. Open the URL — the playground loads your local `.prs` files
-1. Edit in the playground or your editor — changes sync both ways via WebSocket
+1. Open the URL - the playground loads your local `.prs` files
+1. Edit in the playground or your editor - changes sync both ways via WebSocket
 1. The playground reads your `promptscript.yaml` and applies your project configuration (enabled targets, formatting settings)
 
-**File discovery:** The server scans only the source directory (`.promptscript/` by default, or the directory from `input.entry` in your `promptscript.yaml`) and config files — not the entire repository.
+**File discovery:** The server scans only the source directory (`.promptscript/` by default, or the directory from `input.entry` in your `promptscript.yaml`) and config files - not the entire repository.
 
 **API endpoints** (used by the playground):
 
@@ -2310,7 +2310,7 @@ prs serve --read-only
 
 Privacy
 
-All compilation happens locally in your browser — no data is sent to any external server. The `prs serve` command only serves files to the playground running in your browser.
+All compilation happens locally in your browser - no data is sent to any external server. The `prs serve` command only serves files to the playground running in your browser.
 
 Security
 
@@ -3231,11 +3231,11 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 
 `CLAUDE.md`
 
-Skills Agents Local\](https://getpromptscript.dev/dev/reference/formatters/claude/index.md) \[GitHub Copilot Custom
+Skills Agents Commands Local\](https://getpromptscript.dev/dev/reference/formatters/claude/index.md) \[GitHub Copilot Custom
 
 `.github/copilot-instructions.md`
 
-Skills Agents\](https://getpromptscript.dev/dev/reference/formatters/github/index.md) \[Cursor Custom
+Skills Prompts\](https://getpromptscript.dev/dev/reference/formatters/github/index.md) \[Cursor Custom
 
 `.cursor/rules/project.mdc`
 
@@ -3262,11 +3262,11 @@ Skills Agents Commands\](https://getpromptscript.dev/dev/reference/formatters/op
 | Formatter                                                                                | Tier   | Output File                       | Skills | Agents | Local | Commands |
 | ---------------------------------------------------------------------------------------- | ------ | --------------------------------- | ------ | ------ | ----- | -------- |
 | [Antigravity](https://getpromptscript.dev/dev/reference/formatters/antigravity/index.md) | Custom | `.agent/rules/project.md`         | No     | No     | No    | No       |
-| [Claude Code](https://getpromptscript.dev/dev/reference/formatters/claude/index.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | No       |
+| [Claude Code](https://getpromptscript.dev/dev/reference/formatters/claude/index.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | Yes      |
 | [Cursor](https://getpromptscript.dev/dev/reference/formatters/cursor/index.md)           | Custom | `.cursor/rules/project.mdc`       | No     | No     | No    | Yes      |
 | [Factory AI](https://getpromptscript.dev/dev/reference/formatters/factory/index.md)      | Custom | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
 | [Gemini CLI](https://getpromptscript.dev/dev/reference/formatters/gemini/index.md)       | Custom | `GEMINI.md`                       | Yes    | No     | No    | Yes      |
-| [GitHub Copilot](https://getpromptscript.dev/dev/reference/formatters/github/index.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | No       |
+| [GitHub Copilot](https://getpromptscript.dev/dev/reference/formatters/github/index.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | Yes      |
 | [OpenCode](https://getpromptscript.dev/dev/reference/formatters/opencode/index.md)       | Custom | `OPENCODE.md`                     | Yes    | Yes    | No    | Yes      |
 | Cline                                                                                    | Tier 1 | `.clinerules`                     | No     | No     | No    | No       |
 | Codex                                                                                    | Tier 1 | `AGENTS.md`                       | Yes    | No     | No    | No       |
@@ -3312,7 +3312,7 @@ The remaining 30 agents use a shared `MarkdownInstructionFormatter` base with co
 | **Dot directory** | `.claude/`                             |
 | **Skills**        | Yes (`.claude/skills/<name>/SKILL.md`) |
 | **Agents**        | Yes (`.claude/agents/<name>.md`)       |
-| **Commands**      | No                                     |
+| **Commands**      | Yes (`.claude/commands/<name>.md`)     |
 | **Local files**   | Yes (`CLAUDE.local.md`)                |
 
 ## Output Files
@@ -3322,6 +3322,7 @@ The remaining 30 agents use a shared `MarkdownInstructionFormatter` base with co
 | Main instructions | `CLAUDE.md`                      | Primary rule file                 |
 | Local overrides   | `CLAUDE.local.md`                | Private instructions (gitignored) |
 | Skills            | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions        |
+| Commands          | `.claude/commands/<name>.md`     | Slash commands                    |
 | Agents            | `.claude/agents/<name>.md`       | Agent configurations              |
 
 ## Supported Features
@@ -3359,7 +3360,7 @@ The remaining 30 agents use a shared `MarkdownInstructionFormatter` base with co
 
 ## Limitations & Quirks
 
-- `CLAUDE.md` is gitignored by many project templates — you may need to `git add -f CLAUDE.md`
+- `CLAUDE.md` is gitignored by many project templates - you may need to `git add -f CLAUDE.md`
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
 - Agent files support: `name`, `description`, `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`, `skills`
@@ -3384,26 +3385,37 @@ project-root/
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
 
+# Recent Activity
+
+### Mar 17, 2026
+
+| ID                                                                                                    | Time    | T   | Title                                                 | Read |
+| ----------------------------------------------------------------------------------------------------- | ------- | --- | ----------------------------------------------------- | ---- |
+| [#2423](https://github.com/mrwogu/promptscript/issues/2423 "GitHub Issue: mrwogu/promptscript #2423") | 7:06 PM | 🔵  | All 37 Formatter Names Extracted for Homepage Display | ~324 |
+| [#2422](https://github.com/mrwogu/promptscript/issues/2422 "GitHub Issue: mrwogu/promptscript #2422") | "       | 🔵  | Complete 37 Formatter List Confirmed in Documentation | ~434 |
+|                                                                                                       |         |     |                                                       |      |
+
 # GitHub Copilot Formatter
 
-| Property          | Value                                  |
-| ----------------- | -------------------------------------- |
-| **Tier**          | Custom                                 |
-| **Main output**   | `.github/copilot-instructions.md`      |
-| **Dot directory** | `.github/`                             |
-| **Skills**        | Yes (`.github/skills/<name>/SKILL.md`) |
-| **Agents**        | Yes (`.github/agents/<name>.md`)       |
-| **Commands**      | No                                     |
-| **Local files**   | No                                     |
+| Property          | Value                                    |
+| ----------------- | ---------------------------------------- |
+| **Tier**          | Custom                                   |
+| **Main output**   | `.github/copilot-instructions.md`        |
+| **Dot directory** | `.github/`                               |
+| **Skills**        | Yes (`.github/skills/<name>/SKILL.md`)   |
+| **Agents**        | Yes (`.github/agents/<name>.md`)         |
+| **Commands**      | Yes (`.github/prompts/<name>.prompt.md`) |
+| **Local files**   | No                                       |
 
 ## Output Files
 
-| File              | Path                              | Purpose                    |
-| ----------------- | --------------------------------- | -------------------------- |
-| Main instructions | `.github/copilot-instructions.md` | Primary rule file          |
-| Skills            | `.github/skills/<name>/SKILL.md`  | Reusable skill definitions |
-| Agents            | `.github/agents/<name>.md`        | Agent configurations       |
-| Agents index      | `AGENTS.md`                       | Top-level agents file      |
+| File              | Path                               | Purpose                    |
+| ----------------- | ---------------------------------- | -------------------------- |
+| Main instructions | `.github/copilot-instructions.md`  | Primary rule file          |
+| Skills            | `.github/skills/<name>/SKILL.md`   | Reusable skill definitions |
+| Prompts           | `.github/prompts/<name>.prompt.md` | Slash commands             |
+| Agents            | `.github/agents/<name>.md`         | Agent configurations       |
+| Agents index      | `AGENTS.md`                        | Top-level agents file      |
 
 ## Supported Features
 
@@ -3602,7 +3614,7 @@ project-root/
 
 ## Limitations & Quirks
 
-- Has a 12,000 character limit per rule file — content validation warns when exceeded
+- Has a 12,000 character limit per rule file - content validation warns when exceeded
 - Three activation types: `always` (default), `auto` (model decides), `manual` (user invokes)
 - Supports workflows (`.agent/workflows/*.yaml`) generated from `@shortcuts` blocks with steps
 - Uses nested directory structure: `.agent/rules/` with glob-based file targeting
@@ -3683,7 +3695,7 @@ project-root/
 
 - Uses `AGENTS.md` as the main file (extends MarkdownInstructionFormatter)
 - Skills go to `.factory/skills/<name>/SKILL.md`
-- Agents are called "droids" — output to `.factory/droids/<name>.md`
+- Agents are called "droids" - output to `.factory/droids/<name>.md`
 - Three output modes: `simple`, `multifile`, `full`
 - Knowledge blocks render as inline sections within the main instructions file
 
@@ -6908,8 +6920,8 @@ ______________________________________________________________________
 
 ## Next Steps
 
-- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) — Scale PromptScript across your organization
-- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) — Automate validation and compilation in your pipeline
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - Scale PromptScript across your organization
+- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) - Automate validation and compilation in your pipeline
 
 # Enterprise Setup
 
@@ -10071,7 +10083,7 @@ Example local file (`CLAUDE.local.md`):
 
 ## See Also
 
-- [Local Skills Guide](https://getpromptscript.dev/dev/guides/local-skills/index.md) — Install third-party skills with resource files (CSV, scripts)
+- [Local Skills Guide](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Install third-party skills with resource files (CSV, scripts)
 - [Language Reference: @skills](https://getpromptscript.dev/dev/reference/language/#skills)
 - [Language Reference: @local](https://getpromptscript.dev/dev/reference/language/#local)
 - [Formatters API: GitHub](https://getpromptscript.dev/dev/api-reference/formatters/src/classes/GitHubFormatter/index.md)
@@ -10415,7 +10427,7 @@ Claude Code supports lifecycle hooks for subagents (`PreToolUse`, `PostToolUse`,
 
 ## What is PromptScript?
 
-PromptScript is a language and toolchain for standardizing AI coding instructions across enterprise organizations. You write `.prs` files once and compile them to native formats for 37 AI coding agents — GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more.
+PromptScript is a language and toolchain for standardizing AI coding instructions across enterprise organizations. You write `.prs` files once and compile them to native formats for 37 AI coding agents - GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more.
 
 ## How many AI tools are supported?
 
@@ -10445,8 +10457,8 @@ See the [Getting Started guide](https://getpromptscript.dev/dev/getting-started/
 
 PromptScript supports hierarchical inheritance with `@inherit` and `@use` directives:
 
-- `@inherit` — Extend a base configuration (single inheritance)
-- `@use` — Import and merge additional rule sets (multiple imports)
+- `@inherit` - Extend a base configuration (single inheritance)
+- `@use` - Import and merge additional rule sets (multiple imports)
 
 Sources can be local files (`./base`) or registry packages (`@company/standards`). See the [Inheritance guide](https://getpromptscript.dev/dev/guides/inheritance/index.md).
 

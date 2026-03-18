@@ -1,23 +1,24 @@
 # GitHub Copilot Formatter
 
-| Property          | Value                                  |
-| ----------------- | -------------------------------------- |
-| **Tier**          | Custom                                 |
-| **Main output**   | `.github/copilot-instructions.md`      |
-| **Dot directory** | `.github/`                             |
-| **Skills**        | Yes (`.github/skills/<name>/SKILL.md`) |
-| **Agents**        | Yes (`.github/agents/<name>.md`)       |
-| **Commands**      | No                                     |
-| **Local files**   | No                                     |
+| Property          | Value                                    |
+| ----------------- | ---------------------------------------- |
+| **Tier**          | Custom                                   |
+| **Main output**   | `.github/copilot-instructions.md`        |
+| **Dot directory** | `.github/`                               |
+| **Skills**        | Yes (`.github/skills/<name>/SKILL.md`)   |
+| **Agents**        | Yes (`.github/agents/<name>.md`)         |
+| **Commands**      | Yes (`.github/prompts/<name>.prompt.md`) |
+| **Local files**   | No                                       |
 
 ## Output Files
 
-| File              | Path                              | Purpose                    |
-| ----------------- | --------------------------------- | -------------------------- |
-| Main instructions | `.github/copilot-instructions.md` | Primary rule file          |
-| Skills            | `.github/skills/<name>/SKILL.md`  | Reusable skill definitions |
-| Agents            | `.github/agents/<name>.md`        | Agent configurations       |
-| Agents index      | `AGENTS.md`                       | Top-level agents file      |
+| File              | Path                               | Purpose                    |
+| ----------------- | ---------------------------------- | -------------------------- |
+| Main instructions | `.github/copilot-instructions.md`  | Primary rule file          |
+| Skills            | `.github/skills/<name>/SKILL.md`   | Reusable skill definitions |
+| Prompts           | `.github/prompts/<name>.prompt.md` | Slash commands             |
+| Agents            | `.github/agents/<name>.md`         | Agent configurations       |
+| Agents index      | `AGENTS.md`                        | Top-level agents file      |
 
 ## Supported Features
 

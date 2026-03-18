@@ -373,5 +373,5 @@ ______________________________________________________________________
 
 ## Next Steps
 
-- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) — Scale PromptScript across your organization
-- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) — Automate validation and compilation in your pipeline
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - Scale PromptScript across your organization
+- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md) - Automate validation and compilation in your pipeline

@@ -18,11 +18,11 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 
 `CLAUDE.md`
 
-Skills Agents Local\](https://getpromptscript.dev/dev/reference/formatters/claude/index.md) \[GitHub Copilot Custom
+Skills Agents Commands Local\](https://getpromptscript.dev/dev/reference/formatters/claude/index.md) \[GitHub Copilot Custom
 
 `.github/copilot-instructions.md`
 
-Skills Agents\](https://getpromptscript.dev/dev/reference/formatters/github/index.md) \[Cursor Custom
+Skills Prompts\](https://getpromptscript.dev/dev/reference/formatters/github/index.md) \[Cursor Custom
 
 `.cursor/rules/project.mdc`
 
@@ -49,11 +49,11 @@ Skills Agents Commands\](https://getpromptscript.dev/dev/reference/formatters/op
 | Formatter                                                                                | Tier   | Output File                       | Skills | Agents | Local | Commands |
 | ---------------------------------------------------------------------------------------- | ------ | --------------------------------- | ------ | ------ | ----- | -------- |
 | [Antigravity](https://getpromptscript.dev/dev/reference/formatters/antigravity/index.md) | Custom | `.agent/rules/project.md`         | No     | No     | No    | No       |
-| [Claude Code](https://getpromptscript.dev/dev/reference/formatters/claude/index.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | No       |
+| [Claude Code](https://getpromptscript.dev/dev/reference/formatters/claude/index.md)      | Custom | `CLAUDE.md`                       | Yes    | Yes    | Yes   | Yes      |
 | [Cursor](https://getpromptscript.dev/dev/reference/formatters/cursor/index.md)           | Custom | `.cursor/rules/project.mdc`       | No     | No     | No    | Yes      |
 | [Factory AI](https://getpromptscript.dev/dev/reference/formatters/factory/index.md)      | Custom | `AGENTS.md`                       | Yes    | Yes    | No    | Yes      |
 | [Gemini CLI](https://getpromptscript.dev/dev/reference/formatters/gemini/index.md)       | Custom | `GEMINI.md`                       | Yes    | No     | No    | Yes      |
-| [GitHub Copilot](https://getpromptscript.dev/dev/reference/formatters/github/index.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | No       |
+| [GitHub Copilot](https://getpromptscript.dev/dev/reference/formatters/github/index.md)   | Custom | `.github/copilot-instructions.md` | Yes    | Yes    | No    | Yes      |
 | [OpenCode](https://getpromptscript.dev/dev/reference/formatters/opencode/index.md)       | Custom | `OPENCODE.md`                     | Yes    | Yes    | No    | Yes      |
 | Cline                                                                                    | Tier 1 | `.clinerules`                     | No     | No     | No    | No       |
 | Codex                                                                                    | Tier 1 | `AGENTS.md`                       | Yes    | No     | No    | No       |

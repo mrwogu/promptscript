@@ -1,6 +1,6 @@
 # Tutorial: Building Enterprise AI Infrastructure
 
-In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt—you will build a **hierarchical context system** that scales.
+In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt-you will build a **hierarchical context system** that scales.
 
 ## Learning Objectives
 

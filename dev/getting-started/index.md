@@ -65,10 +65,10 @@ targets:
 
 **Key features:**
 
-- **Auto-detection** — Recognizes package.json, tsconfig, frameworks, and test runners
-- **Registry integration** — Browse and inherit from your organization's published standards
-- **Multi-target setup** — Select which AI tools you want to generate output for
-- **Pre-configured** — Generates ready-to-compile configuration based on your stack
+- **Auto-detection** - Recognizes package.json, tsconfig, frameworks, and test runners
+- **Registry integration** - Browse and inherit from your organization's published standards
+- **Multi-target setup** - Select which AI tools you want to generate output for
+- **Pre-configured** - Generates ready-to-compile configuration based on your stack
 
 ## Quick Start: From Zero to PromptOps
 
@@ -150,7 +150,7 @@ By default, this generates:
 
 #### Bundled PromptScript Skill
 
-When you compile, PromptScript automatically includes a language skill in each target's output. This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files — so your AI tools understand PromptScript syntax without any extra setup.
+When you compile, PromptScript automatically includes a language skill in each target's output. This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files - so your AI tools understand PromptScript syntax without any extra setup.
 
 To disable this behavior, add to `promptscript.yaml`:
 
@@ -175,9 +175,9 @@ Terminal ↻ Replay
 
 **Key features:**
 
-- **Auto-discovery** — Finds all existing AI instruction files in your project
-- **Skill installation** — Installs migration skills for each enabled target
-- **Non-destructive** — Your existing files remain untouched until you compile
+- **Auto-discovery** - Finds all existing AI instruction files in your project
+- **Skill installation** - Installs migration skills for each enabled target
+- **Non-destructive** - Your existing files remain untouched until you compile
 
 ### 1. Initialize with Migration Support
 
@@ -446,11 +446,11 @@ Follow the complete tutorial for a deeper understanding of PromptScript.
 
 →\](https://getpromptscript.dev/dev/tutorial/index.md) \[### Language Reference
 
-Learn the full PromptScript syntax — blocks, directives, and inheritance.
+Learn the full PromptScript syntax - blocks, directives, and inheritance.
 
 →\](https://getpromptscript.dev/dev/reference/language/index.md) \[### CLI Reference
 
-Explore all CLI commands — compile, validate, pull, and more.
+Explore all CLI commands - compile, validate, pull, and more.
 
 →\](https://getpromptscript.dev/dev/reference/cli/index.md) \[### Examples
 

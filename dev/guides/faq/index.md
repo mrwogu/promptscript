@@ -2,7 +2,7 @@
 
 ## What is PromptScript?
 
-PromptScript is a language and toolchain for standardizing AI coding instructions across enterprise organizations. You write `.prs` files once and compile them to native formats for 37 AI coding agents — GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more.
+PromptScript is a language and toolchain for standardizing AI coding instructions across enterprise organizations. You write `.prs` files once and compile them to native formats for 37 AI coding agents - GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more.
 
 ## How many AI tools are supported?
 
@@ -32,8 +32,8 @@ See the [Getting Started guide](https://getpromptscript.dev/dev/getting-started/
 
 PromptScript supports hierarchical inheritance with `@inherit` and `@use` directives:
 
-- `@inherit` — Extend a base configuration (single inheritance)
-- `@use` — Import and merge additional rule sets (multiple imports)
+- `@inherit` - Extend a base configuration (single inheritance)
+- `@use` - Import and merge additional rule sets (multiple imports)
 
 Sources can be local files (`./base`) or registry packages (`@company/standards`). See the [Inheritance guide](https://getpromptscript.dev/dev/guides/inheritance/index.md).
 

@@ -388,7 +388,7 @@ Example local file (`CLAUDE.local.md`):
 
 ## See Also
 
-- [Local Skills Guide](https://getpromptscript.dev/dev/guides/local-skills/index.md) — Install third-party skills with resource files (CSV, scripts)
+- [Local Skills Guide](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Install third-party skills with resource files (CSV, scripts)
 - [Language Reference: @skills](https://getpromptscript.dev/dev/reference/language/#skills)
 - [Language Reference: @local](https://getpromptscript.dev/dev/reference/language/#local)
 - [Formatters API: GitHub](https://getpromptscript.dev/dev/api-reference/formatters/src/classes/GitHubFormatter/index.md)
