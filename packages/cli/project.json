@@ -36,7 +36,11 @@
           "chokidar",
           "yaml",
           "simple-git",
-          "@promptscript/server"
+          "fastify",
+          "@fastify/cors",
+          "@fastify/websocket",
+          "ws",
+          "fast-glob"
         ],
         "generatePackageJson": false
       }

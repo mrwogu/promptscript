@@ -102,5 +102,21 @@ describe('bundle smoke tests', () => {
       expect(output).toContain('init');
       expect(output).toContain('registry');
     });
+
+    it('should display serve help without missing module errors', () => {
+      if (!isBundleBuilt()) {
+        console.log('Skipping: bundle not built (run `nx build cli` first)');
+        return;
+      }
+
+      const output = execFileSync('node', [binPath, 'serve', '--help'], {
+        encoding: 'utf-8',
+        cwd: distRoot,
+        timeout: 10000,
+      });
+
+      expect(output).toContain('serve');
+      expect(output).toContain('--port');
+    });
   });
 });

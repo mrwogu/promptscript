@@ -16,6 +16,7 @@ const distRoot = join(root, 'dist/packages/cli');
 
 const pkg = JSON.parse(readFileSync(join(cliRoot, 'package.json'), 'utf-8'));
 const resolverPkg = JSON.parse(readFileSync(join(root, 'packages/resolver/package.json'), 'utf-8'));
+const serverPkg = JSON.parse(readFileSync(join(root, 'packages/server/package.json'), 'utf-8'));
 
 // Fix version detection paths in bundled index.js
 // After bundling, all code is in index.js and package.json is in the same directory.
@@ -42,6 +43,13 @@ const dependencies = Object.fromEntries(
 // Add transitive dependencies that are marked as external in esbuild
 // (simple-git from resolver is CJS and cannot be bundled into ESM)
 dependencies['simple-git'] = resolverPkg.dependencies['simple-git'];
+
+// Server dependencies (server is bundled, but its deps are external)
+dependencies['fastify'] = serverPkg.dependencies['fastify'];
+dependencies['@fastify/cors'] = serverPkg.dependencies['@fastify/cors'];
+dependencies['@fastify/websocket'] = serverPkg.dependencies['@fastify/websocket'];
+dependencies['ws'] = serverPkg.dependencies['ws'];
+dependencies['fast-glob'] = serverPkg.dependencies['fast-glob'];
 
 const publishPkg = {
   name: pkg.name,
