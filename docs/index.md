@@ -29,6 +29,8 @@ hide:
 
 **One source. Every AI agent.**
 
+_Prompt-as-code with inheritance, validation, and compilation to 37 targets._
+
 <div class="hero-ticker" aria-hidden="true">
   <div class="hero-ticker__track">
     <!-- Half 1: 44 chips (each custom ×2, interspersed every 2-3 others) -->
