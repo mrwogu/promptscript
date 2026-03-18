@@ -160,7 +160,7 @@ When a skill from `npx skills` doesn't have the exact settings you need, overrid
 }
 ```
 
-The content still comes from `SKILL.md`, but all metadata properties from the `.prs` file take precedence.
+The `content` always comes from `SKILL.md` and cannot be overridden in `.prs`. For other properties, the `.prs` file takes precedence - for example, `description` from `.prs` overrides `description` from SKILL.md frontmatter.
 
 ## Parameterized skills
 
