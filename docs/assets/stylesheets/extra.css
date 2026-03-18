@@ -2743,8 +2743,8 @@ pre.init-demo__file-preview-content {
   flex-shrink: 0;
 }
 
-/* Light mode — high contrast */
-.hero-ticker__chip--custom {
+/* Light mode — high contrast (md-typeset prefix for specificity) */
+.md-typeset .hero-ticker__chip--custom {
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.35);
   color: #5b21b6;
@@ -2753,7 +2753,7 @@ pre.init-demo__file-preview-content {
   background: #8b5cf6;
 }
 
-.hero-ticker__chip--t1 {
+.md-typeset .hero-ticker__chip--t1 {
   background: rgba(37, 99, 235, 0.1);
   border: 1px solid rgba(37, 99, 235, 0.35);
   color: #1e40af;
@@ -2762,7 +2762,7 @@ pre.init-demo__file-preview-content {
   background: #2563eb;
 }
 
-.hero-ticker__chip--t2 {
+.md-typeset .hero-ticker__chip--t2 {
   background: rgba(6, 182, 212, 0.08);
   border: 1px solid rgba(6, 182, 212, 0.35);
   color: #155e75;
@@ -2771,7 +2771,7 @@ pre.init-demo__file-preview-content {
   background: #06b6d4;
 }
 
-.hero-ticker__chip--t3 {
+.md-typeset .hero-ticker__chip--t3 {
   background: rgba(71, 85, 105, 0.08);
   border: 1px solid rgba(71, 85, 105, 0.3);
   color: #475569;
@@ -2781,25 +2781,25 @@ pre.init-demo__file-preview-content {
 }
 
 /* Dark mode overrides */
-[data-md-color-scheme='slate'] .hero-ticker__chip {
+[data-md-color-scheme='slate'] .md-typeset .hero-ticker__chip {
   color: #cbd5e1;
 }
-[data-md-color-scheme='slate'] .hero-ticker__chip--custom {
+[data-md-color-scheme='slate'] .md-typeset .hero-ticker__chip--custom {
   background: rgba(139, 92, 246, 0.15);
   border-color: rgba(139, 92, 246, 0.3);
   color: #c4b5fd;
 }
-[data-md-color-scheme='slate'] .hero-ticker__chip--t1 {
+[data-md-color-scheme='slate'] .md-typeset .hero-ticker__chip--t1 {
   background: rgba(37, 99, 235, 0.15);
   border-color: rgba(37, 99, 235, 0.3);
   color: #93c5fd;
 }
-[data-md-color-scheme='slate'] .hero-ticker__chip--t2 {
+[data-md-color-scheme='slate'] .md-typeset .hero-ticker__chip--t2 {
   background: rgba(6, 182, 212, 0.12);
   border-color: rgba(6, 182, 212, 0.25);
   color: #67e8f9;
 }
-[data-md-color-scheme='slate'] .hero-ticker__chip--t3 {
+[data-md-color-scheme='slate'] .md-typeset .hero-ticker__chip--t3 {
   background: rgba(71, 85, 105, 0.2);
   border-color: rgba(71, 85, 105, 0.3);
   color: #94a3b8;
