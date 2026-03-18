@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2](https://github.com/mrwogu/promptscript/compare/v1.4.1...v1.4.2) (2026-03-18)
+
+
+### Bug Fixes
+
+* **cli:** bundle @promptscript/server into CLI for global install ([99e2454](https://github.com/mrwogu/promptscript/commit/99e24542af9812d97b71887f2c1c03f59a33e098))
+
 ## [1.4.1](https://github.com/mrwogu/promptscript/compare/v1.4.0...v1.4.1) (2026-03-18)
 
 
