@@ -1,6 +1,34 @@
 /* PromptScript Custom Styles */
 /* Colors from logo.svg gradient: #6D28D9 → #2563EB → #06B6D4 */
 
+/* Announcement bar */
+.md-banner {
+  background: linear-gradient(90deg, #6d28d9, #2563eb);
+  color: #fff;
+  font-size: 0.75rem;
+}
+.md-banner a {
+  color: #e0e7ff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-left: 0.3rem;
+}
+.md-banner a:hover {
+  color: #fff;
+}
+.announce-new {
+  display: inline-block;
+  background: #facc15;
+  color: #1e1b4b;
+  font-weight: 700;
+  font-size: 0.6rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  margin-right: 0.4rem;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
 :root {
   /* Primary colors - from logo gradient */
   --md-primary-fg-color: #6d28d9; /* violet - gradient start */
