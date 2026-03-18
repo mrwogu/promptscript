@@ -41,20 +41,12 @@ That's it. Run `prs compile` and the skill is available in all your AI agents.
 
 ## SKILL.md Frontmatter
 
-The YAML frontmatter controls how the skill behaves:
+The YAML frontmatter defines the skill's identity and content:
 
 ```markdown
 ---
 name: code-review
 description: Security-focused code review
-userInvocable: true
-disableModelInvocation: false
-context: fork
-agent: general-purpose
-allowedTools:
-  - Read
-  - Grep
-  - Bash
 ---
 
 Instructions here...
@@ -64,11 +56,33 @@ Instructions here...
 |---|---|---|---|
 | `name` | string | required | Skill identifier (matches directory name) |
 | `description` | string | required | What the skill does |
-| `userInvocable` | boolean | `false` | User can invoke manually (Claude, Factory) |
-| `disableModelInvocation` | boolean | `false` | Prevent auto-invocation (GitHub, Factory) |
-| `context` | string | - | Context mode: `"fork"` or `"inherit"` (Claude) |
-| `agent` | string | - | Agent type (Claude) |
-| `allowedTools` | string[] | - | Restrict available tools (Claude, Factory) |
+| `params` | object | - | Parameter definitions for `{{variable}}` templates |
+| `inputs` | object | - | Runtime input contract (see [Skill Contracts](skill-contracts.md)) |
+| `outputs` | object | - | Runtime output contract (see [Skill Contracts](skill-contracts.md)) |
+
+## Behavior Properties (in .prs only)
+
+Properties like `userInvocable`, `disableModelInvocation`, `context`, `agent`, and `allowedTools` control how AI agents handle the skill. These are set in your `.prs` file, not in SKILL.md frontmatter:
+
+```promptscript
+@skills {
+  code-review: {
+    description: "Security-focused code review"
+    userInvocable: true
+    context: "fork"
+    agent: "general-purpose"
+    allowedTools: ["Read", "Grep", "Bash"]
+  }
+}
+```
+
+| Property | Type | Default | Supported by |
+|---|---|---|---|
+| `userInvocable` | boolean | `false` | Claude, Factory |
+| `disableModelInvocation` | boolean | `false` | Claude, GitHub, Factory |
+| `context` | string | - | Claude (`"fork"` or `"inherit"`) |
+| `agent` | string | - | Claude |
+| `allowedTools` | string[] | - | Claude, Factory |
 
 ## Writing Good Instructions
 
@@ -164,8 +178,21 @@ Available data files:
 - Maximum 1 MB per file
 - Maximum 10 MB total per skill
 - Maximum 100 files per skill
-- Binary files and symlinks are excluded
-- System files (`.env`, `node_modules/`, etc.) are skipped
+- Binary files (containing null bytes) and symlinks are excluded
+- Path traversal attempts (`../`) are rejected
+- Auto-skipped files: `.env`, lock files (`pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`), config files (`package.json`, `tsconfig.json`, `Dockerfile`), ESLint/Prettier configs, and more (45+ patterns)
+- Auto-skipped directories: `node_modules`, `.git`, `dist`, `build`, `coverage`, `test`, `__tests__`, and more (16+ patterns)
+
+### .skillignore
+
+Add a `.skillignore` file to any skill directory for custom exclusion rules (gitignore syntax):
+
+```
+# .promptscript/skills/my-skill/.skillignore
+*.log
+tmp/
+draft-*.md
+```
 
 ## Parameterized Skills
 
@@ -338,7 +365,6 @@ See [Build Your Registry](registry.md) for details.
 ---
 name: commit
 description: Create well-structured git commits
-userInvocable: true
 ---
 
 When creating commits:
@@ -348,6 +374,17 @@ When creating commits:
 3. Keep the first line under 72 characters
 4. Add a blank line before the body
 5. Explain why, not what
+```
+
+Reference in `.prs` with behavior properties:
+
+```promptscript
+@skills {
+  commit: {
+    description: "Create well-structured git commits"
+    userInvocable: true
+  }
+}
 ```
 
 ### Review skill with checklist
@@ -362,10 +399,6 @@ When creating commits:
 ---
 name: review
 description: Code review with checklist
-userInvocable: true
-allowedTools:
-  - Read
-  - Grep
 ---
 
 Review the code changes using the checklist in `checklist.md`.
@@ -376,6 +409,18 @@ For each item:
 - N/A: not applicable
 
 Summarize findings at the end.
+```
+
+Reference in `.prs` with behavior properties:
+
+```promptscript
+@skills {
+  review: {
+    description: "Code review with checklist"
+    userInvocable: true
+    allowedTools: ["Read", "Grep"]
+  }
+}
 ```
 
 ### Data-driven skill with scripts
