@@ -32,99 +32,114 @@ hide:
 _Prompt-as-code with inheritance, validation, and a versioned registry. Compiled to 37 targets._
 
 <div class="hero-ticker" aria-hidden="true">
+  <svg class="hero-ticker__defs" aria-hidden="true">
+    <symbol id="i-claude" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></symbol>
+    <symbol id="i-copilot" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></symbol>
+    <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></symbol>
+    <symbol id="i-antigravity" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></symbol>
+    <symbol id="i-factory" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></symbol>
+    <symbol id="i-gemini" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></symbol>
+    <symbol id="i-opencode" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></symbol>
+    <symbol id="i-cline" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4l5 4-5 4M9 12h5"/></symbol>
+    <symbol id="i-codex" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8 1l5.66 3.27v6.46L8 14l-5.66-3.27V4.27L8 1z"/></symbol>
+    <symbol id="i-continue" viewBox="0 0 16 16"><path d="M4 2v12l5-6zm5 0v12l5-6z"/></symbol>
+    <symbol id="i-roo" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 14V2h4.5a3.5 3.5 0 010 7H4m4.5-1L13 14"/></symbol>
+    <symbol id="i-windsurf" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M1 5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 8.5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 12c2.5-2 5-2 7.5 0s5 2 7.5 0"/></symbol>
+  </svg>
   <div class="hero-ticker__track">
-    <!-- Half 1: 44 chips (each custom ×2, interspersed every 2-3 others) -->
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Cline</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Codex</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Continue</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Roo Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Windsurf</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
+    <!-- Half 1: 44 chips (custom x2 interspersed, with SVG logos) -->
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-claude"/></svg>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-cline"/></svg>Cline</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-codex"/></svg>Codex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-continue"/></svg>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-copilot"/></svg>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-roo"/></svg>Roo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-windsurf"/></svg>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-cursor"/></svg>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-antigravity"/></svg>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-factory"/></svg>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-gemini"/></svg>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-opencode"/></svg>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-claude"/></svg>Claude Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-copilot"/></svg>GitHub Copilot</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-cursor"/></svg>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-antigravity"/></svg>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-factory"/></svg>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-gemini"/></svg>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-opencode"/></svg>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
     <!-- Half 2: identical copy for seamless loop -->
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Cline</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Codex</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Continue</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Roo Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><span class="hero-ticker__dot"></span>Windsurf</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-claude"/></svg>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-cline"/></svg>Cline</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-codex"/></svg>Codex</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-continue"/></svg>Continue</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-copilot"/></svg>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-roo"/></svg>Roo Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon"><use href="#i-windsurf"/></svg>Windsurf</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-cursor"/></svg>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-antigravity"/></svg>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-factory"/></svg>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-gemini"/></svg>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-opencode"/></svg>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Claude Code</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-claude"/></svg>Claude Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>GitHub Copilot</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-copilot"/></svg>GitHub Copilot</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Cursor</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-cursor"/></svg>Cursor</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Antigravity</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-antigravity"/></svg>Antigravity</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Factory AI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-factory"/></svg>Factory AI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>Gemini CLI</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-gemini"/></svg>Gemini CLI</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><span class="hero-ticker__dot"></span>OpenCode</span>
+    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon"><use href="#i-opencode"/></svg>OpenCode</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
   </div>
 </div>
+
 
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
 [:material-format-list-checks: See All 37 Formatters](reference/formatters/index.md){ .md-button .md-button--secondary }
