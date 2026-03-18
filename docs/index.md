@@ -131,10 +131,10 @@ _Prompt-as-code with inheritance, validation, and a versioned registry. Compiled
 [:material-book-open-variant: Enterprise Guide](guides/enterprise.md){ .md-button }
 [:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
 
-<div class="hero-badges" markdown>
+<!-- <div class="hero-badges" markdown>
 [![GitHub stars](https://img.shields.io/github/stars/mrwogu/promptscript?style=flat-square&logo=github)](https://github.com/mrwogu/promptscript)
 [![npm downloads](https://img.shields.io/npm/dm/@promptscript/cli?style=flat-square&logo=npm)](https://www.npmjs.com/package/@promptscript/cli)
-</div>
+</div> -->
 
 <div class="hero-install" markdown>
 ```
