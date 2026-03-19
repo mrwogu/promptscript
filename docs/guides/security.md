@@ -316,7 +316,13 @@ const validator = createValidator({
 ### Limitations
 
 - **New attack patterns**: Attackers constantly evolve techniques. Keep PromptScript updated.
-- **Context-dependent**: Some patterns may cause false positives in legitimate security documentation.
+- **Context-dependent**: Some patterns may cause false positives in legitimate security documentation. Use `fileExcludes` to suppress specific rules for known-safe files:
+  ```yaml
+  validation:
+    fileExcludes:
+      - pattern: 'skills/**/SKILL.md'
+        rules: [PS011]
+  ```
 - **Language coverage**: Not all languages are covered. Add custom patterns for unsupported languages.
 
 ## Environment Variables vs Template Variables
