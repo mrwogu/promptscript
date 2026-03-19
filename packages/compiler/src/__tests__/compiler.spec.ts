@@ -385,6 +385,56 @@ describe('Compiler', () => {
       expect(testCommand?.content).toContain('<!-- PromptScript');
     });
 
+    it('should use YAML marker inside frontmatter for files with YAML frontmatter', async () => {
+      const ast = createTestProgram();
+
+      const formatterWithFrontmatter: Formatter = {
+        name: 'factory',
+        outputPath: 'AGENTS.md',
+        description: 'Formatter with frontmatter files',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => ({
+          path: 'AGENTS.md',
+          content: '# AGENTS.md\n\nMain content',
+          additionalFiles: [
+            {
+              path: '.factory/skills/commit/SKILL.md',
+              content:
+                '---\nname: commit\ndescription: Create git commits\n---\n\nUse Conventional Commits format.\n',
+            },
+          ],
+        })),
+        getSkillBasePath: () => '.factory/skills',
+        getSkillFileName: () => 'SKILL.md',
+      };
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatterWithFrontmatter],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      const skillFile = result.outputs.get('.factory/skills/commit/SKILL.md');
+      expect(skillFile).toBeDefined();
+
+      // Should use YAML comment inside frontmatter, not HTML comment after it
+      expect(skillFile?.content).toContain('# promptscript-generated:');
+      expect(skillFile?.content).not.toContain('<!-- PromptScript');
+
+      // YAML marker should be inside frontmatter (between --- delimiters)
+      const frontmatterMatch = skillFile?.content.match(/^---\n([\s\S]*?)\n---/);
+      expect(frontmatterMatch).toBeTruthy();
+      expect(frontmatterMatch?.[1]).toContain('# promptscript-generated:');
+
+      // Content should still be intact
+      expect(skillFile?.content).toContain('name: commit');
+      expect(skillFile?.content).toContain('Use Conventional Commits format.');
+    });
+
     it('should pass warnings from validation', async () => {
       const ast = createTestProgram();
       const formatter = createMockFormatter('test');
