@@ -152,6 +152,19 @@ pnpm run test       # Run all tests
     A[Input] --> B[Process] --> C[Output]
   ```
 
+## Configuration Notes
+
+### ESLint
+
+- All package configs inherit from `eslint.base.config.cjs`
+- Use `createBaseConfig(\_\_dirname)` from base config
+- Modify base config instead of duplicating rules
+
+### Vite/Vitest
+
+- Use `\_\_dirname` for root option
+- Do NOT use `import.meta.dirname` (causes TS errors)
+
 ## Don'ts
 
 - Don't use `any` type - use `unknown` with type guards

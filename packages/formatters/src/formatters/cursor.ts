@@ -478,6 +478,9 @@ export class CursorFormatter extends BaseFormatter {
     const diagrams = this.diagrams(ast);
     if (diagrams) sections.push(diagrams);
 
+    const knowledge = this.knowledgeContent(ast);
+    if (knowledge) sections.push(knowledge);
+
     const never = this.never(ast);
     if (never) sections.push(never);
   }
@@ -872,6 +875,40 @@ export class CursorFormatter extends BaseFormatter {
       items.push(`Types: ${diagObj['types'].map((t) => this.valueToString(t)).join(', ')}`);
     }
     return items;
+  }
+
+  private knowledgeContent(ast: Program): string | null {
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
+
+    const text = this.extractText(knowledge.content);
+    if (!text) return null;
+
+    const consumedHeaders = ['## Development Commands', '## Post-Work Verification'];
+    let remaining = text;
+
+    for (const header of consumedHeaders) {
+      const headerIndex = remaining.indexOf(header);
+      if (headerIndex === -1) continue;
+
+      const afterHeader = remaining.indexOf('\n', headerIndex);
+      if (afterHeader === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+        continue;
+      }
+
+      const nextSection = remaining.indexOf('\n## ', afterHeader);
+      if (nextSection === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+      } else {
+        remaining = remaining.substring(0, headerIndex) + remaining.substring(nextSection + 1);
+      }
+    }
+
+    remaining = remaining.trim();
+    if (!remaining) return null;
+
+    return this.stripAllIndent(remaining);
   }
 
   private never(ast: Program): string | null {

@@ -111,6 +111,19 @@ Diagrams:
 - Use Mermaid
 - Types: flowchart, sequence, class, state, ER, gantt, pie
 
+## Configuration Notes
+
+### ESLint
+
+- All package configs inherit from `eslint.base.config.cjs`
+- Use `createBaseConfig(\_\_dirname)` from base config
+- Modify base config instead of duplicating rules
+
+### Vite/Vitest
+
+- Use `\_\_dirname` for root option
+- Do NOT use `import.meta.dirname` (causes TS errors)
+
 Never:
 - Never use `any` type - use `unknown` with type guards
 - Never use default exports - only named exports
