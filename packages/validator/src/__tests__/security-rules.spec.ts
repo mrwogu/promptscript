@@ -642,6 +642,17 @@ describe('authority-injection rule (PS011)', () => {
       expect(messages).toHaveLength(0);
     });
 
+    it('should allow "follow exactly" without "instructions"', () => {
+      const ast = createTestProgram({
+        blocks: [createTextBlock('@skills', 'Follow skill exactly')],
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      authorityInjection.validate(ctx);
+
+      expect(messages).toHaveLength(0);
+    });
+
     it('should allow legitimate use of "override" as a verb', () => {
       const ast = createTestProgram({
         blocks: [
