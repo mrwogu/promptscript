@@ -845,6 +845,7 @@ export class ClaudeFormatter extends BaseFormatter {
     this.addSection(sections, this.postWork(ast, renderer));
     this.addSection(sections, this.documentation(ast, renderer));
     this.addSection(sections, this.diagrams(ast, renderer));
+    this.addSection(sections, this.knowledgeContent(ast, renderer));
     this.addSection(sections, this.donts(ast, renderer));
   }
 
@@ -1096,6 +1097,45 @@ export class ClaudeFormatter extends BaseFormatter {
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection('Diagrams', content) + '\n';
+  }
+
+  /**
+   * Render remaining @knowledge content not already consumed by
+   * commands() (## Development Commands) or postWork() (## Post-Work Verification).
+   */
+  private knowledgeContent(ast: Program, _renderer: ConventionRenderer): string | null {
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
+
+    const text = this.extractText(knowledge.content);
+    if (!text) return null;
+
+    // Remove sections already consumed by other methods
+    const consumedHeaders = ['## Development Commands', '## Post-Work Verification'];
+    let remaining = text;
+
+    for (const header of consumedHeaders) {
+      const headerIndex = remaining.indexOf(header);
+      if (headerIndex === -1) continue;
+
+      const afterHeader = remaining.indexOf('\n', headerIndex);
+      if (afterHeader === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+        continue;
+      }
+
+      const nextSection = remaining.indexOf('\n## ', afterHeader);
+      if (nextSection === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+      } else {
+        remaining = remaining.substring(0, headerIndex) + remaining.substring(nextSection + 1);
+      }
+    }
+
+    remaining = remaining.trim();
+    if (!remaining) return null;
+
+    return this.stripAllIndent(remaining) + '\n';
   }
 
   private donts(ast: Program, renderer: ConventionRenderer): string | null {

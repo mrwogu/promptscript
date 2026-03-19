@@ -21,6 +21,25 @@ We are SOC 2 Type II and GDPR compliant.
 - Never store full PAN
 - Encryption required
 
+## Compliance Resources
+
+- Compliance Portal: https://compliance.acme.com
+- Data Classification: https://wiki.acme.com/data-classification
+- Privacy Policy: https://acme.com/privacy
+
+## Data Classification
+
+- **Public**: Marketing materials, public docs
+- **Internal**: Internal communications, non-sensitive
+- **Confidential**: Business data, customer info
+- **Restricted**: PII, financial data, credentials
+
+## Regional Requirements
+
+- EU: GDPR compliance required
+- California: CCPA compliance required
+- Healthcare: HIPAA where applicable
+
 ## Don'ts
 
 - Don't process data beyond stated purpose

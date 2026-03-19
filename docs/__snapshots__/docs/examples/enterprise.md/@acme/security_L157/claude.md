@@ -34,6 +34,19 @@ Security is everyone's responsibility.
 /secure-code - Review code for security issues
 ```
 
+## Security Resources
+
+- Security Guidelines: https://wiki.acme.com/security
+- Incident Response: https://wiki.acme.com/incident-response
+- Security Training: https://learn.acme.com/security
+- Bug Bounty: https://hackerone.com/acme
+
+## Contacts
+
+- Security Team: security@acme.com
+- Incident Hotline: +1-800-SEC-ACME
+- Slack: #security-help
+
 ## Don'ts
 
 - Don't store passwords in plain text
