@@ -13,6 +13,12 @@ Apply ACME security standards to all code.
 - Mask PII in logs
 - Weekly vulnerability scanning
 
+## Security Resources
+
+- Security guidelines: https://wiki.acme.com/security
+- Vulnerability reporting: security@acme.com
+- Security review checklist: https://wiki.acme.com/security-checklist
+
 ## Don'ts
 
 - Don't store passwords in plain text

@@ -17,6 +17,13 @@ You are a senior developer working on the checkout service.
 /lint      - Run ESLint
 ```
 
+## API Reference
+
+### Orders
+
+- GET /orders - List orders
+- POST /orders - Create order
+
 ## Don'ts
 
 - Don't commit secrets
