@@ -158,9 +158,6 @@ export async function initCommand(
         if (!hasMarker && rawSkillContent.startsWith('---')) {
           const yamlMarker = `# promptscript-generated: ${new Date().toISOString()}`;
           skillContent = `---\n${yamlMarker}${rawSkillContent.slice(3)}`;
-          /* v8 ignore next 3 -- defensive fallback: bundled SKILL.md always has frontmatter */
-        } else if (!hasMarker) {
-          skillContent = `<!-- PromptScript ${new Date().toISOString()} - do not edit -->\n${rawSkillContent}`;
         }
 
         // Install to .promptscript/skills/ (canonical source)
