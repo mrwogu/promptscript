@@ -144,6 +144,16 @@ describe('commands/init', () => {
       );
     });
 
+    it('should not include top-level entry field (default path is implicit)', async () => {
+      await initCommand({ yes: true }, mockServices);
+
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
+      );
+      expect(yamlCall).toBeDefined();
+      expect(yamlCall![1]).not.toContain('entry:');
+    });
+
     it('should use custom name when provided with --yes flag', async () => {
       await initCommand({ yes: true, name: 'custom-project' }, mockServices);
 

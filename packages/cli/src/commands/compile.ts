@@ -454,7 +454,9 @@ export async function compileCommand(
       skillContent,
     });
 
-    const entryPath = resolve(localPath, 'project.prs');
+    const entryPath = config.input?.entry
+      ? resolve(projectRoot, config.input.entry)
+      : resolve(localPath, 'project.prs');
 
     if (!existsSync(entryPath)) {
       spinner.fail('Entry file not found');

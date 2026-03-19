@@ -19,6 +19,11 @@ function classifySection(section: MarkdownSection): ScoredSection {
     return scored(section, 'identity', 0.9);
   }
 
+  // Preamble (no heading, first section) is likely the project description
+  if (!heading && section.level === 0) {
+    return scored(section, 'identity', 0.7);
+  }
+
   // Check heading-based classification
   if (heading && RESTRICTION_HEADINGS.test(heading)) {
     return scored(section, 'restrictions', 0.9);

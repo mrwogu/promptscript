@@ -1089,6 +1089,31 @@ describe('compile command - overwrite protection', () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('File not found'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('prs init'));
     });
+
+    it('should use config.input.entry when specified', async () => {
+      mockLoadConfig.mockResolvedValue({
+        ...defaultConfig,
+        input: { entry: 'custom/entry.prs' },
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('custom/entry.prs')) return true;
+        return false;
+      });
+
+      const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      await compileCommand({}, mockServices);
+
+      expect(mockCompile).toHaveBeenCalledWith(expect.stringContaining('custom/entry.prs'));
+    });
   });
 
   describe('target and format options', () => {
