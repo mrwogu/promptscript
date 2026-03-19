@@ -148,11 +148,17 @@ export async function initCommand(
       const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
       try {
         const rawSkillContent = readFileSync(skillSource, 'utf-8');
-        // Add PromptScript marker so `prs compile` can safely overwrite these files
-        const marker = `<!-- PromptScript ${new Date().toISOString()} - do not edit -->`;
-        const skillContent = rawSkillContent.includes('<!-- PromptScript')
-          ? rawSkillContent
-          : `${marker}\n${rawSkillContent}`;
+        // Add PromptScript marker so `prs compile` can safely overwrite these files.
+        // Use YAML comment inside frontmatter to avoid breaking tools like Factory AI
+        // that cannot parse HTML comments between frontmatter and content body.
+        let skillContent = rawSkillContent;
+        const hasMarker =
+          rawSkillContent.includes('<!-- PromptScript') ||
+          rawSkillContent.includes('# promptscript-generated:');
+        if (!hasMarker && rawSkillContent.startsWith('---')) {
+          const yamlMarker = `# promptscript-generated: ${new Date().toISOString()}`;
+          skillContent = `---\n${yamlMarker}${rawSkillContent.slice(3)}`;
+        }
 
         // Install to .promptscript/skills/ (canonical source)
         const skillDest = `.promptscript/skills/${skillName}`;
