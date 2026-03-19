@@ -618,8 +618,6 @@ function generateConfig(config: ResolvedConfig): string {
 
   const lines: string[] = [`id: ${config.projectId}`, `syntax: "${syntaxVersion}"`];
 
-  lines.push('entry: .promptscript/project.prs');
-
   lines.push('');
 
   if (config.inherit) {

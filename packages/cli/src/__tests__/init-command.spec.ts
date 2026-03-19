@@ -144,14 +144,14 @@ describe('commands/init', () => {
       );
     });
 
-    it('should include entry path pointing to .promptscript/project.prs', async () => {
+    it('should not include top-level entry field (default path is implicit)', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining('entry: .promptscript/project.prs'),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(yamlCall).toBeDefined();
+      expect(yamlCall![1]).not.toContain('entry:');
     });
 
     it('should use custom name when provided with --yes flag', async () => {
