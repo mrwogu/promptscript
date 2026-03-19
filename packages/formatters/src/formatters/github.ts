@@ -946,7 +946,7 @@ export class GitHubFormatter extends BaseFormatter {
     const diagrams = this.diagrams(ast, renderer);
     if (diagrams) sections.push(diagrams);
 
-    const knowledge = this.knowledge(ast, renderer);
+    const knowledge = this.knowledgeContent(ast, renderer);
     if (knowledge) sections.push(knowledge);
   }
 
@@ -956,17 +956,52 @@ export class GitHubFormatter extends BaseFormatter {
 
   private project(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null;
 
-    const content = this.extractText(identity.content);
+    let content = '';
+    if (identity) {
+      content = this.extractText(identity.content);
+    } else {
+      const context = this.findBlock(ast, 'context');
+      if (context?.content.type === 'MixedContent' && context.content.text) {
+        content = context.content.text.value.trim();
+      }
+    }
+
+    if (!content) return null;
+
     // Apply stripAllIndent to normalize merged identity content for Prettier compatibility
     return renderer.renderSection('project', this.stripAllIndent(content));
   }
 
   private techStack(ast: Program, renderer: ConventionRenderer): string | null {
     const context = this.findBlock(ast, 'context');
-    if (!context) return null;
+    if (context) {
+      const items = this.extractTechStackFromContext(context);
+      if (items.length > 0) {
+        const content = renderer.renderList(items);
+        return renderer.renderSection('tech-stack', content);
+      }
+    }
 
+    // Fallback: extract from @standards.code (languages, frameworks, testing)
+    const standards = this.findBlock(ast, 'standards');
+    if (standards) {
+      const items = this.extractTechStackFromStandards(standards);
+      if (items.length > 0) {
+        const content = renderer.renderList(items);
+        return renderer.renderSection('tech-stack', content);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Extract tech stack items from @context block.
+   */
+  private extractTechStackFromContext(
+    context: NonNullable<ReturnType<typeof this.findBlock>>
+  ): string[] {
     const props = this.getProps(context.content);
     const items: string[] = [];
 
@@ -993,10 +1028,27 @@ export class GitHubFormatter extends BaseFormatter {
       }
     }
 
-    if (items.length === 0) return null;
+    return items;
+  }
 
-    const content = renderer.renderList(items);
-    return renderer.renderSection('tech-stack', content);
+  /**
+   * Extract tech stack items from @standards.code (languages, frameworks, testing).
+   */
+  private extractTechStackFromStandards(
+    standards: NonNullable<ReturnType<typeof this.findBlock>>
+  ): string[] {
+    const code = this.getProp(standards.content, 'code');
+    if (!code || typeof code !== 'object' || Array.isArray(code)) return [];
+
+    const codeObj = code as Record<string, Value>;
+    const items: string[] = [];
+
+    for (const key of ['languages', 'frameworks', 'testing']) {
+      const val = codeObj[key];
+      if (val) items.push(...(Array.isArray(val) ? val : [val]).map(String));
+    }
+
+    return items;
   }
 
   private architecture(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1264,9 +1316,43 @@ export class GitHubFormatter extends BaseFormatter {
     return renderer.renderSection('diagrams', renderer.renderList(items));
   }
 
-  private knowledge(_ast: Program, _renderer: ConventionRenderer): string | null {
-    // Knowledge is distributed to other sections in this formatter
-    return null;
+  /**
+   * Render remaining @knowledge content not already consumed by
+   * commands() (## Development Commands) or postWork() (## Post-Work Verification).
+   */
+  private knowledgeContent(ast: Program, _renderer: ConventionRenderer): string | null {
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
+
+    const text = this.extractText(knowledge.content);
+    if (!text) return null;
+
+    // Remove sections already consumed by other methods
+    const consumedHeaders = ['## Development Commands', '## Post-Work Verification'];
+    let remaining = text;
+
+    for (const header of consumedHeaders) {
+      const headerIndex = remaining.indexOf(header);
+      if (headerIndex === -1) continue;
+
+      const afterHeader = remaining.indexOf('\n', headerIndex);
+      if (afterHeader === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+        continue;
+      }
+
+      const nextSection = remaining.indexOf('\n## ', afterHeader);
+      if (nextSection === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+      } else {
+        remaining = remaining.substring(0, headerIndex) + remaining.substring(nextSection + 1);
+      }
+    }
+
+    remaining = remaining.trim();
+    if (!remaining) return null;
+
+    return this.stripAllIndent(remaining);
   }
 
   // Helper methods

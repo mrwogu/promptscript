@@ -370,9 +370,17 @@ export class AntigravityFormatter extends BaseFormatter {
 
   private identity(ast: Program, _renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null;
 
-    const content = this.extractText(identity.content);
+    let content = '';
+    if (identity) {
+      content = this.extractText(identity.content);
+    } else {
+      const context = this.findBlock(ast, 'context');
+      if (context?.content.type === 'MixedContent' && context.content.text) {
+        content = context.content.text.value.trim();
+      }
+    }
+
     if (!content) return null;
 
     // Apply stripAllIndent to normalize merged identity content for Prettier compatibility
@@ -386,8 +394,31 @@ ${this.stripAllIndent(content)}`;
    */
   private techStack(ast: Program, _renderer: ConventionRenderer): string | null {
     const context = this.findBlock(ast, 'context');
-    if (!context) return null;
+    if (context) {
+      const items = this.extractTechStackFromContext(context);
+      if (items.length > 0) {
+        return `## Tech Stack\n\n${items.join('\n')}`;
+      }
+    }
 
+    // Fallback: extract from @standards.code (languages, frameworks, testing)
+    const standards = this.findBlock(ast, 'standards');
+    if (standards) {
+      const items = this.extractTechStackFromStandards(standards);
+      if (items.length > 0) {
+        return `## Tech Stack\n\n${items.join(', ')}`;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Extract tech stack items from @context block.
+   */
+  private extractTechStackFromContext(
+    context: NonNullable<ReturnType<typeof this.findBlock>>
+  ): string[] {
     const props = this.getProps(context.content);
     const items: string[] = [];
 
@@ -426,11 +457,27 @@ ${this.stripAllIndent(content)}`;
       items.push(`**Frameworks:** ${arr.map((f) => this.valueToString(f)).join(', ')}`);
     }
 
-    if (items.length === 0) return null;
+    return items;
+  }
 
-    return `## Tech Stack
+  /**
+   * Extract tech stack items from @standards.code (languages, frameworks, testing).
+   */
+  private extractTechStackFromStandards(
+    standards: NonNullable<ReturnType<typeof this.findBlock>>
+  ): string[] {
+    const code = this.getProp(standards.content, 'code');
+    if (!code || typeof code !== 'object' || Array.isArray(code)) return [];
 
-${items.join('\n')}`;
+    const codeObj = code as Record<string, Value>;
+    const items: string[] = [];
+
+    for (const key of ['languages', 'frameworks', 'testing']) {
+      const val = codeObj[key];
+      if (val) items.push(...(Array.isArray(val) ? val : [val]).map(String));
+    }
+
+    return items;
   }
 
   /**
@@ -798,6 +845,15 @@ ${items.map((i) => '- ' + i).join('\n')}`;
         .split('\n')
         .filter((line) => line.trim())
         .map((line) => this.formatRestriction(line.trim()));
+    }
+
+    if (content.type === 'ObjectContent') {
+      const itemsArray = this.getProp(content, 'items');
+      if (Array.isArray(itemsArray)) {
+        return itemsArray.map((item: unknown) =>
+          this.formatRestriction(this.valueToString(item as Value))
+        );
+      }
     }
 
     return [];

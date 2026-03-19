@@ -496,6 +496,15 @@ export class CursorFormatter extends BaseFormatter {
       }
     }
 
+    // Fall back to @context MixedContent text (project description alongside properties)
+    if (!identity) {
+      const context = this.findBlock(ast, 'context');
+      if (context?.content.type === 'MixedContent' && context.content.text) {
+        const text = this.dedent(context.content.text.value.trim());
+        if (text) return text;
+      }
+    }
+
     // Otherwise use extracted project info for a generated intro
     const projectInfo = this.extractProjectInfo(ast);
     const orgSuffix = projectInfo.org ? ` at ${projectInfo.org}` : '';

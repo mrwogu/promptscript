@@ -21,3 +21,10 @@ You are a senior developer working on the checkout service.
 
 - Don't commit secrets
 - Don't use var
+
+## API Reference
+
+### Orders
+
+- GET /orders - List orders
+- POST /orders - Create order

@@ -507,9 +507,21 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
   protected project(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null;
 
-    const text = this.extractText(identity.content);
+    // Fall back to @context MixedContent text when no @identity exists.
+    // MixedContent means the block has both text AND properties — the text
+    // portion is clearly a project description alongside structured config.
+    let text = '';
+    if (identity) {
+      text = this.extractText(identity.content);
+    } else {
+      const context = this.findBlock(ast, 'context');
+      if (context?.content.type === 'MixedContent' && context.content.text) {
+        text = context.content.text.value.trim();
+      }
+    }
+
+    if (!text) return null;
     const cleanText = text
       .split(/\n{2,}/)
       .map((para) =>

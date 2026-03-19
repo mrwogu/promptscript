@@ -58,3 +58,16 @@ Security is everyone's responsibility.
 - Always use parameterized queries (no SQL concatenation)
 - Always validate and sanitize file uploads
 - Always implement rate limiting for APIs
+
+## Security Resources
+
+- Security Guidelines: https://wiki.acme.com/security
+- Incident Response: https://wiki.acme.com/incident-response
+- Security Training: https://learn.acme.com/security
+- Bug Bounty: https://hackerone.com/acme
+
+## Contacts
+
+- Security Team: security@acme.com
+- Incident Hotline: +1-800-SEC-ACME
+- Slack: #security-help
