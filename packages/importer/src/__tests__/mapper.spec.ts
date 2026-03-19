@@ -111,9 +111,9 @@ describe('mapSections', () => {
     expect(result[0]!.targetBlock).toBe('identity');
   });
 
-  it('maps preamble without identity pattern to @context', () => {
+  it('maps preamble without identity pattern to @identity (project description)', () => {
     const sections = [section({ heading: '', level: 0, content: 'This project does X.' })];
     const result = mapSections(sections);
-    expect(result[0]!.targetBlock).toBe('context');
+    expect(result[0]!.targetBlock).toBe('identity');
   });
 });

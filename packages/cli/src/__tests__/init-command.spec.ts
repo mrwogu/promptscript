@@ -144,6 +144,16 @@ describe('commands/init', () => {
       );
     });
 
+    it('should include entry path pointing to .promptscript/project.prs', async () => {
+      await initCommand({ yes: true }, mockServices);
+
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('entry: .promptscript/project.prs'),
+        'utf-8'
+      );
+    });
+
     it('should use custom name when provided with --yes flag', async () => {
       await initCommand({ yes: true, name: 'custom-project' }, mockServices);
 
