@@ -23,3 +23,9 @@ Apply ACME security standards to all code.
 - Don't use eval() or similar unsafe functions
 - Always validate and sanitize user input
 - Always use parameterized queries
+
+## Security Resources
+
+- Security guidelines: https://wiki.acme.com/security
+- Vulnerability reporting: security@acme.com
+- Security review checklist: https://wiki.acme.com/security-checklist

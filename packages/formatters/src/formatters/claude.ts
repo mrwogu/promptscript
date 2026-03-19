@@ -855,9 +855,18 @@ export class ClaudeFormatter extends BaseFormatter {
 
   private project(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null;
 
-    const text = this.extractText(identity.content);
+    let text = '';
+    if (identity) {
+      text = this.extractText(identity.content);
+    } else {
+      const context = this.findBlock(ast, 'context');
+      if (context?.content.type === 'MixedContent' && context.content.text) {
+        text = context.content.text.value.trim();
+      }
+    }
+
+    if (!text) return null;
     // Preserve paragraph breaks while trimming lines
     const cleanText = text
       .split(/\n{2,}/) // Split on paragraph breaks
