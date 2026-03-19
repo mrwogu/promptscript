@@ -14,6 +14,13 @@ Commands:
 /test - Run the test suite
 /lint - Run ESLint
 
+## API Reference
+
+### Orders
+
+- GET /orders - List orders
+- POST /orders - Create order
+
 Never:
 - Never commit secrets
 - Don't use var

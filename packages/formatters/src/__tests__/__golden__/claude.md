@@ -142,7 +142,3 @@ pnpm run test       # Run all tests
 - Don't make code changes without verifying documentation consistency
 
 @CLAUDE.local.md
-
-<claude-mem-context>
-
-</claude-mem-context>

@@ -138,6 +138,10 @@ export class AntigravityFormatter extends BaseFormatter {
     const diagrams = this.diagrams(ast, renderer);
     if (diagrams) sections.push(diagrams);
 
+    // Add remaining @knowledge content
+    const knowledge = this.knowledgeContent(ast);
+    if (knowledge) sections.push(knowledge);
+
     // Add restrictions/don'ts
     const restrictions = this.restrictions(ast, renderer);
     if (restrictions) sections.push(restrictions);
@@ -734,6 +738,40 @@ ${items.map((i) => '- ' + i).join('\n')}`;
   /**
    * Extract restrictions from @restrictions block (same as GitHub/Cursor).
    */
+  private knowledgeContent(ast: Program): string | null {
+    const knowledge = this.findBlock(ast, 'knowledge');
+    if (!knowledge) return null;
+
+    const text = this.extractText(knowledge.content);
+    if (!text) return null;
+
+    const consumedHeaders = ['## Development Commands', '## Post-Work Verification'];
+    let remaining = text;
+
+    for (const header of consumedHeaders) {
+      const headerIndex = remaining.indexOf(header);
+      if (headerIndex === -1) continue;
+
+      const afterHeader = remaining.indexOf('\n', headerIndex);
+      if (afterHeader === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+        continue;
+      }
+
+      const nextSection = remaining.indexOf('\n## ', afterHeader);
+      if (nextSection === -1) {
+        remaining = remaining.substring(0, headerIndex).trimEnd();
+      } else {
+        remaining = remaining.substring(0, headerIndex) + remaining.substring(nextSection + 1);
+      }
+    }
+
+    remaining = remaining.trim();
+    if (!remaining) return null;
+
+    return this.stripAllIndent(remaining);
+  }
+
   private restrictions(ast: Program, _renderer: ConventionRenderer): string | null {
     const block = this.findBlock(ast, 'restrictions');
     if (!block) return null;

@@ -13,6 +13,12 @@ Code style:
 - Mask PII in logs
 - Weekly vulnerability scanning
 
+## Security Resources
+
+- Security guidelines: https://wiki.acme.com/security
+- Vulnerability reporting: security@acme.com
+- Security review checklist: https://wiki.acme.com/security-checklist
+
 Never:
 - Never store passwords in plain text
 - Never log sensitive data
