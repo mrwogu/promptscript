@@ -590,6 +590,22 @@ describe('commands/init', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('/promptscript'));
     });
+
+    it('should use YAML marker inside frontmatter for skill files with frontmatter', async () => {
+      await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
+
+      const writeCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) =>
+          typeof call[0] === 'string' && call[0].includes('.promptscript/skills/promptscript')
+      );
+      expect(writeCall).toBeDefined();
+      const writtenContent = writeCall?.[1] as string;
+      // Should use YAML marker inside frontmatter, not HTML comment
+      expect(writtenContent).toContain('# promptscript-generated:');
+      expect(writtenContent).not.toContain('<!-- PromptScript');
+      // Frontmatter should still be valid
+      expect(writtenContent).toMatch(/^---\n/);
+    });
   });
 
   describe('Prettier detection', () => {
