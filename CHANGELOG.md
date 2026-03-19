@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.5](https://github.com/mrwogu/promptscript/compare/v1.4.4...v1.4.5) (2026-03-19)
+
+
+### Bug Fixes
+
+* **compiler:** use YAML marker in frontmatter for Factory AI compatibility ([#138](https://github.com/mrwogu/promptscript/issues/138)) ([3f76ac4](https://github.com/mrwogu/promptscript/commit/3f76ac4eed8086a61e58b690debdad91fe079930))
+* **importer,cli:** classify preamble as [@identity](https://github.com/identity) and add entry to init config ([#139](https://github.com/mrwogu/promptscript/issues/139)) ([f414bf3](https://github.com/mrwogu/promptscript/commit/f414bf3d9c22554e9c0ca5e63179300fbe4c1198))
+
 ## [1.4.4](https://github.com/mrwogu/promptscript/compare/v1.4.3...v1.4.4) (2026-03-19)
 
 
