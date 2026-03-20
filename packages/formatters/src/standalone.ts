@@ -136,9 +136,9 @@ export function registerFormatter(
   name: string,
   ctorOrFactory: FormatterClass | FormatterFactory
 ): void {
-  // FormatterRegistry.register() has overloads that handle both
-  // FormatterClass and FormatterFactory via its own isFormatterClass guard
-  FormatterRegistry.register(name, ctorOrFactory);
+  // Use type assertion to bypass overload resolution — FormatterRegistry.register()
+  // internally discriminates between FormatterClass and FormatterFactory
+  FormatterRegistry.register(name, ctorOrFactory as FormatterClass);
 }
 
 /**
