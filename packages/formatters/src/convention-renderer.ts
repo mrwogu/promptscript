@@ -153,10 +153,10 @@ export class ConventionRenderer {
 
   /**
    * Get the section separator based on convention.
+   * Returns '\n\n' (double newline) for all conventions.
    */
   getSectionSeparator(): string {
-    // For XML, sections are adjacent; for markdown, we might want extra newline
-    return this.convention.name === 'markdown' ? '\n\n' : '\n\n';
+    return '\n\n';
   }
 
   private getListMarker(): string {

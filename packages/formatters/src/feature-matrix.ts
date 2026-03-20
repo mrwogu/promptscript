@@ -1592,13 +1592,6 @@ export function getToolComparison(): Record<string, Partial<Record<ToolName, Fea
 }
 
 /**
- * Identify feature gaps - features supported by tool but not implemented.
- */
-export function identifyFeatureGaps(tool: ToolName): FeatureSpec[] {
-  return FEATURE_MATRIX.filter((f) => f.tools[tool] === 'planned');
-}
-
-/**
  * Generate feature matrix report as markdown.
  */
 export function generateFeatureMatrixReport(): string {

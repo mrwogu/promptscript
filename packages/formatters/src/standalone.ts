@@ -136,19 +136,9 @@ export function registerFormatter(
   name: string,
   ctorOrFactory: FormatterClass | FormatterFactory
 ): void {
-  // Disambiguate for the overloaded register() method
-  if (isFormatterClassArg(ctorOrFactory)) {
-    FormatterRegistry.register(name, ctorOrFactory);
-  } else {
-    FormatterRegistry.register(name, ctorOrFactory);
-  }
-}
-
-/**
- * Check if a value is a FormatterClass (constructor) vs a FormatterFactory (plain function).
- */
-function isFormatterClassArg(value: FormatterClass | FormatterFactory): value is FormatterClass {
-  return value.prototype !== undefined && value.prototype.constructor === value;
+  // FormatterRegistry.register() has overloads that handle both
+  // FormatterClass and FormatterFactory via its own isFormatterClass guard
+  FormatterRegistry.register(name, ctorOrFactory);
 }
 
 /**

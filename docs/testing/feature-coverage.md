@@ -211,16 +211,15 @@ When adding a new feature to the matrix:
 
 ### Functions
 
-| Function                        | Description                            |
-| ------------------------------- | -------------------------------------- |
-| `getToolFeatures(tool)`         | Get all supported features for a tool  |
-| `getPlannedFeatures(tool)`      | Get features planned for a tool        |
-| `getFeaturesByCategory(cat)`    | Get features by category               |
-| `toolSupportsFeature(t, f)`     | Check if tool supports feature         |
-| `getFeatureCoverage(tool)`      | Get coverage summary                   |
-| `getToolComparison()`           | Get comparison matrix                  |
-| `identifyFeatureGaps(tool)`     | Get planned but unimplemented features |
-| `generateFeatureMatrixReport()` | Generate markdown report               |
+| Function                        | Description                           |
+| ------------------------------- | ------------------------------------- |
+| `getToolFeatures(tool)`         | Get all supported features for a tool |
+| `getPlannedFeatures(tool)`      | Get features planned for a tool       |
+| `getFeaturesByCategory(cat)`    | Get features by category              |
+| `toolSupportsFeature(t, f)`     | Check if tool supports feature        |
+| `getFeatureCoverage(tool)`      | Get coverage summary                  |
+| `getToolComparison()`           | Get comparison matrix                 |
+| `generateFeatureMatrixReport()` | Generate markdown report              |
 
 ### Types
 
