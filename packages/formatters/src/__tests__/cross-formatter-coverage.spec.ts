@@ -491,6 +491,23 @@ describe('@knowledge — dev commands and post-work are consumed separately', ()
   }
 });
 
+describe('@knowledge — consumed header at end of text with no trailing newline', () => {
+  const ast = program(
+    block('knowledge', text('# Important Info\n\nDo this always.\n\n## Development Commands'))
+  );
+
+  for (const { name, fmt } of customFormatters) {
+    it(`${name}: strips consumed header at end of text`, () => {
+      const result = fmt.format(ast);
+      expect(result.content, `${name} should render remaining knowledge`).toContain(
+        'Do this always'
+      );
+      // The "## Development Commands" at the end (no newline after) should be stripped
+      expect(result.content).not.toContain('## Development Commands');
+    });
+  }
+});
+
 describe('@knowledge — only consumed sections, nothing remaining', () => {
   const ast = program(
     block(
