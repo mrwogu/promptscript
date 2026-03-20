@@ -37,13 +37,15 @@
  * ```
  */
 
-// Virtual file system
+/** @internal Virtual file system for browser-based compilation */
 export { VirtualFileSystem } from './virtual-fs.js';
 
-// Browser resolver
+/** @internal Browser resolver for in-memory file resolution */
 export { BrowserResolver, type BrowserResolverOptions, type ResolvedAST } from './resolver.js';
 
-// Browser compiler
+/**
+ * @internal BrowserCompiler and createBrowserCompiler are internal — use the standalone `compile()` function.
+ */
 export {
   BrowserCompiler,
   createBrowserCompiler,
@@ -54,7 +56,7 @@ export {
   type TargetConfig,
 } from './compiler.js';
 
-// Bundled registry files
+/** @internal Bundled registry files for browser-based compilation */
 export {
   BUNDLED_REGISTRY,
   getBundledRegistryFiles,

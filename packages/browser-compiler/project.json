@@ -25,6 +25,7 @@
       "dependsOn": ["^build"]
     },
     "typecheck": {
+      "__comment": "Typecheck is skipped because browser-compiler bundles Node.js packages (@promptscript/resolver, @promptscript/formatters) into a browser-compatible build via Vite. The Node.js-specific types (fs, path) used internally by those packages would fail tsc --noEmit in a browser tsconfig. The Vite build handles type-stripping and bundling correctly.",
       "command": "echo 'Skipping typecheck for browser-compiler (browser-only package)'"
     },
     "nx-release-publish": {
