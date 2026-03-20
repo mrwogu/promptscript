@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/source",
-  "version": "1.4.7",
+  "version": "1.0.0",
   "license": "MIT",
   "homepage": "https://getpromptscript.dev/",
   "scripts": {
