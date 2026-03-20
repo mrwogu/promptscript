@@ -1,5 +1,6 @@
 /**
  * Parsed semantic version.
+ * @internal Used by the resolver for version comparison.
  */
 export interface SemVer {
   major: number;
@@ -10,6 +11,7 @@ export interface SemVer {
 
 /**
  * Comparison result: -1 (less), 0 (equal), or 1 (greater).
+ * @internal Used by the resolver for version comparison.
  */
 export type CompareResult = -1 | 0 | 1;
 

@@ -2,6 +2,7 @@ import type { TextContent } from '../types/index.js';
 
 /**
  * Options for deep merge behavior.
+ * @internal Used by the resolver for inheritance merging.
  */
 export interface MergeOptions {
   /** How to merge arrays */
@@ -14,6 +15,7 @@ export interface MergeOptions {
 
 /**
  * Default merge options following PromptScript inheritance rules.
+ * @internal Used by the resolver for inheritance merging.
  */
 export const DEFAULT_MERGE_OPTIONS: MergeOptions = {
   arrayStrategy: 'unique',

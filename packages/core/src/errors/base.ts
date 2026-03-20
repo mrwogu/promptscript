@@ -2,6 +2,7 @@ import type { SourceLocation } from '../types/source.js';
 
 /**
  * Error codes for PromptScript errors.
+ * @internal Used by internal error classes; consumers should match on error.code strings directly.
  */
 export enum ErrorCode {
   // Parse errors (1xxx)

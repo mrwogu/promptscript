@@ -3,6 +3,7 @@ import type { PathReference, SourceLocation } from '../types/index.js';
 
 /**
  * Parsed path components.
+ * @internal Used by the resolver for path resolution.
  */
 export interface ParsedPath {
   /** Namespace (without @) */
