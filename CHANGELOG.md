@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.7](https://github.com/mrwogu/promptscript/compare/v1.4.6...v1.4.7) (2026-03-20)
+
+
+### Bug Fixes
+
+* **cli:** export importCommand from main index.ts ([b24399b](https://github.com/mrwogu/promptscript/commit/b24399b430d7918ac939615fee0132b9fb37f727))
+* **formatters:** fix type assertion in registerFormatter for overload resolution ([5ebbba7](https://github.com/mrwogu/promptscript/commit/5ebbba72687d3cfee37b4e05b5783efb3764278e))
+
 ## [1.4.6](https://github.com/mrwogu/promptscript/compare/v1.4.5...v1.4.6) (2026-03-20)
 
 
