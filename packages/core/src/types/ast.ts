@@ -202,7 +202,13 @@ export interface PathReference extends BaseNode {
 // ============================================================
 
 /**
- * Known block types in PromptScript.
+ * Block name type used in the AST.
+ *
+ * Intentionally includes `| string` to allow custom block names beyond
+ * the known set. The parser accepts any `@identifier` as a block name,
+ * so the AST must accommodate arbitrary names. Use {@link BlockTypeName}
+ * (from `constants.ts`) when you need the strict set of known block types
+ * for validation or exhaustive matching.
  */
 export type BlockName =
   | 'identity'
