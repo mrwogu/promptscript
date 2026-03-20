@@ -18,6 +18,7 @@ import { skillParams } from './skill-params.js';
 import { skillDependencies } from './skill-dependencies.js';
 import { skillContracts } from './skill-contracts.js';
 import { syntaxVersionCompat } from './syntax-version-compat.js';
+import { unknownBlockName } from './unknown-block-name.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -67,6 +68,7 @@ export { skillParams } from './skill-params.js';
 export { skillDependencies } from './skill-dependencies.js';
 export { skillContracts } from './skill-contracts.js';
 export { syntaxVersionCompat } from './syntax-version-compat.js';
+export { unknownBlockName } from './unknown-block-name.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -97,6 +99,8 @@ export const allRules: ValidationRule[] = [
   skillContracts,
   // Syntax version compatibility (PS018)
   syntaxVersionCompat,
+  // Unknown block name detection (PS019)
+  unknownBlockName,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
