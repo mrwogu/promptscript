@@ -94,17 +94,22 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 
 ## Commands
 
-| Command                 | Description                                  |
-| :---------------------- | :------------------------------------------- |
-| `prs init`              | Initialize project with auto-detection       |
-| `prs compile`           | Compile to target AI tool formats            |
-| `prs compile -w`        | Watch mode - recompile on changes            |
-| `prs compile --dry-run` | Preview changes without writing files        |
-| `prs validate`          | Validate `.prs` files with detailed errors   |
-| `prs diff`              | Show diff between source and compiled output |
-| `prs import`            | Import existing AI instruction files to .prs |
-| `prs pull`              | Pull updates from registry                   |
-| `prs update-check`      | Check for newer CLI versions                 |
+| Command                 | Description                                   |
+| :---------------------- | :-------------------------------------------- |
+| `prs init`              | Initialize project with auto-detection        |
+| `prs compile`           | Compile to target AI tool formats             |
+| `prs compile -w`        | Watch mode - recompile on changes             |
+| `prs compile --dry-run` | Preview changes without writing files         |
+| `prs validate`          | Validate `.prs` files with detailed errors    |
+| `prs diff`              | Show diff between source and compiled output  |
+| `prs import`            | Import existing AI instruction files to .prs  |
+| `prs check`             | Check configuration and dependencies health   |
+| `prs serve`             | Start local development server for playground |
+| `prs registry init`     | Create a new PromptScript registry            |
+| `prs registry validate` | Validate registry structure and manifest      |
+| `prs registry publish`  | Publish registry to remote                    |
+| `prs pull`              | Pull updates from registry                    |
+| `prs update-check`      | Check for newer CLI versions                  |
 
 ## Key Features
 
@@ -193,6 +198,8 @@ Options:
   --dry-run               Preview changes without writing files
   --force                 Force overwrite existing files without prompts
   --registry <path>       Path or URL to registry
+  -c, --config <path>     Path to custom config file
+  --cwd <dir>             Working directory (project root)
   --verbose               Show detailed compilation progress
   --debug                 Show debug information (includes verbose)
 ```
