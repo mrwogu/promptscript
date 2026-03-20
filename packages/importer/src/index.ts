@@ -18,3 +18,5 @@ export { emitPrs } from './emitter.js';
 export type { EmitOptions } from './emitter.js';
 export { validateRoundtrip } from './roundtrip.js';
 export type { RoundtripResult } from './roundtrip.js';
+export type { FormatParser } from './parsers/types.js';
+export type { MarkdownSection } from './parsers/markdown.js';

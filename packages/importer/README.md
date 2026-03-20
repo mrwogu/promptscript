@@ -105,6 +105,14 @@ Auto-detects source format from filename.
 
 Maps `MarkdownSection[]` to `ScoredSection[]` with heuristic classification.
 
+### `getParser(format)`
+
+Returns the format-specific parser for a detected format.
+
+### `classifyConfidence(score)`
+
+Classifies a numeric confidence score into a `ConfidenceLevel` (`HIGH`, `MEDIUM`, or `LOW`).
+
 ### `emitPrs(sections, options)`
 
 Generates `.prs` text from scored sections.

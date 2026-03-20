@@ -3,6 +3,7 @@ import { join } from 'path';
 
 /**
  * Package information from package.json.
+ * @internal Used by the CLI for version reporting.
  */
 export interface PackageInfo {
   /** Package name */
