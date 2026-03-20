@@ -94,22 +94,25 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 
 ## Commands
 
-| Command                 | Description                                   |
-| :---------------------- | :-------------------------------------------- |
-| `prs init`              | Initialize project with auto-detection        |
-| `prs compile`           | Compile to target AI tool formats             |
-| `prs compile -w`        | Watch mode - recompile on changes             |
-| `prs compile --dry-run` | Preview changes without writing files         |
-| `prs validate`          | Validate `.prs` files with detailed errors    |
-| `prs diff`              | Show diff between source and compiled output  |
-| `prs import`            | Import existing AI instruction files to .prs  |
-| `prs check`             | Check configuration and dependencies health   |
-| `prs serve`             | Start local development server for playground |
-| `prs registry init`     | Create a new PromptScript registry            |
-| `prs registry validate` | Validate registry structure and manifest      |
-| `prs registry publish`  | Publish registry to remote                    |
-| `prs pull`              | Pull updates from registry                    |
-| `prs update-check`      | Check for newer CLI versions                  |
+| Command                 | Description                                       |
+| :---------------------- | :------------------------------------------------ |
+| `prs init`              | Initialize project with auto-detection            |
+| `prs compile`           | Compile to target AI tool formats                 |
+| `prs compile -w`        | Watch mode - recompile on changes                 |
+| `prs compile --dry-run` | Preview changes without writing files             |
+| `prs validate`          | Validate `.prs` files with detailed errors        |
+| `prs validate --fix`    | Auto-fix syntax version mismatches                |
+| `prs upgrade`           | Upgrade all `.prs` files to latest syntax version |
+| `prs upgrade --dry-run` | Preview upgrade changes without writing files     |
+| `prs diff`              | Show diff between source and compiled output      |
+| `prs import`            | Import existing AI instruction files to .prs      |
+| `prs check`             | Check configuration and dependencies health       |
+| `prs serve`             | Start local development server for playground     |
+| `prs registry init`     | Create a new PromptScript registry                |
+| `prs registry validate` | Validate registry structure and manifest          |
+| `prs registry publish`  | Publish registry to remote                        |
+| `prs pull`              | Pull updates from registry                        |
+| `prs update-check`      | Check for newer CLI versions                      |
 
 ## Key Features
 
@@ -235,7 +238,27 @@ prs validate [options]
 Options:
   --strict                Treat warnings as errors
   --format <format>       Output format (text, json)
+  --fix                   Auto-fix syntax version mismatches (bumps declared
+                          version to the minimum required by used blocks)
 ```
+
+`--fix` is conservative: it only raises the `syntax` field in `@meta` to the
+lowest version that satisfies all blocks used in the file. It never downgrades
+and never changes anything other than the version string.
+
+### Upgrade
+
+```bash
+prs upgrade [options]
+
+Options:
+  --dry-run               Preview changes without writing files
+```
+
+Upgrades all `.prs` files in the project to the latest known syntax version.
+Unlike `prs validate --fix` (which only bumps to the minimum required version),
+`upgrade` is aggressive: it sets every file to `LATEST_SYNTAX_VERSION`
+unconditionally. Use `--dry-run` to preview the changes before applying them.
 
 ### Pull Updates
 
