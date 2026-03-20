@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-03-17T10:20:20.332Z - do not edit -->
+<!-- PromptScript 2026-03-20T21:20:41.560Z - do not edit -->
 
 ## Project
 
@@ -127,7 +127,6 @@ pnpm run test             # 4. Run all tests
 pnpm prs validate --strict  # 5. Validate .prs files
 pnpm schema:check         # 6. Verify JSON schemas are current
 pnpm skill:check          # 7. Verify SKILL.md copies are in sync
-pnpm docs:formatters:check  # 8. Verify formatter docs are current
 ```
 
 ## Documentation
@@ -157,3 +156,4 @@ pnpm docs:formatters:check  # 8. Verify formatter docs are current
 - Don't skip the full verification pipeline (format, lint, typecheck, test, validate, schema:check)
 - Don't consider work complete until all CI checks pass (use `gh pr checks --watch`)
 - Don't commit directly to main - always use feature branches
+- Don't edit CHANGELOG.md manually - it is managed by release-please. Manual edits break release state tracking, preventing tag creation and GitHub releases.

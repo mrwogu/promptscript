@@ -1,8 +1,7 @@
 ---
+# promptscript-generated: 2026-03-20T21:20:41.561Z
 description: 'Review code for quality improvements'
 ---
-
-<!-- PromptScript 2026-03-17T10:20:20.332Z - do not edit -->
 
 Review code for quality improvements:
 
