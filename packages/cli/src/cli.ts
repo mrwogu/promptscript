@@ -96,6 +96,7 @@ program
   .description('Validate PromptScript files')
   .option('--strict', 'Treat warnings as errors')
   .option('--format <format>', 'Output format (text, json)', 'text')
+  .option('--fix', 'Auto-fix syntax version issues')
   .action(validateCommand);
 
 program
