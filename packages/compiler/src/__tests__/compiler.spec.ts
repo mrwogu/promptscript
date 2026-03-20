@@ -1469,3 +1469,89 @@ describe('Compiler.watch', () => {
     vi.restoreAllMocks();
   });
 });
+
+describe('addMarkerToOutput edge cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should skip marker for non-markdown files', async () => {
+    const ast = createTestProgram();
+
+    const jsonFormatter: Formatter = {
+      name: 'json-formatter',
+      outputPath: 'output.json',
+      description: 'JSON output formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({
+        path: 'output.json',
+        content: '{"key": "value"}',
+      })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+    };
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [jsonFormatter],
+    });
+
+    const result = await compiler.compile('./test.prs');
+    expect(result.success).toBe(true);
+
+    const output = result.outputs.get('output.json');
+    expect(output).toBeDefined();
+    // Non-markdown file should NOT have a PromptScript marker
+    expect(output?.content).not.toContain('<!-- PromptScript');
+    expect(output?.content).not.toContain('# promptscript-generated:');
+    expect(output?.content).toBe('{"key": "value"}');
+  });
+});
+
+describe('compile with non-Error thrown in resolver', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should handle a non-Error thrown value via String(err) fallback', async () => {
+    const formatter = createMockFormatter('test');
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+
+    // Resolver throws a plain string (not an Error)
+    mockResolve.mockRejectedValue('something went wrong');
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const result = await compiler.compile('./test.prs');
+    expect(result.success).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.message).toBe('something went wrong');
+
+    vi.restoreAllMocks();
+  });
+
+  it('should handle a numeric thrown value via String(err) fallback', async () => {
+    const formatter = createMockFormatter('test');
+    vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+
+    mockResolve.mockRejectedValue(42);
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: ['test'],
+    });
+
+    const result = await compiler.compile('./test.prs');
+    expect(result.success).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.message).toBe('42');
+
+    vi.restoreAllMocks();
+  });
+});
