@@ -62,7 +62,42 @@ Two warning scenarios:
 
 2. **Block incompatible with declared version** — e.g., `syntax: "1.0.0"` + `@agents` → warning: `Block @agents requires syntax >= 1.1.0, but file declares "1.0.0". Use "prs validate --fix" to update.`
 
-Custom/unknown block names (where `getMinimumVersionForBlock` returns `undefined`) are silently skipped — no warning.
+Unknown block names are handled by PS019 (see section 2b below), not by this rule. PS018 silently skips blocks where `getMinimumVersionForBlock` returns `undefined`.
+
+Default severity: **warning**.
+
+Preset severities in `presets.ts`:
+
+- `SECURITY_STRICT`: `'warning'`
+- `SECURITY_MODERATE`: `'warning'`
+- `SECURITY_MINIMAL`: `'off'`
+
+### 2b. Validation Rule PS019: unknown-block-name
+
+**File:** `packages/validator/src/rules/unknown-block-name.ts`
+
+Rule ID: **PS019**.
+
+Warns when a block name is not in `BLOCK_TYPES`. Catches typos and invented block names that compile but have no effect.
+
+**Behavior:**
+
+1. For each block in the AST, check if `block.name` is in `BLOCK_TYPES` (from `@promptscript/core`)
+2. If not — warning with fuzzy match suggestion
+
+**Fuzzy matching:** Levenshtein distance <= 2 against all `BLOCK_TYPES` entries. If a close match is found:
+
+```
+Warning: Unknown block type @agenst. Did you mean @agents?
+```
+
+If no close match:
+
+```
+Warning: Unknown block type @my-custom-block. Known block types: identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local, agents, workflows, prompts.
+```
+
+**Levenshtein implementation:** Simple inline function in the rule file (< 20 lines). No external dependency.
 
 Default severity: **warning**.
 
@@ -115,7 +150,8 @@ Behavior:
 ### 5. Tests
 
 - `packages/core/src/__tests__/syntax-versions.spec.ts` — registry unit tests: `isKnownSyntaxVersion`, `getMinimumVersionForBlock`, `getBlocksForVersion`, consistency with `BLOCK_TYPES`
-- `packages/validator/src/__tests__/rules/syntax-version-compat.spec.ts` — PS018 rule: unknown version, incompatible block, custom block (no warning), happy path
+- `packages/validator/src/__tests__/rules/syntax-version-compat.spec.ts` — PS018 rule: unknown version, incompatible block, unknown block (defers to PS019), happy path
+- `packages/validator/src/__tests__/rules/unknown-block-name.spec.ts` — PS019 rule: typo with suggestion, no-match with full list, known block (no warning)
 - `packages/cli/src/commands/__tests__/validate-fix.spec.ts` — `--fix` changes syntax in file, `--fix --format json` rejected
 - `packages/cli/src/commands/__tests__/upgrade.spec.ts` — upgrade, dry-run, already-latest, no-meta skip
 
@@ -125,7 +161,7 @@ Behavior:
 - `syntax: "1.1.0"` using only 1.0.0 blocks — OK, no downgrade
 - Unknown version higher than latest (e.g., `"2.0.0"`) — warning, but `--fix` does not touch (may be from newer PromptScript)
 - Unknown version lower than latest (e.g., `"1.0.5"`) — warning + `--fix` bumps to minimum required
-- Custom/unknown block names (e.g., `@my-custom-block`) — silently skipped, no version warning
+- Unknown block names (e.g., `@agenst`) — PS019 warns with fuzzy suggestion; PS018 skips (no version warning)
 - `syntax:` appearing in string content outside `@meta` — not affected by regex (scoped to meta block)
 
 ### 7. Registry Consistency
@@ -138,9 +174,11 @@ A test verifies that the latest `SYNTAX_VERSIONS` entry contains **all** block t
 - `packages/core/src/__tests__/syntax-versions.spec.ts` — **new** (tests)
 - `packages/core/src/index.ts` — add exports
 - `packages/validator/src/rules/syntax-version-compat.ts` — **new** (PS018)
-- `packages/validator/src/rules/index.ts` — register PS018
-- `packages/validator/src/presets.ts` — add PS018 to all presets
+- `packages/validator/src/rules/unknown-block-name.ts` — **new** (PS019)
+- `packages/validator/src/rules/index.ts` — register PS018 and PS019
+- `packages/validator/src/presets.ts` — add PS018 and PS019 to all presets
 - `packages/validator/src/__tests__/rules/syntax-version-compat.spec.ts` — **new** (tests)
+- `packages/validator/src/__tests__/rules/unknown-block-name.spec.ts` — **new** (tests)
 - `packages/cli/src/commands/upgrade.ts` — **new** (upgrade command)
 - `packages/cli/src/commands/__tests__/upgrade.spec.ts` — **new** (tests)
 - `packages/cli/src/commands/validate.ts` — add `--fix` logic
