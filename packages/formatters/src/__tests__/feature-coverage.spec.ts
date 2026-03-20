@@ -16,7 +16,6 @@ import {
   getPlannedFeatures,
   getFeaturesByCategory,
   getToolComparison,
-  identifyFeatureGaps,
   generateFeatureMatrixReport,
   type ToolName,
 } from '../feature-matrix.js';
@@ -497,8 +496,8 @@ describe('Additional Feature Matrix Functions', () => {
     }
   });
 
-  it('identifyFeatureGaps should return planned features', () => {
-    const gaps = identifyFeatureGaps('github');
+  it('getPlannedFeatures should also serve as identifyFeatureGaps', () => {
+    const gaps = getPlannedFeatures('github');
     expect(Array.isArray(gaps)).toBe(true);
     // All returned features should have 'planned' status
     gaps.forEach((f) => {

@@ -71,7 +71,7 @@ export {
 } from './section-registry.js';
 export type { SectionInfo } from './section-registry.js';
 
-// Parity Matrix for formatter consistency testing
+/** @internal Parity Matrix for formatter consistency testing */
 export {
   PARITY_MATRIX,
   EXTRACTION_RULES,
@@ -91,7 +91,7 @@ export type {
   ParityReport,
 } from './parity-matrix.js';
 
-// Feature Coverage Matrix for tool capabilities
+/** @internal Feature Coverage Matrix for tool capabilities */
 export {
   FEATURE_MATRIX,
   getToolFeatures,
@@ -100,7 +100,6 @@ export {
   toolSupportsFeature,
   getFeatureCoverage,
   getToolComparison,
-  identifyFeatureGaps,
   generateFeatureMatrixReport,
 } from './feature-matrix.js';
 export type {
