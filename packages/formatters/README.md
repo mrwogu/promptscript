@@ -63,6 +63,58 @@ Output formatters for 37 AI coding agents.
 | OpenClaw     | `INSTRUCTIONS.md`               |
 | CodeBuddy    | `.codebuddy/rules/project.md`   |
 
+## Public API
+
+The package exports the following key classes, functions, and types.
+See JSDoc comments in source files for full details.
+
+### Class Hierarchy
+
+```
+Formatter (interface)
+  |
+  +-- BaseFormatter (abstract)
+        |
+        +-- MarkdownInstructionFormatter (abstract)
+        |     |
+        |     +-- 30 simple markdown formatters (Windsurf, Cline, ...)
+        |
+        +-- GitHubFormatter, ClaudeFormatter, CursorFormatter, ...
+```
+
+### Base Classes
+
+| Export                         | Description                                                                  |
+| :----------------------------- | :--------------------------------------------------------------------------- |
+| `BaseFormatter`                | Abstract base class all formatters extend. Provides shared rendering logic.  |
+| `MarkdownInstructionFormatter` | Abstract subclass of `BaseFormatter` for agents that consume plain markdown. |
+
+### Registry & Factories
+
+| Export                          | Description                                                                            |
+| :------------------------------ | :------------------------------------------------------------------------------------- |
+| `FormatterRegistry`             | Static registry — look up, create, and list formatters by name.                        |
+| `createSimpleMarkdownFormatter` | Factory that generates a `MarkdownInstructionFormatter` subclass from a config object. |
+
+### Standalone Functions
+
+| Export                | Description                                   |
+| :-------------------- | :-------------------------------------------- |
+| `format()`            | Format a resolved AST with a named formatter. |
+| `getFormatter()`      | Retrieve a formatter class by name.           |
+| `registerFormatter()` | Register a custom formatter at runtime.       |
+| `hasFormatter()`      | Check whether a formatter name is registered. |
+| `listFormatters()`    | List all registered formatter names.          |
+
+### Key Types
+
+| Type              | Description                                                            |
+| :---------------- | :--------------------------------------------------------------------- |
+| `Formatter`       | Interface every formatter implements (`format()`, `outputPath`, etc.). |
+| `FormatterOutput` | Return value of `format()` — contains rendered content and metadata.   |
+| `FormatterName`   | String union of all recognised formatter names.                        |
+| `FormatOptions`   | Options accepted by formatting functions.                              |
+
 ## Status
 
 This is an internal package bundled into `@promptscript/cli`. It is not published to npm separately.

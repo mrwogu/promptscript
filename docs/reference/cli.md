@@ -181,6 +181,7 @@ prs compile --debug
 | `antigravity` | `.agent/rules/project.md`         | Google Antigravity |
 | `opencode`    | `OPENCODE.md`                     | OpenCode           |
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
+| `factory`     | `AGENTS.md`                       | Factory AI         |
 
 ---
 
@@ -379,6 +380,155 @@ All compilation happens locally in your browser - no data is sent to any externa
 
 !!! note "Security"
 The server only accepts requests from `https://getpromptscript.dev` by default (CORS). Use `--cors-origin` to allow other origins. Use `--read-only` to prevent file modifications.
+
+---
+
+### prs import
+
+Import an existing AI instruction file to PromptScript format.
+
+```bash
+prs import <file> [options]
+```
+
+**Options:**
+
+| Option                  | Description                                     | Default         |
+| ----------------------- | ----------------------------------------------- | --------------- |
+| `-f, --format <format>` | Source format (claude, github, cursor, generic) | Auto-detected   |
+| `-o, --output <dir>`    | Output directory                                | `.promptscript` |
+| `--dry-run`             | Preview output without writing files            |                 |
+| `--validate`            | Run roundtrip validation after import           |                 |
+
+**Examples:**
+
+```bash
+# Import a CLAUDE.md file (format auto-detected)
+prs import CLAUDE.md
+
+# Import with explicit format
+prs import .github/copilot-instructions.md --format github
+
+# Preview without writing
+prs import CLAUDE.md --dry-run
+
+# Import and validate roundtrip fidelity
+prs import CLAUDE.md --validate
+
+# Import to custom output directory
+prs import CLAUDE.md --output ./my-prompts
+```
+
+---
+
+### prs registry
+
+Manage PromptScript registries. This command group contains subcommands for creating, validating, and publishing registries.
+
+#### prs registry init
+
+Create a new PromptScript registry.
+
+```bash
+prs registry init [directory] [options]
+```
+
+**Options:**
+
+| Option                     | Description                             |
+| -------------------------- | --------------------------------------- |
+| `-n, --name <name>`        | Registry name                           |
+| `-d, --description <desc>` | Registry description                    |
+| `--namespaces <ns...>`     | Namespace names (e.g., `@core @stacks`) |
+| `-y, --yes`                | Non-interactive mode with defaults      |
+| `-o, --output <dir>`       | Output directory                        |
+| `--no-seed`                | Skip seed configurations                |
+
+**Examples:**
+
+```bash
+# Interactive registry creation (default)
+prs registry init
+
+# Create with defaults (non-interactive)
+prs registry init -y
+
+# Create with custom name and namespaces
+prs registry init --name my-registry --namespaces @core @stacks @fragments
+
+# Create in a specific directory
+prs registry init ./my-registry
+
+# Skip seed configurations
+prs registry init --no-seed
+```
+
+#### prs registry validate
+
+Validate registry structure and manifest.
+
+```bash
+prs registry validate [path] [options]
+```
+
+**Options:**
+
+| Option              | Description                |
+| ------------------- | -------------------------- |
+| `--strict`          | Treat warnings as errors   |
+| `--format <format>` | Output format (text, json) |
+
+**Examples:**
+
+```bash
+# Validate registry in current directory
+prs registry validate
+
+# Validate specific registry path
+prs registry validate ./my-registry
+
+# Strict mode (warnings become errors)
+prs registry validate --strict
+
+# JSON output for CI
+prs registry validate --format json
+```
+
+#### prs registry publish
+
+Publish registry to remote.
+
+```bash
+prs registry publish [path] [options]
+```
+
+**Options:**
+
+| Option                | Description                     |
+| --------------------- | ------------------------------- |
+| `--dry-run`           | Preview what would be published |
+| `-f, --force`         | Skip validation                 |
+| `-m, --message <msg>` | Git commit message              |
+| `--tag <tag>`         | Git tag for release             |
+
+**Examples:**
+
+```bash
+# Publish registry in current directory
+prs registry publish
+
+# Preview what would be published
+prs registry publish --dry-run
+
+# Publish with custom commit message
+prs registry publish --message "feat: add new stack configs"
+
+# Publish with a release tag
+prs registry publish --tag v1.0.0
+
+# Skip validation before publishing
+prs registry publish --force
+```
 
 ---
 
