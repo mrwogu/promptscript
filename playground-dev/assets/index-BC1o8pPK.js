@@ -819,7 +819,7 @@ ${m}`}renderList(e){const n=this.getListMarker();return e.map(r=>`${n} ${r}`).jo
 ${e}
 ${r}`}wrapRoot(e){return this.convention.rootWrapper?`${this.convention.rootWrapper.start}
 ${e}
-${this.convention.rootWrapper.end}`:e}getSectionSeparator(){return this.convention.name==="markdown",`
+${this.convention.rootWrapper.end}`:e}getSectionSeparator(){return`
 
 `}getListMarker(){switch(this.convention.listStyle){case"asterisk":return"*";case"bullet":return"•";case"numbered":return"1.";default:return"-"}}transformName(e,n){switch(n){case"kebab-case":return this.toKebabCase(e);case"camelCase":return this.toCamelCase(e);case"PascalCase":return this.toPascalCase(e);default:return e}}toKebabCase(e){return e.replace(/([a-z])([A-Z])/g,"$1-$2").replace(/[\s_]+/g,"-").toLowerCase()}toCamelCase(e){return e.replace(/[-_\s]+(.)?/g,(n,r)=>r?r.toUpperCase():"").replace(/^(.)/,n=>n.toLowerCase())}toPascalCase(e){return e.replace(/[-_\s]+(.)?/g,(n,r)=>r?r.toUpperCase():"").replace(/^(.)/,n=>n.toUpperCase())}applyTemplate(e,n){let r=e;r=r.replace(/\{\{name\}\}/g,n.name),r=r.replace(/\{\{level\}\}/g,String(n.level));const c=/\{\{#repeat\s+(\w+)\}\}(.+?)\{\{\/repeat\}\}/.exec(r);if(c){const u=c[1],f=c[2],p=u==="level"?n.level:1,m=f.repeat(p);r=r.replace(c[0],m)}return r}escapeMarkdownSpecialChars(e){return e.split(`
 `).map(n=>{let r=n.replace(/__/g,"\\_\\_");return r=this.escapeGlobAsteriskOutsideBackticks(r),r}).join(`
