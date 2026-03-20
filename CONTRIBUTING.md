@@ -50,6 +50,10 @@ promptscript/
 │   ├── validator/      # Validation rules
 │   ├── compiler/       # Compilation pipeline
 │   ├── formatters/     # Output formatters (GitHub, Claude, Cursor, etc.)
+│   ├── importer/       # Reverse-parser for importing AI instruction files
+│   ├── browser-compiler/ # Browser-compatible compiler bundle
+│   ├── playground/     # Web-based playground UI (private)
+│   ├── server/         # Local dev server for playground (private)
 │   └── cli/            # CLI application
 ├── docs/               # Documentation
 └── examples/           # Example projects

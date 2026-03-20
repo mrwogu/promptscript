@@ -78,11 +78,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Features
-
-* **importer:** add `prs import` command for importing existing AI instruction files (CLAUDE.md, .cursorrules, copilot-instructions.md) into PromptScript format with heuristic classification and confidence scoring
-* **importer:** add roundtrip validation to verify generated PRS is syntactically valid
-
 ## [1.3.1](https://github.com/mrwogu/promptscript/compare/v1.3.0...v1.3.1) (2026-03-13)
 
 
