@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.6](https://github.com/mrwogu/promptscript/compare/v1.4.5...v1.4.6) (2026-03-20)
+
+
+### Bug Fixes
+
+* **formatters:** add knowledgeContent to GitHub, fix Antigravity restrictions + tech stack fallback ([a5341c0](https://github.com/mrwogu/promptscript/commit/a5341c0bd9ea44cc90750f4bba9d2033e8480990))
+* **formatters:** add missing knowledgeContent to Cursor and Antigravity formatters ([654094f](https://github.com/mrwogu/promptscript/commit/654094fae9d8d9c876dec046dbfc9224d9ce295f))
+* **formatters:** render [@knowledge](https://github.com/knowledge) content in Claude formatter output ([ac53ff1](https://github.com/mrwogu/promptscript/commit/ac53ff137a0124f9e842348d26227fc50f312c8c))
+
 ## [1.4.5](https://github.com/mrwogu/promptscript/compare/v1.4.4...v1.4.5) (2026-03-19)
 
 
