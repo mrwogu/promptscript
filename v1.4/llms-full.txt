@@ -2115,6 +2115,7 @@ prs compile --debug
 | `antigravity` | `.agent/rules/project.md`         | Google Antigravity |
 | `opencode`    | `OPENCODE.md`                     | OpenCode           |
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
+| `factory`     | `AGENTS.md`                       | Factory AI         |
 
 ______________________________________________________________________
 
@@ -2318,6 +2319,155 @@ The server only accepts requests from `https://getpromptscript.dev` by default (
 
 ______________________________________________________________________
 
+### prs import
+
+Import an existing AI instruction file to PromptScript format.
+
+```bash
+prs import <file> [options]
+```
+
+**Options:**
+
+| Option                  | Description                                     | Default         |
+| ----------------------- | ----------------------------------------------- | --------------- |
+| `-f, --format <format>` | Source format (claude, github, cursor, generic) | Auto-detected   |
+| `-o, --output <dir>`    | Output directory                                | `.promptscript` |
+| `--dry-run`             | Preview output without writing files            |                 |
+| `--validate`            | Run roundtrip validation after import           |                 |
+
+**Examples:**
+
+```bash
+# Import a CLAUDE.md file (format auto-detected)
+prs import CLAUDE.md
+
+# Import with explicit format
+prs import .github/copilot-instructions.md --format github
+
+# Preview without writing
+prs import CLAUDE.md --dry-run
+
+# Import and validate roundtrip fidelity
+prs import CLAUDE.md --validate
+
+# Import to custom output directory
+prs import CLAUDE.md --output ./my-prompts
+```
+
+______________________________________________________________________
+
+### prs registry
+
+Manage PromptScript registries. This command group contains subcommands for creating, validating, and publishing registries.
+
+#### prs registry init
+
+Create a new PromptScript registry.
+
+```bash
+prs registry init [directory] [options]
+```
+
+**Options:**
+
+| Option                     | Description                             |
+| -------------------------- | --------------------------------------- |
+| `-n, --name <name>`        | Registry name                           |
+| `-d, --description <desc>` | Registry description                    |
+| `--namespaces <ns...>`     | Namespace names (e.g., `@core @stacks`) |
+| `-y, --yes`                | Non-interactive mode with defaults      |
+| `-o, --output <dir>`       | Output directory                        |
+| `--no-seed`                | Skip seed configurations                |
+
+**Examples:**
+
+```bash
+# Interactive registry creation (default)
+prs registry init
+
+# Create with defaults (non-interactive)
+prs registry init -y
+
+# Create with custom name and namespaces
+prs registry init --name my-registry --namespaces @core @stacks @fragments
+
+# Create in a specific directory
+prs registry init ./my-registry
+
+# Skip seed configurations
+prs registry init --no-seed
+```
+
+#### prs registry validate
+
+Validate registry structure and manifest.
+
+```bash
+prs registry validate [path] [options]
+```
+
+**Options:**
+
+| Option              | Description                |
+| ------------------- | -------------------------- |
+| `--strict`          | Treat warnings as errors   |
+| `--format <format>` | Output format (text, json) |
+
+**Examples:**
+
+```bash
+# Validate registry in current directory
+prs registry validate
+
+# Validate specific registry path
+prs registry validate ./my-registry
+
+# Strict mode (warnings become errors)
+prs registry validate --strict
+
+# JSON output for CI
+prs registry validate --format json
+```
+
+#### prs registry publish
+
+Publish registry to remote.
+
+```bash
+prs registry publish [path] [options]
+```
+
+**Options:**
+
+| Option                | Description                     |
+| --------------------- | ------------------------------- |
+| `--dry-run`           | Preview what would be published |
+| `-f, --force`         | Skip validation                 |
+| `-m, --message <msg>` | Git commit message              |
+| `--tag <tag>`         | Git tag for release             |
+
+**Examples:**
+
+```bash
+# Publish registry in current directory
+prs registry publish
+
+# Preview what would be published
+prs registry publish --dry-run
+
+# Publish with custom commit message
+prs registry publish --message "feat: add new stack configs"
+
+# Publish with a release tag
+prs registry publish --tag v1.0.0
+
+# Skip validation before publishing
+prs registry publish --force
+```
+
+______________________________________________________________________
+
 ### prs update-check
 
 Check for CLI updates.
@@ -2469,43 +2619,15 @@ Complete reference for `promptscript.yaml`.
 The CLI looks for configuration in this order:
 
 1. `--config` command line option
+1. `PROMPTSCRIPT_CONFIG` environment variable
 1. `promptscript.yaml` in current directory
-1. `promptscript.config.yml` in current directory
+1. `promptscript.yml` in current directory
 1. `.promptscriptrc.yaml` in current directory
-
-## Schema Version
-
-The configuration file requires a `version` field at the root level:
-
-```yaml
-version: '1'
-
-project:
-  id: 'my-project'
-# ...
-```
-
-This version refers to the **configuration schema version**, not the PromptScript language version. It allows the CLI to handle different configuration formats as the tooling evolves.
-
-version vs syntax
-
-Don't confuse `version` in `promptscript.yaml` with `syntax` in `.prs` files:
-
-```text
-| File | Field | Purpose |
-|------|-------|---------|
-| `promptscript.yaml` | `version: '1'` | Configuration schema version |
-| `project.prs` | `syntax: "1.0.0"` | PromptScript language syntax version |
-
-The `syntax` field in `.prs` files uses full semver and indicates which version of the PromptScript language grammar the file uses. See [Language Reference](language.md#meta-block-required) for details.
-```
+1. `.promptscriptrc.yml` in current directory
 
 ## Full Configuration
 
 ```yaml
-# Schema version (required)
-version: '1'
-
 # ===================
 # Input Configuration
 # ===================
@@ -2555,31 +2677,10 @@ registry:
 # Target Configuration
 # =====================
 targets:
-  # GitHub Copilot
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-    # Target-specific options
-    options:
-      includeComments: true
-      headerLevel: 2
-
-  # Claude Code
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-    options:
-      format: 'detailed'
-
-  # Cursor
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-    options:
-      compact: true
+  # List format (matches prs init output)
+  - github
+  - claude
+  - cursor
 
 # =========================
 # Validation Configuration
@@ -2647,6 +2748,21 @@ formatting:
   # proseWrap: always    # 'always' | 'never' | 'preserve'
   # tabWidth: 4          # Number of spaces per indent
   # printWidth: 100      # Max line width for prose wrapping
+
+# =============================
+# Universal Directory & Skills
+# =============================
+
+# Universal directory for auto-discovering skills and commands.
+# - true or omitted: Use default '.agents/' directory
+# - false: Disable universal directory discovery
+# - string: Custom path (relative to project root)
+universalDir: true # default: '.agents'
+
+# Include the bundled PromptScript language skill in compilation output.
+# When enabled, a SKILL.md that teaches AI agents how to work with .prs
+# files is automatically added to each target's native skill directory.
+includePromptScriptSkill: true # default: true
 ```
 
 ## Configuration Sections
@@ -2743,15 +2859,28 @@ This checkouts the specified tag before fetching the file.
 
 ### targets
 
-Configures output targets.
+Configures output targets. Targets can be specified as a simple list of names or with detailed configuration.
+
+**List format (recommended, matches `prs init` output):**
 
 ```yaml
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-    options:
-      includeComments: true
+  - github
+  - claude
+  - cursor
+```
+
+**Object format (advanced, for custom options):**
+
+```yaml
+targets:
+  - github:
+      convention: xml
+      output: custom/path/instructions.md
+  - claude:
+      convention: markdown
+  - cursor:
+      version: legacy
 ```
 
 **Available Targets:**
@@ -2791,16 +2920,17 @@ This means your `@identity` content appears exactly as written (without extra in
 
 **Target Configuration:**
 
-Targets can be specified as simple names or with configuration:
+Targets can be specified as simple names (list format) or with configuration (object format). The list format is recommended for most projects and matches `prs init` output:
 
 ```yaml
 targets:
-  # Simple format (uses defaults)
+  # List format (recommended)
   - github
   - claude
+  - cursor
   - antigravity
 
-  # With configuration
+  # Object format (for custom options)
   - github:
       convention: xml
       output: custom/path/instructions.md
@@ -3061,6 +3191,43 @@ formatting:
   printWidth: 100
 ```
 
+### universalDir
+
+Configures the universal directory for auto-discovering skills and commands. Skills are discovered from `<universalDir>/skills/` and commands from `<universalDir>/commands/`.
+
+```yaml
+# Use default .agents/ directory
+universalDir: true
+
+# Custom directory path
+universalDir: '.my-agents'
+
+# Disable universal directory discovery
+universalDir: false
+```
+
+| Value    | Type    | Default     | Description                          |
+| -------- | ------- | ----------- | ------------------------------------ |
+| `true`   | boolean | `true`      | Use default `.agents/` directory     |
+| `false`  | boolean | -           | Disable universal directory          |
+| (string) | string  | `'.agents'` | Custom path relative to project root |
+
+### includePromptScriptSkill
+
+Controls whether the bundled PromptScript language skill is included in compilation output. When enabled, a `SKILL.md` that teaches AI agents how to work with `.prs` files is automatically added to each target's native skill directory.
+
+```yaml
+# Include the PromptScript skill (default)
+includePromptScriptSkill: true
+
+# Disable the PromptScript skill
+includePromptScriptSkill: false
+```
+
+| Field                      | Type    | Default | Description                                 |
+| -------------------------- | ------- | ------- | ------------------------------------------- |
+| `includePromptScriptSkill` | boolean | `true`  | Include bundled PromptScript language skill |
+
 ## Environment Variables
 
 Configuration values can reference environment variables:
@@ -3089,8 +3256,7 @@ input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
+  - github
 ```
 
 ## Extending Configuration
@@ -3141,8 +3307,7 @@ input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
+  - github
 ```
 
 ### Multi-Team Setup
@@ -3155,12 +3320,10 @@ registry:
   path: ./shared-registry
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
 ```
 
 ### CI/CD Configuration
@@ -3184,18 +3347,12 @@ validation:
   strict: true
 
 targets:
-  github:
-    enabled: true
-  claude:
-    enabled: true
-  cursor:
-    enabled: true
-  antigravity:
-    enabled: true
-  opencode:
-    enabled: true
-  gemini:
-    enabled: true
+  - github
+  - claude
+  - cursor
+  - antigravity
+  - opencode
+  - gemini
 ```
 
 ### Private Git Registry with SSH
@@ -11155,16 +11312,15 @@ Change status from `'planned'` to `'supported'` once implemented.
 
 ### Functions
 
-| Function                        | Description                            |
-| ------------------------------- | -------------------------------------- |
-| `getToolFeatures(tool)`         | Get all supported features for a tool  |
-| `getPlannedFeatures(tool)`      | Get features planned for a tool        |
-| `getFeaturesByCategory(cat)`    | Get features by category               |
-| `toolSupportsFeature(t, f)`     | Check if tool supports feature         |
-| `getFeatureCoverage(tool)`      | Get coverage summary                   |
-| `getToolComparison()`           | Get comparison matrix                  |
-| `identifyFeatureGaps(tool)`     | Get planned but unimplemented features |
-| `generateFeatureMatrixReport()` | Generate markdown report               |
+| Function                        | Description                           |
+| ------------------------------- | ------------------------------------- |
+| `getToolFeatures(tool)`         | Get all supported features for a tool |
+| `getPlannedFeatures(tool)`      | Get features planned for a tool       |
+| `getFeaturesByCategory(cat)`    | Get features by category              |
+| `toolSupportsFeature(t, f)`     | Check if tool supports feature        |
+| `getFeatureCoverage(tool)`      | Get coverage summary                  |
+| `getToolComparison()`           | Get comparison matrix                 |
+| `generateFeatureMatrixReport()` | Generate markdown report              |
 
 ### Types
 

@@ -7,43 +7,15 @@ Complete reference for `promptscript.yaml`.
 The CLI looks for configuration in this order:
 
 1. `--config` command line option
+1. `PROMPTSCRIPT_CONFIG` environment variable
 1. `promptscript.yaml` in current directory
-1. `promptscript.config.yml` in current directory
+1. `promptscript.yml` in current directory
 1. `.promptscriptrc.yaml` in current directory
-
-## Schema Version
-
-The configuration file requires a `version` field at the root level:
-
-```yaml
-version: '1'
-
-project:
-  id: 'my-project'
-# ...
-```
-
-This version refers to the **configuration schema version**, not the PromptScript language version. It allows the CLI to handle different configuration formats as the tooling evolves.
-
-version vs syntax
-
-Don't confuse `version` in `promptscript.yaml` with `syntax` in `.prs` files:
-
-```text
-| File | Field | Purpose |
-|------|-------|---------|
-| `promptscript.yaml` | `version: '1'` | Configuration schema version |
-| `project.prs` | `syntax: "1.0.0"` | PromptScript language syntax version |
-
-The `syntax` field in `.prs` files uses full semver and indicates which version of the PromptScript language grammar the file uses. See [Language Reference](language.md#meta-block-required) for details.
-```
+1. `.promptscriptrc.yml` in current directory
 
 ## Full Configuration
 
 ```yaml
-# Schema version (required)
-version: '1'
-
 # ===================
 # Input Configuration
 # ===================
@@ -93,31 +65,10 @@ registry:
 # Target Configuration
 # =====================
 targets:
-  # GitHub Copilot
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-    # Target-specific options
-    options:
-      includeComments: true
-      headerLevel: 2
-
-  # Claude Code
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-    options:
-      format: 'detailed'
-
-  # Cursor
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-    options:
-      compact: true
+  # List format (matches prs init output)
+  - github
+  - claude
+  - cursor
 
 # =========================
 # Validation Configuration
@@ -185,6 +136,21 @@ formatting:
   # proseWrap: always    # 'always' | 'never' | 'preserve'
   # tabWidth: 4          # Number of spaces per indent
   # printWidth: 100      # Max line width for prose wrapping
+
+# =============================
+# Universal Directory & Skills
+# =============================
+
+# Universal directory for auto-discovering skills and commands.
+# - true or omitted: Use default '.agents/' directory
+# - false: Disable universal directory discovery
+# - string: Custom path (relative to project root)
+universalDir: true # default: '.agents'
+
+# Include the bundled PromptScript language skill in compilation output.
+# When enabled, a SKILL.md that teaches AI agents how to work with .prs
+# files is automatically added to each target's native skill directory.
+includePromptScriptSkill: true # default: true
 ```
 
 ## Configuration Sections
@@ -281,15 +247,28 @@ This checkouts the specified tag before fetching the file.
 
 ### targets
 
-Configures output targets.
+Configures output targets. Targets can be specified as a simple list of names or with detailed configuration.
+
+**List format (recommended, matches `prs init` output):**
 
 ```yaml
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-    options:
-      includeComments: true
+  - github
+  - claude
+  - cursor
+```
+
+**Object format (advanced, for custom options):**
+
+```yaml
+targets:
+  - github:
+      convention: xml
+      output: custom/path/instructions.md
+  - claude:
+      convention: markdown
+  - cursor:
+      version: legacy
 ```
 
 **Available Targets:**
@@ -329,16 +308,17 @@ This means your `@identity` content appears exactly as written (without extra in
 
 **Target Configuration:**
 
-Targets can be specified as simple names or with configuration:
+Targets can be specified as simple names (list format) or with configuration (object format). The list format is recommended for most projects and matches `prs init` output:
 
 ```yaml
 targets:
-  # Simple format (uses defaults)
+  # List format (recommended)
   - github
   - claude
+  - cursor
   - antigravity
 
-  # With configuration
+  # Object format (for custom options)
   - github:
       convention: xml
       output: custom/path/instructions.md
@@ -599,6 +579,43 @@ formatting:
   printWidth: 100
 ```
 
+### universalDir
+
+Configures the universal directory for auto-discovering skills and commands. Skills are discovered from `<universalDir>/skills/` and commands from `<universalDir>/commands/`.
+
+```yaml
+# Use default .agents/ directory
+universalDir: true
+
+# Custom directory path
+universalDir: '.my-agents'
+
+# Disable universal directory discovery
+universalDir: false
+```
+
+| Value    | Type    | Default     | Description                          |
+| -------- | ------- | ----------- | ------------------------------------ |
+| `true`   | boolean | `true`      | Use default `.agents/` directory     |
+| `false`  | boolean | -           | Disable universal directory          |
+| (string) | string  | `'.agents'` | Custom path relative to project root |
+
+### includePromptScriptSkill
+
+Controls whether the bundled PromptScript language skill is included in compilation output. When enabled, a `SKILL.md` that teaches AI agents how to work with `.prs` files is automatically added to each target's native skill directory.
+
+```yaml
+# Include the PromptScript skill (default)
+includePromptScriptSkill: true
+
+# Disable the PromptScript skill
+includePromptScriptSkill: false
+```
+
+| Field                      | Type    | Default | Description                                 |
+| -------------------------- | ------- | ------- | ------------------------------------------- |
+| `includePromptScriptSkill` | boolean | `true`  | Include bundled PromptScript language skill |
+
 ## Environment Variables
 
 Configuration values can reference environment variables:
@@ -627,8 +644,7 @@ input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
+  - github
 ```
 
 ## Extending Configuration
@@ -679,8 +695,7 @@ input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
+  - github
 ```
 
 ### Multi-Team Setup
@@ -693,12 +708,10 @@ registry:
   path: ./shared-registry
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
 ```
 
 ### CI/CD Configuration
@@ -722,18 +735,12 @@ validation:
   strict: true
 
 targets:
-  github:
-    enabled: true
-  claude:
-    enabled: true
-  cursor:
-    enabled: true
-  antigravity:
-    enabled: true
-  opencode:
-    enabled: true
-  gemini:
-    enabled: true
+  - github
+  - claude
+  - cursor
+  - antigravity
+  - opencode
+  - gemini
 ```
 
 ### Private Git Registry with SSH
