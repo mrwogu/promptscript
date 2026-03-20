@@ -17,6 +17,7 @@ import { unicodeSecurity } from './unicode-security.js';
 import { skillParams } from './skill-params.js';
 import { skillDependencies } from './skill-dependencies.js';
 import { skillContracts } from './skill-contracts.js';
+import { syntaxVersionCompat } from './syntax-version-compat.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -65,6 +66,7 @@ export { unicodeSecurity } from './unicode-security.js';
 export { skillParams } from './skill-params.js';
 export { skillDependencies } from './skill-dependencies.js';
 export { skillContracts } from './skill-contracts.js';
+export { syntaxVersionCompat } from './syntax-version-compat.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -93,6 +95,8 @@ export const allRules: ValidationRule[] = [
   skillDependencies,
   // Skill contracts (PS017)
   skillContracts,
+  // Syntax version compatibility (PS018)
+  syntaxVersionCompat,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
