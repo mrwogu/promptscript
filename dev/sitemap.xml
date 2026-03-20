@@ -41,14 +41,6 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/browser-compiler/src/functions/createBrowserCompiler/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/browser-compiler/src/functions/getBundledRegistryFiles/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/browser-compiler/src/interfaces/BrowserCompilerOptions/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
@@ -153,6 +145,10 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/importCommand/</loc>
+         <lastmod>2026-03-20</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/functions/initCommand/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
@@ -206,6 +202,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/DiffOptions/</loc>
+         <lastmod>2026-03-20</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/cli/src/interfaces/ImportCommandOptions/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -358,10 +358,6 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/ValidationError/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/core/src/enumerations/ErrorCode/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -541,10 +537,6 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/MergeOptions/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/MetaBlock/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
@@ -565,19 +557,11 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PackageInfo/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ParamArgument/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ParamDefinition/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ParsedPath/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -610,10 +594,6 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SectionRenderer/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SemVer/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -705,10 +685,6 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/CompareResult/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ConventionName/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
@@ -766,10 +742,6 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/BUILT_IN_CONVENTIONS/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/DEFAULT_MERGE_OPTIONS/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -865,10 +837,6 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/analyzeFormatterOutput/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/createConventionRenderer/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
@@ -889,23 +857,7 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/generateFeatureMatrixReport/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getAllSections/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getExpectedSections/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getFeatureCoverage/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getFeaturesByCategory/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -913,43 +865,11 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getOptionalSections/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getPlannedFeatures/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getRequiredSections/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getSourceBlocks/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getToolComparison/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/getToolFeatures/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/hasFormatter/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/identifyFeatureGaps/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/listFormatters/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/matchesSectionHeader/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -961,15 +881,7 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/toolSupportsFeature/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/unregisterFormatter/</loc>
-         <lastmod>2026-03-20</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/validateSectionContent/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
@@ -1537,11 +1449,19 @@
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/importer/src/interfaces/FormatParser/</loc>
+         <lastmod>2026-03-20</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/importer/src/interfaces/ImportOptions/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/importer/src/interfaces/ImportResult/</loc>
+         <lastmod>2026-03-20</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/importer/src/interfaces/MarkdownSection/</loc>
          <lastmod>2026-03-20</lastmod>
     </url>
     <url>
