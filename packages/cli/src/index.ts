@@ -18,6 +18,8 @@ export { pullCommand } from './commands/pull.js';
 export { diffCommand } from './commands/diff.js';
 export { checkCommand } from './commands/check.js';
 export { updateCheckCommand } from './commands/update-check.js';
+export { importCommand } from './commands/import.js';
+export type { ImportCommandOptions } from './commands/import.js';
 
 // Config
 export { loadConfig, findConfigFile, CONFIG_FILES } from './config/loader.js';
