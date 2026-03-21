@@ -60,17 +60,16 @@ describe('detectAITools -- enriched migration candidates', () => {
   });
 
   it('sets sizeBytes to 0 when readFile throws during enrichment', async () => {
+    let claudeReadCount = 0;
     const mockServices = {
       fs: {
         existsSync: vi.fn().mockImplementation((p: string) => p === 'CLAUDE.md'),
         readFile: vi.fn().mockImplementation(async (p: string) => {
           if (p === 'CLAUDE.md') {
+            claudeReadCount++;
             // First call: isPromptScriptGenerated check — return non-PS content
             // Second call: size enrichment — throw
-            const calls = mockServices.fs.readFile.mock.calls.filter(
-              (c: string[]) => c[0] === 'CLAUDE.md'
-            );
-            if (calls.length <= 1) return 'No marker here';
+            if (claudeReadCount <= 1) return 'No marker here';
             throw new Error('permission denied');
           }
           return '{}';
