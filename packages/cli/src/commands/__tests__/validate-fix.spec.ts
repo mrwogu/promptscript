@@ -1,5 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { fixSyntaxVersion } from '../validate.js';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { fixSyntaxVersion, discoverPrsFiles } from '../validate.js';
 
 describe('fixSyntaxVersion', () => {
   it('should update syntax version when target is higher', () => {
@@ -67,5 +70,49 @@ describe('fixSyntaxVersion', () => {
     const result = fixSyntaxVersion(content, '1.0.0', '1.1.0');
     expect(result).toContain('syntax: "1.1.0"');
     expect(result).toContain('id: "test-{project}"');
+  });
+});
+
+describe('discoverPrsFiles', () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(tmpdir(), 'prs-test-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('should find .prs files in a directory', () => {
+    writeFileSync(join(tmpDir, 'project.prs'), '@meta { id: "test" syntax: "1.0.0" }');
+    writeFileSync(join(tmpDir, 'context.prs'), '@context { "test" }');
+    writeFileSync(join(tmpDir, 'readme.md'), '# Readme');
+
+    const files = discoverPrsFiles(tmpDir);
+    expect(files).toHaveLength(2);
+    expect(files.every((f) => f.endsWith('.prs'))).toBe(true);
+  });
+
+  it('should find .prs files in subdirectories', () => {
+    mkdirSync(join(tmpDir, 'sub'));
+    writeFileSync(join(tmpDir, 'project.prs'), 'root');
+    writeFileSync(join(tmpDir, 'sub', 'child.prs'), 'child');
+
+    const files = discoverPrsFiles(tmpDir);
+    expect(files).toHaveLength(2);
+    expect(files.some((f) => f.includes('sub'))).toBe(true);
+  });
+
+  it('should return empty array for non-existent directory', () => {
+    const files = discoverPrsFiles(join(tmpDir, 'nonexistent'));
+    expect(files).toHaveLength(0);
+  });
+
+  it('should return empty array for directory with no .prs files', () => {
+    writeFileSync(join(tmpDir, 'readme.md'), '# Readme');
+
+    const files = discoverPrsFiles(tmpDir);
+    expect(files).toHaveLength(0);
   });
 });
