@@ -57,4 +57,15 @@ describe('fixSyntaxVersion', () => {
     const result = fixSyntaxVersion(content, '1.0.0', '1.1.0');
     expect(result).toBeNull();
   });
+
+  it('should handle braces inside strings in @meta block', () => {
+    const content = `@meta {
+  id: "test-{project}"
+  syntax: "1.0.0"
+}
+`;
+    const result = fixSyntaxVersion(content, '1.0.0', '1.1.0');
+    expect(result).toContain('syntax: "1.1.0"');
+    expect(result).toContain('id: "test-{project}"');
+  });
 });

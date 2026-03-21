@@ -111,6 +111,46 @@ The `params` field defines parameters for parameterized inheritance:
 | `name?: string`            | Optional, can be omitted    |
 | `name: string = "default"` | Optional with default value |
 
+## Syntax Versions
+
+The `syntax` field in `@meta` declares which version of the PromptScript language the file uses. Versions follow semver.
+
+### Known Versions
+
+| Version | Status  | New Blocks / Features                                                                                                           |
+| ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `1.0.0` | Stable  | Core blocks: `@identity`, `@context`, `@standards`, `@restrictions`, `@shortcuts`, `@params`, `@guards`, `@knowledge`, `@local` |
+| `1.1.0` | Current | Adds `@skills` and `@agents` blocks                                                                                             |
+
+### Block Version Requirements
+
+| Block     | Minimum Syntax Version |
+| --------- | ---------------------- |
+| `@skills` | `1.1.0`                |
+| `@agents` | `1.1.0`                |
+
+All other built-in blocks are available from `1.0.0`.
+
+### Validation (PS018, PS019)
+
+The validator enforces syntax version compatibility:
+
+- **PS018 (`syntax-version-compat`)**: warns when a file uses blocks that require a higher syntax version than declared in `@meta`. For example, using `@agents` with `syntax: "1.0.0"` triggers this warning.
+- **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, and suggests the closest match for typos.
+
+### Upgrading
+
+To automatically update the `syntax` field to the required version for the blocks you use:
+
+```bash
+prs validate --fix          # Fix syntax versions in .prs files
+prs upgrade                 # Upgrade all .prs files to the latest syntax version
+```
+
+`prs validate --fix` rewrites the `syntax: "..."` line in each `@meta` block to the minimum version required by the blocks used in that file.
+
+`prs upgrade` upgrades all files to the latest known syntax version regardless of what blocks they use.
+
 ## @inherit Declaration
 
 Single inheritance from another PromptScript file:

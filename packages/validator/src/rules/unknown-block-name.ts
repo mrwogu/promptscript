@@ -1,14 +1,6 @@
 import type { ValidationRule } from '../types.js';
-import { walkBlocks } from '../walker.js';
+import { walkBlocks, getBlockName } from '../walker.js';
 import { isBlockType, BLOCK_TYPES, findClosestMatch } from '@promptscript/core';
-
-/**
- * Get the block name from a Block or ExtendBlock.
- */
-function getBlockName(block: { type: string; name?: string; targetPath?: string }): string {
-  if (block.type === 'Block') return (block as { name: string }).name;
-  return (block as { targetPath: string }).targetPath.split('.')[0]!;
-}
 
 /**
  * PS019: Unknown block name detection.

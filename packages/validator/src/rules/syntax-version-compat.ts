@@ -1,5 +1,5 @@
 import type { ValidationRule } from '../types.js';
-import { walkBlocks } from '../walker.js';
+import { walkBlocks, getBlockName } from '../walker.js';
 import { isValidSemver } from './valid-semver.js';
 import {
   isKnownSyntaxVersion,
@@ -7,15 +7,6 @@ import {
   getMinimumVersionForBlock,
   compareVersions,
 } from '@promptscript/core';
-
-/**
- * Get the block name from a Block or ExtendBlock.
- * Block has `name`, ExtendBlock has `targetPath` (dot-separated, first segment is the block name).
- */
-function getBlockName(block: { type: string; name?: string; targetPath?: string }): string {
-  if (block.type === 'Block') return (block as { name: string }).name;
-  return (block as { targetPath: string }).targetPath.split('.')[0]!;
-}
 
 /**
  * PS018: Syntax version compatibility check.

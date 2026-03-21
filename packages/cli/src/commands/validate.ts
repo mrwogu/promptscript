@@ -160,9 +160,15 @@ export function fixSyntaxVersion(
 
   let depth = 1;
   let braceEnd = braceStart + 1;
+  let inString = false;
   while (braceEnd < content.length && depth > 0) {
-    if (content[braceEnd] === '{') depth++;
-    else if (content[braceEnd] === '}') depth--;
+    const ch = content[braceEnd];
+    if (ch === '"' && content[braceEnd - 1] !== '\\') {
+      inString = !inString;
+    } else if (!inString) {
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+    }
     braceEnd++;
   }
 
