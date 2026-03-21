@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { readFileSync, existsSync } from 'fs';
-import { getPackageVersion, type RegistryManifest } from '@promptscript/core';
+import { getLatestSyntaxVersion, type RegistryManifest } from '@promptscript/core';
 import { type CliServices, createDefaultServices } from '../services.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -620,7 +620,7 @@ function getSkillInvocationHints(targets: AIToolTarget[]): string[] {
  */
 function generateConfig(config: ResolvedConfig): string {
   // Get PromptScript syntax version for the config
-  const syntaxVersion = getPackageVersion(__dirname, './package.json');
+  const syntaxVersion = getLatestSyntaxVersion();
 
   const lines: string[] = [`id: ${config.projectId}`, `syntax: "${syntaxVersion}"`];
 
@@ -714,8 +714,8 @@ function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): st
       ? `  frameworks: [${projectInfo.frameworks.join(', ')}]`
       : '  # frameworks: []';
 
-  // Get PromptScript version for syntax field
-  const syntaxVersion = getPackageVersion(__dirname, './package.json');
+  // Get PromptScript syntax version
+  const syntaxVersion = getLatestSyntaxVersion();
 
   return `# Project Configuration
 # Edit this file to customize AI instructions for your project
