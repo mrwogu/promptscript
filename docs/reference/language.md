@@ -117,17 +117,18 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 
 ### Known Versions
 
-| Version | Status  | New Blocks / Features                                                                                                           |
-| ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `1.0.0` | Stable  | Core blocks: `@identity`, `@context`, `@standards`, `@restrictions`, `@shortcuts`, `@params`, `@guards`, `@knowledge`, `@local` |
-| `1.1.0` | Current | Adds `@skills` and `@agents` blocks                                                                                             |
+| Version | Status  | Blocks                                                                                                                                     |
+| ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
+| `1.1.0` | Current | All 1.0.0 blocks + `@agents`, `@workflows`, `@prompts`                                                                                     |
 
 ### Block Version Requirements
 
-| Block     | Minimum Syntax Version |
-| --------- | ---------------------- |
-| `@skills` | `1.1.0`                |
-| `@agents` | `1.1.0`                |
+| Block        | Minimum Syntax Version |
+| ------------ | ---------------------- |
+| `@agents`    | `1.1.0`                |
+| `@workflows` | `1.1.0`                |
+| `@prompts`   | `1.1.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 

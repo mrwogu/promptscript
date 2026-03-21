@@ -500,10 +500,10 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 
 ### Known Versions
 
-| Version | What it adds                                                                                          |
-| ------- | ----------------------------------------------------------------------------------------------------- |
-| `1.0.0` | Core blocks (identity, context, standards, restrictions, shortcuts, params, guards, knowledge, local) |
-| `1.1.0` | `@skills` and `@agents` blocks                                                                        |
+| Version | What it adds                                                                                                            |
+| ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
+| `1.1.0` | Adds `@agents`, `@workflows`, `@prompts`                                                                                |
 
 ### Validation Rules
 
