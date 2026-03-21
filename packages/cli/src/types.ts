@@ -20,6 +20,25 @@ export interface InitOptions {
   force?: boolean;
   /** Install migration skill for AI-assisted migration */
   migrate?: boolean;
+  /** Non-interactive static import of detected files (--auto-import) */
+  autoImport?: boolean;
+  /** Create backup before migration */
+  backup?: boolean;
+  /** Internal: force migrate flow (used by prs migrate) */
+  _forceMigrate?: boolean;
+  /** Internal: force LLM flow (used by prs migrate --llm) */
+  _forceLlm?: boolean;
+  /** Internal: specific files to migrate (used by prs migrate --files) */
+  _migrateFiles?: string[];
+}
+
+/**
+ * Options for the migrate command.
+ */
+export interface MigrateOptions {
+  static?: boolean;
+  llm?: boolean;
+  files?: string[];
 }
 
 /**

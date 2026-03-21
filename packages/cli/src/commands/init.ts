@@ -239,13 +239,12 @@ export async function initCommand(
         const migrationHint = formatMigrationHint(aiToolsDetection);
         for (const line of migrationHint) {
           if (
-            line.startsWith('📋') ||
+            line.includes('Existing instruction files') ||
             line.includes('migrated') ||
-            line.includes('See:') ||
-            line.includes('Or use')
+            line.includes('See:')
           ) {
             ConsoleOutput.info(line.replace(/^\s+/, ''));
-          } else if (line.trim().startsWith('•')) {
+          } else if (line.trim().startsWith('-')) {
             ConsoleOutput.muted(line);
           } else if (line.trim()) {
             console.log(line);
