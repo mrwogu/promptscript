@@ -143,14 +143,14 @@ Files are only emitted if they contain content. If no `@shortcuts` or `@knowledg
 
 #### Merge rules per block type
 
-| Block | Strategy | Conflict resolution |
-|-------|----------|-------------------|
-| `@identity` | Pick longest (highest character count after trim) | Others added as `# REVIEW: alt from <source>` |
-| `@context` | Union structured fields | Deduplicate identical entries |
-| `@standards` | Merge by category key | Concatenate arrays, source comment on conflicts |
-| `@restrictions` | Full union | Restrictions are additive — no conflicts |
-| `@shortcuts` | Merge all | Same command name → keep longer, comment shorter |
-| `@knowledge` | Concatenate | Source attribution headers between sections |
+| Block           | Strategy                                          | Conflict resolution                              |
+| --------------- | ------------------------------------------------- | ------------------------------------------------ |
+| `@identity`     | Pick longest (highest character count after trim) | Others added as `# REVIEW: alt from <source>`    |
+| `@context`      | Union structured fields                           | Deduplicate identical entries                    |
+| `@standards`    | Merge by category key                             | Concatenate arrays, source comment on conflicts  |
+| `@restrictions` | Full union                                        | Restrictions are additive — no conflicts         |
+| `@shortcuts`    | Merge all                                         | Same command name → keep longer, comment shorter |
+| `@knowledge`    | Concatenate                                       | Source attribution headers between sections      |
 
 #### Confidence reporting
 
@@ -188,6 +188,7 @@ instruction files need to be migrated to .prs format:
 Use the /promptscript skill for the PromptScript language reference.
 
 Steps:
+
 1. Read each file listed above
 2. Analyze the content and map to PromptScript blocks
 3. Generate a modular .prs structure in .promptscript/:
@@ -263,23 +264,23 @@ Reverse sync (re-importing manual edits from compiled output) is out of scope �
 
 #### Non-interactive behavior matrix
 
-| Flags | Files detected? | Behavior |
-|-------|----------------|----------|
-| `-y` | No | Standard init, scaffold project.prs, install skill |
-| `-y` | Yes | Standard init, scaffold project.prs, install skill, hint about migration |
-| `-y --import` | No | Standard init (nothing to import) |
-| `-y --import` | Yes | Standard init + static multi-file import → modular .prs |
-| `-y --import --backup` | Yes | Same + backup to `.prs-backup/` |
-| (no flags) | No | Interactive fresh start |
-| (no flags) | Yes | Interactive gateway: migrate vs fresh start |
+| Flags                  | Files detected? | Behavior                                                                 |
+| ---------------------- | --------------- | ------------------------------------------------------------------------ |
+| `-y`                   | No              | Standard init, scaffold project.prs, install skill                       |
+| `-y`                   | Yes             | Standard init, scaffold project.prs, install skill, hint about migration |
+| `-y --import`          | No              | Standard init (nothing to import)                                        |
+| `-y --import`          | Yes             | Standard init + static multi-file import → modular .prs                  |
+| `-y --import --backup` | Yes             | Same + backup to `.prs-backup/`                                          |
+| (no flags)             | No              | Interactive fresh start                                                  |
+| (no flags)             | Yes             | Interactive gateway: migrate vs fresh start                              |
 
 #### Exit codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | General failure |
-| 2 | Already initialized (without `--force`) |
+| Code | Meaning                                 |
+| ---- | --------------------------------------- |
+| 0    | Success                                 |
+| 1    | General failure                         |
+| 2    | Already initialized (without `--force`) |
 
 #### Git safety check
 
@@ -310,10 +311,10 @@ The `AIToolsDetection.migrationCandidates` type changes from `string[]` to enric
 ```typescript
 interface MigrationCandidate {
   path: string;
-  format: DetectedFormat;    // 'claude' | 'github' | 'cursor' | 'generic'
+  format: DetectedFormat; // 'claude' | 'github' | 'cursor' | 'generic'
   sizeBytes: number;
-  sizeHuman: string;         // "3.4 KB"
-  toolName: string;          // "Claude Code", "Cursor", etc.
+  sizeHuman: string; // "3.4 KB"
+  toolName: string; // "Claude Code", "Cursor", etc.
 }
 ```
 
@@ -330,11 +331,13 @@ This is an internal CLI interface change — no public API impact.
 ### Phase 1: Foundation utilities (no breaking changes)
 
 **New files:**
+
 - `packages/cli/src/utils/clipboard.ts` — cross-platform clipboard
 - `packages/cli/src/utils/backup.ts` — `.prs-backup/` creation + git repo detection
 - `packages/cli/src/utils/migration-prompt.ts` — kick-start prompt generator
 
 **Tests:**
+
 - `packages/cli/src/__tests__/clipboard.spec.ts`
 - `packages/cli/src/__tests__/backup.spec.ts`
 - `packages/cli/src/__tests__/migration-prompt.spec.ts`
@@ -342,42 +345,51 @@ This is an internal CLI interface change — no public API impact.
 ### Phase 2: Multi-file import in `@promptscript/importer`
 
 **New files:**
+
 - `packages/importer/src/merger.ts` — section dedup + merge by block type
 - `packages/importer/src/multi-importer.ts` — batch import → modular .prs output
 
 **Modified files:**
+
 - `packages/importer/src/emitter.ts` — source attribution comments, modular emit
 - `packages/importer/src/index.ts` — export new functions
 
 **Tests:**
+
 - `packages/importer/src/__tests__/merger.spec.ts`
 - `packages/importer/src/__tests__/multi-importer.spec.ts`
 
 ### Phase 3: Enhanced init command
 
 **Modified files:**
+
 - `packages/cli/src/commands/init.ts` — gateway choice, migrate flow, skill install for fresh start, kick-start prompt generation
 - `packages/cli/src/types.ts` — add `import` flag to `InitOptions`
 - `packages/cli/src/utils/ai-tools-detector.ts` — enrich `MigrationCandidate` with size, format, toolName
 
 **Tests:**
+
 - `packages/cli/src/__tests__/init-migrate.spec.ts` (new)
 - `packages/cli/src/__tests__/init-command.spec.ts` (update)
 
 ### Phase 4: `prs migrate` command
 
 **New files:**
+
 - `packages/cli/src/commands/migrate.ts` — thin wrapper delegating to init
 
 **Modified files:**
+
 - `packages/cli/src/cli.ts` — register migrate command + `--import` flag on init, deprecation for `--migrate`
 
 **Tests:**
+
 - `packages/cli/src/__tests__/migrate-command.spec.ts`
 
 ### Phase 5: Documentation
 
 **Modified files:**
+
 - `packages/cli/skills/promptscript/SKILL.md` — update CLI commands section
 - New migration guide (location TBD based on docs structure)
 
@@ -393,28 +405,28 @@ Phases 1 and 2 are independent and can be parallelized.
 
 ### Scope summary
 
-| Phase | New source files | Modified source files | New test files |
-|-------|-----------------|----------------------|----------------|
-| 1 | 3 | 0 | 3 |
-| 2 | 2 | 2 | 2 |
-| 3 | 1 (init-migrate test) | 3 | update 1 existing test |
-| 4 | 2 (command + test) | 1 | — |
-| 5 | 0 | 2 | 0 |
-| **Total** | **8** | **8** | **5 new + 1 update** |
+| Phase     | New source files      | Modified source files | New test files         |
+| --------- | --------------------- | --------------------- | ---------------------- |
+| 1         | 3                     | 0                     | 3                      |
+| 2         | 2                     | 2                     | 2                      |
+| 3         | 1 (init-migrate test) | 3                     | update 1 existing test |
+| 4         | 2 (command + test)    | 1                     | —                      |
+| 5         | 0                     | 2                     | 0                      |
+| **Total** | **8**                 | **8**                 | **5 new + 1 update**   |
 
 ---
 
 ## Error Handling
 
-| Scenario | Handling |
-|----------|----------|
-| File detected but unreadable | Skip with warning, continue with remaining files |
-| Import produces 0 sections | Skip with warning: "Could not parse X" |
-| All sections LOW confidence (<50%) | Warn: "Low confidence — consider AI-assisted migration" |
-| `promptscript.yaml` exists without `--force` | Exit with code 2 |
-| User cancels (Ctrl+C) | Catch `ExitPromptError`, clean exit |
-| Clipboard unavailable | Fallback to terminal display |
-| Not a git repo + no backup | Warn and default backup prompt to "yes" |
+| Scenario                                     | Handling                                                |
+| -------------------------------------------- | ------------------------------------------------------- |
+| File detected but unreadable                 | Skip with warning, continue with remaining files        |
+| Import produces 0 sections                   | Skip with warning: "Could not parse X"                  |
+| All sections LOW confidence (<50%)           | Warn: "Low confidence — consider AI-assisted migration" |
+| `promptscript.yaml` exists without `--force` | Exit with code 2                                        |
+| User cancels (Ctrl+C)                        | Catch `ExitPromptError`, clean exit                     |
+| Clipboard unavailable                        | Fallback to terminal display                            |
+| Not a git repo + no backup                   | Warn and default backup prompt to "yes"                 |
 
 ## Backward Compatibility
 

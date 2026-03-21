@@ -5,9 +5,7 @@ export interface MigrationPromptInput {
 }
 
 export function generateMigrationPrompt(candidates: MigrationPromptInput[]): string {
-  const fileList = candidates
-    .map((c) => `- ${c.path} (${c.sizeHuman}, ${c.toolName})`)
-    .join('\n');
+  const fileList = candidates.map((c) => `- ${c.path} (${c.sizeHuman}, ${c.toolName})`).join('\n');
 
   return `Migrate my existing AI instructions to PromptScript.
 

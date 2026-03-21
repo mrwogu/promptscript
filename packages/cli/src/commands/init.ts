@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { basename, dirname, resolve } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import { getPackageVersion, type RegistryManifest } from '@promptscript/core';
 import { type CliServices, createDefaultServices } from '../services.js';
@@ -21,6 +21,7 @@ function findSkillsDir(): string {
 }
 const BUNDLED_SKILLS_DIR = findSkillsDir();
 
+import { importMultipleFiles } from '@promptscript/importer';
 import type { InitOptions } from '../types.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { detectProject, type ProjectInfo } from '../utils/project-detector.js';
@@ -32,7 +33,11 @@ import {
   formatMigrationHint,
   hasMigrationCandidates,
   type AIToolTarget,
+  type MigrationCandidate,
 } from '../utils/ai-tools-detector.js';
+import { copyToClipboard } from '../utils/clipboard.js';
+import { isGitRepo, createBackup } from '../utils/backup.js';
+import { generateMigrationPrompt } from '../utils/migration-prompt.js';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { findPrettierConfig } from '../prettier/loader.js';
 import {
@@ -92,6 +97,7 @@ export async function initCommand(
   if (fs.existsSync('promptscript.yaml') && !options.force) {
     ConsoleOutput.warn('PromptScript already initialized');
     ConsoleOutput.muted('Use --force to reinitialize');
+    process.exitCode = 2;
     return;
   }
 
@@ -99,6 +105,20 @@ export async function initCommand(
     // Detect project info and AI tools
     const projectInfo = await detectProject(services);
     const aiToolsDetection = await detectAITools(services);
+
+    let migrationMode: 'static' | 'llm' | 'skip' | 'none' = 'none';
+
+    if (hasMigrationCandidates(aiToolsDetection)) {
+      if (options._forceMigrate) {
+        migrationMode = options._forceLlm ? 'llm' : 'static';
+      } else if (options.yes && options.autoImport) {
+        migrationMode = 'static';
+      } else if (options.yes) {
+        migrationMode = 'skip';
+      } else {
+        migrationMode = await showGatewayPrompt(aiToolsDetection, services);
+      }
+    }
 
     // Detect Prettier configuration
     const prettierConfigPath = findPrettierConfig(process.cwd());
@@ -134,51 +154,34 @@ export async function initCommand(
     const configContent = generateConfig(config);
     await fs.writeFile('promptscript.yaml', configContent, 'utf-8');
 
-    const projectPsContent = generateProjectPs(config, projectInfo);
-    await fs.writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
+    // Branch on migration mode for file creation
+    let importedFiles: Map<string, string> | undefined;
+    if (migrationMode === 'static') {
+      importedFiles = await handleStaticMigration(
+        aiToolsDetection.migrationCandidates,
+        config,
+        options,
+        services
+      );
+      // Write imported files to .promptscript/
+      for (const [fileName, content] of importedFiles) {
+        await fs.writeFile(`.promptscript/${fileName}`, content, 'utf-8');
+      }
+    } else {
+      // For 'llm', 'skip', and 'none' modes, write scaffold project.prs
+      const projectPsContent = generateProjectPs(config, projectInfo);
+      await fs.writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
+    }
 
-    // Install migration skill if requested
+    if (migrationMode === 'llm') {
+      await handleLlmMigration(aiToolsDetection.migrationCandidates, options, services);
+    }
+
+    // Install migration skill to targets
     // Copies bundled SKILL.md to both .promptscript/skills/ (source) AND
     // directly to each target's skill directory so AI tools can discover
-    // the skill without running `prs compile` first (which would overwrite
-    // existing instruction files before they can be migrated).
-    const installedSkillPaths: string[] = [];
-    if (options.migrate) {
-      const skillName = 'promptscript';
-      const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
-      try {
-        const rawSkillContent = readFileSync(skillSource, 'utf-8');
-        // Add PromptScript marker so `prs compile` can safely overwrite these files.
-        // Use YAML comment inside frontmatter to avoid breaking tools like Factory AI
-        // that cannot parse HTML comments between frontmatter and content body.
-        let skillContent = rawSkillContent;
-        const hasMarker =
-          rawSkillContent.includes('<!-- PromptScript') ||
-          rawSkillContent.includes('# promptscript-generated:');
-        if (!hasMarker && rawSkillContent.startsWith('---')) {
-          const yamlMarker = `# promptscript-generated: ${new Date().toISOString()}`;
-          skillContent = `---\n${yamlMarker}${rawSkillContent.slice(3)}`;
-        }
-
-        // Install to .promptscript/skills/ (canonical source)
-        const skillDest = `.promptscript/skills/${skillName}`;
-        await fs.mkdir(skillDest, { recursive: true });
-        await fs.writeFile(`${skillDest}/SKILL.md`, skillContent, 'utf-8');
-        installedSkillPaths.push(`${skillDest}/SKILL.md`);
-
-        // Install directly to each target's skill directory
-        for (const target of config.targets) {
-          const targetSkillDir = getTargetSkillDir(target, skillName);
-          if (targetSkillDir) {
-            await fs.mkdir(targetSkillDir.dir, { recursive: true });
-            await fs.writeFile(targetSkillDir.path, skillContent, 'utf-8');
-            installedSkillPaths.push(targetSkillDir.path);
-          }
-        }
-      } catch {
-        ConsoleOutput.warn(`Could not install migration skill from ${skillSource}`);
-      }
-    }
+    // the skill without running `prs compile` first.
+    const installedSkillPaths = await installSkillToTargets(config.targets, services);
 
     spinner.succeed('PromptScript initialized');
 
@@ -186,7 +189,13 @@ export async function initCommand(
     ConsoleOutput.newline();
     console.log('Created:');
     ConsoleOutput.success('promptscript.yaml');
-    ConsoleOutput.success('.promptscript/project.prs');
+    if (importedFiles) {
+      for (const fileName of importedFiles.keys()) {
+        ConsoleOutput.success(`.promptscript/${fileName}`);
+      }
+    } else {
+      ConsoleOutput.success('.promptscript/project.prs');
+    }
     for (const skillPath of installedSkillPaths) {
       ConsoleOutput.success(skillPath);
     }
@@ -221,14 +230,17 @@ export async function initCommand(
     ConsoleOutput.newline();
     console.log('Next steps:');
 
-    // Show migration-specific instructions if --migrate was used
-    if (options.migrate && installedSkillPaths.length > 0) {
+    if (migrationMode === 'llm') {
       ConsoleOutput.muted('1. Use the migration skill in your AI tool:');
       const skillInvocations = getSkillInvocationHints(config.targets);
       for (const hint of skillInvocations) {
         ConsoleOutput.muted(`   ${hint}`);
       }
       ConsoleOutput.muted('2. Review generated .promptscript/project.prs');
+      ConsoleOutput.muted('3. Run: prs compile');
+    } else if (migrationMode === 'static') {
+      ConsoleOutput.muted('1. Review imported .promptscript/ files');
+      ConsoleOutput.muted('2. Run: prs validate --strict');
       ConsoleOutput.muted('3. Run: prs compile');
     } else {
       ConsoleOutput.muted('1. Edit .promptscript/project.prs to customize your AI instructions');
@@ -264,6 +276,195 @@ export async function initCommand(
     );
     process.exitCode = 1;
   }
+}
+
+/**
+ * Show the gateway prompt asking the user how to handle existing instruction files.
+ */
+async function showGatewayPrompt(
+  detection: Awaited<ReturnType<typeof detectAITools>>,
+  services: CliServices
+): Promise<'static' | 'llm' | 'skip'> {
+  ConsoleOutput.newline();
+  console.log('Found existing instruction files:');
+  for (const c of detection.migrationCandidates) {
+    ConsoleOutput.muted(`  ${c.path} (${c.sizeHuman}, ${c.toolName})`);
+  }
+  ConsoleOutput.newline();
+
+  const gateway = await services.prompts.select({
+    message: 'How would you like to start?',
+    choices: [
+      { name: 'Migrate existing instructions to PromptScript', value: 'migrate' },
+      { name: 'Fresh start (ignore existing files)', value: 'fresh-start' },
+    ],
+  });
+
+  if (gateway === 'fresh-start') return 'skip';
+
+  const strategy = await services.prompts.select({
+    message: 'How do you want to migrate?',
+    choices: [
+      { name: 'Static import (fast, deterministic)', value: 'static' },
+      { name: 'AI-assisted migration (installs skill + generates prompt)', value: 'llm' },
+    ],
+  });
+
+  return strategy as 'static' | 'llm';
+}
+
+/**
+ * Handle backup before migration if needed.
+ */
+async function handleMigrationBackup(
+  candidates: MigrationCandidate[],
+  options: InitOptions,
+  services: CliServices
+): Promise<void> {
+  const gitRepo = isGitRepo(services);
+  if (!gitRepo) {
+    ConsoleOutput.warn('Not a git repository. Files are not version-controlled.');
+  }
+
+  const shouldBackup =
+    options.backup ??
+    (options.yes
+      ? false
+      : await services.prompts.confirm({
+          message: 'Create backup to .prs-backup/?',
+          default: !gitRepo,
+        }));
+
+  if (shouldBackup) {
+    const backupResult = await createBackup(
+      candidates.map((c) => c.path),
+      services
+    );
+    ConsoleOutput.info(`Backup created: ${backupResult.dir}`);
+  }
+}
+
+/**
+ * Handle static (deterministic) migration of instruction files.
+ */
+async function handleStaticMigration(
+  candidates: MigrationCandidate[],
+  config: ResolvedConfig,
+  options: InitOptions,
+  services: CliServices
+): Promise<Map<string, string>> {
+  await handleMigrationBackup(candidates, options, services);
+
+  let selectedPaths = candidates.map((c) => c.path);
+  if (!options.yes) {
+    selectedPaths = await services.prompts.checkbox({
+      message: 'Select files to import:',
+      choices: candidates.map((c) => ({
+        name: `${c.path} (${c.sizeHuman}, ${c.toolName})`,
+        value: c.path,
+        checked: true,
+      })),
+    });
+  }
+
+  const spinner = createSpinner('Importing instruction files...').start();
+
+  const result = await importMultipleFiles(
+    selectedPaths.map((f) => resolve(process.cwd(), f)),
+    { projectName: config.projectId }
+  );
+
+  spinner.succeed(`Imported ${result.perFileReports.length} files`);
+
+  ConsoleOutput.newline();
+  console.log('Import Summary:');
+  for (const report of result.perFileReports) {
+    const pct = Math.round(report.confidence * 100);
+    ConsoleOutput.muted(`  ${basename(report.file)} -> ${report.sectionCount} sections (${pct}%)`);
+  }
+  ConsoleOutput.muted(`  Overall confidence: ${Math.round(result.overallConfidence * 100)}%`);
+  if (result.deduplicatedCount > 0) {
+    ConsoleOutput.muted(`  Deduplicated: ${result.deduplicatedCount} lines`);
+  }
+  for (const w of result.warnings) {
+    ConsoleOutput.warn(w);
+  }
+
+  return result.files;
+}
+
+/**
+ * Handle LLM-assisted migration by generating a prompt.
+ */
+async function handleLlmMigration(
+  candidates: MigrationCandidate[],
+  options: InitOptions,
+  services: CliServices
+): Promise<void> {
+  await handleMigrationBackup(candidates, options, services);
+
+  const prompt = generateMigrationPrompt(
+    candidates.map((c) => ({ path: c.path, sizeHuman: c.sizeHuman, toolName: c.toolName }))
+  );
+
+  await services.fs.writeFile('.promptscript/migration-prompt.md', prompt, 'utf-8');
+
+  const copied = copyToClipboard(prompt);
+  if (copied) {
+    ConsoleOutput.success('Migration prompt copied to clipboard!');
+  } else {
+    ConsoleOutput.newline();
+    console.log(prompt);
+  }
+
+  ConsoleOutput.info('Saved to .promptscript/migration-prompt.md');
+}
+
+/**
+ * Install the bundled PromptScript skill to .promptscript/skills/ and all targets.
+ * Returns array of installed skill file paths.
+ */
+async function installSkillToTargets(
+  targets: AIToolTarget[],
+  services: CliServices
+): Promise<string[]> {
+  const installedSkillPaths: string[] = [];
+  const skillName = 'promptscript';
+  const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
+  try {
+    const rawSkillContent = readFileSync(skillSource, 'utf-8');
+    // Add PromptScript marker so `prs compile` can safely overwrite these files.
+    // Use YAML comment inside frontmatter to avoid breaking tools like Factory AI
+    // that cannot parse HTML comments between frontmatter and content body.
+    let skillContent = rawSkillContent;
+    const hasMarker =
+      rawSkillContent.includes('<!-- PromptScript') ||
+      rawSkillContent.includes('# promptscript-generated:');
+    if (!hasMarker && rawSkillContent.startsWith('---')) {
+      const yamlMarker = `# promptscript-generated: ${new Date().toISOString()}`;
+      skillContent = `---\n${yamlMarker}${rawSkillContent.slice(3)}`;
+    }
+
+    // Install to .promptscript/skills/ (canonical source)
+    const skillDest = `.promptscript/skills/${skillName}`;
+    await services.fs.mkdir(skillDest, { recursive: true });
+    await services.fs.writeFile(`${skillDest}/SKILL.md`, skillContent, 'utf-8');
+    installedSkillPaths.push(`${skillDest}/SKILL.md`);
+
+    // Install directly to each target's skill directory
+    for (const target of targets) {
+      const targetSkillDir = getTargetSkillDir(target, skillName);
+      if (targetSkillDir) {
+        await services.fs.mkdir(targetSkillDir.dir, { recursive: true });
+        await services.fs.writeFile(targetSkillDir.path, skillContent, 'utf-8');
+        installedSkillPaths.push(targetSkillDir.path);
+      }
+    }
+  } catch {
+    ConsoleOutput.warn(`Could not install migration skill from ${skillSource}`);
+  }
+
+  return installedSkillPaths;
 }
 
 /**

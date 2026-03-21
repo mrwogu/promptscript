@@ -16,38 +16,38 @@
 
 ### New files
 
-| File | Responsibility |
-|------|---------------|
-| `packages/cli/src/utils/clipboard.ts` | Cross-platform clipboard write (pbcopy/xclip/clip) |
-| `packages/cli/src/utils/backup.ts` | `.prs-backup/<timestamp>/` creation, git repo detection |
-| `packages/cli/src/utils/migration-prompt.ts` | Kick-start prompt generation from MigrationCandidate[] |
-| `packages/importer/src/merger.ts` | Merge ScoredSection[] from multiple files: dedup, group by block |
-| `packages/importer/src/multi-importer.ts` | Batch importFile() + merger -> modular .prs file map |
-| `packages/cli/src/commands/migrate.ts` | Thin wrapper: delegates to initCommand with migrate flags |
+| File                                         | Responsibility                                                   |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| `packages/cli/src/utils/clipboard.ts`        | Cross-platform clipboard write (pbcopy/xclip/clip)               |
+| `packages/cli/src/utils/backup.ts`           | `.prs-backup/<timestamp>/` creation, git repo detection          |
+| `packages/cli/src/utils/migration-prompt.ts` | Kick-start prompt generation from MigrationCandidate[]           |
+| `packages/importer/src/merger.ts`            | Merge ScoredSection[] from multiple files: dedup, group by block |
+| `packages/importer/src/multi-importer.ts`    | Batch importFile() + merger -> modular .prs file map             |
+| `packages/cli/src/commands/migrate.ts`       | Thin wrapper: delegates to initCommand with migrate flags        |
 
 ### New test files
 
-| File | Tests |
-|------|-------|
-| `packages/cli/src/utils/__tests__/clipboard.spec.ts` | Clipboard write, fallback on missing binary |
-| `packages/cli/src/utils/__tests__/backup.spec.ts` | Backup creation, git detection, timestamp dirs |
-| `packages/cli/src/utils/__tests__/migration-prompt.spec.ts` | Prompt generation from candidates |
-| `packages/importer/src/__tests__/merger.spec.ts` | Section merge, dedup, conflict resolution per block type |
-| `packages/importer/src/__tests__/multi-importer.spec.ts` | Multi-file import, modular output, confidence report |
-| `packages/cli/src/__tests__/init-migrate.spec.ts` | Init gateway, static migration, AI-assisted flow |
-| `packages/cli/src/__tests__/migrate-command.spec.ts` | `prs migrate` delegation, --static, --llm, --files |
+| File                                                        | Tests                                                    |
+| ----------------------------------------------------------- | -------------------------------------------------------- |
+| `packages/cli/src/utils/__tests__/clipboard.spec.ts`        | Clipboard write, fallback on missing binary              |
+| `packages/cli/src/utils/__tests__/backup.spec.ts`           | Backup creation, git detection, timestamp dirs           |
+| `packages/cli/src/utils/__tests__/migration-prompt.spec.ts` | Prompt generation from candidates                        |
+| `packages/importer/src/__tests__/merger.spec.ts`            | Section merge, dedup, conflict resolution per block type |
+| `packages/importer/src/__tests__/multi-importer.spec.ts`    | Multi-file import, modular output, confidence report     |
+| `packages/cli/src/__tests__/init-migrate.spec.ts`           | Init gateway, static migration, AI-assisted flow         |
+| `packages/cli/src/__tests__/migrate-command.spec.ts`        | `prs migrate` delegation, --static, --llm, --files       |
 
 ### Modified files
 
-| File | Changes |
-|------|---------|
-| `packages/cli/src/utils/ai-tools-detector.ts` | `migrationCandidates: string[]` -> `MigrationCandidate[]` with size/format/toolName |
-| `packages/cli/src/types.ts` | Add `autoImport`, `backup` to `InitOptions`; add `MigrateOptions` interface |
-| `packages/cli/src/commands/init.ts` | Gateway prompt, migrate flow, skill install on fresh start, exit code 2 |
-| `packages/cli/src/cli.ts` | Register `prs migrate`, add `--auto-import`/`--backup` to init, deprecate `--migrate` |
-| `packages/importer/src/emitter.ts` | Add `emitModularFiles()` for multi-file output |
-| `packages/importer/src/index.ts` | Export merger, multi-importer |
-| `packages/cli/skills/promptscript/SKILL.md` | Update CLI commands section with `prs migrate` |
+| File                                          | Changes                                                                               |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `packages/cli/src/utils/ai-tools-detector.ts` | `migrationCandidates: string[]` -> `MigrationCandidate[]` with size/format/toolName   |
+| `packages/cli/src/types.ts`                   | Add `autoImport`, `backup` to `InitOptions`; add `MigrateOptions` interface           |
+| `packages/cli/src/commands/init.ts`           | Gateway prompt, migrate flow, skill install on fresh start, exit code 2               |
+| `packages/cli/src/cli.ts`                     | Register `prs migrate`, add `--auto-import`/`--backup` to init, deprecate `--migrate` |
+| `packages/importer/src/emitter.ts`            | Add `emitModularFiles()` for multi-file output                                        |
+| `packages/importer/src/index.ts`              | Export merger, multi-importer                                                         |
+| `packages/cli/skills/promptscript/SKILL.md`   | Update CLI commands section with `prs migrate`                                        |
 
 ---
 
@@ -56,6 +56,7 @@
 ### Task 1: Clipboard Utility
 
 **Files:**
+
 - Create: `packages/cli/src/utils/clipboard.ts`
 - Test: `packages/cli/src/utils/__tests__/clipboard.spec.ts`
 
@@ -165,6 +166,7 @@ git commit -m "feat(cli): add cross-platform clipboard utility"
 ### Task 2: Backup Utility
 
 **Files:**
+
 - Create: `packages/cli/src/utils/backup.ts`
 - Test: `packages/cli/src/utils/__tests__/backup.spec.ts`
 
@@ -233,9 +235,7 @@ describe('createBackup', () => {
   });
 
   it('skips files that do not exist', async () => {
-    vi.mocked(mockServices.fs.existsSync).mockImplementation(
-      (p: string) => p !== '.cursorrules'
-    );
+    vi.mocked(mockServices.fs.existsSync).mockImplementation((p: string) => p !== '.cursorrules');
     await createBackup(['CLAUDE.md', '.cursorrules'], mockServices);
 
     expect(mockServices.fs.writeFile).toHaveBeenCalledTimes(1);
@@ -311,6 +311,7 @@ git commit -m "feat(cli): add backup utility with git repo detection"
 ### Task 3: Migration Prompt Generator
 
 **Files:**
+
 - Create: `packages/cli/src/utils/migration-prompt.ts`
 - Test: `packages/cli/src/utils/__tests__/migration-prompt.spec.ts`
 
@@ -388,9 +389,7 @@ export interface MigrationPromptInput {
  * It does NOT include file contents -- the AI reads them from disk.
  */
 export function generateMigrationPrompt(candidates: MigrationPromptInput[]): string {
-  const fileList = candidates
-    .map((c) => `- ${c.path} (${c.sizeHuman}, ${c.toolName})`)
-    .join('\n');
+  const fileList = candidates.map((c) => `- ${c.path} (${c.sizeHuman}, ${c.toolName})`).join('\n');
 
   return `Migrate my existing AI instructions to PromptScript.
 
@@ -436,6 +435,7 @@ git commit -m "feat(cli): add migration prompt generator for AI-assisted migrati
 ### Task 4: Section Merger
 
 **Files:**
+
 - Create: `packages/importer/src/merger.ts`
 - Test: `packages/importer/src/__tests__/merger.spec.ts`
 
@@ -639,9 +639,7 @@ export function mergeSections(sections: SourcedSection[]): MergeResult {
 }
 
 function mergeIdentity(sections: SourcedSection[]): MergedBlock {
-  const sorted = [...sections].sort(
-    (a, b) => b.content.trim().length - a.content.trim().length
-  );
+  const sorted = [...sections].sort((a, b) => b.content.trim().length - a.content.trim().length);
   const winner = sorted[0]!;
   const others = sorted.slice(1);
 
@@ -660,8 +658,7 @@ function mergeIdentity(sections: SourcedSection[]): MergedBlock {
 
 function mergeWithAttribution(sections: SourcedSection[]): MergedBlock {
   const parts = sections.map((s) => `# Source: ${s.source}\n${s.content}`);
-  const avgConfidence =
-    sections.reduce((sum, s) => sum + s.confidence, 0) / sections.length;
+  const avgConfidence = sections.reduce((sum, s) => sum + s.confidence, 0) / sections.length;
 
   return {
     targetBlock: sections[0]!.targetBlock,
@@ -691,8 +688,7 @@ function mergeUnion(sections: SourcedSection[]): { block: MergedBlock; deduped: 
     }
   }
 
-  const avgConfidence =
-    sections.reduce((sum, s) => sum + s.confidence, 0) / sections.length;
+  const avgConfidence = sections.reduce((sum, s) => sum + s.confidence, 0) / sections.length;
 
   return {
     block: {
@@ -724,6 +720,7 @@ git commit -m "feat(importer): add section merger with per-block merge strategie
 ### Task 5: Multi-file Importer & Modular Emitter
 
 **Files:**
+
 - Create: `packages/importer/src/multi-importer.ts`
 - Modify: `packages/importer/src/emitter.ts` (add `emitModularFiles()`)
 - Modify: `packages/importer/src/index.ts` (export new modules)
@@ -743,10 +740,10 @@ const fixturesDir = resolve(__dirname, 'fixtures');
 
 describe('importMultipleFiles', () => {
   it('imports multiple files and returns modular output', async () => {
-    const result = await importMultipleFiles([
-      resolve(fixturesDir, 'sample-claude.md'),
-      resolve(fixturesDir, 'sample-copilot.md'),
-    ], { projectName: 'test-project' });
+    const result = await importMultipleFiles(
+      [resolve(fixturesDir, 'sample-claude.md'), resolve(fixturesDir, 'sample-copilot.md')],
+      { projectName: 'test-project' }
+    );
 
     expect(result.files.has('project.prs')).toBe(true);
     expect(result.files.get('project.prs')).toContain('@meta {');
@@ -755,17 +752,17 @@ describe('importMultipleFiles', () => {
   });
 
   it('project.prs contains @identity block', async () => {
-    const result = await importMultipleFiles([
-      resolve(fixturesDir, 'sample-claude.md'),
-    ], { projectName: 'my-proj' });
+    const result = await importMultipleFiles([resolve(fixturesDir, 'sample-claude.md')], {
+      projectName: 'my-proj',
+    });
 
     expect(result.files.get('project.prs')).toContain('@identity');
   });
 
   it('only emits files with content', async () => {
-    const result = await importMultipleFiles([
-      resolve(fixturesDir, 'sample-claude.md'),
-    ], { projectName: 'test' });
+    const result = await importMultipleFiles([resolve(fixturesDir, 'sample-claude.md')], {
+      projectName: 'test',
+    });
 
     for (const [, content] of result.files) {
       expect(content.trim().length).toBeGreaterThan(0);
@@ -773,10 +770,10 @@ describe('importMultipleFiles', () => {
   });
 
   it('returns per-file confidence reports', async () => {
-    const result = await importMultipleFiles([
-      resolve(fixturesDir, 'sample-claude.md'),
-      resolve(fixturesDir, 'sample-copilot.md'),
-    ], { projectName: 'test' });
+    const result = await importMultipleFiles(
+      [resolve(fixturesDir, 'sample-claude.md'), resolve(fixturesDir, 'sample-copilot.md')],
+      { projectName: 'test' }
+    );
 
     expect(result.perFileReports).toHaveLength(2);
     expect(result.perFileReports[0]!.file).toContain('sample-claude.md');
@@ -784,28 +781,28 @@ describe('importMultipleFiles', () => {
   });
 
   it('reports deduplication count', async () => {
-    const result = await importMultipleFiles([
-      resolve(fixturesDir, 'sample-claude.md'),
-      resolve(fixturesDir, 'sample-copilot.md'),
-    ], { projectName: 'test' });
+    const result = await importMultipleFiles(
+      [resolve(fixturesDir, 'sample-claude.md'), resolve(fixturesDir, 'sample-copilot.md')],
+      { projectName: 'test' }
+    );
 
     expect(typeof result.deduplicatedCount).toBe('number');
   });
 
   it('skips files that fail to import with warnings', async () => {
-    const result = await importMultipleFiles([
-      resolve(fixturesDir, 'sample-claude.md'),
-      '/nonexistent/file.md',
-    ], { projectName: 'test' });
+    const result = await importMultipleFiles(
+      [resolve(fixturesDir, 'sample-claude.md'), '/nonexistent/file.md'],
+      { projectName: 'test' }
+    );
 
     expect(result.files.has('project.prs')).toBe(true);
     expect(result.warnings.some((w) => w.includes('/nonexistent/file.md'))).toBe(true);
   });
 
   it('handles single file input', async () => {
-    const result = await importMultipleFiles([
-      resolve(fixturesDir, 'sample-claude.md'),
-    ], { projectName: 'single' });
+    const result = await importMultipleFiles([resolve(fixturesDir, 'sample-claude.md')], {
+      projectName: 'single',
+    });
 
     expect(result.files.has('project.prs')).toBe(true);
   });
@@ -1054,6 +1051,7 @@ git commit -m "feat(importer): add multi-file import with modular .prs output"
 ### Task 6: Enrich MigrationCandidate in ai-tools-detector
 
 **Files:**
+
 - Modify: `packages/cli/src/utils/ai-tools-detector.ts`
 - Modify: `packages/cli/src/types.ts`
 - Test: `packages/cli/src/utils/__tests__/ai-tools-detector.spec.ts` (new)
@@ -1065,7 +1063,11 @@ git commit -m "feat(importer): add multi-file import with modular .prs output"
 ```typescript
 // packages/cli/src/utils/__tests__/ai-tools-detector.spec.ts
 import { describe, it, expect, vi } from 'vitest';
-import { detectAITools, hasMigrationCandidates, type AIToolsDetection } from '../ai-tools-detector.js';
+import {
+  detectAITools,
+  hasMigrationCandidates,
+  type AIToolsDetection,
+} from '../ai-tools-detector.js';
 import type { CliServices } from '../../services.js';
 
 vi.mock('@promptscript/importer', () => ({
@@ -1076,9 +1078,7 @@ describe('detectAITools -- enriched migration candidates', () => {
   it('returns MigrationCandidate objects with metadata', async () => {
     const mockServices = {
       fs: {
-        existsSync: vi.fn().mockImplementation((p: string) =>
-          p === 'CLAUDE.md' || p === '.git'
-        ),
+        existsSync: vi.fn().mockImplementation((p: string) => p === 'CLAUDE.md' || p === '.git'),
         readFile: vi.fn().mockResolvedValue('# My instructions\nYou are a helpful assistant'),
         readdir: vi.fn().mockResolvedValue([]),
         readFileSync: vi.fn().mockReturnValue('# My instructions\nYou are a helpful assistant'),
@@ -1102,7 +1102,13 @@ describe('detectAITools -- enriched migration candidates', () => {
       detected: ['claude'],
       details: { claude: ['CLAUDE.md'] },
       migrationCandidates: [
-        { path: 'CLAUDE.md', format: 'claude', sizeBytes: 1024, sizeHuman: '1.0 KB', toolName: 'Claude Code' },
+        {
+          path: 'CLAUDE.md',
+          format: 'claude',
+          sizeBytes: 1024,
+          sizeHuman: '1.0 KB',
+          toolName: 'Claude Code',
+        },
       ],
     };
     expect(hasMigrationCandidates(detection)).toBe(true);
@@ -1131,6 +1137,7 @@ Key changes:
 1. Add import at top: `import { detectFormat, type DetectedFormat } from '@promptscript/importer';`
 
 2. Add `MigrationCandidate` interface and export it:
+
 ```typescript
 export interface MigrationCandidate {
   path: string;
@@ -1144,12 +1151,14 @@ export interface MigrationCandidate {
 3. Change `AIToolsDetection.migrationCandidates` type from `string[]` to `MigrationCandidate[]`
 
 4. Expand `INSTRUCTION_FILES` to include:
+
 ```typescript
 '.windsurfrules', '.clinerules', '.goosehints',
 'augment-guidelines.md', 'codex.md',
 ```
 
 5. In `detectAITools()`, replace the string push with enriched object (use async readFile to match existing pattern):
+
 ```typescript
 const content = await services.fs.readFile(file, 'utf-8');
 const sizeBytes = Buffer.byteLength(content, 'utf-8');
@@ -1163,6 +1172,7 @@ migrationCandidates.push({
 ```
 
 6. Add helper functions:
+
 ```typescript
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -1170,15 +1180,20 @@ function formatFileSize(bytes: number): string {
 }
 
 const FILE_TOOL_NAMES: Record<string, string> = {
-  'CLAUDE.md': 'Claude Code', 'claude.md': 'Claude Code',
+  'CLAUDE.md': 'Claude Code',
+  'claude.md': 'Claude Code',
   '.cursorrules': 'Cursor',
   '.github/copilot-instructions.md': 'GitHub Copilot',
   'AGENTS.md': 'Factory AI / Codex',
-  'OPENCODE.md': 'OpenCode', 'GEMINI.md': 'Gemini CLI',
-  '.windsurfrules': 'Windsurf', '.clinerules': 'Cline',
+  'OPENCODE.md': 'OpenCode',
+  'GEMINI.md': 'Gemini CLI',
+  '.windsurfrules': 'Windsurf',
+  '.clinerules': 'Cline',
   '.goosehints': 'Goose',
-  'augment-guidelines.md': 'Augment', 'codex.md': 'Codex',
-  'AI_INSTRUCTIONS.md': 'Generic', 'AI.md': 'Generic',
+  'augment-guidelines.md': 'Augment',
+  'codex.md': 'Codex',
+  'AI_INSTRUCTIONS.md': 'Generic',
+  'AI.md': 'Generic',
 };
 
 function toolNameForFile(file: string): string {
@@ -1212,6 +1227,7 @@ export function formatMigrationHint(detection: AIToolsDetection): string[] {
 - [ ] **Step 4: Update `types.ts`**
 
 Add to `InitOptions` (note: `import` is a reserved keyword, use `autoImport`):
+
 ```typescript
 /** Non-interactive static import of detected files (--auto-import) */
 autoImport?: boolean;
@@ -1226,6 +1242,7 @@ _migrateFiles?: string[];
 ```
 
 Add new interface:
+
 ```typescript
 export interface MigrateOptions {
   static?: boolean;
@@ -1258,11 +1275,13 @@ git commit -m "feat(cli): enrich migration candidates with size, format, and too
 ### Task 7: Gateway Prompt & Migration Flow in init.ts
 
 **Files:**
+
 - Modify: `packages/cli/src/commands/init.ts`
 - Test: `packages/cli/src/__tests__/init-migrate.spec.ts` (new)
 - Modify: `packages/cli/src/__tests__/init-command.spec.ts` (update exit code test)
 
 **Context:** This is the largest task. It modifies `initCommand()` to add:
+
 1. Exit code 2 for "already initialized"
 2. Gateway prompt when migration candidates detected
 3. Static migration flow (calls `importMultipleFiles`)
@@ -1292,14 +1311,20 @@ vi.mock('../config/user-config.js', () => ({
 }));
 vi.mock('ora', () => ({
   default: vi.fn().mockReturnValue({
-    start: vi.fn().mockReturnThis(), succeed: vi.fn().mockReturnThis(),
-    fail: vi.fn().mockReturnThis(), warn: vi.fn().mockReturnThis(), text: '',
+    start: vi.fn().mockReturnThis(),
+    succeed: vi.fn().mockReturnThis(),
+    fail: vi.fn().mockReturnThis(),
+    warn: vi.fn().mockReturnThis(),
+    text: '',
   }),
 }));
 vi.mock('chalk', () => ({
   default: {
-    green: (s: string) => s, red: (s: string) => s,
-    yellow: (s: string) => s, blue: (s: string) => s, gray: (s: string) => s,
+    green: (s: string) => s,
+    red: (s: string) => s,
+    yellow: (s: string) => s,
+    blue: (s: string) => s,
+    gray: (s: string) => s,
   },
 }));
 
@@ -1358,12 +1383,12 @@ describe('init -- migration flow', () => {
     };
   });
 
-  afterEach(() => { consoleSpy.mockRestore(); });
+  afterEach(() => {
+    consoleSpy.mockRestore();
+  });
 
   it('sets exit code 2 when already initialized', async () => {
-    mockFs.existsSync = vi.fn().mockImplementation(
-      (p: string) => p === 'promptscript.yaml'
-    );
+    mockFs.existsSync = vi.fn().mockImplementation((p: string) => p === 'promptscript.yaml');
     await initCommand({}, mockServices);
     expect(process.exitCode).toBe(2);
   });
@@ -1371,9 +1396,10 @@ describe('init -- migration flow', () => {
   it('shows gateway prompt when migration candidates detected (interactive)', async () => {
     // Gateway: fresh-start (no second select for strategy needed)
     // Then: registry skip, targets checkbox
-    mockPrompts.select = vi.fn()
-      .mockResolvedValueOnce('fresh-start')  // gateway
-      .mockResolvedValueOnce('skip');         // registry
+    mockPrompts.select = vi
+      .fn()
+      .mockResolvedValueOnce('fresh-start') // gateway
+      .mockResolvedValueOnce('skip'); // registry
 
     await initCommand({ interactive: true }, mockServices);
 
@@ -1386,10 +1412,11 @@ describe('init -- migration flow', () => {
   });
 
   it('shows strategy prompt when user picks migrate', async () => {
-    mockPrompts.select = vi.fn()
-      .mockResolvedValueOnce('migrate')   // gateway: migrate
-      .mockResolvedValueOnce('llm')       // strategy: AI-assisted
-      .mockResolvedValueOnce('skip');      // registry
+    mockPrompts.select = vi
+      .fn()
+      .mockResolvedValueOnce('migrate') // gateway: migrate
+      .mockResolvedValueOnce('llm') // strategy: AI-assisted
+      .mockResolvedValueOnce('skip'); // registry
 
     await initCommand({ interactive: true }, mockServices);
 
@@ -1472,6 +1499,7 @@ This is the most complex change. Key modifications:
 **3a.** Change "already initialized" from `return` to `process.exitCode = 2; return;`
 
 **3b.** Add new imports at top of init.ts:
+
 ```typescript
 import { importMultipleFiles } from '@promptscript/importer';
 import { copyToClipboard } from '../utils/clipboard.js';
@@ -1481,6 +1509,7 @@ import type { MigrationCandidate } from '../utils/ai-tools-detector.js';
 ```
 
 **3c.** After `detectAITools()`, add migration mode determination:
+
 ```typescript
 let migrationMode: 'static' | 'llm' | 'skip' | 'none' = 'none';
 
@@ -1498,6 +1527,7 @@ if (hasMigrationCandidates(aiToolsDetection)) {
 ```
 
 **3d.** Add `showGatewayPrompt()` function:
+
 ```typescript
 async function showGatewayPrompt(
   detection: Awaited<ReturnType<typeof detectAITools>>,
@@ -1533,6 +1563,7 @@ async function showGatewayPrompt(
 ```
 
 **3e.** Add `handleMigrationBackup()` helper (shared by static and LLM flows):
+
 ```typescript
 async function handleMigrationBackup(
   candidates: MigrationCandidate[],
@@ -1544,16 +1575,19 @@ async function handleMigrationBackup(
     ConsoleOutput.warn('Not a git repository. Files are not version-controlled.');
   }
 
-  const shouldBackup = options.backup ?? (
-    options.yes ? false : await services.prompts.confirm({
-      message: 'Create backup to .prs-backup/?',
-      default: !gitRepo,
-    })
-  );
+  const shouldBackup =
+    options.backup ??
+    (options.yes
+      ? false
+      : await services.prompts.confirm({
+          message: 'Create backup to .prs-backup/?',
+          default: !gitRepo,
+        }));
 
   if (shouldBackup) {
     const backupResult = await createBackup(
-      candidates.map((c) => c.path), services
+      candidates.map((c) => c.path),
+      services
     );
     ConsoleOutput.info(`Backup created: ${backupResult.dir}`);
   }
@@ -1561,6 +1595,7 @@ async function handleMigrationBackup(
 ```
 
 **3f.** Add `handleStaticMigration()` — full implementation:
+
 ```typescript
 async function handleStaticMigration(
   candidates: MigrationCandidate[],
@@ -1614,6 +1649,7 @@ async function handleStaticMigration(
 Add `import { basename, resolve } from 'path';` (resolve is already imported, basename may need adding).
 
 **3g.** Add `handleLlmMigration()` — full implementation:
+
 ```typescript
 async function handleLlmMigration(
   candidates: MigrationCandidate[],
@@ -1647,11 +1683,9 @@ async function handleLlmMigration(
 ```
 
 **3h.** Extract existing skill install logic (lines 146-181 of current init.ts) into `installSkillToTargets()`:
+
 ```typescript
-function installSkillToTargets(
-  targets: AIToolTarget[],
-  services: CliServices
-): string[] {
+function installSkillToTargets(targets: AIToolTarget[], services: CliServices): string[] {
   const skillName = 'promptscript';
   const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
   const installedPaths: string[] = [];
@@ -1686,6 +1720,7 @@ function installSkillToTargets(
 ```
 
 **3i.** In the file creation section, branch on `migrationMode`:
+
 - If `migrationMode === 'static'`: call `handleStaticMigration()`, write returned files to `.promptscript/` instead of scaffold `project.prs`
 - If `migrationMode === 'llm'`: write scaffold `project.prs`, then call `handleLlmMigration()`
 - If `migrationMode === 'skip'` or `'none'`: existing scaffold behavior
@@ -1695,6 +1730,7 @@ function installSkillToTargets(
 - [ ] **Step 4: Update existing test in init-command.spec.ts**
 
 Change the "should warn when already initialized" test:
+
 ```typescript
 it('should set exit code 2 when already initialized', async () => {
   mockFs.existsSync.mockImplementation((path: string) => path === 'promptscript.yaml');
@@ -1727,6 +1763,7 @@ git commit -m "feat(cli): add gateway prompt and migration flow to prs init"
 ### Task 8: `prs migrate` Command
 
 **Files:**
+
 - Create: `packages/cli/src/commands/migrate.ts`
 - Modify: `packages/cli/src/cli.ts`
 - Test: `packages/cli/src/__tests__/migrate-command.spec.ts`
@@ -1834,21 +1871,26 @@ export async function migrateCommand(
 - [ ] **Step 4: Update `cli.ts`**
 
 Add `--auto-import` and `--backup` to init command registration:
+
 ```typescript
 .option('--auto-import', 'Automatically import existing instruction files (static)')
 .option('--backup', 'Create .prs-backup/ before migration')
 ```
 
 In the action handler, map Commander's camelCase to our option:
+
 ```typescript
 .action((opts) => initCommand({ ...opts, autoImport: opts.autoImport }, services));
 ```
 
 Add deprecation warning for `--migrate` in init action handler. Import `ConsoleOutput` at top of `cli.ts`:
+
 ```typescript
 import { ConsoleOutput } from './output/console.js';
 ```
+
 Then in the init action:
+
 ```typescript
 if (opts.migrate) {
   ConsoleOutput.warn('--migrate is deprecated. The migration flow is now built into prs init.');
@@ -1856,6 +1898,7 @@ if (opts.migrate) {
 ```
 
 Register new `migrate` command:
+
 ```typescript
 program
   .command('migrate')
@@ -1893,6 +1936,7 @@ git commit -m "feat(cli): add prs migrate command as alias to init migration flo
 ### Task 9: Update SKILL.md
 
 **Files:**
+
 - Modify: `packages/cli/skills/promptscript/SKILL.md`
 
 - [ ] **Step 1: Update CLI Commands section**
@@ -1900,9 +1944,9 @@ git commit -m "feat(cli): add prs migrate command as alias to init migration flo
 In the `## CLI Commands` section, add `prs migrate` entries after existing commands:
 
 ```markdown
-prs migrate                 # Interactive migration flow
-prs migrate --static        # Non-interactive static import
-prs migrate --llm           # Generate AI-assisted migration prompt
+prs migrate # Interactive migration flow
+prs migrate --static # Non-interactive static import
+prs migrate --llm # Generate AI-assisted migration prompt
 ```
 
 - [ ] **Step 2: Commit**
