@@ -497,8 +497,11 @@ registry:
 ## CLI Commands
 
 ```
-prs init                    # Initialize project
-prs init --migrate          # Initialize + migration skills
+prs init                    # Initialize project (auto-detects existing files)
+prs init --auto-import      # Initialize + static import of existing files
+prs migrate                 # Interactive migration flow
+prs migrate --static        # Non-interactive static import
+prs migrate --llm           # Generate AI-assisted migration prompt
 prs compile                 # Compile to all targets
 prs compile --watch         # Watch mode
 prs validate --strict       # Validate syntax
