@@ -299,6 +299,43 @@ describe('init migration flow', () => {
     });
   });
 
+  describe('static migration deduplication report', () => {
+    it('should show deduplicated count when deduplicatedCount > 0', async () => {
+      setupMigrationCandidates();
+      mockImportMultipleFiles.mockResolvedValue({
+        files: new Map([['project.prs', '@meta { id: "test" }']]),
+        perFileReports: [{ file: '/mock/project/CLAUDE.md', sectionCount: 3, confidence: 0.85 }],
+        deduplicatedCount: 5,
+        overallConfidence: 0.85,
+        warnings: [],
+      });
+
+      await initCommand({ yes: true, autoImport: true }, mockServices);
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Deduplicated: 5 lines'));
+    });
+  });
+
+  describe('LLM clipboard failure', () => {
+    it('should print prompt to console when clipboard copy fails', async () => {
+      setupMigrationCandidates();
+      mockCopyToClipboard.mockReturnValue(false);
+
+      await initCommand({ yes: true, _forceMigrate: true, _forceLlm: true }, mockServices);
+
+      // Should still write migration-prompt.md
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        '.promptscript/migration-prompt.md',
+        expect.stringContaining('Migrate my existing AI instructions'),
+        'utf-8'
+      );
+      // Should print prompt to console since clipboard failed
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Migrate my existing AI instructions')
+      );
+    });
+  });
+
   describe('backup', () => {
     it('should create backup when --backup flag is set', async () => {
       setupMigrationCandidates();

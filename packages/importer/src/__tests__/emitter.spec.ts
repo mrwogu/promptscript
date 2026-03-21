@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { emitPrs } from '../emitter.js';
+import { emitPrs, emitModularFiles } from '../emitter.js';
 import { ConfidenceLevel } from '../confidence.js';
 import type { ScoredSection } from '../confidence.js';
+import type { MergedBlock } from '../merger.js';
 
 function scored(overrides: Partial<ScoredSection> = {}): ScoredSection {
   return {
@@ -124,5 +125,36 @@ describe('emitPrs', () => {
     expect(result).toContain('@meta {');
     expect(result).not.toContain('@identity');
     expect(result).not.toContain('@standards');
+  });
+});
+
+describe('emitModularFiles', () => {
+  function mergedBlock(overrides: Partial<MergedBlock> = {}): MergedBlock {
+    return {
+      targetBlock: 'context',
+      content: 'Some context content',
+      sources: ['CLAUDE.md'],
+      confidence: 0.85,
+      reviewComments: [],
+      ...overrides,
+    };
+  }
+
+  it('adds low-confidence review comment when block confidence < 0.5', () => {
+    const blocks = new Map<string, MergedBlock>([
+      ['context', mergedBlock({ targetBlock: 'context', confidence: 0.3 })],
+    ]);
+    const files = emitModularFiles(blocks, { projectName: 'test' });
+    const contextFile = files.get('context.prs')!;
+    expect(contextFile).toContain('# REVIEW: low confidence -- verify this mapping');
+  });
+
+  it('does not add low-confidence review comment when confidence >= 0.5', () => {
+    const blocks = new Map<string, MergedBlock>([
+      ['context', mergedBlock({ targetBlock: 'context', confidence: 0.7 })],
+    ]);
+    const files = emitModularFiles(blocks, { projectName: 'test' });
+    const contextFile = files.get('context.prs')!;
+    expect(contextFile).not.toContain('low confidence');
   });
 });

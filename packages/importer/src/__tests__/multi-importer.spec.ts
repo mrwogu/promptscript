@@ -65,4 +65,20 @@ describe('importMultipleFiles', () => {
     });
     expect(result.files.has('project.prs')).toBe(true);
   });
+
+  it('returns empty project scaffold when all imports fail', async () => {
+    const result = await importMultipleFiles(['/nonexistent/a.md', '/nonexistent/b.md'], {
+      projectName: 'empty-proj',
+    });
+    expect(result.files.has('project.prs')).toBe(true);
+    const content = result.files.get('project.prs')!;
+    expect(content).toContain('@meta {');
+    expect(content).toContain('id: "empty-proj"');
+    expect(content).toContain('@identity {');
+    expect(content).toContain('No content could be imported');
+    expect(result.perFileReports).toHaveLength(0);
+    expect(result.deduplicatedCount).toBe(0);
+    expect(result.overallConfidence).toBe(0);
+    expect(result.warnings).toHaveLength(2);
+  });
 });

@@ -96,4 +96,11 @@ describe('mergeSections', () => {
     const result = mergeSections(sections);
     expect(result.overallConfidence).toBeCloseTo(0.8, 1);
   });
+
+  it('returns overallConfidence 0 for empty sections array', () => {
+    const result = mergeSections([]);
+    expect(result.overallConfidence).toBe(0);
+    expect(result.merged.size).toBe(0);
+    expect(result.deduplicatedCount).toBe(0);
+  });
 });
