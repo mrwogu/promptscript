@@ -199,4 +199,53 @@ You are an expert planning specialist.`
     const planner = props['planner'] as Record<string, unknown>;
     expect(planner['description']).toBe('Local planner');
   });
+
+  it('should handle --- inside frontmatter values without breaking parser', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'tricky.md'),
+      '---\nname: test---name\ndescription: Has dashes\n---\nBody content.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+
+    const agentsBlock = result.blocks.find((b) => b.name === 'agents');
+    expect(agentsBlock).toBeDefined();
+    const props = (agentsBlock!.content as ObjectContent).properties;
+    // Name comes from frontmatter, not broken by --- in value
+    expect(props['test---name']).toBeDefined();
+  });
+
+  it('should skip agents with unsafe names (path traversal)', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'bad.md'),
+      '---\nname: ../../../etc/passwd\ndescription: Evil agent\n---\nEvil.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    expect(result).toBe(ast); // No agents added
+  });
+
+  it('should fall back to filename when name is empty string', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'fallback.md'),
+      '---\nname: ""\ndescription: Agent with empty name\n---\nContent.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+
+    const agentsBlock = result.blocks.find((b) => b.name === 'agents');
+    expect(agentsBlock).toBeDefined();
+    const props = (agentsBlock!.content as ObjectContent).properties;
+    // Falls back to filename 'fallback'
+    expect(props['fallback']).toBeDefined();
+  });
 });
