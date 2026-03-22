@@ -18,12 +18,19 @@ import { simpleGit } from 'simple-git';
 import { FileNotFoundError } from '@promptscript/core';
 import type { Registry } from './registry.js';
 import { GitCacheManager } from './git-cache-manager.js';
+import type { RegistryCache } from './registry-cache.js';
 import {
   parseGitUrl,
   buildAuthenticatedUrl,
   parseVersionedPath,
   normalizeGitUrl,
 } from './git-url-utils.js';
+
+/** 24-hour TTL for cached tag lists */
+const TAGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** Semver tag pattern: optional "v" prefix followed by major.minor.patch */
+const SEMVER_TAG_RE = /^v?\d+\.\d+\.\d+/;
 
 /**
  * Authentication options for Git registry.
@@ -236,6 +243,135 @@ export class GitRegistry implements Registry {
     const git = this.createGit(repoPath);
     const result = await git.revparse(['HEAD']);
     return result.trim();
+  }
+
+  /**
+   * Clone a repo at a specific Git tag (shallow, depth=1).
+   *
+   * @param repoUrl - Repository URL to clone
+   * @param tag - Git tag to check out
+   * @param targetDir - Directory to clone into
+   */
+  async cloneAtTag(repoUrl: string, tag: string, targetDir: string): Promise<void> {
+    if (existsSync(targetDir)) {
+      await fs.rm(targetDir, { recursive: true, force: true });
+    }
+    await fs.mkdir(targetDir, { recursive: true });
+
+    const git = this.createGit();
+    try {
+      await git.clone(repoUrl, targetDir, [
+        '--depth=1',
+        `--branch=${tag}`,
+        '--single-branch',
+      ]);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (this.isRefError(error)) {
+        throw new GitRefNotFoundError(tag, repoUrl);
+      }
+      if (this.isAuthError(error)) {
+        throw new GitAuthError(`Authentication failed for ${repoUrl}`, repoUrl, error);
+      }
+      throw new GitCloneError(`Failed to clone ${repoUrl} at tag ${tag}: ${error.message}`, repoUrl, error);
+    }
+  }
+
+  /**
+   * List all semver tags from a remote repo.
+   * Results are cached via RegistryCache to avoid repeated ls-remote calls.
+   *
+   * @param repoUrl - Repository URL
+   * @param cache - Optional RegistryCache (24-hour TTL for tag lists)
+   * @returns Sorted semver tag strings
+   */
+  async listTags(repoUrl: string, cache?: RegistryCache): Promise<string[]> {
+    // Check cache first
+    if (cache) {
+      const cached = await cache.getTagsMeta(repoUrl);
+      if (cached && Date.now() - cached.fetchedAt < TAGS_CACHE_TTL_MS) {
+        return cached.tags;
+      }
+    }
+
+    const git = this.createGit();
+    const raw = await git.listRemote(['--tags', repoUrl]);
+
+    // Parse "abc123\trefs/tags/v1.0.0" lines; strip peeled tag suffixes (^{})
+    const tags = [...new Set(
+      raw
+        .split('\n')
+        .map((line) => line.split('\t')[1]?.trim())
+        .filter((ref): ref is string => Boolean(ref) && ref.startsWith('refs/tags/') && !ref.endsWith('^{}'))
+        .map((ref) => ref.replace('refs/tags/', ''))
+        .filter((tag) => SEMVER_TAG_RE.test(tag))
+    )];
+
+    if (cache) {
+      await cache.setTagsMeta(repoUrl, tags);
+    }
+
+    return tags;
+  }
+
+  /**
+   * Resolve a semver range against available tags from a remote repo.
+   *
+   * @param repoUrl - Repository URL
+   * @param range - Semver range string (e.g. "^1.0.0", ">=2.0.0 <3.0.0", "1.x")
+   * @param cache - Optional RegistryCache passed through to listTags
+   * @returns Best-matching tag string, or null if no tag satisfies the range
+   */
+  async resolveVersion(repoUrl: string, range: string, cache?: RegistryCache): Promise<string | null> {
+    const tags = await this.listTags(repoUrl, cache);
+    return maxSatisfying(tags, range);
+  }
+
+  /**
+   * Clone with sparse checkout — only fetch the requested path within the repo.
+   *
+   * @param repoUrl - Repository URL
+   * @param ref - Git ref (branch, tag, or commit)
+   * @param targetDir - Directory to clone into
+   * @param sparsePath - Subdirectory path to include in the sparse checkout
+   */
+  async cloneSparse(
+    repoUrl: string,
+    ref: string,
+    targetDir: string,
+    sparsePath: string
+  ): Promise<void> {
+    if (existsSync(targetDir)) {
+      await fs.rm(targetDir, { recursive: true, force: true });
+    }
+    await fs.mkdir(targetDir, { recursive: true });
+
+    const git = this.createGit();
+    try {
+      await git.clone(repoUrl, targetDir, [
+        '--depth=1',
+        `--branch=${ref}`,
+        '--single-branch',
+        '--filter=blob:none',
+        '--sparse',
+      ]);
+
+      const repoGit = this.createGit(targetDir);
+      await repoGit.raw(['sparse-checkout', 'set', sparsePath]);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (this.isRefError(error)) {
+        throw new GitRefNotFoundError(ref, repoUrl);
+      }
+      if (this.isAuthError(error)) {
+        throw new GitAuthError(`Authentication failed for ${repoUrl}`, repoUrl, error);
+      }
+      throw new GitCloneError(
+        `Failed to sparse-clone ${repoUrl} at ${ref}: ${error.message}`,
+        repoUrl,
+        error
+      );
+    }
   }
 
   /**
@@ -491,6 +627,111 @@ export class GitRegistry implements Registry {
       message.includes('not found in upstream')
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Internal semver helpers (avoids requiring the semver package)
+// ---------------------------------------------------------------------------
+
+interface SemverParts {
+  major: number;
+  minor: number;
+  patch: number;
+  pre: string;
+  raw: string;
+}
+
+function parseSemver(tag: string): SemverParts | null {
+  const stripped = tag.startsWith('v') ? tag.slice(1) : tag;
+  const match = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/.exec(stripped);
+  if (!match) return null;
+  return {
+    major: parseInt(match[1], 10),
+    minor: parseInt(match[2], 10),
+    patch: parseInt(match[3], 10),
+    pre: match[5] ?? '',
+    raw: tag,
+  };
+}
+
+function compareSemver(a: SemverParts, b: SemverParts): number {
+  if (a.major !== b.major) return a.major - b.major;
+  if (a.minor !== b.minor) return a.minor - b.minor;
+  if (a.patch !== b.patch) return a.patch - b.patch;
+  // Pre-release versions sort lower than release versions
+  if (a.pre && !b.pre) return -1;
+  if (!a.pre && b.pre) return 1;
+  return a.pre.localeCompare(b.pre);
+}
+
+/**
+ * Return the highest tag from `tags` that satisfies `range`.
+ * Supports: exact versions, caret ranges (^1.2.3),
+ * tilde ranges (~1.2.3), wildcards (1.x, 1.*), and
+ * comparison operators (>=1.0.0 <2.0.0).
+ */
+function maxSatisfying(tags: string[], range: string): string | null {
+  const parsed = tags.map(parseSemver).filter((v): v is SemverParts => v !== null);
+  const satisfying = parsed.filter((v) => satisfiesRange(v, range));
+  if (satisfying.length === 0) return null;
+  satisfying.sort(compareSemver);
+  return satisfying[satisfying.length - 1].raw;
+}
+
+function satisfiesRange(v: SemverParts, range: string): boolean {
+  const trimmed = range.trim();
+
+  // Wildcard / x-range
+  if (/^[*xX]$/.test(trimmed) || trimmed === '') return true;
+
+  const xRangeMatch = /^(\d+)(?:\.([0-9xX*]+))?(?:\.([0-9xX*]+))?$/.exec(trimmed);
+  if (xRangeMatch) {
+    const [, maj, min, pat] = xRangeMatch;
+    if (v.major !== parseInt(maj, 10)) return false;
+    if (!min || /^[xX*]$/.test(min)) return true;
+    if (v.minor !== parseInt(min, 10)) return false;
+    if (!pat || /^[xX*]$/.test(pat)) return true;
+    return v.patch === parseInt(pat, 10);
+  }
+
+  // Caret range: ^1.2.3
+  const caretMatch = /^\^(.+)$/.exec(trimmed);
+  if (caretMatch) {
+    const base = parseSemver(caretMatch[1]);
+    if (!base) return false;
+    if (v.major !== base.major) return false;
+    return compareSemver(v, base) >= 0;
+  }
+
+  // Tilde range: ~1.2.3
+  const tildeMatch = /^~(.+)$/.exec(trimmed);
+  if (tildeMatch) {
+    const base = parseSemver(tildeMatch[1]);
+    if (!base) return false;
+    if (v.major !== base.major || v.minor !== base.minor) return false;
+    return compareSemver(v, base) >= 0;
+  }
+
+  // Compound range (space-separated comparators): >=1.0.0 <2.0.0
+  if (trimmed.includes(' ')) {
+    return trimmed.split(/\s+/).every((part) => satisfiesRange(v, part));
+  }
+
+  // Single comparator: >=1.0.0, >1.0.0, <=1.0.0, <1.0.0, =1.0.0
+  const compMatch = /^(>=|<=|>|<|=?)(.+)$/.exec(trimmed);
+  if (compMatch) {
+    const [, op, ver] = compMatch;
+    const base = parseSemver(ver);
+    if (!base) return false;
+    const cmp = compareSemver(v, base);
+    if (op === '>=') return cmp >= 0;
+    if (op === '<=') return cmp <= 0;
+    if (op === '>') return cmp > 0;
+    if (op === '<') return cmp < 0;
+    return cmp === 0;
+  }
+
+  return false;
 }
 
 /**

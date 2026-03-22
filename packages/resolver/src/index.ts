@@ -63,6 +63,12 @@ export {
   type CacheEntry,
 } from './git-cache-manager.js';
 
+// Registry cache (hierarchical, for semver tag resolution)
+export { RegistryCache } from './registry-cache.js';
+
+// Vendor registry (offline / CI builds)
+export { VendorRegistry, createVendorRegistry } from './vendor-registry.js';
+
 // Inheritance resolution
 export { resolveInheritance } from './inheritance.js';
 
