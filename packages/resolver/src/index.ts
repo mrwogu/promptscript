@@ -100,6 +100,15 @@ export {
   type TemplateContext,
 } from '@promptscript/core';
 
+// Alias resolver
+export {
+  expandAlias,
+  validateAlias,
+  validateRegistriesConfig,
+  type ExpandedAlias,
+  type RegistriesValidationResult,
+} from './alias-resolver.js';
+
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';
 import { createResolver } from './resolver.js';
