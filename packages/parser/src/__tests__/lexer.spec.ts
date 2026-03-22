@@ -31,6 +31,7 @@ import {
   Identifier,
   PathReference,
   RelativePath,
+  UrlPath,
 } from '../lexer/tokens.js';
 
 describe('PSLexer', () => {
@@ -197,6 +198,82 @@ describe('PSLexer', () => {
       expect(result.tokens).toHaveLength(1);
       expect(result.tokens[0]!.tokenType).toBe(RelativePath);
       expect(result.tokens[0]!.image).toBe('../parent/file');
+    });
+  });
+
+  describe('UrlPath token', () => {
+    it('should lex a basic URL path', () => {
+      const result = tokenize('github.com/acme/repo/standards/security');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(UrlPath);
+      expect(result.tokens[0]!.image).toBe('github.com/acme/repo/standards/security');
+    });
+
+    it('should lex a URL path with exact semver version suffix', () => {
+      const result = tokenize('github.com/acme/repo/path@1.2.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(UrlPath);
+      expect(result.tokens[0]!.image).toBe('github.com/acme/repo/path@1.2.0');
+    });
+
+    it('should lex a URL path with semver range version suffix', () => {
+      const result = tokenize('github.com/acme/repo/path@^1.0.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(UrlPath);
+      expect(result.tokens[0]!.image).toBe('github.com/acme/repo/path@^1.0.0');
+    });
+
+    it('should lex a URL path with branch name version suffix', () => {
+      const result = tokenize('github.com/acme/repo/path@main');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(UrlPath);
+      expect(result.tokens[0]!.image).toBe('github.com/acme/repo/path@main');
+    });
+
+    it('should not match a plain identifier without a dot', () => {
+      const result = tokenize('somepackage');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(Identifier);
+    });
+
+    it('should lex a URL path in a @use declaration context', () => {
+      const result = tokenize('@use github.com/acme/repo/standards/security');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(3);
+      expect(result.tokens[0]!.tokenType).toBe(At);
+      expect(result.tokens[1]!.tokenType).toBe(Use);
+      expect(result.tokens[2]!.tokenType).toBe(UrlPath);
+    });
+  });
+
+  describe('PathReference extended versions', () => {
+    it('should lex @acme/security@^1.0.0 as a PathReference', () => {
+      const result = tokenize('@acme/security@^1.0.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(PathReference);
+      expect(result.tokens[0]!.image).toBe('@acme/security@^1.0.0');
+    });
+
+    it('should lex @acme/security@main as a PathReference', () => {
+      const result = tokenize('@acme/security@main');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(PathReference);
+      expect(result.tokens[0]!.image).toBe('@acme/security@main');
+    });
+
+    it('should lex @acme/security@~2.0.0 as a PathReference', () => {
+      const result = tokenize('@acme/security@~2.0.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(PathReference);
+      expect(result.tokens[0]!.image).toBe('@acme/security@~2.0.0');
     });
   });
 
