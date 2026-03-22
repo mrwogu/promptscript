@@ -63,6 +63,8 @@ export interface CompileOptions {
   config?: string;
   /** Force overwrite existing files without prompts */
   force?: boolean;
+  /** Treat output path conflicts as errors */
+  strict?: boolean;
   /** Working directory (project root) */
   cwd?: string;
 }

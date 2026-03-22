@@ -168,3 +168,74 @@ describe('findConfigInDir', () => {
     expect(result).toBe(resolve('/my/project', 'promptscript.yaml'));
   });
 });
+
+/**
+ * Copy of detectOutputConflicts from compile.ts for testing.
+ */
+function detectOutputConflicts(
+  targets: { name: string; config?: TargetConfig }[]
+): Map<string, string[]> {
+  // Inline DEFAULT_OUTPUT_PATHS for test isolation
+  const DEFAULT_PATHS: Record<string, string> = {
+    github: '.github/copilot-instructions.md',
+    claude: 'CLAUDE.md',
+    cursor: '.cursor/rules/project.mdc',
+    factory: 'AGENTS.md',
+    codex: 'AGENTS.md',
+    amp: 'AGENTS.md',
+    opencode: 'OPENCODE.md',
+    gemini: 'GEMINI.md',
+    windsurf: '.windsurf/rules/project.md',
+    cline: '.clinerules',
+  };
+
+  const pathMap = new Map<string, string[]>();
+  for (const target of targets) {
+    const outputPath = target.config?.output ?? DEFAULT_PATHS[target.name] ?? target.name;
+    const existing = pathMap.get(outputPath) ?? [];
+    existing.push(target.name);
+    pathMap.set(outputPath, existing);
+  }
+
+  const conflicts = new Map<string, string[]>();
+  for (const [path, names] of pathMap) {
+    if (names.length > 1) {
+      conflicts.set(path, names);
+    }
+  }
+  return conflicts;
+}
+
+describe('detectOutputConflicts', () => {
+  it('should detect factory and codex conflicting on AGENTS.md', () => {
+    const targets = [{ name: 'factory' }, { name: 'codex' }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(1);
+    expect(conflicts.get('AGENTS.md')).toEqual(['factory', 'codex']);
+  });
+
+  it('should detect three-way conflict on AGENTS.md', () => {
+    const targets = [{ name: 'factory' }, { name: 'codex' }, { name: 'amp' }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.get('AGENTS.md')).toEqual(['factory', 'codex', 'amp']);
+  });
+
+  it('should report no conflicts for unique paths', () => {
+    const targets = [{ name: 'claude' }, { name: 'github' }, { name: 'cursor' }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(0);
+  });
+
+  it('should respect custom output overrides', () => {
+    const targets = [{ name: 'factory' }, { name: 'codex', config: { output: 'CODEX-AGENTS.md' } }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(0);
+  });
+
+  it('should detect conflict when custom output matches another target', () => {
+    const targets = [{ name: 'claude' }, { name: 'opencode', config: { output: 'CLAUDE.md' } }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(1);
+    expect(conflicts.get('CLAUDE.md')).toEqual(['claude', 'opencode']);
+  });
+});
