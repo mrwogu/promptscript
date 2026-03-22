@@ -16,7 +16,7 @@ agent markdown files with YAML frontmatter living in an `agents/` directory:
 
 3. **No source comparison.** `prs diff` compares compiled output with the
    target path. During migration you need to compare compiled output with the
-   *original* source files to measure fidelity loss introduced by the
+   _original_ source files to measure fidelity loss introduced by the
    PromptScript compilation pipeline.
 
 ## Goals
@@ -53,10 +53,9 @@ pattern:
 ---
 name: planner
 description: Expert planning specialist
-tools: ["Read", "Grep", "Glob"]
+tools: ['Read', 'Grep', 'Glob']
 model: opus
 ---
-
 You are an expert planning specialist...
 ```
 
@@ -80,17 +79,17 @@ Add an optional `agentsPath` field to the universal directory configuration in
 ```yaml
 universalDir:
   path: .promptscript
-  agentsPath: agents  # default
+  agentsPath: agents # default
 ```
 
 #### Files Affected
 
-| File | Change |
-|------|--------|
-| `packages/core/src/types/config.ts` | Add `agentsPath` to universal dir config type |
-| `packages/resolver/src/discovery/` | New `agent-discovery.ts` module (parallel to skill discovery) |
-| `packages/resolver/src/universal-dir.ts` | Wire agent discovery into the universal dir resolver |
-| `packages/compiler/src/compiler.ts` | Merge discovered agents with `@agents` blocks before compilation |
+| File                                     | Change                                                           |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `packages/core/src/types/config.ts`      | Add `agentsPath` to universal dir config type                    |
+| `packages/resolver/src/discovery/`       | New `agent-discovery.ts` module (parallel to skill discovery)    |
+| `packages/resolver/src/universal-dir.ts` | Wire agent discovery into the universal dir resolver             |
+| `packages/compiler/src/compiler.ts`      | Merge discovered agents with `@agents` blocks before compilation |
 
 ### 2. Bulk Agent Import
 
@@ -145,21 +144,21 @@ A single `.prs` file containing one `@agents` block with all discovered agents:
 
 #### Mapping Rules
 
-| Frontmatter field | `@agents` property |
-|-------------------|--------------------|
-| `name`            | Agent key (block name) |
-| `description`     | `description` property |
-| `tools`           | `tools` property (array) |
-| `model`           | `model` property |
+| Frontmatter field | `@agents` property                      |
+| ----------------- | --------------------------------------- |
+| `name`            | Agent key (block name)                  |
+| `description`     | `description` property                  |
+| `tools`           | `tools` property (array)                |
+| `model`           | `model` property                        |
 | markdown body     | `content` property (triple-quoted text) |
 
 #### Files Affected
 
-| File | Change |
-|------|--------|
-| `packages/cli/src/commands/import.ts` | Detect directory argument, invoke bulk import |
-| `packages/importer/src/agents/` | New `agent-importer.ts` with frontmatter parsing and PRS generation |
-| `packages/importer/src/agents/frontmatter-parser.ts` | YAML frontmatter extraction utility |
+| File                                                 | Change                                                              |
+| ---------------------------------------------------- | ------------------------------------------------------------------- |
+| `packages/cli/src/commands/import.ts`                | Detect directory argument, invoke bulk import                       |
+| `packages/importer/src/agents/`                      | New `agent-importer.ts` with frontmatter parsing and PRS generation |
+| `packages/importer/src/agents/frontmatter-parser.ts` | YAML frontmatter extraction utility                                 |
 
 ### 3. Source Comparison Diff
 
@@ -203,10 +202,10 @@ semantic changes.
 
 #### Files Affected
 
-| File | Change |
-|------|--------|
-| `packages/cli/src/commands/diff.ts` | Add `--source` flag, source comparison mode |
-| `packages/compiler/src/diff/` | New `source-comparator.ts` with matching and fidelity logic |
+| File                                | Change                                                      |
+| ----------------------------------- | ----------------------------------------------------------- |
+| `packages/cli/src/commands/diff.ts` | Add `--source` flag, source comparison mode                 |
+| `packages/compiler/src/diff/`       | New `source-comparator.ts` with matching and fidelity logic |
 
 ## Testing Strategy
 
