@@ -67,6 +67,8 @@ temp/
 # Claude-mem context files (subdirectory CLAUDE.md, not root)
 **/CLAUDE.md
 !/CLAUDE.md
+# Allow lowercase claude.md in doc snapshots (macOS case-insensitive FS matches **/CLAUDE.md)
+!docs/__snapshots__/**/claude.md
 
 vitest.config.*.timestamp*
 
