@@ -355,11 +355,17 @@ async function handleStaticMigration(
 ): Promise<Map<string, string>> {
   await handleMigrationBackup(candidates, options, services);
 
-  let selectedPaths = candidates.map((c) => c.path);
+  // If specific files were requested (prs migrate --files), filter candidates
+  const effectiveCandidates =
+    options._migrateFiles && options._migrateFiles.length > 0
+      ? candidates.filter((c) => options._migrateFiles!.includes(c.path))
+      : candidates;
+
+  let selectedPaths = effectiveCandidates.map((c) => c.path);
   if (!options.yes) {
     selectedPaths = await services.prompts.checkbox({
       message: 'Select files to import:',
-      choices: candidates.map((c) => ({
+      choices: effectiveCandidates.map((c) => ({
         name: `${c.path} (${c.sizeHuman}, ${c.toolName})`,
         value: c.path,
         checked: true,

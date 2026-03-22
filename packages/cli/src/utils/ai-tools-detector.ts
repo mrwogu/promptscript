@@ -347,7 +347,7 @@ export function formatMigrationHint(detection: AIToolsDetection): string[] {
   }
   lines.push('');
   lines.push('   These can be migrated to PromptScript for unified management.');
-  lines.push('   Run: prs init --migrate');
+  lines.push('   Run: prs migrate');
   lines.push('   See: https://getpromptscript.dev/latest/guides/ai-migration-best-practices');
 
   return lines;
