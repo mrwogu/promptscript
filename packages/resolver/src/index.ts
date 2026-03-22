@@ -109,6 +109,9 @@ export {
   type RegistriesValidationResult,
 } from './alias-resolver.js';
 
+// Auto-discovery
+export { discoverNativeContent } from './auto-discovery.js';
+
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';
 import { createResolver } from './resolver.js';
