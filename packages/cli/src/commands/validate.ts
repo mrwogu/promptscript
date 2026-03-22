@@ -1,11 +1,13 @@
-import { resolve } from 'path';
-import { existsSync } from 'fs';
+import { resolve, join } from 'path';
+import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
 import type { ValidateOptions } from '../types.js';
 import type { CompileResult } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+import { getMinimumVersionForBlock, compareVersions } from '@promptscript/core';
+import { parse } from '@promptscript/parser';
 
 /**
  * JSON output structure for validation results.
@@ -140,9 +142,80 @@ function toJsonOutput(result: CompileResult, success: boolean): ValidationJsonOu
 }
 
 /**
+ * Replace syntax version within the @meta block only.
+ * Returns the modified content, or null if no change needed.
+ */
+export function fixSyntaxVersion(
+  content: string,
+  currentVersion: string,
+  targetVersion: string
+): string | null {
+  if (compareVersions(targetVersion, currentVersion) <= 0) return null;
+
+  const metaStart = content.indexOf('@meta');
+  if (metaStart === -1) return null;
+
+  const braceStart = content.indexOf('{', metaStart);
+  if (braceStart === -1) return null;
+
+  let depth = 1;
+  let braceEnd = braceStart + 1;
+  let inString = false;
+  while (braceEnd < content.length && depth > 0) {
+    const ch = content[braceEnd];
+    if (ch === '"' && content[braceEnd - 1] !== '\\') {
+      inString = !inString;
+    } else if (!inString) {
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+    }
+    braceEnd++;
+  }
+
+  const before = content.slice(0, braceStart);
+  const metaBody = content.slice(braceStart, braceEnd);
+  const after = content.slice(braceEnd);
+
+  const updatedMeta = metaBody.replace(/syntax:\s*"[^"]*"/, `syntax: "${targetVersion}"`);
+  if (updatedMeta === metaBody) return null;
+
+  return before + updatedMeta + after;
+}
+
+/**
+ * Recursively discover all .prs files in a directory.
+ */
+export function discoverPrsFiles(dir: string): string[] {
+  const results: string[] = [];
+  try {
+    const entries = readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        results.push(...discoverPrsFiles(fullPath));
+      } else if (entry.name.endsWith('.prs')) {
+        results.push(fullPath);
+      }
+    }
+  } catch {
+    // Directory doesn't exist
+  }
+  return results;
+}
+
+/**
  * Validate PromptScript files without generating output.
  */
 export async function validateCommand(options: ValidateOptions): Promise<void> {
+  if (options.fix && options.format === 'json') {
+    throw new Error('--fix is incompatible with --format json');
+  }
+
+  if (options.fix) {
+    await runFix();
+    return;
+  }
+
   const isJsonFormat = options.format === 'json';
   const spinner = isJsonFormat
     ? createSpinner('').stop()
@@ -225,4 +298,49 @@ function handleValidationError(
  */
 function outputJsonResult(result: ValidationJsonOutput): void {
   console.log(JSON.stringify(result, null, 2));
+}
+
+/**
+ * Auto-fix syntax version issues in .prs files.
+ */
+async function runFix(): Promise<void> {
+  const files = discoverPrsFiles('.promptscript');
+  let fixedCount = 0;
+
+  for (const filePath of files) {
+    const content = readFileSync(filePath, 'utf-8');
+    const result = parse(content);
+    if (!result.ast?.meta?.fields?.['syntax']) continue;
+
+    const declaredVersion = result.ast.meta.fields['syntax'];
+    if (typeof declaredVersion !== 'string') continue;
+
+    let minRequired = '1.0.0';
+    for (const block of result.ast.blocks) {
+      const blockMin = getMinimumVersionForBlock(block.name);
+      if (blockMin && compareVersions(blockMin, minRequired) > 0) {
+        minRequired = blockMin;
+      }
+    }
+    for (const ext of result.ast.extends) {
+      const blockName = ext.targetPath.split('.')[0]!;
+      const blockMin = getMinimumVersionForBlock(blockName);
+      if (blockMin && compareVersions(blockMin, minRequired) > 0) {
+        minRequired = blockMin;
+      }
+    }
+
+    const fixed = fixSyntaxVersion(content, declaredVersion, minRequired);
+    if (fixed) {
+      writeFileSync(filePath, fixed, 'utf-8');
+      console.log(`Fixed: ${filePath} syntax "${declaredVersion}" \u2192 "${minRequired}"`);
+      fixedCount++;
+    }
+  }
+
+  if (fixedCount === 0) {
+    console.log('No syntax version fixes needed.');
+  } else {
+    console.log(`\n${fixedCount} file(s) fixed.`);
+  }
 }

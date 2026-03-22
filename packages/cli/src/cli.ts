@@ -18,6 +18,7 @@ import { registerRegistryCommands } from './commands/registry/index.js';
 import { setContext, LogLevel } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 import { importCommand } from './commands/import.js';
+import { upgradeCommand } from './commands/upgrade.js';
 
 const program = new Command();
 
@@ -96,6 +97,7 @@ program
   .description('Validate PromptScript files')
   .option('--strict', 'Treat warnings as errors')
   .option('--format <format>', 'Output format (text, json)', 'text')
+  .option('--fix', 'Auto-fix syntax version issues')
   .action(validateCommand);
 
 program
@@ -147,6 +149,12 @@ program
   .option('--dry-run', 'Preview output without writing files')
   .option('--validate', 'Run roundtrip validation after import')
   .action(importCommand);
+
+program
+  .command('upgrade')
+  .description('Upgrade .prs files to the latest syntax version')
+  .option('--dry-run', 'Show what would be changed without writing')
+  .action(upgradeCommand);
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);

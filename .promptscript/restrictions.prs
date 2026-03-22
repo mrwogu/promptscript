@@ -15,4 +15,5 @@
   - "Never skip the full verification pipeline (format, lint, typecheck, test, validate, schema:check)"
   - "Never consider work complete until all CI checks pass (use `gh pr checks --watch`)"
   - "Never commit directly to main - always use feature branches"
+  - "Never edit CHANGELOG.md manually - it is managed by release-please. Manual edits break release state tracking, preventing tag creation and GitHub releases."
 }

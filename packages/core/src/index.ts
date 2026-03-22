@@ -25,3 +25,6 @@ export * from './logger.js';
 
 // Template interpolation
 export * from './template.js';
+
+// Syntax version registry
+export * from './syntax-versions.js';

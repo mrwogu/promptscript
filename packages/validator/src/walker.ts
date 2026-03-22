@@ -65,6 +65,15 @@ export function walkBlocks(ast: Program, callback: BlockCallback): void {
 }
 
 /**
+ * Get the block name from a Block or ExtendBlock.
+ * Block has `name`, ExtendBlock has `targetPath` (dot-separated, first segment is the block name).
+ */
+export function getBlockName(block: Block | ExtendBlock): string {
+  if (block.type === 'Block') return block.name;
+  return block.targetPath.split('.')[0]!;
+}
+
+/**
  * Walk all use declarations in the AST.
  */
 export function walkUses(ast: Program, callback: UseCallback): void {
