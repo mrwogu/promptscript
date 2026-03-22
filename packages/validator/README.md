@@ -29,7 +29,7 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 | PS015 | missing-skill-file      | error    | A skill references a `SKILL.md` path that does not exist on disk                        |
 | PS016 | parameter-name-conflict | error    | A template parameter name shadows a built-in field name                                 |
 | PS017 | unused-parameter        | warning  | A declared template parameter is never referenced in the file body                      |
-| PS018 | syntax-version-compat   | warning  | Checks declared syntax version is known and compatible with used blocks                 |
+| PS018 | syntax-version-compat   | warning  | Warns if declared syntax version is unknown; otherwise checks block compatibility       |
 | PS019 | unknown-block-name      | warning  | Detects unknown block type names with typo suggestions (Levenshtein fuzzy matching)     |
 
 ## License

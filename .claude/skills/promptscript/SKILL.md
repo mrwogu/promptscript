@@ -1,45 +1,7 @@
 ---
-name: promptscript
-description: >-
-  PromptScript language expert for reading, writing, modifying, and
-  troubleshooting .prs files. Use when working with PromptScript syntax,
-  creating or editing .prs files, adding blocks like @identity, @standards,
-  @restrictions, @shortcuts, @skills, or @agents, configuring
-  promptscript.yaml, resolving compilation errors, understanding inheritance
-  (@inherit) and composition (@use, @extend), or migrating AI instructions
-  to PromptScript. Also use when asked about compilation targets (GitHub
-  Copilot, Claude Code, Cursor, Antigravity, Factory AI, and 30+ other
-  AI coding agents).
-license: MIT
-metadata:
-  author: PromptScript
-  homepage: https://getpromptscript.dev
-compatibility:
-  - claude-code
-  - github-copilot
-  - cursor
-  - factory-ai
-  - gemini-cli
-  - opencode
-  - windsurf
-  - cline
-  - roo
-  - codex
-  - continue
-  - augment
-  - goose
-  - kilo
-  - amp
-  - trae
-  - junie
-  - kiro-cli
-allowed-tools:
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
-user-invocable: true
+# promptscript-generated: 2026-03-22T16:22:12.294Z
+name: 'promptscript'
+description: '>-'
 ---
 
 # PromptScript Language Guide
@@ -503,7 +465,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | Version | What it adds                                                                                                            |
 | ------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
-| `1.1.0` | Adds `@agents`, `@workflows`, `@prompts`                                                                                |
+| `1.1.0` | Adds `@agents` (plus internal `@workflows`, `@prompts` — not user-facing)                                               |
 
 ### Validation Rules
 
@@ -518,6 +480,8 @@ prs upgrade                 # Upgrade all .prs files to the latest version
 ```
 
 `--fix` rewrites the `syntax: "..."` line in each file's `@meta` block to match the minimum version required by the blocks used. It only upgrades, never downgrades.
+
+`prs upgrade` upgrades all files to the latest known syntax version regardless of what blocks they use.
 
 ## CLI Commands
 

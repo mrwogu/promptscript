@@ -503,7 +503,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | Version | What it adds                                                                                                            |
 | ------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
-| `1.1.0` | Adds `@agents`, `@workflows`, `@prompts`                                                                                |
+| `1.1.0` | Adds `@agents` (plus internal `@workflows`, `@prompts` — not user-facing)                                               |
 
 ### Validation Rules
 
@@ -518,6 +518,8 @@ prs upgrade                 # Upgrade all .prs files to the latest version
 ```
 
 `--fix` rewrites the `syntax: "..."` line in each file's `@meta` block to match the minimum version required by the blocks used. It only upgrades, never downgrades.
+
+`prs upgrade` upgrades all files to the latest known syntax version regardless of what blocks they use.
 
 ## CLI Commands
 
