@@ -273,6 +273,13 @@ export interface PromptScriptConfig {
   validation?: {
     requiredGuards?: string[];
     rules?: Record<string, 'error' | 'warning' | 'off'>;
+    /** Per-file rule exclusions using glob patterns */
+    fileExcludes?: Array<{
+      /** Glob pattern matched against the file path */
+      pattern: string;
+      /** Rule names or IDs to disable for matching files */
+      rules: string[];
+    }>;
   };
 }
 

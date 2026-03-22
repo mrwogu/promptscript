@@ -266,6 +266,31 @@
               "off"
             ]
           }
+        },
+        "fileExcludes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "Glob pattern matched against the file path"
+              },
+              "rules": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Rule names or IDs to disable for matching files"
+              }
+            },
+            "required": [
+              "pattern",
+              "rules"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Per-file rule exclusions using glob patterns"
         }
       },
       "additionalProperties": false,

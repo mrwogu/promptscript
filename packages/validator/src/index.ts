@@ -23,6 +23,7 @@ export type {
   ValidationRule,
   ValidatorConfig,
   ValidateOptions,
+  FileExclude,
 } from './types.js';
 
 // Rules

@@ -482,13 +482,35 @@ validation:
     - 'unused-shortcut'
   rules:
     require-syntax: error
+  fileExcludes:
+    - pattern: 'skills/**/SKILL.md'
+      rules: [PS011]
 ```
 
-| Field            | Type     | Default | Description             |
-| ---------------- | -------- | ------- | ----------------------- |
-| `strict`         | boolean  | `false` | Warnings as errors      |
-| `ignoreWarnings` | string[] | `[]`    | Warning codes to ignore |
-| `rules`          | object   | `{}`    | Rule severity overrides |
+| Field            | Type          | Default | Description                          |
+| ---------------- | ------------- | ------- | ------------------------------------ |
+| `strict`         | boolean       | `false` | Warnings as errors                   |
+| `ignoreWarnings` | string[]      | `[]`    | Warning codes to ignore              |
+| `rules`          | object        | `{}`    | Rule severity overrides              |
+| `fileExcludes`   | FileExclude[] | `[]`    | Per-file rule exclusions (see below) |
+
+#### fileExcludes
+
+Disable specific rules for files matching a glob pattern. Each entry has:
+
+| Field     | Type     | Description                                     |
+| --------- | -------- | ----------------------------------------------- |
+| `pattern` | string   | Glob pattern matched against the file path      |
+| `rules`   | string[] | Rule names or IDs to disable for matching files |
+
+```yaml
+validation:
+  fileExcludes:
+    - pattern: 'skills/**/SKILL.md'
+      rules: [PS011, PS012]
+    - pattern: 'vendor/**'
+      rules: [empty-block]
+```
 
 ### watch
 

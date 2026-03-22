@@ -1,4 +1,5 @@
 import { noopLogger, type Logger, type Program } from '@promptscript/core';
+import picomatch from 'picomatch';
 import type {
   ValidationRule,
   ValidatorConfig,
@@ -66,8 +67,16 @@ export class Validator {
    */
   validate(ast: Program): ValidationResult {
     const messages: ValidationMessage[] = [];
+
+    // Compute per-file excluded rules
+    const fileExcludedRules = this.getFileExcludedRules(ast.loc.file);
+
     const activeRules = this.rules.filter(
-      (r) => !this.disabledRules.has(r.name) && !this.disabledRules.has(r.id)
+      (r) =>
+        !this.disabledRules.has(r.name) &&
+        !this.disabledRules.has(r.id) &&
+        !fileExcludedRules.has(r.name) &&
+        !fileExcludedRules.has(r.id)
     );
 
     this.logger.verbose(`Running ${activeRules.length} validation rules`);
@@ -76,6 +85,12 @@ export class Validator {
       // Skip if rule is disabled via disableRules
       if (this.disabledRules.has(rule.name) || this.disabledRules.has(rule.id)) {
         this.logger.debug(`Skipping disabled rule: ${rule.name}`);
+        continue;
+      }
+
+      // Skip if rule is excluded for this file
+      if (fileExcludedRules.has(rule.name) || fileExcludedRules.has(rule.id)) {
+        this.logger.debug(`Skipping file-excluded rule: ${rule.name} (file: ${ast.loc.file})`);
         continue;
       }
 
@@ -149,6 +164,23 @@ export class Validator {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Compute rules excluded for a specific file based on fileExcludes config.
+   */
+  private getFileExcludedRules(filePath: string): Set<string> {
+    const excluded = new Set<string>();
+    if (!this.config.fileExcludes || !filePath) return excluded;
+
+    for (const entry of this.config.fileExcludes) {
+      if (picomatch.isMatch(filePath, entry.pattern, { contains: true })) {
+        for (const rule of entry.rules) {
+          excluded.add(rule);
+        }
+      }
+    }
+    return excluded;
   }
 
   /**

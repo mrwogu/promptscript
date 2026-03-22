@@ -150,6 +150,79 @@ describe('Validator with disableRules config', () => {
   });
 });
 
+describe('Validator with fileExcludes config', () => {
+  it('should skip rules for files matching a glob pattern by rule name', () => {
+    const validator = new Validator({
+      fileExcludes: [{ pattern: 'skills/**/SKILL.md', rules: ['required-meta-id'] }],
+    });
+    const ast = createTestProgram({
+      loc: { file: 'skills/using-superpowers/SKILL.md', line: 1, column: 1 },
+      meta: undefined,
+    });
+
+    const result = validator.validate(ast);
+
+    expect(result.errors.some((e) => e.ruleId === 'PS001')).toBe(false);
+  });
+
+  it('should skip rules for files matching a glob pattern by rule ID', () => {
+    const validator = new Validator({
+      fileExcludes: [{ pattern: 'skills/**', rules: ['PS001'] }],
+    });
+    const ast = createTestProgram({
+      loc: { file: 'skills/debug/SKILL.md', line: 1, column: 1 },
+      meta: undefined,
+    });
+
+    const result = validator.validate(ast);
+
+    expect(result.errors.some((e) => e.ruleId === 'PS001')).toBe(false);
+  });
+
+  it('should not skip rules for files that do not match the pattern', () => {
+    const validator = new Validator({
+      fileExcludes: [{ pattern: 'skills/**', rules: ['required-meta-id'] }],
+    });
+    const ast = createTestProgram({
+      loc: { file: 'project.prs', line: 1, column: 1 },
+      meta: undefined,
+    });
+
+    const result = validator.validate(ast);
+
+    expect(result.errors.some((e) => e.ruleId === 'PS001')).toBe(true);
+  });
+
+  it('should support multiple fileExclude entries', () => {
+    const validator = new Validator({
+      fileExcludes: [
+        { pattern: 'skills/**', rules: ['PS001'] },
+        { pattern: 'vendor/**', rules: ['PS002'] },
+      ],
+    });
+    const ast = createTestProgram({
+      loc: { file: 'vendor/third-party.prs', line: 1, column: 1 },
+      meta: undefined,
+    });
+
+    const result = validator.validate(ast);
+
+    // PS002 should be excluded for vendor files
+    expect(result.errors.some((e) => e.ruleId === 'PS002')).toBe(false);
+    // PS001 should still fire (not excluded for vendor)
+    expect(result.errors.some((e) => e.ruleId === 'PS001')).toBe(true);
+  });
+
+  it('should handle empty fileExcludes gracefully', () => {
+    const validator = new Validator({ fileExcludes: [] });
+    const ast = createTestProgram({ meta: undefined });
+
+    const result = validator.validate(ast);
+
+    expect(result.errors.some((e) => e.ruleId === 'PS001')).toBe(true);
+  });
+});
+
 describe('formatValidationMessage', () => {
   const baseMessage: ValidationMessage = {
     ruleId: 'PS001',
