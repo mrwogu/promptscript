@@ -169,42 +169,8 @@ describe('findConfigInDir', () => {
   });
 });
 
-/**
- * Copy of detectOutputConflicts from compile.ts for testing.
- */
-function detectOutputConflicts(
-  targets: { name: string; config?: TargetConfig }[]
-): Map<string, string[]> {
-  // Inline DEFAULT_OUTPUT_PATHS for test isolation
-  const DEFAULT_PATHS: Record<string, string> = {
-    github: '.github/copilot-instructions.md',
-    claude: 'CLAUDE.md',
-    cursor: '.cursor/rules/project.mdc',
-    factory: 'AGENTS.md',
-    codex: 'AGENTS.md',
-    amp: 'AGENTS.md',
-    opencode: 'OPENCODE.md',
-    gemini: 'GEMINI.md',
-    windsurf: '.windsurf/rules/project.md',
-    cline: '.clinerules',
-  };
-
-  const pathMap = new Map<string, string[]>();
-  for (const target of targets) {
-    const outputPath = target.config?.output ?? DEFAULT_PATHS[target.name] ?? target.name;
-    const existing = pathMap.get(outputPath) ?? [];
-    existing.push(target.name);
-    pathMap.set(outputPath, existing);
-  }
-
-  const conflicts = new Map<string, string[]>();
-  for (const [path, names] of pathMap) {
-    if (names.length > 1) {
-      conflicts.set(path, names);
-    }
-  }
-  return conflicts;
-}
+// Import the real function — tests exercise the actual implementation
+import { detectOutputConflicts } from '../utils/conflict-detector.js';
 
 describe('detectOutputConflicts', () => {
   it('should detect factory and codex conflicting on AGENTS.md', () => {
