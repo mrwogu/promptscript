@@ -1201,7 +1201,18 @@ function parseAgentFrontmatter(
   const trimmed = content.trimStart();
   if (!trimmed.startsWith('---')) return null;
 
-  const endIdx = trimmed.indexOf('---', 3);
+  // Find closing --- that starts at the beginning of a line
+  let endIdx = -1;
+  let searchFrom = 3;
+  while (searchFrom < trimmed.length) {
+    const idx = trimmed.indexOf('---', searchFrom);
+    if (idx === -1) break;
+    if (idx === 0 || trimmed[idx - 1] === '\n') {
+      endIdx = idx;
+      break;
+    }
+    searchFrom = idx + 1;
+  }
   if (endIdx === -1) return null;
 
   const yamlStr = trimmed.slice(3, endIdx).trim();
@@ -1271,7 +1282,15 @@ async function discoverAgentFiles(
         }
 
         const { frontmatter, body: agentBody } = parsed;
-        const name = (frontmatter['name'] as string) ?? entry.name.replace(/\.md$/, '');
+        // Use || to fall back on empty string (not just null/undefined)
+        const name = (frontmatter['name'] as string) || entry.name.replace(/\.md$/, '');
+
+        // Sanitize name to prevent path traversal in output paths
+        if (!isSafeSkillName(name)) {
+          logger.verbose(`Skipping agent with unsafe name: ${name}`);
+          continue;
+        }
+
         const description = frontmatter['description'] as string | undefined;
 
         if (!description) {
@@ -1288,6 +1307,11 @@ async function discoverAgentFiles(
 
         if (frontmatter['tools'] && Array.isArray(frontmatter['tools'])) {
           agentProps['tools'] = frontmatter['tools'] as string[];
+        } else if (frontmatter['tools'] === '') {
+          // Block-style YAML tools (- Read\n- Grep) not parsed by simple parser
+          logger.verbose(
+            `Agent ${name}: tools field detected but not in inline array format. Use tools: ["Read", "Grep"] syntax.`
+          );
         }
 
         if (frontmatter['model']) {
