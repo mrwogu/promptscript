@@ -103,15 +103,17 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | Version | Status  | Blocks                                                                                                                                     |
 | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
-| `1.1.0` | Current | All 1.0.0 blocks + `@agents`, `@workflows`, `@prompts`                                                                                     |
+| `1.1.0` | Current | All 1.0.0 blocks + `@agents`                                                                                                               |
+
+Internal Block Types
+
+`@workflows` and `@prompts` are registered in version `1.1.0` but are **internal, not user-facing**. They are generated automatically from `@shortcuts` (see [Antigravity Workflows](#antigravity-workflows) and [GitHub Copilot Prompts](#github-copilot-prompts)). Do not write `@workflows` or `@prompts` blocks directly.
 
 ### Block Version Requirements
 
-| Block        | Minimum Syntax Version |
-| ------------ | ---------------------- |
-| `@agents`    | `1.1.0`                |
-| `@workflows` | `1.1.0`                |
-| `@prompts`   | `1.1.0`                |
+| Block     | Minimum Syntax Version |
+| --------- | ---------------------- |
+| `@agents` | `1.1.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 
@@ -655,7 +657,7 @@ When creating commits:
 Define specialized AI subagents for GitHub Copilot and Claude Code:
 
 ```
-@meta { id: "agents-example" syntax: "1.0.0" }
+@meta { id: "agents-example" syntax: "1.1.0" }
 
 @agents {
   code-reviewer: {
@@ -803,6 +805,17 @@ Or with key-value properties:
 [@local](https://github.com/local "GitHub User: local") Output
 
 The `@local` block generates `CLAUDE.local.md` when using the Claude formatter with `version: full`. This file should be added to `.gitignore`.
+
+### [@commands](https://github.com/commands "GitHub User: commands")
+
+Alias for `@shortcuts`. The `@commands` block is functionally identical to `@shortcuts` — both define command aliases. Use `@shortcuts` in new files; `@commands` is supported for backward compatibility.
+
+```
+@commands {
+  "/review": "Review code for quality and best practices"
+  "/test": "Write unit tests with Vitest"
+}
+```
 
 ### [@knowledge](https://github.com/knowledge "GitHub User: knowledge")
 
@@ -1073,7 +1086,7 @@ The following are reserved and cannot be used as identifiers:
 **Block names:**
 
 - `identity`, `context`, `standards`, `restrictions`
-- `knowledge`, `shortcuts`, `guards`, `params`
+- `knowledge`, `shortcuts`, `commands`, `guards`, `params`
 - `skills`, `agents`, `local`
 - `workflows`, `prompts` (internal, not user-facing)
 
