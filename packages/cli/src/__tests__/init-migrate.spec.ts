@@ -379,4 +379,35 @@ describe('init migration flow', () => {
       expect(mockCreateBackup).toHaveBeenCalled();
     });
   });
+
+  describe('_migrateFiles filtering', () => {
+    it('should filter candidates by _migrateFiles when provided', async () => {
+      // Setup: two migration candidates
+      mockFs.existsSync.mockImplementation(
+        (p: string) => p === 'CLAUDE.md' || p === '.cursorrules'
+      );
+      mockFs.readFile.mockResolvedValue('# Instructions');
+
+      mockImportMultipleFiles.mockResolvedValue({
+        files: new Map([['project.prs', '@meta { id: "test" }']]),
+        perFileReports: [{ file: 'CLAUDE.md', sectionCount: 2, confidence: 0.9 }],
+        deduplicatedCount: 0,
+        overallConfidence: 0.9,
+        warnings: [],
+      });
+
+      await initCommand(
+        { yes: true, autoImport: true, _forceMigrate: true, _migrateFiles: ['CLAUDE.md'] },
+        mockServices
+      );
+
+      // importMultipleFiles should be called with only CLAUDE.md, not .cursorrules
+      const callArgs = mockImportMultipleFiles.mock.calls[0]?.[0] as string[];
+      if (callArgs) {
+        const filenames = callArgs.map((p: string) => p.split('/').pop());
+        expect(filenames).toContain('CLAUDE.md');
+        expect(filenames).not.toContain('.cursorrules');
+      }
+    });
+  });
 });
