@@ -248,4 +248,60 @@ You are an expert planning specialist.`
     // Falls back to filename 'fallback'
     expect(props['fallback']).toBeDefined();
   });
+
+  it('should handle block-style tools gracefully (not crash)', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    // Block-style YAML: tools has empty value, items on next lines
+    await writeFile(
+      join(agentsDir, 'block-tools.md'),
+      '---\nname: block-tools\ndescription: Has block tools\ntools:\n---\nContent.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+
+    const agentsBlock = result.blocks.find((b) => b.name === 'agents');
+    expect(agentsBlock).toBeDefined();
+    const props = (agentsBlock!.content as ObjectContent).properties;
+    const agent = props['block-tools'] as Record<string, unknown>;
+    // tools not set (block-style not parsed), but agent still discovered
+    expect(agent['description']).toBe('Has block tools');
+    expect(agent['tools']).toBeUndefined();
+  });
+
+  it('should merge discovered agents with existing @agents block', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'new-agent.md'),
+      '---\nname: new-agent\ndescription: Discovered agent\n---\nNew content.'
+    );
+
+    const sourceFile = join(localPath, 'project.prs');
+    const ast: Program = {
+      ...emptyAst(sourceFile),
+      blocks: [
+        {
+          type: 'Block' as const,
+          name: 'agents',
+          content: {
+            type: 'ObjectContent' as const,
+            properties: {
+              existing: { description: 'Already defined' },
+            },
+            loc: { file: sourceFile, line: 1, column: 1 },
+          },
+          loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+        },
+      ],
+    };
+
+    const result = await resolveNativeAgents(ast, sourceFile, localPath);
+    const agentsBlock = result.blocks.find((b) => b.name === 'agents');
+    const props = (agentsBlock!.content as ObjectContent).properties;
+    // Both existing and new agent present
+    expect(props['existing']).toBeDefined();
+    expect(props['new-agent']).toBeDefined();
+  });
 });
