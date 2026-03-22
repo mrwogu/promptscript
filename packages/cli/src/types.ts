@@ -75,6 +75,8 @@ export interface ValidateOptions {
   strict?: boolean;
   /** Output format (text, json) */
   format?: 'text' | 'json';
+  /** Auto-fix syntax version issues */
+  fix?: boolean;
 }
 
 /**

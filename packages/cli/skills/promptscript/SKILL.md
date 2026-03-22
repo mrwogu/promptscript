@@ -494,6 +494,31 @@ registry:
   ref: main
 ```
 
+## Syntax Version Validation
+
+The `syntax` field in `@meta` declares the PromptScript language version (semver).
+
+### Known Versions
+
+| Version | What it adds                                                                                                            |
+| ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
+| `1.1.0` | Adds `@agents`, `@workflows`, `@prompts`                                                                                |
+
+### Validation Rules
+
+- **PS018 (`syntax-version-compat`)**: warns when blocks used in a file require a higher syntax version than declared. For example, `@agents` with `syntax: "1.0.0"` triggers PS018. Suggestion: run `prs validate --fix`.
+- **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
+
+### Fixing Syntax Versions
+
+```
+prs validate --fix          # Auto-fix syntax versions in .prs files
+prs upgrade                 # Upgrade all .prs files to the latest version
+```
+
+`--fix` rewrites the `syntax: "..."` line in each file's `@meta` block to match the minimum version required by the blocks used. It only upgrades, never downgrades.
+
 ## CLI Commands
 
 ```
@@ -505,6 +530,8 @@ prs migrate --llm           # Generate AI-assisted migration prompt
 prs compile                 # Compile to all targets
 prs compile --watch         # Watch mode
 prs validate --strict       # Validate syntax
+prs validate --fix          # Auto-fix syntax version declarations
+prs upgrade                 # Upgrade all .prs files to latest syntax version
 prs import CLAUDE.md        # Import existing AI instructions
 prs import --dry-run        # Preview import conversion
 prs pull                    # Update registry

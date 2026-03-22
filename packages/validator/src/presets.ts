@@ -157,6 +157,8 @@ export const SECURITY_STRICT: ValidatorConfig = {
     'valid-params': 'error',
     // Informational rules
     'empty-block': 'warning',
+    'syntax-version-compat': 'warning',
+    'unknown-block-name': 'warning',
     deprecated: 'warning',
   },
   // Additional blocked patterns for strict mode
@@ -208,6 +210,8 @@ export const SECURITY_MODERATE: ValidatorConfig = {
     'valid-params': 'error',
     // Informational rules
     'empty-block': 'info',
+    'syntax-version-compat': 'warning',
+    'unknown-block-name': 'warning',
     deprecated: 'warning',
   },
 };
@@ -247,6 +251,8 @@ export const SECURITY_MINIMAL: ValidatorConfig = {
     'valid-params': 'warning',
     // Informational
     'empty-block': 'off',
+    'syntax-version-compat': 'off',
+    'unknown-block-name': 'off',
     deprecated: 'info',
   },
 };
