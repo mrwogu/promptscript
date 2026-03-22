@@ -128,6 +128,7 @@ interface EnumTypeCstCtx {
 interface PathRefCstCtx {
   PathReference?: IToken[];
   RelativePath?: IToken[];
+  UrlPath?: IToken[];
 }
 
 interface DotPathCstCtx {
@@ -673,13 +674,16 @@ class PromptScriptVisitor extends BaseVisitor {
    * pathRef → PathReference
    */
   pathRef(ctx: PathRefCstCtx): PathReference {
-    // Grammar ensures only PathReference or RelativePath can appear here
     if (ctx.PathReference) {
       return this.parsePathReference(ctx.PathReference[0]!);
     }
 
-    // Must be RelativePath (grammar guarantees one of the two)
-    return this.parseRelativePath(ctx.RelativePath![0]!);
+    if (ctx.RelativePath) {
+      return this.parseRelativePath(ctx.RelativePath[0]!);
+    }
+
+    // Must be UrlPath (grammar guarantees one of the three)
+    return this.parseUrlPath(ctx.UrlPath![0]!);
   }
 
   /**
@@ -837,17 +841,17 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   private parsePathReference(token: IToken): PathReference {
     const raw = token.image;
-    // Format: @namespace/path/to/file@1.0.0
+    // Format: @namespace/path/to/file@version
     const withoutAt = raw.slice(1); // Remove leading @
 
     let version: string | undefined;
     let pathPart = withoutAt;
 
-    // Check for version suffix
-    const versionMatch = withoutAt.match(/@(\d+\.\d+\.\d+)$/);
-    if (versionMatch) {
-      version = versionMatch[1];
-      pathPart = withoutAt.slice(0, -versionMatch[0].length);
+    // Find the LAST @ which separates path from version (semver, range, or branch name)
+    const lastAtIndex = withoutAt.lastIndexOf('@');
+    if (lastAtIndex > 0) {
+      version = withoutAt.slice(lastAtIndex + 1);
+      pathPart = withoutAt.slice(0, lastAtIndex);
     }
 
     const segments = pathPart.split('/');
@@ -876,6 +880,33 @@ class PromptScriptVisitor extends BaseVisitor {
       raw,
       segments,
       isRelative: true,
+      loc: this.loc(token),
+    };
+  }
+
+  /**
+   * Parse a URL-style path reference (domain.tld/org/repo/path[@version]).
+   */
+  private parseUrlPath(token: IToken): PathReference {
+    const raw = token.image;
+    // Split version suffix: github.com/org/repo/path@1.2.0
+    // Find the LAST @ that could be a version separator
+    const lastAtIndex = raw.lastIndexOf('@');
+    let pathPart = raw;
+    let version: string | undefined;
+
+    if (lastAtIndex > 0) {
+      pathPart = raw.slice(0, lastAtIndex);
+      version = raw.slice(lastAtIndex + 1);
+    }
+
+    const segments = pathPart.split('/');
+    return {
+      type: 'PathReference',
+      raw,
+      segments,
+      version,
+      isRelative: false,
       loc: this.loc(token),
     };
   }

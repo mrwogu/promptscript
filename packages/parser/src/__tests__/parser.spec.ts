@@ -453,6 +453,72 @@ describe('parse', () => {
   });
 });
 
+describe('parse URL imports', () => {
+  it('should parse @use with a basic URL path', () => {
+    const result = parse('@use github.com/acme/repo/standards/security');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast?.uses).toHaveLength(1);
+    const use = result.ast!.uses[0]!;
+    expect(use.path.isRelative).toBe(false);
+    expect(use.path.raw).toBe('github.com/acme/repo/standards/security');
+  });
+
+  it('should parse @use URL path with exact semver version', () => {
+    const result = parse('@use github.com/acme/repo/path@1.2.0');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.uses[0]!.path.version).toBe('1.2.0');
+  });
+
+  it('should parse @use URL path with semver range', () => {
+    const result = parse('@use github.com/acme/repo/path@^1.0.0');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.uses[0]!.path.version).toBe('^1.0.0');
+  });
+
+  it('should parse @use URL path with branch name', () => {
+    const result = parse('@use github.com/acme/repo/path@main');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.uses[0]!.path.version).toBe('main');
+  });
+
+  it('should parse @use URL path with alias', () => {
+    const result = parse('@use github.com/acme/repo/path as mylib');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.uses[0]!.alias).toBe('mylib');
+  });
+
+  it('should parse URL segments correctly', () => {
+    const result = parse('@use github.com/acme/repo/standards/security');
+    expect(result.errors).toHaveLength(0);
+    const path = result.ast!.uses[0]!.path;
+    expect(path.segments).toEqual(['github.com', 'acme', 'repo', 'standards', 'security']);
+  });
+
+  it('should parse @inherit with a URL path', () => {
+    const result = parse('@inherit github.com/company/base-config/standards');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast?.inherit).toBeDefined();
+    expect(result.ast!.inherit!.path.isRelative).toBe(false);
+    expect(result.ast!.inherit!.path.raw).toBe('github.com/company/base-config/standards');
+  });
+});
+
+describe('parse PathReference extended versions', () => {
+  it('should parse @use with semver range version', () => {
+    const result = parse('@use @acme/security@^1.0.0');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.uses[0]!.path.version).toBe('^1.0.0');
+    expect(result.ast!.uses[0]!.path.namespace).toBe('acme');
+  });
+
+  it('should parse @use with branch name version', () => {
+    const result = parse('@use @acme/security@main');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.uses[0]!.path.version).toBe('main');
+    expect(result.ast!.uses[0]!.path.namespace).toBe('acme');
+  });
+});
+
 describe('parseOrThrow', () => {
   it('should return AST on success', () => {
     const source = '@meta { id: "test" }';

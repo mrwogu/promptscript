@@ -33,7 +33,7 @@ export const TextBlock = createToken({
 
 export const PathReference = createToken({
   name: 'PathReference',
-  pattern: /@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/-]*(?:@\d+\.\d+\.\d+)?/,
+  pattern: /@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/-]*(?:@[a-zA-Z0-9^~./-]+)?/,
 });
 
 export const RelativePath = createToken({
@@ -48,6 +48,17 @@ export const RelativePath = createToken({
 export const Identifier = createToken({
   name: 'Identifier',
   pattern: /[a-zA-Z_][a-zA-Z0-9_-]*/,
+});
+
+/**
+ * URL-style path for Go-style direct imports.
+ * Matches: domain.tld/org/repo/path[@version]
+ * Domain detection: first segment must contain a dot.
+ */
+export const UrlPath = createToken({
+  name: 'UrlPath',
+  pattern: /[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[a-zA-Z0-9_./-]+(?:@[a-zA-Z0-9^~./-]+)?/,
+  longer_alt: Identifier,
 });
 
 // ============================================================
@@ -251,6 +262,7 @@ export const allTokens: TokenType[] = [
   // Paths (must be before DotDot to handle ../)
   PathReference,
   RelativePath,
+  UrlPath,
 
   // Template expression tokens (multi-char, before single braces)
   TemplateOpen,
