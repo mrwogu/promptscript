@@ -1105,7 +1105,7 @@ describe('Golden Files Tests', () => {
       expect(codeReviewerAgent?.content).toContain(
         'description: Reviews code for quality and best practices'
       );
-      expect(codeReviewerAgent?.content).toContain('tools: Read, Grep, Glob, Bash');
+      expect(codeReviewerAgent?.content).toContain("tools: ['Read', 'Grep', 'Glob', 'Bash']");
       expect(codeReviewerAgent?.content).toContain('model: sonnet');
 
       const debuggerAgent = result.additionalFiles?.find(

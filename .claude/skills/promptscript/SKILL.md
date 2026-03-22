@@ -1,7 +1,45 @@
 ---
-# promptscript-generated: 2026-03-22T16:22:12.294Z
-name: 'promptscript'
-description: '>-'
+name: promptscript
+description: >-
+  PromptScript language expert for reading, writing, modifying, and
+  troubleshooting .prs files. Use when working with PromptScript syntax,
+  creating or editing .prs files, adding blocks like @identity, @standards,
+  @restrictions, @shortcuts, @skills, or @agents, configuring
+  promptscript.yaml, resolving compilation errors, understanding inheritance
+  (@inherit) and composition (@use, @extend), or migrating AI instructions
+  to PromptScript. Also use when asked about compilation targets (GitHub
+  Copilot, Claude Code, Cursor, Antigravity, Factory AI, and 30+ other
+  AI coding agents).
+license: MIT
+metadata:
+  author: PromptScript
+  homepage: https://getpromptscript.dev
+compatibility:
+  - claude-code
+  - github-copilot
+  - cursor
+  - factory-ai
+  - gemini-cli
+  - opencode
+  - windsurf
+  - cline
+  - roo
+  - codex
+  - continue
+  - augment
+  - goose
+  - kilo
+  - amp
+  - trae
+  - junie
+  - kiro-cli
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - Bash
+user-invocable: true
 ---
 
 # PromptScript Language Guide
