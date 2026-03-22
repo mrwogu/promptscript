@@ -15,7 +15,7 @@ import { diffCommand } from './commands/diff.js';
 import { checkCommand } from './commands/check.js';
 import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
-import { setContext, LogLevel } from './output/console.js';
+import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 import { importCommand } from './commands/import.js';
 import { upgradeCommand } from './commands/upgrade.js';
@@ -75,7 +75,14 @@ program
   .option('-y, --yes', 'Skip prompts, use defaults')
   .option('-f, --force', 'Force reinitialize even if already initialized')
   .option('-m, --migrate', 'Install migration skill for AI-assisted migration')
-  .action((opts) => initCommand(opts));
+  .option('--auto-import', 'Automatically import existing instruction files (static)')
+  .option('--backup', 'Create .prs-backup/ before migration')
+  .action((opts) => {
+    if (opts.migrate) {
+      ConsoleOutput.warn('--migrate is deprecated. The migration flow is now built into prs init.');
+    }
+    return initCommand(opts);
+  });
 
 program
   .command('compile')
@@ -149,6 +156,17 @@ program
   .option('--dry-run', 'Preview output without writing files')
   .option('--validate', 'Run roundtrip validation after import')
   .action(importCommand);
+
+program
+  .command('migrate')
+  .description('Migrate existing AI instructions to PromptScript')
+  .option('--static', 'Non-interactive static import of all detected files')
+  .option('--llm', 'Generate AI-assisted migration prompt')
+  .option('--files <files...>', 'Specific files to import')
+  .action(async (opts) => {
+    const { migrateCommand } = await import('./commands/migrate.js');
+    await migrateCommand(opts);
+  });
 
 program
   .command('upgrade')

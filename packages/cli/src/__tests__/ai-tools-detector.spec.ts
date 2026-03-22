@@ -13,12 +13,14 @@ describe('utils/ai-tools-detector', () => {
   let mockFs: {
     existsSync: ReturnType<typeof vi.fn>;
     readdir: ReturnType<typeof vi.fn>;
+    readFile: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     mockFs = {
       existsSync: vi.fn(),
       readdir: vi.fn().mockResolvedValue([]),
+      readFile: vi.fn().mockResolvedValue('# mock content'),
     };
 
     mockServices = {

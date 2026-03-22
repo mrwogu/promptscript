@@ -73,15 +73,14 @@ describe('initCommand', () => {
     );
   });
 
-  describe('--migrate flag', () => {
-    it('should install migration skill to .promptscript/skills and target dirs when --migrate is used', async () => {
+  describe('skill installation', () => {
+    it('should always install skill to .promptscript/skills and target dirs', async () => {
       vi.mocked(mockFs.existsSync).mockReturnValue(false);
       const options: InitOptions = {
         ...defaultOptions,
         yes: true,
         name: 'test-project',
         targets: ['claude'],
-        migrate: true,
       };
 
       await initCommand(options, mockServices);
@@ -106,23 +105,20 @@ describe('initCommand', () => {
       );
     });
 
-    it('should not create migration files when --migrate is not used', async () => {
+    it('should install skill to all target dirs', async () => {
       vi.mocked(mockFs.existsSync).mockReturnValue(false);
       const options: InitOptions = {
         ...defaultOptions,
         yes: true,
         name: 'test-project',
         targets: ['claude', 'github', 'cursor', 'antigravity'],
-        migrate: false,
       };
 
       await initCommand(options, mockServices);
 
-      // Should create base files
+      // Should create base files and skill dirs
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
-
-      // Should NOT create migration skill
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.promptscript/skills/promptscript', {
+      expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
       });
     });

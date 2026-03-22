@@ -58,6 +58,7 @@ describe('commands/init', () => {
     mkdir: ReturnType<typeof vi.fn>;
     readFile: ReturnType<typeof vi.fn>;
     readdir: ReturnType<typeof vi.fn>;
+    readFileSync: ReturnType<typeof vi.fn>;
   };
   let mockPrompts: {
     input: ReturnType<typeof vi.fn>;
@@ -83,6 +84,7 @@ describe('commands/init', () => {
       mkdir: vi.fn().mockResolvedValue(undefined),
       readFile: vi.fn().mockResolvedValue('{}'),
       readdir: vi.fn().mockResolvedValue([]),
+      readFileSync: vi.fn().mockReturnValue(''),
     };
 
     mockPrompts = {
@@ -104,13 +106,14 @@ describe('commands/init', () => {
   });
 
   describe('initCommand', () => {
-    it('should warn when already initialized', async () => {
+    it('should set exit code 2 when already initialized', async () => {
       mockFs.existsSync.mockImplementation((path: string) => path === 'promptscript.yaml');
 
       await initCommand({}, mockServices);
 
       expect(mockFs.existsSync).toHaveBeenCalledWith('promptscript.yaml');
       expect(mockFs.writeFile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(2);
     });
 
     it('should reinitialize when --force is used', async () => {
@@ -119,10 +122,14 @@ describe('commands/init', () => {
       await initCommand({ yes: true, force: true }, mockServices);
 
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
-      expect(mockFs.writeFile).toHaveBeenCalledTimes(2);
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
         expect.stringContaining('syntax:'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        '.promptscript/project.prs',
+        expect.stringContaining('@meta'),
         'utf-8'
       );
     });
@@ -131,7 +138,6 @@ describe('commands/init', () => {
       await initCommand({ yes: true }, mockServices);
 
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript', { recursive: true });
-      expect(mockFs.writeFile).toHaveBeenCalledTimes(2);
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'promptscript.yaml',
         expect.stringContaining('syntax:'),
@@ -534,9 +540,9 @@ describe('commands/init', () => {
     });
   });
 
-  describe('--migrate flag', () => {
-    it('should install migration skill to .promptscript/skills when --migrate is used', async () => {
-      await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
+  describe('skill installation', () => {
+    it('should always install skill to .promptscript/skills', async () => {
+      await initCommand({ yes: true, targets: ['claude'] }, mockServices);
 
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
@@ -553,12 +559,11 @@ describe('commands/init', () => {
         {
           yes: true,
           targets: ['github', 'claude', 'cursor', 'antigravity', 'factory'],
-          migrate: true,
         },
         mockServices
       );
 
-      // Only one skill installed to .promptscript/skills/ (auto-discovery handles targets)
+      // Skill always installed to .promptscript/skills/
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
       });
@@ -569,30 +574,16 @@ describe('commands/init', () => {
       );
     });
 
-    it('should not install migration skill when --migrate is not used', async () => {
-      await initCommand({ yes: true, targets: ['github', 'claude'] }, mockServices);
-
-      expect(mockFs.mkdir).not.toHaveBeenCalledWith('.promptscript/skills/promptscript', {
-        recursive: true,
-      });
-    });
-
-    it('should show migration skill path in output when --migrate is used', async () => {
-      await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
+    it('should show skill path in output', async () => {
+      await initCommand({ yes: true, targets: ['claude'] }, mockServices);
 
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('.promptscript/skills/promptscript/SKILL.md')
       );
     });
 
-    it('should show migration-specific next steps when --migrate is used', async () => {
-      await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
-
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('/promptscript'));
-    });
-
     it('should use YAML marker inside frontmatter for skill files with frontmatter', async () => {
-      await initCommand({ yes: true, targets: ['claude'], migrate: true }, mockServices);
+      await initCommand({ yes: true, targets: ['claude'] }, mockServices);
 
       const writeCall = mockFs.writeFile.mock.calls.find(
         (call: unknown[]) =>

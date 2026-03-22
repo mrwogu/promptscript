@@ -184,7 +184,7 @@ jobs:
           node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate
           node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile
 
-      - name: Smoke test - init without --migrate (verify no migration files)
+      - name: Smoke test - init without --migrate (verify skill always installed)
         run: |
           mkdir -p /tmp/test-no-migrate
           cd /tmp/test-no-migrate
@@ -196,8 +196,8 @@ jobs:
           test -f promptscript.yaml
           test -f .promptscript/project.prs
 
-          # Verify migration skill does NOT exist when --migrate is not used
-          test ! -f .promptscript/skills/promptscript/SKILL.md
+          # Verify PromptScript skill is always installed (fresh start installs skill)
+          test -f .promptscript/skills/promptscript/SKILL.md
 
       - name: Smoke test - all targets compilation
         run: |
