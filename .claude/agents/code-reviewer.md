@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Reviews code for quality, security, and project conventions. Use after completing features or before commits.
-tools: Read, Grep, Glob, Bash
+tools: ['Read', 'Grep', 'Glob', 'Bash']
 model: sonnet
 ---
 

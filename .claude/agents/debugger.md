@@ -1,7 +1,7 @@
 ---
 name: debugger
 description: Debugs errors, test failures, and unexpected behavior. Knows PromptScript architecture.
-tools: Read, Edit, Bash, Grep, Glob
+tools: ['Read', 'Edit', 'Bash', 'Grep', 'Glob']
 model: sonnet
 permissionMode: acceptEdits
 ---

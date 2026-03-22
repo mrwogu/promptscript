@@ -745,11 +745,13 @@ export class ClaudeFormatter extends BaseFormatter {
     lines.push(`description: ${config.description}`);
 
     if (config.tools && config.tools.length > 0) {
-      lines.push(`tools: ${config.tools.join(', ')}`);
+      const arr = config.tools.map((t) => `'${t}'`).join(', ');
+      lines.push(`tools: [${arr}]`);
     }
 
     if (config.disallowedTools && config.disallowedTools.length > 0) {
-      lines.push(`disallowedTools: ${config.disallowedTools.join(', ')}`);
+      const arr = config.disallowedTools.map((t) => `'${t}'`).join(', ');
+      lines.push(`disallowedTools: [${arr}]`);
     }
 
     if (config.model) {
@@ -776,7 +778,8 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     if (config.mcpServers && config.mcpServers.length > 0) {
-      lines.push(`mcpServers: ${config.mcpServers.join(', ')}`);
+      const arr = config.mcpServers.map((s) => `'${s}'`).join(', ');
+      lines.push(`mcpServers: [${arr}]`);
     }
 
     if (config.background === true) {
