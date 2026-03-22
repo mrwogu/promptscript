@@ -1,5 +1,6 @@
 import type { ConventionName, OutputConvention } from './convention.js';
 import type { PrettierMarkdownOptions } from './prettier.js';
+import type { RegistriesConfig } from './registries.js';
 
 /**
  * Formatting configuration for output files.
@@ -186,6 +187,13 @@ export interface PromptScriptConfig {
   };
 
   /**
+   * Named registry aliases for multi-source imports.
+   * Maps alias names to Git repository URLs.
+   * Coexists with `registry` — aliases take precedence for matching paths.
+   */
+  registries?: RegistriesConfig;
+
+  /**
    * Watch mode configuration.
    * Settings for `prs compile --watch`.
    */
@@ -299,6 +307,7 @@ export interface UserConfig {
       ttl?: number;
     };
   };
+  registries?: RegistriesConfig;
   defaults?: {
     targets?: string[];
     team?: string;
