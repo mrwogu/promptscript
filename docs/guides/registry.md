@@ -428,15 +428,15 @@ registries:
   '@team': github.com/acme/team-frontend
 ```
 
-Use any scoped name as the key. The value is a bare Git host path — no `https://` prefix required.
+Use any scoped name as the key. The value is a bare Git host path - no `https://` prefix required.
 
 ### Three-Level Merge
 
 Aliases are merged from three sources in priority order (highest first):
 
-1. **Project** — `promptscript.yaml` in the repo (team-specific overrides)
-2. **User** — `~/.promptscript/config.yaml` (developer preferences)
-3. **System** — `/etc/promptscript/config.yaml` (IT-provisioned defaults)
+1. **Project** - `promptscript.yaml` in the repo (team-specific overrides)
+2. **User** - `~/.promptscript/config.yaml` (developer preferences)
+3. **System** - `/etc/promptscript/config.yaml` (IT-provisioned defaults)
 
 Project aliases win over user aliases, which win over system aliases. This lets IT provision company-wide aliases while still allowing projects to override specific ones.
 
@@ -458,7 +458,7 @@ Once configured, use the alias as the scope prefix in any import:
 
 ## Go-Style URL Imports
 
-Beyond registry aliases, PromptScript supports Go-module-style bare URL imports. You can reference any Git repository directly by its host path — no alias required.
+Beyond registry aliases, PromptScript supports Go-module-style bare URL imports. You can reference any Git repository directly by its host path - no alias required.
 
 ### Basic URL Import
 
@@ -506,7 +506,7 @@ Append a version specifier with `@`:
 
 ## Auto-Discovery
 
-When you import a repository that does not contain `.prs` files, PromptScript looks for native AI plugin files and converts them automatically. This means you can `@use` any GitHub repository that contains `SKILL.md`, agent definitions, or command files — even if it was not authored with PromptScript.
+When you import a repository that does not contain `.prs` files, PromptScript looks for native AI plugin files and converts them automatically. This means you can `@use` any GitHub repository that contains `SKILL.md`, agent definitions, or command files - even if it was not authored with PromptScript.
 
 ### What Gets Auto-Discovered
 
@@ -522,7 +522,7 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 ```promptscript
 @meta { id: "my-project" syntax: "1.0.0" }
 
-# This repo has a SKILL.md but no .prs files — auto-discovered
+# This repo has a SKILL.md but no .prs files - auto-discovered
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 ```
 
@@ -535,7 +535,7 @@ Auto-discovery works without any setup in the remote repo. The remote maintainer
 
 ## Lockfile
 
-PromptScript generates a `promptscript.lock` file to record the exact resolved commit for every remote import. This gives you reproducible builds — the same source always produces the same output, regardless of when you compile.
+PromptScript generates a `promptscript.lock` file to record the exact resolved commit for every remote import. This gives you reproducible builds - the same source always produces the same output, regardless of when you compile.
 
 ### Generating the Lockfile
 
@@ -568,9 +568,9 @@ packages:
 
 Commit `promptscript.lock` to version control. This ensures:
 
-- **Reproducible builds** — CI always compiles against the same commits
-- **Auditable deps** — diffs show exactly when a dependency was updated
-- **Offline support** — works with `prs vendor sync` (see below)
+- **Reproducible builds** - CI always compiles against the same commits
+- **Auditable deps** - diffs show exactly when a dependency was updated
+- **Offline support** - works with `prs vendor sync` (see below)
 
 ### Updating Dependencies
 
@@ -589,7 +589,7 @@ prs update --dry-run
 
 ## Vendor Mode
 
-Vendor mode copies all remote dependencies into a local `.promptscript/vendor/` directory. This enables fully offline builds — useful in air-gapped CI environments or when you want to audit third-party content before it runs.
+Vendor mode copies all remote dependencies into a local `.promptscript/vendor/` directory. This enables fully offline builds - useful in air-gapped CI environments or when you want to audit third-party content before it runs.
 
 ### Syncing the Vendor Directory
 
@@ -673,7 +673,7 @@ registry:
       tokenEnvVar: GITHUB_TOKEN
 ```
 
-The `tokenEnvVar` field names the environment variable that holds the token — it is never stored in plain text.
+The `tokenEnvVar` field names the environment variable that holds the token - it is never stored in plain text.
 
 ### User-Level Token Configuration
 

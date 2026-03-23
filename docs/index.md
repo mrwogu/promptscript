@@ -793,7 +793,7 @@ Run a comprehensive OWASP Top 10 scan.
 </div>
 
 <h2 class="section-title">Import from Anywhere</h2>
-<p class="section-subtitle">Use packages from Git repositories — or import skills directly from any AI coding plugin</p>
+<p class="section-subtitle">Use packages from Git repositories - or import skills directly from any AI coding plugin</p>
 
 ```promptscript
 # Company-wide security rules
@@ -818,7 +818,7 @@ registries:
   '@team': github.com/acme/team-frontend
 ```
 
-> **Zero infrastructure required** — uses Git directly. Private repo? Your existing SSH keys and tokens just work.
+> **Zero infrastructure required** - uses Git directly. Private repo? Your existing SSH keys and tokens just work.
 
 <div style="text-align: center; margin: 1.5rem 0;">
   <a href="guides/registry/" class="md-button md-button--primary">Registry Guide</a>

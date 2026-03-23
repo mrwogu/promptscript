@@ -64,6 +64,9 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
         },
       ],
 
+      // URL paths (github.com/org/repo/@path@version)
+      [/[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[a-zA-Z0-9_./@^~-]+/, 'string.url'],
+
       // Identifiers and keywords
       [
         /[a-zA-Z_][\w-]*/,
@@ -183,6 +186,7 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'variable.template', foreground: 'f472b6', fontStyle: 'bold' },
   { token: 'variable.name', foreground: 'fb923c' },
   { token: 'variable.env', foreground: 'fbbf24' },
+  { token: 'string.url', foreground: '67e8f9' },
 ];
 
 /**
