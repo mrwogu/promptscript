@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, writeFile, mkdir, rm } from 'fs/promises';
+import { mkdtemp, writeFile, mkdir, rm, symlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { resolveNativeAgents } from '../skills.js';
@@ -303,5 +303,130 @@ You are an expert planning specialist.`
     // Both existing and new agent present
     expect(props['existing']).toBeDefined();
     expect(props['new-agent']).toBeDefined();
+  });
+
+  it('should return unchanged AST when localPath is undefined', async () => {
+    const ast = emptyAst('/fake/project.prs');
+    const result = await resolveNativeAgents(ast, ast.loc.file, undefined);
+    expect(result).toBe(ast);
+  });
+
+  it('should skip symlinked agent files', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+
+    // Create a real file and a symlink to it
+    const realFile = join(tempDir, 'real-agent.md');
+    await writeFile(realFile, '---\nname: linked\ndescription: Symlinked\n---\nContent.');
+    try {
+      await symlink(realFile, join(agentsDir, 'linked.md'));
+    } catch {
+      // Symlink creation may fail on some CI environments — skip test
+      return;
+    }
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    // Symlinked file should be skipped
+    expect(result).toBe(ast);
+  });
+
+  it('should skip binary files (containing null bytes)', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    // Write a file with null byte in content
+    await writeFile(
+      join(agentsDir, 'binary.md'),
+      '---\nname: bin\ndescription: Bin\n---\nHas\0null.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    expect(result).toBe(ast);
+  });
+
+  it('should skip non-.md files', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'agent.txt'),
+      '---\nname: txt\ndescription: Not markdown\n---\nContent.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    expect(result).toBe(ast);
+  });
+
+  it('should handle frontmatter with no closing ---', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(join(agentsDir, 'noclosing.md'), '---\nname: broken\ndescription: No close\n');
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    expect(result).toBe(ast);
+  });
+
+  it('should handle frontmatter lines without colons', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'extralines.md'),
+      '---\nname: extra\ndescription: Has extra lines\nno-colon-line\n---\nContent.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    const agentsBlock = result.blocks.find((b) => b.name === 'agents');
+    expect(agentsBlock).toBeDefined();
+    const props = (agentsBlock!.content as ObjectContent).properties;
+    expect(props['extra']).toBeDefined();
+  });
+
+  it('should skip agent with name containing backslash', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'bad2.md'),
+      '---\nname: path\\traversal\ndescription: Backslash\n---\nContent.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    expect(result).toBe(ast);
+  });
+
+  it('should skip oversized agent files (>1MB)', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    // Create a file slightly over 1MB
+    const header = '---\nname: big\ndescription: Oversized agent\n---\n';
+    const padding = 'x'.repeat(1_048_577 - header.length);
+    await writeFile(join(agentsDir, 'big.md'), header + padding);
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+    expect(result).toBe(ast);
+  });
+
+  it('should skip files that cannot be read (permissions)', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    const filePath = join(agentsDir, 'unreadable.md');
+    await writeFile(filePath, '---\nname: secret\ndescription: No access\n---\nContent.');
+    // Remove read permission
+    const { chmod } = await import('fs/promises');
+    await chmod(filePath, 0o000);
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    try {
+      const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
+      // Should skip the unreadable file, not crash
+      expect(result).toBe(ast);
+    } finally {
+      // Restore permissions for cleanup
+      await chmod(filePath, 0o644);
+    }
   });
 });
