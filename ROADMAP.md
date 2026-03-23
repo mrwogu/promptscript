@@ -248,10 +248,15 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 
 **Goal:** Make PromptScript production-ready for large organizations.
 
-- [ ] **Remote registry support**
-  - Self-hosted registry (Docker image)
-  - Private package hosting
-  - Authentication via OIDC/SAML
+- [x] **Remote registry support (Git-based)**
+  - Git repository as registry (public and private)
+  - Registry aliases with three-level merge (system > user > project)
+  - Go-style URL imports (`@use github.com/org/repo/@path`)
+  - Lockfile (`promptscript.lock`) for reproducible builds
+  - Vendor mode (`prs vendor sync/check`) for offline/air-gapped CI
+  - Auto-discovery of SKILL.md, agents, commands from repos without .prs files
+  - Private repo auth via SSH keys and GITHUB_TOKEN
+- [ ] **Self-hosted HTTP registry** (Docker image, OIDC/SAML auth) — planned
 
 - [ ] **Policy enforcement**
   - Required sections in all projects
@@ -364,7 +369,7 @@ _These features are being evaluated based on community interest. Vote with 👍 
 - [ ] **Template inheritance** — Mustache/Handlebars in prompts
 - [ ] **Conditional compilation** — `@if env.production` blocks
 - [ ] **Monorepo support** — Per-package configurations with shared base
-- [ ] **Import from URL** — `@inherit https://example.com/rules.prs`
+- [x] **Import from URL** — `@use github.com/org/repo/@path` Go-style URL imports with version pinning, auto-discovery, lockfile, and vendor mode (see [Registry Guide](docs/guides/registry.md))
 - [x] **Docker container** — Pre-built image with PromptScript CLI (see [Docker guide](docs/guides/docker.md))
 
 ---
