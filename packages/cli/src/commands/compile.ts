@@ -4,7 +4,8 @@ import { writeFile, mkdir, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import chokidar from 'chokidar';
 import type { CompileOptions } from '../types.js';
-import type { Logger, PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
+import type { Logger, PromptScriptConfig, TargetEntry, TargetConfig, Lockfile } from '@promptscript/core';
+import { isValidLockfile } from '@promptscript/core';
 
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadConfig, CONFIG_FILES } from '../config/loader.js';
@@ -14,6 +15,7 @@ import { Compiler } from '@promptscript/compiler';
 import { isTTY } from '../output/pager.js';
 import { type CliServices, createDefaultServices } from '../services.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+import { parse as parseYaml } from 'yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -426,6 +428,22 @@ export async function compileCommand(
       }
     }
 
+    // Read lockfile if it exists
+    let lockfile: Lockfile | undefined;
+    const lockfilePath = resolve(projectRoot, 'promptscript.lock');
+    try {
+      const lockfileContent = await readFile(lockfilePath, 'utf-8');
+      const parsed = parseYaml(lockfileContent);
+      if (isValidLockfile(parsed)) {
+        lockfile = parsed;
+        logger.verbose(`Loaded lockfile from ${lockfilePath}`);
+      } else {
+        logger.verbose(`Lockfile at ${lockfilePath} has invalid format — ignoring`);
+      }
+    } catch {
+      // No lockfile present, that's fine
+    }
+
     spinner.text = 'Compiling...';
     logger.verbose(`Registry: ${registryPath}`);
     logger.debug(`Config: ${JSON.stringify(config, null, 2)}`);
@@ -448,6 +466,8 @@ export async function compileCommand(
         registryPath,
         localPath,
         skills: resolveUniversalDir(config.universalDir),
+        registries: config.registries,
+        lockfile,
       },
       validator: config.validation,
       formatters: targets,
@@ -481,6 +501,13 @@ export async function compileCommand(
 
     spinner.succeed('Compilation successful');
     ConsoleOutput.newline();
+
+    // Hint about lockfile if registries are configured but no lockfile exists
+    if (config.registries && Object.keys(config.registries).length > 0 && !lockfile) {
+      logger.verbose(
+        'Tip: Run "prs lock" to pin remote dependencies for reproducible builds.'
+      );
+    }
 
     // When --cwd is set, default output to projectRoot so files land in the right place
     const effectiveOptions = options.output ? options : { ...options, output: projectRoot };
