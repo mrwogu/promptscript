@@ -33,10 +33,7 @@ export class RegistryCache {
     const cachePath = this.getCachePath(repoUrl, version);
     await mkdir(cachePath, { recursive: true });
     const meta: CacheMeta = { commit, cachedAt: Date.now() };
-    await writeFile(
-      join(cachePath, '.prs-registry-meta.json'),
-      JSON.stringify(meta, null, 2)
-    );
+    await writeFile(join(cachePath, '.prs-registry-meta.json'), JSON.stringify(meta, null, 2));
     return cachePath;
   }
 

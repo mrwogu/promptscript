@@ -1,3 +1,5 @@
+import { existsSync } from 'fs';
+import { join } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -10,12 +12,20 @@ import {
   interpolateAST,
   type TemplateContext,
 } from '@promptscript/core';
-import { FileLoader, type LoaderOptions } from './loader.js';
+import {
+  FileLoader,
+  type LoaderOptions,
+  REGISTRY_MARKER_PREFIX,
+  parseRegistryMarker,
+} from './loader.js';
 import { resolveInheritance } from './inheritance.js';
 import { resolveUses } from './imports.js';
 import { applyExtends } from './extensions.js';
 import { resolveNativeSkills, resolveNativeCommands, type NativeSkillOptions } from './skills.js';
 import { normalizeBlockAliases } from './normalize.js';
+import { GitRegistry } from './git-registry.js';
+import { RegistryCache } from './registry-cache.js';
+import { discoverNativeContent } from './auto-discovery.js';
 
 /**
  * Options for the resolver.
@@ -27,6 +37,8 @@ export interface ResolverOptions extends LoaderOptions {
   logger?: Logger;
   /** Options for native skill resolution */
   skills?: NativeSkillOptions;
+  /** Base directory for the registry cache (defaults to ~/.promptscript/cache) */
+  cacheDir?: string;
 }
 
 /**
@@ -69,6 +81,8 @@ export class Resolver {
   private readonly cacheEnabled: boolean;
   private readonly logger: Logger;
   private readonly options: ResolverOptions;
+  private readonly gitRegistry: GitRegistry;
+  private readonly registryCache: RegistryCache;
 
   constructor(options: ResolverOptions) {
     this.options = options;
@@ -77,6 +91,13 @@ export class Resolver {
     this.resolving = new Set();
     this.cacheEnabled = options.cache !== false;
     this.logger = options.logger ?? noopLogger;
+    this.gitRegistry = new GitRegistry({ url: 'https://github.com/placeholder/placeholder.git' });
+    const defaultCacheDir = join(
+      process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp',
+      '.promptscript',
+      'cache'
+    );
+    this.registryCache = new RegistryCache(options.cacheDir ?? defaultCacheDir);
   }
 
   /**
@@ -235,7 +256,12 @@ export class Resolver {
     this.logger.verbose(`  → ${parentPath}`);
 
     try {
-      const parent = await this.resolve(parentPath);
+      let parent: ResolvedAST;
+      if (parentPath.startsWith(REGISTRY_MARKER_PREFIX)) {
+        parent = await this.resolveRegistryImport(parentPath, errors);
+      } else {
+        parent = await this.resolve(parentPath);
+      }
       sources.push(...parent.sources);
       errors.push(...parent.errors);
 
@@ -299,7 +325,15 @@ export class Resolver {
       this.logger.verbose(`  → ${importPath}`);
 
       try {
-        const imported = await this.resolve(importPath);
+        let imported: ResolvedAST;
+
+        if (importPath.startsWith(REGISTRY_MARKER_PREFIX)) {
+          // Remote registry import — handle async Git resolution
+          imported = await this.resolveRegistryImport(importPath, errors);
+        } else {
+          imported = await this.resolve(importPath);
+        }
+
         sources.push(...imported.sources);
         errors.push(...imported.errors);
 
@@ -340,6 +374,122 @@ export class Resolver {
     }
 
     return result;
+  }
+
+  /**
+   * Resolve a remote registry import from a `__registry__:` marker path.
+   *
+   * Steps:
+   * 1. Parse the marker to extract repoUrl, path, version
+   * 2. Check lockfile for pinned commit
+   * 3. Check RegistryCache for cached version
+   * 4. On cache miss: clone via GitRegistry (cloneAtTag for tagged versions)
+   * 5. Look for .prs file at the path in the cached repo
+   * 6. If no .prs found: call discoverNativeContent() for auto-discovery
+   * 7. Parse the result and return as ResolvedAST
+   */
+  private async resolveRegistryImport(
+    marker: string,
+    errors: ResolveError[]
+  ): Promise<ResolvedAST> {
+    const parsed = parseRegistryMarker(marker);
+    if (!parsed) {
+      errors.push(new ResolveError(`Invalid registry marker: ${marker}`));
+      return { ast: null, sources: [marker], errors: [] };
+    }
+
+    const { repoUrl, path: subPath, version } = parsed;
+    const effectiveVersion = version || 'latest';
+
+    // Add to resolving set for circular dependency detection
+    if (this.resolving.has(marker)) {
+      this.logger.debug(`Circular dependency detected: ${marker}`);
+      throw new CircularDependencyError([...this.resolving, marker]);
+    }
+
+    // Check internal AST cache
+    if (this.cacheEnabled && this.cache.has(marker)) {
+      this.logger.debug(`Cache hit (AST): ${marker}`);
+      return this.cache.get(marker)!;
+    }
+
+    this.resolving.add(marker);
+
+    try {
+      // Check lockfile for pinned commit
+      const lockEntry = this.options.lockfile?.dependencies[repoUrl];
+      const pinnedTag = lockEntry?.version ?? (version || undefined);
+
+      // Determine the Git tag to clone at
+      const tag = pinnedTag ?? 'main';
+
+      // Check RegistryCache for cached version
+      const hasCached = await this.registryCache.has(repoUrl, effectiveVersion);
+      let cachePath: string;
+
+      if (hasCached) {
+        this.logger.debug(`Registry cache hit: ${repoUrl}@${effectiveVersion}`);
+        cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
+      } else {
+        this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag}`);
+        cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
+
+        // Clone using GitRegistry
+        await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath);
+
+        // Record in RegistryCache
+        const commitHash = lockEntry?.commit ?? 'unknown';
+        await this.registryCache.set(repoUrl, effectiveVersion, commitHash);
+      }
+
+      // Resolve the .prs file path within the cached repo
+      const prsFileName = subPath.endsWith('.prs') ? subPath : `${subPath}.prs`;
+      const prsFullPath = join(cachePath, prsFileName);
+
+      let resolvedAST: Program | null = null;
+
+      if (existsSync(prsFullPath)) {
+        // Found a .prs file — parse it
+        this.logger.debug(`Found .prs file: ${prsFullPath}`);
+        const source = await this.loader.load(prsFullPath);
+        const parseResult = parse(source, { filename: prsFullPath });
+
+        if (parseResult.ast) {
+          resolvedAST = parseResult.ast;
+        } else {
+          for (const e of parseResult.errors) {
+            errors.push(new ResolveError(e.message, e.location));
+          }
+        }
+      } else {
+        // No .prs file — try auto-discovery of native content
+        const discoverDir = join(cachePath, subPath);
+        this.logger.debug(`No .prs found, trying auto-discovery: ${discoverDir}`);
+        resolvedAST = await discoverNativeContent(discoverDir);
+
+        if (!resolvedAST) {
+          errors.push(
+            new ResolveError(
+              `Cannot resolve registry import: no .prs file or native content at '${subPath}' in ${repoUrl}`
+            )
+          );
+        }
+      }
+
+      const result: ResolvedAST = {
+        ast: resolvedAST,
+        sources: [marker],
+        errors: [],
+      };
+
+      if (this.cacheEnabled) {
+        this.cache.set(marker, result);
+      }
+
+      return result;
+    } finally {
+      this.resolving.delete(marker);
+    }
   }
 
   /**

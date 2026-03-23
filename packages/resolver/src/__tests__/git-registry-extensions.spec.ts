@@ -41,9 +41,7 @@ function makeRegistry(testCacheDir: string): GitRegistry {
 
 /** Build a fake ls-remote --tags output */
 function buildLsRemoteOutput(tags: string[]): string {
-  return tags
-    .map((tag) => `abc123\trefs/tags/${tag}`)
-    .join('\n');
+  return tags.map((tag) => `abc123\trefs/tags/${tag}`).join('\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -92,11 +90,11 @@ describe('GitRegistry — extended methods', () => {
       await registry.cloneAtTag('https://github.com/org/repo.git', 'v1.2.3', targetDir);
 
       // Assert
-      expect(mockGit.clone).toHaveBeenCalledWith(
-        'https://github.com/org/repo.git',
-        targetDir,
-        ['--depth=1', '--branch=v1.2.3', '--single-branch']
-      );
+      expect(mockGit.clone).toHaveBeenCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+        '--branch=v1.2.3',
+        '--single-branch',
+      ]);
     });
 
     it('removes an existing target directory before cloning', async () => {
@@ -140,9 +138,7 @@ describe('GitRegistry — extended methods', () => {
   describe('listTags()', () => {
     it('returns parsed semver tags from ls-remote output', async () => {
       // Arrange
-      mockGit.listRemote.mockResolvedValueOnce(
-        buildLsRemoteOutput(['v1.0.0', 'v1.1.0', 'v2.0.0'])
-      );
+      mockGit.listRemote.mockResolvedValueOnce(buildLsRemoteOutput(['v1.0.0', 'v1.1.0', 'v2.0.0']));
 
       // Act
       const tags = await registry.listTags('https://github.com/org/repo.git');
@@ -171,10 +167,7 @@ describe('GitRegistry — extended methods', () => {
 
     it('deduplicates tags (strips ^{} peeled refs)', async () => {
       // Arrange — peeled annotated tag refs appear twice
-      const lsRemoteOutput = [
-        'abc123\trefs/tags/v1.0.0',
-        'def456\trefs/tags/v1.0.0^{}',
-      ].join('\n');
+      const lsRemoteOutput = ['abc123\trefs/tags/v1.0.0', 'def456\trefs/tags/v1.0.0^{}'].join('\n');
       mockGit.listRemote.mockResolvedValueOnce(lsRemoteOutput);
 
       // Act
@@ -292,11 +285,13 @@ describe('GitRegistry — extended methods', () => {
       );
 
       // Assert — initial clone with sparse flags
-      expect(mockGit.clone).toHaveBeenCalledWith(
-        'https://github.com/org/repo.git',
-        targetDir,
-        ['--depth=1', '--branch=v1.0.0', '--single-branch', '--filter=blob:none', '--sparse']
-      );
+      expect(mockGit.clone).toHaveBeenCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+        '--branch=v1.0.0',
+        '--single-branch',
+        '--filter=blob:none',
+        '--sparse',
+      ]);
 
       // Assert — sparse-checkout set called with path
       expect(mockGit.raw).toHaveBeenCalledWith(['sparse-checkout', 'set', 'registry/']);

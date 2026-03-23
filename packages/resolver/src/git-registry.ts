@@ -260,11 +260,7 @@ export class GitRegistry implements Registry {
 
     const git = this.createGit();
     try {
-      await git.clone(repoUrl, targetDir, [
-        '--depth=1',
-        `--branch=${tag}`,
-        '--single-branch',
-      ]);
+      await git.clone(repoUrl, targetDir, ['--depth=1', `--branch=${tag}`, '--single-branch']);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       if (this.isRefError(error)) {
@@ -273,7 +269,11 @@ export class GitRegistry implements Registry {
       if (this.isAuthError(error)) {
         throw new GitAuthError(`Authentication failed for ${repoUrl}`, repoUrl, error);
       }
-      throw new GitCloneError(`Failed to clone ${repoUrl} at tag ${tag}: ${error.message}`, repoUrl, error);
+      throw new GitCloneError(
+        `Failed to clone ${repoUrl} at tag ${tag}: ${error.message}`,
+        repoUrl,
+        error
+      );
     }
   }
 
@@ -298,14 +298,16 @@ export class GitRegistry implements Registry {
     const raw = await git.listRemote(['--tags', repoUrl]);
 
     // Parse "abc123\trefs/tags/v1.0.0" lines; strip peeled tag suffixes (^{})
-    const tags = [...new Set(
-      raw
-        .split('\n')
-        .map((line) => line.split('\t')[1]?.trim())
-        .filter((ref): ref is string => Boolean(ref) && ref.startsWith('refs/tags/') && !ref.endsWith('^{}'))
-        .map((ref) => ref.replace('refs/tags/', ''))
-        .filter((tag) => SEMVER_TAG_RE.test(tag))
-    )];
+    const tags = [
+      ...new Set(
+        raw
+          .split('\n')
+          .map((line) => line.split('\t')[1]?.trim() ?? '')
+          .filter((ref) => ref.startsWith('refs/tags/') && !ref.endsWith('^{}'))
+          .map((ref) => ref.replace('refs/tags/', ''))
+          .filter((tag) => SEMVER_TAG_RE.test(tag))
+      ),
+    ];
 
     if (cache) {
       await cache.setTagsMeta(repoUrl, tags);
@@ -322,7 +324,11 @@ export class GitRegistry implements Registry {
    * @param cache - Optional RegistryCache passed through to listTags
    * @returns Best-matching tag string, or null if no tag satisfies the range
    */
-  async resolveVersion(repoUrl: string, range: string, cache?: RegistryCache): Promise<string | null> {
+  async resolveVersion(
+    repoUrl: string,
+    range: string,
+    cache?: RegistryCache
+  ): Promise<string | null> {
     const tags = await this.listTags(repoUrl, cache);
     return maxSatisfying(tags, range);
   }
@@ -646,9 +652,9 @@ function parseSemver(tag: string): SemverParts | null {
   const match = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/.exec(stripped);
   if (!match) return null;
   return {
-    major: parseInt(match[1], 10),
-    minor: parseInt(match[2], 10),
-    patch: parseInt(match[3], 10),
+    major: parseInt(match[1] ?? '0', 10),
+    minor: parseInt(match[2] ?? '0', 10),
+    patch: parseInt(match[3] ?? '0', 10),
     pre: match[5] ?? '',
     raw: tag,
   };
@@ -675,7 +681,8 @@ function maxSatisfying(tags: string[], range: string): string | null {
   const satisfying = parsed.filter((v) => satisfiesRange(v, range));
   if (satisfying.length === 0) return null;
   satisfying.sort(compareSemver);
-  return satisfying[satisfying.length - 1].raw;
+  const best = satisfying[satisfying.length - 1];
+  return best ? best.raw : null;
 }
 
 function satisfiesRange(v: SemverParts, range: string): boolean {
@@ -686,7 +693,9 @@ function satisfiesRange(v: SemverParts, range: string): boolean {
 
   const xRangeMatch = /^(\d+)(?:\.([0-9xX*]+))?(?:\.([0-9xX*]+))?$/.exec(trimmed);
   if (xRangeMatch) {
-    const [, maj, min, pat] = xRangeMatch;
+    const maj = xRangeMatch[1] ?? '0';
+    const min = xRangeMatch[2];
+    const pat = xRangeMatch[3];
     if (v.major !== parseInt(maj, 10)) return false;
     if (!min || /^[xX*]$/.test(min)) return true;
     if (v.minor !== parseInt(min, 10)) return false;
@@ -697,7 +706,7 @@ function satisfiesRange(v: SemverParts, range: string): boolean {
   // Caret range: ^1.2.3
   const caretMatch = /^\^(.+)$/.exec(trimmed);
   if (caretMatch) {
-    const base = parseSemver(caretMatch[1]);
+    const base = parseSemver(caretMatch[1] ?? '');
     if (!base) return false;
     if (v.major !== base.major) return false;
     return compareSemver(v, base) >= 0;
@@ -706,7 +715,7 @@ function satisfiesRange(v: SemverParts, range: string): boolean {
   // Tilde range: ~1.2.3
   const tildeMatch = /^~(.+)$/.exec(trimmed);
   if (tildeMatch) {
-    const base = parseSemver(tildeMatch[1]);
+    const base = parseSemver(tildeMatch[1] ?? '');
     if (!base) return false;
     if (v.major !== base.major || v.minor !== base.minor) return false;
     return compareSemver(v, base) >= 0;
@@ -720,7 +729,8 @@ function satisfiesRange(v: SemverParts, range: string): boolean {
   // Single comparator: >=1.0.0, >1.0.0, <=1.0.0, <1.0.0, =1.0.0
   const compMatch = /^(>=|<=|>|<|=?)(.+)$/.exec(trimmed);
   if (compMatch) {
-    const [, op, ver] = compMatch;
+    const op = compMatch[1] ?? '';
+    const ver = compMatch[2] ?? '';
     const base = parseSemver(ver);
     if (!base) return false;
     const cmp = compareSemver(v, base);
