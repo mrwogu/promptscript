@@ -298,6 +298,49 @@ jobs:
           test -f bare-registry/@core/.gitkeep
           test ! -f bare-registry/@core/base.prs
 
+      - name: Smoke test - registry list command
+        run: |
+          mkdir -p /tmp/test-reg-list
+          cd /tmp/test-reg-list
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name reg-list-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry list
+
+      - name: Smoke test - registry add command
+        run: |
+          mkdir -p /tmp/test-reg-add
+          cd /tmp/test-reg-add
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name reg-add-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry add @company github.com/acme/promptscript-registry
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js registry list | grep -q company
+
+      - name: Smoke test - lock command (no remote imports)
+        run: |
+          mkdir -p /tmp/test-lock
+          cd /tmp/test-lock
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name lock-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js lock
+
+      - name: Smoke test - update command (no remote imports)
+        run: |
+          mkdir -p /tmp/test-update
+          cd /tmp/test-update
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name update-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js update || true
+
+      - name: Smoke test - vendor check (no lockfile)
+        run: |
+          mkdir -p /tmp/test-vendor
+          cd /tmp/test-vendor
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name vendor-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js vendor check || true
+
+      - name: Smoke test - resolve command
+        run: |
+          mkdir -p /tmp/test-resolve
+          cd /tmp/test-resolve
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js init --name resolve-test --targets github -y
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js resolve @company/base 2>&1 || true
+
       - name: Smoke test - compile with watch disabled
         run: |
           mkdir -p /tmp/test-watch
