@@ -1292,16 +1292,90 @@ Single-line comments with `#`:
 </a>
 <!-- playground-link-end -->
 
+## URL Imports
+
+PromptScript supports Go-module-style bare URL imports in `@use` and `@inherit` declarations. A URL import references a Git repository directly by its host path — no registry alias required.
+
+### Basic URL Import
+
+```promptscript
+@meta { id: "my-project" syntax: "1.0.0" }
+
+# Import from a public GitHub repo
+@use github.com/acme/shared-standards/@fragments/security
+
+# Import from GitLab
+@use gitlab.com/myorg/prompts/@stacks/python
+```
+
+### Extended Version Syntax
+
+Append a version specifier after the import path with `@`:
+
+```promptscript
+# Exact tag
+@use github.com/acme/shared-standards/@org/base@1.2.0
+
+# Semver range (latest compatible patch)
+@use github.com/acme/shared-standards/@org/base@^1.0.0
+
+# Branch
+@use github.com/acme/shared-standards/@org/base@main
+```
+
+| Specifier | Meaning                               |
+| --------- | ------------------------------------- |
+| `@1.2.0`  | Exact tag `v1.2.0` or `1.2.0`         |
+| `@^1.0.0` | Latest tag matching `^1.0.0` (semver) |
+| `@main`   | Tip of branch `main`                  |
+| (none)    | Default branch as configured          |
+
+### Auto-Discovery
+
+When the imported path does not contain `.prs` files, PromptScript automatically discovers and converts native AI plugin files:
+
+| Source File Pattern                       | Imported As        |
+| ----------------------------------------- | ------------------ |
+| `SKILL.md` in root or `skills/` directory | `@skills` block    |
+| `.claude/agents/*.md`                     | `@agents` block    |
+| `.claude/commands/*.md`                   | `@shortcuts` block |
+| `.github/skills/*/SKILL.md`               | `@skills` block    |
+
+This means you can import skills from any repository — including projects that were not authored with PromptScript:
+
+```promptscript
+@meta { id: "my-project" syntax: "1.0.0" }
+
+# Repo has SKILL.md but no .prs files — auto-discovered
+@use github.com/some-org/claude-skills/skills/tdd-workflow
+```
+
+### Alias vs URL Import
+
+Registry aliases (configured via `registries` in `promptscript.yaml`) are a shorthand for URL imports. Both resolve to the same Git fetch:
+
+```promptscript
+# With alias (configured as @company -> github.com/acme/base)
+@inherit @company/@org/base
+
+# Equivalent full URL import
+@inherit github.com/acme/base/@org/base
+```
+
+See [Registry Aliases](../guides/registry.md#registry-aliases) for alias configuration.
+
 ## Path References
 
 Path syntax for imports and inheritance:
 
-| Format     | Example                    | Description        |
-| ---------- | -------------------------- | ------------------ |
-| Namespaced | `@company/team`            | Registry namespace |
-| Versioned  | `@company/team@1.0.0`      | With version       |
-| Relative   | `./parent`                 | Relative path      |
-| Nested     | `@company/guards/security` | Nested path        |
+| Format     | Example                            | Description         |
+| ---------- | ---------------------------------- | ------------------- |
+| Namespaced | `@company/team`                    | Registry namespace  |
+| Versioned  | `@company/team@1.0.0`              | With version        |
+| Relative   | `./parent`                         | Relative path       |
+| Nested     | `@company/guards/security`         | Nested path         |
+| URL        | `github.com/org/repo/@path`        | Go-style URL import |
+| URL+ver    | `github.com/org/repo/@path@^1.0.0` | URL with version    |
 
 ## Reserved Words
 

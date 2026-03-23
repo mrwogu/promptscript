@@ -11,6 +11,12 @@ import {
   GitAuthError,
   GitRefNotFoundError,
   ValidationError,
+  UnknownAliasError,
+  RegistryPathNotFoundError,
+  SemverNoMatchError,
+  LockfileIntegrityError,
+  OfflineResolveError,
+  RateLimitError,
 } from '../errors/index.js';
 import type { SourceLocation } from '../types/index.js';
 
@@ -270,5 +276,81 @@ describe('ErrorCode', () => {
     expect(ErrorCode.INVALID_VALUE).toBe('PS3002');
     expect(ErrorCode.BLOCKED_PATTERN).toBe('PS3003');
     expect(ErrorCode.MISSING_GUARD).toBe('PS3004');
+  });
+});
+
+describe('Registry errors', () => {
+  it('should create UnknownAliasError with alias', () => {
+    const error = new UnknownAliasError('myalias', mockLocation);
+    expect(error.name).toBe('UnknownAliasError');
+    expect(error.alias).toBe('myalias');
+    expect(error.code).toBe(ErrorCode.UNKNOWN_ALIAS);
+    expect(error.message).toContain('myalias');
+    expect(error.message).toContain('prs registry list');
+  });
+
+  it('should create RegistryPathNotFoundError with available paths', () => {
+    const error = new RegistryPathNotFoundError('@org/missing', ['@org/a', '@org/b'], mockLocation);
+    expect(error.name).toBe('RegistryPathNotFoundError');
+    expect(error.importPath).toBe('@org/missing');
+    expect(error.available).toEqual(['@org/a', '@org/b']);
+    expect(error.message).toContain('@org/missing');
+    expect(error.message).toContain('@org/a, @org/b');
+  });
+
+  it('should create RegistryPathNotFoundError with no available paths', () => {
+    const error = new RegistryPathNotFoundError('@org/missing', []);
+    expect(error.message).not.toContain('Available');
+  });
+
+  it('should create SemverNoMatchError with latest version', () => {
+    const error = new SemverNoMatchError(
+      '^2.0.0',
+      'https://github.com/org/reg',
+      '1.5.0',
+      mockLocation
+    );
+    expect(error.name).toBe('SemverNoMatchError');
+    expect(error.range).toBe('^2.0.0');
+    expect(error.latest).toBe('1.5.0');
+    expect(error.message).toContain('^2.0.0');
+    expect(error.message).toContain('1.5.0');
+  });
+
+  it('should create SemverNoMatchError without latest version', () => {
+    const error = new SemverNoMatchError('^3.0.0', 'https://github.com/org/reg');
+    expect(error.latest).toBeUndefined();
+    expect(error.message).not.toContain('Latest');
+  });
+
+  it('should create LockfileIntegrityError', () => {
+    const error = new LockfileIntegrityError('@org/base', mockLocation);
+    expect(error.name).toBe('LockfileIntegrityError');
+    expect(error.importPath).toBe('@org/base');
+    expect(error.message).toContain('@org/base');
+    expect(error.message).toContain('prs update');
+  });
+
+  it('should create OfflineResolveError', () => {
+    const error = new OfflineResolveError('@org/offline', mockLocation);
+    expect(error.name).toBe('OfflineResolveError');
+    expect(error.importPath).toBe('@org/offline');
+    expect(error.message).toContain('no network');
+    expect(error.message).toContain('prs vendor sync');
+  });
+
+  it('should create RateLimitError with retry time', () => {
+    const error = new RateLimitError('https://api.github.com', 15, mockLocation);
+    expect(error.name).toBe('RateLimitError');
+    expect(error.retryAfterMinutes).toBe(15);
+    expect(error.message).toContain('15 minutes');
+    expect(error.message).toContain('GITHUB_TOKEN');
+  });
+
+  it('should create RateLimitError without retry time', () => {
+    const error = new RateLimitError('https://api.github.com');
+    expect(error.retryAfterMinutes).toBeUndefined();
+    expect(error.message).toContain('GITHUB_TOKEN');
+    expect(error.message).not.toContain('minutes');
   });
 });

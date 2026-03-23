@@ -783,6 +783,48 @@ Run a comprehensive OWASP Top 10 scan.
 
 </div>
 
+<!-- Registry Section -->
+<div class="section-divider">
+  <div class="section-divider__line"></div>
+  <div class="section-divider__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+  </div>
+  <div class="section-divider__line"></div>
+</div>
+
+<h2 class="section-title">Import from Anywhere</h2>
+<p class="section-subtitle">Use packages from Git repositories - or import skills directly from any AI coding plugin</p>
+
+```promptscript
+# Company-wide security rules
+@use @company/security
+
+# Team-specific standards
+@use @company/standards/code-quality
+
+# Open-source skills (auto-discovered from SKILL.md)
+@use github.com/some-org/claude-skills/skills/tdd-workflow
+
+# Pin to a version
+@use @company/security@^1.0.0
+```
+
+Configure aliases once, use everywhere:
+
+```yaml
+# promptscript.yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+  '@team': github.com/acme/team-frontend
+```
+
+> **Zero infrastructure required** - uses Git directly. Private repo? Your existing SSH keys and tokens just work.
+
+<div style="text-align: center; margin: 1.5rem 0;">
+  <a href="guides/registry/" class="md-button md-button--primary">Registry Guide</a>
+  <a href="examples/git-registry/" class="md-button md-button--secondary">See Examples</a>
+</div>
+
 <!-- Problem Section -->
 <div class="section-divider">
   <div class="section-divider__line"></div>

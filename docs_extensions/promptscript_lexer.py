@@ -45,14 +45,14 @@ class PromptScriptLexer(RegexLexer):
                 r"(@)(meta|identity|standards|shortcuts|agents|skills|local|extend|restrictions)\b",
                 bygroups(Punctuation, Keyword.Declaration),
             ),
-            # Inherit statement with path
+            # Inherit statement with path (registry @path, relative ./path, or URL host/path)
             (
-                r"(@inherit)(\s+)(@[\w\-./]+(?:@[\w\-.]+)?)",
+                r"(@inherit)(\s+)(@[\w\-./]+(?:@[\w\-.^~]+)?|\.[\w\-./]+|[a-zA-Z][\w\-]*\.[a-zA-Z]{2,}/[\w\-./@^~]+)",
                 bygroups(Keyword.Namespace, Whitespace, String),
             ),
-            # Use statement with path
+            # Use statement with path (registry @path, relative ./path, or URL host/path)
             (
-                r"(@use)(\s+)(@[\w\-./]+(?:@[\w\-.]+)?|\.[\w\-./]+)",
+                r"(@use)(\s+)(@[\w\-./]+(?:@[\w\-.^~]+)?|\.[\w\-./]+|[a-zA-Z][\w\-]*\.[a-zA-Z]{2,}/[\w\-./@^~]+)",
                 bygroups(Keyword.Namespace, Whitespace, String),
             ),
             # Block content

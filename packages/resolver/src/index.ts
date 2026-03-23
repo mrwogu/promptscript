@@ -12,7 +12,12 @@ export { Resolver, createResolver } from './resolver.js';
 export type { ResolverOptions, ResolvedAST } from './resolver.js';
 
 // File loader
-export { FileLoader } from './loader.js';
+export {
+  FileLoader,
+  REGISTRY_MARKER_PREFIX,
+  parseRegistryMarker,
+  buildRegistryMarker,
+} from './loader.js';
 export type { LoaderOptions } from './loader.js';
 
 // Registry implementations
@@ -63,6 +68,12 @@ export {
   type CacheEntry,
 } from './git-cache-manager.js';
 
+// Registry cache (hierarchical, for semver tag resolution)
+export { RegistryCache } from './registry-cache.js';
+
+// Vendor registry (offline / CI builds)
+export { VendorRegistry, createVendorRegistry } from './vendor-registry.js';
+
 // Inheritance resolution
 export { resolveInheritance } from './inheritance.js';
 
@@ -99,6 +110,18 @@ export {
   isTemplateExpression,
   type TemplateContext,
 } from '@promptscript/core';
+
+// Alias resolver
+export {
+  expandAlias,
+  validateAlias,
+  validateRegistriesConfig,
+  type ExpandedAlias,
+  type RegistriesValidationResult,
+} from './alias-resolver.js';
+
+// Auto-discovery
+export { discoverNativeContent } from './auto-discovery.js';
 
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';

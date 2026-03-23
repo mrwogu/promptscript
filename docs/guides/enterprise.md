@@ -680,6 +680,99 @@ Security vulnerabilities are handled according to our [Security Policy](https://
 - **Medium**: Fix within 30 days
 - **Low**: Fix in next scheduled release
 
+## Enterprise Registry Resolver
+
+### System-Level Configuration
+
+IT or platform teams can provision organization-wide registry aliases before developers touch the tool. Place a config file at `/etc/promptscript/config.yaml` on all developer machines (via MDM, Ansible, or similar provisioning):
+
+```yaml
+# /etc/promptscript/config.yaml  — provisioned by IT
+registries:
+  '@company': github.com/acme/promptscript-base
+  '@security': github.com/acme/security-standards
+
+auth:
+  github.com:
+    type: token
+    tokenEnvVar: GITHUB_TOKEN
+```
+
+Developers run `prs init` and the `@company` alias resolves automatically — no manual configuration required.
+
+### Three-Level Config Precedence
+
+Aliases merge from three levels, highest priority first:
+
+| Priority | Location                                 | Who Controls It |
+| -------- | ---------------------------------------- | --------------- |
+| Highest  | `promptscript.yaml` (project)            | Project team    |
+| Middle   | `~/.promptscript/config.yaml` (user)     | Developer       |
+| Lowest   | `/etc/promptscript/config.yaml` (system) | IT / Platform   |
+
+This model lets IT enforce company defaults while teams retain flexibility to override specific aliases per project.
+
+### Private Git Registries with SSO
+
+For enterprises using GitHub Enterprise Server, GitLab Self-Managed, or Azure DevOps:
+
+```yaml
+# promptscript.yaml
+registries:
+  '@company':
+    url: github.your-company.com/acme/promptscript-base
+    auth:
+      type: token
+      tokenEnvVar: GHE_TOKEN
+```
+
+For SSO-gated repositories, use a service account PAT or a deploy key stored in your secrets manager (Vault, AWS Secrets Manager, etc.) and surfaced as an environment variable.
+
+### Vendor Mode for Air-Gapped Environments
+
+In environments with no outbound internet access, use vendor mode to pre-download all dependencies and commit them to the repository:
+
+```bash
+# Run this once outside the air-gapped network
+prs vendor sync
+
+# Commit vendor directory
+git add .promptscript/vendor promptscript.lock
+git commit -m "chore: vendor PromptScript dependencies"
+```
+
+In air-gapped CI:
+
+```yaml
+# No network access required
+- name: Validate
+  run: prs vendor check && prs validate --strict
+
+- name: Compile
+  run: prs compile
+```
+
+The `prs vendor check` step fails the build if the vendor directory is out of sync with the lockfile, preventing accidental use of stale dependencies.
+
+### Lockfile in Enterprise CI
+
+Commit `promptscript.lock` to every repository that uses remote imports. This ensures:
+
+- **Deterministic builds** — every CI run resolves the exact same commits
+- **Change visibility** — lockfile diffs in PRs make dependency updates explicit
+- **Security auditing** — commit hashes can be cross-referenced with supply-chain scanning
+
+```yaml
+# .github/workflows/promptscript.yml
+- name: Check lockfile is up to date
+  run: prs lock --dry-run | grep "No changes"
+
+- name: Compile
+  run: prs compile
+  env:
+    GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+```
+
 ## Best Practices
 
 !!! tip "Registry Organization"

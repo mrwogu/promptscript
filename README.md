@@ -149,6 +149,22 @@ One `.prs` file. Every AI tool gets native, idiomatic output. No manual formatti
 }
 ```
 
+**Registry Resolver** - import from any Git repository with Go-style URL imports or short aliases. Auto-discovers skills from repos that don't have `.prs` files. Lockfile support for reproducible builds. Vendor mode for offline/air-gapped CI:
+
+```promptscript
+# Alias (configured once in promptscript.yaml)
+@use @company/security
+
+# Or direct URL import — no config needed
+@use github.com/acme/shared-standards/@fragments/security@^1.0.0
+```
+
+```yaml
+# promptscript.yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+```
+
 **AI-Assisted Migration** - already have `CLAUDE.md` or `.cursorrules`? Convert automatically:
 
 ```bash

@@ -380,6 +380,40 @@ Import and merge fragments:
 @use @core/typescript as ts   # alias enables @extend access
 ```
 
+#### URL imports (Go-module style)
+
+Import directly from any Git repository by host path - no alias required:
+
+```
+@use github.com/acme/shared-standards/@fragments/security
+@use gitlab.com/myorg/prompts/@stacks/python
+```
+
+Version pinning with `@`:
+
+```
+@use github.com/acme/shared-standards/@org/base@1.2.0    # exact version
+@use github.com/acme/shared-standards/@org/base@^1.0.0   # semver range
+@use github.com/acme/shared-standards/@org/base@main     # branch
+```
+
+#### Registry aliases
+
+Short names for Git repository URLs, configured in `promptscript.yaml`:
+
+```yaml
+registries:
+  company:
+    url: github.com/acme/promptscript-registry
+```
+
+Then use the alias as scope prefix:
+
+```
+@use @company/security
+@inherit @company/base-config
+```
+
 Merge rules:
 
 - Text: concatenated with deduplication
@@ -409,7 +443,7 @@ passed from one `.prs` file to another through `@inherit` or `@use`.
 **Step 1: Create the template** (parent file with `params` in `@meta`):
 
 ```
-# base.prs — reusable template
+# base.prs - reusable template
 @meta {
   id: "service-template"
   syntax: "1.0.0"
@@ -429,7 +463,7 @@ passed from one `.prs` file to another through `@inherit` or `@use`.
 **Step 2: Inherit with values** (child file passes params):
 
 ```
-# project.prs — concrete project
+# project.prs - concrete project
 @meta { id: "user-api" syntax: "1.0.0" }
 
 @inherit ./base(serviceName: "user-api", port: 8080)
@@ -447,7 +481,7 @@ The same works with `@use`:
 Optional params use `?` suffix. Defaults use `= value`.
 Missing required params produce a compile error.
 
-**Multi-service pattern** — reuse one template across many projects:
+**Multi-service pattern** - reuse one template across many projects:
 
 ```
 services/
@@ -492,7 +526,19 @@ targets:
 registry:
   git: https://github.com/org/registry.git
   ref: main
+registries:
+  company:
+    url: github.com/acme/promptscript-registry
+  oss:
+    url: github.com/prscrpt/community-registry
+    ref: v2
 ```
+
+### Lockfile: `promptscript.lock`
+
+When remote imports are used, `prs compile` automatically generates a lockfile
+recording the exact resolved commit for each dependency. This enables reproducible
+builds across machines and CI. Commit `promptscript.lock` to version control.
 
 ## Syntax Version Validation
 
@@ -503,7 +549,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | Version | What it adds                                                                                                            |
 | ------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
-| `1.1.0` | Adds `@agents` (plus internal `@workflows`, `@prompts` — not user-facing)                                               |
+| `1.1.0` | Adds `@agents` (plus internal `@workflows`, `@prompts` - not user-facing)                                               |
 
 ### Validation Rules
 
@@ -538,6 +584,15 @@ prs import CLAUDE.md        # Import existing AI instructions
 prs import --dry-run        # Preview import conversion
 prs pull                    # Update registry
 prs diff --target claude    # Show compilation diff
+prs lock                    # Generate/update promptscript.lock
+prs lock --dry-run          # Preview lockfile changes
+prs update                  # Re-resolve all remote imports to latest
+prs update <url>            # Update a specific registry
+prs vendor sync             # Copy cached deps to .promptscript/vendor/
+prs vendor check            # Verify vendor matches lockfile
+prs resolve @alias/path     # Debug: show how an import resolves
+prs registry list           # Show configured registries and aliases
+prs registry add <alias> <url>  # Add a registry alias
 ```
 
 ## Output Targets
@@ -565,7 +620,7 @@ prs diff --target claude    # Show compilation diff
 For detailed information about each formatter's output paths, supported features, quirks, and example outputs:
 
 - **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 37)
-- **llms-full.txt:** Available at the docs site root — contains all documentation in a single file for LLM consumption
+- **llms-full.txt:** Available at the docs site root - contains all documentation in a single file for LLM consumption
 - **Dedicated pages exist for:** Claude Code, GitHub Copilot, Cursor, Antigravity, Factory AI, Gemini CLI, OpenCode
 - **All 37 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
 
