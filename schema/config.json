@@ -165,6 +165,10 @@
       "additionalProperties": false,
       "description": "Registry configuration"
     },
+    "registries": {
+      "$ref": "#/definitions/RegistriesConfig",
+      "description": "Named registry aliases for multi-source imports. Maps alias names to Git repository URLs. Coexists with `registry` — aliases take precedence for matching paths."
+    },
     "watch": {
       "type": "object",
       "properties": {
@@ -279,6 +283,39 @@
   ],
   "additionalProperties": false,
   "definitions": {
+    "RegistriesConfig": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/definitions/RegistryAliasEntry"
+          }
+        ]
+      },
+      "description": "Registry alias configuration. Maps alias names (e.g., '@acme') to Git URLs or extended entries.",
+      "example": "registries:\n  '@company': 'github.com/company/promptscript-base'\n  '@internal':\n    url: 'git@gitlab.internal.com:company/monorepo'\n    root: 'packages/promptscript'"
+    },
+    "RegistryAliasEntry": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Git repository URL (HTTPS or SSH)"
+        },
+        "root": {
+          "type": "string",
+          "description": "Base path within the repository"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "description": "Extended registry alias entry for monorepos or custom roots."
+    },
     "FormattingConfig": {
       "type": "object",
       "properties": {

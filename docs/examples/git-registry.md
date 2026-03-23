@@ -477,6 +477,203 @@ targets:
 </a>
 <!-- playground-link-end -->
 
+## Alias-Based Import Workflow
+
+### 1. Configure Aliases
+
+Add aliases to `promptscript.yaml` once:
+
+```yaml
+# promptscript.yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+  '@team': github.com/acme/team-frontend
+
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+
+targets:
+  - github
+  - claude
+```
+
+### 2. Use Aliases in .prs Files
+
+```promptscript
+@meta {
+  id: "customer-portal"
+  syntax: "1.0.0"
+}
+
+# Inherit from company base — resolves to github.com/acme/promptscript-base/base.prs
+@inherit @company/base
+
+# Team-specific standards
+@use @team/stacks/react
+
+# Pin to a specific release
+@use @company/security@2.0.0
+```
+
+### 3. Compile
+
+```bash
+prs compile
+```
+
+PromptScript expands `@company` to `github.com/acme/promptscript-base`, clones (or uses cache), resolves the file path, and compiles.
+
+---
+
+## URL Import Example
+
+URL imports work without any alias configuration:
+
+```promptscript
+@meta {
+  id: "my-project"
+  syntax: "1.0.0"
+}
+
+# Direct URL import — no alias needed
+@use github.com/acme/shared-standards/fragments/security
+
+# Open-source skill auto-discovered from SKILL.md
+@use github.com/some-org/claude-skills/skills/tdd-workflow
+
+# Versioned URL import
+@use github.com/acme/shared-standards/stacks/typescript@1.0.0
+```
+
+Debug the resolution chain with:
+
+```bash
+prs resolve github.com/acme/shared-standards/@fragments/security
+```
+
+---
+
+## Lockfile Workflow
+
+### Initial Setup
+
+```bash
+# 1. Add remote imports to your .prs files, then lock:
+prs lock
+
+# 2. Commit the lockfile
+git add promptscript.lock
+git commit -m "chore: add PromptScript lockfile"
+```
+
+### Checking for Updates
+
+```bash
+# See what would change without updating
+prs update --dry-run
+
+# Update a specific package
+prs update github.com/acme/promptscript-base
+
+# Update all packages and commit
+prs update
+git add promptscript.lock
+git commit -m "chore(deps): update PromptScript dependencies"
+```
+
+### Verifying in CI
+
+```bash
+# Fail if lockfile is not up to date
+prs lock --dry-run
+```
+
+---
+
+## CI Pipeline Example with Vendor
+
+This example uses vendor mode so CI never needs network access to the registry.
+
+### Local Setup (run once or on updates)
+
+```bash
+# Sync vendor from lockfile
+prs vendor sync
+
+# Commit vendor directory and lockfile
+git add .promptscript/vendor promptscript.lock
+git commit -m "chore: vendor PromptScript dependencies"
+```
+
+### GitHub Actions Pipeline
+
+```yaml
+# .github/workflows/promptscript.yml
+name: PromptScript CI
+
+on:
+  push:
+    paths:
+      - '.promptscript/**'
+      - 'promptscript.yaml'
+      - 'promptscript.lock'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PromptScript
+        run: npm install -g @promptscript/cli
+
+      - name: Check vendor is in sync
+        run: prs vendor check
+
+      - name: Validate
+        run: prs validate --strict
+
+      - name: Compile
+        run: prs compile
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || {
+            echo "::error::Compiled files are out of date. Run 'prs compile' locally."
+            exit 1
+          }
+```
+
+### GitLab CI Pipeline
+
+```yaml
+# .gitlab-ci.yml
+promptscript:
+  image: node:20
+  script:
+    - npm install -g @promptscript/cli
+    - prs vendor check
+    - prs validate --strict
+    - prs compile
+    - git diff --exit-code
+  only:
+    changes:
+      - .promptscript/**/*
+      - promptscript.yaml
+      - promptscript.lock
+```
+
+---
+
 ## Troubleshooting
 
 ### Authentication Failed

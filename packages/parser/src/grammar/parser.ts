@@ -17,6 +17,7 @@ import {
   BooleanType,
   PathReference,
   RelativePath,
+  UrlPath,
   LBrace,
   RBrace,
   LBracket,
@@ -314,12 +315,13 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * pathRef
-   *   : PathReference | RelativePath
+   *   : PathReference | RelativePath | UrlPath
    */
   private pathRef = this.RULE('pathRef', () => {
     this.OR([
       { ALT: () => this.CONSUME(PathReference) },
       { ALT: () => this.CONSUME(RelativePath) },
+      { ALT: () => this.CONSUME(UrlPath) },
     ]);
   });
 

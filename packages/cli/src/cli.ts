@@ -15,6 +15,10 @@ import { diffCommand } from './commands/diff.js';
 import { checkCommand } from './commands/check.js';
 import { updateCheckCommand } from './commands/update-check.js';
 import { registerRegistryCommands } from './commands/registry/index.js';
+import { lockCommand } from './commands/lock.js';
+import { updateCommand } from './commands/update.js';
+import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
+import { resolveCommand } from './commands/resolve-cmd.js';
 import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 import { importCommand } from './commands/import.js';
@@ -174,6 +178,36 @@ program
   .description('Upgrade .prs files to the latest syntax version')
   .option('--dry-run', 'Show what would be changed without writing')
   .action(upgradeCommand);
+
+program
+  .command('lock')
+  .description('Generate or update promptscript.lock by resolving all remote imports')
+  .option('--dry-run', 'Preview lockfile without writing')
+  .action((opts) => lockCommand(opts));
+
+program
+  .command('update [package]')
+  .description('Re-resolve versions and update promptscript.lock')
+  .option('--dry-run', 'Preview changes without writing')
+  .action((pkg, opts) => updateCommand(pkg, opts));
+
+const vendor = program.command('vendor').description('Manage vendored dependencies');
+
+vendor
+  .command('sync')
+  .description('Copy all cached dependencies to .promptscript/vendor/')
+  .option('--dry-run', 'Preview without copying files')
+  .action((opts) => vendorSyncCommand(opts));
+
+vendor
+  .command('check')
+  .description('Verify vendor directory matches lockfile')
+  .action((opts) => vendorCheckCommand(opts));
+
+program
+  .command('resolve <import>')
+  .description('Show full resolution chain for an import path (debug)')
+  .action((importPath, opts) => resolveCommand(importPath, opts));
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);
