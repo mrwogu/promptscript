@@ -162,3 +162,47 @@ export interface RegistryPublishOptions {
   /** Git tag for release */
   tag?: string;
 }
+
+/**
+ * Options for the registry add command.
+ */
+export interface RegistryAddOptions {
+  /** Add to global user config instead of project config */
+  global?: boolean;
+}
+
+/**
+ * Options for the lock command.
+ */
+export interface LockOptions {
+  /** Preview without writing lockfile */
+  dryRun?: boolean;
+}
+
+/**
+ * Options for the update command.
+ */
+export interface UpdateOptions {
+  /** Preview without writing lockfile */
+  dryRun?: boolean;
+}
+
+/**
+ * Options for the vendor sync command.
+ */
+export interface VendorSyncOptions {
+  /** Preview without copying files */
+  dryRun?: boolean;
+}
+
+/**
+ * Options for the vendor check command.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface VendorCheckOptions {}
+
+/**
+ * Options for the resolve command.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ResolveCommandOptions {}
