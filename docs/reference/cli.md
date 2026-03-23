@@ -530,6 +530,215 @@ prs registry publish --tag v1.0.0
 prs registry publish --force
 ```
 
+#### prs registry list
+
+List all configured registry alias mappings, showing the merged result from project, user, and system sources.
+
+```bash
+prs registry list [options]
+```
+
+**Options:**
+
+| Option              | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| `--source <source>` | Show only aliases from `project`, `user`, or `system` |
+| `--format <format>` | Output format (text, json)                     |
+
+**Examples:**
+
+```bash
+# Show all resolved aliases
+prs registry list
+
+# Show only project-level aliases
+prs registry list --source project
+
+# JSON output
+prs registry list --format json
+```
+
+**Example output:**
+
+```
+Registry aliases (merged: project > user > system)
+
+  @company  github.com/acme/promptscript-base   [project]
+  @team     github.com/acme/team-frontend        [project]
+  @shared   github.com/acme/shared-libs          [user]
+```
+
+#### prs registry add
+
+Add a registry alias to the project or user config.
+
+```bash
+prs registry add <alias> <url> [options]
+```
+
+**Arguments:**
+
+| Argument  | Description                              |
+| --------- | ---------------------------------------- |
+| `<alias>` | Alias name, e.g. `@company`              |
+| `<url>`   | Git host path, e.g. `github.com/org/repo` |
+
+**Options:**
+
+| Option     | Description                              |
+| ---------- | ---------------------------------------- |
+| `--global` | Add to user config (`~/.promptscript/config.yaml`) instead of project config |
+
+**Examples:**
+
+```bash
+# Add alias to project config
+prs registry add @company github.com/acme/promptscript-base
+
+# Add alias to user config (available across all projects)
+prs registry add @company github.com/acme/promptscript-base --global
+```
+
+---
+
+### prs lock
+
+Generate or update the `promptscript.lock` lockfile. The lockfile records the exact resolved commit for every remote import, enabling reproducible builds.
+
+```bash
+prs lock [options]
+```
+
+**Options:**
+
+| Option      | Description                               |
+| ----------- | ----------------------------------------- |
+| `--dry-run` | Show what would change without writing    |
+
+**Examples:**
+
+```bash
+# Create or update lockfile
+prs lock
+
+# Preview changes without writing
+prs lock --dry-run
+```
+
+The lockfile is also written automatically during `prs compile` when remote imports are present. Commit `promptscript.lock` to version control.
+
+---
+
+### prs update
+
+Update one or all remote dependencies to their latest allowed versions and refresh the lockfile.
+
+```bash
+prs update [package] [options]
+```
+
+**Arguments:**
+
+| Argument    | Description                                      |
+| ----------- | ------------------------------------------------ |
+| `[package]` | Specific package to update, e.g. `github.com/acme/base`. Omit to update all. |
+
+**Options:**
+
+| Option      | Description                              |
+| ----------- | ---------------------------------------- |
+| `--dry-run` | Preview updates without writing          |
+
+**Examples:**
+
+```bash
+# Update all dependencies
+prs update
+
+# Update a specific package
+prs update github.com/acme/promptscript-base
+
+# Preview updates
+prs update --dry-run
+```
+
+---
+
+### prs vendor
+
+Manage the vendor directory for offline builds. Vendor mode copies all lockfile-resolved dependencies into `.promptscript/vendor/`.
+
+#### prs vendor sync
+
+Download all dependencies from the lockfile into the vendor directory.
+
+```bash
+prs vendor sync
+```
+
+After syncing, compilation uses the vendored files and makes no network requests.
+
+#### prs vendor check
+
+Verify that the vendor directory matches the current lockfile.
+
+```bash
+prs vendor check
+```
+
+Exits with code 1 if vendor is out of sync. Use in CI before compiling:
+
+```bash
+prs vendor check && prs compile
+```
+
+---
+
+### prs resolve
+
+Debug the resolution chain for an import. Shows how an import path is resolved step-by-step: alias expansion, URL construction, cache lookup, and file path within the repository.
+
+```bash
+prs resolve <import> [options]
+```
+
+**Arguments:**
+
+| Argument   | Description                                              |
+| ---------- | -------------------------------------------------------- |
+| `<import>` | Import path to resolve, e.g. `@company/security` or `github.com/acme/base/@org/base` |
+
+**Options:**
+
+| Option              | Description                |
+| ------------------- | -------------------------- |
+| `--format <format>` | Output format (text, json) |
+
+**Examples:**
+
+```bash
+# Resolve an aliased import
+prs resolve @company/security
+
+# Resolve a URL import
+prs resolve github.com/acme/promptscript-base/@org/base
+
+# JSON output for tooling
+prs resolve @company/security --format json
+```
+
+**Example output:**
+
+```
+Resolving: @company/security
+
+  1. Alias lookup:     @company -> github.com/acme/promptscript-base  [project config]
+  2. URL construction: https://github.com/acme/promptscript-base.git
+  3. Cache status:     HIT (commit: a3f8c2d, age: 12m)
+  4. File path:        security.prs
+  5. Resolved to:      ~/.promptscript/.cache/git/abc123/security.prs
+```
+
 ---
 
 ### prs update-check
