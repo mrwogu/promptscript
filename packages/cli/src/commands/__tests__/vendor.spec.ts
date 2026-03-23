@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const {
   mockSucceed,
   mockFail,
-  mockWarn,
   mockSpinner,
   mockExistsSync,
   mockReadFile,
@@ -15,21 +14,40 @@ const {
   const mockSucceed = vi.fn().mockReturnThis();
   const mockFail = vi.fn().mockReturnThis();
   const mockWarn = vi.fn().mockReturnThis();
-  const mockSpinner = { start: mockStart, succeed: mockSucceed, fail: mockFail, warn: mockWarn, text: '' };
+  const mockSpinner = {
+    start: mockStart,
+    succeed: mockSucceed,
+    fail: mockFail,
+    warn: mockWarn,
+    text: '',
+  };
   const mockExistsSync = vi.fn();
   const mockReadFile = vi.fn();
   const mockWriteFile = vi.fn().mockResolvedValue(undefined);
   const mockMkdir = vi.fn().mockResolvedValue(undefined);
   const mockReaddir = vi.fn().mockResolvedValue([]);
   return {
-    mockSucceed, mockFail, mockWarn, mockSpinner,
-    mockExistsSync, mockReadFile, mockWriteFile, mockMkdir, mockReaddir,
+    mockSucceed,
+    mockFail,
+    mockWarn,
+    mockSpinner,
+    mockExistsSync,
+    mockReadFile,
+    mockWriteFile,
+    mockMkdir,
+    mockReaddir,
   };
 });
 
 vi.mock('../../output/console.js', () => ({
   createSpinner: vi.fn(() => mockSpinner),
-  ConsoleOutput: { success: vi.fn(), error: vi.fn(), muted: vi.fn(), newline: vi.fn(), warn: vi.fn() },
+  ConsoleOutput: {
+    success: vi.fn(),
+    error: vi.fn(),
+    muted: vi.fn(),
+    newline: vi.fn(),
+    warn: vi.fn(),
+  },
 }));
 
 vi.mock('../lock.js', () => ({ LOCKFILE_PATH: 'promptscript.lock' }));

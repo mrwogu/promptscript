@@ -487,20 +487,20 @@ Append a version specifier with `@`:
 @use github.com/acme/shared-standards/@org/base@main
 ```
 
-| Specifier      | Meaning                                |
-| -------------- | -------------------------------------- |
-| `@1.2.0`       | Exact tag `v1.2.0` or `1.2.0`         |
-| `@^1.0.0`      | Latest tag matching `^1.0.0` (semver) |
-| `@main`        | Tip of branch `main`                   |
-| (none)         | Default branch as configured           |
+| Specifier | Meaning                               |
+| --------- | ------------------------------------- |
+| `@1.2.0`  | Exact tag `v1.2.0` or `1.2.0`         |
+| `@^1.0.0` | Latest tag matching `^1.0.0` (semver) |
+| `@main`   | Tip of branch `main`                  |
+| (none)    | Default branch as configured          |
 
 ### Alias vs URL Import
 
-| Style             | Example                                    | When to Use                        |
-| ----------------- | ------------------------------------------ | ---------------------------------- |
-| Alias             | `@use @company/security`                   | Frequently-used internal packages  |
-| Full URL          | `@use github.com/acme/security`            | One-off external imports           |
-| Versioned URL     | `@use github.com/acme/security@^1.0.0`     | Reproducible external dependencies |
+| Style         | Example                                | When to Use                        |
+| ------------- | -------------------------------------- | ---------------------------------- |
+| Alias         | `@use @company/security`               | Frequently-used internal packages  |
+| Full URL      | `@use github.com/acme/security`        | One-off external imports           |
+| Versioned URL | `@use github.com/acme/security@^1.0.0` | Reproducible external dependencies |
 
 ---
 
@@ -510,12 +510,12 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 
 ### What Gets Auto-Discovered
 
-| Source File Pattern                       | Imported As     |
-| ----------------------------------------- | --------------- |
-| `SKILL.md` in root or `skills/` directory | `@skills` block |
-| `.claude/agents/*.md`                     | `@agents` block |
+| Source File Pattern                       | Imported As        |
+| ----------------------------------------- | ------------------ |
+| `SKILL.md` in root or `skills/` directory | `@skills` block    |
+| `.claude/agents/*.md`                     | `@agents` block    |
 | `.claude/commands/*.md`                   | `@shortcuts` block |
-| `.github/skills/*/SKILL.md`               | `@skills` block |
+| `.github/skills/*/SKILL.md`               | `@skills` block    |
 
 ### Example: Importing an Open-Source Skill Library
 
@@ -529,7 +529,7 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 PromptScript fetches the repository, detects the `SKILL.md`, and synthesizes a virtual `.prs` fragment that you can merge into your project just like any other import.
 
 !!! tip "Zero Config Required"
-    Auto-discovery works without any setup in the remote repo. The remote maintainer does not need to know about PromptScript.
+Auto-discovery works without any setup in the remote repo. The remote maintainer does not need to know about PromptScript.
 
 ---
 

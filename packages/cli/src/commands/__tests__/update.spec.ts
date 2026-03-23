@@ -15,15 +15,28 @@ const {
   const mockSucceed = vi.fn().mockReturnThis();
   const mockFail = vi.fn().mockReturnThis();
   const mockWarn = vi.fn().mockReturnThis();
-  const mockSpinner = { start: mockStart, succeed: mockSucceed, fail: mockFail, warn: mockWarn, text: '' };
+  const mockSpinner = {
+    start: mockStart,
+    succeed: mockSucceed,
+    fail: mockFail,
+    warn: mockWarn,
+    text: '',
+  };
   const mockLoadConfig = vi.fn();
   const mockFindConfigFile = vi.fn();
   const mockExistsSync = vi.fn().mockReturnValue(false);
   const mockWriteFile = vi.fn().mockResolvedValue(undefined);
   const mockReadFile = vi.fn();
   return {
-    mockSucceed, mockFail, mockWarn, mockSpinner,
-    mockLoadConfig, mockFindConfigFile, mockExistsSync, mockWriteFile, mockReadFile,
+    mockSucceed,
+    mockFail,
+    mockWarn,
+    mockSpinner,
+    mockLoadConfig,
+    mockFindConfigFile,
+    mockExistsSync,
+    mockWriteFile,
+    mockReadFile,
   };
 });
 

@@ -704,11 +704,11 @@ Developers run `prs init` and the `@company` alias resolves automatically — no
 
 Aliases merge from three levels, highest priority first:
 
-| Priority | Location                             | Who Controls It |
-| -------- | ------------------------------------ | --------------- |
-| Highest  | `promptscript.yaml` (project)        | Project team    |
-| Middle   | `~/.promptscript/config.yaml` (user) | Developer       |
-| Lowest   | `/etc/promptscript/config.yaml` (system) | IT / Platform |
+| Priority | Location                                 | Who Controls It |
+| -------- | ---------------------------------------- | --------------- |
+| Highest  | `promptscript.yaml` (project)            | Project team    |
+| Middle   | `~/.promptscript/config.yaml` (user)     | Developer       |
+| Lowest   | `/etc/promptscript/config.yaml` (system) | IT / Platform   |
 
 This model lets IT enforce company defaults while teams retain flexibility to override specific aliases per project.
 

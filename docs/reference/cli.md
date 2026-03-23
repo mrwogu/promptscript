@@ -540,10 +540,10 @@ prs registry list [options]
 
 **Options:**
 
-| Option              | Description                                    |
-| ------------------- | ---------------------------------------------- |
+| Option              | Description                                           |
+| ------------------- | ----------------------------------------------------- |
 | `--source <source>` | Show only aliases from `project`, `user`, or `system` |
-| `--format <format>` | Output format (text, json)                     |
+| `--format <format>` | Output format (text, json)                            |
 
 **Examples:**
 
@@ -578,15 +578,15 @@ prs registry add <alias> <url> [options]
 
 **Arguments:**
 
-| Argument  | Description                              |
-| --------- | ---------------------------------------- |
-| `<alias>` | Alias name, e.g. `@company`              |
+| Argument  | Description                               |
+| --------- | ----------------------------------------- |
+| `<alias>` | Alias name, e.g. `@company`               |
 | `<url>`   | Git host path, e.g. `github.com/org/repo` |
 
 **Options:**
 
-| Option     | Description                              |
-| ---------- | ---------------------------------------- |
+| Option     | Description                                                                  |
+| ---------- | ---------------------------------------------------------------------------- |
 | `--global` | Add to user config (`~/.promptscript/config.yaml`) instead of project config |
 
 **Examples:**
@@ -611,9 +611,9 @@ prs lock [options]
 
 **Options:**
 
-| Option      | Description                               |
-| ----------- | ----------------------------------------- |
-| `--dry-run` | Show what would change without writing    |
+| Option      | Description                            |
+| ----------- | -------------------------------------- |
+| `--dry-run` | Show what would change without writing |
 
 **Examples:**
 
@@ -639,15 +639,15 @@ prs update [package] [options]
 
 **Arguments:**
 
-| Argument    | Description                                      |
-| ----------- | ------------------------------------------------ |
+| Argument    | Description                                                                  |
+| ----------- | ---------------------------------------------------------------------------- |
 | `[package]` | Specific package to update, e.g. `github.com/acme/base`. Omit to update all. |
 
 **Options:**
 
-| Option      | Description                              |
-| ----------- | ---------------------------------------- |
-| `--dry-run` | Preview updates without writing          |
+| Option      | Description                     |
+| ----------- | ------------------------------- |
+| `--dry-run` | Preview updates without writing |
 
 **Examples:**
 
@@ -704,8 +704,8 @@ prs resolve <import> [options]
 
 **Arguments:**
 
-| Argument   | Description                                              |
-| ---------- | -------------------------------------------------------- |
+| Argument   | Description                                                                          |
+| ---------- | ------------------------------------------------------------------------------------ |
 | `<import>` | Import path to resolve, e.g. `@company/security` or `github.com/acme/base/@org/base` |
 
 **Options:**

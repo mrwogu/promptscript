@@ -1323,23 +1323,23 @@ Append a version specifier after the import path with `@`:
 @use github.com/acme/shared-standards/@org/base@main
 ```
 
-| Specifier   | Meaning                                |
-| ----------- | -------------------------------------- |
-| `@1.2.0`    | Exact tag `v1.2.0` or `1.2.0`         |
-| `@^1.0.0`   | Latest tag matching `^1.0.0` (semver) |
-| `@main`     | Tip of branch `main`                   |
-| (none)      | Default branch as configured           |
+| Specifier | Meaning                               |
+| --------- | ------------------------------------- |
+| `@1.2.0`  | Exact tag `v1.2.0` or `1.2.0`         |
+| `@^1.0.0` | Latest tag matching `^1.0.0` (semver) |
+| `@main`   | Tip of branch `main`                  |
+| (none)    | Default branch as configured          |
 
 ### Auto-Discovery
 
 When the imported path does not contain `.prs` files, PromptScript automatically discovers and converts native AI plugin files:
 
-| Source File Pattern                       | Imported As     |
-| ----------------------------------------- | --------------- |
-| `SKILL.md` in root or `skills/` directory | `@skills` block |
-| `.claude/agents/*.md`                     | `@agents` block |
+| Source File Pattern                       | Imported As        |
+| ----------------------------------------- | ------------------ |
+| `SKILL.md` in root or `skills/` directory | `@skills` block    |
+| `.claude/agents/*.md`                     | `@agents` block    |
 | `.claude/commands/*.md`                   | `@shortcuts` block |
-| `.github/skills/*/SKILL.md`               | `@skills` block |
+| `.github/skills/*/SKILL.md`               | `@skills` block    |
 
 This means you can import skills from any repository — including projects that were not authored with PromptScript:
 
@@ -1368,14 +1368,14 @@ See [Registry Aliases](../guides/registry.md#registry-aliases) for alias configu
 
 Path syntax for imports and inheritance:
 
-| Format     | Example                                              | Description            |
-| ---------- | ---------------------------------------------------- | ---------------------- |
-| Namespaced | `@company/team`                                      | Registry namespace     |
-| Versioned  | `@company/team@1.0.0`                                | With version           |
-| Relative   | `./parent`                                           | Relative path          |
-| Nested     | `@company/guards/security`                           | Nested path            |
-| URL        | `github.com/org/repo/@path`                          | Go-style URL import    |
-| URL+ver    | `github.com/org/repo/@path@^1.0.0`                   | URL with version       |
+| Format     | Example                            | Description         |
+| ---------- | ---------------------------------- | ------------------- |
+| Namespaced | `@company/team`                    | Registry namespace  |
+| Versioned  | `@company/team@1.0.0`              | With version        |
+| Relative   | `./parent`                         | Relative path       |
+| Nested     | `@company/guards/security`         | Nested path         |
+| URL        | `github.com/org/repo/@path`        | Go-style URL import |
+| URL+ver    | `github.com/org/repo/@path@^1.0.0` | URL with version    |
 
 ## Reserved Words
 

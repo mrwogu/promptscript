@@ -42,12 +42,12 @@ export async function resolveCommand(
 
     if (isAlias) {
       // Validate the import looks like a path (not just a bare alias)
-      const aliasName = importPath.split('/')[0];
+      const aliasName = importPath.split('/')[0] ?? '';
 
-      if (!validateAlias(aliasName)) {
-        ConsoleOutput.error(
-          `Invalid alias format: "${aliasName}". Must match @[a-z0-9][a-z0-9-]*`
-        );
+      try {
+        validateAlias(aliasName);
+      } catch {
+        ConsoleOutput.error(`Invalid alias format: "${aliasName}". Must match @[a-z0-9][a-z0-9-]*`);
         process.exitCode = 1;
         return;
       }
@@ -64,9 +64,7 @@ export async function resolveCommand(
         expanded = expandAlias(importPath, registries);
       } catch (err) {
         ConsoleOutput.error(err instanceof Error ? err.message : String(err));
-        ConsoleOutput.muted(
-          `Known aliases: ${Object.keys(registries).join(', ') || '(none)'}`
-        );
+        ConsoleOutput.muted(`Known aliases: ${Object.keys(registries).join(', ') || '(none)'}`);
         process.exitCode = 1;
         return;
       }

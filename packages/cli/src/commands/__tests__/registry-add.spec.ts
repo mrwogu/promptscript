@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockReadFile, mockWriteFile, mockMkdir, mockExistsSync, mockFindConfigFile } =
-  vi.hoisted(() => {
+const { mockReadFile, mockWriteFile, mockMkdir, mockExistsSync, mockFindConfigFile } = vi.hoisted(
+  () => {
     const mockReadFile = vi.fn();
     const mockWriteFile = vi.fn().mockResolvedValue(undefined);
     const mockMkdir = vi.fn().mockResolvedValue(undefined);
     const mockExistsSync = vi.fn();
     const mockFindConfigFile = vi.fn();
     return { mockReadFile, mockWriteFile, mockMkdir, mockExistsSync, mockFindConfigFile };
-  });
+  }
+);
 
 vi.mock('../../output/console.js', () => ({
   ConsoleOutput: {
@@ -65,20 +66,22 @@ describe('registryAddCommand', () => {
   it('should reject empty URL', async () => {
     await registryAddCommand('@company', '  ', {});
 
-    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('URL must not be empty'));
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('URL must not be empty')
+    );
     expect(process.exitCode).toBe(1);
   });
 
   it('should add alias to project config', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
-    mockReadFile.mockResolvedValue(JSON.stringify({ id: 'my-project', targets: [], registries: {} }));
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({ id: 'my-project', targets: [], registries: {} })
+    );
 
     await registryAddCommand('@company', 'github.com/company/base', {});
 
     expect(mockWriteFile).toHaveBeenCalledWith('promptscript.yaml', expect.any(String), 'utf-8');
-    expect(ConsoleOutput.success).toHaveBeenCalledWith(
-      expect.stringContaining('@company')
-    );
+    expect(ConsoleOutput.success).toHaveBeenCalledWith(expect.stringContaining('@company'));
   });
 
   it('should error when no project config exists and not --global', async () => {
@@ -100,15 +103,16 @@ describe('registryAddCommand', () => {
 
     await registryAddCommand('@company', 'github.com/company/base', { global: true });
 
-    expect(mockMkdir).toHaveBeenCalledWith(expect.stringContaining('.promptscript'), expect.any(Object));
+    expect(mockMkdir).toHaveBeenCalledWith(
+      expect.stringContaining('.promptscript'),
+      expect.any(Object)
+    );
     expect(mockWriteFile).toHaveBeenCalledWith(
       '/home/user/.promptscript/config.yaml',
       expect.any(String),
       'utf-8'
     );
-    expect(ConsoleOutput.success).toHaveBeenCalledWith(
-      expect.stringContaining('@company')
-    );
+    expect(ConsoleOutput.success).toHaveBeenCalledWith(expect.stringContaining('@company'));
   });
 
   it('should merge into existing global config', async () => {

@@ -7,7 +7,13 @@ const { mockLoadConfig, mockFindConfigFile, mockLoadUserConfig, mockExistsSync, 
     const mockLoadUserConfig = vi.fn();
     const mockExistsSync = vi.fn().mockReturnValue(false);
     const mockExpandAlias = vi.fn();
-    return { mockLoadConfig, mockFindConfigFile, mockLoadUserConfig, mockExistsSync, mockExpandAlias };
+    return {
+      mockLoadConfig,
+      mockFindConfigFile,
+      mockLoadUserConfig,
+      mockExistsSync,
+      mockExpandAlias,
+    };
   });
 
 vi.mock('../../output/console.js', () => ({
@@ -44,9 +50,7 @@ describe('resolveCommand', () => {
 
     await resolveCommand('@company/base', {});
 
-    expect(ConsoleOutput.error).toHaveBeenCalledWith(
-      expect.stringContaining('No project config')
-    );
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('No project config'));
     expect(process.exitCode).toBe(1);
   });
 

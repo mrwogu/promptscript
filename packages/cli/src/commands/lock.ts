@@ -62,13 +62,13 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     // Build dependencies map
     const dependencies: Record<string, LockfileDependency> = {};
 
-    for (const [_alias, entry] of aliasEntries) {
+    for (const [, entry] of aliasEntries) {
       const repoUrl = typeof entry === 'string' ? entry : entry.url;
 
       // Preserve existing pin if present; otherwise record a placeholder
       // (a real implementation would resolve the latest commit here)
       if (repoUrl in existing.dependencies) {
-        dependencies[repoUrl] = existing.dependencies[repoUrl];
+        dependencies[repoUrl] = existing.dependencies[repoUrl]!;
       } else {
         dependencies[repoUrl] = {
           version: 'latest',

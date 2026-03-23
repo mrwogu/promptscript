@@ -15,15 +15,28 @@ const {
   const mockSucceed = vi.fn().mockReturnThis();
   const mockFail = vi.fn().mockReturnThis();
   const mockWarn = vi.fn().mockReturnThis();
-  const mockSpinner = { start: mockStart, succeed: mockSucceed, fail: mockFail, warn: mockWarn, text: '' };
+  const mockSpinner = {
+    start: mockStart,
+    succeed: mockSucceed,
+    fail: mockFail,
+    warn: mockWarn,
+    text: '',
+  };
   const mockLoadConfig = vi.fn();
   const mockFindConfigFile = vi.fn();
   const mockExistsSync = vi.fn().mockReturnValue(false);
   const mockWriteFile = vi.fn().mockResolvedValue(undefined);
   const mockReadFile = vi.fn();
   return {
-    mockSucceed, mockFail, mockWarn, mockSpinner,
-    mockLoadConfig, mockFindConfigFile, mockExistsSync, mockWriteFile, mockReadFile,
+    mockSucceed,
+    mockFail,
+    mockWarn,
+    mockSpinner,
+    mockLoadConfig,
+    mockFindConfigFile,
+    mockExistsSync,
+    mockWriteFile,
+    mockReadFile,
   };
 });
 
@@ -50,7 +63,6 @@ vi.mock('yaml', () => ({
 }));
 
 import { lockCommand } from '../lock.js';
-import { ConsoleOutput } from '../../output/console.js';
 
 describe('lockCommand', () => {
   beforeEach(() => {
@@ -86,11 +98,7 @@ describe('lockCommand', () => {
 
     await lockCommand({});
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      'promptscript.lock',
-      expect.any(String),
-      'utf-8'
-    );
+    expect(mockWriteFile).toHaveBeenCalledWith('promptscript.lock', expect.any(String), 'utf-8');
     expect(mockSucceed).toHaveBeenCalledWith('Lockfile generated');
   });
 
@@ -118,7 +126,7 @@ describe('lockCommand', () => {
 
     const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
     const parsed = JSON.parse(written) as { dependencies: Record<string, { version: string }> };
-    expect(parsed.dependencies['github.com/company/base'].version).toBe('v1.2.0');
+    expect(parsed.dependencies['github.com/company/base']!.version).toBe('v1.2.0');
   });
 
   it('should not write file in dry-run mode', async () => {
