@@ -139,4 +139,31 @@ describe('updateCommand', () => {
     expect(mockWriteFile).not.toHaveBeenCalled();
     expect(mockSucceed).toHaveBeenCalledWith('Dry run — lockfile not written');
   });
+
+  it('should handle exception when loadConfig throws', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockRejectedValue(new Error('config read error'));
+
+    await updateCommand(undefined, {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to update lockfile');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should fail when packageArg does not match any registry', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: {
+        '@alpha': 'github.com/alpha/repo',
+        '@beta': 'github.com/beta/repo',
+      },
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await updateCommand('nonexistent-pkg', {});
+
+    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('nonexistent-pkg'));
+    expect(process.exitCode).toBe(1);
+  });
 });

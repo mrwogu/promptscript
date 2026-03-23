@@ -129,4 +129,32 @@ describe('registryAddCommand', () => {
     expect(regs['@existing']).toBe('https://old.example.com');
     expect(regs['@new']).toBe('github.com/new/repo');
   });
+
+  it('should reject alias with invalid format characters', async () => {
+    await registryAddCommand('@BAD_ALIAS!', 'github.com/company/base', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Invalid alias'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should error when configFile is null and not global', async () => {
+    mockFindConfigFile.mockReturnValue(null);
+
+    await registryAddCommand('@valid', 'github.com/valid/repo', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('No project config'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should handle exception during add', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockReadFile.mockRejectedValue(new Error('permission denied'));
+
+    await registryAddCommand('@company', 'github.com/company/base', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to add registry')
+    );
+    expect(process.exitCode).toBe(1);
+  });
 });

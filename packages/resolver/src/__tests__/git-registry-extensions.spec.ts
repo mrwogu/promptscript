@@ -265,6 +265,25 @@ describe('GitRegistry — extended methods', () => {
       // Assert
       expect(resolved).toBeNull();
     });
+
+    it('resolves with explicit = operator (exact match comparator)', async () => {
+      // Act — exercises the `return cmp === 0` path in satisfiesRange
+      const resolved = await registry.resolveVersion('https://github.com/org/repo.git', '=1.1.0');
+
+      // Assert
+      expect(resolved).toBe('v1.1.0');
+    });
+
+    it('returns null for completely invalid range syntax', async () => {
+      // Act — exercises the final `return false` fallthrough in satisfiesRange
+      const resolved = await registry.resolveVersion(
+        'https://github.com/org/repo.git',
+        '!!!invalid!!!'
+      );
+
+      // Assert
+      expect(resolved).toBeNull();
+    });
   });
 
   // -------------------------------------------------------------------------

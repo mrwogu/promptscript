@@ -114,6 +114,59 @@ describe('vendorSyncCommand', () => {
     expect(mockWriteFile).not.toHaveBeenCalled();
     expect(mockSucceed).toHaveBeenCalledWith('Dry run — vendor directory not modified');
   });
+
+  it('should report missing status when cache directory is absent', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return true;
+      return false; // cache dir missing
+    });
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+
+    await vendorSyncCommand({ dryRun: false });
+
+    expect(mockSucceed).toHaveBeenCalledWith(expect.stringContaining('0 copied, 1 missing'));
+  });
+
+  it('should copy files when dryRun is false and cache exists', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return true;
+      return true; // cache exists
+    });
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockReaddir.mockResolvedValue([
+      { name: 'file.prs', isDirectory: () => false },
+      { name: 'subdir', isDirectory: () => true },
+    ]);
+    // Second readdir call for the subdirectory returns empty
+    mockReaddir
+      .mockResolvedValueOnce([
+        { name: 'file.prs', isDirectory: () => false },
+        { name: 'subdir', isDirectory: () => true },
+      ])
+      .mockResolvedValueOnce([]);
+    mockReadFile
+      .mockResolvedValueOnce(VALID_LOCKFILE)
+      .mockResolvedValueOnce(Buffer.from('content'));
+
+    await vendorSyncCommand({ dryRun: false });
+
+    expect(mockMkdir).toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith(expect.stringContaining('1 copied'));
+  });
+
+  it('should handle exception in vendor sync', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return true;
+      // Throw on cache dir check to trigger outer catch
+      throw new Error('disk failure');
+    });
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+
+    await vendorSyncCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Vendor sync failed');
+    expect(process.exitCode).toBe(1);
+  });
 });
 
 describe('vendorCheckCommand', () => {

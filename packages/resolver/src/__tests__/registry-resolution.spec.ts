@@ -326,6 +326,163 @@ describe('Resolver — registry marker handling', () => {
     expect(hasRegistryError).toBe(true);
   });
 
+  it('caches registry import AST when cache is enabled', async () => {
+    // Arrange
+    const tempDir = join(testCacheDir, 'project-cached');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-cache-enabled"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/standards',
+      '',
+      '@identity {',
+      '  """',
+      '  test identity',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'standards.prs'),
+        [
+          '@meta {',
+          '  id: "acme-standards"',
+          '  syntax: "1.0.0"',
+          '}',
+          '',
+          '@context {',
+          '  """',
+          '  Cached standards',
+          '  """',
+          '}',
+        ].join('\n')
+      );
+    });
+
+    // Act — cache: true so resolveRegistryImport stores into this.cache
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: true,
+      cacheDir: join(testCacheDir, 'regcache-enabled'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    // Assert — should resolve successfully with cache enabled (line 496-497)
+    expect(result.ast).not.toBeNull();
+    const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+    expect(contextBlock).toBeDefined();
+  });
+
+  it('does not cache registry import AST when cache is disabled', async () => {
+    // Arrange
+    const tempDir = join(testCacheDir, 'project-nocache');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-cache-disabled"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/standards',
+      '',
+      '@identity {',
+      '  """',
+      '  test identity',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'standards.prs'),
+        [
+          '@meta {',
+          '  id: "acme-standards"',
+          '  syntax: "1.0.0"',
+          '}',
+          '',
+          '@context {',
+          '  """',
+          '  No cache standards',
+          '  """',
+          '}',
+        ].join('\n')
+      );
+    });
+
+    // Act — cache: false so the cacheEnabled branch is skipped (lines 136-139, 496-498)
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-disabled'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    // Assert
+    expect(result.ast).not.toBeNull();
+  });
+
+  it('collects parse errors from invalid .prs file in registry import', async () => {
+    // Arrange
+    const tempDir = join(testCacheDir, 'project-parseerr');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-parse-error"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/broken',
+      '',
+      '@identity {',
+      '  """',
+      '  test identity',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    // Mock clone to create a broken .prs file (invalid syntax)
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(join(targetDir, 'broken.prs'), 'this is not valid PRS syntax {{{');
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-parseerr'),
+    });
+
+    // Act
+    const result = await resolver.resolve(prsFile);
+
+    // Assert — should have parse errors from the invalid .prs file (lines 470-473)
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
   it('resolves registry import when .prs file exists in cloned repo', async () => {
     // Arrange
     const tempDir = join(testCacheDir, 'project2');

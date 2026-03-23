@@ -523,6 +523,57 @@ describe('GitRegistry', () => {
     });
   });
 
+  describe('list with subPath', () => {
+    it('should list files using resolveDirectoryPath with subPath', async () => {
+      // Arrange — mock clone to create directory structure with subPath
+      mockGit.clone.mockImplementation(async (_url: string, targetPath: string) => {
+        await fs.mkdir(targetPath, { recursive: true });
+        await fs.mkdir(join(targetPath, '.git'), { recursive: true });
+        await fs.mkdir(join(targetPath, 'registry', '@company'), { recursive: true });
+        await fs.writeFile(
+          join(targetPath, 'registry', '@company', 'base.prs'),
+          '@meta\nname = "base"'
+        );
+      });
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        path: 'registry',
+        cacheDir: testCacheDir,
+      });
+
+      // Act — list with subPath configured
+      const files = await registry.list('@company');
+
+      // Assert
+      expect(files).toContain('base.prs');
+    });
+  });
+
+  describe('authentication edge cases', () => {
+    it('should fall back to plain URL when token auth has no token or env var', async () => {
+      // Arrange — auth type is 'token' but neither token nor tokenEnvVar is set
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        auth: {
+          type: 'token',
+          // no token, no tokenEnvVar — resolveToken returns undefined
+        },
+      });
+
+      // Act
+      await registry.fetch('@company/base');
+
+      // Assert — clone called with the plain URL (no token embedded)
+      expect(mockGit.clone).toHaveBeenCalledWith(
+        'https://github.com/org/repo.git',
+        expect.any(String),
+        expect.any(Array)
+      );
+    });
+  });
+
   describe('createGitRegistry', () => {
     it('should create a GitRegistry instance', () => {
       const registry = createGitRegistry({
