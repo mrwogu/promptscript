@@ -325,7 +325,15 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/LockfileIntegrityError/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/MissingParamError/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/OfflineResolveError/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -341,7 +349,19 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/RateLimitError/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/RegistryPathNotFoundError/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/ResolveError/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/SemverNoMatchError/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -350,6 +370,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/UnexpectedTokenError/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/classes/UnknownAliasError/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -497,6 +521,10 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/isValidLockfile/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/isValidVersion/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
@@ -557,6 +585,14 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/Lockfile/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/LockfileDependency/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/Logger/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
@@ -606,6 +642,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PromptScriptConfig/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/RegistryAliasEntry/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -745,6 +785,10 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/RegistriesConfig/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ReservedWord/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
@@ -786,6 +830,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/LATEST_SYNTAX_VERSION/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/LOCKFILE_VERSION/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -1737,6 +1785,10 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/parser/src/variables/UrlPath/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/parser/src/variables/Use/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
@@ -1797,7 +1849,15 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/classes/RegistryCache/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/classes/Resolver/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/classes/VendorRegistry/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -1806,6 +1866,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/buildAuthenticatedUrl/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/buildRegistryMarker/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -1830,6 +1894,18 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/createResolver/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/createVendorRegistry/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/discoverNativeContent/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/expandAlias/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -1877,6 +1953,10 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/parseRegistryMarker/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/parseSkillMd/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
@@ -1905,6 +1985,14 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/validateAlias/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/validateRegistriesConfig/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/CacheEntry/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
@@ -1914,6 +2002,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/CompositeRegistryOptions/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/ExpandedAlias/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
@@ -1957,6 +2049,10 @@
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/RegistriesValidationResult/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/Registry/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
@@ -1974,6 +2070,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/variables/IMPORT_MARKER_PREFIX/</loc>
+         <lastmod>2026-03-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/variables/REGISTRY_MARKER_PREFIX/</loc>
          <lastmod>2026-03-23</lastmod>
     </url>
     <url>

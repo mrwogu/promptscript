@@ -245,6 +245,85 @@ With Git registry, you can pin imports to specific versions using Git tags:
 This checkouts the specified tag before fetching the file.
 ```
 
+### registries
+
+Defines short aliases for Git repository URLs. Aliases are used as scope prefixes in `@use` and `@inherit` paths, resolving to their full Git URL at compile time.
+
+#### Simple Form
+
+```yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+  '@team': github.com/acme/team-frontend
+  '@shared': gitlab.com/acme/shared-libs
+```
+
+#### Extended Form (with auth)
+
+```yaml
+registries:
+  '@company':
+    url: github.com/acme/promptscript-base
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  '@internal':
+    url: git@gitlab.internal.acme.com:platform/prs-registry
+    auth:
+      type: ssh
+      sshKeyPath: ~/.ssh/id_ed25519
+```
+
+**Alias Fields:**
+
+| Field              | Type   | Description                                    |
+| ------------------ | ------ | ---------------------------------------------- |
+| (simple string)    | string | Bare Git host path, e.g. `github.com/org/repo` |
+| `url`              | string | Bare Git host path (extended form)             |
+| `auth.type`        | string | `token` or `ssh`                               |
+| `auth.tokenEnvVar` | string | Env var containing a personal access token     |
+| `auth.sshKeyPath`  | string | Path to SSH private key                        |
+
+#### Three-Level Merge
+
+The `registries` field is resolved by merging three sources in priority order:
+
+| Priority | Source                          | Scope         |
+| -------- | ------------------------------- | ------------- |
+| Highest  | `promptscript.yaml` in project  | Project-level |
+| Middle   | `~/.promptscript/config.yaml`   | User-level    |
+| Lowest   | `/etc/promptscript/config.yaml` | System-level  |
+
+Project aliases override user aliases, which override system aliases. This allows IT to provision company-wide aliases (system level) while teams or projects can add or override specific aliases.
+
+#### User-Level Config (`~/.promptscript/config.yaml`)
+
+```yaml
+# ~/.promptscript/config.yaml
+registries:
+  '@company': github.com/acme/promptscript-base
+  '@shared': github.com/acme/shared-libs
+
+auth:
+  github.com:
+    type: token
+    tokenEnvVar: GITHUB_TOKEN
+```
+
+Setting aliases in user config makes them available in every project on the machine without adding them to individual `promptscript.yaml` files.
+
+#### Usage in .prs Files
+
+Once aliases are configured, use them in any import path:
+
+```
+# Resolves @company to github.com/acme/promptscript-base
+@inherit @company/@org/base
+
+# Versioned alias import
+@use @company/@stacks/react@^1.0.0
+```
+
 ### targets
 
 Configures output targets. Targets can be specified as a simple list of names or with detailed configuration.
