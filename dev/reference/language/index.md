@@ -747,7 +747,7 @@ Supports all properties including `disallowedTools`, `permissionMode`, `skills`:
 ---
 name: code-reviewer
 description: Reviews code for quality and best practices
-tools: Read, Grep, Glob, Bash
+tools: ['Read', 'Grep', 'Glob', 'Bash']
 model: sonnet
 ---
 
