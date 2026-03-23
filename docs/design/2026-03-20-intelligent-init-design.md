@@ -1,7 +1,7 @@
 # Intelligent `prs init` & Migration Flow
 
 **Date:** 2026-03-20
-**Status:** Approved
+**Status:** Implemented
 **Scope:** `packages/cli`, `packages/importer`
 
 ## Problem
@@ -163,7 +163,6 @@ Import Summary:
   copilot-instr.md → 4 sections (85% confidence)
 
   Merged: 8 unique sections (3 deduplicated)
-  Review needed: 2 sections marked # REVIEW
   Overall confidence: 84%
 ```
 
@@ -215,10 +214,10 @@ Steps:
 After prompt generation, show invocation hints per detected target:
 
 ```
-Paste this prompt in your AI tool:
-  Claude Code: just paste in chat
-  Cursor: Cmd+I → paste
-  GitHub Copilot: open Copilot Chat → paste
+Invoke the PromptScript skill in your AI tool:
+  Claude Code: /promptscript
+  Cursor: /promptscript
+  GitHub Copilot: /promptscript
 ```
 
 ### 4. CLI Flags & Non-interactive Mode
@@ -228,7 +227,7 @@ Paste this prompt in your AI tool:
 ```
 prs init                          # Interactive — gateway choice if files detected
 prs init -y                       # Non-interactive, safe defaults, skip migration
-prs init -y --import              # Non-interactive + static import of detected files
+prs init -y --auto-import         # Non-interactive + static import of detected files
 prs init -i                       # Force interactive even with all args provided
 prs init -f                       # Force reinitialize
 prs init --backup                 # Create .prs-backup/
@@ -253,7 +252,7 @@ prs migrate --llm                 # Non-interactive: generates kick-start prompt
 prs migrate --files <f1> <f2>     # Selective: import only specified files
 ```
 
-`--static` imports all detected candidates without confirmation (equivalent to `prs init -y --import`). Use `--files` for selective non-interactive import. `--llm` pre-selects the AI-assisted path and emits the prompt to stdout (no Inquirer prompts).
+`--static` imports all detected candidates without confirmation (equivalent to `prs init -y --auto-import`). Use `--files` for selective non-interactive import. `--llm` pre-selects the AI-assisted path and copies the prompt to clipboard (falls back to stdout if clipboard unavailable).
 
 Behavior depends on whether `promptscript.yaml` exists:
 
@@ -264,15 +263,15 @@ Reverse sync (re-importing manual edits from compiled output) is out of scope �
 
 #### Non-interactive behavior matrix
 
-| Flags                  | Files detected? | Behavior                                                                 |
-| ---------------------- | --------------- | ------------------------------------------------------------------------ |
-| `-y`                   | No              | Standard init, scaffold project.prs, install skill                       |
-| `-y`                   | Yes             | Standard init, scaffold project.prs, install skill, hint about migration |
-| `-y --import`          | No              | Standard init (nothing to import)                                        |
-| `-y --import`          | Yes             | Standard init + static multi-file import → modular .prs                  |
-| `-y --import --backup` | Yes             | Same + backup to `.prs-backup/`                                          |
-| (no flags)             | No              | Interactive fresh start                                                  |
-| (no flags)             | Yes             | Interactive gateway: migrate vs fresh start                              |
+| Flags                       | Files detected? | Behavior                                                                 |
+| --------------------------- | --------------- | ------------------------------------------------------------------------ |
+| `-y`                        | No              | Standard init, scaffold project.prs, install skill                       |
+| `-y`                        | Yes             | Standard init, scaffold project.prs, install skill, hint about migration |
+| `-y --auto-import`          | No              | Standard init (nothing to import)                                        |
+| `-y --auto-import`          | Yes             | Standard init + static multi-file import → modular .prs                  |
+| `-y --auto-import --backup` | Yes             | Same + backup to `.prs-backup/`                                          |
+| (no flags)                  | No              | Interactive fresh start                                                  |
+| (no flags)                  | Yes             | Interactive gateway: migrate vs fresh start                              |
 
 #### Exit codes
 

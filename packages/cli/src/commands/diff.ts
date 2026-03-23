@@ -9,6 +9,7 @@ import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { createPager, Pager } from '../output/pager.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
+import { stripMarkers } from '../utils/markers.js';
 import chalk from 'chalk';
 
 /**
@@ -81,10 +82,12 @@ async function compareOutput(
     return true;
   }
 
-  // File exists - compare content
+  // File exists - compare content (strip markers to ignore timestamp-only changes)
   const existingContent = await readFile(outputPath, 'utf-8');
+  const existingStripped = stripMarkers(existingContent);
+  const newStripped = stripMarkers(newContent);
 
-  if (existingContent === newContent) {
+  if (existingStripped === newStripped) {
     pager.write(chalk.gray(`  ${outputPath} (no changes)`));
     return false;
   }
@@ -92,8 +95,8 @@ async function compareOutput(
   pager.write(chalk.yellow(`~ ${outputPath} (modified)`));
   pager.write('');
 
-  const existingLines = existingContent.split('\n');
-  const newLines = newContent.split('\n');
+  const existingLines = existingStripped.split('\n');
+  const newLines = newStripped.split('\n');
   printSimpleDiff(existingLines, newLines, showFull, pager);
   pager.write('');
 

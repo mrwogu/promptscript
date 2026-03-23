@@ -168,3 +168,40 @@ describe('findConfigInDir', () => {
     expect(result).toBe(resolve('/my/project', 'promptscript.yaml'));
   });
 });
+
+// Import the real function — tests exercise the actual implementation
+import { detectOutputConflicts } from '../utils/conflict-detector.js';
+
+describe('detectOutputConflicts', () => {
+  it('should detect factory and codex conflicting on AGENTS.md', () => {
+    const targets = [{ name: 'factory' }, { name: 'codex' }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(1);
+    expect(conflicts.get('AGENTS.md')).toEqual(['factory', 'codex']);
+  });
+
+  it('should detect three-way conflict on AGENTS.md', () => {
+    const targets = [{ name: 'factory' }, { name: 'codex' }, { name: 'amp' }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.get('AGENTS.md')).toEqual(['factory', 'codex', 'amp']);
+  });
+
+  it('should report no conflicts for unique paths', () => {
+    const targets = [{ name: 'claude' }, { name: 'github' }, { name: 'cursor' }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(0);
+  });
+
+  it('should respect custom output overrides', () => {
+    const targets = [{ name: 'factory' }, { name: 'codex', config: { output: 'CODEX-AGENTS.md' } }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(0);
+  });
+
+  it('should detect conflict when custom output matches another target', () => {
+    const targets = [{ name: 'claude' }, { name: 'opencode', config: { output: 'CLAUDE.md' } }];
+    const conflicts = detectOutputConflicts(targets);
+    expect(conflicts.size).toBe(1);
+    expect(conflicts.get('CLAUDE.md')).toEqual(['claude', 'opencode']);
+  });
+});

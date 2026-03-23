@@ -21,7 +21,12 @@ import {
 import { resolveInheritance } from './inheritance.js';
 import { resolveUses } from './imports.js';
 import { applyExtends } from './extensions.js';
-import { resolveNativeSkills, resolveNativeCommands, type NativeSkillOptions } from './skills.js';
+import {
+  resolveNativeSkills,
+  resolveNativeCommands,
+  resolveNativeAgents,
+  type NativeSkillOptions,
+} from './skills.js';
 import { normalizeBlockAliases } from './normalize.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
@@ -178,6 +183,12 @@ export class Resolver {
 
     // Auto-discover command files from local and universal directories
     ast = await resolveNativeCommands(ast, absPath, this.loader.getLocalPath(), {
+      ...this.options.skills,
+      logger: this.logger,
+    });
+
+    // Auto-discover agent files from local and universal directories
+    ast = await resolveNativeAgents(ast, absPath, this.loader.getLocalPath(), {
       ...this.options.skills,
       logger: this.logger,
     });

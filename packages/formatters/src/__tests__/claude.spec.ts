@@ -780,7 +780,7 @@ describe('ClaudeFormatter', () => {
         expect(agentFile?.content).toContain(
           'description: Reviews code for quality and best practices'
         );
-        expect(agentFile?.content).toContain('tools: Read, Grep, Glob, Bash');
+        expect(agentFile?.content).toContain("tools: ['Read', 'Grep', 'Glob', 'Bash']");
         expect(agentFile?.content).toContain('model: sonnet');
         expect(agentFile?.content).toContain('You are a senior code reviewer.');
       });
@@ -818,8 +818,8 @@ describe('ClaudeFormatter', () => {
         );
         expect(agentFile).toBeDefined();
         expect(agentFile?.content).toContain('name: db-reader');
-        expect(agentFile?.content).toContain('tools: Bash, Read');
-        expect(agentFile?.content).toContain('disallowedTools: Write, Edit');
+        expect(agentFile?.content).toContain("tools: ['Bash', 'Read']");
+        expect(agentFile?.content).toContain("disallowedTools: ['Write', 'Edit']");
         expect(agentFile?.content).toContain('model: haiku');
         expect(agentFile?.content).toContain('permissionMode: dontAsk');
         expect(agentFile?.content).toContain('skills:');
@@ -861,7 +861,7 @@ describe('ClaudeFormatter', () => {
         expect(agentFile).toBeDefined();
         expect(agentFile?.content).toContain('maxTurns: 50');
         expect(agentFile?.content).toContain('memory: project');
-        expect(agentFile?.content).toContain('mcpServers: postgres, redis');
+        expect(agentFile?.content).toContain("mcpServers: ['postgres', 'redis']");
         expect(agentFile?.content).toContain('background: true');
         expect(agentFile?.content).toContain('isolation: worktree');
       });
@@ -905,7 +905,7 @@ describe('ClaudeFormatter', () => {
 
         expect(reviewerFile).toBeDefined();
         expect(debuggerFile).toBeDefined();
-        expect(debuggerFile?.content).toContain('tools: Read, Edit, Bash');
+        expect(debuggerFile?.content).toContain("tools: ['Read', 'Edit', 'Bash']");
       });
 
       it('should generate minimal agent with only required fields', () => {
@@ -941,6 +941,38 @@ describe('ClaudeFormatter', () => {
         expect(agentFile?.content).not.toContain('model:');
         expect(agentFile?.content).not.toContain('permissionMode:');
         expect(agentFile?.content).toContain('Do simple tasks.');
+      });
+
+      it('should serialize a single tool as a YAML array', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'single-tool': {
+                    description: 'Agent with one tool',
+                    tools: ['Bash'],
+                    model: 'sonnet',
+                    content: { type: 'TextContent', value: 'Do one thing.' },
+                  },
+                },
+                loc: { file: 'test.prs', line: 1, column: 1 },
+              },
+              loc: { file: 'test.prs', line: 1, column: 1 },
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agentFile = result.additionalFiles?.find(
+          (f) => f.path === '.claude/agents/single-tool.md'
+        );
+        expect(agentFile).toBeDefined();
+        expect(agentFile?.content).toContain("tools: ['Bash']");
       });
 
       it('should not generate agent files in simple mode', () => {

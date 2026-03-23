@@ -1,7 +1,7 @@
 # Syntax Version Validation & Upgrade
 
 **Date:** 2026-03-20
-**Status:** Approved
+**Status:** Implemented
 
 ## Problem
 
@@ -127,7 +127,7 @@ New `--fix` flag on existing `prs validate` command.
 
 **Behavior:**
 
-1. Discovers `.prs` files via glob over project root (default `.promptscript/**/*.prs`, configurable via `promptscript.yaml`)
+1. Discovers `.prs` files via glob over project root (default `.promptscript/**/*.prs`)
 2. For each file, parses AST and determines minimum required syntax version based on used blocks
 3. **Only upgrades, never downgrades:** if `minimumRequired <= declaredVersion`, the file is left untouched
 4. If declared version < required — updates `syntax:` field in file

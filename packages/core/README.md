@@ -55,9 +55,10 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 
 ```
 SyntaxVersionDef
-  version : string        -- the version string (e.g. "1.0.0")
   blocks  : string[]      -- block type names available in this version
 ```
+
+The version string is the key in `SYNTAX_VERSIONS`, not a property of `SyntaxVersionDef`.
 
 | Export                            | Description                                                              |
 | :-------------------------------- | :----------------------------------------------------------------------- |

@@ -1186,3 +1186,239 @@ export async function resolveNativeCommands(
     blocks: updatedBlocks,
   };
 }
+
+// ============================================================
+// Agent auto-discovery
+// ============================================================
+
+/**
+ * Parse YAML frontmatter from a markdown file.
+ * Returns the frontmatter key-value pairs and the body after the closing ---.
+ */
+function parseAgentFrontmatter(
+  content: string
+): { frontmatter: Record<string, unknown>; body: string } | null {
+  const trimmed = content.trimStart();
+  if (!trimmed.startsWith('---')) return null;
+
+  // Find closing --- that starts at the beginning of a line
+  let endIdx = -1;
+  let searchFrom = 3;
+  while (searchFrom < trimmed.length) {
+    const idx = trimmed.indexOf('---', searchFrom);
+    if (idx === -1) break;
+    if (idx === 0 || trimmed[idx - 1] === '\n') {
+      endIdx = idx;
+      break;
+    }
+    searchFrom = idx + 1;
+  }
+  if (endIdx === -1) return null;
+
+  const yamlStr = trimmed.slice(3, endIdx).trim();
+  const body = trimmed.slice(endIdx + 3).trim();
+
+  // Simple YAML key-value parser for agent frontmatter
+  const frontmatter: Record<string, unknown> = {};
+  for (const line of yamlStr.split('\n')) {
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    let val: unknown = line.slice(colonIdx + 1).trim();
+
+    // Parse inline arrays: ["Read", "Grep"]
+    if (typeof val === 'string' && val.startsWith('[') && val.endsWith(']')) {
+      val = val
+        .slice(1, -1)
+        .split(',')
+        .map((s) => s.trim().replace(/^["']|["']$/g, ''))
+        .filter(Boolean);
+    }
+    // Unquote strings
+    if (typeof val === 'string') {
+      val = val.replace(/^["']|["']$/g, '');
+    }
+    frontmatter[key] = val;
+  }
+  return { frontmatter, body };
+}
+
+/**
+ * Discover agent .md files from a directory.
+ * Reads files with YAML frontmatter (name, description, tools, model)
+ * and returns them as ObjectContent property entries for the @agents block.
+ */
+async function discoverAgentFiles(
+  dir: string,
+  logger: Logger = noopLogger
+): Promise<Record<string, Value>> {
+  const agents: Record<string, Value> = {};
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+      if (entry.isSymbolicLink()) continue;
+
+      const fullPath = resolve(dir, entry.name);
+
+      try {
+        const fileStat = await lstat(fullPath);
+        if (fileStat.isSymbolicLink()) continue;
+        if (fileStat.size > MAX_RESOURCE_SIZE) {
+          logger.verbose(`Skipping oversized agent file: ${entry.name}`);
+          continue;
+        }
+
+        const fileContent = await readFile(fullPath, 'utf-8');
+        if (fileContent.includes('\0')) {
+          logger.verbose(`Skipping binary agent file: ${entry.name}`);
+          continue;
+        }
+
+        const parsed = parseAgentFrontmatter(fileContent);
+        if (!parsed) {
+          logger.verbose(`Skipping agent file without frontmatter: ${entry.name}`);
+          continue;
+        }
+
+        const { frontmatter, body: agentBody } = parsed;
+        // Use || to fall back on empty string (not just null/undefined)
+        const name = (frontmatter['name'] as string) || entry.name.replace(/\.md$/, '');
+
+        // Sanitize name to prevent path traversal in output paths
+        if (!isSafeSkillName(name)) {
+          logger.verbose(`Skipping agent with unsafe name: ${name}`);
+          continue;
+        }
+
+        const description = frontmatter['description'] as string | undefined;
+
+        if (!description) {
+          logger.verbose(`Skipping agent without description: ${entry.name}`);
+          continue;
+        }
+
+        const loc = { file: fullPath, line: 1, column: 1, offset: 0 };
+
+        // Build the agent properties as an ObjectContent value
+        const agentProps: Record<string, Value> = {
+          description: description,
+        };
+
+        if (frontmatter['tools'] && Array.isArray(frontmatter['tools'])) {
+          agentProps['tools'] = frontmatter['tools'] as string[];
+        } else if (frontmatter['tools'] === '') {
+          // Block-style YAML tools (- Read\n- Grep) not parsed by simple parser
+          logger.verbose(
+            `Agent ${name}: tools field detected but not in inline array format. Use tools: ["Read", "Grep"] syntax.`
+          );
+        }
+
+        if (frontmatter['model']) {
+          agentProps['model'] = frontmatter['model'] as string;
+        }
+
+        if (agentBody) {
+          agentProps['content'] = {
+            type: 'TextContent',
+            value: agentBody,
+            loc,
+          } as TextContent;
+        }
+
+        agents[name] = agentProps;
+        logger.verbose(`Auto-discovered agent: ${name} (from ${dir})`);
+      } catch {
+        logger.verbose(`Skipping unreadable agent file: ${entry.name}`);
+      }
+    }
+  } catch {
+    // Directory doesn't exist or can't be read
+  }
+  return agents;
+}
+
+/**
+ * Auto-discover agent .md files from local and universal directories
+ * and inject them into the @agents block.
+ *
+ * Scans .promptscript/agents/ and optionally <universalDir>/agents/ for .md files
+ * with YAML frontmatter. Each file becomes an agent entry.
+ * Explicitly declared agents in .prs @agents blocks take precedence.
+ */
+export async function resolveNativeAgents(
+  ast: Program,
+  sourceFile: string,
+  localPath?: string,
+  options?: NativeSkillOptions
+): Promise<Program> {
+  if (!localPath) return ast;
+
+  const logger = options?.logger ?? noopLogger;
+
+  // Collect agents from discovery directories
+  const allAgents: Record<string, Value> = {};
+
+  // Local agents first
+  const localAgents = await discoverAgentFiles(resolve(localPath, 'agents'), logger);
+  Object.assign(allAgents, localAgents);
+
+  // Universal agents (don't overwrite local)
+  if (options?.universalDir) {
+    const universalAgents = await discoverAgentFiles(
+      resolve(localPath, '..', options.universalDir, 'agents'),
+      logger
+    );
+    for (const [name, value] of Object.entries(universalAgents)) {
+      if (!(name in allAgents)) {
+        allAgents[name] = value;
+      }
+    }
+  }
+
+  if (Object.keys(allAgents).length === 0) return ast;
+
+  // Find existing @agents block
+  const agentsBlock = ast.blocks.find((b) => b.name === 'agents');
+  const agentsContent: ObjectContent =
+    agentsBlock && agentsBlock.content.type === 'ObjectContent'
+      ? (agentsBlock.content as ObjectContent)
+      : {
+          type: 'ObjectContent',
+          properties: {},
+          loc: { file: sourceFile, line: 1, column: 1 },
+        };
+
+  // Merge: existing agents take precedence over discovered ones
+  const mergedProperties: Record<string, Value> = { ...allAgents };
+  for (const [name, value] of Object.entries(agentsContent.properties)) {
+    mergedProperties[name] = value; // Explicit declarations win
+  }
+
+  // Check if anything actually changed
+  const existingKeys = new Set(Object.keys(agentsContent.properties));
+  const hasNewAgents = Object.keys(allAgents).some((k) => !existingKeys.has(k));
+  if (!hasNewAgents) return ast;
+
+  const updatedBlock: Block = {
+    ...(agentsBlock ?? {
+      type: 'Block' as const,
+      name: 'agents',
+      content: agentsContent,
+      loc: { file: sourceFile, line: 1, column: 1, offset: 0 },
+    }),
+    content: {
+      ...agentsContent,
+      properties: mergedProperties,
+    },
+  };
+
+  const updatedBlocks = agentsBlock
+    ? ast.blocks.map((b) => (b.name === 'agents' ? updatedBlock : b))
+    : [...ast.blocks, updatedBlock];
+
+  return {
+    ...ast,
+    blocks: updatedBlocks,
+  };
+}

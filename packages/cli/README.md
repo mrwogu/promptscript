@@ -50,8 +50,11 @@ prs import CLAUDE.md
 # Preview the conversion without writing files
 prs import .cursorrules --dry-run
 
-# Auto-detect and migrate during project init
-prs init --migrate
+# Migrate during project init (interactive gateway)
+prs init
+
+# Or use the dedicated migrate command
+prs migrate
 ```
 
 ---
@@ -94,25 +97,28 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 
 ## Commands
 
-| Command                 | Description                                       |
-| :---------------------- | :------------------------------------------------ |
-| `prs init`              | Initialize project with auto-detection            |
-| `prs compile`           | Compile to target AI tool formats                 |
-| `prs compile -w`        | Watch mode - recompile on changes                 |
-| `prs compile --dry-run` | Preview changes without writing files             |
-| `prs validate`          | Validate `.prs` files with detailed errors        |
-| `prs validate --fix`    | Auto-fix syntax version mismatches                |
-| `prs upgrade`           | Upgrade all `.prs` files to latest syntax version |
-| `prs upgrade --dry-run` | Preview upgrade changes without writing files     |
-| `prs diff`              | Show diff between source and compiled output      |
-| `prs import`            | Import existing AI instruction files to .prs      |
-| `prs check`             | Check configuration and dependencies health       |
-| `prs serve`             | Start local development server for playground     |
-| `prs registry init`     | Create a new PromptScript registry                |
-| `prs registry validate` | Validate registry structure and manifest          |
-| `prs registry publish`  | Publish registry to remote                        |
-| `prs pull`              | Pull updates from registry                        |
-| `prs update-check`      | Check for newer CLI versions                      |
+| Command                 | Description                                         |
+| :---------------------- | :-------------------------------------------------- |
+| `prs init`              | Initialize project with auto-detection              |
+| `prs compile`           | Compile to target AI tool formats                   |
+| `prs compile -w`        | Watch mode - recompile on changes                   |
+| `prs compile --dry-run` | Preview changes without writing files               |
+| `prs validate`          | Validate `.prs` files with detailed errors          |
+| `prs validate --fix`    | Auto-fix syntax version mismatches                  |
+| `prs upgrade`           | Upgrade all `.prs` files to latest syntax version   |
+| `prs upgrade --dry-run` | Preview upgrade changes without writing files       |
+| `prs diff`              | Show diff between source and compiled output        |
+| `prs import`            | Import existing AI instruction files to .prs        |
+| `prs migrate`           | Migrate existing AI instructions to PromptScript    |
+| `prs migrate --static`  | Non-interactive static import of all detected files |
+| `prs migrate --llm`     | Generate AI-assisted migration prompt               |
+| `prs check`             | Check configuration and dependencies health         |
+| `prs serve`             | Start local development server for playground       |
+| `prs registry init`     | Create a new PromptScript registry                  |
+| `prs registry validate` | Validate registry structure and manifest            |
+| `prs registry publish`  | Publish registry to remote                          |
+| `prs pull`              | Pull updates from registry                          |
+| `prs update-check`      | Check for newer CLI versions                        |
 
 ## Key Features
 
@@ -125,7 +131,7 @@ Run `prs compile` and get correctly formatted output for every AI tool your team
 - **Overwrite protection** - never accidentally clobbers hand-written files
 - **Validation** - catch errors before they reach your AI tools
 - **Registry support** - share configs via Git registries (private or public)
-- **AI-assisted migration** - convert existing `CLAUDE.md`, `.cursorrules`, etc.
+- **Migration** - static import or AI-assisted migration of existing `CLAUDE.md`, `.cursorrules`, etc.
 - **Bundled language skill** - AI agents learn PromptScript syntax via injected SKILL.md
 
 ## Supported Targets
@@ -179,6 +185,8 @@ Options:
   -i, --interactive        Force interactive mode
   -y, --yes                Skip prompts, use defaults
   -f, --force              Force reinitialize even if already initialized
+  --auto-import            Automatically import existing instruction files (static)
+  --backup                 Create .prs-backup/ before migration
 ```
 
 **Auto-detection:** Project name, languages, frameworks, and existing AI tool configurations.
@@ -259,6 +267,25 @@ Upgrades all `.prs` files in the project to the latest known syntax version.
 Unlike `prs validate --fix` (which only bumps to the minimum required version),
 `upgrade` is aggressive: it sets every file to `LATEST_SYNTAX_VERSION`
 unconditionally. Use `--dry-run` to preview the changes before applying them.
+
+### Migrate
+
+```bash
+prs migrate [options]
+
+Options:
+  --static                Non-interactive static import of all detected files
+  --llm                   Generate AI-assisted migration prompt
+  --files <files...>      Specific files to import
+```
+
+Alias/shortcut to the init migration path. Detects existing AI instruction files
+(CLAUDE.md, .cursorrules, copilot-instructions.md, etc.) and offers static or
+AI-assisted import into PromptScript format.
+
+- `--static` imports all detected candidates without prompts (equivalent to `prs init -y --auto-import`)
+- `--llm` generates a kick-start prompt for AI-assisted migration and copies it to clipboard
+- `--files` selectively imports only specified files
 
 ### Pull Updates
 
