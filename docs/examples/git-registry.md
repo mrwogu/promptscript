@@ -505,16 +505,19 @@ targets:
 ### 2. Use Aliases in .prs Files
 
 ```promptscript
-@meta { id: "customer-portal" syntax: "1.0.0" }
+@meta {
+  id: "customer-portal"
+  syntax: "1.0.0"
+}
 
-# Short alias import — resolves to github.com/acme/promptscript-base/@org/base.prs
-@inherit @company/@org/base
+# Inherit from company base — resolves to github.com/acme/promptscript-base/base.prs
+@inherit @company/base
 
 # Team-specific standards
-@use @team/@stacks/react
+@use @team/stacks/react
 
 # Pin to a specific release
-@use @company/@org/security@^2.0.0
+@use @company/security@2.0.0
 ```
 
 ### 3. Compile
@@ -532,16 +535,19 @@ PromptScript expands `@company` to `github.com/acme/promptscript-base`, clones (
 URL imports work without any alias configuration:
 
 ```promptscript
-@meta { id: "my-project" syntax: "1.0.0" }
+@meta {
+  id: "my-project"
+  syntax: "1.0.0"
+}
 
 # Direct URL import — no alias needed
-@use github.com/acme/shared-standards/@fragments/security
+@use github.com/acme/shared-standards/fragments/security
 
 # Open-source skill auto-discovered from SKILL.md
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 
 # Versioned URL import
-@use github.com/acme/shared-standards/@stacks/typescript@^1.0.0
+@use github.com/acme/shared-standards/stacks/typescript@1.0.0
 ```
 
 Debug the resolution chain with:
