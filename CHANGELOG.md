@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://github.com/mrwogu/promptscript/compare/v1.4.7...v1.5.0) (2026-03-23)
+
+
+### Features
+
+* **cli:** compiler safety and output conflict detection ([145735a](https://github.com/mrwogu/promptscript/commit/145735aebd3dafd2a69618a0f30e0e1550fdadea))
+* **cli:** intelligent prs init with inline migration flow ([#147](https://github.com/mrwogu/promptscript/issues/147)) ([30ce56d](https://github.com/mrwogu/promptscript/commit/30ce56da9401dfbfc00d635756e7e141f33b2a9f))
+* **core:** native registry resolver with Go-style imports and auto-discovery ([#153](https://github.com/mrwogu/promptscript/issues/153)) ([dab580e](https://github.com/mrwogu/promptscript/commit/dab580e4d4bb3cd9791c1122f6318703a9a5cbc2))
+* **resolver:** auto-discover agent files from local and universal directories ([2af1b8e](https://github.com/mrwogu/promptscript/commit/2af1b8edcb098292a14703b0a8d4378b0c10b182))
+* **resolver:** auto-discover agent files from local and universal directories ([8debcda](https://github.com/mrwogu/promptscript/commit/8debcdae2bd46df226397880419de4f15534e54f))
+* syntax version validation, upgrade command, and unknown block detection ([#146](https://github.com/mrwogu/promptscript/issues/146)) ([a0cfd99](https://github.com/mrwogu/promptscript/commit/a0cfd9962b7ff626add4c3cf06d42be54dbc354d))
+
+
+### Bug Fixes
+
+* **cli:** address review feedback for compiler safety ([10871ce](https://github.com/mrwogu/promptscript/commit/10871ce440f22e405e216615103ef64ff68b9ac4))
+* **formatters:** serialize agent tools as YAML inline array in Claude formatter ([a1e4616](https://github.com/mrwogu/promptscript/commit/a1e46168edcf72beff99b69b6ceefe2e58277f28))
+* **resolver:** address review feedback for agent discovery ([cfbc222](https://github.com/mrwogu/promptscript/commit/cfbc222e9af7a82838226c23d51cf918fefb5c73))
+
 ## [1.4.7](https://github.com/mrwogu/promptscript/compare/v1.4.6...v1.4.7) (2026-03-20)
 
 
