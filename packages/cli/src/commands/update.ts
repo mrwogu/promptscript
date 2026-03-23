@@ -93,7 +93,7 @@ export async function updateCommand(
     // Preserve deps not in the update set
     for (const repoUrl of allRepoUrls) {
       if (!toUpdate.includes(repoUrl) && repoUrl in existing.dependencies) {
-        dependencies[repoUrl] = existing.dependencies[repoUrl];
+        dependencies[repoUrl] = existing.dependencies[repoUrl]!;
       }
     }
 

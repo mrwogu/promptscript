@@ -4,7 +4,13 @@ import { writeFile, mkdir, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import chokidar from 'chokidar';
 import type { CompileOptions } from '../types.js';
-import type { Logger, PromptScriptConfig, TargetEntry, TargetConfig, Lockfile } from '@promptscript/core';
+import type {
+  Logger,
+  PromptScriptConfig,
+  TargetEntry,
+  TargetConfig,
+  Lockfile,
+} from '@promptscript/core';
 import { isValidLockfile } from '@promptscript/core';
 
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
@@ -504,9 +510,7 @@ export async function compileCommand(
 
     // Hint about lockfile if registries are configured but no lockfile exists
     if (config.registries && Object.keys(config.registries).length > 0 && !lockfile) {
-      logger.verbose(
-        'Tip: Run "prs lock" to pin remote dependencies for reproducible builds.'
-      );
+      logger.verbose('Tip: Run "prs lock" to pin remote dependencies for reproducible builds.');
     }
 
     // When --cwd is set, default output to projectRoot so files land in the right place

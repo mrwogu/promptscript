@@ -277,23 +277,23 @@ registries:
 
 **Alias Fields:**
 
-| Field                | Type   | Description                                      |
-| -------------------- | ------ | ------------------------------------------------ |
-| (simple string)      | string | Bare Git host path, e.g. `github.com/org/repo`   |
-| `url`                | string | Bare Git host path (extended form)               |
-| `auth.type`          | string | `token` or `ssh`                                 |
-| `auth.tokenEnvVar`   | string | Env var containing a personal access token       |
-| `auth.sshKeyPath`    | string | Path to SSH private key                          |
+| Field              | Type   | Description                                    |
+| ------------------ | ------ | ---------------------------------------------- |
+| (simple string)    | string | Bare Git host path, e.g. `github.com/org/repo` |
+| `url`              | string | Bare Git host path (extended form)             |
+| `auth.type`        | string | `token` or `ssh`                               |
+| `auth.tokenEnvVar` | string | Env var containing a personal access token     |
+| `auth.sshKeyPath`  | string | Path to SSH private key                        |
 
 #### Three-Level Merge
 
 The `registries` field is resolved by merging three sources in priority order:
 
-| Priority | Source                               | Scope           |
-| -------- | ------------------------------------ | --------------- |
-| Highest  | `promptscript.yaml` in project       | Project-level   |
-| Middle   | `~/.promptscript/config.yaml`        | User-level      |
-| Lowest   | `/etc/promptscript/config.yaml`      | System-level    |
+| Priority | Source                          | Scope         |
+| -------- | ------------------------------- | ------------- |
+| Highest  | `promptscript.yaml` in project  | Project-level |
+| Middle   | `~/.promptscript/config.yaml`   | User-level    |
+| Lowest   | `/etc/promptscript/config.yaml` | System-level  |
 
 Project aliases override user aliases, which override system aliases. This allows IT to provision company-wide aliases (system level) while teams or projects can add or override specific aliases.
 

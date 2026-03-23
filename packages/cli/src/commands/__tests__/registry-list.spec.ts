@@ -48,9 +48,7 @@ describe('registryListCommand', () => {
     await registryListCommand();
 
     expect(ConsoleOutput.muted).toHaveBeenCalledWith('No registry aliases configured.');
-    expect(ConsoleOutput.muted).toHaveBeenCalledWith(
-      expect.stringContaining('prs registry add')
-    );
+    expect(ConsoleOutput.muted).toHaveBeenCalledWith(expect.stringContaining('prs registry add'));
   });
 
   it('should display user-level aliases as global', async () => {
@@ -104,7 +102,9 @@ describe('registryListCommand', () => {
     const calls = consoleSpy.mock.calls.map((c) => c[0] as string);
     // project entry wins — only the project version should appear
     expect(
-      calls.some((line) => line.includes('@company') && line.includes('new') && line.includes('(project)'))
+      calls.some(
+        (line) => line.includes('@company') && line.includes('new') && line.includes('(project)')
+      )
     ).toBe(true);
     // old entry from global should not be shown for @company
     expect(calls.some((line) => line.includes('old'))).toBe(false);

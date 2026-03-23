@@ -113,4 +113,3 @@ async function addToProjectConfig(alias: string, url: string): Promise<void> {
   ConsoleOutput.success(`Added ${alias} → ${url}`);
   ConsoleOutput.muted(`Saved to: ${configFile}`);
 }
-
