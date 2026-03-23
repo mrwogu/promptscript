@@ -12,7 +12,12 @@ export { Resolver, createResolver } from './resolver.js';
 export type { ResolverOptions, ResolvedAST } from './resolver.js';
 
 // File loader
-export { FileLoader } from './loader.js';
+export {
+  FileLoader,
+  REGISTRY_MARKER_PREFIX,
+  parseRegistryMarker,
+  buildRegistryMarker,
+} from './loader.js';
 export type { LoaderOptions } from './loader.js';
 
 // Registry implementations

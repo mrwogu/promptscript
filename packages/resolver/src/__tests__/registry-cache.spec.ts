@@ -42,9 +42,7 @@ describe('RegistryCache', () => {
 
     it('returns correct hierarchical path for http URL', () => {
       const result = cache.getCachePath('http://example.com/org/repo', 'develop');
-      expect(result).toBe(
-        join(testBaseDir, 'registries', 'example.com', 'org', 'repo', 'develop')
-      );
+      expect(result).toBe(join(testBaseDir, 'registries', 'example.com', 'org', 'repo', 'develop'));
     });
   });
 

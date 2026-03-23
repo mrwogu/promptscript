@@ -1,7 +1,7 @@
 ---
 name: security-reviewer
 description: Security vulnerability detection
-tools: ["Read", "Grep", "Bash"]
+tools: ['Read', 'Grep', 'Bash']
 model: sonnet
 ---
 

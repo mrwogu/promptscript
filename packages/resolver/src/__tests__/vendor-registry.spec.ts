@@ -51,10 +51,7 @@ describe('VendorRegistry', () => {
     it('reads nested file correctly', async () => {
       // Arrange
       await fs.mkdir(join(vendorDir, '@company', 'nested'), { recursive: true });
-      await fs.writeFile(
-        join(vendorDir, '@company', 'nested', 'deep.prs'),
-        '@meta\nname = "deep"'
-      );
+      await fs.writeFile(join(vendorDir, '@company', 'nested', 'deep.prs'), '@meta\nname = "deep"');
 
       // Act
       const content = await registry.fetch('@company/nested/deep.prs');
