@@ -175,4 +175,69 @@ describe('resolveCommand', () => {
     expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Resolution failed'));
     expect(process.exitCode).toBe(1);
   });
+
+  it('should error when no registries are configured for alias import', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+
+    await resolveCommand('@company/security', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith('No registries configured.');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should show cache exists with file found info', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExpandAlias.mockReturnValue({
+      repoUrl: 'github.com/company/base',
+      path: 'security',
+      version: 'v1.3.0',
+    });
+    // existsSync returns true for both cacheDir and cachedFile
+    mockExistsSync.mockReturnValue(true);
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('@company/security@v1.3.0', {});
+
+    const output = consoleSpy.mock.calls.map((c) => c[0] as string).join('\n');
+    expect(output).toContain('native .prs');
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should show cache exists but file not found info', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExpandAlias.mockReturnValue({
+      repoUrl: 'github.com/company/base',
+      path: 'security',
+      version: 'v1.3.0',
+    });
+    // First call (cacheDir) returns true, second call (cachedFile) returns false
+    let callCount = 0;
+    mockExistsSync.mockImplementation(() => {
+      callCount++;
+      return callCount === 1; // only cacheDir exists
+    });
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('@company/security@v1.3.0', {});
+
+    const output = consoleSpy.mock.calls.map((c) => c[0] as string).join('\n');
+    expect(output).toContain('not found in cache');
+
+    consoleSpy.mockRestore();
+  });
 });

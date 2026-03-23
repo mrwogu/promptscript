@@ -124,6 +124,56 @@ describe('discoverNativeContent', () => {
     expect(result).toBeNull();
   });
 
+  it('should skip symbolic links when discovering agents', async () => {
+    const { mkdtemp, writeFile, symlink, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-symlink-'));
+
+    try {
+      // Create a real agent file
+      await writeFile(
+        resolve(tmpDir, 'real-agent.md'),
+        '---\nmodel: opus\ndescription: Real agent\n---\nReal agent body.'
+      );
+
+      // Create a symlink to another md file
+      await writeFile(resolve(tmpDir, 'target.md'), '---\nmodel: opus\n---\nSymlinked.');
+      await symlink(resolve(tmpDir, 'target.md'), resolve(tmpDir, 'linked-agent.md'));
+
+      const result = await discoverNativeContent(tmpDir);
+      expect(result).not.toBeNull();
+
+      const agentsBlock = result!.blocks.find((b) => b.name === 'agents');
+      expect(agentsBlock).toBeDefined();
+
+      const content = agentsBlock!.content as ObjectContent;
+      // real-agent should be present, linked-agent should be skipped (symlink)
+      expect(content.properties).toHaveProperty('real-agent');
+      // The symlink target.md is also a regular file so it may appear,
+      // but linked-agent.md should NOT appear because lstat reports symlink
+      expect(content.properties).not.toHaveProperty('linked-agent');
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should handle empty context files (content.trim() is empty)', async () => {
+    const { mkdtemp, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-empty-ctx-'));
+
+    try {
+      // Write an empty CLAUDE.md (only whitespace)
+      await writeFile(resolve(tmpDir, 'CLAUDE.md'), '   \n  \n  ');
+
+      const result = await discoverNativeContent(tmpDir);
+      // Empty content.trim() means no context block → null if no other content
+      expect(result).toBeNull();
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it('should handle file read errors in discoverContext gracefully', async () => {
     // When readFile throws inside discoverContext, the catch block skips
     // that file and continues. This is tested implicitly by directories

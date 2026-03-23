@@ -142,4 +142,48 @@ describe('lockCommand', () => {
     expect(mockWriteFile).not.toHaveBeenCalled();
     expect(mockSucceed).toHaveBeenCalledWith('Dry run — lockfile not written');
   });
+
+  it('should handle exception during lock generation', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockRejectedValue(new Error('config load failure'));
+
+    await lockCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should handle malformed existing lockfile gracefully', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    // Return content that will throw during parse (invalid JSON for our mock)
+    mockReadFile.mockRejectedValue(new Error('read failure'));
+
+    await lockCommand({});
+
+    // Should still succeed — malformed lockfile is ignored and starts fresh
+    expect(mockWriteFile).toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Lockfile generated');
+  });
+
+  it('should handle object-form registry entry', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': { url: 'github.com/company/base', root: 'packages/prs' } },
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { version: string }>;
+    };
+    expect(parsed.dependencies['github.com/company/base']).toBeDefined();
+  });
 });

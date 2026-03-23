@@ -111,4 +111,84 @@ describe('registryListCommand', () => {
 
     consoleSpy.mockRestore();
   });
+
+  it('should handle exception during registry listing', async () => {
+    mockLoadUserConfig.mockRejectedValue(new Error('config error'));
+
+    await registryListCommand();
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to list registries')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should handle object-form registry entries in user config', async () => {
+    mockLoadUserConfig.mockResolvedValue({
+      version: '1',
+      registries: { '@company': { url: 'github.com/company/base', root: 'packages/prs' } },
+    });
+    mockFindConfigFile.mockReturnValue(null);
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
+
+    await registryListCommand();
+
+    const calls = consoleSpy.mock.calls.map((c) => c[0] as string);
+    expect(
+      calls.some(
+        (line) =>
+          line.includes('@company') &&
+          line.includes('github.com/company/base') &&
+          line.includes('(global)')
+      )
+    ).toBe(true);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle object-form registry entries in project config', async () => {
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        registries: { '@team': { url: 'github.com/company/team', root: 'src' } },
+      })
+    );
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
+
+    await registryListCommand();
+
+    const calls = consoleSpy.mock.calls.map((c) => c[0] as string);
+    expect(
+      calls.some(
+        (line) =>
+          line.includes('@team') &&
+          line.includes('github.com/company/team') &&
+          line.includes('(project)')
+      )
+    ).toBe(true);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle project config parse errors gracefully', async () => {
+    mockLoadUserConfig.mockResolvedValue({
+      version: '1',
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockReadFile.mockRejectedValue(new Error('read error'));
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
+
+    await registryListCommand();
+
+    // Should still show user-level alias even if project config fails
+    const calls = consoleSpy.mock.calls.map((c) => c[0] as string);
+    expect(calls.some((line) => line.includes('@company') && line.includes('(global)'))).toBe(true);
+
+    consoleSpy.mockRestore();
+  });
 });

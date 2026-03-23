@@ -219,4 +219,64 @@ describe('vendorCheckCommand', () => {
 
     expect(mockSucceed).toHaveBeenCalledWith('Vendor directory matches lockfile');
   });
+
+  it('should warn when lockfile has no dependencies', async () => {
+    const emptyLockfile = JSON.stringify({ version: 1, dependencies: {} });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(emptyLockfile);
+
+    await vendorCheckCommand({});
+
+    expect(mockSpinner.warn).toHaveBeenCalledWith('No dependencies in lockfile');
+  });
+
+  it('should handle exception in vendor check', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return true;
+      // Throw after lockfile check to trigger outer catch
+      throw new Error('unexpected error');
+    });
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+
+    await vendorCheckCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Vendor check failed');
+    expect(process.exitCode).toBe(1);
+  });
+});
+
+describe('vendorSyncCommand — empty dependencies', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+  });
+
+  it('should warn when lockfile has no dependencies', async () => {
+    const emptyLockfile = JSON.stringify({ version: 1, dependencies: {} });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(emptyLockfile);
+
+    await vendorSyncCommand({});
+
+    expect(mockSpinner.warn).toHaveBeenCalledWith('No dependencies in lockfile');
+  });
+
+  it('should return null for invalid lockfile content', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(JSON.stringify({ invalid: true }));
+
+    await vendorSyncCommand({});
+
+    // isValidLockfile returns false → loadLockfile returns null → "No lockfile found"
+    expect(mockFail).toHaveBeenCalledWith('No lockfile found');
+  });
+
+  it('should return null when lockfile read throws', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockRejectedValue(new Error('read error'));
+
+    await vendorSyncCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('No lockfile found');
+  });
 });
