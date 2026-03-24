@@ -2,2630 +2,2630 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://getpromptscript.dev/v1.5/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/getting-started/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/tutorial/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/classes/BrowserCompiler/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/classes/BrowserResolver/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/classes/VirtualFileSystem/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/functions/compile/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/functions/compileFor/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/BrowserCompilerOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/BrowserResolverOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/CompileError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/CompileOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/CompileResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/CompileStats/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/ResolvedAST/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/interfaces/TargetConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/type-aliases/FormatterName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/variables/BUNDLED_REGISTRY/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/variables/CORE_BASE/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/variables/CORE_QUALITY/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/browser-compiler/src/variables/CORE_SECURITY/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/enumerations/LogLevel/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/checkCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/checkForUpdates/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/compileCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/createSpinner/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/diffCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/fetchLatestVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/findConfigFile/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/forceCheckForUpdates/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/getCacheDir/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/getCachePath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/getContext/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/importCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/initCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/isQuiet/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/isVerbose/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/loadConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/printUpdateNotification/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/pullCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/run/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/setContext/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/updateCheckCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/functions/validateCommand/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/CLIContext/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/CheckOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/CompileOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/DiffOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/ImportCommandOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/InitOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/PullOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/UpdateInfo/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/interfaces/ValidateOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/variables/CONFIG_FILES/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/cli/src/variables/ConsoleOutput/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/classes/Compiler/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/functions/compile/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/functions/createCompiler/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/CompileError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/CompileOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/CompileResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/CompileStats/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/CompilerOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/FormatOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/Formatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/FormatterOutput/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/TargetConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/WatchOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/interfaces/Watcher/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/type-aliases/FormatterConstructor/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/compiler/src/type-aliases/WatchCallback/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/CircularDependencyError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/FileNotFoundError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/GitAuthError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/GitCloneError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/GitRefNotFoundError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/LockfileIntegrityError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/MissingParamError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/OfflineResolveError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/PSError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/ParamTypeMismatchError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/ParseError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/RateLimitError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/RegistryPathNotFoundError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/ResolveError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/SemverNoMatchError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/UndefinedVariableError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/UnexpectedTokenError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/UnknownAliasError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/UnknownParamError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/classes/ValidationError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/bindParams/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/compareVersions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/createLocation/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/createLogger/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/createPathReference/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/customTarget/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/deepClone/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/deepMerge/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/findClosestMatch/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/formatDiagnostic/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/formatDiagnostics/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/formatPath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/formatVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/getBlocksForVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/getBuiltInConvention/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/getFileName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/getLatestSyntaxVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/getMinimumVersionForBlock/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/getPackageInfo/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/getPackageVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/incrementVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/interpolateAST/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/interpolateContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/interpolateText/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isAbsolutePath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isBlockType/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isBuiltInConvention/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isKnownSyntaxVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isKnownTarget/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isPlainObject/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isRelativePath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isReservedWord/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isTemplateExpression/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isTextContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isValidLockfile/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/isValidVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/levenshteinDistance/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/parsePath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/parseVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/functions/resolvePath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/ArrayContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/BaseNode/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/Block/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/CatalogEntry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/DetectionHints/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/Diagnostic/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/ExtendBlock/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/FormatDiagnosticOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/FormattingConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/InheritDeclaration/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/Lockfile/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/LockfileDependency/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/Logger/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/MetaBlock/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/MixedContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/NamespaceDefinition/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/ObjectContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/OutputConvention/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/ParamArgument/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/ParamDefinition/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/PathReference/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/PrettierMarkdownOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/Program/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/ProjectContext/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/PromptScriptConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/RegistryAliasEntry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/RegistryManifest/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/RegistryMeta/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SectionRenderer/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SkillContractField/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SkillDefinition/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SourceAttribution/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SourceLocation/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SourceRange/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SuggestionAction/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SuggestionCondition/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SuggestionReasoning/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SuggestionResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SuggestionRule/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/SyntaxVersionDef/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/TargetConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/TemplateContext/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/TemplateExpression/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/TextContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/TypeExpression/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/UseDeclaration/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/interfaces/UserConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/BlockContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/BlockName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/BlockTypeName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/BuiltInConventionName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/ClaudeVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/ConventionName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/CustomTarget/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/DiagnosticSeverity/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/GithubVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/KnownTarget/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/ManifestTarget/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/ParamType/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/PrimitiveValue/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/RegistriesConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/ReservedWord/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/Severity/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/TargetEntry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/TargetName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/type-aliases/Value/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/BLOCK_TYPES/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/BUILT_IN_CONVENTIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/DEFAULT_OUTPUT_PATHS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/DEFAULT_PRETTIER_OPTIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/KNOWN_TARGETS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/LATEST_SYNTAX_VERSION/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/LOCKFILE_VERSION/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/MARKDOWN_CONVENTION/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/RESERVED_WORDS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/SYNTAX_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/XML_CONVENTION/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/core/src/variables/noopLogger/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/AntigravityFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/BaseFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/ClaudeFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/ContinueFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/ConventionRenderer/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/CursorFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/FactoryFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/FormatterRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/GeminiFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/GitHubFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/KiroFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/MarkdownInstructionFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/TraeFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/WindsurfFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/classes/ZencoderFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/createConventionRenderer/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/createSimpleMarkdownFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/extractSectionsFromOutput/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/findMissingSections/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/format/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/getExpectedSections/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/getFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/hasFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/listFormatters/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/normalizeSectionName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/registerFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/functions/unregisterFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/ConventionRendererOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/ExtractionRule/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/FeatureCoverageSummary/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/FeatureSpec/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/FormatOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/Formatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/FormatterClass/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/FormatterOutput/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/FormatterVersionInfo/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/MarkdownAgentConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/MarkdownCommandConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/MarkdownFormatterConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/MarkdownSkillConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/ParityReport/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/SectionInfo/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/SectionSpec/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/SimpleFormatterOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/SimpleFormatterResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/SimpleFormatterVersions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/SourceBlockConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/StandaloneFormatOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/interfaces/VersionEntry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/ActivationType/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/AdalVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/AmpVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/AntigravityVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/AugmentVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/ClineVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/CodeBuddyVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/CodexVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/CommandCodeVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/ContinueVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/CortexVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/CrushVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/FactoryVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/FeatureCategory/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/FeatureStatus/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/FormatterFactory/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/FormatterVersionMap/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/GeminiVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/GooseVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/IflowVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/JunieVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/KiloVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/KiroVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/KodeVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/MarkdownVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/McpjamVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/MistralVibeVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/MuxVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/NeovateVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/OpenClawVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/OpenCodeVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/OpenHandsVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/PiVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/PochiVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/QoderVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/QwenCodeVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/RooVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/SectionNameKey/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/ToolName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/TraeVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/WindsurfVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/type-aliases/ZencoderVersion/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/ADAL_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/AMP_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/ANTIGRAVITY_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/AUGMENT_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/AdalFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/AmpFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/AugmentFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CLAUDE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CLINE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CODEBUDDY_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CODEX_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/COMMAND_CODE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CONTINUE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CORTEX_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CRUSH_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/ClineFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CodeBuddyFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CodexFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CommandCodeFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CortexFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/CrushFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/EXTRACTION_RULES/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/FACTORY_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/FEATURE_MATRIX/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/GEMINI_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/GITHUB_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/GOOSE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/GooseFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/IFLOW_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/IflowFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/JUNIE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/JunieFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/KILO_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/KIRO_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/KNOWN_SECTIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/KODE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/KiloFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/KodeFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/MCPJAM_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/MISTRAL_VIBE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/MUX_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/McpjamFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/MistralVibeFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/MuxFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/NEOVATE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/NeovateFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/OPENCLAW_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/OPENCODE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/OPENHANDS_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/OpenClawFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/OpenCodeFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/OpenHandsFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/PARITY_MATRIX/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/PI_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/POCHI_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/PiFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/PochiFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/QODER_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/QWEN_CODE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/QoderFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/QwenCodeFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/ROO_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/RooFormatter/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/TRAE_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/WINDSURF_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/ZENCODER_VERSIONS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/formatters/src/variables/conventionRenderers/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/enumerations/ConfidenceLevel/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/classifyConfidence/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/detectFormat/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/emitModularFiles/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/emitPrs/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/getParser/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/importFile/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/importMultipleFiles/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/mapSections/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/mergeSections/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/functions/validateRoundtrip/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/EmitOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/FileReport/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/FormatParser/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/ImportOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/ImportResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/MarkdownSection/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/MergeResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/MergedBlock/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/ModularEmitOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/MultiImportResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/RoundtripResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/ScoredSection/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/interfaces/SourcedSection/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/type-aliases/DetectedFormat/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/importer/src/type-aliases/MultiImportOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/classes/PromptScriptParser/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/functions/parse/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/functions/parseFile/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/functions/parseFileOrThrow/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/functions/parseOrThrow/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/functions/tokenize/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/interfaces/ParseOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/interfaces/ParseResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/type-aliases/EnvProvider/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/As/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/At/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/BooleanType/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Colon/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Comma/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Dash/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Dot/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/DotDot/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Enum/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Equals/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Extend/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/False/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Identifier/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Inherit/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/LBrace/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/LBracket/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/LParen/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/LineComment/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Meta/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Null/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/NumberLiteral/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/NumberType/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/PSLexer/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/PathReference/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Question/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/RBrace/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/RBracket/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/RParen/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Range/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/RelativePath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/StringLiteral/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/StringType/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/TemplateClose/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/TemplateOpen/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/TextBlock/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/True/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/UrlPath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/Use/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/WhiteSpace/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/allTokens/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/parser/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/parser/src/variables/visitor/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/CompositeRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/FileLoader/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/FileSystemRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/GitAuthError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/GitCacheManager/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/GitCloneError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/GitRefNotFoundError/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/GitRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/HttpRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/RegistryCache/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/Resolver/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/classes/VendorRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/applyExtends/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/buildAuthenticatedUrl/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/buildRegistryMarker/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/createCompositeRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/createFileSystemRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/createGitCacheManager/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/createGitRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/createHttpRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/createResolver/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/createVendorRegistry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/discoverNativeContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/expandAlias/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/getCacheKey/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/getImportAlias/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/getOriginalBlockName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/getWebUrl/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/interpolateSkillContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/isGitUrl/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/isImportMarker/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/isKnownGitHost/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/normalizeBlockAliases/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/normalizeGitUrl/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/parseGitUrl/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/parseRegistryMarker/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/parseSkillMd/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/parseVersionedPath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/resolve/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/resolveInheritance/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/resolveNativeCommands/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/resolveNativeSkills/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/resolveUses/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/validateAlias/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/functions/validateRegistriesConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/CacheEntry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/CacheMetadata/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/CompositeRegistryOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/ExpandedAlias/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/FileSystemRegistryOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/GitAuthOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/GitCacheManagerOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/GitRegistryOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/HttpRegistryOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/LoaderOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/NativeSkillOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/ParsedGitUrl/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/ParsedSkillMd/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/ParsedVersionedPath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/RegistriesValidationResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/Registry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/ResolveOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/ResolvedAST/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/interfaces/ResolverOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/variables/IMPORT_MARKER_PREFIX/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/resolver/src/variables/REGISTRY_MARKER_PREFIX/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/functions/createFileWatcher/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/functions/createServer/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/functions/startServer/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/interfaces/FileContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/interfaces/FileEntry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/interfaces/FileWatchEvent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/interfaces/ServerConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/server/src/interfaces/ServerOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/classes/Validator/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/createMultilingualConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/createValidator/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/formatValidationMessage/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/formatValidationMessages/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/formatValidationResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/getPatternsForLanguage/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/getRuleById/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/getRuleByName/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/getSecurityPreset/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/getSupportedLanguages/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/hasContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/hasPathTraversal/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/isValidPath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/isValidSemver/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/offsetLocation/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/validate/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/walkBlocks/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/walkText/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/functions/walkUses/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/FormatValidationOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/RuleContext/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/ValidateOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/ValidationMessage/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/ValidationResult/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/ValidationRule/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/ValidatorConfig/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/interfaces/WalkTextOptions/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/type-aliases/Severity/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/type-aliases/SupportedLanguage/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_ALL_LANGUAGES/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_AR/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_CS/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_DA/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_DE/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_EL/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_ES/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_FI/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_FR/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_HE/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_HI/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_HU/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_ID/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_IT/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_JA/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_KO/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_NL/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_NO/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_PL/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_PT/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_RO/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_RU/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_SV/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_TH/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_TR/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_UK/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_VI/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/BLOCKED_PATTERNS_ZH/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/SECURITY_MINIMAL/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/SECURITY_MODERATE/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/SECURITY_STRICT/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/SECURITY_STRICT_MULTILINGUAL/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/allRules/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/authorityInjection/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/blockedPatterns/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/deprecated/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/emptyBlock/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/formatDiagnostic/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/formatDiagnostics/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/obfuscatedContent/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/pathTraversal/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/requiredGuards/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/requiredMetaId/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/requiredMetaSyntax/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/suspiciousUrls/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/unicodeSecurity/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/validParams/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/validPath/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/api-reference/validator/src/variables/validSemver/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/design/2026-03-20-intelligent-init-design/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/design/2026-03-20-syntax-version-validation-plan/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/design/2026-03-20-syntax-version-validation/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/design/2026-03-22-agent-discovery-migration-tooling/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/design/2026-03-22-compiler-safety-output-conflicts/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/design/2026-03-22-formatter-correctness/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/examples/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/examples/agents/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/examples/enterprise/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/examples/git-registry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/examples/minimal/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/examples/skills-and-local/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/examples/team-setup/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/ai-migration-best-practices/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/building-skills/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/ci/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/docker/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/enterprise/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/faq/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/formatter-architecture/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/import/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/inheritance/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/local-skills/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/migration/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/multi-file/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/npx-skills/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/registry/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/security/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/shared-resources/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/skill-contracts/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/user-config/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/guides/vs-manual/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/plans/2026-03-21-intelligent-init/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/cli/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/config/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/language/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/antigravity/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/claude/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/cursor/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/factory/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/gemini/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/github/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/reference/formatters/opencode/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/testing/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/testing/feature-coverage/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/v1.5/testing/parity-testing/</loc>
-         <lastmod>2026-03-23</lastmod>
+         <lastmod>2026-03-24</lastmod>
     </url>
 </urlset>
