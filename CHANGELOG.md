@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1](https://github.com/mrwogu/promptscript/compare/v1.5.0...v1.5.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* **compiler:** suppress spurious PS4001 warning for same-formatter skill collision ([28062ce](https://github.com/mrwogu/promptscript/commit/28062ce32733cdf4fc0c25a7bfcc0dbb7247c28a))
+
 ## [1.5.0](https://github.com/mrwogu/promptscript/compare/v1.4.7...v1.5.0) (2026-03-23)
 
 
