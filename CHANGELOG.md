@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0](https://github.com/mrwogu/promptscript/compare/v1.5.1...v1.6.0) (2026-03-24)
+
+
+### Features
+
+* **cli:** add auto-compilation hooks for AI tools ([#158](https://github.com/mrwogu/promptscript/issues/158)) ([d5c5eb0](https://github.com/mrwogu/promptscript/commit/d5c5eb072ca5c9a9890eee67f6326a240f986dbe))
+
 ## [1.5.1](https://github.com/mrwogu/promptscript/compare/v1.5.0...v1.5.1) (2026-03-24)
 
 
