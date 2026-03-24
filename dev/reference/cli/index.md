@@ -160,6 +160,10 @@ prs compile --verbose
 prs compile --debug
 ```
 
+Automatic compilation with hooks
+
+Instead of running `prs compile --watch` in a terminal, you can let your AI tool trigger compilation automatically. Run `prs hooks install` once to wire `prs compile` into your tool's native hook system — no manual watch process needed. See the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for details.
+
 **Available Targets:**
 
 | Target        | Output File                       | Description        |

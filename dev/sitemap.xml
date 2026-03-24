@@ -2517,6 +2517,10 @@
          <lastmod>2026-03-24</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/guides/hooks/</loc>
+         <lastmod>2026-03-24</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/guides/import/</loc>
          <lastmod>2026-03-24</lastmod>
     </url>
@@ -2582,6 +2586,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/reference/language/</loc>
+         <lastmod>2026-03-24</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/cli/hook/</loc>
+         <lastmod>2026-03-24</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/cli/hooks/</loc>
          <lastmod>2026-03-24</lastmod>
     </url>
     <url>
