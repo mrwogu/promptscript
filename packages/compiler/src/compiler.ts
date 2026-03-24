@@ -304,13 +304,22 @@ export class Compiler {
         const skillPath = `${skillBasePath}/promptscript/${skillFileName}`;
         const existingOwner = outputPathOwners.get(skillPath);
         if (existingOwner) {
-          formatWarnings.push({
-            ruleId: 'PS4001',
-            ruleName: 'output-path-collision',
-            severity: 'warning',
-            message: `Output path '${skillPath}' is already written by '${existingOwner}'. Skipping auto-injected PromptScript skill for '${formatter.name}'.`,
-            suggestion: `The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.`,
-          });
+          // If the same formatter already output the promptscript skill (e.g. via
+          // auto-discovered @skills block), silently skip — the content is identical.
+          // Only warn when a *different* formatter caused the collision.
+          if (existingOwner !== formatter.name) {
+            formatWarnings.push({
+              ruleId: 'PS4001',
+              ruleName: 'output-path-collision',
+              severity: 'warning',
+              message: `Output path '${skillPath}' is already written by '${existingOwner}'. Skipping auto-injected PromptScript skill for '${formatter.name}'.`,
+              suggestion: `The user-defined skill takes precedence. To use the bundled skill, remove the custom one or rename it.`,
+            });
+          } else {
+            this.logger.debug(
+              `  Skill path '${skillPath}' already output by '${formatter.name}' (auto-discovered). Skipping auto-injection.`
+            );
+          }
           continue;
         }
         outputPathOwners.set(skillPath, `${formatter.name}:promptscript-skill`);

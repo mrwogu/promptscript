@@ -969,7 +969,7 @@ describe('Compiler', () => {
       expect(result.outputs.has('.gemini/skills/promptscript/SKILL.md')).toBe(false);
     });
 
-    it('should warn and skip when collision with user-defined skill at same path', async () => {
+    it('should silently skip auto-injection when same formatter already output the skill', async () => {
       const ast = createTestProgram();
       const formatter: Formatter = {
         ...createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md'),
@@ -993,6 +993,36 @@ describe('Compiler', () => {
       expect(result.success).toBe(true);
       const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
       expect(skillOutput?.content).toContain('User-defined promptscript skill');
+      // Same formatter → no warning (auto-discovered skill takes precedence silently)
+      expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(false);
+    });
+
+    it('should warn when different formatter already output the skill at same path', async () => {
+      const ast = createTestProgram();
+      // First formatter outputs a skill at the path that the second formatter's
+      // auto-injection would use
+      const formatter1: Formatter = {
+        ...createMockFormatter('custom', 'CUSTOM.md'),
+        format: vi.fn(() => ({
+          path: 'CUSTOM.md',
+          content: '# Custom',
+          additionalFiles: [
+            {
+              path: '.claude/skills/promptscript/SKILL.md',
+              content: '# Custom promptscript skill',
+            },
+          ],
+        })),
+      };
+      const formatter2 = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({ formatters: [formatter1, formatter2], skillContent });
+      const result = await compiler.compile('test.prs');
+      expect(result.success).toBe(true);
+      // Different formatter → should warn
       expect(result.warnings.some((w) => w.ruleId === 'PS4001')).toBe(true);
     });
 
