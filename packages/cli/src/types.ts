@@ -206,3 +206,10 @@ export interface VendorCheckOptions {}
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ResolveCommandOptions {}
+
+/**
+ * Options for the hook command.
+ */
+export interface HookOptions {
+  action: 'pre-edit' | 'post-edit';
+}
