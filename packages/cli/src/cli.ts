@@ -23,6 +23,8 @@ import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 import { importCommand } from './commands/import.js';
 import { upgradeCommand } from './commands/upgrade.js';
+import { hookCommand } from './commands/hook.js';
+import { hooksCommand } from './commands/hooks.js';
 
 const program = new Command();
 
@@ -208,6 +210,20 @@ program
   .command('resolve <import>')
   .description('Show full resolution chain for an import path (debug)')
   .action((importPath, opts) => resolveCommand(importPath, opts));
+
+program
+  .command('hook')
+  .argument('<action>', 'Hook action: pre-edit or post-edit')
+  .description('Hook handler invoked by AI tools (not for direct use)')
+  .action(hookCommand);
+
+program
+  .command('hooks')
+  .argument('<action>', 'Action: install or uninstall')
+  .argument('[tool]', 'Tool: claude, gemini, copilot, cursor, windsurf, factory, cline')
+  .option('--all', 'Install/uninstall for all detected tools')
+  .description('Manage PromptScript hooks for AI tools')
+  .action(hooksCommand);
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);

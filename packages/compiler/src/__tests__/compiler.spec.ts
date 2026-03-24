@@ -1500,6 +1500,147 @@ describe('Compiler.watch', () => {
   });
 });
 
+describe('marker source and target metadata', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should include source and target in HTML marker for main output', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('claude', 'CLAUDE.md');
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatter],
+    });
+
+    const result = await compiler.compile('.promptscript/project.prs');
+    expect(result.success).toBe(true);
+
+    const output = result.outputs.get('CLAUDE.md');
+    expect(output).toBeDefined();
+    expect(output?.content).toContain('| source: .promptscript/project.prs');
+    expect(output?.content).toContain('| target: claude');
+  });
+
+  it('should include source and target in YAML marker for frontmatter files', async () => {
+    const ast = createTestProgram();
+
+    const formatterWithFrontmatter: Formatter = {
+      name: 'factory',
+      outputPath: '.factory/skills/commit/SKILL.md',
+      description: 'Formatter with frontmatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({
+        path: '.factory/skills/commit/SKILL.md',
+        content: '---\nname: commit\n---\n\nContent.',
+      })),
+      getSkillBasePath: () => '.factory/skills',
+      getSkillFileName: () => 'SKILL.md',
+    };
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatterWithFrontmatter],
+    });
+
+    const result = await compiler.compile('.promptscript/project.prs');
+    const output = result.outputs.get('.factory/skills/commit/SKILL.md');
+    expect(output).toBeDefined();
+    expect(output?.content).toContain('| source: .promptscript/project.prs');
+    expect(output?.content).toContain('| target: factory');
+  });
+
+  it('should include source and target in HTML marker for additional files', async () => {
+    const ast = createTestProgram();
+
+    const formatterWithAdditional: Formatter = {
+      name: 'cursor',
+      outputPath: '.cursor/rules/project.mdc',
+      description: 'Cursor formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({
+        path: '.cursor/rules/project.mdc',
+        content: '# Main',
+        additionalFiles: [{ path: '.cursor/commands/test.md', content: '# Test command' }],
+      })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+    };
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatterWithAdditional],
+    });
+
+    const result = await compiler.compile('.promptscript/project.prs');
+    const additionalOutput = result.outputs.get('.cursor/commands/test.md');
+    expect(additionalOutput).toBeDefined();
+    expect(additionalOutput?.content).toContain('| source: .promptscript/project.prs');
+    expect(additionalOutput?.content).toContain('| target: cursor');
+  });
+
+  it('should use "promptscript" as target for auto-injected skill files', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
+    const skillContent = '# PromptScript Skill\nTeaches .prs syntax.';
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = createTestCompiler({ formatters: [formatter], skillContent });
+    const result = await compiler.compile('.promptscript/project.prs');
+    expect(result.success).toBe(true);
+
+    const skillOutput = result.outputs.get('.claude/skills/promptscript/SKILL.md');
+    expect(skillOutput).toBeDefined();
+    expect(skillOutput?.content).toContain('| source: .promptscript/project.prs');
+    expect(skillOutput?.content).toContain('| target: promptscript');
+  });
+
+  it('should still detect existing markers for backward compat (no duplicate marker)', async () => {
+    const ast = createTestProgram();
+
+    const formatterWithMarker: Formatter = {
+      name: 'claude',
+      outputPath: 'CLAUDE.md',
+      description: 'Formatter that already has marker',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({
+        path: 'CLAUDE.md',
+        content:
+          '<!-- PromptScript 2026-01-01T00:00:00.000Z - do not edit -->\n\n# Existing content',
+      })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+    };
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatterWithMarker],
+    });
+
+    const result = await compiler.compile('.promptscript/project.prs');
+    const output = result.outputs.get('CLAUDE.md');
+    expect(output).toBeDefined();
+    // Should not add a second marker
+    const markerCount = (output?.content.match(/<!-- PromptScript/g) ?? []).length;
+    expect(markerCount).toBe(1);
+  });
+});
+
 describe('addMarkerToOutput edge cases', () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -25,6 +25,10 @@ vi.mock('../commands/registry/index', () => ({
   registerRegistryCommands: vi.fn(),
 }));
 
+vi.mock('../commands/hook', () => ({
+  hookCommand: vi.fn(),
+}));
+
 // Store references to mock functions for assertions
 const mockCommand = vi.fn();
 const mockName = vi.fn().mockReturnThis();
@@ -32,11 +36,13 @@ const mockDescription = vi.fn().mockReturnThis();
 const mockVersion = vi.fn().mockReturnThis();
 const mockOption = vi.fn().mockReturnThis();
 const mockHook = vi.fn().mockReturnThis();
+const mockArgument = vi.fn().mockReturnThis();
 const mockAction = vi.fn().mockReturnThis();
 const mockParse = vi.fn();
 
 // Create a chainable mock that supports nested command() calls
 const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
+  argument: mockArgument,
   description: mockDescription,
   option: mockOption,
   action: mockAction,

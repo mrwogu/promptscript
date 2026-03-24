@@ -264,6 +264,10 @@ export async function initCommand(
         }
       }
     }
+
+    ConsoleOutput.muted(
+      '\n  Tip: Run prs hooks install to set up auto-compilation hooks for your AI tools.\n'
+    );
   } catch (error) {
     if (error instanceof Error && error.name === 'ExitPromptError') {
       // User cancelled with Ctrl+C
