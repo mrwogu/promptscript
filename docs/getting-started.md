@@ -504,6 +504,28 @@ targets:
       version: frontmatter
 ```
 
+## Set Up Hooks (Optional)
+
+Once your targets are configured, install hooks so that PromptScript compiles automatically whenever a `.prs` file is saved — and so AI agents cannot accidentally overwrite generated outputs.
+
+```bash
+prs hooks install
+```
+
+PromptScript detects which AI tools are present in the project and writes the appropriate hook configuration for each one. You can also target a specific tool:
+
+```bash
+prs hooks install claude    # Claude Code only
+prs hooks install cursor    # Cursor only
+prs hooks install --all     # All supported tools
+```
+
+Supported tools: Claude Code, Factory AI, Cursor, Windsurf, Cline, Copilot, Gemini CLI.
+
+For tools that do not support hooks, use `prs compile --watch` as an alternative.
+
+See the [Hooks Guide](guides/hooks.md) for a full walkthrough, manual configuration examples, and troubleshooting.
+
 ## What's Next?
 
 <div class="ref-list">
