@@ -24,6 +24,7 @@ import { checkForUpdates, printUpdateNotification } from './utils/version-check.
 import { importCommand } from './commands/import.js';
 import { upgradeCommand } from './commands/upgrade.js';
 import { hookCommand } from './commands/hook.js';
+import { hooksCommand } from './commands/hooks.js';
 
 const program = new Command();
 
@@ -215,6 +216,14 @@ program
   .argument('<action>', 'Hook action: pre-edit or post-edit')
   .description('Hook handler invoked by AI tools (not for direct use)')
   .action(hookCommand);
+
+program
+  .command('hooks')
+  .argument('<action>', 'Action: install or uninstall')
+  .argument('[tool]', 'Tool: claude, gemini, copilot, cursor, windsurf, factory, cline')
+  .option('--all', 'Install/uninstall for all detected tools')
+  .description('Manage PromptScript hooks for AI tools')
+  .action(hooksCommand);
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);

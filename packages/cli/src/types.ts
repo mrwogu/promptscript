@@ -213,3 +213,11 @@ export interface ResolveCommandOptions {}
 export interface HookOptions {
   action: 'pre-edit' | 'post-edit';
 }
+
+/**
+ * Options for the hooks install/uninstall command.
+ */
+export interface HooksOptions {
+  /** Install/uninstall for all detected tools */
+  all?: boolean;
+}
