@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { claudeConfig } from '../claude.js';
+import { claudeConfig, isPrsHookEntry } from '../claude.js';
 
 describe('hooks/tool-configs/claudeConfig', () => {
   // --- metadata ---
@@ -183,5 +183,27 @@ describe('hooks/tool-configs/claudeConfig', () => {
     // Assert
     const typed = result as Record<string, unknown>;
     expect(typed['permissions']).toEqual({ allow: ['Bash'] });
+  });
+});
+
+describe('isPrsHookEntry', () => {
+  it('returns false for null', () => {
+    expect(isPrsHookEntry(null)).toBe(false);
+  });
+
+  it('returns false for string', () => {
+    expect(isPrsHookEntry('not an object')).toBe(false);
+  });
+
+  it('returns false when hooks is not an array', () => {
+    expect(isPrsHookEntry({ hooks: 'not array' })).toBe(false);
+  });
+
+  it('returns false for empty hooks array', () => {
+    expect(isPrsHookEntry({ hooks: [] })).toBe(false);
+  });
+
+  it('returns true when hooks contain prs hook command', () => {
+    expect(isPrsHookEntry({ hooks: [{ command: '/usr/bin/prs hook pre-edit' }] })).toBe(true);
   });
 });

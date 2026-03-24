@@ -179,4 +179,12 @@ describe('hookCommand', () => {
       expect(mockReleaseLock).toHaveBeenCalledWith(originalCwd);
     });
   });
+
+  describe('unknown action', () => {
+    it('exits 1 for unknown action', async () => {
+      await hookCommand('invalid-action', { stdin: '{"tool_input":{"file_path":"/test.ts"}}' });
+      expect(process.exitCode).toBe(1);
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('unknown action'));
+    });
+  });
 });

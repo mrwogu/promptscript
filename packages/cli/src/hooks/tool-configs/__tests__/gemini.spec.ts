@@ -170,4 +170,25 @@ describe('hooks/tool-configs/geminiConfig', () => {
     const typed = result as Record<string, unknown>;
     expect(typed['model']).toBe('gemini-pro');
   });
+
+  it('removeFromSettings handles malformed entries gracefully', () => {
+    // Arrange
+    const existing = {
+      hooks: {
+        BeforeTool: [
+          null,
+          42,
+          { hooks: 'not-array' },
+          { hooks: [{ command: '/usr/bin/prs hook pre-edit' }] },
+        ],
+      },
+    };
+
+    // Act
+    const result = geminiConfig.removeFromSettings(existing);
+    const hooks = result['hooks'] as Record<string, unknown[]>;
+
+    // Assert: prs entry removed; null, 42, and {hooks:'not-array'} are preserved
+    expect(hooks['BeforeTool']).toHaveLength(3);
+  });
 });

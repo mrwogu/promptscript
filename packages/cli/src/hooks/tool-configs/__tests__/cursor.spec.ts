@@ -157,4 +157,26 @@ describe('hooks/tool-configs/cursorConfig', () => {
     const typed = result as Record<string, unknown>;
     expect(typed['theme']).toBe('dark');
   });
+
+  it('removeFromSettings handles malformed entries gracefully', () => {
+    // Arrange
+    const existing = {
+      hooks: {
+        beforeFileEdit: [
+          null,
+          'string',
+          { command: 'not-array' },
+          { command: ['bash', '-c', '/usr/bin/prs hook pre-edit'] },
+        ],
+      },
+    };
+
+    // Act
+    const result = cursorConfig.removeFromSettings(existing);
+    const hooks = result['hooks'] as Record<string, unknown[]>;
+
+    // Assert: null, 'string', and {command:'not-array'} are preserved (not prs hooks);
+    // the prs hook entry is removed
+    expect(hooks['beforeFileEdit']).toHaveLength(3);
+  });
 });
