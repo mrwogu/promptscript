@@ -10,6 +10,8 @@ export interface ScoredSection {
   targetBlock: string;
   confidence: number;
   level: ConfidenceLevel;
+  /** Optional metadata propagated from parser. */
+  metadata?: Record<string, unknown>;
 }
 
 export function classifyConfidence(score: number): ConfidenceLevel {

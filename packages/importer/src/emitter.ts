@@ -30,6 +30,29 @@ export function emitPrs(sections: ScoredSection[], options: EmitOptions): string
       lines.push(`# REVIEW: ${headings} — verify this block classification`);
     }
 
+    if (block === 'guards') {
+      lines.push(`@guards {`);
+      for (const section of blockSections) {
+        const meta = section.metadata as Record<string, unknown> | undefined;
+        const entryName = (meta?.['entryName'] as string) ?? section.heading;
+        const applyTo = (meta?.['applyTo'] as string[]) ?? [];
+        const description = (meta?.['description'] as string) ?? `${entryName} rules`;
+        const applyToStr = applyTo.map((p) => `"${p}"`).join(', ');
+        lines.push(`  ${entryName}: {`);
+        lines.push(`    applyTo: [${applyToStr}]`);
+        lines.push(`    description: "${description}"`);
+        lines.push(`    content: """`);
+        for (const contentLine of section.content.split('\n')) {
+          lines.push(`    ${contentLine}`);
+        }
+        lines.push(`    """`);
+        lines.push(`  }`);
+      }
+      lines.push(`}`);
+      lines.push('');
+      continue;
+    }
+
     lines.push(`@${block} {`);
 
     // Merge content from all sections in this block

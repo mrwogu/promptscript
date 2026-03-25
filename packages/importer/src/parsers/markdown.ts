@@ -3,6 +3,8 @@ export interface MarkdownSection {
   level: number;
   content: string;
   rawLines: string[];
+  /** Optional metadata for specialized parsers. */
+  metadata?: Record<string, unknown>;
 }
 
 const HEADING_REGEX = /^(#{1,6})\s+(.+)$/;

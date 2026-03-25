@@ -12,6 +12,17 @@ export function mapSections(sections: MarkdownSection[]): ScoredSection[] {
 }
 
 function classifySection(section: MarkdownSection): ScoredSection {
+  if (section.metadata?.['type'] === 'instruction') {
+    return {
+      heading: section.heading,
+      content: section.content,
+      targetBlock: 'guards',
+      confidence: 0.95,
+      level: classifyConfidence(0.95),
+      metadata: section.metadata,
+    };
+  }
+
   const { heading, content } = section;
 
   // Check identity pattern in content
