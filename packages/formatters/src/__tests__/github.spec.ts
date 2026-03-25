@@ -534,6 +534,38 @@ describe('GitHubFormatter', () => {
       expect(skillFile?.content).toContain('disable-model-invocation: true');
     });
 
+    it('should emit argument-hint in skill frontmatter when specified', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy to production',
+                  argumentHint: 'feature-name (e.g. "comments", "notifications")',
+                  content: 'Deploy instructions.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/skills/deploy/SKILL.md')
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).toContain('argument-hint:');
+      expect(skillFile?.content).toContain('feature-name');
+    });
+
     it('should generate custom agent files in full mode', () => {
       const ast: Program = {
         ...createMinimalProgram(),

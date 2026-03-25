@@ -25,6 +25,8 @@ export interface MarkdownSkillConfig {
   name: string;
   /** Description */
   description: string;
+  /** Optional argument hint */
+  argumentHint?: string;
   /** Skill content/instructions */
   content: string;
   /** Resource files to copy alongside the skill file */
@@ -359,6 +361,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
         skills.push({
           name,
           description: obj['description'] ? this.valueToString(obj['description']) : name,
+          argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
           resources:
             obj['resources'] && Array.isArray(obj['resources'])
@@ -381,6 +384,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     lines.push('---');
     lines.push(`name: ${config.name}`);
     lines.push(`description: ${this.yamlString(config.description)}`);
+    if (config.argumentHint) {
+      lines.push(`argument-hint: ${this.yamlString(config.argumentHint)}`);
+    }
     lines.push('---');
     lines.push('');
 
