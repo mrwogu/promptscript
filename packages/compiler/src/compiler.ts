@@ -500,6 +500,7 @@ export class Compiler {
       outputPath: config?.output,
       version: config?.version,
       prettier: prettierOptions,
+      targetConfig: config,
     };
 
     const conventionName = config?.convention;
