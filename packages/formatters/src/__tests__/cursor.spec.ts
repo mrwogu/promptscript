@@ -753,6 +753,89 @@ describe('CursorFormatter', () => {
         expect(result.additionalFiles).toBeUndefined();
       });
 
+      it('should generate rule files from @guards named entries with applyTo', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'angular-components': {
+                    applyTo: ['apps/admin/**/*.ts', 'apps/webview/**/*.ts'],
+                    description: 'Angular component standards',
+                    content: 'Use OnPush change detection.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.additionalFiles).toBeDefined();
+        const ruleFile = result.additionalFiles?.find((f) =>
+          f.path.includes('angular-components.mdc')
+        );
+        expect(ruleFile).toBeDefined();
+        expect(ruleFile?.content).toContain('globs:');
+        expect(ruleFile?.content).toContain('apps/admin/**/*.ts');
+        expect(ruleFile?.content).toContain('apps/webview/**/*.ts');
+        expect(ruleFile?.content).toContain('Angular component standards');
+        expect(ruleFile?.content).toContain('Use OnPush change detection.');
+      });
+
+      it('should handle both globs auto-split and named entries together', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  globs: ['**/*.ts'],
+                  'api-rules': {
+                    applyTo: ['apps/api/**/*.ts'],
+                    description: 'API rules',
+                    content: 'Use DI.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+            {
+              type: 'Block',
+              name: 'standards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  typescript: { strict: 'Enable strict' },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.additionalFiles).toBeDefined();
+        const tsFile = result.additionalFiles?.find((f) => f.path.includes('typescript.mdc'));
+        const apiFile = result.additionalFiles?.find((f) => f.path.includes('api-rules.mdc'));
+        expect(tsFile).toBeDefined();
+        expect(apiFile).toBeDefined();
+        expect(apiFile?.content).toContain('Use DI.');
+      });
+
       it('should treat frontmatter version as modern', () => {
         const ast = createMinimalProgram();
         const result = formatter.format(ast, { version: 'frontmatter' });

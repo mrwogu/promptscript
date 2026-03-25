@@ -60,6 +60,8 @@ interface GlobConfig {
   name: string;
   /** Glob patterns to match */
   patterns: string[];
+  /** Custom content for named entries (overrides auto-generated content) */
+  content?: string;
   /** Description for frontmatter */
   description: string;
 }
@@ -352,6 +354,23 @@ export class CursorFormatter extends BaseFormatter {
       }
     }
 
+    // Handle named entries with applyTo patterns
+    for (const [key, value] of Object.entries(props)) {
+      if (key === 'globs') continue;
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+
+      const obj = value as Record<string, Value>;
+      const applyTo = obj['applyTo'];
+      if (!applyTo || !Array.isArray(applyTo)) continue;
+
+      globs.push({
+        name: key,
+        patterns: applyTo.map((p) => this.valueToString(p)),
+        content: obj['content'] ? this.valueToString(obj['content']) : undefined,
+        description: obj['description'] ? this.valueToString(obj['description']) : `${key} rules`,
+      });
+    }
+
     return globs;
   }
 
@@ -371,15 +390,22 @@ export class CursorFormatter extends BaseFormatter {
     ];
     sections.push(fm.join('\n'));
 
-    // Add relevant content based on file type
-    if (config.name === 'typescript') {
-      const codeStyle = this.codeStyle(ast);
-      if (codeStyle) sections.push(codeStyle);
-    }
+    // Named entries with custom content take priority
+    if (config.content) {
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      sections.push(normalizedContent);
+    } else {
+      // Auto-generated content based on file type
+      if (config.name === 'typescript') {
+        const codeStyle = this.codeStyle(ast);
+        if (codeStyle) sections.push(codeStyle);
+      }
 
-    if (config.name === 'testing') {
-      sections.push('## Testing Guidelines');
-      sections.push('Follow project testing conventions and patterns.');
+      if (config.name === 'testing') {
+        sections.push('## Testing Guidelines');
+        sections.push('Follow project testing conventions and patterns.');
+      }
     }
 
     // Only return if we have content beyond frontmatter
