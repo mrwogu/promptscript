@@ -699,6 +699,56 @@ Path-specific instruction files are only generated with `version: multifile` or 
           version: multifile
     ```
 
+#### Named Instruction Entries
+
+For projects with multiple path-specific instruction files, use named entries in `@guards` to generate individual instruction files with their own `applyTo` patterns:
+
+```promptscript
+@meta { id: "named-guards-example" syntax: "1.0.0" }
+
+@guards {
+  angular-components: {
+    applyTo: ["apps/admin/**/*.ts", "apps/webview/**/*.ts"]
+    description: "Angular component coding standards"
+    content: """
+    Use OnPush change detection for all components.
+    Always implement OnDestroy for cleanup.
+    """
+  }
+  inversify: {
+    applyTo: ["apps/api/**/*.ts"]
+    description: "InversifyJS DI coding standards"
+    content: """
+    Use constructor injection with inject decorator.
+    Register all bindings in the container module.
+    """
+  }
+}
+```
+
+Each named entry generates a separate instruction file per target:
+
+- **GitHub Copilot** (`version: multifile` or `full`): `.github/instructions/<name>.instructions.md` with `applyTo` frontmatter
+- **Factory AI** (`version: multifile` or `full`): `.factory/skills/<name>/SKILL.md` with scope info in the description
+
+Named entries support three properties:
+
+| Property      | Required | Description                                             |
+| ------------- | -------- | ------------------------------------------------------- |
+| `applyTo`     | Yes      | Array of glob patterns for file targeting               |
+| `description` | No       | Human-readable description (defaults to `<name> rules`) |
+| `content`     | No       | Full instruction content (triple-quoted markdown)       |
+
+Named entries and `globs` + `@standards` auto-split can coexist in the same `@guards` block.
+
+#### Merge Behavior with `@use`
+
+When multiple `@use`'d files contribute `@guards` blocks with named entries:
+
+- Named entries from different files are preserved as separate keys (ObjectContent deep merge)
+- If two files define the same entry name, the importing file's entry takes precedence
+- `globs` arrays are concatenated with deduplication
+
 ### @skills
 
 Define reusable skills that AI assistants can invoke:
