@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0](https://github.com/mrwogu/promptscript/compare/v1.6.1...v1.7.0) (2026-03-25)
+
+
+### Features
+
+* **core:** add guardsAsSkills and guardsSkillsListing to TargetConfig ([f0099fb](https://github.com/mrwogu/promptscript/commit/f0099fb065a97a2d77fa579df2a4613c721bcb88))
+* **formatters:** add [@guards](https://github.com/guards) named entries support to Cursor formatter ([a1d4901](https://github.com/mrwogu/promptscript/commit/a1d49018479627f666a01016457e0ef0e2be37d8))
+* **formatters:** generate Factory skills from [@guards](https://github.com/guards) named entries ([f7972d1](https://github.com/mrwogu/promptscript/commit/f7972d10472ff8027cdb645f98e7671605495ea0))
+* **importer:** import instruction files with applyTo as [@guards](https://github.com/guards) entries ([acacc41](https://github.com/mrwogu/promptscript/commit/acacc41a81b4210385f6bef92f56d1f578b6863f))
+* **resolver:** recursive skill discovery in .promptscript/skills/ ([#162](https://github.com/mrwogu/promptscript/issues/162)) ([63c2e9f](https://github.com/mrwogu/promptscript/commit/63c2e9f38901a2a6e94288d18db4431a82fcbc94))
+
+
+### Bug Fixes
+
+* **formatters:** replace glob heuristic with standards-driven categorization ([#168](https://github.com/mrwogu/promptscript/issues/168)) ([939c4c6](https://github.com/mrwogu/promptscript/commit/939c4c6866617234c007356a23c3193cd702a455))
+* **validator:** skip fenced code blocks in PS011 authority injection check ([0f03a62](https://github.com/mrwogu/promptscript/commit/0f03a62d81df72043c506f6bc835833f0447929f))
+
 ## [1.6.1](https://github.com/mrwogu/promptscript/compare/v1.6.0...v1.6.1) (2026-03-25)
 
 
