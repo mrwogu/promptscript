@@ -1,5 +1,6 @@
 import type { BlockContent } from '@promptscript/core';
 import { StandardsExtractor } from './standards-extractor.js';
+import type { StandardsEntry } from './types.js';
 import { getSectionTitle } from './types.js';
 
 export interface CategorizedGlobs {
@@ -9,7 +10,7 @@ export interface CategorizedGlobs {
   readonly description: string;
 }
 
-export const CATEGORY_GLOB_HINTS: Record<string, string[]> = {
+export const CATEGORY_GLOB_HINTS: Readonly<Record<string, readonly string[]>> = {
   // === Languages ===
   typescript: ['.ts', '.tsx', '.mts', '.cts'],
   javascript: ['.js', '.jsx', '.mjs', '.cjs'],
@@ -111,7 +112,6 @@ export class GlobCategorizer {
     const buckets = new Map<string, string[]>();
 
     for (const glob of globs) {
-      if (typeof glob !== 'string') continue;
       const winner = this.findBestMatch(glob, codeStandards);
       if (winner) {
         const existing = buckets.get(winner) ?? [];
@@ -139,7 +139,7 @@ export class GlobCategorizer {
     return results;
   }
 
-  private findBestMatch(glob: string, codeStandards: Map<string, unknown>): string | null {
+  private findBestMatch(glob: string, codeStandards: Map<string, StandardsEntry>): string | null {
     let bestCategory: string | null = null;
     let bestLength = 0;
     let bestIsPattern = false;
