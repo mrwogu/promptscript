@@ -44,6 +44,16 @@ const AUTHORITY_PATTERNS: RegExp[] = [
 ];
 
 /**
+ * Strip fenced code blocks from text before security scanning.
+ * Code examples in instructions legitimately contain phrases that match
+ * authority injection patterns (e.g., "don't flag", "skip validation").
+ * Handles indented fences (common in triple-quoted content blocks).
+ */
+function stripFencedCodeBlocks(text: string): string {
+  return text.replace(/^\s*```[\s\S]*?^\s*```/gm, '');
+}
+
+/**
  * PS011: Detect authority injection attempts in content.
  *
  * This rule identifies patterns commonly used in prompt injection attacks
@@ -60,8 +70,9 @@ export const authorityInjection: ValidationRule = {
     walkText(
       ctx.ast,
       (text, loc) => {
+        const strippedText = stripFencedCodeBlocks(text);
         for (const pattern of AUTHORITY_PATTERNS) {
-          if (pattern.test(text)) {
+          if (pattern.test(strippedText)) {
             ctx.report({
               message: `Authority injection pattern detected: ${pattern.source}`,
               location: loc,

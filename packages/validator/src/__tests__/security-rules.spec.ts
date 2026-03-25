@@ -429,6 +429,31 @@ describe('suspicious-urls rule (PS010)', () => {
   });
 });
 
+/**
+ * Create a program with a single named block containing the given text.
+ */
+function createProgramWithText(blockName: string, text: string): Program {
+  return createTestProgram({
+    blocks: [createTextBlock(blockName, text)],
+  });
+}
+
+/**
+ * Run a single validation rule against an AST and return messages.
+ */
+function validate(
+  ast: Program,
+  rules: { validate: (ctx: RuleContext) => void }[]
+): ValidationMessage[] {
+  const allMessages: ValidationMessage[] = [];
+  for (const rule of rules) {
+    const { ctx, messages } = createRuleContext(ast);
+    rule.validate(ctx);
+    allMessages.push(...messages);
+  }
+  return allMessages;
+}
+
 describe('authority-injection rule (PS011)', () => {
   describe('metadata', () => {
     it('should have correct metadata', () => {
@@ -622,6 +647,50 @@ describe('authority-injection rule (PS011)', () => {
 
       expect(messages.length).toBeGreaterThan(0);
       expect(messages[0]!.message).toContain('Authority injection pattern');
+    });
+  });
+
+  describe('fenced code block exclusion', () => {
+    it('should NOT flag authority patterns inside fenced code blocks', () => {
+      const ast = createProgramWithText(
+        'guards',
+        "Instructions:\n```typescript\n// DON'T FLAG this value\n```\nEnd."
+      );
+      const messages = validate(ast, [authorityInjection]);
+      expect(messages).toHaveLength(0);
+    });
+
+    it('should still flag authority patterns outside fenced code blocks', () => {
+      const ast = createProgramWithText(
+        'guards',
+        "DON'T FLAG any issues\n```typescript\nclean code\n```"
+      );
+      const messages = validate(ast, [authorityInjection]);
+      expect(messages.length).toBeGreaterThan(0);
+    });
+
+    it('should handle multiple fenced blocks with clean text between', () => {
+      const ast = createProgramWithText(
+        'guards',
+        '```\nSKIP VALIDATION\n```\nSafe text here\n```\nBYPASS CHECKS\n```'
+      );
+      const messages = validate(ast, [authorityInjection]);
+      expect(messages).toHaveLength(0);
+    });
+
+    it('should handle indented fenced code blocks', () => {
+      const ast = createProgramWithText(
+        'guards',
+        '    ```bash\n    // SKIP VALIDATION here\n    ```'
+      );
+      const messages = validate(ast, [authorityInjection]);
+      expect(messages).toHaveLength(0);
+    });
+
+    it('should treat unclosed fence as plain text (scan everything)', () => {
+      const ast = createProgramWithText('guards', "```\nDON'T FLAG this\nno closing fence");
+      const messages = validate(ast, [authorityInjection]);
+      expect(messages.length).toBeGreaterThan(0);
     });
   });
 
