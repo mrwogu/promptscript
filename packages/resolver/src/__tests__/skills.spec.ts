@@ -1238,6 +1238,123 @@ Content.
       expect(result).toBeDefined();
     });
 
+    it('should auto-discover skills from nested subdirectories', async () => {
+      const localPath = join(testDir, '.promptscript');
+      // Create nested structure: skills/gitnexus/gitnexus-debugging/SKILL.md
+      const nestedSkillDir = join(localPath, 'skills', 'gitnexus', 'gitnexus-debugging');
+      const nestedSkillDir2 = join(localPath, 'skills', 'gitnexus', 'gitnexus-exploring');
+      await mkdir(nestedSkillDir, { recursive: true });
+      await mkdir(nestedSkillDir2, { recursive: true });
+      await writeFile(
+        join(nestedSkillDir, 'SKILL.md'),
+        '---\ndescription: Debug with GitNexus\n---\n\nDebugging skill content.\n'
+      );
+      await writeFile(
+        join(nestedSkillDir2, 'SKILL.md'),
+        '---\ndescription: Explore with GitNexus\n---\n\nExploring skill content.\n'
+      );
+
+      const ast = createProgram([]);
+
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      const props = (skillsBlock!.content as ObjectContent).properties;
+      expect(props['gitnexus-debugging']).toBeDefined();
+      expect(props['gitnexus-exploring']).toBeDefined();
+      const skill1 = props['gitnexus-debugging'] as Record<string, unknown>;
+      const content1 = skill1['content'] as TextContent;
+      expect(content1.value).toContain('Debugging skill content.');
+      const skill2 = props['gitnexus-exploring'] as Record<string, unknown>;
+      const content2 = skill2['content'] as TextContent;
+      expect(content2.value).toContain('Exploring skill content.');
+    });
+
+    it('should prefer shallower skills over deeper ones with the same name', async () => {
+      const localPath = join(testDir, '.promptscript');
+      // Shallow: skills/my-skill/SKILL.md
+      const shallowDir = join(localPath, 'skills', 'my-skill');
+      // Deep: skills/group/my-skill/SKILL.md
+      const deepDir = join(localPath, 'skills', 'group', 'my-skill');
+      await mkdir(shallowDir, { recursive: true });
+      await mkdir(deepDir, { recursive: true });
+      await writeFile(
+        join(shallowDir, 'SKILL.md'),
+        '---\ndescription: Shallow version\n---\n\nShallow content.\n'
+      );
+      await writeFile(
+        join(deepDir, 'SKILL.md'),
+        '---\ndescription: Deep version\n---\n\nDeep content.\n'
+      );
+
+      const ast = createProgram([]);
+
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const props = (skillsBlock!.content as ObjectContent).properties;
+      const skill = props['my-skill'] as Record<string, unknown>;
+      const content = skill['content'] as TextContent;
+      expect(content.value).toContain('Shallow content.');
+    });
+
+    it('should not recurse beyond depth 3', async () => {
+      const localPath = join(testDir, '.promptscript');
+      // Create skill at depth 4: skills/a/b/c/d/deep-skill/SKILL.md
+      const deepDir = join(localPath, 'skills', 'a', 'b', 'c', 'd', 'deep-skill');
+      await mkdir(deepDir, { recursive: true });
+      await writeFile(
+        join(deepDir, 'SKILL.md'),
+        '---\ndescription: Too deep\n---\n\nShould not be found.\n'
+      );
+
+      const ast = createProgram([]);
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath
+      );
+
+      // Should not discover the skill at depth 4
+      expect(result.blocks.find((b) => b.name === 'skills')).toBeUndefined();
+    });
+
+    it('should discover skills at exactly depth 3', async () => {
+      const localPath = join(testDir, '.promptscript');
+      // Create skill at depth 3: skills/a/b/c/ok-skill/SKILL.md
+      const okDir = join(localPath, 'skills', 'a', 'b', 'c', 'ok-skill');
+      await mkdir(okDir, { recursive: true });
+      await writeFile(
+        join(okDir, 'SKILL.md'),
+        '---\ndescription: Just right depth\n---\n\nFound at depth 3.\n'
+      );
+
+      const ast = createProgram([]);
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      const props = (skillsBlock!.content as ObjectContent).properties;
+      expect(props['ok-skill']).toBeDefined();
+    });
+
     it('should skip node_modules during auto-discovery', async () => {
       const localPath = join(testDir, '.promptscript');
       const nodeModDir = join(localPath, 'skills', 'node_modules');
