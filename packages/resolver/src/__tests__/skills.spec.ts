@@ -1309,6 +1309,52 @@ Content.
       expect(content.value).toContain('Shallow content.');
     });
 
+    it('should not recurse beyond depth 3', async () => {
+      const localPath = join(testDir, '.promptscript');
+      // Create skill at depth 4: skills/a/b/c/d/deep-skill/SKILL.md
+      const deepDir = join(localPath, 'skills', 'a', 'b', 'c', 'd', 'deep-skill');
+      await mkdir(deepDir, { recursive: true });
+      await writeFile(
+        join(deepDir, 'SKILL.md'),
+        '---\ndescription: Too deep\n---\n\nShould not be found.\n'
+      );
+
+      const ast = createProgram([]);
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath
+      );
+
+      // Should not discover the skill at depth 4
+      expect(result.blocks.find((b) => b.name === 'skills')).toBeUndefined();
+    });
+
+    it('should discover skills at exactly depth 3', async () => {
+      const localPath = join(testDir, '.promptscript');
+      // Create skill at depth 3: skills/a/b/c/ok-skill/SKILL.md
+      const okDir = join(localPath, 'skills', 'a', 'b', 'c', 'ok-skill');
+      await mkdir(okDir, { recursive: true });
+      await writeFile(
+        join(okDir, 'SKILL.md'),
+        '---\ndescription: Just right depth\n---\n\nFound at depth 3.\n'
+      );
+
+      const ast = createProgram([]);
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      const props = (skillsBlock!.content as ObjectContent).properties;
+      expect(props['ok-skill']).toBeDefined();
+    });
+
     it('should skip node_modules during auto-discovery', async () => {
       const localPath = join(testDir, '.promptscript');
       const nodeModDir = join(localPath, 'skills', 'node_modules');
