@@ -392,6 +392,27 @@ Before completing a migration, verify:
 - File-specific instructions use `@guards` with globs
 - Instructions in `.github/instructions/` map to `@guards`
 
+#### Migrating `.github/instructions/*.instructions.md` Files
+
+Files in `.github/instructions/` with `applyTo` frontmatter should be migrated using **`@guards` named entries**, not `@standards` or `@context`. Each instruction file becomes a named entry under `@guards`:
+
+```promptscript
+@meta { id: "copilot-instructions-migration" syntax: "1.0.0" }
+
+@guards {
+  angular-components: {
+    applyTo: ["apps/admin/**/*.ts", "apps/webview/**/*.ts"]
+    description: "Angular component coding standards"
+    content: """
+    Use OnPush change detection for all components.
+    Always implement OnDestroy for cleanup.
+    """
+  }
+}
+```
+
+`prs import` can now detect `.github/instructions/*.instructions.md` files with `applyTo` frontmatter and convert them to named `@guards` entries automatically. Run `prs import` in your project root to let the importer discover and convert these files.
+
 ### Cursor
 
 - Rules map to `@standards` and `@restrictions`
