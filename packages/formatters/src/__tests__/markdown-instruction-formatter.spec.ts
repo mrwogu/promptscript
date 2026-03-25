@@ -342,6 +342,61 @@ describe('MarkdownInstructionFormatter', () => {
       expect(skillFile?.content).toContain('description: simple description');
     });
 
+    it('should emit argument-hint in skill frontmatter when specified', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy to production',
+                  argumentHint: '<environment>',
+                  content: 'Deploy instructions.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('SKILL.md'));
+      expect(skillFile?.content).toContain('argument-hint: <environment>');
+    });
+
+    it('should not emit argument-hint when not specified', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                test: {
+                  description: 'simple description',
+                  content: 'test content',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('SKILL.md'));
+      expect(skillFile?.content).not.toContain('argument-hint');
+    });
+
     it('should quote strings with special characters', () => {
       const ast: Program = {
         ...createMinimalProgram(),

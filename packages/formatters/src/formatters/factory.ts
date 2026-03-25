@@ -255,6 +255,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
         skills.push({
           name,
           description: obj['description'] ? this.valueToString(obj['description']) : name,
+          argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
           userInvocable: obj['userInvocable'] !== false,
           disableModelInvocation: obj['disableModelInvocation'] === true,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
@@ -287,6 +288,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     lines.push('---');
     lines.push(`name: ${skillName}`);
     lines.push(`description: ${this.yamlString(factoryConfig.description)}`);
+    if (factoryConfig.argumentHint) {
+      lines.push(`argument-hint: ${this.yamlString(factoryConfig.argumentHint)}`);
+    }
 
     // Only emit non-default values (user-invocable defaults to true)
     if (factoryConfig.userInvocable === false) {

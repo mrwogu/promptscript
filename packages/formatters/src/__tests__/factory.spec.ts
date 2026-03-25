@@ -716,6 +716,35 @@ describe('FactoryFormatter', () => {
       expect(skill?.content).toContain('disable-model-invocation: true');
     });
 
+    it('should emit argument-hint in skill frontmatter when specified', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy to production',
+                  argumentHint: '<environment>',
+                  content: 'Deploy instructions.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.find((f) => f.path.includes('deploy/SKILL.md'));
+      expect(skill).toBeDefined();
+      expect(skill?.content).toContain('argument-hint: <environment>');
+    });
+
     it('should not emit default values for user-invocable and disable-model-invocation', () => {
       const ast: Program = {
         ...createMinimalProgram(),

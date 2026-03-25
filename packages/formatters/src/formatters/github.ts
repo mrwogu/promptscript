@@ -69,6 +69,8 @@ interface SkillConfig {
   description: string;
   /** Whether to disable model invocation */
   disableModelInvocation?: boolean;
+  /** Optional argument hint */
+  argumentHint?: string;
   /** Skill content/instructions */
   content: string;
 }
@@ -533,6 +535,7 @@ export class GitHubFormatter extends BaseFormatter {
           name,
           description: obj['description'] ? this.valueToString(obj['description']) : name,
           disableModelInvocation: obj['disableModelInvocation'] === true,
+          argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
         });
       }
@@ -555,6 +558,10 @@ export class GitHubFormatter extends BaseFormatter {
     lines.push(`description: ${descQuote}${config.description}${descQuote}`);
     if (config.disableModelInvocation) {
       lines.push('disable-model-invocation: true');
+    }
+    if (config.argumentHint) {
+      const hintQuote = config.argumentHint.includes("'") ? '"' : "'";
+      lines.push(`argument-hint: ${hintQuote}${config.argumentHint}${hintQuote}`);
     }
     lines.push('---');
     lines.push('');
