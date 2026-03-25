@@ -3,6 +3,8 @@
  * Ensures parity across all formatters by centralizing extraction logic.
  */
 
+export { GlobCategorizer, CATEGORY_GLOB_HINTS } from './glob-categorizer.js';
+export type { CategorizedGlobs } from './glob-categorizer.js';
 export { StandardsExtractor } from './standards-extractor.js';
 export type {
   ConfigStandards,
