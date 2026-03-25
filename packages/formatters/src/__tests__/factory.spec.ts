@@ -1752,6 +1752,335 @@ describe('FactoryFormatter', () => {
     });
   });
 
+  describe('guards as skills', () => {
+    it('should generate skill files from @guards named entries', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  applyTo: ['**/*.spec.ts', '**/__tests__/**'],
+                  description: 'Testing rules',
+                  content: 'Use vitest for testing.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.additionalFiles).toBeDefined();
+      const skillFile = result.additionalFiles?.find(
+        (f) => f.path === '.factory/skills/testing/SKILL.md'
+      );
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).toContain('name: testing');
+      expect(skillFile?.content).toContain('Use vitest for testing.');
+    });
+
+    it('should include scope info in skill description', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  applyTo: ['**/*.spec.ts', '**/__tests__/**'],
+                  description: 'Testing rules',
+                  content: 'Use vitest.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const skillFile = result.additionalFiles?.find(
+        (f) => f.path === '.factory/skills/testing/SKILL.md'
+      );
+      expect(skillFile?.content).toContain(
+        'Testing rules (applies to: **/*.spec.ts, **/__tests__/**)'
+      );
+    });
+
+    it('should add path-specific skills listing to AGENTS.md', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  applyTo: ['**/*.spec.ts'],
+                  description: 'Testing rules',
+                  content: 'Use vitest.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.content).toContain('Path-specific Skills');
+      expect(result.content).toContain('testing');
+    });
+
+    it('should suppress listing when guardsSkillsListing is false', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  applyTo: ['**/*.spec.ts'],
+                  description: 'Testing rules',
+                  content: 'Use vitest.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { guardsSkillsListing: false },
+      });
+
+      expect(result.content).not.toContain('Path-specific Skills');
+    });
+
+    it('should not generate guard skills when guardsAsSkills is false', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  applyTo: ['**/*.spec.ts'],
+                  description: 'Testing rules',
+                  content: 'Use vitest.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { guardsAsSkills: false },
+      });
+
+      const skillFiles = result.additionalFiles?.filter((f) => f.path.includes('.factory/skills/'));
+      expect(skillFiles ?? []).toHaveLength(0);
+      expect(result.content).not.toContain('Path-specific Skills');
+    });
+
+    it('should skip guard entry that collides with @skills entry', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  description: 'Existing skill',
+                  content: 'Existing content.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                testing: {
+                  applyTo: ['**/*.spec.ts'],
+                  description: 'Guard testing rules',
+                  content: 'Guard content.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      // Should have exactly 1 skill file (from @skills, not the duplicate from @guards)
+      const skillFiles = result.additionalFiles?.filter((f) => f.path.includes('.factory/skills/'));
+      expect(skillFiles).toHaveLength(1);
+      expect(skillFiles?.[0]?.content).toContain('Existing skill');
+    });
+
+    it('should skip guard entries with unsafe names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../unsafe': {
+                  applyTo: ['**/*.ts'],
+                  description: 'Unsafe',
+                  content: 'Bad.',
+                },
+                'safe-name': {
+                  applyTo: ['**/*.ts'],
+                  description: 'Safe rule',
+                  content: 'Good.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const skillFiles = result.additionalFiles?.filter((f) => f.path.includes('.factory/skills/'));
+      expect(skillFiles).toHaveLength(1);
+      expect(skillFiles?.[0]?.path).toBe('.factory/skills/safe-name/SKILL.md');
+    });
+
+    it('should produce no output for empty @guards', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {},
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const skillFiles = result.additionalFiles?.filter((f) => f.path.includes('.factory/skills/'));
+      expect(skillFiles ?? []).toHaveLength(0);
+      expect(result.content).not.toContain('Path-specific Skills');
+    });
+
+    it('should work without @identity block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                api: {
+                  applyTo: ['**/api/**'],
+                  description: 'API rules',
+                  content: 'Validate all inputs.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      const skillFile = result.additionalFiles?.find(
+        (f) => f.path === '.factory/skills/api/SKILL.md'
+      );
+      expect(skillFile).toBeDefined();
+      expect(result.path).toBe('AGENTS.md');
+    });
+
+    it('should normalize dots to hyphens in guard skill names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'api.security': {
+                  applyTo: ['**/api/**'],
+                  description: 'API security rules',
+                  content: 'Validate inputs.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('.factory/skills/'));
+      expect(skillFile?.path).toBe('.factory/skills/api-security/SKILL.md');
+      expect(skillFile?.content).toContain('name: api-security');
+    });
+  });
+
   describe('regression: droid specModel and specReasoningEffort emission', () => {
     it('should emit specModel and specReasoningEffort keys when set', () => {
       const ast: Program = {
