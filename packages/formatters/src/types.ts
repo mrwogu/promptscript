@@ -38,6 +38,9 @@ export interface FormatOptions {
    * Prettier formatting options for markdown output.
    */
   prettier?: PrettierMarkdownOptions;
+
+  /** Full target configuration, passed through from promptscript.yaml. */
+  targetConfig?: import('@promptscript/core').TargetConfig;
 }
 
 /**

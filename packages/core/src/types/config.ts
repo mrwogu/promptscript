@@ -83,6 +83,12 @@ export interface TargetConfig {
    * @example 'legacy' | '1.0' | '2.0'
    */
   version?: string;
+
+  /** Generate skills from @guards named entries (Factory). @default true */
+  guardsAsSkills?: boolean;
+
+  /** List generated guard skills in main output file (Factory). @default true */
+  guardsSkillsListing?: boolean;
 }
 
 /**

@@ -587,6 +587,16 @@
           "type": "string",
           "description": "Target version or format variant. Use 'legacy' for deprecated formats (e.g., Cursor's .cursorrules).",
           "example": "'legacy' | '1.0' | '2.0'"
+        },
+        "guardsAsSkills": {
+          "type": "boolean",
+          "description": "Generate skills from",
+          "default": true
+        },
+        "guardsSkillsListing": {
+          "type": "boolean",
+          "description": "List generated guard skills in main output file (Factory).",
+          "default": true
         }
       },
       "additionalProperties": false,
