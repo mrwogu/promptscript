@@ -803,29 +803,52 @@ export interface NativeSkillOptions {
 }
 
 /**
- * Discover skill directories in a given base path.
+ * Discover skill directories in a given base path, recursively.
  * Each subdirectory containing a SKILL.md is considered a skill.
+ * The skill name is the immediate parent directory of SKILL.md.
+ * Shallower skills take precedence over deeper ones with the same name.
  *
  * @param basePath - Absolute path to the skills directory (e.g. .promptscript/skills/)
- * @returns Array of skill names found
+ * @returns Map of skill name → absolute directory path
  */
-async function discoverSkillDirs(basePath: string): Promise<string[]> {
-  try {
-    const entries = await readdir(basePath, { withFileTypes: true });
-    const skillNames: string[] = [];
+async function discoverSkillDirs(basePath: string): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+
+  // BFS: process all entries at each depth level before going deeper
+  const queue: Array<{ dir: string; depth: number }> = [{ dir: basePath, depth: 0 }];
+
+  while (queue.length > 0) {
+    const { dir, depth } = queue.shift()!;
+
+    let entries;
+    try {
+      entries = await readdir(dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       if (SKIP_DIRS.has(entry.name)) continue;
       if (!isSafeSkillName(entry.name)) continue;
-      const skillMd = resolve(basePath, entry.name, 'SKILL.md');
+
+      const subDir = resolve(dir, entry.name);
+      const skillMd = resolve(subDir, 'SKILL.md');
       if (await fileExists(skillMd)) {
-        skillNames.push(entry.name);
+        // Shallower skills win — only set if not already discovered
+        if (!result.has(entry.name)) {
+          result.set(entry.name, subDir);
+        }
+      }
+
+      // Queue subdirectories for later processing (but not too deep)
+      if (depth < 3) {
+        queue.push({ dir: subDir, depth: depth + 1 });
       }
     }
-    return skillNames;
-  } catch {
-    return [];
   }
+
+  return result;
 }
 
 /**
@@ -873,6 +896,9 @@ export async function resolveNativeSkills(
   const isSkillsDir = sourceDir.includes('@skills') || sourceDir.endsWith('/skills');
 
   // Auto-discover skills from local and universal directories
+  // Tracks discovered skill name → absolute directory path for later resolution
+  const discoveredSkillPaths = new Map<string, string>();
+
   if (!isSkillsDir && localPath) {
     const discoveryDirs: string[] = [resolve(localPath, 'skills')];
     if (options?.universalDir && localPath) {
@@ -881,12 +907,16 @@ export async function resolveNativeSkills(
 
     for (const dir of discoveryDirs) {
       const discovered = await discoverSkillDirs(dir);
-      for (const skillName of discovered) {
+      for (const [skillName, skillDir] of discovered) {
         // Only add if not already declared in @skills block
         if (!(skillName in updatedProperties)) {
-          logger.verbose(`Auto-discovered skill: ${skillName} (from ${dir})`);
+          logger.verbose(`Auto-discovered skill: ${skillName} (from ${skillDir})`);
           updatedProperties[skillName] = {};
           hasUpdates = true;
+        }
+        // Track the path even for explicitly declared skills so we can resolve SKILL.md
+        if (!discoveredSkillPaths.has(skillName)) {
+          discoveredSkillPaths.set(skillName, skillDir);
         }
       }
     }
@@ -935,21 +965,29 @@ export async function resolveNativeSkills(
       const basePath = sourceDir;
       skillMdPath = resolve(basePath, skillName, 'SKILL.md');
     } else {
-      // Look in local skills/ directory first, then optionally .agents/skills/ (universal),
-      // then registry @skills/
-      const localCandidate = localPath ? resolve(localPath, 'skills', skillName, 'SKILL.md') : null;
-      const universalCandidate =
-        options?.universalDir && localPath
-          ? resolve(localPath, '..', options.universalDir, 'skills', skillName, 'SKILL.md')
-          : null;
-      const registryCandidate = resolve(registryPath, '@skills', skillName, 'SKILL.md');
-
-      if (localCandidate && (await fileExists(localCandidate))) {
-        skillMdPath = localCandidate;
-      } else if (universalCandidate && (await fileExists(universalCandidate))) {
-        skillMdPath = universalCandidate;
+      // Check if we already discovered this skill's path during auto-discovery
+      const discoveredDir = discoveredSkillPaths.get(skillName);
+      if (discoveredDir) {
+        skillMdPath = resolve(discoveredDir, 'SKILL.md');
       } else {
-        skillMdPath = registryCandidate;
+        // Look in local skills/ directory first, then optionally .agents/skills/ (universal),
+        // then registry @skills/
+        const localCandidate = localPath
+          ? resolve(localPath, 'skills', skillName, 'SKILL.md')
+          : null;
+        const universalCandidate =
+          options?.universalDir && localPath
+            ? resolve(localPath, '..', options.universalDir, 'skills', skillName, 'SKILL.md')
+            : null;
+        const registryCandidate = resolve(registryPath, '@skills', skillName, 'SKILL.md');
+
+        if (localCandidate && (await fileExists(localCandidate))) {
+          skillMdPath = localCandidate;
+        } else if (universalCandidate && (await fileExists(universalCandidate))) {
+          skillMdPath = universalCandidate;
+        } else {
+          skillMdPath = registryCandidate;
+        }
       }
     }
 
