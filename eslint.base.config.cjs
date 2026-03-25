@@ -167,6 +167,7 @@ function createBaseConfig(baseDirectory) {
               'chokidar',
               'ora',
               'commander',
+              'yaml',
             ],
           },
         ],
