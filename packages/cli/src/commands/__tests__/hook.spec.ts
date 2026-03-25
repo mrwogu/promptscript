@@ -187,4 +187,25 @@ describe('hookCommand', () => {
       expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('unknown action'));
     });
   });
+
+  describe('TTY detection', () => {
+    it('exits 1 with usage message when stdin is a TTY and no internal stdin provided', async () => {
+      const originalIsTTY = process.stdin.isTTY;
+      try {
+        Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
+
+        await hookCommand('pre-edit');
+
+        expect(process.exitCode).toBe(1);
+        expect(stderrSpy).toHaveBeenCalledWith(
+          expect.stringContaining('no input received on stdin')
+        );
+      } finally {
+        Object.defineProperty(process.stdin, 'isTTY', {
+          value: originalIsTTY,
+          configurable: true,
+        });
+      }
+    });
+  });
 });

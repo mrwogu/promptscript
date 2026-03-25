@@ -15,20 +15,11 @@ export interface HooksOptions {
 
 /**
  * Resolve the path to the `prs` CLI binary.
- * Prefers the actual script path from process.argv[1] but falls back
- * to the bare command `prs` when the resolved path looks ephemeral
- * (e.g. inside node_modules/.bin or a pnpm store).
+ * Always returns the bare command `prs` so that generated hook
+ * configurations are portable across machines (different Node
+ * version managers, install locations, etc.).
  */
 function resolvePrsPath(): string {
-  const scriptPath = process.argv[1];
-  if (scriptPath && !scriptPath.includes('node_modules/.bin') && !scriptPath.includes('pnpm')) {
-    return scriptPath;
-  }
-  if (scriptPath) {
-    ConsoleOutput.warning(
-      `Detected ephemeral script path (${scriptPath}), using bare "prs" instead`
-    );
-  }
   return 'prs';
 }
 
