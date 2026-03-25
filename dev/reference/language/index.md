@@ -554,11 +554,12 @@ This generates:
 applyTo:
   - '**/*.ts'
   - '**/*.tsx'
-  - '**/*.spec.ts'
-  - '**/*.test.ts'
 ---
 
-# TypeScript-specific coding rules
+# TypeScript-specific rules
+
+- Use strict TypeScript with no any types
+- Prefer interfaces over type aliases
 ```
 
 **`.github/instructions/testing.instructions.md`:**
@@ -570,9 +571,10 @@ applyTo:
   - '**/*.test.ts'
 ---
 
-# Testing-specific rules and patterns
+# Testing-specific rules
 
-Follow project testing conventions.
+- Use Vitest for unit tests
+- Follow AAA pattern (Arrange, Act, Assert)
 ```
 
 Version Required

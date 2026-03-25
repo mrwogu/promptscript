@@ -247,21 +247,23 @@ targets:
 </code></pre></div> <!-- playground-link-start --> <p><a href="https://getpromptscript.dev/playground-dev/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEAHMArhmpi4AWgxpyATyzNVRUuRgzBcLewyFJMgIwUADA5MBfKazfcFSlcLeDBslDMAEZwksgyAFSRAPSRFFhwMnTSINFxCXCEyanp8XBoMIyZOVGx8RxwWCUgALpuru6s3FUYrGLecL6s-lhahXCM1BBoWOF+-qkAqnAwpljDjFiCACr9MADKQyPLAO4QuIKszIJtWoJ9A8kT-jIACtQwYDDUouwvYBiM8ILMAG4vC7rU5QCAYWZJEATepNXrwLAQViycY9SYyGZzABqB3hgjAzFe8lYBwu8MhdBuqQAYswoEFdoIAILMwSYLAcag9AAUjOo1DashgKUZS2FcFm1CwAEoZNCGiBnLUGJwFlp8AYyJQaPQQADaBA2PgbAqgA" target=_blank rel="noopener noreferrer"> <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground"> </a></p> <!-- playground-link-end --> <p>This generates:</p> <p><strong><code>.github/instructions/typescript.instructions.md</code>:</strong></p> <!-- output:github for="guards-applyto-example" file="instructions/typescript.instructions.md" --> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-4-1><a id=__codelineno-4-1 name=__codelineno-4-1 href=#__codelineno-4-1></a>---
 </span><span id=__span-4-2><a id=__codelineno-4-2 name=__codelineno-4-2 href=#__codelineno-4-2></a>applyTo:
 </span><span id=__span-4-3><a id=__codelineno-4-3 name=__codelineno-4-3 href=#__codelineno-4-3></a><span class=w>  </span><span class=k>-</span><span class=w> </span>&#39;**/*.ts&#39;
-</span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a><span class=w>  </span><span class=k>-</span><span class=w> </span>&#39;**/*.tsx&#39;
-</span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a><span class=w>  </span><span class=k>-</span><span class=w> </span>&#39;**/*.spec.ts&#39;
-</span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a><span class=gu>  - &#39;**/*.test.ts&#39;</span>
-</span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a><span class=gu>---</span>
+</span><span id=__span-4-4><a id=__codelineno-4-4 name=__codelineno-4-4 href=#__codelineno-4-4></a><span class=gu>  - &#39;**/*.tsx&#39;</span>
+</span><span id=__span-4-5><a id=__codelineno-4-5 name=__codelineno-4-5 href=#__codelineno-4-5></a><span class=gu>---</span>
+</span><span id=__span-4-6><a id=__codelineno-4-6 name=__codelineno-4-6 href=#__codelineno-4-6></a>
+</span><span id=__span-4-7><a id=__codelineno-4-7 name=__codelineno-4-7 href=#__codelineno-4-7></a><span class=gh># TypeScript-specific rules</span>
 </span><span id=__span-4-8><a id=__codelineno-4-8 name=__codelineno-4-8 href=#__codelineno-4-8></a>
-</span><span id=__span-4-9><a id=__codelineno-4-9 name=__codelineno-4-9 href=#__codelineno-4-9></a><span class=gh># TypeScript-specific coding rules</span>
+</span><span id=__span-4-9><a id=__codelineno-4-9 name=__codelineno-4-9 href=#__codelineno-4-9></a><span class=k>-</span><span class=w> </span>Use strict TypeScript with no any types
+</span><span id=__span-4-10><a id=__codelineno-4-10 name=__codelineno-4-10 href=#__codelineno-4-10></a><span class=k>-</span><span class=w> </span>Prefer interfaces over type aliases
 </span></code></pre></div> <!-- /output --> <p><strong><code>.github/instructions/testing.instructions.md</code>:</strong></p> <!-- output:github for="guards-applyto-example" file="instructions/testing.instructions.md" --> <div class="language-markdown highlight"><pre><span></span><code><span id=__span-5-1><a id=__codelineno-5-1 name=__codelineno-5-1 href=#__codelineno-5-1></a>---
 </span><span id=__span-5-2><a id=__codelineno-5-2 name=__codelineno-5-2 href=#__codelineno-5-2></a>applyTo:
 </span><span id=__span-5-3><a id=__codelineno-5-3 name=__codelineno-5-3 href=#__codelineno-5-3></a><span class=w>  </span><span class=k>-</span><span class=w> </span>&#39;**/*.spec.ts&#39;
 </span><span id=__span-5-4><a id=__codelineno-5-4 name=__codelineno-5-4 href=#__codelineno-5-4></a><span class=gu>  - &#39;**/*.test.ts&#39;</span>
 </span><span id=__span-5-5><a id=__codelineno-5-5 name=__codelineno-5-5 href=#__codelineno-5-5></a><span class=gu>---</span>
 </span><span id=__span-5-6><a id=__codelineno-5-6 name=__codelineno-5-6 href=#__codelineno-5-6></a>
-</span><span id=__span-5-7><a id=__codelineno-5-7 name=__codelineno-5-7 href=#__codelineno-5-7></a><span class=gh># Testing-specific rules and patterns</span>
+</span><span id=__span-5-7><a id=__codelineno-5-7 name=__codelineno-5-7 href=#__codelineno-5-7></a><span class=gh># Testing-specific rules</span>
 </span><span id=__span-5-8><a id=__codelineno-5-8 name=__codelineno-5-8 href=#__codelineno-5-8></a>
-</span><span id=__span-5-9><a id=__codelineno-5-9 name=__codelineno-5-9 href=#__codelineno-5-9></a>Follow project testing conventions.
+</span><span id=__span-5-9><a id=__codelineno-5-9 name=__codelineno-5-9 href=#__codelineno-5-9></a><span class=k>-</span><span class=w> </span>Use Vitest for unit tests
+</span><span id=__span-5-10><a id=__codelineno-5-10 name=__codelineno-5-10 href=#__codelineno-5-10></a><span class=k>-</span><span class=w> </span>Follow AAA pattern (Arrange, Act, Assert)
 </span></code></pre></div> <!-- /output --> <div class="admonition note"> <p class=admonition-title>Version Required</p> </div> <p>Path-specific instruction files are only generated with <code>version: multifile</code> or <code>version: full</code>:</p> <div class="language-text highlight"><pre><span></span><code>```yaml
 targets:
   - github:
