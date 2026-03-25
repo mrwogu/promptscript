@@ -31,6 +31,24 @@ describe('detectFormat', () => {
     expect(detectFormat('README.md')).toBe('generic');
     expect(detectFormat('unknown.txt')).toBe('generic');
   });
+
+  it('detects .github/instructions/ files as github format', () => {
+    const result = detectFormat('.github/instructions/angular.instructions.md');
+    expect(result).toBe('github');
+  });
+});
+
+describe('github parser canParse', () => {
+  it('detects applyTo frontmatter in content', () => {
+    const parser = getParser('github');
+    const content = '---\napplyTo:\n  - "src/**/*.ts"\n---\n# Rules';
+    expect(parser.canParse('some/random/file.md', content)).toBe(true);
+  });
+
+  it('returns false for empty content on unknown path', () => {
+    const parser = getParser('github');
+    expect(parser.canParse('some/random/file.md', '')).toBe(false);
+  });
 });
 
 describe('getParser', () => {

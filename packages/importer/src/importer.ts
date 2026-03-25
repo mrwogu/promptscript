@@ -31,7 +31,7 @@ export async function importFile(
 
   const format = options.format ?? detectFormat(filepath);
   const parser = getParser(format);
-  const markdownSections = parser.parse(raw);
+  const markdownSections = parser.parse(raw, filepath);
   const sections = mapSections(markdownSections);
 
   const totalConfidence =
