@@ -622,6 +622,38 @@ Use functional components with TypeScript.
 }
 ```
 
+### [@guards](https://github.com/guards "GitHub User: guards") Named Entries
+
+For projects with multiple `.github/instructions/*.instructions.md` files — each with different `applyTo` patterns — use named entries in `@guards` to preserve the one-file-per-rule-set structure:
+
+```markdown
+---
+applyTo: apps/admin/**/*.ts
+---
+
+# Angular Component Standards
+
+Use OnPush change detection for all components.
+Always implement OnDestroy for cleanup.
+```
+
+```
+@meta { id: "named-guards-migration" syntax: "1.0.0" }
+
+@guards {
+  angular-components: {
+    applyTo: ["apps/admin/**/*.ts"]
+    description: "Angular component coding standards"
+    content: """
+    Use OnPush change detection for all components.
+    Always implement OnDestroy for cleanup.
+    """
+  }
+}
+```
+
+Each named entry generates a separate `.github/instructions/<name>.instructions.md` file with the corresponding `applyTo` frontmatter. This is the recommended approach when migrating multiple instruction files — `prs import` can detect and convert these files automatically.
+
 ### [@params](https://github.com/params "GitHub User: params") Block
 
 Configurable parameters with types:
