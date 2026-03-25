@@ -82,6 +82,14 @@ describe('GlobCategorizer', () => {
       expect(result).toHaveLength(0);
     });
 
+    it('should retry matching when first occurrence fails boundary check', () => {
+      const content = makeStandardsContent({ testing: { pattern: 'AAA' } });
+      // "contest" fails boundary (letter before "test"), but ".test." later passes
+      const result = categorizer.categorize(['**/contest.test.ts'], content);
+      expect(result).toHaveLength(1);
+      expect(result[0]!.name).toBe('testing');
+    });
+
     it('should match __tests__ with path boundaries', () => {
       const content = makeStandardsContent({ testing: { pattern: 'AAA' } });
       const result = categorizer.categorize(['**/__tests__/**'], content);
