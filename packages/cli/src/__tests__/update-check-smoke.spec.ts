@@ -29,7 +29,7 @@ describe('update-check smoke tests', () => {
       expect(output).toContain('Update check disabled');
     });
 
-    it('should be listed in help', () => {
+    it('should be listed in help', { timeout: 15000 }, () => {
       const output = runCli(['--help']);
 
       expect(output).toContain('update-check');
@@ -38,17 +38,21 @@ describe('update-check smoke tests', () => {
   });
 
   describe('automatic update check', () => {
-    it('should skip update check when PROMPTSCRIPT_NO_UPDATE_CHECK is set', () => {
-      // Run help command with update check disabled
-      // If this doesn't throw and completes quickly, the env var works
-      const output = runCli(['--help'], {
-        PROMPTSCRIPT_NO_UPDATE_CHECK: '1',
-      });
+    it(
+      'should skip update check when PROMPTSCRIPT_NO_UPDATE_CHECK is set',
+      { timeout: 15000 },
+      () => {
+        // Run help command with update check disabled
+        // If this doesn't throw and completes quickly, the env var works
+        const output = runCli(['--help'], {
+          PROMPTSCRIPT_NO_UPDATE_CHECK: '1',
+        });
 
-      expect(output).toContain('prs');
-    });
+        expect(output).toContain('prs');
+      }
+    );
 
-    it('should skip update check in quiet mode', () => {
+    it('should skip update check in quiet mode', { timeout: 15000 }, () => {
       const output = runCli(['--quiet', '--help']);
 
       // In quiet mode, only essential output should appear

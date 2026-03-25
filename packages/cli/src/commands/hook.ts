@@ -95,6 +95,15 @@ export async function hookCommand(
   action: string,
   internalOpts?: HookInternalOptions
 ): Promise<void> {
+  if (internalOpts?.stdin === undefined && process.stdin.isTTY) {
+    process.exitCode = 1;
+    process.stderr.write(
+      `prs hook: no input received on stdin. This command is intended to be invoked by AI tools, not directly.\n` +
+        `Usage: echo '{"file_path":"..."}' | prs hook ${action}\n`
+    );
+    return;
+  }
+
   const raw = internalOpts?.stdin !== undefined ? internalOpts.stdin : await readStdin();
   const payload = parseInput(raw);
   if (!payload) return;
