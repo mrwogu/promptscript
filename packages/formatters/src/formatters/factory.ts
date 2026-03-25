@@ -5,7 +5,7 @@ import {
   type MarkdownCommandConfig,
   type MarkdownSkillConfig,
 } from '../markdown-instruction-formatter.js';
-import type { FormatterOutput } from '../types.js';
+import type { FormatOptions, FormatterOutput } from '../types.js';
 
 /**
  * Supported Factory AI format versions.
@@ -403,6 +403,172 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     return {
       path: `.factory/droids/${droidConfig.name}.md`,
       content: lines.join('\n') + '\n',
+    };
+  }
+
+  // ============================================================
+  // Guard Skills Extraction (Factory-specific)
+  // ============================================================
+
+  /**
+   * Extract FactorySkillConfig entries from @guards named entries that have applyTo arrays.
+   * Skips unsafe names and names that collide with existing skill names.
+   */
+  private extractGuardSkills(ast: Program, existingSkillNames: Set<string>): FactorySkillConfig[] {
+    const guardsBlock = this.findBlock(ast, 'guards');
+    if (!guardsBlock) return [];
+
+    const skills: FactorySkillConfig[] = [];
+    const props = this.getProps(guardsBlock.content);
+
+    for (const [rawName, value] of Object.entries(props)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+
+      const obj = value as Record<string, Value>;
+
+      // Only process named entries that have an applyTo array
+      if (!obj['applyTo'] || !Array.isArray(obj['applyTo'])) continue;
+
+      // Normalize dots to hyphens
+      const name = rawName.replace(/\./g, '-');
+
+      if (!this.isSafeSkillName(name)) continue;
+      if (existingSkillNames.has(name)) continue;
+
+      const applyTo = (obj['applyTo'] as Value[]).map((g) => this.valueToString(g));
+      const baseDesc = obj['description'] ? this.valueToString(obj['description']) : name;
+      const enrichedDesc =
+        applyTo.length > 0 ? `${baseDesc} (applies to: ${applyTo.join(', ')})` : baseDesc;
+
+      skills.push({
+        name,
+        description: enrichedDesc,
+        userInvocable: true,
+        disableModelInvocation: false,
+        content: obj['content'] ? this.valueToString(obj['content']) : '',
+      });
+    }
+
+    return skills;
+  }
+
+  /**
+   * Extract guard skills unless guardsAsSkills is explicitly false.
+   */
+  private maybeExtractGuardSkills(
+    ast: Program,
+    regularSkills: FactorySkillConfig[],
+    options: FormatOptions | undefined
+  ): FactorySkillConfig[] {
+    if (options?.targetConfig?.guardsAsSkills === false) return [];
+    const existingNames = new Set(regularSkills.map((s) => s.name));
+    return this.extractGuardSkills(ast, existingNames);
+  }
+
+  /**
+   * Append a "Path-specific Skills" listing section to sections when guard skills exist
+   * and guardsSkillsListing is not explicitly false.
+   */
+  private maybeAddGuardSkillsListing(
+    guardSkills: FactorySkillConfig[],
+    sections: string[],
+    options: FormatOptions | undefined
+  ): void {
+    if (guardSkills.length === 0) return;
+    if (options?.targetConfig?.guardsSkillsListing === false) return;
+
+    const lines = guardSkills.map((s) => `- **${s.name}**: ${s.description}`);
+    sections.push(`## Path-specific Skills\n\n${lines.join('\n')}\n`);
+  }
+
+  // ============================================================
+  // Multifile & Full Mode Overrides (adds guard skill extraction)
+  // ============================================================
+
+  protected override formatMultifile(ast: Program, options?: FormatOptions): FormatterOutput {
+    const renderer = this.createRenderer(options);
+    const additionalFiles: FormatterOutput[] = [];
+
+    if (this.config.hasCommands) {
+      const commands = this.extractCommands(ast);
+      for (const command of commands) {
+        additionalFiles.push(this.generateCommandFile(command));
+      }
+    }
+
+    const regularSkills: FactorySkillConfig[] = [];
+    if (this.config.hasSkills && this.config.skillsInMultifile) {
+      const skills = this.extractSkills(ast);
+      for (const skill of skills) {
+        additionalFiles.push(this.generateSkillFile(skill));
+        regularSkills.push(skill as FactorySkillConfig);
+      }
+    }
+
+    const guardSkills = this.maybeExtractGuardSkills(ast, regularSkills, options);
+    for (const skill of guardSkills) {
+      additionalFiles.push(this.generateSkillFile(skill));
+    }
+
+    // Main file content
+    const sections: string[] = [];
+    if (renderer.getConvention().name === 'markdown') {
+      sections.push(`${this.config.mainFileHeader}\n`);
+    }
+    this.addCommonSections(ast, renderer, sections);
+    this.maybeAddGuardSkillsListing(guardSkills, sections, options);
+
+    return {
+      path: this.getOutputPath(options),
+      content: sections.join('\n'),
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  protected override formatFull(ast: Program, options?: FormatOptions): FormatterOutput {
+    const renderer = this.createRenderer(options);
+    const additionalFiles: FormatterOutput[] = [];
+
+    if (this.config.hasCommands) {
+      const commands = this.extractCommands(ast);
+      for (const command of commands) {
+        additionalFiles.push(this.generateCommandFile(command));
+      }
+    }
+
+    const regularSkills: FactorySkillConfig[] = [];
+    if (this.config.hasSkills) {
+      const skills = this.extractSkills(ast);
+      for (const skill of skills) {
+        additionalFiles.push(this.generateSkillFile(skill));
+        regularSkills.push(skill as FactorySkillConfig);
+      }
+    }
+
+    const guardSkills = this.maybeExtractGuardSkills(ast, regularSkills, options);
+    for (const skill of guardSkills) {
+      additionalFiles.push(this.generateSkillFile(skill));
+    }
+
+    if (this.config.hasAgents) {
+      const agents = this.extractAgents(ast);
+      for (const agent of agents) {
+        additionalFiles.push(this.generateAgentFile(agent));
+      }
+    }
+
+    // Main file content
+    const sections: string[] = [];
+    if (renderer.getConvention().name === 'markdown') {
+      sections.push(`${this.config.mainFileHeader}\n`);
+    }
+    this.addCommonSections(ast, renderer, sections);
+    this.maybeAddGuardSkillsListing(guardSkills, sections, options);
+
+    return {
+      path: this.getOutputPath(options),
+      content: sections.join('\n'),
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
     };
   }
 
