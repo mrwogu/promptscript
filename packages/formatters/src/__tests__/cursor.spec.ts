@@ -702,6 +702,21 @@ describe('CursorFormatter', () => {
               },
               loc: createLoc(),
             },
+            {
+              type: 'Block',
+              name: 'standards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  testing: {
+                    pattern: 'AAA',
+                    coverage: '90%',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
           ],
         };
 
@@ -713,6 +728,78 @@ describe('CursorFormatter', () => {
         expect(testFile).toBeDefined();
         expect(testFile?.content).toContain('globs:');
         expect(testFile?.content).toContain('Testing-specific rules');
+        expect(testFile?.content).toContain('pattern: AAA');
+      });
+
+      it('should generate python.mdc from @standards.python + .py globs', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  globs: ['**/*.py'],
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+            {
+              type: 'Block',
+              name: 'standards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  python: {
+                    style: 'PEP 8',
+                    typing: 'Use type hints',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.additionalFiles).toBeDefined();
+
+        const pyFile = result.additionalFiles?.find((f) => f.path.includes('python.mdc'));
+        expect(pyFile).toBeDefined();
+        expect(pyFile?.content).toContain('**/*.py');
+        expect(pyFile?.content).toContain('Python-specific rules');
+        expect(pyFile?.content).toContain('PEP 8');
+      });
+
+      it('should not generate glob files when no @standards block exists', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  globs: ['**/*.ts', '**/*.py'],
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        // Filter out command files — only check for glob-based additional files
+        const globFiles = result.additionalFiles?.filter((f) => !f.path.includes('commands/'));
+        expect(globFiles ?? []).toHaveLength(0);
       });
 
       it('should not generate shortcuts.mdc in multifile mode (removed in favor of Commands section)', () => {

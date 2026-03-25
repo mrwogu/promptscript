@@ -237,13 +237,14 @@ describe('GitHubFormatter Edge Cases', () => {
         f.path.includes('.github/instructions/testing.instructions.md')
       );
       expect(testInstructionFile).toBeDefined();
-      expect(testInstructionFile?.content).toContain('Test files:');
-      expect(testInstructionFile?.content).toContain('pattern');
-      expect(testInstructionFile?.content).toContain('coverage');
-      expect(testInstructionFile?.content).toContain('fixtures');
+      // Content now comes from StandardsExtractor (bullet list format)
+      expect(testInstructionFile?.content).toContain('filePattern: *.spec.ts');
+      expect(testInstructionFile?.content).toContain('pattern: AAA');
+      expect(testInstructionFile?.content).toContain('coverage: 90');
+      expect(testInstructionFile?.content).toContain('fixtures: for parser tests');
     });
 
-    it('should return default message when no testing standards', () => {
+    it('should not generate testing file when no testing standards', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -266,14 +267,13 @@ describe('GitHubFormatter Edge Cases', () => {
       const testInstructionFile = result.additionalFiles?.find((f) =>
         f.path.includes('.github/instructions/testing.instructions.md')
       );
-      expect(testInstructionFile).toBeDefined();
-      // When no testing standards exist, the content is empty but file is still generated
-      expect(testInstructionFile?.content).toContain('Testing-specific rules and patterns');
+      // GlobCategorizer returns no results when there are no matching standards
+      expect(testInstructionFile).toBeUndefined();
     });
   });
 
-  describe('getTypeScriptInstructionContent for multifile version', () => {
-    it('should generate TypeScript instruction content with all naming fields using globs', () => {
+  describe('GlobCategorizer-driven instruction content for multifile version', () => {
+    it('should not generate typescript file when only naming standards exist (no typescript key)', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -309,13 +309,12 @@ describe('GitHubFormatter Edge Cases', () => {
       };
 
       const result = formatter.format(ast, { version: 'multifile' });
+      // GlobCategorizer matches globs to standards keys via CATEGORY_GLOB_HINTS.
+      // 'naming' has no entry in CATEGORY_GLOB_HINTS, so no instruction file is generated.
       const tsInstructionFile = result.additionalFiles?.find((f) =>
         f.path.includes('.github/instructions/typescript.instructions.md')
       );
-      expect(tsInstructionFile).toBeDefined();
-      expect(tsInstructionFile?.content).toContain('Files:');
-      expect(tsInstructionFile?.content).toContain('Classes/Interfaces:');
-      expect(tsInstructionFile?.content).toContain('Functions/Variables:');
+      expect(tsInstructionFile).toBeUndefined();
     });
   });
 

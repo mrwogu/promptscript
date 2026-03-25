@@ -1,6 +1,7 @@
 import type { Block, GithubVersion, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
+import { GlobCategorizer } from '../extractors/glob-categorizer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
 
 /**
@@ -352,34 +353,22 @@ export class GitHubFormatter extends BaseFormatter {
     const instructions: InstructionConfig[] = [];
     const props = this.getProps(guards.content);
 
-    // Handle globs property (array of patterns)
+    // Handle globs property via GlobCategorizer
     const globPatterns = props['globs'];
     if (Array.isArray(globPatterns)) {
-      // Group patterns by category
-      const tsPatterns = globPatterns.filter(
-        (p) => typeof p === 'string' && (p.includes('.ts') || p.includes('.tsx'))
-      );
-      const testPatterns = globPatterns.filter(
-        (p) =>
-          typeof p === 'string' &&
-          (p.includes('test') || p.includes('spec') || p.includes('__tests__'))
+      const standards = this.findBlock(ast, 'standards');
+      const categorizer = new GlobCategorizer(this.standardsExtractor);
+      const categorized = categorizer.categorize(
+        globPatterns.filter((p): p is string => typeof p === 'string'),
+        standards?.content ?? null
       );
 
-      if (tsPatterns.length > 0) {
+      for (const cat of categorized) {
         instructions.push({
-          name: 'typescript',
-          applyTo: tsPatterns as string[],
-          description: 'TypeScript-specific coding rules',
-          content: this.getTypeScriptInstructionContent(ast),
-        });
-      }
-
-      if (testPatterns.length > 0) {
-        instructions.push({
-          name: 'testing',
-          applyTo: testPatterns as string[],
-          description: 'Testing-specific rules and patterns',
-          content: this.getTestingInstructionContent(ast),
+          name: cat.name,
+          applyTo: cat.patterns,
+          description: cat.description,
+          content: cat.content,
         });
       }
     }
@@ -440,65 +429,6 @@ export class GitHubFormatter extends BaseFormatter {
       path: `.github/instructions/${config.name}.instructions.md`,
       content: lines.join('\n'),
     };
-  }
-
-  /**
-   * Get TypeScript instruction content from AST.
-   */
-  private getTypeScriptInstructionContent(ast: Program): string {
-    const standards = this.findBlock(ast, 'standards');
-    if (!standards) return '';
-
-    const props = this.getProps(standards.content);
-    const items: string[] = [];
-
-    // TypeScript standards
-    const ts = props['typescript'];
-    if (ts && typeof ts === 'object' && !Array.isArray(ts)) {
-      const tsObj = ts as Record<string, Value>;
-      if (tsObj['strictMode']) items.push('- Use strict TypeScript, avoid `any` types');
-      if (tsObj['useUnknown'])
-        items.push(`- Use \`unknown\` ${this.valueToString(tsObj['useUnknown'])}`);
-      if (tsObj['exports'])
-        items.push(`- ${this.capitalize(this.valueToString(tsObj['exports']))}`);
-      if (tsObj['returnTypes'])
-        items.push(`- Explicit return types ${this.valueToString(tsObj['returnTypes'])}`);
-    }
-
-    // Naming standards
-    const naming = props['naming'];
-    if (naming && typeof naming === 'object' && !Array.isArray(naming)) {
-      const n = naming as Record<string, Value>;
-      if (n['files']) items.push(`- Files: \`${this.valueToString(n['files'])}\``);
-      if (n['classes']) items.push(`- Classes/Interfaces: \`${this.valueToString(n['classes'])}\``);
-      if (n['functions'])
-        items.push(`- Functions/Variables: \`${this.valueToString(n['functions'])}\``);
-    }
-
-    return items.join('\n');
-  }
-
-  /**
-   * Get testing instruction content from AST.
-   */
-  private getTestingInstructionContent(ast: Program): string {
-    const standards = this.findBlock(ast, 'standards');
-    if (!standards) return '';
-
-    const props = this.getProps(standards.content);
-    const items: string[] = [];
-
-    const testing = props['testing'];
-    if (testing && typeof testing === 'object' && !Array.isArray(testing)) {
-      const t = testing as Record<string, Value>;
-      if (t['filePattern']) items.push(`- Test files: \`${this.valueToString(t['filePattern'])}\``);
-      if (t['pattern']) items.push(`- Follow ${this.valueToString(t['pattern'])} pattern`);
-      if (t['coverage'])
-        items.push(`- Target >${this.valueToString(t['coverage'])}% coverage for libraries`);
-      if (t['fixtures']) items.push(`- Use fixtures ${this.valueToString(t['fixtures'])}`);
-    }
-
-    return items.length > 0 ? items.join('\n') : 'Follow project testing conventions.';
   }
 
   // ============================================================
@@ -1369,9 +1299,5 @@ export class GitHubFormatter extends BaseFormatter {
       .replace(/^Never\s+/i, "Don't ");
 
     return formatted;
-  }
-
-  private capitalize(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }

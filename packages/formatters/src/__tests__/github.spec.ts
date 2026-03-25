@@ -1716,11 +1716,6 @@ describe('GitHubFormatter', () => {
                   exports: 'named exports only',
                   returnTypes: 'on public functions',
                 },
-                naming: {
-                  files: 'kebab-case.ts',
-                  classes: 'PascalCase',
-                  functions: 'camelCase',
-                },
               },
               loc: createLoc(),
             },
@@ -1734,11 +1729,49 @@ describe('GitHubFormatter', () => {
         f.path.includes('typescript.instructions.md')
       );
       expect(tsFile).toBeDefined();
-      expect(tsFile?.content).toContain('strict TypeScript');
-      expect(tsFile?.content).toContain('`unknown` with type guards');
-      expect(tsFile?.content).toContain('Named exports only');
-      expect(tsFile?.content).toContain('return types on public functions');
-      expect(tsFile?.content).toContain('Files: `kebab-case.ts`');
+      // Content now comes from StandardsExtractor (bullet list format)
+      expect(tsFile?.content).toContain('strictMode');
+      expect(tsFile?.content).toContain('useUnknown: with type guards');
+      expect(tsFile?.content).toContain('exports: named exports only');
+      expect(tsFile?.content).toContain('returnTypes: on public functions');
+    });
+
+    it('should generate python instruction file from @standards.python + .py globs', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.py'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                python: { style: 'PEP 8', typing: 'Use type hints' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const pyFile = result.additionalFiles?.find((f) => f.path.includes('python.instructions.md'));
+      expect(pyFile).toBeDefined();
+      expect(pyFile?.content).toContain('**/*.py');
+      expect(pyFile?.content).toContain('PEP 8');
     });
   });
 

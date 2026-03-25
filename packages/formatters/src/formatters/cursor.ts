@@ -1,5 +1,6 @@
 import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
+import { GlobCategorizer } from '../extractors/glob-categorizer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
 
 /**
@@ -299,12 +300,9 @@ export class CursorFormatter extends BaseFormatter {
   /**
    * Extract glob patterns from @guards block.
    *
-   * **Known limitation**: Glob patterns are re-categorized into `typescript`,
-   * `testing`, and `files` buckets using hard-coded string matching
-   * (`.ts`/`.tsx` → typescript, `test`/`spec`/`__tests__` → testing, other →
-   * files). User-defined globs that do not match these heuristics may produce
-   * confusing output. This is a medium-priority improvement tracked in
-   * docs/agent-compat/cursor-plan.md.
+   * Glob patterns are categorized using the shared {@link GlobCategorizer}
+   * which matches globs to `@standards` entries via extension/keyword hints.
+   * Only globs that match an existing `@standards` key produce output files.
    */
   private extractGlobs(ast: Program): GlobConfig[] {
     const guards = this.findBlock(ast, 'guards');
@@ -313,48 +311,27 @@ export class CursorFormatter extends BaseFormatter {
     const globs: GlobConfig[] = [];
     const props = this.getProps(guards.content);
 
-    // Handle globs property (array of patterns)
+    // Handle globs property (array of patterns) via GlobCategorizer
     const globPatterns = props['globs'];
     if (Array.isArray(globPatterns)) {
-      // Group patterns by category
-      const tsPatterns = globPatterns.filter(
-        (p) => typeof p === 'string' && (p.includes('.ts') || p.includes('.tsx'))
-      );
-      const testPatterns = globPatterns.filter(
-        (p) =>
-          typeof p === 'string' &&
-          (p.includes('test') || p.includes('spec') || p.includes('__tests__'))
-      );
-      const otherPatterns = globPatterns.filter(
-        (p) => typeof p === 'string' && !tsPatterns.includes(p) && !testPatterns.includes(p)
+      const standards = this.findBlock(ast, 'standards');
+      const categorizer = new GlobCategorizer(this.standardsExtractor);
+      const categorized = categorizer.categorize(
+        globPatterns.filter((p): p is string => typeof p === 'string'),
+        standards?.content ?? null
       );
 
-      if (tsPatterns.length > 0) {
+      for (const cat of categorized) {
         globs.push({
-          name: 'typescript',
-          patterns: tsPatterns as string[],
-          description: 'TypeScript-specific rules',
-        });
-      }
-
-      if (testPatterns.length > 0) {
-        globs.push({
-          name: 'testing',
-          patterns: testPatterns as string[],
-          description: 'Testing-specific rules',
-        });
-      }
-
-      if (otherPatterns.length > 0) {
-        globs.push({
-          name: 'files',
-          patterns: otherPatterns as string[],
-          description: 'File-specific rules',
+          name: cat.name,
+          patterns: cat.patterns,
+          content: cat.content,
+          description: cat.description,
         });
       }
     }
 
-    // Handle named entries with applyTo patterns
+    // Handle named entries with applyTo patterns (unchanged)
     for (const [key, value] of Object.entries(props)) {
       if (key === 'globs') continue;
       if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
@@ -377,7 +354,7 @@ export class CursorFormatter extends BaseFormatter {
   /**
    * Generate a glob-specific rule file.
    */
-  private generateGlobFile(ast: Program, config: GlobConfig): FormatterOutput | null {
+  private generateGlobFile(_ast: Program, config: GlobConfig): FormatterOutput | null {
     const sections: string[] = [];
 
     // Frontmatter with globs
@@ -390,22 +367,10 @@ export class CursorFormatter extends BaseFormatter {
     ];
     sections.push(fm.join('\n'));
 
-    // Named entries with custom content take priority
     if (config.content) {
       const dedentedContent = this.dedent(config.content);
       const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       sections.push(normalizedContent);
-    } else {
-      // Auto-generated content based on file type
-      if (config.name === 'typescript') {
-        const codeStyle = this.codeStyle(ast);
-        if (codeStyle) sections.push(codeStyle);
-      }
-
-      if (config.name === 'testing') {
-        sections.push('## Testing Guidelines');
-        sections.push('Follow project testing conventions and patterns.');
-      }
     }
 
     // Only return if we have content beyond frontmatter
