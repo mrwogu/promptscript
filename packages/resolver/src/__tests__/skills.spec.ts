@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { resolveNativeSkills, resolveNativeCommands } from '../skills.js';
+import { resolveNativeSkills, resolveNativeCommands, parseSkillMd } from '../skills.js';
 import { mkdir, writeFile, rm, symlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -2202,6 +2202,99 @@ Content with {{braces}} that should stay as-is.
 
       const content = skill['content'] as TextContent;
       expect(content.value).toContain('{{braces}}');
+    });
+  });
+});
+
+describe('parseSkillMd', () => {
+  describe('rawFrontmatter field', () => {
+    it('should capture raw frontmatter text when frontmatter is present', () => {
+      const input = `---
+name: my-skill
+description: Does something
+license: MIT
+---
+
+Skill body content.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.rawFrontmatter).toBe(
+        'name: my-skill\ndescription: Does something\nlicense: MIT'
+      );
+    });
+
+    it('should set rawFrontmatter to undefined when no frontmatter delimiters exist', () => {
+      const input = `# No Frontmatter
+
+Just plain content.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.rawFrontmatter).toBeUndefined();
+    });
+
+    it('should set rawFrontmatter to undefined when only opening --- exists', () => {
+      const input = `---
+name: incomplete
+No closing delimiter
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.rawFrontmatter).toBeUndefined();
+    });
+
+    it('should capture extra frontmatter fields not extracted by parseFrontmatterFields', () => {
+      const input = `---
+name: tool-skill
+description: A skill with extras
+allowed-tools: ["Read", "Grep"]
+argument-hint: <path>
+compatibility: claude-3-5
+metadata: some-value
+---
+
+Body content here.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.rawFrontmatter).toContain('allowed-tools: ["Read", "Grep"]');
+      expect(result.rawFrontmatter).toContain('argument-hint: <path>');
+      expect(result.rawFrontmatter).toContain('compatibility: claude-3-5');
+      expect(result.rawFrontmatter).toContain('metadata: some-value');
+    });
+
+    it('should capture rawFrontmatter for empty frontmatter block', () => {
+      const input = `---
+---
+
+Content here.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.rawFrontmatter).toBe('');
+    });
+
+    it('should still extract name and description alongside rawFrontmatter', () => {
+      const input = `---
+name: combined-skill
+description: Has both structured and raw fields
+license: Apache-2.0
+---
+
+Content.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.name).toBe('combined-skill');
+      expect(result.description).toBe('Has both structured and raw fields');
+      expect(result.rawFrontmatter).toContain('license: Apache-2.0');
     });
   });
 });

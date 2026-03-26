@@ -32,6 +32,7 @@ export interface ParsedSkillMd {
   params?: ParamDefinition[];
   inputs?: Record<string, SkillContractField>;
   outputs?: Record<string, SkillContractField>;
+  rawFrontmatter?: string;
 }
 
 /**
@@ -64,6 +65,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
   let params: ParamDefinition[] | undefined;
   let inputs: Record<string, SkillContractField> | undefined;
   let outputs: Record<string, SkillContractField> | undefined;
+  let rawFrontmatter: string | undefined;
   let bodyContent: string;
 
   if (frontmatterStart >= 0 && frontmatterEnd > frontmatterStart) {
@@ -74,6 +76,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     params = parsed.params;
     inputs = parsed.inputs;
     outputs = parsed.outputs;
+    rawFrontmatter = frontmatterLines.join('\n');
 
     bodyContent = lines
       .slice(frontmatterEnd + 1)
@@ -83,7 +86,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     bodyContent = content.trim();
   }
 
-  return { name, description, content: bodyContent, params, inputs, outputs };
+  return { name, description, content: bodyContent, params, inputs, outputs, rawFrontmatter };
 }
 
 /**
