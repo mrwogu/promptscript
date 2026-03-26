@@ -8,6 +8,7 @@ import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { LOCKFILE_PATH } from './lock.js';
+import { validateRemoteAccess } from '@promptscript/resolver';
 
 /**
  * Pattern to match remote source strings.
@@ -22,6 +23,22 @@ const REMOTE_SOURCE_PATTERN = /^[a-zA-Z0-9][\w.-]*\.[a-zA-Z]{2,}\/.+/;
  * occurrence of any of these directives.
  */
 const HEADER_DIRECTIVES = ['@use ', '@inherit ', '@meta '];
+
+/**
+ * Extract the base repository URL from a skill source path.
+ * Takes the first 3 path segments (host/owner/repo) and prefixes with https://.
+ *
+ * Examples:
+ *   `github.com/owner/repo/skills/name` → `https://github.com/owner/repo`
+ *   `github.com/owner/repo/path/to/skill` → `https://github.com/owner/repo`
+ */
+function extractRepoUrl(source: string): string {
+  const parts = source.replace(/^https?:\/\//, '').split('/');
+  if (parts.length >= 3) {
+    return `https://${parts[0]}/${parts[1]}/${parts[2]}`;
+  }
+  return `https://${source}`;
+}
 
 /**
  * Validate that a source string is a remote reference (not a local path).
@@ -215,6 +232,18 @@ export async function skillsAddCommand(source: string, options: SkillsAddOptions
       return;
     }
 
+    // Validate remote repository is accessible
+    spinner.text = 'Validating remote repository...';
+    const repoUrl = extractRepoUrl(source);
+    const validation = await validateRemoteAccess(repoUrl);
+
+    if (!validation.accessible) {
+      spinner.fail('Cannot reach remote repository');
+      ConsoleOutput.error(validation.error ?? `Failed to connect to ${repoUrl}`);
+      process.exitCode = 1;
+      return;
+    }
+
     // Find insertion point and insert
     const insertionPoint = findInsertionPoint(lines);
     const newLine = `@use ${source}`;
@@ -225,7 +254,7 @@ export async function skillsAddCommand(source: string, options: SkillsAddOptions
     const lockfile = await loadLockfile();
     const lockEntry: LockfileDependency = {
       version: 'latest',
-      commit: '0000000000000000000000000000000000000000',
+      commit: validation.headCommit ?? '0000000000000000000000000000000000000000',
       integrity: 'sha256-pending',
       source: 'md',
     };
