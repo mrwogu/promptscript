@@ -149,5 +149,40 @@ describe('cli', () => {
 
       expect(mockCommand).toHaveBeenCalledWith('registry');
     });
+
+    it('should register skills command group', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills']);
+
+      expect(mockCommand).toHaveBeenCalledWith('skills');
+    });
+
+    it('should register skills add subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'add']);
+
+      expect(mockCommand).toHaveBeenCalledWith('add <source>');
+    });
+
+    it('should register skills remove subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'remove']);
+
+      expect(mockCommand).toHaveBeenCalledWith('remove <name>');
+    });
+
+    it('should register skills list subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'list']);
+
+      expect(mockCommand).toHaveBeenCalledWith('list');
+    });
+
+    it('should register skills update subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'update']);
+
+      expect(mockCommand).toHaveBeenCalledWith('update [name]');
+    });
   });
 });

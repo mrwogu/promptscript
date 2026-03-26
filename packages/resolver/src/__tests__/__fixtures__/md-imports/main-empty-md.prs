@@ -1,0 +1,10 @@
+@meta {
+  id: "test-empty-md"
+  version: "1.0.0"
+}
+
+@use ./empty-skill.md
+
+@identity {
+  role: "tester"
+}

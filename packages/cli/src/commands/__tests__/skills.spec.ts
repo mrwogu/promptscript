@@ -95,6 +95,285 @@ const SAMPLE_PRS = `@meta {
 }
 `;
 
+describe('resolveEntryFile fallback paths', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+  });
+
+  it('should fail when --file points to a nonexistent file', async () => {
+    mockExistsSync.mockReturnValue(false);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: '/tmp/nonexistent.prs',
+    });
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should scan .promptscript/ for a single .prs file when no config entry', async () => {
+    mockFindConfigFile.mockReturnValue(null);
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('.promptscript') && !p.includes('.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReaddir.mockResolvedValue(['project.prs']);
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('should auto-detect project.prs when multiple .prs files exist', async () => {
+    mockFindConfigFile.mockReturnValue(null);
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('.promptscript') && !p.includes('.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReaddir.mockResolvedValue(['alpha.prs', 'project.prs', 'beta.prs']);
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('should throw when multiple .prs files and no project.prs', async () => {
+    mockFindConfigFile.mockReturnValue(null);
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('.promptscript') && !p.includes('.prs')) return true;
+      return false;
+    });
+    mockReaddir.mockResolvedValue(['alpha.prs', 'beta.prs']);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should throw when no .prs file found at all', async () => {
+    mockFindConfigFile.mockReturnValue(null);
+    mockExistsSync.mockReturnValue(false);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should fall through when config entry path does not exist', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      input: { entry: 'missing/main.prs' },
+    });
+    // Config entry path doesn't exist, .promptscript dir also doesn't exist
+    mockExistsSync.mockReturnValue(false);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should fall through when config loading throws', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockRejectedValue(new Error('bad config'));
+    mockExistsSync.mockReturnValue(false);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should scan .promptscript/ when config has no input.entry', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('.promptscript') && !p.includes('.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReaddir.mockResolvedValue(['single.prs']);
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('should handle .promptscript/ with no .prs files', async () => {
+    mockFindConfigFile.mockReturnValue(null);
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('.promptscript') && !p.includes('.prs')) return true;
+      return false;
+    });
+    mockReaddir.mockResolvedValue(['README.md', 'config.yaml']);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
+    expect(process.exitCode).toBe(1);
+  });
+});
+
+describe('loadLockfile edge cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+  });
+
+  it('should start fresh when lockfile has invalid structure', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return true;
+      return false;
+    });
+    // First call reads the .prs file, second reads an invalid lockfile
+    let readCallCount = 0;
+    mockReadFile.mockImplementation(() => {
+      readCallCount++;
+      if (readCallCount === 1) return Promise.resolve(SAMPLE_PRS);
+      // Return a valid JSON but invalid lockfile structure
+      return Promise.resolve(JSON.stringify({ wrong: 'shape' }));
+    });
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('should start fresh when lockfile read throws', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return true;
+      return false;
+    });
+    let readCallCount = 0;
+    mockReadFile.mockImplementation(() => {
+      readCallCount++;
+      if (readCallCount === 1) return Promise.resolve(SAMPLE_PRS);
+      return Promise.reject(new Error('lockfile read error'));
+    });
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+});
+
+describe('extractUsePath edge cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+  });
+
+  it('should handle @use with alias in duplicate check', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(
+      '@use github.com/org/repo/SKILL.md as myskill\n\n@identity {\n  role: "dev"\n}'
+    );
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    // Should detect the existing import even with the alias
+    expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('already imported'));
+  });
+});
+
+describe('findInsertionPoint edge cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+  });
+
+  it('should insert at line 0 when file has no header directives', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue('@identity {\n  role: "dev"\n}');
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const prsWriteCall = writeCalls.find(
+      (call) => typeof call[0] === 'string' && (call[0] as string).includes('entry.prs')
+    );
+    const writtenContent = prsWriteCall![1] as string;
+    const lines = writtenContent.split('\n');
+    // Should be inserted at line 0
+    expect(lines[0]).toBe('@use github.com/org/repo/SKILL.md');
+  });
+
+  it('should handle @meta{ without space', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    const content = '@meta{\n  id: "test"\n}\n\n@identity {\n  role: "dev"\n}';
+    mockReadFile.mockResolvedValue(content);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const prsWriteCall = writeCalls.find(
+      (call) => typeof call[0] === 'string' && (call[0] as string).includes('entry.prs')
+    );
+    const writtenContent = prsWriteCall![1] as string;
+    const lines = writtenContent.split('\n');
+    // Should insert after the closing } of meta block (line index 2)
+    const useIdx = lines.indexOf('@use github.com/org/repo/SKILL.md');
+    expect(useIdx).toBe(3); // after @meta{, id, }, then new line
+  });
+
+  it('should handle @inherit directive in header', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    const content = '@inherit ./base\n\n@identity {\n  role: "dev"\n}';
+    mockReadFile.mockResolvedValue(content);
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const prsWriteCall = writeCalls.find(
+      (call) => typeof call[0] === 'string' && (call[0] as string).includes('entry.prs')
+    );
+    const writtenContent = prsWriteCall![1] as string;
+    const lines = writtenContent.split('\n');
+    const useIdx = lines.indexOf('@use github.com/org/repo/SKILL.md');
+    const inheritIdx = lines.indexOf('@inherit ./base');
+    expect(useIdx).toBe(inheritIdx + 1);
+  });
+});
+
 describe('skillsAddCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -359,6 +638,75 @@ describe('skillsRemoveCommand', () => {
     expect(mockSucceed).toHaveBeenCalledWith('Dry run — no files modified');
     expect(mockWriteFile).not.toHaveBeenCalled();
   });
+
+  it('should handle exception during remove', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockRejectedValue(new Error('config failure'));
+
+    await skillsRemoveCommand('some-skill', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to remove skill');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should handle removal when skill path is not in lockfile', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      input: { entry: 'project.prs' },
+    });
+
+    const prsContent =
+      '@meta {\n  id: "test"\n}\n\n@use github.com/org/repo/SKILL.md\n\n@identity {\n  role: "dev"\n}\n';
+    // Lockfile exists but has no matching entry
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {},
+    });
+
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('project.prs')) return true;
+      if (p === 'promptscript.lock') return true;
+      return false;
+    });
+
+    let readCallCount = 0;
+    mockReadFile.mockImplementation(() => {
+      readCallCount++;
+      if (readCallCount === 1) return Promise.resolve(prsContent);
+      return Promise.resolve(lockContent);
+    });
+
+    await skillsRemoveCommand('github.com/org/repo/SKILL.md', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill removed');
+    // Should write the .prs file but NOT the lockfile (since no lock entry matched)
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    // Only the .prs file should be written, not the lockfile
+    expect(writeCalls.length).toBe(1);
+  });
+
+  it('should match skill by partial name', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      input: { entry: 'project.prs' },
+    });
+
+    const prsContent =
+      '@meta {\n  id: "test"\n}\n\n@use github.com/org/repo/SKILL.md\n\n@identity {\n  role: "dev"\n}\n';
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('project.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(prsContent);
+
+    // Should match by partial name 'repo/SKILL'
+    await skillsRemoveCommand('repo/SKILL', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill removed');
+  });
 });
 
 describe('skillsListCommand', () => {
@@ -412,6 +760,26 @@ describe('skillsListCommand', () => {
     await skillsListCommand();
 
     expect(mockSucceed).toHaveBeenCalledWith('Found 0 skill(s)');
+  });
+
+  it('should handle exception during list', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockRejectedValue(new Error('config load failure'));
+
+    await skillsListCommand();
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to list skills');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should handle non-Error exception during list', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockRejectedValue('string error');
+
+    await skillsListCommand();
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to list skills');
+    expect(process.exitCode).toBe(1);
   });
 });
 
@@ -522,5 +890,91 @@ describe('skillsUpdateCommand', () => {
 
     expect(mockSucceed).toHaveBeenCalledWith('Dry run — lockfile not written');
     expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('should handle exception during update', async () => {
+    // Make loadLockfile succeed first, then fail on saveLockfile
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/SKILL.md': {
+          version: 'v1.0.0',
+          commit: 'abc123',
+          integrity: 'sha256-xyz',
+          source: 'md',
+        },
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return true;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(lockContent);
+    mockWriteFile.mockRejectedValue(new Error('write failure'));
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to update skills');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should handle non-Error exception during update', async () => {
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/SKILL.md': {
+          version: 'v1.0.0',
+          commit: 'abc123',
+          integrity: 'sha256-xyz',
+          source: 'md',
+        },
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return true;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(lockContent);
+    // Simulate a non-Error throw from saveLockfile
+    mockWriteFile.mockRejectedValue('string error');
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to update skills');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should update a specific skill by name', async () => {
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/SKILL.md': {
+          version: 'v1.0.0',
+          commit: 'abc123',
+          integrity: 'sha256-xyz',
+          source: 'md',
+        },
+        'github.com/other/repo/SKILL.md': {
+          version: 'v2.0.0',
+          commit: 'def456',
+          integrity: 'sha256-abc',
+          source: 'md',
+        },
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return true;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(lockContent);
+    mockWriteFile.mockResolvedValue(undefined);
+
+    await skillsUpdateCommand('other', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Updated 1 skill(s)');
+    expect(mockWriteFile).toHaveBeenCalled();
   });
 });
