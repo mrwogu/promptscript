@@ -144,6 +144,12 @@ npm install -g @promptscript/cli
 
 </div>
 
+<div class="video-embed" style="max-width: 800px; margin: 2rem auto;">
+  <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px;">
+    <iframe src="https://www.youtube.com/embed/7sHMn-DbZig" title="PromptScript Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+  </div>
+</div>
+
 <div class="compile-demo" id="compile-demo">
   <div class="compile-demo__source">
     <div class="compile-demo__header">

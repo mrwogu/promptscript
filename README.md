@@ -60,6 +60,8 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
 
 ## See It In Action
 
+[![Watch the video](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
+
 **Source:** `.promptscript/project.prs`
 
 ```promptscript

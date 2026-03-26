@@ -6,6 +6,8 @@
 
 **One compiler. 37 AI coding agents. Zero manual syncing.**
 
+[![Watch the video](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
+
 PromptScript is the Terraform for AI instructions. Write your standards once in `.prs` files, compile to GitHub Copilot, Claude Code, Cursor, and 34 more agents - with inheritance, composition, validation, and version control built in.
 
 ---
