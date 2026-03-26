@@ -314,6 +314,16 @@ describe('valid-path rule (PS006)', () => {
       expect(isValidPath('./file')).toBe(true);
     });
 
+    it('should accept valid registry (domain-based) paths', () => {
+      expect(isValidPath('github.com/owner/repo')).toBe(true);
+      expect(isValidPath('github.com/owner/repo/path/to/file')).toBe(true);
+      expect(isValidPath('gitlab.com/my-org/my-repo')).toBe(true);
+      expect(isValidPath('github.com/owner/repo@1.0.0')).toBe(true);
+      expect(isValidPath('github.com/owner/repo@^1.0.0')).toBe(true);
+      expect(isValidPath('github.com/owner/repo/sub/path@~2.3.0')).toBe(true);
+      expect(isValidPath('my-registry.example.com/org/pkg')).toBe(true);
+    });
+
     it('should reject invalid paths', () => {
       expect(isValidPath('no-prefix')).toBe(false);
       expect(isValidPath('@')).toBe(false);
