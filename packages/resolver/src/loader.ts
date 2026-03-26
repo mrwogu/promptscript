@@ -76,7 +76,7 @@ export class FileLoader {
 
   constructor(options: LoaderOptions) {
     this.registryPath = options.registryPath;
-    this.localPath = options.localPath ?? process.cwd();
+    this.localPath = resolve(options.localPath ?? process.cwd());
     this.options = options;
   }
 
@@ -145,7 +145,14 @@ export class FileLoader {
       // Use the raw path which preserves .. and . components
       const rawPath =
         ref.raw.endsWith('.prs') || ref.raw.endsWith('.md') ? ref.raw : `${ref.raw}.prs`;
-      return resolve(dir, rawPath);
+      const resolved = resolve(dir, rawPath);
+
+      // Path traversal check: resolved path must remain under the project root (localPath)
+      if (!resolved.startsWith(this.localPath + '/') && resolved !== this.localPath) {
+        throw new Error(`Path traversal outside project root is not allowed: ${ref.raw}`);
+      }
+
+      return resolved;
     }
 
     // Registry alias path: @alias/subpath[@version]
