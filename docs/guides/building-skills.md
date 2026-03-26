@@ -326,7 +326,17 @@ Open your AI coding agent and invoke the skill. For user-invocable skills in Cla
 
 ## Publishing Skills
 
-### Share via Git
+### Share via direct import (v1.8+)
+
+Once your skill is in a public Git repository, others can import it directly using `@use` — no installer needed:
+
+```
+@use github.com/your-org/your-skills/my-skill@1.0.0
+```
+
+See [Markdown Imports](markdown-imports.md) for syntax details, version pinning, and the `prs skills` management commands.
+
+### Share via Git (npx skills)
 
 Push your skill directory to a GitHub repository. Others install it with:
 
@@ -463,6 +473,7 @@ python3 .claude/skills/stack-advisor/scripts/compare.py "react" "vue"
 
 ## See Also
 
+- [Markdown Imports](markdown-imports.md) - Import skills directly via `@use` without external tools
 - [Using npx skills](npx-skills.md) - Install open-source skills from GitHub
 - [Local Skills](local-skills.md) - Full reference for skill resolution and resource handling
 - [Skill Contracts](skill-contracts.md) - Define inputs and outputs

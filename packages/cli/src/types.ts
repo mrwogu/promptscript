@@ -221,3 +221,29 @@ export interface HooksOptions {
   /** Install/uninstall for all detected tools */
   all?: boolean;
 }
+
+/**
+ * Options for the skills add subcommand.
+ */
+export interface SkillsAddOptions {
+  /** Target .prs file to modify */
+  file?: string;
+  /** Preview changes without writing */
+  dryRun?: boolean;
+}
+
+/**
+ * Options for the skills remove subcommand.
+ */
+export interface SkillsRemoveOptions {
+  /** Preview changes without writing */
+  dryRun?: boolean;
+}
+
+/**
+ * Options for the skills update subcommand.
+ */
+export interface SkillsUpdateOptions {
+  /** Preview changes without writing */
+  dryRun?: boolean;
+}
