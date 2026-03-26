@@ -1,6 +1,6 @@
-{% extends "base.html" %} {% block announce %} <span class="announce-new">NEW</span> Import from
-Anywhere - use packages from Git repos, URL imports, and registry aliases.
-<a href="{{ 'guides/registry/' | url }}">Read the guide &rarr;</a>
+{% extends "base.html" %} {% block announce %} <span class="announce-new">NEW</span> Markdown
+Imports - import skills directly from Git repos with <code>@use</code>. No external tools needed.
+<a href="{{ 'guides/markdown-imports/' | url }}">Read the guide &rarr;</a>
 {% endblock %} {% block extrahead %} {{ super() }} {# Open Graph image - use page-specific or
 default #} {% if page.meta and page.meta.image %}
 <meta property="og:image" content="{{ page.meta.image }}" />

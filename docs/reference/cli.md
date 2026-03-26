@@ -667,6 +667,130 @@ prs update --dry-run
 
 ---
 
+### prs skills
+
+Manage markdown-imported skills. See the [Markdown Imports guide](../guides/markdown-imports.md) for full details.
+
+#### prs skills add
+
+Add a remote skill to the project. Inserts a `@use` directive into the entry `.prs` file and updates `promptscript.lock`.
+
+```bash
+prs skills add <source> [options]
+```
+
+**Arguments:**
+
+| Argument   | Description                                                           |
+| ---------- | --------------------------------------------------------------------- |
+| `<source>` | Remote skill path (e.g., `github.com/anthropics/skills/commit@1.0.0`) |
+
+**Options:**
+
+| Option              | Description                     |
+| ------------------- | ------------------------------- |
+| `-f, --file <file>` | Target `.prs` file to modify    |
+| `--dry-run`         | Preview changes without writing |
+
+**Examples:**
+
+```bash
+# Add a versioned skill
+prs skills add github.com/anthropics/skills/commit@1.0.0
+
+# Add a skill directory (auto-discovers SKILL.md)
+prs skills add github.com/repo/skills/gitnexus
+
+# Add to a specific .prs file
+prs skills add github.com/anthropics/skills/commit@1.0.0 --file .promptscript/team.prs
+
+# Preview what would change
+prs skills add github.com/anthropics/skills/commit@1.0.0 --dry-run
+```
+
+#### prs skills remove
+
+Remove a skill from the project. Removes the matching `@use` line and its lock entry.
+
+```bash
+prs skills remove <name> [options]
+```
+
+**Arguments:**
+
+| Argument | Description                                               |
+| -------- | --------------------------------------------------------- |
+| `<name>` | Skill name or path fragment to match against `@use` lines |
+
+**Options:**
+
+| Option      | Description                     |
+| ----------- | ------------------------------- |
+| `--dry-run` | Preview changes without writing |
+
+**Examples:**
+
+```bash
+# Remove by full path
+prs skills remove github.com/anthropics/skills/commit@1.0.0
+
+# Remove by partial match
+prs skills remove commit
+
+# Preview removal
+prs skills remove commit --dry-run
+```
+
+#### prs skills list
+
+List all skills imported in the current project via `@use` directives.
+
+```bash
+prs skills list
+```
+
+**Examples:**
+
+```bash
+# Show all imported skills
+prs skills list
+```
+
+#### prs skills update
+
+Update lock entries for markdown-sourced skills. Resets lock pins so the next `prs compile` re-resolves to the latest matching versions.
+
+```bash
+prs skills update [name] [options]
+```
+
+**Arguments:**
+
+| Argument | Description                                                   |
+| -------- | ------------------------------------------------------------- |
+| `[name]` | Specific skill to update (partial match). Omit to update all. |
+
+**Options:**
+
+| Option      | Description                     |
+| ----------- | ------------------------------- |
+| `--dry-run` | Preview changes without writing |
+
+**Examples:**
+
+```bash
+# Update all markdown-sourced skills
+prs skills update
+
+# Update a specific skill
+prs skills update github.com/anthropics/skills/commit
+
+# Preview updates
+prs skills update --dry-run
+```
+
+---
+
 ### prs vendor
 
 Manage the vendor directory for offline builds. Vendor mode copies all lockfile-resolved dependencies into `.promptscript/vendor/`.
