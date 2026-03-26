@@ -295,7 +295,7 @@ async function writeOutputs(
       const existingWithoutMarker = stripMarkers(existingContent);
       const newWithoutMarker = stripMarkers(output.content);
 
-      if (existingWithoutMarker === newWithoutMarker) {
+      if (!options.force && existingWithoutMarker === newWithoutMarker) {
         // Content unchanged - skip writing to preserve original timestamp
         ConsoleOutput.unchanged(outputPath);
         result.unchanged.push(outputPath);
@@ -321,7 +321,7 @@ async function writeOutputs(
       // Can't read file — fall through to overwrite protection
     }
 
-    if (contentMatches) {
+    if (!options.force && contentMatches) {
       ConsoleOutput.unchanged(outputPath);
       result.unchanged.push(outputPath);
       continue;

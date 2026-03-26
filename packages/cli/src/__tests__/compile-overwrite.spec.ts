@@ -827,6 +827,71 @@ describe('compile command - overwrite protection', () => {
     });
   });
 
+  describe('--force with unchanged files', () => {
+    it('should rewrite PromptScript-generated files even when content is unchanged', async () => {
+      const newContent = `${PROMPTSCRIPT_HTML_MARKER}\n\n# Title\n\nSame content`;
+      const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', newContent)]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('project.prs')) return true;
+        if (path.includes('CLAUDE.md')) return true;
+        return false;
+      });
+
+      // Existing file has different timestamp but same body content
+      const existingContent = `<!-- PromptScript 2023-06-15T12:00:00.000Z - do not edit -->\n\n# Title\n\nSame content`;
+      mockReadFile.mockResolvedValue(existingContent);
+
+      await compileCommand({ force: true }, mockServices);
+
+      // --force should rewrite the file even though body content is unchanged
+      expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), newContent, 'utf-8');
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('✓'));
+    });
+
+    it('should rewrite non-marker files even when content matches', async () => {
+      const resourceContent = 'import os\nprint("hello")\n';
+      const outputs = new Map([
+        ['skills/myskill/helper.py', createMockOutput('skills/myskill/helper.py', resourceContent)],
+      ]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('project.prs')) return true;
+        if (path.includes('helper.py')) return true;
+        return false;
+      });
+
+      // Identical content on disk
+      mockReadFile.mockResolvedValue(resourceContent);
+
+      await compileCommand({ force: true }, mockServices);
+
+      // --force should rewrite the file even though content is identical
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        resolve('skills/myskill/helper.py'),
+        resourceContent,
+        'utf-8'
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('✓'));
+    });
+  });
+
   describe('dry-run with unchanged detection', () => {
     it('should show unchanged status in dry-run mode', async () => {
       const content = `${PROMPTSCRIPT_HTML_MARKER}\n\nSame content`;
