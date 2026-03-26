@@ -58,8 +58,15 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
 
-    const skillMdPath = resolve(dir, entry.name, 'SKILL.md');
-    if (!(await fileExists(skillMdPath))) continue;
+    let skillMdPath = resolve(dir, entry.name, 'SKILL.md');
+    if (!(await fileExists(skillMdPath))) {
+      const dirnameMdPath = resolve(dir, entry.name, `${entry.name}.md`);
+      if (await fileExists(dirnameMdPath)) {
+        skillMdPath = dirnameMdPath;
+      } else {
+        continue;
+      }
+    }
 
     try {
       const raw = await readFile(skillMdPath, 'utf-8');

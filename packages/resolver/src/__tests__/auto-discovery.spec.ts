@@ -188,4 +188,72 @@ describe('discoverNativeContent', () => {
     const contextBlock = result!.blocks.find((b) => b.name === 'context');
     expect(contextBlock).toBeUndefined();
   });
+
+  it('should discover <dirname>.md as fallback when SKILL.md is absent', async () => {
+    const { mkdtemp, mkdir, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-dirname-'));
+
+    try {
+      // Create a skill directory with <dirname>.md instead of SKILL.md
+      const skillDir = resolve(tmpDir, 'my-skill');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        resolve(skillDir, 'my-skill.md'),
+        '---\nname: my-skill\ndescription: My skill via dirname convention\n---\n\n# My Skill\n\nDoes something useful.'
+      );
+
+      const result = await discoverNativeContent(tmpDir);
+      expect(result).not.toBeNull();
+
+      const skillsBlock = result!.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      expect(skillsBlock!.content.type).toBe('ObjectContent');
+
+      const content = skillsBlock!.content as ObjectContent;
+      expect(content.properties).toHaveProperty('my-skill');
+
+      const skill = content.properties['my-skill'] as Record<string, unknown>;
+      expect(skill['description']).toBe('My skill via dirname convention');
+
+      const skillContent = skill['content'] as TextContent;
+      expect(skillContent.type).toBe('TextContent');
+      expect(skillContent.value).toContain('Does something useful');
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should prefer SKILL.md over <dirname>.md when both exist', async () => {
+    const { mkdtemp, mkdir, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-prefer-'));
+
+    try {
+      const skillDir = resolve(tmpDir, 'my-skill');
+      await mkdir(skillDir, { recursive: true });
+
+      // Create both SKILL.md and my-skill.md
+      await writeFile(
+        resolve(skillDir, 'SKILL.md'),
+        '---\nname: my-skill\ndescription: From SKILL.md\n---\n\n# SKILL.md Content'
+      );
+      await writeFile(
+        resolve(skillDir, 'my-skill.md'),
+        '---\nname: my-skill\ndescription: From dirname.md\n---\n\n# Dirname Content'
+      );
+
+      const result = await discoverNativeContent(tmpDir);
+      expect(result).not.toBeNull();
+
+      const skillsBlock = result!.blocks.find((b) => b.name === 'skills');
+      const content = skillsBlock!.content as ObjectContent;
+      const skill = content.properties['my-skill'] as Record<string, unknown>;
+
+      // SKILL.md wins
+      expect(skill['description']).toBe('From SKILL.md');
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });
