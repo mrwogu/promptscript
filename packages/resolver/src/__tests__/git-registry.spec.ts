@@ -112,6 +112,31 @@ describe('GitRegistry', () => {
       expect(content).toContain('name = "base"');
     });
 
+    it('should fetch a .md file without appending .prs', async () => {
+      // Arrange — mock clone to create directory structure with a .md file
+      mockGit.clone.mockImplementation(async (_url: string, targetPath: string) => {
+        await fs.mkdir(targetPath, { recursive: true });
+        await fs.mkdir(join(targetPath, '.git'), { recursive: true });
+        await fs.mkdir(join(targetPath, '@company'), { recursive: true });
+        await fs.writeFile(
+          join(targetPath, '@company', 'SKILL.md'),
+          '---\nname: my-skill\n---\nSkill body'
+        );
+      });
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      // Act — fetch with explicit .md extension
+      const content = await registry.fetch('@company/SKILL.md');
+
+      // Assert — should read the .md file directly, not look for SKILL.md.prs
+      expect(content).toContain('name: my-skill');
+      expect(content).toContain('Skill body');
+    });
+
     it('should fetch a file with version tag', async () => {
       const registry = new GitRegistry({
         url: 'https://github.com/org/repo.git',

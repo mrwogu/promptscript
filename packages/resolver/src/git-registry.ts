@@ -578,7 +578,7 @@ export class GitRegistry implements Registry {
     let cleanPath = relativePath;
 
     // Add .prs extension if not present and path doesn't end with /
-    if (!cleanPath.endsWith('.prs') && !cleanPath.endsWith('/')) {
+    if (!cleanPath.endsWith('.prs') && !cleanPath.endsWith('.md') && !cleanPath.endsWith('/')) {
       cleanPath += '.prs';
     }
 
