@@ -391,4 +391,122 @@ describe('discoverNativeContent', () => {
       await rm(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('should recognize root-level SKILL.md as a skill entry', async () => {
+    // Arrange
+    const { mkdtemp, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-root-skill-'));
+
+    try {
+      await writeFile(
+        resolve(tmpDir, 'SKILL.md'),
+        '---\nname: brainstorming\ndescription: Structured brainstorming technique\n---\n\n# Brainstorming\n\nUse divergent thinking.'
+      );
+
+      // Act
+      const result = await discoverNativeContent(tmpDir);
+
+      // Assert
+      expect(result).not.toBeNull();
+
+      const skillsBlock = result!.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      expect(skillsBlock!.content.type).toBe('ObjectContent');
+
+      const content = skillsBlock!.content as ObjectContent;
+      expect(content.properties).toHaveProperty('brainstorming');
+
+      const skill = content.properties['brainstorming'] as Record<string, unknown>;
+      expect(skill['description']).toBe('Structured brainstorming technique');
+
+      const skillContent = skill['content'] as TextContent;
+      expect(skillContent.type).toBe('TextContent');
+      expect(skillContent.value).toContain('Use divergent thinking.');
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should use directory basename as skill name when root SKILL.md has no name in frontmatter', async () => {
+    // Arrange
+    const { mkdtemp, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-root-noname-'));
+
+    try {
+      await writeFile(
+        resolve(tmpDir, 'SKILL.md'),
+        '---\ndescription: A skill without a name field\n---\n\n# Content here'
+      );
+
+      // Act
+      const result = await discoverNativeContent(tmpDir);
+
+      // Assert
+      expect(result).not.toBeNull();
+
+      const skillsBlock = result!.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+
+      const content = skillsBlock!.content as ObjectContent;
+
+      // The key should be the basename of tmpDir (e.g. "prs-autodiscovery-root-noname-XXXXX")
+      const { basename: pathBasename } = await import('path');
+      const expectedName = pathBasename(tmpDir);
+      expect(content.properties).toHaveProperty(expectedName);
+
+      const skill = content.properties[expectedName] as Record<string, unknown>;
+      expect(skill['description']).toBe('A skill without a name field');
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should discover both root-level SKILL.md and subdirectory skills together', async () => {
+    // Arrange
+    const { mkdtemp, mkdir, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-root-and-sub-'));
+
+    try {
+      // Root SKILL.md
+      await writeFile(
+        resolve(tmpDir, 'SKILL.md'),
+        '---\nname: root-skill\ndescription: Root level skill\n---\n\n# Root Skill\n\nRoot content.'
+      );
+
+      // Subdirectory skill
+      const subSkillDir = resolve(tmpDir, 'sub-skill');
+      await mkdir(subSkillDir, { recursive: true });
+      await writeFile(
+        resolve(subSkillDir, 'SKILL.md'),
+        '---\nname: sub-skill\ndescription: Subdirectory skill\n---\n\n# Sub Skill\n\nSub content.'
+      );
+
+      // Act
+      const result = await discoverNativeContent(tmpDir);
+
+      // Assert
+      expect(result).not.toBeNull();
+
+      const skillsBlock = result!.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      expect(skillsBlock!.content.type).toBe('ObjectContent');
+
+      const content = skillsBlock!.content as ObjectContent;
+
+      // Both skills should be present
+      expect(content.properties).toHaveProperty('root-skill');
+      expect(content.properties).toHaveProperty('sub-skill');
+
+      const rootSkill = content.properties['root-skill'] as Record<string, unknown>;
+      expect(rootSkill['description']).toBe('Root level skill');
+
+      const subSkill = content.properties['sub-skill'] as Record<string, unknown>;
+      expect(subSkill['description']).toBe('Subdirectory skill');
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });
