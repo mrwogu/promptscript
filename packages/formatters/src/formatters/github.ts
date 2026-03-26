@@ -73,6 +73,8 @@ interface SkillConfig {
   argumentHint?: string;
   /** Skill content/instructions */
   content: string;
+  /** Raw frontmatter from source SKILL.md for pass-through */
+  rawFrontmatter?: string;
 }
 
 /**
@@ -537,6 +539,8 @@ export class GitHubFormatter extends BaseFormatter {
           disableModelInvocation: obj['disableModelInvocation'] === true,
           argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
+          rawFrontmatter:
+            typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
         });
       }
     }
@@ -552,16 +556,20 @@ export class GitHubFormatter extends BaseFormatter {
 
     // YAML frontmatter
     lines.push('---');
-    lines.push(`name: ${config.name}`);
-    // Use double quotes if description contains apostrophe, single quotes otherwise
-    const descQuote = config.description.includes("'") ? '"' : "'";
-    lines.push(`description: ${descQuote}${config.description}${descQuote}`);
-    if (config.disableModelInvocation) {
-      lines.push('disable-model-invocation: true');
-    }
-    if (config.argumentHint) {
-      const hintQuote = config.argumentHint.includes("'") ? '"' : "'";
-      lines.push(`argument-hint: ${hintQuote}${config.argumentHint}${hintQuote}`);
+    if (config.rawFrontmatter) {
+      lines.push(config.rawFrontmatter);
+    } else {
+      lines.push(`name: ${config.name}`);
+      // Use double quotes if description contains apostrophe, single quotes otherwise
+      const descQuote = config.description.includes("'") ? '"' : "'";
+      lines.push(`description: ${descQuote}${config.description}${descQuote}`);
+      if (config.disableModelInvocation) {
+        lines.push('disable-model-invocation: true');
+      }
+      if (config.argumentHint) {
+        const hintQuote = config.argumentHint.includes("'") ? '"' : "'";
+        lines.push(`argument-hint: ${hintQuote}${config.argumentHint}${hintQuote}`);
+      }
     }
     lines.push('---');
     lines.push('');

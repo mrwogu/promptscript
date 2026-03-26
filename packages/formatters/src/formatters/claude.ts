@@ -65,6 +65,8 @@ interface ClaudeSkillConfig {
   content: string;
   /** Resource files to copy alongside SKILL.md */
   resources?: Array<{ relativePath: string; content: string }>;
+  /** Raw frontmatter from source SKILL.md for pass-through */
+  rawFrontmatter?: string;
 }
 
 /**
@@ -493,6 +495,8 @@ export class ClaudeFormatter extends BaseFormatter {
                   content: r['content'] as string,
                 }))
               : undefined,
+          rawFrontmatter:
+            typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
         });
       }
     }
@@ -508,33 +512,37 @@ export class ClaudeFormatter extends BaseFormatter {
 
     // YAML frontmatter (use quotes compatible with Prettier)
     lines.push('---');
-    lines.push(`name: '${config.name}'`);
-    // Use double quotes if description contains apostrophe, single quotes otherwise
-    const descQuote = config.description.includes("'") ? '"' : "'";
-    lines.push(`description: ${descQuote}${config.description}${descQuote}`);
-    if (config.context) {
-      lines.push(`context: ${config.context}`);
-    }
-    if (config.agent) {
-      lines.push(`agent: ${config.agent}`);
-    }
-    if (config.allowedTools && config.allowedTools.length > 0) {
-      lines.push('allowed-tools:');
-      for (const tool of config.allowedTools) {
-        lines.push(`  - ${tool}`);
+    if (config.rawFrontmatter) {
+      lines.push(config.rawFrontmatter);
+    } else {
+      lines.push(`name: '${config.name}'`);
+      // Use double quotes if description contains apostrophe, single quotes otherwise
+      const descQuote = config.description.includes("'") ? '"' : "'";
+      lines.push(`description: ${descQuote}${config.description}${descQuote}`);
+      if (config.context) {
+        lines.push(`context: ${config.context}`);
       }
-    }
-    if (config.userInvocable) {
-      lines.push('user-invocable: true');
-    }
-    if (config.disableModelInvocation) {
-      lines.push('disable-model-invocation: true');
-    }
-    if (config.argumentHint) {
-      lines.push(`argument-hint: '${config.argumentHint}'`);
-    }
-    if (config.model) {
-      lines.push(`model: ${config.model}`);
+      if (config.agent) {
+        lines.push(`agent: ${config.agent}`);
+      }
+      if (config.allowedTools && config.allowedTools.length > 0) {
+        lines.push('allowed-tools:');
+        for (const tool of config.allowedTools) {
+          lines.push(`  - ${tool}`);
+        }
+      }
+      if (config.userInvocable) {
+        lines.push('user-invocable: true');
+      }
+      if (config.disableModelInvocation) {
+        lines.push('disable-model-invocation: true');
+      }
+      if (config.argumentHint) {
+        lines.push(`argument-hint: '${config.argumentHint}'`);
+      }
+      if (config.model) {
+        lines.push(`model: ${config.model}`);
+      }
     }
     lines.push('---');
     lines.push('');

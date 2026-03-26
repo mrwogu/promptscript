@@ -31,6 +31,8 @@ export interface MarkdownSkillConfig {
   content: string;
   /** Resource files to copy alongside the skill file */
   resources?: Array<{ relativePath: string; content: string }>;
+  /** Raw frontmatter from source SKILL.md for pass-through */
+  rawFrontmatter?: string;
 }
 
 /**
@@ -370,6 +372,8 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
                   content: r['content'] as string,
                 }))
               : undefined,
+          rawFrontmatter:
+            typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
         });
       }
     }
@@ -382,10 +386,14 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     // YAML frontmatter
     lines.push('---');
-    lines.push(`name: ${config.name}`);
-    lines.push(`description: ${this.yamlString(config.description)}`);
-    if (config.argumentHint) {
-      lines.push(`argument-hint: ${this.yamlString(config.argumentHint)}`);
+    if (config.rawFrontmatter) {
+      lines.push(config.rawFrontmatter);
+    } else {
+      lines.push(`name: ${config.name}`);
+      lines.push(`description: ${this.yamlString(config.description)}`);
+      if (config.argumentHint) {
+        lines.push(`argument-hint: ${this.yamlString(config.argumentHint)}`);
+      }
     }
     lines.push('---');
     lines.push('');

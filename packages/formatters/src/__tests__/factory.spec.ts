@@ -777,6 +777,42 @@ describe('FactoryFormatter', () => {
       expect(skill?.content).not.toContain('disable-model-invocation');
     });
 
+    it('should use raw frontmatter pass-through when __rawFrontmatter is present', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'test-skill': {
+                  description: 'A test skill',
+                  userInvocable: false,
+                  disableModelInvocation: true,
+                  content: 'Test content.',
+                  __rawFrontmatter:
+                    'name: test-skill\ndescription: A test skill\nuser-invocable: false\ndisable-model-invocation: true\ncustom-field: preserved',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.[0];
+      expect(skill).toBeDefined();
+      // Should use raw frontmatter instead of reconstructing
+      expect(skill?.content).toContain('custom-field: preserved');
+      expect(skill?.content).toContain('description: A test skill');
+      // Verify frontmatter delimiters wrap raw content
+      expect(skill?.content).toMatch(/^---\n.*custom-field: preserved.*\n---/s);
+    });
+
     it('should emit allowed-tools in YAML frontmatter', () => {
       const ast: Program = {
         ...createMinimalProgram(),

@@ -397,6 +397,41 @@ describe('MarkdownInstructionFormatter', () => {
       expect(skillFile?.content).not.toContain('argument-hint');
     });
 
+    it('should use raw frontmatter pass-through when __rawFrontmatter is present', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy to production',
+                  argumentHint: '<environment>',
+                  content: 'Deploy instructions.',
+                  __rawFrontmatter:
+                    'name: deploy\ndescription: Deploy to production\nargument-hint: <environment>\ncustom-field: preserved',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('SKILL.md'));
+      expect(skillFile).toBeDefined();
+      // Should use raw frontmatter instead of reconstructing
+      expect(skillFile?.content).toContain('custom-field: preserved');
+      expect(skillFile?.content).toContain('description: Deploy to production');
+      // Verify frontmatter delimiters wrap raw content
+      expect(skillFile?.content).toMatch(/^---\n.*custom-field: preserved.*\n---/s);
+    });
+
     it('should quote strings with special characters', () => {
       const ast: Program = {
         ...createMinimalProgram(),
