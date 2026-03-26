@@ -11,6 +11,7 @@ const {
   mockWriteFile,
   mockReadFile,
   mockReaddir,
+  mockValidateRemoteAccess,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -29,6 +30,10 @@ const {
   const mockWriteFile = vi.fn().mockResolvedValue(undefined);
   const mockReadFile = vi.fn();
   const mockReaddir = vi.fn();
+  const mockValidateRemoteAccess = vi.fn().mockResolvedValue({
+    accessible: true,
+    headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
+  });
   return {
     mockSucceed,
     mockFail,
@@ -40,6 +45,7 @@ const {
     mockWriteFile,
     mockReadFile,
     mockReaddir,
+    mockValidateRemoteAccess,
   };
 });
 
@@ -73,6 +79,10 @@ vi.mock('fs/promises', () => ({
 vi.mock('yaml', () => ({
   parse: (s: string) => JSON.parse(s),
   stringify: (o: unknown) => JSON.stringify(o),
+}));
+
+vi.mock('@promptscript/resolver', () => ({
+  validateRemoteAccess: mockValidateRemoteAccess,
 }));
 
 import {
@@ -540,6 +550,91 @@ describe('skillsAddCommand', () => {
 
     expect(mockFail).toHaveBeenCalledWith('Failed to add skill');
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should fail with network error when remote is unreachable', async () => {
+    // Arrange
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: false,
+      error: 'Could not resolve host: github.com',
+    });
+
+    // Act
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    // Assert
+    expect(mockFail).toHaveBeenCalledWith('Cannot reach remote repository');
+    expect(process.exitCode).toBe(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('should use real commit hash when remote is accessible', async () => {
+    // Arrange
+    const realCommit = 'deadbeef12345678901234567890123456789012';
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: realCommit,
+    });
+
+    // Act
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    // Assert
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const lockWriteCall = writeCalls.find((call) => call[0] === 'promptscript.lock');
+    expect(lockWriteCall).toBeDefined();
+    const lockContent = JSON.parse(lockWriteCall![1] as string) as {
+      dependencies: Record<string, { commit: string }>;
+    };
+    expect(lockContent.dependencies['github.com/org/repo/SKILL.md']?.commit).toBe(realCommit);
+  });
+
+  it('should fall back to zero hash when headCommit is undefined', async () => {
+    // Arrange
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: undefined,
+    });
+
+    // Act
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    // Assert
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const lockWriteCall = writeCalls.find((call) => call[0] === 'promptscript.lock');
+    expect(lockWriteCall).toBeDefined();
+    const lockContent = JSON.parse(lockWriteCall![1] as string) as {
+      dependencies: Record<string, { commit: string }>;
+    };
+    expect(lockContent.dependencies['github.com/org/repo/SKILL.md']?.commit).toBe(
+      '0000000000000000000000000000000000000000'
+    );
   });
 });
 
