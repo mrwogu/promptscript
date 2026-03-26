@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3](https://github.com/mrwogu/promptscript/compare/v1.8.2...v1.8.3) (2026-03-26)
+
+
+### Bug Fixes
+
+* **compiler:** use relative paths in generated file markers ([#178](https://github.com/mrwogu/promptscript/issues/178)) ([8fdeaea](https://github.com/mrwogu/promptscript/commit/8fdeaea35630c44410b448708df6e69662e9da5a))
+
 ## [1.8.2](https://github.com/mrwogu/promptscript/compare/v1.8.1...v1.8.2) (2026-03-26)
 
 
