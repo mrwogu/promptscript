@@ -9,6 +9,7 @@ import {
   GitAuthError,
   GitRefNotFoundError,
   createGitRegistry,
+  validateRemoteAccess,
 } from '../git-registry.js';
 
 // Define mock object at module level
@@ -19,6 +20,7 @@ const mockGit = {
   reset: vi.fn().mockResolvedValue(undefined),
   revparse: vi.fn().mockResolvedValue('abc123def456'),
   env: vi.fn().mockReturnThis(),
+  listRemote: vi.fn().mockResolvedValue(''),
 };
 
 // Mock simple-git
@@ -42,6 +44,7 @@ describe('GitRegistry', () => {
     mockGit.reset.mockResolvedValue(undefined);
     mockGit.revparse.mockResolvedValue('abc123def456');
     mockGit.env.mockReturnThis();
+    mockGit.listRemote.mockResolvedValue('');
 
     // Create unique temp directories for each test
     const testId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -607,5 +610,85 @@ describe('GitRegistry', () => {
       });
       expect(registry).toBeInstanceOf(GitRegistry);
     });
+  });
+});
+
+describe('validateRemoteAccess', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGit.listRemote.mockResolvedValue('');
+  });
+
+  it('should return accessible: true with commit hash when ls-remote succeeds', async () => {
+    // Arrange
+    const lsRemoteOutput = [
+      'abc123def456789012345678901234567890abcd\tHEAD',
+      'abc123def456789012345678901234567890abcd\trefs/heads/main',
+    ].join('\n');
+    mockGit.listRemote.mockResolvedValue(lsRemoteOutput);
+
+    // Act
+    const result = await validateRemoteAccess('https://github.com/org/repo.git');
+
+    // Assert
+    expect(result.accessible).toBe(true);
+    expect(result.headCommit).toBe('abc123def456789012345678901234567890abcd');
+    expect(result.error).toBeUndefined();
+  });
+
+  it('should return accessible: true with main branch commit when HEAD line absent', async () => {
+    // Arrange — no HEAD line, only refs/heads/main
+    const lsRemoteOutput = 'deadbeef1234567890123456789012345678abcd\trefs/heads/main\n';
+    mockGit.listRemote.mockResolvedValue(lsRemoteOutput);
+
+    // Act
+    const result = await validateRemoteAccess('https://github.com/org/repo.git');
+
+    // Assert
+    expect(result.accessible).toBe(true);
+    expect(result.headCommit).toBe('deadbeef1234567890123456789012345678abcd');
+  });
+
+  it('should return accessible: false with auth error message for authentication failures', async () => {
+    // Arrange
+    mockGit.listRemote.mockRejectedValue(
+      new Error('Authentication failed: could not read from remote repository')
+    );
+
+    // Act
+    const result = await validateRemoteAccess('https://github.com/org/private.git');
+
+    // Assert
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Authentication failed');
+    expect(result.error).toContain('https://github.com/org/private.git');
+    expect(result.error).toContain('personal access token');
+  });
+
+  it('should return accessible: false with auth error message for 403 responses', async () => {
+    // Arrange
+    mockGit.listRemote.mockRejectedValue(new Error('remote: HTTP 403 Forbidden'));
+
+    // Act
+    const result = await validateRemoteAccess('https://github.com/org/repo.git');
+
+    // Assert
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Authentication failed');
+    expect(result.error).toContain('personal access token');
+  });
+
+  it('should return accessible: false with network error for connection failures', async () => {
+    // Arrange
+    mockGit.listRemote.mockRejectedValue(new Error('getaddrinfo ENOTFOUND github.com'));
+
+    // Act
+    const result = await validateRemoteAccess('https://github.com/org/repo.git');
+
+    // Assert
+    expect(result.accessible).toBe(false);
+    expect(result.error).toContain('Failed to reach');
+    expect(result.error).toContain('https://github.com/org/repo.git');
+    expect(result.error).toContain('network');
   });
 });

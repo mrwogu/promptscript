@@ -778,3 +778,64 @@ function satisfiesRange(v: SemverParts, range: string): boolean {
 export function createGitRegistry(options: GitRegistryOptions): GitRegistry {
   return new GitRegistry(options);
 }
+
+/**
+ * Result of validating remote repository accessibility.
+ */
+export interface RemoteValidation {
+  /** Whether the remote repository is accessible */
+  accessible: boolean;
+  /** HEAD or default branch commit hash (only present when accessible) */
+  headCommit?: string;
+  /** Error message describing why the repository is not accessible */
+  error?: string;
+}
+
+/**
+ * Validate that a remote Git repository is accessible via `git ls-remote`.
+ *
+ * Use this before writing a lockfile entry to catch auth/network problems early
+ * and surface actionable error messages rather than failing silently at clone time.
+ *
+ * @param repoUrl - Repository URL to check (HTTPS or SSH)
+ * @returns RemoteValidation result with accessibility status and optional commit hash
+ */
+export async function validateRemoteAccess(repoUrl: string): Promise<RemoteValidation> {
+  const git = simpleGit();
+  try {
+    const result = await git.listRemote([repoUrl]);
+
+    // Parse HEAD commit from ls-remote output
+    const lines = result.split('\n').filter(Boolean);
+    const headLine = lines.find((l) => l.endsWith('\tHEAD'));
+    const mainLine = lines.find((l) => l.includes('refs/heads/main'));
+    const masterLine = lines.find((l) => l.includes('refs/heads/master'));
+    const commitLine = headLine ?? mainLine ?? masterLine ?? lines[0];
+    const commitHash = commitLine?.split('\t')[0]?.trim();
+
+    return {
+      accessible: true,
+      headCommit: commitHash && /^[0-9a-f]{40}$/.test(commitHash) ? commitHash : undefined,
+    };
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const msg = error.message.toLowerCase();
+
+    if (
+      msg.includes('authentication') ||
+      msg.includes('could not read from remote') ||
+      msg.includes('403') ||
+      msg.includes('401')
+    ) {
+      return {
+        accessible: false,
+        error: `Authentication failed for ${repoUrl}. If behind a firewall/VPN, configure a GitHub personal access token.`,
+      };
+    }
+
+    return {
+      accessible: false,
+      error: `Failed to reach ${repoUrl}: ${error.message}. Check your network connection and VPN settings.`,
+    };
+  }
+}
