@@ -1682,6 +1682,89 @@ describe('addMarkerToOutput edge cases', () => {
   });
 });
 
+describe('marker uses relative source path', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should convert absolute entryPath to relative in HTML marker', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('claude', 'CLAUDE.md');
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatter],
+    });
+
+    // Pass an absolute path (simulating what the CLI does)
+    const absolutePath = `${process.cwd()}/.promptscript/project.prs`;
+    const result = await compiler.compile(absolutePath);
+    expect(result.success).toBe(true);
+
+    const output = result.outputs.get('CLAUDE.md');
+    expect(output).toBeDefined();
+    // Should contain relative path, NOT absolute
+    expect(output?.content).toContain('| source: .promptscript/project.prs');
+    expect(output?.content).not.toContain(process.cwd());
+  });
+
+  it('should convert absolute entryPath to relative in YAML marker', async () => {
+    const ast = createTestProgram();
+
+    const formatterWithFrontmatter: Formatter = {
+      name: 'factory',
+      outputPath: '.factory/skills/commit/SKILL.md',
+      description: 'Formatter with frontmatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({
+        path: '.factory/skills/commit/SKILL.md',
+        content: '---\nname: commit\n---\n\nContent.',
+      })),
+      getSkillBasePath: () => '.factory/skills',
+      getSkillFileName: () => 'SKILL.md',
+    };
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatterWithFrontmatter],
+    });
+
+    const absolutePath = `${process.cwd()}/.promptscript/project.prs`;
+    const result = await compiler.compile(absolutePath);
+    expect(result.success).toBe(true);
+
+    const output = result.outputs.get('.factory/skills/commit/SKILL.md');
+    expect(output).toBeDefined();
+    expect(output?.content).toContain('| source: .promptscript/project.prs');
+    expect(output?.content).not.toContain(process.cwd());
+  });
+
+  it('should keep already-relative paths unchanged', async () => {
+    const ast = createTestProgram();
+    const formatter = createMockFormatter('claude', 'CLAUDE.md');
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatter],
+    });
+
+    const result = await compiler.compile('.promptscript/project.prs');
+    expect(result.success).toBe(true);
+
+    const output = result.outputs.get('CLAUDE.md');
+    expect(output?.content).toContain('| source: .promptscript/project.prs');
+  });
+});
+
 describe('compile with non-Error thrown in resolver', () => {
   beforeEach(() => {
     vi.clearAllMocks();

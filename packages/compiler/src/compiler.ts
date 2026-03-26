@@ -2,6 +2,7 @@ import { noopLogger, type Logger, type PSError } from '@promptscript/core';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { Resolver, type ResolvedAST } from '@promptscript/resolver';
 import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
+import { relative, isAbsolute } from 'path';
 import type {
   CompilerOptions,
   CompileResult,
@@ -152,6 +153,10 @@ export class Compiler {
       totalTime: 0,
     };
 
+    // Compute a relative source label for markers so absolute user paths
+    // are never leaked into generated output files.
+    const sourceLabel = isAbsolute(entryPath) ? relative(process.cwd(), entryPath) : entryPath;
+
     // Stage 1: Resolve
     this.logger.verbose('=== Stage 1: Resolve ===');
     const startResolve = Date.now();
@@ -252,7 +257,7 @@ export class Compiler {
         outputPathOwners.set(output.path, formatter.name);
 
         // Add PromptScript marker to all outputs for overwrite detection
-        outputs.set(output.path, addMarkerToOutput(output, entryPath, formatter.name));
+        outputs.set(output.path, addMarkerToOutput(output, sourceLabel, formatter.name));
 
         // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
         // Recursively collect nested additionalFiles (e.g., skill resource files)
@@ -282,7 +287,7 @@ export class Compiler {
 
             outputs.set(
               additionalFile.path,
-              addMarkerToOutput(additionalFile, entryPath, formatter.name)
+              addMarkerToOutput(additionalFile, sourceLabel, formatter.name)
             );
             if (additionalFile.additionalFiles) {
               queue.push(...additionalFile.additionalFiles);
@@ -335,7 +340,7 @@ export class Compiler {
           path: skillPath,
           content: this.options.skillContent,
         };
-        outputs.set(skillPath, addMarkerToOutput(skillOutput, entryPath, 'promptscript'));
+        outputs.set(skillPath, addMarkerToOutput(skillOutput, sourceLabel, 'promptscript'));
         this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);
       }
     }
