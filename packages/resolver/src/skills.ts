@@ -1035,6 +1035,10 @@ export async function resolveNativeSkills(
             : parsed.description;
         }
 
+        if (parsed.rawFrontmatter) {
+          updatedSkill['__rawFrontmatter'] = parsed.rawFrontmatter;
+        }
+
         // Discover resource files alongside SKILL.md
         const skillDir = dirname(skillMdPath);
         const resources = await discoverSkillResources(skillDir, logger);
