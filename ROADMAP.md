@@ -34,76 +34,47 @@
 - [x] **Example gallery** (10 examples from beginner to advanced)
 - [x] **Config panel** for target/formatting settings
 
+### Parameterized Inheritance
+
+**Goal:** Enable reusable, configurable rule templates through parameterized inheritance.
+
+- [x] **Basic parameters** — `(key: value)` syntax, string interpolation `{{var}}` in `@inherit`, `@use`, and `@skills`
+- [x] **Type validation** — Validate param types at compile time (PS009 for `@params`, PS015 for `@skills`)
+
+### 37 AI Agent Formatters
+
+**Goal:** Support all major AI coding assistants — **done.**
+
+GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, Gemini CLI, Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI, Cortex, Crush, Command Code, Kode, MCPJam, Mistral Vibe, Mux, OpenHands, Pi, Qoder, Qwen Code, Zencoder, Neovate, Pochi, AdaL, iFlow, OpenClaw, CodeBuddy.
+
+### Remote Git Registry
+
+**Goal:** Share configs via Git repositories.
+
+- [x] Git repository as registry (public and private)
+- [x] Registry aliases with three-level merge (system > user > project)
+- [x] Go-style URL imports (`@use github.com/org/repo/@path`)
+- [x] Lockfile (`promptscript.lock`) for reproducible builds
+- [x] Vendor mode (`prs vendor sync/check`) for offline/air-gapped CI
+- [x] Auto-discovery of SKILL.md, agents, commands from repos without .prs files
+- [x] Private repo auth via SSH keys and GITHUB_TOKEN
+
+### Docker & CI/CD
+
+- [x] **Docker container** — Pre-built image with PromptScript CLI ([Docker guide](docs/guides/docker.md))
+- [x] **`prs upgrade`** — Update syntax version with automatic migrations
+- [x] **`prs migrate`** — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
+
 ---
 
 ## 🎯 Current Focus
 
-### Parameterized Inheritance (Variables in `@inherit` / `@use`)
+### Parameterized Inheritance — Advanced Features
 
-**Goal:** Enable reusable, configurable rule templates through parameterized inheritance.
+**Goal:** Complete the template system with conditionals and loops.
 
-**Problem:** Currently, when you `@inherit` or `@use` a file, you get everything as-is. If you want variations (e.g., different project names, languages, strictness levels), you need to create multiple near-duplicate files.
-
-**Proposed Syntax:**
-
-```prs
-# Passing parameters to inherited/used files
-@inherit @stacks/typescript-lib(project: "my-app", runtime: "node20")
-
-@use @core/security(level: "strict", auditFrequency: "weekly")
-@use @core/testing(framework: "vitest", coverage: 90)
-```
-
-```prs
-# Defining parameters in the template (with defaults)
-@meta {
-  name: "typescript-lib"
-  params: {
-    project: string
-    runtime: string = "node18"
-    strictMode?: boolean = true
-  }
-}
-
-@project {
-  name: {{project}}
-  runtime: {{runtime}}
-}
-
-@typescript {
-  {{#if strictMode}}
-  strict: true
-  noImplicitAny: true
-  {{/if}}
-}
-```
-
-**Key Design Decisions:**
-
-| Aspect                 | Proposal                                   | Rationale                                          |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------- |
-| Parameter syntax       | `(key: value, ...)`                        | Familiar from function calls, clean inline         |
-| Variable interpolation | `{{variable}}`                             | Distinguishable from other syntax, Handlebars-like |
-| Conditionals           | `{{#if var}}...{{/if}}`                    | Enables conditional sections based on params       |
-| Defaults               | `param: type = defaultValue`               | Standard default value syntax                      |
-| Required vs optional   | `param: type` vs `param?: type`            | TypeScript-like conventions                        |
-| Type constraints       | `string`, `number`, `boolean`, `enum(...)` | Reuse existing type system                         |
-
-**Use Cases:**
-
-1. **Multi-team templates** — Same base with team-specific project names
-2. **Language stacks** — `@stacks/backend(lang: "python")` vs `(lang: "go")`
-3. **Environment configs** — `@use @core/security(env: "production")`
-4. **Strictness levels** — `@use @core/quality(level: "strict" | "relaxed")`
-
-**Implementation Phases:**
-
-- [x] **Phase 1: Basic parameters** — `(key: value)` syntax, string interpolation `{{var}}` in `@inherit`, `@use`, and `@skills`
-- [x] **Phase 2: Type validation** — Validate param types at compile time (PS009 for `@params`, PS015 for `@skills`)
-- [ ] **Phase 3: Conditionals** — `{{#if}}` / `{{#unless}}` blocks
-- [ ] **Phase 4: Loops** — `{{#each items}}` for dynamic lists
-
----
+- [ ] **Conditionals** — `{{#if}}` / `{{#unless}}` blocks for conditional sections
+- [ ] **Loops** — `{{#each items}}` for dynamic lists
 
 ### VS Code Extension
 
@@ -113,51 +84,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 
 ## 🔜 Next Up — Foundation & Ecosystem
 
-### 1. Platform Support Expansion
-
-**Goal:** Support all major AI coding assistants.
-
-| Tool               | Status  | Output Format                     | Priority |
-| ------------------ | ------- | --------------------------------- | -------- |
-| GitHub Copilot     | ✅ Done | `.github/copilot-instructions.md` | —        |
-| Claude Code        | ✅ Done | `CLAUDE.md`                       | —        |
-| Cursor             | ✅ Done | `.cursor/rules/*.mdc`             | —        |
-| Google Antigravity | ✅ Done | `.agent/rules/*.md`               | —        |
-| Factory AI         | ✅ Done | `AGENTS.md`                       | —        |
-| OpenCode           | ✅ Done | `OPENCODE.md`                     | —        |
-| Gemini CLI         | ✅ Done | `GEMINI.md`                       | —        |
-| Windsurf           | ✅ Done | `.windsurf/rules/project.md`      | —        |
-| Cline              | ✅ Done | `.clinerules`                     | —        |
-| Roo Code           | ✅ Done | `.roorules`                       | —        |
-| Codex              | ✅ Done | `AGENTS.md`                       | —        |
-| Continue           | ✅ Done | `.continue/rules/project.md`      | —        |
-| Augment            | ✅ Done | `.augment/rules/project.md`       | —        |
-| Goose              | ✅ Done | `.goose/rules/project.md`         | —        |
-| Kilo Code          | ✅ Done | `.kilocode/rules/project.md`      | —        |
-| Amp                | ✅ Done | `AGENTS.md`                       | —        |
-| Trae               | ✅ Done | `.trae/rules/project.md`          | —        |
-| Junie              | ✅ Done | `.junie/rules/project.md`         | —        |
-| Kiro CLI           | ✅ Done | `.kiro/rules/project.md`          | —        |
-| Cortex             | ✅ Done | `.cortex/rules/project.md`        | —        |
-| Crush              | ✅ Done | `.crush/rules/project.md`         | —        |
-| Command Code       | ✅ Done | `.commandcode/rules/project.md`   | —        |
-| Kode               | ✅ Done | `.kode/rules/project.md`          | —        |
-| MCPJam             | ✅ Done | `.mcpjam/rules/project.md`        | —        |
-| Mistral Vibe       | ✅ Done | `.vibe/rules/project.md`          | —        |
-| Mux                | ✅ Done | `.mux/rules/project.md`           | —        |
-| OpenHands          | ✅ Done | `.openhands/rules/project.md`     | —        |
-| Pi                 | ✅ Done | `.pi/rules/project.md`            | —        |
-| Qoder              | ✅ Done | `.qoder/rules/project.md`         | —        |
-| Qwen Code          | ✅ Done | `.qwen/rules/project.md`          | —        |
-| Zencoder           | ✅ Done | `.zencoder/rules/project.md`      | —        |
-| Neovate            | ✅ Done | `.neovate/rules/project.md`       | —        |
-| Pochi              | ✅ Done | `.pochi/rules/project.md`         | —        |
-| AdaL               | ✅ Done | `.adal/rules/project.md`          | —        |
-| iFlow              | ✅ Done | `.iflow/rules/project.md`         | —        |
-| OpenClaw           | ✅ Done | `INSTRUCTIONS.md`                 | —        |
-| CodeBuddy          | ✅ Done | `.codebuddy/rules/project.md`     | —        |
-
-### 2. CI/CD Integration
+### 1. CI/CD Integration
 
 **Goal:** Make it effortless to integrate PromptScript into existing workflows.
 
@@ -174,7 +101,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 - [ ] **GitLab CI template**
 - [ ] **Azure DevOps task**
 
-### 3. Developer Experience
+### 2. Developer Experience
 
 **Goal:** Improve internal development velocity and quality safeguards.
 
@@ -187,15 +114,13 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Links to documentation
 
 - [ ] **CLI enhancements**
-  - ~~`prs migrate`~~ → ✅ Shipped as `prs import` — Convert existing `.md`, `.cursorrules`, `CLAUDE.md` to PromptScript
   - `prs doctor` — Diagnose common configuration issues
-  - `prs upgrade` — Update syntax version with automatic migrations
 
 ---
 
 ## 🔮 Future — IDE Integration & Registry
 
-### 4. Language Server Protocol (LSP)
+### 3. Language Server Protocol (LSP)
 
 **Goal:** World-class editing experience in any editor.
 
@@ -207,7 +132,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Code actions (quick fixes)
   - Rename refactoring
 
-### 5. VS Code Extension
+### 4. VS Code Extension
 
 **Goal:** First-class support for the most popular editor.
 
@@ -218,7 +143,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 - [ ] **Command palette** — Compile, validate, migrate from VS Code
 - [ ] **Outline view** — Navigate sections easily
 
-### 6. Public Registry
+### 5. Public Registry
 
 **Goal:** Enable sharing and reusing rule sets across organizations.
 
@@ -244,19 +169,11 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 
 ## 🏢 Future — Enterprise & Security
 
-### 7. Enterprise Features
+### 6. Enterprise Features
 
 **Goal:** Make PromptScript production-ready for large organizations.
 
-- [x] **Remote registry support (Git-based)**
-  - Git repository as registry (public and private)
-  - Registry aliases with three-level merge (system > user > project)
-  - Go-style URL imports (`@use github.com/org/repo/@path`)
-  - Lockfile (`promptscript.lock`) for reproducible builds
-  - Vendor mode (`prs vendor sync/check`) for offline/air-gapped CI
-  - Auto-discovery of SKILL.md, agents, commands from repos without .prs files
-  - Private repo auth via SSH keys and GITHUB_TOKEN
-- [ ] **Self-hosted HTTP registry** (Docker image, OIDC/SAML auth) — planned
+- [ ] **Self-hosted HTTP registry** (Docker image, OIDC/SAML auth)
 
 - [ ] **Policy enforcement**
   - Required sections in all projects
@@ -269,7 +186,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Git-native audit trail
   - Export to SIEM systems
 
-### 8. Security & Compliance
+### 7. Security & Compliance
 
 **Goal:** Ensure prompts don't introduce security risks.
 
@@ -287,7 +204,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Track dependencies in prompt inheritance
   - Export as CycloneDX/SPDX
 
-### 9. Analytics & Insights
+### 8. Analytics & Insights
 
 **Goal:** Understand how prompts are being used.
 
@@ -308,7 +225,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 
 ## 🌐 Future — Ecosystem & Community
 
-### 10. Plugin System
+### 9. Plugin System
 
 **Goal:** Make PromptScript extensible.
 
@@ -323,7 +240,7 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
 - [ ] **Hooks system**
   - Pre-compile, post-compile, pre-validate
 
-### 11. AI-Specific Features
+### 10. AI-Specific Features
 
 **Goal:** Optimize prompts for different models.
 
@@ -338,15 +255,15 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Score effectiveness
 
 - [ ] **Model version targeting**
-  - Different outputs for Claude Sonnet 3.5 vs Sonnet 4
+  - Different outputs for Claude Sonnet 4 vs Opus 4
   - Feature flags per model version
 
-### 12. Documentation & Community
+### 11. Documentation & Community
 
 **Goal:** Build a thriving community.
 
+- [x] **Video walkthroughs** — [YouTube introduction](https://youtu.be/7sHMn-DbZig)
 - [ ] **Interactive tutorials**
-- [ ] **Video walkthroughs**
 - [ ] **Migration guides** for each tool
 - [ ] **Enterprise case studies**
 - [ ] **Discord community**
@@ -366,11 +283,7 @@ _These features are being evaluated based on community interest. Vote with 👍 
 - [ ] **Neovim plugin** — LSP + Treesitter support
 - [ ] **AI-powered migration** — Use LLMs to convert legacy prompts
 - [ ] **Prompt linting rules** — ESLint-style configurable rules
-- [ ] **Template inheritance** — Mustache/Handlebars in prompts
-- [ ] **Conditional compilation** — `@if env.production` blocks
 - [ ] **Monorepo support** — Per-package configurations with shared base
-- [x] **Import from URL** — `@use github.com/org/repo/@path` Go-style URL imports with version pinning, auto-discovery, lockfile, and vendor mode (see [Registry Guide](docs/guides/registry.md))
-- [x] **Docker container** — Pre-built image with PromptScript CLI (see [Docker guide](docs/guides/docker.md))
 
 ---
 
@@ -378,7 +291,7 @@ _These features are being evaluated based on community interest. Vote with 👍 
 
 We're actively looking for contributors and sponsors! Here's how you can help:
 
-1. **Add a formatter** — Pick a tool from the "Planned" list and implement it
+1. **Build integrations** — GitHub Action, pre-commit hooks, CI templates
 2. **Write documentation** — Tutorials, guides, examples
 3. **Test and report** — Try PromptScript and file issues
 4. **Spread the word** — Blog posts, talks, social media
