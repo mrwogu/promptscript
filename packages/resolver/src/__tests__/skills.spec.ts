@@ -303,6 +303,70 @@ description: Has description but no content
       // Content should not be set (empty)
       expect(skill['content']).toBeUndefined();
     });
+
+    it('should store raw frontmatter as __rawFrontmatter on the skill node', async () => {
+      // Arrange
+      const skillDir = join(registryPath, '@skills', 'frontmatter-skill');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: frontmatter-skill
+description: A skill with extra frontmatter fields
+custom-field: extra-value
+---
+
+Skill content here.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'frontmatter-skill': {},
+        }),
+      ]);
+
+      // Act
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      // Assert
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['frontmatter-skill'] as Record<string, unknown>;
+
+      expect(skill['__rawFrontmatter']).toBe(
+        'name: frontmatter-skill\ndescription: A skill with extra frontmatter fields\ncustom-field: extra-value'
+      );
+    });
+
+    it('should not set __rawFrontmatter when SKILL.md has no frontmatter', async () => {
+      // Arrange
+      const skillDir = join(registryPath, '@skills', 'no-fm-skill');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        `# Just a heading
+
+Plain content, no frontmatter.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'no-fm-skill': {},
+        }),
+      ]);
+
+      // Act
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+
+      // Assert
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['no-fm-skill'] as Record<string, unknown>;
+
+      expect(skill['__rawFrontmatter']).toBeUndefined();
+    });
   });
 
   describe('when source file is in @skills directory', () => {
