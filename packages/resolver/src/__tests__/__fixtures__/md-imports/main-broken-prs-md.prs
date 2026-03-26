@@ -1,0 +1,10 @@
+@meta {
+  id: "test-broken-prs-md"
+  version: "1.0.0"
+}
+
+@use ./broken-prs.md
+
+@identity {
+  role: "tester"
+}

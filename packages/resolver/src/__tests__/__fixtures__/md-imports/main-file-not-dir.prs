@@ -1,0 +1,10 @@
+@meta {
+  id: "test-file-not-dir"
+  version: "1.0.0"
+}
+
+@use ./not-a-dir
+
+@identity {
+  role: "tester"
+}

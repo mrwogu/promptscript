@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { mkdtemp, mkdir, writeFile, symlink, rm } from 'fs/promises';
+import { mkdtemp, mkdir, writeFile, symlink, rm, chmod } from 'fs/promises';
 import { tmpdir } from 'os';
 import type { Logger, ObjectContent } from '@promptscript/core';
 import { Resolver } from '../resolver.js';
@@ -269,6 +269,75 @@ describe('directory imports', () => {
     }
   });
 
+  it('should handle unreadable subdirectory during scan gracefully', async () => {
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-md-imports-unreadable-sub-'));
+    try {
+      await writeFile(
+        join(tmpDir, 'main.prs'),
+        [
+          '@meta {',
+          '  id: "test-unreadable-sub"',
+          '  version: "1.0.0"',
+          '}',
+          '',
+          '@use ./skills',
+          '',
+          '@identity {',
+          '  role: "tester"',
+          '}',
+        ].join('\n')
+      );
+
+      const skillsDir = join(tmpDir, 'skills');
+      await mkdir(skillsDir);
+
+      // Create one valid skill directory
+      const validDir = join(skillsDir, 'good');
+      await mkdir(validDir);
+      await writeFile(
+        join(validDir, 'SKILL.md'),
+        '---\nname: good-skill\ndescription: Works fine\n---\n\nGood body.'
+      );
+
+      // Create an unreadable subdirectory (will trigger readdir catch)
+      const badDir = join(skillsDir, 'bad');
+      await mkdir(badDir);
+
+      // Create a nested dir inside bad, then make bad unreadable
+      const nestedBadDir = join(badDir, 'nested');
+      await mkdir(nestedBadDir);
+
+      // Make the nested dir unreadable so readdir fails on it
+      await chmod(nestedBadDir, 0o000);
+
+      const resolver = new Resolver({
+        registryPath: tmpDir,
+        localPath: tmpDir,
+        cache: false,
+      });
+
+      const result = await resolver.resolve('./main.prs');
+
+      // Should still succeed — errors in readdir are caught and skipped
+      expect(result.ast).not.toBeNull();
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        expect(skillsBlock.content.properties['good-skill']).toBeDefined();
+      }
+    } finally {
+      // Restore permissions before cleanup
+      const nestedBadDir = join(tmpDir, 'skills', 'bad', 'nested');
+      try {
+        await chmod(nestedBadDir, 0o755);
+      } catch {
+        // may not exist
+      }
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it('should handle unreadable files in directory scan gracefully', async () => {
     const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-md-imports-unreadable-'));
     try {
@@ -427,6 +496,108 @@ describe('.md edge cases', () => {
 
     // Should error about file not found (the file literally does not exist)
     expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('should report parse errors when .md file contains invalid PRS', async () => {
+    const resolver = new Resolver({
+      registryPath: MD_FIXTURES,
+      localPath: MD_FIXTURES,
+      cache: false,
+    });
+
+    const result = await resolver.resolve('./main-broken-prs-md.prs');
+
+    // The .md file has @identity (detected as PRS) but contains invalid syntax.
+    // loadAndParseMd should push parse errors and return null ast for the import.
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors.some((e) => e.message.length > 0)).toBe(true);
+  });
+
+  it('should return null from tryDirectoryScan when path exists but is a file', async () => {
+    const resolver = new Resolver({
+      registryPath: MD_FIXTURES,
+      localPath: MD_FIXTURES,
+      cache: false,
+    });
+
+    // main-file-not-dir.prs does @use ./not-a-dir
+    // Loader appends .prs -> not-a-dir.prs (not found)
+    // tryDirectoryScan strips .prs -> not-a-dir (exists but is a regular file)
+    // tryDirectoryScan returns null, falls through to normal FileNotFoundError
+    const result = await resolver.resolve('./main-file-not-dir.prs');
+
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
+
+describe('directory scan depth limit', () => {
+  it('should not recurse past depth 3', async () => {
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-md-imports-depth-limit-'));
+    try {
+      await writeFile(
+        join(tmpDir, 'main.prs'),
+        [
+          '@meta {',
+          '  id: "test-depth-limit"',
+          '  version: "1.0.0"',
+          '}',
+          '',
+          '@use ./skills',
+          '',
+          '@identity {',
+          '  role: "tester"',
+          '}',
+        ].join('\n')
+      );
+
+      const skillsDir = join(tmpDir, 'skills');
+      await mkdir(skillsDir);
+
+      // Create deeply nested structure: depth 0 -> 1 -> 2 -> 3 -> 4
+      // The scan root is at depth 0. It explores entries at depth 0..3.
+      // An entry at depth 4 means: root(0)/l1(1)/l2(2)/l3(3)/l4(4)/deep(5)
+      // depth 3 directories ARE scanned (entries checked for SKILL.md)
+      // but depth 4+ directories are NOT pushed.
+      // skills/l1/l2/l3/l4/deep/SKILL.md should NOT be found (too deep)
+      let current = skillsDir;
+      for (const level of ['l1', 'l2', 'l3', 'l4', 'deep']) {
+        current = join(current, level);
+        await mkdir(current);
+      }
+      await writeFile(
+        join(current, 'SKILL.md'),
+        '---\nname: too-deep\ndescription: Should not be found\n---\n\nToo deep.'
+      );
+
+      // skills/l1/l2/l3/reachable/SKILL.md SHOULD be found (depth 3 from root)
+      const reachableDir = join(skillsDir, 'l1', 'l2', 'l3', 'reachable');
+      await mkdir(reachableDir);
+      await writeFile(
+        join(reachableDir, 'SKILL.md'),
+        '---\nname: reachable\ndescription: Found at depth 3\n---\n\nReachable body.'
+      );
+
+      const resolver = new Resolver({
+        registryPath: tmpDir,
+        localPath: tmpDir,
+        cache: false,
+      });
+
+      const result = await resolver.resolve('./main.prs');
+
+      expect(result.errors).toHaveLength(0);
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        // Reachable at depth 3 should be found
+        expect(skillsBlock.content.properties['reachable']).toBeDefined();
+        // too-deep at depth 4 should NOT be found
+        expect(skillsBlock.content.properties['too-deep']).toBeUndefined();
+      }
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
   });
 });
 
