@@ -7,13 +7,19 @@ const VALID_PATH_PATTERNS = {
   namespace: /^@[a-z][a-z0-9-]*\/[a-z0-9-/]+(@\d+\.\d+\.\d+)?$/i,
   // Relative path: ./path/to/file or ../path/to/file
   relative: /^\.\.?\/[a-z0-9-/.]+$/i,
+  // Registry path: github.com/owner/repo or host.tld/owner/repo/path@version
+  registry: /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+\/[a-z0-9_./-]+(@[a-z0-9^~./-]+)?$/i,
 };
 
 /**
  * Check if a path reference is valid.
  */
 export function isValidPath(path: string): boolean {
-  return VALID_PATH_PATTERNS.namespace.test(path) || VALID_PATH_PATTERNS.relative.test(path);
+  return (
+    VALID_PATH_PATTERNS.namespace.test(path) ||
+    VALID_PATH_PATTERNS.relative.test(path) ||
+    VALID_PATH_PATTERNS.registry.test(path)
+  );
 }
 
 /**
@@ -32,8 +38,7 @@ export const validPath: ValidationRule = {
         ctx.report({
           message: `Invalid path reference: "${path.raw}"`,
           location: ctx.ast.inherit.loc ?? ctx.ast.loc,
-          suggestion:
-            'Use @namespace/path format for absolute paths or ./relative/path for relative paths',
+          suggestion: 'Use @namespace/path, github.com/owner/repo/path, or ./relative/path',
         });
       }
     }
@@ -44,8 +49,7 @@ export const validPath: ValidationRule = {
         ctx.report({
           message: `Invalid path reference: "${use.path.raw}"`,
           location: use.loc,
-          suggestion:
-            'Use @namespace/path format for absolute paths or ./relative/path for relative paths',
+          suggestion: 'Use @namespace/path, github.com/owner/repo/path, or ./relative/path',
         });
       }
     });
