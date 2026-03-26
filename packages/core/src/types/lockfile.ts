@@ -8,6 +8,12 @@ export interface LockfileDependency {
   commit: string;
   /** Content integrity hash */
   integrity: string;
+  /** Source discriminator for .md-sourced dependencies */
+  source?: 'md';
+  /** ISO timestamp of last fetch (informational) */
+  fetchedAt?: string;
+  /** Discovered skill names for directory imports (advisory) */
+  skills?: string[];
 }
 
 /**

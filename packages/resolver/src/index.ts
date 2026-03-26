@@ -97,6 +97,7 @@ export {
   resolveNativeSkills,
   resolveNativeCommands,
   parseSkillMd,
+  skillNameFromPath,
   interpolateSkillContent,
 } from './skills.js';
 export type { NativeSkillOptions, ParsedSkillMd } from './skills.js';
@@ -122,6 +123,9 @@ export {
 
 // Auto-discovery
 export { discoverNativeContent } from './auto-discovery.js';
+
+// AST factory helpers
+export { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';

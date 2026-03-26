@@ -121,13 +121,14 @@ export class FileLoader {
       if (match && match[1] && match[2]) {
         const namespace = match[1];
         const segments = match[2];
-        const fileName = segments.endsWith('.prs') ? segments : `${segments}.prs`;
+        const fileName =
+          segments.endsWith('.prs') || segments.endsWith('.md') ? segments : `${segments}.prs`;
         return resolve(this.registryPath, `@${namespace}`, fileName);
       }
     }
 
     // Relative or local path
-    const fileName = path.endsWith('.prs') ? path : `${path}.prs`;
+    const fileName = path.endsWith('.prs') || path.endsWith('.md') ? path : `${path}.prs`;
     return resolve(this.localPath, fileName);
   }
 
@@ -142,7 +143,8 @@ export class FileLoader {
     if (ref.isRelative) {
       const dir = dirname(fromFile);
       // Use the raw path which preserves .. and . components
-      const rawPath = ref.raw.endsWith('.prs') ? ref.raw : `${ref.raw}.prs`;
+      const rawPath =
+        ref.raw.endsWith('.prs') || ref.raw.endsWith('.md') ? ref.raw : `${ref.raw}.prs`;
       return resolve(dir, rawPath);
     }
 

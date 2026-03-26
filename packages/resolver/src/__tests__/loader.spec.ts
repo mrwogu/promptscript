@@ -169,6 +169,79 @@ describe('FileLoader', () => {
     });
   });
 
+  describe('.md extension handling', () => {
+    it('should not append .prs to relative resolveRef with .md path', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/local',
+      });
+
+      const ref = {
+        type: 'PathReference' as const,
+        raw: './SKILL.md',
+        segments: ['SKILL.md'],
+        isRelative: true,
+        loc: { file: '<test>', line: 1, column: 1 },
+      };
+
+      expect(loader.resolveRef(ref, '/project/parent.prs')).toBe('/project/SKILL.md');
+    });
+
+    it('should not append .prs to resolveRef with ../ and .md path', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/local',
+      });
+
+      const ref = {
+        type: 'PathReference' as const,
+        raw: '../shared/SKILL.md',
+        segments: ['..', 'shared', 'SKILL.md'],
+        isRelative: true,
+        loc: { file: '<test>', line: 1, column: 1 },
+      };
+
+      expect(loader.resolveRef(ref, '/project/src/main.prs')).toBe('/project/shared/SKILL.md');
+    });
+
+    it('should not append .prs to toAbsolutePath with registry .md path', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/local',
+      });
+
+      expect(loader.toAbsolutePath('@org/skill.md')).toBe('/registry/@org/skill.md');
+    });
+
+    it('should not append .prs to toAbsolutePath with local .md path', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/local',
+      });
+
+      expect(loader.toAbsolutePath('skill.md')).toBe('/local/skill.md');
+    });
+
+    it('should still append .prs to paths without .md extension', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/local',
+      });
+
+      const ref = {
+        type: 'PathReference' as const,
+        raw: './child',
+        segments: ['child'],
+        isRelative: true,
+        loc: { file: '<test>', line: 1, column: 1 },
+      };
+
+      expect(loader.resolveRef(ref, '/project/parent.prs')).toBe('/project/child.prs');
+      expect(loader.toAbsolutePath('@org/skill')).toBe('/registry/@org/skill.prs');
+      expect(loader.toAbsolutePath('skill')).toBe('/local/skill.prs');
+    });
+  });
+
   describe('load error handling', () => {
     it('should re-throw non-ENOENT errors', async () => {
       const loader = new FileLoader({

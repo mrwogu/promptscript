@@ -5,6 +5,7 @@ import {
   noopLogger,
   type Logger,
   type Program,
+  type Value,
   ResolveError,
   CircularDependencyError,
   FileNotFoundError,
@@ -25,8 +26,12 @@ import {
   resolveNativeSkills,
   resolveNativeCommands,
   resolveNativeAgents,
+  parseSkillMd,
+  skillNameFromPath,
   type NativeSkillOptions,
 } from './skills.js';
+import { detectContentType } from './content-detector.js';
+import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 import { normalizeBlockAliases } from './normalize.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
@@ -233,6 +238,11 @@ export class Resolver {
       throw err;
     }
 
+    // Route .md files through content detection
+    if (absPath.endsWith('.md')) {
+      return this.loadAndParseMd(absPath, source, errors);
+    }
+
     const parseResult = parse(source, { filename: absPath });
 
     if (!parseResult.ast) {
@@ -247,6 +257,66 @@ export class Resolver {
     }
 
     return { ast: parseResult.ast };
+  }
+
+  /**
+   * Load and parse a .md file, routing through content detection.
+   *
+   * If the content looks like PRS (has @identity block), parse as PRS.
+   * If it has YAML frontmatter, treat as a skill and synthesize a Program
+   * with a @skills block.
+   * Otherwise, treat as raw markdown and synthesize a Program with a @skills
+   * block using the filename as the skill name.
+   */
+  private loadAndParseMd(
+    absPath: string,
+    source: string,
+    errors: ResolveError[]
+  ): { ast: Program | null } {
+    const contentType = detectContentType(source);
+
+    if (contentType === 'prs') {
+      // Parse as PromptScript
+      const parseResult = parse(source, { filename: absPath });
+      if (!parseResult.ast) {
+        for (const e of parseResult.errors) {
+          errors.push(new ResolveError(e.message, e.location));
+        }
+        return { ast: null };
+      }
+      for (const err of parseResult.errors) {
+        errors.push(new ResolveError(err.message, err.location));
+      }
+      return { ast: parseResult.ast };
+    }
+
+    // skill or raw -> synthesize Program with @skills block
+    const parsed = parseSkillMd(source);
+    const skillName = parsed.name ?? skillNameFromPath(absPath);
+
+    if (!parsed.name) {
+      this.logger.verbose(
+        `Missing frontmatter in ${absPath} — using filename "${skillName}" as skill name`
+      );
+    }
+
+    const skillProps: Record<string, Value> = {};
+    if (parsed.description) {
+      skillProps['description'] = parsed.description;
+    }
+    if (parsed.content) {
+      skillProps['content'] = makeTextContent(parsed.content, absPath);
+    }
+
+    const program: Program = {
+      type: 'Program',
+      blocks: [makeBlock('skills', makeObjectContent({ [skillName]: skillProps }))],
+      uses: [],
+      extends: [],
+      loc: VIRTUAL_LOC,
+    };
+
+    return { ast: program };
   }
 
   /**
