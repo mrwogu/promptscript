@@ -2,27 +2,25 @@
 
 ## The Manual Approach
 
-Without PromptScript, teams maintain separate configuration files for each AI tool in every repository:
+Without PromptScript, teams maintain separate configuration files for each AI tool in every repository. Even with just 2–3 tools, this quickly becomes unmanageable across many repos:
 
 ```text
 .github/copilot-instructions.md   # GitHub Copilot
 CLAUDE.md                          # Claude Code
 .cursor/rules/project.mdc         # Cursor
-.windsurf/rules/project.md        # Windsurf
-.clinerules                        # Cline
 AGENTS.md                          # Codex / Factory AI
 GEMINI.md                          # Gemini CLI
-... and 30 more files
+... one file per tool
 ```
 
-| Problem                       | Impact                                     |
-| ----------------------------- | ------------------------------------------ |
-| **No single source of truth** | Instructions drift between tools           |
-| **No validation**             | Errors go undetected until runtime         |
-| **No inheritance**            | Copy-paste across 100+ repos               |
-| **No audit trail**            | Who changed what and when?                 |
-| **Manual updates**            | One policy change = 100 PRs                |
-| **Vendor lock-in**            | Switching tools means rewriting everything |
+| Problem                       | Impact                                                          |
+| ----------------------------- | --------------------------------------------------------------- |
+| **No single source of truth** | Instructions drift between tools                                |
+| **No validation**             | Errors go undetected until runtime                              |
+| **No inheritance**            | Copy-paste across repos                                         |
+| **No audit trail**            | Who changed what and when?                                      |
+| **Manual updates**            | One policy change = PRs in every repo, for every tool           |
+| **Vendor lock-in**            | Switching tools means rewriting instructions, READMEs, and docs |
 
 ## The PromptScript Approach
 
