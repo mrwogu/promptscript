@@ -270,6 +270,8 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
                   content: r['content'] as string,
                 }))
               : undefined,
+          rawFrontmatter:
+            typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
         });
       }
     }
@@ -286,25 +288,29 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
     // YAML frontmatter
     lines.push('---');
-    lines.push(`name: ${skillName}`);
-    lines.push(`description: ${this.yamlString(factoryConfig.description)}`);
-    if (factoryConfig.argumentHint) {
-      lines.push(`argument-hint: ${this.yamlString(factoryConfig.argumentHint)}`);
-    }
+    if (factoryConfig.rawFrontmatter) {
+      lines.push(factoryConfig.rawFrontmatter);
+    } else {
+      lines.push(`name: ${skillName}`);
+      lines.push(`description: ${this.yamlString(factoryConfig.description)}`);
+      if (factoryConfig.argumentHint) {
+        lines.push(`argument-hint: ${this.yamlString(factoryConfig.argumentHint)}`);
+      }
 
-    // Only emit non-default values (user-invocable defaults to true)
-    if (factoryConfig.userInvocable === false) {
-      lines.push('user-invocable: false');
-    }
+      // Only emit non-default values (user-invocable defaults to true)
+      if (factoryConfig.userInvocable === false) {
+        lines.push('user-invocable: false');
+      }
 
-    // Only emit non-default values (disable-model-invocation defaults to false)
-    if (factoryConfig.disableModelInvocation === true) {
-      lines.push('disable-model-invocation: true');
-    }
+      // Only emit non-default values (disable-model-invocation defaults to false)
+      if (factoryConfig.disableModelInvocation === true) {
+        lines.push('disable-model-invocation: true');
+      }
 
-    if (factoryConfig.allowedTools && factoryConfig.allowedTools.length > 0) {
-      const toolsArray = factoryConfig.allowedTools.map((t) => `"${t}"`).join(', ');
-      lines.push(`allowed-tools: [${toolsArray}]`);
+      if (factoryConfig.allowedTools && factoryConfig.allowedTools.length > 0) {
+        const toolsArray = factoryConfig.allowedTools.map((t) => `"${t}"`).join(', ');
+        lines.push(`allowed-tools: [${toolsArray}]`);
+      }
     }
 
     lines.push('---');

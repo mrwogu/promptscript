@@ -628,6 +628,43 @@ describe('ClaudeFormatter', () => {
       expect(skillFile?.content).toContain('model: opus');
     });
 
+    it('should use raw frontmatter pass-through when __rawFrontmatter is present', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                commit: {
+                  description: 'Create git commits',
+                  context: 'fork',
+                  content: 'Instructions for commit skill...',
+                  __rawFrontmatter:
+                    "name: 'commit'\ndescription: 'Create git commits'\ncontext: fork\ncustom-field: preserved",
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/skills/commit/SKILL.md')
+      );
+      expect(skillFile).toBeDefined();
+      // Should use raw frontmatter instead of reconstructing
+      expect(skillFile?.content).toContain('custom-field: preserved');
+      expect(skillFile?.content).toContain("description: 'Create git commits'");
+      // Verify frontmatter delimiters wrap raw content
+      expect(skillFile?.content).toMatch(/^---\n.*custom-field: preserved.*\n---/s);
+    });
+
     it('should emit resource files alongside skill SKILL.md in full mode', () => {
       const ast: Program = {
         ...createMinimalProgram(),
