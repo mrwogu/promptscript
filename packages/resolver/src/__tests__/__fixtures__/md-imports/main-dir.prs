@@ -1,0 +1,10 @@
+@meta {
+  id: "test-dir-import"
+  version: "1.0.0"
+}
+
+@use ./skill-dir
+
+@identity {
+  role: "tester"
+}

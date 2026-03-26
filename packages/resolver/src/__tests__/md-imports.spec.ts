@@ -140,3 +140,61 @@ describe('.md imports', () => {
     expect(result.sources.some((s) => s.endsWith('skill-with-frontmatter.md'))).toBe(true);
   });
 });
+
+describe('directory imports', () => {
+  it('should resolve @use pointing to a directory with skills', async () => {
+    const resolver = new Resolver({
+      registryPath: MD_FIXTURES,
+      localPath: MD_FIXTURES,
+      cache: false,
+    });
+
+    const result = await resolver.resolve('./main-dir.prs');
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
+
+    // Should have a skills block from the directory scan
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    expect(skillsBlock).toBeDefined();
+    expect(skillsBlock?.content.type).toBe('ObjectContent');
+
+    if (skillsBlock?.content.type === 'ObjectContent') {
+      const props = skillsBlock.content.properties;
+
+      // Should have both 'alpha' and 'beta' entries
+      expect(props['alpha']).toBeDefined();
+      expect(props['beta']).toBeDefined();
+
+      // Alpha comes from SKILL.md
+      const alphaObj = props['alpha'] as Record<string, unknown>;
+      expect(alphaObj['description']).toBe('Alpha skill');
+      const alphaContent = alphaObj['content'] as { type: string; value: string };
+      expect(alphaContent.type).toBe('TextContent');
+      expect(alphaContent.value).toBe('Alpha body content');
+
+      // Beta comes from beta.md (dirname fallback)
+      const betaObj = props['beta'] as Record<string, unknown>;
+      expect(betaObj['description']).toBe('Beta skill');
+      const betaContent = betaObj['content'] as { type: string; value: string };
+      expect(betaContent.type).toBe('TextContent');
+      expect(betaContent.value).toBe('Beta body content');
+
+      // README.md at root should be ignored (not treated as a skill)
+      expect(props['README']).toBeUndefined();
+    }
+  });
+
+  it('should error when directory has no skills', async () => {
+    const resolver = new Resolver({
+      registryPath: MD_FIXTURES,
+      localPath: MD_FIXTURES,
+      cache: false,
+    });
+
+    const result = await resolver.resolve('./main-empty-dir.prs');
+
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors.some((e) => e.message.includes('No skills found'))).toBe(true);
+  });
+});

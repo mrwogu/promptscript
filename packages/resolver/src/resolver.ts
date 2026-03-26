@@ -1,5 +1,6 @@
 import { existsSync } from 'fs';
-import { join } from 'path';
+import { lstat, readdir, readFile } from 'fs/promises';
+import { basename, join } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -232,6 +233,12 @@ export class Resolver {
       source = await this.loader.load(absPath);
     } catch (err) {
       if (err instanceof FileNotFoundError) {
+        // Directory fallback: if path looks like .prs was appended, try as directory
+        if (absPath.endsWith('.prs')) {
+          const possibleDir = absPath.slice(0, -4); // strip .prs
+          const dirResult = await this.tryDirectoryScan(possibleDir, sources, errors);
+          if (dirResult) return dirResult;
+        }
         errors.push(new ResolveError(err.message));
         return { ast: null };
       }
@@ -571,6 +578,152 @@ export class Resolver {
     } finally {
       this.resolving.delete(marker);
     }
+  }
+
+  /**
+   * Try scanning a path as a directory of skills.
+   *
+   * Called when loadAndParse cannot find a .prs file. Checks whether
+   * the original path (without .prs) is a real directory, scans it
+   * for SKILL.md / dirname.md files, and synthesizes a Program with
+   * a @skills block.
+   *
+   * @returns A parse result if the path is a directory, or null to
+   *          let normal error handling continue.
+   */
+  private async tryDirectoryScan(
+    dirPath: string,
+    sources: string[],
+    errors: ResolveError[]
+  ): Promise<{ ast: Program | null } | null> {
+    let stat;
+    try {
+      stat = await lstat(dirPath);
+    } catch {
+      return null; // path doesn't exist at all
+    }
+
+    if (!stat.isDirectory() || stat.isSymbolicLink()) {
+      return null;
+    }
+
+    this.logger.verbose(`Directory import detected: ${dirPath}`);
+    const properties = await this.scanDirectoryForSkills(dirPath);
+
+    if (Object.keys(properties).length === 0) {
+      errors.push(new ResolveError(`No skills found in directory: ${dirPath}`));
+      return { ast: null };
+    }
+
+    this.logger.debug(`Found ${Object.keys(properties).length} skill(s) in directory: ${dirPath}`);
+
+    const program: Program = {
+      type: 'Program',
+      blocks: [makeBlock('skills', makeObjectContent(properties))],
+      uses: [],
+      extends: [],
+      loc: VIRTUAL_LOC,
+    };
+
+    return { ast: program };
+  }
+
+  /**
+   * Scan a directory for skill files using BFS up to depth 3.
+   *
+   * For each subdirectory:
+   * - Skip if symlink
+   * - Check for SKILL.md first
+   * - Fallback: check for <dirname>.md
+   * - Ignore other .md files (README, etc.)
+   * - If a skill is found, do not recurse deeper into that subdirectory
+   *
+   * @param dir - Absolute path to the directory to scan
+   * @returns Accumulated skill properties keyed by skill name
+   */
+  private async scanDirectoryForSkills(dir: string): Promise<Record<string, Value>> {
+    const properties: Record<string, Value> = {};
+    const queue: Array<{ path: string; depth: number }> = [{ path: dir, depth: 0 }];
+
+    while (queue.length > 0) {
+      const { path: currentDir, depth } = queue.shift()!;
+
+      let entries;
+      try {
+        entries = await readdir(currentDir, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        if (entry.isSymbolicLink()) continue;
+
+        const subDir = join(currentDir, entry.name);
+
+        // Check for symlinked directory via lstat
+        let subStat;
+        try {
+          subStat = await lstat(subDir);
+        } catch {
+          continue;
+        }
+        if (subStat.isSymbolicLink()) continue;
+
+        // Try SKILL.md first
+        const skillMdPath = join(subDir, 'SKILL.md');
+        let foundSkill = false;
+
+        try {
+          const skillContent = await readFile(skillMdPath, 'utf-8');
+          const parsed = parseSkillMd(skillContent);
+          const skillName = parsed.name ?? entry.name;
+
+          const skillProps: Record<string, Value> = {};
+          if (parsed.description) {
+            skillProps['description'] = parsed.description;
+          }
+          if (parsed.content) {
+            skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
+          }
+
+          properties[skillName] = skillProps;
+          foundSkill = true;
+          this.logger.debug(`Found skill "${skillName}" via SKILL.md in ${subDir}`);
+        } catch {
+          // SKILL.md not found, try dirname.md fallback
+          const dirnameMdPath = join(subDir, `${entry.name}.md`);
+          try {
+            const fallbackContent = await readFile(dirnameMdPath, 'utf-8');
+            const parsed = parseSkillMd(fallbackContent);
+            const skillName = parsed.name ?? skillNameFromPath(dirnameMdPath);
+
+            const skillProps: Record<string, Value> = {};
+            if (parsed.description) {
+              skillProps['description'] = parsed.description;
+            }
+            if (parsed.content) {
+              skillProps['content'] = makeTextContent(parsed.content, dirnameMdPath);
+            }
+
+            properties[skillName] = skillProps;
+            foundSkill = true;
+            this.logger.debug(
+              `Found skill "${skillName}" via ${basename(dirnameMdPath)} in ${subDir}`
+            );
+          } catch {
+            // Neither file found, will recurse if depth allows
+          }
+        }
+
+        // Only recurse deeper if no skill was found at this level
+        if (!foundSkill && depth < 3) {
+          queue.push({ path: subDir, depth: depth + 1 });
+        }
+      }
+    }
+
+    return properties;
   }
 
   /**
