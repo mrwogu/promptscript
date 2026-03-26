@@ -2009,6 +2009,10 @@
          <lastmod>2026-03-26</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/validateRemoteAccess/</loc>
+         <lastmod>2026-03-26</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/CacheEntry/</loc>
          <lastmod>2026-03-26</lastmod>
     </url>
@@ -2070,6 +2074,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/Registry/</loc>
+         <lastmod>2026-03-26</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/RemoteValidation/</loc>
          <lastmod>2026-03-26</lastmod>
     </url>
     <url>
