@@ -1,0 +1,10 @@
+@meta {
+  id: "test-empty-dir-import"
+  version: "1.0.0"
+}
+
+@use ./empty-dir
+
+@identity {
+  role: "tester"
+}

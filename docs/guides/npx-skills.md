@@ -5,6 +5,8 @@ description: Install open-source skills from GitHub repositories and use them wi
 
 # Using npx skills with PromptScript
 
+> **Note:** With PromptScript v1.8+, you can import skills directly using `@use` — no need for `npx skills` or `skills.sh`. See [Markdown Imports](./markdown-imports.md).
+
 The [`skills`](https://www.npmjs.com/package/skills) CLI lets you install open-source skills from GitHub repositories directly into your project. PromptScript compiles these skills to all your AI coding agents automatically.
 
 ## Quick Start

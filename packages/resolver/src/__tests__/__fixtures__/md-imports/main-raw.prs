@@ -1,0 +1,10 @@
+@meta {
+  id: "test-raw-import"
+  version: "1.0.0"
+}
+
+@use ./raw-skill.md
+
+@identity {
+  role: "tester"
+}

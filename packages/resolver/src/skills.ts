@@ -1,5 +1,5 @@
 import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
-import { resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
+import { basename, resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
 import type { Logger } from '@promptscript/core';
 import type {
   Program,
@@ -84,6 +84,16 @@ export function parseSkillMd(content: string): ParsedSkillMd {
   }
 
   return { name, description, content: bodyContent, params, inputs, outputs };
+}
+
+/**
+ * Derive a skill name from a file path by stripping the .md extension.
+ *
+ * @param filePath - Absolute or relative path to a .md file
+ * @returns The filename without the .md extension
+ */
+export function skillNameFromPath(filePath: string): string {
+  return basename(filePath, '.md');
 }
 
 /**

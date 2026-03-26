@@ -612,6 +612,64 @@ describe('Resolver — registry marker handling', () => {
     expect(identityBlock).toBeDefined();
   });
 
+  it('resolves registry import when .md skill file exists in cloned repo', async () => {
+    // Arrange — import @acme/my-skill.md which triggers the isMdPath branch
+    const tempDir = join(testCacheDir, 'project-md-registry');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-md-registry"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/my-skill.md',
+      '',
+      '@identity {',
+      '  """',
+      '  test identity',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    // Mock clone to create a .md skill file (with frontmatter)
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'my-skill.md'),
+        [
+          '---',
+          'name: registry-skill',
+          'description: Skill from registry .md',
+          '---',
+          '',
+          'Registry skill instructions.',
+        ].join('\n')
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-md'),
+    });
+
+    // Act
+    const result = await resolver.resolve(prsFile);
+
+    // Assert — should resolve with a @skills block from the .md file
+    expect(result.ast).not.toBeNull();
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    expect(skillsBlock).toBeDefined();
+    if (skillsBlock?.content.type === 'ObjectContent') {
+      expect(skillsBlock.content.properties['registry-skill']).toBeDefined();
+    }
+  });
+
   it('resolves registry import when .prs file exists in cloned repo', async () => {
     // Arrange
     const tempDir = join(testCacheDir, 'project2');

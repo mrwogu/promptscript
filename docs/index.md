@@ -154,7 +154,7 @@ npm install -g @promptscript/cli
     </div>
     <pre class="compile-demo__code"><code id="typewriter-target"></code></pre>
     <div class="compile-demo__cursor" id="typing-cursor"></div>
-    <div class="compile-demo__badge">11 lines → 37 agents</div>
+    <div class="compile-demo__badge">9 lines → 37 agents</div>
   </div>
 
   <div class="compile-demo__arrow">

@@ -50,7 +50,7 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     if (existsSync(LOCKFILE_PATH)) {
       try {
         const raw = await readFile(LOCKFILE_PATH, 'utf-8');
-        const parsed: unknown = parseYaml(raw);
+        const parsed: unknown = parseYaml(raw, { maxAliasCount: 100 });
         if (isValidLockfile(parsed)) {
           existing = parsed;
         }
@@ -75,6 +75,15 @@ export async function lockCommand(options: LockOptions): Promise<void> {
           commit: '0000000000000000000000000000000000000000',
           integrity: 'sha256-pending',
         };
+      }
+    }
+
+    // Preserve .md-sourced entries from previous lock (managed by `prs skills add`)
+    if (existing.dependencies) {
+      for (const [key, dep] of Object.entries(existing.dependencies)) {
+        if (dep.source === 'md') {
+          dependencies[key] = dep;
+        }
       }
     }
 

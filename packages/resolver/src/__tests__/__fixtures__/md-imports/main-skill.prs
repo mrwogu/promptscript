@@ -1,0 +1,10 @@
+@meta {
+  id: "test-md-import"
+  version: "1.0.0"
+}
+
+@use ./skill-with-frontmatter.md
+
+@identity {
+  role: "tester"
+}

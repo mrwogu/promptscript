@@ -8,6 +8,7 @@ import type {
   MixedContent,
   Value,
 } from '@promptscript/core';
+import { ResolveError } from '@promptscript/core';
 import {
   resolveUses,
   isImportMarker,
@@ -276,6 +277,135 @@ describe('imports', () => {
       expect(result.blocks).toHaveLength(1);
       const content = result.blocks[0]?.content as TextContent;
       expect(content.value).toBe('Full text with more details');
+    });
+
+    it('should throw ResolveError when imported skills collide with existing skills', () => {
+      const target = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'tdd-workflow': { description: 'TDD in target' },
+              'code-review': { description: 'Code review' },
+            })
+          ),
+        ],
+      });
+
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'tdd-workflow': { description: 'TDD in source' },
+              'security-scan': { description: 'Security scanning' },
+            })
+          ),
+        ],
+      });
+
+      expect(() => resolveUses(target, createUseDeclaration('./source'), source)).toThrow(
+        ResolveError
+      );
+    });
+
+    it('should include colliding skill names in the error message', () => {
+      const target = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'tdd-workflow': { description: 'TDD in target' },
+            })
+          ),
+        ],
+      });
+
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'tdd-workflow': { description: 'TDD in source' },
+            })
+          ),
+        ],
+      });
+
+      expect(() => resolveUses(target, createUseDeclaration('./source'), source)).toThrowError(
+        /tdd-workflow/
+      );
+    });
+
+    it('should not throw when skills blocks have no overlapping keys', () => {
+      const target = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'tdd-workflow': { description: 'TDD' },
+            })
+          ),
+        ],
+      });
+
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'security-scan': { description: 'Security' },
+            })
+          ),
+        ],
+      });
+
+      expect(() => resolveUses(target, createUseDeclaration('./source'), source)).not.toThrow();
+    });
+
+    it('should not throw when overlapping skill names have identical content (auto-discovery dedup)', () => {
+      const sharedSkill = { description: 'Shared skill content', type: 'tdd' };
+
+      const target = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'tdd-workflow': sharedSkill,
+            })
+          ),
+        ],
+      });
+
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'tdd-workflow': sharedSkill,
+            })
+          ),
+        ],
+      });
+
+      // Same content from same auto-discovery source should not error
+      expect(() => resolveUses(target, createUseDeclaration('./source'), source)).not.toThrow();
+    });
+
+    it('should not throw when only source or only target has a skills block', () => {
+      const targetWithSkills = createProgram({
+        blocks: [
+          createBlock('skills', createObjectContent({ 'tdd-workflow': { description: 'TDD' } })),
+        ],
+      });
+
+      const sourceWithoutSkills = createProgram({
+        blocks: [createBlock('identity', createTextContent('source identity'))],
+      });
+
+      expect(() =>
+        resolveUses(targetWithSkills, createUseDeclaration('./source'), sourceWithoutSkills)
+      ).not.toThrow();
     });
 
     it('should store source info in marker when alias provided', () => {

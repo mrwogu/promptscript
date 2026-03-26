@@ -29,6 +29,18 @@ vi.mock('../commands/hook', () => ({
   hookCommand: vi.fn(),
 }));
 
+const mockSkillsAdd = vi.fn();
+const mockSkillsRemove = vi.fn();
+const mockSkillsList = vi.fn();
+const mockSkillsUpdate = vi.fn();
+
+vi.mock('../commands/skills', () => ({
+  skillsAddCommand: mockSkillsAdd,
+  skillsRemoveCommand: mockSkillsRemove,
+  skillsListCommand: mockSkillsList,
+  skillsUpdateCommand: mockSkillsUpdate,
+}));
+
 // Store references to mock functions for assertions
 const mockCommand = vi.fn();
 const mockName = vi.fn().mockReturnThis();
@@ -37,6 +49,7 @@ const mockVersion = vi.fn().mockReturnThis();
 const mockOption = vi.fn().mockReturnThis();
 const mockHook = vi.fn().mockReturnThis();
 const mockArgument = vi.fn().mockReturnThis();
+const capturedActions: Array<(...args: unknown[]) => unknown> = [];
 const mockAction = vi.fn().mockReturnThis();
 const mockParse = vi.fn();
 
@@ -45,7 +58,14 @@ const createChainableMock = (): Record<string, ReturnType<typeof vi.fn>> => ({
   argument: mockArgument,
   description: mockDescription,
   option: mockOption,
-  action: mockAction,
+  action: vi.fn().mockImplementation(function (
+    this: Record<string, ReturnType<typeof vi.fn>>,
+    fn: (...args: unknown[]) => unknown
+  ) {
+    capturedActions.push(fn);
+    mockAction(fn);
+    return this;
+  }),
   command: mockCommand,
 });
 
@@ -148,6 +168,65 @@ describe('cli', () => {
       run(['node', 'prs', 'registry']);
 
       expect(mockCommand).toHaveBeenCalledWith('registry');
+    });
+
+    it('should register skills command group', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills']);
+
+      expect(mockCommand).toHaveBeenCalledWith('skills');
+    });
+
+    it('should register skills add subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'add']);
+
+      expect(mockCommand).toHaveBeenCalledWith('add <source>');
+    });
+
+    it('should register skills remove subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'remove']);
+
+      expect(mockCommand).toHaveBeenCalledWith('remove <name>');
+    });
+
+    it('should register skills list subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'list']);
+
+      expect(mockCommand).toHaveBeenCalledWith('list');
+    });
+
+    it('should register skills update subcommand', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'skills', 'update']);
+
+      expect(mockCommand).toHaveBeenCalledWith('update [name]');
+    });
+
+    it('should wire skills action callbacks to their command functions', async () => {
+      // The capturedActions array is populated during module loading.
+      // Invoke only the skills-related action callbacks (the last 4 registered),
+      // which correspond to skills add, remove, list, and update subcommands.
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', '--help']);
+
+      // The skills subcommands are registered last, so their action callbacks
+      // are the final 4 in the capturedActions array.
+      const skillsActions = capturedActions.slice(-4);
+      expect(skillsActions).toHaveLength(4);
+
+      // Invoke each skills action with test arguments
+      for (const cb of skillsActions) {
+        cb('test-arg', { dryRun: false });
+      }
+
+      // Verify each skills command function was called
+      expect(mockSkillsAdd).toHaveBeenCalledWith('test-arg', { dryRun: false });
+      expect(mockSkillsRemove).toHaveBeenCalledWith('test-arg', { dryRun: false });
+      expect(mockSkillsList).toHaveBeenCalled();
+      expect(mockSkillsUpdate).toHaveBeenCalledWith('test-arg', { dryRun: false });
     });
   });
 });

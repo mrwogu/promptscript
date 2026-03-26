@@ -33,12 +33,12 @@ export const TextBlock = createToken({
 
 export const PathReference = createToken({
   name: 'PathReference',
-  pattern: /@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/-]*(?:@[a-zA-Z0-9^~./-]+)?/,
+  pattern: /@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?:@[a-zA-Z0-9^~./-]+)?/,
 });
 
 export const RelativePath = createToken({
   name: 'RelativePath',
-  pattern: /\.\/[a-zA-Z0-9_/-]+|\.\.\/[a-zA-Z0-9_/-]+/,
+  pattern: /\.\/[a-zA-Z0-9_/.-]+|\.\.\/[a-zA-Z0-9_/.-]+/,
 });
 
 // ============================================================

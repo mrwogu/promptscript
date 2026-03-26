@@ -277,6 +277,64 @@ describe('PSLexer', () => {
     });
   });
 
+  describe('paths with dots', () => {
+    it('should tokenize relative path with .md extension', () => {
+      const result = tokenize('./skills/frontend-design.md');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(RelativePath);
+      expect(result.tokens[0]!.image).toBe('./skills/frontend-design.md');
+    });
+
+    it('should tokenize parent relative path with .md extension', () => {
+      const result = tokenize('../shared/security-scan.md');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(RelativePath);
+      expect(result.tokens[0]!.image).toBe('../shared/security-scan.md');
+    });
+
+    it('should tokenize path reference with .md extension', () => {
+      const result = tokenize('@org/skills/frontend-design.md');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(PathReference);
+      expect(result.tokens[0]!.image).toBe('@org/skills/frontend-design.md');
+    });
+
+    it('should tokenize path reference with .md extension and version suffix', () => {
+      const result = tokenize('@org/skills/frontend-design.md@2.1.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(PathReference);
+      expect(result.tokens[0]!.image).toBe('@org/skills/frontend-design.md@2.1.0');
+    });
+
+    it('should tokenize relative path with mid-segment dots', () => {
+      const result = tokenize('./some.dir/file.prs');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(RelativePath);
+      expect(result.tokens[0]!.image).toBe('./some.dir/file.prs');
+    });
+
+    it('should still tokenize relative paths without dots (regression)', () => {
+      const result = tokenize('./local/file');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(RelativePath);
+      expect(result.tokens[0]!.image).toBe('./local/file');
+    });
+
+    it('should still tokenize path references without dots (regression)', () => {
+      const result = tokenize('@core/guards/compliance');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(PathReference);
+      expect(result.tokens[0]!.image).toBe('@core/guards/compliance');
+    });
+  });
+
   describe('identifiers', () => {
     it('should tokenize simple identifiers', () => {
       const result = tokenize('myVariable');

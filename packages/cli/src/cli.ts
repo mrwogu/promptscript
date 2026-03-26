@@ -25,6 +25,12 @@ import { importCommand } from './commands/import.js';
 import { upgradeCommand } from './commands/upgrade.js';
 import { hookCommand } from './commands/hook.js';
 import { hooksCommand } from './commands/hooks.js';
+import {
+  skillsAddCommand,
+  skillsRemoveCommand,
+  skillsListCommand,
+  skillsUpdateCommand,
+} from './commands/skills.js';
 
 const program = new Command();
 
@@ -224,6 +230,32 @@ program
   .option('--all', 'Install/uninstall for all detected tools')
   .description('Manage PromptScript hooks for AI tools')
   .action(hooksCommand);
+
+const skills = program.command('skills').description('Manage PromptScript skills');
+
+skills
+  .command('add <source>')
+  .description('Add a remote skill to the project')
+  .option('-f, --file <file>', 'Target .prs file to modify')
+  .option('--dry-run', 'Preview changes without writing')
+  .action((source, opts) => skillsAddCommand(source, opts));
+
+skills
+  .command('remove <name>')
+  .description('Remove a skill from the project')
+  .option('--dry-run', 'Preview changes without writing')
+  .action((name, opts) => skillsRemoveCommand(name, opts));
+
+skills
+  .command('list')
+  .description('List skills imported in the current project')
+  .action(() => skillsListCommand());
+
+skills
+  .command('update [name]')
+  .description('Update lock entries for markdown-sourced skills')
+  .option('--dry-run', 'Preview changes without writing')
+  .action((name, opts) => skillsUpdateCommand(name, opts));
 
 const registry = program.command('registry').description('Manage PromptScript registries');
 registerRegistryCommands(registry);

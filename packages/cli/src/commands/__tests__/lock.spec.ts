@@ -186,4 +186,45 @@ describe('lockCommand', () => {
     };
     expect(parsed.dependencies['github.com/company/base']).toBeDefined();
   });
+
+  it('should preserve md-sourced entries from previous lockfile', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'v1.0.0',
+            commit: 'abc123',
+            integrity: 'sha256-xyz',
+          },
+          'github.com/org/skills/SKILL.md': {
+            version: 'latest',
+            commit: '0000000000000000000000000000000000000000',
+            integrity: 'sha256-pending',
+            source: 'md',
+          },
+        },
+      })
+    );
+
+    await lockCommand({});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Lockfile generated');
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { version: string; source?: string }>;
+    };
+    // Registry entry should be preserved
+    expect(parsed.dependencies['github.com/company/base']!.version).toBe('v1.0.0');
+    // md-sourced entry should also be preserved
+    expect(parsed.dependencies['github.com/org/skills/SKILL.md']).toBeDefined();
+    expect(parsed.dependencies['github.com/org/skills/SKILL.md']!.source).toBe('md');
+  });
 });

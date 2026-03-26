@@ -9,7 +9,7 @@ import type {
   MixedContent,
   Value,
 } from '@promptscript/core';
-import { deepClone, isTextContent } from '@promptscript/core';
+import { deepClone, isTextContent, ResolveError } from '@promptscript/core';
 
 /**
  * Import marker block prefix for storing imported content.
@@ -30,6 +30,30 @@ export const IMPORT_MARKER_PREFIX = '__import__';
  * @returns Updated program with merged blocks
  */
 export function resolveUses(target: Program, use: UseDeclaration, source: Program): Program {
+  // Pre-merge duplicate skill check: detect collisions in @skills block
+  const targetSkillsBlock = target.blocks.find((b) => b.name === 'skills');
+  const sourceSkillsBlock = source.blocks.find((b) => b.name === 'skills');
+
+  if (
+    targetSkillsBlock?.content.type === 'ObjectContent' &&
+    sourceSkillsBlock?.content.type === 'ObjectContent'
+  ) {
+    const targetProps = (targetSkillsBlock.content as ObjectContent).properties;
+    const sourceProps = (sourceSkillsBlock.content as ObjectContent).properties;
+
+    const duplicates = Object.keys(sourceProps).filter(
+      (key) =>
+        key in targetProps && JSON.stringify(sourceProps[key]) !== JSON.stringify(targetProps[key])
+    );
+
+    if (duplicates.length > 0) {
+      throw new ResolveError(
+        `Duplicate skill name(s) detected when importing '${use.path.raw}': ${duplicates.join(', ')}`,
+        use.loc
+      );
+    }
+  }
+
   // Merge blocks from source into target
   const mergedBlocks = mergeBlocks(target.blocks, source.blocks);
 

@@ -1,0 +1,10 @@
+@meta {
+  id: "test-whitespace-md"
+  version: "1.0.0"
+}
+
+@use ./whitespace-skill.md
+
+@identity {
+  role: "tester"
+}

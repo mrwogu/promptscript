@@ -47,6 +47,7 @@ export {
   pathTraversal,
   hasPathTraversal,
   unicodeSecurity,
+  duplicateSkills,
 } from './rules/index.js';
 
 // Security presets

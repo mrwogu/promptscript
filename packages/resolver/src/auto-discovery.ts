@@ -1,13 +1,8 @@
 import { readFile, readdir, access, lstat } from 'fs/promises';
 import { resolve } from 'path';
-import type { Program, Block, ObjectContent, TextContent, Value } from '@promptscript/core';
+import type { Program, Block, TextContent, Value } from '@promptscript/core';
 import { parseSkillMd } from './skills.js';
-
-/** Virtual source file name used in synthesized AST locations. */
-const VIRTUAL_SOURCE = '<auto-discovery>';
-
-/** Null location used throughout synthesized nodes. */
-const VIRTUAL_LOC = { file: VIRTUAL_SOURCE, line: 1, column: 1, offset: 0 } as const;
+import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 
 /** Context file names to look for when synthesizing a @context block. */
 const CONTEXT_FILES = ['CLAUDE.md', '.clinerules', '.cursorrules'] as const;
@@ -47,29 +42,6 @@ function parseFrontmatter(content: string): Record<string, string> {
 }
 
 /**
- * Synthesize an ObjectContent node from a properties record.
- */
-function makeObjectContent(properties: Record<string, Value>): ObjectContent {
-  return {
-    type: 'ObjectContent',
-    properties,
-    loc: VIRTUAL_LOC,
-  };
-}
-
-/**
- * Synthesize a Block node.
- */
-function makeBlock(name: string, content: ObjectContent | TextContent): Block {
-  return {
-    type: 'Block',
-    name,
-    content,
-    loc: VIRTUAL_LOC,
-  };
-}
-
-/**
  * Discover SKILL.md files in subdirectories of the given path.
  * Returns an ObjectContent mapping skill-name -> skill properties.
  */
@@ -86,8 +58,15 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
 
-    const skillMdPath = resolve(dir, entry.name, 'SKILL.md');
-    if (!(await fileExists(skillMdPath))) continue;
+    let skillMdPath = resolve(dir, entry.name, 'SKILL.md');
+    if (!(await fileExists(skillMdPath))) {
+      const dirnameMdPath = resolve(dir, entry.name, `${entry.name}.md`);
+      if (await fileExists(dirnameMdPath)) {
+        skillMdPath = dirnameMdPath;
+      } else {
+        continue;
+      }
+    }
 
     try {
       const raw = await readFile(skillMdPath, 'utf-8');
@@ -98,12 +77,7 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
         skillProps['description'] = parsed.description;
       }
       if (parsed.content) {
-        const textContent: TextContent = {
-          type: 'TextContent',
-          value: parsed.content,
-          loc: { file: skillMdPath, line: 1, column: 1, offset: 0 },
-        };
-        skillProps['content'] = textContent;
+        skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
       }
 
       properties[entry.name] = skillProps;
@@ -155,12 +129,7 @@ async function discoverAgents(dir: string): Promise<Record<string, Value> | null
       if (bodyStart !== -1) {
         const body = raw.slice(bodyStart + 5).trim();
         if (body) {
-          const textContent: TextContent = {
-            type: 'TextContent',
-            value: body,
-            loc: { file: fullPath, line: 1, column: 1, offset: 0 },
-          };
-          agentProps['content'] = textContent;
+          agentProps['content'] = makeTextContent(body, fullPath);
         }
       }
 
@@ -203,12 +172,7 @@ async function discoverCommands(dir: string): Promise<Record<string, Value> | nu
       if ('tools' in fm || 'model' in fm) continue;
 
       const cmdName = '/' + entry.name.replace(/\.md$/, '');
-      const textContent: TextContent = {
-        type: 'TextContent',
-        value: raw.trim(),
-        loc: { file: fullPath, line: 1, column: 1, offset: 0 },
-      };
-      properties[cmdName] = textContent;
+      properties[cmdName] = makeTextContent(raw.trim(), fullPath);
     } catch {
       // Skip unreadable files
     }
@@ -229,11 +193,7 @@ async function discoverContext(dir: string): Promise<TextContent | null> {
     try {
       const content = await readFile(fullPath, 'utf-8');
       if (content.trim()) {
-        return {
-          type: 'TextContent',
-          value: content.trim(),
-          loc: { file: fullPath, line: 1, column: 1, offset: 0 },
-        };
+        return makeTextContent(content.trim(), fullPath);
       }
     } catch {
       // Skip unreadable files
