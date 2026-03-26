@@ -38,11 +38,13 @@ export {
 export {
   GitRegistry,
   createGitRegistry,
+  validateRemoteAccess,
   GitCloneError,
   GitAuthError,
   GitRefNotFoundError,
   type GitRegistryOptions,
   type GitAuthOptions,
+  type RemoteValidation,
 } from './git-registry.js';
 
 // Git utilities
