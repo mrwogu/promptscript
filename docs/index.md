@@ -144,11 +144,21 @@ npm install -g @promptscript/cli
 
 </div>
 
-<div class="video-embed" style="max-width: 800px; margin: 2rem auto;">
-  <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px;">
-    <iframe src="https://www.youtube.com/embed/7sHMn-DbZig" title="PromptScript Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
-  </div>
+<div class="video-embed" id="video-embed">
+  <img class="video-embed__thumb" src="https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg" alt="PromptScript Introduction" loading="lazy">
+  <button class="video-embed__play" aria-label="Play video" id="video-play-btn">
+    <svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="rgba(0,0,0,.75)"/><path d="M45 24L27 14v20" fill="#fff"/></svg>
+  </button>
+  <iframe class="video-embed__iframe" id="video-iframe" src="" title="PromptScript Introduction" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
+<script>
+document.getElementById('video-play-btn').addEventListener('click', function() {
+  var embed = document.getElementById('video-embed');
+  var iframe = document.getElementById('video-iframe');
+  iframe.src = 'https://www.youtube.com/embed/7sHMn-DbZig?autoplay=1';
+  embed.classList.add('video-embed--active');
+});
+</script>
 
 <div class="compile-demo" id="compile-demo">
   <div class="compile-demo__source">
