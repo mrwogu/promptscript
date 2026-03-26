@@ -1,5 +1,5 @@
 import { readFile, readdir, access, lstat } from 'fs/promises';
-import { resolve } from 'path';
+import { resolve, basename } from 'path';
 import type { Program, Block, TextContent, Value } from '@promptscript/core';
 import { parseSkillMd } from './skills.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
@@ -79,6 +79,9 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
       if (parsed.content) {
         skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
       }
+      if (parsed.rawFrontmatter) {
+        skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
+      }
 
       properties[entry.name] = skillProps;
     } catch {
@@ -87,6 +90,37 @@ async function discoverSkills(dir: string): Promise<Record<string, Value> | null
   }
 
   return Object.keys(properties).length > 0 ? properties : null;
+}
+
+/**
+ * Check if the directory itself contains a root-level SKILL.md and, if so,
+ * parse it and return a single skill entry keyed by the skill's frontmatter
+ * `name` field (falling back to the directory basename).
+ */
+async function discoverRootSkill(dir: string): Promise<Record<string, Value> | null> {
+  const skillMdPath = resolve(dir, 'SKILL.md');
+  if (!(await fileExists(skillMdPath))) return null;
+
+  try {
+    const raw = await readFile(skillMdPath, 'utf-8');
+    const parsed = parseSkillMd(raw);
+
+    const skillName = parsed.name || basename(dir);
+    const skillProps: Record<string, Value> = {};
+    if (parsed.description) {
+      skillProps['description'] = parsed.description;
+    }
+    if (parsed.content) {
+      skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
+    }
+    if (parsed.rawFrontmatter) {
+      skillProps['__rawFrontmatter'] = parsed.rawFrontmatter;
+    }
+
+    return { [skillName]: skillProps };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -225,10 +259,16 @@ export async function discoverNativeContent(dir: string): Promise<Program | null
 
   const blocks: Block[] = [];
 
-  // Discover skills
-  const skillProperties = await discoverSkills(dir);
-  if (skillProperties) {
-    blocks.push(makeBlock('skills', makeObjectContent(skillProperties)));
+  // Check if directory itself is a skill (root-level SKILL.md)
+  const rootSkill = await discoverRootSkill(dir);
+
+  // Discover skills in subdirectories
+  const subSkills = await discoverSkills(dir);
+
+  // Merge: subdirectory skills take precedence over root skill (more specific wins)
+  const mergedSkills = { ...rootSkill, ...subSkills };
+  if (Object.keys(mergedSkills).length > 0) {
+    blocks.push(makeBlock('skills', makeObjectContent(mergedSkills)));
   }
 
   // Discover agents
