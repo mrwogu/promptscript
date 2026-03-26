@@ -463,6 +463,41 @@ describe('discoverNativeContent', () => {
     }
   });
 
+  it('should gracefully skip root SKILL.md when readFile throws inside discoverRootSkill', async () => {
+    // Arrange: create a directory with a root SKILL.md that cannot be read
+    // (we achieve this by making the file unreadable via chmod)
+    const { mkdtemp, writeFile, chmod, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-root-err-'));
+
+    try {
+      const skillPath = resolve(tmpDir, 'SKILL.md');
+      await writeFile(skillPath, '---\nname: broken\ndescription: Broken\n---\n\n# Broken');
+      // Remove read permission so readFile throws
+      await chmod(skillPath, 0o000);
+
+      // Act
+      const result = await discoverNativeContent(tmpDir);
+
+      // Assert: the catch block returns null for discoverRootSkill,
+      // so no skills block is produced (and result is null)
+      if (result !== null) {
+        const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+        if (skillsBlock) {
+          const content = skillsBlock.content as ObjectContent;
+          expect(content.properties).not.toHaveProperty('broken');
+        }
+      }
+      // If no other content was found, the whole result is null
+      // Either way, the function did not throw.
+    } finally {
+      // Restore permissions before cleanup
+      const { chmod: chmodRestore } = await import('fs/promises');
+      await chmodRestore(resolve(tmpDir, 'SKILL.md'), 0o644).catch(() => {});
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it('should discover both root-level SKILL.md and subdirectory skills together', async () => {
     // Arrange
     const { mkdtemp, mkdir, writeFile, rm } = await import('fs/promises');

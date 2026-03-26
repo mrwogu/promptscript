@@ -576,6 +576,32 @@ describe('skillsAddCommand', () => {
     expect(mockWriteFile).not.toHaveBeenCalled();
   });
 
+  it('should use fallback error message when validation.error is undefined', async () => {
+    // Arrange
+    const repoUrl = 'https://github.com/org/repo';
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: false,
+      error: undefined,
+    });
+
+    // Act
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    // Assert
+    expect(mockFail).toHaveBeenCalledWith('Cannot reach remote repository');
+    const { ConsoleOutput } = await import('../../output/console.js');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(`Failed to connect to ${repoUrl}`);
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should use real commit hash when remote is accessible', async () => {
     // Arrange
     const realCommit = 'deadbeef12345678901234567890123456789012';
