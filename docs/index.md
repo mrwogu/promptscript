@@ -1237,7 +1237,7 @@ flowchart TB
 
 === "Without PromptScript"
 
-    Manually maintain **5+ separate config files** per repo, per tool:
+    Maintain **separate config files** for each AI tool in every repo:
 
     ```
     .github/copilot-instructions.md   # GitHub Copilot
@@ -1250,7 +1250,7 @@ flowchart TB
     - No validation - instructions drift silently
     - No inheritance - copy-paste across repos
     - No audit trail - who changed what?
-    - Adding a new tool = rewrite everything
+    - Switching tools = rewrite instructions, READMEs, and docs everywhere
 
 === "With PromptScript"
 

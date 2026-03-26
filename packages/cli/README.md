@@ -14,9 +14,9 @@ PromptScript is the Terraform for AI instructions. Write your standards once in 
 
 Maintaining `.cursorrules`, `CLAUDE.md`, `.github/copilot-instructions.md` separately?
 
-- ❌ 50 repos x 37 AI tools = **1,900 files** to keep in sync
-- ❌ Security policy update? Manual changes across every repo
-- ❌ Switching AI tools? Rewrite everything from scratch
+- ❌ Even 2–3 AI tools × many repos = **dozens of config files** drifting out of sync
+- ❌ Security policy update? Manual changes across every repo, for every tool
+- ❌ Switching AI tools? Rewrite instructions, READMEs, and docs everywhere
 - ❌ No inheritance, no validation, no audit trail
 
 ## The Fix: Prompt-as-Code

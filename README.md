@@ -21,9 +21,9 @@ _Write once. Compile to 37 AI coding agents: GitHub Copilot, Claude Code, Cursor
 
 ## The Problem
 
-- ❌ 50 repos × 37 AI tools = **1,900 files** to keep in sync
-- ❌ Security policy update? Manual changes across every repo
-- ❌ Switching from Cursor to Claude Code? Rewrite everything
+- ❌ Even 2–3 AI tools × many repos = **dozens of config files** drifting out of sync
+- ❌ Security policy update? Manual changes across every repo, for every tool
+- ❌ Switching from Copilot to Codex? Rewrite instructions, READMEs, and docs everywhere
 - ❌ No audit trail, no inheritance, no validation
 
 ## The Fix
