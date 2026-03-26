@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1](https://github.com/mrwogu/promptscript/compare/v1.8.0...v1.8.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* **cli:** validate remote repo before writing lockfile in skills add ([c9aa94d](https://github.com/mrwogu/promptscript/commit/c9aa94d94b713db4162c4586819ed0c3b67fa6a1))
+* **formatters:** pass-through raw frontmatter from source SKILL.md ([5b37394](https://github.com/mrwogu/promptscript/commit/5b3739424e9473a913e6a7e1c6a9d191cf437780))
+* **resolver:** add validateRemoteAccess for pre-clone repo validation ([c162c83](https://github.com/mrwogu/promptscript/commit/c162c8345c0dc853a3c2da9ee9e0540fc0ffb8bd))
+* **resolver:** capture raw frontmatter in parseSkillMd ([23401a6](https://github.com/mrwogu/promptscript/commit/23401a6418cb5709aac2ccd7155650d7d2ba45f4))
+* **resolver:** pipe raw frontmatter through resolveNativeSkills ([ac79f69](https://github.com/mrwogu/promptscript/commit/ac79f6902685710b148f987dc28de6b7bb1682fd))
+* **resolver:** recognize root-level SKILL.md in directory discovery ([632a048](https://github.com/mrwogu/promptscript/commit/632a0483c02920c11d2cb78f65fbe8132aad19ab))
+
 ## [1.8.0](https://github.com/mrwogu/promptscript/compare/v1.7.1...v1.8.0) (2026-03-26)
 
 
