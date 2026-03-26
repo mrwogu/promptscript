@@ -158,7 +158,7 @@ async function loadLockfile(): Promise<Lockfile | null> {
 
   try {
     const content = await readFile(LOCKFILE_PATH, 'utf-8');
-    const parsed: unknown = parseYaml(content);
+    const parsed: unknown = parseYaml(content, { maxAliasCount: 100 });
     return isValidLockfile(parsed) ? parsed : null;
   } catch {
     return null;

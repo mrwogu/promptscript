@@ -476,7 +476,7 @@ export async function compileCommand(
     const lockfilePath = resolve(projectRoot, 'promptscript.lock');
     try {
       const lockfileContent = await readFile(lockfilePath, 'utf-8');
-      const parsed = parseYaml(lockfileContent);
+      const parsed = parseYaml(lockfileContent, { maxAliasCount: 100 });
       if (isValidLockfile(parsed)) {
         lockfile = parsed;
         logger.verbose(`Loaded lockfile from ${lockfilePath}`);

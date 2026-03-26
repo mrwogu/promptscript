@@ -48,7 +48,7 @@ export async function updateCommand(
     if (existsSync(LOCKFILE_PATH)) {
       try {
         const raw = await readFile(LOCKFILE_PATH, 'utf-8');
-        const parsed: unknown = parseYaml(raw);
+        const parsed: unknown = parseYaml(raw, { maxAliasCount: 100 });
         if (isValidLockfile(parsed)) {
           existing = parsed;
         }
