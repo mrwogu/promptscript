@@ -8,6 +8,7 @@ import type {
   ArrayContent,
   MixedContent,
   Value,
+  ParamArgument,
 } from '@promptscript/core';
 import { deepClone, isTextContent, ResolveError } from '@promptscript/core';
 
@@ -371,4 +372,78 @@ export function getOriginalBlockName(blockName: string): string | undefined {
   const withoutPrefix = blockName.slice(IMPORT_MARKER_PREFIX.length);
   const dotIndex = withoutPrefix.indexOf('.');
   return dotIndex === -1 ? undefined : withoutPrefix.slice(dotIndex + 1);
+}
+
+// ============================================================
+// @use Block Filtering
+// ============================================================
+
+/**
+ * Result of extracting reserved parameters from @use arguments.
+ */
+export interface ReservedParamsResult {
+  /** Block names to include (mutually exclusive with exclude) */
+  only?: string[];
+  /** Block names to exclude (mutually exclusive with only) */
+  exclude?: string[];
+  /** Remaining non-reserved parameters for template interpolation */
+  remaining: ParamArgument[];
+}
+
+/**
+ * Extract reserved parameters (only, exclude) from @use param arguments.
+ * These are consumed by the resolver for block filtering and must not
+ * be passed to bindParams (which would throw UnknownParamError).
+ *
+ * Only extracts when the value is an array. Non-array values for only/exclude
+ * are left in remaining for the validator (PS021) to report as type errors.
+ */
+export function extractReservedParams(params: ParamArgument[] | undefined): ReservedParamsResult {
+  if (!params || params.length === 0) {
+    return { remaining: [] };
+  }
+
+  const remaining: ParamArgument[] = [];
+  let only: string[] | undefined;
+  let exclude: string[] | undefined;
+
+  for (const param of params) {
+    if (param.name === 'only' && Array.isArray(param.value)) {
+      only = param.value.filter((v): v is string => typeof v === 'string');
+    } else if (param.name === 'exclude' && Array.isArray(param.value)) {
+      exclude = param.value.filter((v): v is string => typeof v === 'string');
+    } else {
+      remaining.push(param);
+    }
+  }
+
+  return { only, exclude, remaining };
+}
+
+/**
+ * Filter options for block-level @use filtering.
+ */
+export interface BlockFilterOptions {
+  /** Keep only these block names */
+  only?: string[];
+  /** Remove these block names */
+  exclude?: string[];
+}
+
+/**
+ * Filter an array of blocks based on only/exclude criteria.
+ * Returns a new array; does not mutate the input.
+ */
+export function filterBlocks(blocks: Block[], options: BlockFilterOptions): Block[] {
+  if (options.only) {
+    const allowSet = new Set(options.only);
+    return blocks.filter((b) => allowSet.has(b.name));
+  }
+
+  if (options.exclude) {
+    const denySet = new Set(options.exclude);
+    return blocks.filter((b) => !denySet.has(b.name));
+  }
+
+  return blocks;
 }

@@ -7,6 +7,7 @@ import type {
   ArrayContent,
   MixedContent,
   Value,
+  ParamArgument,
 } from '@promptscript/core';
 import { ResolveError } from '@promptscript/core';
 import {
@@ -15,6 +16,8 @@ import {
   getImportAlias,
   getOriginalBlockName,
   IMPORT_MARKER_PREFIX,
+  extractReservedParams,
+  filterBlocks,
 } from '../imports.js';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
@@ -983,5 +986,122 @@ describe('imports', () => {
       const level2 = level1['level2'] as Record<string, string>;
       expect(level2['value']).toBe('deep');
     });
+  });
+});
+
+describe('extractReservedParams', () => {
+  it('should extract only param and return remaining', () => {
+    const params: ParamArgument[] = [
+      { type: 'ParamArgument', name: 'only', value: ['skills', 'context'], loc: createLoc() },
+      { type: 'ParamArgument', name: 'mode', value: 'strict', loc: createLoc() },
+    ];
+
+    const result = extractReservedParams(params);
+
+    expect(result.only).toEqual(['skills', 'context']);
+    expect(result.exclude).toBeUndefined();
+    expect(result.remaining).toHaveLength(1);
+    expect(result.remaining[0]!.name).toBe('mode');
+  });
+
+  it('should extract exclude param and return remaining', () => {
+    const params: ParamArgument[] = [
+      { type: 'ParamArgument', name: 'exclude', value: ['knowledge'], loc: createLoc() },
+    ];
+
+    const result = extractReservedParams(params);
+
+    expect(result.only).toBeUndefined();
+    expect(result.exclude).toEqual(['knowledge']);
+    expect(result.remaining).toHaveLength(0);
+  });
+
+  it('should return empty reserved when no only/exclude present', () => {
+    const params: ParamArgument[] = [
+      { type: 'ParamArgument', name: 'mode', value: 'dev', loc: createLoc() },
+    ];
+
+    const result = extractReservedParams(params);
+
+    expect(result.only).toBeUndefined();
+    expect(result.exclude).toBeUndefined();
+    expect(result.remaining).toEqual(params);
+  });
+
+  it('should handle undefined params', () => {
+    const result = extractReservedParams(undefined);
+
+    expect(result.only).toBeUndefined();
+    expect(result.exclude).toBeUndefined();
+    expect(result.remaining).toHaveLength(0);
+  });
+
+  it('should skip only/exclude when value is not an array', () => {
+    const params: ParamArgument[] = [
+      { type: 'ParamArgument', name: 'only', value: 'skills', loc: createLoc() },
+    ];
+
+    const result = extractReservedParams(params);
+
+    expect(result.only).toBeUndefined();
+    expect(result.remaining).toHaveLength(1);
+  });
+});
+
+describe('filterBlocks', () => {
+  const skillsBlock = createBlock('skills', createTextContent('skill content'));
+  const knowledgeBlock = createBlock('knowledge', createTextContent('knowledge content'));
+  const contextBlock = createBlock('context', createTextContent('context content'));
+
+  it('should keep only specified blocks with only filter', () => {
+    const blocks = [skillsBlock, knowledgeBlock, contextBlock];
+    const result = filterBlocks(blocks, { only: ['skills', 'context'] });
+
+    expect(result).toHaveLength(2);
+    expect(result.map((b) => b.name)).toEqual(['skills', 'context']);
+  });
+
+  it('should remove specified blocks with exclude filter', () => {
+    const blocks = [skillsBlock, knowledgeBlock, contextBlock];
+    const result = filterBlocks(blocks, { exclude: ['knowledge'] });
+
+    expect(result).toHaveLength(2);
+    expect(result.map((b) => b.name)).toEqual(['skills', 'context']);
+  });
+
+  it('should return all blocks when no filter is specified', () => {
+    const blocks = [skillsBlock, knowledgeBlock, contextBlock];
+    const result = filterBlocks(blocks, {});
+
+    expect(result).toHaveLength(3);
+  });
+
+  it('should preserve block order', () => {
+    const blocks = [contextBlock, skillsBlock, knowledgeBlock];
+    const result = filterBlocks(blocks, { only: ['knowledge', 'context'] });
+
+    expect(result.map((b) => b.name)).toEqual(['context', 'knowledge']);
+  });
+
+  it('should handle unknown block names gracefully', () => {
+    const blocks = [skillsBlock, knowledgeBlock];
+    const result = filterBlocks(blocks, { only: ['skills', 'foobar'] });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.name).toBe('skills');
+  });
+
+  it('should return empty array when only filter matches nothing', () => {
+    const blocks = [skillsBlock, knowledgeBlock];
+    const result = filterBlocks(blocks, { only: ['agents'] });
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('should return all blocks when exclude filter matches nothing', () => {
+    const blocks = [skillsBlock, knowledgeBlock];
+    const result = filterBlocks(blocks, { exclude: ['agents'] });
+
+    expect(result).toHaveLength(2);
   });
 });
