@@ -12,9 +12,9 @@ _Write once. Compile to 37 AI coding agents: GitHub Copilot, Claude Code, Cursor
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/mrwogu/promptscript/pkgs/container/promptscript)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![VS Code](https://img.shields.io/badge/VS_Code-Extension-007ACC?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript)
+[![VS Code](https://img.shields.io/badge/VS_Code-Extension-007ACC?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language)
 
-[**Try Playground**](https://getpromptscript.dev/playground/) · [**Documentation**](https://getpromptscript.dev/) · [**Quick Start**](#quick-start) · [**VS Code Extension**](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript)
+[**Try Playground**](https://getpromptscript.dev/playground/) · [**Documentation**](https://getpromptscript.dev/) · [**Quick Start**](#quick-start) · [**VS Code Extension**](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language)
 
 </div>
 
@@ -229,13 +229,13 @@ Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Ki
 
 ## Documentation
 
-| Resource                                                                                               | Description                                |
-| :----------------------------------------------------------------------------------------------------- | :----------------------------------------- |
-| [**Getting Started**](https://getpromptscript.dev/getting-started/)                                    | 5-minute quickstart guide                  |
-| [**Language Reference**](https://getpromptscript.dev/reference/syntax/)                                | Full syntax documentation                  |
-| [**Guides**](https://getpromptscript.dev/guides/)                                                      | Inheritance, registry, migration, and more |
-| [**Enterprise**](https://getpromptscript.dev/guides/enterprise/)                                       | Scaling across organizations               |
-| [**VS Code Extension**](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript) | Syntax highlighting for `.prs` files       |
+| Resource                                                                                                        | Description                                |
+| :-------------------------------------------------------------------------------------------------------------- | :----------------------------------------- |
+| [**Getting Started**](https://getpromptscript.dev/getting-started/)                                             | 5-minute quickstart guide                  |
+| [**Language Reference**](https://getpromptscript.dev/reference/syntax/)                                         | Full syntax documentation                  |
+| [**Guides**](https://getpromptscript.dev/guides/)                                                               | Inheritance, registry, migration, and more |
+| [**Enterprise**](https://getpromptscript.dev/guides/enterprise/)                                                | Scaling across organizations               |
+| [**VS Code Extension**](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language) | Syntax highlighting for `.prs` files       |
 
 ---
 

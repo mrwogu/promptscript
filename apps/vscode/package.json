@@ -1,5 +1,5 @@
 {
-  "name": "promptscript",
+  "name": "promptscript-language",
   "displayName": "PromptScript",
   "description": "Syntax highlighting for PromptScript (.prs) files",
   "version": "1.8.3",

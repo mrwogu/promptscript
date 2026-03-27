@@ -1,10 +1,13 @@
 name: VS Code Extension
+
 on:
   push:
     branches: [main]
-    paths: ['apps/vscode/**']
+    paths: ['apps/vscode/**', 'packages/parser/src/lexer/**']
+    tags: ['v*']
   pull_request:
-    paths: ['apps/vscode/**']
+    paths: ['apps/vscode/**', 'packages/parser/src/lexer/**']
+  workflow_dispatch:
 
 jobs:
   package:
@@ -34,7 +37,7 @@ jobs:
 
   publish:
     needs: package
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment: vscode-marketplace
     steps:
@@ -59,10 +62,6 @@ jobs:
       - name: Publish to VS Code Marketplace
         run: |
           VSIX_FILE=$(ls apps/vscode/*.vsix | head -1)
-          if [ -n "$VSCE_PAT" ]; then
-            npx vsce publish --packagePath "$VSIX_FILE"
-          else
-            echo "VSCE_PAT not set, skipping publish"
-          fi
+          npx vsce publish --packagePath "$VSIX_FILE"
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

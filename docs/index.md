@@ -143,7 +143,7 @@ npm install -g @promptscript/cli
 </div>
 
 <p style="text-align: center; margin-top: -0.5rem; margin-bottom: 1rem;">
-  <a href="https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript" style="font-size: 0.85rem; opacity: 0.7;">VS Code Extension available &rarr;</a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language" style="font-size: 0.85rem; opacity: 0.7;">VS Code Extension available &rarr;</a>
 </p>
 
 </div>
