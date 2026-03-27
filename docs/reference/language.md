@@ -264,6 +264,31 @@ When you provide an alias, imported blocks are also stored with a prefix for use
     - **Without alias**: Simple include/mixin behavior - blocks are merged directly
     - **With alias**: When you need to selectively extend specific imported blocks
 
+### Block Filtering
+
+Control which blocks are imported using the reserved `only` and `exclude` parameters:
+
+```promptscript
+# Import only skills and context blocks
+@use ./shared-config(only: ["skills", "context"])
+
+# Import everything except knowledge
+@use ./shared-config(exclude: ["knowledge"])
+
+# Combine with template parameters
+@use ./shared-config(exclude: ["knowledge"], mode: "strict")
+
+# Combine with alias
+@use ./shared-config(only: ["skills"]) as shared
+```
+
+**Rules:**
+
+- `only` and `exclude` are mutually exclusive — using both is a validation error (PS021)
+- Values are block type names: `identity`, `context`, `standards`, `knowledge`, `skills`, `shortcuts`, `commands`, `guards`, `restrictions`, `agents`, etc.
+- Unknown block names produce a warning (for forward compatibility)
+- Block filtering does not apply to `@inherit` directives
+
 ## Content Blocks
 
 ### @identity
