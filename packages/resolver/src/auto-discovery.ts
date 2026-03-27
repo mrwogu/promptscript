@@ -193,6 +193,11 @@ async function discoverCommands(dir: string): Promise<Record<string, Value> | nu
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
 
+    // Skip SKILL.md — these are skill files, not commands.
+    // Without this guard, discoverRootSkill and discoverCommands both
+    // claim the same file, producing a phantom /SKILL command.
+    if (entry.name === 'SKILL.md') continue;
+
     const fullPath = resolve(dir, entry.name);
     try {
       const stat = await lstat(fullPath);

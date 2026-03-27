@@ -498,6 +498,35 @@ describe('discoverNativeContent', () => {
     }
   });
 
+  it('should not treat root SKILL.md as a command (no phantom /SKILL shortcut)', async () => {
+    // Regression: discoverCommands picked up SKILL.md files because they have
+    // description: in frontmatter and no tools:/model:, creating a phantom
+    // /SKILL command alongside the correct skill entry.
+    const { mkdtemp, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-no-phantom-'));
+
+    try {
+      await writeFile(
+        resolve(tmpDir, 'SKILL.md'),
+        '---\nname: my-skill\ndescription: A real skill\n---\n\n# My Skill\n\nDoes things.'
+      );
+
+      const result = await discoverNativeContent(tmpDir);
+      expect(result).not.toBeNull();
+
+      // Should have a skills block
+      const skillsBlock = result!.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+
+      // Should NOT have a shortcuts block (no phantom /SKILL command)
+      const shortcutsBlock = result!.blocks.find((b) => b.name === 'shortcuts');
+      expect(shortcutsBlock).toBeUndefined();
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it('should discover both root-level SKILL.md and subdirectory skills together', async () => {
     // Arrange
     const { mkdtemp, mkdir, writeFile, rm } = await import('fs/promises');
