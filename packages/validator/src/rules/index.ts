@@ -20,6 +20,7 @@ import { skillContracts } from './skill-contracts.js';
 import { syntaxVersionCompat } from './syntax-version-compat.js';
 import { unknownBlockName } from './unknown-block-name.js';
 import { duplicateSkills } from './duplicate-skills.js';
+import { useBlockFilter } from './use-block-filter.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -71,6 +72,7 @@ export { skillContracts } from './skill-contracts.js';
 export { syntaxVersionCompat } from './syntax-version-compat.js';
 export { unknownBlockName } from './unknown-block-name.js';
 export { duplicateSkills } from './duplicate-skills.js';
+export { useBlockFilter } from './use-block-filter.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -105,6 +107,8 @@ export const allRules: ValidationRule[] = [
   unknownBlockName,
   // Duplicate skill names (PS020)
   duplicateSkills,
+  // @use block filter validation (PS021)
+  useBlockFilter,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
