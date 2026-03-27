@@ -6,6 +6,7 @@ project:
 targets:
   - claude:
       version: full
+  - factory
 
 validation:
   rules:

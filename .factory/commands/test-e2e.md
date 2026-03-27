@@ -1,6 +1,6 @@
 ---
-# promptscript-generated: 2026-03-27T14:44:51.202Z | source: .promptscript/project.prs | target: claude
-description: 'Write end-to-end tests for critical user journeys'
+# promptscript-generated: 2026-03-27T14:44:51.207Z | source: .promptscript/project.prs | target: factory
+description: Write end-to-end tests for critical user journeys
 ---
 
 Write end-to-end tests for critical user journeys:

@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-03-27T11:23:57.861Z | source: .promptscript/project.prs | target: claude
+# promptscript-generated: 2026-03-27T14:44:51.202Z | source: .promptscript/project.prs | target: claude
 description: 'Create TypeScript type definitions'
 ---
 

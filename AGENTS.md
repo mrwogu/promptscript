@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-<!-- PromptScript 2026-03-27T14:44:51.202Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-03-27T14:44:51.207Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 
@@ -44,7 +44,7 @@ flowchart TB
   formatters --> core
 ```
 
-## Code Style
+## Conventions & Patterns
 
 - Strict mode enabled
 - Never use `any` type - use `unknown` with type guards
@@ -72,14 +72,14 @@ flowchart TB
 - newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
 - prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
 
-## Git Commits
+## Git Workflows
 
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
 - Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 
-## Config Files
+## Configuration
 
 - ESLint: inherit from eslint.base.config.cjs
 - Vite root: \_\_dirname (not import.meta.dirname)
@@ -114,7 +114,7 @@ pnpm nx graph             # View dependency graph
 pnpm prs compile          # Compile .prs files (uses local dev version)
 ```
 
-## Post-Work Verification
+## Build & Test
 
 (MANDATORY)
 

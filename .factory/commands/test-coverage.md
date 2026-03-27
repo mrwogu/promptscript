@@ -1,6 +1,6 @@
 ---
-# promptscript-generated: 2026-03-27T14:44:51.202Z | source: .promptscript/project.prs | target: claude
-description: 'Analyze test coverage and suggest improvements'
+# promptscript-generated: 2026-03-27T14:44:51.207Z | source: .promptscript/project.prs | target: factory
+description: Analyze test coverage and suggest improvements
 ---
 
 Analyze test coverage and suggest improvements:

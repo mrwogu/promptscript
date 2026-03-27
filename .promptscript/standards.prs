@@ -67,6 +67,10 @@
     noVaporware: "never document features that don't exist or don't work - ideas and future plans go to ROADMAP.md only"
   }
 
+  syntax-highlighting: {
+    keepInSync: "when adding or changing block keywords (e.g. @knowledge, @guards), always update ALL THREE syntax highlighters: (1) Pygments lexer: docs_extensions/promptscript_lexer.py, (2) VS Code TextMate grammar: apps/vscode/syntaxes/promptscript.tmLanguage.json, (3) Playground Monaco language: packages/playground/src/utils/prs-language.ts"
+  }
+
   workflow: {
     branchStrategy: "gitflow"
     newTask: """

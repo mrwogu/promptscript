@@ -1,0 +1,51 @@
+{
+  "extraKnownMarketplaces": {},
+  "enabledPlugins": {
+    "security-engineer@factory-plugins": true,
+    "droid-evolved@factory-plugins": true,
+    "core@factory-plugins": true,
+    "gitnexus@GitNexus": true
+  },
+  "logoAnimation": "off",
+  "includeCoAuthoredByDroid": false,
+  "showThinkingInMainView": true,
+  "cloudSessionSync": false,
+  "autonomyMode": "auto-high",
+  "commandAllowlist": ["ls", "pwd", "dir", "git:*", "npm:*", "docker:*"],
+  "commandDenylist": [
+    "rm -rf /",
+    "mkfs",
+    "shutdown",
+    "chmod 777 /",
+    "chown root:root /",
+    "dd if=/dev/zero of=/dev/sda"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Create|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "prs hook pre-edit",
+            "timeout": 5,
+            "statusMessage": "PromptScript: checking generated files..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Create|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "prs hook post-edit",
+            "timeout": 15,
+            "statusMessage": "PromptScript: compiling..."
+          }
+        ]
+      }
+    ]
+  }
+}

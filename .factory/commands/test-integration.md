@@ -1,6 +1,6 @@
 ---
-# promptscript-generated: 2026-03-27T14:44:51.202Z | source: .promptscript/project.prs | target: claude
-description: 'Write integration tests for component boundaries'
+# promptscript-generated: 2026-03-27T14:44:51.207Z | source: .promptscript/project.prs | target: factory
+description: Write integration tests for component boundaries
 ---
 
 Write integration tests for component boundaries:

@@ -1,6 +1,6 @@
 ---
-# promptscript-generated: 2026-03-27T14:44:51.202Z | source: .promptscript/project.prs | target: claude
-description: 'Review code for quality improvements'
+# promptscript-generated: 2026-03-27T14:44:51.207Z | source: .promptscript/project.prs | target: factory
+description: Review code for quality improvements
 ---
 
 Review code for quality improvements:
