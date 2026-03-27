@@ -57,6 +57,18 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
 
 **[Open Playground](https://getpromptscript.dev/playground/)** - no install needed.
 
+### Set Up Hooks
+
+```bash
+prs hooks install    # auto-compiles on .prs save, protects generated files
+```
+
+From now on, every time you edit a `.prs` file, outputs recompile automatically. AI agents are blocked from overwriting generated configs.
+
+### Then Let Your AI Agents Take Over
+
+After `prs compile`, a **PromptScript language skill** is automatically injected into your AI agents. They learn the `.prs` syntax and can create, edit, and manage your PromptScript files for you. Just ask your agent to add a new rule, change a standard, or create a shortcut — it already knows how.
+
 ---
 
 ## See It In Action
@@ -180,7 +192,7 @@ prs init --migrate
 prs compile --watch
 ```
 
-**Bundled Language Skill** - AI agents automatically learn PromptScript syntax via an injected SKILL.md, so they can help you write `.prs` files.
+**Zero Learning Curve** - A PromptScript language skill is automatically compiled into your AI agents' native skill format. Your agents learn the syntax, so _they_ manage your `.prs` files — you just tell them what you want in plain language.
 
 **Docker CI/CD** - validate in any pipeline:
 

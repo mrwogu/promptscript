@@ -807,6 +807,14 @@ Run a comprehensive OWASP Top 10 scan.
   <p>Update a security policy once. Every repo gets the latest standards compiled to every AI tool - no manual PRs.</p>
 </div>
 
+<div class="feature-card">
+  <div class="feature-card__icon feature-card__icon--purple">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1a6.88 6.88 0 0 0 0 9.79a7.02 7.02 0 0 0 9.88 0A6.85 6.85 0 0 0 19 12.1h2a9 9 0 0 1-2.64 6.36c-3.51 3.48-9.21 3.48-12.73 0c-3.51-3.48-3.51-9.12 0-12.6c3.51-3.48 9.21-3.48 12.73 0L21 3z"/></svg>
+  </div>
+  <h3>Zero Learning Curve</h3>
+  <p>A PromptScript language skill is automatically compiled into your AI agents. They learn the syntax and manage your <code>.prs</code> files for you — just ask in plain language.</p>
+</div>
+
 </div>
 
 <!-- Registry Section -->
