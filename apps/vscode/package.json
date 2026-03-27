@@ -5,7 +5,7 @@
   "version": "1.8.3",
   "publisher": "promptscript",
   "license": "MIT",
-  "repository": "https://github.com/promptscript/promptscript",
+  "repository": "https://github.com/mrwogu/promptscript",
   "engines": {
     "vscode": "^1.75.0"
   },
