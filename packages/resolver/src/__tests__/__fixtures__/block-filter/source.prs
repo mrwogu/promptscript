@@ -1,0 +1,23 @@
+@meta {
+  id: "source"
+  syntax: "1.1.0"
+}
+
+@context {
+  project: "Test Source"
+}
+
+@knowledge {
+  """
+  Source knowledge content.
+  """
+}
+
+@skills {
+  my-skill: {
+    description: "A test skill"
+    content: """
+    Skill instructions here.
+    """
+  }
+}

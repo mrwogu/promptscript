@@ -1,0 +1,6 @@
+@meta {
+  id: "test-project"
+  syntax: "1.1.0"
+}
+
+@use ./source(only: ["skills", "context"])
