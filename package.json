@@ -24,6 +24,7 @@
     "prs": "node --import @swc-node/register/esm-register packages/cli/src/cli.ts",
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
+    "grammar:check": "node --import @swc-node/register/esm-register scripts/check-grammar.mts",
     "prepare": "husky"
   },
   "private": true,
@@ -44,6 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^8.57.0",
     "@typescript-eslint/parser": "^8.57.0",
     "@vitest/coverage-v8": "^4.0.18",
+    "@vscode/vsce": "^3.7.1",
     "esbuild": "^0.27.3",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
@@ -61,7 +63,8 @@
     "typescript": "~5.9.3",
     "verdaccio": "^6.3.1",
     "vite": "^7.0.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "yaml": "^2.8.3"
   },
   "nx": {
     "includedScripts": []
