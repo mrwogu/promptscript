@@ -25,6 +25,8 @@
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
     "grammar:check": "node --import @swc-node/register/esm-register scripts/check-grammar.mts",
+    "vscode:package": "nx package vscode",
+    "vscode:publish": "nx publish vscode",
     "prepare": "husky"
   },
   "private": true,
