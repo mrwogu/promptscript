@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "vscode",
+  "projectType": "application",
+  "tags": ["scope:vscode", "type:app"],
+  "targets": {
+    "package": {
+      "command": "npx vsce package --allow-missing-repository",
+      "options": { "cwd": "apps/vscode" }
+    },
+    "publish": {
+      "command": "npx vsce publish",
+      "options": { "cwd": "apps/vscode" },
+      "dependsOn": ["package"]
+    }
+  }
+}
