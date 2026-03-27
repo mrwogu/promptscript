@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0](https://github.com/mrwogu/promptscript/compare/v1.8.3...v1.9.0) (2026-03-27)
+
+
+### Features
+
+* **resolver:** add extractReservedParams and filterBlocks for [@use](https://github.com/use) filtering ([1c2dfaf](https://github.com/mrwogu/promptscript/commit/1c2dfaf8770cda3a9a2dfb00960e103e89086892))
+* **resolver:** integrate block filtering into [@use](https://github.com/use) resolution pipeline ([08a84ee](https://github.com/mrwogu/promptscript/commit/08a84ee3e7a2fd69e9567b85ade84d0d2d528c39))
+* **validator:** add PS021 use-block-filter validation rule ([97dd8ea](https://github.com/mrwogu/promptscript/commit/97dd8eae739c597cdc1aa44b857da99f31824071))
+* **vscode:** add VS Code extension with syntax highlighting ([#184](https://github.com/mrwogu/promptscript/issues/184)) ([1f09f48](https://github.com/mrwogu/promptscript/commit/1f09f48936d6967f85b55c2ca109b2106b1fcf39))
+
+
+### Bug Fixes
+
+* **cli:** respect --force flag for unchanged files during compilation ([#180](https://github.com/mrwogu/promptscript/issues/180)) ([6cab45b](https://github.com/mrwogu/promptscript/commit/6cab45b8a98c4feb553fbd08a62f28124b3e1d2c))
+* **docs:** add missing block keywords to Pygments lexer ([4074d0a](https://github.com/mrwogu/promptscript/commit/4074d0abef1d37d45cb258dec3befcb160606a33))
+* **resolver:** skip SKILL.md in command auto-discovery to prevent phantom /SKILL shortcut ([9da9a0a](https://github.com/mrwogu/promptscript/commit/9da9a0a4f93d0cfa144b85ad05942f0a475a2de0))
+* **vscode:** publish extension only on release tags and resolve name collision ([a9d623a](https://github.com/mrwogu/promptscript/commit/a9d623a7bdeca569f60ff8179ee5d8cd8c0d0f06))
+
 ## [1.8.3](https://github.com/mrwogu/promptscript/compare/v1.8.2...v1.8.3) (2026-03-26)
 
 
