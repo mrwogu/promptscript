@@ -21,7 +21,7 @@ import {
   parseRegistryMarker,
 } from './loader.js';
 import { resolveInheritance } from './inheritance.js';
-import { resolveUses } from './imports.js';
+import { resolveUses, extractReservedParams, filterBlocks } from './imports.js';
 import { applyExtends } from './extensions.js';
 import {
   resolveNativeSkills,
@@ -426,12 +426,21 @@ export class Resolver {
         errors.push(...imported.errors);
 
         if (imported.ast) {
-          // Handle parameterized imports
           let resolvedImport = imported.ast;
-          if (imported.ast.meta?.params || use.params) {
+
+          // Extract reserved params (only/exclude) before they reach bindParams
+          const { only, exclude, remaining } = extractReservedParams(use.params);
+
+          // Handle template parameter interpolation with remaining (non-reserved) params
+          if (imported.ast.meta?.params || remaining.length > 0) {
             this.logger.debug(`Binding template parameters for ${importPath}`);
             try {
-              const params = bindParams(use.params, imported.ast.meta?.params, importPath, use.loc);
+              const params = bindParams(
+                remaining.length > 0 ? remaining : undefined,
+                imported.ast.meta?.params,
+                importPath,
+                use.loc
+              );
 
               if (params.size > 0) {
                 const ctx: TemplateContext = { params, sourceFile: importPath };
@@ -444,6 +453,17 @@ export class Resolver {
               );
               continue;
             }
+          }
+
+          // Apply block filtering (post-interpolation)
+          if (only || exclude) {
+            this.logger.debug(
+              `Filtering blocks: ${only ? `only=[${only.join(',')}]` : `exclude=[${exclude!.join(',')}]`}`
+            );
+            resolvedImport = {
+              ...resolvedImport,
+              blocks: filterBlocks(resolvedImport.blocks, { only, exclude }),
+            };
           }
 
           this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);
