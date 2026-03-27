@@ -70,6 +70,18 @@ export interface ValidationRule {
 /**
  * Validator configuration options.
  */
+/**
+ * Per-file rule exclusion entry.
+ *
+ * Allows disabling specific rules for files matching a glob pattern.
+ */
+export interface FileExclude {
+  /** Glob pattern matched against the file path (e.g., "skills/** /SKILL.md") */
+  pattern: string;
+  /** Rule names or IDs to disable for matching files */
+  rules: string[];
+}
+
 export interface ValidatorConfig {
   /** Override severity for specific rules (rule name -> severity or 'off') */
   rules?: Record<string, Severity | 'off'>;
@@ -79,6 +91,8 @@ export interface ValidatorConfig {
   blockedPatterns?: (string | RegExp)[];
   /** Array of rule names to disable */
   disableRules?: string[];
+  /** Per-file rule exclusions using glob patterns */
+  fileExcludes?: FileExclude[];
   /** Custom validation rules to add */
   customRules?: ValidationRule[];
   /** Logger for verbose/debug output */
