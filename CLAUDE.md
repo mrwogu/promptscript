@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-03-20T21:20:41.560Z - do not edit -->
+<!-- PromptScript 2026-03-27T11:23:57.861Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -75,7 +75,7 @@ flowchart TB
 
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
-- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 
 ## Config Files
@@ -127,6 +127,7 @@ pnpm run test             # 4. Run all tests
 pnpm prs validate --strict  # 5. Validate .prs files
 pnpm schema:check         # 6. Verify JSON schemas are current
 pnpm skill:check          # 7. Verify SKILL.md copies are in sync
+pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
 ```
 
 ## Documentation

@@ -7,7 +7,7 @@
       "include-component-in-tag": false,
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
-      "extra-files": ["packages/cli/package.json"]
+      "extra-files": ["packages/cli/package.json", "apps/vscode/package.json"]
     }
   },
   "changelog-sections": [

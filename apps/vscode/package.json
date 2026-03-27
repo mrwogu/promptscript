@@ -1,0 +1,42 @@
+{
+  "name": "promptscript",
+  "displayName": "PromptScript",
+  "description": "Syntax highlighting for PromptScript (.prs) files",
+  "version": "1.8.3",
+  "publisher": "promptscript",
+  "license": "MIT",
+  "repository": "https://github.com/mrwogu/promptscript",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "icon": "icons/prs-icon.png",
+  "contributes": {
+    "languages": [
+      {
+        "id": "promptscript",
+        "aliases": [
+          "PromptScript",
+          "prs"
+        ],
+        "extensions": [
+          ".prs"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "icons/prs-icon.png",
+          "dark": "icons/prs-icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "promptscript",
+        "scopeName": "source.promptscript",
+        "path": "./syntaxes/promptscript.tmLanguage.json"
+      }
+    ]
+  }
+}

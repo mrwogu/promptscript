@@ -1,0 +1,183 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "PromptScript",
+  "scopeName": "source.promptscript",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#registry-import" },
+    { "include": "#control-directive" },
+    { "include": "#block-directive" },
+    { "include": "#url-import" },
+    { "include": "#relative-import" },
+    { "include": "#triple-string" },
+    { "include": "#double-string" },
+    { "include": "#single-string" },
+    { "include": "#env-variable" },
+    { "include": "#template-expression" },
+    { "include": "#range-operator" },
+    { "include": "#number" },
+    { "include": "#restriction-dash" },
+    { "include": "#boolean" },
+    { "include": "#null" },
+    { "include": "#keyword-as" },
+    { "include": "#keyword-type" },
+    { "include": "#type-keywords" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comment": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.prs"
+    },
+    "registry-import": {
+      "match": "@[a-zA-Z_][a-zA-Z0-9_-]*/[a-zA-Z0-9_/.-]*(?:@[a-zA-Z0-9^~./-]+)?",
+      "name": "entity.name.import.registry.prs"
+    },
+    "control-directive": {
+      "match": "@(?:meta|inherit|use|extend)\\b",
+      "name": "keyword.control.directive.prs"
+    },
+    "block-directive": {
+      "match": "@[a-zA-Z_][a-zA-Z0-9_-]*",
+      "name": "entity.name.tag.block.prs"
+    },
+    "url-import": {
+      "match": "[a-zA-Z][a-zA-Z0-9-]*\\.[a-zA-Z]{2,}/[a-zA-Z0-9_./-]+(?:@[a-zA-Z0-9^~./-]+)?",
+      "name": "entity.name.import.url.prs"
+    },
+    "relative-import": {
+      "match": "\\.\\./[a-zA-Z0-9_/.-]+|\\./[a-zA-Z0-9_/.-]+",
+      "name": "entity.name.import.relative.prs"
+    },
+    "triple-string": {
+      "begin": "\"\"\"",
+      "end": "\"\"\"",
+      "name": "string.quoted.triple.prs",
+      "patterns": [
+        { "include": "#template-in-string" },
+        { "include": "#env-variable" },
+        {
+          "match": "[^\"{}$]+",
+          "name": "string.quoted.triple.prs"
+        }
+      ]
+    },
+    "double-string": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.prs",
+      "patterns": [{ "include": "#escape-sequence" }, { "include": "#env-variable" }]
+    },
+    "single-string": {
+      "begin": "'",
+      "end": "'",
+      "name": "string.quoted.single.prs",
+      "patterns": [{ "include": "#escape-sequence" }]
+    },
+    "escape-sequence": {
+      "patterns": [
+        {
+          "match": "\\\\[abfnrtv\\\\\"']",
+          "name": "constant.character.escape.prs"
+        },
+        {
+          "match": "\\\\x[0-9A-Fa-f]{1,4}",
+          "name": "constant.character.escape.prs"
+        },
+        {
+          "match": "\\\\u[0-9A-Fa-f]{4}",
+          "name": "constant.character.escape.prs"
+        },
+        {
+          "match": "\\\\.",
+          "name": "invalid.illegal.escape.prs"
+        }
+      ]
+    },
+    "env-variable": {
+      "match": "\\$\\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\\}",
+      "name": "variable.other.env.prs"
+    },
+    "template-expression": {
+      "begin": "\\{\\{",
+      "end": "\\}\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.template.begin.prs" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.template.end.prs" }
+      },
+      "patterns": [
+        {
+          "match": "[a-zA-Z_][a-zA-Z0-9_]*",
+          "name": "variable.other.template.prs"
+        }
+      ]
+    },
+    "template-in-string": {
+      "comment": "Separate state from template-expression - pops back to triple-string, not root",
+      "begin": "\\{\\{",
+      "end": "\\}\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.template.begin.prs" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.template.end.prs" }
+      },
+      "patterns": [
+        {
+          "match": "[a-zA-Z_][a-zA-Z0-9_]*",
+          "name": "variable.other.template.prs"
+        }
+      ]
+    },
+    "range-operator": {
+      "match": "\\.\\.",
+      "name": "keyword.operator.range.prs"
+    },
+    "number": {
+      "match": "-?\\d+(?:\\.\\d+)?",
+      "name": "constant.numeric.prs"
+    },
+    "restriction-dash": {
+      "match": "-(?!\\d)",
+      "name": "keyword.operator.restriction.prs"
+    },
+    "boolean": {
+      "match": "\\b(?:true|false)\\b",
+      "name": "constant.language.boolean.prs"
+    },
+    "null": {
+      "match": "\\bnull\\b",
+      "name": "constant.language.null.prs"
+    },
+    "keyword-as": {
+      "match": "\\bas\\b",
+      "name": "keyword.control.as.prs"
+    },
+    "keyword-type": {
+      "match": "\\b(?:range|enum)\\b",
+      "name": "keyword.other.type.prs"
+    },
+    "type-keywords": {
+      "match": "\\b(?:string|number|boolean)\\b",
+      "name": "support.type.prs"
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "match": "[{}()\\[\\]]",
+          "name": "punctuation.bracket.prs"
+        },
+        {
+          "match": "[:,.=?]",
+          "name": "punctuation.delimiter.prs"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.accessor.prs"
+        }
+      ]
+    }
+  }
+}
