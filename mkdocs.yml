@@ -231,6 +231,12 @@ nav:
       - Enterprise Setup: guides/enterprise.md
       - Migration: guides/migration.md
       - FAQ: guides/faq.md
+      - Markdown Imports: guides/markdown-imports.md
+      - AI Tool Hooks: guides/hooks.md
+      - Importing Instructions: guides/import.md
+      - Security: guides/security.md
+      - User Configuration: guides/user-config.md
+      - AI Migration Best Practices: guides/ai-migration-best-practices.md
       - Comparison: guides/vs-manual.md
   - API:
       - api-reference/README.md
