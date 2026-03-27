@@ -42,7 +42,7 @@ class PromptScriptLexer(RegexLexer):
             (r"\s+", Whitespace),
             # Block declarations (e.g., @meta, @identity, @restrictions)
             (
-                r"(@)(meta|identity|standards|shortcuts|agents|skills|local|extend|restrictions)\b",
+                r"(@)(meta|identity|context|standards|restrictions|shortcuts|params|guards|knowledge|agents|skills|local|extend)\b",
                 bygroups(Punctuation, Keyword.Declaration),
             ),
             # Inherit statement with path (registry @path, relative ./path, or URL host/path)
