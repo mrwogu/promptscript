@@ -1,11 +1,13 @@
 import { writeFile, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
+import { resolve } from 'path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { LockOptions } from '../types.js';
 import { loadConfig, findConfigFile } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
+import { collectRemoteImports } from './lock-scanner.js';
 
 /** Path to the lockfile relative to cwd. */
 export const LOCKFILE_PATH = 'promptscript.lock';
@@ -39,9 +41,20 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     const aliases = config.registries ?? {};
     const aliasEntries = Object.entries(aliases);
 
-    if (aliasEntries.length === 0) {
-      spinner.warn('No registry aliases configured');
-      ConsoleOutput.muted('Add registries to promptscript.yaml to use the lockfile');
+    // Scan .prs files for remote @use imports
+    const projectRoot = process.cwd();
+    const localPath = resolve(projectRoot, '.promptscript');
+    const entryPath = config.input?.entry
+      ? resolve(projectRoot, config.input.entry)
+      : resolve(localPath, 'project.prs');
+    const scannedImports = await collectRemoteImports(entryPath, {
+      localPath,
+      registries: config.registries,
+    });
+
+    if (aliasEntries.length === 0 && scannedImports.length === 0) {
+      spinner.warn('No remote dependencies found');
+      ConsoleOutput.muted('Add registries to promptscript.yaml or use @use github.com/... imports');
       return;
     }
 
@@ -72,6 +85,21 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       } else {
         dependencies[repoUrl] = {
           version: 'latest',
+          commit: '0000000000000000000000000000000000000000',
+          integrity: 'sha256-pending',
+        };
+      }
+    }
+
+    // Add scanned @use imports (deduplicated by repoUrl — lockfile pins at
+    // repo granularity since all paths within a repo share the same commit)
+    for (const imp of scannedImports) {
+      if (imp.repoUrl in dependencies) continue;
+      if (imp.repoUrl in existing.dependencies) {
+        dependencies[imp.repoUrl] = existing.dependencies[imp.repoUrl]!;
+      } else {
+        dependencies[imp.repoUrl] = {
+          version: imp.version || 'latest',
           commit: '0000000000000000000000000000000000000000',
           integrity: 'sha256-pending',
         };
