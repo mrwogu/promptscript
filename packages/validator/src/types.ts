@@ -48,7 +48,9 @@ export interface RuleContext {
   /** Validator configuration */
   config: ValidatorConfig;
   /** Report a validation issue */
-  report: (msg: Omit<ValidationMessage, 'ruleId' | 'ruleName' | 'severity'>) => void;
+  report: (
+    msg: Omit<ValidationMessage, 'ruleId' | 'ruleName' | 'severity'> & { severity?: Severity }
+  ) => void;
 }
 
 /**
