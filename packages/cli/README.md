@@ -185,6 +185,10 @@ targets:
 docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
 ```
 
+## Editor Support
+
+Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript) for syntax highlighting, bracket matching, code folding, and file icons for `.prs` files.
+
 ## Documentation
 
 - [Getting Started](https://getpromptscript.dev/getting-started/) - 5-minute quickstart
