@@ -76,9 +76,13 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **Conditionals** — `{{#if}}` / `{{#unless}}` blocks for conditional sections
 - [ ] **Loops** — `{{#each items}}` for dynamic lists
 
-### VS Code Extension
+### VS Code Extension — Phase 1 (Syntax Highlighting)
 
-See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
+- [x] **TextMate grammar** for `.prs` syntax highlighting
+- [x] **Language configuration** — brackets, comments, folding, indentation
+- [x] **File icon** for `.prs` files in VS Code explorer
+- [x] **Grammar validator** — ensures TextMate grammar stays in sync with lexer
+- [x] **CI/CD** — automated build and publish to VS Code Marketplace
 
 ---
 
@@ -132,16 +136,19 @@ See [VS Code Extension under Future](#5-vs-code-extension) for the full plan.
   - Code actions (quick fixes)
   - Rename refactoring
 
-### 4. VS Code Extension
+### 4. VS Code Extension — Phase 2 (LSP & Intelligence)
 
-**Goal:** First-class support for the most popular editor.
+**Goal:** Rich editing experience beyond syntax highlighting.
 
-- [ ] **Syntax highlighting** for `.prs` files
-- [ ] **Snippets** for common patterns
-- [ ] **LSP integration** (bundled language server)
-- [ ] **Preview pane** — See compiled output side-by-side
-- [ ] **Command palette** — Compile, validate, migrate from VS Code
-- [ ] **Outline view** — Navigate sections easily
+- [ ] **Snippets** for common patterns (migrate from Monaco completions)
+- [ ] **LSP integration** (bundled language server using existing parser + validator)
+- [ ] **Real-time diagnostics** — validation errors as you type
+- [ ] **Go-to-definition** — jump to `@use` / `@inherit` targets
+- [ ] **Autocomplete** — directives, registry paths, block names
+- [ ] **Hover documentation** — inline help for directives
+- [ ] **Command palette** — compile, validate, migrate from VS Code
+- [ ] **Preview pane** — compiled output side-by-side
+- [ ] **Outline view** — navigate sections easily
 
 ### 5. Public Registry
 
@@ -284,6 +291,7 @@ _These features are being evaluated based on community interest. Vote with 👍 
 - [ ] **AI-powered migration** — Use LLMs to convert legacy prompts
 - [ ] **Prompt linting rules** — ESLint-style configurable rules
 - [ ] **Monorepo support** — Per-package configurations with shared base
+- [ ] **GitHub Linguist registration** — `.prs` syntax highlighting on GitHub (requires TextMate grammar + adoption)
 
 ---
 
