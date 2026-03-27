@@ -83,6 +83,7 @@
       5. pnpm prs validate --strict  # Validate .prs files
       6. pnpm schema:check   # Verify JSON schemas are current
       7. pnpm skill:check    # Verify SKILL.md copies are in sync
+      8. pnpm grammar:check  # Verify TextMate grammar covers all tokens
 
       If any step fails, fix the issue before proceeding.
     """
@@ -211,6 +212,7 @@
   pnpm prs validate --strict  # 5. Validate .prs files
   pnpm schema:check         # 6. Verify JSON schemas are current
   pnpm skill:check          # 7. Verify SKILL.md copies are in sync
+  pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
   ```
   If any step fails, fix the issue and re-run from that step.
   """

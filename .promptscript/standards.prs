@@ -39,7 +39,7 @@
     reference: "https://www.conventionalcommits.org/"
     maxSubjectLength: 70
     types: [feat, fix, docs, style, refactor, test, chore]
-    scope: "always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package"
+    scope: "always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package"
     example: "feat(parser): add support for multiline strings"
   }
 

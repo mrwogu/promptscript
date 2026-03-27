@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-03-20T21:20:41.561Z
+# promptscript-generated: 2026-03-27T11:23:57.861Z | source: .promptscript/project.prs | target: claude
 description: 'Run full verification pipeline'
 ---
 
@@ -12,5 +12,6 @@ Run complete verification pipeline (all steps required):
 5. pnpm prs validate --strict # Validate .prs files
 6. pnpm schema:check # Verify JSON schemas are current
 7. pnpm skill:check # Verify SKILL.md copies are in sync
+8. pnpm grammar:check # Verify TextMate grammar covers all tokens
 
 If any step fails, fix the issue before proceeding.
