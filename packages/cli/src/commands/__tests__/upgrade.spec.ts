@@ -32,7 +32,7 @@ describe('upgradeCommand', () => {
     await upgradeCommand({ dryRun: false });
 
     const content = readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8');
-    expect(content).toContain('syntax: "1.1.0"');
+    expect(content).toContain('syntax: "1.2.0"');
   });
 
   it('should skip files already at latest', async () => {
@@ -40,7 +40,7 @@ describe('upgradeCommand', () => {
     mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
     writeFileSync(
       join(tmpDir, '.promptscript', 'project.prs'),
-      `@meta {\n  id: "test"\n  syntax: "1.1.0"\n}\n`
+      `@meta {\n  id: "test"\n  syntax: "1.2.0"\n}\n`
     );
 
     await upgradeCommand({ dryRun: false });

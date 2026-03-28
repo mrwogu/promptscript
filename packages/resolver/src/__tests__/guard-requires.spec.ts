@@ -54,7 +54,7 @@ describe('resolveGuardRequires', () => {
 
     const result = resolveGuardRequires(ast, { maxDepth: 3 });
 
-    const guardsBlock = result.blocks[0];
+    const guardsBlock = result.blocks[0]!;
     expect(guardsBlock.content.type).toBe('ObjectContent');
     const props = (guardsBlock.content as ObjectContent).properties;
     const authCheck = props['auth-check'] as Record<string, unknown>;
@@ -87,7 +87,7 @@ describe('resolveGuardRequires', () => {
 
     const result = resolveGuardRequires(ast, { maxDepth: 3 });
 
-    const props = (result.blocks[0].content as ObjectContent).properties;
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
     const a = props['a'] as Record<string, unknown>;
     expect(a['__resolvedRequires']).toEqual([
       { name: 'c', content: 'Guard C' },
@@ -119,7 +119,7 @@ describe('resolveGuardRequires', () => {
 
     const result = resolveGuardRequires(ast, { maxDepth: 3 });
 
-    const props = (result.blocks[0].content as ObjectContent).properties;
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
     const a = props['a'] as Record<string, unknown>;
     const resolved = a['__resolvedRequires'] as Array<{ name: string; content: string }>;
 
@@ -183,7 +183,7 @@ describe('resolveGuardRequires', () => {
 
     const result = resolveGuardRequires(ast, { maxDepth: 2 });
 
-    const props = (result.blocks[0].content as ObjectContent).properties;
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
     const a = props['a'] as Record<string, unknown>;
     const resolved = a['__resolvedRequires'] as Array<{ name: string; content: string }>;
 
@@ -244,7 +244,7 @@ describe('resolveGuardRequires', () => {
 
     const result = resolveGuardRequires(ast, { maxDepth: 3 });
 
-    const props = (result.blocks[0].content as ObjectContent).properties;
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
     const a = props['a'] as Record<string, unknown>;
     expect(a['__resolvedRequires']).toEqual([
       { name: 'b', content: 'Guard B content from TextContent' },

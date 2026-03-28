@@ -129,7 +129,7 @@ export function resolveGuardRequires(ast: Program, options: GuardRequiresOptions
     return ast;
   }
 
-  const guardsBlock = ast.blocks[guardsBlockIndex];
+  const guardsBlock = ast.blocks[guardsBlockIndex]!;
   if (guardsBlock.content.type !== 'ObjectContent') {
     return ast;
   }
@@ -194,10 +194,10 @@ export function resolveGuardRequires(ast: Program, options: GuardRequiresOptions
     properties: newProperties,
   };
 
-  const newBlock: Block = {
+  const newBlock = {
     ...guardsBlock,
     content: newContent,
-  };
+  } as Block;
 
   const newBlocks = [...ast.blocks];
   newBlocks[guardsBlockIndex] = newBlock;
