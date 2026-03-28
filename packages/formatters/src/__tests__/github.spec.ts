@@ -2003,6 +2003,85 @@ describe('GitHubFormatter', () => {
     });
   });
 
+  describe('examples section', () => {
+    it('should render examples from @examples block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'commit-message': {
+                  input: 'Fix login bug',
+                  output: 'fix(auth): resolve login redirect loop',
+                  description: 'Shows conventional commit format',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## examples');
+      expect(result.content).toContain('### Example: commit-message');
+      expect(result.content).toContain('Shows conventional commit format');
+      expect(result.content).toContain('**Input:**');
+      expect(result.content).toContain('Fix login bug');
+      expect(result.content).toContain('**Output:**');
+      expect(result.content).toContain('fix(auth): resolve login redirect loop');
+    });
+
+    it('should not render examples section when no @examples block exists', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.content).not.toContain('## examples');
+    });
+  });
+
+  describe('required context in instruction files', () => {
+    it('should render required context in generated instruction files', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'auth-check': {
+                  applyTo: ['src/auth/**/*.ts'],
+                  description: 'Auth rules',
+                  content: 'Always validate tokens',
+                  __resolvedRequires: [
+                    { name: 'api-validation', content: 'Validation rules content here...' },
+                  ],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const instructionFile = result.additionalFiles?.find(
+        (f) => f.path === '.github/instructions/auth-check.instructions.md'
+      );
+      expect(instructionFile).toBeDefined();
+      expect(instructionFile?.content).toContain('## Required Context');
+      expect(instructionFile?.content).toContain('### api-validation');
+      expect(instructionFile?.content).toContain('Validation rules content here...');
+    });
+  });
+
   describe('getSkillBasePath', () => {
     it('should return .github/skills', () => {
       const formatter = new GitHubFormatter();

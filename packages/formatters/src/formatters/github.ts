@@ -39,6 +39,8 @@ interface InstructionConfig {
   description: string;
   /** Content of the instruction */
   content: string;
+  /** Resolved guard dependencies (injected by resolver) */
+  __resolvedRequires?: Array<{ name: string; content: string }>;
 }
 
 /**
@@ -389,12 +391,16 @@ export class GitHubFormatter extends BaseFormatter {
         const content = obj['content'];
 
         if (applyTo && Array.isArray(applyTo)) {
+          const resolved = obj['__resolvedRequires'];
           instructions.push({
             name: key,
             applyTo: applyTo.map((p) => this.valueToString(p)),
             excludeAgent: excludeAgent ? this.valueToString(excludeAgent) : undefined,
             description: description ? this.valueToString(description) : `${key} rules`,
             content: content ? this.valueToString(content) : '',
+            __resolvedRequires: Array.isArray(resolved)
+              ? (resolved as Array<{ name: string; content: string }>)
+              : undefined,
           });
         }
       }
@@ -427,6 +433,19 @@ export class GitHubFormatter extends BaseFormatter {
       const dedentedContent = this.dedent(config.content);
       const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       lines.push(normalizedContent);
+    }
+
+    // Append required context from resolved guard dependencies
+    if (config.__resolvedRequires && config.__resolvedRequires.length > 0) {
+      lines.push('');
+      lines.push('## Required Context');
+      lines.push('');
+      for (const dep of config.__resolvedRequires) {
+        lines.push(`### ${dep.name}`);
+        lines.push('');
+        lines.push(dep.content);
+        lines.push('');
+      }
     }
 
     return {
@@ -893,6 +912,9 @@ export class GitHubFormatter extends BaseFormatter {
 
     const knowledge = this.knowledgeContent(ast, renderer);
     if (knowledge) sections.push(knowledge);
+
+    const examples = this.examples(ast, renderer);
+    if (examples) sections.push(examples);
   }
 
   private header(_ast: Program): string {
@@ -1298,6 +1320,36 @@ export class GitHubFormatter extends BaseFormatter {
     if (!remaining) return null;
 
     return this.stripAllIndent(remaining);
+  }
+
+  private examples(ast: Program, renderer: ConventionRenderer): string | null {
+    const examples = this.extractExamples(ast);
+    if (examples.length === 0) return null;
+
+    const parts: string[] = [];
+
+    for (const example of examples) {
+      parts.push(`### Example: ${example.name}`);
+      if (example.description) {
+        parts.push('');
+        parts.push(example.description);
+      }
+      parts.push('');
+      parts.push('**Input:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.input));
+      parts.push('```');
+      parts.push('');
+      parts.push('**Output:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.output));
+      parts.push('```');
+    }
+
+    const content = parts.join('\n');
+    return renderer.renderSection('examples', content);
   }
 
   // Helper methods
