@@ -7,6 +7,7 @@ import {
   ResolveError,
   FileNotFoundError,
   CircularDependencyError,
+  CircularGuardRequiresError,
   GitCloneError,
   GitAuthError,
   GitRefNotFoundError,
@@ -131,6 +132,22 @@ describe('CircularDependencyError', () => {
     expect(error.code).toBe(ErrorCode.CIRCULAR_DEPENDENCY);
     expect(error.chain).toEqual(chain);
     expect(error.message).toBe('Circular dependency detected: a.prs → b.prs → c.prs → a.prs');
+  });
+});
+
+describe('CircularGuardRequiresError', () => {
+  it('should create error with chain and location', () => {
+    const error = new CircularGuardRequiresError(['a', 'b', 'a'], mockLocation);
+    expect(error.name).toBe('CircularGuardRequiresError');
+    expect(error.chain).toEqual(['a', 'b', 'a']);
+    expect(error.message).toContain('a → b → a');
+    expect(error.code).toBe('PS2030');
+  });
+
+  it('should work without location', () => {
+    const error = new CircularGuardRequiresError(['x', 'y', 'x']);
+    expect(error.location).toBeUndefined();
+    expect(error.message).toBe('Circular guard dependency detected: x → y → x');
   });
 });
 

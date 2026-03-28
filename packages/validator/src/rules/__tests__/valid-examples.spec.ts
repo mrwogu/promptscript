@@ -141,4 +141,53 @@ describe('PS023: valid-examples', () => {
     const messages = validate(ast);
     expect(messages).toHaveLength(0);
   });
+
+  it('should skip skill examples that are not objects (string)', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        'my-skill': {
+          description: 'A skill',
+          examples: 'not an object',
+        },
+      }),
+    ]);
+    const messages = validate(ast);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should skip skill examples that are arrays', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        'my-skill': {
+          description: 'A skill',
+          examples: ['item1', 'item2'],
+        },
+      }),
+    ]);
+    const messages = validate(ast);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should skip skill examples that are AST nodes', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        'my-skill': {
+          description: 'A skill',
+          examples: { type: 'TextContent', value: 'some text', loc },
+        },
+      }),
+    ]);
+    const messages = validate(ast);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should skip skill entries that are not objects', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        'my-skill': 'just a string',
+      }),
+    ]);
+    const messages = validate(ast);
+    expect(messages).toHaveLength(0);
+  });
 });
