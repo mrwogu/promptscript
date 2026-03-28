@@ -1,0 +1,21 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on the project.
+
+Examples:
+
+### Example: camel-case
+Variable naming convention
+
+**Input:**
+```
+const user_name = 'Alice'
+```
+
+**Output:**
+```
+const userName = 'Alice'
+```
