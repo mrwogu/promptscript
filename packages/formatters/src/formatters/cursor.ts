@@ -287,6 +287,9 @@ export class CursorFormatter extends BaseFormatter {
     const diagrams = this.diagrams(ast);
     if (diagrams) mainSections.push(diagrams);
 
+    const examples = this.examples(ast);
+    if (examples) mainSections.push(examples);
+
     const never = this.never(ast);
     if (never) mainSections.push(never);
 
@@ -471,6 +474,9 @@ export class CursorFormatter extends BaseFormatter {
 
     const knowledge = this.knowledgeContent(ast);
     if (knowledge) sections.push(knowledge);
+
+    const examples = this.examples(ast);
+    if (examples) sections.push(examples);
 
     const never = this.never(ast);
     if (never) sections.push(never);
@@ -909,6 +915,32 @@ export class CursorFormatter extends BaseFormatter {
     if (!remaining) return null;
 
     return this.stripAllIndent(remaining);
+  }
+
+  private examples(ast: Program): string | null {
+    const examples = this.extractExamples(ast);
+    if (examples.length === 0) return null;
+
+    const parts: string[] = ['Examples:'];
+
+    for (const example of examples) {
+      parts.push(`\n### Example: ${example.name}`);
+      if (example.description) {
+        parts.push(example.description);
+      }
+      parts.push('');
+      parts.push('**Input:**');
+      parts.push('```');
+      parts.push(this.dedent(example.input));
+      parts.push('```');
+      parts.push('');
+      parts.push('**Output:**');
+      parts.push('```');
+      parts.push(this.dedent(example.output));
+      parts.push('```');
+    }
+
+    return parts.join('\n');
   }
 
   private never(ast: Program): string | null {
