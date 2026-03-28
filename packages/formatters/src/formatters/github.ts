@@ -442,8 +442,8 @@ export class GitHubFormatter extends BaseFormatter {
           (d): d is { name: string; content: string } =>
             d != null &&
             typeof d === 'object' &&
-            typeof (d as Record<string, unknown>).name === 'string' &&
-            typeof (d as Record<string, unknown>).content === 'string'
+            typeof (d as Record<string, unknown>)['name'] === 'string' &&
+            typeof (d as Record<string, unknown>)['content'] === 'string'
         )
       : [];
     if (resolvedReqs.length > 0) {

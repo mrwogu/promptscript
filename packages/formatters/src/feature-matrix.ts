@@ -1057,7 +1057,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     tools: {
       // Tier 0
       github: 'supported',
-      cursor: 'supported',
+      cursor: 'not-supported',
       claude: 'supported',
       antigravity: 'supported',
       factory: 'supported',

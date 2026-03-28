@@ -158,8 +158,8 @@ export function resolveGuardRequires(ast: Program, options: GuardRequiresOptions
       // Skip AST nodes that are not guard entry objects
       if (
         'type' in value &&
-        typeof (value as Record<string, unknown>).type === 'string' &&
-        AST_NODE_TYPES.has((value as Record<string, unknown>).type as string)
+        typeof (value as Record<string, unknown>)['type'] === 'string' &&
+        AST_NODE_TYPES.has((value as Record<string, unknown>)['type'] as string)
       ) {
         continue;
       }

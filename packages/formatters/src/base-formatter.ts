@@ -571,21 +571,18 @@ export abstract class BaseFormatter implements Formatter {
     for (const example of examples) {
       parts.push(`### Example: ${example.name}`);
       if (example.description) {
+        const safeDescription = example.description.replace(/[\r\n]+/g, ' ').trim();
         parts.push('');
-        parts.push(example.description);
+        parts.push(safeDescription);
       }
       parts.push('');
       parts.push('**Input:**');
       parts.push('');
-      parts.push('```');
-      parts.push(this.dedent(example.input));
-      parts.push('```');
+      parts.push(this.renderCodeFence(this.dedent(example.input)));
       parts.push('');
       parts.push('**Output:**');
       parts.push('');
-      parts.push('```');
-      parts.push(this.dedent(example.output));
-      parts.push('```');
+      parts.push(this.renderCodeFence(this.dedent(example.output)));
     }
 
     const content = parts.join('\n');
@@ -607,5 +604,14 @@ export abstract class BaseFormatter implements Formatter {
    */
   protected isSafeSkillName(name: string): boolean {
     return !name.includes('..') && !name.includes('/') && !name.includes('\\');
+  }
+
+  /**
+   * Render content inside a code fence, using a longer fence if the content
+   * itself contains triple backticks (prevents code fence injection).
+   */
+  protected renderCodeFence(content: string, lang = ''): string {
+    const fence = content.includes('```') ? '````' : '```';
+    return `${fence}${lang}\n${content}\n${fence}`;
   }
 }

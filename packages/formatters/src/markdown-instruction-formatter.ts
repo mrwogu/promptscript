@@ -414,21 +414,18 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
         lines.push('');
         lines.push(`### Example: ${example.name}`);
         if (example.description) {
+          const safeDescription = example.description.replace(/[\r\n]+/g, ' ').trim();
           lines.push('');
-          lines.push(example.description);
+          lines.push(safeDescription);
         }
         lines.push('');
         lines.push('**Input:**');
         lines.push('');
-        lines.push('```');
-        lines.push(this.dedent(example.input));
-        lines.push('```');
+        lines.push(this.renderCodeFence(this.dedent(example.input)));
         lines.push('');
         lines.push('**Output:**');
         lines.push('');
-        lines.push('```');
-        lines.push(this.dedent(example.output));
-        lines.push('```');
+        lines.push(this.renderCodeFence(this.dedent(example.output)));
       }
     }
 

@@ -5,6 +5,8 @@
 export const AST_NODE_TYPES = new Set([
   'TextContent',
   'ObjectContent',
+  'ArrayContent',
+  'MixedContent',
   'TemplateExpression',
   'TypeExpression',
   'Block',
