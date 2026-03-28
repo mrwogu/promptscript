@@ -672,6 +672,111 @@ describe('MarkdownInstructionFormatter', () => {
     });
   });
 
+  describe('examples section', () => {
+    it('should render examples from @examples block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                greeting: {
+                  input: 'Say hello',
+                  output: 'Hello, world!',
+                  description: 'A simple greeting',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## Examples');
+      expect(result.content).toContain('### Example: greeting');
+      expect(result.content).toContain('A simple greeting');
+      expect(result.content).toContain('**Input:**');
+      expect(result.content).toContain('Say hello');
+      expect(result.content).toContain('**Output:**');
+      expect(result.content).toContain('Hello, world!');
+    });
+
+    it('should not render examples section when no @examples block', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.content).not.toContain('## Examples');
+    });
+
+    it('should render multiple examples', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                first: { input: 'in1', output: 'out1' },
+                second: { input: 'in2', output: 'out2' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('### Example: first');
+      expect(result.content).toContain('### Example: second');
+    });
+
+    it('should omit description line when not present', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                basic: { input: 'in', output: 'out' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('### Example: basic');
+      expect(result.content).toContain('**Input:**');
+      // No description line between header and Input
+      const lines = result.content.split('\n');
+      const headerIdx = lines.findIndex((l: string) => l.includes('### Example: basic'));
+      // Next non-empty line after header should be **Input:**
+      const afterHeader = lines.slice(headerIdx + 1).filter((l: string) => l.trim() !== '');
+      expect(afterHeader[0]).toContain('**Input:**');
+    });
+  });
+
+  describe('requiredContext section', () => {
+    it('should return null by default (placeholder)', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      // requiredContext returns null, so no "Required Context" section
+      expect(result.content).not.toContain('Required Context');
+    });
+  });
+
   describe('dotDir configuration', () => {
     it('should use configured dotDir for file paths', () => {
       const customFormatter = new TestFormatter({ dotDir: '.custom' });

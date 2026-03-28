@@ -513,6 +513,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     this.addSection(sections, this.diagrams(ast, renderer));
     this.addSection(sections, this.knowledgeContent(ast, renderer));
     this.addSection(sections, this.restrictions(ast, renderer));
+    this.addSection(sections, this.examples(ast, renderer));
   }
 
   protected addSection(sections: string[], content: string | null): void {
@@ -816,6 +817,45 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection(this.getSectionName('restrictions'), content) + '\n';
+  }
+
+  protected examples(ast: Program, renderer: ConventionRenderer): string | null {
+    const examples = this.extractExamples(ast);
+    if (examples.length === 0) return null;
+
+    const parts: string[] = [];
+
+    for (const example of examples) {
+      parts.push(`### Example: ${example.name}`);
+      if (example.description) {
+        parts.push('');
+        parts.push(example.description);
+      }
+      parts.push('');
+      parts.push('**Input:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.input));
+      parts.push('```');
+      parts.push('');
+      parts.push('**Output:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.output));
+      parts.push('```');
+    }
+
+    const content = parts.join('\n');
+    return renderer.renderSection('Examples', content) + '\n';
+  }
+
+  /**
+   * Placeholder for required context rendering.
+   * Required context is rendered per-guard in multifile mode.
+   * Formatters can override this to provide custom behavior.
+   */
+  protected requiredContext(_ast: Program, _renderer: ConventionRenderer): string | null {
+    return null;
   }
 
   protected extractRestrictionsItems(content: Block['content']): string[] {
