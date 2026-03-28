@@ -37,6 +37,8 @@ interface RuleConfig {
   description: string;
   /** Rule content */
   content: string;
+  /** Resolved guard dependencies (injected by resolver) */
+  __resolvedRequires?: Array<{ name: string; content: string }>;
 }
 
 /**
@@ -364,11 +366,15 @@ export class ClaudeFormatter extends BaseFormatter {
         const content = obj['content'];
 
         if (paths && Array.isArray(paths)) {
+          const resolved = obj['__resolvedRequires'];
           rules.push({
             name: key,
             paths: paths.map((p) => this.valueToString(p)),
             description: description ? this.valueToString(description) : `${key} rules`,
             content: content ? this.valueToString(content) : '',
+            __resolvedRequires: Array.isArray(resolved)
+              ? (resolved as Array<{ name: string; content: string }>)
+              : undefined,
           });
         }
       }
@@ -398,6 +404,19 @@ export class ClaudeFormatter extends BaseFormatter {
       const dedentedContent = this.dedent(config.content);
       const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       lines.push(normalizedContent);
+    }
+
+    // Append required context from resolved guard dependencies
+    if (config.__resolvedRequires && config.__resolvedRequires.length > 0) {
+      lines.push('');
+      lines.push('## Required Context');
+      lines.push('');
+      for (const dep of config.__resolvedRequires) {
+        lines.push(`### ${dep.name}`);
+        lines.push('');
+        lines.push(dep.content);
+        lines.push('');
+      }
     }
 
     return {
@@ -858,6 +877,7 @@ export class ClaudeFormatter extends BaseFormatter {
     this.addSection(sections, this.diagrams(ast, renderer));
     this.addSection(sections, this.knowledgeContent(ast, renderer));
     this.addSection(sections, this.donts(ast, renderer));
+    this.addSection(sections, this.examples(ast, renderer));
   }
 
   private addSection(sections: string[], content: string | null): void {
@@ -1166,6 +1186,36 @@ export class ClaudeFormatter extends BaseFormatter {
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection("Don'ts", content) + '\n';
+  }
+
+  private examples(ast: Program, renderer: ConventionRenderer): string | null {
+    const examples = this.extractExamples(ast);
+    if (examples.length === 0) return null;
+
+    const parts: string[] = [];
+
+    for (const example of examples) {
+      parts.push(`### Example: ${example.name}`);
+      if (example.description) {
+        parts.push('');
+        parts.push(example.description);
+      }
+      parts.push('');
+      parts.push('**Input:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.input));
+      parts.push('```');
+      parts.push('');
+      parts.push('**Output:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.output));
+      parts.push('```');
+    }
+
+    const content = parts.join('\n');
+    return renderer.renderSection('Examples', content) + '\n';
   }
 
   private extractDontsItems(content: Block['content']): string[] {
