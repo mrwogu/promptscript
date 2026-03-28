@@ -1,0 +1,29 @@
+@meta {
+  id: "guard-requires-test"
+  syntax-version: "1.2.0"
+}
+
+@guards {
+  "api-controllers": {
+    applyTo: ["**/*.controller.ts"]
+    requires: ["api-validation", "api-security"]
+    content: """
+      Controller rules.
+    """
+  }
+
+  "api-validation": {
+    applyTo: ["**/*.validator.ts"]
+    content: """
+      Validation rules.
+    """
+  }
+
+  "api-security": {
+    applyTo: ["**/*.guard.ts"]
+    requires: ["api-validation"]
+    content: """
+      Security rules.
+    """
+  }
+}
