@@ -32,6 +32,9 @@ export enum ErrorCode {
   OFFLINE_RESOLVE = 'PS2024',
   RATE_LIMITED = 'PS2025',
 
+  // Guard requires errors (2030+)
+  CIRCULAR_GUARD_REQUIRES = 'PS2030',
+
   // Validation errors (3xxx)
   VALIDATION_ERROR = 'PS3000',
   REQUIRED_FIELD = 'PS3001',

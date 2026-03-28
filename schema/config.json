@@ -270,6 +270,10 @@
               "off"
             ]
           }
+        },
+        "guardRequiresDepth": {
+          "type": "number",
+          "description": "Maximum depth for recursive guard requires resolution. Default: 3"
         }
       },
       "additionalProperties": false,

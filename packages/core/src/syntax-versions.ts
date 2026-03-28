@@ -46,10 +46,29 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
       'prompts',
     ],
   },
+  '1.2.0': {
+    blocks: [
+      'identity',
+      'context',
+      'standards',
+      'restrictions',
+      'knowledge',
+      'shortcuts',
+      'commands',
+      'guards',
+      'params',
+      'skills',
+      'local',
+      'agents',
+      'workflows',
+      'prompts',
+      'examples',
+    ],
+  },
 };
 
 /** Latest known syntax version. */
-export const LATEST_SYNTAX_VERSION = '1.1.0';
+export const LATEST_SYNTAX_VERSION = '1.2.0';
 
 /**
  * Get the latest known syntax version.

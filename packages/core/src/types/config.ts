@@ -287,6 +287,8 @@ export interface PromptScriptConfig {
   validation?: {
     requiredGuards?: string[];
     rules?: Record<string, 'error' | 'warning' | 'off'>;
+    /** Maximum depth for recursive guard requires resolution. Default: 3 */
+    guardRequiresDepth?: number;
   };
 }
 
