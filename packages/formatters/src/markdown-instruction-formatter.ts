@@ -33,6 +33,8 @@ export interface MarkdownSkillConfig {
   resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
+  /** Raw skill properties for extracting nested examples */
+  rawProps?: Record<string, Value>;
 }
 
 /**
@@ -374,6 +376,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          rawProps: obj,
         });
       }
     }
@@ -401,6 +404,35 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (config.content) {
       const dedentedContent = this.dedent(config.content);
       lines.push(dedentedContent);
+    }
+
+    // Append examples section if the skill has examples
+    if (config.rawProps) {
+      const skillExamples = this.extractSkillExamples(config.rawProps);
+      if (skillExamples.length > 0) {
+        lines.push('');
+        lines.push('## Examples');
+        for (const example of skillExamples) {
+          lines.push('');
+          lines.push(`### Example: ${example.name}`);
+          if (example.description) {
+            lines.push('');
+            lines.push(example.description);
+          }
+          lines.push('');
+          lines.push('**Input:**');
+          lines.push('');
+          lines.push('```');
+          lines.push(this.dedent(example.input));
+          lines.push('```');
+          lines.push('');
+          lines.push('**Output:**');
+          lines.push('');
+          lines.push('```');
+          lines.push(this.dedent(example.output));
+          lines.push('```');
+        }
+      }
     }
 
     const skillDirPath = `${this.config.dotDir}/skills/${config.name}`;
