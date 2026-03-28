@@ -140,15 +140,29 @@ export function resolveGuardRequires(ast: Program, options: GuardRequiresOptions
   const objectContent = guardsBlock.content as ObjectContent;
   const properties = objectContent.properties;
 
+  // AST node types to skip — these are parser-generated nodes, not guard entries
+  const AST_NODE_TYPES = new Set([
+    'TextContent',
+    'ObjectContent',
+    'ArrayContent',
+    'MixedContent',
+    'TemplateExpression',
+    'TypeExpression',
+    'Block',
+  ]);
+
   // Build a map of guard name -> properties for lookup
   const guardsMap = new Map<string, Record<string, Value>>();
   for (const [name, value] of Object.entries(properties)) {
-    if (
-      value !== null &&
-      typeof value === 'object' &&
-      !Array.isArray(value) &&
-      !('type' in value && (value as { type: string }).type === 'TextContent')
-    ) {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      // Skip AST nodes that are not guard entry objects
+      if (
+        'type' in value &&
+        typeof (value as Record<string, unknown>).type === 'string' &&
+        AST_NODE_TYPES.has((value as Record<string, unknown>).type as string)
+      ) {
+        continue;
+      }
       guardsMap.set(name, value as Record<string, Value>);
     }
   }

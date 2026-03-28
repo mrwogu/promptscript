@@ -384,6 +384,7 @@ export class GitHubFormatter extends BaseFormatter {
       if (key === 'globs') continue;
 
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeSkillName(key)) continue;
         const obj = value as Record<string, Value>;
         const applyTo = obj['applyTo'];
         const excludeAgent = obj['excludeAgent'];
@@ -436,13 +437,25 @@ export class GitHubFormatter extends BaseFormatter {
     }
 
     // Append required context from resolved guard dependencies
-    if (config.__resolvedRequires && config.__resolvedRequires.length > 0) {
+    const resolvedReqs = Array.isArray(config.__resolvedRequires)
+      ? (config.__resolvedRequires as unknown[]).filter(
+          (d): d is { name: string; content: string } =>
+            d != null &&
+            typeof d === 'object' &&
+            typeof (d as Record<string, unknown>).name === 'string' &&
+            typeof (d as Record<string, unknown>).content === 'string'
+        )
+      : [];
+    if (resolvedReqs.length > 0) {
       lines.push('');
       lines.push('## Required Context');
       lines.push('');
-      for (const dep of config.__resolvedRequires) {
-        // Sanitize dep.name: strip newlines and YAML frontmatter separators
-        const safeName = dep.name.replace(/[\r\n]/g, ' ').replace(/---/g, '—');
+      for (const dep of resolvedReqs) {
+        // Sanitize dep.name: strip heading markers, newlines, and YAML frontmatter separators
+        const safeName = dep.name
+          .replace(/^#+\s*/g, '')
+          .replace(/[\r\n]/g, ' ')
+          .replace(/---/g, '—');
         lines.push(`### ${safeName}`);
         lines.push('');
         // Sanitize dep.content: dedent and strip leading --- that could be mistaken for frontmatter
