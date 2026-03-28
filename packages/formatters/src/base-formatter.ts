@@ -499,6 +499,67 @@ export abstract class BaseFormatter implements Formatter {
       }));
   }
 
+  /**
+   * Extract examples from the @examples block.
+   * Returns an array of example definitions with name, input, output, and optional description.
+   */
+  protected extractExamples(
+    ast: Program
+  ): Array<{ name: string; input: string; output: string; description?: string }> {
+    const block = this.findBlock(ast, 'examples');
+    if (!block) return [];
+
+    const props = this.getProps(block.content);
+    const examples: Array<{ name: string; input: string; output: string; description?: string }> =
+      [];
+
+    for (const [name, value] of Object.entries(props)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+
+      const obj = value as Record<string, Value>;
+      const input = obj['input'] ? this.valueToString(obj['input']) : '';
+      const output = obj['output'] ? this.valueToString(obj['output']) : '';
+
+      if (!input || !output) continue;
+
+      const description = obj['description'] ? this.valueToString(obj['description']) : undefined;
+      examples.push({ name, input, output, description });
+    }
+
+    return examples;
+  }
+
+  /**
+   * Extract examples from a skill's nested examples property.
+   * Returns the same shape as extractExamples.
+   */
+  protected extractSkillExamples(
+    skillProps: Record<string, Value>
+  ): Array<{ name: string; input: string; output: string; description?: string }> {
+    const examplesValue = skillProps['examples'];
+    if (!examplesValue || typeof examplesValue !== 'object' || Array.isArray(examplesValue))
+      return [];
+
+    const examplesObj = examplesValue as Record<string, Value>;
+    const examples: Array<{ name: string; input: string; output: string; description?: string }> =
+      [];
+
+    for (const [name, value] of Object.entries(examplesObj)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+
+      const obj = value as Record<string, Value>;
+      const input = obj['input'] ? this.valueToString(obj['input']) : '';
+      const output = obj['output'] ? this.valueToString(obj['output']) : '';
+
+      if (!input || !output) continue;
+
+      const description = obj['description'] ? this.valueToString(obj['description']) : undefined;
+      examples.push({ name, input, output, description });
+    }
+
+    return examples;
+  }
+
   /** Base path for skills, or null if formatter has no skill support. */
   getSkillBasePath(): string | null {
     return null;

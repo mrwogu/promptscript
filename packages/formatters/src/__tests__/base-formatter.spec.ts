@@ -90,6 +90,14 @@ class TestFormatter extends BaseFormatter {
   public testStripAllIndent(content: string): string {
     return this.stripAllIndent(content);
   }
+
+  public testExtractExamples(ast: Program) {
+    return this.extractExamples(ast);
+  }
+
+  public testExtractSkillExamples(skillProps: Record<string, Value>) {
+    return this.extractSkillExamples(skillProps);
+  }
 }
 
 describe('BaseFormatter', () => {
@@ -658,6 +666,180 @@ describe('BaseFormatter', () => {
   describe('getSkillFileName', () => {
     it('should return null by default', () => {
       expect(formatter.getSkillFileName()).toBeNull();
+    });
+  });
+
+  describe('extractExamples', () => {
+    it('should extract examples from @examples block', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                greeting: {
+                  input: 'Say hello',
+                  output: 'Hello, world!',
+                  description: 'A simple greeting example',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      const result = formatter.testExtractExamples(ast);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        name: 'greeting',
+        input: 'Say hello',
+        output: 'Hello, world!',
+        description: 'A simple greeting example',
+      });
+    });
+
+    it('should return empty array when no @examples block', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      expect(formatter.testExtractExamples(ast)).toEqual([]);
+    });
+
+    it('should skip entries missing input or output', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                noOutput: { input: 'hello' },
+                noInput: { output: 'world' },
+                valid: { input: 'in', output: 'out' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      const result = formatter.testExtractExamples(ast);
+      expect(result).toHaveLength(1);
+      expect(result[0]?.name).toBe('valid');
+    });
+
+    it('should skip array values', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                listItem: ['not', 'an', 'object'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      expect(formatter.testExtractExamples(ast)).toEqual([]);
+    });
+
+    it('should omit description when not present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                basic: { input: 'in', output: 'out' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      const result = formatter.testExtractExamples(ast);
+      expect(result).toHaveLength(1);
+      expect(result[0]?.description).toBeUndefined();
+    });
+  });
+
+  describe('extractSkillExamples', () => {
+    it('should extract examples from skill properties', () => {
+      const skillProps: Record<string, Value> = {
+        description: 'A skill',
+        examples: {
+          basic: {
+            input: 'skill input',
+            output: 'skill output',
+            description: 'skill example',
+          },
+        },
+      };
+
+      const result = formatter.testExtractSkillExamples(skillProps);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        name: 'basic',
+        input: 'skill input',
+        output: 'skill output',
+        description: 'skill example',
+      });
+    });
+
+    it('should return empty array when examples is not an object', () => {
+      expect(formatter.testExtractSkillExamples({ examples: 'not-object' })).toEqual([]);
+      expect(formatter.testExtractSkillExamples({ examples: ['array'] })).toEqual([]);
+      expect(formatter.testExtractSkillExamples({})).toEqual([]);
+    });
+
+    it('should skip entries missing input or output', () => {
+      const skillProps: Record<string, Value> = {
+        examples: {
+          noOutput: { input: 'hello' },
+          valid: { input: 'in', output: 'out' },
+        },
+      };
+
+      const result = formatter.testExtractSkillExamples(skillProps);
+      expect(result).toHaveLength(1);
+      expect(result[0]?.name).toBe('valid');
     });
   });
 
