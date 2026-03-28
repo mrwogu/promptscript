@@ -21,6 +21,9 @@ import { syntaxVersionCompat } from './syntax-version-compat.js';
 import { unknownBlockName } from './unknown-block-name.js';
 import { duplicateSkills } from './duplicate-skills.js';
 import { useBlockFilter } from './use-block-filter.js';
+import { circularGuardRequires } from './circular-guard-requires.js';
+import { validExamples } from './valid-examples.js';
+import { validGuardRequires } from './valid-guard-requires.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -73,6 +76,9 @@ export { syntaxVersionCompat } from './syntax-version-compat.js';
 export { unknownBlockName } from './unknown-block-name.js';
 export { duplicateSkills } from './duplicate-skills.js';
 export { useBlockFilter } from './use-block-filter.js';
+export { circularGuardRequires } from './circular-guard-requires.js';
+export { validExamples } from './valid-examples.js';
+export { validGuardRequires } from './valid-guard-requires.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -109,6 +115,12 @@ export const allRules: ValidationRule[] = [
   duplicateSkills,
   // @use block filter validation (PS021)
   useBlockFilter,
+  // Circular guard requires (PS022)
+  circularGuardRequires,
+  // Valid examples (PS023)
+  validExamples,
+  // Valid guard requires (PS024)
+  validGuardRequires,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
