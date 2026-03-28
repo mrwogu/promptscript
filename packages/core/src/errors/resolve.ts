@@ -48,6 +48,22 @@ export class CircularDependencyError extends ResolveError {
 }
 
 /**
+ * Circular dependency detected in guard requires chain.
+ */
+export class CircularGuardRequiresError extends ResolveError {
+  readonly chain: string[];
+  constructor(chain: string[], location?: SourceLocation) {
+    super(
+      `Circular guard dependency detected: ${chain.join(' → ')}`,
+      location,
+      ErrorCode.CIRCULAR_GUARD_REQUIRES
+    );
+    this.name = 'CircularGuardRequiresError';
+    this.chain = chain;
+  }
+}
+
+/**
  * Git clone operation failed.
  */
 export class GitCloneError extends ResolveError {

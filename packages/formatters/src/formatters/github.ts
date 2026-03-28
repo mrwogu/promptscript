@@ -39,6 +39,8 @@ interface InstructionConfig {
   description: string;
   /** Content of the instruction */
   content: string;
+  /** Resolved guard dependencies (injected by resolver) */
+  __resolvedRequires?: Array<{ name: string; content: string }>;
 }
 
 /**
@@ -382,6 +384,7 @@ export class GitHubFormatter extends BaseFormatter {
       if (key === 'globs') continue;
 
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeSkillName(key)) continue;
         const obj = value as Record<string, Value>;
         const applyTo = obj['applyTo'];
         const excludeAgent = obj['excludeAgent'];
@@ -389,12 +392,16 @@ export class GitHubFormatter extends BaseFormatter {
         const content = obj['content'];
 
         if (applyTo && Array.isArray(applyTo)) {
+          const resolved = obj['__resolvedRequires'];
           instructions.push({
             name: key,
             applyTo: applyTo.map((p) => this.valueToString(p)),
             excludeAgent: excludeAgent ? this.valueToString(excludeAgent) : undefined,
             description: description ? this.valueToString(description) : `${key} rules`,
             content: content ? this.valueToString(content) : '',
+            __resolvedRequires: Array.isArray(resolved)
+              ? (resolved as Array<{ name: string; content: string }>)
+              : undefined,
           });
         }
       }
@@ -427,6 +434,35 @@ export class GitHubFormatter extends BaseFormatter {
       const dedentedContent = this.dedent(config.content);
       const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       lines.push(normalizedContent);
+    }
+
+    // Append required context from resolved guard dependencies
+    const resolvedReqs = Array.isArray(config.__resolvedRequires)
+      ? (config.__resolvedRequires as unknown[]).filter(
+          (d): d is { name: string; content: string } =>
+            d != null &&
+            typeof d === 'object' &&
+            typeof (d as Record<string, unknown>)['name'] === 'string' &&
+            typeof (d as Record<string, unknown>)['content'] === 'string'
+        )
+      : [];
+    if (resolvedReqs.length > 0) {
+      lines.push('');
+      lines.push('## Required Context');
+      lines.push('');
+      for (const dep of resolvedReqs) {
+        // Sanitize dep.name: strip heading markers, newlines, and YAML frontmatter separators
+        const safeName = dep.name
+          .replace(/^#+\s*/g, '')
+          .replace(/[\r\n]/g, ' ')
+          .replace(/---/g, '—');
+        lines.push(`### ${safeName}`);
+        lines.push('');
+        // Sanitize dep.content: dedent and strip leading --- that could be mistaken for frontmatter
+        const safeContent = this.dedent(dep.content).replace(/^---/gm, '\\---');
+        lines.push(safeContent);
+        lines.push('');
+      }
     }
 
     return {
@@ -893,6 +929,9 @@ export class GitHubFormatter extends BaseFormatter {
 
     const knowledge = this.knowledgeContent(ast, renderer);
     if (knowledge) sections.push(knowledge);
+
+    const examples = this.examples(ast, renderer);
+    if (examples) sections.push(examples);
   }
 
   private header(_ast: Program): string {
@@ -1298,6 +1337,10 @@ export class GitHubFormatter extends BaseFormatter {
     if (!remaining) return null;
 
     return this.stripAllIndent(remaining);
+  }
+
+  private examples(ast: Program, renderer: ConventionRenderer): string | null {
+    return this.renderExamplesSection(ast, renderer, 'examples');
   }
 
   // Helper methods

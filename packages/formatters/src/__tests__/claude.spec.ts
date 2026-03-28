@@ -1524,6 +1524,282 @@ describe('ClaudeFormatter', () => {
     });
   });
 
+  describe('examples section', () => {
+    it('should render examples from @examples block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'commit-message': {
+                  input: 'Fix login bug',
+                  output: 'fix(auth): resolve login redirect loop',
+                  description: 'Shows conventional commit format',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## Examples');
+      expect(result.content).toContain('### Example: commit-message');
+      expect(result.content).toContain('Shows conventional commit format');
+      expect(result.content).toContain('**Input:**');
+      expect(result.content).toContain('Fix login bug');
+      expect(result.content).toContain('**Output:**');
+      expect(result.content).toContain('fix(auth): resolve login redirect loop');
+    });
+
+    it('should not render examples section when no @examples block exists', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.content).not.toContain('## Examples');
+    });
+  });
+
+  describe('required context in rule files', () => {
+    it('should render required context in generated rule files', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'auth-check': {
+                  paths: ['src/auth/**/*.ts'],
+                  description: 'Auth rules',
+                  content: 'Always validate tokens',
+                  __resolvedRequires: [
+                    { name: 'api-validation', content: 'Validation rules content here...' },
+                  ],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const ruleFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/rules/auth-check.md'
+      );
+      expect(ruleFile).toBeDefined();
+      expect(ruleFile?.content).toContain('## Required Context');
+      expect(ruleFile?.content).toContain('### api-validation');
+      expect(ruleFile?.content).toContain('Validation rules content here...');
+    });
+  });
+
+  describe('required context sanitization', () => {
+    it('should strip newlines from guard dependency name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  paths: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: 'evil\nname\nhere', content: 'some content' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const ruleFile = result.additionalFiles?.find((f) => f.path === '.claude/rules/my-guard.md');
+      expect(ruleFile).toBeDefined();
+      // The heading should not contain raw newlines
+      expect(ruleFile?.content).toContain('### evil name here');
+      expect(ruleFile?.content).not.toMatch(/### .*\n.*name/);
+    });
+
+    it('should strip --- from guard dependency name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  paths: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: 'bad---name', content: 'some content' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const ruleFile = result.additionalFiles?.find((f) => f.path === '.claude/rules/my-guard.md');
+      expect(ruleFile).toBeDefined();
+      // The heading should not contain raw ---
+      expect(ruleFile?.content).not.toContain('### bad---name');
+      expect(ruleFile?.content).toContain('### bad\u2014name');
+    });
+
+    it('should escape --- at start of guard dependency content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  paths: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: 'dep', content: '---\nfrontmatter: true\n---' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const ruleFile = result.additionalFiles?.find((f) => f.path === '.claude/rules/my-guard.md');
+      expect(ruleFile).toBeDefined();
+      // Content --- should be escaped
+      expect(ruleFile?.content).toContain('\\---');
+      // Should not have unescaped --- in the required context section (after the frontmatter block)
+      const requiredContextIdx = ruleFile!.content.indexOf('## Required Context');
+      const afterRequired = ruleFile!.content.substring(requiredContextIdx);
+      expect(afterRequired).not.toMatch(/^---$/m);
+    });
+
+    it('should skip guard entries with path traversal names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../../../etc/passwd': {
+                  paths: ['src/**/*.ts'],
+                  description: 'Malicious guard',
+                  content: 'Evil content',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      // Should not generate a rule file for the malicious name
+      const maliciousFile = result.additionalFiles?.find((f) => f.path.includes('passwd'));
+      expect(maliciousFile).toBeUndefined();
+    });
+
+    it('should strip heading markers from guard dependency name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  paths: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: '## heading injection', content: 'some content' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const ruleFile = result.additionalFiles?.find((f) => f.path === '.claude/rules/my-guard.md');
+      expect(ruleFile).toBeDefined();
+      // Should not contain ## ## (double heading)
+      expect(ruleFile?.content).not.toContain('### ## heading');
+      expect(ruleFile?.content).toContain('### heading injection');
+    });
+
+    it('should filter out invalid __resolvedRequires entries at runtime', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  paths: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [
+                    null,
+                    { name: 123, content: 'bad' },
+                    { name: 'valid', content: 'Valid content' },
+                  ],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const ruleFile = result.additionalFiles?.find((f) => f.path === '.claude/rules/my-guard.md');
+      expect(ruleFile).toBeDefined();
+      expect(ruleFile?.content).toContain('### valid');
+      expect(ruleFile?.content).toContain('Valid content');
+    });
+  });
+
   describe('getSkillBasePath', () => {
     it('should return .claude/skills', () => {
       const formatter = new ClaudeFormatter();

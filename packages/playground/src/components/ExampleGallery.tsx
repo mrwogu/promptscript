@@ -388,7 +388,347 @@ const EXAMPLES: Example[] = [
     ],
   },
 
+  {
+    id: 'with-knowledge',
+    name: 'Knowledge & Commands',
+    description: 'External knowledge, commands, and local instructions',
+    complexity: 'intermediate',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "knowledge-example"
+  syntax: "1.2.0"
+}
+
+@identity {
+  """
+  You are a full-stack developer for an e-commerce platform.
+  """
+}
+
+@knowledge {
+  """
+  Our database uses PostgreSQL 16 with the following key tables:
+  - users (id, email, role, created_at)
+  - orders (id, user_id, total, status, created_at)
+  - products (id, name, price, stock, category)
+
+  API rate limits: 100 req/min for standard, 1000 req/min for premium.
+  """
+}
+
+@commands {
+  db-schema: {
+    description: "Show current database schema"
+    content: """
+    Query the database schema and display all tables,
+    columns, and relationships in a readable format.
+    """
+  }
+  migrate: {
+    description: "Generate a database migration"
+    content: """
+    Create a new migration file following our naming convention:
+    YYYY-MM-DD-description.sql
+    """
+  }
+}
+
+@local {
+  """
+  Personal dev notes:
+  - Staging DB at staging.db.internal:5432
+  - Use feature flags for new checkout flow
+  """
+}
+`,
+      },
+    ],
+  },
+  {
+    id: 'with-block-filtering',
+    name: 'Import Filtering',
+    description: 'Selective block imports with only/exclude',
+    complexity: 'intermediate',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "filtered-imports"
+  syntax: "1.2.0"
+}
+
+# Import only standards and restrictions from shared config
+@use ./shared only=["standards", "restrictions"]
+
+@identity {
+  """
+  You are a backend API developer.
+  You build scalable REST services.
+  """
+}
+
+@context {
+  languages: ["Go"]
+  runtime: "Go 1.22"
+  frameworks: ["Chi router", "sqlc"]
+}
+`,
+      },
+      {
+        path: 'shared.prs',
+        content: `@meta {
+  id: "shared-config"
+  syntax: "1.2.0"
+}
+
+@identity {
+  """
+  This identity block will NOT be imported (filtered out).
+  """
+}
+
+@standards {
+  code: {
+    testing: ["table-driven tests"]
+    errorHandling: "return errors, don't panic"
+  }
+  git: {
+    format: "Conventional Commits"
+  }
+}
+
+@restrictions {
+  - "No global mutable state"
+  - "All public functions must have godoc"
+  - "Errors must wrap with fmt.Errorf"
+}
+
+@context {
+  """
+  This context block will NOT be imported (filtered out).
+  """
+}
+`,
+      },
+    ],
+  },
+
   // === ADVANCED ===
+  {
+    id: 'with-examples',
+    name: 'Few-Shot Examples',
+    description: 'Structured input/output examples for teaching AI patterns',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "few-shot-examples"
+  syntax: "1.2.0"
+}
+
+@identity {
+  """
+  You are a code review assistant.
+  You transform code to match project conventions.
+  """
+}
+
+@examples {
+  error-handling: {
+    description: "Wrap async calls in try/catch with typed errors"
+    input: """
+      async function getUser(id: string) {
+        const res = await fetch(\`/api/users/\${id}\`);
+        return res.json();
+      }
+    """
+    output: """
+      async function getUser(id: string): Promise<User> {
+        try {
+          const res = await fetch(\`/api/users/\${id}\`);
+          if (!res.ok) throw new HttpError(res.status);
+          return res.json() as Promise<User>;
+        } catch (err) {
+          logger.error('getUser failed', { id, err });
+          throw err;
+        }
+      }
+    """
+  }
+
+  naming-convention: {
+    description: "Use camelCase for variables, PascalCase for types"
+    input: "const user_name: user_type = get_user();"
+    output: "const userName: UserType = getUser();"
+  }
+
+  explicit-return-types: {
+    input: "function add(a: number, b: number) { return a + b; }"
+    output: "function add(a: number, b: number): number { return a + b; }"
+  }
+}
+
+@standards {
+  code: {
+    language: "TypeScript"
+    strictMode: true
+  }
+}
+`,
+      },
+    ],
+  },
+  {
+    id: 'with-guard-requires',
+    name: 'Guard Dependencies',
+    description: 'Guards that automatically pull in related rules via requires',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "guard-dependencies"
+  syntax: "1.2.0"
+}
+
+@identity {
+  """
+  You are a backend developer for a Node.js API.
+  """
+}
+
+@guards {
+  # When editing controllers, validation + security rules are auto-injected
+  "api-controllers": {
+    applyTo: ["**/controllers/**/*.ts"]
+    requires: ["api-validation", "api-security"]
+    content: """
+      Controller rules:
+      - Use dependency injection for services
+      - Return typed response DTOs
+      - Keep controllers thin, delegate to services
+    """
+  }
+
+  "api-validation": {
+    applyTo: ["**/validators/**/*.ts", "**/dto/**/*.ts"]
+    content: """
+      Validation rules:
+      - Use class-validator decorators on DTOs
+      - Validate all request parameters
+      - Return structured validation errors
+    """
+  }
+
+  "api-security": {
+    applyTo: ["**/guards/**/*.ts", "**/middleware/**/*.ts"]
+    requires: ["api-validation"]
+    content: """
+      Security rules:
+      - Validate JWT tokens on protected routes
+      - Implement role-based access control
+      - Log all unauthorized access attempts
+    """
+  }
+
+  # Context library: no applyTo, used only via requires
+  "shared-conventions": {
+    content: """
+      Shared conventions:
+      - Use kebab-case for file names
+      - Named exports only, no default exports
+      - Follow Conventional Commits
+    """
+  }
+}
+
+@standards {
+  code: {
+    language: "TypeScript"
+    runtime: "Node.js 20+"
+    framework: "NestJS"
+  }
+}
+`,
+      },
+    ],
+  },
+  {
+    id: 'with-skills-and-examples',
+    name: 'Skills with Examples',
+    description: 'Skills with embedded few-shot examples for precise behavior',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "skills-with-examples"
+  syntax: "1.2.0"
+}
+
+@identity {
+  """
+  You are a development assistant with specialized skills.
+  """
+}
+
+@skills {
+  commit: {
+    description: "Create commits following conventional format"
+    examples: {
+      feature: {
+        description: "New feature commit"
+        input: "Added dark mode toggle to settings page"
+        output: "feat(settings): add dark mode toggle"
+      }
+      bugfix: {
+        description: "Bug fix commit"
+        input: "Fixed null pointer when user has no avatar"
+        output: "fix(profile): handle missing avatar gracefully"
+      }
+      breaking: {
+        description: "Breaking change"
+        input: "Renamed /api/users to /api/accounts"
+        output: "feat(api)!: rename users endpoint to accounts"
+      }
+    }
+    content: """
+      Format: type(scope): description
+      Types: feat, fix, docs, refactor, test, chore
+      Keep subject under 72 characters.
+      Use imperative mood.
+    """
+  }
+
+  review: {
+    description: "Review code for quality and correctness"
+    examples: {
+      good-review: {
+        input: "let x = arr.length > 0 ? arr[0] : null"
+        output: "const firstItem = arr.at(0) ?? null  // Use .at() and const"
+      }
+    }
+    content: """
+      When reviewing:
+      1. Check for bugs and edge cases
+      2. Verify error handling
+      3. Suggest naming improvements
+      4. Flag security concerns
+    """
+  }
+}
+
+@shortcuts {
+  "/commit": "Create a commit message"
+  "/review": "Review the current file"
+}
+`,
+      },
+    ],
+  },
   {
     id: 'with-skills',
     name: 'With Skills & Shortcuts',
@@ -474,7 +814,7 @@ const EXAMPLES: Example[] = [
         path: 'project.prs',
         content: `@meta {
   id: "guards-example"
-  syntax: "1.0.0"
+  syntax: "1.2.0"
 }
 
 @identity {
@@ -604,18 +944,18 @@ const EXAMPLES: Example[] = [
   {
     id: 'enterprise',
     name: 'Enterprise Setup',
-    description: 'Full enterprise configuration with all features',
+    description: 'Full enterprise config with examples, guards, requires, and more',
     complexity: 'advanced',
     files: [
       {
         path: 'project.prs',
         content: `@meta {
   id: "enterprise-project"
-  syntax: "1.0.0"
+  syntax: "1.2.0"
   tags: [enterprise, typescript, react]
 }
 
-# Inherit from local file + registry (github.com/mrwogu/promptscript-registry)
+# Inherit from local file + registry
 @inherit ./org-base
 @use @core/security
 
@@ -631,27 +971,43 @@ const EXAMPLES: Example[] = [
   infrastructure: ["AWS", "Docker", "Kubernetes"]
 }
 
+@examples {
+  api-error-response: {
+    description: "Standard API error response format"
+    input: "throw new Error('User not found')"
+    output: """
+      throw new ApiError({
+        code: 'USER_NOT_FOUND',
+        message: 'User not found',
+        status: 404,
+      });
+    """
+  }
+}
+
 @skills {
   "security-review": {
     description: "Review code for security vulnerabilities"
+    examples: {
+      sql-injection: {
+        input: "db.query('SELECT * FROM users WHERE id = ' + userId)"
+        output: "db.query('SELECT * FROM users WHERE id = $1', [userId])"
+      }
+    }
     content: """
-    Perform security review:
-    1. Check for OWASP Top 10 vulnerabilities
-    2. Verify input validation and sanitization
-    3. Check authentication and authorization
-    4. Review data exposure and logging
-    5. Verify secure communication
+      Perform security review:
+      1. Check for OWASP Top 10 vulnerabilities
+      2. Verify input validation and sanitization
+      3. Check authentication and authorization
     """
   }
   deploy: {
     description: "Prepare deployment checklist"
     content: """
-    Deployment preparation:
-    1. Run full test suite
-    2. Check for security vulnerabilities
-    3. Verify environment variables
-    4. Update changelog
-    5. Create release notes
+      Deployment preparation:
+      1. Run full test suite
+      2. Check for security vulnerabilities
+      3. Verify environment variables
     """
   }
 }
@@ -659,22 +1015,29 @@ const EXAMPLES: Example[] = [
 @guards {
   api: {
     applyTo: ["**/api/**", "**/routes/**"]
+    requires: ["shared-security"]
     description: "API security rules"
     content: """
-    - Validate all input parameters
-    - Use parameterized queries
-    - Implement rate limiting
-    - Log security events
+      - Validate all input parameters
+      - Use parameterized queries
+      - Implement rate limiting
     """
   }
   auth: {
     applyTo: ["**/auth/**", "**/middleware/**"]
+    requires: ["shared-security"]
     description: "Authentication rules"
     content: """
-    - Never log credentials
-    - Use secure session management
-    - Implement proper CORS
-    - Use HTTPS only
+      - Never log credentials
+      - Use secure session management
+      - Implement proper CORS
+    """
+  }
+  "shared-security": {
+    content: """
+      - All endpoints require HTTPS
+      - Log security events to audit trail
+      - Follow principle of least privilege
     """
   }
 }
@@ -690,7 +1053,6 @@ const EXAMPLES: Example[] = [
   - "No secrets in code - use environment variables"
   - "All user input must be validated"
   - "PII must be encrypted at rest"
-  - "Changes require security team approval"
 }
 `,
       },
@@ -817,6 +1179,29 @@ export function ExampleGallery() {
         )}
         {example.files.some((f) => f.content.includes('@agents')) && (
           <span className="text-xs px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded">agents</span>
+        )}
+        {example.files.some((f) => f.content.includes('@examples')) && (
+          <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
+            examples
+          </span>
+        )}
+        {example.files.some((f) => /requires:\s*\[/.test(f.content)) && (
+          <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded">requires</span>
+        )}
+        {example.files.some((f) => f.content.includes('@knowledge')) && (
+          <span className="text-xs px-2 py-0.5 bg-teal-500/20 text-teal-400 rounded">
+            knowledge
+          </span>
+        )}
+        {example.files.some((f) => f.content.includes('@commands')) && (
+          <span className="text-xs px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded">
+            commands
+          </span>
+        )}
+        {example.files.some((f) => /only=|exclude=/.test(f.content)) && (
+          <span className="text-xs px-2 py-0.5 bg-violet-500/20 text-violet-400 rounded">
+            filtering
+          </span>
         )}
         {example.files.some((f) => f.content.includes('params:') && f.content.includes('{{')) && (
           <span className="text-xs px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded">

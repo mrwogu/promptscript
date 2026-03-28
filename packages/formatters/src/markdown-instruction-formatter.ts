@@ -33,6 +33,8 @@ export interface MarkdownSkillConfig {
   resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
+  /** Pre-extracted examples from the skill's nested examples property */
+  examples?: Array<{ name: string; input: string; output: string; description?: string }>;
 }
 
 /**
@@ -374,6 +376,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          examples: this.extractSkillExamples(obj),
         });
       }
     }
@@ -401,6 +404,29 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (config.content) {
       const dedentedContent = this.dedent(config.content);
       lines.push(dedentedContent);
+    }
+
+    // Append examples section if the skill has examples
+    if (config.examples && config.examples.length > 0) {
+      lines.push('');
+      lines.push('## Examples');
+      for (const example of config.examples) {
+        lines.push('');
+        lines.push(`### Example: ${example.name}`);
+        if (example.description) {
+          const safeDescription = example.description.replace(/[\r\n]+/g, ' ').trim();
+          lines.push('');
+          lines.push(safeDescription);
+        }
+        lines.push('');
+        lines.push('**Input:**');
+        lines.push('');
+        lines.push(this.renderCodeFence(this.dedent(example.input)));
+        lines.push('');
+        lines.push('**Output:**');
+        lines.push('');
+        lines.push(this.renderCodeFence(this.dedent(example.output)));
+      }
     }
 
     const skillDirPath = `${this.config.dotDir}/skills/${config.name}`;
@@ -513,6 +539,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     this.addSection(sections, this.diagrams(ast, renderer));
     this.addSection(sections, this.knowledgeContent(ast, renderer));
     this.addSection(sections, this.restrictions(ast, renderer));
+    this.addSection(sections, this.examples(ast, renderer));
   }
 
   protected addSection(sections: string[], content: string | null): void {
@@ -816,6 +843,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection(this.getSectionName('restrictions'), content) + '\n';
+  }
+
+  protected examples(ast: Program, renderer: ConventionRenderer): string | null {
+    return this.renderExamplesSection(ast, renderer);
   }
 
   protected extractRestrictionsItems(content: Block['content']): string[] {

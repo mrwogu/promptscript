@@ -1,0 +1,38 @@
+@meta {
+  id: "examples-test"
+  syntax-version: "1.2.0"
+}
+
+@examples {
+  simple-example: {
+    input: "before code"
+    output: "after code"
+  }
+
+  with-description: {
+    description: "A described example"
+    input: """
+      multi-line
+      input content
+    """
+    output: """
+      multi-line
+      output content
+    """
+  }
+}
+
+@skills {
+  refactoring: {
+    description: "Code refactoring"
+    examples: {
+      extract-method: {
+        input: "inline code"
+        output: "extracted method"
+      }
+    }
+    content: """
+      Refactoring rules here.
+    """
+  }
+}

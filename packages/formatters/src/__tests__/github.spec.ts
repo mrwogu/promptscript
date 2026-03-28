@@ -2003,6 +2003,292 @@ describe('GitHubFormatter', () => {
     });
   });
 
+  describe('examples section', () => {
+    it('should render examples from @examples block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'commit-message': {
+                  input: 'Fix login bug',
+                  output: 'fix(auth): resolve login redirect loop',
+                  description: 'Shows conventional commit format',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## examples');
+      expect(result.content).toContain('### Example: commit-message');
+      expect(result.content).toContain('Shows conventional commit format');
+      expect(result.content).toContain('**Input:**');
+      expect(result.content).toContain('Fix login bug');
+      expect(result.content).toContain('**Output:**');
+      expect(result.content).toContain('fix(auth): resolve login redirect loop');
+    });
+
+    it('should not render examples section when no @examples block exists', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.content).not.toContain('## examples');
+    });
+  });
+
+  describe('required context in instruction files', () => {
+    it('should render required context in generated instruction files', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'auth-check': {
+                  applyTo: ['src/auth/**/*.ts'],
+                  description: 'Auth rules',
+                  content: 'Always validate tokens',
+                  __resolvedRequires: [
+                    { name: 'api-validation', content: 'Validation rules content here...' },
+                  ],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const instructionFile = result.additionalFiles?.find(
+        (f) => f.path === '.github/instructions/auth-check.instructions.md'
+      );
+      expect(instructionFile).toBeDefined();
+      expect(instructionFile?.content).toContain('## Required Context');
+      expect(instructionFile?.content).toContain('### api-validation');
+      expect(instructionFile?.content).toContain('Validation rules content here...');
+    });
+  });
+
+  describe('required context sanitization', () => {
+    it('should strip newlines from guard dependency name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  applyTo: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: 'evil\nname\nhere', content: 'some content' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const instrFile = result.additionalFiles?.find(
+        (f) => f.path === '.github/instructions/my-guard.instructions.md'
+      );
+      expect(instrFile).toBeDefined();
+      // The heading should not contain raw newlines
+      expect(instrFile?.content).toContain('### evil name here');
+      expect(instrFile?.content).not.toMatch(/### .*\n.*name/);
+    });
+
+    it('should strip --- from guard dependency name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  applyTo: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: 'bad---name', content: 'some content' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const instrFile = result.additionalFiles?.find(
+        (f) => f.path === '.github/instructions/my-guard.instructions.md'
+      );
+      expect(instrFile).toBeDefined();
+      // The heading should not contain raw ---
+      expect(instrFile?.content).not.toContain('### bad---name');
+      expect(instrFile?.content).toContain('### bad\u2014name');
+    });
+
+    it('should escape --- at start of guard dependency content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  applyTo: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: 'dep', content: '---\nfrontmatter: true\n---' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const instrFile = result.additionalFiles?.find(
+        (f) => f.path === '.github/instructions/my-guard.instructions.md'
+      );
+      expect(instrFile).toBeDefined();
+      // Content --- should be escaped
+      expect(instrFile?.content).toContain('\\---');
+      // Should not have unescaped --- in the required context section (after the frontmatter block)
+      const requiredContextIdx = instrFile!.content.indexOf('## Required Context');
+      const afterRequired = instrFile!.content.substring(requiredContextIdx);
+      expect(afterRequired).not.toMatch(/^---$/m);
+    });
+
+    it('should skip guard entries with path traversal names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../../../etc/passwd': {
+                  applyTo: ['src/**/*.ts'],
+                  description: 'Malicious guard',
+                  content: 'Evil content',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      // Should not generate an instruction file for the malicious name
+      const maliciousFile = result.additionalFiles?.find((f) => f.path.includes('passwd'));
+      expect(maliciousFile).toBeUndefined();
+    });
+
+    it('should strip heading markers from guard dependency name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  applyTo: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [{ name: '## heading injection', content: 'some content' }],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const instrFile = result.additionalFiles?.find(
+        (f) => f.path === '.github/instructions/my-guard.instructions.md'
+      );
+      expect(instrFile).toBeDefined();
+      // Should not contain ## ## (double heading)
+      expect(instrFile?.content).not.toContain('### ## heading');
+      expect(instrFile?.content).toContain('### heading injection');
+    });
+
+    it('should filter out invalid __resolvedRequires entries at runtime', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-guard': {
+                  applyTo: ['src/**/*.ts'],
+                  description: 'Guard rules',
+                  content: 'Guard content',
+                  __resolvedRequires: [
+                    null,
+                    { name: 123, content: 'bad' },
+                    { name: 'valid', content: 'Valid content' },
+                  ],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const instrFile = result.additionalFiles?.find(
+        (f) => f.path === '.github/instructions/my-guard.instructions.md'
+      );
+      expect(instrFile).toBeDefined();
+      expect(instrFile?.content).toContain('### valid');
+      expect(instrFile?.content).toContain('Valid content');
+    });
+  });
+
   describe('getSkillBasePath', () => {
     it('should return .github/skills', () => {
       const formatter = new GitHubFormatter();

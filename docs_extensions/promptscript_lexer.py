@@ -40,9 +40,14 @@ class PromptScriptLexer(RegexLexer):
             (r"#.*$", Comment.Single),
             # Whitespace
             (r"\s+", Whitespace),
-            # Block declarations (e.g., @meta, @identity, @restrictions)
+            # Control directives (e.g., @meta, @extend)
             (
-                r"(@)(meta|identity|context|standards|restrictions|shortcuts|params|guards|knowledge|agents|skills|local|extend)\b",
+                r"(@)(meta|extend)\b",
+                bygroups(Punctuation, Keyword.Namespace),
+            ),
+            # Block declarations (e.g., @identity, @context, @examples)
+            (
+                r"(@)(identity|context|standards|restrictions|knowledge|shortcuts|commands|guards|params|skills|local|agents|workflows|prompts|examples)\b",
                 bygroups(Punctuation, Keyword.Declaration),
             ),
             # Inherit statement with path (registry @path, relative ./path, or URL host/path)

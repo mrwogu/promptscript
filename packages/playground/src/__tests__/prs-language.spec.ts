@@ -29,7 +29,7 @@ describe('prs-language', () => {
       expect(directives).toContain('@standards');
       expect(directives).toContain('@restrictions');
       expect(directives).toContain('@shortcuts');
-      expect(directives).toContain('@tools');
+      expect(directives).toContain('@commands');
       expect(directives).toContain('@skills');
       expect(directives).toContain('@examples');
     });
@@ -260,7 +260,6 @@ describe('prs-language', () => {
       expect(labels).toContain('@standards');
       expect(labels).toContain('@restrictions');
       expect(labels).toContain('@shortcuts');
-      expect(labels).toContain('@tools');
       expect(labels).toContain('@examples');
     });
 

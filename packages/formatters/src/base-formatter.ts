@@ -499,6 +499,96 @@ export abstract class BaseFormatter implements Formatter {
       }));
   }
 
+  /**
+   * Extract example entries from a properties object.
+   * Shared iteration logic used by both extractExamples and extractSkillExamples.
+   */
+  private extractExamplesFromProps(
+    props: Record<string, Value>
+  ): Array<{ name: string; input: string; output: string; description?: string }> {
+    const examples: Array<{ name: string; input: string; output: string; description?: string }> =
+      [];
+
+    for (const [name, value] of Object.entries(props)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+
+      const obj = value as Record<string, Value>;
+      const input = obj['input'] ? this.valueToString(obj['input']) : '';
+      const output = obj['output'] ? this.valueToString(obj['output']) : '';
+
+      if (!input || !output) continue;
+
+      const description = obj['description'] ? this.valueToString(obj['description']) : undefined;
+      examples.push({ name, input, output, description });
+    }
+
+    return examples;
+  }
+
+  /**
+   * Extract examples from the @examples block.
+   * Returns an array of example definitions with name, input, output, and optional description.
+   */
+  protected extractExamples(
+    ast: Program
+  ): Array<{ name: string; input: string; output: string; description?: string }> {
+    const block = this.findBlock(ast, 'examples');
+    if (!block) return [];
+
+    return this.extractExamplesFromProps(this.getProps(block.content));
+  }
+
+  /**
+   * Extract examples from a skill's nested examples property.
+   * Returns the same shape as extractExamples.
+   */
+  protected extractSkillExamples(
+    skillProps: Record<string, Value>
+  ): Array<{ name: string; input: string; output: string; description?: string }> {
+    const examplesValue = skillProps['examples'];
+    if (!examplesValue || typeof examplesValue !== 'object' || Array.isArray(examplesValue))
+      return [];
+
+    return this.extractExamplesFromProps(examplesValue as Record<string, Value>);
+  }
+
+  /**
+   * Render an examples section from the @examples block.
+   * Shared rendering logic used by Claude, GitHub, and MarkdownInstructionFormatter.
+   *
+   * @param sectionName - Custom section heading name (default: 'Examples')
+   */
+  protected renderExamplesSection(
+    ast: Program,
+    renderer: ConventionRenderer,
+    sectionName = 'Examples'
+  ): string | null {
+    const examples = this.extractExamples(ast);
+    if (examples.length === 0) return null;
+
+    const parts: string[] = [];
+
+    for (const example of examples) {
+      parts.push(`### Example: ${example.name}`);
+      if (example.description) {
+        const safeDescription = example.description.replace(/[\r\n]+/g, ' ').trim();
+        parts.push('');
+        parts.push(safeDescription);
+      }
+      parts.push('');
+      parts.push('**Input:**');
+      parts.push('');
+      parts.push(this.renderCodeFence(this.dedent(example.input)));
+      parts.push('');
+      parts.push('**Output:**');
+      parts.push('');
+      parts.push(this.renderCodeFence(this.dedent(example.output)));
+    }
+
+    const content = parts.join('\n');
+    return renderer.renderSection(sectionName, content) + '\n';
+  }
+
   /** Base path for skills, or null if formatter has no skill support. */
   getSkillBasePath(): string | null {
     return null;
@@ -514,5 +604,14 @@ export abstract class BaseFormatter implements Formatter {
    */
   protected isSafeSkillName(name: string): boolean {
     return !name.includes('..') && !name.includes('/') && !name.includes('\\');
+  }
+
+  /**
+   * Render content inside a code fence, using a longer fence if the content
+   * itself contains triple backticks (prevents code fence injection).
+   */
+  protected renderCodeFence(content: string, lang = ''): string {
+    const fence = content.includes('```') ? '````' : '```';
+    return `${fence}${lang}\n${content}\n${fence}`;
   }
 }

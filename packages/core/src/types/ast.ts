@@ -223,6 +223,9 @@ export type BlockName =
   | 'skills'
   | 'agents'
   | 'local'
+  | 'workflows'
+  | 'prompts'
+  | 'examples'
   | string; // Allow custom blocks
 
 /**
@@ -388,6 +391,21 @@ export interface SkillDefinition {
   inputs?: Record<string, SkillContractField>;
   /** Outputs the skill produces */
   outputs?: Record<string, SkillContractField>;
+  /** Structured examples for few-shot prompting */
+  examples?: Record<string, ExampleDefinition>;
+}
+
+/**
+ * Typed representation of an example in the @examples block or within @skills.
+ * This is a helper extraction type (like SkillDefinition), NOT an AST node.
+ */
+export interface ExampleDefinition {
+  /** Input data for the example */
+  input: string | TextContent;
+  /** Expected output */
+  output: string | TextContent;
+  /** Optional description */
+  description?: string;
 }
 
 /**

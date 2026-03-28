@@ -94,6 +94,10 @@ export { normalizeBlockAliases } from './normalize.js';
 // Extension resolution
 export { applyExtends } from './extensions.js';
 
+// Guard requires resolution
+export { resolveGuardRequires } from './guard-requires.js';
+export type { GuardRequiresOptions } from './guard-requires.js';
+
 // Skill resolution
 export {
   resolveNativeSkills,

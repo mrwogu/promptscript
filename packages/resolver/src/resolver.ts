@@ -33,6 +33,7 @@ import {
 } from './skills.js';
 import { detectContentType } from './content-detector.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
+import { resolveGuardRequires } from './guard-requires.js';
 import { normalizeBlockAliases } from './normalize.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
@@ -48,6 +49,8 @@ export interface ResolverOptions extends LoaderOptions {
   logger?: Logger;
   /** Options for native skill resolution */
   skills?: NativeSkillOptions;
+  /** Maximum depth for guard requires resolution. Defaults to 3. */
+  guardRequiresDepth?: number;
   /** Base directory for the registry cache (defaults to ~/.promptscript/cache) */
   cacheDir?: string;
 }
@@ -177,6 +180,11 @@ export class Resolver {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
     ast = applyExtends(ast);
+
+    // Resolve guard requires dependencies
+    ast = resolveGuardRequires(ast, {
+      maxDepth: this.options.guardRequiresDepth ?? 3,
+    });
 
     // Resolve native skill files (replace @skills content with SKILL.md files if available)
     ast = await resolveNativeSkills(

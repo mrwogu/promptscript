@@ -26,6 +26,7 @@ A PromptScript file (`.prs`) consists of:
 @params { ... }
 @guards { ... }
 @knowledge { ... }
+@examples { ... }
 
 @extend path { ... }    # Block modifications
 ```
@@ -120,16 +121,18 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | Version | Status  | Blocks                                                                                                                                     |
 | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
-| `1.1.0` | Current | All 1.0.0 blocks + `@agents`                                                                                                               |
+| `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`                                                                                                               |
+| `1.2.0` | Current | All 1.1.0 blocks + `@examples`                                                                                                             |
 
 !!! note "Internal Block Types"
 `@workflows` and `@prompts` are registered in version `1.1.0` but are **internal, not user-facing**. They are generated automatically from `@shortcuts` (see [Antigravity Workflows](#antigravity-workflows) and [GitHub Copilot Prompts](#github-copilot-prompts)). Do not write `@workflows` or `@prompts` blocks directly.
 
 ### Block Version Requirements
 
-| Block     | Minimum Syntax Version |
-| --------- | ---------------------- |
-| `@agents` | `1.1.0`                |
+| Block       | Minimum Syntax Version |
+| ----------- | ---------------------- |
+| `@agents`   | `1.1.0`                |
+| `@examples` | `1.2.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 
@@ -1096,6 +1099,46 @@ Reference documentation and knowledge:
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+### @examples
+
+Structured few-shot examples for AI assistants (requires syntax `1.2.0`):
+
+```promptscript
+@meta {
+  id: "commit-style"
+  syntax: "1.2.0"
+}
+
+@examples {
+  feat-commit: {
+    description: "Feature commit with scope"
+    input: "Added user authentication with JWT tokens"
+    output: "feat(auth): add JWT-based user authentication"
+  }
+
+  multiline-example: {
+    input: """
+      const x = users.filter(u => u.active).map(u => u.email);
+    """
+    output: """
+      const activeEmails = users
+        .filter(u => u.active)
+        .map(u => u.email);
+    """
+  }
+}
+```
+
+| Property      | Required | Description                               |
+| ------------- | -------- | ----------------------------------------- |
+| `input`       | Yes      | The input the AI receives                 |
+| `output`      | Yes      | The expected output the AI should produce |
+| `description` | No       | Human-readable label for the example      |
+
+Examples can also be defined inline within a `@skills` entry via the `examples` property, scoping them to that specific skill.
+
+See the [Examples guide](../guides/examples.md) for a full walkthrough.
 
 ## @extend Block
 

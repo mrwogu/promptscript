@@ -672,6 +672,285 @@ describe('MarkdownInstructionFormatter', () => {
     });
   });
 
+  describe('examples section', () => {
+    it('should render examples from @examples block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                greeting: {
+                  input: 'Say hello',
+                  output: 'Hello, world!',
+                  description: 'A simple greeting',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('## Examples');
+      expect(result.content).toContain('### Example: greeting');
+      expect(result.content).toContain('A simple greeting');
+      expect(result.content).toContain('**Input:**');
+      expect(result.content).toContain('Say hello');
+      expect(result.content).toContain('**Output:**');
+      expect(result.content).toContain('Hello, world!');
+    });
+
+    it('should not render examples section when no @examples block', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      expect(result.content).not.toContain('## Examples');
+    });
+
+    it('should render multiple examples', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                first: { input: 'in1', output: 'out1' },
+                second: { input: 'in2', output: 'out2' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('### Example: first');
+      expect(result.content).toContain('### Example: second');
+    });
+
+    it('should omit description line when not present', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                basic: { input: 'in', output: 'out' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('### Example: basic');
+      expect(result.content).toContain('**Input:**');
+      // No description line between header and Input
+      const lines = result.content.split('\n');
+      const headerIdx = lines.findIndex((l: string) => l.includes('### Example: basic'));
+      // Next non-empty line after header should be **Input:**
+      const afterHeader = lines.slice(headerIdx + 1).filter((l: string) => l.trim() !== '');
+      expect(afterHeader[0]).toContain('**Input:**');
+    });
+  });
+
+  describe('skill-level examples in SKILL.md', () => {
+    it('should render examples section in SKILL.md when skill has examples', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  description: 'Review code',
+                  content: 'Review instructions.',
+                  examples: {
+                    'simple-review': {
+                      input: 'Review this function',
+                      output: 'LGTM - the function looks good.',
+                      description: 'A basic code review',
+                    },
+                  },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('SKILL.md'));
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).toContain('## Examples');
+      expect(skillFile?.content).toContain('### Example: simple-review');
+      expect(skillFile?.content).toContain('A basic code review');
+      expect(skillFile?.content).toContain('**Input:**');
+      expect(skillFile?.content).toContain('Review this function');
+      expect(skillFile?.content).toContain('**Output:**');
+      expect(skillFile?.content).toContain('LGTM - the function looks good.');
+    });
+
+    it('should not render examples section in SKILL.md when skill has no examples', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                test: {
+                  description: 'A skill',
+                  content: 'Do stuff.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('SKILL.md'));
+      expect(skillFile).toBeDefined();
+      expect(skillFile?.content).not.toContain('## Examples');
+    });
+
+    it('should sanitize newlines in example description', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  description: 'Review code',
+                  content: 'Review instructions.',
+                  examples: {
+                    multiline: {
+                      input: 'input text',
+                      output: 'output text',
+                      description: 'Line one\nLine two\r\nLine three',
+                    },
+                  },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('SKILL.md'));
+      expect(skillFile).toBeDefined();
+      // Newlines should be replaced with spaces
+      expect(skillFile?.content).toContain('Line one Line two Line three');
+      expect(skillFile?.content).not.toMatch(/Line one\n/);
+    });
+
+    it('should escalate code fences when content contains triple backticks', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'code-example': {
+                  input: 'Show me a code block:\n```js\nconsole.log("hi")\n```',
+                  output: 'Here is the code block.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // The input contains ``` so the outer fence should be ````
+      expect(result.content).toContain('````');
+    });
+
+    it('should omit description in SKILL.md example when not present', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  description: 'Review code',
+                  content: 'Review instructions.',
+                  examples: {
+                    basic: {
+                      input: 'input text',
+                      output: 'output text',
+                    },
+                  },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.includes('SKILL.md'));
+      expect(skillFile).toBeDefined();
+      const content = skillFile!.content;
+      const lines = content.split('\n');
+      const headerIdx = lines.findIndex((l: string) => l.includes('### Example: basic'));
+      // Next non-empty line after header should be **Input:** (no description)
+      const afterHeader = lines.slice(headerIdx + 1).filter((l: string) => l.trim() !== '');
+      expect(afterHeader[0]).toContain('**Input:**');
+    });
+  });
+
+  describe('requiredContext section', () => {
+    it('should not include required context in main output', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast);
+      // Required context is rendered per-guard in multifile mode, not in main output
+      expect(result.content).not.toContain('Required Context');
+    });
+  });
+
   describe('dotDir configuration', () => {
     it('should use configured dotDir for file paths', () => {
       const customFormatter = new TestFormatter({ dotDir: '.custom' });

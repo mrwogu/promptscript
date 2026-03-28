@@ -37,6 +37,8 @@ interface RuleConfig {
   description: string;
   /** Rule content */
   content: string;
+  /** Resolved guard dependencies (injected by resolver) */
+  __resolvedRequires?: Array<{ name: string; content: string }>;
 }
 
 /**
@@ -358,17 +360,22 @@ export class ClaudeFormatter extends BaseFormatter {
       if (key === 'globs') continue;
 
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.isSafeSkillName(key)) continue;
         const obj = value as Record<string, Value>;
         const paths = obj['paths'] ?? obj['applyTo'];
         const description = obj['description'];
         const content = obj['content'];
 
         if (paths && Array.isArray(paths)) {
+          const resolved = obj['__resolvedRequires'];
           rules.push({
             name: key,
             paths: paths.map((p) => this.valueToString(p)),
             description: description ? this.valueToString(description) : `${key} rules`,
             content: content ? this.valueToString(content) : '',
+            __resolvedRequires: Array.isArray(resolved)
+              ? (resolved as Array<{ name: string; content: string }>)
+              : undefined,
           });
         }
       }
@@ -398,6 +405,35 @@ export class ClaudeFormatter extends BaseFormatter {
       const dedentedContent = this.dedent(config.content);
       const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
       lines.push(normalizedContent);
+    }
+
+    // Append required context from resolved guard dependencies
+    const resolvedReqs = Array.isArray(config.__resolvedRequires)
+      ? (config.__resolvedRequires as unknown[]).filter(
+          (d): d is { name: string; content: string } =>
+            d != null &&
+            typeof d === 'object' &&
+            typeof (d as Record<string, unknown>)['name'] === 'string' &&
+            typeof (d as Record<string, unknown>)['content'] === 'string'
+        )
+      : [];
+    if (resolvedReqs.length > 0) {
+      lines.push('');
+      lines.push('## Required Context');
+      lines.push('');
+      for (const dep of resolvedReqs) {
+        // Sanitize dep.name: strip heading markers, newlines, and YAML frontmatter separators
+        const safeName = dep.name
+          .replace(/^#+\s*/g, '')
+          .replace(/[\r\n]/g, ' ')
+          .replace(/---/g, '—');
+        lines.push(`### ${safeName}`);
+        lines.push('');
+        // Sanitize dep.content: dedent and strip leading --- that could be mistaken for frontmatter
+        const safeContent = this.dedent(dep.content).replace(/^---/gm, '\\---');
+        lines.push(safeContent);
+        lines.push('');
+      }
     }
 
     return {
@@ -858,6 +894,7 @@ export class ClaudeFormatter extends BaseFormatter {
     this.addSection(sections, this.diagrams(ast, renderer));
     this.addSection(sections, this.knowledgeContent(ast, renderer));
     this.addSection(sections, this.donts(ast, renderer));
+    this.addSection(sections, this.examples(ast, renderer));
   }
 
   private addSection(sections: string[], content: string | null): void {
@@ -1166,6 +1203,10 @@ export class ClaudeFormatter extends BaseFormatter {
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection("Don'ts", content) + '\n';
+  }
+
+  private examples(ast: Program, renderer: ConventionRenderer): string | null {
+    return this.renderExamplesSection(ast, renderer);
   }
 
   private extractDontsItems(content: Block['content']): string[] {

@@ -519,6 +519,109 @@ describe('parse PathReference extended versions', () => {
   });
 });
 
+describe('@examples block', () => {
+  it('should parse top-level @examples block without errors', () => {
+    const source = loadFixture('examples-block.prs');
+    const result = parse(source, { filename: 'examples-block.prs' });
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
+  });
+
+  it('should parse top-level @examples with nested input/output objects', () => {
+    const source = loadFixture('examples-block.prs');
+    const result = parse(source, { filename: 'examples-block.prs' });
+
+    const examples = result.ast?.blocks.find((b) => b.name === 'examples');
+    expect(examples).toBeDefined();
+    expect(examples?.content.type).toBe('ObjectContent');
+    if (examples?.content.type === 'ObjectContent') {
+      const simpleExample = examples.content.properties['simple-example'] as Record<
+        string,
+        unknown
+      >;
+      expect(simpleExample['input']).toBe('before code');
+      expect(simpleExample['output']).toBe('after code');
+
+      const withDescription = examples.content.properties['with-description'] as Record<
+        string,
+        unknown
+      >;
+      expect(withDescription['description']).toBe('A described example');
+      expect(withDescription['input']).toBeDefined();
+      expect(withDescription['output']).toBeDefined();
+    }
+  });
+
+  it('should parse examples nested inside @skills', () => {
+    const source = loadFixture('examples-block.prs');
+    const result = parse(source, { filename: 'examples-block.prs' });
+
+    const skills = result.ast?.blocks.find((b) => b.name === 'skills');
+    expect(skills).toBeDefined();
+    expect(skills?.content.type).toBe('ObjectContent');
+    if (skills?.content.type === 'ObjectContent') {
+      const refactoring = skills.content.properties['refactoring'] as Record<string, unknown>;
+      expect(refactoring['description']).toBe('Code refactoring');
+
+      const skillExamples = refactoring['examples'] as Record<string, unknown>;
+      expect(skillExamples).toBeDefined();
+      const extractMethod = skillExamples['extract-method'] as Record<string, unknown>;
+      expect(extractMethod['input']).toBe('inline code');
+      expect(extractMethod['output']).toBe('extracted method');
+    }
+  });
+});
+
+describe('@guards with requires', () => {
+  it('should parse @guards block with requires arrays without errors', () => {
+    const source = loadFixture('guard-requires.prs');
+    const result = parse(source, { filename: 'guard-requires.prs' });
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
+  });
+
+  it('should parse requires array inside guard entries', () => {
+    const source = loadFixture('guard-requires.prs');
+    const result = parse(source, { filename: 'guard-requires.prs' });
+
+    const guards = result.ast?.blocks.find((b) => b.name === 'guards');
+    expect(guards).toBeDefined();
+    expect(guards?.content.type).toBe('ObjectContent');
+    if (guards?.content.type === 'ObjectContent') {
+      const apiControllers = guards.content.properties['api-controllers'] as Record<
+        string,
+        unknown
+      >;
+      expect(apiControllers['applyTo']).toEqual(['**/*.controller.ts']);
+      expect(apiControllers['requires']).toEqual(['api-validation', 'api-security']);
+
+      const apiValidation = guards.content.properties['api-validation'] as Record<string, unknown>;
+      expect(apiValidation['applyTo']).toEqual(['**/*.validator.ts']);
+      expect(apiValidation['requires']).toBeUndefined();
+
+      const apiSecurity = guards.content.properties['api-security'] as Record<string, unknown>;
+      expect(apiSecurity['requires']).toEqual(['api-validation']);
+    }
+  });
+
+  it('should parse guard entries with content text blocks', () => {
+    const source = loadFixture('guard-requires.prs');
+    const result = parse(source, { filename: 'guard-requires.prs' });
+
+    const guards = result.ast?.blocks.find((b) => b.name === 'guards');
+    expect(guards?.content.type).toBe('ObjectContent');
+    if (guards?.content.type === 'ObjectContent') {
+      const apiControllers = guards.content.properties['api-controllers'] as Record<
+        string,
+        unknown
+      >;
+      expect(apiControllers['content']).toBeDefined();
+    }
+  });
+});
+
 describe('parseOrThrow', () => {
   it('should return AST on success', () => {
     const source = '@meta { id: "test" }';
