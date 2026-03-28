@@ -56,7 +56,7 @@ describe('PS018: syntax-version-compat', () => {
     const messages = validate(makeAst('1.4.7'));
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('Unknown syntax version "1.4.7"');
-    expect(messages[0]!.message).toContain('1.1.0');
+    expect(messages[0]!.message).toContain('1.2.0');
   });
 
   it('should warn when block requires higher version', () => {
