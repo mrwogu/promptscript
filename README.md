@@ -73,7 +73,7 @@ After `prs compile`, a **PromptScript language skill** is automatically injected
 
 ## See It In Action
 
-[![Watch the video](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
+[![Watch the video](docs/assets/images/demo-video-thumb.jpg)](https://youtu.be/7sHMn-DbZig)
 
 **Source:** `.promptscript/project.prs`
 
