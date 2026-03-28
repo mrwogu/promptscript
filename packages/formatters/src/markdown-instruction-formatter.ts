@@ -33,8 +33,8 @@ export interface MarkdownSkillConfig {
   resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
-  /** Raw skill properties for extracting nested examples */
-  rawProps?: Record<string, Value>;
+  /** Pre-extracted examples from the skill's nested examples property */
+  examples?: Array<{ name: string; input: string; output: string; description?: string }>;
 }
 
 /**
@@ -376,7 +376,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
-          rawProps: obj,
+          examples: this.extractSkillExamples(obj),
         });
       }
     }
@@ -407,31 +407,28 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     }
 
     // Append examples section if the skill has examples
-    if (config.rawProps) {
-      const skillExamples = this.extractSkillExamples(config.rawProps);
-      if (skillExamples.length > 0) {
+    if (config.examples && config.examples.length > 0) {
+      lines.push('');
+      lines.push('## Examples');
+      for (const example of config.examples) {
         lines.push('');
-        lines.push('## Examples');
-        for (const example of skillExamples) {
+        lines.push(`### Example: ${example.name}`);
+        if (example.description) {
           lines.push('');
-          lines.push(`### Example: ${example.name}`);
-          if (example.description) {
-            lines.push('');
-            lines.push(example.description);
-          }
-          lines.push('');
-          lines.push('**Input:**');
-          lines.push('');
-          lines.push('```');
-          lines.push(this.dedent(example.input));
-          lines.push('```');
-          lines.push('');
-          lines.push('**Output:**');
-          lines.push('');
-          lines.push('```');
-          lines.push(this.dedent(example.output));
-          lines.push('```');
+          lines.push(example.description);
         }
+        lines.push('');
+        lines.push('**Input:**');
+        lines.push('');
+        lines.push('```');
+        lines.push(this.dedent(example.input));
+        lines.push('```');
+        lines.push('');
+        lines.push('**Output:**');
+        lines.push('');
+        lines.push('```');
+        lines.push(this.dedent(example.output));
+        lines.push('```');
       }
     }
 
@@ -852,42 +849,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   }
 
   protected examples(ast: Program, renderer: ConventionRenderer): string | null {
-    const examples = this.extractExamples(ast);
-    if (examples.length === 0) return null;
-
-    const parts: string[] = [];
-
-    for (const example of examples) {
-      parts.push(`### Example: ${example.name}`);
-      if (example.description) {
-        parts.push('');
-        parts.push(example.description);
-      }
-      parts.push('');
-      parts.push('**Input:**');
-      parts.push('');
-      parts.push('```');
-      parts.push(this.dedent(example.input));
-      parts.push('```');
-      parts.push('');
-      parts.push('**Output:**');
-      parts.push('');
-      parts.push('```');
-      parts.push(this.dedent(example.output));
-      parts.push('```');
-    }
-
-    const content = parts.join('\n');
-    return renderer.renderSection('Examples', content) + '\n';
-  }
-
-  /**
-   * Placeholder for required context rendering.
-   * Required context is rendered per-guard in multifile mode.
-   * Formatters can override this to provide custom behavior.
-   */
-  protected requiredContext(_ast: Program, _renderer: ConventionRenderer): string | null {
-    return null;
+    return this.renderExamplesSection(ast, renderer);
   }
 
   protected extractRestrictionsItems(content: Block['content']): string[] {

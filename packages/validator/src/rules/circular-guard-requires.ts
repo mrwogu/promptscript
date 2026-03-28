@@ -1,19 +1,6 @@
 import type { ValidationRule } from '../types.js';
 import type { Value } from '@promptscript/core';
-
-const AST_NODE_TYPES = new Set([
-  'TextContent',
-  'ObjectContent',
-  'TemplateExpression',
-  'TypeExpression',
-  'Block',
-]);
-
-function isAstNode(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null) return false;
-  const typed = value as Record<string, unknown>;
-  return typeof typed['type'] === 'string' && AST_NODE_TYPES.has(typed['type'] as string);
-}
+import { isAstNode } from './guard-utils.js';
 
 /**
  * PS022: Circular guard requires detection.
@@ -71,8 +58,7 @@ export const circularGuardRequires: ValidationRule = {
     }
 
     for (const guardName of requiresMap.keys()) {
-      visited.clear();
-      inStack.clear();
+      if (visited.has(guardName)) continue;
       if (hasCycle(guardName)) {
         ctx.report({
           message: `Circular dependency detected in guard requires chain involving "${guardName}".`,

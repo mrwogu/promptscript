@@ -441,9 +441,13 @@ export class GitHubFormatter extends BaseFormatter {
       lines.push('## Required Context');
       lines.push('');
       for (const dep of config.__resolvedRequires) {
-        lines.push(`### ${dep.name}`);
+        // Sanitize dep.name: strip newlines and YAML frontmatter separators
+        const safeName = dep.name.replace(/[\r\n]/g, ' ').replace(/---/g, '—');
+        lines.push(`### ${safeName}`);
         lines.push('');
-        lines.push(dep.content);
+        // Sanitize dep.content: dedent and strip leading --- that could be mistaken for frontmatter
+        const safeContent = this.dedent(dep.content).replace(/^---/gm, '\\---');
+        lines.push(safeContent);
         lines.push('');
       }
     }
@@ -1323,33 +1327,7 @@ export class GitHubFormatter extends BaseFormatter {
   }
 
   private examples(ast: Program, renderer: ConventionRenderer): string | null {
-    const examples = this.extractExamples(ast);
-    if (examples.length === 0) return null;
-
-    const parts: string[] = [];
-
-    for (const example of examples) {
-      parts.push(`### Example: ${example.name}`);
-      if (example.description) {
-        parts.push('');
-        parts.push(example.description);
-      }
-      parts.push('');
-      parts.push('**Input:**');
-      parts.push('');
-      parts.push('```');
-      parts.push(this.dedent(example.input));
-      parts.push('```');
-      parts.push('');
-      parts.push('**Output:**');
-      parts.push('');
-      parts.push('```');
-      parts.push(this.dedent(example.output));
-      parts.push('```');
-    }
-
-    const content = parts.join('\n');
-    return renderer.renderSection('examples', content);
+    return this.renderExamplesSection(ast, renderer, 'examples');
   }
 
   // Helper methods

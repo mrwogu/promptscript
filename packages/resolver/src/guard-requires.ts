@@ -49,33 +49,44 @@ function extractRequires(guardProps: Record<string, Value>): string[] {
   return req.filter((v): v is string => typeof v === 'string');
 }
 
+/** Maximum number of resolved guards before stopping resolution. */
+const MAX_GUARD_COUNT = 100;
+
 /**
  * Recursively resolve guard dependencies, collecting them in order.
+ * Uses a Set for O(1) cycle detection instead of array scanning.
  */
 function collectDeps(
   guardName: string,
   guardsMap: Map<string, Record<string, Value>>,
   visited: Set<string>,
-  chain: string[],
+  ancestors: Set<string>,
   depth: number,
-  maxDepth: number
-): ResolvedGuardDep[] {
+  maxDepth: number,
+  result: ResolvedGuardDep[]
+): void {
+  if (result.length >= MAX_GUARD_COUNT) {
+    return;
+  }
+
   const guardProps = guardsMap.get(guardName);
   if (!guardProps) {
-    return [];
+    return;
   }
 
   const requires = extractRequires(guardProps);
   if (requires.length === 0) {
-    return [];
+    return;
   }
 
-  const result: ResolvedGuardDep[] = [];
-
   for (const depName of requires) {
-    // Cycle detection
-    if (chain.includes(depName)) {
-      throw new CircularGuardRequiresError([...chain, depName]);
+    if (result.length >= MAX_GUARD_COUNT) {
+      return;
+    }
+
+    // Cycle detection via ancestor set (O(1))
+    if (ancestors.has(depName)) {
+      throw new CircularGuardRequiresError([...ancestors, depName]);
     }
 
     // Skip already visited (deduplication)
@@ -92,15 +103,9 @@ function collectDeps(
 
     // Recurse if within depth limit
     if (depth < maxDepth) {
-      const transitive = collectDeps(
-        depName,
-        guardsMap,
-        visited,
-        [...chain, depName],
-        depth + 1,
-        maxDepth
-      );
-      result.push(...transitive);
+      ancestors.add(depName);
+      collectDeps(depName, guardsMap, visited, ancestors, depth + 1, maxDepth, result);
+      ancestors.delete(depName);
     }
 
     // Extract content for this dependency
@@ -109,8 +114,6 @@ function collectDeps(
       result.push({ name: depName, content });
     }
   }
-
-  return result;
 }
 
 /**
@@ -163,6 +166,9 @@ export function resolveGuardRequires(ast: Program, options: GuardRequiresOptions
     return ast;
   }
 
+  // Clamp maxDepth to at least 1
+  const effectiveMaxDepth = Math.max(1, options.maxDepth);
+
   // Resolve requires for each guard entry
   const newProperties: Record<string, Value> = {};
 
@@ -174,7 +180,9 @@ export function resolveGuardRequires(ast: Program, options: GuardRequiresOptions
     }
 
     const visited = new Set<string>();
-    const resolved = collectDeps(name, guardsMap, visited, [name], 1, options.maxDepth);
+    const ancestors = new Set<string>([name]);
+    const resolved: ResolvedGuardDep[] = [];
+    collectDeps(name, guardsMap, visited, ancestors, 1, effectiveMaxDepth, resolved);
 
     if (resolved.length > 0) {
       newProperties[name] = {

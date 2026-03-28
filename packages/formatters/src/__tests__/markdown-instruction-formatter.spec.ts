@@ -769,10 +769,10 @@ describe('MarkdownInstructionFormatter', () => {
   });
 
   describe('requiredContext section', () => {
-    it('should return null by default (placeholder)', () => {
+    it('should not include required context in main output', () => {
       const ast = createMinimalProgram();
       const result = formatter.format(ast);
-      // requiredContext returns null, so no "Required Context" section
+      // Required context is rendered per-guard in multifile mode, not in main output
       expect(result.content).not.toContain('Required Context');
     });
   });

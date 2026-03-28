@@ -500,16 +500,12 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
-   * Extract examples from the @examples block.
-   * Returns an array of example definitions with name, input, output, and optional description.
+   * Extract example entries from a properties object.
+   * Shared iteration logic used by both extractExamples and extractSkillExamples.
    */
-  protected extractExamples(
-    ast: Program
+  private extractExamplesFromProps(
+    props: Record<string, Value>
   ): Array<{ name: string; input: string; output: string; description?: string }> {
-    const block = this.findBlock(ast, 'examples');
-    if (!block) return [];
-
-    const props = this.getProps(block.content);
     const examples: Array<{ name: string; input: string; output: string; description?: string }> =
       [];
 
@@ -530,6 +526,19 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Extract examples from the @examples block.
+   * Returns an array of example definitions with name, input, output, and optional description.
+   */
+  protected extractExamples(
+    ast: Program
+  ): Array<{ name: string; input: string; output: string; description?: string }> {
+    const block = this.findBlock(ast, 'examples');
+    if (!block) return [];
+
+    return this.extractExamplesFromProps(this.getProps(block.content));
+  }
+
+  /**
    * Extract examples from a skill's nested examples property.
    * Returns the same shape as extractExamples.
    */
@@ -540,24 +549,47 @@ export abstract class BaseFormatter implements Formatter {
     if (!examplesValue || typeof examplesValue !== 'object' || Array.isArray(examplesValue))
       return [];
 
-    const examplesObj = examplesValue as Record<string, Value>;
-    const examples: Array<{ name: string; input: string; output: string; description?: string }> =
-      [];
+    return this.extractExamplesFromProps(examplesValue as Record<string, Value>);
+  }
 
-    for (const [name, value] of Object.entries(examplesObj)) {
-      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+  /**
+   * Render an examples section from the @examples block.
+   * Shared rendering logic used by Claude, GitHub, and MarkdownInstructionFormatter.
+   *
+   * @param sectionName - Custom section heading name (default: 'Examples')
+   */
+  protected renderExamplesSection(
+    ast: Program,
+    renderer: ConventionRenderer,
+    sectionName = 'Examples'
+  ): string | null {
+    const examples = this.extractExamples(ast);
+    if (examples.length === 0) return null;
 
-      const obj = value as Record<string, Value>;
-      const input = obj['input'] ? this.valueToString(obj['input']) : '';
-      const output = obj['output'] ? this.valueToString(obj['output']) : '';
+    const parts: string[] = [];
 
-      if (!input || !output) continue;
-
-      const description = obj['description'] ? this.valueToString(obj['description']) : undefined;
-      examples.push({ name, input, output, description });
+    for (const example of examples) {
+      parts.push(`### Example: ${example.name}`);
+      if (example.description) {
+        parts.push('');
+        parts.push(example.description);
+      }
+      parts.push('');
+      parts.push('**Input:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.input));
+      parts.push('```');
+      parts.push('');
+      parts.push('**Output:**');
+      parts.push('');
+      parts.push('```');
+      parts.push(this.dedent(example.output));
+      parts.push('```');
     }
 
-    return examples;
+    const content = parts.join('\n');
+    return renderer.renderSection(sectionName, content) + '\n';
   }
 
   /** Base path for skills, or null if formatter has no skill support. */

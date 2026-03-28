@@ -1,20 +1,7 @@
 import type { ValidationRule } from '../types.js';
 import type { Value } from '@promptscript/core';
 import { walkBlocks, getBlockName } from '../walker.js';
-
-const AST_NODE_TYPES = new Set([
-  'TextContent',
-  'ObjectContent',
-  'TemplateExpression',
-  'TypeExpression',
-  'Block',
-]);
-
-function isAstNode(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null) return false;
-  const typed = value as Record<string, unknown>;
-  return typeof typed['type'] === 'string' && AST_NODE_TYPES.has(typed['type'] as string);
-}
+import { isAstNode } from './guard-utils.js';
 
 /**
  * PS023: Valid examples validation.
