@@ -320,6 +320,114 @@ describe('resolveGuardRequires', () => {
     expect(result).toBe(ast);
   });
 
+  it('should return original value when guard has requires but all deps are missing from map (line 99)', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'guards',
+          createObjectContent({
+            a: {
+              content: 'Guard A',
+              requires: ['nonexistent'],
+            } as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = resolveGuardRequires(ast, { maxDepth: 3 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    // 'a' has requires but 'nonexistent' is not in the map, so resolved is empty → original value kept (line 210)
+    const a = props['a'] as Record<string, unknown>;
+    expect(a['__resolvedRequires']).toBeUndefined();
+  });
+
+  it('should handle guard content that is neither string nor TextContent (line 38)', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'guards',
+          createObjectContent({
+            a: {
+              content: 'Guard A',
+              requires: ['b'],
+            } as unknown as Value,
+            b: {
+              // content is a number — extractContent returns undefined
+              content: 42,
+            } as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = resolveGuardRequires(ast, { maxDepth: 3 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const a = props['a'] as Record<string, unknown>;
+    // b was visited but content extraction returned undefined, so it's not in resolved → original value kept
+    expect(a['__resolvedRequires']).toBeUndefined();
+  });
+
+  it('should handle collectDeps called on guard with no requires (line 74)', () => {
+    // Guard 'a' requires 'b', but 'b' is not in the guardsMap at all (filtered out)
+    // This tests line 74: guardProps not found in collectDeps
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'guards',
+          createObjectContent({
+            a: {
+              content: 'Guard A',
+              requires: ['b'],
+            } as unknown as Value,
+            // 'b' is a primitive, not an object → won't be added to guardsMap
+            b: 'just a string' as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = resolveGuardRequires(ast, { maxDepth: 3 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const a = props['a'] as Record<string, unknown>;
+    // 'b' not in guardsMap → skip → empty resolved
+    expect(a['__resolvedRequires']).toBeUndefined();
+  });
+
+  it('should hit MAX_GUARD_COUNT at top of collectDeps (line 69)', () => {
+    // Create a setup where collectDeps is called recursively after result already has 100 items
+    // Guard 'root' requires 100 deps, each of which requires 'extra'
+    const properties: Record<string, Value> = {};
+    const depNames: string[] = [];
+    for (let i = 0; i < 100; i++) {
+      const name = `dep-${i}`;
+      depNames.push(name);
+      properties[name] = {
+        content: `Content ${i}`,
+        requires: ['extra'],
+      } as unknown as Value;
+    }
+    properties['extra'] = {
+      content: 'Extra guard',
+    } as unknown as Value;
+    properties['root'] = {
+      content: 'Root guard',
+      requires: depNames,
+    } as unknown as Value;
+
+    const ast = createProgram({
+      blocks: [createBlock('guards', createObjectContent(properties))],
+    });
+
+    // maxDepth=2 allows recursion into each dep's requires
+    // After resolving 100 deps, collectDeps for 'extra' should hit the top-of-function cap
+    const result = resolveGuardRequires(ast, { maxDepth: 2 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const root = props['root'] as Record<string, unknown>;
+    const resolved = root['__resolvedRequires'] as Array<{ name: string }>;
+    expect(resolved.length).toBe(100);
+  });
+
   it('should handle TextContent objects as guard content', () => {
     const ast = createProgram({
       blocks: [
