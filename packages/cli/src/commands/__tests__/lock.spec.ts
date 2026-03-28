@@ -320,6 +320,41 @@ describe('lockCommand', () => {
     expect(repoKeys).toHaveLength(1);
   });
 
+  it('should reuse existing lockfile entry for scanned imports', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'https://github.com/org/repo': {
+            version: 'v2.0.0',
+            commit: 'abc123def',
+            integrity: 'sha256-existing',
+          },
+        },
+      })
+    );
+    mockCollectRemoteImports.mockResolvedValue([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'guards/safety.prs',
+        version: 'v2.0.0',
+      },
+    ]);
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { version: string; commit: string; integrity: string }>;
+    };
+    // Should preserve the existing pinned entry, not create a fresh one
+    expect(parsed.dependencies['https://github.com/org/repo']!.commit).toBe('abc123def');
+    expect(parsed.dependencies['https://github.com/org/repo']!.integrity).toBe('sha256-existing');
+  });
+
   it('should fail gracefully when scanner throws', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [], registries: { '@co': 'github.com/co/base' } });

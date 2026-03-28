@@ -304,6 +304,29 @@ describe('collectRemoteImports', () => {
     expect(mockReadFile).toHaveBeenCalledTimes(2);
   });
 
+  it('should skip gracefully when readFile throws on a local import', async () => {
+    const knownFiles = new Set(['/project/project.prs', '/project/unreadable.prs']);
+    mockExistsSync.mockImplementation((p: string) => knownFiles.has(p));
+
+    const source = '@use ./unreadable';
+    mockReadFile.mockImplementation(async (filePath: string) => {
+      if (filePath === '/project/project.prs') return source;
+      throw new Error('EACCES: permission denied');
+    });
+
+    mockParse.mockReturnValue({
+      ast: program([useDecl('./unreadable')]),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockReadFile).toHaveBeenCalledTimes(2);
+  });
+
   it('should skip gracefully when parse returns null AST', async () => {
     mockExistsSync.mockReturnValue(true);
     mockReadFile.mockResolvedValue('invalid content');
