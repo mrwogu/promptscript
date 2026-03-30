@@ -20,6 +20,10 @@ class MockFormatter implements Formatter {
   getSkillFileName(): string | null {
     return null;
   }
+
+  referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'none';
+  }
 }
 
 describe('FormatterRegistry coverage', () => {

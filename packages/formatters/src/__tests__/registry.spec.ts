@@ -37,6 +37,10 @@ class MockFormatter implements Formatter {
   getSkillFileName(): string | null {
     return null;
   }
+
+  referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'none';
+  }
 }
 
 // Valid formatter class with static getSupportedVersions()
