@@ -175,6 +175,10 @@ export class ClaudeFormatter extends BaseFormatter {
     return 'SKILL.md';
   }
 
+  override referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'directory';
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
 
@@ -593,10 +597,20 @@ export class ClaudeFormatter extends BaseFormatter {
     const skillDirPath = `.claude/skills/${config.name}`;
     const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
 
+    const resourcesWithProvenance = resourceFiles.map((f) => {
+      if (f.path.includes('/references/')) {
+        return {
+          ...f,
+          content: `${this.referenceProvenance(f.path)}\n\n${f.content}`,
+        };
+      }
+      return f;
+    });
+
     return {
       path: `${skillDirPath}/SKILL.md`,
       content: lines.join('\n') + '\n',
-      additionalFiles: resourceFiles.length > 0 ? resourceFiles : undefined,
+      additionalFiles: resourcesWithProvenance.length > 0 ? resourcesWithProvenance : undefined,
     };
   }
 
