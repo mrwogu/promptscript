@@ -24,6 +24,8 @@ import { useBlockFilter } from './use-block-filter.js';
 import { circularGuardRequires } from './circular-guard-requires.js';
 import { validExamples } from './valid-examples.js';
 import { validGuardRequires } from './valid-guard-requires.js';
+import { validSkillReferences } from './valid-skill-references.js';
+import { safeReferenceContent } from './safe-reference-content.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -79,6 +81,8 @@ export { useBlockFilter } from './use-block-filter.js';
 export { circularGuardRequires } from './circular-guard-requires.js';
 export { validExamples } from './valid-examples.js';
 export { validGuardRequires } from './valid-guard-requires.js';
+export { validSkillReferences } from './valid-skill-references.js';
+export { safeReferenceContent } from './safe-reference-content.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -121,6 +125,10 @@ export const allRules: ValidationRule[] = [
   validExamples,
   // Valid guard requires (PS024)
   validGuardRequires,
+  // Valid skill references (PS025)
+  validSkillReferences,
+  // Safe reference content (PS026)
+  safeReferenceContent,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

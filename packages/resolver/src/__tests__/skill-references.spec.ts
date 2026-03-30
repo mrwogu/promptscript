@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { parseSkillMd } from '../skills.js';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseSkillMd, resolveSkillReferences } from '../skills.js';
 import { applyExtends } from '../extensions.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const FIXTURES = join(__dirname, '__fixtures__', 'skill-references');
 import type {
   Program,
   Block,
@@ -274,5 +280,39 @@ describe('skill-aware @extend semantics', () => {
     const content = result.blocks[0]?.content as TextContent;
 
     expect(content.value).toBe('Original standards\n\nExtended standards');
+  });
+});
+
+describe('resolveSkillReferences', () => {
+  it('should load reference files from resolved paths', async () => {
+    const refs = ['references/spring.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    const resources = await resolveSkillReferences(refs, basePath);
+
+    expect(resources).toHaveLength(1);
+    expect(resources[0]!.relativePath).toBe('references/spring.md');
+    expect(resources[0]!.content).toContain('Spring Patterns');
+  });
+
+  it('should reject path traversal', async () => {
+    const refs = ['../../etc/passwd'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(/unsafe path/i);
+  });
+
+  it('should reject absolute paths', async () => {
+    const refs = ['/etc/passwd'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(/unsafe path/i);
+  });
+
+  it('should throw for non-existent reference files', async () => {
+    const refs = ['references/nonexistent.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(/not found/i);
   });
 });

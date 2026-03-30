@@ -1,7 +1,8 @@
 import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
 import { basename, resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
-import type { Logger } from '@promptscript/core';
+import { ResolveError } from '@promptscript/core';
 import type {
+  Logger,
   Program,
   Block,
   ObjectContent,
@@ -15,7 +16,7 @@ import type {
 /**
  * A resource file discovered alongside a skill's SKILL.md.
  */
-interface SkillResource {
+export interface SkillResource {
   /** Relative path from the skill directory (e.g. "data/colors.csv") */
   relativePath: string;
   /** File content (utf-8) */
@@ -818,6 +819,81 @@ async function discoverSkillResources(
 }
 
 /**
+ * Load reference files listed in a SKILL.md `references` frontmatter array.
+ *
+ * Validates each path against traversal attacks, enforces per-file and
+ * aggregate size limits, and enforces the max resource count.
+ *
+ * @param references - Relative paths listed in the SKILL.md frontmatter
+ * @param basePath - Absolute path to the skill directory (anchor for relative paths)
+ * @param logger - Optional logger for warnings
+ * @returns Array of loaded SkillResource objects
+ */
+export async function resolveSkillReferences(
+  references: string[],
+  basePath: string,
+  logger?: Logger
+): Promise<SkillResource[]> {
+  const resources: SkillResource[] = [];
+  let totalSize = 0;
+
+  for (const ref of references) {
+    if (!isSafeRelativePath(ref)) {
+      throw new ResolveError(`Unsafe path in references: ${ref} — path traversal not allowed`, {
+        file: basePath,
+        line: 0,
+        column: 0,
+      });
+    }
+
+    const fullPath = resolve(basePath, ref);
+
+    let content: string;
+    try {
+      content = await readFile(fullPath, 'utf-8');
+    } catch {
+      throw new ResolveError(`Reference file not found: ${ref}`, {
+        file: basePath,
+        line: 0,
+        column: 0,
+      });
+    }
+
+    const size = Buffer.byteLength(content, 'utf-8');
+
+    if (size > MAX_RESOURCE_SIZE) {
+      throw new ResolveError(
+        `Reference file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${ref}`,
+        { file: basePath, line: 0, column: 0 }
+      );
+    }
+
+    totalSize += size;
+    if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
+      throw new ResolveError(
+        `Total reference size exceeds ${MAX_TOTAL_RESOURCE_SIZE / 1_048_576}MB limit for skill`,
+        { file: basePath, line: 0, column: 0 }
+      );
+    }
+
+    if (size === 0) {
+      logger?.verbose(`Empty reference file: ${ref}`);
+    }
+
+    resources.push({ relativePath: ref, content });
+  }
+
+  if (resources.length > MAX_RESOURCE_COUNT) {
+    throw new ResolveError(
+      `Too many reference files (${resources.length}, max ${MAX_RESOURCE_COUNT})`,
+      { file: basePath, line: 0, column: 0 }
+    );
+  }
+
+  return resources;
+}
+
+/**
  * Check if a file exists.
  */
 async function fileExists(path: string): Promise<boolean> {
@@ -1086,6 +1162,23 @@ export async function resolveNativeSkills(
             content: r.content,
           }));
           updatedSkill['resources'] = resourceValues;
+        }
+
+        // Load reference files listed in the SKILL.md frontmatter
+        const skillRefs = parsed.references;
+        if (skillRefs && skillRefs.length > 0) {
+          const refResources = await resolveSkillReferences(skillRefs, skillDir, logger);
+          const existingResources =
+            (updatedSkill['resources'] as
+              | Array<{ relativePath: string; content: string }>
+              | undefined) ?? [];
+          updatedSkill['resources'] = [
+            ...existingResources,
+            ...refResources.map((r) => ({
+              relativePath: r.relativePath,
+              content: r.content,
+            })),
+          ];
         }
 
         updatedProperties[skillName] = updatedSkill;
