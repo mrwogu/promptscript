@@ -152,7 +152,7 @@ jobs:
           DOCS_VERSION: ${{ steps.version.outputs.version }}
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4
