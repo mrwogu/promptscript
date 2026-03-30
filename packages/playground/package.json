@@ -19,7 +19,7 @@
     "monaco-editor": "^0.55.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",

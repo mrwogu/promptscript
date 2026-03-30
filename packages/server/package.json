@@ -9,12 +9,12 @@
   "dependencies": {
     "@fastify/cors": "^11.0.0",
     "@fastify/websocket": "^11.0.0",
-    "@swc/helpers": "~0.5.19",
+    "@swc/helpers": "~0.5.20",
     "@types/ws": "^8.18.1",
     "chokidar": "^4.0.0",
     "fast-glob": "^3.3.0",
-    "fastify": "^5.8.3",
-    "ws": "^8.19.0",
+    "fastify": "^5.8.4",
+    "ws": "^8.20.0",
     "yaml": "^2.8.3"
   },
   "devDependencies": {

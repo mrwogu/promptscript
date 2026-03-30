@@ -26,6 +26,6 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@promptscript/parser": "workspace:*",
-    "@swc/helpers": "~0.5.19"
+    "@swc/helpers": "~0.5.20"
   }
 }
