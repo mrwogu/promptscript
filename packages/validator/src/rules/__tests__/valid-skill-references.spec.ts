@@ -87,4 +87,30 @@ describe('PS025: valid-skill-references', () => {
     const ast = makeAst([]);
     expect(validate(ast)).toHaveLength(0);
   });
+
+  it('should error on absolute path with drive letter', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        expert: { description: 'Expert', references: ['C:\\Windows\\System32\\config'] },
+      }),
+    ]);
+    const msgs = validate(ast);
+    expect(msgs.length).toBeGreaterThan(0);
+    expect(msgs[0]!.message).toContain('path traversal');
+  });
+
+  it('should skip non-object skill values', () => {
+    const ast = makeAst([makeSkillsBlock({ expert: 'just a string' })]);
+    expect(validate(ast)).toHaveLength(0);
+  });
+
+  it('should skip non-string reference entries', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        expert: { description: 'Expert', references: [123, null, { nested: true }] },
+      }),
+    ]);
+    // Non-string refs are silently skipped
+    expect(validate(ast)).toHaveLength(0);
+  });
 });

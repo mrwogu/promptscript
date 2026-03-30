@@ -4,6 +4,7 @@ import { GitHubFormatter } from '../formatters/github.js';
 import { CursorFormatter } from '../formatters/cursor.js';
 import { FactoryFormatter } from '../formatters/factory.js';
 import { AntigravityFormatter } from '../formatters/antigravity.js';
+import { RooFormatter } from '../formatters/roo.js';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
 
 const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
@@ -97,4 +98,29 @@ describe('formatter skill references', () => {
       });
     });
   }
+
+  // None mode formatters (inherit base referencesMode)
+  describe('formatters inheriting base referencesMode (none)', () => {
+    it('should return none for formatters that do not override referencesMode', () => {
+      expect(new RooFormatter().referencesMode()).toBe('none');
+    });
+  });
+
+  // GitHub formatter: resources without /references/ path are emitted without provenance
+  describe('GitHub formatter resource without references path', () => {
+    it('should emit resource files without provenance when path does not contain /references/', () => {
+      const ast = makeAst({
+        expert: {
+          description: 'Expert skill',
+          content: 'Help users.',
+          resources: [{ relativePath: 'data/config.json', content: '{"key": "value"}' }],
+        },
+      });
+      const result = new GitHubFormatter().format(ast, { version: 'full' });
+      const allFiles = collectAllFiles(result);
+      const dataFile = allFiles.find((f) => f.path.includes('data/config.json'));
+      expect(dataFile).toBeDefined();
+      expect(dataFile!.content).not.toContain('<!-- from:');
+    });
+  });
 });

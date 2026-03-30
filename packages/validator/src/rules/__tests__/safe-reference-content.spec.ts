@@ -115,4 +115,52 @@ describe('PS026: safe-reference-content', () => {
     const ast = makeAst([]);
     expect(validate(ast)).toHaveLength(0);
   });
+
+  it('should skip non-object skill values', () => {
+    const ast = makeAst([makeSkillsBlock({ expert: 'just a string' })]);
+    expect(validate(ast)).toHaveLength(0);
+  });
+
+  it('should skip when resources contain non-object entries', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        expert: {
+          description: 'Expert',
+          resources: ['not-an-object', null, 42],
+        },
+      }),
+    ]);
+    expect(validate(ast)).toHaveLength(0);
+  });
+
+  it('should skip when resource has non-string relativePath or content', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        expert: {
+          description: 'Expert',
+          resources: [{ relativePath: 123, content: 456 }],
+        },
+      }),
+    ]);
+    expect(validate(ast)).toHaveLength(0);
+  });
+
+  it('should check references in nested /references/ paths', () => {
+    const ast = makeAst([
+      makeSkillsBlock({
+        expert: {
+          description: 'Expert',
+          resources: [
+            {
+              relativePath: '@shared/references/evil.md',
+              content: '@guards {\n  check\n}',
+            },
+          ],
+        },
+      }),
+    ]);
+    const msgs = validate(ast);
+    expect(msgs).toHaveLength(1);
+    expect(msgs[0]!.message).toContain('@guards');
+  });
 });
