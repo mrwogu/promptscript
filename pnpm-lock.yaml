@@ -241,8 +241,8 @@ importers:
         specifier: ~0.5.20
         version: 0.5.20
       chevrotain:
-        specifier: ^11.2.0
-        version: 11.2.0
+        specifier: ^12.0.0
+        version: 12.0.0
 
   packages/playground:
     dependencies:
@@ -1027,20 +1027,20 @@ packages:
     resolution: {integrity: sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw==}
     hasBin: true
 
-  '@chevrotain/cst-dts-gen@11.2.0':
-    resolution: {integrity: sha512-ssJFvn/UXhQQeICw3SR/fZPmYVj+JM2mP+Lx7bZ51cOeHaMWOKp3AUMuyM3QR82aFFXTfcAp67P5GpPjGmbZWQ==}
+  '@chevrotain/cst-dts-gen@12.0.0':
+    resolution: {integrity: sha512-fSL4KXjTl7cDgf0B5Rip9Q05BOrYvkJV/RrBTE/bKDN096E4hN/ySpcBK5B24T76dlQ2i32Zc3PAE27jFnFrKg==}
 
-  '@chevrotain/gast@11.2.0':
-    resolution: {integrity: sha512-c+KoD6eSI1xjAZZoNUW+V0l13UEn+a4ShmUrjIKs1BeEWCji0Kwhmqn5FSx1K4BhWL7IQKlV7wLR4r8lLArORQ==}
+  '@chevrotain/gast@12.0.0':
+    resolution: {integrity: sha512-1ne/m3XsIT8aEdrvT33so0GUC+wkctpUPK6zU9IlOyJLUbR0rg4G7ZiApiJbggpgPir9ERy3FRjT6T7lpgetnQ==}
 
-  '@chevrotain/regexp-to-ast@11.2.0':
-    resolution: {integrity: sha512-lG73pBFqbXODTbXhdZwv0oyUaI+3Irm+uOv5/W79lI3g5hasYaJnVJOm3H2NkhA0Ef4XLBU4Scr7TJDJwgFkAw==}
+  '@chevrotain/regexp-to-ast@12.0.0':
+    resolution: {integrity: sha512-p+EW9MaJwgaHguhoqwOtx/FwuGr+DnNn857sXWOi/mClXIkPGl3rn7hGNWvo31HA3vyeQxjqe+H36yZJwYU8cA==}
 
-  '@chevrotain/types@11.2.0':
-    resolution: {integrity: sha512-vBMSj/lz/LqolbGQEHB0tlpW5BnljHVtp+kzjQfQU+5BtGMTuZCPVgaAjtKvQYXnHb/8i/02Kii00y0tsuwfsw==}
+  '@chevrotain/types@12.0.0':
+    resolution: {integrity: sha512-S+04vjFQKeuYw0/eW3U52LkAHQsB1ASxsPGsLPUyQgrZ2iNNibQrsidruDzjEX2JYfespXMG0eZmXlhA6z7nWA==}
 
-  '@chevrotain/utils@11.2.0':
-    resolution: {integrity: sha512-+7whECg4yNWHottjvr2To2BRxL4XJVjIyyv5J4+bJ0iMOVU8j/8n1qPDLZS/90W/BObDR8VNL46lFbzY/Hosmw==}
+  '@chevrotain/utils@12.0.0':
+    resolution: {integrity: sha512-lB59uJoaGIfOOL9knQqQRfhl9g7x8/wqFkp13zTdkRu1huG9kg6IJs1O8hqj9rs6h7orGxHJUKb+mX3rPbWGhA==}
 
   '@codecov/bundle-analyzer@1.9.1':
     resolution: {integrity: sha512-WVWZIV0v09RueL0L2x8pgaWzGsJsKMsMFjsFgzfjeApq9cE6bZ+0fQC3f/pTQ8h40Y3D5Gk9o4W6jd/if3ohSA==}
@@ -3307,8 +3307,9 @@ packages:
     resolution: {integrity: sha512-WDrybc/gKFpTYQutKIK6UvfcuxijIZfMfXaYm8NMsPQxSYvf+13fXUJ4rztGGbJcBQ/GF55gvrZ0Bc0bj/mqvg==}
     engines: {node: '>=20.18.1'}
 
-  chevrotain@11.2.0:
-    resolution: {integrity: sha512-mHCHTxM51nCklUw9RzRVc0DLjAh/SAUPM4k/zMInlTIo25ldWXOZoPt7XEIk/LwoT4lFVmJcu9g5MHtx371x3A==}
+  chevrotain@12.0.0:
+    resolution: {integrity: sha512-csJvb+6kEiQaqo1woTdSAuOWdN0WTLIydkKrBnS+V5gZz0oqBrp4kQ35519QgK6TpBThiG3V1vNSHlIkv4AglQ==}
+    engines: {node: '>=22.0.0'}
 
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
@@ -4577,9 +4578,6 @@ packages:
 
   lockfile@1.0.4:
     resolution: {integrity: sha512-cvbTwETRfsFh4nHsL1eGWapU1XFi5Ot9E85sWAwia7Y7EgB7vfqcZhTKZ+l7hCGxSPoushMv5GKhT5PdLv03WA==}
-
-  lodash-es@4.17.23:
-    resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
 
   lodash.debounce@4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
@@ -7100,22 +7098,20 @@ snapshots:
     dependencies:
       css-tree: 3.1.0
 
-  '@chevrotain/cst-dts-gen@11.2.0':
+  '@chevrotain/cst-dts-gen@12.0.0':
     dependencies:
-      '@chevrotain/gast': 11.2.0
-      '@chevrotain/types': 11.2.0
-      lodash-es: 4.17.23
+      '@chevrotain/gast': 12.0.0
+      '@chevrotain/types': 12.0.0
 
-  '@chevrotain/gast@11.2.0':
+  '@chevrotain/gast@12.0.0':
     dependencies:
-      '@chevrotain/types': 11.2.0
-      lodash-es: 4.17.23
+      '@chevrotain/types': 12.0.0
 
-  '@chevrotain/regexp-to-ast@11.2.0': {}
+  '@chevrotain/regexp-to-ast@12.0.0': {}
 
-  '@chevrotain/types@11.2.0': {}
+  '@chevrotain/types@12.0.0': {}
 
-  '@chevrotain/utils@11.2.0': {}
+  '@chevrotain/utils@12.0.0': {}
 
   '@codecov/bundle-analyzer@1.9.1':
     dependencies:
@@ -9596,14 +9592,13 @@ snapshots:
       undici: 7.22.0
       whatwg-mimetype: 4.0.0
 
-  chevrotain@11.2.0:
+  chevrotain@12.0.0:
     dependencies:
-      '@chevrotain/cst-dts-gen': 11.2.0
-      '@chevrotain/gast': 11.2.0
-      '@chevrotain/regexp-to-ast': 11.2.0
-      '@chevrotain/types': 11.2.0
-      '@chevrotain/utils': 11.2.0
-      lodash-es: 4.17.23
+      '@chevrotain/cst-dts-gen': 12.0.0
+      '@chevrotain/gast': 12.0.0
+      '@chevrotain/regexp-to-ast': 12.0.0
+      '@chevrotain/types': 12.0.0
+      '@chevrotain/utils': 12.0.0
 
   chokidar@4.0.3:
     dependencies:
@@ -10931,8 +10926,6 @@ snapshots:
   lockfile@1.0.4:
     dependencies:
       signal-exit: 3.0.7
-
-  lodash-es@4.17.23: {}
 
   lodash.debounce@4.0.8: {}
 
