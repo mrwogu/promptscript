@@ -18,10 +18,10 @@
 | File | Responsibility |
 |------|----------------|
 | `packages/validator/src/rules/valid-skill-references.ts` | PS025: validate reference paths exist, are text files, within size limits |
-| `packages/validator/src/rules/safe-reference-content.ts` | PS026: detect PRS directives in reference files |
+| `packages/validator/src/rules/safe-reference-content.ts` | PS026: detect PRS directives and triple-quotes in reference files |
 | `packages/validator/src/rules/__tests__/valid-skill-references.spec.ts` | Tests for PS025 |
 | `packages/validator/src/rules/__tests__/safe-reference-content.spec.ts` | Tests for PS026 |
-| `packages/resolver/src/__tests__/skill-references.spec.ts` | Tests for reference loading and extend semantics |
+| `packages/resolver/src/__tests__/skill-references.spec.ts` | Tests for reference loading, extend semantics, collision detection |
 | `packages/resolver/src/__tests__/__fixtures__/skill-references/` | Fixtures for multi-registry overlay tests |
 | `packages/formatters/src/__tests__/skill-references.spec.ts` | Tests for reference emission across formatters |
 
@@ -29,12 +29,14 @@
 | File | Change |
 |------|--------|
 | `packages/core/src/types/ast.ts` | Add `references?: string[]` to `SkillDefinition` |
-| `packages/resolver/src/skills.ts` | Add `'references'` to `SKILL_RESERVED_KEYS`, parse references from frontmatter, load reference files (Etap B) |
-| `packages/resolver/src/extensions.ts` | Skill-aware `mergeValue()` for `@extend` on skill properties (Etap A) |
-| `packages/formatters/src/base-formatter.ts` | Add `referencesMode()` method |
+| `packages/resolver/src/skills.ts` | Export `SkillResource`, add `'references'` to `SKILL_RESERVED_KEYS`, parse references from frontmatter, load reference files (Etap B), add `existsSync` and `ResolveError` imports |
+| `packages/resolver/src/extensions.ts` | Skill-context-aware `mergeValue()` for `@extend` on skill properties (Etap A) — activated ONLY when extend target is inside `@skills` block |
+| `packages/formatters/src/base-formatter.ts` | Add `referencesMode()` method and `referenceProvenance()` helper |
 | `packages/formatters/src/formatters/claude.ts` | Extract `references` property, emit with provenance |
-| `packages/formatters/src/formatters/github.ts` | Extract `references` property, emit with provenance |
+| `packages/formatters/src/formatters/github.ts` | Add `resources` to `SkillConfig`, update `extractSkills()` to read resources, emit with provenance |
 | `packages/formatters/src/formatters/cursor.ts` | Inline references with provenance headers |
+| `packages/formatters/src/formatters/antigravity.ts` | Inline references (same as Cursor) |
+| `packages/formatters/src/formatters/factory.ts` | Directory-mode references (same as Claude) |
 | `packages/validator/src/rules/index.ts` | Register PS025 and PS026 |
 | `packages/cli/src/commands/lock-scanner.ts` | Discover `references` paths as dependencies |
 
@@ -214,6 +216,10 @@ git commit -m "feat(resolver): parse references from SKILL.md frontmatter"
 - Modify: `packages/resolver/src/extensions.ts:272-306` (mergeValue)
 - Test: `packages/resolver/src/__tests__/skill-references.spec.ts` (add tests)
 
+**CRITICAL DESIGN NOTE:** The `mergeValue()` refactoring MUST only activate skill-aware semantics when the extend target is inside a `@skills` block. Otherwise, properties named `content`, `description`, etc. in non-skill blocks (e.g., `@standards`) would get replace semantics instead of the existing deepMerge/concat behavior. The approach: pass the extend target path into `mergeValue()` and check if the first segment is `skills`.
+
+**CRITICAL TYPE NOTE:** In the AST, array values inside `ObjectContent.properties` are represented as `ArrayContent` nodes (with `.type === 'ArrayContent'` and `.elements`), NOT as plain JavaScript arrays. The append logic must handle `ArrayContent` nodes by reading `.elements`, not using `Array.isArray()`.
+
 - [ ] **Step 1: Write failing tests for skill-aware extend**
 
 Append to `packages/resolver/src/__tests__/skill-references.spec.ts`:
@@ -300,9 +306,10 @@ describe('skill-aware @extend semantics', () => {
     const result = applyExtends(ast);
     const skills = result.blocks[0]?.content as ObjectContent;
     const expert = skills.properties['expert'] as Record<string, Value>;
-    const refs = expert['references'] as string[];
+    // After merge, references is an ArrayContent with combined elements
+    const refs = expert['references'] as ArrayContent;
 
-    expect(refs).toEqual(['base/spring.md', 'overlay/arch.md']);
+    expect(refs.elements).toEqual(['base/spring.md', 'overlay/arch.md']);
   });
 
   it('should replace description when extending a skill', () => {
@@ -401,6 +408,68 @@ describe('skill-aware @extend semantics', () => {
     expect(params['env']).toBe('prod');
     expect(params['client']).toBe('Retail');
   });
+
+  it('should cumulate references from multiple @extend blocks', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base',
+              references: createArrayContent(['base.md']),
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['layer3.md']),
+          })
+        ),
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['layer4.md']),
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as ArrayContent;
+
+    expect(refs.elements).toEqual(['base.md', 'layer3.md', 'layer4.md']);
+  });
+
+  it('should NOT apply skill-aware semantics to non-skill blocks (regression guard)', () => {
+    // @extend on @standards with a 'content' property should use
+    // existing TextContent concat semantics, NOT skill-aware replace
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'standards',
+          createTextContent('Original standards')
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'standards',
+          createTextContent('Extended standards')
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const content = result.blocks[0]?.content as TextContent;
+
+    // Existing behavior: TextContent concatenation with \n\n
+    expect(content.value).toBe('Original standards\n\nExtended standards');
+  });
 });
 ```
 
@@ -409,11 +478,11 @@ describe('skill-aware @extend semantics', () => {
 Run: `pnpm nx test resolver -- --testPathPattern=skill-references`
 Expected: FAIL — current `mergeValue()` uses generic merge (TextContent concatenation, not skill-aware)
 
-- [ ] **Step 3: Implement skill-aware mergeValue**
+- [ ] **Step 3: Implement skill-context-aware mergeValue**
 
-In `packages/resolver/src/extensions.ts`, modify `mergeValue()` to detect when it's operating on a skill property inside `@skills` block. The approach: when `mergeExtension()` targets a path like `skills.expert`, and the extend content has properties that are skill-reserved keys, apply skill-aware semantics.
+In `packages/resolver/src/extensions.ts`, the key change is to pass the extend **target path** through the call chain so `mergeValue()` knows whether it's inside a `@skills` block.
 
-Add a set of skill properties with their merge strategies at the top of the file:
+Add skill merge strategy sets at the top of the file:
 
 ```typescript
 /** Skill properties that use replace semantics in @extend */
@@ -441,12 +510,17 @@ const SKILL_MERGE_PROPERTIES = new Set([
   'inputs',
   'outputs',
 ]);
+
+/** Check if a value is an ArrayContent AST node */
+function isArrayContent(v: unknown): v is ArrayContent {
+  return typeof v === 'object' && v !== null && (v as Record<string, unknown>)['type'] === 'ArrayContent';
+}
 ```
 
-Then modify the object merging branch in `mergeValue()`. When the existing value is an object (a skill definition) and the extension is `ObjectContent`, check each property against the skill semantics sets:
+Modify `mergeValue()` to accept a `skillContext` boolean parameter:
 
 ```typescript
-function mergeValue(existing: Value | undefined, extContent: BlockContent): Value {
+function mergeValue(existing: Value | undefined, extContent: BlockContent, skillContext: boolean): Value {
   if (existing === undefined) {
     return extractValue(extContent);
   }
@@ -456,17 +530,22 @@ function mergeValue(existing: Value | undefined, extContent: BlockContent): Valu
     return uniqueConcat(existing, extContent.elements);
   }
 
-  // Object merging (includes skill-aware semantics)
+  // Object merging — use skill-aware semantics ONLY inside @skills block
   if (
     typeof existing === 'object' &&
     existing !== null &&
     !Array.isArray(existing) &&
     extContent.type === 'ObjectContent'
   ) {
-    return mergeObjectValue(
+    if (skillContext) {
+      return mergeSkillValue(existing as Record<string, unknown>, extContent);
+    }
+    // Default: existing deepMerge behavior for non-skill objects
+    const merged = deepMerge(
       existing as Record<string, unknown>,
-      extContent
+      extContent.properties as Record<string, unknown>
     );
+    return merged as unknown as Value;
   }
 
   // TextContent merging
@@ -482,10 +561,10 @@ function mergeValue(existing: Value | undefined, extContent: BlockContent): Valu
 }
 
 /**
- * Merge two object values with skill-aware semantics.
- * When a property is a known skill property, use the appropriate merge strategy.
+ * Merge a skill object with skill-aware property semantics.
+ * Handles ArrayContent nodes (not plain arrays) for append properties.
  */
-function mergeObjectValue(
+function mergeSkillValue(
   existing: Record<string, unknown>,
   extContent: ObjectContent
 ): Value {
@@ -498,38 +577,38 @@ function mergeObjectValue(
       // Replace: extension wins completely
       result[key] = extValue;
     } else if (SKILL_APPEND_PROPERTIES.has(key)) {
-      // Append: concatenate arrays
-      if (Array.isArray(existingValue) && Array.isArray(extValue)) {
-        result[key] = [...existingValue, ...extValue];
-      } else if (Array.isArray(extValue)) {
-        result[key] = extValue;
-      } else {
-        result[key] = extValue;
-      }
+      // Append: handle both ArrayContent nodes and plain arrays
+      const existingElements = isArrayContent(existingValue)
+        ? (existingValue as ArrayContent).elements
+        : Array.isArray(existingValue) ? existingValue : [];
+      const extElements = isArrayContent(extValue)
+        ? (extValue as ArrayContent).elements
+        : Array.isArray(extValue) ? extValue as Value[] : [];
+
+      result[key] = {
+        type: 'ArrayContent',
+        elements: [...existingElements, ...extElements],
+        loc: isArrayContent(extValue) ? (extValue as ArrayContent).loc : createLoc(),
+      };
     } else if (SKILL_MERGE_PROPERTIES.has(key)) {
-      // Shallow merge: objects
-      if (
-        typeof existingValue === 'object' &&
-        existingValue !== null &&
-        !Array.isArray(existingValue) &&
-        typeof extValue === 'object' &&
-        extValue !== null &&
-        !Array.isArray(extValue)
-      ) {
-        result[key] = {
-          ...(existingValue as Record<string, unknown>),
-          ...(extValue as Record<string, unknown>),
-        };
-      } else {
-        result[key] = extValue;
-      }
+      // Shallow merge: objects (handle ObjectContent nodes)
+      const existingProps = isObjectContent(existingValue)
+        ? (existingValue as ObjectContent).properties
+        : (typeof existingValue === 'object' && existingValue !== null)
+          ? existingValue as Record<string, unknown>
+          : {};
+      const extProps = isObjectContent(extValue)
+        ? (extValue as ObjectContent).properties
+        : (typeof extValue === 'object' && extValue !== null)
+          ? extValue as Record<string, unknown>
+          : {};
+
+      result[key] = { ...existingProps, ...extProps };
     } else {
-      // Default: use existing deepMerge for unknown properties
+      // Default: deepMerge for unknown properties
       if (
-        typeof existingValue === 'object' &&
-        existingValue !== null &&
-        typeof extValue === 'object' &&
-        extValue !== null
+        typeof existingValue === 'object' && existingValue !== null &&
+        typeof extValue === 'object' && extValue !== null
       ) {
         result[key] = deepMerge(
           existingValue as Record<string, unknown>,
@@ -545,6 +624,16 @@ function mergeObjectValue(
 }
 ```
 
+Then update all call sites that invoke `mergeValue()` to pass `skillContext`. The `skillContext` is `true` when the extend's `targetPath` starts with `skills.` (i.e., `targetPath.split('.')[0] === 'skills'`). Pass this from `mergeExtension()` / `mergeAtPath()` down to `mergeValue()`.
+
+Add helper `isObjectContent()`:
+
+```typescript
+function isObjectContent(v: unknown): v is ObjectContent {
+  return typeof v === 'object' && v !== null && (v as Record<string, unknown>)['type'] === 'ObjectContent';
+}
+```
+
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `pnpm nx test resolver -- --testPathPattern=skill-references`
@@ -553,13 +642,13 @@ Expected: PASS
 - [ ] **Step 5: Run all resolver tests to check for regressions**
 
 Run: `pnpm nx test resolver`
-Expected: PASS — existing extend behavior preserved (generic objects still use deepMerge)
+Expected: PASS — non-skill `@extend` behavior preserved (regression guard test confirms)
 
 - [ ] **Step 6: Commit**
 
 ```bash
 git add packages/resolver/src/extensions.ts packages/resolver/src/__tests__/skill-references.spec.ts
-git commit -m "feat(resolver): skill-aware extend semantics for references, params, content"
+git commit -m "feat(resolver): skill-context-aware extend semantics for references, params, content"
 ```
 
 ---
@@ -657,8 +746,38 @@ describe('resolveSkillReferences', () => {
   });
 
   it('should enforce MAX_RESOURCE_SIZE per file', async () => {
-    // This test would need a large fixture; test the check logic directly
-    // by mocking file size or testing the validation function in isolation
+    const refs = ['references/spring.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    // Mock readFile to return content exceeding 1MB
+    const { readFile: originalReadFile } = await import('node:fs/promises');
+    const mockReadFile = vi.fn().mockResolvedValue('x'.repeat(1_048_577));
+    vi.doMock('node:fs/promises', () => ({ readFile: mockReadFile }));
+
+    // Re-import to pick up mock (or test the size check logic directly)
+    // Alternative: create a test that verifies the error message format
+    await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(
+      /exceeds.*1.*MB/i
+    );
+  });
+
+  it('should warn on empty reference files', async () => {
+    // Create an empty fixture file
+    const emptyFixture = join(FIXTURES, 'skills', 'expert', 'references', 'empty.md');
+    const { writeFileSync, unlinkSync } = await import('node:fs');
+    writeFileSync(emptyFixture, '');
+
+    const mockLogger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), debug: vi.fn() };
+    const refs = ['references/empty.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    const resources = await resolveSkillReferences(refs, basePath, mockLogger as unknown as Logger);
+
+    expect(resources).toHaveLength(1);
+    expect(resources[0]!.content).toBe('');
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Empty reference file'));
+
+    unlinkSync(emptyFixture);
   });
 });
 ```
@@ -668,7 +787,14 @@ describe('resolveSkillReferences', () => {
 Run: `pnpm nx test resolver -- --testPathPattern=skill-references`
 Expected: FAIL — `resolveSkillReferences` not exported
 
-- [ ] **Step 4: Implement resolveSkillReferences**
+- [ ] **Step 4: Add missing imports and export SkillResource**
+
+In `packages/resolver/src/skills.ts`:
+1. Add `import { existsSync } from 'node:fs';` to imports
+2. Add `ResolveError` to the `@promptscript/core` import (check if it's already imported; if not, add it)
+3. Change `interface SkillResource` (line 18) from private to **exported**: `export interface SkillResource`
+
+- [ ] **Step 5: Implement resolveSkillReferences**
 
 In `packages/resolver/src/skills.ts`, add a new exported function:
 
@@ -746,7 +872,7 @@ export async function resolveSkillReferences(
 
 Also export `isSafeRelativePath` (currently private) so it can be reused, or keep it private and call `resolveSkillReferences` which uses it internally.
 
-- [ ] **Step 5: Integrate into resolveNativeSkills pipeline**
+- [ ] **Step 6: Integrate into resolveNativeSkills pipeline**
 
 In `resolveNativeSkills()`, after building the `updatedSkill` object (around lines 1042-1061), add reference resolution:
 
@@ -768,17 +894,17 @@ if (skillRefs && Array.isArray(skillRefs)) {
 }
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [ ] **Step 7: Run tests to verify they pass**
 
 Run: `pnpm nx test resolver -- --testPathPattern=skill-references`
 Expected: PASS
 
-- [ ] **Step 7: Run all resolver tests**
+- [ ] **Step 8: Run all resolver tests**
 
 Run: `pnpm nx test resolver`
 Expected: PASS
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add packages/resolver/src/skills.ts packages/resolver/src/__tests__/skill-references.spec.ts packages/resolver/src/__tests__/__fixtures__/skill-references/
@@ -1120,7 +1246,7 @@ const PRS_DIRECTIVES = [
 ];
 
 const DIRECTIVE_PATTERN = new RegExp(
-  `^\\s*(${PRS_DIRECTIVES.map((d) => d.replace('@', '@')).join('|')})\\b`,
+  `^\\s*(${PRS_DIRECTIVES.map((d) => d.replace('@', '@')).join('|')}|""")`,
   'm'
 );
 
@@ -1447,10 +1573,22 @@ Expected: FAIL
 
 - [ ] **Step 3: Implement in GitHub formatter**
 
-Apply the same pattern as Claude formatter:
+**IMPORTANT:** Unlike Claude, the GitHub formatter's `SkillConfig` interface does NOT currently have a `resources` property, and `extractSkills()` does not read `obj['resources']`. You must:
 
-1. Override `referencesMode()` returning `'directory'`
-2. Add provenance to reference resources in the skill file generation method
+1. Add `resources?: Array<{ relativePath: string; content: string }>` to the GitHub `SkillConfig` interface
+2. In `extractSkills()`, add resource extraction (same pattern as Claude's line 536-540):
+```typescript
+resources:
+  obj['resources'] && Array.isArray(obj['resources'])
+    ? (obj['resources'] as Array<Record<string, Value>>).map((r) => ({
+        relativePath: r['relativePath'] as string,
+        content: r['content'] as string,
+      }))
+    : undefined,
+```
+3. In `generateSkillFile()`, add `sanitizeResourceFiles()` call and include result as `additionalFiles`
+4. Override `referencesMode()` returning `'directory'`
+5. Add provenance to reference resources (same as Claude)
 
 - [ ] **Step 4: Run tests and commit**
 
@@ -1799,6 +1937,172 @@ git commit -m "test(compiler): add skill overlay integration test"
 
 ---
 
+## Task 14: Factory formatter — directory-mode references
+
+**Files:**
+- Modify: `packages/formatters/src/formatters/factory.ts`
+- Test: `packages/formatters/src/__tests__/skill-references.spec.ts` (append tests)
+
+- [ ] **Step 1: Write failing tests**
+
+Append to `packages/formatters/src/__tests__/skill-references.spec.ts`:
+
+```typescript
+import { FactoryFormatter } from '../formatters/factory.js';
+
+describe('Factory formatter — skill references (directory)', () => {
+  it('should return directory referencesMode', () => {
+    const formatter = new FactoryFormatter();
+    expect(formatter.referencesMode()).toBe('directory');
+  });
+
+  it('should emit reference files with provenance', () => {
+    const formatter = new FactoryFormatter();
+    const ast = makeAst({
+      expert: {
+        description: 'Expert skill',
+        content: 'Help users.',
+        resources: [
+          { relativePath: 'references/arch.md', content: '# Architecture\nLayout.' },
+        ],
+      },
+    });
+
+    const result = formatter.format(ast, { version: 'full' });
+    const allFiles = collectAllFiles(result);
+    const refFile = allFiles.find((f) => f.path.includes('references/arch.md'));
+
+    expect(refFile).toBeDefined();
+    expect(refFile!.content).toMatch(/<!-- from:.*arch\.md -->/);
+  });
+});
+```
+
+- [ ] **Step 2: Implement**
+
+Same pattern as Claude/GitHub: add `resources` to SkillConfig (if missing), override `referencesMode()` returning `'directory'`, add provenance to reference files.
+
+- [ ] **Step 3: Run tests, commit**
+
+```bash
+git add packages/formatters/src/formatters/factory.ts packages/formatters/src/__tests__/skill-references.spec.ts
+git commit -m "feat(formatters): emit skill references with provenance in Factory formatter"
+```
+
+---
+
+## Task 15: Antigravity formatter — inline references
+
+**Files:**
+- Modify: `packages/formatters/src/formatters/antigravity.ts`
+- Test: `packages/formatters/src/__tests__/skill-references.spec.ts` (append tests)
+
+- [ ] **Step 1: Write failing tests**
+
+Append to `packages/formatters/src/__tests__/skill-references.spec.ts`:
+
+```typescript
+import { AntigravityFormatter } from '../formatters/antigravity.js';
+
+describe('Antigravity formatter — skill references (inline)', () => {
+  it('should return inline referencesMode', () => {
+    const formatter = new AntigravityFormatter();
+    expect(formatter.referencesMode()).toBe('inline');
+  });
+
+  it('should inline references at the end of main output', () => {
+    const formatter = new AntigravityFormatter();
+    const ast = makeAst({
+      expert: {
+        description: 'Expert skill',
+        content: 'Help users.',
+        resources: [
+          { relativePath: 'references/arch.md', content: '# Architecture\nMicroservices.' },
+        ],
+      },
+    });
+
+    const result = formatter.format(ast);
+
+    expect(result.content).toContain('## References');
+    expect(result.content).toContain('arch.md');
+    expect(result.content).toContain('Microservices.');
+  });
+});
+```
+
+- [ ] **Step 2: Implement**
+
+Same pattern as Cursor: override `referencesMode()` returning `'inline'`, add `inlineSkillReferences()` method, append to main output.
+
+- [ ] **Step 3: Run tests, commit**
+
+```bash
+git add packages/formatters/src/formatters/antigravity.ts packages/formatters/src/__tests__/skill-references.spec.ts
+git commit -m "feat(formatters): inline skill references in Antigravity formatter"
+```
+
+---
+
+## Task 16: Reference name collision detection
+
+**Files:**
+- Modify: `packages/resolver/src/skills.ts` (resolveSkillReferences)
+- Test: `packages/resolver/src/__tests__/skill-references.spec.ts` (add tests)
+
+Spec section 5 requires: when `@extend` appends a reference with the same filename as a base reference, the higher layer's version wins and a warning is emitted.
+
+- [ ] **Step 1: Write failing tests**
+
+Append to `packages/resolver/src/__tests__/skill-references.spec.ts`:
+
+```typescript
+describe('reference name collision detection', () => {
+  it('should deduplicate references by basename, keeping last occurrence', () => {
+    // Simulate post-Etap-A merged list where base and overlay both have spring.md
+    const refs = ['references/spring.md', 'references/spring.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+    const mockLogger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), debug: vi.fn() };
+
+    // resolveSkillReferences should deduplicate and warn
+    return resolveSkillReferences(refs, basePath, mockLogger as unknown as Logger).then((resources) => {
+      expect(resources).toHaveLength(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('overridden'));
+    });
+  });
+});
+```
+
+- [ ] **Step 2: Implement deduplication in resolveSkillReferences**
+
+In `resolveSkillReferences()`, after loading all files, deduplicate by basename (last occurrence wins):
+
+```typescript
+// After the main loading loop, before returning:
+const byBasename = new Map<string, number>();
+for (let i = 0; i < resources.length; i++) {
+  const basename = resources[i]!.relativePath.split('/').pop() ?? resources[i]!.relativePath;
+  if (byBasename.has(basename)) {
+    const prevIdx = byBasename.get(basename)!;
+    logger?.warn(
+      `Reference ${basename} overridden — later layer's version wins`
+    );
+    resources[prevIdx] = undefined as unknown as SkillResource; // mark for removal
+  }
+  byBasename.set(basename, i);
+}
+return resources.filter((r): r is SkillResource => r !== undefined);
+```
+
+- [ ] **Step 3: Run tests, commit**
+
+```bash
+git add packages/resolver/src/skills.ts packages/resolver/src/__tests__/skill-references.spec.ts
+git commit -m "feat(resolver): deduplicate references by basename with override warning"
+```
+
+---
+
 ## Self-Review Checklist
 
 ### Spec coverage
@@ -1806,25 +2110,47 @@ git commit -m "test(compiler): add skill overlay integration test"
 |---|---|
 | 3. New property `references` | Task 1 (type), Task 2 (frontmatter), Task 4 (loading) |
 | 4. Composition via `@use` + `@extend` | Task 3 (extend semantics) |
-| 5. Extend semantics per property | Task 3 (replace/append/merge) |
+| 5. Extend semantics per property | Task 3 (replace/append/merge, multiple extends, regression guard) |
+| 5.1 Diamond dependency priority | **Deferred to Phase 2** — requires registry-order awareness in resolver, not achievable via `@extend` alone |
 | 6.1 Parser — zero changes | Confirmed, no parser tasks |
 | 6.2 Core — SkillDefinition | Task 1 |
-| 6.3 Resolver — SKILL_RESERVED_KEYS | Task 2 |
+| 6.3 Resolver — SKILL_RESERVED_KEYS + SkillResource export | Task 2, Task 4 |
 | 6.4 Extend: two stages | Task 3 (Etap A), Task 4 (Etap B) |
-| 6.5 Formatters + provenance | Tasks 7, 8, 9, 10 |
+| 6.5 Formatters + provenance | Tasks 7, 8, 9, 10, 14 (Factory), 15 (Antigravity) |
 | 6.6 Validator PS025 | Task 5 |
 | 6.7 Lockfile | Task 11 |
-| 6.8 Content safety PS026 | Task 6 |
-| 7. Error handling | Task 4 (resolve errors), Task 5 (validation) |
+| 6.8 Content safety PS026 (incl. triple-quote) | Task 6 |
+| 7. Error handling (name collisions) | Task 16 (dedup + warning) |
+| 7. Error handling (resolve errors) | Task 4 |
 | 10. Testing | Tasks 2-6 (unit), Task 13 (integration) |
 | 12. Migration checklist | Not in plan scope (registry-side, not code) |
-| 13. Phase 1 MVP items | All 12 items covered |
+| 13. Phase 1 MVP items | 11 of 12 covered (item 10 diamond dep deferred) |
+
+### Review fixes applied (v2)
+| Blocker | Fix |
+|---|---|
+| B1: `mergeObjectValue` applies skill semantics globally | Task 3: `skillContext` boolean passed through call chain, activated only when target path starts with `skills.` |
+| B2: ArrayContent vs plain array mismatch | Task 3: `isArrayContent()` helper checks `.type === 'ArrayContent'`, reads `.elements` |
+| B3: Missing `existsSync` import | Task 4 Step 4: explicit import from `'node:fs'` |
+| B4: Missing `ResolveError` import | Task 4 Step 4: add to `@promptscript/core` import |
+| B4: `SkillResource` is private | Task 4 Step 4: change to `export interface SkillResource` |
+| B5: GitHub lacks `resources` in SkillConfig | Task 9 Step 3: explicit instructions to add resources to SkillConfig and extractSkills |
+| B7: No name collision dedup | Task 16: deduplication by basename with warning |
+| B8: Missing Antigravity/Factory formatters | Tasks 14 (Factory), 15 (Antigravity) |
+| W2: PS026 missing triple-quote | Task 6: `"""` added to DIRECTIVE_PATTERN regex |
+| W9: Empty test body for MAX_RESOURCE_SIZE | Task 4: concrete test with mock |
+| W10: No regression guard for non-skill extend | Task 3: explicit regression test for `@standards` extend |
+
+### Diamond dependency (B6) — deferred justification
+Spec section 5.1 requires priority resolution based on `registries:` declaration order in `promptscript.yaml`. This operates at the config/registry layer, not at the `@extend` AST layer. The `@extend` mechanism in extensions.ts has no visibility into which registry a file came from. Implementing this requires changes to the resolver's registry resolution pipeline to tag imported blocks with their source registry index — a separate, cross-cutting concern. Recommended as first Phase 2 task.
 
 ### Placeholder scan
 No TBD/TODO found. All steps have concrete code or commands.
 
 ### Type consistency
-- `SkillResource` used consistently: `{ relativePath: string; content: string }`
-- `resolveSkillReferences()` signature consistent across Task 4 definition and Task 4 integration
+- `SkillResource` exported from `skills.ts`: `{ relativePath: string; content: string }`
+- `resolveSkillReferences()` returns `Promise<SkillResource[]>` consistently
 - `referencesMode()` returns `'directory' | 'inline' | 'none'` in types and implementations
-- `referenceProvenance()` used in Tasks 8, 9 consistently
+- `referenceProvenance()` used in Tasks 8, 9, 14 consistently
+- `ArrayContent` handled via `isArrayContent()` in Task 3, not `Array.isArray()`
+- `mergeValue()` signature: `(existing, extContent, skillContext)` — `skillContext` threaded from extend target path
