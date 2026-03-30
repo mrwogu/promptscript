@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0](https://github.com/mrwogu/promptscript/compare/v1.9.0...v1.10.0) (2026-03-30)
+
+
+### Features
+
+* add [@examples](https://github.com/examples) block and [@requires](https://github.com/requires) guard dependencies ([#186](https://github.com/mrwogu/promptscript/issues/186)) ([df1b1e1](https://github.com/mrwogu/promptscript/commit/df1b1e1bb3d2a2238581e7f81d649b5daec17a83))
+* skill overlay/extends - references property and skill-aware [@extend](https://github.com/extend) ([#198](https://github.com/mrwogu/promptscript/issues/198)) ([67d9a5f](https://github.com/mrwogu/promptscript/commit/67d9a5fc87e09c870bfbe2d0cd54488d958863f9))
+
+
+### Bug Fixes
+
+* **cli:** prs lock discovers [@use](https://github.com/use) github.com imports from .prs files ([#185](https://github.com/mrwogu/promptscript/issues/185)) ([b0303df](https://github.com/mrwogu/promptscript/commit/b0303df63db516061d7833769a91d449acff1166))
+
 ## [1.9.0](https://github.com/mrwogu/promptscript/compare/v1.8.3...v1.9.0) (2026-03-27)
 
 
