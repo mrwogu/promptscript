@@ -68,6 +68,7 @@ function createMockFormatter(
     }),
     getSkillBasePath: () => skillBasePath,
     getSkillFileName: () => skillFileName,
+    referencesMode: () => 'none' as const,
   };
 }
 
@@ -96,6 +97,7 @@ function createFailingFormatter(name: string, error: string): Formatter {
     }),
     getSkillBasePath: () => null,
     getSkillFileName: () => null,
+    referencesMode: () => 'none' as const,
   };
 }
 
@@ -178,6 +180,9 @@ describe('Compiler', () => {
         }
         getSkillFileName() {
           return null;
+        }
+        referencesMode() {
+          return 'none' as const;
         }
       }
 
@@ -360,6 +365,7 @@ describe('Compiler', () => {
         })),
         getSkillBasePath: () => null,
         getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -406,6 +412,7 @@ describe('Compiler', () => {
         })),
         getSkillBasePath: () => '.factory/skills',
         getSkillFileName: () => 'SKILL.md',
+        referencesMode: () => 'none' as const,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -744,6 +751,7 @@ describe('Compiler', () => {
         })),
         getSkillBasePath: () => null,
         getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
       };
 
       // GitHub formatter produces AGENTS.md as an additional file
@@ -759,6 +767,7 @@ describe('Compiler', () => {
         })),
         getSkillBasePath: () => null,
         getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -803,6 +812,7 @@ describe('Compiler', () => {
         })),
         getSkillBasePath: () => null,
         getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
       };
 
       const formatter2: Formatter = {
@@ -817,6 +827,7 @@ describe('Compiler', () => {
         })),
         getSkillBasePath: () => null,
         getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -867,6 +878,7 @@ describe('Compiler', () => {
         })),
         getSkillBasePath: () => null,
         getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
       };
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -1540,6 +1552,7 @@ describe('marker source and target metadata', () => {
       })),
       getSkillBasePath: () => '.factory/skills',
       getSkillFileName: () => 'SKILL.md',
+      referencesMode: () => 'none' as const,
     };
 
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -1572,6 +1585,7 @@ describe('marker source and target metadata', () => {
       })),
       getSkillBasePath: () => null,
       getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
     };
 
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -1622,6 +1636,7 @@ describe('marker source and target metadata', () => {
       })),
       getSkillBasePath: () => null,
       getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
     };
 
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -1660,6 +1675,7 @@ describe('addMarkerToOutput edge cases', () => {
       })),
       getSkillBasePath: () => null,
       getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
     };
 
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -1725,6 +1741,7 @@ describe('marker uses relative source path', () => {
       })),
       getSkillBasePath: () => '.factory/skills',
       getSkillFileName: () => 'SKILL.md',
+      referencesMode: () => 'none' as const,
     };
 
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
