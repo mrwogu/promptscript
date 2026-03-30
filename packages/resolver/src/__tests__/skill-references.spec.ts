@@ -114,7 +114,7 @@ describe('skill-aware @extend semantics', () => {
           createObjectContent({
             expert: createObjectContent({
               description: 'Base expert',
-              references: createArrayContent(['base/spring.md']),
+              references: createArrayContent(['base/spring.md']) as unknown as Value,
             }) as unknown as Value,
           })
         ),
@@ -123,7 +123,7 @@ describe('skill-aware @extend semantics', () => {
         createExtendBlock(
           'skills.expert',
           createObjectContent({
-            references: createArrayContent(['overlay/arch.md']),
+            references: createArrayContent(['overlay/arch.md']) as unknown as Value,
           })
         ),
       ],
@@ -132,7 +132,7 @@ describe('skill-aware @extend semantics', () => {
     const result = applyExtends(ast);
     const skills = result.blocks[0]?.content as ObjectContent;
     const expert = skills.properties['expert'] as Record<string, Value>;
-    const refs = expert['references'] as ArrayContent;
+    const refs = expert['references'] as unknown as ArrayContent;
 
     expect(refs.elements).toEqual(['base/spring.md', 'overlay/arch.md']);
   });
@@ -242,7 +242,7 @@ describe('skill-aware @extend semantics', () => {
           createObjectContent({
             expert: createObjectContent({
               description: 'Base',
-              references: createArrayContent(['base.md']),
+              references: createArrayContent(['base.md']) as unknown as Value,
             }) as unknown as Value,
           })
         ),
@@ -251,13 +251,13 @@ describe('skill-aware @extend semantics', () => {
         createExtendBlock(
           'skills.expert',
           createObjectContent({
-            references: createArrayContent(['layer3.md']),
+            references: createArrayContent(['layer3.md']) as unknown as Value,
           })
         ),
         createExtendBlock(
           'skills.expert',
           createObjectContent({
-            references: createArrayContent(['layer4.md']),
+            references: createArrayContent(['layer4.md']) as unknown as Value,
           })
         ),
       ],
@@ -266,7 +266,7 @@ describe('skill-aware @extend semantics', () => {
     const result = applyExtends(ast);
     const skills = result.blocks[0]?.content as ObjectContent;
     const expert = skills.properties['expert'] as Record<string, Value>;
-    const refs = expert['references'] as ArrayContent;
+    const refs = expert['references'] as unknown as ArrayContent;
 
     expect(refs.elements).toEqual(['base.md', 'layer3.md', 'layer4.md']);
   });

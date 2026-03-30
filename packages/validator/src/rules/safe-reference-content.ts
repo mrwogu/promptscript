@@ -16,10 +16,7 @@ const PRS_DIRECTIVES = [
   '@extend',
 ];
 
-const DIRECTIVE_PATTERN = new RegExp(
-  `^\\s*(${PRS_DIRECTIVES.map((d) => d.replace('@', '@')).join('|')}|""")`,
-  'm'
-);
+const DIRECTIVE_PATTERN = new RegExp(`^\\s*(${PRS_DIRECTIVES.join('|')}|""")`, 'm');
 
 export const safeReferenceContent: ValidationRule = {
   id: 'PS026',
