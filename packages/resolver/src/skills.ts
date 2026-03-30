@@ -32,6 +32,7 @@ export interface ParsedSkillMd {
   params?: ParamDefinition[];
   inputs?: Record<string, SkillContractField>;
   outputs?: Record<string, SkillContractField>;
+  references?: string[];
   rawFrontmatter?: string;
 }
 
@@ -65,6 +66,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
   let params: ParamDefinition[] | undefined;
   let inputs: Record<string, SkillContractField> | undefined;
   let outputs: Record<string, SkillContractField> | undefined;
+  let references: string[] | undefined;
   let rawFrontmatter: string | undefined;
   let bodyContent: string;
 
@@ -76,6 +78,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     params = parsed.params;
     inputs = parsed.inputs;
     outputs = parsed.outputs;
+    references = parsed.references;
     rawFrontmatter = frontmatterLines.join('\n');
 
     bodyContent = lines
@@ -86,7 +89,16 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     bodyContent = content.trim();
   }
 
-  return { name, description, content: bodyContent, params, inputs, outputs, rawFrontmatter };
+  return {
+    name,
+    description,
+    content: bodyContent,
+    params,
+    inputs,
+    outputs,
+    references,
+    rawFrontmatter,
+  };
 }
 
 /**
@@ -108,12 +120,14 @@ function parseFrontmatterFields(lines: string[]): {
   params?: ParamDefinition[];
   inputs?: Record<string, SkillContractField>;
   outputs?: Record<string, SkillContractField>;
+  references?: string[];
 } {
   let name: string | undefined;
   let description: string | undefined;
   let params: ParamDefinition[] | undefined;
   let inputs: Record<string, SkillContractField> | undefined;
   let outputs: Record<string, SkillContractField> | undefined;
+  let references: string[] | undefined;
 
   let i = 0;
   while (i < lines.length) {
@@ -157,10 +171,23 @@ function parseFrontmatterFields(lines: string[]): {
       continue;
     }
 
+    if (line.match(/^references:\s*$/)) {
+      i++;
+      references = [];
+      while (i < lines.length) {
+        const itemLine = lines[i] ?? '';
+        const itemMatch = itemLine.match(/^ {2}-\s+(.+)$/);
+        if (!itemMatch) break;
+        references.push(itemMatch[1]!.trim());
+        i++;
+      }
+      continue;
+    }
+
     i++;
   }
 
-  return { name, description, params, inputs, outputs };
+  return { name, description, params, inputs, outputs, references };
 }
 
 /**
@@ -396,6 +423,7 @@ const SKILL_RESERVED_KEYS = new Set([
   'type',
   'loc',
   'resources',
+  'references',
 ]);
 
 function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value> {
