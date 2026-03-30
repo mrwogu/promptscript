@@ -75,6 +75,8 @@ interface SkillConfig {
   argumentHint?: string;
   /** Skill content/instructions */
   content: string;
+  /** Resource files to copy alongside SKILL.md */
+  resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
 }
@@ -214,6 +216,10 @@ export class GitHubFormatter extends BaseFormatter {
 
   override getSkillFileName(): string | null {
     return 'SKILL.md';
+  }
+
+  override referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'directory';
   }
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
@@ -575,6 +581,13 @@ export class GitHubFormatter extends BaseFormatter {
           disableModelInvocation: obj['disableModelInvocation'] === true,
           argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
+          resources:
+            obj['resources'] && Array.isArray(obj['resources'])
+              ? (obj['resources'] as Array<Record<string, Value>>).map((r) => ({
+                  relativePath: r['relativePath'] as string,
+                  content: r['content'] as string,
+                }))
+              : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
         });
@@ -619,9 +632,23 @@ export class GitHubFormatter extends BaseFormatter {
 
     // Strip leading slashes from name for clean file paths
     const cleanName = config.name.replace(/^\/+/, '');
+    const skillDirPath = `.github/skills/${cleanName}`;
+    const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
+
+    const resourcesWithProvenance = resourceFiles.map((f) => {
+      if (f.path.includes('/references/')) {
+        return {
+          ...f,
+          content: `${this.referenceProvenance(f.path)}\n\n${f.content}`,
+        };
+      }
+      return f;
+    });
+
     return {
-      path: `.github/skills/${cleanName}/SKILL.md`,
+      path: `${skillDirPath}/SKILL.md`,
       content: lines.join('\n') + '\n',
+      additionalFiles: resourcesWithProvenance.length > 0 ? resourcesWithProvenance : undefined,
     };
   }
 
