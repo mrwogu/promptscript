@@ -363,6 +363,35 @@ The `@extend` block modifies specific paths:
 </a>
 <!-- playground-link-end -->
 
+### Skill-Specific Extend Semantics
+
+When `@extend` targets a skill definition, individual skill properties follow dedicated merge
+strategies rather than the generic block merge rules:
+
+| Strategy          | Properties                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent` |
+| **Append**        | `references`, `examples`, `requires`                                                                               |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                      |
+
+Example — overlay content and add a reference file without replacing the base skill's references:
+
+```promptscript
+@use @company/skills as skills
+
+@extend skills.code-review {
+  content: """
+  Enhanced review with stricter security checks.
+  """
+  references: [
+    ./extra-context.md
+  ]
+}
+```
+
+The overlay's `references` list is appended to the base skill's list. The `content` field replaces
+the base skill's content entirely.
+
 ## Composition with @use
 
 Use `@use` to import and merge fragments (like mixins):

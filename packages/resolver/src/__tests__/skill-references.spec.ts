@@ -1,0 +1,791 @@
+import { describe, it, expect, vi } from 'vitest';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdtemp, writeFile, mkdir, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { parseSkillMd, resolveSkillReferences } from '../skills.js';
+import { applyExtends } from '../extensions.js';
+import type { Logger } from '@promptscript/core';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const FIXTURES = join(__dirname, '__fixtures__', 'skill-references');
+import type {
+  Program,
+  Block,
+  ObjectContent,
+  ArrayContent,
+  TextContent,
+  ExtendBlock,
+  Value,
+} from '@promptscript/core';
+
+describe('skill references', () => {
+  describe('parseSkillMd with references', () => {
+    it('should parse references from SKILL.md frontmatter', () => {
+      const content = [
+        '---',
+        'name: test-skill',
+        'description: A test skill',
+        'references:',
+        '  - references/architecture.md',
+        '  - references/modules.md',
+        '---',
+        'Skill content here.',
+      ].join('\n');
+
+      const result = parseSkillMd(content);
+
+      expect(result.name).toBe('test-skill');
+      expect(result.references).toEqual(['references/architecture.md', 'references/modules.md']);
+    });
+
+    it('should return undefined references when not specified', () => {
+      const content = [
+        '---',
+        'name: test-skill',
+        'description: A test skill',
+        '---',
+        'Skill content here.',
+      ].join('\n');
+
+      const result = parseSkillMd(content);
+
+      expect(result.references).toBeUndefined();
+    });
+
+    it('should parse empty references list', () => {
+      const content = ['---', 'name: test-skill', 'references:', '---', 'Content.'].join('\n');
+
+      const result = parseSkillMd(content);
+
+      expect(result.references).toEqual([]);
+    });
+  });
+});
+
+const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
+
+const createProgram = (overrides: Partial<Program> = {}): Program => ({
+  type: 'Program',
+  uses: [],
+  blocks: [],
+  extends: [],
+  loc: createLoc(),
+  ...overrides,
+});
+
+const createBlock = (name: string, content: Block['content']): Block => ({
+  type: 'Block',
+  name,
+  content,
+  loc: createLoc(),
+});
+
+const createObjectContent = (properties: Record<string, Value>): ObjectContent => ({
+  type: 'ObjectContent',
+  properties,
+  loc: createLoc(),
+});
+
+const createArrayContent = (elements: Value[]): ArrayContent => ({
+  type: 'ArrayContent',
+  elements,
+  loc: createLoc(),
+});
+
+const createTextContent = (value: string): TextContent => ({
+  type: 'TextContent',
+  value,
+  loc: createLoc(),
+});
+
+const createExtendBlock = (targetPath: string, content: Block['content']): ExtendBlock => ({
+  type: 'ExtendBlock',
+  targetPath,
+  content,
+  loc: createLoc(),
+});
+
+describe('skill-aware @extend semantics', () => {
+  it('should append references when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: createArrayContent(['base/spring.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['overlay/arch.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as unknown as ArrayContent;
+
+    expect(refs.elements).toEqual(['base/spring.md', 'overlay/arch.md']);
+  });
+
+  it('should replace description when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base description',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            description: 'Overridden description',
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    expect(expert['description']).toBe('Overridden description');
+  });
+
+  it('should replace content when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              content: createTextContent('Base content'),
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            content: createTextContent('New content'),
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const content = expert['content'] as TextContent;
+
+    expect(content.value).toBe('New content');
+  });
+
+  it('should shallow merge params when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              params: createObjectContent({
+                region: 'US',
+                env: 'prod',
+              }) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            params: createObjectContent({
+              region: 'EMEA',
+              client: 'Retail',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const params = expert['params'] as Record<string, Value>;
+
+    expect(params['region']).toBe('EMEA');
+    expect(params['env']).toBe('prod');
+    expect(params['client']).toBe('Retail');
+  });
+
+  it('should cumulate references from multiple @extend blocks', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base',
+              references: createArrayContent(['base.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['layer3.md']) as unknown as Value,
+          })
+        ),
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['layer4.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as unknown as ArrayContent;
+
+    expect(refs.elements).toEqual(['base.md', 'layer3.md', 'layer4.md']);
+  });
+
+  it('should NOT apply skill-aware semantics to non-skill blocks (regression guard)', () => {
+    const ast = createProgram({
+      blocks: [createBlock('standards', createTextContent('Original standards'))],
+      extends: [createExtendBlock('standards', createTextContent('Extended standards'))],
+    });
+
+    const result = applyExtends(ast);
+    const content = result.blocks[0]?.content as TextContent;
+
+    expect(content.value).toBe('Original standards\n\nExtended standards');
+  });
+
+  it('should append references when existing has no references (undefined)', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['overlay/arch.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    expect(expert['references']).toBeDefined();
+  });
+
+  it('should append when existing references is a plain array (not ArrayContent)', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: ['base/spring.md'] as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['overlay/arch.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    // ext is ArrayContent but existing is plain array — ext clone wins
+    expect(expert['references']).toBeDefined();
+  });
+
+  it('should replace trigger property when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              trigger: 'old trigger',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            trigger: 'new trigger',
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    expect(expert['trigger']).toBe('new trigger');
+  });
+
+  it('should replace allowedTools property when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              allowedTools: 'tool1',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            allowedTools: 'tool2',
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    expect(expert['allowedTools']).toBe('tool2');
+  });
+
+  it('should shallow merge inputs when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              inputs: createObjectContent({
+                fileType: 'string',
+              }) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            inputs: createObjectContent({
+              language: 'string',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const inputs = expert['inputs'] as Record<string, Value>;
+
+    expect(inputs['fileType']).toBe('string');
+    expect(inputs['language']).toBe('string');
+  });
+
+  it('should shallow merge outputs when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              outputs: createObjectContent({
+                result: 'string',
+              }) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            outputs: createObjectContent({
+              summary: 'string',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const outputs = expert['outputs'] as Record<string, Value>;
+
+    expect(outputs['result']).toBe('string');
+    expect(outputs['summary']).toBe('string');
+  });
+
+  it('should append examples when extending a skill', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              examples: createArrayContent(['example1']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            examples: createArrayContent(['example2']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const examples = expert['examples'] as unknown as { elements: Value[] };
+
+    expect(examples.elements).toEqual(['example1', 'example2']);
+  });
+
+  it('should deep merge unknown skill properties', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              customConfig: createObjectContent({
+                settingA: 'valueA',
+              }) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            customConfig: createObjectContent({
+              settingB: 'valueB',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const config = expert['customConfig'] as Record<string, unknown>;
+
+    // deepMerge merges ObjectContent nodes at the structural level,
+    // so both settings end up in the properties sub-object
+    const props = (config['properties'] ?? config) as Record<string, Value>;
+    expect(props['settingA']).toBe('valueA');
+    expect(props['settingB']).toBe('valueB');
+  });
+
+  it('should replace unknown property when ext value is not an object', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              customProp: 'old value',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            customProp: 'new value',
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    expect(expert['customProp']).toBe('new value');
+  });
+
+  it('should handle append when ext value is not ArrayContent (fallback)', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              references: 'not-an-array' as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: 'new-ref' as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    // Both non-ArrayContent — fallback deepClone of ext value
+    expect(expert['references']).toBe('new-ref');
+  });
+
+  it('should handle merge when existing is not ObjectContent but ext is', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              inputs: 'not-an-object' as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            inputs: createObjectContent({
+              language: 'string',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    // ext ObjectContent cloned since base is not ObjectContent
+    expect(expert['inputs']).toBeDefined();
+  });
+
+  it('should handle merge when ext value is not ObjectContent (fallback)', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              inputs: createObjectContent({
+                fileType: 'string',
+              }) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            inputs: 'replaced' as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+
+    // ext is not ObjectContent — deepClone fallback
+    expect(expert['inputs']).toBe('replaced');
+  });
+});
+
+describe('resolveSkillReferences', () => {
+  it('should load reference files from resolved paths', async () => {
+    const refs = ['references/spring.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    const resources = await resolveSkillReferences(refs, basePath);
+
+    expect(resources).toHaveLength(1);
+    expect(resources[0]!.relativePath).toBe('references/spring.md');
+    expect(resources[0]!.content).toContain('Spring Patterns');
+  });
+
+  it('should reject path traversal', async () => {
+    const refs = ['../../etc/passwd'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(/unsafe path/i);
+  });
+
+  it('should reject absolute paths', async () => {
+    const refs = ['/etc/passwd'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(/unsafe path/i);
+  });
+
+  it('should throw for non-existent reference files', async () => {
+    const refs = ['references/nonexistent.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+
+    await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(/not found/i);
+  });
+});
+
+describe('resolveSkillReferences limits', () => {
+  let tempDir: string;
+
+  async function setupTempDir(): Promise<string> {
+    tempDir = await mkdtemp(join(tmpdir(), 'prs-ref-test-'));
+    await mkdir(join(tempDir, 'references'), { recursive: true });
+    return tempDir;
+  }
+
+  async function cleanupTempDir(): Promise<void> {
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  }
+
+  it('should throw when a single reference file exceeds MAX_RESOURCE_SIZE', async () => {
+    const base = await setupTempDir();
+    try {
+      const bigContent = 'x'.repeat(1_048_577); // 1 byte over 1MB
+      await writeFile(join(base, 'references', 'big.md'), bigContent);
+
+      await expect(resolveSkillReferences(['references/big.md'], base)).rejects.toThrow(
+        /exceeds.*1MB/i
+      );
+    } finally {
+      await cleanupTempDir();
+    }
+  });
+
+  it('should throw when aggregate reference size exceeds MAX_TOTAL_RESOURCE_SIZE', async () => {
+    const base = await setupTempDir();
+    try {
+      // Each file just under 1MB, 11 files to exceed 10MB total
+      const chunkContent = 'x'.repeat(1_000_000);
+      const refs: string[] = [];
+      for (let i = 0; i < 11; i++) {
+        const name = `references/chunk${i}.md`;
+        await writeFile(join(base, name), chunkContent);
+        refs.push(name);
+      }
+
+      await expect(resolveSkillReferences(refs, base)).rejects.toThrow(/total reference size/i);
+    } finally {
+      await cleanupTempDir();
+    }
+  }, 30000);
+
+  it('should throw when reference count exceeds MAX_RESOURCE_COUNT', async () => {
+    const base = await setupTempDir();
+    try {
+      const refs: string[] = [];
+      for (let i = 0; i < 101; i++) {
+        const name = `references/file${i}.md`;
+        await writeFile(join(base, name), 'content');
+        refs.push(name);
+      }
+
+      await expect(resolveSkillReferences(refs, base)).rejects.toThrow(/too many reference/i);
+    } finally {
+      await cleanupTempDir();
+    }
+  });
+
+  it('should log verbose message for empty reference files', async () => {
+    const base = await setupTempDir();
+    try {
+      await writeFile(join(base, 'references', 'empty.md'), '');
+      const mockLogger = { verbose: vi.fn(), debug: vi.fn() };
+
+      await resolveSkillReferences(['references/empty.md'], base, mockLogger as unknown as Logger);
+      expect(mockLogger.verbose).toHaveBeenCalledWith(expect.stringContaining('Empty reference'));
+    } finally {
+      await cleanupTempDir();
+    }
+  });
+});
+
+describe('reference name collision detection', () => {
+  it('should deduplicate references by basename, keeping last occurrence', async () => {
+    const refs = ['references/spring.md', 'references/spring.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+    const mockLogger = { verbose: vi.fn(), debug: vi.fn() };
+
+    const resources = await resolveSkillReferences(refs, basePath, mockLogger as unknown as Logger);
+
+    expect(resources).toHaveLength(1);
+    expect(resources[0]!.relativePath).toBe('references/spring.md');
+    expect(mockLogger.verbose).toHaveBeenCalledWith(expect.stringContaining('overridden'));
+  });
+});

@@ -147,6 +147,10 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     return FACTORY_VERSIONS;
   }
 
+  override referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'directory';
+  }
+
   // ============================================================
   // Command File Generation (Factory-specific)
   // ============================================================
@@ -325,10 +329,20 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     const skillDirPath = `.factory/skills/${factoryConfig.name}`;
     const resourceFiles = this.sanitizeResourceFiles(factoryConfig.resources, skillDirPath);
 
+    const resourcesWithProvenance = resourceFiles.map((f) => {
+      if (f.path.includes('/references/')) {
+        return {
+          ...f,
+          content: `${this.referenceProvenance(f.path)}\n\n${f.content}`,
+        };
+      }
+      return f;
+    });
+
     return {
       path: `${skillDirPath}/SKILL.md`,
       content: lines.join('\n') + '\n',
-      additionalFiles: resourceFiles.length > 0 ? resourceFiles : undefined,
+      additionalFiles: resourcesWithProvenance.length > 0 ? resourcesWithProvenance : undefined,
     };
   }
 

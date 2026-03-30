@@ -52,13 +52,48 @@ description: Security-focused code review
 Instructions here...
 ```
 
-| Property      | Type   | Default  | Description                                                         |
-| ------------- | ------ | -------- | ------------------------------------------------------------------- |
-| `name`        | string | required | Skill identifier (matches directory name)                           |
-| `description` | string | required | What the skill does                                                 |
-| `params`      | object | -        | Parameter definitions for `{{variable}}` templates                  |
-| `inputs`      | object | -        | Runtime input contract (see [Skill Contracts](skill-contracts.md))  |
-| `outputs`     | object | -        | Runtime output contract (see [Skill Contracts](skill-contracts.md)) |
+| Property      | Type     | Default  | Description                                                         |
+| ------------- | -------- | -------- | ------------------------------------------------------------------- |
+| `name`        | string   | required | Skill identifier (matches directory name)                           |
+| `description` | string   | required | What the skill does                                                 |
+| `params`      | object   | -        | Parameter definitions for `{{variable}}` templates                  |
+| `references`  | string[] | -        | File paths to attach to the skill's context (see below)             |
+| `inputs`      | object   | -        | Runtime input contract (see [Skill Contracts](skill-contracts.md))  |
+| `outputs`     | object   | -        | Runtime output contract (see [Skill Contracts](skill-contracts.md)) |
+
+## Declaring References
+
+Use `references` in SKILL.md frontmatter to attach files to the skill's context:
+
+```markdown
+---
+name: architecture-review
+description: Review architecture decisions
+references:
+  - references/architecture.md
+  - references/modules.md
+---
+
+Review the architecture using the attached context files.
+```
+
+Formatters emit referenced files alongside `SKILL.md` in the output directory. Allowed types: `.md`, `.json`, `.yaml`, `.yml`, `.txt`, `.csv`. Paths are relative to the `SKILL.md` file.
+
+You can also declare references in your `.prs` file using the `references` property on a skill definition:
+
+```promptscript
+@skills {
+  architecture-review: {
+    description: "Review architecture decisions"
+    references: [
+      ./references/architecture.md
+      ./references/modules.md
+    ]
+  }
+}
+```
+
+The validator checks that referenced files use allowed extensions (PS025) and don't contain sensitive content (PS026).
 
 ## Behavior Properties (in .prs only)
 

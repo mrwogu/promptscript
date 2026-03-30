@@ -124,6 +124,10 @@ export class CursorFormatter extends BaseFormatter {
     return CURSOR_VERSIONS;
   }
 
+  override referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'inline';
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     // Validate convention - Cursor only supports markdown
     const convention = options?.convention ?? this.defaultConvention;
@@ -177,6 +181,40 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   /**
+   * Generate inline references section from @skills block.
+   * Finds all skills with resources in a references/ subdirectory and
+   * appends them as a ## References section.
+   */
+  private inlineSkillReferences(ast: Program): string {
+    const skillsBlock = this.findBlock(ast, 'skills');
+    if (!skillsBlock) return '';
+
+    const props = this.getProps(skillsBlock.content);
+    const sections: string[] = [];
+
+    for (const [skillName, value] of Object.entries(props)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      const obj = value as Record<string, Value>;
+      const resources = obj['resources'];
+      if (!resources || !Array.isArray(resources)) continue;
+
+      for (const r of resources) {
+        if (!r || typeof r !== 'object' || Array.isArray(r)) continue;
+        const res = r as Record<string, Value>;
+        const relativePath = res['relativePath'] ? this.valueToString(res['relativePath']) : '';
+        const content = res['content'] ? this.valueToString(res['content']) : '';
+        if (!relativePath.includes('references/')) continue;
+
+        const fileName = relativePath.split('/').pop() ?? relativePath;
+        sections.push(`### ${fileName} (from ${skillName})\n\n${content}`);
+      }
+    }
+
+    if (sections.length === 0) return '';
+    return '\n\n## References\n\n' + sections.join('\n\n---\n\n');
+  }
+
+  /**
    * Format for modern Cursor (0.45+) with MDC frontmatter.
    */
   private formatModern(ast: Program, options?: FormatOptions): FormatterOutput {
@@ -191,9 +229,11 @@ export class CursorFormatter extends BaseFormatter {
     // Generate command files for multi-line shortcuts
     const commandFiles = this.generateCommandFiles(ast);
 
+    const inlineRefs = this.inlineSkillReferences(ast);
+
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
-      content: sections.join('\n\n') + '\n',
+      content: sections.join('\n\n') + '\n' + inlineRefs,
       additionalFiles: commandFiles.length > 0 ? commandFiles : undefined,
     };
   }
@@ -208,9 +248,11 @@ export class CursorFormatter extends BaseFormatter {
     // No frontmatter for legacy format
     this.addCommonSections(ast, sections);
 
+    const inlineRefs = this.inlineSkillReferences(ast);
+
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.legacy.outputPath,
-      content: sections.join('\n\n') + '\n',
+      content: sections.join('\n\n') + '\n' + inlineRefs,
     };
   }
 
@@ -230,9 +272,11 @@ export class CursorFormatter extends BaseFormatter {
     // No frontmatter — plain markdown only
     this.addCommonSections(ast, sections);
 
+    const inlineRefs = this.inlineSkillReferences(ast);
+
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS['agents-md'].outputPath,
-      content: sections.join('\n\n') + '\n',
+      content: sections.join('\n\n') + '\n' + inlineRefs,
     };
   }
 
@@ -293,9 +337,11 @@ export class CursorFormatter extends BaseFormatter {
     const never = this.never(ast);
     if (never) mainSections.push(never);
 
+    const inlineRefs = this.inlineSkillReferences(ast);
+
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
-      content: mainSections.join('\n\n') + '\n',
+      content: mainSections.join('\n\n') + '\n' + inlineRefs,
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
     };
   }

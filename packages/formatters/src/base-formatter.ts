@@ -600,6 +600,23 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * How this formatter handles skill references.
+   * - 'directory': emit as separate files in references/ subdirectory
+   * - 'inline': append as sections in the main output file
+   * - 'none': references not supported
+   */
+  referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'none';
+  }
+
+  /**
+   * Generate a provenance comment for a reference file.
+   */
+  protected referenceProvenance(sourcePath: string): string {
+    return `<!-- from: ${sourcePath} -->`;
+  }
+
+  /**
    * Check if a skill name is safe for use in file paths.
    */
   protected isSafeSkillName(name: string): boolean {

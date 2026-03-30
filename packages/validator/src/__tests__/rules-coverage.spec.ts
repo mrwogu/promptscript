@@ -73,7 +73,7 @@ function createTextBlock(name: string, text: string, loc?: SourceLocation): Bloc
 describe('rules/index.ts coverage', () => {
   describe('allRules', () => {
     it('should contain all validation rules', () => {
-      expect(allRules).toHaveLength(24);
+      expect(allRules).toHaveLength(26);
       expect(allRules.map((r) => r.id)).toEqual([
         'PS001',
         'PS002',
@@ -94,6 +94,8 @@ describe('rules/index.ts coverage', () => {
         'PS022',
         'PS023',
         'PS024',
+        'PS025',
+        'PS026',
         'PS010',
         'PS011',
         'PS012',

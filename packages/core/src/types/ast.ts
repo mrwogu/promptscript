@@ -393,6 +393,8 @@ export interface SkillDefinition {
   outputs?: Record<string, SkillContractField>;
   /** Structured examples for few-shot prompting */
   examples?: Record<string, ExampleDefinition>;
+  /** Reference files attached to skill context (paths resolved by resolver) */
+  references?: string[];
 }
 
 /**

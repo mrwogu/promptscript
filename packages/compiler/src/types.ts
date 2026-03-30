@@ -60,6 +60,8 @@ export interface Formatter {
   getSkillBasePath(): string | null;
   /** Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support */
   getSkillFileName(): string | null;
+  /** How this formatter handles skill references: 'directory', 'inline', or 'none' */
+  referencesMode(): 'directory' | 'inline' | 'none';
 }
 
 /**

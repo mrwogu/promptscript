@@ -20,6 +20,7 @@
 - [x] **Skill folders with shared resources** — `.promptscript/shared/` directory for cross-skill resources with `@shared/` prefix
 - [x] **Skill dependencies** — `requires` field for declaring skill dependencies, PS016 validation (circular dep detection)
 - [x] **Skill contracts** — `inputs`/`outputs` typed fields (`string`, `number`, `boolean`, `enum`), PS017 validation
+- [x] **Skill Overlay / Extends — Phase 1 (MVP)** — `references` property on skills; skill-aware `@extend` semantics (replace/append/shallow-merge per property); `references` in SKILL.md frontmatter; PS025 (valid-skill-references) and PS026 (safe-reference-content) validator rules; formatter support for directory mode (Claude, GitHub, Factory) and inline mode (Cursor, Antigravity)
 
 ### Web Playground
 
@@ -88,7 +89,24 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 
 ## 🔜 Next Up — Foundation & Ecosystem
 
-### 1. CI/CD Integration
+### 1. Skill Overlay / Extends — Phase 2
+
+**Goal:** Tooling and advanced authoring support for skill overlays.
+
+- [ ] **`prs inspect --layers`** — Show per-property merge layers for a compiled skill (base vs overlay)
+- [ ] **Semantic base/overlay validation** — Warn when an overlay redefines a property that is semantically incompatible with its base
+- [ ] **Negation syntax** — Allow overlays to remove individual `requires` or `references` entries
+- [ ] **`sealed` / `final` modifier** — Mark a skill property as non-overridable by downstream overlays
+- [ ] **Overlay-aware suggestions** — LSP / validator hints when extending a skill
+
+### 2. Skill Overlay / Extends — Phase 3
+
+**Goal:** Supply-chain integrity and enterprise policy controls for skill overlays.
+
+- [ ] **Integrity hashes in lockfile** — Record content hashes for `references` files in `promptscript.lock`
+- [ ] **Policy engine** — Org-level rules: require approved base skills, block unsafe reference types, enforce overlay constraints
+
+### 3. CI/CD Integration
 
 **Goal:** Make it effortless to integrate PromptScript into existing workflows.
 
@@ -105,7 +123,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **GitLab CI template**
 - [ ] **Azure DevOps task**
 
-### 2. Developer Experience
+### 4. Developer Experience
 
 **Goal:** Improve internal development velocity and quality safeguards.
 

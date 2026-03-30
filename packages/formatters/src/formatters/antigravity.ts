@@ -80,6 +80,44 @@ export class AntigravityFormatter extends BaseFormatter {
     return ANTIGRAVITY_VERSIONS;
   }
 
+  override referencesMode(): 'directory' | 'inline' | 'none' {
+    return 'inline';
+  }
+
+  /**
+   * Generate inline references section from @skills block.
+   * Finds all skills with resources in a references/ subdirectory and
+   * appends them as a ## References section.
+   */
+  private inlineSkillReferences(ast: Program): string {
+    const skillsBlock = this.findBlock(ast, 'skills');
+    if (!skillsBlock) return '';
+
+    const props = this.getProps(skillsBlock.content);
+    const sections: string[] = [];
+
+    for (const [skillName, value] of Object.entries(props)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      const obj = value as Record<string, Value>;
+      const resources = obj['resources'];
+      if (!resources || !Array.isArray(resources)) continue;
+
+      for (const r of resources) {
+        if (!r || typeof r !== 'object' || Array.isArray(r)) continue;
+        const res = r as Record<string, Value>;
+        const relativePath = res['relativePath'] ? this.valueToString(res['relativePath']) : '';
+        const content = res['content'] ? this.valueToString(res['content']) : '';
+        if (!relativePath.includes('references/')) continue;
+
+        const fileName = relativePath.split('/').pop() ?? relativePath;
+        sections.push(`### ${fileName} (from ${skillName})\n\n${content}`);
+      }
+    }
+
+    if (sections.length === 0) return '';
+    return '\n\n## References\n\n' + sections.join('\n\n---\n\n');
+  }
+
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
     const renderer = this.createRenderer(options);
@@ -146,7 +184,8 @@ export class AntigravityFormatter extends BaseFormatter {
     const restrictions = this.restrictions(ast, renderer);
     if (restrictions) sections.push(restrictions);
 
-    const content = sections.join('\n\n') + '\n';
+    const inlineRefs = this.inlineSkillReferences(ast);
+    const content = sections.join('\n\n') + '\n' + inlineRefs;
 
     // Validate character limit
     this.validateContentLength(content);

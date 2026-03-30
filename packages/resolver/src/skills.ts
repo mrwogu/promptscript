@@ -1,7 +1,8 @@
 import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
 import { basename, resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
-import type { Logger } from '@promptscript/core';
+import { ResolveError } from '@promptscript/core';
 import type {
+  Logger,
   Program,
   Block,
   ObjectContent,
@@ -15,7 +16,7 @@ import type {
 /**
  * A resource file discovered alongside a skill's SKILL.md.
  */
-interface SkillResource {
+export interface SkillResource {
   /** Relative path from the skill directory (e.g. "data/colors.csv") */
   relativePath: string;
   /** File content (utf-8) */
@@ -32,6 +33,7 @@ export interface ParsedSkillMd {
   params?: ParamDefinition[];
   inputs?: Record<string, SkillContractField>;
   outputs?: Record<string, SkillContractField>;
+  references?: string[];
   rawFrontmatter?: string;
 }
 
@@ -65,6 +67,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
   let params: ParamDefinition[] | undefined;
   let inputs: Record<string, SkillContractField> | undefined;
   let outputs: Record<string, SkillContractField> | undefined;
+  let references: string[] | undefined;
   let rawFrontmatter: string | undefined;
   let bodyContent: string;
 
@@ -76,6 +79,7 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     params = parsed.params;
     inputs = parsed.inputs;
     outputs = parsed.outputs;
+    references = parsed.references;
     rawFrontmatter = frontmatterLines.join('\n');
 
     bodyContent = lines
@@ -86,7 +90,16 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     bodyContent = content.trim();
   }
 
-  return { name, description, content: bodyContent, params, inputs, outputs, rawFrontmatter };
+  return {
+    name,
+    description,
+    content: bodyContent,
+    params,
+    inputs,
+    outputs,
+    references,
+    rawFrontmatter,
+  };
 }
 
 /**
@@ -108,12 +121,14 @@ function parseFrontmatterFields(lines: string[]): {
   params?: ParamDefinition[];
   inputs?: Record<string, SkillContractField>;
   outputs?: Record<string, SkillContractField>;
+  references?: string[];
 } {
   let name: string | undefined;
   let description: string | undefined;
   let params: ParamDefinition[] | undefined;
   let inputs: Record<string, SkillContractField> | undefined;
   let outputs: Record<string, SkillContractField> | undefined;
+  let references: string[] | undefined;
 
   let i = 0;
   while (i < lines.length) {
@@ -157,10 +172,23 @@ function parseFrontmatterFields(lines: string[]): {
       continue;
     }
 
+    if (line.match(/^references:\s*$/)) {
+      i++;
+      references = [];
+      while (i < lines.length) {
+        const itemLine = lines[i] ?? '';
+        const itemMatch = itemLine.match(/^ {2}-\s+(.+)$/);
+        if (!itemMatch) break;
+        references.push(itemMatch[1]!.trim());
+        i++;
+      }
+      continue;
+    }
+
     i++;
   }
 
-  return { name, description, params, inputs, outputs };
+  return { name, description, params, inputs, outputs, references };
 }
 
 /**
@@ -396,6 +424,7 @@ const SKILL_RESERVED_KEYS = new Set([
   'type',
   'loc',
   'resources',
+  'references',
 ]);
 
 function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value> {
@@ -790,6 +819,95 @@ async function discoverSkillResources(
 }
 
 /**
+ * Load reference files listed in a SKILL.md `references` frontmatter array.
+ *
+ * Validates each path against traversal attacks, enforces per-file and
+ * aggregate size limits, and enforces the max resource count.
+ *
+ * @param references - Relative paths listed in the SKILL.md frontmatter
+ * @param basePath - Absolute path to the skill directory (anchor for relative paths)
+ * @param logger - Optional logger for warnings
+ * @returns Array of loaded SkillResource objects
+ */
+export async function resolveSkillReferences(
+  references: string[],
+  basePath: string,
+  logger?: Logger
+): Promise<SkillResource[]> {
+  const resources: SkillResource[] = [];
+  let totalSize = 0;
+
+  for (const ref of references) {
+    if (!isSafeRelativePath(ref)) {
+      throw new ResolveError(`Unsafe path in references: ${ref} — path traversal not allowed`, {
+        file: basePath,
+        line: 0,
+        column: 0,
+      });
+    }
+
+    const fullPath = resolve(basePath, ref);
+
+    let content: string;
+    try {
+      content = await readFile(fullPath, 'utf-8');
+    } catch {
+      throw new ResolveError(`Reference file not found: ${ref}`, {
+        file: basePath,
+        line: 0,
+        column: 0,
+      });
+    }
+
+    const size = Buffer.byteLength(content, 'utf-8');
+
+    if (size > MAX_RESOURCE_SIZE) {
+      throw new ResolveError(
+        `Reference file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${ref}`,
+        { file: basePath, line: 0, column: 0 }
+      );
+    }
+
+    totalSize += size;
+    if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
+      throw new ResolveError(
+        `Total reference size exceeds ${MAX_TOTAL_RESOURCE_SIZE / 1_048_576}MB limit for skill`,
+        { file: basePath, line: 0, column: 0 }
+      );
+    }
+
+    if (size === 0) {
+      logger?.verbose(`Empty reference file: ${ref}`);
+    }
+
+    resources.push({ relativePath: ref, content });
+  }
+
+  // Deduplicate by basename — last occurrence wins (higher layer override)
+  const byBasename = new Map<string, number>();
+  for (let i = 0; i < resources.length; i++) {
+    const bname = resources[i]!.relativePath.split('/').pop() ?? resources[i]!.relativePath;
+    const prevIdx = byBasename.get(bname);
+    if (prevIdx !== undefined) {
+      logger?.verbose(`Reference ${bname} overridden — later layer's version wins`);
+      // Mark previous for removal
+      resources[prevIdx] = null as unknown as SkillResource;
+    }
+    byBasename.set(bname, i);
+  }
+  const deduplicated = resources.filter((r): r is SkillResource => r !== null);
+
+  if (deduplicated.length > MAX_RESOURCE_COUNT) {
+    throw new ResolveError(
+      `Too many reference files (${deduplicated.length}, max ${MAX_RESOURCE_COUNT})`,
+      { file: basePath, line: 0, column: 0 }
+    );
+  }
+
+  return deduplicated;
+}
+
+/**
  * Check if a file exists.
  */
 async function fileExists(path: string): Promise<boolean> {
@@ -1058,6 +1176,23 @@ export async function resolveNativeSkills(
             content: r.content,
           }));
           updatedSkill['resources'] = resourceValues;
+        }
+
+        // Load reference files listed in the SKILL.md frontmatter
+        const skillRefs = parsed.references;
+        if (skillRefs && skillRefs.length > 0) {
+          const refResources = await resolveSkillReferences(skillRefs, skillDir, logger);
+          const existingResources =
+            (updatedSkill['resources'] as
+              | Array<{ relativePath: string; content: string }>
+              | undefined) ?? [];
+          updatedSkill['resources'] = [
+            ...existingResources,
+            ...refResources.map((r) => ({
+              relativePath: r.relativePath,
+              content: r.content,
+            })),
+          ];
         }
 
         updatedProperties[skillName] = updatedSkill;

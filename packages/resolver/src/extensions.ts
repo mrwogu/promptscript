@@ -12,6 +12,54 @@ import type {
 import { deepMerge, deepClone, isTextContent } from '@promptscript/core';
 import { IMPORT_MARKER_PREFIX } from './imports.js';
 
+// ── Skill-aware merge strategy sets ──────────────────────────────────
+
+/** Properties where the extension value replaces the base value. */
+const SKILL_REPLACE_PROPERTIES = new Set([
+  'content',
+  'description',
+  'trigger',
+  'userInvocable',
+  'allowedTools',
+  'disableModelInvocation',
+  'context',
+  'agent',
+]);
+
+/** Properties where array elements are appended (deduplicated). */
+const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires']);
+
+/** Properties where objects are shallow-merged (extension wins per key). */
+const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);
+
+// ── AST-node type guards ─────────────────────────────────────────────
+
+interface ArrayContentNode {
+  readonly type: 'ArrayContent';
+  elements: Value[];
+  loc: { file: string; line: number; column: number };
+}
+
+interface ObjectContentNode {
+  readonly type: 'ObjectContent';
+  properties: Record<string, Value>;
+  loc: { file: string; line: number; column: number };
+}
+
+function isArrayContent(v: unknown): v is ArrayContentNode {
+  return (
+    typeof v === 'object' && v !== null && (v as Record<string, unknown>)['type'] === 'ArrayContent'
+  );
+}
+
+function isObjectContent(v: unknown): v is ObjectContentNode {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    (v as Record<string, unknown>)['type'] === 'ObjectContent'
+  );
+}
+
 /**
  * Apply all @extend blocks to resolve extensions.
  *
@@ -66,7 +114,10 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
     return blocks;
   }
 
-  const merged = mergeExtension(target, deepPath, ext);
+  // Determine if the extend target is inside a @skills block
+  const skillContext = ext.targetPath.split('.')[0] === 'skills';
+
+  const merged = mergeExtension(target, deepPath, ext, skillContext);
 
   return [...blocks.slice(0, idx), merged, ...blocks.slice(idx + 1)];
 }
@@ -74,7 +125,12 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
 /**
  * Merge extension content into a block.
  */
-function mergeExtension(block: Block, path: string[], ext: ExtendBlock): Block {
+function mergeExtension(
+  block: Block,
+  path: string[],
+  ext: ExtendBlock,
+  skillContext: boolean
+): Block {
   if (path.length === 0) {
     // Direct merge at block level
     return {
@@ -86,7 +142,7 @@ function mergeExtension(block: Block, path: string[], ext: ExtendBlock): Block {
   // Deep path merge - navigate into ObjectContent or MixedContent
   return {
     ...block,
-    content: mergeAtPath(block.content, path, ext.content),
+    content: mergeAtPath(block.content, path, ext.content, skillContext),
   };
 }
 
@@ -96,7 +152,8 @@ function mergeExtension(block: Block, path: string[], ext: ExtendBlock): Block {
 function mergeAtPath(
   content: BlockContent,
   path: string[],
-  extContent: BlockContent
+  extContent: BlockContent,
+  skillContext: boolean
 ): BlockContent {
   if (path.length === 0) {
     return mergeContent(content, extContent);
@@ -118,7 +175,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeValue(existing, extContent),
+          [currentKey]: mergeValue(existing, extContent, skillContext),
         },
       };
     }
@@ -129,7 +186,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent),
+          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext),
         },
       };
     }
@@ -152,7 +209,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeValue(existing, extContent),
+          [currentKey]: mergeValue(existing, extContent, skillContext),
         },
       };
     }
@@ -162,7 +219,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent),
+          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext),
         },
       };
     }
@@ -183,9 +240,14 @@ function mergeAtPath(
 /**
  * Merge at path within a Value.
  */
-function mergeAtPathValue(value: Value, path: string[], extContent: BlockContent): Value {
+function mergeAtPathValue(
+  value: Value,
+  path: string[],
+  extContent: BlockContent,
+  skillContext: boolean
+): Value {
   if (path.length === 0) {
-    return mergeValue(value, extContent);
+    return mergeValue(value, extContent, skillContext);
   }
 
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
@@ -195,7 +257,7 @@ function mergeAtPathValue(value: Value, path: string[], extContent: BlockContent
 
   const currentKey = path[0];
   if (!currentKey) {
-    return mergeValue(value, extContent);
+    return mergeValue(value, extContent, skillContext);
   }
 
   const rest = path.slice(1);
@@ -205,14 +267,14 @@ function mergeAtPathValue(value: Value, path: string[], extContent: BlockContent
   if (rest.length === 0) {
     return {
       ...obj,
-      [currentKey]: mergeValue(existing, extContent),
+      [currentKey]: mergeValue(existing, extContent, skillContext),
     };
   }
 
   if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
     return {
       ...obj,
-      [currentKey]: mergeAtPathValue(existing as Value, rest, extContent),
+      [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext),
     };
   }
 
@@ -269,9 +331,18 @@ function extractValue(content: BlockContent): Value {
 /**
  * Merge a Value with BlockContent.
  */
-function mergeValue(existing: Value | undefined, extContent: BlockContent): Value {
+function mergeValue(
+  existing: Value | undefined,
+  extContent: BlockContent,
+  skillContext: boolean = false
+): Value {
   if (existing === undefined) {
     return extractValue(extContent);
+  }
+
+  // Skill-aware merging: delegate to mergeSkillValue when inside a @skills block
+  if (skillContext && isObjectContent(existing) && extContent.type === 'ObjectContent') {
+    return mergeSkillValue(existing, extContent);
   }
 
   // Array merging
@@ -303,6 +374,80 @@ function mergeValue(existing: Value | undefined, extContent: BlockContent): Valu
 
   // Default - extension wins
   return extractValue(extContent);
+}
+
+/**
+ * Skill-aware merge: applies replace/append/shallow-merge strategies
+ * based on the property name within a skill definition.
+ *
+ * Returns a flat Record matching the shape produced by deepMerge
+ * (ObjectContent structural fields + skill properties at top level).
+ */
+function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value {
+  // Start with a shallow copy of the existing node (preserves type, loc, etc.)
+  const base = { ...existing } as unknown as Record<string, Value>;
+  // Flatten base properties to top level (matching deepMerge behaviour).
+  // Only set from .properties if the key doesn't already exist at top level
+  // (a previous merge pass may have placed a more up-to-date value there).
+  for (const [k, v] of Object.entries(existing.properties)) {
+    if (!(k in base)) {
+      base[k] = v;
+    }
+  }
+
+  for (const [key, extVal] of Object.entries(ext.properties)) {
+    const baseVal = base[key];
+
+    if (SKILL_REPLACE_PROPERTIES.has(key)) {
+      // Extension value wins outright
+      base[key] = deepClone(extVal as Record<string, unknown>) as Value;
+    } else if (SKILL_APPEND_PROPERTIES.has(key)) {
+      // Append array elements
+      if (isArrayContent(baseVal) && isArrayContent(extVal)) {
+        base[key] = {
+          type: 'ArrayContent' as const,
+          elements: uniqueConcat(baseVal.elements, extVal.elements),
+          loc: extVal.loc,
+        } as unknown as Value;
+      } else if (isArrayContent(extVal)) {
+        base[key] = deepClone(extVal as unknown as Record<string, unknown>) as Value;
+      } else {
+        base[key] = deepClone(extVal as Record<string, unknown>) as Value;
+      }
+    } else if (SKILL_MERGE_PROPERTIES.has(key)) {
+      // Shallow merge of object properties
+      if (isObjectContent(baseVal) && isObjectContent(extVal)) {
+        base[key] = {
+          ...baseVal.properties,
+          ...extVal.properties,
+        } as unknown as Value;
+      } else if (isObjectContent(extVal)) {
+        base[key] = deepClone(extVal as unknown as Record<string, unknown>) as Value;
+      } else {
+        base[key] = deepClone(extVal as Record<string, unknown>) as Value;
+      }
+    } else {
+      // Unknown property — fallback to deepMerge
+      if (
+        baseVal !== undefined &&
+        typeof baseVal === 'object' &&
+        baseVal !== null &&
+        !Array.isArray(baseVal) &&
+        typeof extVal === 'object' &&
+        extVal !== null &&
+        !Array.isArray(extVal)
+      ) {
+        base[key] = deepMerge(
+          baseVal as Record<string, unknown>,
+          extVal as Record<string, unknown>
+        ) as unknown as Value;
+      } else {
+        base[key] = deepClone(extVal as Record<string, unknown>) as Value;
+      }
+    }
+  }
+
+  return base as unknown as Value;
 }
 
 /**
