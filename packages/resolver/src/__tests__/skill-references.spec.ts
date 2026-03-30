@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseSkillMd, resolveSkillReferences } from '../skills.js';
 import { applyExtends } from '../extensions.js';
+import type { Logger } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -314,5 +315,19 @@ describe('resolveSkillReferences', () => {
     const basePath = join(FIXTURES, 'skills', 'expert');
 
     await expect(resolveSkillReferences(refs, basePath)).rejects.toThrow(/not found/i);
+  });
+});
+
+describe('reference name collision detection', () => {
+  it('should deduplicate references by basename, keeping last occurrence', async () => {
+    const refs = ['references/spring.md', 'references/spring.md'];
+    const basePath = join(FIXTURES, 'skills', 'expert');
+    const mockLogger = { verbose: vi.fn(), debug: vi.fn() };
+
+    const resources = await resolveSkillReferences(refs, basePath, mockLogger as unknown as Logger);
+
+    expect(resources).toHaveLength(1);
+    expect(resources[0]!.relativePath).toBe('references/spring.md');
+    expect(mockLogger.verbose).toHaveBeenCalledWith(expect.stringContaining('overridden'));
   });
 });

@@ -883,14 +883,28 @@ export async function resolveSkillReferences(
     resources.push({ relativePath: ref, content });
   }
 
-  if (resources.length > MAX_RESOURCE_COUNT) {
+  // Deduplicate by basename — last occurrence wins (higher layer override)
+  const byBasename = new Map<string, number>();
+  for (let i = 0; i < resources.length; i++) {
+    const bname = resources[i]!.relativePath.split('/').pop() ?? resources[i]!.relativePath;
+    const prevIdx = byBasename.get(bname);
+    if (prevIdx !== undefined) {
+      logger?.verbose(`Reference ${bname} overridden — later layer's version wins`);
+      // Mark previous for removal
+      resources[prevIdx] = null as unknown as SkillResource;
+    }
+    byBasename.set(bname, i);
+  }
+  const deduplicated = resources.filter((r): r is SkillResource => r !== null);
+
+  if (deduplicated.length > MAX_RESOURCE_COUNT) {
     throw new ResolveError(
-      `Too many reference files (${resources.length}, max ${MAX_RESOURCE_COUNT})`,
+      `Too many reference files (${deduplicated.length}, max ${MAX_RESOURCE_COUNT})`,
       { file: basePath, line: 0, column: 0 }
     );
   }
 
-  return resources;
+  return deduplicated;
 }
 
 /**
