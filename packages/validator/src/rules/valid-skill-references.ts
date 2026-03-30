@@ -1,13 +1,13 @@
 import type { ValidationRule } from '../types.js';
 import type { Value } from '@promptscript/core';
-import { normalize, isAbsolute, sep } from 'node:path';
 
 const ALLOWED_EXTENSIONS = new Set(['.md', '.json', '.yaml', '.yml', '.txt', '.csv']);
 
+/** Browser-safe path traversal check (no node:path dependency) */
 function hasPathTraversal(path: string): boolean {
-  const normalized = normalize(path);
-  if (isAbsolute(normalized)) return true;
-  return normalized.split(sep).some((s) => s === '..');
+  if (path.startsWith('/') || /^[a-zA-Z]:/.test(path)) return true;
+  const segments = path.split(/[/\\]/);
+  return segments.some((s) => s === '..');
 }
 
 function getExtension(path: string): string {
