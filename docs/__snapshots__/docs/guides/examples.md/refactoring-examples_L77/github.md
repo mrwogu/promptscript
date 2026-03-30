@@ -23,3 +23,4 @@ function getActiveAdminEmails(users: User[]): string[] {
     .map(u => u.email);
 }
 ```
+

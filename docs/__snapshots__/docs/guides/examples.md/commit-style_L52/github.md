@@ -32,3 +32,4 @@ Fixed null pointer in payment service
 ```
 fix(payments): resolve null pointer in charge handler
 ```
+
