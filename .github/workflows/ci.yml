@@ -87,12 +87,12 @@ jobs:
         if: matrix.node-version == '25.x'
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         if: matrix.node-version == '25.x'
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() && matrix.node-version == '25.x' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
