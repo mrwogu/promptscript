@@ -9,8 +9,8 @@
     content: """
       You are a production triage orchestrator.
     """
-    @use ./phases/health-scan
-    @use ./phases/triage
-    @use ./phases/code-fix as autofix
   }
+  @use ./phases/health-scan
+  @use ./phases/triage
+  @use ./phases/code-fix as autofix
 }
