@@ -26,6 +26,7 @@ import { validExamples } from './valid-examples.js';
 import { validGuardRequires } from './valid-guard-requires.js';
 import { validSkillReferences } from './valid-skill-references.js';
 import { safeReferenceContent } from './safe-reference-content.js';
+import { validSkillComposition } from './valid-skill-composition.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -83,6 +84,7 @@ export { validExamples } from './valid-examples.js';
 export { validGuardRequires } from './valid-guard-requires.js';
 export { validSkillReferences } from './valid-skill-references.js';
 export { safeReferenceContent } from './safe-reference-content.js';
+export { validSkillComposition } from './valid-skill-composition.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -129,6 +131,8 @@ export const allRules: ValidationRule[] = [
   validSkillReferences,
   // Safe reference content (PS026)
   safeReferenceContent,
+  // Valid skill composition (PS027)
+  validSkillComposition,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
