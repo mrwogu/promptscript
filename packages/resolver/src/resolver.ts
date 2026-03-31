@@ -35,6 +35,7 @@ import { detectContentType } from './content-detector.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 import { resolveGuardRequires } from './guard-requires.js';
 import { normalizeBlockAliases } from './normalize.js';
+import { resolveSkillComposition } from './skill-composition.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
 import { discoverNativeContent } from './auto-discovery.js';
@@ -174,6 +175,9 @@ export class Resolver {
 
     // Resolve imports
     ast = await this.resolveImports(ast, absPath, sources, errors);
+
+    // Resolve skill composition (inline @use within @skills blocks)
+    ast = await this.resolveComposition(ast, absPath, sources, errors);
 
     // Apply extensions
     if (ast.extends.length > 0) {
@@ -490,6 +494,62 @@ export class Resolver {
     }
 
     return result;
+  }
+
+  /**
+   * Resolve inline @use declarations within @skills blocks (skill composition).
+   */
+  private async resolveComposition(
+    ast: Program,
+    absPath: string,
+    sources: string[],
+    errors: ResolveError[]
+  ): Promise<Program> {
+    try {
+      ast = await resolveSkillComposition(ast, {
+        currentFile: absPath,
+        resolvePath: (ref: string, fromFile: string): string => {
+          // Build a PathReference from the raw string, matching how the parser does it
+          const isRelative = ref.startsWith('./') || ref.startsWith('../');
+          const segments = ref.split('/').filter((s) => s !== '.' && s !== '..');
+
+          const pathRef = {
+            type: 'PathReference' as const,
+            raw: ref,
+            segments,
+            isRelative,
+            loc: { file: fromFile, line: 1, column: 1, offset: 0 },
+          };
+
+          return this.loader.resolveRef(pathRef, fromFile);
+        },
+        resolveFile: async (subPath: string): Promise<Program> => {
+          const subResult = await this.resolve(subPath);
+          if (subResult.sources.length > 0) {
+            sources.push(...subResult.sources);
+          }
+          if (subResult.errors.length > 0) {
+            errors.push(...subResult.errors);
+          }
+          if (!subResult.ast) {
+            throw new ResolveError(`Failed to resolve sub-skill: ${subPath}`);
+          }
+          return subResult.ast;
+        },
+      });
+    } catch (err) {
+      if (err instanceof ResolveError) {
+        errors.push(err);
+      } else {
+        errors.push(
+          new ResolveError(
+            `Skill composition failed: ${err instanceof Error ? err.message : String(err)}`
+          )
+        );
+      }
+    }
+
+    return ast;
   }
 
   /**
