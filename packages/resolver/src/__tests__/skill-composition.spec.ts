@@ -700,7 +700,7 @@ describe('resolveSkillComposition — edge cases', () => {
       const result = await resolveSkillComposition(parentAst, {
         currentFile: '/project/parent.prs',
         resolvePath: (ref) => `/project/${ref}.prs`,
-        resolveFile: async (path) => {
+        resolveFile: async (_path) => {
           callCount++;
           return makeSubSkillProgram(`sub-${callCount}`, {
             references: ['https://shared.com'],
