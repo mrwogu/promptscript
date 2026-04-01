@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-03-28T09:13:38.492Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-03-31T23:49:19.607Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 

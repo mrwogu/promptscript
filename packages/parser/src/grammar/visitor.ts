@@ -420,7 +420,12 @@ class PromptScriptVisitor extends BaseVisitor {
     const textContent = hasText ? this.buildTextContent(ctx.TextBlock![0]!) : undefined;
     const properties = hasFields ? this.buildProperties(ctx.field!) : {};
 
-    const content = this.resolveBlockContent(textContent, properties, hasText, hasFields || hasInlineUses);
+    const content = this.resolveBlockContent(
+      textContent,
+      properties,
+      hasText,
+      hasFields || hasInlineUses
+    );
 
     // Attach inline uses to ObjectContent or MixedContent
     if (hasInlineUses && (content.type === 'ObjectContent' || content.type === 'MixedContent')) {

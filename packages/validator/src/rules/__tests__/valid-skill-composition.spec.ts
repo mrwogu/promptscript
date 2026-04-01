@@ -122,9 +122,7 @@ describe('PS027: valid-skill-composition', () => {
       makeSkillsBlock({
         ops: {
           description: 'Operations skill',
-          __composedFrom: [
-            { name: 'health-scan', source: 'health-scan.prs', composedBlocks: [] },
-          ],
+          __composedFrom: [{ name: 'health-scan', source: 'health-scan.prs', composedBlocks: [] }],
         },
       }),
     ]);

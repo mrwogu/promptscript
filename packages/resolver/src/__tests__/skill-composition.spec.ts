@@ -200,9 +200,7 @@ describe('skill composition resolver', () => {
 
   describe('regression — simple skill file without inline uses', () => {
     it('resolves health-scan.prs normally without errors', async () => {
-      const result = await resolver.resolve(
-        resolve(FIXTURES_DIR, 'phases/health-scan.prs')
-      );
+      const result = await resolver.resolve(resolve(FIXTURES_DIR, 'phases/health-scan.prs'));
 
       expect(result.ast).not.toBeNull();
       expect(result.errors).toHaveLength(0);
@@ -216,9 +214,7 @@ describe('skill composition resolver', () => {
     });
 
     it('resolves triage.prs normally without errors', async () => {
-      const result = await resolver.resolve(
-        resolve(FIXTURES_DIR, 'phases/triage.prs')
-      );
+      const result = await resolver.resolve(resolve(FIXTURES_DIR, 'phases/triage.prs'));
 
       expect(result.ast).not.toBeNull();
       expect(result.errors).toHaveLength(0);
@@ -230,9 +226,7 @@ describe('skill composition resolver', () => {
     });
 
     it('resolves a file with no @skills block without errors', async () => {
-      const result = await resolver.resolve(
-        resolve(FIXTURES_DIR, 'no-skills.prs')
-      );
+      const result = await resolver.resolve(resolve(FIXTURES_DIR, 'no-skills.prs'));
 
       expect(result.ast).not.toBeNull();
       expect(result.errors).toHaveLength(0);

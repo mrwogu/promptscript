@@ -311,7 +311,9 @@ function extractSkillDefinition(ast: Program, absPath: string): ExtractedSkillDe
   const skillsBlock = ast.blocks.find((b) => b.name === 'skills');
 
   // Default name from filename
-  const fileBaseName = basename(absPath).replace(/\.prs$/, '').replace(/\.md$/, '');
+  const fileBaseName = basename(absPath)
+    .replace(/\.prs$/, '')
+    .replace(/\.md$/, '');
 
   if (!skillsBlock || skillsBlock.content.type !== 'ObjectContent') {
     return {
@@ -438,9 +440,9 @@ function composeIntoSkill(
   }
 
   const composedPhases: ComposedPhase[] = [];
-  let allAllowedTools = extractStringArray(result['allowedTools']);
-  let allReferences = extractStringArray(result['references']);
-  let allRequires = extractStringArray(result['requires']);
+  const allAllowedTools = extractStringArray(result['allowedTools']);
+  const allReferences = extractStringArray(result['references']);
+  const allRequires = extractStringArray(result['requires']);
 
   for (const phase of phases) {
     // Build phase section
@@ -583,9 +585,7 @@ function extractStringArray(value: Value | undefined): string[] {
 /**
  * Convert a raw inputs/outputs record to SkillContractField records.
  */
-function convertToContractFields(
-  raw: Record<string, Value>
-): Record<string, SkillContractField> {
+function convertToContractFields(raw: Record<string, Value>): Record<string, SkillContractField> {
   const result: Record<string, SkillContractField> = {};
 
   for (const [name, val] of Object.entries(raw)) {
@@ -593,7 +593,9 @@ function convertToContractFields(
       const obj = val as Record<string, Value>;
       result[name] = {
         description: typeof obj['description'] === 'string' ? obj['description'] : '',
-        type: (typeof obj['type'] === 'string' ? obj['type'] : 'string') as SkillContractField['type'],
+        type: (typeof obj['type'] === 'string'
+          ? obj['type']
+          : 'string') as SkillContractField['type'],
       };
     }
   }
