@@ -92,3 +92,4 @@ docs/api-reference/
 docs/superpowers/
 .claude/worktrees/
 apps/vscode/*.vsix
+notebook-lm-sources/
