@@ -531,7 +531,9 @@ describe('applyExtends', () => {
             'skills.ops',
             createObjectContent({
               description: 'extended description',
-              __composedFrom: [{ name: 'phase-b', source: '/b.prs', composedBlocks: [] }] as unknown as Value,
+              __composedFrom: [
+                { name: 'phase-b', source: '/b.prs', composedBlocks: [] },
+              ] as unknown as Value,
             })
           ),
         ],

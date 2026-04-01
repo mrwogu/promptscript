@@ -275,7 +275,13 @@ function makeSkillsProgram(skillName: string, skillProps: Record<string, unknown
           inlineUses: [
             {
               type: 'InlineUseDeclaration',
-              path: { type: 'PathReference', raw: './sub', segments: ['sub'], isRelative: true, loc: LOC },
+              path: {
+                type: 'PathReference',
+                raw: './sub',
+                segments: ['sub'],
+                isRelative: true,
+                loc: LOC,
+              },
               loc: LOC,
             },
           ],
@@ -546,7 +552,13 @@ describe('resolveSkillComposition — edge cases', () => {
               inlineUses: [
                 {
                   type: 'InlineUseDeclaration',
-                  path: { type: 'PathReference', raw: './sub', segments: ['sub'], isRelative: true, loc: LOC },
+                  path: {
+                    type: 'PathReference',
+                    raw: './sub',
+                    segments: ['sub'],
+                    isRelative: true,
+                    loc: LOC,
+                  },
                   loc: LOC,
                 },
               ],
@@ -658,12 +670,24 @@ describe('resolveSkillComposition — edge cases', () => {
               inlineUses: [
                 {
                   type: 'InlineUseDeclaration',
-                  path: { type: 'PathReference', raw: './sub-a', segments: ['sub-a'], isRelative: true, loc: LOC },
+                  path: {
+                    type: 'PathReference',
+                    raw: './sub-a',
+                    segments: ['sub-a'],
+                    isRelative: true,
+                    loc: LOC,
+                  },
                   loc: LOC,
                 },
                 {
                   type: 'InlineUseDeclaration',
-                  path: { type: 'PathReference', raw: './sub-b', segments: ['sub-b'], isRelative: true, loc: LOC },
+                  path: {
+                    type: 'PathReference',
+                    raw: './sub-b',
+                    segments: ['sub-b'],
+                    isRelative: true,
+                    loc: LOC,
+                  },
                   loc: LOC,
                 },
               ],
