@@ -54,7 +54,7 @@ catalog:
 
 ### 3.1 Deklaracja w PRS
 
-```prs
+```text
 @skills {
   clm512-expert {
     description: "CLM 5.12+ development expert"
@@ -98,7 +98,7 @@ references:
 
 ### 4.1 Dodawanie referencji
 
-```prs
+```text
 @use @clm5core/skills/clm512-expert as base
 
 @extend base.skills.clm512-expert {
@@ -114,7 +114,7 @@ references:
 
 ### 4.2 Override treści
 
-```prs
+```text
 @extend base.skills.clm512-expert {
   content: """
     Zmodyfikowany workflow uwzględniający specyfikę BU...
@@ -124,7 +124,7 @@ references:
 
 ### 4.3 Konsumpcja złożonego skilla
 
-```prs
+```text
 @use @bu/skills/clm512-expert
 ```
 
@@ -396,7 +396,7 @@ suggestionRules:
 
 ### 9.1 Podejście: inline w `project.prs`
 
-```prs
+```text
 @use @clm5core/skills/clm512-expert
 
 @knowledge {
@@ -414,7 +414,7 @@ suggestionRules:
 
 BU tworzy plik `skills/clm512-expert-bu.prs`:
 
-```prs
+```text
 @use @clm5core/skills/clm512-expert
 
 @knowledge {
@@ -430,7 +430,7 @@ BU tworzy plik `skills/clm512-expert-bu.prs`:
 
 Projekt:
 
-```prs
+```text
 @use @bu/skills/clm512-expert-bu
 ```
 
@@ -440,7 +440,7 @@ Projekt:
 
 Po wdrożeniu feature'a, BU zamienia `@knowledge` na `references`:
 
-```prs
+```text
 @use @clm5core/skills/clm512-expert as base
 
 @extend base.skills.clm512-expert {
@@ -566,7 +566,7 @@ Generic workflows for CLM 5.12+ development...
 
 ### 11.2 Layer 3: `@bu` — `skills/clm512-expert.prs`
 
-```prs
+```text
 @use @clm5core/skills/clm512-expert as base
 
 @extend base.skills.clm512-expert {
@@ -582,7 +582,7 @@ Generic workflows for CLM 5.12+ development...
 
 ### 11.3 Layer 4: projekt — `project.prs`
 
-```prs
+```text
 @use @bu/skills/clm512-expert
 ```
 
@@ -626,7 +626,7 @@ Katalogi overlay, które dziś są orphaned (istnieją w repo, ale nie są konsu
 
 **Przykład nowego pliku `skills/clm512-expert.prs`:**
 
-```prs
+```text
 @use @clm5core/skills/clm512-expert as base
 
 @extend base.skills.clm512-expert {

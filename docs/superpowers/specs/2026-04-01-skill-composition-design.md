@@ -115,7 +115,7 @@ Allow `@use` directives inside `@skills` block entries. Each `@use` imports a fu
 
 ### 4.1 `@use` Inside `@skills` Block
 
-```prs
+```text
 @meta {
   id: "ops"
   syntax: "1.1.0"
@@ -140,7 +140,7 @@ Allow `@use` directives inside `@skills` block entries. Each `@use` imports a fu
 
 All existing `@use` features work inside skill blocks:
 
-```prs
+```text
 @skills {
   ops: {
     description: "..."
@@ -177,7 +177,7 @@ A sub-skill is a **standard `.prs` file** — independently compilable, testable
 
 ### 5.1 Minimal Sub-Skill
 
-```prs
+```text
 # ./phases/health-scan.prs
 @meta {
   id: "health-scan"
@@ -197,7 +197,7 @@ A sub-skill is a **standard `.prs` file** — independently compilable, testable
 
 ### 5.2 Sub-Skill with Context Blocks
 
-```prs
+```text
 # ./phases/triage.prs
 @meta {
   id: "triage"
@@ -864,7 +864,7 @@ The Monaco tokenizer rules for `@use` should already work inside blocks since Mo
 
 Add a "Skill Composition" example to the playground dropdown (`packages/playground/src/store.ts`):
 
-```prs
+```text
 @meta {
   id: "ops-example"
   syntax: "1.1.0"
@@ -1063,7 +1063,7 @@ Sub-skill `.prs` files are parsed as PRS — they're code, not data. Content saf
 
 Parent skill has no `content`, only `@use` phases:
 
-```prs
+```text
 @skills {
   ops: {
     description: "Production triage"
@@ -1077,7 +1077,7 @@ Parent skill has no `content`, only `@use` phases:
 
 ### 20.2 Single Phase
 
-```prs
+```text
 @skills {
   ops: {
     description: "Wrapper around health scan"
@@ -1090,7 +1090,7 @@ Parent skill has no `content`, only `@use` phases:
 
 ### 20.3 Phase with Parameters That Don't Exist
 
-```prs
+```text
 @use ./phases/triage(nonexistent: "value")
 ```
 
@@ -1098,7 +1098,7 @@ Parent skill has no `content`, only `@use` phases:
 
 ### 20.4 Phase File That Is Also Used at Top Level
 
-```prs
+```text
 @use ./shared/standards
 
 @skills {
@@ -1115,7 +1115,7 @@ Where `./shared/standards.prs` and `./phases/health-scan.prs` are different file
 
 ### 20.5 Same Phase Used Twice
 
-```prs
+```text
 @skills {
   ops: {
     description: "..."
@@ -1127,14 +1127,14 @@ Where `./shared/standards.prs` and `./phases/health-scan.prs` are different file
 
 **Behavior:** Error — duplicate phase name `health-scan`. User can alias:
 
-```prs
+```text
 @use ./phases/health-scan as initial-scan
 @use ./phases/health-scan as final-scan
 ```
 
 ### 20.6 Phase Used Twice with Different Params
 
-```prs
+```text
 @skills {
   ops: {
     description: "..."
@@ -1148,7 +1148,7 @@ Where `./shared/standards.prs` and `./phases/health-scan.prs` are different file
 
 ### 20.7 Sub-Skill with Its Own `@use` at Top Level
 
-```prs
+```text
 # ./phases/health-scan.prs
 @use @shared/monitoring-knowledge
 
@@ -1161,7 +1161,7 @@ Where `./shared/standards.prs` and `./phases/health-scan.prs` are different file
 
 ### 20.8 Sub-Skill That Composes Other Sub-Skills
 
-```prs
+```text
 # ./phases/health-scan.prs
 @skills {
   health-scan: {
@@ -1176,7 +1176,7 @@ Where `./shared/standards.prs` and `./phases/health-scan.prs` are different file
 
 ### 20.9 Phase File Not Found
 
-```prs
+```text
 @use ./phases/nonexistent
 ```
 
@@ -1184,7 +1184,7 @@ Where `./shared/standards.prs` and `./phases/health-scan.prs` are different file
 
 ### 20.10 Phase File Is Not Valid PRS
 
-```prs
+```text
 @use ./phases/broken
 ```
 
@@ -1194,7 +1194,7 @@ Where `broken.prs` has syntax errors.
 
 ### 20.11 @extend on a Composed Skill
 
-```prs
+```text
 @use @registry/skills/ops
 
 @extend skills.ops {
@@ -1212,7 +1212,7 @@ Parent has `references: [./docs/arch.md]`. Phase also references `./docs/arch.md
 
 ### 20.13 Composition + Overlay Interaction
 
-```prs
+```text
 # Layer 3: BU overlay on a composed skill from Layer 2
 @use @product/skills/ops as base
 
@@ -1226,7 +1226,7 @@ Parent has `references: [./docs/arch.md]`. Phase also references `./docs/arch.md
 
 ### 20.14 `@use` with `only`/`exclude` Filters Inside Skills
 
-```prs
+```text
 @skills {
   ops: {
     @use ./phases/health-scan(only: [skills])
@@ -1264,7 +1264,7 @@ A `.prs` skill composing SKILL.md phases or vice versa.
 
 ### 20.17 Sub-Skill Params with Defaults (No Args Passed)
 
-```prs
+```text
 # triage.prs has params: { severity: string = "all" }
 @use ./phases/triage
 ```
@@ -1279,7 +1279,7 @@ Parent uses `syntax: "1.1.0"`, sub-skill uses `syntax: "1.0.0"`.
 
 ### 20.19 Empty Phase (No Content, No Context Blocks)
 
-```prs
+```text
 # empty.prs
 @skills { x: { description: "placeholder" } }
 ```
@@ -1331,7 +1331,7 @@ Skill A composes Phase X from `./x.prs`. Skill B also composes Phase X from `./x
 
 Top-level `@extend` runs after composition. It can target composed skills:
 
-```prs
+```text
 @extend skills.ops {
   content: """
     Override the entire composed content with custom instructions.
@@ -1351,7 +1351,7 @@ This replaces the flattened content (all phase sections) because `content` has `
 
 Parent skill can have parameters that are interpolated in its own content but NOT passed to phases:
 
-```prs
+```text
 @meta {
   id: "ops"
   params: {
@@ -1555,7 +1555,7 @@ packages/resolver/src/__tests__/__fixtures__/skill-composition/
 
 **`ops.prs`** — orchestrator:
 
-```prs
+```text
 @meta {
   id: "ops"
   syntax: "1.1.0"
@@ -1587,7 +1587,7 @@ packages/resolver/src/__tests__/__fixtures__/skill-composition/
 
 **`phases/health-scan.prs`**:
 
-```prs
+```text
 @meta {
   id: "health-scan"
   syntax: "1.1.0"
@@ -1643,7 +1643,7 @@ packages/resolver/src/__tests__/__fixtures__/skill-composition/
 
 **`phases/triage.prs`**:
 
-```prs
+```text
 @meta {
   id: "triage"
   syntax: "1.1.0"
@@ -1699,7 +1699,7 @@ packages/resolver/src/__tests__/__fixtures__/skill-composition/
 
 **`phases/code-fix.prs`**:
 
-```prs
+```text
 @meta {
   id: "code-fix"
   syntax: "1.1.0"
@@ -1852,7 +1852,7 @@ Skip "warning" findings — they go to the P2 ticket backlog.
 
 The same `health-scan.prs` used by multiple parent skills:
 
-```prs
+```text
 # monitoring.prs
 @skills {
   monitoring: {

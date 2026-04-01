@@ -1137,7 +1137,7 @@ git commit -m "feat(resolver): integrate skill composition into resolution pipel
 
 - [ ] **Step 1: Create `parent.prs`**
 
-```prs
+```text
 @meta {
   id: "ops"
   syntax: "1.1.0"
@@ -1158,7 +1158,7 @@ git commit -m "feat(resolver): integrate skill composition into resolution pipel
 
 - [ ] **Step 2: Create `phases/health-scan.prs`**
 
-```prs
+```text
 @meta {
   id: "health-scan"
   syntax: "1.1.0"
@@ -1194,7 +1194,7 @@ git commit -m "feat(resolver): integrate skill composition into resolution pipel
 
 - [ ] **Step 3: Create `phases/triage.prs`**
 
-```prs
+```text
 @meta {
   id: "triage"
   syntax: "1.1.0"
@@ -1224,7 +1224,7 @@ git commit -m "feat(resolver): integrate skill composition into resolution pipel
 
 - [ ] **Step 4: Create `phases/code-fix.prs`**
 
-```prs
+```text
 @meta {
   id: "code-fix"
   syntax: "1.1.0"
@@ -1259,7 +1259,7 @@ git commit -m "feat(resolver): integrate skill composition into resolution pipel
 
 - [ ] **Step 5: Create `circular/a.prs`**
 
-```prs
+```text
 @meta { id: "a", syntax: "1.1.0" }
 @skills {
   a: {
@@ -1271,7 +1271,7 @@ git commit -m "feat(resolver): integrate skill composition into resolution pipel
 
 - [ ] **Step 6: Create `circular/b.prs`**
 
-```prs
+```text
 @meta { id: "b", syntax: "1.1.0" }
 @skills {
   b: {
@@ -1283,7 +1283,7 @@ git commit -m "feat(resolver): integrate skill composition into resolution pipel
 
 - [ ] **Step 7: Create `no-skills.prs`**
 
-```prs
+```text
 @meta { id: "no-skills", syntax: "1.1.0" }
 @standards {
   """
