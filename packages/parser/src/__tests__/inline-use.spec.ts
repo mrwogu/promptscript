@@ -326,7 +326,9 @@ describe('inline @use in block content', () => {
       const identity = result.ast?.blocks.find((b) => b.name === 'identity');
       expect(identity?.content.type).toBe('TextContent');
       // TextContent has no inlineUses property at all
-      expect((identity?.content as unknown as Record<string, unknown>)['inlineUses']).toBeUndefined();
+      expect(
+        (identity?.content as unknown as Record<string, unknown>)['inlineUses']
+      ).toBeUndefined();
     });
 
     it('should not affect top-level @use declarations', () => {
