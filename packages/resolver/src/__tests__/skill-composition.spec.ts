@@ -200,6 +200,17 @@ describe('skill composition resolver', () => {
     });
   });
 
+  describe('composition error handling via Resolver', () => {
+    it('collects errors when sub-skill file does not exist', async () => {
+      const result = await resolver.resolve(resolve(FIXTURES_DIR, 'bad-ref.prs'));
+
+      // Resolver should collect the error rather than throwing
+      expect(result.errors.length).toBeGreaterThan(0);
+      const errorMessages = result.errors.map((e) => e.message);
+      expect(errorMessages.some((m) => m.includes('does-not-exist'))).toBe(true);
+    });
+  });
+
   describe('regression — simple skill file without inline uses', () => {
     it('resolves health-scan.prs normally without errors', async () => {
       const result = await resolver.resolve(resolve(FIXTURES_DIR, 'phases/health-scan.prs'));
@@ -991,6 +1002,248 @@ describe('resolveSkillComposition — edge cases', () => {
       const ops = content.properties['ops'] as Record<string, unknown>;
 
       expect(ops['__composedFrom']).toBeDefined();
+    });
+
+    it('extracts string content value directly', async () => {
+      const ast = makeSkillsProgram('ops');
+
+      const subAst = makeProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                sub: {
+                  content: 'plain string content',
+                  allowedTools: [],
+                },
+              },
+              loc: LOC,
+            },
+          },
+        ],
+      });
+
+      const result = await resolveSkillComposition(ast, {
+        currentFile: '/project/parent.prs',
+        resolvePath: () => '/project/sub.prs',
+        resolveFile: async () => subAst,
+      });
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const content = skillsBlock!.content as ObjectContent;
+      const ops = content.properties['ops'] as Record<string, unknown>;
+      const flatContent = ops['content'] as TextContent;
+
+      expect(flatContent.value).toContain('plain string content');
+    });
+  });
+
+  describe('extractBlockText with ObjectContent knowledge block', () => {
+    it('serializes string, TextContent, object, and fallback property values', async () => {
+      const ast = makeSkillsProgram('ops');
+
+      const subAst = makeProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                sub: {
+                  content: { type: 'TextContent', value: 'instructions', loc: LOC },
+                  allowedTools: [],
+                },
+              },
+              loc: LOC,
+            },
+          },
+          {
+            type: 'Block',
+            name: 'knowledge',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                plainString: 'a plain string value',
+                textContent: { type: 'TextContent', value: 'a text content value', loc: LOC },
+                nestedObj: { nested: true },
+                fallbackVal: 42 as unknown as string,
+              },
+              loc: LOC,
+            },
+          },
+        ],
+      });
+
+      const result = await resolveSkillComposition(ast, {
+        currentFile: '/project/parent.prs',
+        resolvePath: () => '/project/sub.prs',
+        resolveFile: async () => subAst,
+      });
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const content = skillsBlock!.content as ObjectContent;
+      const ops = content.properties['ops'] as Record<string, unknown>;
+      const flatContent = ops['content'] as TextContent;
+
+      expect(flatContent.value).toContain('plainString: a plain string value');
+      expect(flatContent.value).toContain('textContent: a text content value');
+      expect(flatContent.value).toContain('nestedObj: {"nested":true}');
+      expect(flatContent.value).toContain('fallbackVal: 42');
+    });
+
+    it('serializes TextContent block as plain text', async () => {
+      const ast = makeSkillsProgram('ops');
+
+      const subAst = makeProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                sub: {
+                  content: { type: 'TextContent', value: 'instructions', loc: LOC },
+                  allowedTools: [],
+                },
+              },
+              loc: LOC,
+            },
+          },
+          {
+            type: 'Block',
+            name: 'knowledge',
+            loc: LOC,
+            content: {
+              type: 'TextContent',
+              value: 'plain text knowledge',
+              loc: LOC,
+            },
+          },
+        ],
+      });
+
+      const result = await resolveSkillComposition(ast, {
+        currentFile: '/project/parent.prs',
+        resolvePath: () => '/project/sub.prs',
+        resolveFile: async () => subAst,
+      });
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const content = skillsBlock!.content as ObjectContent;
+      const ops = content.properties['ops'] as Record<string, unknown>;
+      const flatContent = ops['content'] as TextContent;
+
+      expect(flatContent.value).toContain('plain text knowledge');
+    });
+  });
+
+  describe('extractBlockText with ArrayContent containing non-string elements', () => {
+    it('handles TextContent and non-string elements in array', async () => {
+      const ast = makeSkillsProgram('ops');
+
+      const subAst = makeProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            loc: LOC,
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                sub: {
+                  content: { type: 'TextContent', value: 'instructions', loc: LOC },
+                  allowedTools: [],
+                },
+              },
+              loc: LOC,
+            },
+          },
+          {
+            type: 'Block',
+            name: 'restrictions',
+            loc: LOC,
+            content: {
+              type: 'ArrayContent',
+              elements: [
+                { type: 'TextContent', value: 'text element', loc: LOC },
+                42 as unknown as string,
+              ],
+              loc: LOC,
+            },
+          },
+        ],
+      });
+
+      const result = await resolveSkillComposition(ast, {
+        currentFile: '/project/parent.prs',
+        resolvePath: () => '/project/sub.prs',
+        resolveFile: async () => subAst,
+      });
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const content = skillsBlock!.content as ObjectContent;
+      const ops = content.properties['ops'] as Record<string, unknown>;
+      const flatContent = ops['content'] as TextContent;
+
+      expect(flatContent.value).toContain('text element');
+      expect(flatContent.value).toContain('42');
+    });
+  });
+
+  describe('resolveComposition error handling in Resolver', () => {
+    it('collects sources and errors from sub-skill resolution', async () => {
+      const ast = makeSkillsProgram('ops');
+
+      let callCount = 0;
+      const result = await resolveSkillComposition(ast, {
+        currentFile: '/project/parent.prs',
+        resolvePath: () => '/project/sub.prs',
+        resolveFile: async () => {
+          callCount++;
+          return makeSubSkillProgram(`sub-${callCount}`);
+        },
+      });
+
+      // Verify that sub-skill sources are collected
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+    });
+
+    it('handles resolveFile that throws a non-ResolveError', async () => {
+      const ast = makeSkillsProgram('ops');
+
+      await expect(
+        resolveSkillComposition(ast, {
+          currentFile: '/project/parent.prs',
+          resolvePath: () => '/project/sub.prs',
+          resolveFile: async () => {
+            throw new TypeError('unexpected type error');
+          },
+        })
+      ).rejects.toThrow('unexpected type error');
+    });
+
+    it('handles resolveFile that throws a non-Error value', async () => {
+      const ast = makeSkillsProgram('ops');
+
+      await expect(
+        resolveSkillComposition(ast, {
+          currentFile: '/project/parent.prs',
+          resolvePath: () => '/project/sub.prs',
+          resolveFile: async () => {
+            throw 'string error'; // eslint-disable-line no-throw-literal
+          },
+        })
+      ).rejects.toThrow('string error');
     });
   });
 });

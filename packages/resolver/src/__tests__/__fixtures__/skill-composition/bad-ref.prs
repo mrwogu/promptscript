@@ -1,0 +1,14 @@
+@meta {
+  id: "bad-ref"
+  syntax: "1.1.0"
+}
+
+@skills {
+  ops: {
+    description: "Bad reference test"
+    content: """
+      This skill references a non-existent sub-skill.
+    """
+  }
+  @use ./phases/does-not-exist
+}
