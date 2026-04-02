@@ -942,6 +942,122 @@ const EXAMPLES: Example[] = [
     ],
   },
   {
+    id: 'skill-composition',
+    name: 'Skill Composition',
+    description: 'Compose a multi-phase skill from independent sub-skill files',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "ops"
+  syntax: "1.1.0"
+}
+
+@skills {
+  ops: {
+    description: "Production triage for cloud services"
+    userInvocable: true
+    content: """
+      You are a production triage orchestrator.
+
+      Follow the phases below in order:
+      1. Run health checks across all services
+      2. Triage and classify findings
+      3. Apply automated fixes where safe
+    """
+  }
+  @use ./phases/health-scan
+  @use ./phases/triage(severity: "critical")
+  @use ./phases/code-fix as autofix
+}
+`,
+      },
+      {
+        path: 'phases/health-scan.prs',
+        content: `@meta {
+  id: "health-scan"
+  syntax: "1.1.0"
+}
+
+@knowledge {
+  """
+  Health check endpoints:
+  - /health for HTTP services
+  - /ready for Kubernetes readiness
+  - /metrics for Prometheus scraping
+  """
+}
+
+@skills {
+  health-scan: {
+    description: "Run MCP health checks in parallel"
+    allowedTools: ["mcp__monitoring__check_cpu", "mcp__monitoring__check_memory"]
+    content: """
+      Run all health checks in parallel.
+      Report findings with service name, status, and response time.
+    """
+  }
+}
+`,
+      },
+      {
+        path: 'phases/triage.prs',
+        content: `@meta {
+  id: "triage"
+  syntax: "1.1.0"
+  params: {
+    severity: string = "all"
+  }
+}
+
+@restrictions {
+  - "Never escalate without evidence from at least 2 independent checks"
+  - "Never classify severity higher than {{severity}} threshold"
+}
+
+@skills {
+  triage: {
+    description: "Classify and group health findings by severity"
+    content: """
+      Classify all findings. Group by service, then by severity.
+      Only include findings at or above {{severity}} level.
+    """
+  }
+}
+`,
+      },
+      {
+        path: 'phases/code-fix.prs',
+        content: `@meta {
+  id: "code-fix"
+  syntax: "1.1.0"
+}
+
+@restrictions {
+  - "Never push directly to main branch"
+  - "Never modify files outside the affected service directory"
+}
+
+@skills {
+  code-fix: {
+    description: "Locate code, create branch, write fix, create PR"
+    allowedTools: ["Read", "Edit", "Bash", "Grep"]
+    content: """
+      For each critical finding:
+      1. Locate the relevant source code
+      2. Create a feature branch
+      3. Apply the fix
+      4. Run tests
+      5. Create a pull request
+    """
+  }
+}
+`,
+      },
+    ],
+  },
+  {
     id: 'enterprise',
     name: 'Enterprise Setup',
     description: 'Full enterprise config with examples, guards, requires, and more',
@@ -1191,6 +1307,13 @@ export function ExampleGallery() {
         {example.files.some((f) => f.content.includes('@knowledge')) && (
           <span className="text-xs px-2 py-0.5 bg-teal-500/20 text-teal-400 rounded">
             knowledge
+          </span>
+        )}
+        {example.files.some(
+          (f) => f.content.includes('@skills') && /^\s*@use\s/m.test(f.content)
+        ) && (
+          <span className="text-xs px-2 py-0.5 bg-lime-500/20 text-lime-400 rounded">
+            composition
           </span>
         )}
         {example.files.some((f) => f.content.includes('@commands')) && (
