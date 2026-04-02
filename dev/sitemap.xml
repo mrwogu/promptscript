@@ -2645,6 +2645,10 @@
          <lastmod>2026-04-02</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/guides/skill-composition/</loc>
+         <lastmod>2026-04-02</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/guides/skill-contracts/</loc>
          <lastmod>2026-04-02</lastmod>
     </url>
@@ -2714,42 +2718,6 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/reference/formatters/opencode/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/plans/2026-03-25-guards-improvements/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/plans/2026-03-28-examples-and-guard-requires/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/plans/2026-03-30-skill-overlay-extends/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/plans/2026-04-01-skill-composition/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/specs/2026-03-25-guards-improvements-design/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/specs/2026-03-28-examples-and-guard-requires-design/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/specs/2026-03-30-skill-overlay-extends-design/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/specs/2026-03-30-skill-overlay-extends-review/</loc>
-         <lastmod>2026-04-02</lastmod>
-    </url>
-    <url>
-         <loc>https://getpromptscript.dev/dev/superpowers/specs/2026-04-01-skill-composition-design/</loc>
          <lastmod>2026-04-02</lastmod>
     </url>
     <url>
