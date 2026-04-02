@@ -64,6 +64,43 @@ function isObjectContent(v: unknown): v is ObjectContentNode {
 }
 
 /**
+ * Normalize a path for comparison: strip leading ./, resolve ../, collapse //.
+ */
+export function normalizePath(path: string): string {
+  if (path === '') return '';
+  // Strip leading ./
+  let result = path.replace(/^\.\//, '');
+  // Collapse duplicate slashes
+  result = result.replace(/\/\/+/g, '/');
+  // Resolve ../ segments
+  const parts = result.split('/');
+  const resolved: string[] = [];
+  for (const part of parts) {
+    if (part === '..') {
+      resolved.pop();
+    } else if (part !== '.') {
+      resolved.push(part);
+    }
+  }
+  return resolved.join('/');
+}
+
+/**
+ * Extract string elements from a value that may be a plain array or ArrayContent node.
+ * Returns null if the value is neither.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function extractElements(val: unknown): string[] | null {
+  if (Array.isArray(val)) {
+    return val.filter((el): el is string => typeof el === 'string');
+  }
+  if (isArrayContent(val)) {
+    return val.elements.filter((el): el is string => typeof el === 'string');
+  }
+  return null;
+}
+
+/**
  * Apply all @extend blocks to resolve extensions.
  *
  * @param ast - Program AST with @extend blocks

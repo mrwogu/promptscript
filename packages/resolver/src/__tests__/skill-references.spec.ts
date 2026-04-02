@@ -789,3 +789,35 @@ describe('reference name collision detection', () => {
     expect(mockLogger.verbose).toHaveBeenCalledWith(expect.stringContaining('overridden'));
   });
 });
+
+import { normalizePath } from '../extensions.js';
+
+describe('normalizePath', () => {
+  it('should strip leading ./', () => {
+    expect(normalizePath('./references/arch.md')).toBe('references/arch.md');
+  });
+
+  it('should leave paths without ./ prefix unchanged', () => {
+    expect(normalizePath('references/arch.md')).toBe('references/arch.md');
+  });
+
+  it('should resolve ../ segments', () => {
+    expect(normalizePath('foo/../bar/baz.md')).toBe('bar/baz.md');
+  });
+
+  it('should collapse duplicate slashes', () => {
+    expect(normalizePath('foo//bar///baz.md')).toBe('foo/bar/baz.md');
+  });
+
+  it('should handle combined normalizations', () => {
+    expect(normalizePath('./foo/../bar//baz.md')).toBe('bar/baz.md');
+  });
+
+  it('should return empty string for empty input', () => {
+    expect(normalizePath('')).toBe('');
+  });
+
+  it('should handle bare filename', () => {
+    expect(normalizePath('file.md')).toBe('file.md');
+  });
+});
