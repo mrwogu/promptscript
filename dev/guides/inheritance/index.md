@@ -289,6 +289,29 @@ Example — overlay content and add a reference file without replacing the base 
 
 The overlay's `references` list is appended to the base skill's list. The `content` field replaces the base skill's content entirely.
 
+#### Reference Negation
+
+Use the `!` prefix to remove entries added by a lower layer:
+
+```
+@use @company/skills as skills
+
+@extend skills.code-review {
+  references: [
+    "!references/deprecated-patterns.md"
+    "references/new-patterns.md"
+  ]
+  requires: [
+    "!legacy-tool"
+    "modern-tool"
+  ]
+}
+```
+
+Negation uses normalized path matching — `"!./references/foo.md"` matches `"references/foo.md"`. If a negation doesn't match any base entry, a warning is logged during compilation.
+
+Negation applies to append-strategy properties only (`references`, `requires`). The `!` prefix is only meaningful in `@extend` blocks — using it in a base skill definition triggers a validator warning (PS028).
+
 ## Composition with [@use](https://github.com/use "GitHub User: use")
 
 Use `@use` to import and merge fragments (like mixins):

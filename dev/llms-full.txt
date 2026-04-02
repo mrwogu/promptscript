@@ -1764,6 +1764,31 @@ Modify inherited or existing blocks:
 }
 ```
 
+### Skill-Specific Extend Semantics
+
+When `@extend` targets a skill definition inside `@skills`, properties follow dedicated merge strategies:
+
+| Strategy          | Properties                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent` |
+| **Append**        | `references`, `requires`                                                                                           |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                      |
+
+### Reference Negation
+
+Prefix an entry with `!` in an `@extend` block to remove it from the base before appending:
+
+```
+@extend skills.code-review {
+  references: [
+    "!references/deprecated.md"
+    "references/replacement.md"
+  ]
+}
+```
+
+Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks on append-strategy properties (`references`, `requires`).
+
 ## Values
 
 ### Primitive Types
@@ -5312,6 +5337,29 @@ Example — overlay content and add a reference file without replacing the base 
 ```
 
 The overlay's `references` list is appended to the base skill's list. The `content` field replaces the base skill's content entirely.
+
+#### Reference Negation
+
+Use the `!` prefix to remove entries added by a lower layer:
+
+```
+@use @company/skills as skills
+
+@extend skills.code-review {
+  references: [
+    "!references/deprecated-patterns.md"
+    "references/new-patterns.md"
+  ]
+  requires: [
+    "!legacy-tool"
+    "modern-tool"
+  ]
+}
+```
+
+Negation uses normalized path matching — `"!./references/foo.md"` matches `"references/foo.md"`. If a negation doesn't match any base entry, a warning is logged during compilation.
+
+Negation applies to append-strategy properties only (`references`, `requires`). The `!` prefix is only meaningful in `@extend` blocks — using it in a base skill definition triggers a validator warning (PS028).
 
 ## Composition with [@use](https://github.com/use "GitHub User: use")
 

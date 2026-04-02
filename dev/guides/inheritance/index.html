@@ -169,7 +169,19 @@
 <span class=w>    </span>./extra-context.md
 <span class=w>  </span><span class=p>]</span>
 <span class=p>}</span>
-</code></pre></div> <p>The overlay's <code>references</code> list is appended to the base skill's list. The <code>content</code> field replaces the base skill's content entirely.</p> <h2 id=composition-with-use>Composition with <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a><a class=headerlink href=#composition-with-use title="Permanent link">&para;</a></h2> <p>Use <code>@use</code> to import and merge fragments (like mixins):</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
+</code></pre></div> <p>The overlay's <code>references</code> list is appended to the base skill's list. The <code>content</code> field replaces the base skill's content entirely.</p> <h4 id=reference-negation>Reference Negation<a class=headerlink href=#reference-negation title="Permanent link">&para;</a></h4> <p>Use the <code>!</code> prefix to remove entries added by a lower layer:</p> <div class=highlight><pre><span></span><code><span class=kn>@use</span><span class=w> </span><span class=s>@company/skills</span><span class=w> </span><span class=err>as</span><span class=w> </span><span class=err>skills</span>
+
+<span class=p>@</span><span class=kn>extend</span><span class=w> </span><span class=err>skills.code-review</span><span class=w> </span><span class=p>{</span>
+<span class=w>  </span><span class=nl>references</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;!references/deprecated-patterns.md&quot;</span>
+<span class=w>    </span><span class=s2>&quot;references/new-patterns.md&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=w>  </span><span class=nl>requires</span><span class=p>:</span><span class=w> </span><span class=p>[</span>
+<span class=w>    </span><span class=s2>&quot;!legacy-tool&quot;</span>
+<span class=w>    </span><span class=s2>&quot;modern-tool&quot;</span>
+<span class=w>  </span><span class=p>]</span>
+<span class=p>}</span>
+</code></pre></div> <p>Negation uses normalized path matching — <code>"!./references/foo.md"</code> matches <code>"references/foo.md"</code>. If a negation doesn't match any base entry, a warning is logged during compilation.</p> <p>Negation applies to append-strategy properties only (<code>references</code>, <code>requires</code>). The <code>!</code> prefix is only meaningful in <code>@extend</code> blocks — using it in a base skill definition triggers a validator warning (PS028).</p> <h2 id=composition-with-use>Composition with <a class="magiclink magiclink-github magiclink-mention" href=https://github.com/use title="GitHub User: use">@use</a><a class=headerlink href=#composition-with-use title="Permanent link">&para;</a></h2> <p>Use <code>@use</code> to import and merge fragments (like mixins):</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=kn>meta</span><span class=w> </span><span class=p>{</span>
 <span class=w>  </span><span class=na>id</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;my-project&quot;</span>
 <span class=w>  </span><span class=na>syntax</span><span class=p>:</span><span class=w> </span><span class=s2>&quot;1.0.0&quot;</span>
 <span class=p>}</span>
