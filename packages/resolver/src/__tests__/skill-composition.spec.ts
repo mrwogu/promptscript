@@ -1240,7 +1240,7 @@ describe('resolveSkillComposition — edge cases', () => {
           currentFile: '/project/parent.prs',
           resolvePath: () => '/project/sub.prs',
           resolveFile: async () => {
-            throw 'string error'; // eslint-disable-line no-throw-literal
+            throw 'string error';
           },
         })
       ).rejects.toThrow('string error');
