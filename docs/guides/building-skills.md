@@ -508,6 +508,7 @@ python3 .claude/skills/stack-advisor/scripts/compare.py "react" "vue"
 
 ## See Also
 
+- [Skill Composition](skill-composition.md) - Compose complex skills from multiple sub-skill phases
 - [Markdown Imports](markdown-imports.md) - Import skills directly via `@use` without external tools
 - [Using npx skills](npx-skills.md) - Install open-source skills from GitHub
 - [Local Skills](local-skills.md) - Full reference for skill resolution and resource handling
