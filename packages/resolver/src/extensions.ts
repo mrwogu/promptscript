@@ -89,7 +89,6 @@ export function normalizePath(path: string): string {
  * Extract string elements from a value that may be a plain array or ArrayContent node.
  * Returns null if the value is neither.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function extractElements(val: unknown): string[] | null {
   if (Array.isArray(val)) {
     return val.filter((el): el is string => typeof el === 'string');
@@ -447,15 +446,16 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
       // Extension value wins outright
       base[key] = deepClone(extVal as Record<string, unknown>) as Value;
     } else if (SKILL_APPEND_PROPERTIES.has(key)) {
-      // Append array elements
-      if (isArrayContent(baseVal) && isArrayContent(extVal)) {
-        base[key] = {
-          type: 'ArrayContent' as const,
-          elements: uniqueConcat(baseVal.elements, extVal.elements),
-          loc: extVal.loc,
-        } as unknown as Value;
-      } else if (isArrayContent(extVal)) {
-        base[key] = deepClone(extVal as unknown as Record<string, unknown>) as Value;
+      // Append array elements with negation support.
+      // Extract elements from either plain arrays or ArrayContent nodes.
+      const baseElems = extractElements(baseVal);
+      const extElems = extractElements(extVal);
+      if (baseElems !== null && extElems !== null) {
+        base[key] = processAppendWithNegations(baseElems, extElems) as unknown as Value;
+      } else if (extElems !== null) {
+        // Base is not an array — extension array wins (strip negations)
+        const additions = extElems.filter((s) => !s.startsWith('!'));
+        base[key] = additions as unknown as Value;
       } else {
         base[key] = deepClone(extVal as Record<string, unknown>) as Value;
       }
@@ -587,6 +587,66 @@ function mergeContent(target: BlockContent, ext: BlockContent): BlockContent {
 
   // Default - extension wins
   return deepClone(ext);
+}
+
+/**
+ * Process append-strategy arrays with negation support.
+ *
+ * Entries in `extItems` starting with `!` are negations — they remove matching
+ * entries from `baseItems` (after path normalization). Remaining entries are
+ * appended with deduplication.
+ */
+function processAppendWithNegations(baseItems: string[], extItems: string[]): string[] {
+  // 1. Partition extension items into negations and additions
+  const negations = new Set<string>();
+  const additions: string[] = [];
+  for (const item of extItems) {
+    if (item.startsWith('!')) {
+      negations.add(normalizePath(item.slice(1)));
+    } else {
+      additions.push(item);
+    }
+  }
+
+  // 2. If no negations, fast path — just deduplicate concat
+  if (negations.size === 0) {
+    return deduplicateConcat(baseItems, additions);
+  }
+
+  // 3. Filter base items, track which negations matched
+  const unmatchedNegations = new Set(negations);
+  const filtered = baseItems.filter((item) => {
+    const normalized = normalizePath(item);
+    if (negations.has(normalized)) {
+      unmatchedNegations.delete(normalized);
+      return false;
+    }
+    return true;
+  });
+
+  // 4. Log unmatched negations (non-blocking)
+  for (const path of unmatchedNegations) {
+    // eslint-disable-next-line no-console
+    console.warn(`Negation '!${path}' did not match any base entry`);
+  }
+
+  // 5. Append additions with deduplication
+  return deduplicateConcat(filtered, additions);
+}
+
+/**
+ * Concatenate two string arrays with deduplication (preserves order, first occurrence wins).
+ */
+function deduplicateConcat(a: string[], b: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const item of [...a, ...b]) {
+    if (!seen.has(item)) {
+      seen.add(item);
+      result.push(item);
+    }
+  }
+  return result;
 }
 
 /**
