@@ -134,9 +134,9 @@ describe('skill-aware @extend semantics', () => {
     const result = applyExtends(ast);
     const skills = result.blocks[0]?.content as ObjectContent;
     const expert = skills.properties['expert'] as Record<string, Value>;
-    const refs = expert['references'] as unknown as ArrayContent;
+    const refs = expert['references'] as string[];
 
-    expect(refs.elements).toEqual(['base/spring.md', 'overlay/arch.md']);
+    expect(refs).toEqual(['base/spring.md', 'overlay/arch.md']);
   });
 
   it('should replace description when extending a skill', () => {
@@ -268,9 +268,9 @@ describe('skill-aware @extend semantics', () => {
     const result = applyExtends(ast);
     const skills = result.blocks[0]?.content as ObjectContent;
     const expert = skills.properties['expert'] as Record<string, Value>;
-    const refs = expert['references'] as unknown as ArrayContent;
+    const refs = expert['references'] as string[];
 
-    expect(refs.elements).toEqual(['base.md', 'layer3.md', 'layer4.md']);
+    expect(refs).toEqual(['base.md', 'layer3.md', 'layer4.md']);
   });
 
   it('should NOT apply skill-aware semantics to non-skill blocks (regression guard)', () => {
@@ -498,9 +498,9 @@ describe('skill-aware @extend semantics', () => {
     const result = applyExtends(ast);
     const skills = result.blocks[0]?.content as ObjectContent;
     const expert = skills.properties['expert'] as Record<string, Value>;
-    const examples = expert['examples'] as unknown as { elements: Value[] };
+    const examples = expert['examples'] as string[];
 
-    expect(examples.elements).toEqual(['example1', 'example2']);
+    expect(examples).toEqual(['example1', 'example2']);
   });
 
   it('should deep merge unknown skill properties', () => {
@@ -663,6 +663,336 @@ describe('skill-aware @extend semantics', () => {
     // ext is not ObjectContent — deepClone fallback
     expect(expert['inputs']).toBe('replaced');
   });
+
+  it('should negate a base reference via ! prefix', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: createArrayContent(['base/spring.md', 'base/old.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['!base/old.md', 'overlay/new.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toContain('base/spring.md');
+    expect(refs).toContain('overlay/new.md');
+    expect(refs).not.toContain('base/old.md');
+  });
+
+  it('should negate with normalized path matching', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: createArrayContent(['references/arch.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['!./references/arch.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toEqual([]);
+  });
+
+  it('should handle negation with plain arrays (real parser output)', () => {
+    // The expert skill is an ObjectContent node (as the real parser produces)
+    // but its `references` property is a plain JS array (also real parser output).
+    // The extension references is also a plain array with a negation.
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: ['base/spring.md', 'base/old.md'] as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: ['!base/old.md', 'overlay/new.md'] as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toContain('base/spring.md');
+    expect(refs).toContain('overlay/new.md');
+    expect(refs).not.toContain('base/old.md');
+  });
+
+  it('should negate requires entries with ! prefix', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              requires: createArrayContent(['legacy-tool', 'bash']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            requires: createArrayContent(['!legacy-tool', 'modern-tool']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const requires = expert['requires'] as string[];
+
+    expect(requires).toContain('bash');
+    expect(requires).toContain('modern-tool');
+    expect(requires).not.toContain('legacy-tool');
+  });
+
+  it('should handle all base entries negated', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: createArrayContent(['old1.md', 'old2.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['!old1.md', '!old2.md', 'new.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toEqual(['new.md']);
+  });
+
+  it('should handle negation when base has no entries for the property', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['!nonexistent.md', 'new.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toEqual(['new.md']);
+  });
+
+  it('should append plain arrays without negation (prerequisite fix)', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: ['base/spring.md'] as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: ['overlay/arch.md'] as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toContain('base/spring.md');
+    expect(refs).toContain('overlay/arch.md');
+  });
+
+  it('should negate entry added by a prior @extend in sequential extends', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: createArrayContent(['base.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['added-by-first.md']) as unknown as Value,
+          })
+        ),
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['!added-by-first.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toContain('base.md');
+    expect(refs).not.toContain('added-by-first.md');
+  });
+
+  it('should treat double negation !! as literal after stripping first !', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: createArrayContent(['base.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: createArrayContent(['!!double.md']) as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    // !! strips first ! → negation target is "!double.md" (normalized)
+    // Since base has no "!double.md", it's an unmatched negation
+    // base.md remains, no additions
+    expect(refs).toContain('base.md');
+    expect(refs).toHaveLength(1);
+  });
+
+  it('should handle mixed ArrayContent and plain array in base vs ext', () => {
+    const ast = createProgram({
+      blocks: [
+        createBlock(
+          'skills',
+          createObjectContent({
+            expert: createObjectContent({
+              description: 'Base expert',
+              references: createArrayContent(['base.md']) as unknown as Value,
+            }) as unknown as Value,
+          })
+        ),
+      ],
+      extends: [
+        createExtendBlock(
+          'skills.expert',
+          createObjectContent({
+            references: ['!base.md', 'new.md'] as unknown as Value,
+          })
+        ),
+      ],
+    });
+
+    const result = applyExtends(ast);
+    const skills = result.blocks[0]?.content as ObjectContent;
+    const expert = skills.properties['expert'] as Record<string, Value>;
+    const refs = expert['references'] as string[];
+
+    expect(refs).toEqual(['new.md']);
+  });
 });
 
 describe('resolveSkillReferences', () => {
@@ -787,5 +1117,37 @@ describe('reference name collision detection', () => {
     expect(resources).toHaveLength(1);
     expect(resources[0]!.relativePath).toBe('references/spring.md');
     expect(mockLogger.verbose).toHaveBeenCalledWith(expect.stringContaining('overridden'));
+  });
+});
+
+import { normalizePath } from '../extensions.js';
+
+describe('normalizePath', () => {
+  it('should strip leading ./', () => {
+    expect(normalizePath('./references/arch.md')).toBe('references/arch.md');
+  });
+
+  it('should leave paths without ./ prefix unchanged', () => {
+    expect(normalizePath('references/arch.md')).toBe('references/arch.md');
+  });
+
+  it('should resolve ../ segments', () => {
+    expect(normalizePath('foo/../bar/baz.md')).toBe('bar/baz.md');
+  });
+
+  it('should collapse duplicate slashes', () => {
+    expect(normalizePath('foo//bar///baz.md')).toBe('foo/bar/baz.md');
+  });
+
+  it('should handle combined normalizations', () => {
+    expect(normalizePath('./foo/../bar//baz.md')).toBe('bar/baz.md');
+  });
+
+  it('should return empty string for empty input', () => {
+    expect(normalizePath('')).toBe('');
+  });
+
+  it('should handle bare filename', () => {
+    expect(normalizePath('file.md')).toBe('file.md');
   });
 });

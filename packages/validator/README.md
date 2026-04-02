@@ -31,6 +31,15 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 | PS017 | unused-parameter        | warning  | A declared template parameter is never referenced in the file body                      |
 | PS018 | syntax-version-compat   | warning  | Warns if declared syntax version is unknown; otherwise checks block compatibility       |
 | PS019 | unknown-block-name      | warning  | Detects unknown block type names with typo suggestions (Levenshtein fuzzy matching)     |
+| PS020 | duplicate-skills        | error    | Two skills share the same name within a `@skills` block                                 |
+| PS021 | use-block-filter        | warning  | `@use` block filter references a block that does not exist in the imported file         |
+| PS022 | circular-guard-requires | error    | `@guards` `@requires` chain forms a cycle                                               |
+| PS023 | valid-examples          | warning  | Skill examples must have valid structure and non-empty content                          |
+| PS024 | valid-guard-requires    | warning  | Guard `@requires` targets must exist and be valid guard paths                           |
+| PS025 | valid-skill-references  | warning  | Skill reference paths must use allowed extensions and exist on disk                     |
+| PS026 | safe-reference-content  | warning  | Reference files must not contain PRS directives (prompt injection risk)                 |
+| PS027 | valid-skill-composition | warning  | Composed skills must not have conflicting phase names or excessive phases               |
+| PS028 | valid-append-negation   | warning  | Negation prefix `!` in append properties is only effective in `@extend` blocks          |
 
 ## License
 
