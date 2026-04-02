@@ -5,6 +5,7 @@ import type {
   MetaBlock,
   InheritDeclaration,
   UseDeclaration,
+  InlineUseDeclaration,
   Block,
   ExtendBlock,
   BlockContent,
@@ -55,6 +56,13 @@ interface UseDeclCstCtx {
   Identifier?: IToken[];
 }
 
+interface InlineUseCstCtx {
+  At: IToken[];
+  pathRef: CstNode[];
+  paramCallList?: CstNode[];
+  Identifier?: IToken[];
+}
+
 interface BlockCstCtx {
   At: IToken[];
   Identifier: IToken[];
@@ -71,6 +79,7 @@ interface BlockContentCstCtx {
   TextBlock?: IToken[];
   field?: CstNode[];
   restrictionItem?: CstNode[];
+  inlineUse?: CstNode[];
 }
 
 interface RestrictionItemCstCtx {
@@ -344,6 +353,27 @@ class PromptScriptVisitor extends BaseVisitor {
   }
 
   /**
+   * inlineUse → InlineUseDeclaration
+   */
+  inlineUse(ctx: InlineUseCstCtx): InlineUseDeclaration {
+    const decl: InlineUseDeclaration = {
+      type: 'InlineUseDeclaration',
+      path: this.visit(ctx.pathRef[0]!),
+      loc: this.loc(ctx.At[0]!),
+    };
+
+    if (ctx.paramCallList) {
+      decl.params = this.visit(ctx.paramCallList[0]!);
+    }
+
+    if (ctx.Identifier) {
+      decl.alias = ctx.Identifier[0]!.image;
+    }
+
+    return decl;
+  }
+
+  /**
    * block → Block
    */
   block(ctx: BlockCstCtx): Block {
@@ -380,6 +410,7 @@ class PromptScriptVisitor extends BaseVisitor {
     const hasText = ctx.TextBlock !== undefined && ctx.TextBlock.length > 0;
     const hasFields = ctx.field !== undefined && ctx.field.length > 0;
     const hasRestrictions = ctx.restrictionItem !== undefined && ctx.restrictionItem.length > 0;
+    const hasInlineUses = ctx.inlineUse !== undefined && ctx.inlineUse.length > 0;
 
     // Collect restrictions (array of strings)
     if (hasRestrictions) {
@@ -389,7 +420,22 @@ class PromptScriptVisitor extends BaseVisitor {
     const textContent = hasText ? this.buildTextContent(ctx.TextBlock![0]!) : undefined;
     const properties = hasFields ? this.buildProperties(ctx.field!) : {};
 
-    return this.resolveBlockContent(textContent, properties, hasText, hasFields);
+    const content = this.resolveBlockContent(
+      textContent,
+      properties,
+      hasText,
+      hasFields || hasInlineUses
+    );
+
+    // Attach inline uses to ObjectContent or MixedContent
+    if (hasInlineUses && (content.type === 'ObjectContent' || content.type === 'MixedContent')) {
+      const inlineUses = ctx.inlineUse!.map(
+        (node: CstNode) => this.visit(node) as InlineUseDeclaration
+      );
+      (content as ObjectContent).inlineUses = inlineUses;
+    }
+
+    return content;
   }
 
   /**

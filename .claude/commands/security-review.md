@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-03-28T09:13:38.493Z | source: .promptscript/project.prs | target: claude
+# promptscript-generated: 2026-03-31T23:49:19.607Z | source: .promptscript/project.prs | target: claude
 description: 'Review code for security vulnerabilities'
 ---
 

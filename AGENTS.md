@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PromptScript 2026-03-28T09:13:38.494Z | source: .promptscript/project.prs | target: factory - do not edit -->
+<!-- PromptScript 2026-03-31T23:49:19.610Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 

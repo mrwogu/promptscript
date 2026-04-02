@@ -500,6 +500,57 @@ describe('applyExtends', () => {
     });
   });
 
+  describe('SKILL_PRESERVE_PROPERTIES — composedFrom is never overwritten by @extend', () => {
+    it('preserves __composedFrom when @extend targets a skill property inside @skills', () => {
+      const composedFromValue = [{ name: 'phase-a', source: '/a.prs', composedBlocks: [] }];
+
+      // The @skills block has an ObjectContent node containing an 'ops' skill object.
+      // The 'ops' skill object itself is a plain Record that includes __composedFrom.
+      // We use createObjectContent to represent the @skills block, and nest 'ops' as
+      // an ObjectContent-shaped object (type + properties + loc) so isObjectContent()
+      // recognises it and the skill-aware merge path fires.
+      const opsSkillNode = {
+        type: 'ObjectContent' as const,
+        properties: {
+          description: 'original description',
+          __composedFrom: composedFromValue as unknown as Value,
+        },
+        loc: createLoc(),
+      };
+
+      const ast = createProgram({
+        blocks: [
+          createBlock('skills', createObjectContent({ ops: opsSkillNode as unknown as Value })),
+        ],
+        extends: [
+          // Target 'skills.ops' — this sets skillContext=true and path=['ops'],
+          // so mergeAtPath calls mergeValue with skillContext=true on the ObjectContent
+          // 'ops' node, which routes through mergeSkillValue where SKILL_PRESERVE_PROPERTIES
+          // prevents __composedFrom from being overwritten.
+          createExtendBlock(
+            'skills.ops',
+            createObjectContent({
+              description: 'extended description',
+              __composedFrom: [
+                { name: 'phase-b', source: '/b.prs', composedBlocks: [] },
+              ] as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const ops = content.properties['ops'] as Record<string, unknown>;
+
+      // description should be replaced (SKILL_REPLACE_PROPERTIES)
+      expect(ops['description']).toBe('extended description');
+
+      // __composedFrom must survive — SKILL_PRESERVE_PROPERTIES blocks the overwrite
+      expect(ops['__composedFrom']).toEqual(composedFromValue);
+    });
+  });
+
   describe('navigating into non-object values', () => {
     it('should build path when trying to navigate into primitive', () => {
       const ast = createProgram({

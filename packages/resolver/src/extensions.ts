@@ -32,6 +32,9 @@ const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires']);
 /** Properties where objects are shallow-merged (extension wins per key). */
 const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);
 
+/** Properties that are never overwritten by @extend (resolver-generated metadata). */
+const SKILL_PRESERVE_PROPERTIES = new Set(['composedFrom', '__composedFrom']);
+
 // ── AST-node type guards ─────────────────────────────────────────────
 
 interface ArrayContentNode {
@@ -397,6 +400,11 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
 
   for (const [key, extVal] of Object.entries(ext.properties)) {
     const baseVal = base[key];
+
+    if (SKILL_PRESERVE_PROPERTIES.has(key)) {
+      // Never overwrite resolver-generated metadata
+      continue;
+    }
 
     if (SKILL_REPLACE_PROPERTIES.has(key)) {
       // Extension value wins outright

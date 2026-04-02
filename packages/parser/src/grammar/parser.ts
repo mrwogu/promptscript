@@ -136,16 +136,34 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * blockContent
-   *   : (TextBlock | restrictionItem | field)*
+   *   : (TextBlock | restrictionItem | inlineUse | field)*
    */
   private blockContent = this.RULE('blockContent', () => {
     this.MANY(() =>
       this.OR([
         { ALT: () => this.CONSUME(TextBlock) },
         { ALT: () => this.SUBRULE(this.restrictionItem) },
+        { ALT: () => this.SUBRULE(this.inlineUse), GATE: () => this.isInlineUseAhead() },
         { ALT: () => this.SUBRULE(this.field) },
       ])
     );
+  });
+
+  /**
+   * inlineUse
+   *   : '@' 'use' pathRef paramCallList? ('as' Identifier)?
+   *
+   * Same syntax as top-level useDecl but allowed within block content.
+   */
+  private inlineUse = this.RULE('inlineUse', () => {
+    this.CONSUME(At);
+    this.CONSUME(Use);
+    this.SUBRULE(this.pathRef);
+    this.OPTION(() => this.SUBRULE(this.paramCallList));
+    this.OPTION2(() => {
+      this.CONSUME(As);
+      this.CONSUME(Identifier);
+    });
   });
 
   /**
@@ -204,6 +222,17 @@ export class PromptScriptParser extends CstParser {
       { ALT: () => this.CONSUME(Identifier) },
     ]);
   });
+
+  /**
+   * Check if we're about to parse an inlineUse.
+   * An inlineUse starts with '@' followed by 'use'.
+   */
+  private isInlineUseAhead(): boolean {
+    const first = this.LA(1);
+    if (!first || first.tokenType?.name !== 'At') return false;
+    const second = this.LA(2);
+    return second?.tokenType?.name === 'Use';
+  }
 
   /**
    * Check if we're about to parse a paramDefList.

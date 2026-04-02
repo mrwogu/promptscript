@@ -1,0 +1,25 @@
+@meta {
+  id: "triage"
+  syntax: "1.1.0"
+}
+
+@skills {
+  triage: {
+    description: "Classify findings"
+    inputs: {
+      findings: {
+        type: "string"
+        description: "Health findings from scan"
+      }
+    }
+    outputs: {
+      classification: {
+        type: "string"
+        description: "Classified findings"
+      }
+    }
+    content: """
+      Classify all findings by severity.
+    """
+  }
+}

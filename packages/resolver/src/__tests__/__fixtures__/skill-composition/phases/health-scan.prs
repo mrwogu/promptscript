@@ -1,0 +1,31 @@
+@meta {
+  id: "health-scan"
+  syntax: "1.1.0"
+}
+
+@knowledge {
+  thresholds: {
+    cpu: 80
+    memory: 90
+  }
+}
+
+@restrictions {
+  - "Never restart services without confirmation"
+}
+
+@skills {
+  health-scan: {
+    description: "Run health checks"
+    allowedTools: ["mcp__check_cpu", "mcp__check_memory"]
+    outputs: {
+      findings: {
+        type: "string"
+        description: "Health findings"
+      }
+    }
+    content: """
+      Run all health checks in parallel.
+    """
+  }
+}

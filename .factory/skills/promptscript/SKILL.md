@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-03-27T12:01:02.813Z | source: .promptscript/project.prs | target: promptscript
+# promptscript-generated: 2026-03-31T23:49:19.610Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -212,7 +212,25 @@ Reusable skill definitions with metadata:
 ```
 
 Properties: description (required), content (required), trigger, disableModelInvocation,
-userInvocable, allowedTools, context ("fork" or "inherit"), agent, requires, inputs, outputs.
+userInvocable, allowedTools, context ("fork" or "inherit"), agent, requires, references, inputs, outputs.
+
+The `references` property attaches external files to the skill's context:
+
+```
+@skills {
+  architecture-review: {
+    description: "Review architecture decisions"
+    references: [
+      ./references/architecture.md
+      ./references/modules.md
+    ]
+    content: (triple-quoted text)
+  }
+}
+```
+
+Allowed file types: `.md`, `.json`, `.yaml`, `.yml`, `.txt`, `.csv`. Paths are resolved relative
+to the `.prs` file. Formatters emit referenced files alongside SKILL.md in the output directory.
 
 ### Parameterized Skills
 
@@ -229,9 +247,14 @@ params:
   standard:
     type: string
     default: 'best practices'
+references:
+  - references/architecture.md
 ---
 Review the code using {{language}} conventions following {{standard}}.
 ```
+
+The `references` field in SKILL.md frontmatter lists files to attach to the skill's context.
+Paths are relative to the SKILL.md file.
 
 Pass values in `@skills` block:
 
@@ -433,6 +456,33 @@ Requires an aliased @use:
 }
 ```
 
+#### Skill-aware @extend semantics
+
+When extending a skill definition via `@extend`, individual skill properties follow specific merge
+strategies rather than the generic block merge rules:
+
+| Strategy          | Properties                                                                                         |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| **Replace**       | content, description, trigger, userInvocable, allowedTools, disableModelInvocation, context, agent |
+| **Append**        | references, examples, requires                                                                     |
+| **Shallow merge** | params, inputs, outputs                                                                            |
+
+Example — extending a base skill to add references and override content:
+
+```
+@use @company/skills as skills
+
+@extend skills.code-review {
+  content: (triple-quoted text with overridden instructions)
+  references: [
+    ./extra-context.md
+  ]
+}
+```
+
+The `references` array from the base skill and the overlay are combined (append). The `content`
+field from the overlay replaces the base (replace).
+
 ### Parameterized Inheritance (Template Variables)
 
 Use `{{variable}}` placeholders in a **parent/template** file, and pass values
@@ -556,6 +606,8 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 
 - **PS018 (`syntax-version-compat`)**: warns when blocks used in a file require a higher syntax version than declared. For example, `@agents` with `syntax: "1.0.0"` triggers PS018. Suggestion: run `prs validate --fix`.
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
+- **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
+- **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).
 
 ### Fixing Syntax Versions
 

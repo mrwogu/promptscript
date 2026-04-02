@@ -84,6 +84,13 @@ class PromptScriptLexer(RegexLexer):
                 r"([\w\-]+)\s*(:)",
                 bygroups(Name.Label, Punctuation),
             ),
+            # Inline @use statement within blocks (e.g., inside @skills)
+            (
+                r"(@use)(\s+)(@[\w\-./]+(?:@[\w\-.^~]+)?|\.[\w\-./]+|[a-zA-Z][\w\-]*\.[a-zA-Z]{2,}/[\w\-./@^~]+)",
+                bygroups(Keyword.Namespace, Whitespace, String),
+            ),
+            # 'as' keyword for inline @use aliases
+            (r"\b(as)\b", Keyword.Namespace),
             # Nested blocks
             (r"\{", Punctuation, "#push"),
             (r"\}", Punctuation, "#pop"),

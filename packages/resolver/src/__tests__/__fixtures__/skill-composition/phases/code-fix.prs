@@ -1,0 +1,30 @@
+@meta {
+  id: "code-fix"
+  syntax: "1.1.0"
+}
+
+@restrictions {
+  - "Never push to main"
+}
+
+@skills {
+  code-fix: {
+    description: "Create fixes"
+    allowedTools: ["Bash", "Read", "Write"]
+    inputs: {
+      classification: {
+        type: "string"
+        description: "Classified findings"
+      }
+    }
+    outputs: {
+      pr_url: {
+        type: "string"
+        description: "PR URL"
+      }
+    }
+    content: """
+      Create automated fixes for each finding.
+    """
+  }
+}

@@ -1,0 +1,10 @@
+@meta {
+  id: "no-skills"
+  syntax: "1.1.0"
+}
+
+@standards {
+  """
+  This file has no @skills block.
+  """
+}

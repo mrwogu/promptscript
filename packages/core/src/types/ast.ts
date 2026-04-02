@@ -171,6 +171,22 @@ export interface UseDeclaration extends BaseNode {
   params?: ParamArgument[];
 }
 
+/**
+ * Inline @use declaration within a skill block body.
+ * Same syntax as top-level UseDeclaration but appears inside block content.
+ */
+export interface InlineUseDeclaration {
+  readonly type: 'InlineUseDeclaration';
+  /** Path to the sub-skill file */
+  path: PathReference;
+  /** Template parameters */
+  params?: ParamArgument[];
+  /** Alias for the phase */
+  alias?: string;
+  /** Source location */
+  loc: SourceLocation;
+}
+
 // ============================================================
 // Path Reference
 // ============================================================
@@ -297,6 +313,8 @@ export interface ObjectContent extends BaseNode {
   readonly type: 'ObjectContent';
   /** Properties */
   properties: Record<string, Value>;
+  /** Inline @use declarations (consumed by resolver, ephemeral) */
+  inlineUses?: InlineUseDeclaration[];
 }
 
 /**
@@ -395,6 +413,27 @@ export interface SkillDefinition {
   examples?: Record<string, ExampleDefinition>;
   /** Reference files attached to skill context (paths resolved by resolver) */
   references?: string[];
+  /** Metadata about composed phases (set by resolver, not by user) */
+  composedFrom?: ComposedPhase[];
+}
+
+/**
+ * Metadata about a composed phase in a skill.
+ * Set by the resolver during skill composition — not user-authored.
+ */
+export interface ComposedPhase {
+  /** Phase name (alias or skill name) */
+  name: string;
+  /** Source file path */
+  source: string;
+  /** Alias if @use ... as alias was used */
+  alias?: string;
+  /** Extracted inputs contract (if defined) */
+  inputs?: Record<string, SkillContractField>;
+  /** Extracted outputs contract (if defined) */
+  outputs?: Record<string, SkillContractField>;
+  /** Which context blocks were composed from this phase */
+  composedBlocks: string[];
 }
 
 /**
