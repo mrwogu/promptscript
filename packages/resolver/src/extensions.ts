@@ -626,7 +626,6 @@ function processAppendWithNegations(baseItems: string[], extItems: string[]): st
 
   // 4. Log unmatched negations (non-blocking)
   for (const path of unmatchedNegations) {
-    // eslint-disable-next-line no-console
     console.warn(`Negation '!${path}' did not match any base entry`);
   }
 
