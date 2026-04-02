@@ -1170,6 +1170,32 @@ Modify inherited or existing blocks:
 </a>
 <!-- playground-link-end -->
 
+### Skill-Specific Extend Semantics
+
+When `@extend` targets a skill definition inside `@skills`, properties follow dedicated merge strategies:
+
+| Strategy          | Properties                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent` |
+| **Append**        | `references`, `requires`                                                                                           |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                      |
+
+### Reference Negation
+
+Prefix an entry with `!` in an `@extend` block to remove it from the base before appending:
+
+```promptscript
+@extend skills.code-review {
+  references: [
+    "!references/deprecated.md"
+    "references/replacement.md"
+  ]
+}
+```
+
+Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks
+on append-strategy properties (`references`, `requires`).
+
 ## Values
 
 ### Primitive Types
