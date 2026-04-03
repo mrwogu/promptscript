@@ -998,6 +998,21 @@ Prefix an entry with `!` in an `@extend` block to remove it from the base before
 
 Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks on append-strategy properties (`references`, `requires`).
 
+### Sealed Properties
+
+Prevent `@extend` from overriding specific replace-strategy properties:
+
+```
+@skills {
+  expert: {
+    content: """..."""
+    sealed: ["content", "description"]
+  }
+}
+```
+
+`sealed: true` seals all replace-strategy properties. Attempting to override a sealed property is a compilation error. Append-strategy properties are not affected.
+
 ## Values
 
 ### Primitive Types
