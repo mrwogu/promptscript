@@ -33,7 +33,12 @@ const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires']);
 const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);
 
 /** Properties that are never overwritten by @extend (resolver-generated metadata). */
-const SKILL_PRESERVE_PROPERTIES = new Set(['composedFrom', '__composedFrom', 'sealed']);
+const SKILL_PRESERVE_PROPERTIES = new Set([
+  'composedFrom',
+  '__composedFrom',
+  'sealed',
+  '__layerTrace',
+]);
 
 // ── AST-node type guards ─────────────────────────────────────────────
 
@@ -453,6 +458,9 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
     }
   }
 
+  const trace: Array<{ property: string; source: string; strategy: string; action: string }> = [];
+  const sourceFile = ext.loc?.file ?? '<unknown>';
+
   for (const [key, extVal] of Object.entries(ext.properties)) {
     const baseVal = base[key];
 
@@ -472,6 +480,7 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
     if (SKILL_REPLACE_PROPERTIES.has(key)) {
       // Extension value wins outright
       base[key] = deepClone(extVal as Record<string, unknown>) as Value;
+      trace.push({ property: key, source: sourceFile, strategy: 'replace', action: 'replaced' });
     } else if (SKILL_APPEND_PROPERTIES.has(key)) {
       // Append array elements with negation support.
       // Extract elements from either plain arrays or ArrayContent nodes.
@@ -486,6 +495,7 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
       } else {
         base[key] = deepClone(extVal as Record<string, unknown>) as Value;
       }
+      trace.push({ property: key, source: sourceFile, strategy: 'append', action: 'appended' });
     } else if (SKILL_MERGE_PROPERTIES.has(key)) {
       // Shallow merge of object properties
       if (isObjectContent(baseVal) && isObjectContent(extVal)) {
@@ -498,6 +508,7 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
       } else {
         base[key] = deepClone(extVal as Record<string, unknown>) as Value;
       }
+      trace.push({ property: key, source: sourceFile, strategy: 'merge', action: 'merged' });
     } else {
       // Unknown property — fallback to deepMerge
       if (
@@ -516,7 +527,15 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
       } else {
         base[key] = deepClone(extVal as Record<string, unknown>) as Value;
       }
+      trace.push({ property: key, source: sourceFile, strategy: 'unknown', action: 'merged' });
     }
+  }
+
+  if (trace.length > 0) {
+    const existingTrace = Array.isArray(base['__layerTrace'])
+      ? (base['__layerTrace'] as unknown[])
+      : [];
+    base['__layerTrace'] = [...existingTrace, ...trace] as unknown as Value;
   }
 
   return base as unknown as Value;
