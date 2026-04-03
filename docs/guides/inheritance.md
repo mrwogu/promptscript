@@ -418,6 +418,31 @@ Negation applies to append-strategy properties only (`references`, `requires`). 
 is only meaningful in `@extend` blocks — using it in a base skill definition triggers a
 validator warning (PS028).
 
+#### Sealed Properties
+
+The `sealed` property prevents higher layers from replacing specified skill properties:
+
+```promptscript
+@skills {
+  code-review: {
+    content: """
+      Critical review workflow.
+    """
+    sealed: ["content"]
+  }
+}
+```
+
+If an `@extend` block attempts to override a sealed property, compilation fails:
+
+```
+ResolveError: Cannot override sealed property 'content' on skill (sealed by base definition)
+```
+
+Use `sealed: true` to seal all replace-strategy properties at once. Only the base skill
+author can set `sealed` — overlays cannot add or remove it. Append-strategy properties
+(`references`, `requires`) remain extendable even when `sealed: true` is set.
+
 ## Composition with @use
 
 Use `@use` to import and merge fragments (like mixins):

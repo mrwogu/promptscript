@@ -40,6 +40,7 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 | PS026 | safe-reference-content  | warning  | Reference files must not contain PRS directives (prompt injection risk)                 |
 | PS027 | valid-skill-composition | warning  | Composed skills must not have conflicting phase names or excessive phases               |
 | PS028 | valid-append-negation   | warning  | Negation prefix `!` in append properties is only effective in `@extend` blocks          |
+| PS029 | valid-sealed-property   | warning  | Sealed property names must be replace-strategy properties                               |
 
 ## License
 
