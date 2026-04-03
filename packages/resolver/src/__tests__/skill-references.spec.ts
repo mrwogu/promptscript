@@ -19,6 +19,7 @@ import type {
   ExtendBlock,
   Value,
 } from '@promptscript/core';
+import { ResolveError } from '@promptscript/core';
 
 describe('skill references', () => {
   describe('parseSkillMd with references', () => {
@@ -992,6 +993,253 @@ describe('skill-aware @extend semantics', () => {
     const refs = expert['references'] as string[];
 
     expect(refs).toEqual(['new.md']);
+  });
+
+  describe('sealed property enforcement', () => {
+    it('should throw ResolveError when extending a sealed property', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                content: createTextContent('Critical instructions'),
+                sealed: ['content'] as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              content: createTextContent('Override attempt'),
+            })
+          ),
+        ],
+      });
+
+      expect(() => applyExtends(ast)).toThrow(ResolveError);
+      expect(() => applyExtends(ast)).toThrow("Cannot override sealed property 'content'");
+    });
+
+    it('should throw when sealed: true and any replace-strategy property is overridden', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                content: createTextContent('Instructions'),
+                sealed: true as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              description: 'Override attempt',
+            })
+          ),
+        ],
+      });
+
+      expect(() => applyExtends(ast)).toThrow(ResolveError);
+      expect(() => applyExtends(ast)).toThrow("Cannot override sealed property 'description'");
+    });
+
+    it('should NOT block append-strategy properties even when sealed: true', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                references: createArrayContent(['base.md']) as unknown as Value,
+                sealed: true as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              references: createArrayContent(['overlay.md']) as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const skills = result.blocks[0]?.content as ObjectContent;
+      const expert = skills.properties['expert'] as Record<string, Value>;
+      const refs = expert['references'] as string[];
+
+      expect(refs).toContain('base.md');
+      expect(refs).toContain('overlay.md');
+    });
+
+    it('should NOT block merge-strategy properties even when sealed: true', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                params: createObjectContent({ name: 'string' }) as unknown as Value,
+                sealed: true as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              params: createObjectContent({ age: 'number' }) as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const skills = result.blocks[0]?.content as ObjectContent;
+      const expert = skills.properties['expert'] as Record<string, Value>;
+      expect(expert).toBeDefined();
+    });
+
+    it('should preserve sealed through multiple extends', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                content: createTextContent('Critical'),
+                sealed: ['content'] as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              references: createArrayContent(['layer2.md']) as unknown as Value,
+            })
+          ),
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              content: createTextContent('Override by layer 3'),
+            })
+          ),
+        ],
+      });
+
+      expect(() => applyExtends(ast)).toThrow("Cannot override sealed property 'content'");
+    });
+
+    it('should silently ignore sealed added by @extend (SKILL_PRESERVE_PROPERTIES)', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                content: createTextContent('Not sealed'),
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              sealed: ['content'] as unknown as Value,
+            })
+          ),
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              content: createTextContent('Override succeeds'),
+            })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const skills = result.blocks[0]?.content as ObjectContent;
+      const expert = skills.properties['expert'] as Record<string, Value>;
+      const content = expert['content'] as { value: string };
+      expect(content.value).toBe('Override succeeds');
+    });
+
+    it('should include property name in error message', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base',
+                allowedTools: ['Read'] as unknown as Value,
+                sealed: ['allowedTools'] as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              allowedTools: ['Write'] as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      expect(() => applyExtends(ast)).toThrow("'allowedTools'");
+    });
+
+    it('should allow normal extends when no sealed property exists', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                content: createTextContent('Original'),
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.expert',
+            createObjectContent({
+              content: createTextContent('Overridden'),
+            })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const skills = result.blocks[0]?.content as ObjectContent;
+      const expert = skills.properties['expert'] as Record<string, Value>;
+      const content = expert['content'] as { value: string };
+      expect(content.value).toBe('Overridden');
+    });
   });
 });
 

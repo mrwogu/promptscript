@@ -9,7 +9,7 @@ import type {
   ArrayContent,
   Value,
 } from '@promptscript/core';
-import { deepMerge, deepClone, isTextContent } from '@promptscript/core';
+import { deepMerge, deepClone, isTextContent, ResolveError } from '@promptscript/core';
 import { IMPORT_MARKER_PREFIX } from './imports.js';
 
 // ── Skill-aware merge strategy sets ──────────────────────────────────
@@ -33,7 +33,7 @@ const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires']);
 const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);
 
 /** Properties that are never overwritten by @extend (resolver-generated metadata). */
-const SKILL_PRESERVE_PROPERTIES = new Set(['composedFrom', '__composedFrom']);
+const SKILL_PRESERVE_PROPERTIES = new Set(['composedFrom', '__composedFrom', 'sealed']);
 
 // ── AST-node type guards ─────────────────────────────────────────────
 
@@ -97,6 +97,25 @@ function extractElements(val: unknown): string[] | null {
     return val.elements.filter((el): el is string => typeof el === 'string');
   }
   return null;
+}
+
+/**
+ * Resolve the `sealed` property value into a set of enforceable property names.
+ * Only replace-strategy property names are enforceable; others are silently ignored.
+ */
+function resolveSealedKeys(val: unknown): Set<string> {
+  if (val === true) {
+    return new Set(SKILL_REPLACE_PROPERTIES);
+  }
+  let names: string[];
+  if (Array.isArray(val)) {
+    names = val.filter((el): el is string => typeof el === 'string');
+  } else if (isArrayContent(val)) {
+    names = val.elements.filter((el): el is string => typeof el === 'string');
+  } else {
+    return new Set();
+  }
+  return new Set(names.filter((n) => SKILL_REPLACE_PROPERTIES.has(n)));
 }
 
 /**
@@ -440,6 +459,14 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
     if (SKILL_PRESERVE_PROPERTIES.has(key)) {
       // Never overwrite resolver-generated metadata
       continue;
+    }
+
+    // Check sealed properties — block overrides of sealed replace-strategy properties
+    const sealedKeys = resolveSealedKeys(base['sealed']);
+    if (sealedKeys.has(key)) {
+      throw new ResolveError(
+        `Cannot override sealed property '${key}' on skill (sealed by base definition)`
+      );
     }
 
     if (SKILL_REPLACE_PROPERTIES.has(key)) {
