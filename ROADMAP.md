@@ -96,7 +96,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **`prs inspect --layers`** — Show per-property merge layers for a compiled skill (base vs overlay)
 - [ ] **Semantic base/overlay validation** — Warn when an overlay redefines a property that is semantically incompatible with its base
 - [x] **Negation syntax** — Allow overlays to remove individual `requires` or `references` entries via `!` prefix in `@extend` blocks
-- [ ] **`sealed` / `final` modifier** — Mark a skill property as non-overridable by downstream overlays
+- [x] **`sealed` modifier** — Mark a skill property as non-overridable by downstream overlays via `@extend`
 - [ ] **Overlay-aware suggestions** — LSP / validator hints when extending a skill
 
 ### 2. Skill Overlay / Extends — Phase 3
