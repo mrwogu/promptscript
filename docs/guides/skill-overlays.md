@@ -245,6 +245,23 @@ requires:
   - security-scan                                ← Layer 3
 ```
 
+## Debugging with `prs inspect`
+
+Use `prs inspect` to see how layers compose a skill:
+
+```bash
+# Property-level view (default) — shows each property with source
+prs inspect code-review
+
+# Layer-level view — groups changes by source file
+prs inspect code-review --layers
+
+# JSON output for tooling
+prs inspect code-review --format json
+```
+
+The property view shows each property's current value, merge strategy, and which file contributed it. The layer view shows what each `@extend` changed, using symbols: `+` added, `~` replaced, `-` negated.
+
 ## Validation Rules
 
 | Rule  | Name                   | Description                                                             |
