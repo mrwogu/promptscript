@@ -247,3 +247,17 @@ export interface SkillsUpdateOptions {
   /** Preview changes without writing */
   dryRun?: boolean;
 }
+
+/**
+ * Options for the inspect command.
+ */
+export interface InspectOptions {
+  /** Show layer-level view instead of property-level */
+  layers?: boolean;
+  /** Output format */
+  format?: 'text' | 'json';
+  /** Path to custom config file */
+  config?: string;
+  /** Working directory (project root) */
+  cwd?: string;
+}

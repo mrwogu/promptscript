@@ -1179,10 +1179,10 @@ describe('skill-aware @extend semantics', () => {
 
         expect(trace).toBeDefined();
         expect(trace).toHaveLength(1);
-        expect(trace[0]!.property).toBe('description');
-        expect(trace[0]!.strategy).toBe('replace');
-        expect(trace[0]!.action).toBe('replaced');
-        expect(trace[0]!.source).toBeDefined();
+        expect(trace[0]!['property']).toBe('description');
+        expect(trace[0]!['strategy']).toBe('replace');
+        expect(trace[0]!['action']).toBe('replaced');
+        expect(trace[0]!['source']).toBeDefined();
       });
 
       it('should record trace entry when appending references via @extend', () => {
@@ -1215,9 +1215,9 @@ describe('skill-aware @extend semantics', () => {
 
         expect(trace).toBeDefined();
         expect(trace).toHaveLength(1);
-        expect(trace[0]!.property).toBe('references');
-        expect(trace[0]!.strategy).toBe('append');
-        expect(trace[0]!.action).toBe('appended');
+        expect(trace[0]!['property']).toBe('references');
+        expect(trace[0]!['strategy']).toBe('append');
+        expect(trace[0]!['action']).toBe('appended');
       });
 
       it('should record trace entry for merge-strategy properties', () => {
@@ -1250,9 +1250,9 @@ describe('skill-aware @extend semantics', () => {
 
         expect(trace).toBeDefined();
         expect(trace).toHaveLength(1);
-        expect(trace[0]!.property).toBe('params');
-        expect(trace[0]!.strategy).toBe('merge');
-        expect(trace[0]!.action).toBe('merged');
+        expect(trace[0]!['property']).toBe('params');
+        expect(trace[0]!['strategy']).toBe('merge');
+        expect(trace[0]!['action']).toBe('merged');
       });
 
       it('should record source file from ext.loc.file', () => {
@@ -1287,7 +1287,7 @@ describe('skill-aware @extend semantics', () => {
         const expert = skills.properties['expert'] as Record<string, unknown>;
         const trace = expert['__layerTrace'] as Array<Record<string, string>>;
 
-        expect(trace[0]!.source).toBe('/project/overlay.prs');
+        expect(trace[0]!['source']).toBe('/project/overlay.prs');
       });
 
       it('should accumulate trace entries across multiple extends', () => {
@@ -1325,8 +1325,8 @@ describe('skill-aware @extend semantics', () => {
         const trace = expert['__layerTrace'] as Array<Record<string, string>>;
 
         expect(trace).toHaveLength(2);
-        expect(trace[0]!.property).toBe('description');
-        expect(trace[1]!.property).toBe('references');
+        expect(trace[0]!['property']).toBe('description');
+        expect(trace[1]!['property']).toBe('references');
       });
 
       it('should not have __layerTrace when no extends are applied', () => {
