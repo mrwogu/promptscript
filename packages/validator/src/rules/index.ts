@@ -28,6 +28,7 @@ import { validSkillReferences } from './valid-skill-references.js';
 import { safeReferenceContent } from './safe-reference-content.js';
 import { validSkillComposition } from './valid-skill-composition.js';
 import { validAppendNegation } from './valid-append-negation.js';
+import { validSealedProperty } from './valid-sealed-property.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -87,6 +88,7 @@ export { validSkillReferences } from './valid-skill-references.js';
 export { safeReferenceContent } from './safe-reference-content.js';
 export { validSkillComposition } from './valid-skill-composition.js';
 export { validAppendNegation } from './valid-append-negation.js';
+export { validSealedProperty } from './valid-sealed-property.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -137,6 +139,8 @@ export const allRules: ValidationRule[] = [
   validSkillComposition,
   // Valid append negation (PS028)
   validAppendNegation,
+  // Valid sealed property (PS029)
+  validSealedProperty,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
