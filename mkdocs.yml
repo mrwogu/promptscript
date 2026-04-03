@@ -221,6 +221,7 @@ nav:
       - Using npx skills: guides/npx-skills.md
       - Building Skills: guides/building-skills.md
       - Skill Composition: guides/skill-composition.md
+      - Skill Overlays: guides/skill-overlays.md
       - Local Skills: guides/local-skills.md
       - Skill Contracts: guides/skill-contracts.md
       - Shared Resources: guides/shared-resources.md
