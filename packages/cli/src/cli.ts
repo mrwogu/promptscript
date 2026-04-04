@@ -19,6 +19,7 @@ import { lockCommand } from './commands/lock.js';
 import { updateCommand } from './commands/update.js';
 import { vendorSyncCommand, vendorCheckCommand } from './commands/vendor.js';
 import { resolveCommand } from './commands/resolve-cmd.js';
+import { inspectCommand } from './commands/inspect.js';
 import { setContext, LogLevel, ConsoleOutput } from './output/console.js';
 import { checkForUpdates, printUpdateNotification } from './utils/version-check.js';
 import { importCommand } from './commands/import.js';
@@ -119,6 +120,15 @@ program
   .option('--format <format>', 'Output format (text, json)', 'text')
   .option('--fix', 'Auto-fix syntax version issues')
   .action(validateCommand);
+
+program
+  .command('inspect <skill-name>')
+  .description('Inspect skill composition layers and property provenance')
+  .option('--layers', 'Show layer-level breakdown')
+  .option('--format <format>', 'Output format (text, json)', 'text')
+  .option('-c, --config <path>', 'Path to custom config file')
+  .option('--cwd <dir>', 'Working directory (project root)')
+  .action((skillName, opts) => inspectCommand(skillName, opts));
 
 program
   .command('pull')

@@ -32,6 +32,33 @@ Import a base skill and extend it:
 }
 ```
 
+## Resolution Order
+
+When multiple `@use` and `@extend` declarations target the same skill, priority is determined by **declaration order** in the `.prs` file:
+
+- `@use` declarations are processed top-to-bottom — later imports override earlier ones for block name conflicts
+- `@extend` blocks are applied sequentially — later extends override earlier ones for replace-strategy properties, and append to earlier ones for append-strategy properties
+
+```promptscript
+@use @bu-retail/skills as retail
+@use @bu-travel/skills as travel
+
+# Applied in order: retail first, travel second
+@extend retail.skills.code-review {
+  description: "Retail review"
+  references: ["retail-patterns.md"]
+}
+
+@extend travel.skills.code-review {
+  description: "Travel review"         # wins (later replace)
+  references: ["travel-patterns.md"]   # appended after retail
+}
+```
+
+Result: `description` = `"Travel review"` (last replace wins), `references` includes both `retail-patterns.md` and `travel-patterns.md` (append accumulates).
+
+**Rule of thumb:** put the highest-priority registry's `@extend` last in the file.
+
 ## Merge Strategies
 
 When `@extend` targets a skill, each property follows a specific merge strategy:
@@ -244,6 +271,23 @@ requires:
   - lint-check                                   ← Layer 1
   - security-scan                                ← Layer 3
 ```
+
+## Debugging with `prs inspect`
+
+Use `prs inspect` to see how layers compose a skill:
+
+```bash
+# Property-level view (default) — shows each property with source
+prs inspect code-review
+
+# Layer-level view — groups changes by source file
+prs inspect code-review --layers
+
+# JSON output for tooling
+prs inspect code-review --format json
+```
+
+The property view shows each property's current value, merge strategy, and which file contributed it. The layer view shows what each `@extend` changed, using symbols: `+` added, `~` replaced, `-` negated.
 
 ## Validation Rules
 

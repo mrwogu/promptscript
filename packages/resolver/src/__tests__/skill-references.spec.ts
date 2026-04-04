@@ -1148,6 +1148,246 @@ describe('skill-aware @extend semantics', () => {
       expect(() => applyExtends(ast)).toThrow("Cannot override sealed property 'content'");
     });
 
+    describe('__layerTrace recording', () => {
+      it('should record trace entry when replacing a property via @extend', () => {
+        const ast = createProgram({
+          blocks: [
+            createBlock(
+              'skills',
+              createObjectContent({
+                expert: createObjectContent({
+                  description: 'Base expert',
+                  content: createTextContent('Base instructions'),
+                }) as unknown as Value,
+              })
+            ),
+          ],
+          extends: [
+            createExtendBlock(
+              'skills.expert',
+              createObjectContent({
+                description: 'Overridden description',
+              })
+            ),
+          ],
+        });
+
+        const result = applyExtends(ast);
+        const skills = result.blocks[0]?.content as ObjectContent;
+        const expert = skills.properties['expert'] as Record<string, unknown>;
+        const trace = expert['__layerTrace'] as Array<Record<string, string>>;
+
+        expect(trace).toBeDefined();
+        expect(trace).toHaveLength(1);
+        expect(trace[0]!['property']).toBe('description');
+        expect(trace[0]!['strategy']).toBe('replace');
+        expect(trace[0]!['action']).toBe('replaced');
+        expect(trace[0]!['source']).toBeDefined();
+      });
+
+      it('should record trace entry when appending references via @extend', () => {
+        const ast = createProgram({
+          blocks: [
+            createBlock(
+              'skills',
+              createObjectContent({
+                expert: createObjectContent({
+                  description: 'Base expert',
+                  references: createArrayContent(['base.md']) as unknown as Value,
+                }) as unknown as Value,
+              })
+            ),
+          ],
+          extends: [
+            createExtendBlock(
+              'skills.expert',
+              createObjectContent({
+                references: createArrayContent(['overlay.md']) as unknown as Value,
+              })
+            ),
+          ],
+        });
+
+        const result = applyExtends(ast);
+        const skills = result.blocks[0]?.content as ObjectContent;
+        const expert = skills.properties['expert'] as Record<string, unknown>;
+        const trace = expert['__layerTrace'] as Array<Record<string, string>>;
+
+        expect(trace).toBeDefined();
+        expect(trace).toHaveLength(1);
+        expect(trace[0]!['property']).toBe('references');
+        expect(trace[0]!['strategy']).toBe('append');
+        expect(trace[0]!['action']).toBe('appended');
+      });
+
+      it('should record trace entry for merge-strategy properties', () => {
+        const ast = createProgram({
+          blocks: [
+            createBlock(
+              'skills',
+              createObjectContent({
+                expert: createObjectContent({
+                  description: 'Base',
+                  params: createObjectContent({ name: 'string' }) as unknown as Value,
+                }) as unknown as Value,
+              })
+            ),
+          ],
+          extends: [
+            createExtendBlock(
+              'skills.expert',
+              createObjectContent({
+                params: createObjectContent({ age: 'number' }) as unknown as Value,
+              })
+            ),
+          ],
+        });
+
+        const result = applyExtends(ast);
+        const skills = result.blocks[0]?.content as ObjectContent;
+        const expert = skills.properties['expert'] as Record<string, unknown>;
+        const trace = expert['__layerTrace'] as Array<Record<string, string>>;
+
+        expect(trace).toBeDefined();
+        expect(trace).toHaveLength(1);
+        expect(trace[0]!['property']).toBe('params');
+        expect(trace[0]!['strategy']).toBe('merge');
+        expect(trace[0]!['action']).toBe('merged');
+      });
+
+      it('should record source file from ext.loc.file', () => {
+        const loc = { file: '/project/overlay.prs', line: 1, column: 1 };
+        const ast = createProgram({
+          blocks: [
+            createBlock(
+              'skills',
+              createObjectContent({
+                expert: createObjectContent({
+                  description: 'Base',
+                }) as unknown as Value,
+              })
+            ),
+          ],
+          extends: [
+            {
+              type: 'ExtendBlock' as const,
+              targetPath: 'skills.expert',
+              content: {
+                type: 'ObjectContent' as const,
+                properties: { description: 'New' },
+                loc,
+              },
+              loc,
+            },
+          ],
+        });
+
+        const result = applyExtends(ast);
+        const skills = result.blocks[0]?.content as ObjectContent;
+        const expert = skills.properties['expert'] as Record<string, unknown>;
+        const trace = expert['__layerTrace'] as Array<Record<string, string>>;
+
+        expect(trace[0]!['source']).toBe('/project/overlay.prs');
+      });
+
+      it('should accumulate trace entries across multiple extends', () => {
+        const ast = createProgram({
+          blocks: [
+            createBlock(
+              'skills',
+              createObjectContent({
+                expert: createObjectContent({
+                  description: 'Base',
+                  references: createArrayContent(['base.md']) as unknown as Value,
+                }) as unknown as Value,
+              })
+            ),
+          ],
+          extends: [
+            createExtendBlock(
+              'skills.expert',
+              createObjectContent({
+                description: 'Layer 2',
+              })
+            ),
+            createExtendBlock(
+              'skills.expert',
+              createObjectContent({
+                references: createArrayContent(['layer3.md']) as unknown as Value,
+              })
+            ),
+          ],
+        });
+
+        const result = applyExtends(ast);
+        const skills = result.blocks[0]?.content as ObjectContent;
+        const expert = skills.properties['expert'] as Record<string, unknown>;
+        const trace = expert['__layerTrace'] as Array<Record<string, string>>;
+
+        expect(trace).toHaveLength(2);
+        expect(trace[0]!['property']).toBe('description');
+        expect(trace[1]!['property']).toBe('references');
+      });
+
+      it('should not have __layerTrace when no extends are applied', () => {
+        const ast = createProgram({
+          blocks: [
+            createBlock(
+              'skills',
+              createObjectContent({
+                expert: createObjectContent({
+                  description: 'Base only',
+                }) as unknown as Value,
+              })
+            ),
+          ],
+        });
+
+        const result = applyExtends(ast);
+        const skills = result.blocks[0]?.content as ObjectContent;
+        const expert = skills.properties['expert'] as Record<string, unknown>;
+
+        expect(expert['__layerTrace']).toBeUndefined();
+      });
+
+      it('should prevent __layerTrace from being overwritten by @extend', () => {
+        const ast = createProgram({
+          blocks: [
+            createBlock(
+              'skills',
+              createObjectContent({
+                expert: createObjectContent({
+                  description: 'Base',
+                }) as unknown as Value,
+              })
+            ),
+          ],
+          extends: [
+            createExtendBlock(
+              'skills.expert',
+              createObjectContent({
+                description: 'First extend',
+              })
+            ),
+            createExtendBlock(
+              'skills.expert',
+              createObjectContent({
+                __layerTrace: 'attempt to overwrite' as unknown as Value,
+              })
+            ),
+          ],
+        });
+
+        const result = applyExtends(ast);
+        const skills = result.blocks[0]?.content as ObjectContent;
+        const expert = skills.properties['expert'] as Record<string, unknown>;
+        const trace = expert['__layerTrace'] as Array<Record<string, string>>;
+
+        expect(Array.isArray(trace)).toBe(true);
+        expect(trace).toHaveLength(1);
+      });
+    });
+
     it('should silently ignore sealed added by @extend (SKILL_PRESERVE_PROPERTIES)', () => {
       const ast = createProgram({
         blocks: [
