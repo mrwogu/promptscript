@@ -79,6 +79,8 @@ export interface CatalogEntry {
   detectionHints?: DetectionHints;
   /** Source attribution for migrated content */
   source?: SourceAttribution;
+  /** Registry path of the base skill this entry extends (for overlay detection) */
+  extends?: string;
 }
 
 /**
