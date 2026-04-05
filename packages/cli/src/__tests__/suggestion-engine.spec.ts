@@ -6,9 +6,10 @@ import {
   formatSuggestionResult,
   createSuggestionChoices,
   parseSelectedChoices,
+  collapseOverlays,
 } from '../utils/suggestion-engine.js';
 import { type CliServices } from '../services.js';
-import type { RegistryManifest, ProjectContext } from '@promptscript/core';
+import type { RegistryManifest, ProjectContext, SuggestionResult } from '@promptscript/core';
 
 describe('utils/suggestion-engine', () => {
   let mockServices: CliServices;
@@ -672,5 +673,295 @@ describe('utils/suggestion-engine', () => {
       expect(commitCount).toBe(1);
       expect(result.skills).toContain('@skills/review');
     });
+  });
+});
+
+describe('collapseOverlays', () => {
+  const sampleManifest: RegistryManifest = {
+    version: '1',
+    meta: { name: 'Test Registry', description: 'Test description', lastUpdated: '2026-01-28' },
+    namespaces: { '@core': { description: 'Core', priority: 100 } },
+    catalog: [],
+    suggestionRules: [],
+  };
+
+  it('should collapse overlay when manifest entry has extends', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@clm5core/skills/expert',
+          path: 'a.prs',
+          name: 'Base',
+          description: 'Base expert',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+        },
+        {
+          id: '@bu/skills/expert',
+          path: 'b.prs',
+          name: 'BU',
+          description: 'BU overlay',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+          extends: '@clm5core/skills/expert',
+        },
+      ],
+    };
+
+    const result = collapseOverlays(['@clm5core/skills/expert', '@bu/skills/expert'], manifest);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.path).toBe('@bu/skills/expert');
+    expect(result[0]!.extends).toBe('@clm5core/skills/expert');
+  });
+
+  it('should not collapse unrelated skills', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@core/security',
+          path: 'a.prs',
+          name: 'Sec',
+          description: 'Sec',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+        },
+        {
+          id: '@core/testing',
+          path: 'b.prs',
+          name: 'Test',
+          description: 'Test',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+        },
+      ],
+    };
+
+    const result = collapseOverlays(['@core/security', '@core/testing'], manifest);
+    expect(result).toHaveLength(2);
+    expect(result[0]!.extends).toBeUndefined();
+  });
+
+  it('should not collapse when base is not in suggestions list', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@bu/skills/expert',
+          path: 'a.prs',
+          name: 'BU',
+          description: 'Overlay',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+          extends: '@clm5core/skills/expert',
+        },
+      ],
+    };
+
+    const result = collapseOverlays(['@bu/skills/expert'], manifest);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.extends).toBe('@clm5core/skills/expert');
+  });
+
+  it('should guard against self-extends', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@core/expert',
+          path: 'a.prs',
+          name: 'Expert',
+          description: 'Self',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+          extends: '@core/expert',
+        },
+      ],
+    };
+
+    const result = collapseOverlays(['@core/expert'], manifest);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.extends).toBeUndefined();
+  });
+
+  it('should handle multiple overlays on same base', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@clm5core/skills/expert',
+          path: 'a.prs',
+          name: 'Base',
+          description: 'Base',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+        },
+        {
+          id: '@bu-retail/skills/expert',
+          path: 'b.prs',
+          name: 'Retail',
+          description: 'Retail',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+          extends: '@clm5core/skills/expert',
+        },
+        {
+          id: '@bu-travel/skills/expert',
+          path: 'c.prs',
+          name: 'Travel',
+          description: 'Travel',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+          extends: '@clm5core/skills/expert',
+        },
+      ],
+    };
+
+    const result = collapseOverlays(
+      ['@clm5core/skills/expert', '@bu-retail/skills/expert', '@bu-travel/skills/expert'],
+      manifest
+    );
+    expect(result).toHaveLength(2);
+    expect(result.every((s) => s.extends === '@clm5core/skills/expert')).toBe(true);
+    expect(result.find((s) => s.path === '@clm5core/skills/expert')).toBeUndefined();
+  });
+
+  it('should include description from catalog entry', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@bu/skills/expert',
+          path: 'a.prs',
+          name: 'BU',
+          description: 'Expert with BU context',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+          extends: '@other/base',
+        },
+      ],
+    };
+
+    const result = collapseOverlays(['@bu/skills/expert'], manifest);
+    expect(result[0]!.description).toBe('Expert with BU context');
+  });
+
+  it('should detect extends via .prs file scan fallback', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@clm5core/skills/expert',
+          path: 'a.prs',
+          name: 'Base',
+          description: 'Base',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+        },
+        {
+          id: '@bu/skills/expert',
+          path: 'b.prs',
+          name: 'BU',
+          description: 'BU',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+        },
+      ],
+    };
+
+    const prsContent = [
+      '@meta { id: "@bu/skills/expert" syntax: "1.1.0" }',
+      '@use @clm5core/skills/expert as base',
+      '@extend base.skills.expert {',
+      '  description: "BU expert overlay"',
+      '}',
+    ].join('\n');
+
+    const result = collapseOverlays(
+      ['@clm5core/skills/expert', '@bu/skills/expert'],
+      manifest,
+      (skillPath) => {
+        if (skillPath === '@bu/skills/expert') return prsContent;
+        return null;
+      }
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.path).toBe('@bu/skills/expert');
+    expect(result[0]!.extends).toBe('@clm5core/skills/expert');
+  });
+
+  it('should silently skip when .prs file is not found', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@bu/skills/expert',
+          path: 'a.prs',
+          name: 'BU',
+          description: 'BU',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+        },
+      ],
+    };
+
+    const result = collapseOverlays(['@bu/skills/expert'], manifest, () => null);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.extends).toBeUndefined();
+  });
+});
+
+describe('createSuggestionChoices with overlay awareness', () => {
+  const sampleManifest: RegistryManifest = {
+    version: '1',
+    meta: { name: 'Test Registry', description: 'Test description', lastUpdated: '2026-01-28' },
+    namespaces: { '@core': { description: 'Core', priority: 100 } },
+    catalog: [],
+    suggestionRules: [],
+  };
+
+  it('should show extends annotation in skill choice name', () => {
+    const manifest: RegistryManifest = {
+      ...sampleManifest,
+      catalog: [
+        {
+          id: '@bu/skills/expert',
+          path: 'a.prs',
+          name: 'BU',
+          description: 'BU overlay',
+          tags: [],
+          targets: ['claude'],
+          dependencies: [],
+          extends: '@clm5core/skills/expert',
+        },
+      ],
+    };
+
+    const result: SuggestionResult = {
+      inherit: undefined,
+      use: [],
+      skills: ['@bu/skills/expert'],
+      reasoning: [],
+    };
+    const choices = createSuggestionChoices(manifest, result);
+    const skillChoice = choices.find((c) => c.value === 'skill:@bu/skills/expert');
+
+    expect(skillChoice).toBeDefined();
+    expect(skillChoice!.name).toContain('extends @clm5core/skills/expert');
   });
 });

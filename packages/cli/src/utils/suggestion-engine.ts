@@ -353,6 +353,83 @@ export function formatSuggestionResult(result: SuggestionResult): string[] {
 }
 
 /**
+ * A skill suggestion with optional overlay annotation.
+ */
+export interface CollapsedSkillSuggestion {
+  path: string;
+  extends?: string;
+  description?: string;
+}
+
+/**
+ * Scan .prs file content to detect @extend targets via alias resolution.
+ */
+function detectExtendsFromPrs(
+  prsContent: string,
+  suggestedSkills: Set<string>
+): string | undefined {
+  const aliasMap = new Map<string, string>();
+  for (const match of prsContent.matchAll(/@use\s+(\S+)\s+as\s+(\S+)/g)) {
+    aliasMap.set(match[2]!, match[1]!);
+  }
+
+  for (const match of prsContent.matchAll(/@extend\s+(\S+)\.skills\.(\S+)/g)) {
+    const alias = match[1]!;
+    const usePath = aliasMap.get(alias);
+    if (usePath && suggestedSkills.has(usePath)) {
+      return usePath;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Collapse overlay relationships between suggested skills.
+ */
+export function collapseOverlays(
+  skills: string[],
+  manifest: RegistryManifest,
+  readPrsFile?: (skillPath: string) => string | null
+): CollapsedSkillSuggestion[] {
+  const skillSet = new Set(skills);
+  const basesToRemove = new Set<string>();
+
+  const entries: CollapsedSkillSuggestion[] = skills.map((skillPath) => {
+    const catalogEntry = manifest.catalog.find((e) => e.id === skillPath);
+    const description = catalogEntry?.description;
+
+    let extendsTarget = catalogEntry?.extends;
+
+    if (extendsTarget === skillPath) {
+      extendsTarget = undefined;
+    }
+
+    if (!extendsTarget && readPrsFile) {
+      try {
+        const content = readPrsFile(skillPath);
+        if (content) {
+          extendsTarget = detectExtendsFromPrs(content, skillSet);
+        }
+      } catch {
+        // Silently skip on read failure
+      }
+    }
+
+    if (extendsTarget) {
+      if (skillSet.has(extendsTarget)) {
+        basesToRemove.add(extendsTarget);
+      }
+      return { path: skillPath, extends: extendsTarget, description };
+    }
+
+    return { path: skillPath, description };
+  });
+
+  return entries.filter((e) => !basesToRemove.has(e.path));
+}
+
+/**
  * Create interactive choices from suggestions.
  */
 export function createSuggestionChoices(
@@ -384,12 +461,14 @@ export function createSuggestionChoices(
     });
   }
 
-  // Add all skills as choices
-  for (const skill of result.skills) {
-    const entry = manifest.catalog.find((e) => e.id === skill);
+  // Add all skills as choices (with overlay awareness)
+  const collapsed = collapseOverlays(result.skills, manifest);
+  for (const skill of collapsed) {
+    const entry = manifest.catalog.find((e) => e.id === skill.path);
+    const extendsLabel = skill.extends ? ` (extends ${skill.extends})` : '';
     choices.push({
-      name: `${skill} (skill)`,
-      value: `skill:${skill}`,
+      name: `${skill.path}${extendsLabel} (skill)`,
+      value: `skill:${skill.path}`,
       checked: true,
       description: entry?.description,
     });
