@@ -78,6 +78,7 @@ interface ResolvedConfig {
   team?: string;
   inherit?: string;
   use?: string[];
+  skills?: string[];
   registry?: RegistryConfig;
   targets: AIToolTarget[];
   /** Path to detected Prettier config, or null if not found */
@@ -527,6 +528,7 @@ async function resolveConfig(
     }
 
     // Apply manifest suggestions if available
+    let skills: string[] | undefined;
     if (activeManifest) {
       const context = await buildProjectContext(projectInfo, services);
       const suggestions = calculateSuggestions(activeManifest, context);
@@ -536,6 +538,9 @@ async function resolveConfig(
       if (suggestions.use.length > 0) {
         use = suggestions.use;
       }
+      if (suggestions.skills.length > 0) {
+        skills = suggestions.skills;
+      }
     }
 
     return {
@@ -543,6 +548,7 @@ async function resolveConfig(
       team: options.team ?? userConfig.defaults?.team,
       inherit,
       use,
+      skills,
       registry,
       targets:
         (options.targets as AIToolTarget[]) ??
@@ -681,13 +687,14 @@ async function runInteractivePrompts(
   // 3. Manifest-based suggestions (if available)
   let inherit: string | undefined = options.inherit;
   let use: string[] | undefined;
+  let skills: string[] | undefined;
 
   if (activeManifest) {
     const context = await buildProjectContext(projectInfo, services);
     const suggestions = calculateSuggestions(activeManifest, context);
 
     // Show suggestions
-    if (suggestions.inherit || suggestions.use.length > 0) {
+    if (suggestions.inherit || suggestions.use.length > 0 || suggestions.skills.length > 0) {
       ConsoleOutput.newline();
       console.log('📦 Suggested configurations based on your project:');
       const suggestionLines = formatSuggestionResult(suggestions);
@@ -712,6 +719,7 @@ async function runInteractivePrompts(
         const parsed = parseSelectedChoices(selected);
         inherit = parsed.inherit;
         use = parsed.use.length > 0 ? parsed.use : undefined;
+        skills = parsed.skills.length > 0 ? parsed.skills : undefined;
       }
     }
   }
@@ -771,6 +779,7 @@ async function runInteractivePrompts(
     team,
     inherit,
     use,
+    skills,
     registry,
     targets,
     prettierConfigPath,
@@ -906,10 +915,17 @@ function generateConfig(config: ResolvedConfig): string {
 function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): string {
   const inheritLine = config.inherit ? `@inherit ${config.inherit}` : '# @inherit @stacks/react';
 
-  // Generate @use directives
-  let useLines = '';
+  // Generate @use directives (imports + skills)
+  const useEntries: string[] = [];
   if (config.use && config.use.length > 0) {
-    useLines = config.use.map((u) => `@use ${u}`).join('\n');
+    useEntries.push(...config.use.map((u) => `@use ${u}`));
+  }
+  if (config.skills && config.skills.length > 0) {
+    useEntries.push(...config.skills.map((s) => `@use ${s}`));
+  }
+  let useLines = '';
+  if (useEntries.length > 0) {
+    useLines = useEntries.join('\n');
   } else {
     useLines = '# @use @fragments/testing\n# @use @fragments/typescript';
   }
