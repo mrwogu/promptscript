@@ -97,7 +97,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [ ] **Semantic base/overlay validation** — Warn when an overlay redefines a property that is semantically incompatible with its base
 - [x] **Negation syntax** — Allow overlays to remove individual `requires` or `references` entries via `!` prefix in `@extend` blocks
 - [x] **`sealed` modifier** — Mark a skill property as non-overridable by downstream overlays via `@extend`
-- [ ] **Overlay-aware suggestions** — LSP / validator hints when extending a skill
+- [x] **Overlay-aware suggestions** — `prs init` detects @extend relationships between suggested skills and collapses overlays
 
 ### 2. Skill Overlay / Extends — Phase 3
 
