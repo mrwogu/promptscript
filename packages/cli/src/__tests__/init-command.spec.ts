@@ -343,6 +343,45 @@ describe('commands/init', () => {
       expect(process.exitCode).toBeUndefined();
     });
 
+    it('should include suggested skills as @use directives in project.prs', async () => {
+      const originalEnv = process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+      process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = 'https://github.com/my-org/my-registry.git';
+
+      mockLoadManifestFromUrl.mockResolvedValue({
+        manifest: {
+          version: '1',
+          meta: { name: 'Test', description: 'Test', lastUpdated: '2026-01-01' },
+          namespaces: { '@core': { description: 'Core', priority: 100 } },
+          catalog: [],
+          suggestionRules: [
+            {
+              condition: { always: true },
+              suggest: { skills: ['@skills/code-review', '@skills/deploy'] },
+            },
+          ],
+        },
+      });
+
+      try {
+        await initCommand({ yes: true }, mockServices);
+
+        const prsCall = mockFs.writeFile.mock.calls.find(
+          (call: unknown[]) =>
+            typeof call[0] === 'string' && (call[0] as string).includes('project.prs')
+        );
+        expect(prsCall).toBeDefined();
+        const prsContent = prsCall![1] as string;
+        expect(prsContent).toContain('@use @skills/code-review');
+        expect(prsContent).toContain('@use @skills/deploy');
+      } finally {
+        if (originalEnv === undefined) {
+          delete process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
+        } else {
+          process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = originalEnv;
+        }
+      }
+    });
+
     it('should skip registry and suggestions in --yes mode without local manifest', async () => {
       await initCommand({ yes: true }, mockServices);
 
