@@ -289,6 +289,140 @@ prs inspect code-review --format json
 
 The property view shows each property's current value, merge strategy, and which file contributed it. The layer view shows what each `@extend` changed, using symbols: `+` added, `~` replaced, `-` negated.
 
+## Governance: Managing Multi-Layer Skills
+
+When skills span multiple registry layers, structural changes in a base skill can break overlays
+that depend on its content. PromptScript provides tooling to detect and prevent problems, but
+organizational process is equally important.
+
+### Preventing Breakage
+
+**Seal critical properties.** If a base skill's `content` should never be replaced by overlays,
+seal it:
+
+```promptscript
+@skills {
+  code-review: {
+    content: """
+      Critical review workflow — protected from overrides.
+    """
+    sealed: ["content"]
+  }
+}
+```
+
+This ensures no `@extend` can silently replace the core instructions.
+
+**Use references instead of inline content.** Rather than putting all context in `content`,
+move supplementary information to `references` files. Overlays can then append, negate, or
+replace individual reference files without touching the sealed content:
+
+```promptscript
+@skills {
+  code-review: {
+    content: """
+      Core review workflow (sealed).
+    """
+    references: ["references/patterns.md", "references/standards.md"]
+    sealed: ["content"]
+  }
+}
+```
+
+### Detecting Problems After Base Updates
+
+**Use `prs inspect` after updating a base registry.** When a base skill changes, run inspect
+on each overlay skill to verify the layer composition still makes sense:
+
+```bash
+# After pulling a registry update
+prs pull
+
+# Check how the overlay composes with the updated base
+prs inspect code-review --layers
+```
+
+Look for:
+
+- Properties that were previously from the base but are now missing
+- Reference files that may no longer match the base skill's context
+- Unexpected changes in the layer count
+
+**Use `prs diff` to see compilation changes.** After pulling updates, compare the compiled
+output against the previous version:
+
+```bash
+prs diff --target claude
+```
+
+This shows exactly what changed in the final output, making it easy to spot when a base
+update broke an overlay.
+
+### Organizational Best Practices
+
+**Version your registry skills.** Use a `version` field in skill descriptions to communicate
+breaking changes:
+
+```promptscript
+@skills {
+  code-review: {
+    description: "Code review v2.0 — restructured workflow"
+    content: """..."""
+  }
+}
+```
+
+When you make breaking changes (removing sections, restructuring content, changing property
+types), bump the version in the description and communicate via your team's changelog.
+
+**Maintain a registry changelog.** Keep a `CHANGELOG.md` at the root of each registry
+documenting skill changes:
+
+```markdown
+# @company Registry Changelog
+
+## 2026-04-01 — v2.0.0
+
+### Breaking
+
+- code-review: removed "## Legacy Patterns" section
+- code-review: restructured workflow into 3 phases (was 5)
+
+### Added
+
+- code-review: sealed content property
+- deploy: new skill for deployment workflows
+```
+
+**Coordinate between layers.** When Layer 2 maintains a skill that Layer 3 extends:
+
+1. Layer 2 communicates planned breaking changes before deploying
+2. Layer 3 runs `prs inspect --layers` to verify compatibility
+3. Both layers use `prs diff` in CI to detect unexpected changes
+
+**Test overlays in CI.** Add a CI step that compiles the overlay project and verifies
+the output is valid:
+
+```yaml
+# .github/workflows/validate-overlay.yml
+- run: prs validate --strict
+- run: prs compile --dry-run
+- run: prs inspect code-review --format json | jq '.sealed'
+```
+
+### When Things Break
+
+If an overlay becomes incompatible after a base update:
+
+1. **Run `prs inspect skill-name --layers`** to see the current layer composition
+2. **Check sealed properties** — if the base added `sealed` to a property your overlay
+   was overriding, you'll get a compilation error with a clear message
+3. **Check references** — use negation (`!path`) to remove references that no longer
+   apply, and add new ones that match the updated base
+4. **Review the base changelog** — look for breaking changes that affect your overlay
+5. **Consider using `sealed`** in your overlay to protect properties from further changes
+   by downstream layers
+
 ## Validation Rules
 
 | Rule  | Name                   | Description                                                             |
