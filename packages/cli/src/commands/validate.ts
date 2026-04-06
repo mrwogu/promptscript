@@ -239,6 +239,7 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
         ...config.validation,
         policies: options.skipPolicies ? undefined : config.policies,
         skipPolicies: options.skipPolicies,
+        ignoreHashes: options.ignoreHashes,
       },
       formatters: [], // No formatters needed for validation only
     });
