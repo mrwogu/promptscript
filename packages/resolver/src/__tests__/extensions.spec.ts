@@ -591,6 +591,139 @@ describe('overlay consistency warnings', () => {
     return logger satisfies Logger;
   };
 
+  describe('stale skill target', () => {
+    it('should warn when @extend creates new skill in ObjectContent @skills block', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'existing-skill': { description: 'exists' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.nonexistent-skill',
+            createObjectContent({
+              description: 'overlay for removed skill',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent-skill"'));
+    });
+
+    it('should warn when @extend creates new skill in MixedContent @skills block', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createMixedContent(createTextContent('skill instructions'), {
+              'existing-skill': { description: 'exists' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.nonexistent-skill',
+            createObjectContent({
+              description: 'overlay for removed skill',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent-skill"'));
+    });
+
+    it('should not warn when extending existing skill', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                type: 'ObjectContent',
+                properties: { description: 'base review' },
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              description: 'extended review',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should not warn when creating key outside @skills context', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'standards',
+            createObjectContent({
+              existing: 'value' as unknown as Value,
+            })
+          ),
+        ],
+        extends: [createExtendBlock('standards.new-key', createTextContent('new content'))],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should detect stale skill target through aliased import', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(`${IMPORT_MARKER_PREFIX}base`, createObjectContent({})),
+          createBlock(
+            `${IMPORT_MARKER_PREFIX}base.skills`,
+            createObjectContent({
+              'existing-skill': { description: 'exists' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'base.skills.removed-skill',
+            createObjectContent({
+              description: 'overlay for removed skill',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"removed-skill"'));
+    });
+  });
+
   describe('orphaned extend', () => {
     it('should warn when @extend target block does not exist', () => {
       const logger = createMockLogger();

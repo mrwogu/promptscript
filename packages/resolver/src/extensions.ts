@@ -223,7 +223,7 @@ function mergeAtPath(
   path: string[],
   extContent: BlockContent,
   skillContext: boolean,
-  _logger?: Logger
+  logger?: Logger
 ): BlockContent {
   if (path.length === 0) {
     return mergeContent(content, extContent);
@@ -241,6 +241,12 @@ function mergeAtPath(
 
     if (rest.length === 0) {
       // We're at the target - merge or set
+      if (skillContext && existing === undefined) {
+        logger?.warn(
+          `@extend creates new skill "${currentKey}" — base does not define it. ` +
+            `If this was an overlay targeting an existing skill, verify the base still defines "${currentKey}".`
+        );
+      }
       return {
         ...content,
         properties: {
@@ -275,6 +281,12 @@ function mergeAtPath(
     const existing = content.properties[currentKey];
 
     if (rest.length === 0) {
+      if (skillContext && existing === undefined) {
+        logger?.warn(
+          `@extend creates new skill "${currentKey}" — base does not define it. ` +
+            `If this was an overlay targeting an existing skill, verify the base still defines "${currentKey}".`
+        );
+      }
       return {
         ...content,
         properties: {
