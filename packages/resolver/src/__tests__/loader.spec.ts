@@ -184,6 +184,66 @@ describe('FileLoader', () => {
 
       expect(() => loader.resolveRef(ref, '/local/subdir/file.prs')).toThrow(/path traversal/i);
     });
+
+    it('should allow relative @use from a subdirectory of localPath', () => {
+      // Regression: @use ./fragments/workspace from .promptscript/project.prs
+      // was incorrectly flagged as path traversal on Windows because the check
+      // used hardcoded '/' instead of platform-aware path comparison.
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/project',
+      });
+
+      const ref = {
+        type: 'PathReference' as const,
+        raw: './fragments/workspace',
+        segments: ['fragments', 'workspace'],
+        isRelative: true,
+        loc: { file: '<test>', line: 1, column: 1 },
+      };
+
+      // Entry file is in a subdirectory; relative path stays inside project root
+      expect(loader.resolveRef(ref, '/project/.promptscript/project.prs')).toBe(
+        '/project/.promptscript/fragments/workspace.prs'
+      );
+    });
+
+    it('should allow ../sibling from a deeply nested subdirectory', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/project',
+      });
+
+      const ref = {
+        type: 'PathReference' as const,
+        raw: '../shared/base',
+        segments: ['..', 'shared', 'base'],
+        isRelative: true,
+        loc: { file: '<test>', line: 1, column: 1 },
+      };
+
+      // Goes up one level from src/ to project root level, still inside localPath
+      expect(loader.resolveRef(ref, '/project/src/deep/file.prs')).toBe(
+        '/project/src/shared/base.prs'
+      );
+    });
+
+    it('should reject traversal from deeply nested file', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/project',
+      });
+
+      const ref = {
+        type: 'PathReference' as const,
+        raw: './../../../etc/shadow',
+        segments: ['..', '..', '..', 'etc', 'shadow'],
+        isRelative: true,
+        loc: { file: '<test>', line: 1, column: 1 },
+      };
+
+      expect(() => loader.resolveRef(ref, '/project/a/b/file.prs')).toThrow(/path traversal/i);
+    });
   });
 
   describe('.md extension handling', () => {

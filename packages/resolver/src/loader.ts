@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { resolve, dirname, isAbsolute } from 'path';
+import { resolve, dirname, isAbsolute, relative } from 'path';
 import type { PathReference, RegistriesConfig, Lockfile } from '@promptscript/core';
 import { FileNotFoundError } from '@promptscript/core';
 import type { Registry } from './registry.js';
@@ -147,8 +147,11 @@ export class FileLoader {
         ref.raw.endsWith('.prs') || ref.raw.endsWith('.md') ? ref.raw : `${ref.raw}.prs`;
       const resolved = resolve(dir, rawPath);
 
-      // Path traversal check: resolved path must remain under the project root (localPath)
-      if (!resolved.startsWith(this.localPath + '/') && resolved !== this.localPath) {
+      // Path traversal check: resolved path must remain under the project root (localPath).
+      // Uses relative() instead of startsWith() so the check works with both
+      // forward-slash (Unix) and backslash (Windows) path separators.
+      const rel = relative(this.localPath, resolved);
+      if (rel.startsWith('..') || isAbsolute(rel)) {
         throw new Error(`Path traversal outside project root is not allowed: ${ref.raw}`);
       }
 
