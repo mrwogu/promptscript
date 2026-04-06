@@ -140,6 +140,10 @@ export {
  * }
  * ```
  */
+// Policy engine
+export { parsePolicies, evaluatePolicies } from './policy/index.js';
+export type { ParsedPolicies } from './policy/index.js';
+
 export function validate(ast: Program, options: ValidateOptions = {}): ValidationResult {
   const { validator, ...config } = options;
 
