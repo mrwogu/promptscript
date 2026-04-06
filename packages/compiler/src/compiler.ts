@@ -238,7 +238,8 @@ export class Compiler {
         this.options.validator.ignoreHashes = this.options.ignoreHashes;
       }
     } else if (this.options.ignoreHashes) {
-      this.logger.verbose('⚠ --ignore-hashes is set: reference integrity verification is disabled');
+      this.logger.verbose('--ignore-hashes is set: reference integrity verification is disabled');
+      console.error('⚠ --ignore-hashes is set: reference integrity verification is disabled');
       if (this.options.validator) {
         this.options.validator.ignoreHashes = true;
       }

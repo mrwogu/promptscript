@@ -1909,6 +1909,7 @@ describe('Stage 1.5: Reference Integrity', () => {
   it('should set ignoreHashes on validator when flag is true', async () => {
     const ast = createTestProgram();
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const validatorConfig = {};
     const compiler = createTestCompiler({
@@ -1921,6 +1922,8 @@ describe('Stage 1.5: Reference Integrity', () => {
     await compiler.compile('./test.prs');
 
     expect(validatorConfig).toHaveProperty('ignoreHashes', true);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('--ignore-hashes is set'));
+    errorSpy.mockRestore();
   });
 
   it('should skip non-skills blocks when collecting references', async () => {

@@ -503,10 +503,6 @@ export async function compileCommand(
       skillContent = await loadBundledSkillContent(logger);
     }
 
-    if (options.ignoreHashes) {
-      console.error('⚠ --ignore-hashes is set: reference integrity verification is disabled');
-    }
-
     const localPath = resolve(projectRoot, '.promptscript');
     const compiler = new Compiler({
       resolver: {
