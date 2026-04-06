@@ -103,6 +103,43 @@ describe('parsePolicies', () => {
       });
     });
 
+    it('preserves description on all policy kinds', () => {
+      // Arrange
+      const input: PolicyDefinition[] = [
+        {
+          name: 'lb',
+          kind: 'layer-boundary',
+          severity: 'error',
+          description: 'Layer desc',
+          layers: ['@a', '@b'],
+        },
+        {
+          name: 'pp',
+          kind: 'property-protection',
+          severity: 'warning',
+          description: 'Prop desc',
+          properties: ['content'],
+        },
+        {
+          name: 'ra',
+          kind: 'registry-allowlist',
+          severity: 'error',
+          description: 'Reg desc',
+          allowed: ['@a'],
+        },
+      ];
+
+      // Act
+      const result = parsePolicies(input);
+
+      // Assert
+      expect(result.errors).toEqual([]);
+      expect(result.policies).toHaveLength(3);
+      expect(result.policies[0]!.description).toBe('Layer desc');
+      expect(result.policies[1]!.description).toBe('Prop desc');
+      expect(result.policies[2]!.description).toBe('Reg desc');
+    });
+
     it('defaults maxDistance to 1 when not specified for layer-boundary', () => {
       // Arrange
       const input: PolicyDefinition[] = [
@@ -253,6 +290,60 @@ describe('parsePolicies', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]).toContain('empty-allowlist');
       expect(result.errors[0]).toContain('"allowed"');
+    });
+
+    it('returns an error for non-object input', () => {
+      // Arrange
+      const input = ['not-an-object'] as unknown as PolicyDefinition[];
+
+      // Act
+      const result = parsePolicies(input);
+
+      // Assert
+      expect(result.policies).toEqual([]);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('must be an object');
+    });
+
+    it('returns an error for invalid severity', () => {
+      // Arrange
+      const input = [
+        {
+          name: 'bad-severity',
+          kind: 'registry-allowlist',
+          severity: 'fatal',
+          allowed: ['@a'],
+        },
+      ] as unknown as PolicyDefinition[];
+
+      // Act
+      const result = parsePolicies(input);
+
+      // Assert
+      expect(result.policies).toEqual([]);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('invalid severity');
+    });
+
+    it('returns an error for invalid maxDistance', () => {
+      // Arrange
+      const input = [
+        {
+          name: 'bad-dist',
+          kind: 'layer-boundary',
+          severity: 'error',
+          layers: ['@a', '@b'],
+          maxDistance: -1,
+        },
+      ] as unknown as PolicyDefinition[];
+
+      // Act
+      const result = parsePolicies(input);
+
+      // Assert
+      expect(result.policies).toEqual([]);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('maxDistance');
     });
 
     it('continues validating remaining policies when one fails', () => {
