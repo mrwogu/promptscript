@@ -5,7 +5,7 @@ import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { LockOptions } from '../types.js';
 import { loadConfig, findConfigFile } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
-import type { Lockfile, LockfileDependency } from '@promptscript/core';
+import type { Lockfile, LockfileDependency, LockfileReference } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { collectRemoteImports } from './lock-scanner.js';
 
@@ -115,7 +115,14 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       }
     }
 
-    const lockfile: Lockfile = { version: LOCKFILE_VERSION, dependencies };
+    // Hash registry reference files (placeholder for full resolution)
+    const references: Record<string, LockfileReference> = {};
+
+    const lockfile: Lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies,
+      ...(Object.keys(references).length > 0 ? { references } : {}),
+    };
 
     if (options.dryRun) {
       spinner.succeed('Dry run — lockfile not written');

@@ -1826,3 +1826,264 @@ describe('compile with non-Error thrown in resolver', () => {
     vi.restoreAllMocks();
   });
 });
+
+describe('Stage 1.5: Reference Integrity', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockValidate.mockReturnValue(createValidationSuccess());
+  });
+
+  it('should collect registry references from skills blocks and pass to validator', async () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              mySkill: {
+                description: 'test skill',
+                references: ['ref1.md', 'ref2.md'],
+              },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+
+    const validatorConfig = {};
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1,
+          dependencies: {},
+          references: {
+            key1: { hash: 'sha256-abc', lockedAt: '2026-01-01T00:00:00Z' },
+          },
+        },
+      },
+      validator: validatorConfig,
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    // Validator config should now have registryReferences populated
+    expect(validatorConfig).toHaveProperty('registryReferences');
+    const regRefs = (validatorConfig as Record<string, unknown>)[
+      'registryReferences'
+    ] as Set<string>;
+    expect(regRefs).toBeInstanceOf(Set);
+    expect(regRefs.size).toBe(2);
+    expect(regRefs.has('ref1.md')).toBe(true);
+    expect(regRefs.has('ref2.md')).toBe(true);
+    expect(validatorConfig).toHaveProperty('lockfile');
+  });
+
+  it('should skip Stage 1.5 when no lockfile references section', async () => {
+    const ast = createTestProgram();
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+
+    const validatorConfig = {};
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: { version: 1, dependencies: {} },
+      },
+      validator: validatorConfig,
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    // registryReferences should NOT be set
+    expect(validatorConfig).not.toHaveProperty('registryReferences');
+  });
+
+  it('should set ignoreHashes on validator when flag is true', async () => {
+    const ast = createTestProgram();
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const validatorConfig = {};
+    const compiler = createTestCompiler({
+      resolver: { registryPath: '/registry' },
+      validator: validatorConfig,
+      formatters: [],
+      ignoreHashes: true,
+    });
+
+    await compiler.compile('./test.prs');
+
+    expect(validatorConfig).toHaveProperty('ignoreHashes', true);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('--ignore-hashes is set'));
+    errorSpy.mockRestore();
+  });
+
+  it('should skip non-skills blocks when collecting references', async () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'identity',
+          loc,
+          content: { type: 'TextContent', value: 'I am a bot', loc },
+        },
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              mySkill: { description: 'test', references: ['reg-ref.md'] },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+
+    const validatorConfig = {};
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: { version: 1, dependencies: {}, references: {} },
+      },
+      validator: validatorConfig,
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const regRefs = (validatorConfig as Record<string, unknown>)[
+      'registryReferences'
+    ] as Set<string>;
+    expect(regRefs.size).toBe(1);
+    expect(regRefs.has('reg-ref.md')).toBe(true);
+  });
+
+  it('should skip skills without references property', async () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              skillNoRefs: { description: 'no refs' },
+              skillWithRefs: { description: 'has refs', references: ['a.md'] },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+
+    const validatorConfig = {};
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: { version: 1, dependencies: {}, references: {} },
+      },
+      validator: validatorConfig,
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const regRefs = (validatorConfig as Record<string, unknown>)[
+      'registryReferences'
+    ] as Set<string>;
+    expect(regRefs.size).toBe(1);
+  });
+
+  it('should handle non-array references property', async () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              mySkill: { description: 'test', references: 'not-an-array' },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+
+    const validatorConfig = {};
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: { version: 1, dependencies: {}, references: {} },
+      },
+      validator: validatorConfig,
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const regRefs = (validatorConfig as Record<string, unknown>)[
+      'registryReferences'
+    ] as Set<string>;
+    expect(regRefs.size).toBe(0);
+  });
+
+  it('should skip non-string entries in references array', async () => {
+    const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              mySkill: { description: 'test', references: [42, null, 'valid.md'] },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+
+    const validatorConfig = {};
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: { version: 1, dependencies: {}, references: {} },
+      },
+      validator: validatorConfig,
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const regRefs = (validatorConfig as Record<string, unknown>)[
+      'registryReferences'
+    ] as Set<string>;
+    expect(regRefs.size).toBe(1);
+    expect(regRefs.has('valid.md')).toBe(true);
+  });
+});

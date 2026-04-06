@@ -518,6 +518,7 @@ export async function compileCommand(
       prettier: prettierOptions,
       logger,
       skillContent,
+      ignoreHashes: options.ignoreHashes,
     });
 
     const entryPath = config.input?.entry

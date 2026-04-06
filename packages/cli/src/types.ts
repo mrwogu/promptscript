@@ -65,6 +65,8 @@ export interface CompileOptions {
   force?: boolean;
   /** Treat output path conflicts as errors */
   strict?: boolean;
+  /** Skip reference integrity hash verification */
+  ignoreHashes?: boolean;
   /** Working directory (project root) */
   cwd?: string;
 }
@@ -81,6 +83,8 @@ export interface ValidateOptions {
   fix?: boolean;
   /** Skip policy evaluation */
   skipPolicies?: boolean;
+  /** Skip reference integrity checks (disables PS031) */
+  ignoreHashes?: boolean;
 }
 
 /**
@@ -179,6 +183,8 @@ export interface RegistryAddOptions {
 export interface LockOptions {
   /** Preview without writing lockfile */
   dryRun?: boolean;
+  /** Force fresh clone and re-hash all registry references */
+  update?: boolean;
 }
 
 /**

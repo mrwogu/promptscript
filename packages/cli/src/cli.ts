@@ -110,6 +110,7 @@ program
   .option('-c, --config <path>', 'Path to custom config file')
   .option('--force', 'Force overwrite existing files without prompts')
   .option('--strict', 'Treat output path conflicts as errors')
+  .option('--ignore-hashes', 'Skip reference integrity hash verification')
   .option('--cwd <dir>', 'Working directory (project root)')
   .action((opts) => compileCommand(opts));
 
@@ -120,6 +121,7 @@ program
   .option('--format <format>', 'Output format (text, json)', 'text')
   .option('--fix', 'Auto-fix syntax version issues')
   .option('--skip-policies', 'Skip extension compliance policy evaluation')
+  .option('--ignore-hashes', 'Skip reference integrity checks')
   .action(validateCommand);
 
 program
@@ -202,6 +204,7 @@ program
   .command('lock')
   .description('Generate or update promptscript.lock by resolving all remote imports')
   .option('--dry-run', 'Preview lockfile without writing')
+  .option('--update', 'Force fresh clone and re-hash all registry references')
   .action((opts) => lockCommand(opts));
 
 program

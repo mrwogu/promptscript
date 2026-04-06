@@ -115,6 +115,8 @@ export interface CompilerOptions {
    * to each formatter's native skill directory.
    */
   skillContent?: string;
+  /** Skip reference integrity hash verification */
+  ignoreHashes?: boolean;
 }
 
 /**

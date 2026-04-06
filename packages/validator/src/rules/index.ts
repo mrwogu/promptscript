@@ -30,6 +30,7 @@ import { validSkillComposition } from './valid-skill-composition.js';
 import { validAppendNegation } from './valid-append-negation.js';
 import { validSealedProperty } from './valid-sealed-property.js';
 import { policyCompliance } from './policy-compliance.js';
+import { referenceIntegrity } from './reference-integrity.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -91,6 +92,7 @@ export { validSkillComposition } from './valid-skill-composition.js';
 export { validAppendNegation } from './valid-append-negation.js';
 export { validSealedProperty } from './valid-sealed-property.js';
 export { policyCompliance } from './policy-compliance.js';
+export { referenceIntegrity } from './reference-integrity.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -145,6 +147,8 @@ export const allRules: ValidationRule[] = [
   validSealedProperty,
   // Policy compliance (PS030)
   policyCompliance,
+  // Reference integrity (PS031)
+  referenceIntegrity,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

@@ -1,5 +1,4 @@
 ---
-# promptscript-generated: 2026-04-06T08:34:33.386Z | source: .promptscript/project.prs | target: claude
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
