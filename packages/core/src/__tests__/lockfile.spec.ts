@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { LockfileDependency, Lockfile } from '../types/lockfile.js';
+import type { LockfileDependency, Lockfile, LockfileReference } from '../types/lockfile.js';
 import { isValidLockfile, LOCKFILE_VERSION } from '../types/lockfile.js';
 
 describe('LockfileDependency', () => {
@@ -181,5 +181,58 @@ describe('isValidLockfile', () => {
     };
 
     expect(isValidLockfile(lockfile)).toBe(false);
+  });
+
+  it('should accept valid lockfile with references section', () => {
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+      references: {
+        'https://github.com/org/repo\0ref.md\0v1.0.0': {
+          hash: 'sha256-abc123',
+          lockedAt: '2026-04-01T12:00:00Z',
+        },
+      },
+    };
+    expect(isValidLockfile(lockfile)).toBe(true);
+  });
+
+  it('should accept lockfile without references section (backward compat)', () => {
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+    };
+    expect(isValidLockfile(lockfile)).toBe(true);
+  });
+
+  it('should reject lockfile with non-object references', () => {
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+      references: 'bad',
+    };
+    expect(isValidLockfile(lockfile)).toBe(false);
+  });
+
+  it('should reject lockfile with malformed reference entry', () => {
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+      references: {
+        key: { hash: 123 },
+      },
+    };
+    expect(isValidLockfile(lockfile)).toBe(false);
+  });
+});
+
+describe('LockfileReference', () => {
+  it('should accept valid reference entry', () => {
+    const ref: LockfileReference = {
+      hash: 'sha256-abc123def456',
+      lockedAt: '2026-04-01T12:00:00Z',
+    };
+    expect(ref.hash).toBe('sha256-abc123def456');
+    expect(ref.lockedAt).toBe('2026-04-01T12:00:00Z');
   });
 });
