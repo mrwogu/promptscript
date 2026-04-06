@@ -57,6 +57,31 @@ describe('parse coverage - error paths', () => {
     });
   });
 
+  describe('lexer error hints', () => {
+    it('should hint about relative path syntax for .word/ patterns', () => {
+      // Regression: @use .promptscript/fragments/workspace gives an unhelpful
+      // "unexpected character: /" error. The user likely meant ./ prefix.
+      const source = '@use .promptscript/fragments/workspace';
+      const result = parse(source, { filename: 'test.prs' });
+
+      expect(result.errors.length).toBeGreaterThan(0);
+      const hintError = result.errors.find((e) => e.message.includes('Hint:'));
+      expect(hintError).toBeDefined();
+      expect(hintError!.message).toContain('relative paths must start with "./"');
+    });
+
+    it('should not hint for slash errors unrelated to dot-word patterns', () => {
+      // A bare slash not preceded by .word should not get the hint
+      const source = '@use something/else';
+      const result = parse(source, { filename: 'test.prs' });
+
+      // Should have errors but no hint about relative paths
+      for (const err of result.errors) {
+        expect(err.message).not.toContain('Hint:');
+      }
+    });
+  });
+
   describe('parser errors', () => {
     it('should report parser errors with location', () => {
       const source = '@meta { id: }'; // Missing value
