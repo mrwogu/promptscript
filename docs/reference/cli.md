@@ -128,17 +128,20 @@ prs compile [options]
 
 **Options:**
 
-| Option                  | Description                               |
-| ----------------------- | ----------------------------------------- |
-| `-t, --target <target>` | Compile to specific target                |
-| `-f, --format <format>` | Output format (alias for `--target`)      |
-| `-a, --all`             | Compile to all configured targets         |
-| `-w, --watch`           | Watch mode for continuous compilation     |
-| `-o, --output <dir>`    | Override output directory                 |
-| `--dry-run`             | Preview changes without writing           |
-| `-c, --config <path>`   | Path to config file                       |
-| `--verbose`             | Show detailed compilation progress        |
-| `--debug`               | Show debug information (includes verbose) |
+| Option                  | Description                                    |
+| ----------------------- | ---------------------------------------------- |
+| `-t, --target <target>` | Compile to specific target                     |
+| `-f, --format <format>` | Output format (alias for `--target`)           |
+| `-a, --all`             | Compile to all configured targets              |
+| `-w, --watch`           | Watch mode for continuous compilation          |
+| `-o, --output <dir>`    | Override output directory                      |
+| `--dry-run`             | Preview changes without writing                |
+| `-c, --config <path>`   | Path to config file                            |
+| `--force`               | Force overwrite existing files without prompts |
+| `--strict`              | Treat output path conflicts as errors          |
+| `--ignore-hashes`       | Skip reference integrity hash verification     |
+| `--verbose`             | Show detailed compilation progress             |
+| `--debug`               | Show debug information (includes verbose)      |
 
 **Examples:**
 
@@ -198,10 +201,13 @@ prs validate [options] [files...]
 
 **Options:**
 
-| Option              | Description                |
-| ------------------- | -------------------------- |
-| `--strict`          | Treat warnings as errors   |
-| `--format <format>` | Output format (text, json) |
+| Option              | Description                                 |
+| ------------------- | ------------------------------------------- |
+| `--strict`          | Treat warnings as errors                    |
+| `--format <format>` | Output format (text, json)                  |
+| `--fix`             | Auto-fix syntax version issues              |
+| `--skip-policies`   | Skip extension compliance policy evaluation |
+| `--ignore-hashes`   | Skip reference integrity hash verification  |
 
 **Examples:**
 
@@ -226,6 +232,43 @@ prs validate --format json
 | 0    | Validation passed                         |
 | 1    | Validation errors found                   |
 | 2    | Validation warnings found (with --strict) |
+
+---
+
+### prs inspect
+
+Inspect how skill composition layers contribute to the final resolved skill. Shows per-property provenance (default) or per-layer breakdown.
+
+```bash
+prs inspect <skill-name> [options]
+```
+
+**Arguments:**
+
+| Argument       | Description                  |
+| -------------- | ---------------------------- |
+| `<skill-name>` | Name of the skill to inspect |
+
+**Options:**
+
+| Option                | Description                |
+| --------------------- | -------------------------- |
+| `--layers`            | Show layer-level breakdown |
+| `--format <format>`   | Output format (text, json) |
+| `-c, --config <path>` | Path to custom config file |
+
+**Examples:**
+
+```bash
+# Show per-property provenance (default)
+prs inspect code-review
+
+# Show layer-level breakdown
+prs inspect code-review --layers
+
+# JSON output for tooling
+prs inspect code-review --format json
+```
 
 ---
 
