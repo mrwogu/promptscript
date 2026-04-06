@@ -617,6 +617,10 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/LockfileReference/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/Logger/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
@@ -1917,6 +1921,10 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/buildReferenceKey/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/buildRegistryMarker/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
@@ -1973,6 +1981,10 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/hashContent/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/interpolateSkillContent/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
@@ -1982,6 +1994,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/isImportMarker/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/isInsideCachePath/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
