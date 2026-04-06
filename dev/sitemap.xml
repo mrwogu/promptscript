@@ -557,6 +557,10 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/BasePolicyDefinition/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/Block/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
@@ -598,6 +602,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/InlineUseDeclaration/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/LayerBoundaryPolicy/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
@@ -645,6 +653,10 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PolicyViolation/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
@@ -661,7 +673,15 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PropertyProtectionPolicy/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/RegistryAliasEntry/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/RegistryAllowlistPolicy/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
@@ -794,6 +814,18 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ParamType/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/PolicyDefinition/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/PolicyKind/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/PolicySeverity/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
@@ -2189,6 +2221,10 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/validator/src/functions/evaluatePolicies/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/validator/src/functions/formatValidationMessage/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
@@ -2241,6 +2277,10 @@
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/validator/src/functions/parsePolicies/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/validator/src/functions/validate/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
@@ -2258,6 +2298,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/validator/src/interfaces/FormatValidationOptions/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/validator/src/interfaces/ParsedPolicies/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>
@@ -2630,6 +2674,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/guides/npx-skills/</loc>
+         <lastmod>2026-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/guides/policy-engine/</loc>
          <lastmod>2026-04-06</lastmod>
     </url>
     <url>

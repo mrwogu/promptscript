@@ -278,6 +278,13 @@
       },
       "additionalProperties": false,
       "description": "Validation settings"
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PolicyDefinition"
+      },
+      "description": "Extension compliance policies"
     }
   },
   "required": [
@@ -720,6 +727,147 @@
       ],
       "additionalProperties": false,
       "description": "Section rendering configuration."
+    },
+    "PolicyDefinition": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/LayerBoundaryPolicy"
+        },
+        {
+          "$ref": "#/definitions/PropertyProtectionPolicy"
+        },
+        {
+          "$ref": "#/definitions/RegistryAllowlistPolicy"
+        }
+      ],
+      "description": "Union of all policy definition types."
+    },
+    "LayerBoundaryPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "layer-boundary",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordered list of layers from base to leaf"
+        },
+        "maxDistance": {
+          "type": "number",
+          "description": "Maximum allowed distance between source and target layers (default: 1)"
+        }
+      },
+      "required": [
+        "kind",
+        "layers",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Layer-boundary policy: controls which layers can extend which."
+    },
+    "PolicySeverity": {
+      "type": "string",
+      "enum": [
+        "error",
+        "warning"
+      ],
+      "description": "Severity for policy violations."
+    },
+    "PropertyProtectionPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "property-protection",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Properties that cannot be overridden"
+        },
+        "targetPattern": {
+          "type": "string",
+          "description": "Glob pattern for target skills (e.g., '@core/*'). If omitted, applies to all."
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "properties",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Property-protection policy: prevents overriding specific properties."
+    },
+    "RegistryAllowlistPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique policy name within the config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "kind": {
+          "type": "string",
+          "const": "registry-allowlist",
+          "description": "Policy kind discriminator"
+        },
+        "severity": {
+          "$ref": "#/definitions/PolicySeverity",
+          "description": "Violation severity"
+        },
+        "allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of allowed registry prefixes"
+        }
+      },
+      "required": [
+        "allowed",
+        "kind",
+        "name",
+        "severity"
+      ],
+      "additionalProperties": false,
+      "description": "Registry-allowlist policy: restricts which registries can provide extensions."
     }
   }
 }
