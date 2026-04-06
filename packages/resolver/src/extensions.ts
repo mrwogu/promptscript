@@ -8,9 +8,10 @@ import type {
   TextContent,
   ArrayContent,
   Value,
+  Logger,
 } from '@promptscript/core';
 import { deepMerge, deepClone, isTextContent, ResolveError } from '@promptscript/core';
-import { IMPORT_MARKER_PREFIX } from './imports.js';
+import { IMPORT_MARKER_PREFIX, getOriginalBlockName } from './imports.js';
 
 // ── Skill-aware merge strategy sets ──────────────────────────────────
 
@@ -129,12 +130,12 @@ function resolveSealedKeys(val: unknown): Set<string> {
  * @param ast - Program AST with @extend blocks
  * @returns Program with extensions applied and import markers removed
  */
-export function applyExtends(ast: Program): Program {
+export function applyExtends(ast: Program, logger?: Logger): Program {
   let blocks = [...ast.blocks];
 
   // Apply each extension
   for (const ext of ast.extends) {
-    blocks = applyExtend(blocks, ext);
+    blocks = applyExtend(blocks, ext, logger);
   }
 
   // Remove import markers
@@ -150,7 +151,7 @@ export function applyExtends(ast: Program): Program {
 /**
  * Apply a single @extend block.
  */
-function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
+function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[] {
   const pathParts = ext.targetPath.split('.');
   const rootName = pathParts[0];
 
@@ -168,7 +169,10 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
 
   const idx = blocks.findIndex((b) => b.name === targetName);
   if (idx === -1) {
-    // Target not found - return unchanged
+    logger?.warn(
+      `@extend target "${ext.targetPath}" not found — overlay will be ignored. ` +
+        `If the base skill was removed or renamed, update or remove this @extend block.`
+    );
     return blocks;
   }
 
@@ -178,9 +182,10 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
   }
 
   // Determine if the extend target is inside a @skills block
-  const skillContext = ext.targetPath.split('.')[0] === 'skills';
+  const resolvedBlockName = targetName ? (getOriginalBlockName(targetName) ?? targetName) : '';
+  const skillContext = resolvedBlockName === 'skills';
 
-  const merged = mergeExtension(target, deepPath, ext, skillContext);
+  const merged = mergeExtension(target, deepPath, ext, skillContext, logger);
 
   return [...blocks.slice(0, idx), merged, ...blocks.slice(idx + 1)];
 }
@@ -192,7 +197,8 @@ function mergeExtension(
   block: Block,
   path: string[],
   ext: ExtendBlock,
-  skillContext: boolean
+  skillContext: boolean,
+  logger?: Logger
 ): Block {
   if (path.length === 0) {
     // Direct merge at block level
@@ -205,7 +211,7 @@ function mergeExtension(
   // Deep path merge - navigate into ObjectContent or MixedContent
   return {
     ...block,
-    content: mergeAtPath(block.content, path, ext.content, skillContext),
+    content: mergeAtPath(block.content, path, ext.content, skillContext, logger),
   };
 }
 
@@ -216,7 +222,8 @@ function mergeAtPath(
   content: BlockContent,
   path: string[],
   extContent: BlockContent,
-  skillContext: boolean
+  skillContext: boolean,
+  _logger?: Logger
 ): BlockContent {
   if (path.length === 0) {
     return mergeContent(content, extContent);

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type {
   Program,
   Block,
@@ -8,6 +8,7 @@ import type {
   ExtendBlock,
   MixedContent,
   Value,
+  Logger,
 } from '@promptscript/core';
 import { applyExtends } from '../extensions.js';
 import { IMPORT_MARKER_PREFIX } from '../imports.js';
@@ -576,6 +577,55 @@ describe('applyExtends', () => {
 
       // Should replace array with nested object
       expect(content.properties['arr']).toEqual({ nested: { key: 'val' } });
+    });
+  });
+});
+
+describe('overlay consistency warnings', () => {
+  const createMockLogger = () => {
+    const logger = {
+      verbose: vi.fn<(message: string) => void>(),
+      debug: vi.fn<(message: string) => void>(),
+      warn: vi.fn<(message: string) => void>(),
+    };
+    return logger satisfies Logger;
+  };
+
+  describe('orphaned extend', () => {
+    it('should warn when @extend target block does not exist', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [createBlock('identity', createTextContent('original'))],
+        extends: [createExtendBlock('nonexistent', createTextContent('extended'))],
+      });
+
+      const result = applyExtends(ast, logger);
+
+      expect(result.blocks).toHaveLength(1);
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent" not found'));
+    });
+
+    it('should not warn when @extend target exists', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [createBlock('identity', createTextContent('original'))],
+        extends: [createExtendBlock('identity', createTextContent('extended'))],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should not crash when logger is not provided', () => {
+      const ast = createProgram({
+        blocks: [createBlock('identity', createTextContent('original'))],
+        extends: [createExtendBlock('nonexistent', createTextContent('extended'))],
+      });
+
+      const result = applyExtends(ast);
+      expect(result.blocks).toHaveLength(1);
     });
   });
 });
