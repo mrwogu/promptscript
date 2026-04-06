@@ -137,6 +137,9 @@ export { discoverNativeContent } from './auto-discovery.js';
 // AST factory helpers
 export { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 
+// Reference integrity hashing
+export { hashContent, buildReferenceKey, isInsideCachePath } from './reference-hasher.js';
+
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';
 import { createResolver } from './resolver.js';
