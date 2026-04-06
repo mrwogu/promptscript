@@ -12,6 +12,7 @@ import type {
 } from '@promptscript/core';
 import { applyExtends } from '../extensions.js';
 import { IMPORT_MARKER_PREFIX } from '../imports.js';
+import { Resolver } from '../resolver.js';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
 
@@ -222,16 +223,24 @@ describe('applyExtends', () => {
   });
 
   describe('target not found', () => {
-    it('should ignore extension for non-existent target', () => {
+    it('should ignore extension for non-existent target and warn via logger', () => {
+      const warnMessages: string[] = [];
+      const logger: Logger = {
+        verbose: () => {},
+        debug: () => {},
+        warn: (msg: string) => warnMessages.push(msg),
+      };
+
       const ast = createProgram({
         blocks: [createBlock('identity', createTextContent('original'))],
         extends: [createExtendBlock('nonexistent', createTextContent('extended'))],
       });
 
-      const result = applyExtends(ast);
+      const result = applyExtends(ast, logger);
 
       expect(result.blocks).toHaveLength(1);
       expect((result.blocks[0]?.content as TextContent).value).toBe('original');
+      expect(warnMessages.some((m) => m.includes('"nonexistent" not found'))).toBe(true);
     });
   });
 
@@ -846,5 +855,61 @@ describe('overlay consistency warnings', () => {
 
       expect(logger.warn).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('overlay warnings integration', () => {
+  it('should propagate orphaned extend warning through Resolver', async () => {
+    const warnMessages: string[] = [];
+    const logger: Logger = {
+      verbose: () => {},
+      debug: () => {},
+      warn: (msg: string) => warnMessages.push(msg),
+    };
+
+    const os = await import('node:os');
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const testDir = path.join(os.tmpdir(), `prs-test-${Date.now()}`);
+    await fs.mkdir(testDir, { recursive: true });
+
+    const prsContent = `@meta {
+  id: "test/overlay-warn"
+  syntax: "1.0"
+}
+
+@identity {
+  """
+  Test identity.
+  """
+}
+
+@extend nonexistent {
+  """
+  This targets a block that doesn't exist.
+  """
+}
+`;
+
+    const testFile = path.join(testDir, 'test.prs');
+    await fs.writeFile(testFile, prsContent);
+
+    const resolver = new Resolver({
+      registryPath: testDir,
+      localPath: testDir,
+      logger,
+      cache: false,
+    });
+
+    try {
+      await resolver.resolve(testFile);
+    } catch {
+      // May throw if file parsing has issues, but we're checking warnings
+    }
+
+    expect(warnMessages.some((m) => m.includes('"nonexistent" not found'))).toBe(true);
+
+    // Cleanup
+    await fs.rm(testDir, { recursive: true, force: true });
   });
 });
