@@ -761,4 +761,90 @@ describe('overlay consistency warnings', () => {
       expect(result.blocks).toHaveLength(1);
     });
   });
+
+  describe('negation orphan', () => {
+    it('should warn via logger when negation does not match any base entry', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                type: 'ObjectContent',
+                properties: {
+                  description: 'base review',
+                  references: {
+                    type: 'ArrayContent',
+                    elements: ['references/existing.md'],
+                    loc: { file: '<test>', line: 1, column: 1 },
+                  },
+                },
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              references: {
+                type: 'ArrayContent',
+                elements: ['!references/nonexistent.md', 'references/new.md'],
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('references/nonexistent.md')
+      );
+    });
+
+    it('should not warn when negation matches a base entry', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                type: 'ObjectContent',
+                properties: {
+                  description: 'base review',
+                  references: {
+                    type: 'ArrayContent',
+                    elements: ['references/old.md'],
+                    loc: { file: '<test>', line: 1, column: 1 },
+                  },
+                },
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              references: {
+                type: 'ArrayContent',
+                elements: ['!references/old.md', 'references/new.md'],
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
 });
