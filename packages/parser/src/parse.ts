@@ -88,8 +88,18 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
   const lexResult = PSLexer.tokenize(source);
 
   for (const err of lexResult.errors) {
+    let message = `Lexer: ${err.message}`;
+
+    // Detect ".word/" pattern — user likely meant "./" relative path prefix
+    if (err.message.includes('unexpected character: ->/<-') && err.offset != null) {
+      const before = source.slice(Math.max(0, err.offset - 60), err.offset);
+      if (/\.\w+$/.test(before)) {
+        message += ` Hint: relative paths must start with "./" or "../" (e.g., "./path/to/file")`;
+      }
+    }
+
     errors.push(
-      new ParseError(`Lexer: ${err.message}`, {
+      new ParseError(message, {
         file: filename,
         // Chevrotain lexer errors always have line/column when source has content
         line: err.line!,
