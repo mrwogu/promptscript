@@ -11,9 +11,9 @@ When Layer 2 (company/product) updates a base skill — removing a skill, renami
 
 - `@extend base.skills.code-review` where Layer 2 removed `code-review` → **overlay silently ignored** (the extend block is dropped, no warning)
 - `@extend base.skills.deploy { params: { severity: "high" } }` where Layer 2 removed the `deploy` skill from `@skills` → **silently creates a new skill** (unintended)
-- `references: ["!references/spring.md"]` where Layer 2 already removed `spring.md` → **negation silently dropped**
+- `references: ["!references/spring.md"]` where Layer 2 already removed `spring.md` → **negation warning goes to `console.warn`** instead of the structured logger
 
-The resolver currently handles all three cases without any feedback. Teams discover the inconsistency only when the compiled output behaves unexpectedly.
+The resolver currently handles the first two cases silently and routes the third through `console.warn` (bypassing the logger). Teams discover inconsistencies only when the compiled output behaves unexpectedly.
 
 ## 2. Goals
 
@@ -59,7 +59,7 @@ If the base skill was removed or renamed, update or remove this @extend block.
 
 **File:** `packages/resolver/src/extensions.ts`, `mergeAtPath()`
 
-Current behavior (line 257-264): when navigating a deep path inside ObjectContent and the key doesn't exist, silently creates the path.
+Current behavior: when navigating a deep path inside ObjectContent or MixedContent and the key doesn't exist, silently creates the path via `buildPathValue()`.
 
 New behavior: when `skillContext` is true and the key doesn't exist in the base, emit warning before creating.
 
@@ -70,13 +70,33 @@ If this was an overlay targeting an existing skill, verify the base still define
 
 Only warns inside `@skills` context. Creating new top-level blocks via extend remains silent (that's a valid additive pattern).
 
+Both the ObjectContent branch (line ~257) and MixedContent branch (line ~290) must emit the warning.
+
+### 5.2.1 Fix: `skillContext` determination for aliased imports
+
+**Pre-existing bug:** `skillContext` is currently derived from `ext.targetPath.split('.')[0] === 'skills'`. For aliased imports like `@extend base.skills.code-review`, `split('.')[0]` returns `'base'`, not `'skills'`, so `skillContext` is incorrectly `false`.
+
+**Fix:** After resolving `targetName` and `idx`, derive `skillContext` from the resolved block name:
+
+```typescript
+import { IMPORT_MARKER_PREFIX, getOriginalBlockName } from './imports.js';
+
+// Replace line 181:
+// const skillContext = ext.targetPath.split('.')[0] === 'skills';
+// With:
+const resolvedBlockName = getOriginalBlockName(targetName) ?? targetName;
+const skillContext = resolvedBlockName === 'skills';
+```
+
+This fixes both the new stale-target warning and the existing skill-aware merge strategies (replace/append/merge) for imported skills. `getOriginalBlockName('__import__base.skills')` returns `'skills'`; for non-imported blocks, it returns `undefined` and falls back to `targetName`.
+
 ### 5.3 Negation Orphan
 
 **File:** `packages/resolver/src/extensions.ts`, `processAppendWithNegations()`
 
-Current behavior: negations that don't match any base entry are silently discarded.
+Current behavior: unmatched negations are logged via `console.warn()` (line ~674-676), bypassing the structured logger.
 
-New behavior: after filtering, check for unmatched negations and warn for each.
+New behavior: replace `console.warn()` with `logger?.warn?.()` to route through the same logger interface used by all other resolver warnings.
 
 ```
 Negation "!{entry}" did not match any base entry — it may be stale.
@@ -87,10 +107,14 @@ Negation "!{entry}" did not match any base entry — it may be stale.
 `applyExtends(ast: Program)` gains an optional `logger?: Logger` parameter. This threads down to:
 
 - `applyExtend(blocks, ext, logger?)`
+- `mergeExtension(block, path, ext, skillContext, logger?)`
 - `mergeAtPath(content, path, extContent, skillContext, logger?)`
+- `mergeSkillValue(existing, ext, logger?)` (already contains negation call)
 - `processAppendWithNegations(base, ext, logger?)`
 
-The compiler already passes a logger to other resolver functions; this follows the same pattern.
+The compiler already passes a logger to other resolver functions (`this.logger` at call site `resolver.ts:186`); this follows the same pattern.
+
+Also add import: `getOriginalBlockName` from `./imports.js` (currently only `IMPORT_MARKER_PREFIX` is imported).
 
 ## 6. Stretch Goal: Lightweight Semantic Drift Detection
 
@@ -127,11 +151,14 @@ This is independent work and can ship separately.
 | Test | Validates |
 |------|-----------|
 | `@extend` targets non-existent block → `logger.warn` called | Orphaned extend |
-| `@extend base.skills.removed` where base has `@skills` without `removed` → `logger.warn` called | Stale skill target |
-| `references: ["!nonexistent.md"]` → `logger.warn` called | Negation orphan |
+| `@extend base.skills.removed` where base has `@skills` without `removed` → `logger.warn` called | Stale skill target (ObjectContent) |
+| Same for MixedContent `@skills` block → `logger.warn` called | Stale skill target (MixedContent) |
+| `references: ["!nonexistent.md"]` → `logger.warn` called (not `console.warn`) | Negation orphan |
 | `@extend` targets existing block → no warnings | No false positives |
 | Additive extend outside `@skills` context → no warning | Additive pattern respected |
+| Aliased import `@extend base.skills.X` → correct `skillContext` detection | Import alias fix |
 | Logger not provided → no crash | Graceful degradation |
+| Update existing "target not found" test to verify logger.warn | Existing test updated |
 
 ### Integration Tests (`packages/compiler/src/__tests__/compiler.spec.ts`)
 
