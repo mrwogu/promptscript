@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { referenceIntegrity } from '../reference-integrity.js';
-import type { Program, SourceLocation, Block } from '@promptscript/core';
+import type { Program, SourceLocation, Block, Value } from '@promptscript/core';
 import { LOCKFILE_VERSION } from '@promptscript/core';
 import type { RuleContext, ValidationMessage, ValidatorConfig } from '../../types.js';
 
 const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
 
 function makeSkillsBlock(skills: Record<string, { references?: string[] }>): Block {
-  const properties: Record<string, unknown> = {};
+  const properties: Record<string, Value> = {};
   for (const [name, skill] of Object.entries(skills)) {
     properties[name] = {
       description: `${name} skill`,

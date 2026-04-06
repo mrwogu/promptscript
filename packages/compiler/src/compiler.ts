@@ -3,6 +3,8 @@ import { FormatterRegistry } from '@promptscript/formatters';
 import { Resolver, type ResolvedAST } from '@promptscript/resolver';
 import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
 import { relative, isAbsolute } from 'path';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
+import { verifyReferenceIntegrity } from './reference-verifier.js';
 import type {
   CompilerOptions,
   CompileResult,
@@ -200,6 +202,46 @@ export class Compiler {
         warnings: [],
         stats,
       };
+    }
+
+    // Stage 1.5: Reference Integrity
+    if (!this.options.ignoreHashes && this.options.resolver.lockfile?.references) {
+      this.logger.verbose('=== Stage 1.5: Reference Integrity ===');
+      // Collect registry reference paths for the validator
+      const registryReferences = new Set<string>();
+
+      for (const block of resolved.ast.blocks) {
+        if (block.name !== 'skills' || block.content.type !== 'ObjectContent') continue;
+
+        for (const [, skillValue] of Object.entries(block.content.properties)) {
+          if (
+            typeof skillValue !== 'object' ||
+            skillValue === null ||
+            !('references' in skillValue)
+          )
+            continue;
+
+          const refs = (skillValue as Record<string, unknown>)['references'];
+          if (!Array.isArray(refs)) continue;
+
+          for (const ref of refs) {
+            if (typeof ref !== 'string') continue;
+            registryReferences.add(ref);
+          }
+        }
+      }
+
+      // Pass registry references to validator config for PS031
+      if (this.options.validator) {
+        this.options.validator.registryReferences = registryReferences;
+        this.options.validator.lockfile = this.options.resolver.lockfile;
+        this.options.validator.ignoreHashes = this.options.ignoreHashes;
+      }
+    } else if (this.options.ignoreHashes) {
+      this.logger.verbose('⚠ --ignore-hashes is set: reference integrity verification is disabled');
+      if (this.options.validator) {
+        this.options.validator.ignoreHashes = true;
+      }
     }
 
     // Stage 2: Validate
