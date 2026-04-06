@@ -1584,7 +1584,7 @@ describe('resolveSkillReferences limits', () => {
     const base = await setupTempDir();
     try {
       await writeFile(join(base, 'references', 'empty.md'), '');
-      const mockLogger = { verbose: vi.fn(), debug: vi.fn() };
+      const mockLogger = { verbose: vi.fn(), debug: vi.fn(), warn: vi.fn() };
 
       await resolveSkillReferences(['references/empty.md'], base, mockLogger as unknown as Logger);
       expect(mockLogger.verbose).toHaveBeenCalledWith(expect.stringContaining('Empty reference'));
@@ -1598,7 +1598,7 @@ describe('reference name collision detection', () => {
   it('should deduplicate references by basename, keeping last occurrence', async () => {
     const refs = ['references/spring.md', 'references/spring.md'];
     const basePath = join(FIXTURES, 'skills', 'expert');
-    const mockLogger = { verbose: vi.fn(), debug: vi.fn() };
+    const mockLogger = { verbose: vi.fn(), debug: vi.fn(), warn: vi.fn() };
 
     const resources = await resolveSkillReferences(refs, basePath, mockLogger as unknown as Logger);
 

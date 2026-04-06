@@ -10,6 +10,7 @@
  * const logger: Logger = {
  *   verbose: (msg) => console.log(`[verbose] ${msg}`),
  *   debug: (msg) => console.log(`[debug] ${msg}`),
+ *   warn: (msg) => console.warn(`[warn] ${msg}`),
  * };
  *
  * const compiler = new Compiler({ logger });
@@ -27,6 +28,11 @@ export interface Logger {
    * Shown only with --debug flag.
    */
   debug(message: string): void;
+
+  /**
+   * Log warning message. Always shown regardless of verbosity flags.
+   */
+  warn(message: string): void;
 }
 
 /**
@@ -36,6 +42,7 @@ export interface Logger {
 export const noopLogger: Logger = {
   verbose: () => {},
   debug: () => {},
+  warn: () => {},
 };
 
 /**
@@ -47,9 +54,11 @@ export const noopLogger: Logger = {
 export function createLogger(options: {
   verbose?: (message: string) => void;
   debug?: (message: string) => void;
+  warn?: (message: string) => void;
 }): Logger {
   return {
     verbose: options.verbose ?? (() => {}),
     debug: options.debug ?? (() => {}),
+    warn: options.warn ?? (() => {}),
   };
 }

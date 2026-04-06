@@ -97,6 +97,9 @@ function createCliLogger(): Logger {
         ConsoleOutput.debug(message);
       }
     },
+    warn: (message: string) => {
+      ConsoleOutput.warn(message);
+    },
   };
 }
 
