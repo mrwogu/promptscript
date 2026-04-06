@@ -1,4 +1,4 @@
-import type { Logger, Program, SourceLocation } from '@promptscript/core';
+import type { Logger, Program, SourceLocation, PolicyDefinition } from '@promptscript/core';
 
 /**
  * Severity level for validation messages.
@@ -85,6 +85,10 @@ export interface ValidatorConfig {
   customRules?: ValidationRule[];
   /** Logger for verbose/debug output */
   logger?: Logger;
+  /** Extension compliance policies */
+  policies?: PolicyDefinition[];
+  /** Skip policy evaluation */
+  skipPolicies?: boolean;
 }
 
 /**
