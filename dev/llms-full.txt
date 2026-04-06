@@ -2357,17 +2357,20 @@ prs compile [options]
 
 **Options:**
 
-| Option                  | Description                               |
-| ----------------------- | ----------------------------------------- |
-| `-t, --target <target>` | Compile to specific target                |
-| `-f, --format <format>` | Output format (alias for `--target`)      |
-| `-a, --all`             | Compile to all configured targets         |
-| `-w, --watch`           | Watch mode for continuous compilation     |
-| `-o, --output <dir>`    | Override output directory                 |
-| `--dry-run`             | Preview changes without writing           |
-| `-c, --config <path>`   | Path to config file                       |
-| `--verbose`             | Show detailed compilation progress        |
-| `--debug`               | Show debug information (includes verbose) |
+| Option                  | Description                                    |
+| ----------------------- | ---------------------------------------------- |
+| `-t, --target <target>` | Compile to specific target                     |
+| `-f, --format <format>` | Output format (alias for `--target`)           |
+| `-a, --all`             | Compile to all configured targets              |
+| `-w, --watch`           | Watch mode for continuous compilation          |
+| `-o, --output <dir>`    | Override output directory                      |
+| `--dry-run`             | Preview changes without writing                |
+| `-c, --config <path>`   | Path to config file                            |
+| `--force`               | Force overwrite existing files without prompts |
+| `--strict`              | Treat output path conflicts as errors          |
+| `--ignore-hashes`       | Skip reference integrity hash verification     |
+| `--verbose`             | Show detailed compilation progress             |
+| `--debug`               | Show debug information (includes verbose)      |
 
 **Examples:**
 
@@ -2428,10 +2431,13 @@ prs validate [options] [files...]
 
 **Options:**
 
-| Option              | Description                |
-| ------------------- | -------------------------- |
-| `--strict`          | Treat warnings as errors   |
-| `--format <format>` | Output format (text, json) |
+| Option              | Description                                 |
+| ------------------- | ------------------------------------------- |
+| `--strict`          | Treat warnings as errors                    |
+| `--format <format>` | Output format (text, json)                  |
+| `--fix`             | Auto-fix syntax version issues              |
+| `--skip-policies`   | Skip extension compliance policy evaluation |
+| `--ignore-hashes`   | Skip reference integrity hash verification  |
 
 **Examples:**
 
@@ -2456,6 +2462,43 @@ prs validate --format json
 | 0    | Validation passed                         |
 | 1    | Validation errors found                   |
 | 2    | Validation warnings found (with --strict) |
+
+______________________________________________________________________
+
+### prs inspect
+
+Inspect how skill composition layers contribute to the final resolved skill. Shows per-property provenance (default) or per-layer breakdown.
+
+```bash
+prs inspect <skill-name> [options]
+```
+
+**Arguments:**
+
+| Argument       | Description                  |
+| -------------- | ---------------------------- |
+| `<skill-name>` | Name of the skill to inspect |
+
+**Options:**
+
+| Option                | Description                |
+| --------------------- | -------------------------- |
+| `--layers`            | Show layer-level breakdown |
+| `--format <format>`   | Output format (text, json) |
+| `-c, --config <path>` | Path to custom config file |
+
+**Examples:**
+
+```bash
+# Show per-property provenance (default)
+prs inspect code-review
+
+# Show layer-level breakdown
+prs inspect code-review --layers
+
+# JSON output for tooling
+prs inspect code-review --format json
+```
 
 ______________________________________________________________________
 
@@ -8011,12 +8054,41 @@ packages:
     ref: main
     commit: a3f8c2d91b4e6f7890123456789abcdef0123456
     resolved: '2026-03-23T10:00:00Z'
+    references:
+      '@stacks/react.prs':
+        hash: sha256:a1b2c3d4e5f6...
+      '@fragments/testing.prs':
+        hash: sha256:f6e5d4c3b2a1...
   github.com/some-org/claude-skills:
     url: https://github.com/some-org/claude-skills.git
     ref: v1.2.0
     commit: deadbeef12345678901234567890abcdef012345
     resolved: '2026-03-22T08:30:00Z'
+    references:
+      'skills/tdd-workflow/SKILL.md':
+        hash: sha256:1234abcd5678...
 ```
+
+### Integrity Hashes
+
+Each lockfile entry includes SHA-256 hashes for the individual files resolved from that package. During compilation and validation, these hashes are verified against the actual file contents. If a file has been modified since it was locked, a reference integrity error is raised.
+
+This protects against:
+
+- **Tampered dependencies** - changes to registry files after locking
+- **Cache corruption** - stale or corrupted cached copies
+- **Supply chain attacks** - unauthorized modifications to shared skills
+
+To skip hash verification (e.g., during local development), use:
+
+```bash
+prs compile --ignore-hashes
+prs validate --ignore-hashes
+```
+
+Warning
+
+Never use `--ignore-hashes` in CI pipelines. Hash verification is a critical security check for production builds.
 
 ### Committing the Lockfile
 
