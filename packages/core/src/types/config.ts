@@ -1,4 +1,5 @@
 import type { ConventionName, OutputConvention } from './convention.js';
+import type { PolicyDefinition } from './policy.js';
 import type { PrettierMarkdownOptions } from './prettier.js';
 import type { RegistriesConfig } from './registries.js';
 
@@ -293,6 +294,9 @@ export interface PromptScriptConfig {
      */
     guardRequiresDepth?: number;
   };
+
+  /** Extension compliance policies */
+  policies?: PolicyDefinition[];
 }
 
 /**
