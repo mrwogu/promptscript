@@ -1,4 +1,10 @@
-import type { Logger, Program, SourceLocation, PolicyDefinition } from '@promptscript/core';
+import type {
+  Logger,
+  Program,
+  SourceLocation,
+  PolicyDefinition,
+  Lockfile,
+} from '@promptscript/core';
 
 /**
  * Severity level for validation messages.
@@ -89,6 +95,12 @@ export interface ValidatorConfig {
   policies?: PolicyDefinition[];
   /** Skip policy evaluation */
   skipPolicies?: boolean;
+  /** Lockfile for reference integrity checks */
+  lockfile?: Lockfile;
+  /** Set of resolved absolute paths that came from registry cache */
+  registryReferences?: Set<string>;
+  /** Skip reference integrity checks */
+  ignoreHashes?: boolean;
 }
 
 /**
