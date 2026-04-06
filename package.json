@@ -64,7 +64,7 @@
     "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "~5.9.3",
     "verdaccio": "^6.3.2",
-    "vite": "^8.0.4",
+    "vite": "^8.0.5",
     "vitest": "^4.1.2",
     "yaml": "^2.8.3"
   },
