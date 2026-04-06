@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { collectRegistryReferences } from '../lock-reference-scanner.js';
-import type { Program, SourceLocation, Block } from '@promptscript/core';
+import type { Program, SourceLocation, Block, Value } from '@promptscript/core';
 
 const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
 
 function makeSkillsBlock(skills: Record<string, { references?: string[] }>): Block {
-  const properties: Record<string, unknown> = {};
+  const properties: Record<string, Value> = {};
   for (const [name, skill] of Object.entries(skills)) {
     properties[name] = {
       description: `${name} skill`,
@@ -74,7 +74,7 @@ describe('collectRegistryReferences', () => {
       content: {
         type: 'ObjectContent',
         properties: {
-          mySkill: { description: 'test', references: [123, null, '/cache/ref.md'] },
+          mySkill: { description: 'test', references: [123, null, '/cache/ref.md'] } as Value,
         },
         loc,
       },
