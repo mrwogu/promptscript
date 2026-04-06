@@ -235,7 +235,11 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
         registryPath: registry.path,
         localPath: './.promptscript',
       },
-      validator: config.validation,
+      validator: {
+        ...config.validation,
+        policies: options.skipPolicies ? undefined : config.policies,
+        skipPolicies: options.skipPolicies,
+      },
       formatters: [], // No formatters needed for validation only
     });
 

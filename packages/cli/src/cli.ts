@@ -119,6 +119,7 @@ program
   .option('--strict', 'Treat warnings as errors')
   .option('--format <format>', 'Output format (text, json)', 'text')
   .option('--fix', 'Auto-fix syntax version issues')
+  .option('--skip-policies', 'Skip extension compliance policy evaluation')
   .action(validateCommand);
 
 program

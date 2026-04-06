@@ -79,6 +79,8 @@ export interface ValidateOptions {
   format?: 'text' | 'json';
   /** Auto-fix syntax version issues */
   fix?: boolean;
+  /** Skip policy evaluation */
+  skipPolicies?: boolean;
 }
 
 /**
