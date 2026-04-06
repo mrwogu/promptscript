@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-03-31T23:49:19.610Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-04-06T08:34:33.387Z | source: .promptscript/project.prs | target: factory
 description: Create CLI command handler
 ---
 

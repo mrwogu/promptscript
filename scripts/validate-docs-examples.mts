@@ -256,6 +256,16 @@ function shouldSkipBlock(content: string, markdownContext: string): boolean {
     return true;
   }
 
+  // Skip blocks containing @extend (proposed syntax not yet supported by parser)
+  if (content.includes('@extend ')) {
+    return true;
+  }
+
+  // Skip blocks with unquoted file paths in arrays (e.g., ./references/foo.md)
+  if (/^\s+\.\/[\w/.-]+\.md\s*$/m.test(content)) {
+    return true;
+  }
+
   // Skip blocks that are showing YAML-like config syntax (not .prs)
   if (
     content.match(/^tags:\s*\[/) ||
