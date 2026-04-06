@@ -557,12 +557,40 @@ packages:
     ref: main
     commit: a3f8c2d91b4e6f7890123456789abcdef0123456
     resolved: '2026-03-23T10:00:00Z'
+    references:
+      '@stacks/react.prs':
+        hash: sha256:a1b2c3d4e5f6...
+      '@fragments/testing.prs':
+        hash: sha256:f6e5d4c3b2a1...
   github.com/some-org/claude-skills:
     url: https://github.com/some-org/claude-skills.git
     ref: v1.2.0
     commit: deadbeef12345678901234567890abcdef012345
     resolved: '2026-03-22T08:30:00Z'
+    references:
+      'skills/tdd-workflow/SKILL.md':
+        hash: sha256:1234abcd5678...
 ```
+
+### Integrity Hashes
+
+Each lockfile entry includes SHA-256 hashes for the individual files resolved from that package. During compilation and validation, these hashes are verified against the actual file contents. If a file has been modified since it was locked, a reference integrity error is raised.
+
+This protects against:
+
+- **Tampered dependencies** - changes to registry files after locking
+- **Cache corruption** - stale or corrupted cached copies
+- **Supply chain attacks** - unauthorized modifications to shared skills
+
+To skip hash verification (e.g., during local development), use:
+
+```bash
+prs compile --ignore-hashes
+prs validate --ignore-hashes
+```
+
+!!! warning
+Never use `--ignore-hashes` in CI pipelines. Hash verification is a critical security check for production builds.
 
 ### Committing the Lockfile
 

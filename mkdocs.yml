@@ -239,6 +239,7 @@ nav:
       - Security: guides/security.md
       - User Configuration: guides/user-config.md
       - Examples (Few-Shot): guides/examples.md
+      - Policy Engine: guides/policy-engine.md
       - Guard Dependencies: guides/guard-dependencies.md
       - AI Migration Best Practices: guides/ai-migration-best-practices.md
       - Comparison: guides/vs-manual.md
