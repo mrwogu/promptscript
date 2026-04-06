@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-03-27T11:23:57.861Z | source: .promptscript/project.prs | target: claude
+# promptscript-generated: 2026-04-02T09:58:21.619Z | source: .promptscript/project.prs | target: claude
 name: debugger
 description: Debugs errors, test failures, and unexpected behavior. Knows PromptScript architecture.
 tools: ['Read', 'Edit', 'Bash', 'Grep', 'Glob']

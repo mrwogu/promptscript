@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-03-31T23:49:19.607Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-04-06T08:34:33.386Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -69,7 +69,15 @@ flowchart TB
 - Use fixtures for parser tests
 - keepInSync: when adding or changing block keywords (e.g. @knowledge, @guards), always update ALL THREE syntax highlighters: (1) Pygments lexer: docs_extensions/promptscript_lexer.py, (2) VS Code TextMate grammar: apps/vscode/syntaxes/promptscript.tmLanguage.json, (3) Playground Monaco language: packages/playground/src/utils/prs-language.ts
 - branchStrategy: gitflow
-- newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
+- newTask: When starting a new task while on main branch:
+      1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name>
+      2. Make changes with atomic commits (Conventional Commits format)
+      3. Run full verification pipeline before pushing
+      4. Push branch: git push -u origin <branch-name>
+      5. Create PR: gh pr create --fill
+      6. Monitor CI: gh pr checks --watch
+      7. If checks fail, fix issues and push again
+      8. Wait for all checks to pass before considering work complete
 - prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
 
 ## Git Commits
@@ -118,18 +126,18 @@ pnpm prs compile          # Compile .prs files (uses local dev version)
 
 (MANDATORY)
 
-After completing ANY code changes, run ALL steps in order:
+ After completing ANY code changes, run ALL steps in order:
 
-```bash
-pnpm run format           # 1. Format code with Prettier
-pnpm run lint             # 2. Check for linting errors
-pnpm run typecheck        # 3. Verify TypeScript types
-pnpm run test             # 4. Run all tests
-pnpm prs validate --strict  # 5. Validate .prs files
-pnpm schema:check         # 6. Verify JSON schemas are current
-pnpm skill:check          # 7. Verify SKILL.md copies are in sync
-pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
-```
+ ```bash
+ pnpm run format           # 1. Format code with Prettier
+ pnpm run lint             # 2. Check for linting errors
+ pnpm run typecheck        # 3. Verify TypeScript types
+ pnpm run test             # 4. Run all tests
+ pnpm prs validate --strict  # 5. Validate .prs files
+ pnpm schema:check         # 6. Verify JSON schemas are current
+ pnpm skill:check          # 7. Verify SKILL.md copies are in sync
+ pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
+ ```
 
 ## Documentation
 

@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-03-31T23:49:19.610Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-04-06T08:34:33.387Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -483,6 +483,60 @@ Example — extending a base skill to add references and override content:
 The `references` array from the base skill and the overlay are combined (append). The `content`
 field from the overlay replaces the base (replace).
 
+#### Reference negation
+
+Use `!` prefix in `@extend` to remove entries from a lower layer's append-strategy arrays:
+
+```
+@extend skills.code-review {
+  references: [
+    "!references/deprecated.md"
+    "references/replacement.md"
+  ]
+}
+```
+
+Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks
+on `references` and `requires`. Validator PS028 warns about `!` in base definitions.
+
+#### Sealed properties
+
+Prevent `@extend` from overriding specified replace-strategy properties:
+
+```
+@skills {
+  deploy: {
+    content: (triple-quoted text with critical workflow)
+    sealed: ["content", "description"]
+  }
+}
+```
+
+`sealed: true` seals all replace-strategy properties. Attempting to override a sealed
+property is a hard compilation error. Only the base skill author can set `sealed` —
+overlays cannot add or modify it. Append-strategy properties remain extendable.
+Validator PS029 warns about invalid entries in `sealed`.
+
+#### Skill composition (inline @use)
+
+Import sub-skills within a `@skills` block to compose multi-phase workflows:
+
+```
+@skills {
+  ops: {
+    description: "Production triage"
+    content: (triple-quoted text with orchestrator instructions)
+  }
+  @use ./phases/health-scan
+  @use ./phases/triage
+  @use ./phases/code-fix as autofix
+}
+```
+
+Each `@use` resolves the referenced `.prs` file, extracts its skill definition and context
+blocks, and flattens them as numbered phase sections into the parent skill's content. The
+`as alias` form controls the phase display name. Validator PS027 checks composition validity.
+
 ### Parameterized Inheritance (Template Variables)
 
 Use `{{variable}}` placeholders in a **parent/template** file, and pass values
@@ -608,6 +662,9 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
 - **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).
+- **PS027 (`valid-skill-composition`)**: warns about conflicting phase names or excessive phases in composed skills.
+- **PS028 (`valid-append-negation`)**: warns when negation prefix `!` appears in base skill definitions (only effective in `@extend`).
+- **PS029 (`valid-sealed-property`)**: warns when `sealed` contains non-replace-strategy property names.
 
 ### Fixing Syntax Versions
 
