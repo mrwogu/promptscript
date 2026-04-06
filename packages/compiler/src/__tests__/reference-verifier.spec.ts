@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { verifyReferenceIntegrity } from '../reference-verifier.js';
 import type { Lockfile } from '@promptscript/core';
-import { LOCKFILE_VERSION } from '@promptscript/core';
+import { LOCKFILE_VERSION, ResolveError } from '@promptscript/core';
 import { hashContent, buildReferenceKey } from '@promptscript/resolver';
 
 describe('verifyReferenceIntegrity', () => {
@@ -31,7 +31,7 @@ describe('verifyReferenceIntegrity', () => {
     ).not.toThrow();
   });
 
-  it('should throw on hash mismatch', () => {
+  it('should throw ResolveError on hash mismatch', () => {
     const content = Buffer.from('tampered content');
     const key = buildReferenceKey(repoUrl, 'ref.md', version);
     const lockfile: Lockfile = {
@@ -50,10 +50,10 @@ describe('verifyReferenceIntegrity', () => {
         version,
         lockfile,
       })
-    ).toThrow(/hash mismatch/i);
+    ).toThrow(ResolveError);
   });
 
-  it('should throw when no hash entry exists and lockfile has references section', () => {
+  it('should throw ResolveError when no hash entry exists and lockfile has references section', () => {
     const content = Buffer.from('new content');
     const lockfile: Lockfile = {
       version: LOCKFILE_VERSION,
@@ -69,7 +69,7 @@ describe('verifyReferenceIntegrity', () => {
         version,
         lockfile,
       })
-    ).toThrow(/no integrity hash/i);
+    ).toThrow(ResolveError);
   });
 
   it('should skip verification when lockfile has no references section', () => {

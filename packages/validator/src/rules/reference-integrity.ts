@@ -44,10 +44,10 @@ export const referenceIntegrity: ValidationRule = {
           // Only check registry-sourced references
           if (!registryReferences.has(ref)) continue;
 
-          // Check if any lockfile reference key contains this path
+          // Check if any lockfile reference key has this path as its second component
           const hasEntry = Object.keys(lockfile.references).some((key) => {
             const parts = key.split('\0');
-            return parts[1] === ref || ref.endsWith(parts[1] ?? '');
+            return parts[1] === ref;
           });
 
           if (!hasEntry) {

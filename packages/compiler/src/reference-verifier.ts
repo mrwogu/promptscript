@@ -1,4 +1,5 @@
 import type { Lockfile } from '@promptscript/core';
+import { ResolveError, ErrorCode } from '@promptscript/core';
 import { hashContent, buildReferenceKey } from '@promptscript/resolver';
 
 /**
@@ -34,17 +35,21 @@ export function verifyReferenceIntegrity(options: VerifyReferenceOptions): void 
   const entry = lockfile.references[key];
 
   if (!entry) {
-    throw new Error(
+    throw new ResolveError(
       `Reference file "${relativePath}" has no integrity hash in lockfile. ` +
-        `Run \`prs lock\` to generate integrity hashes for registry references.`
+        `Run \`prs lock\` to generate integrity hashes for registry references.`,
+      undefined,
+      ErrorCode.LOCKFILE_INTEGRITY
     );
   }
 
   const actualHash = hashContent(content);
   if (actualHash !== entry.hash) {
-    throw new Error(
+    throw new ResolveError(
       `Reference file hash mismatch: ${relativePath} has changed since last lock. ` +
-        `Run \`prs lock --update\` to accept changes.`
+        `Run \`prs lock --update\` to accept changes.`,
+      undefined,
+      ErrorCode.LOCKFILE_INTEGRITY
     );
   }
 }
