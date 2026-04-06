@@ -214,12 +214,32 @@ describe('isValidLockfile', () => {
     expect(isValidLockfile(lockfile)).toBe(false);
   });
 
+  it('should reject lockfile with array references', () => {
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+      references: [],
+    };
+    expect(isValidLockfile(lockfile)).toBe(false);
+  });
+
   it('should reject lockfile with malformed reference entry', () => {
     const lockfile = {
       version: LOCKFILE_VERSION,
       dependencies: {},
       references: {
         key: { hash: 123 },
+      },
+    };
+    expect(isValidLockfile(lockfile)).toBe(false);
+  });
+
+  it('should reject lockfile with non-string lockedAt', () => {
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+      references: {
+        key: { hash: 'sha256-abc', lockedAt: 99 },
       },
     };
     expect(isValidLockfile(lockfile)).toBe(false);
