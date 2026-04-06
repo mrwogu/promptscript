@@ -4,6 +4,7 @@ description: Suggest refactoring opportunities
 ---
 
 Suggest refactoring opportunities:
+
 - Extract reusable functions
 - Simplify conditional logic
 - Improve naming clarity

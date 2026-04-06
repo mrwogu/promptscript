@@ -4,6 +4,7 @@ description: 'Create CLI command handler'
 ---
 
 Create CLI command handler:
+
 - Use commander.js patterns from existing commands
 - Add proper option parsing
 - Include help text and examples
