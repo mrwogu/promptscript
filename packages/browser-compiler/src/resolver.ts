@@ -124,6 +124,73 @@ export interface ResolvedAST {
  */
 const IMPORT_MARKER_PREFIX = '__import__';
 
+// ── Skill-aware merge strategy sets ──────────────────────────────────
+//
+// Mirrors the canonical CLI resolver in `@promptscript/resolver/extensions`
+// so the playground produces the same output for `@extend skills.<name>`
+// (and aliased `@extend alias.skills.<name>`) as `prs compile`. Without
+// this, generic `deepMerge` concatenated TextContent properties like
+// `content` instead of letting the overlay replace them.
+
+/** Properties where the extension value replaces the base value. */
+const SKILL_REPLACE_PROPERTIES = new Set([
+  'content',
+  'description',
+  'trigger',
+  'userInvocable',
+  'allowedTools',
+  'disableModelInvocation',
+  'context',
+  'agent',
+]);
+
+/** Properties where array elements are appended (deduplicated). */
+const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires']);
+
+/** Properties where objects are shallow-merged (extension wins per key). */
+const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);
+
+/** Properties that are never overwritten by @extend (resolver-generated). */
+const SKILL_PRESERVE_PROPERTIES = new Set([
+  'composedFrom',
+  '__composedFrom',
+  'sealed',
+  '__layerTrace',
+]);
+
+/**
+ * Type guard for values that should be treated as a skill object. The parser
+ * emits nested object literals inside `@skills` as plain `Record<string, Value>`,
+ * never as ObjectContent AST nodes — so any non-array, non-AST-node object
+ * qualifies. TextContent (`{ type: 'TextContent', ... }`) must be excluded.
+ */
+function isSkillRecordCandidate(v: unknown): v is Record<string, Value> {
+  return (
+    v !== null &&
+    typeof v === 'object' &&
+    !Array.isArray(v) &&
+    (v as Record<string, unknown>)['type'] !== 'TextContent'
+  );
+}
+
+/** Extract string elements from a plain array. */
+function extractSkillElements(val: unknown): string[] | null {
+  if (Array.isArray(val)) {
+    return val.filter((el): el is string => typeof el === 'string');
+  }
+  return null;
+}
+
+/** True for plain `{}` objects, false for arrays, primitives, and AST nodes. */
+function isPlainSkillObject(v: unknown): v is Record<string, Value> {
+  return (
+    v !== null &&
+    typeof v === 'object' &&
+    !Array.isArray(v) &&
+    (v as Record<string, unknown>)['type'] !== 'TextContent'
+  );
+}
+
 /**
  * Browser-compatible resolver for PromptScript files with inheritance and import support.
  *
@@ -791,9 +858,13 @@ export class BrowserResolver {
     let targetName = rootName;
     let deepPath = pathParts.slice(1);
 
+    // Aliased imports are merged into the un-aliased namespace by
+    // resolveUses; the aliased `__import__alias.<name>` copies are stripped
+    // at the end of applyExtends. Redirect alias.<block> targets to the
+    // un-aliased block so the @extend modifies the surviving copy.
     const importMarker = blocks.find((b) => b.name === `${IMPORT_MARKER_PREFIX}${rootName}`);
     if (importMarker && pathParts.length > 1) {
-      targetName = `${IMPORT_MARKER_PREFIX}${rootName}.${pathParts[1]}`;
+      targetName = pathParts[1] ?? rootName;
       deepPath = pathParts.slice(2);
     }
 
@@ -807,7 +878,12 @@ export class BrowserResolver {
       return blocks;
     }
 
-    const merged = this.mergeExtension(target, deepPath, ext);
+    // Skill-aware merging fires when the (un-aliased) target block is the
+    // `skills` block — both `@extend skills.<name>` and the post-fix
+    // `@extend alias.skills.<name>` resolve to targetName === 'skills'.
+    const skillContext = targetName === 'skills';
+
+    const merged = this.mergeExtension(target, deepPath, ext, skillContext);
 
     return [...blocks.slice(0, idx), merged, ...blocks.slice(idx + 1)];
   }
@@ -815,7 +891,12 @@ export class BrowserResolver {
   /**
    * Merge extension content into a block.
    */
-  private mergeExtension(block: Block, path: string[], ext: ExtendBlock): Block {
+  private mergeExtension(
+    block: Block,
+    path: string[],
+    ext: ExtendBlock,
+    skillContext: boolean
+  ): Block {
     if (path.length === 0) {
       return {
         ...block,
@@ -825,7 +906,7 @@ export class BrowserResolver {
 
     return {
       ...block,
-      content: this.mergeAtPath(block.content, path, ext.content),
+      content: this.mergeAtPath(block.content, path, ext.content, skillContext),
     };
   }
 
@@ -835,7 +916,8 @@ export class BrowserResolver {
   private mergeAtPath(
     content: BlockContent,
     path: string[],
-    extContent: BlockContent
+    extContent: BlockContent,
+    skillContext: boolean
   ): BlockContent {
     if (path.length === 0) {
       return this.mergeExtendContent(content, extContent);
@@ -856,7 +938,7 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeExtendValue(existing, extContent),
+            [currentKey]: this.mergeExtendValue(existing, extContent, skillContext),
           },
         };
       }
@@ -866,7 +948,7 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent),
+            [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent, skillContext),
           },
         };
       }
@@ -888,7 +970,7 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeExtendValue(existing, extContent),
+            [currentKey]: this.mergeExtendValue(existing, extContent, skillContext),
           },
         };
       }
@@ -898,7 +980,7 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent),
+            [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent, skillContext),
           },
         };
       }
@@ -918,20 +1000,19 @@ export class BrowserResolver {
   /**
    * Merge at path within a Value.
    */
-  private mergeAtPathValue(value: Value, path: string[], extContent: BlockContent): Value {
-    if (path.length === 0) {
-      return this.mergeExtendValue(value, extContent);
-    }
-
+  private mergeAtPathValue(
+    value: Value,
+    path: string[],
+    extContent: BlockContent,
+    skillContext: boolean
+  ): Value {
+    // Caller (mergeAtPath / self-recursion) guarantees path is non-empty
+    // and split('.') never yields empty segments for validated input.
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       return this.buildPathValue(path, extContent);
     }
 
-    const currentKey = path[0];
-    if (!currentKey) {
-      return this.mergeExtendValue(value, extContent);
-    }
-
+    const currentKey = path[0]!;
     const rest = path.slice(1);
     const obj = value as Record<string, Value>;
     const existing = obj[currentKey];
@@ -939,14 +1020,14 @@ export class BrowserResolver {
     if (rest.length === 0) {
       return {
         ...obj,
-        [currentKey]: this.mergeExtendValue(existing, extContent),
+        [currentKey]: this.mergeExtendValue(existing, extContent, skillContext),
       };
     }
 
     if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
       return {
         ...obj,
-        [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent),
+        [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent, skillContext),
       };
     }
 
@@ -1003,9 +1084,21 @@ export class BrowserResolver {
   /**
    * Merge a Value with BlockContent.
    */
-  private mergeExtendValue(existing: Value | undefined, extContent: BlockContent): Value {
+  private mergeExtendValue(
+    existing: Value | undefined,
+    extContent: BlockContent,
+    skillContext: boolean = false
+  ): Value {
     if (existing === undefined) {
       return this.extractValue(extContent);
+    }
+
+    // Skill-aware merging: when overlaying a skill inside a `@skills` block,
+    // apply replace/append/merge strategies per property name instead of
+    // running everything through generic deepMerge (which would concatenate
+    // TextContent properties like `content` and silently keep base text).
+    if (skillContext && extContent.type === 'ObjectContent' && isSkillRecordCandidate(existing)) {
+      return this.mergeSkillValue(existing, extContent);
     }
 
     if (Array.isArray(existing) && extContent.type === 'ArrayContent') {
@@ -1033,6 +1126,92 @@ export class BrowserResolver {
     }
 
     return this.extractValue(extContent);
+  }
+
+  /**
+   * Skill-aware merge — applies replace/append/shallow-merge strategies per
+   * property name. Mirrors `mergeSkillValue` in `@promptscript/resolver`.
+   *
+   * Returns a plain `Record<string, Value>` so the result matches the shape
+   * the parser uses for nested skill objects.
+   */
+  private mergeSkillValue(existing: Record<string, Value>, ext: ObjectContent): Value {
+    const base: Record<string, Value> = { ...existing };
+
+    for (const [key, extVal] of Object.entries(ext.properties)) {
+      if (SKILL_PRESERVE_PROPERTIES.has(key)) {
+        continue;
+      }
+
+      if (SKILL_REPLACE_PROPERTIES.has(key)) {
+        base[key] = this.deepCloneValue(extVal as Value);
+        continue;
+      }
+
+      if (SKILL_APPEND_PROPERTIES.has(key)) {
+        // The validator rejects non-array values for references/examples/
+        // requires, so we trust the overlay is an array here.
+        const extElems = extractSkillElements(extVal) ?? [];
+        const baseElems = extractSkillElements(base[key]) ?? [];
+        base[key] = this.processSkillAppend(baseElems, extElems) as unknown as Value;
+        continue;
+      }
+
+      if (SKILL_MERGE_PROPERTIES.has(key)) {
+        // Shallow merge of object properties. The validator rejects non-object
+        // values for these keys, so the deepClone fallback only fires when
+        // overlay is the first to introduce the property.
+        const baseVal = base[key];
+        if (isPlainSkillObject(baseVal) && isPlainSkillObject(extVal)) {
+          base[key] = { ...baseVal, ...extVal };
+        } else {
+          base[key] = this.deepCloneValue(extVal as Value);
+        }
+        continue;
+      }
+
+      // Unknown property — deep-merge nested objects, otherwise overlay wins.
+      const baseVal = base[key];
+      if (isPlainSkillObject(baseVal) && isPlainSkillObject(extVal)) {
+        base[key] = deepMerge(
+          baseVal as Record<string, unknown>,
+          extVal as Record<string, unknown>
+        ) as unknown as Value;
+      } else {
+        base[key] = this.deepCloneValue(extVal as Value);
+      }
+    }
+
+    return base as unknown as Value;
+  }
+
+  /**
+   * Append-strategy with negation support: `!path` entries remove matching
+   * base entries, remaining entries are appended with deduplication.
+   */
+  private processSkillAppend(baseItems: string[], extItems: string[]): string[] {
+    const negations = new Set<string>();
+    const additions: string[] = [];
+    for (const item of extItems) {
+      if (item.startsWith('!')) {
+        negations.add(item.slice(1));
+      } else {
+        additions.push(item);
+      }
+    }
+
+    const filtered =
+      negations.size === 0 ? baseItems : baseItems.filter((item) => !negations.has(item));
+
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const item of [...filtered, ...additions]) {
+      if (!seen.has(item)) {
+        seen.add(item);
+        result.push(item);
+      }
+    }
+    return result;
   }
 
   /**

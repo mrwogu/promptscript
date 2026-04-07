@@ -533,6 +533,62 @@ describe('applyExtends', () => {
     });
   });
 
+  describe('skill-aware merge on plain Record skill objects', () => {
+    it('replaces content / description and appends references when the existing skill is a plain Record', () => {
+      // Mirrors what the parser actually emits for `@skills { code-review: {...} }`:
+      // a `code-review` value that is a plain `Record<string, Value>`, not an
+      // ObjectContent AST node. Before this fix, mergeValue's
+      // `isObjectContent(existing)` gate kept the skill-aware path from firing
+      // and `content` was concatenated by the generic deepMerge fallback.
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                description: 'Generic code review',
+                references: ['./standards/clean-code.md'],
+                content: createTextContent('Generic review steps.'),
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              description: 'Banking-grade code review',
+              references: ['./policies/pci-dss.md'],
+              content: createTextContent('Banking-specific review steps.'),
+            })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const codeReview = skillsBlock.content.properties['code-review'] as Record<string, Value>;
+
+      // Replace strategy
+      expect(codeReview['description']).toBe('Banking-grade code review');
+
+      // Replace strategy on TextContent — banking wins, generic gone.
+      const content = codeReview['content'] as unknown;
+      const contentValue =
+        typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+      expect(contentValue).toBe('Banking-specific review steps.');
+      expect(contentValue).not.toContain('Generic review steps');
+
+      // Append strategy — both base and overlay refs present.
+      const refs = codeReview['references'] as unknown[];
+      expect(refs).toContain('./standards/clean-code.md');
+      expect(refs).toContain('./policies/pci-dss.md');
+    });
+  });
+
   describe('SKILL_PRESERVE_PROPERTIES — composedFrom is never overwritten by @extend', () => {
     it('preserves __composedFrom when @extend targets a skill property inside @skills', () => {
       const composedFromValue = [{ name: 'phase-a', source: '/a.prs', composedBlocks: [] }];
@@ -822,15 +878,19 @@ describe('overlay consistency warnings', () => {
 
     it('should detect stale skill target through aliased import', () => {
       const logger = createMockLogger();
+      // Mirror what resolveUses produces for `@use ./base as base`: the
+      // source's `skills` block is merged into the un-aliased namespace
+      // AND a `__import__base.skills` aliased copy is stored. After this
+      // fix, applyExtend resolves `base.skills.removed-skill` against the
+      // surviving un-aliased `skills` block.
+      const skillsContent = createObjectContent({
+        'existing-skill': { description: 'exists' } as unknown as Value,
+      });
       const ast = createProgram({
         blocks: [
+          createBlock('skills', skillsContent),
           createBlock(`${IMPORT_MARKER_PREFIX}base`, createObjectContent({})),
-          createBlock(
-            `${IMPORT_MARKER_PREFIX}base.skills`,
-            createObjectContent({
-              'existing-skill': { description: 'exists' } as unknown as Value,
-            })
-          ),
+          createBlock(`${IMPORT_MARKER_PREFIX}base.skills`, skillsContent),
         ],
         extends: [
           createExtendBlock(
@@ -1027,5 +1087,97 @@ describe('overlay warnings integration', () => {
 
     // Cleanup
     await fs.rm(testDir, { recursive: true, force: true });
+  });
+
+  it('should apply @extend alias.skills.<name> to the surviving merged block', async () => {
+    const os = await import('node:os');
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const testDir = path.join(os.tmpdir(), `prs-overlay-${Date.now()}`);
+    await fs.mkdir(testDir, { recursive: true });
+
+    const baseSkill = `@meta {
+  id: "base-skill"
+  syntax: "1.2.0"
+}
+
+@skills {
+  code-review: {
+    description: "Generic code review"
+    references: ["./standards/clean-code.md"]
+    content: """
+      Generic review steps.
+    """
+  }
+}
+`;
+
+    const project = `@meta {
+  id: "banking-review"
+  syntax: "1.2.0"
+}
+
+@use ./base-skill as base
+
+@extend base.skills.code-review {
+  description: "Banking-grade code review"
+  references: ["./policies/pci-dss.md"]
+  content: """
+    Banking-specific review steps.
+  """
+}
+`;
+
+    await fs.writeFile(path.join(testDir, 'base-skill.prs'), baseSkill);
+    const projectFile = path.join(testDir, 'project.prs');
+    await fs.writeFile(projectFile, project);
+
+    const resolver = new Resolver({
+      registryPath: testDir,
+      localPath: testDir,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(projectFile);
+
+    try {
+      expect(result.errors).toEqual([]);
+      // Aliased import marker copies must be stripped from the final AST.
+      expect(result.ast?.blocks.some((b) => b.name.startsWith(IMPORT_MARKER_PREFIX))).toBe(false);
+
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+
+      const codeReview = skillsBlock.content.properties['code-review'] as Record<string, Value>;
+      expect(codeReview).toBeDefined();
+
+      // The override must reach the surviving block. Before the alias fix,
+      // @extend silently mutated `__import__base.skills` (which is stripped
+      // at the end of applyExtends), so none of these properties appeared.
+      // Before the skill-aware-record fix, `content` (replace-strategy) was
+      // concatenated instead of replaced because the parser emits nested
+      // skill objects as plain Records, not ObjectContent nodes.
+      expect(codeReview['description']).toBe('Banking-grade code review');
+
+      const refs = codeReview['references'] as unknown;
+      const refList = Array.isArray(refs)
+        ? refs
+        : ((refs as { type?: string; elements?: unknown[] })?.elements ?? []);
+      const refStrings = (refList as unknown[]).map((r) => String(r));
+      expect(refStrings).toContain('./policies/pci-dss.md');
+      expect(refStrings).toContain('./standards/clean-code.md');
+
+      const content = codeReview['content'] as unknown;
+      const contentValue =
+        typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+      expect(contentValue).toContain('Banking-specific review steps');
+      // Replace-strategy: base content must be gone after the overlay wins.
+      expect(contentValue).not.toContain('Generic review steps');
+    } finally {
+      await fs.rm(testDir, { recursive: true, force: true });
+    }
   });
 });

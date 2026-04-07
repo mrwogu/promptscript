@@ -159,11 +159,15 @@ function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[
   let targetName = rootName;
   let deepPath = pathParts.slice(1);
 
-  // Check for aliased import reference
+  // Check for aliased import reference. When `@use ./x as alias` is used,
+  // `resolveUses` merges source.blocks into the un-aliased namespace AND
+  // stores aliased copies under `__import__alias.<name>`. The aliased copies
+  // are stripped at the end of `applyExtends`, so modifying them would lose
+  // the override. Resolve the alias to the un-aliased block name instead so
+  // the @extend mutates the surviving block.
   const importMarker = blocks.find((b) => b.name === `${IMPORT_MARKER_PREFIX}${rootName}`);
   if (importMarker && pathParts.length > 1) {
-    // This is alias.blockName - find the imported block
-    targetName = `${IMPORT_MARKER_PREFIX}${rootName}.${pathParts[1]}`;
+    targetName = pathParts[1] ?? rootName;
     deepPath = pathParts.slice(2);
   }
 
@@ -420,8 +424,13 @@ function mergeValue(
     return extractValue(extContent);
   }
 
-  // Skill-aware merging: delegate to mergeSkillValue when inside a @skills block
-  if (skillContext && isObjectContent(existing) && extContent.type === 'ObjectContent') {
+  // Skill-aware merging: delegate to mergeSkillValue when inside a @skills
+  // block. The parser emits nested skill objects (e.g. the value of
+  // `code-review` inside `@skills`) as plain `Record<string, Value>`, while
+  // synthetic test fixtures sometimes wrap them as ObjectContent nodes —
+  // route both shapes through the skill-aware path so replace/append/merge
+  // strategies fire on real-world ASTs.
+  if (skillContext && extContent.type === 'ObjectContent' && isSkillRecordCandidate(existing)) {
     return mergeSkillValue(existing, extContent, logger);
   }
 
@@ -457,23 +466,46 @@ function mergeValue(
 }
 
 /**
+ * Type guard for values that should be treated as a skill object — either an
+ * ObjectContent AST node (synthetic fixtures) or a plain `Record<string, Value>`
+ * (real parser output for nested object literals inside `@skills`).
+ */
+function isSkillRecordCandidate(v: unknown): v is ObjectContentNode | Record<string, Value> {
+  if (v === null || typeof v !== 'object' || Array.isArray(v)) {
+    return false;
+  }
+  if (isObjectContent(v)) {
+    return true;
+  }
+  // Reject other AST content nodes (TextContent, ArrayContent, MixedContent).
+  const type = (v as Record<string, unknown>)['type'];
+  return (
+    type !== 'TextContent' &&
+    type !== 'ArrayContent' &&
+    type !== 'MixedContent' &&
+    type !== 'ObjectContent'
+  );
+}
+
+/**
  * Skill-aware merge: applies replace/append/shallow-merge strategies
  * based on the property name within a skill definition.
  *
- * Returns a flat Record matching the shape produced by deepMerge
- * (ObjectContent structural fields + skill properties at top level).
+ * Returns a plain `Record<string, Value>` so the result matches the shape
+ * the parser uses for nested skill objects. The previous implementation
+ * returned a hybrid that mixed ObjectContent AST fields (`type`, `properties`,
+ * `loc`) with the skill properties at top level — convenient for synthetic
+ * tests but inconsistent with real parser output and hard to consume.
  */
-function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent, logger?: Logger): Value {
-  // Start with a shallow copy of the existing node (preserves type, loc, etc.)
-  const base = { ...existing } as unknown as Record<string, Value>;
-  // Flatten base properties to top level (matching deepMerge behaviour).
-  // Only set from .properties if the key doesn't already exist at top level
-  // (a previous merge pass may have placed a more up-to-date value there).
-  for (const [k, v] of Object.entries(existing.properties)) {
-    if (!(k in base)) {
-      base[k] = v;
-    }
-  }
+function mergeSkillValue(
+  existing: ObjectContentNode | Record<string, Value>,
+  ext: ObjectContent,
+  logger?: Logger
+): Value {
+  // Normalize to a plain property bag regardless of input shape.
+  const base: Record<string, Value> = isObjectContent(existing as unknown)
+    ? { ...(existing as ObjectContentNode).properties }
+    : { ...(existing as Record<string, Value>) };
 
   const trace: Array<{ property: string; source: string; strategy: string; action: string }> = [];
   const sourceFile = ext.loc?.file ?? '<unknown>';

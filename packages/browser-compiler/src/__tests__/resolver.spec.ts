@@ -410,6 +410,285 @@ describe('BrowserResolver', () => {
       const result = await resolver.resolve('project.prs');
 
       expect(result.ast).not.toBeNull();
+      // The aliased @extend must mutate the surviving (un-aliased) block,
+      // not the `__import__tools.standards` copy that gets stripped at the
+      // end of applyExtends. Otherwise the override silently disappears.
+      const standardsBlock = result.ast?.blocks.find((b) => b.name === 'standards');
+      expect(standardsBlock).toBeDefined();
+      expect(result.ast?.blocks.some((b) => b.name.startsWith('__import__'))).toBe(false);
+      if (standardsBlock?.content.type === 'ObjectContent') {
+        expect(standardsBlock.content.properties).toMatchObject({ extra: 'value' });
+      } else {
+        throw new Error('expected ObjectContent for standards block');
+      }
+    });
+
+    it('should overlay an aliased skill via @extend alias.skills.<name>', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "banking-review" syntax: "1.2.0" }
+@use ./base-skill as base
+@extend base.skills.code-review {
+  description: "Banking-grade code review"
+  references: ["./policies/pci-dss.md"]
+  content: """Banking review steps"""
+}`,
+        'base-skill.prs': `@meta { id: "base-skill" syntax: "1.2.0" }
+@skills {
+  code-review: {
+    description: "Generic code review"
+    references: ["./standards/clean-code.md"]
+    content: """Generic review steps"""
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+
+      const codeReview = skillsBlock.content.properties['code-review'] as Record<string, unknown>;
+      expect(codeReview).toBeDefined();
+
+      // Replace strategy on description (primitive).
+      expect(codeReview['description']).toBe('Banking-grade code review');
+
+      // Append strategy on references — both base and overlay entries present.
+      const refs = codeReview['references'];
+      const refList = Array.isArray(refs)
+        ? refs
+        : ((refs as { type?: string; elements?: unknown[] })?.elements ?? []);
+      const refStrings = (refList as unknown[]).map((r) => String(r));
+      expect(refStrings).toContain('./policies/pci-dss.md');
+      expect(refStrings).toContain('./standards/clean-code.md');
+
+      // Replace strategy on TextContent content — banking wins, generic gone.
+      const content = codeReview['content'];
+      const contentValue =
+        typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+      expect(contentValue).toContain('Banking review steps');
+      expect(contentValue).not.toContain('Generic review steps');
+    });
+
+    it('should preserve composedFrom and merge params/inputs via skill-aware merge', async () => {
+      // Hits SKILL_PRESERVE_PROPERTIES (composedFrom skipped) and
+      // SKILL_MERGE_PROPERTIES (params shallow-merged, overlay key wins).
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  ops: {
+    description: "base ops"
+    params: { mode: "fast", retries: 3 }
+    composedFrom: ["base.prs"]
+  }
+}
+@extend skills.ops {
+  description: "ops overlay"
+  params: { mode: "safe", verbose: true }
+  composedFrom: ["overlay-attempt.prs"]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const ops = skillsBlock.content.properties['ops'] as Record<string, unknown>;
+
+      // Replace strategy.
+      expect(ops['description']).toBe('ops overlay');
+
+      // Shallow-merge strategy: overlay key wins, base-only key survives.
+      expect(ops['params']).toMatchObject({ mode: 'safe', retries: 3, verbose: true });
+
+      // Preserve strategy: composedFrom is never overwritten by @extend.
+      const composed = ops['composedFrom'] as unknown[];
+      expect(composed).toEqual(['base.prs']);
+    });
+
+    it('should support negation in append-strategy references with !-prefix', async () => {
+      // Exercises processSkillAppend's negation path: `!entry` removes a base
+      // reference, remaining entries append with deduplication.
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  audit: {
+    description: "audit"
+    references: ["./standards/owasp-2017.md", "./standards/clean-code.md"]
+  }
+}
+@extend skills.audit {
+  references: ["!./standards/owasp-2017.md", "./standards/owasp-2024.md"]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const audit = skillsBlock.content.properties['audit'] as Record<string, unknown>;
+      const refs = audit['references'] as unknown[];
+      const refStrings = refs.map(String);
+
+      expect(refStrings).not.toContain('./standards/owasp-2017.md');
+      expect(refStrings).toContain('./standards/clean-code.md');
+      expect(refStrings).toContain('./standards/owasp-2024.md');
+    });
+
+    it('should let overlay introduce params/inputs when the base skill omits them', async () => {
+      // Hits the SKILL_MERGE_PROPERTIES deepClone fallback: base has no
+      // `params`, overlay introduces it. Without the fallback the first-time
+      // introduction would be lost.
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  ops: { description: "ops" }
+}
+@extend skills.ops {
+  params: { mode: "safe" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const ops = skillsBlock.content.properties['ops'] as Record<string, unknown>;
+      expect(ops['params']).toEqual({ mode: 'safe' });
+    });
+
+    it('should accept overlay-only references when the base skill omits them', async () => {
+      // base has no `references` key → extractSkillElements(undefined) is null,
+      // extElems is an array → mergeSkillValue takes the "else if extElems !== null"
+      // branch (overlay wins, negations stripped).
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  audit: { description: "audit" }
+}
+@extend skills.audit {
+  references: ["./policies/pci-dss.md", "!./removed.md"]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const audit = skillsBlock.content.properties['audit'] as Record<string, unknown>;
+      const refs = audit['references'] as unknown[];
+      expect(refs).toEqual(['./policies/pci-dss.md']);
+    });
+
+    it('should fall back to deepClone for unknown skill properties whose base value is non-object', async () => {
+      // metadata is unknown → unknown branch. Base value is a string (not an
+      // object), so the deepMerge branch is skipped and the overlay wins
+      // outright via deepClone.
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  custom: {
+    description: "base"
+    metadata: "old-string"
+  }
+}
+@extend skills.custom {
+  metadata: { kind: "structured" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const custom = skillsBlock.content.properties['custom'] as Record<string, unknown>;
+      expect(custom['metadata']).toEqual({ kind: 'structured' });
+    });
+
+    it('should fall back to deepMerge for unknown skill properties', async () => {
+      // Exercises the "unknown property" branch — properties not in any of
+      // the REPLACE/APPEND/MERGE/PRESERVE sets fall through to deepMerge.
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  custom: {
+    description: "base"
+    metadata: { kind: "old", owner: "team-a" }
+  }
+}
+@extend skills.custom {
+  metadata: { kind: "new", priority: 1 }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const custom = skillsBlock.content.properties['custom'] as Record<string, unknown>;
+
+      // metadata isn't a known skill property → deepMerge: overlay wins per
+      // key, base-only keys survive.
+      expect(custom['metadata']).toMatchObject({ kind: 'new', owner: 'team-a', priority: 1 });
+    });
+
+    it('should apply skill-aware replace strategy on un-aliased @extend skills.<name>', async () => {
+      // Lock in the parser's plain-Record shape for nested skill objects:
+      // before this fix, mergeExtendValue routed everything through generic
+      // deepMerge and concatenated TextContent properties (`content`).
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  code-review: {
+    description: "Generic review"
+    references: ["./standards/clean-code.md"]
+    content: """Generic body"""
+  }
+}
+@extend skills.code-review {
+  description: "Banking review"
+  references: ["./policies/pci-dss.md"]
+  content: """Banking body"""
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const codeReview = skillsBlock.content.properties['code-review'] as Record<string, unknown>;
+
+      expect(codeReview['description']).toBe('Banking review');
+
+      const refs = codeReview['references'] as unknown[];
+      const refStrings = refs.map((r) => (typeof r === 'string' ? r : String(r)));
+      expect(refStrings).toContain('./standards/clean-code.md');
+      expect(refStrings).toContain('./policies/pci-dss.md');
+
+      const content = codeReview['content'];
+      const contentValue =
+        typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+      expect(contentValue).toBe('Banking body');
+      expect(contentValue).not.toContain('Generic body');
     });
   });
 
