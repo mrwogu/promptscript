@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0](https://github.com/mrwogu/promptscript/compare/v1.10.0...v1.11.0) (2026-04-07)
+
+
+### Features
+
+* **cli:** overlay-aware skill suggestions in prs init ([#215](https://github.com/mrwogu/promptscript/issues/215)) ([5c4f4d6](https://github.com/mrwogu/promptscript/commit/5c4f4d67c46b5cf76b55f8d49e4fa646a61cd1b2))
+* **cli:** prs inspect --layers for debugging skill composition ([#213](https://github.com/mrwogu/promptscript/issues/213)) ([71ff860](https://github.com/mrwogu/promptscript/commit/71ff8608f16efef22f10403401cc897d36902b9a))
+* **playground:** add overlay/sealed gallery examples and compile test ([2cf09bb](https://github.com/mrwogu/promptscript/commit/2cf09bb63d8eab34bb08d0ac3f18049de546c991))
+* **playground:** add skill composition example to gallery ([09cde5b](https://github.com/mrwogu/promptscript/commit/09cde5b12d97204df133ae59efa3936c75a4c024))
+* **resolver:** integrity hashes in lockfile for registry references ([#225](https://github.com/mrwogu/promptscript/issues/225)) ([5ef239b](https://github.com/mrwogu/promptscript/commit/5ef239b680470ef0128c2cb75656cd084e119ebb))
+* **resolver:** reference negation syntax for skill extensions ([#211](https://github.com/mrwogu/promptscript/issues/211)) ([ab8f33d](https://github.com/mrwogu/promptscript/commit/ab8f33d3786a1d0b7d564d04e7d8b0dd99b1c4f9))
+* **resolver:** sealed property to prevent content override by higher layers ([#212](https://github.com/mrwogu/promptscript/issues/212)) ([b709f48](https://github.com/mrwogu/promptscript/commit/b709f484fbd8bd15fecc9498487033b3bec76092))
+* **resolver:** semantic base/overlay validation warnings ([#227](https://github.com/mrwogu/promptscript/issues/227)) ([302e271](https://github.com/mrwogu/promptscript/commit/302e271222b45ff12105266f5eac5694dace385e))
+* skill composition — import sub-skills within a skill ([#200](https://github.com/mrwogu/promptscript/issues/200)) ([#201](https://github.com/mrwogu/promptscript/issues/201)) ([4dc6bf2](https://github.com/mrwogu/promptscript/commit/4dc6bf2c1d493e95e5ead14b5ad32140d329b8a2))
+* **validator:** policy engine for extension compliance validation ([#222](https://github.com/mrwogu/promptscript/issues/222)) ([b175f60](https://github.com/mrwogu/promptscript/commit/b175f60bf1ae2430fba8d0188e61068c1e674957))
+
+
+### Bug Fixes
+
+* **browser-compiler:** apply only/exclude reserved params on [@use](https://github.com/use) imports ([d7388f4](https://github.com/mrwogu/promptscript/commit/d7388f4d2211682c81c4272e465422ae9a85fc6e))
+* **cli:** wire up skill suggestions in prs init ([#216](https://github.com/mrwogu/promptscript/issues/216)) ([eeef0d4](https://github.com/mrwogu/promptscript/commit/eeef0d44c471f998676d48958e0cfefc10032de1))
+* **docs:** skip unsupported syntax in docs validator ([#220](https://github.com/mrwogu/promptscript/issues/220)) ([5827c38](https://github.com/mrwogu/promptscript/commit/5827c3814ae39ef396bf65569ee938657d7f1a30))
+* **resolver:** cross-platform path traversal check for relative [@use](https://github.com/use) ([#224](https://github.com/mrwogu/promptscript/issues/224)) ([0f06f8c](https://github.com/mrwogu/promptscript/commit/0f06f8c909c6f4c6d880f121017940a4b23a4132))
+
 ## [1.10.0](https://github.com/mrwogu/promptscript/compare/v1.9.0...v1.10.0) (2026-03-30)
 
 
