@@ -1,0 +1,57 @@
+# PromptScript
+
+> Prompt-as-Code for Enterprise AI. Standardize, audit, and deploy instructions across any AI coding assistant.
+
+PromptScript is a language and toolchain for standardizing AI coding
+assistant instructions across enterprise organizations. It compiles
+.prs files to native formats for 37 AI agent platforms including
+GitHub Copilot, Claude Code, Cursor, Windsurf, and more.
+
+
+## Getting Started
+
+- [Getting Started](https://getpromptscript.dev/v1.11/getting-started/index.md)
+- [Tutorial](https://getpromptscript.dev/v1.11/tutorial/index.md)
+
+## Reference
+
+- [Language](https://getpromptscript.dev/v1.11/reference/language/index.md): Complete PromptScript language specification
+- [CLI](https://getpromptscript.dev/v1.11/reference/cli/index.md): CLI commands and options
+- [Configuration](https://getpromptscript.dev/v1.11/reference/config/index.md): Configuration file format
+
+## Formatters
+
+- [Supported Formatters](https://getpromptscript.dev/v1.11/reference/formatters/index.md): All 37 supported AI agent formatters
+- [Claude Code](https://getpromptscript.dev/v1.11/reference/formatters/claude/index.md): Claude Code output format, skills, agents, local files
+- [GitHub Copilot](https://getpromptscript.dev/v1.11/reference/formatters/github/index.md): GitHub Copilot output format, instructions, prompts, skills
+- [Cursor](https://getpromptscript.dev/v1.11/reference/formatters/cursor/index.md): Cursor output format, MDC frontmatter, commands
+- [Antigravity](https://getpromptscript.dev/v1.11/reference/formatters/antigravity/index.md): Antigravity output format, workflows, activation types
+- [Factory AI](https://getpromptscript.dev/v1.11/reference/formatters/factory/index.md): Factory AI output format, droids, skills
+- [Gemini CLI](https://getpromptscript.dev/v1.11/reference/formatters/gemini/index.md): Gemini CLI output format, commands, skills
+- [OpenCode](https://getpromptscript.dev/v1.11/reference/formatters/opencode/index.md): OpenCode output format, commands, skills, agents
+
+## Guides
+
+- [Formatter Architecture](https://getpromptscript.dev/v1.11/guides/formatter-architecture/index.md): Internal architecture of formatters
+- [Inheritance](https://getpromptscript.dev/v1.11/guides/inheritance/index.md): PromptScript inheritance system
+- [Multi-File Organization](https://getpromptscript.dev/v1.11/guides/multi-file/index.md): Multi-file organization
+- [CI/CD Integration](https://getpromptscript.dev/v1.11/guides/ci/index.md): CI/CD integration
+- [Build Your Registry](https://getpromptscript.dev/v1.11/guides/registry/index.md): Building a PromptScript registry
+- [Enterprise Setup](https://getpromptscript.dev/v1.11/guides/enterprise/index.md): Enterprise setup
+- [Migration](https://getpromptscript.dev/v1.11/guides/migration/index.md): Migration guide
+
+## Examples
+
+- [Minimal](https://getpromptscript.dev/v1.11/examples/minimal/index.md): Minimal project setup
+- [Team Setup](https://getpromptscript.dev/v1.11/examples/team-setup/index.md): Team configuration
+- [Enterprise](https://getpromptscript.dev/v1.11/examples/enterprise/index.md): Enterprise example
+- [Skills & Local](https://getpromptscript.dev/v1.11/examples/skills-and-local/index.md): Skills and local overrides
+- [Claude Agents](https://getpromptscript.dev/v1.11/examples/agents/index.md): Claude agent configuration
+
+## Optional
+
+- [FAQ](https://getpromptscript.dev/v1.11/guides/faq/index.md): Frequently asked questions
+- [Comparison](https://getpromptscript.dev/v1.11/guides/vs-manual/index.md): Comparison with manual configuration
+- [Parity Testing](https://getpromptscript.dev/v1.11/testing/parity-testing/index.md): Formatter parity testing
+- [Feature Coverage](https://getpromptscript.dev/v1.11/testing/feature-coverage/index.md): Feature coverage matrix
+
