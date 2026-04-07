@@ -329,12 +329,8 @@ function mergeAtPathValue(
   skillContext: boolean,
   logger?: Logger
 ): Value {
-  if (path.length === 0) {
-    return mergeValue(value, extContent, skillContext, logger);
-  }
-
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    // Can't navigate - build new path
+    // Can't navigate into a primitive or array — build path from here
     return buildPathValue(path, extContent);
   }
 

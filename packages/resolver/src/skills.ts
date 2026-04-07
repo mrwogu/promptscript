@@ -705,7 +705,7 @@ function isSafeSkillName(name: string): boolean {
 const noopLogger: Logger = {
   verbose: () => {},
   debug: () => {},
-  /* v8 ignore next */
+  /* v8 ignore next 1 */
   warn: () => {},
 };
 
