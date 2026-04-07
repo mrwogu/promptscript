@@ -791,9 +791,13 @@ export class BrowserResolver {
     let targetName = rootName;
     let deepPath = pathParts.slice(1);
 
+    // Aliased imports are merged into the un-aliased namespace by
+    // resolveUses; the aliased `__import__alias.<name>` copies are stripped
+    // at the end of applyExtends. Redirect alias.<block> targets to the
+    // un-aliased block so the @extend modifies the surviving copy.
     const importMarker = blocks.find((b) => b.name === `${IMPORT_MARKER_PREFIX}${rootName}`);
     if (importMarker && pathParts.length > 1) {
-      targetName = `${IMPORT_MARKER_PREFIX}${rootName}.${pathParts[1]}`;
+      targetName = pathParts[1] ?? rootName;
       deepPath = pathParts.slice(2);
     }
 

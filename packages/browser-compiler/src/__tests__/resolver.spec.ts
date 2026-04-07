@@ -410,6 +410,58 @@ describe('BrowserResolver', () => {
       const result = await resolver.resolve('project.prs');
 
       expect(result.ast).not.toBeNull();
+      // The aliased @extend must mutate the surviving (un-aliased) block,
+      // not the `__import__tools.standards` copy that gets stripped at the
+      // end of applyExtends. Otherwise the override silently disappears.
+      const standardsBlock = result.ast?.blocks.find((b) => b.name === 'standards');
+      expect(standardsBlock).toBeDefined();
+      expect(result.ast?.blocks.some((b) => b.name.startsWith('__import__'))).toBe(false);
+      if (standardsBlock?.content.type === 'ObjectContent') {
+        expect(standardsBlock.content.properties).toMatchObject({ extra: 'value' });
+      } else {
+        throw new Error('expected ObjectContent for standards block');
+      }
+    });
+
+    it('should overlay an aliased skill via @extend alias.skills.<name>', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "banking-review" syntax: "1.2.0" }
+@use ./base-skill as base
+@extend base.skills.code-review {
+  description: "Banking-grade code review"
+  references: ["./policies/pci-dss.md"]
+  content: """Banking review steps"""
+}`,
+        'base-skill.prs': `@meta { id: "base-skill" syntax: "1.2.0" }
+@skills {
+  code-review: {
+    description: "Generic code review"
+    references: ["./standards/clean-code.md"]
+    content: """Generic review steps"""
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast).not.toBeNull();
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      expect(skillsBlock).toBeDefined();
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+
+      const codeReview = skillsBlock.content.properties['code-review'];
+      expect(codeReview).toBeDefined();
+      const stringified = JSON.stringify(codeReview);
+      // The browser-compiler resolver uses generic deepMerge (no skill-aware
+      // replace/append strategies). The regression we're guarding against is
+      // overlay content being silently dropped — assert the override is
+      // present in the merged block.
+      expect(stringified).toContain('Banking-grade code review');
+      expect(stringified).toContain('pci-dss.md');
+      expect(stringified).toContain('Banking review steps');
     });
   });
 

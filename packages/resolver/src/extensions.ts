@@ -159,11 +159,15 @@ function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[
   let targetName = rootName;
   let deepPath = pathParts.slice(1);
 
-  // Check for aliased import reference
+  // Check for aliased import reference. When `@use ./x as alias` is used,
+  // `resolveUses` merges source.blocks into the un-aliased namespace AND
+  // stores aliased copies under `__import__alias.<name>`. The aliased copies
+  // are stripped at the end of `applyExtends`, so modifying them would lose
+  // the override. Resolve the alias to the un-aliased block name instead so
+  // the @extend mutates the surviving block.
   const importMarker = blocks.find((b) => b.name === `${IMPORT_MARKER_PREFIX}${rootName}`);
   if (importMarker && pathParts.length > 1) {
-    // This is alias.blockName - find the imported block
-    targetName = `${IMPORT_MARKER_PREFIX}${rootName}.${pathParts[1]}`;
+    targetName = pathParts[1] ?? rootName;
     deepPath = pathParts.slice(2);
   }
 
