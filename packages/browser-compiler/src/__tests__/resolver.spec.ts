@@ -452,16 +452,69 @@ describe('BrowserResolver', () => {
         throw new Error('expected ObjectContent for skills block');
       }
 
-      const codeReview = skillsBlock.content.properties['code-review'];
+      const codeReview = skillsBlock.content.properties['code-review'] as Record<string, unknown>;
       expect(codeReview).toBeDefined();
-      const stringified = JSON.stringify(codeReview);
-      // The browser-compiler resolver uses generic deepMerge (no skill-aware
-      // replace/append strategies). The regression we're guarding against is
-      // overlay content being silently dropped — assert the override is
-      // present in the merged block.
-      expect(stringified).toContain('Banking-grade code review');
-      expect(stringified).toContain('pci-dss.md');
-      expect(stringified).toContain('Banking review steps');
+
+      // Replace strategy on description (primitive).
+      expect(codeReview['description']).toBe('Banking-grade code review');
+
+      // Append strategy on references — both base and overlay entries present.
+      const refs = codeReview['references'];
+      const refList = Array.isArray(refs)
+        ? refs
+        : ((refs as { type?: string; elements?: unknown[] })?.elements ?? []);
+      const refStrings = (refList as unknown[]).map((r) => String(r));
+      expect(refStrings).toContain('./policies/pci-dss.md');
+      expect(refStrings).toContain('./standards/clean-code.md');
+
+      // Replace strategy on TextContent content — banking wins, generic gone.
+      const content = codeReview['content'];
+      const contentValue =
+        typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+      expect(contentValue).toContain('Banking review steps');
+      expect(contentValue).not.toContain('Generic review steps');
+    });
+
+    it('should apply skill-aware replace strategy on un-aliased @extend skills.<name>', async () => {
+      // Lock in the parser's plain-Record shape for nested skill objects:
+      // before this fix, mergeExtendValue routed everything through generic
+      // deepMerge and concatenated TextContent properties (`content`).
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "p" syntax: "1.2.0" }
+@skills {
+  code-review: {
+    description: "Generic review"
+    references: ["./standards/clean-code.md"]
+    content: """Generic body"""
+  }
+}
+@extend skills.code-review {
+  description: "Banking review"
+  references: ["./policies/pci-dss.md"]
+  content: """Banking body"""
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const codeReview = skillsBlock.content.properties['code-review'] as Record<string, unknown>;
+
+      expect(codeReview['description']).toBe('Banking review');
+
+      const refs = codeReview['references'] as unknown[];
+      const refStrings = refs.map((r) => (typeof r === 'string' ? r : String(r)));
+      expect(refStrings).toContain('./standards/clean-code.md');
+      expect(refStrings).toContain('./policies/pci-dss.md');
+
+      const content = codeReview['content'];
+      const contentValue =
+        typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+      expect(contentValue).toBe('Banking body');
+      expect(contentValue).not.toContain('Generic body');
     });
   });
 

@@ -533,6 +533,62 @@ describe('applyExtends', () => {
     });
   });
 
+  describe('skill-aware merge on plain Record skill objects', () => {
+    it('replaces content / description and appends references when the existing skill is a plain Record', () => {
+      // Mirrors what the parser actually emits for `@skills { code-review: {...} }`:
+      // a `code-review` value that is a plain `Record<string, Value>`, not an
+      // ObjectContent AST node. Before this fix, mergeValue's
+      // `isObjectContent(existing)` gate kept the skill-aware path from firing
+      // and `content` was concatenated by the generic deepMerge fallback.
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                description: 'Generic code review',
+                references: ['./standards/clean-code.md'],
+                content: createTextContent('Generic review steps.'),
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              description: 'Banking-grade code review',
+              references: ['./policies/pci-dss.md'],
+              content: createTextContent('Banking-specific review steps.'),
+            })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      const codeReview = skillsBlock.content.properties['code-review'] as Record<string, Value>;
+
+      // Replace strategy
+      expect(codeReview['description']).toBe('Banking-grade code review');
+
+      // Replace strategy on TextContent — banking wins, generic gone.
+      const content = codeReview['content'] as unknown;
+      const contentValue =
+        typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+      expect(contentValue).toBe('Banking-specific review steps.');
+      expect(contentValue).not.toContain('Generic review steps');
+
+      // Append strategy — both base and overlay refs present.
+      const refs = codeReview['references'] as unknown[];
+      expect(refs).toContain('./standards/clean-code.md');
+      expect(refs).toContain('./policies/pci-dss.md');
+    });
+  });
+
   describe('SKILL_PRESERVE_PROPERTIES — composedFrom is never overwritten by @extend', () => {
     it('preserves __composedFrom when @extend targets a skill property inside @skills', () => {
       const composedFromValue = [{ name: 'phase-a', source: '/a.prs', composedBlocks: [] }];
@@ -1098,9 +1154,12 @@ describe('overlay warnings integration', () => {
       const codeReview = skillsBlock.content.properties['code-review'] as Record<string, Value>;
       expect(codeReview).toBeDefined();
 
-      // The override must reach the surviving block. Before this fix, the
+      // The override must reach the surviving block. Before the alias fix,
       // @extend silently mutated `__import__base.skills` (which is stripped
       // at the end of applyExtends), so none of these properties appeared.
+      // Before the skill-aware-record fix, `content` (replace-strategy) was
+      // concatenated instead of replaced because the parser emits nested
+      // skill objects as plain Records, not ObjectContent nodes.
       expect(codeReview['description']).toBe('Banking-grade code review');
 
       const refs = codeReview['references'] as unknown;
@@ -1115,6 +1174,8 @@ describe('overlay warnings integration', () => {
       const contentValue =
         typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
       expect(contentValue).toContain('Banking-specific review steps');
+      // Replace-strategy: base content must be gone after the overlay wins.
+      expect(contentValue).not.toContain('Generic review steps');
     } finally {
       await fs.rm(testDir, { recursive: true, force: true });
     }
