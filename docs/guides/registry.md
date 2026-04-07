@@ -73,6 +73,37 @@ It will:
 
 You can also set a default registry via [user-level config](./user-config.md) so `prs init --yes` automatically uses it.
 
+### How Overlay-Aware Suggestions Work
+
+When your registry catalogs Layer 2 / Layer 3 [skill overlays](./skill-overlays.md), `prs init` collapses overlay relationships before showing the picker so you don't see both the base skill and its overlay as separate choices.
+
+Detection works two ways:
+
+1. **Manifest `extends` field** — when a skill entry in `registry-manifest.yaml` declares `extends: <base-skill-id>`, the suggestion engine treats it as an overlay of that base.
+2. **Inline `@extend` scan** — when no manifest hint exists, the engine scans the suggested skill's `.prs` source for `@use … as <alias>` plus `@extend <alias>.skills.<name>` and resolves the base skill via the alias map.
+
+When an overlay is detected and **both** the overlay and its base were suggested, the base is removed from the choices. The overlay choice is annotated inline:
+
+```text
+? Select skills to add: (Use space to select, enter to confirm)
+  ◉ @stacks/react (use)
+  ◉ @skills/code-review (extends @skills/code-review-base) (skill)
+  ◉ @skills/security-review (skill)
+```
+
+The `(extends …)` annotation makes it explicit which base the overlay is layering on top of, so reviewers can audit the chain at a glance. If your registry doesn't yet declare `extends`, populate the field in `registry-manifest.yaml` to get the cleanest experience:
+
+```yaml
+catalog:
+  - id: '@skills/code-review-base'
+    description: 'Generic code-review base skill'
+  - id: '@skills/code-review'
+    description: 'Org-specific code-review overlay (banking compliance)'
+    extends: '@skills/code-review-base'
+```
+
+See [Skill Overlays](./skill-overlays.md) for the overlay model itself, and the [Registry Manifest](#registry-manifest) section below for the full schema.
+
 ## Usage Patterns
 
 ### Pattern 1: Inherit a Tech Stack
@@ -454,6 +485,12 @@ Once configured, use the alias as the scope prefix in any import:
 @use @team/@stacks/react
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIIBK8ZlABu8QVmaCA5hFwAVwAjChYSAHoMRj4I5TIsOEZqCDQsBWCMOBgI7mZqXwjM7KpaG24IVhwYFKxBbnDMVjlc-MLimBt7Jxd3T28-AJwQsOZI6NiOUgUwajYOVjFcuAFGAGs4COoYaKxSuHLA7PqpyO4V6I2tnY0QSwBdBk4sajl8IlJyGH2QBg9aCBsfBGO5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ---
 
 ## Go-Style URL Imports
@@ -472,6 +509,12 @@ Beyond registry aliases, PromptScript supports Go-module-style bare URL imports.
 @use gitlab.com/myorg/prompts/@stacks/python
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIICSZZtSyCxEauqxQ5gsGpmEkEhNABXACMoCEZBAHEILAAJKMFvNGYbbnC4GEEAcyScKIoWEgB6DEY+CrgcDG8xBTgBVjFGsTgK7kCMAr52brzGcOokuRt7Jxc3AKCQjFZ-RPccZlbs3Pyi3wxIsuCK+VcCiuUyLG7uVuqAa260OVw2EEsAXQZOLGo5fCJSOQYFRaCAGAA3GC0CCvRAgIxvIA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Version Pinning in URL Imports
 
 Append a version specifier with `@`:
@@ -486,6 +529,12 @@ Append a version specifier with `@`:
 # Pin to a branch
 @use github.com/acme/shared-standards/@org/base@main
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAChFa8szXhmFEMjLCIwBzADqsAAgFc4MXvIi41AIwosSAemkkYJuDgzUYAEwC0cLBPu37cEyubV5J-QxNFQBGCgAmCgAGZWU+QWFRcV5NEgA3GGpeagl5LQAKKGx4WUwsRhxeIV4wwgBKZXVNbV0cAyNmU3NLa1sHZ1dWd2pPb19-QOCAPTCo6NjWeOqkjF59HNYKxo0tHT1DYzNGCysbOycXNw8vHz8AoJgVEgwhEABfAF0GTixqAE98FIyJQaPQQBlaBA2PgQu8gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 | Specifier | Meaning                               |
 | --------- | ------------------------------------- |
@@ -525,6 +574,12 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 # This repo has a SKILL.md but no .prs files - auto-discovered
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIIAqOCHEHUYaZoJwY3QgGUAaQBJABkwihIxQQAjAFcsQVZvKlpBSFg3BUEMROYFMVcWADcYDzEbbni4GEEAcwhceNiKFhIAejhmPgVmanqOxig8sRgFOABraCg4LumoWY6sMTEFAHd+ybAoZnWQSwBdBk4sajl8IlJyGDT6EDLaCDZ8IwOgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 PromptScript fetches the repository, detects the `SKILL.md`, and synthesizes a virtual `.prs` fragment that you can merge into your project just like any other import.
 
@@ -683,6 +738,12 @@ Or in URL imports:
 ```promptscript
 @use git@github.com:acme/private-skills/@fragments/security
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQBzCFm6jcvAEYUWJRBkYkYAehoQAbthgBaOAGtoUOKu5hqGYSvamBjXtTEBPEAF8Aug05ZqrxATEZJQ09CCaMLQQbPgAjO5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Ensure your SSH key is added to `ssh-agent` or configured in `~/.ssh/config`.
 
