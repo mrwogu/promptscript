@@ -31,7 +31,65 @@ import type {
   Value,
   UseDeclaration,
   ExtendBlock,
+  ParamArgument,
 } from '@promptscript/core';
+
+/**
+ * Result of separating reserved (`only`/`exclude`) `@use` parameters
+ * from regular template parameters.
+ */
+interface ReservedParamsResult {
+  only?: string[];
+  exclude?: string[];
+  remaining: ParamArgument[];
+}
+
+/**
+ * Extract reserved `only`/`exclude` parameters from a `@use` argument list,
+ * returning them separately from the remaining template parameters. Mirrors
+ * the logic in `@promptscript/resolver` so the playground produces the same
+ * output as the CLI for block-filtered imports.
+ */
+function extractReservedParams(params: ParamArgument[] | undefined): ReservedParamsResult {
+  if (!params || params.length === 0) {
+    return { remaining: [] };
+  }
+
+  const remaining: ParamArgument[] = [];
+  let only: string[] | undefined;
+  let exclude: string[] | undefined;
+
+  for (const param of params) {
+    if (param.name === 'only' && Array.isArray(param.value)) {
+      only = param.value.filter((v): v is string => typeof v === 'string');
+    } else if (param.name === 'exclude' && Array.isArray(param.value)) {
+      exclude = param.value.filter((v): v is string => typeof v === 'string');
+    } else {
+      remaining.push(param);
+    }
+  }
+
+  return { only, exclude, remaining };
+}
+
+/**
+ * Filter an imported program's blocks by `only`/`exclude` lists.
+ * Returns a new array; does not mutate the input.
+ */
+function filterBlocksBy(
+  blocks: Block[],
+  options: { only?: string[]; exclude?: string[] }
+): Block[] {
+  if (options.only) {
+    const allowSet = new Set(options.only);
+    return blocks.filter((b) => allowSet.has(b.name));
+  }
+  if (options.exclude) {
+    const denySet = new Set(options.exclude);
+    return blocks.filter((b) => !denySet.has(b.name));
+  }
+  return blocks;
+}
 
 /**
  * Options for the browser resolver.
@@ -367,10 +425,19 @@ export class BrowserResolver {
         if (imported.ast) {
           // Handle parameterized imports (template interpolation)
           let resolvedImport = imported.ast;
-          if (imported.ast.meta?.params || use.params) {
+
+          // Extract reserved params (only/exclude) before they reach bindParams
+          const { only, exclude, remaining } = extractReservedParams(use.params);
+
+          if (imported.ast.meta?.params || remaining.length > 0) {
             this.logger.debug(`Binding template parameters for ${importPath}`);
             try {
-              const params = bindParams(use.params, imported.ast.meta?.params, importPath, use.loc);
+              const params = bindParams(
+                remaining.length > 0 ? remaining : undefined,
+                imported.ast.meta?.params,
+                importPath,
+                use.loc
+              );
 
               if (params.size > 0) {
                 const ctx: TemplateContext = { params, sourceFile: importPath };
@@ -383,6 +450,18 @@ export class BrowserResolver {
               );
               continue;
             }
+          }
+
+          // Apply block filtering (post-interpolation) so the playground
+          // matches the CLI's `only:` / `exclude:` semantics.
+          if (only || exclude) {
+            this.logger.debug(
+              `Filtering blocks: ${only ? `only=[${only.join(',')}]` : `exclude=[${exclude!.join(',')}]`}`
+            );
+            resolvedImport = {
+              ...resolvedImport,
+              blocks: filterBlocksBy(resolvedImport.blocks, { only, exclude }),
+            };
           }
 
           this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);

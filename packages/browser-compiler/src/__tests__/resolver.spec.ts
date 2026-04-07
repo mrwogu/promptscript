@@ -1981,4 +1981,64 @@ describe('BrowserResolver', () => {
       }
     });
   });
+
+  describe('@use block filtering with reserved params', () => {
+    it('should respect only: to keep listed blocks and drop others', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(only: ["standards", "restrictions"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@identity { """Should be filtered out""" }
+@standards { code: { language: "TypeScript" } }
+@restrictions { - "No global state" }
+@knowledge { """Should be filtered out""" }`,
+      });
+
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      const blockNames = result.ast?.blocks.map((b) => b.name) ?? [];
+      expect(blockNames).toContain('standards');
+      expect(blockNames).toContain('restrictions');
+      expect(blockNames).not.toContain('identity');
+      expect(blockNames).not.toContain('knowledge');
+    });
+
+    it('should respect exclude: to drop listed blocks and keep others', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(exclude: ["knowledge"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@standards { code: { language: "TypeScript" } }
+@knowledge { """Should be filtered out""" }`,
+      });
+
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      const blockNames = result.ast?.blocks.map((b) => b.name) ?? [];
+      expect(blockNames).toContain('standards');
+      expect(blockNames).not.toContain('knowledge');
+    });
+
+    it('should not pass only/exclude into bindParams as template params', async () => {
+      // Regression: previously the resolver passed only/exclude through to
+      // bindParams, which threw "Unknown parameter 'only' for template …"
+      // for any source file that didn't declare params.
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(only: ["standards"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@standards { code: { language: "TypeScript" } }`,
+      });
+
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      expect(result.ast).not.toBeNull();
+    });
+  });
 });
