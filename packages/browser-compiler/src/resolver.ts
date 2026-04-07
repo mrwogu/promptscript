@@ -159,35 +159,36 @@ const SKILL_PRESERVE_PROPERTIES = new Set([
 ]);
 
 /**
- * Type guard for values that should be treated as a skill object — either an
- * ObjectContent AST node (synthetic fixtures) or a plain `Record<string, Value>`
- * (real parser output for nested object literals inside `@skills`).
+ * Type guard for values that should be treated as a skill object. The parser
+ * emits nested object literals inside `@skills` as plain `Record<string, Value>`,
+ * never as ObjectContent AST nodes — so any non-array, non-AST-node object
+ * qualifies. TextContent (`{ type: 'TextContent', ... }`) must be excluded.
  */
-function isSkillRecordCandidate(v: unknown): v is ObjectContent | Record<string, Value> {
-  if (v === null || typeof v !== 'object' || Array.isArray(v)) {
-    return false;
-  }
-  const type = (v as Record<string, unknown>)['type'];
-  if (type === 'ObjectContent') {
-    return true;
-  }
-  return type !== 'TextContent' && type !== 'ArrayContent' && type !== 'MixedContent';
+function isSkillRecordCandidate(v: unknown): v is Record<string, Value> {
+  return (
+    v !== null &&
+    typeof v === 'object' &&
+    !Array.isArray(v) &&
+    (v as Record<string, unknown>)['type'] !== 'TextContent'
+  );
 }
 
-/** Extract string elements from a plain array or ArrayContent node. */
+/** Extract string elements from a plain array. */
 function extractSkillElements(val: unknown): string[] | null {
   if (Array.isArray(val)) {
     return val.filter((el): el is string => typeof el === 'string');
   }
-  if (
-    val !== null &&
-    typeof val === 'object' &&
-    (val as { type?: string }).type === 'ArrayContent'
-  ) {
-    const elements = (val as ArrayContent).elements;
-    return elements.filter((el): el is string => typeof el === 'string');
-  }
   return null;
+}
+
+/** True for plain `{}` objects, false for arrays, primitives, and AST nodes. */
+function isPlainSkillObject(v: unknown): v is Record<string, Value> {
+  return (
+    v !== null &&
+    typeof v === 'object' &&
+    !Array.isArray(v) &&
+    (v as Record<string, unknown>)['type'] !== 'TextContent'
+  );
 }
 
 /**
@@ -1140,15 +1141,8 @@ export class BrowserResolver {
    * Returns a plain `Record<string, Value>` so the result matches the shape
    * the parser uses for nested skill objects.
    */
-  private mergeSkillValue(
-    existing: ObjectContent | Record<string, Value>,
-    ext: ObjectContent
-  ): Value {
-    // Normalize to a plain property bag regardless of input shape.
-    const isObjectContentNode = (existing as { type?: string }).type === 'ObjectContent';
-    const base: Record<string, Value> = isObjectContentNode
-      ? { ...((existing as ObjectContent).properties as Record<string, Value>) }
-      : { ...(existing as Record<string, Value>) };
+  private mergeSkillValue(existing: Record<string, Value>, ext: ObjectContent): Value {
+    const base: Record<string, Value> = { ...existing };
 
     for (const [key, extVal] of Object.entries(ext.properties)) {
       if (SKILL_PRESERVE_PROPERTIES.has(key)) {
@@ -1161,51 +1155,30 @@ export class BrowserResolver {
       }
 
       if (SKILL_APPEND_PROPERTIES.has(key)) {
-        const baseElems = extractSkillElements(base[key]);
-        const extElems = extractSkillElements(extVal);
-        if (baseElems !== null && extElems !== null) {
-          base[key] = this.processSkillAppend(baseElems, extElems) as unknown as Value;
-        } else if (extElems !== null) {
-          // Base isn't an array — strip negations and let the overlay win.
-          base[key] = extElems.filter((s) => !s.startsWith('!')) as unknown as Value;
-        } else {
-          base[key] = this.deepCloneValue(extVal as Value);
-        }
+        // The validator rejects non-array values for references/examples/
+        // requires, so we trust the overlay is an array here.
+        const extElems = extractSkillElements(extVal) ?? [];
+        const baseElems = extractSkillElements(base[key]) ?? [];
+        base[key] = this.processSkillAppend(baseElems, extElems) as unknown as Value;
         continue;
       }
 
       if (SKILL_MERGE_PROPERTIES.has(key)) {
+        // Shallow merge of object properties. The validator rejects non-object
+        // values for these keys, so the deepClone fallback only fires when
+        // overlay is the first to introduce the property.
         const baseVal = base[key];
-        if (
-          baseVal !== undefined &&
-          typeof baseVal === 'object' &&
-          baseVal !== null &&
-          !Array.isArray(baseVal) &&
-          typeof extVal === 'object' &&
-          extVal !== null &&
-          !Array.isArray(extVal)
-        ) {
-          base[key] = {
-            ...(baseVal as Record<string, Value>),
-            ...(extVal as Record<string, Value>),
-          };
+        if (isPlainSkillObject(baseVal) && isPlainSkillObject(extVal)) {
+          base[key] = { ...baseVal, ...extVal };
         } else {
           base[key] = this.deepCloneValue(extVal as Value);
         }
         continue;
       }
 
-      // Unknown property — fall back to generic deepMerge.
+      // Unknown property — deep-merge nested objects, otherwise overlay wins.
       const baseVal = base[key];
-      if (
-        baseVal !== undefined &&
-        typeof baseVal === 'object' &&
-        baseVal !== null &&
-        !Array.isArray(baseVal) &&
-        typeof extVal === 'object' &&
-        extVal !== null &&
-        !Array.isArray(extVal)
-      ) {
+      if (isPlainSkillObject(baseVal) && isPlainSkillObject(extVal)) {
         base[key] = deepMerge(
           baseVal as Record<string, unknown>,
           extVal as Record<string, unknown>
