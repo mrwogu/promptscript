@@ -183,7 +183,7 @@ export class Resolver {
     if (ast.extends.length > 0) {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
-    ast = applyExtends(ast);
+    ast = applyExtends(ast, this.logger);
 
     // Resolve guard requires dependencies
     ast = resolveGuardRequires(ast, {

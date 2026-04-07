@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type {
   Program,
   Block,
@@ -8,9 +8,11 @@ import type {
   ExtendBlock,
   MixedContent,
   Value,
+  Logger,
 } from '@promptscript/core';
 import { applyExtends } from '../extensions.js';
 import { IMPORT_MARKER_PREFIX } from '../imports.js';
+import { Resolver } from '../resolver.js';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
 
@@ -221,16 +223,24 @@ describe('applyExtends', () => {
   });
 
   describe('target not found', () => {
-    it('should ignore extension for non-existent target', () => {
+    it('should ignore extension for non-existent target and warn via logger', () => {
+      const warnMessages: string[] = [];
+      const logger: Logger = {
+        verbose: () => {},
+        debug: () => {},
+        warn: (msg: string) => warnMessages.push(msg),
+      };
+
       const ast = createProgram({
         blocks: [createBlock('identity', createTextContent('original'))],
         extends: [createExtendBlock('nonexistent', createTextContent('extended'))],
       });
 
-      const result = applyExtends(ast);
+      const result = applyExtends(ast, logger);
 
       expect(result.blocks).toHaveLength(1);
       expect((result.blocks[0]?.content as TextContent).value).toBe('original');
+      expect(warnMessages.some((m) => m.includes('"nonexistent" not found'))).toBe(true);
     });
   });
 
@@ -364,6 +374,29 @@ describe('applyExtends', () => {
       const content = result.blocks[0]?.content as MixedContent;
 
       expect(content.properties['newProp']).toEqual({ value: 'test' });
+    });
+
+    it('should extend deeply nested property in MixedContent via mergeAtPathValue', () => {
+      // This exercises the mergeAtPathValue path via MixedContent:
+      // config.settings.sub navigates into MixedContent.settings (object), then
+      // recurses with mergeAtPathValue to reach settings.sub.
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createMixedContent(createTextContent('desc'), {
+              settings: { sub: { value: 'old' } },
+            })
+          ),
+        ],
+        extends: [createExtendBlock('config.settings.sub', createObjectContent({ extra: 'new' }))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as MixedContent;
+      const settings = content.properties['settings'] as Record<string, Value>;
+
+      expect(settings['sub']).toEqual({ value: 'old', extra: 'new' });
     });
   });
 
@@ -577,5 +610,422 @@ describe('applyExtends', () => {
       // Should replace array with nested object
       expect(content.properties['arr']).toEqual({ nested: { key: 'val' } });
     });
+
+    it('should build path when navigating through a primitive at depth 3+ (mergeAtPathValue line 338)', () => {
+      // config.a is an object, but config.a.b is a primitive string.
+      // Extending config.a.b.c enters mergeAtPathValue(value=a, path=['b','c']),
+      // then recurses with mergeAtPathValue(value='primitive', path=['c']) which
+      // hits the non-navigable branch (line 338) and builds the remaining path.
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              a: { b: 'primitive-string' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [createExtendBlock('config.a.b.c', createObjectContent({ key: 'val' }))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const a = content.properties['a'] as Record<string, Value>;
+
+      // b was a primitive; navigating into it should build the new path
+      expect(a['b']).toEqual({ c: { key: 'val' } });
+    });
+
+    it('should build path when navigating through an array at depth 3+ (mergeAtPathValue line 338)', () => {
+      // Same as above but b is an array value.
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              a: { b: [1, 2, 3] } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [createExtendBlock('config.a.b.c', createTextContent('new'))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const a = content.properties['a'] as Record<string, Value>;
+
+      // b was an array; navigating into it should build the new path
+      expect(a['b']).toEqual({ c: 'new' });
+    });
+  });
+
+  describe('empty path segment handling (consecutive dots in targetPath)', () => {
+    it('should merge at block level when targetPath has consecutive dots producing empty segment (mergeAtPath line 234)', () => {
+      // targetPath 'config..deep' splits to ['config', '', 'deep'].
+      // deepPath becomes ['', 'deep']. In mergeAtPath, currentKey = '' which
+      // is falsy, so it falls back to mergeContent at the block level (line 234).
+      const ast = createProgram({
+        blocks: [createBlock('config', createObjectContent({ existing: 'value' }))],
+        extends: [createExtendBlock('config..deep', createObjectContent({ extra: 'added' }))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+
+      // The empty path segment causes mergeContent to be called on the block,
+      // so the ObjectContent properties are merged at block level.
+      expect(content.properties['existing']).toBe('value');
+      expect(content.properties['extra']).toBe('added');
+    });
+
+    it('should merge via mergeAtPathValue when an intermediate path segment is empty (mergeAtPathValue line 339)', () => {
+      // targetPath 'config.key..deep' splits to ['config', 'key', '', 'deep'].
+      // deepPath = ['key', '', 'deep']. mergeAtPath navigates into 'key' (an object),
+      // calls mergeAtPathValue(keyValue, ['', 'deep'], ...).
+      // In mergeAtPathValue, currentKey = '' is falsy → falls back to mergeValue (line 339).
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              key: { nested: 'original' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [createExtendBlock('config.key..deep', createObjectContent({ added: 'new' }))],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const key = content.properties['key'] as Record<string, Value>;
+
+      // mergeValue is called on the key object, merging ObjectContent into it
+      expect(key['nested']).toBe('original');
+      expect(key['added']).toBe('new');
+    });
+  });
+});
+
+describe('overlay consistency warnings', () => {
+  const createMockLogger = () => {
+    const logger = {
+      verbose: vi.fn<(message: string) => void>(),
+      debug: vi.fn<(message: string) => void>(),
+      warn: vi.fn<(message: string) => void>(),
+    };
+    return logger satisfies Logger;
+  };
+
+  describe('stale skill target', () => {
+    it('should warn when @extend creates new skill in ObjectContent @skills block', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'existing-skill': { description: 'exists' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.nonexistent-skill',
+            createObjectContent({
+              description: 'overlay for removed skill',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent-skill"'));
+    });
+
+    it('should warn when @extend creates new skill in MixedContent @skills block', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createMixedContent(createTextContent('skill instructions'), {
+              'existing-skill': { description: 'exists' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.nonexistent-skill',
+            createObjectContent({
+              description: 'overlay for removed skill',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent-skill"'));
+    });
+
+    it('should not warn when extending existing skill', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                type: 'ObjectContent',
+                properties: { description: 'base review' },
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              description: 'extended review',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should not warn when creating key outside @skills context', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'standards',
+            createObjectContent({
+              existing: 'value' as unknown as Value,
+            })
+          ),
+        ],
+        extends: [createExtendBlock('standards.new-key', createTextContent('new content'))],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should detect stale skill target through aliased import', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(`${IMPORT_MARKER_PREFIX}base`, createObjectContent({})),
+          createBlock(
+            `${IMPORT_MARKER_PREFIX}base.skills`,
+            createObjectContent({
+              'existing-skill': { description: 'exists' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'base.skills.removed-skill',
+            createObjectContent({
+              description: 'overlay for removed skill',
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"removed-skill"'));
+    });
+  });
+
+  describe('orphaned extend', () => {
+    it('should warn when @extend target block does not exist', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [createBlock('identity', createTextContent('original'))],
+        extends: [createExtendBlock('nonexistent', createTextContent('extended'))],
+      });
+
+      const result = applyExtends(ast, logger);
+
+      expect(result.blocks).toHaveLength(1);
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent" not found'));
+    });
+
+    it('should not warn when @extend target exists', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [createBlock('identity', createTextContent('original'))],
+        extends: [createExtendBlock('identity', createTextContent('extended'))],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should not crash when logger is not provided', () => {
+      const ast = createProgram({
+        blocks: [createBlock('identity', createTextContent('original'))],
+        extends: [createExtendBlock('nonexistent', createTextContent('extended'))],
+      });
+
+      const result = applyExtends(ast);
+      expect(result.blocks).toHaveLength(1);
+    });
+  });
+
+  describe('negation orphan', () => {
+    it('should warn via logger when negation does not match any base entry', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                type: 'ObjectContent',
+                properties: {
+                  description: 'base review',
+                  references: {
+                    type: 'ArrayContent',
+                    elements: ['references/existing.md'],
+                    loc: { file: '<test>', line: 1, column: 1 },
+                  },
+                },
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              references: {
+                type: 'ArrayContent',
+                elements: ['!references/nonexistent.md', 'references/new.md'],
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('references/nonexistent.md')
+      );
+    });
+
+    it('should not warn when negation matches a base entry', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'code-review': {
+                type: 'ObjectContent',
+                properties: {
+                  description: 'base review',
+                  references: {
+                    type: 'ArrayContent',
+                    elements: ['references/old.md'],
+                    loc: { file: '<test>', line: 1, column: 1 },
+                  },
+                },
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills.code-review',
+            createObjectContent({
+              references: {
+                type: 'ArrayContent',
+                elements: ['!references/old.md', 'references/new.md'],
+                loc: { file: '<test>', line: 1, column: 1 },
+              } as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('overlay warnings integration', () => {
+  it('should propagate orphaned extend warning through Resolver', async () => {
+    const warnMessages: string[] = [];
+    const logger: Logger = {
+      verbose: () => {},
+      debug: () => {},
+      warn: (msg: string) => warnMessages.push(msg),
+    };
+
+    const os = await import('node:os');
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const testDir = path.join(os.tmpdir(), `prs-test-${Date.now()}`);
+    await fs.mkdir(testDir, { recursive: true });
+
+    const prsContent = `@meta {
+  id: "test/overlay-warn"
+  syntax: "1.0"
+}
+
+@identity {
+  """
+  Test identity.
+  """
+}
+
+@extend nonexistent {
+  """
+  This targets a block that doesn't exist.
+  """
+}
+`;
+
+    const testFile = path.join(testDir, 'test.prs');
+    await fs.writeFile(testFile, prsContent);
+
+    const resolver = new Resolver({
+      registryPath: testDir,
+      localPath: testDir,
+      logger,
+      cache: false,
+    });
+
+    try {
+      await resolver.resolve(testFile);
+    } catch {
+      // May throw if file parsing has issues, but we're checking warnings
+    }
+
+    expect(warnMessages.some((m) => m.includes('"nonexistent" not found'))).toBe(true);
+
+    // Cleanup
+    await fs.rm(testDir, { recursive: true, force: true });
   });
 });

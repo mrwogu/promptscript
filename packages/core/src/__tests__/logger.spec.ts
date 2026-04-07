@@ -10,9 +10,14 @@ describe('noopLogger', () => {
     expect(() => noopLogger.debug('test message')).not.toThrow();
   });
 
-  it('should have both required methods', () => {
+  it('warn should not throw', () => {
+    expect(() => noopLogger.warn('test message')).not.toThrow();
+  });
+
+  it('should have all required methods', () => {
     expect(typeof noopLogger.verbose).toBe('function');
     expect(typeof noopLogger.debug).toBe('function');
+    expect(typeof noopLogger.warn).toBe('function');
   });
 });
 
@@ -21,6 +26,7 @@ describe('createLogger', () => {
     const logger = createLogger({});
     expect(typeof logger.verbose).toBe('function');
     expect(typeof logger.debug).toBe('function');
+    expect(typeof logger.warn).toBe('function');
   });
 
   it('should call provided verbose callback', () => {
@@ -45,5 +51,17 @@ describe('createLogger', () => {
   it('should use noop for missing debug callback', () => {
     const logger = createLogger({ verbose: vi.fn() });
     expect(() => logger.debug('test')).not.toThrow();
+  });
+
+  it('should call provided warn callback', () => {
+    const warn = vi.fn();
+    const logger = createLogger({ warn });
+    logger.warn('hello');
+    expect(warn).toHaveBeenCalledWith('hello');
+  });
+
+  it('should use noop for missing warn callback', () => {
+    const logger = createLogger({ verbose: vi.fn() });
+    expect(() => logger.warn('test')).not.toThrow();
   });
 });

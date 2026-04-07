@@ -8,9 +8,10 @@ import type {
   TextContent,
   ArrayContent,
   Value,
+  Logger,
 } from '@promptscript/core';
 import { deepMerge, deepClone, isTextContent, ResolveError } from '@promptscript/core';
-import { IMPORT_MARKER_PREFIX } from './imports.js';
+import { IMPORT_MARKER_PREFIX, getOriginalBlockName } from './imports.js';
 
 // ── Skill-aware merge strategy sets ──────────────────────────────────
 
@@ -129,12 +130,12 @@ function resolveSealedKeys(val: unknown): Set<string> {
  * @param ast - Program AST with @extend blocks
  * @returns Program with extensions applied and import markers removed
  */
-export function applyExtends(ast: Program): Program {
+export function applyExtends(ast: Program, logger?: Logger): Program {
   let blocks = [...ast.blocks];
 
   // Apply each extension
   for (const ext of ast.extends) {
-    blocks = applyExtend(blocks, ext);
+    blocks = applyExtend(blocks, ext, logger);
   }
 
   // Remove import markers
@@ -150,7 +151,7 @@ export function applyExtends(ast: Program): Program {
 /**
  * Apply a single @extend block.
  */
-function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
+function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[] {
   const pathParts = ext.targetPath.split('.');
   const rootName = pathParts[0];
 
@@ -168,7 +169,10 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
 
   const idx = blocks.findIndex((b) => b.name === targetName);
   if (idx === -1) {
-    // Target not found - return unchanged
+    logger?.warn(
+      `@extend target "${ext.targetPath}" not found — overlay will be ignored. ` +
+        `If the base skill was removed or renamed, update or remove this @extend block.`
+    );
     return blocks;
   }
 
@@ -178,9 +182,10 @@ function applyExtend(blocks: Block[], ext: ExtendBlock): Block[] {
   }
 
   // Determine if the extend target is inside a @skills block
-  const skillContext = ext.targetPath.split('.')[0] === 'skills';
+  const resolvedBlockName = targetName ? (getOriginalBlockName(targetName) ?? targetName) : '';
+  const skillContext = resolvedBlockName === 'skills';
 
-  const merged = mergeExtension(target, deepPath, ext, skillContext);
+  const merged = mergeExtension(target, deepPath, ext, skillContext, logger);
 
   return [...blocks.slice(0, idx), merged, ...blocks.slice(idx + 1)];
 }
@@ -192,7 +197,8 @@ function mergeExtension(
   block: Block,
   path: string[],
   ext: ExtendBlock,
-  skillContext: boolean
+  skillContext: boolean,
+  logger?: Logger
 ): Block {
   if (path.length === 0) {
     // Direct merge at block level
@@ -205,7 +211,7 @@ function mergeExtension(
   // Deep path merge - navigate into ObjectContent or MixedContent
   return {
     ...block,
-    content: mergeAtPath(block.content, path, ext.content, skillContext),
+    content: mergeAtPath(block.content, path, ext.content, skillContext, logger),
   };
 }
 
@@ -216,7 +222,8 @@ function mergeAtPath(
   content: BlockContent,
   path: string[],
   extContent: BlockContent,
-  skillContext: boolean
+  skillContext: boolean,
+  logger?: Logger
 ): BlockContent {
   if (path.length === 0) {
     return mergeContent(content, extContent);
@@ -234,11 +241,17 @@ function mergeAtPath(
 
     if (rest.length === 0) {
       // We're at the target - merge or set
+      if (skillContext && existing === undefined) {
+        logger?.warn(
+          `@extend creates new skill "${currentKey}" — base does not define it. ` +
+            `If this was an overlay targeting an existing skill, verify the base still defines "${currentKey}".`
+        );
+      }
       return {
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeValue(existing, extContent, skillContext),
+          [currentKey]: mergeValue(existing, extContent, skillContext, logger),
         },
       };
     }
@@ -249,7 +262,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext),
+          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext, logger),
         },
       };
     }
@@ -268,11 +281,17 @@ function mergeAtPath(
     const existing = content.properties[currentKey];
 
     if (rest.length === 0) {
+      if (skillContext && existing === undefined) {
+        logger?.warn(
+          `@extend creates new skill "${currentKey}" — base does not define it. ` +
+            `If this was an overlay targeting an existing skill, verify the base still defines "${currentKey}".`
+        );
+      }
       return {
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeValue(existing, extContent, skillContext),
+          [currentKey]: mergeValue(existing, extContent, skillContext, logger),
         },
       };
     }
@@ -282,7 +301,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext),
+          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext, logger),
         },
       };
     }
@@ -307,20 +326,17 @@ function mergeAtPathValue(
   value: Value,
   path: string[],
   extContent: BlockContent,
-  skillContext: boolean
+  skillContext: boolean,
+  logger?: Logger
 ): Value {
-  if (path.length === 0) {
-    return mergeValue(value, extContent, skillContext);
-  }
-
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    // Can't navigate - build new path
+    // Can't navigate into a primitive or array — build path from here
     return buildPathValue(path, extContent);
   }
 
   const currentKey = path[0];
   if (!currentKey) {
-    return mergeValue(value, extContent, skillContext);
+    return mergeValue(value, extContent, skillContext, logger);
   }
 
   const rest = path.slice(1);
@@ -330,14 +346,14 @@ function mergeAtPathValue(
   if (rest.length === 0) {
     return {
       ...obj,
-      [currentKey]: mergeValue(existing, extContent, skillContext),
+      [currentKey]: mergeValue(existing, extContent, skillContext, logger),
     };
   }
 
   if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
     return {
       ...obj,
-      [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext),
+      [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext, logger),
     };
   }
 
@@ -397,7 +413,8 @@ function extractValue(content: BlockContent): Value {
 function mergeValue(
   existing: Value | undefined,
   extContent: BlockContent,
-  skillContext: boolean = false
+  skillContext: boolean = false,
+  logger?: Logger
 ): Value {
   if (existing === undefined) {
     return extractValue(extContent);
@@ -405,7 +422,7 @@ function mergeValue(
 
   // Skill-aware merging: delegate to mergeSkillValue when inside a @skills block
   if (skillContext && isObjectContent(existing) && extContent.type === 'ObjectContent') {
-    return mergeSkillValue(existing, extContent);
+    return mergeSkillValue(existing, extContent, logger);
   }
 
   // Array merging
@@ -446,7 +463,7 @@ function mergeValue(
  * Returns a flat Record matching the shape produced by deepMerge
  * (ObjectContent structural fields + skill properties at top level).
  */
-function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value {
+function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent, logger?: Logger): Value {
   // Start with a shallow copy of the existing node (preserves type, loc, etc.)
   const base = { ...existing } as unknown as Record<string, Value>;
   // Flatten base properties to top level (matching deepMerge behaviour).
@@ -487,7 +504,7 @@ function mergeSkillValue(existing: ObjectContentNode, ext: ObjectContent): Value
       const baseElems = extractElements(baseVal);
       const extElems = extractElements(extVal);
       if (baseElems !== null && extElems !== null) {
-        base[key] = processAppendWithNegations(baseElems, extElems) as unknown as Value;
+        base[key] = processAppendWithNegations(baseElems, extElems, logger) as unknown as Value;
       } else if (extElems !== null) {
         // Base is not an array — extension array wins (strip negations)
         const additions = extElems.filter((s) => !s.startsWith('!'));
@@ -642,7 +659,11 @@ function mergeContent(target: BlockContent, ext: BlockContent): BlockContent {
  * entries from `baseItems` (after path normalization). Remaining entries are
  * appended with deduplication.
  */
-function processAppendWithNegations(baseItems: string[], extItems: string[]): string[] {
+function processAppendWithNegations(
+  baseItems: string[],
+  extItems: string[],
+  logger?: Logger
+): string[] {
   // 1. Partition extension items into negations and additions
   const negations = new Set<string>();
   const additions: string[] = [];
@@ -671,8 +692,8 @@ function processAppendWithNegations(baseItems: string[], extItems: string[]): st
   });
 
   // 4. Log unmatched negations (non-blocking)
-  for (const path of unmatchedNegations) {
-    console.warn(`Negation '!${path}' did not match any base entry`);
+  for (const unmatchedPath of unmatchedNegations) {
+    logger?.warn(`Negation "!${unmatchedPath}" did not match any base entry — it may be stale.`);
   }
 
   // 5. Append additions with deduplication

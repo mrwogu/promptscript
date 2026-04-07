@@ -20,6 +20,7 @@ function createTestLogger(): Logger & { messages: string[] } {
     messages,
     verbose: (msg: string) => messages.push(`[verbose] ${msg}`),
     debug: (msg: string) => messages.push(`[debug] ${msg}`),
+    warn: (msg: string) => messages.push(`[warn] ${msg}`),
   };
 }
 
