@@ -2040,5 +2040,22 @@ describe('BrowserResolver', () => {
       expect(result.errors).toEqual([]);
       expect(result.ast).not.toBeNull();
     });
+
+    it('should still report bindParams errors for genuinely unknown template params', async () => {
+      // Sanity: real template-parameter mistakes (i.e. non-reserved keys)
+      // must still surface as ResolveError, not be silently dropped.
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(bogusParam: "value")`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@standards { code: { language: "TypeScript" } }`,
+      });
+
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]?.message).toMatch(/bogusParam|parameter/i);
+    });
   });
 });

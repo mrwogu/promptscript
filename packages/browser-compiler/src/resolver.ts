@@ -74,6 +74,7 @@ function extractReservedParams(params: ParamArgument[] | undefined): ReservedPar
 
 /**
  * Filter an imported program's blocks by `only`/`exclude` lists.
+ * Exactly one of `only` or `exclude` must be set; callers gate on this.
  * Returns a new array; does not mutate the input.
  */
 function filterBlocksBy(
@@ -84,11 +85,8 @@ function filterBlocksBy(
     const allowSet = new Set(options.only);
     return blocks.filter((b) => allowSet.has(b.name));
   }
-  if (options.exclude) {
-    const denySet = new Set(options.exclude);
-    return blocks.filter((b) => !denySet.has(b.name));
-  }
-  return blocks;
+  const denySet = new Set(options.exclude);
+  return blocks.filter((b) => !denySet.has(b.name));
 }
 
 /**
