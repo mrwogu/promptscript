@@ -1804,6 +1804,18 @@ Prevent `@extend` from overriding specific replace-strategy properties:
 
 `sealed: true` seals all replace-strategy properties. Attempting to override a sealed property is a compilation error. Append-strategy properties are not affected.
 
+### Overlay Consistency Warnings
+
+The resolver emits warnings during compile when an `@extend` overlay drifts from its base. These warnings are always shown (not gated by `--verbose` or `--strict`):
+
+| Warning            | Trigger                                                                     |
+| ------------------ | --------------------------------------------------------------------------- |
+| Orphaned extend    | `@extend` targets a block that doesn't exist (base removed/renamed)         |
+| Stale skill target | `@extend` inside `@skills` would create a new skill not defined by the base |
+| Negation orphan    | `!entry` in `references`/`requires` doesn't match any base element          |
+
+These come from the resolver, not the validator (`PS0XX` rules). They appear during `prs compile`, not `prs validate`. See the [Skill Overlays Guide](https://getpromptscript.dev/dev/guides/skill-overlays/index.md) for examples and remediation.
+
 ## Values
 
 ### Primitive Types
