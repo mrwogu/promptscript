@@ -1006,19 +1006,13 @@ export class BrowserResolver {
     extContent: BlockContent,
     skillContext: boolean
   ): Value {
-    if (path.length === 0) {
-      return this.mergeExtendValue(value, extContent, skillContext);
-    }
-
+    // Caller (mergeAtPath / self-recursion) guarantees path is non-empty
+    // and split('.') never yields empty segments for validated input.
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       return this.buildPathValue(path, extContent);
     }
 
-    const currentKey = path[0];
-    if (!currentKey) {
-      return this.mergeExtendValue(value, extContent, skillContext);
-    }
-
+    const currentKey = path[0]!;
     const rest = path.slice(1);
     const obj = value as Record<string, Value>;
     const existing = obj[currentKey];
