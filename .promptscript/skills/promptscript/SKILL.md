@@ -498,6 +498,21 @@ Use `!` prefix in `@extend` to remove entries from a lower layer's append-strate
 Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks
 on `references` and `requires`. Validator PS028 warns about `!` in base definitions.
 
+#### Overlay consistency warnings
+
+The resolver emits warnings during compile when an overlay drifts from its base. Always shown
+(not gated by `--verbose`):
+
+- **Orphaned extend** — `@extend target "X" not found — overlay will be ignored.` Triggered when
+  the targeted block doesn't exist (base removed or renamed).
+- **Stale skill target** — `@extend creates new skill "X" — base does not define it.` Triggered
+  when an `@extend` inside `@skills` would create a new skill instead of extending an existing one.
+- **Negation orphan** — `Negation "!path" did not match any base entry — it may be stale.`
+  Triggered when a `!entry` in references/requires doesn't match anything in the base.
+
+These come from the resolver, not the validator (PS0XX rules). They appear during `prs compile`,
+not `prs validate`.
+
 #### Sealed properties
 
 Prevent `@extend` from overriding specified replace-strategy properties:

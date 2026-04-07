@@ -138,8 +138,10 @@ Negation uses normalized path matching — `"!./references/foo.md"` matches `"re
 If a negation doesn't match any base entry, a warning is logged during compilation:
 
 ```
-⚠ Negation '!references/old.md' did not match any base entry
+Negation "!references/old.md" did not match any base entry — it may be stale.
 ```
+
+This usually means the base skill was updated and the entry you're negating no longer exists. Remove the negation or update it to match the current base.
 
 ### Rules
 
@@ -423,6 +425,34 @@ If an overlay becomes incompatible after a base update:
 5. **Consider using `sealed`** in your overlay to protect properties from further changes
    by downstream layers
 
+### Overlay Consistency Warnings
+
+The resolver emits warnings during compilation when an overlay becomes structurally
+inconsistent with its base. These warnings help detect drift after a Layer 2 update.
+They are always shown — no `--verbose` flag required.
+
+**Orphaned extend** — `@extend` targets a block that doesn't exist:
+
+```
+@extend target "base.skills.code-review" not found — overlay will be ignored.
+If the base skill was removed or renamed, update or remove this @extend block.
+```
+
+This means the overlay is silently dropped. Either update the path or remove the `@extend`.
+
+**Stale skill target** — `@extend` creates a new skill in `@skills` that the base doesn't
+define:
+
+```
+@extend creates new skill "deploy-prod" — base does not define it.
+If this was an overlay targeting an existing skill, verify the base still defines "deploy-prod".
+```
+
+This usually means the base renamed or removed the skill. The overlay accidentally creates
+a new skill rather than extending an existing one.
+
+**Negation orphan** — see [Unmatched Negations](#unmatched-negations) above.
+
 ## Validation Rules
 
 | Rule  | Name                   | Description                                                             |
@@ -431,3 +461,7 @@ If an overlay becomes incompatible after a base update:
 | PS026 | safe-reference-content | Reference files must not contain PRS directives (prompt injection risk) |
 | PS028 | valid-append-negation  | `!` prefix is only effective in `@extend` blocks                        |
 | PS029 | valid-sealed-property  | Sealed property names must be replace-strategy properties               |
+
+> **Note:** The overlay consistency warnings above are emitted by the resolver, not the
+> validator. They appear during `prs compile` (always shown, not gated by `--strict`),
+> while validator warnings (`PS0XX`) appear during `prs validate`.
