@@ -2042,12 +2042,17 @@ describe('BrowserResolver', () => {
     });
 
     it('should still report bindParams errors for genuinely unknown template params', async () => {
-      // Sanity: real template-parameter mistakes (i.e. non-reserved keys)
-      // must still surface as ResolveError, not be silently dropped.
+      // Sanity: real template-parameter mistakes (i.e. non-reserved keys
+      // against a source that declares params) must still surface as
+      // ResolveError, not be silently dropped by the reserved-param split.
       const fs = new VirtualFileSystem({
         'project.prs': `@meta { id: "test" syntax: "1.1.0" }
 @use ./shared(bogusParam: "value")`,
-        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+        'shared.prs': `@meta {
+  id: "shared"
+  syntax: "1.1.0"
+  params: { knownParam: string = "default" }
+}
 @standards { code: { language: "TypeScript" } }`,
       });
 
@@ -2056,6 +2061,29 @@ describe('BrowserResolver', () => {
 
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]?.message).toMatch(/bogusParam|parameter/i);
+    });
+
+    it('should bind template params when only reserved params are present and source declares params', async () => {
+      // Covers the `remaining.length === 0` ternary branch in resolveImports:
+      // source declares params (so bindParams must run), but the call site
+      // only passes reserved params, so we forward `undefined` to bindParams.
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(only: ["standards"])`,
+        'shared.prs': `@meta {
+  id: "shared"
+  syntax: "1.1.0"
+  params: { greeting: string = "hello" }
+}
+@standards { code: { language: "TypeScript" } }`,
+      });
+
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      const blockNames = result.ast?.blocks.map((b) => b.name) ?? [];
+      expect(blockNames).toContain('standards');
     });
   });
 });
