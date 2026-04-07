@@ -7605,6 +7605,37 @@ It will:
 
 You can also set a default registry via [user-level config](https://getpromptscript.dev/dev/guides/user-config/index.md) so `prs init --yes` automatically uses it.
 
+### How Overlay-Aware Suggestions Work
+
+When your registry catalogs Layer 2 / Layer 3 [skill overlays](https://getpromptscript.dev/dev/guides/skill-overlays/index.md), `prs init` collapses overlay relationships before showing the picker so you don't see both the base skill and its overlay as separate choices.
+
+Detection works two ways:
+
+1. **Manifest `extends` field** — when a skill entry in `registry-manifest.yaml` declares `extends: <base-skill-id>`, the suggestion engine treats it as an overlay of that base.
+1. **Inline `@extend` scan** — when no manifest hint exists, the engine scans the suggested skill's `.prs` source for `@use … as <alias>` plus `@extend <alias>.skills.<name>` and resolves the base skill via the alias map.
+
+When an overlay is detected and **both** the overlay and its base were suggested, the base is removed from the choices. The overlay choice is annotated inline:
+
+```text
+? Select skills to add: (Use space to select, enter to confirm)
+  ◉ @stacks/react (use)
+  ◉ @skills/code-review (extends @skills/code-review-base) (skill)
+  ◉ @skills/security-review (skill)
+```
+
+The `(extends …)` annotation makes it explicit which base the overlay is layering on top of, so reviewers can audit the chain at a glance. If your registry doesn't yet declare `extends`, populate the field in `registry-manifest.yaml` to get the cleanest experience:
+
+```yaml
+catalog:
+  - id: '@skills/code-review-base'
+    description: 'Generic code-review base skill'
+  - id: '@skills/code-review'
+    description: 'Org-specific code-review overlay (banking compliance)'
+    extends: '@skills/code-review-base'
+```
+
+See [Skill Overlays](https://getpromptscript.dev/dev/guides/skill-overlays/index.md) for the overlay model itself, and the [Registry Manifest](#registry-manifest) section below for the full schema.
+
 ## Usage Patterns
 
 ### Pattern 1: Inherit a Tech Stack
