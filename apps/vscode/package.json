@@ -2,7 +2,7 @@
   "name": "promptscript-language",
   "displayName": "PromptScript",
   "description": "Syntax highlighting for PromptScript (.prs) files",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "publisher": "promptscript",
   "license": "MIT",
   "repository": "https://github.com/mrwogu/promptscript",
