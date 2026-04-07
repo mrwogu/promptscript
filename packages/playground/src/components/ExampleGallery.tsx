@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { usePlaygroundStore, type FileState } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
-interface Example {
+export interface Example {
   id: string;
   name: string;
   description: string;
@@ -12,7 +12,7 @@ interface Example {
   envVars?: Record<string, string>;
 }
 
-const EXAMPLES: Example[] = [
+export const EXAMPLES: Example[] = [
   // === BEGINNER ===
   {
     id: 'hello-world',
@@ -460,7 +460,7 @@ const EXAMPLES: Example[] = [
 }
 
 # Import only standards and restrictions from shared config
-@use ./shared only=["standards", "restrictions"]
+@use ./shared(only: ["standards", "restrictions"])
 
 @identity {
   """
@@ -942,6 +942,132 @@ const EXAMPLES: Example[] = [
     ],
   },
   {
+    id: 'skill-overlay',
+    name: 'Skill Overlays (@extend)',
+    description: 'Layer organization-specific rules on top of a base skill via @extend',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "banking-review"
+  syntax: "1.2.0"
+}
+
+# Layer 1: import the generic base skill under an alias
+@use ./base-skill as base
+
+@identity {
+  """
+  You are a code review assistant for a regulated banking platform.
+  """
+}
+
+# Layer 2: overlay the base skill with banking-specific rules
+@extend base.skills.code-review {
+  description: "Banking-grade code review (PCI-DSS aware)"
+
+  # Append-strategy: added to the base list, not replaced
+  references: ["./policies/pci-dss.md", "./policies/audit-trail.md"]
+
+  # Replace-strategy: completely replaces the base content
+  content: """
+    Perform a code review with banking-specific concerns:
+    1. Verify PCI-DSS compliance for any payment-related code
+    2. Confirm audit-trail logging on all state-changing operations
+    3. Check encryption-at-rest for any PII or PAN handling
+    4. Flag any direct DB access that bypasses the repository layer
+  """
+}
+`,
+      },
+      {
+        path: 'base-skill.prs',
+        content: `@meta {
+  id: "base-skill"
+  syntax: "1.2.0"
+}
+
+@skills {
+  code-review: {
+    description: "Generic code review"
+    references: ["./standards/clean-code.md"]
+    content: """
+      Perform a general code review:
+      1. Check for bugs and edge cases
+      2. Verify error handling
+      3. Suggest naming improvements
+    """
+  }
+}
+`,
+      },
+    ],
+  },
+  {
+    id: 'skill-overlay-sealed-negation',
+    name: 'Sealed & Negation',
+    description: 'Protect base content with sealed and remove deprecated entries with !',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "compliance-overlay"
+  syntax: "1.2.0"
+}
+
+@use ./base-skill as base
+
+@identity {
+  """
+  You are a security review assistant.
+  Compliance team controls the core review workflow.
+  """
+}
+
+# Overlay: cannot replace sealed content, can curate references
+@extend base.skills.security-review {
+  # Remove a deprecated reference from the base list with !,
+  # then add fresh references — append-strategy with negation
+  references: ["!./standards/owasp-2017.md", "./standards/owasp-2024.md", "./standards/internal-threat-model.md"]
+
+  # Attempting to override 'content' here would FAIL with a clear error,
+  # because the base sealed it. Uncomment to see PS029 in action:
+  # content: """ overridden by overlay """
+}
+`,
+      },
+      {
+        path: 'base-skill.prs',
+        content: `@meta {
+  id: "base-skill"
+  syntax: "1.2.0"
+}
+
+@skills {
+  security-review: {
+    description: "Compliance-owned security review"
+
+    # Sealed content cannot be replaced by any overlay layer
+    sealed: ["content"]
+
+    references: ["./standards/owasp-2017.md", "./standards/clean-code.md"]
+
+    content: """
+      Perform a security review using the compliance-approved workflow:
+      1. Run dependency vulnerability scan
+      2. Check OWASP Top 10 categories
+      3. Verify authentication and authorization on every endpoint
+      4. Flag any code paths that bypass logging or audit hooks
+    """
+  }
+}
+`,
+      },
+    ],
+  },
+  {
     id: 'skill-composition',
     name: 'Skill Composition',
     description: 'Compose a multi-phase skill from independent sub-skill files',
@@ -1314,6 +1440,21 @@ export function ExampleGallery() {
         ) && (
           <span className="text-xs px-2 py-0.5 bg-lime-500/20 text-lime-400 rounded">
             composition
+          </span>
+        )}
+        {example.files.some((f) => f.content.includes('@extend')) && (
+          <span className="text-xs px-2 py-0.5 bg-fuchsia-500/20 text-fuchsia-400 rounded">
+            overlay
+          </span>
+        )}
+        {example.files.some((f) => /\bsealed\s*:/.test(f.content)) && (
+          <span className="text-xs px-2 py-0.5 bg-yellow-600/20 text-yellow-300 rounded">
+            sealed
+          </span>
+        )}
+        {example.files.some((f) => /["'`]!\.?\//.test(f.content)) && (
+          <span className="text-xs px-2 py-0.5 bg-orange-600/20 text-orange-300 rounded">
+            negation
           </span>
         )}
         {example.files.some((f) => f.content.includes('@commands')) && (
