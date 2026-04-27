@@ -22,17 +22,17 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/lz-string": "^1.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.5.0",
-    "jsdom": "^29.0.2",
-    "postcss": "^8.5.10",
-    "tailwindcss": "^4.2.2",
+    "jsdom": "^29.1.0",
+    "postcss": "^8.5.12",
+    "tailwindcss": "^4.2.4",
     "typescript": "~5.9.3",
-    "vite": "^8.0.9",
-    "vitest": "^4.1.4"
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
   }
 }
