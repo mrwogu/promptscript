@@ -15,7 +15,7 @@
     "fast-glob": "^3.3.0",
     "fastify": "^5.8.5",
     "ws": "^8.20.0",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.4"
   },
   "devDependencies": {
     "@fastify/rate-limit": "^10.3.0"
