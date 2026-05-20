@@ -18,6 +18,36 @@ import { validateRemoteAccess } from '@promptscript/resolver';
 const REMOTE_SOURCE_PATTERN = /^[a-zA-Z0-9][\w.-]*\.[a-zA-Z]{2,}\/.+/;
 
 /**
+ * Normalize a user-provided skill source so the internal representation is
+ * canonical (no scheme, no `.git` suffix, no SSH form, no trailing slash).
+ *
+ * Accepts:
+ *   - `https://github.com/owner/repo/path`
+ *   - `http://github.com/owner/repo/path`
+ *   - `git@github.com:owner/repo.git`
+ *   - `github.com/owner/repo/path`
+ *
+ * Returns the trimmed value when nothing matches, so downstream validation
+ * still produces a deterministic error.
+ */
+export function normalizeSkillSource(input: string): string {
+  let source = input.trim();
+  if (source.length === 0) return source;
+
+  // SSH form: git@host:owner/repo[.git]
+  const sshMatch = source.match(/^git@([^:]+):(.+)$/);
+  if (sshMatch) {
+    source = `${sshMatch[1]}/${sshMatch[2]}`;
+  } else {
+    source = source.replace(/^https?:\/\//i, '');
+  }
+
+  source = source.replace(/\.git(?=\/|$)/i, '');
+  source = source.replace(/\/+$/, '');
+  return source;
+}
+
+/**
  * Directives that appear in the header section of a `.prs` file.
  * The `@use` insertion point is calculated as the line after the last
  * occurrence of any of these directives.
@@ -201,10 +231,18 @@ async function saveLockfile(lockfile: Lockfile): Promise<void> {
  * 3. Inserts `@use <source>` directive
  * 4. Updates promptscript.lock with `source: 'md'` entry
  */
-export async function skillsAddCommand(source: string, options: SkillsAddOptions): Promise<void> {
+export async function skillsAddCommand(
+  rawSource: string,
+  options: SkillsAddOptions
+): Promise<void> {
   const spinner = createSpinner('Adding skill...').start();
 
   try {
+    // Normalize the user-provided source before validating so we treat
+    // `https://github.com/foo/bar`, `git@github.com:foo/bar.git`, and
+    // `github.com/foo/bar` as the same logical identifier.
+    const source = normalizeSkillSource(rawSource);
+
     // Validate source
     const sourceError = validateRemoteSource(source);
     if (sourceError) {
