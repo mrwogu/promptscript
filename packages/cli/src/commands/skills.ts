@@ -81,6 +81,19 @@ function validateRemoteSource(source: string): string | undefined {
   if (!REMOTE_SOURCE_PATTERN.test(source)) {
     return `Invalid source: "${source}". Expected a remote path (e.g., github.com/owner/repo/path/SKILL.md)`;
   }
+
+  // Reject GitHub-style web URLs that include a tree/<ref> or blob/<ref>
+  // segment immediately after host/owner/repo. These come from copying
+  // a URL out of a browser and they are not valid repository paths.
+  const parts = source.split('/');
+  if (parts.length > 4 && (parts[3] === 'tree' || parts[3] === 'blob')) {
+    const kind = parts[3];
+    const ref = parts[4] ?? '<ref>';
+    const stripped = [...parts.slice(0, 3), ...parts.slice(5)].join('/').replace(/\/$/, '');
+    const example = stripped.length > 0 ? stripped : parts.slice(0, 3).join('/');
+    return `Invalid source: "${source}". Drop the "${kind}/${ref}" segment copied from the GitHub web UI (use "${example}" instead).`;
+  }
+
   return undefined;
 }
 

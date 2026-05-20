@@ -454,6 +454,27 @@ describe('skillsAddCommand', () => {
     expect(writtenContent).not.toContain('https://');
   });
 
+  it('should reject GitHub URLs that include tree/<ref>', async () => {
+    await skillsAddCommand(
+      'https://github.com/coreyhaines31/marketingskills/tree/main/skills/seo-audit',
+      {}
+    );
+
+    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Drop the "tree/main" segment'));
+    expect(mockFail).toHaveBeenCalledWith(
+      expect.stringContaining('github.com/coreyhaines31/marketingskills/skills/seo-audit')
+    );
+    expect(process.exitCode).toBe(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('should reject GitHub URLs that include blob/<ref>', async () => {
+    await skillsAddCommand('github.com/foo/bar/blob/main/SKILL.md', {});
+
+    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Drop the "blob/main" segment'));
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should accept SSH-style git URLs by normalizing them', async () => {
     mockExistsSync.mockImplementation((p: string) => {
       if (p.includes('entry.prs')) return true;
