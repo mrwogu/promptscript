@@ -2302,4 +2302,34 @@ describe('GitHubFormatter', () => {
       expect(formatter.getSkillFileName()).toBe('SKILL.md');
     });
   });
+
+  describe('outputDir override for skills', () => {
+    it('writes skill file to custom outputDir path', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy skill',
+                  content: 'Deploy instructions',
+                  __outputDir: 'skills/custom/deploy',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile?.path).toBe('.github/skills/custom/deploy/SKILL.md');
+    });
+  });
 });

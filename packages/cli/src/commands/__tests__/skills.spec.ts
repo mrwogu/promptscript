@@ -1245,4 +1245,29 @@ describe('skillsUpdateCommand', () => {
     expect(mockSucceed).toHaveBeenCalledWith('Updated 1 skill(s)');
     expect(mockWriteFile).toHaveBeenCalled();
   });
+
+  it('should skip a skill when validateRemoteAccess throws an exception', async () => {
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/SKILL.md': {
+          version: 'v1.0.0',
+          commit: 'abc123',
+          integrity: 'sha256-xyz',
+          source: 'md',
+        },
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => p === 'promptscript.lock');
+    mockReadFile.mockResolvedValue(lockContent);
+    mockValidateRemoteAccess.mockRejectedValue(new Error('network failure'));
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockConsoleWarn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipped github.com/org/repo/SKILL.md')
+    );
+  });
 });

@@ -491,6 +491,31 @@ describe('imports', () => {
 
       expect(source).toEqual(sourceSnapshot);
     });
+
+    it('handles non-object skill values by replacing them with __outputDir wrapper', () => {
+      // If a skill property is a primitive (unlikely but defensive),
+      // the else branch wraps it with { __outputDir: outputDir }.
+      const target = createProgram();
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              // Skill value is a string primitive, not an object
+              'my-skill': 'just a string' as unknown as Record<string, Value>,
+            })
+          ),
+        ],
+      });
+      const use = createUseDeclaration('github.com/foo/m', undefined, 'skills/m');
+
+      const result = resolveUses(target, use, source);
+
+      const skills = result.blocks.find((b) => b.name === 'skills');
+      const props = (skills?.content as ObjectContent).properties;
+      const wrapper = props['my-skill'] as Record<string, Value>;
+      expect(wrapper['__outputDir']).toBe('skills/m');
+    });
   });
 
   describe('isImportMarker', () => {

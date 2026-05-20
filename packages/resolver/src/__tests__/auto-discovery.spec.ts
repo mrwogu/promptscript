@@ -573,4 +573,65 @@ describe('discoverNativeContent', () => {
       await rm(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('discovers agents inside an agents/ wrapper directory', async () => {
+    const { mkdtemp, mkdir, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-agents-wrapper-'));
+
+    try {
+      const agentsDir = resolve(tmpDir, 'agents');
+      await mkdir(agentsDir, { recursive: true });
+      await writeFile(
+        resolve(agentsDir, 'deploy.md'),
+        '---\nmodel: opus\ndescription: Deploy agent\n---\nDeploy body.'
+      );
+
+      const result = await discoverNativeContent(tmpDir);
+      expect(result).not.toBeNull();
+      const agentsBlock = result!.blocks.find((b) => b.name === 'agents');
+      expect(agentsBlock).toBeDefined();
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('discovers commands inside a commands/ wrapper directory', async () => {
+    const { mkdtemp, mkdir, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-commands-wrapper-'));
+
+    try {
+      const commandsDir = resolve(tmpDir, 'commands');
+      await mkdir(commandsDir, { recursive: true });
+      await writeFile(
+        resolve(commandsDir, 'review.md'),
+        '---\ndescription: Review command\n---\nReview body.'
+      );
+
+      const result = await discoverNativeContent(tmpDir);
+      expect(result).not.toBeNull();
+      const shortcutsBlock = result!.blocks.find((b) => b.name === 'shortcuts');
+      expect(shortcutsBlock).toBeDefined();
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns null from safeIsDirectory for a non-existent path', async () => {
+    const { mkdtemp, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-safedir-'));
+
+    try {
+      // Create a file named "skills" (not a directory) in the root
+      await writeFile(resolve(tmpDir, 'skills'), 'not a directory');
+
+      // No actual skill content — result should be null
+      const result = await discoverNativeContent(tmpDir);
+      expect(result).toBeNull();
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });
