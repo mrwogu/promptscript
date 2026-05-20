@@ -735,6 +735,83 @@ describe('Resolver — registry marker handling', () => {
     expect(contextBlock).toBeDefined();
   });
 
+  it('resolves a root-level registry import via auto-discovery (no sub-path)', async () => {
+    const tempDir = join(testCacheDir, 'project-root-import');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-root-import"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use github.com/cloudflare/skills',
+      '',
+      '@identity { """test""" }',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(join(targetDir, 'skills', 'foo'), { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'skills', 'foo', 'SKILL.md'),
+        ['---', 'name: foo-skill', 'description: A discovered skill', '---', 'Body content.'].join(
+          '\n'
+        )
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-root'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    expect(result.errors).toEqual([]);
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    expect(skillsBlock).toBeDefined();
+  });
+
+  it('reports a helpful error when a root-level repo has no skill content', async () => {
+    const tempDir = join(testCacheDir, 'project-root-empty');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-root-empty"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use github.com/foo/empty',
+      '',
+      '@identity { """test""" }',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      // Empty repository — no skills, agents or commands.
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-root-empty'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    const messages = result.errors.map((e) => e.message).join('\n');
+    expect(messages).toContain('<repository root>');
+    expect(messages).toContain('Specify a sub-path');
+  });
+
   it('loads resource files and frontmatter references for registry .md skills', async () => {
     const tempDir = join(testCacheDir, 'project-md-resources');
     await fs.mkdir(tempDir, { recursive: true });

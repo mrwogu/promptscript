@@ -666,24 +666,29 @@ export class Resolver {
         await this.registryCache.set(repoUrl, effectiveVersion, commitHash);
       }
 
-      // Resolve the file path within the cached repo
-      const isMdPath = subPath.endsWith('.md');
-      const resolvedFileName = isMdPath
-        ? subPath
-        : subPath.endsWith('.prs')
+      // Resolve the file path within the cached repo. An empty sub-path means
+      // the import targets the repository root (e.g. `@use github.com/foo/bar`)
+      // so we skip the .prs/.md guess and go straight to auto-discovery.
+      const isRoot = subPath === '';
+      const isMdPath = !isRoot && subPath.endsWith('.md');
+      const resolvedFileName = isRoot
+        ? ''
+        : isMdPath
           ? subPath
-          : `${subPath}.prs`;
-      const resolvedFullPath = join(cachePath, resolvedFileName);
+          : subPath.endsWith('.prs')
+            ? subPath
+            : `${subPath}.prs`;
+      const resolvedFullPath = isRoot ? '' : join(cachePath, resolvedFileName);
 
       let resolvedAST: Program | null = null;
 
-      if (existsSync(resolvedFullPath) && isMdPath) {
+      if (!isRoot && existsSync(resolvedFullPath) && isMdPath) {
         // Found a .md file — route through content detection
         this.logger.debug(`Found .md file: ${resolvedFullPath}`);
         const source = await readFile(resolvedFullPath, 'utf-8');
         const mdResult = await this.loadAndParseMd(resolvedFullPath, source, errors);
         resolvedAST = mdResult.ast;
-      } else if (existsSync(resolvedFullPath)) {
+      } else if (!isRoot && existsSync(resolvedFullPath)) {
         // Found a .prs file — parse it
         this.logger.debug(`Found .prs file: ${resolvedFullPath}`);
         const source = await this.loader.load(resolvedFullPath);
@@ -698,14 +703,16 @@ export class Resolver {
         }
       } else {
         // No file found — try auto-discovery of native content
-        const discoverDir = join(cachePath, subPath);
+        const discoverDir = isRoot ? cachePath : join(cachePath, subPath);
         this.logger.debug(`No .prs found, trying auto-discovery: ${discoverDir}`);
         resolvedAST = await discoverNativeContent(discoverDir);
 
         if (!resolvedAST) {
+          const where = isRoot ? '<repository root>' : `'${subPath}'`;
+          const hint = isRoot ? ` Specify a sub-path (e.g. ${repoUrl}/skills/<name>).` : '';
           errors.push(
             new ResolveError(
-              `Cannot resolve registry import: no .prs file or native content at '${subPath}' in ${repoUrl}`
+              `Cannot resolve registry import: no .prs file or native content at ${where} in ${repoUrl}.${hint}`
             )
           );
         }
