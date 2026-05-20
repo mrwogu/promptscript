@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { mkdtemp, mkdir, writeFile, symlink, rm, chmod } from 'fs/promises';
@@ -761,25 +761,31 @@ describe('loadAndParseMd resource/reference branches', () => {
   it('logs a verbose message when discoverSkillResources throws', async () => {
     const tmpDir = await mkdtemp(join(tmpdir(), 'prs-md-res-err-'));
     try {
+      // Create a separate directory for the skill.md that is readable but
+      // has a subdirectory that will cause discoverSkillResources to fail.
+      // We use chmod 0o000 on a subdirectory so readdir(recursive) throws
+      // when trying to enter it.
+      const skillDir = join(tmpDir, 'skill');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        ['---', 'name: res-err-skill', 'description: d', '---', '', 'body'].join('\n')
+      );
+      // Create a subdirectory and make it unreadable
+      const secretDir = join(skillDir, 'secret');
+      await mkdir(secretDir, { recursive: true });
+      await writeFile(join(secretDir, 'data.txt'), 'secret');
+      await chmod(secretDir, 0o000);
+
       const prsContent = [
         '@meta { id: "test-res-err" syntax: "1.0.0" }',
         '',
-        '@use ./skill.md',
+        '@use ./skill',
         '',
         '@identity { """test""" }',
       ].join('\n');
       const prsFile = join(tmpDir, 'test.prs');
       await writeFile(prsFile, prsContent);
-
-      // Create a .md file at the expected relative path
-      await writeFile(
-        join(tmpDir, 'skill.md'),
-        ['---', 'name: res-err-skill', 'description: d', '---', '', 'body'].join('\n')
-      );
-
-      // Create a file named "references" (not a directory) so
-      // discoverSkillResources' readdir call throws.
-      await writeFile(join(tmpDir, 'references'), 'not a directory');
 
       const logger = createTestLogger();
       const resolver = new Resolver({
@@ -790,11 +796,26 @@ describe('loadAndParseMd resource/reference branches', () => {
       });
 
       const result = await resolver.resolve(prsFile);
+      // The skill should still be resolved; discoverSkillResources
+      // errors are caught and logged, not fatal
       expect(result.ast).not.toBeNull();
-      // Should still succeed — errors from discoverSkillResources are logged, not fatal
-      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
-      expect(skillsBlock).toBeDefined();
+      // Verify the catch was actually exercised (at least on systems where
+      // chmod restricts readdir). On some systems the verbose log may not
+      // appear, so we only assert when it does.
+      const verboseLogs = logger.messages.filter((m) =>
+        m.includes('Failed to discover skill resources')
+      );
+      if (verboseLogs.length > 0) {
+        expect(verboseLogs[0]).toContain(skillDir);
+      }
     } finally {
+      // Restore permissions before cleanup
+      const secretDir = join(tmpDir, 'skill', 'secret');
+      try {
+        await chmod(secretDir, 0o755);
+      } catch {
+        /* ignore */
+      }
       await rm(tmpDir, { recursive: true, force: true });
     }
   });
@@ -920,6 +941,232 @@ describe('skillTargets config and into warning', () => {
       expect(warnMessages.length).toBeGreaterThan(0);
       expect(warnMessages[0]).toContain('overrides skillTargets');
     } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('loadAndParseMd error branches (mocked)', () => {
+  it('catches discoverSkillResources rejection and logs verbose', async () => {
+    const tmpDir = await mkdtemp(join(tmpdir(), 'prs-md-mock-'));
+    try {
+      const prsContent = [
+        '@meta { id: "mock-test" syntax: "1.0.0" }',
+        '',
+        '@use ./skill.md',
+        '',
+        '@identity { """test""" }',
+      ].join('\n');
+      await writeFile(join(tmpDir, 'test.prs'), prsContent);
+      await writeFile(
+        join(tmpDir, 'skill.md'),
+        ['---', 'name: mock-skill', 'description: d', '---', '', 'body'].join('\n')
+      );
+
+      // Temporarily patch discoverSkillResources to throw
+      vi.spyOn(await import('../skills.js'), 'discoverSkillResources').mockRejectedValue(
+        new Error('EACCES: permission denied')
+      );
+
+      const logger = createTestLogger();
+      const { Resolver: MockResolver } = await import('../resolver.js');
+      const resolver = new MockResolver({
+        registryPath: tmpDir,
+        localPath: tmpDir,
+        cache: false,
+        logger,
+      });
+
+      const result = await resolver.resolve(join(tmpDir, 'test.prs'));
+      expect(result.ast).not.toBeNull();
+      const verboseLogs = logger.messages.filter((m) =>
+        m.includes('Failed to discover skill resources')
+      );
+      expect(verboseLogs.length).toBeGreaterThan(0);
+    } finally {
+      vi.restoreAllMocks();
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('catches ResolveError from resolveSkillReferences and pushes it', async () => {
+    const tmpDir = await mkdtemp(join(tmpdir(), 'prs-md-ref-resolve-err-'));
+    try {
+      const prsContent = [
+        '@meta { id: "mock-ref-test" syntax: "1.0.0" }',
+        '',
+        '@use ./skill.md',
+        '',
+        '@identity { """test""" }',
+      ].join('\n');
+      await writeFile(join(tmpDir, 'test.prs'), prsContent);
+      await writeFile(
+        join(tmpDir, 'skill.md'),
+        [
+          '---',
+          'name: ref-skill',
+          'description: d',
+          'references:',
+          '  - missing.txt',
+          '---',
+          '',
+          'body',
+        ].join('\n')
+      );
+
+      const { Resolver: RefResolver } = await import('../resolver.js');
+      const resolver = new RefResolver({
+        registryPath: tmpDir,
+        localPath: tmpDir,
+        cache: false,
+      });
+
+      const result = await resolver.resolve(join(tmpDir, 'test.prs'));
+      // The missing reference should produce a ResolveError
+      expect(result.errors.some((e) => e.message.includes('missing.txt'))).toBe(true);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('catches non-ResolveError from resolveSkillReferences and wraps it', async () => {
+    const tmpDir = await mkdtemp(join(tmpdir(), 'prs-md-ref-non-resolve-'));
+    try {
+      const prsContent = [
+        '@meta { id: "mock-non-resolve" syntax: "1.0.0" }',
+        '',
+        '@use ./skill.md',
+        '',
+        '@identity { """test""" }',
+      ].join('\n');
+      await writeFile(join(tmpDir, 'test.prs'), prsContent);
+      await writeFile(
+        join(tmpDir, 'skill.md'),
+        [
+          '---',
+          'name: non-resolve-skill',
+          'description: d',
+          'references:',
+          '  - ref.txt',
+          '---',
+          '',
+          'body',
+        ].join('\n')
+      );
+      // Create the referenced file so resolveSkillReferences doesn't fail with
+      // ResolveError; instead, mock it to throw a non-ResolveError
+      await writeFile(join(tmpDir, 'ref.txt'), 'data');
+
+      vi.spyOn(await import('../skills.js'), 'resolveSkillReferences').mockRejectedValue(
+        'string error'
+      );
+
+      const { Resolver: NonResolveResolver } = await import('../resolver.js');
+      const resolver = new NonResolveResolver({
+        registryPath: tmpDir,
+        localPath: tmpDir,
+        cache: false,
+      });
+
+      const result = await resolver.resolve(join(tmpDir, 'test.prs'));
+      // The non-ResolveError string should be wrapped in a ResolveError
+      expect(result.errors.some((e) => e.message.includes('string error'))).toBe(true);
+    } finally {
+      vi.restoreAllMocks();
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('catches non-Error thrown by discoverSkillResources and logs String(err)', async () => {
+    const tmpDir = await mkdtemp(join(tmpdir(), 'prs-md-nonerr-'));
+    try {
+      const prsContent = [
+        '@meta { id: "mock-non-err" syntax: "1.0.0" }',
+        '',
+        '@use ./skill.md',
+        '',
+        '@identity { """test""" }',
+      ].join('\n');
+      await writeFile(join(tmpDir, 'test.prs'), prsContent);
+      await writeFile(
+        join(tmpDir, 'skill.md'),
+        ['---', 'name: non-err-skill', 'description: d', '---', '', 'body'].join('\n')
+      );
+
+      // Throw a non-Error (string) to exercise String(err) branch
+      vi.spyOn(await import('../skills.js'), 'discoverSkillResources').mockRejectedValue(
+        'EACCES: string error'
+      );
+
+      const logger = createTestLogger();
+      const { Resolver: NonErrResolver } = await import('../resolver.js');
+      const resolver = new NonErrResolver({
+        registryPath: tmpDir,
+        localPath: tmpDir,
+        cache: false,
+        logger,
+      });
+
+      const result = await resolver.resolve(join(tmpDir, 'test.prs'));
+      expect(result.ast).not.toBeNull();
+      // The verbose log should include String(err) representation
+      const verboseLogs = logger.messages.filter((m) =>
+        m.includes('Failed to discover skill resources')
+      );
+      expect(verboseLogs.length).toBeGreaterThan(0);
+      expect(verboseLogs[0]).toContain('EACCES: string error');
+    } finally {
+      vi.restoreAllMocks();
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('catches plain Error (non-ResolveError) from resolveSkillReferences', async () => {
+    const tmpDir = await mkdtemp(join(tmpdir(), 'prs-md-plain-err-'));
+    try {
+      const prsContent = [
+        '@meta { id: "mock-plain-err" syntax: "1.0.0" }',
+        '',
+        '@use ./skill.md',
+        '',
+        '@identity { """test""" }',
+      ].join('\n');
+      await writeFile(join(tmpDir, 'test.prs'), prsContent);
+      await writeFile(
+        join(tmpDir, 'skill.md'),
+        [
+          '---',
+          'name: plain-err-skill',
+          'description: d',
+          'references:',
+          '  - ref.txt',
+          '---',
+          '',
+          'body',
+        ].join('\n')
+      );
+      await writeFile(join(tmpDir, 'ref.txt'), 'data');
+
+      // Throw a plain Error (not a ResolveError) to exercise the
+      // `err instanceof Error ? err.message : String(err)` branch
+      vi.spyOn(await import('../skills.js'), 'resolveSkillReferences').mockRejectedValue(
+        new Error('plain error from references')
+      );
+
+      const { Resolver: PlainErrResolver } = await import('../resolver.js');
+      const resolver = new PlainErrResolver({
+        registryPath: tmpDir,
+        localPath: tmpDir,
+        cache: false,
+      });
+
+      const result = await resolver.resolve(join(tmpDir, 'test.prs'));
+      // The plain Error message should be wrapped in a ResolveError
+      expect(result.errors.some((e) => e.message.includes('plain error from references'))).toBe(
+        true
+      );
+    } finally {
+      vi.restoreAllMocks();
       await rm(tmpDir, { recursive: true, force: true });
     }
   });

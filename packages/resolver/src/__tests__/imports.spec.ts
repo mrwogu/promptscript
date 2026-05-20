@@ -503,19 +503,52 @@ describe('imports', () => {
             createObjectContent({
               // Skill value is a string primitive, not an object
               'my-skill': 'just a string' as unknown as Record<string, Value>,
+              // Also test with null value
+              'null-skill': null as unknown as Record<string, Value>,
             })
           ),
         ],
       });
       const use = createUseDeclaration('github.com/foo/m', undefined, 'skills/m');
 
+      // Verify the source values are actually primitives before resolveUses
+      const srcSkillsBlock = source.blocks.find((b) => b.name === 'skills');
+      const srcProps = (srcSkillsBlock?.content as ObjectContent).properties;
+      expect(typeof srcProps['my-skill']).toBe('string');
+      expect(srcProps['null-skill']).toBeNull();
+
       const result = resolveUses(target, use, source);
 
       const skills = result.blocks.find((b) => b.name === 'skills');
+      expect(skills).toBeDefined();
       const props = (skills?.content as ObjectContent).properties;
-      const wrapper = props['my-skill'] as Record<string, Value>;
-      expect(wrapper['__outputDir']).toBe('skills/m');
+
+      // Debug: inspect what we got
+      const mySkillEntry = props['my-skill'];
+      const nullSkillEntry = props['null-skill'];
+      // Both should be __outputDir wrappers (the else branch fires for non-objects)
+      expect(typeof mySkillEntry).toBe('object');
+      expect(mySkillEntry).not.toBeNull();
+      expect((mySkillEntry as Record<string, Value>)['__outputDir']).toBe('skills/m');
+      expect(typeof nullSkillEntry).toBe('object');
+      expect((nullSkillEntry as Record<string, Value>)['__outputDir']).toBe('skills/m');
     });
+  });
+
+  it('skips outputDir attachment when source has no skills block', () => {
+    const target = createProgram();
+    // Source program has no skills block
+    const source = createProgram({
+      blocks: [createBlock('identity', createTextContent('imported'))],
+    });
+    const use = createUseDeclaration('github.com/foo/m', undefined, 'skills/m');
+
+    // Should not throw, just skip the outputDir attachment
+    const result = resolveUses(target, use, source);
+    expect(result).toBeDefined();
+    // No skills block should be added since source has none
+    const skills = result.blocks.find((b) => b.name === 'skills');
+    expect(skills).toBeUndefined();
   });
 
   describe('isImportMarker', () => {
