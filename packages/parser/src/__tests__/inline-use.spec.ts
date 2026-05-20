@@ -353,4 +353,39 @@ describe('inline @use in block content', () => {
       }
     });
   });
+
+  describe('@use ... into <path> output directory', () => {
+    it('parses outputDir on a top-level @use', () => {
+      const source = `@use github.com/foo/bar as seo into "skills/seo-audit"`;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.uses).toHaveLength(1);
+      const use = result.ast!.uses[0]!;
+      expect(use.alias).toBe('seo');
+      expect(use.outputDir).toBe('skills/seo-audit');
+    });
+
+    it('parses outputDir on an inline @use', () => {
+      const source = `
+        @skills {
+          @use ./shared/ops into "skills/ops"
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const skills = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skills?.content.type === 'ObjectContent') {
+        expect(skills.content.inlineUses).toHaveLength(1);
+        expect(skills.content.inlineUses![0]!.outputDir).toBe('skills/ops');
+      }
+    });
+
+    it('leaves outputDir undefined when not provided', () => {
+      const source = `@use ./foo`;
+      const result = parse(source);
+      expect(result.ast?.uses[0]!.outputDir).toBeUndefined();
+    });
+  });
 });

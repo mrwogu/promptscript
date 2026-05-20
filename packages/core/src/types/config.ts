@@ -229,6 +229,20 @@ export interface PromptScriptConfig {
   };
 
   /**
+   * Per-source output directories for `@use` imports.
+   *
+   * Maps a `@use` source string (matching the path's `raw` value) to a
+   * relative directory underneath each target's skill output location.
+   * An inline `into "<path>"` on the same `@use` declaration overrides
+   * the configured value.
+   *
+   * @example
+   * skillTargets:
+   *   "github.com/coreyhaines31/marketingskills/skills/seo-audit": "skills/seo-audit"
+   */
+  skillTargets?: Record<string, string>;
+
+  /**
    * Formatting configuration.
    * Controls how generated markdown files are formatted.
    * @example

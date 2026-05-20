@@ -477,6 +477,22 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Normalize a user-provided output directory (from `@use ... into "<path>"`
+   * or `skillTargets` config) to a safe forward-slash relative path. Rejects
+   * `..`, `.` and leading slashes so the result can be appended to a target's
+   * dot-directory without escaping it.
+   */
+  protected normalizeOutputDir(dir: string): string {
+    return dir
+      .replace(/\\/g, '/')
+      .replace(/^\/+/, '')
+      .replace(/\/+$/g, '')
+      .split('/')
+      .filter((segment) => segment.length > 0 && segment !== '.' && segment !== '..')
+      .join('/');
+  }
+
+  /**
    * Filter resource files to only include safe paths.
    * Rejects paths with traversal, absolute paths, and unsafe names.
    */

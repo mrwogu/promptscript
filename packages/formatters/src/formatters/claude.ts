@@ -69,6 +69,8 @@ interface ClaudeSkillConfig {
   resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
+  /** Optional relative output directory underneath .claude/ */
+  outputDir?: string;
 }
 
 /**
@@ -537,6 +539,7 @@ export class ClaudeFormatter extends BaseFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
         });
       }
     }
@@ -594,7 +597,9 @@ export class ClaudeFormatter extends BaseFormatter {
       lines.push(normalizedContent);
     }
 
-    const skillDirPath = `.claude/skills/${config.name}`;
+    const skillDirPath = config.outputDir
+      ? `.claude/${this.normalizeOutputDir(config.outputDir)}`
+      : `.claude/skills/${config.name}`;
     const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
 
     const resourcesWithProvenance = resourceFiles.map((f) => {

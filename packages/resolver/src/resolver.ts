@@ -57,6 +57,12 @@ export interface ResolverOptions extends LoaderOptions {
   guardRequiresDepth?: number;
   /** Base directory for the registry cache (defaults to ~/.promptscript/cache) */
   cacheDir?: string;
+  /**
+   * Map from `@use` source `path.raw` to a target output directory.
+   * Provides a config-driven default for skills imported via @use when no
+   * inline `into "<path>"` clause is present on the directive.
+   */
+  skillTargets?: Record<string, string>;
 }
 
 /**
@@ -526,8 +532,26 @@ export class Resolver {
             };
           }
 
-          this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);
-          result = resolveUses(result, use, resolvedImport);
+          // If no inline `into "<path>"` was given, fall back to the
+          // skillTargets map from resolver options. When both are set the
+          // inline directive wins and we surface a warning so users notice
+          // the redundant config entry.
+          let effectiveUse = use;
+          const fromConfig = this.options.skillTargets?.[use.path.raw];
+          if (use.outputDir && fromConfig && use.outputDir !== fromConfig) {
+            this.logger.warn(
+              `@use ${use.path.raw} into "${use.outputDir}" overrides skillTargets["${use.path.raw}"]="${fromConfig}"`
+            );
+          } else if (!use.outputDir && fromConfig) {
+            effectiveUse = { ...use, outputDir: fromConfig };
+          }
+
+          this.logger.debug(
+            `Merging import${effectiveUse.alias ? ` as "${effectiveUse.alias}"` : ''}${
+              effectiveUse.outputDir ? ` into "${effectiveUse.outputDir}"` : ''
+            }`
+          );
+          result = resolveUses(result, effectiveUse, resolvedImport);
         }
       } catch (err) {
         if (err instanceof CircularDependencyError) {

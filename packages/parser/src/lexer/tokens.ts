@@ -89,6 +89,12 @@ export const As = createToken({
   longer_alt: Identifier,
 });
 
+export const Into = createToken({
+  name: 'Into',
+  pattern: /into/,
+  longer_alt: Identifier,
+});
+
 export const Extend = createToken({
   name: 'Extend',
   pattern: /extend/,
@@ -276,6 +282,7 @@ export const allTokens: TokenType[] = [
   Inherit,
   Use,
   As,
+  Into,
   Extend,
   True,
   False,

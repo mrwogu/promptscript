@@ -276,6 +276,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
         });
       }
     }
@@ -326,7 +327,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       lines.push(dedentedContent);
     }
 
-    const skillDirPath = `.factory/skills/${factoryConfig.name}`;
+    const skillDirPath = factoryConfig.outputDir
+      ? `.factory/${this.normalizeOutputDir(factoryConfig.outputDir)}`
+      : `.factory/skills/${factoryConfig.name}`;
     const resourceFiles = this.sanitizeResourceFiles(factoryConfig.resources, skillDirPath);
 
     const resourcesWithProvenance = resourceFiles.map((f) => {

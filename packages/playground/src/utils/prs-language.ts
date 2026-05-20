@@ -13,7 +13,7 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
   defaultToken: '',
   tokenPostfix: '.prs',
 
-  keywords: ['true', 'false', 'null', 'string', 'number', 'boolean', 'enum'],
+  keywords: ['true', 'false', 'null', 'string', 'number', 'boolean', 'enum', 'as', 'into'],
 
   // Directive names
   directives: [

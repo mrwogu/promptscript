@@ -514,6 +514,7 @@ export async function compileCommand(
         skills: resolveUniversalDir(config.universalDir),
         registries: config.registries,
         lockfile,
+        skillTargets: config.skillTargets,
       },
       validator: config.validation,
       formatters: targets,
