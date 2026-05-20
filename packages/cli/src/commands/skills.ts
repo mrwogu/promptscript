@@ -43,7 +43,9 @@ export function normalizeSkillSource(input: string): string {
   }
 
   source = source.replace(/\.git(?=\/|$)/i, '');
-  source = source.replace(/\/+$/, '');
+  while (source.endsWith('/')) {
+    source = source.slice(0, -1);
+  }
   return source;
 }
 
