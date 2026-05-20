@@ -734,4 +734,76 @@ describe('Resolver — registry marker handling', () => {
     const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
     expect(contextBlock).toBeDefined();
   });
+
+  it('loads resource files and frontmatter references for registry .md skills', async () => {
+    const tempDir = join(testCacheDir, 'project-md-resources');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-md-resources"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/my-skill.md',
+      '',
+      '@identity { """test""" }',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    // Mock clone to create a skill directory with a SKILL.md + reference file
+    // alongside it. The resolver currently routes the .md file through
+    // loadAndParseMd, which must now also load nearby resources.
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'my-skill.md'),
+        [
+          '---',
+          'name: registry-skill-with-refs',
+          'description: Has resources and references',
+          'references:',
+          '  - references/checklist.md',
+          '---',
+          '',
+          'Skill body.',
+        ].join('\n')
+      );
+      await fs.mkdir(join(targetDir, 'references'), { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'references', 'checklist.md'),
+        '# Checklist\n- item one\n- item two\n'
+      );
+      await fs.writeFile(join(targetDir, 'data.txt'), 'sample resource content');
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-md-resources'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    expect(result.errors).toEqual([]);
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    expect(skillsBlock).toBeDefined();
+    if (skillsBlock?.content.type !== 'ObjectContent') {
+      throw new Error('skills block should be ObjectContent');
+    }
+    const skill = skillsBlock.content.properties['registry-skill-with-refs'] as
+      | Record<string, unknown>
+      | undefined;
+    expect(skill).toBeDefined();
+    const resources = skill!['resources'] as
+      | Array<{ relativePath: string; content: string }>
+      | undefined;
+    expect(resources).toBeDefined();
+    const paths = (resources ?? []).map((r) => r.relativePath).sort();
+    expect(paths).toContain('references/checklist.md');
+    expect(paths).toContain('data.txt');
+  });
 });

@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { lstat, readdir, readFile } from 'fs/promises';
-import { basename, join } from 'path';
+import { basename, dirname, join } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -29,7 +29,10 @@ import {
   resolveNativeAgents,
   parseSkillMd,
   skillNameFromPath,
+  discoverSkillResources,
+  resolveSkillReferences,
   type NativeSkillOptions,
+  type SkillResource,
 } from './skills.js';
 import { detectContentType } from './content-detector.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
@@ -259,7 +262,7 @@ export class Resolver {
 
     // Route .md files through content detection
     if (absPath.endsWith('.md')) {
-      return this.loadAndParseMd(absPath, source, errors);
+      return await this.loadAndParseMd(absPath, source, errors);
     }
 
     const parseResult = parse(source, { filename: absPath });
@@ -283,15 +286,17 @@ export class Resolver {
    *
    * If the content looks like PRS (has @identity block), parse as PRS.
    * If it has YAML frontmatter, treat as a skill and synthesize a Program
-   * with a @skills block.
+   * with a @skills block. Resource files alongside SKILL.md and explicit
+   * `references:` entries are loaded so registry-imported skills behave the
+   * same as locally-discovered ones.
    * Otherwise, treat as raw markdown and synthesize a Program with a @skills
    * block using the filename as the skill name.
    */
-  private loadAndParseMd(
+  private async loadAndParseMd(
     absPath: string,
     source: string,
     errors: ResolveError[]
-  ): { ast: Program | null } {
+  ): Promise<{ ast: Program | null }> {
     const contentType = detectContentType(source);
 
     if (contentType === 'prs') {
@@ -325,6 +330,49 @@ export class Resolver {
     }
     if (parsed.content) {
       skillProps['content'] = makeTextContent(parsed.content, absPath);
+    }
+
+    // Discover resource files alongside the SKILL.md and explicit reference
+    // entries. This mirrors the behaviour of resolveNativeSkills() so a skill
+    // pulled in via a registry import carries the same resources as a locally
+    // discovered one.
+    const skillDir = dirname(absPath);
+    const collected: SkillResource[] = [];
+
+    try {
+      const discovered = await discoverSkillResources(skillDir, this.logger);
+      collected.push(...discovered);
+    } catch (err) {
+      this.logger.verbose(
+        `Failed to discover skill resources in ${skillDir}: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+
+    if (parsed.references && parsed.references.length > 0) {
+      try {
+        const refs = await resolveSkillReferences(parsed.references, skillDir, this.logger);
+        collected.push(...refs);
+      } catch (err) {
+        if (err instanceof ResolveError) {
+          errors.push(err);
+        } else {
+          errors.push(new ResolveError(err instanceof Error ? err.message : String(err)));
+        }
+      }
+    }
+
+    if (collected.length > 0) {
+      // Deduplicate by relativePath: explicit references override discovered ones.
+      const byPath = new Map<string, SkillResource>();
+      for (const resource of collected) {
+        byPath.set(resource.relativePath, resource);
+      }
+      skillProps['resources'] = Array.from(byPath.values()).map((r) => ({
+        relativePath: r.relativePath,
+        content: r.content,
+      })) as Value[];
     }
 
     const program: Program = {
@@ -633,7 +681,7 @@ export class Resolver {
         // Found a .md file — route through content detection
         this.logger.debug(`Found .md file: ${resolvedFullPath}`);
         const source = await readFile(resolvedFullPath, 'utf-8');
-        const mdResult = this.loadAndParseMd(resolvedFullPath, source, errors);
+        const mdResult = await this.loadAndParseMd(resolvedFullPath, source, errors);
         resolvedAST = mdResult.ast;
       } else if (existsSync(resolvedFullPath)) {
         // Found a .prs file — parse it
