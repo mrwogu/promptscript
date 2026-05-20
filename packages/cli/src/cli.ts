@@ -90,6 +90,7 @@ program
   .option('-m, --migrate', 'Install migration skill for AI-assisted migration')
   .option('--auto-import', 'Automatically import existing instruction files (static)')
   .option('--backup', 'Create .prs-backup/ before migration')
+  .option('--no-hooks', 'Skip auto-compile hook installation for AI tools')
   .action((opts) => {
     if (opts.migrate) {
       ConsoleOutput.warn('--migrate is deprecated. The migration flow is now built into prs init.');

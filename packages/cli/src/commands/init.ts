@@ -40,6 +40,17 @@ import { isGitRepo, createBackup } from '../utils/backup.js';
 import { generateMigrationPrompt } from '../utils/migration-prompt.js';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { findPrettierConfig } from '../prettier/loader.js';
+import { hooksCommand } from './hooks.js';
+import { getToolConfig } from '../hooks/tool-configs/index.js';
+
+/**
+ * Map AI tool target identifiers to hook tool-config names.
+ * Most names match directly; this only lists targets whose hook
+ * config name differs from the formatter target name.
+ */
+const TARGET_TO_HOOK_NAME: Record<string, string> = {
+  github: 'copilot',
+};
 import {
   loadManifest,
   loadManifestFromUrl,
@@ -184,6 +195,34 @@ export async function initCommand(
     // the skill without running `prs compile` first.
     const installedSkillPaths = await installSkillToTargets(config.targets, services);
 
+    // Install auto-compile hooks for the selected targets unless --no-hooks.
+    // commander maps `--no-hooks` to options.hooks === false, so any other value
+    // (undefined, true) keeps the default behaviour of installing hooks.
+    const installedHookTargets: AIToolTarget[] = [];
+    if (options.hooks !== false) {
+      const previousExitCode = process.exitCode;
+      for (const target of config.targets) {
+        const hookName = TARGET_TO_HOOK_NAME[target] ?? target;
+        if (!getToolConfig(hookName)) {
+          // No hook config registered for this target — silently skip
+          continue;
+        }
+        try {
+          await hooksCommand('install', hookName);
+          installedHookTargets.push(target);
+        } catch (error) {
+          ConsoleOutput.warn(
+            `Failed to install ${target} hooks: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+      // hooksCommand sets process.exitCode on its own validation errors,
+      // but we guarded against unknown tools above, so restore the prior code.
+      process.exitCode = previousExitCode;
+    }
+
     spinner.succeed('PromptScript initialized');
 
     // Show summary
@@ -266,9 +305,18 @@ export async function initCommand(
       }
     }
 
-    ConsoleOutput.muted(
-      '\n  Tip: Run prs hooks install to set up auto-compilation hooks for your AI tools.\n'
-    );
+    ConsoleOutput.newline();
+    if (installedHookTargets.length > 0) {
+      ConsoleOutput.info(`Auto-compile hooks installed for: ${installedHookTargets.join(', ')}`);
+    } else if (options.hooks === false) {
+      ConsoleOutput.muted(
+        'Hooks skipped (--no-hooks). Run "prs hooks install" later to enable auto-compilation.'
+      );
+    } else {
+      ConsoleOutput.muted(
+        'Tip: Run prs hooks install to set up auto-compilation hooks for your AI tools.'
+      );
+    }
   } catch (error) {
     if (error instanceof Error && error.name === 'ExitPromptError') {
       // User cancelled with Ctrl+C
