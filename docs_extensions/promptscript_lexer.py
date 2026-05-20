@@ -91,6 +91,8 @@ class PromptScriptLexer(RegexLexer):
             ),
             # 'as' keyword for inline @use aliases
             (r"\b(as)\b", Keyword.Namespace),
+            # 'into' keyword for inline @use output directories
+            (r"\b(into)\b", Keyword.Namespace),
             # Nested blocks
             (r"\{", Punctuation, "#push"),
             (r"\}", Punctuation, "#pop"),

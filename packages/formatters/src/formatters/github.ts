@@ -79,6 +79,8 @@ interface SkillConfig {
   resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
+  /** Optional relative output directory underneath .github/ */
+  outputDir?: string;
 }
 
 /**
@@ -590,6 +592,7 @@ export class GitHubFormatter extends BaseFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
         });
       }
     }
@@ -632,7 +635,9 @@ export class GitHubFormatter extends BaseFormatter {
 
     // Strip leading slashes from name for clean file paths
     const cleanName = config.name.replace(/^\/+/, '');
-    const skillDirPath = `.github/skills/${cleanName}`;
+    const skillDirPath = config.outputDir
+      ? `.github/${this.normalizeOutputDir(config.outputDir)}`
+      : `.github/skills/${cleanName}`;
     const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
 
     const resourcesWithProvenance = resourceFiles.map((f) => {

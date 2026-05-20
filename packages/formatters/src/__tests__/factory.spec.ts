@@ -2178,4 +2178,62 @@ describe('FactoryFormatter', () => {
       expect(droidFile?.content).toContain('specReasoningEffort: high');
     });
   });
+
+  describe('outputDir override for @use ... into', () => {
+    it('honors __outputDir when generating the skill file', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'seo-audit': {
+                  description: 'SEO audit skill',
+                  content: 'Audit content',
+                  __outputDir: 'skills/marketing/seo-audit',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile?.path).toBe('.factory/skills/marketing/seo-audit/SKILL.md');
+    });
+
+    it('strips traversal segments from __outputDir', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                s: {
+                  description: 'd',
+                  content: 'c',
+                  __outputDir: '../../etc',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile?.path).toBe('.factory/etc/SKILL.md');
+    });
+  });
 });

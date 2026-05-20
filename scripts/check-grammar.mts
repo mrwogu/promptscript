@@ -30,6 +30,7 @@ const TOKEN_SCOPE_MAP: Record<string, string> = {
   Use: 'keyword.control',
   Extend: 'keyword.control',
   As: 'keyword.control',
+  Into: 'keyword.control',
   At: 'entity.name.tag',
   Range: 'keyword.other',
   Enum: 'keyword.other',

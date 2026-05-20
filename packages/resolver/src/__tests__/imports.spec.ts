@@ -66,7 +66,7 @@ const createMixedContent = (
   loc: createLoc(),
 });
 
-const createUseDeclaration = (path: string, alias?: string) => ({
+const createUseDeclaration = (path: string, alias?: string, outputDir?: string) => ({
   type: 'UseDeclaration' as const,
   path: {
     type: 'PathReference' as const,
@@ -76,6 +76,7 @@ const createUseDeclaration = (path: string, alias?: string) => ({
     loc: createLoc(),
   },
   alias,
+  outputDir,
   loc: createLoc(),
 });
 
@@ -444,6 +445,51 @@ describe('imports', () => {
 
       expect(content.properties['__source']).toBe('@company/guards');
       expect(content.properties['__blocks']).toEqual(['rules']);
+    });
+
+    it('attaches __outputDir to every skill brought in by @use ... into', () => {
+      const target = createProgram();
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              seo: { description: 'SEO audit' },
+              social: { description: 'Social skills' },
+            })
+          ),
+        ],
+      });
+      const use = createUseDeclaration('github.com/foo/marketing', undefined, 'skills/marketing');
+
+      const result = resolveUses(target, use, source);
+
+      const skills = result.blocks.find((b) => b.name === 'skills');
+      const props = (skills?.content as ObjectContent).properties;
+      const seo = props['seo'] as Record<string, Value>;
+      const social = props['social'] as Record<string, Value>;
+
+      expect(seo['__outputDir']).toBe('skills/marketing');
+      expect(social['__outputDir']).toBe('skills/marketing');
+    });
+
+    it('leaves source AST unchanged when outputDir is applied', () => {
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              seo: { description: 'SEO audit' },
+            })
+          ),
+        ],
+      });
+      const sourceSnapshot = JSON.parse(JSON.stringify(source));
+      const use = createUseDeclaration('github.com/foo/m', undefined, 'skills/m');
+
+      resolveUses(createProgram(), use, source);
+
+      expect(source).toEqual(sourceSnapshot);
     });
   });
 

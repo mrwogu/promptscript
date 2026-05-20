@@ -169,6 +169,12 @@ export interface UseDeclaration extends BaseNode {
   alias?: string;
   /** Template parameters (for parameterized imports) */
   params?: ParamArgument[];
+  /**
+   * Optional inline output directory (e.g. `@use foo into skills/seo`).
+   * Stored as a forward-slash relative path. When present this overrides
+   * the global `skillTargets` configuration for this import only.
+   */
+  outputDir?: string;
 }
 
 /**
@@ -183,6 +189,8 @@ export interface InlineUseDeclaration {
   params?: ParamArgument[];
   /** Alias for the phase */
   alias?: string;
+  /** Optional inline output directory (forward-slash relative). */
+  outputDir?: string;
   /** Source location */
   loc: SourceLocation;
 }

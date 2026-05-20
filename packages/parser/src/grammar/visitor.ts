@@ -54,6 +54,7 @@ interface UseDeclCstCtx {
   pathRef: CstNode[];
   paramCallList?: CstNode[];
   Identifier?: IToken[];
+  StringLiteral?: IToken[];
 }
 
 interface InlineUseCstCtx {
@@ -61,6 +62,7 @@ interface InlineUseCstCtx {
   pathRef: CstNode[];
   paramCallList?: CstNode[];
   Identifier?: IToken[];
+  StringLiteral?: IToken[];
 }
 
 interface BlockCstCtx {
@@ -349,6 +351,10 @@ class PromptScriptVisitor extends BaseVisitor {
       use.alias = ctx.Identifier[0]!.image;
     }
 
+    if (ctx.StringLiteral) {
+      use.outputDir = this.parseStringLiteral(ctx.StringLiteral[0]!.image);
+    }
+
     return use;
   }
 
@@ -368,6 +374,10 @@ class PromptScriptVisitor extends BaseVisitor {
 
     if (ctx.Identifier) {
       decl.alias = ctx.Identifier[0]!.image;
+    }
+
+    if (ctx.StringLiteral) {
+      decl.outputDir = this.parseStringLiteral(ctx.StringLiteral[0]!.image);
     }
 
     return decl;

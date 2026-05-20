@@ -35,6 +35,11 @@ export interface MarkdownSkillConfig {
   rawFrontmatter?: string;
   /** Pre-extracted examples from the skill's nested examples property */
   examples?: Array<{ name: string; input: string; output: string; description?: string }>;
+  /**
+   * Relative output directory underneath the target's skill folder.
+   * Overrides the default `<dotDir>/skills/<name>` layout when provided.
+   */
+  outputDir?: string;
 }
 
 /**
@@ -377,6 +382,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
           examples: this.extractSkillExamples(obj),
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
         });
       }
     }
@@ -429,7 +435,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       }
     }
 
-    const skillDirPath = `${this.config.dotDir}/skills/${config.name}`;
+    const skillDirPath = config.outputDir
+      ? `${this.config.dotDir}/${this.normalizeOutputDir(config.outputDir)}`
+      : `${this.config.dotDir}/skills/${config.name}`;
     const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
 
     return {
