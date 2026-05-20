@@ -40,7 +40,8 @@ export function resolveUses(target: Program, use: UseDeclaration, source: Progra
     if (skillsBlock?.content.type === 'ObjectContent') {
       const props = (skillsBlock.content as ObjectContent).properties;
       for (const [name, value] of Object.entries(props)) {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        const isObj = typeof value === 'object' && value !== null && !Array.isArray(value);
+        if (isObj) {
           (value as Record<string, Value>)['__outputDir'] = use.outputDir;
         } else {
           props[name] = { __outputDir: use.outputDir } as unknown as Value;
