@@ -12,6 +12,7 @@ const {
   mockReadFile,
   mockReaddir,
   mockValidateRemoteAccess,
+  mockConsoleWarn,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -34,6 +35,7 @@ const {
     accessible: true,
     headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
   });
+  const mockConsoleWarn = vi.fn();
   return {
     mockSucceed,
     mockFail,
@@ -46,6 +48,7 @@ const {
     mockReadFile,
     mockReaddir,
     mockValidateRemoteAccess,
+    mockConsoleWarn,
   };
 });
 
@@ -58,6 +61,8 @@ vi.mock('../../output/console.js', () => ({
     newline: vi.fn(),
     info: vi.fn(),
     dryRun: vi.fn(),
+    warn: mockConsoleWarn,
+    warning: mockConsoleWarn,
   },
 }));
 
@@ -1008,6 +1013,10 @@ describe('skillsUpdateCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = undefined;
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
+    });
   });
 
   it('should update all md-sourced skills', async () => {
@@ -1033,11 +1042,49 @@ describe('skillsUpdateCommand', () => {
       return false;
     });
     mockReadFile.mockResolvedValue(lockContent);
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    });
 
     await skillsUpdateCommand(undefined, {});
 
     expect(mockSucceed).toHaveBeenCalledWith('Updated 1 skill(s)');
     expect(mockWriteFile).toHaveBeenCalled();
+    const writeCall = mockWriteFile.mock.calls[0]!;
+    const written = JSON.parse(writeCall[1] as string);
+    const entry = written.dependencies['github.com/org/repo/SKILL.md'];
+    expect(entry.commit).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    expect(entry.integrity).toBe('sha256-xyz');
+    expect(typeof entry.fetchedAt).toBe('string');
+  });
+
+  it('should skip md-sourced skills when the remote is unreachable', async () => {
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/SKILL.md': {
+          version: 'v1.0.0',
+          commit: 'abc123',
+          integrity: 'sha256-xyz',
+          source: 'md',
+        },
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => p === 'promptscript.lock');
+    mockReadFile.mockResolvedValue(lockContent);
+    mockValidateRemoteAccess.mockResolvedValueOnce({
+      accessible: false,
+      error: 'remote unreachable',
+    });
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockConsoleWarn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipped github.com/org/repo/SKILL.md')
+    );
   });
 
   it('should warn when no md-sourced skills in lockfile', async () => {

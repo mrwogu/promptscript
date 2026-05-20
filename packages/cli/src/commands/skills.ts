@@ -479,31 +479,68 @@ export async function skillsUpdateCommand(
       return;
     }
 
-    // Reset pins to trigger re-resolution
-    for (const [key] of toUpdate) {
-      lockfile.dependencies[key] = {
-        version: 'latest',
-        commit: '0000000000000000000000000000000000000000',
-        integrity: 'sha256-pending',
-        source: 'md',
-      };
+    // Fetch the latest HEAD commit for each entry by reaching out to the
+    // remote with validateRemoteAccess. The integrity field is preserved from
+    // the previous pin (full re-hash happens during the next compile).
+    const fetchedAt = new Date().toISOString();
+    const updated: string[] = [];
+    const skipped: Array<{ key: string; reason: string }> = [];
+
+    for (const [key, dep] of toUpdate) {
+      const repoUrl = extractRepoUrl(key);
+      try {
+        const validation = await validateRemoteAccess(repoUrl);
+        if (!validation.accessible || !validation.headCommit) {
+          skipped.push({
+            key,
+            reason: validation.error ?? 'remote unreachable',
+          });
+          continue;
+        }
+        lockfile.dependencies[key] = {
+          version: dep.version ?? 'latest',
+          commit: validation.headCommit,
+          integrity: dep.integrity ?? 'sha256-pending',
+          source: 'md',
+          fetchedAt,
+        };
+        updated.push(key);
+      } catch (err) {
+        skipped.push({
+          key,
+          reason: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
 
     if (options.dryRun) {
       spinner.succeed('Dry run — lockfile not written');
       ConsoleOutput.newline();
-      for (const [key] of toUpdate) {
+      for (const key of updated) {
         ConsoleOutput.dryRun(`Would update: ${key}`);
+      }
+      for (const { key, reason } of skipped) {
+        ConsoleOutput.warn(`Would skip ${key}: ${reason}`);
       }
       return;
     }
 
-    await saveLockfile(lockfile);
+    if (updated.length > 0) {
+      await saveLockfile(lockfile);
+    }
 
-    spinner.succeed(`Updated ${toUpdate.length} skill(s)`);
-    ConsoleOutput.newline();
-    for (const [key] of toUpdate) {
-      ConsoleOutput.success(key);
+    if (updated.length > 0) {
+      spinner.succeed(`Updated ${updated.length} skill(s)`);
+      ConsoleOutput.newline();
+      for (const key of updated) {
+        ConsoleOutput.success(key);
+      }
+    } else {
+      spinner.warn('No skills were updated');
+    }
+
+    for (const { key, reason } of skipped) {
+      ConsoleOutput.warn(`Skipped ${key}: ${reason}`);
     }
   } catch (error) {
     spinner.fail('Failed to update skills');
