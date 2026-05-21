@@ -1018,13 +1018,16 @@ watch:
 
 ## Environment Variables
 
-| Variable                | Description                           |
-| ----------------------- | ------------------------------------- |
-| `PROMPTSCRIPT_CONFIG`   | Path to config file                   |
-| `PROMPTSCRIPT_REGISTRY` | Registry path or URL                  |
-| `PROMPTSCRIPT_VERBOSE`  | Enable verbose output (`1` or `true`) |
-| `PROMPTSCRIPT_DEBUG`    | Enable debug output (`1` or `true`)   |
-| `NO_COLOR`              | Disable colored output                |
+| Variable                                 | Description                                |
+| ---------------------------------------- | ------------------------------------------ |
+| `PROMPTSCRIPT_CONFIG`                    | Path to config file                        |
+| `PROMPTSCRIPT_REGISTRY`                  | Registry path or URL                       |
+| `PROMPTSCRIPT_REGISTRY_GIT_URL`          | Git registry URL (HTTPS or SSH)            |
+| `PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL` | Fallback Git URL (retried on auth failure) |
+| `PROMPTSCRIPT_REGISTRY_GIT_REF`          | Git ref (branch, tag, or commit)           |
+| `PROMPTSCRIPT_VERBOSE`                   | Enable verbose output (`1` or `true`)      |
+| `PROMPTSCRIPT_DEBUG`                     | Enable debug output (`1` or `true`)        |
+| `NO_COLOR`                               | Disable colored output                     |
 
 ## Exit Codes
 

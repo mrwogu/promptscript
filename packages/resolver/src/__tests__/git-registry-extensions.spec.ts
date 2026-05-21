@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { existsSync, promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { GitRegistry, GitRefNotFoundError, GitCloneError } from '../git-registry.js';
+import { GitRegistry, GitRefNotFoundError, GitCloneError, GitAuthError } from '../git-registry.js';
 import { RegistryCache } from '../registry-cache.js';
 
 // ---------------------------------------------------------------------------
@@ -357,6 +357,166 @@ describe('GitRegistry — extended methods', () => {
           'src/'
         )
       ).rejects.toThrow(GitCloneError);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // fallbackUrl — cloneAtTag
+  // -------------------------------------------------------------------------
+
+  describe('cloneAtTag() — fallbackUrl', () => {
+    it('retries with fallback URL on auth error', async () => {
+      // Arrange — primary URL fails with auth error, fallback succeeds
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockResolvedValueOnce(undefined);
+
+      // Act
+      await registry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        'v1.0.0',
+        join(testCacheDir, 'fb1'),
+        'git@github.com:org/repo.git'
+      );
+
+      // Assert — called twice: once with primary, once with fallback
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
+      expect(mockGit.clone).toHaveBeenNthCalledWith(
+        1,
+        'https://github.com/org/repo.git',
+        expect.any(String),
+        expect.arrayContaining(['--branch=v1.0.0'])
+      );
+      expect(mockGit.clone).toHaveBeenNthCalledWith(
+        2,
+        'git@github.com:org/repo.git',
+        expect.any(String),
+        expect.arrayContaining(['--branch=v1.0.0'])
+      );
+    });
+
+    it('throws combined GitAuthError when both URLs fail with auth', async () => {
+      // Arrange — both primary and fallback fail with auth errors
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('Permission denied (publickey)'));
+
+      // Act / Assert
+      await expect(
+        registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v1.0.0',
+          join(testCacheDir, 'fb2'),
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toThrow(GitAuthError);
+
+      // Verify error message mentions both URLs
+      try {
+        await registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v1.0.0',
+          join(testCacheDir, 'fb2b'),
+          'git@github.com:org/repo.git'
+        );
+      } catch (err) {
+        expect(err).toBeInstanceOf(GitAuthError);
+        expect((err as GitAuthError).message).toContain('both');
+      }
+    });
+
+    it('does not retry with fallback on non-auth error', async () => {
+      // Arrange — primary fails with non-auth error
+      mockGit.clone.mockRejectedValueOnce(new Error('Could not find remote branch v9.9.9'));
+
+      // Act / Assert
+      await expect(
+        registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v9.9.9',
+          join(testCacheDir, 'fb3'),
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toThrow(GitRefNotFoundError);
+
+      // Only called once — no fallback attempt for ref errors
+      expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    });
+
+    it('succeeds immediately without fallback when primary URL works', async () => {
+      // Arrange — primary URL succeeds
+      mockGit.clone.mockResolvedValueOnce(undefined);
+
+      // Act
+      await registry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        'v1.0.0',
+        join(testCacheDir, 'fb4'),
+        'git@github.com:org/repo.git'
+      );
+
+      // Assert — only one clone call
+      expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws GitCloneError when fallback fails with non-auth error', async () => {
+      // Arrange — primary auth error, fallback non-auth error
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('Network timeout'));
+
+      // Act / Assert
+      await expect(
+        registry.cloneAtTag(
+          'https://github.com/org/repo.git',
+          'v1.0.0',
+          join(testCacheDir, 'fb5'),
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toThrow(GitCloneError);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // fallbackUrl — cloneSparse
+  // -------------------------------------------------------------------------
+
+  describe('cloneSparse() — fallbackUrl', () => {
+    it('retries with fallback URL on auth error', async () => {
+      // Arrange — primary URL fails with auth error, fallback succeeds
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockResolvedValueOnce(undefined);
+
+      // Act
+      await registry.cloneSparse(
+        'https://github.com/org/repo.git',
+        'main',
+        join(testCacheDir, 'sparse-fb1'),
+        'src/',
+        'git@github.com:org/repo.git'
+      );
+
+      // Assert
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws combined GitAuthError when both sparse URLs fail with auth', async () => {
+      // Arrange
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('Permission denied (publickey)'));
+
+      // Act / Assert
+      await expect(
+        registry.cloneSparse(
+          'https://github.com/org/repo.git',
+          'main',
+          join(testCacheDir, 'sparse-fb2'),
+          'src/',
+          'git@github.com:org/repo.git'
+        )
+      ).rejects.toThrow(GitAuthError);
     });
   });
 });

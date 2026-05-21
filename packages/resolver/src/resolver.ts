@@ -42,6 +42,7 @@ import { resolveSkillComposition } from './skill-composition.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
 import { discoverNativeContent } from './auto-discovery.js';
+import { findFallbackUrl } from './alias-resolver.js';
 
 /**
  * Options for the resolver.
@@ -682,8 +683,13 @@ export class Resolver {
         this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
+        // Look up fallback URL from registries config (for HTTPS→SSH auth retry)
+        const fallbackRepoUrl = this.options.registries
+          ? findFallbackUrl(repoUrl, this.options.registries)
+          : undefined;
+
         // Clone using GitRegistry
-        await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath);
+        await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath, fallbackRepoUrl);
 
         // Record in RegistryCache
         const commitHash = lockEntry?.commit ?? 'unknown';

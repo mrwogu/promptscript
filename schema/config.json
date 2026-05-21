@@ -69,6 +69,11 @@
               "type": "string",
               "description": "Git repository URL (HTTPS or SSH)"
             },
+            "fallbackUrl": {
+              "type": "string",
+              "description": "Fallback Git URL to try when the primary `url` fails with an auth error. Useful when the registry references an HTTPS URL but the user authenticates via SSH (or vice versa).",
+              "example": "registry:\n  git:\n    url: 'https://github.com/org/registry.git'\n    fallbackUrl: 'git@github.com:org/registry.git'"
+            },
             "ref": {
               "type": "string",
               "description": "Git ref to checkout (branch, tag, or commit hash).",
@@ -330,6 +335,11 @@
         "url": {
           "type": "string",
           "description": "Git repository URL (HTTPS or SSH)"
+        },
+        "fallbackUrl": {
+          "type": "string",
+          "description": "Fallback Git URL to try when the primary `url` fails with an auth error. Useful when registries reference HTTPS URLs but the user authenticates via SSH (or vice versa).",
+          "example": "registries:\n  '@acme':\n    url: 'https://github.com/acme/standards.git'\n    fallbackUrl: 'git@github.com:acme/standards.git'"
         },
         "root": {
           "type": "string",

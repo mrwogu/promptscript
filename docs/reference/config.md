@@ -50,6 +50,7 @@ registry:
   # Or Git repository (recommended for teams)
   # git:
   #   url: https://github.com/org/promptscript-registry.git
+  #   fallbackUrl: git@github.com:org/promptscript-registry.git  # SSH fallback
   #   ref: main                    # branch, tag, or commit
   #   path: registry/              # subdirectory in repo
   #   auth:
@@ -241,19 +242,20 @@ registry:
 
 **Registry Fields:**
 
-| Field                  | Type    | Default   | Description                    |
-| ---------------------- | ------- | --------- | ------------------------------ |
-| `path`                 | string  | -         | Local registry path            |
-| `url`                  | string  | -         | HTTP registry URL              |
-| `git.url`              | string  | -         | Git repository URL             |
-| `git.ref`              | string  | `main`    | Branch, tag, or commit         |
-| `git.path`             | string  | -         | Subdirectory within the repo   |
-| `git.auth.type`        | string  | -         | Auth type: `token` or `ssh`    |
-| `git.auth.token`       | string  | -         | Personal access token (direct) |
-| `git.auth.tokenEnvVar` | string  | -         | Env var containing the token   |
-| `git.auth.sshKeyPath`  | string  | -         | Path to SSH key (for SSH auth) |
-| `cache.enabled`        | boolean | `true`    | Enable caching                 |
-| `cache.ttl`            | number  | `3600000` | Cache TTL in milliseconds      |
+| Field                  | Type    | Default   | Description                          |
+| ---------------------- | ------- | --------- | ------------------------------------ |
+| `path`                 | string  | -         | Local registry path                  |
+| `url`                  | string  | -         | HTTP registry URL                    |
+| `git.url`              | string  | -         | Git repository URL                   |
+| `git.fallbackUrl`      | string  | -         | Fallback URL (tried on auth failure) |
+| `git.ref`              | string  | `main`    | Branch, tag, or commit               |
+| `git.path`             | string  | -         | Subdirectory within the repo         |
+| `git.auth.type`        | string  | -         | Auth type: `token` or `ssh`          |
+| `git.auth.token`       | string  | -         | Personal access token (direct)       |
+| `git.auth.tokenEnvVar` | string  | -         | Env var containing the token         |
+| `git.auth.sshKeyPath`  | string  | -         | Path to SSH key (for SSH auth)       |
+| `cache.enabled`        | boolean | `true`    | Enable caching                       |
+| `cache.ttl`            | number  | `3600000` | Cache TTL in milliseconds            |
 
 !!! tip "Version-tagged imports"
 With Git registry, you can pin imports to specific versions using Git tags:
@@ -291,7 +293,24 @@ registries:
     url: git@gitlab.internal.acme.com:platform/prs-registry
     auth:
       type: ssh
-      sshKeyPath: ~/.ssh/id_ed25519
+      sshKeyPath: *****************
+```
+
+#### Extended Form (with fallback URL)
+
+When registry files reference HTTPS URLs but you authenticate via SSH (or vice
+versa), set `fallbackUrl` so the clone is retried with the alternative URL
+on auth failures:
+
+```yaml
+registries:
+  '@acme':
+    url: https://github.com/acme/standards.git
+    fallbackUrl: git@github.com:acme/standards.git
+  '@internal':
+    url: https://gitlab.internal.com/team/monorepo.git
+    fallbackUrl: git@gitlab.internal.com:team/monorepo.git
+    root: packages/promptscript
 ```
 
 **Alias Fields:**
@@ -300,6 +319,8 @@ registries:
 | ------------------ | ------ | ---------------------------------------------- |
 | (simple string)    | string | Bare Git host path, e.g. `github.com/org/repo` |
 | `url`              | string | Bare Git host path (extended form)             |
+| `fallbackUrl`      | string | Fallback Git URL (tried on auth failure)       |
+| `root`             | string | Base path within the repository                |
 | `auth.type`        | string | `token` or `ssh`                               |
 | `auth.tokenEnvVar` | string | Env var containing a personal access token     |
 | `auth.sshKeyPath`  | string | Path to SSH private key                        |
@@ -909,5 +930,31 @@ registry:
     ref: v1.0.0 # Pin to specific version
     auth:
       type: ssh
-      sshKeyPath: ~/.ssh/id_ed25519
+      sshKeyPath: *****************
+```
+
+### HTTPS Registry with SSH Fallback
+
+When registry references use HTTPS URLs but you authenticate via SSH keys,
+configure a `fallbackUrl` so PromptScript automatically retries the clone
+with SSH on auth failure:
+
+```yaml
+registry:
+  git:
+    url: https://github.com/org/registry.git
+    fallbackUrl: git@github.com:org/registry.git
+    ref: main
+```
+
+You can also set this via the environment variable
+`PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL`.
+
+The same pattern works for registry aliases:
+
+```yaml
+registries:
+  '@acme':
+    url: https://github.com/acme/standards.git
+    fallbackUrl: git@github.com:acme/standards.git
 ```

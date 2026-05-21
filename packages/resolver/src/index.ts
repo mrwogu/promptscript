@@ -125,6 +125,7 @@ export {
 // Alias resolver
 export {
   expandAlias,
+  findFallbackUrl,
   validateAlias,
   validateRegistriesConfig,
   type ExpandedAlias,

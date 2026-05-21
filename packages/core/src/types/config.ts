@@ -174,6 +174,18 @@ export interface PromptScriptConfig {
       /** Git repository URL (HTTPS or SSH) */
       url: string;
       /**
+       * Fallback Git URL to try when the primary `url` fails with an auth error.
+       * Useful when the registry references an HTTPS URL but the user authenticates
+       * via SSH (or vice versa).
+       *
+       * @example
+       * registry:
+       *   git:
+       *     url: 'https://github.com/org/registry.git'
+       *     fallbackUrl: 'git@github.com:org/registry.git'
+       */
+      fallbackUrl?: string;
+      /**
        * Git ref to checkout (branch, tag, or commit hash).
        * @default 'main'
        */
@@ -356,6 +368,7 @@ export interface UserConfig {
   registry?: {
     git?: {
       url: string;
+      fallbackUrl?: string;
       ref?: string;
       path?: string;
       auth?: {

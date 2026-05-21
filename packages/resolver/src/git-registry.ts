@@ -52,6 +52,12 @@ export interface GitAuthOptions {
 export interface GitRegistryOptions {
   /** Git repository URL */
   url: string;
+  /**
+   * Fallback Git URL to try when the primary `url` fails with an auth error.
+   * Useful when the registry references an HTTPS URL but the user authenticates
+   * via SSH (or vice versa).
+   */
+  fallbackUrl?: string;
   /** Git ref to checkout (branch/tag/commit). Defaults to 'main' */
   ref?: string;
   /** Subdirectory within the repository to use as registry root */
@@ -124,6 +130,7 @@ export class GitRefNotFoundError extends Error {
 export class GitRegistry implements Registry {
   private readonly url: string;
   private readonly originalUrl: string;
+  private readonly fallbackUrl: string | undefined;
   private readonly defaultRef: string;
   private readonly subPath: string;
   private readonly auth?: GitAuthOptions;
@@ -135,6 +142,7 @@ export class GitRegistry implements Registry {
   constructor(options: GitRegistryOptions) {
     this.originalUrl = options.url;
     this.url = normalizeGitUrl(options.url);
+    this.fallbackUrl = options.fallbackUrl;
     this.defaultRef = options.ref ?? 'main';
     this.subPath = options.path ?? '';
     this.auth = options.auth;
@@ -247,12 +255,20 @@ export class GitRegistry implements Registry {
 
   /**
    * Clone a repo at a specific Git tag (shallow, depth=1).
+   * When a `fallbackRepoUrl` is provided, auth errors trigger an automatic
+   * retry with the fallback URL.
    *
    * @param repoUrl - Repository URL to clone
    * @param tag - Git tag to check out
    * @param targetDir - Directory to clone into
+   * @param fallbackRepoUrl - Optional fallback URL to try on auth failure
    */
-  async cloneAtTag(repoUrl: string, tag: string, targetDir: string): Promise<void> {
+  async cloneAtTag(
+    repoUrl: string,
+    tag: string,
+    targetDir: string,
+    fallbackRepoUrl?: string
+  ): Promise<void> {
     if (existsSync(targetDir)) {
       await fs.rm(targetDir, { recursive: true, force: true });
     }
@@ -267,6 +283,31 @@ export class GitRegistry implements Registry {
         throw new GitRefNotFoundError(tag, repoUrl);
       }
       if (this.isAuthError(error)) {
+        if (fallbackRepoUrl) {
+          try {
+            await git.clone(fallbackRepoUrl, targetDir, [
+              '--depth=1',
+              `--branch=${tag}`,
+              '--single-branch',
+            ]);
+            return;
+          } catch (fallbackErr) {
+            const fbError =
+              fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+            if (this.isAuthError(fbError)) {
+              throw new GitAuthError(
+                `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
+                fallbackRepoUrl,
+                fbError
+              );
+            }
+            throw new GitCloneError(
+              `Failed to clone ${fallbackRepoUrl} at tag ${tag}: ${fbError.message}`,
+              fallbackRepoUrl,
+              fbError
+            );
+          }
+        }
         throw new GitAuthError(`Authentication failed for ${repoUrl}`, repoUrl, error);
       }
       throw new GitCloneError(
@@ -335,17 +376,21 @@ export class GitRegistry implements Registry {
 
   /**
    * Clone with sparse checkout — only fetch the requested path within the repo.
+   * When a `fallbackRepoUrl` is provided, auth errors trigger an automatic
+   * retry with the fallback URL.
    *
    * @param repoUrl - Repository URL
    * @param ref - Git ref (branch, tag, or commit)
    * @param targetDir - Directory to clone into
    * @param sparsePath - Subdirectory path to include in the sparse checkout
+   * @param fallbackRepoUrl - Optional fallback URL to try on auth failure
    */
   async cloneSparse(
     repoUrl: string,
     ref: string,
     targetDir: string,
-    sparsePath: string
+    sparsePath: string,
+    fallbackRepoUrl?: string
   ): Promise<void> {
     if (existsSync(targetDir)) {
       await fs.rm(targetDir, { recursive: true, force: true });
@@ -354,18 +399,30 @@ export class GitRegistry implements Registry {
 
     const git = this.createGit();
     try {
-      await git.clone(repoUrl, targetDir, [
-        '--depth=1',
-        `--branch=${ref}`,
-        '--single-branch',
-        '--filter=blob:none',
-        '--sparse',
-      ]);
-
-      const repoGit = this.createGit(targetDir);
-      await repoGit.raw(['sparse-checkout', 'set', sparsePath]);
+      await this.doCloneSparse(git, repoUrl, ref, targetDir, sparsePath);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
+      if (this.isAuthError(error) && fallbackRepoUrl) {
+        try {
+          await this.doCloneSparse(git, fallbackRepoUrl, ref, targetDir, sparsePath);
+          return;
+        } catch (fallbackErr) {
+          const fbError =
+            fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+          if (this.isAuthError(fbError)) {
+            throw new GitAuthError(
+              `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
+              fallbackRepoUrl,
+              fbError
+            );
+          }
+          throw new GitCloneError(
+            `Failed to sparse-clone ${fallbackRepoUrl} at ${ref}: ${fbError.message}`,
+            fallbackRepoUrl,
+            fbError
+          );
+        }
+      }
       if (this.isRefError(error)) {
         throw new GitRefNotFoundError(ref, repoUrl);
       }
@@ -378,6 +435,33 @@ export class GitRegistry implements Registry {
         error
       );
     }
+  }
+
+  /**
+   * Internal sparse-clone implementation (no fallback logic).
+   */
+  private async doCloneSparse(
+    git: SimpleGit,
+    repoUrl: string,
+    ref: string,
+    targetDir: string,
+    sparsePath: string
+  ): Promise<void> {
+    if (existsSync(targetDir)) {
+      await fs.rm(targetDir, { recursive: true, force: true });
+    }
+    await fs.mkdir(targetDir, { recursive: true });
+
+    await git.clone(repoUrl, targetDir, [
+      '--depth=1',
+      `--branch=${ref}`,
+      '--single-branch',
+      '--filter=blob:none',
+      '--sparse',
+    ]);
+
+    const repoGit = this.createGit(targetDir);
+    await repoGit.raw(['sparse-checkout', 'set', sparsePath]);
   }
 
   /**
@@ -419,6 +503,8 @@ export class GitRegistry implements Registry {
 
   /**
    * Clone the repository to the specified path.
+   * When a `fallbackUrl` is configured, auth errors trigger an automatic
+   * retry with the fallback URL.
    */
   private async clone(targetPath: string, ref: string): Promise<void> {
     // Remove existing directory if present
@@ -461,12 +547,73 @@ export class GitRegistry implements Registry {
         return;
       }
 
-      // Check if it's an auth error
+      // Check if it's an auth error — try fallback URL if available
       if (this.isAuthError(error)) {
+        if (this.fallbackUrl) {
+          try {
+            await this.cloneWithUrl(this.fallbackUrl, targetPath, ref, git);
+            return;
+          } catch (fallbackErr) {
+            const fbError =
+              fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+            // If fallback also fails with auth error, throw combined message
+            if (this.isAuthError(fbError)) {
+              throw new GitAuthError(
+                `Authentication failed for both ${this.url} and fallback ${this.fallbackUrl}`,
+                this.fallbackUrl,
+                fbError
+              );
+            }
+            // Re-throw non-auth fallback errors as-is
+            throw fbError;
+          }
+        }
         throw new GitAuthError(`Authentication failed for ${this.url}`, this.url, error);
       }
 
       throw new GitCloneError(`Failed to clone repository: ${error.message}`, this.url, error);
+    }
+  }
+
+  /**
+   * Clone using a specific URL (used for fallback attempts).
+   * Handles both branch-specific and fallback-to-full-clone strategies.
+   */
+  private async cloneWithUrl(
+    url: string,
+    targetPath: string,
+    ref: string,
+    git: SimpleGit
+  ): Promise<void> {
+    if (existsSync(targetPath)) {
+      await fs.rm(targetPath, { recursive: true, force: true });
+    }
+    await fs.mkdir(targetPath, { recursive: true });
+
+    try {
+      await git.clone(url, targetPath, ['--depth=1', `--branch=${ref}`, '--single-branch']);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (this.isRefError(error)) {
+        try {
+          await git.clone(url, targetPath, ['--depth=1']);
+          const repoGit = this.createGit(targetPath);
+          await repoGit.fetch(['origin', ref, '--depth=1']);
+          await repoGit.checkout(ref);
+        } catch (fetchErr) {
+          const fetchError = fetchErr instanceof Error ? fetchErr : new Error(String(fetchErr));
+          if (this.isRefError(fetchError)) {
+            throw new GitRefNotFoundError(ref, url);
+          }
+          throw new GitCloneError(
+            `Failed to clone repository: ${fetchError.message}`,
+            url,
+            fetchError
+          );
+        }
+        return;
+      }
+      throw new GitCloneError(`Failed to clone repository: ${error.message}`, url, error);
     }
   }
 
