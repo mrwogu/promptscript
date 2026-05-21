@@ -90,7 +90,8 @@ export async function resolveRegistryPath(config: PromptScriptConfig): Promise<R
       if (!message.includes('not found') && !message.includes('FileNotFoundError')) {
         throw new Error(
           `Failed to clone registry from ${gitConfig.url}: ${message}. ` +
-            `Please check your network connection and registry configuration.`
+            `Please check your network connection and registry configuration.`,
+          { cause: error }
         );
       }
       // Manifest not found is OK - just means registry doesn't have one

@@ -1091,38 +1091,26 @@ export async function resolveNativeSkills(
     const skillObj = skillValue as Record<string, Value>;
 
     // Try to find native SKILL.md
-    let skillMdPath: string | null = null;
+    const skillMdPath: string | null = isSkillsDir
+      ? resolve(sourceDir, skillName, 'SKILL.md')
+      : await (async () => {
+          const discoveredDir = discoveredSkillPaths.get(skillName);
+          if (discoveredDir) return resolve(discoveredDir, 'SKILL.md');
 
-    if (isSkillsDir) {
-      // Source is in skills dir, look for sibling directories
-      const basePath = sourceDir;
-      skillMdPath = resolve(basePath, skillName, 'SKILL.md');
-    } else {
-      // Check if we already discovered this skill's path during auto-discovery
-      const discoveredDir = discoveredSkillPaths.get(skillName);
-      if (discoveredDir) {
-        skillMdPath = resolve(discoveredDir, 'SKILL.md');
-      } else {
-        // Look in local skills/ directory first, then optionally .agents/skills/ (universal),
-        // then registry @skills/
-        const localCandidate = localPath
-          ? resolve(localPath, 'skills', skillName, 'SKILL.md')
-          : null;
-        const universalCandidate =
-          options?.universalDir && localPath
-            ? resolve(localPath, '..', options.universalDir, 'skills', skillName, 'SKILL.md')
+          const localCandidate = localPath
+            ? resolve(localPath, 'skills', skillName, 'SKILL.md')
             : null;
-        const registryCandidate = resolve(registryPath, '@skills', skillName, 'SKILL.md');
+          const universalCandidate =
+            options?.universalDir && localPath
+              ? resolve(localPath, '..', options.universalDir, 'skills', skillName, 'SKILL.md')
+              : null;
+          const registryCandidate = resolve(registryPath, '@skills', skillName, 'SKILL.md');
 
-        if (localCandidate && (await fileExists(localCandidate))) {
-          skillMdPath = localCandidate;
-        } else if (universalCandidate && (await fileExists(universalCandidate))) {
-          skillMdPath = universalCandidate;
-        } else {
-          skillMdPath = registryCandidate;
-        }
-      }
-    }
+          if (localCandidate && (await fileExists(localCandidate))) return localCandidate;
+          if (universalCandidate && (await fileExists(universalCandidate)))
+            return universalCandidate;
+          return registryCandidate;
+        })();
 
     if (skillMdPath && (await fileExists(skillMdPath))) {
       try {

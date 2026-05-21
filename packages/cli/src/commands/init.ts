@@ -971,12 +971,10 @@ function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): st
   if (config.skills && config.skills.length > 0) {
     useEntries.push(...config.skills.map((s) => `@use ${s}`));
   }
-  let useLines = '';
-  if (useEntries.length > 0) {
-    useLines = useEntries.join('\n');
-  } else {
-    useLines = '# @use @fragments/testing\n# @use @fragments/typescript';
-  }
+  const useLines =
+    useEntries.length > 0
+      ? useEntries.join('\n')
+      : '# @use @fragments/testing\n# @use @fragments/typescript';
 
   const languagesLine =
     projectInfo.languages.length > 0

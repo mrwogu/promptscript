@@ -94,7 +94,7 @@ export async function loadConfig(customPath?: string): Promise<PromptScriptConfi
     return parseYaml(content) as PromptScriptConfig;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown parse error';
-    throw new Error(`Failed to parse ${configFile}: ${message}`);
+    throw new Error(`Failed to parse ${configFile}: ${message}`, { cause: error });
   }
 }
 

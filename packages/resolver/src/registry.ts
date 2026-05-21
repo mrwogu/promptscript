@@ -245,7 +245,7 @@ export class HttpRegistry implements Registry {
 
         if (this.isNonRetryableError(error)) {
           if (error.name === 'AbortError') {
-            throw new Error(`Request timeout after ${this.timeout}ms`);
+            throw new Error(`Request timeout after ${this.timeout}ms`, { cause: err });
           }
           throw error;
         }
@@ -299,7 +299,7 @@ export class HttpRegistry implements Registry {
       if (message.includes('404')) {
         throw new FileNotFoundError(path);
       }
-      throw new Error(`Failed to fetch ${path}: ${message}`);
+      throw new Error(`Failed to fetch ${path}: ${message}`, { cause: err });
     }
   }
 

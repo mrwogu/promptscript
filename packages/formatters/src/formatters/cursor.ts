@@ -818,18 +818,16 @@ export class CursorFormatter extends BaseFormatter {
 
     const lines: string[] = [];
     for (const [cmd, desc] of Object.entries(props)) {
-      let shortDesc = '';
-      if (
+      const descObj = desc as Record<string, Value>;
+      const shortDesc =
         desc &&
         typeof desc === 'object' &&
         !Array.isArray(desc) &&
         !('type' in desc && (desc as Record<string, unknown>)['type'] === 'TextContent')
-      ) {
-        const obj = desc as Record<string, Value>;
-        shortDesc = obj['description'] ? this.valueToString(obj['description']) : '';
-      } else {
-        shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
-      }
+          ? descObj['description']
+            ? this.valueToString(descObj['description']!)
+            : ''
+          : (this.valueToString(desc).split('\n')[0] ?? '');
       lines.push(`${cmd} - ${shortDesc}`);
     }
 
