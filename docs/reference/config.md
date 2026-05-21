@@ -947,9 +947,6 @@ registry:
     ref: main
 ```
 
-You can also set this via the environment variable
-`PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL`.
-
 The same pattern works for registry aliases:
 
 ```yaml
