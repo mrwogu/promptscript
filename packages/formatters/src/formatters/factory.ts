@@ -245,7 +245,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
   // Skill File Generation (Factory-specific)
   // ============================================================
 
-  protected override extractSkills(ast: Program): FactorySkillConfig[] {
+  protected override extractSkills(ast: Program, options?: FormatOptions): FactorySkillConfig[] {
     const skillsBlock = this.findBlock(ast, 'skills');
     if (!skillsBlock) return [];
 
@@ -255,6 +255,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         if (!this.isSafeSkillName(name)) continue;
+        if (!this.shouldIncludeSkill(name, options)) continue;
         const obj = value as Record<string, Value>;
         skills.push({
           name,
@@ -284,7 +285,10 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     return skills;
   }
 
-  protected override generateSkillFile(config: MarkdownSkillConfig): FormatterOutput {
+  protected override generateSkillFile(
+    config: MarkdownSkillConfig,
+    options?: FormatOptions
+  ): FormatterOutput {
     const factoryConfig = config as FactorySkillConfig;
     const lines: string[] = [];
 
@@ -327,9 +331,12 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       lines.push(dedentedContent);
     }
 
-    const skillDirPath = factoryConfig.outputDir
-      ? `.factory/${this.normalizeOutputDir(factoryConfig.outputDir)}`
-      : `.factory/skills/${factoryConfig.name}`;
+    const skillDirPath = this.resolveSkillDir(
+      '.factory/skills',
+      factoryConfig.name,
+      factoryConfig.outputDir,
+      options
+    );
     const resourceFiles = this.sanitizeResourceFiles(factoryConfig.resources, skillDirPath);
 
     const resourcesWithProvenance = resourceFiles.map((f) => {
@@ -489,7 +496,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
   ): FactorySkillConfig[] {
     if (options?.targetConfig?.guardsAsSkills === false) return [];
     const existingNames = new Set(regularSkills.map((s) => s.name));
-    return this.extractGuardSkills(ast, existingNames);
+    return this.extractGuardSkills(ast, existingNames).filter((skill) =>
+      this.shouldIncludeSkill(skill.name, options)
+    );
   }
 
   /**
@@ -525,16 +534,16 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
     const regularSkills: FactorySkillConfig[] = [];
     if (this.config.hasSkills && this.config.skillsInMultifile) {
-      const skills = this.extractSkills(ast);
+      const skills = this.extractSkills(ast, options);
       for (const skill of skills) {
-        additionalFiles.push(this.generateSkillFile(skill));
+        additionalFiles.push(this.generateSkillFile(skill, options));
         regularSkills.push(skill as FactorySkillConfig);
       }
     }
 
     const guardSkills = this.maybeExtractGuardSkills(ast, regularSkills, options);
     for (const skill of guardSkills) {
-      additionalFiles.push(this.generateSkillFile(skill));
+      additionalFiles.push(this.generateSkillFile(skill, options));
     }
 
     // Main file content
@@ -565,16 +574,16 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
     const regularSkills: FactorySkillConfig[] = [];
     if (this.config.hasSkills) {
-      const skills = this.extractSkills(ast);
+      const skills = this.extractSkills(ast, options);
       for (const skill of skills) {
-        additionalFiles.push(this.generateSkillFile(skill));
+        additionalFiles.push(this.generateSkillFile(skill, options));
         regularSkills.push(skill as FactorySkillConfig);
       }
     }
 
     const guardSkills = this.maybeExtractGuardSkills(ast, regularSkills, options);
     for (const skill of guardSkills) {
-      additionalFiles.push(this.generateSkillFile(skill));
+      additionalFiles.push(this.generateSkillFile(skill, options));
     }
 
     if (this.config.hasAgents) {

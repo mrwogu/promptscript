@@ -50,6 +50,8 @@ export interface MigrateOptions {
  * Options for the compile command.
  */
 export interface CompileOptions {
+  /** Named build profile from config.builds */
+  build?: string;
   /** Specific target to compile (github, claude, cursor) */
   target?: string;
   /** Output format (github, claude, cursor) - alias for target */

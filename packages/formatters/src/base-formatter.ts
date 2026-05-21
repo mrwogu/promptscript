@@ -493,6 +493,50 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Return true when the target configuration allows emitting the given skill.
+   */
+  protected shouldIncludeSkill(name: string, options?: FormatOptions): boolean {
+    const includeSkills = options?.targetConfig?.includeSkills;
+    if (includeSkills === false) return false;
+    if (Array.isArray(includeSkills)) return includeSkills.includes(name);
+    return true;
+  }
+
+  /**
+   * Resolve the directory for a generated skill, respecting per-target skill
+   * base overrides while preserving existing `@use ... into` behavior.
+   */
+  protected resolveSkillDir(
+    defaultSkillBasePath: string,
+    skillName: string,
+    outputDir?: string,
+    options?: FormatOptions
+  ): string {
+    const configuredBaseDir = options?.targetConfig?.skillBaseDir;
+    const skillBasePath = configuredBaseDir
+      ? this.normalizeOutputDir(configuredBaseDir)
+      : defaultSkillBasePath;
+
+    if (!outputDir) {
+      return `${skillBasePath}/${skillName}`;
+    }
+
+    const normalizedOutputDir = this.normalizeOutputDir(outputDir);
+    if (!configuredBaseDir) {
+      const targetRoot = defaultSkillBasePath.replace(/\/skills$/, '');
+      return `${targetRoot}/${normalizedOutputDir}`;
+    }
+
+    const outputSegments = normalizedOutputDir.split('/').filter((segment) => segment.length > 0);
+    const relativeOutputDir =
+      outputSegments[0] === 'skills' ? outputSegments.slice(1).join('/') : outputSegments.join('/');
+
+    return relativeOutputDir
+      ? `${skillBasePath}/${relativeOutputDir}`
+      : `${skillBasePath}/${skillName}`;
+  }
+
+  /**
    * Filter resource files to only include safe paths.
    * Rejects paths with traversal, absolute paths, and unsafe names.
    */

@@ -90,12 +90,39 @@ export interface TargetConfig {
 
   /** List generated guard skills in main output file (Factory). @default true */
   guardsSkillsListing?: boolean;
+
+  /**
+   * Custom base directory for generated skill files.
+   * When set, skill files are emitted under this directory instead of the
+   * target's native skill directory (for example `.factory/skills`).
+   */
+  skillBaseDir?: string;
+
+  /**
+   * Controls which skills are emitted for this target.
+   * - `true` or omitted: emit all skills
+   * - `false`: emit no skills
+   * - string array: emit only the listed skill names
+   */
+  includeSkills?: boolean | string[];
 }
 
 /**
  * Target can be a simple string name or a full configuration object.
  */
 export type TargetEntry = TargetName | { [key in TargetName]?: TargetConfig };
+
+/**
+ * Named build profile for compiling a specific entry point to specific outputs.
+ */
+export interface BuildProfileConfig {
+  /** Entry file path for this build profile */
+  entry?: string;
+  /** Output directory for this build profile */
+  output?: string;
+  /** Target list for this build profile */
+  targets?: TargetEntry[];
+}
 
 /**
  * PromptScript configuration file (promptscript.yaml).
@@ -227,6 +254,13 @@ export interface PromptScriptConfig {
     /** Whether to overwrite existing files without warning */
     overwrite?: boolean;
   };
+
+  /**
+   * Named per-command build profiles.
+   * Profiles let one repository build multiple instruction artifacts to
+   * different target directories without changing the default project compile.
+   */
+  builds?: Record<string, BuildProfileConfig>;
 
   /**
    * Per-source output directories for `@use` imports.

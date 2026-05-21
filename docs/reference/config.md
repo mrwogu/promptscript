@@ -75,6 +75,25 @@ targets:
   - claude
   - cursor
 
+# =============================
+# Named Build Profiles
+# =============================
+builds:
+  plugin-factory:
+    # Optional entry override for this build only
+    entry: .promptscript/project.prs
+
+    # Optional output directory for this build only
+    output: plugins/logstrip
+
+    # Optional target list for this build only
+    targets:
+      - factory:
+          version: multifile
+          skillBaseDir: skills
+          includeSkills:
+            - logstrip
+
 # =========================
 # Validation Configuration
 # =========================
@@ -476,12 +495,14 @@ targets:
 
 **Target Options:**
 
-| Field        | Type    | Default     | Description                                  |
-| ------------ | ------- | ----------- | -------------------------------------------- |
-| `enabled`    | boolean | `true`      | Whether target is enabled                    |
-| `output`     | string  | (see above) | Custom output path                           |
-| `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown')      |
-| `version`    | string  | `full`      | Format version (varies by target, see below) |
+| Field           | Type                | Default         | Description                                            |
+| --------------- | ------------------- | --------------- | ------------------------------------------------------ |
+| `enabled`       | boolean             | `true`          | Whether target is enabled                              |
+| `output`        | string              | (see above)     | Custom output path                                     |
+| `convention`    | string              | `markdown`      | Output convention ('xml' or 'markdown')                |
+| `version`       | string              | `full`          | Format version (varies by target, see below)           |
+| `skillBaseDir`  | string              | target-specific | Custom base directory for generated skill files        |
+| `includeSkills` | boolean or string[] | `true`          | Emit all skills, no skills, or only listed skill names |
 
 !!! tip "Disabling Targets"
 Setting `enabled: false` skips the target during compilation.
@@ -496,6 +517,31 @@ This is equivalent to removing the target from the list.
     ```
 
 See [Formatters API](../api-reference/formatters/src/README.md) for more details.
+
+!!! tip "Building skills into plugin or library folders"
+Use `skillBaseDir` when you want a target to place generated skills outside
+its default directory. For example, this writes Factory skills under
+`plugins/logstrip/skills` when combined with a build profile output:
+
+    ```yaml
+    builds:
+      logstrip-factory:
+        output: plugins/logstrip
+        targets:
+          - factory:
+              version: multifile
+              skillBaseDir: skills
+              includeSkills:
+                - logstrip
+    ```
+
+    Run it with:
+
+    ```bash
+    prs compile --build logstrip-factory
+    # or
+    prs build logstrip-factory
+    ```
 
 **Built-in Conventions:**
 
@@ -549,6 +595,44 @@ targets:
 | `codeBlock.prefix`          | string  | Code block start marker                |
 | `codeBlock.suffix`          | string  | Code block end marker                  |
 | `codeBlock.languageSupport` | boolean | Whether to include language identifier |
+
+### builds
+
+Defines named build profiles for compiling a specific entry point to a
+specific set of targets and output directories. Build profiles are useful when
+one repository needs to generate extra artifacts for subpackages, plugins, or
+tool-specific distribution folders without changing the default project build.
+
+```yaml
+builds:
+  logstrip-factory:
+    entry: .promptscript/project.prs
+    output: plugins/logstrip
+    targets:
+      - factory:
+          version: multifile
+          skillBaseDir: skills
+          includeSkills:
+            - logstrip
+```
+
+Run a profile with either command:
+
+```bash
+prs compile --build logstrip-factory
+prs build logstrip-factory
+```
+
+**Build Profile Fields:**
+
+| Field     | Type          | Default          | Description                             |
+| --------- | ------------- | ---------------- | --------------------------------------- |
+| `entry`   | string        | `input.entry`    | Entry file to compile for this profile  |
+| `output`  | string        | `output.baseDir` | Base output directory for this profile  |
+| `targets` | TargetEntry[] | `targets`        | Target list to compile for this profile |
+
+CLI flags still take precedence: `--target`/`--format` override the profile's
+target list, and `--output` overrides the profile's `output`.
 
 ### validation
 

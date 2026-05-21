@@ -940,6 +940,58 @@ describe('Compiler', () => {
       expect(skillOutput?.content).toContain('PromptScript Language Skill');
     });
 
+    it('should inject skill into configured skillBaseDir', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('factory', 'AGENTS.md', '.factory/skills', 'SKILL.md');
+      vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({
+        formatters: [
+          {
+            name: 'factory',
+            config: { skillBaseDir: 'plugins/logstrip/.factory/skills' },
+          },
+        ],
+        skillContent,
+      });
+      const result = await compiler.compile('test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('plugins/logstrip/.factory/skills/promptscript/SKILL.md')).toBe(
+        true
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('should skip injected skill when includeSkills excludes promptscript', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('factory', 'AGENTS.md', '.factory/skills', 'SKILL.md');
+      vi.spyOn(FormatterRegistry, 'get').mockReturnValue(formatter);
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = createTestCompiler({
+        formatters: [
+          {
+            name: 'factory',
+            config: { includeSkills: ['logstrip'] },
+          },
+        ],
+        skillContent,
+      });
+      const result = await compiler.compile('test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.outputs.has('.factory/skills/promptscript/SKILL.md')).toBe(false);
+
+      vi.restoreAllMocks();
+    });
+
     it('should skip injection when skillContent is not provided', async () => {
       const ast = createTestProgram();
       const formatter = createMockFormatter('claude', 'CLAUDE.md', '.claude/skills', 'SKILL.md');
