@@ -1,0 +1,11 @@
+# PromptScript Documentation
+# https://getpromptscript.dev
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://getpromptscript.dev/sitemap.xml
+
+# Crawl-delay (optional, be polite to crawlers)
+Crawl-delay: 1
