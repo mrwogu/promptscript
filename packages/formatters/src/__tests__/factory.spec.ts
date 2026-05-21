@@ -2359,5 +2359,69 @@ describe('FactoryFormatter', () => {
       const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
       expect(skillFile?.path).toBe('.factory/etc/SKILL.md');
     });
+
+    it('combines skillBaseDir with non-skills __outputDir', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                audit: {
+                  description: 'Audit skill',
+                  content: 'Audit content.',
+                  __outputDir: 'audit/seo-audit',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { skillBaseDir: 'plugins/logstrip/.factory/skills' },
+      });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      // Non-skills prefix outputDir is kept under skillBaseDir as-is
+      expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/audit/seo-audit/SKILL.md');
+    });
+
+    it('uses skillBaseDir with skillName when __outputDir is just skills/', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                myskill: {
+                  description: 'My skill',
+                  content: 'My content.',
+                  __outputDir: 'skills',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { skillBaseDir: 'plugins/logstrip/.factory/skills' },
+      });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      // "skills" as outputDir strips the skills prefix, leaving empty → falls back to skillName
+      expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/myskill/SKILL.md');
+    });
   });
 });
