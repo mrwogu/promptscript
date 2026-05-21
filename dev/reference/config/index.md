@@ -45,6 +45,7 @@ registry:
   # Or Git repository (recommended for teams)
   # git:
   #   url: https://github.com/org/promptscript-registry.git
+  #   fallbackUrl: git@github.com:org/promptscript-registry.git  # SSH fallback
   #   ref: main                    # branch, tag, or commit
   #   path: registry/              # subdirectory in repo
   #   auth:
@@ -69,6 +70,25 @@ targets:
   - github
   - claude
   - cursor
+
+# =============================
+# Named Build Profiles
+# =============================
+builds:
+  plugin-factory:
+    # Optional entry override for this build only
+    entry: .promptscript/project.prs
+
+    # Optional output directory for this build only
+    output: plugins/logstrip
+
+    # Optional target list for this build only
+    targets:
+      - factory:
+          version: multifile
+          skillBaseDir: skills
+          includeSkills:
+            - logstrip
 
 # =========================
 # Validation Configuration
@@ -217,19 +237,20 @@ registry:
 
 **Registry Fields:**
 
-| Field                  | Type    | Default   | Description                    |
-| ---------------------- | ------- | --------- | ------------------------------ |
-| `path`                 | string  | -         | Local registry path            |
-| `url`                  | string  | -         | HTTP registry URL              |
-| `git.url`              | string  | -         | Git repository URL             |
-| `git.ref`              | string  | `main`    | Branch, tag, or commit         |
-| `git.path`             | string  | -         | Subdirectory within the repo   |
-| `git.auth.type`        | string  | -         | Auth type: `token` or `ssh`    |
-| `git.auth.token`       | string  | -         | Personal access token (direct) |
-| `git.auth.tokenEnvVar` | string  | -         | Env var containing the token   |
-| `git.auth.sshKeyPath`  | string  | -         | Path to SSH key (for SSH auth) |
-| `cache.enabled`        | boolean | `true`    | Enable caching                 |
-| `cache.ttl`            | number  | `3600000` | Cache TTL in milliseconds      |
+| Field                  | Type    | Default   | Description                          |
+| ---------------------- | ------- | --------- | ------------------------------------ |
+| `path`                 | string  | -         | Local registry path                  |
+| `url`                  | string  | -         | HTTP registry URL                    |
+| `git.url`              | string  | -         | Git repository URL                   |
+| `git.fallbackUrl`      | string  | -         | Fallback URL (tried on auth failure) |
+| `git.ref`              | string  | `main`    | Branch, tag, or commit               |
+| `git.path`             | string  | -         | Subdirectory within the repo         |
+| `git.auth.type`        | string  | -         | Auth type: `token` or `ssh`          |
+| `git.auth.token`       | string  | -         | Personal access token (direct)       |
+| `git.auth.tokenEnvVar` | string  | -         | Env var containing the token         |
+| `git.auth.sshKeyPath`  | string  | -         | Path to SSH key (for SSH auth)       |
+| `cache.enabled`        | boolean | `true`    | Enable caching                       |
+| `cache.ttl`            | number  | `3600000` | Cache TTL in milliseconds            |
 
 Version-tagged imports
 
@@ -271,7 +292,22 @@ registries:
     url: git@gitlab.internal.acme.com:platform/prs-registry
     auth:
       type: ssh
-      sshKeyPath: ~/.ssh/id_ed25519
+      sshKeyPath: *****************
+```
+
+#### Extended Form (with fallback URL)
+
+When registry files reference HTTPS URLs but you authenticate via SSH (or vice versa), set `fallbackUrl` so the clone is retried with the alternative URL on auth failures:
+
+```yaml
+registries:
+  '@acme':
+    url: https://github.com/acme/standards.git
+    fallbackUrl: git@github.com:acme/standards.git
+  '@internal':
+    url: https://gitlab.internal.com/team/monorepo.git
+    fallbackUrl: git@gitlab.internal.com:team/monorepo.git
+    root: packages/promptscript
 ```
 
 **Alias Fields:**
@@ -280,6 +316,8 @@ registries:
 | ------------------ | ------ | ---------------------------------------------- |
 | (simple string)    | string | Bare Git host path, e.g. `github.com/org/repo` |
 | `url`              | string | Bare Git host path (extended form)             |
+| `fallbackUrl`      | string | Fallback Git URL (tried on auth failure)       |
+| `root`             | string | Base path within the repository                |
 | `auth.type`        | string | `token` or `ssh`                               |
 | `auth.tokenEnvVar` | string | Env var containing a personal access token     |
 | `auth.sshKeyPath`  | string | Path to SSH private key                        |
@@ -477,12 +515,14 @@ targets:
 
 **Target Options:**
 
-| Field        | Type    | Default     | Description                                  |
-| ------------ | ------- | ----------- | -------------------------------------------- |
-| `enabled`    | boolean | `true`      | Whether target is enabled                    |
-| `output`     | string  | (see above) | Custom output path                           |
-| `convention` | string  | `markdown`  | Output convention ('xml' or 'markdown')      |
-| `version`    | string  | `full`      | Format version (varies by target, see below) |
+| Field           | Type                | Default         | Description                                            |
+| --------------- | ------------------- | --------------- | ------------------------------------------------------ |
+| `enabled`       | boolean             | `true`          | Whether target is enabled                              |
+| `output`        | string              | (see above)     | Custom output path                                     |
+| `convention`    | string              | `markdown`      | Output convention ('xml' or 'markdown')                |
+| `version`       | string              | `full`          | Format version (varies by target, see below)           |
+| `skillBaseDir`  | string              | target-specific | Custom base directory for generated skill files        |
+| `includeSkills` | boolean or string[] | `true`          | Emit all skills, no skills, or only listed skill names |
 
 Disabling Targets
 
@@ -500,6 +540,35 @@ targets:
 ````
 
 See [Formatters API](https://getpromptscript.dev/dev/api-reference/formatters/src/index.md) for more details.
+
+Building skills into plugin or library folders
+
+Use `skillBaseDir` when you want a target to place generated skills outside
+its default directory. For example, this writes Factory skills under
+`plugins/logstrip/skills` when combined with a build profile output:
+
+```text
+```yaml
+builds:
+  logstrip-factory:
+    output: plugins/logstrip
+    targets:
+      - factory:
+          version: multifile
+          skillBaseDir: skills
+          includeSkills:
+            - logstrip
+````
+
+Run it with:
+
+```bash
+prs compile --build logstrip-factory
+# or
+prs build logstrip-factory
+```
+
+````
 
 **Built-in Conventions:**
 
@@ -553,6 +622,40 @@ targets:
 | `codeBlock.prefix`          | string  | Code block start marker                |
 | `codeBlock.suffix`          | string  | Code block end marker                  |
 | `codeBlock.languageSupport` | boolean | Whether to include language identifier |
+
+### builds
+
+Defines named build profiles for compiling a specific entry point to a specific set of targets and output directories. Build profiles are useful when one repository needs to generate extra artifacts for subpackages, plugins, or tool-specific distribution folders without changing the default project build.
+
+```yaml
+builds:
+  logstrip-factory:
+    entry: .promptscript/project.prs
+    output: plugins/logstrip
+    targets:
+      - factory:
+          version: multifile
+          skillBaseDir: skills
+          includeSkills:
+            - logstrip
+```
+
+Run a profile with either command:
+
+```bash
+prs compile --build logstrip-factory
+prs build logstrip-factory
+```
+
+**Build Profile Fields:**
+
+| Field     | Type          | Default          | Description                             |
+| --------- | ------------- | ---------------- | --------------------------------------- |
+| `entry`   | string        | `input.entry`    | Entry file to compile for this profile  |
+| `output`  | string        | `output.baseDir` | Base output directory for this profile  |
+| `targets` | TargetEntry[] | `targets`        | Target list to compile for this profile |
+
+CLI flags still take precedence: `--target`/`--format` override the profile's target list, and `--output` overrides the profile's `output`.
 
 ### validation
 
@@ -831,5 +934,26 @@ registry:
     ref: v1.0.0 # Pin to specific version
     auth:
       type: ssh
-      sshKeyPath: ~/.ssh/id_ed25519
+      sshKeyPath: *****************
+```
+
+### HTTPS Registry with SSH Fallback
+
+When registry references use HTTPS URLs but you authenticate via SSH keys, configure a `fallbackUrl` so PromptScript automatically retries the clone with SSH on auth failure:
+
+```yaml
+registry:
+  git:
+    url: https://github.com/org/registry.git
+    fallbackUrl: git@github.com:org/registry.git
+    ref: main
+```
+
+The same pattern works for registry aliases:
+
+```yaml
+registries:
+  '@acme':
+    url: https://github.com/acme/standards.git
+    fallbackUrl: git@github.com:acme/standards.git
 ```
