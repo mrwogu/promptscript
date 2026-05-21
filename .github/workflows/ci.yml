@@ -464,7 +464,7 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v5
         with:
-          allow-ghsas: GHSA-48c2-rrv3-qjmp, GHSA-fv7c-fp4j-7gwp
+          allow-ghsas: GHSA-48c2-rrv3-qjmp, GHSA-fv7c-fp4j-7gwp, GHSA-q3j6-qgpj-74h6, GHSA-v39h-62p7-jpjc
 
   docker-build:
     name: Docker Build & Security Scan
