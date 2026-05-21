@@ -7,7 +7,6 @@ describe('config/env-config', () => {
   beforeEach(() => {
     // Clean relevant env vars
     delete process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
-    delete process.env['PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL'];
     delete process.env['PROMPTSCRIPT_REGISTRY_GIT_REF'];
     delete process.env['PROMPTSCRIPT_REGISTRY_URL'];
     delete process.env['PROMPTSCRIPT_CACHE_TTL'];
@@ -96,24 +95,6 @@ describe('config/env-config', () => {
 
     // gitRef alone should not create a registry.git entry
     expect(overrides.registry?.git).toBeUndefined();
-  });
-
-  it('should map PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL to registry.git.fallbackUrl', () => {
-    process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'] = 'https://github.com/org/reg.git';
-    process.env['PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL'] = 'git@github.com:org/reg.git';
-
-    const overrides = loadEnvOverrides();
-
-    expect(overrides.registry?.git?.fallbackUrl).toBe('git@github.com:org/reg.git');
-  });
-
-  it('should create git config with fallbackUrl even without primary URL', () => {
-    process.env['PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL'] = 'git@github.com:org/reg.git';
-
-    const overrides = loadEnvOverrides();
-
-    expect(overrides.registry?.git?.fallbackUrl).toBe('git@github.com:org/reg.git');
-    expect(overrides.registry?.git?.url).toBe('');
   });
 
   it('should combine multiple env vars', () => {

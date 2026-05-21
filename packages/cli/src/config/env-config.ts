@@ -5,7 +5,6 @@ import type { PromptScriptConfig } from '@promptscript/core';
  *
  * Supported env vars:
  * - PROMPTSCRIPT_REGISTRY_GIT_URL → registry.git.url
- * - PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL → registry.git.fallbackUrl
  * - PROMPTSCRIPT_REGISTRY_GIT_REF → registry.git.ref
  * - PROMPTSCRIPT_REGISTRY_URL → registry.url
  * - PROMPTSCRIPT_CACHE_TTL → registry.cache.ttl (parsed as number)
@@ -15,14 +14,13 @@ export function loadEnvOverrides(): Partial<PromptScriptConfig> {
   const overrides: Partial<PromptScriptConfig> = {};
 
   const gitUrl = process.env['PROMPTSCRIPT_REGISTRY_GIT_URL'];
-  const gitFallbackUrl = process.env['PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL'];
   const gitRef = process.env['PROMPTSCRIPT_REGISTRY_GIT_REF'];
   const registryUrl = process.env['PROMPTSCRIPT_REGISTRY_URL'];
   const cacheTtl = process.env['PROMPTSCRIPT_CACHE_TTL'];
   const cacheEnabled = process.env['PROMPTSCRIPT_CACHE_ENABLED'];
 
   const hasCache = cacheTtl || cacheEnabled;
-  const hasRegistry = gitUrl || gitFallbackUrl || gitRef || registryUrl || hasCache;
+  const hasRegistry = gitUrl || gitRef || registryUrl || hasCache;
 
   if (!hasRegistry) {
     return overrides;
@@ -30,18 +28,11 @@ export function loadEnvOverrides(): Partial<PromptScriptConfig> {
 
   const registry: NonNullable<PromptScriptConfig['registry']> = {};
 
-  if (gitUrl || gitFallbackUrl || gitRef) {
+  if (gitUrl) {
     registry.git = {
-      url: gitUrl ?? '',
-      ...(gitFallbackUrl ? { fallbackUrl: gitFallbackUrl } : {}),
+      url: gitUrl,
       ...(gitRef ? { ref: gitRef } : {}),
     };
-  }
-
-  // Only set git config when a URL is actually provided (not just ref or fallback)
-  if (gitUrl === undefined && gitFallbackUrl === undefined && gitRef !== undefined) {
-    // gitRef alone should not create a registry.git entry — keep old behavior
-    delete registry.git;
   }
 
   if (registryUrl) {
