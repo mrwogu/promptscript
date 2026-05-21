@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0](https://github.com/mrwogu/promptscript/compare/v1.11.1...v1.12.0) (2026-05-21)
+
+
+### Features
+
+* **cli:** add named build profiles ([e31840d](https://github.com/mrwogu/promptscript/commit/e31840df2d04da1513303587f236299ba17cec4c))
+* **cli:** install hooks during prs init by default ([0b9bf9f](https://github.com/mrwogu/promptscript/commit/0b9bf9fa6803e92570c6e329e4c8fbaba780d838))
+* **parser,resolver,formatters:** [@use](https://github.com/use) ... into &lt;path&gt; for skill output dirs ([953667a](https://github.com/mrwogu/promptscript/commit/953667ad33a4ba584d4a07acfcdbeb1ee0200e03))
+* **resolver,cli:** add fallbackUrl for HTTPS↔SSH registry clone retry ([beb30da](https://github.com/mrwogu/promptscript/commit/beb30da0c2a9a99621d0af103b85e142b6381db7))
+
+
+### Bug Fixes
+
+* **cli:** drop polynomial regex when stripping trailing slashes ([464a72e](https://github.com/mrwogu/promptscript/commit/464a72ecff8c4dc241f65909de0ed1a6b9796a34))
+* **cli:** normalize skill source URLs before validation ([e0765bc](https://github.com/mrwogu/promptscript/commit/e0765bc8c59679533d0e2ba47c4ecbfe079ba2cd))
+* **cli:** reject GitHub web URLs with tree/&lt;ref&gt; or blob/&lt;ref&gt; segments ([eb8fbfc](https://github.com/mrwogu/promptscript/commit/eb8fbfc7a529eeadc58666e1d3d11b352f1b691f))
+* **cli:** remove PROMPTSCRIPT_REGISTRY_GIT_FALLBACK_URL env var ([ad1c066](https://github.com/mrwogu/promptscript/commit/ad1c0668d0ec88020c23033b078c956a95d67f97))
+* **cli:** resolve real HEAD commit on prs skills update ([0d8daf2](https://github.com/mrwogu/promptscript/commit/0d8daf2cdd4fc24723eca7ae14bdde758c97163f))
+* **resolver:** load references and skill resources for registry imports ([12160ff](https://github.com/mrwogu/promptscript/commit/12160ffd23ee8a2a6f9714cbaa32071d9cc35524))
+* **resolver:** support root-level registry imports with nested skill layouts ([9390948](https://github.com/mrwogu/promptscript/commit/939094845ec50e0991501e57356151b6394c58b7))
+* **resolver:** use &gt;= in isStale TTL check to prevent same-ms flaky test ([01a4e22](https://github.com/mrwogu/promptscript/commit/01a4e220ce06f247d87cedcc7230e595fa283a23))
+
 ## [1.11.1](https://github.com/mrwogu/promptscript/compare/v1.11.0...v1.11.1) (2026-04-07)
 
 
