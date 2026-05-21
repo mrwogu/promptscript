@@ -1,4 +1,4 @@
-import { resolve, dirname } from 'path';
+import { resolve, dirname, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
 import { writeFile, mkdir, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
@@ -9,6 +9,7 @@ import type {
   PromptScriptConfig,
   TargetEntry,
   TargetConfig,
+  BuildProfileConfig,
   Lockfile,
 } from '@promptscript/core';
 import { isValidLockfile } from '@promptscript/core';
@@ -122,6 +123,28 @@ function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetCo
       return { name, config };
     })
     .filter((target) => target.config?.enabled !== false);
+}
+
+function getBuildProfile(
+  config: PromptScriptConfig,
+  buildName: string | undefined
+): BuildProfileConfig | undefined {
+  if (!buildName) return undefined;
+
+  const profile = config.builds?.[buildName];
+  if (!profile) {
+    const available = Object.keys(config.builds ?? {});
+    const suffix =
+      available.length > 0 ? ` Available build profiles: ${available.join(', ')}.` : '';
+    throw new Error(`Unknown build profile: ${buildName}.${suffix}`);
+  }
+
+  return profile;
+}
+
+function resolveOutputBase(projectRoot: string, output: string | undefined): string {
+  if (!output) return projectRoot;
+  return isAbsolute(output) ? output : resolve(projectRoot, output);
 }
 
 /**
@@ -437,10 +460,12 @@ export async function compileCommand(
         ? findConfigInDir(projectRoot)
         : undefined;
     const config = await loadConfig(configPath);
+    const buildProfile = getBuildProfile(config, options.build);
 
     // --format is an alias for --target
     const selectedTarget = options.target ?? options.format;
-    const targets = selectedTarget ? [{ name: selectedTarget }] : parseTargets(config.targets);
+    const targetEntries = buildProfile?.targets ?? config.targets;
+    const targets = selectedTarget ? [{ name: selectedTarget }] : parseTargets(targetEntries);
 
     // Detect output path conflicts before doing any work
     const conflicts = detectOutputConflicts(targets);
@@ -511,9 +536,11 @@ export async function compileCommand(
       resolver: {
         registryPath,
         localPath,
+        projectRoot,
         skills: resolveUniversalDir(config.universalDir),
         registries: config.registries,
         lockfile,
+        skillTargets: config.skillTargets,
       },
       validator: config.validation,
       formatters: targets,
@@ -524,9 +551,8 @@ export async function compileCommand(
       ignoreHashes: options.ignoreHashes,
     });
 
-    const entryPath = config.input?.entry
-      ? resolve(projectRoot, config.input.entry)
-      : resolve(localPath, 'project.prs');
+    const entry = buildProfile?.entry ?? config.input?.entry;
+    const entryPath = entry ? resolve(projectRoot, entry) : resolve(localPath, 'project.prs');
 
     if (!existsSync(entryPath)) {
       spinner.fail('Entry file not found');
@@ -554,8 +580,11 @@ export async function compileCommand(
       logger.verbose('Tip: Run "prs lock" to pin remote dependencies for reproducible builds.');
     }
 
-    // When --cwd is set, default output to projectRoot so files land in the right place
-    const effectiveOptions = options.output ? options : { ...options, output: projectRoot };
+    const configuredOutput = options.output ?? buildProfile?.output ?? config.output?.baseDir;
+    const effectiveOptions = {
+      ...options,
+      output: resolveOutputBase(projectRoot, configuredOutput),
+    };
     const writeResult = await writeOutputs(result.outputs, effectiveOptions, config, services);
     if (writeResult.unchanged.length > 0) {
       ConsoleOutput.muted(`Unchanged ${writeResult.unchanged.length} file(s)`);

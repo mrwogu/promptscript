@@ -68,6 +68,7 @@ export async function resolveRegistryPath(config: PromptScriptConfig): Promise<R
     // will be written by ensureCloned() when we call fetch().
     const registry = createGitRegistry({
       url: gitConfig.url,
+      fallbackUrl: gitConfig.fallbackUrl,
       ref,
       path: gitConfig.path,
       auth: gitConfig.auth,

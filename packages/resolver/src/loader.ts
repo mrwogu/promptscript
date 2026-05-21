@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { resolve, dirname, isAbsolute, relative } from 'path';
+import { resolve, dirname, basename, isAbsolute, relative } from 'path';
 import type { PathReference, RegistriesConfig, Lockfile } from '@promptscript/core';
 import { FileNotFoundError } from '@promptscript/core';
 import type { Registry } from './registry.js';
@@ -58,6 +58,8 @@ export interface LoaderOptions {
   registryPath: string;
   /** Base path for local/relative file resolution */
   localPath?: string;
+  /** Project root used as the traversal safety boundary */
+  projectRoot?: string;
   /** Optional Registry implementation for file fetching */
   registry?: Registry;
   /** Registry alias configuration for remote imports */
@@ -72,11 +74,16 @@ export interface LoaderOptions {
 export class FileLoader {
   private readonly registryPath: string;
   private readonly localPath: string;
+  private readonly projectRoot: string;
   private readonly options: LoaderOptions;
 
   constructor(options: LoaderOptions) {
     this.registryPath = options.registryPath;
     this.localPath = resolve(options.localPath ?? process.cwd());
+    this.projectRoot = resolve(
+      options.projectRoot ??
+        (basename(this.localPath) === '.promptscript' ? dirname(this.localPath) : this.localPath)
+    );
     this.options = options;
   }
 
@@ -147,10 +154,10 @@ export class FileLoader {
         ref.raw.endsWith('.prs') || ref.raw.endsWith('.md') ? ref.raw : `${ref.raw}.prs`;
       const resolved = resolve(dir, rawPath);
 
-      // Path traversal check: resolved path must remain under the project root (localPath).
+      // Path traversal check: resolved path must remain under the project root.
       // Uses relative() instead of startsWith() so the check works with both
       // forward-slash (Unix) and backslash (Windows) path separators.
-      const rel = relative(this.localPath, resolved);
+      const rel = relative(this.projectRoot, resolved);
       if (rel.startsWith('..') || isAbsolute(rel)) {
         throw new Error(`Path traversal outside project root is not allowed: ${ref.raw}`);
       }

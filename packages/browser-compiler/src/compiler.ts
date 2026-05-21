@@ -36,6 +36,10 @@ export interface TargetConfig {
   convention?: string;
   /** Target version or format variant */
   version?: string;
+  /** Custom base directory for generated skill files */
+  skillBaseDir?: string;
+  /** Controls which skills are emitted for this target */
+  includeSkills?: boolean | string[];
 }
 
 /**
@@ -318,6 +322,7 @@ export class BrowserCompiler {
       outputPath: config?.output,
       version: config?.version,
       prettier: this.prettierOptions,
+      targetConfig: config,
     };
 
     const conventionName = config?.convention;

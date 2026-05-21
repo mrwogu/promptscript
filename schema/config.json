@@ -69,6 +69,11 @@
               "type": "string",
               "description": "Git repository URL (HTTPS or SSH)"
             },
+            "fallbackUrl": {
+              "type": "string",
+              "description": "Fallback Git URL to try when the primary `url` fails with an auth error. Useful when the registry references an HTTPS URL but the user authenticates via SSH (or vice versa).",
+              "example": "registry:\n  git:\n    url: 'https://github.com/org/registry.git'\n    fallbackUrl: 'git@github.com:org/registry.git'"
+            },
             "ref": {
               "type": "string",
               "description": "Git ref to checkout (branch, tag, or commit hash).",
@@ -217,6 +222,21 @@
       "additionalProperties": false,
       "description": "Output configuration. Global output settings applied to all targets."
     },
+    "builds": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/BuildProfileConfig"
+      },
+      "description": "Named per-command build profiles. Profiles let one repository build multiple instruction artifacts to different target directories without changing the default project compile."
+    },
+    "skillTargets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Per-source output directories for `@use` imports.\n\nMaps a `@use` source string (matching the path's `raw` value) to a relative directory underneath each target's skill output location. An inline `into \"<path>\"` on the same `@use` declaration overrides the configured value.",
+      "example": "skillTargets:\n  \"github.com/coreyhaines31/marketingskills/skills/seo-audit\": \"skills/seo-audit\""
+    },
     "formatting": {
       "$ref": "#/definitions/FormattingConfig",
       "description": "Formatting configuration. Controls how generated markdown files are formatted.",
@@ -316,6 +336,11 @@
           "type": "string",
           "description": "Git repository URL (HTTPS or SSH)"
         },
+        "fallbackUrl": {
+          "type": "string",
+          "description": "Fallback Git URL to try when the primary `url` fails with an auth error. Useful when registries reference HTTPS URLs but the user authenticates via SSH (or vice versa).",
+          "example": "registries:\n  '@acme':\n    url: 'https://github.com/acme/standards.git'\n    fallbackUrl: 'git@github.com:acme/standards.git'"
+        },
         "root": {
           "type": "string",
           "description": "Base path within the repository"
@@ -327,71 +352,27 @@
       "additionalProperties": false,
       "description": "Extended registry alias entry for monorepos or custom roots."
     },
-    "FormattingConfig": {
+    "BuildProfileConfig": {
       "type": "object",
       "properties": {
-        "prettier": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "string"
-            },
-            {
-              "$ref": "#/definitions/PrettierMarkdownOptions"
-            }
-          ],
-          "description": "Enable Prettier formatting.\n- `true`: Auto-detect .prettierrc in project\n- `string`: Path to Prettier config file\n- `PrettierMarkdownOptions`: Explicit options",
-          "example": "formatting:\n  prettier: true  # Auto-detect\n\nformatting:\n  prettier: \"./config/.prettierrc\"  # Explicit path\n\nformatting:\n  proseWrap: always\n  tabWidth: 4"
-        },
-        "proseWrap": {
+        "entry": {
           "type": "string",
-          "enum": [
-            "always",
-            "never",
-            "preserve"
-          ],
-          "description": "Explicit proseWrap setting (shorthand for prettier.proseWrap)."
+          "description": "Entry file path for this build profile"
         },
-        "tabWidth": {
-          "type": "number",
-          "description": "Explicit tabWidth setting (shorthand for prettier.tabWidth)."
+        "output": {
+          "type": "string",
+          "description": "Output directory for this build profile"
         },
-        "printWidth": {
-          "type": "number",
-          "description": "Explicit printWidth setting (shorthand for prettier.printWidth)."
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TargetEntry"
+          },
+          "description": "Target list for this build profile"
         }
       },
       "additionalProperties": false,
-      "description": "Formatting configuration for output files. Controls how generated markdown is formatted."
-    },
-    "PrettierMarkdownOptions": {
-      "type": "object",
-      "properties": {
-        "proseWrap": {
-          "type": "string",
-          "enum": [
-            "always",
-            "never",
-            "preserve"
-          ],
-          "description": "How to wrap prose.\n- 'always': Wrap prose at printWidth\n- 'never': Do not wrap prose\n- 'preserve': Preserve original wrapping",
-          "default": "preserve"
-        },
-        "tabWidth": {
-          "type": "number",
-          "description": "Number of spaces per indentation level.",
-          "default": 2
-        },
-        "printWidth": {
-          "type": "number",
-          "description": "Maximum line width for prose wrapping.",
-          "default": 80
-        }
-      },
-      "additionalProperties": false,
-      "description": "Prettier markdown formatting options. These options control how markdown output is formatted."
+      "description": "Named build profile for compiling a specific entry point to specific outputs."
     },
     "TargetEntry": {
       "anyOf": [
@@ -608,6 +589,24 @@
           "type": "boolean",
           "description": "List generated guard skills in main output file (Factory).",
           "default": true
+        },
+        "skillBaseDir": {
+          "type": "string",
+          "description": "Custom base directory for generated skill files. When set, skill files are emitted under this directory instead of the target's native skill directory (for example `.factory/skills`)."
+        },
+        "includeSkills": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Controls which skills are emitted for this target.\n- `true` or omitted: emit all skills\n- `false`: emit no skills\n- string array: emit only the listed skill names"
         }
       },
       "additionalProperties": false,
@@ -631,6 +630,72 @@
         "markdown"
       ],
       "description": "Built-in convention names."
+    },
+    "FormattingConfig": {
+      "type": "object",
+      "properties": {
+        "prettier": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PrettierMarkdownOptions"
+            }
+          ],
+          "description": "Enable Prettier formatting.\n- `true`: Auto-detect .prettierrc in project\n- `string`: Path to Prettier config file\n- `PrettierMarkdownOptions`: Explicit options",
+          "example": "formatting:\n  prettier: true  # Auto-detect\n\nformatting:\n  prettier: \"./config/.prettierrc\"  # Explicit path\n\nformatting:\n  proseWrap: always\n  tabWidth: 4"
+        },
+        "proseWrap": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never",
+            "preserve"
+          ],
+          "description": "Explicit proseWrap setting (shorthand for prettier.proseWrap)."
+        },
+        "tabWidth": {
+          "type": "number",
+          "description": "Explicit tabWidth setting (shorthand for prettier.tabWidth)."
+        },
+        "printWidth": {
+          "type": "number",
+          "description": "Explicit printWidth setting (shorthand for prettier.printWidth)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Formatting configuration for output files. Controls how generated markdown is formatted."
+    },
+    "PrettierMarkdownOptions": {
+      "type": "object",
+      "properties": {
+        "proseWrap": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never",
+            "preserve"
+          ],
+          "description": "How to wrap prose.\n- 'always': Wrap prose at printWidth\n- 'never': Do not wrap prose\n- 'preserve': Preserve original wrapping",
+          "default": "preserve"
+        },
+        "tabWidth": {
+          "type": "number",
+          "description": "Number of spaces per indentation level.",
+          "default": 2
+        },
+        "printWidth": {
+          "type": "number",
+          "description": "Maximum line width for prose wrapping.",
+          "default": 80
+        }
+      },
+      "additionalProperties": false,
+      "description": "Prettier markdown formatting options. These options control how markdown output is formatted."
     },
     "OutputConvention": {
       "type": "object",

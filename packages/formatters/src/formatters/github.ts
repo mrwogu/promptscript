@@ -79,6 +79,8 @@ interface SkillConfig {
   resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
+  /** Optional relative output directory underneath .github/ */
+  outputDir?: string;
 }
 
 /**
@@ -320,9 +322,9 @@ export class GitHubFormatter extends BaseFormatter {
     }
 
     // Generate skill files
-    const skills = this.extractSkills(ast);
+    const skills = this.extractSkills(ast, options);
     for (const skill of skills) {
-      additionalFiles.push(this.generateSkillFile(skill));
+      additionalFiles.push(this.generateSkillFile(skill, options));
     }
 
     // Generate custom agent files (.github/agents/)
@@ -565,7 +567,7 @@ export class GitHubFormatter extends BaseFormatter {
   /**
    * Extract skill configurations from @skills block.
    */
-  private extractSkills(ast: Program): SkillConfig[] {
+  private extractSkills(ast: Program, options?: FormatOptions): SkillConfig[] {
     const skillsBlock = this.findBlock(ast, 'skills');
     if (!skillsBlock) return [];
 
@@ -574,6 +576,7 @@ export class GitHubFormatter extends BaseFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.shouldIncludeSkill(name, options)) continue;
         const obj = value as Record<string, Value>;
         skills.push({
           name,
@@ -590,6 +593,7 @@ export class GitHubFormatter extends BaseFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
         });
       }
     }
@@ -600,7 +604,7 @@ export class GitHubFormatter extends BaseFormatter {
   /**
    * Generate a .github/skills/<name>/SKILL.md file.
    */
-  private generateSkillFile(config: SkillConfig): FormatterOutput {
+  private generateSkillFile(config: SkillConfig, options?: FormatOptions): FormatterOutput {
     const lines: string[] = [];
 
     // YAML frontmatter
@@ -632,7 +636,12 @@ export class GitHubFormatter extends BaseFormatter {
 
     // Strip leading slashes from name for clean file paths
     const cleanName = config.name.replace(/^\/+/, '');
-    const skillDirPath = `.github/skills/${cleanName}`;
+    const skillDirPath = this.resolveSkillDir(
+      '.github/skills',
+      cleanName,
+      config.outputDir,
+      options
+    );
     const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
 
     const resourcesWithProvenance = resourceFiles.map((f) => {

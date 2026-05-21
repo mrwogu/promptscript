@@ -2178,4 +2178,250 @@ describe('FactoryFormatter', () => {
       expect(droidFile?.content).toContain('specReasoningEffort: high');
     });
   });
+
+  describe('outputDir override for @use ... into', () => {
+    it('honors __outputDir when generating the skill file', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'seo-audit': {
+                  description: 'SEO audit skill',
+                  content: 'Audit content',
+                  __outputDir: 'skills/marketing/seo-audit',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile?.path).toBe('.factory/skills/marketing/seo-audit/SKILL.md');
+    });
+
+    it('honors target skillBaseDir when generating skill files', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                logstrip: {
+                  description: 'Logstrip skill',
+                  content: 'Compress logs.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { skillBaseDir: 'plugins/logstrip/.factory/skills' },
+      });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/logstrip/SKILL.md');
+    });
+
+    it('combines skillBaseDir with __outputDir without duplicating skills segment', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'seo-audit': {
+                  description: 'SEO audit skill',
+                  content: 'Audit content',
+                  __outputDir: 'skills/marketing/seo-audit',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { skillBaseDir: 'plugins/logstrip/.factory/skills' },
+      });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/marketing/seo-audit/SKILL.md');
+    });
+
+    it('filters emitted skills with includeSkills', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                keep: {
+                  description: 'Keep skill',
+                  content: 'Keep content.',
+                },
+                skip: {
+                  description: 'Skip skill',
+                  content: 'Skip content.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { includeSkills: ['keep'] },
+      });
+      const skillFiles = result.additionalFiles?.filter((f) => f.path.endsWith('SKILL.md')) ?? [];
+      expect(skillFiles.map((f) => f.path)).toEqual(['.factory/skills/keep/SKILL.md']);
+    });
+
+    it('disables emitted skills when includeSkills is false', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                logstrip: {
+                  description: 'Logstrip skill',
+                  content: 'Compress logs.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { includeSkills: false },
+      });
+      expect(result.additionalFiles?.some((f) => f.path.endsWith('SKILL.md')) ?? false).toBe(false);
+    });
+
+    it('strips traversal segments from __outputDir', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                s: {
+                  description: 'd',
+                  content: 'c',
+                  __outputDir: '../../etc',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      expect(skillFile?.path).toBe('.factory/etc/SKILL.md');
+    });
+
+    it('combines skillBaseDir with non-skills __outputDir', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                audit: {
+                  description: 'Audit skill',
+                  content: 'Audit content.',
+                  __outputDir: 'audit/seo-audit',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { skillBaseDir: 'plugins/logstrip/.factory/skills' },
+      });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      // Non-skills prefix outputDir is kept under skillBaseDir as-is
+      expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/audit/seo-audit/SKILL.md');
+    });
+
+    it('uses skillBaseDir with skillName when __outputDir is just skills/', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                myskill: {
+                  description: 'My skill',
+                  content: 'My content.',
+                  __outputDir: 'skills',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { skillBaseDir: 'plugins/logstrip/.factory/skills' },
+      });
+      const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
+      // "skills" as outputDir strips the skills prefix, leaving empty → falls back to skillName
+      expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/myskill/SKILL.md');
+    });
+  });
 });

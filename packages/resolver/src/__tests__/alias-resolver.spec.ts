@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { expandAlias, validateAlias, validateRegistriesConfig } from '../alias-resolver.js';
+import {
+  expandAlias,
+  validateAlias,
+  validateRegistriesConfig,
+  findFallbackUrl,
+} from '../alias-resolver.js';
 import { UnknownAliasError } from '@promptscript/core';
 
 describe('alias-resolver', () => {
@@ -119,6 +124,7 @@ describe('alias-resolver', () => {
         repoUrl: 'https://github.com/acme/prs-standards.git',
         path: 'standards/security',
         version: undefined,
+        fallbackUrl: undefined,
       });
     });
 
@@ -136,6 +142,7 @@ describe('alias-resolver', () => {
         repoUrl: 'https://github.com/acme/prs-standards.git',
         path: 'standards/security',
         version: '1.2.0',
+        fallbackUrl: undefined,
       });
     });
 
@@ -153,6 +160,7 @@ describe('alias-resolver', () => {
         repoUrl: 'https://github.com/acme/prs-standards.git',
         path: 'base',
         version: 'v2.0.0-beta.1',
+        fallbackUrl: undefined,
       });
     });
 
@@ -173,6 +181,7 @@ describe('alias-resolver', () => {
         repoUrl: 'git@gitlab.internal.com:company/monorepo.git',
         path: 'packages/prs/auth',
         version: undefined,
+        fallbackUrl: undefined,
       });
     });
 
@@ -193,6 +202,7 @@ describe('alias-resolver', () => {
         repoUrl: 'git@gitlab.internal.com:company/monorepo.git',
         path: 'packages/prs/auth',
         version: '1.0.0',
+        fallbackUrl: undefined,
       });
     });
 
@@ -213,6 +223,7 @@ describe('alias-resolver', () => {
         repoUrl: 'git@gitlab.internal.com:company/monorepo.git',
         path: 'packages/prs',
         version: undefined,
+        fallbackUrl: undefined,
       });
     });
 
@@ -230,6 +241,7 @@ describe('alias-resolver', () => {
         repoUrl: 'https://github.com/acme/prs-standards.git',
         path: '',
         version: undefined,
+        fallbackUrl: undefined,
       });
     });
 
@@ -274,7 +286,82 @@ describe('alias-resolver', () => {
         repoUrl: 'https://github.com/acme/prs-standards.git',
         path: 'security',
         version: undefined,
+        fallbackUrl: undefined,
       });
+    });
+
+    it('should propagate fallbackUrl from extended entry', () => {
+      // Arrange
+      const registries = {
+        '@acme': {
+          url: 'https://github.com/acme/standards.git',
+          fallbackUrl: 'git@github.com:acme/standards.git',
+        },
+      };
+
+      // Act
+      const result = expandAlias('@acme/security', registries);
+
+      // Assert
+      expect(result.repoUrl).toBe('https://github.com/acme/standards.git');
+      expect(result.fallbackUrl).toBe('git@github.com:acme/standards.git');
+    });
+
+    it('should not set fallbackUrl for string entries', () => {
+      // Arrange
+      const registries = {
+        '@acme': 'https://github.com/acme/standards.git',
+      };
+
+      // Act
+      const result = expandAlias('@acme/base', registries);
+
+      // Assert
+      expect(result.fallbackUrl).toBeUndefined();
+    });
+  });
+
+  describe('findFallbackUrl', () => {
+    it('should find fallback URL for a matching repo URL', () => {
+      const registries = {
+        '@acme': {
+          url: 'https://github.com/acme/standards.git',
+          fallbackUrl: 'git@github.com:acme/standards.git',
+        },
+      };
+
+      expect(findFallbackUrl('https://github.com/acme/standards.git', registries)).toBe(
+        'git@github.com:acme/standards.git'
+      );
+    });
+
+    it('should return undefined when no fallbackUrl is configured', () => {
+      const registries = {
+        '@acme': {
+          url: 'https://github.com/acme/standards.git',
+        },
+      };
+
+      expect(findFallbackUrl('https://github.com/acme/standards.git', registries)).toBeUndefined();
+    });
+
+    it('should return undefined for string-only entries', () => {
+      const registries = {
+        '@acme': 'https://github.com/acme/standards.git',
+      };
+
+      expect(findFallbackUrl('https://github.com/acme/standards.git', registries)).toBeUndefined();
+    });
+
+    it('should return undefined when repo URL is not found', () => {
+      const registries = {
+        '@acme': {
+          url: 'https://github.com/acme/standards.git',
+          fallbackUrl: 'git@github.com:acme/standards.git',
+        },
+      };
+
+      expect(findFallbackUrl('https://github.com/other/repo.git', registries)).toBeUndefined();
     });
   });
 });

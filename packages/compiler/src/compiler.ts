@@ -96,6 +96,23 @@ function addMarkerToOutput(
   return { ...output, content: lines.join('\n') };
 }
 
+function normalizeOutputDir(dir: string): string {
+  return dir
+    .replace(/\\/g, '/')
+    .replace(/^\/+/, '')
+    .replace(/\/+$/g, '')
+    .split('/')
+    .filter((segment) => segment.length > 0 && segment !== '.' && segment !== '..')
+    .join('/');
+}
+
+function shouldIncludeSkill(name: string, config?: TargetConfig): boolean {
+  const includeSkills = config?.includeSkills;
+  if (includeSkills === false) return false;
+  if (Array.isArray(includeSkills)) return includeSkills.includes(name);
+  return true;
+}
+
 /**
  * Compiler that orchestrates the PromptScript compilation pipeline.
  *
@@ -348,8 +365,17 @@ export class Compiler {
 
     // Inject PromptScript SKILL.md into each formatter's skill directory
     if (this.options.skillContent) {
-      for (const { formatter } of this.loadedFormatters) {
-        const skillBasePath = formatter.getSkillBasePath();
+      for (const { formatter, config } of this.loadedFormatters) {
+        if (!shouldIncludeSkill('promptscript', config)) {
+          this.logger.debug(
+            `  Skipping skill injection for ${formatter.name} (promptscript not included)`
+          );
+          continue;
+        }
+
+        const skillBasePath = config?.skillBaseDir
+          ? normalizeOutputDir(config.skillBaseDir)
+          : formatter.getSkillBasePath();
         const skillFileName = formatter.getSkillFileName();
         if (!skillBasePath || !skillFileName) {
           this.logger.debug(`  Skipping skill injection for ${formatter.name} (no skill support)`);

@@ -66,7 +66,7 @@ const createMixedContent = (
   loc: createLoc(),
 });
 
-const createUseDeclaration = (path: string, alias?: string) => ({
+const createUseDeclaration = (path: string, alias?: string, outputDir?: string) => ({
   type: 'UseDeclaration' as const,
   path: {
     type: 'PathReference' as const,
@@ -76,6 +76,7 @@ const createUseDeclaration = (path: string, alias?: string) => ({
     loc: createLoc(),
   },
   alias,
+  outputDir,
   loc: createLoc(),
 });
 
@@ -445,6 +446,109 @@ describe('imports', () => {
       expect(content.properties['__source']).toBe('@company/guards');
       expect(content.properties['__blocks']).toEqual(['rules']);
     });
+
+    it('attaches __outputDir to every skill brought in by @use ... into', () => {
+      const target = createProgram();
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              seo: { description: 'SEO audit' },
+              social: { description: 'Social skills' },
+            })
+          ),
+        ],
+      });
+      const use = createUseDeclaration('github.com/foo/marketing', undefined, 'skills/marketing');
+
+      const result = resolveUses(target, use, source);
+
+      const skills = result.blocks.find((b) => b.name === 'skills');
+      const props = (skills?.content as ObjectContent).properties;
+      const seo = props['seo'] as Record<string, Value>;
+      const social = props['social'] as Record<string, Value>;
+
+      expect(seo['__outputDir']).toBe('skills/marketing');
+      expect(social['__outputDir']).toBe('skills/marketing');
+    });
+
+    it('leaves source AST unchanged when outputDir is applied', () => {
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              seo: { description: 'SEO audit' },
+            })
+          ),
+        ],
+      });
+      const sourceSnapshot = JSON.parse(JSON.stringify(source));
+      const use = createUseDeclaration('github.com/foo/m', undefined, 'skills/m');
+
+      resolveUses(createProgram(), use, source);
+
+      expect(source).toEqual(sourceSnapshot);
+    });
+
+    it('handles non-object skill values by replacing them with __outputDir wrapper', () => {
+      // If a skill property is a primitive (unlikely but defensive),
+      // the else branch wraps it with { __outputDir: outputDir }.
+      const target = createProgram();
+      const source = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              // Skill value is a string primitive, not an object
+              'my-skill': 'just a string' as unknown as Record<string, Value>,
+              // Also test with null value
+              'null-skill': null as unknown as Record<string, Value>,
+            })
+          ),
+        ],
+      });
+      const use = createUseDeclaration('github.com/foo/m', undefined, 'skills/m');
+
+      // Verify the source values are actually primitives before resolveUses
+      const srcSkillsBlock = source.blocks.find((b) => b.name === 'skills');
+      const srcProps = (srcSkillsBlock?.content as ObjectContent).properties;
+      expect(typeof srcProps['my-skill']).toBe('string');
+      expect(srcProps['null-skill']).toBeNull();
+
+      const result = resolveUses(target, use, source);
+
+      const skills = result.blocks.find((b) => b.name === 'skills');
+      expect(skills).toBeDefined();
+      const props = (skills?.content as ObjectContent).properties;
+
+      // Debug: inspect what we got
+      const mySkillEntry = props['my-skill'];
+      const nullSkillEntry = props['null-skill'];
+      // Both should be __outputDir wrappers (the else branch fires for non-objects)
+      expect(typeof mySkillEntry).toBe('object');
+      expect(mySkillEntry).not.toBeNull();
+      expect((mySkillEntry as Record<string, Value>)['__outputDir']).toBe('skills/m');
+      expect(typeof nullSkillEntry).toBe('object');
+      expect((nullSkillEntry as Record<string, Value>)['__outputDir']).toBe('skills/m');
+    });
+  });
+
+  it('skips outputDir attachment when source has no skills block', () => {
+    const target = createProgram();
+    // Source program has no skills block
+    const source = createProgram({
+      blocks: [createBlock('identity', createTextContent('imported'))],
+    });
+    const use = createUseDeclaration('github.com/foo/m', undefined, 'skills/m');
+
+    // Should not throw, just skip the outputDir attachment
+    const result = resolveUses(target, use, source);
+    expect(result).toBeDefined();
+    // No skills block should be added since source has none
+    const skills = result.blocks.find((b) => b.name === 'skills');
+    expect(skills).toBeUndefined();
   });
 
   describe('isImportMarker', () => {

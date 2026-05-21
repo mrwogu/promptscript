@@ -1,7 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initCommand, formatTargetName } from '../init.js';
 import { type CliServices, type FileSystem, type PromptSystem } from '../../services.js';
 import type { InitOptions } from '../../types.js';
+
+const { hooksCommandMock } = vi.hoisted(() => ({
+  hooksCommandMock: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../hooks.js', () => ({
+  hooksCommand: hooksCommandMock,
+}));
+
+const { initCommand, formatTargetName } = await import('../init.js');
 
 describe('initCommand', () => {
   let mockFs: FileSystem;
@@ -30,6 +39,9 @@ describe('initCommand', () => {
       prompts: mockPrompts,
       cwd: '/mock/cwd',
     };
+
+    hooksCommandMock.mockClear();
+    hooksCommandMock.mockResolvedValue(undefined);
   });
 
   const defaultOptions: InitOptions = {
@@ -121,6 +133,66 @@ describe('initCommand', () => {
       expect(mockFs.mkdir).toHaveBeenCalledWith('.promptscript/skills/promptscript', {
         recursive: true,
       });
+    });
+  });
+
+  describe('hook installation', () => {
+    it('should install hooks for supported targets by default', async () => {
+      vi.mocked(mockFs.existsSync).mockReturnValue(false);
+      const options: InitOptions = {
+        ...defaultOptions,
+        yes: true,
+        name: 'test-project',
+        targets: ['claude', 'cursor'],
+      };
+
+      await initCommand(options, mockServices);
+
+      expect(hooksCommandMock).toHaveBeenCalledWith('install', 'claude');
+      expect(hooksCommandMock).toHaveBeenCalledWith('install', 'cursor');
+    });
+
+    it('should map github target to copilot hook config', async () => {
+      vi.mocked(mockFs.existsSync).mockReturnValue(false);
+      const options: InitOptions = {
+        ...defaultOptions,
+        yes: true,
+        name: 'test-project',
+        targets: ['github'],
+      };
+
+      await initCommand(options, mockServices);
+
+      expect(hooksCommandMock).toHaveBeenCalledWith('install', 'copilot');
+    });
+
+    it('should skip targets without hook configs silently', async () => {
+      vi.mocked(mockFs.existsSync).mockReturnValue(false);
+      const options: InitOptions = {
+        ...defaultOptions,
+        yes: true,
+        name: 'test-project',
+        targets: ['antigravity'],
+      };
+
+      await initCommand(options, mockServices);
+
+      expect(hooksCommandMock).not.toHaveBeenCalled();
+    });
+
+    it('should not install hooks when --no-hooks flag is set', async () => {
+      vi.mocked(mockFs.existsSync).mockReturnValue(false);
+      const options: InitOptions = {
+        ...defaultOptions,
+        yes: true,
+        name: 'test-project',
+        targets: ['claude'],
+        hooks: false,
+      };
+
+      await initCommand(options, mockServices);
+
+      expect(hooksCommandMock).not.toHaveBeenCalled();
     });
   });
 

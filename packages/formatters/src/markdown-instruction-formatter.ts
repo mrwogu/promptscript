@@ -35,6 +35,11 @@ export interface MarkdownSkillConfig {
   rawFrontmatter?: string;
   /** Pre-extracted examples from the skill's nested examples property */
   examples?: Array<{ name: string; input: string; output: string; description?: string }>;
+  /**
+   * Relative output directory underneath the target's skill folder.
+   * Overrides the default `<dotDir>/skills/<name>` layout when provided.
+   */
+  outputDir?: string;
 }
 
 /**
@@ -202,9 +207,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     }
 
     if (this.config.hasSkills && this.config.skillsInMultifile) {
-      const skills = this.extractSkills(ast);
+      const skills = this.extractSkills(ast, options);
       for (const skill of skills) {
-        additionalFiles.push(this.generateSkillFile(skill));
+        additionalFiles.push(this.generateSkillFile(skill, options));
       }
     }
 
@@ -238,9 +243,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     }
 
     if (this.config.hasSkills) {
-      const skills = this.extractSkills(ast);
+      const skills = this.extractSkills(ast, options);
       for (const skill of skills) {
-        additionalFiles.push(this.generateSkillFile(skill));
+        additionalFiles.push(this.generateSkillFile(skill, options));
       }
     }
 
@@ -351,7 +356,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   // Skill Extraction & File Generation
   // ============================================================
 
-  protected extractSkills(ast: Program): MarkdownSkillConfig[] {
+  protected extractSkills(ast: Program, options?: FormatOptions): MarkdownSkillConfig[] {
     const skillsBlock = this.findBlock(ast, 'skills');
     if (!skillsBlock) return [];
 
@@ -361,6 +366,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         if (!this.isSafeSkillName(name)) continue;
+        if (!this.shouldIncludeSkill(name, options)) continue;
         const obj = value as Record<string, Value>;
         skills.push({
           name,
@@ -377,6 +383,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
           examples: this.extractSkillExamples(obj),
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
         });
       }
     }
@@ -384,7 +391,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     return skills;
   }
 
-  protected generateSkillFile(config: MarkdownSkillConfig): FormatterOutput {
+  protected generateSkillFile(
+    config: MarkdownSkillConfig,
+    options?: FormatOptions
+  ): FormatterOutput {
     const lines: string[] = [];
 
     // YAML frontmatter
@@ -429,7 +439,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       }
     }
 
-    const skillDirPath = `${this.config.dotDir}/skills/${config.name}`;
+    const skillDirPath = this.resolveSkillDir(
+      `${this.config.dotDir}/skills`,
+      config.name,
+      config.outputDir,
+      options
+    );
     const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
 
     return {

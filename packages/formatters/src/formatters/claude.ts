@@ -69,6 +69,8 @@ interface ClaudeSkillConfig {
   resources?: Array<{ relativePath: string; content: string }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
+  /** Optional relative output directory underneath .claude/ */
+  outputDir?: string;
 }
 
 /**
@@ -271,9 +273,9 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     // Generate skill files
-    const skills = this.extractSkills(ast);
+    const skills = this.extractSkills(ast, options);
     for (const skill of skills) {
-      additionalFiles.push(this.generateSkillFile(skill));
+      additionalFiles.push(this.generateSkillFile(skill, options));
     }
 
     // Generate agent files
@@ -502,7 +504,7 @@ export class ClaudeFormatter extends BaseFormatter {
   /**
    * Extract skill configurations from @skills block.
    */
-  private extractSkills(ast: Program): ClaudeSkillConfig[] {
+  private extractSkills(ast: Program, options?: FormatOptions): ClaudeSkillConfig[] {
     const skillsBlock = this.findBlock(ast, 'skills');
     if (!skillsBlock) return [];
 
@@ -511,6 +513,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (!this.shouldIncludeSkill(name, options)) continue;
         if (!this.isSafeSkillName(name)) continue;
         const obj = value as Record<string, Value>;
         skills.push({
@@ -537,6 +540,7 @@ export class ClaudeFormatter extends BaseFormatter {
               : undefined,
           rawFrontmatter:
             typeof obj['__rawFrontmatter'] === 'string' ? obj['__rawFrontmatter'] : undefined,
+          outputDir: typeof obj['__outputDir'] === 'string' ? obj['__outputDir'] : undefined,
         });
       }
     }
@@ -547,7 +551,7 @@ export class ClaudeFormatter extends BaseFormatter {
   /**
    * Generate a .claude/skills/<name>/SKILL.md file.
    */
-  private generateSkillFile(config: ClaudeSkillConfig): FormatterOutput {
+  private generateSkillFile(config: ClaudeSkillConfig, options?: FormatOptions): FormatterOutput {
     const lines: string[] = [];
 
     // YAML frontmatter (use quotes compatible with Prettier)
@@ -594,7 +598,12 @@ export class ClaudeFormatter extends BaseFormatter {
       lines.push(normalizedContent);
     }
 
-    const skillDirPath = `.claude/skills/${config.name}`;
+    const skillDirPath = this.resolveSkillDir(
+      '.claude/skills',
+      config.name,
+      config.outputDir,
+      options
+    );
     const resourceFiles = this.sanitizeResourceFiles(config.resources, skillDirPath);
 
     const resourcesWithProvenance = resourceFiles.map((f) => {

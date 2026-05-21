@@ -90,6 +90,7 @@ program
   .option('-m, --migrate', 'Install migration skill for AI-assisted migration')
   .option('--auto-import', 'Automatically import existing instruction files (static)')
   .option('--backup', 'Create .prs-backup/ before migration')
+  .option('--no-hooks', 'Skip auto-compile hook installation for AI tools')
   .action((opts) => {
     if (opts.migrate) {
       ConsoleOutput.warn('--migrate is deprecated. The migration flow is now built into prs init.');
@@ -100,6 +101,7 @@ program
 program
   .command('compile')
   .description('Compile PromptScript to target formats')
+  .option('-b, --build <name>', 'Named build profile from config.builds')
   .option('-t, --target <target>', 'Specific target (github, claude, cursor)')
   .option('-f, --format <format>', 'Output format (alias for --target)')
   .option('-a, --all', 'All configured targets', true)
@@ -113,6 +115,22 @@ program
   .option('--ignore-hashes', 'Skip reference integrity hash verification')
   .option('--cwd <dir>', 'Working directory (project root)')
   .action((opts) => compileCommand(opts));
+
+program
+  .command('build <name>')
+  .description('Compile a named build profile')
+  .option('-t, --target <target>', 'Specific target (github, claude, cursor)')
+  .option('-f, --format <format>', 'Output format (alias for --target)')
+  .option('-w, --watch', 'Watch mode')
+  .option('-o, --output <dir>', 'Output directory')
+  .option('--dry-run', 'Preview changes')
+  .option('--registry <path>', 'Registry path (overrides config)')
+  .option('-c, --config <path>', 'Path to custom config file')
+  .option('--force', 'Force overwrite existing files without prompts')
+  .option('--strict', 'Treat output path conflicts as errors')
+  .option('--ignore-hashes', 'Skip reference integrity hash verification')
+  .option('--cwd <dir>', 'Working directory (project root)')
+  .action((name, opts) => compileCommand({ ...opts, build: name }));
 
 program
   .command('validate')

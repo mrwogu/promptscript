@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { lstat, readdir, readFile } from 'fs/promises';
-import { basename, join } from 'path';
+import { basename, dirname, join } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -29,7 +29,10 @@ import {
   resolveNativeAgents,
   parseSkillMd,
   skillNameFromPath,
+  discoverSkillResources,
+  resolveSkillReferences,
   type NativeSkillOptions,
+  type SkillResource,
 } from './skills.js';
 import { detectContentType } from './content-detector.js';
 import { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
@@ -39,6 +42,7 @@ import { resolveSkillComposition } from './skill-composition.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
 import { discoverNativeContent } from './auto-discovery.js';
+import { findFallbackUrl } from './alias-resolver.js';
 
 /**
  * Options for the resolver.
@@ -54,6 +58,12 @@ export interface ResolverOptions extends LoaderOptions {
   guardRequiresDepth?: number;
   /** Base directory for the registry cache (defaults to ~/.promptscript/cache) */
   cacheDir?: string;
+  /**
+   * Map from `@use` source `path.raw` to a target output directory.
+   * Provides a config-driven default for skills imported via @use when no
+   * inline `into "<path>"` clause is present on the directive.
+   */
+  skillTargets?: Record<string, string>;
 }
 
 /**
@@ -259,7 +269,7 @@ export class Resolver {
 
     // Route .md files through content detection
     if (absPath.endsWith('.md')) {
-      return this.loadAndParseMd(absPath, source, errors);
+      return await this.loadAndParseMd(absPath, source, errors);
     }
 
     const parseResult = parse(source, { filename: absPath });
@@ -283,15 +293,17 @@ export class Resolver {
    *
    * If the content looks like PRS (has @identity block), parse as PRS.
    * If it has YAML frontmatter, treat as a skill and synthesize a Program
-   * with a @skills block.
+   * with a @skills block. Resource files alongside SKILL.md and explicit
+   * `references:` entries are loaded so registry-imported skills behave the
+   * same as locally-discovered ones.
    * Otherwise, treat as raw markdown and synthesize a Program with a @skills
    * block using the filename as the skill name.
    */
-  private loadAndParseMd(
+  private async loadAndParseMd(
     absPath: string,
     source: string,
     errors: ResolveError[]
-  ): { ast: Program | null } {
+  ): Promise<{ ast: Program | null }> {
     const contentType = detectContentType(source);
 
     if (contentType === 'prs') {
@@ -325,6 +337,49 @@ export class Resolver {
     }
     if (parsed.content) {
       skillProps['content'] = makeTextContent(parsed.content, absPath);
+    }
+
+    // Discover resource files alongside the SKILL.md and explicit reference
+    // entries. This mirrors the behaviour of resolveNativeSkills() so a skill
+    // pulled in via a registry import carries the same resources as a locally
+    // discovered one.
+    const skillDir = dirname(absPath);
+    const collected: SkillResource[] = [];
+
+    try {
+      const discovered = await discoverSkillResources(skillDir, this.logger);
+      collected.push(...discovered);
+    } catch (err) {
+      this.logger.verbose(
+        `Failed to discover skill resources in ${skillDir}: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+
+    if (parsed.references && parsed.references.length > 0) {
+      try {
+        const refs = await resolveSkillReferences(parsed.references, skillDir, this.logger);
+        collected.push(...refs);
+      } catch (err) {
+        if (err instanceof ResolveError) {
+          errors.push(err);
+        } else {
+          errors.push(new ResolveError(err instanceof Error ? err.message : String(err)));
+        }
+      }
+    }
+
+    if (collected.length > 0) {
+      // Deduplicate by relativePath: explicit references override discovered ones.
+      const byPath = new Map<string, SkillResource>();
+      for (const resource of collected) {
+        byPath.set(resource.relativePath, resource);
+      }
+      skillProps['resources'] = Array.from(byPath.values()).map((r) => ({
+        relativePath: r.relativePath,
+        content: r.content,
+      })) as Value[];
     }
 
     const program: Program = {
@@ -478,8 +533,26 @@ export class Resolver {
             };
           }
 
-          this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);
-          result = resolveUses(result, use, resolvedImport);
+          // If no inline `into "<path>"` was given, fall back to the
+          // skillTargets map from resolver options. When both are set the
+          // inline directive wins and we surface a warning so users notice
+          // the redundant config entry.
+          let effectiveUse = use;
+          const fromConfig = this.options.skillTargets?.[use.path.raw];
+          if (use.outputDir && fromConfig && use.outputDir !== fromConfig) {
+            this.logger.warn(
+              `@use ${use.path.raw} into "${use.outputDir}" overrides skillTargets["${use.path.raw}"]="${fromConfig}"`
+            );
+          } else if (!use.outputDir && fromConfig) {
+            effectiveUse = { ...use, outputDir: fromConfig };
+          }
+
+          this.logger.debug(
+            `Merging import${effectiveUse.alias ? ` as "${effectiveUse.alias}"` : ''}${
+              effectiveUse.outputDir ? ` into "${effectiveUse.outputDir}"` : ''
+            }`
+          );
+          result = resolveUses(result, effectiveUse, resolvedImport);
         }
       } catch (err) {
         if (err instanceof CircularDependencyError) {
@@ -610,32 +683,42 @@ export class Resolver {
         this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
+        // Look up fallback URL from registries config (for HTTPS→SSH auth retry)
+        const fallbackRepoUrl = this.options.registries
+          ? findFallbackUrl(repoUrl, this.options.registries)
+          : undefined;
+
         // Clone using GitRegistry
-        await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath);
+        await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath, fallbackRepoUrl);
 
         // Record in RegistryCache
         const commitHash = lockEntry?.commit ?? 'unknown';
         await this.registryCache.set(repoUrl, effectiveVersion, commitHash);
       }
 
-      // Resolve the file path within the cached repo
-      const isMdPath = subPath.endsWith('.md');
-      const resolvedFileName = isMdPath
-        ? subPath
-        : subPath.endsWith('.prs')
+      // Resolve the file path within the cached repo. An empty sub-path means
+      // the import targets the repository root (e.g. `@use github.com/foo/bar`)
+      // so we skip the .prs/.md guess and go straight to auto-discovery.
+      const isRoot = subPath === '';
+      const isMdPath = !isRoot && subPath.endsWith('.md');
+      const resolvedFileName = isRoot
+        ? ''
+        : isMdPath
           ? subPath
-          : `${subPath}.prs`;
-      const resolvedFullPath = join(cachePath, resolvedFileName);
+          : subPath.endsWith('.prs')
+            ? subPath
+            : `${subPath}.prs`;
+      const resolvedFullPath = isRoot ? '' : join(cachePath, resolvedFileName);
 
       let resolvedAST: Program | null = null;
 
-      if (existsSync(resolvedFullPath) && isMdPath) {
+      if (!isRoot && existsSync(resolvedFullPath) && isMdPath) {
         // Found a .md file — route through content detection
         this.logger.debug(`Found .md file: ${resolvedFullPath}`);
         const source = await readFile(resolvedFullPath, 'utf-8');
-        const mdResult = this.loadAndParseMd(resolvedFullPath, source, errors);
+        const mdResult = await this.loadAndParseMd(resolvedFullPath, source, errors);
         resolvedAST = mdResult.ast;
-      } else if (existsSync(resolvedFullPath)) {
+      } else if (!isRoot && existsSync(resolvedFullPath)) {
         // Found a .prs file — parse it
         this.logger.debug(`Found .prs file: ${resolvedFullPath}`);
         const source = await this.loader.load(resolvedFullPath);
@@ -650,14 +733,16 @@ export class Resolver {
         }
       } else {
         // No file found — try auto-discovery of native content
-        const discoverDir = join(cachePath, subPath);
+        const discoverDir = isRoot ? cachePath : join(cachePath, subPath);
         this.logger.debug(`No .prs found, trying auto-discovery: ${discoverDir}`);
         resolvedAST = await discoverNativeContent(discoverDir);
 
         if (!resolvedAST) {
+          const where = isRoot ? '<repository root>' : `'${subPath}'`;
+          const hint = isRoot ? ` Specify a sub-path (e.g. ${repoUrl}/skills/<name>).` : '';
           errors.push(
             new ResolveError(
-              `Cannot resolve registry import: no .prs file or native content at '${subPath}' in ${repoUrl}`
+              `Cannot resolve registry import: no .prs file or native content at ${where} in ${repoUrl}.${hint}`
             )
           );
         }

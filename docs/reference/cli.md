@@ -130,6 +130,7 @@ prs compile [options]
 
 | Option                  | Description                                    |
 | ----------------------- | ---------------------------------------------- |
+| `-b, --build <name>`    | Compile a named build profile from config      |
 | `-t, --target <target>` | Compile to specific target                     |
 | `-f, --format <format>` | Output format (alias for `--target`)           |
 | `-a, --all`             | Compile to all configured targets              |
@@ -164,6 +165,9 @@ prs compile --watch
 # Preview changes
 prs compile --dry-run
 
+# Compile a named build profile
+prs compile --build logstrip-factory
+
 # Custom config
 prs compile --config ./custom.config.yaml
 
@@ -188,6 +192,44 @@ Instead of running `prs compile --watch` in a terminal, you can let your AI tool
 | `opencode`    | `OPENCODE.md`                     | OpenCode           |
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 | `factory`     | `AGENTS.md`                       | Factory AI         |
+
+### prs build
+
+Compile a named build profile from `promptscript.yaml`.
+
+```bash
+prs build <name> [options]
+```
+
+This is a shortcut for:
+
+```bash
+prs compile --build <name>
+```
+
+Build profiles are useful when a project needs extra generated artifacts for a
+subpackage, plugin, or library folder.
+
+```yaml
+builds:
+  logstrip-factory:
+    entry: .promptscript/project.prs
+    output: plugins/logstrip
+    targets:
+      - factory:
+          version: multifile
+          skillBaseDir: skills
+          includeSkills:
+            - logstrip
+```
+
+```bash
+prs build logstrip-factory
+```
+
+The command accepts the same compile options as `prs compile`, including
+`--target`, `--format`, `--output`, `--dry-run`, `--config`, `--force`,
+`--strict`, `--ignore-hashes`, and `--cwd`.
 
 ---
 
@@ -976,13 +1018,15 @@ watch:
 
 ## Environment Variables
 
-| Variable                | Description                           |
-| ----------------------- | ------------------------------------- |
-| `PROMPTSCRIPT_CONFIG`   | Path to config file                   |
-| `PROMPTSCRIPT_REGISTRY` | Registry path or URL                  |
-| `PROMPTSCRIPT_VERBOSE`  | Enable verbose output (`1` or `true`) |
-| `PROMPTSCRIPT_DEBUG`    | Enable debug output (`1` or `true`)   |
-| `NO_COLOR`              | Disable colored output                |
+| Variable                        | Description                           |
+| ------------------------------- | ------------------------------------- |
+| `PROMPTSCRIPT_CONFIG`           | Path to config file                   |
+| `PROMPTSCRIPT_REGISTRY`         | Registry path or URL                  |
+| `PROMPTSCRIPT_REGISTRY_GIT_URL` | Git registry URL (HTTPS or SSH)       |
+| `PROMPTSCRIPT_REGISTRY_GIT_REF` | Git ref (branch, tag, or commit)      |
+| `PROMPTSCRIPT_VERBOSE`          | Enable verbose output (`1` or `true`) |
+| `PROMPTSCRIPT_DEBUG`            | Enable debug output (`1` or `true`)   |
+| `NO_COLOR`                      | Disable colored output                |
 
 ## Exit Codes
 

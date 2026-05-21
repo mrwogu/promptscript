@@ -47,7 +47,7 @@ export class RegistryCache {
       const raw = await readFile(metaPath, 'utf-8');
       const parsed: unknown = JSON.parse(raw);
       const meta = parsed as CacheMeta;
-      return Date.now() - meta.cachedAt > ttlMs;
+      return Date.now() - meta.cachedAt >= ttlMs;
     } catch {
       return true;
     }

@@ -17,6 +17,11 @@ import { UnknownAliasError } from '@promptscript/core';
 export interface ExpandedAlias {
   /** Resolved Git repository URL (HTTPS or SSH) */
   repoUrl: string;
+  /**
+   * Fallback Git URL to try when the primary `repoUrl` fails with an auth error.
+   * Populated from `fallbackUrl` in the registry alias entry.
+   */
+  fallbackUrl?: string;
   /** Path within the repository (subPath, with root prepended if configured) */
   path: string;
   /** Optional version tag or semver string (e.g., 'v1.2.0', '1.2.3') */
@@ -179,6 +184,7 @@ export function expandAlias(aliasPath: string, registries: RegistriesConfig): Ex
 
   let repoUrl: string;
   let resolvedPath: string;
+  let fallbackUrl: string | undefined;
 
   if (typeof entry === 'string') {
     repoUrl = entry;
@@ -186,6 +192,7 @@ export function expandAlias(aliasPath: string, registries: RegistriesConfig): Ex
   } else {
     const extEntry = entry as RegistryAliasEntry;
     repoUrl = extEntry.url;
+    fallbackUrl = extEntry.fallbackUrl;
     // Prepend root to subPath when root is configured
     if (extEntry.root) {
       resolvedPath = subPath ? `${extEntry.root}/${subPath}` : extEntry.root;
@@ -194,5 +201,38 @@ export function expandAlias(aliasPath: string, registries: RegistriesConfig): Ex
     }
   }
 
-  return { repoUrl, path: resolvedPath, version };
+  return { repoUrl, path: resolvedPath, version, fallbackUrl };
+}
+
+/**
+ * Find the fallback URL for a given repository URL by scanning the registries config.
+ *
+ * This is used when resolving registry imports where only the expanded `repoUrl`
+ * is available (from the registry marker), but the `fallbackUrl` from the
+ * original alias entry is still needed for clone retries.
+ *
+ * @param repoUrl - The primary repository URL to look up
+ * @param registries - Registry alias configuration to search
+ * @returns The fallback URL if found, or undefined
+ *
+ * @example
+ * ```typescript
+ * findFallbackUrl('https://github.com/acme/standards.git', {
+ *   '@acme': { url: 'https://github.com/acme/standards.git', fallbackUrl: 'git@github.com:acme/standards.git' },
+ * });
+ * // 'git@github.com:acme/standards.git'
+ * ```
+ */
+export function findFallbackUrl(repoUrl: string, registries: RegistriesConfig): string | undefined {
+  for (const entry of Object.values(registries)) {
+    if (typeof entry === 'string') {
+      if (entry === repoUrl) return undefined;
+    } else {
+      const extEntry = entry as RegistryAliasEntry;
+      if (extEntry.url === repoUrl) {
+        return extEntry.fallbackUrl;
+      }
+    }
+  }
+  return undefined;
 }

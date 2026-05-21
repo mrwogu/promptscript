@@ -31,6 +31,25 @@ export const IMPORT_MARKER_PREFIX = '__import__';
  * @returns Updated program with merged blocks
  */
 export function resolveUses(target: Program, use: UseDeclaration, source: Program): Program {
+  // If the @use carries an inline output directory, attach it to every skill
+  // brought in by this import. We operate on a clone so cached source ASTs are
+  // never mutated.
+  if (use.outputDir) {
+    source = deepClone(source);
+    const skillsBlock = source.blocks.find((b) => b.name === 'skills');
+    if (skillsBlock?.content.type === 'ObjectContent') {
+      const props = (skillsBlock.content as ObjectContent).properties;
+      for (const [name, value] of Object.entries(props)) {
+        const isObj = typeof value === 'object' && value !== null && !Array.isArray(value);
+        if (isObj) {
+          (value as Record<string, Value>)['__outputDir'] = use.outputDir;
+        } else {
+          props[name] = { __outputDir: use.outputDir } as unknown as Value;
+        }
+      }
+    }
+  }
+
   // Pre-merge duplicate skill check: detect collisions in @skills block
   const targetSkillsBlock = target.blocks.find((b) => b.name === 'skills');
   const sourceSkillsBlock = source.blocks.find((b) => b.name === 'skills');
