@@ -12,6 +12,7 @@ const {
   mockReadFile,
   mockReaddir,
   mockValidateRemoteAccess,
+  mockConsoleWarn,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -34,6 +35,7 @@ const {
     accessible: true,
     headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
   });
+  const mockConsoleWarn = vi.fn();
   return {
     mockSucceed,
     mockFail,
@@ -46,6 +48,7 @@ const {
     mockReadFile,
     mockReaddir,
     mockValidateRemoteAccess,
+    mockConsoleWarn,
   };
 });
 
@@ -58,6 +61,8 @@ vi.mock('../../output/console.js', () => ({
     newline: vi.fn(),
     info: vi.fn(),
     dryRun: vi.fn(),
+    warn: mockConsoleWarn,
+    warning: mockConsoleWarn,
   },
 }));
 
@@ -90,7 +95,40 @@ import {
   skillsRemoveCommand,
   skillsListCommand,
   skillsUpdateCommand,
+  normalizeSkillSource,
 } from '../skills.js';
+
+describe('normalizeSkillSource', () => {
+  it('strips https:// prefix', () => {
+    expect(normalizeSkillSource('https://github.com/foo/bar')).toBe('github.com/foo/bar');
+  });
+
+  it('strips http:// prefix', () => {
+    expect(normalizeSkillSource('http://github.com/foo/bar')).toBe('github.com/foo/bar');
+  });
+
+  it('rewrites SSH form to canonical host/owner/repo', () => {
+    expect(normalizeSkillSource('git@github.com:foo/bar.git')).toBe('github.com/foo/bar');
+  });
+
+  it('strips trailing .git suffix', () => {
+    expect(normalizeSkillSource('https://github.com/foo/bar.git')).toBe('github.com/foo/bar');
+  });
+
+  it('preserves sub-path after .git', () => {
+    expect(normalizeSkillSource('https://github.com/foo/bar.git/skills/seo')).toBe(
+      'github.com/foo/bar/skills/seo'
+    );
+  });
+
+  it('strips trailing slashes', () => {
+    expect(normalizeSkillSource('github.com/foo/bar/')).toBe('github.com/foo/bar');
+  });
+
+  it('returns empty string unchanged', () => {
+    expect(normalizeSkillSource('   ')).toBe('');
+  });
+});
 
 /** Sample .prs file content with @meta block and @use directives. */
 const SAMPLE_PRS = `@meta {
@@ -395,6 +433,73 @@ describe('skillsAddCommand', () => {
 
     expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Local paths are not supported'));
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should accept https:// URLs by normalizing them', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+
+    await skillsAddCommand('https://github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const prsWriteCall = writeCalls.find(
+      (call) => typeof call[0] === 'string' && (call[0] as string).includes('entry.prs')
+    );
+    const writtenContent = prsWriteCall![1] as string;
+    // The directive uses the normalized form (no scheme)
+    expect(writtenContent).toContain('@use github.com/org/repo/SKILL.md');
+    expect(writtenContent).not.toContain('https://');
+  });
+
+  it('should reject GitHub URLs that include tree/<ref>', async () => {
+    await skillsAddCommand(
+      'https://github.com/coreyhaines31/marketingskills/tree/main/skills/seo-audit',
+      {}
+    );
+
+    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Drop the "tree/main" segment'));
+    expect(mockFail).toHaveBeenCalledWith(
+      expect.stringContaining('github.com/coreyhaines31/marketingskills/skills/seo-audit')
+    );
+    expect(process.exitCode).toBe(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('should reject GitHub URLs that include blob/<ref>', async () => {
+    await skillsAddCommand('github.com/foo/bar/blob/main/SKILL.md', {});
+
+    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Drop the "blob/main" segment'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should accept SSH-style git URLs by normalizing them', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      if (p === 'promptscript.lock') return false;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS);
+
+    await skillsAddCommand('git@github.com:org/repo.git', {
+      file: 'entry.prs',
+    });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const lockWriteCall = writeCalls.find((call) => call[0] === 'promptscript.lock');
+    const lockContent = JSON.parse(lockWriteCall![1] as string) as {
+      dependencies: Record<string, unknown>;
+    };
+    expect(Object.keys(lockContent.dependencies)).toContain('github.com/org/repo');
   });
 
   it('should reject local paths starting with ../', async () => {
@@ -908,6 +1013,10 @@ describe('skillsUpdateCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = undefined;
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
+    });
   });
 
   it('should update all md-sourced skills', async () => {
@@ -933,11 +1042,49 @@ describe('skillsUpdateCommand', () => {
       return false;
     });
     mockReadFile.mockResolvedValue(lockContent);
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    });
 
     await skillsUpdateCommand(undefined, {});
 
     expect(mockSucceed).toHaveBeenCalledWith('Updated 1 skill(s)');
     expect(mockWriteFile).toHaveBeenCalled();
+    const writeCall = mockWriteFile.mock.calls[0]!;
+    const written = JSON.parse(writeCall[1] as string);
+    const entry = written.dependencies['github.com/org/repo/SKILL.md'];
+    expect(entry.commit).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    expect(entry.integrity).toBe('sha256-xyz');
+    expect(typeof entry.fetchedAt).toBe('string');
+  });
+
+  it('should skip md-sourced skills when the remote is unreachable', async () => {
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/SKILL.md': {
+          version: 'v1.0.0',
+          commit: 'abc123',
+          integrity: 'sha256-xyz',
+          source: 'md',
+        },
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => p === 'promptscript.lock');
+    mockReadFile.mockResolvedValue(lockContent);
+    mockValidateRemoteAccess.mockResolvedValueOnce({
+      accessible: false,
+      error: 'remote unreachable',
+    });
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockConsoleWarn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipped github.com/org/repo/SKILL.md')
+    );
   });
 
   it('should warn when no md-sourced skills in lockfile', async () => {
@@ -1097,5 +1244,30 @@ describe('skillsUpdateCommand', () => {
 
     expect(mockSucceed).toHaveBeenCalledWith('Updated 1 skill(s)');
     expect(mockWriteFile).toHaveBeenCalled();
+  });
+
+  it('should skip a skill when validateRemoteAccess throws an exception', async () => {
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/SKILL.md': {
+          version: 'v1.0.0',
+          commit: 'abc123',
+          integrity: 'sha256-xyz',
+          source: 'md',
+        },
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => p === 'promptscript.lock');
+    mockReadFile.mockResolvedValue(lockContent);
+    mockValidateRemoteAccess.mockRejectedValue(new Error('network failure'));
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockConsoleWarn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipped github.com/org/repo/SKILL.md')
+    );
   });
 });

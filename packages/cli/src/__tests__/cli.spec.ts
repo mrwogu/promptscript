@@ -115,6 +115,13 @@ describe('cli', () => {
       expect(mockCommand).toHaveBeenCalledWith('compile');
     });
 
+    it('should register build command', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', 'build']);
+
+      expect(mockCommand).toHaveBeenCalledWith('build <name>');
+    });
+
     it('should register validate command', async () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', 'validate']);

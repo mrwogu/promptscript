@@ -20,6 +20,7 @@
     { "include": "#boolean" },
     { "include": "#null" },
     { "include": "#keyword-as" },
+    { "include": "#keyword-into" },
     { "include": "#keyword-type" },
     { "include": "#type-keywords" },
     { "include": "#punctuation" }
@@ -154,6 +155,10 @@
     "keyword-as": {
       "match": "\\bas\\b",
       "name": "keyword.control.as.prs"
+    },
+    "keyword-into": {
+      "match": "\\binto\\b",
+      "name": "keyword.control.into.prs"
     },
     "keyword-type": {
       "match": "\\b(?:range|enum)\\b",

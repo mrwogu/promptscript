@@ -6,6 +6,7 @@ import {
   Inherit,
   Use,
   As,
+  Into,
   Extend,
   True,
   False,
@@ -96,7 +97,7 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * useDecl
-   *   : '@' 'use' pathRef paramCallList? ('as' Identifier)?
+   *   : '@' 'use' pathRef paramCallList? ('as' Identifier)? ('into' StringLiteral)?
    */
   private useDecl = this.RULE('useDecl', () => {
     this.CONSUME(At);
@@ -106,6 +107,10 @@ export class PromptScriptParser extends CstParser {
     this.OPTION2(() => {
       this.CONSUME(As);
       this.CONSUME(Identifier);
+    });
+    this.OPTION3(() => {
+      this.CONSUME(Into);
+      this.CONSUME(StringLiteral);
     });
   });
 
@@ -151,7 +156,7 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * inlineUse
-   *   : '@' 'use' pathRef paramCallList? ('as' Identifier)?
+   *   : '@' 'use' pathRef paramCallList? ('as' Identifier)? ('into' StringLiteral)?
    *
    * Same syntax as top-level useDecl but allowed within block content.
    */
@@ -163,6 +168,10 @@ export class PromptScriptParser extends CstParser {
     this.OPTION2(() => {
       this.CONSUME(As);
       this.CONSUME(Identifier);
+    });
+    this.OPTION3(() => {
+      this.CONSUME(Into);
+      this.CONSUME(StringLiteral);
     });
   });
 

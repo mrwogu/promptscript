@@ -478,6 +478,125 @@ describe('GitRegistry', () => {
 
       await expect(registry.fetch('@company/base')).rejects.toThrow(GitRefNotFoundError);
     });
+
+    it('should retry with fallbackUrl on auth error', async () => {
+      // Primary URL fails with auth error, fallback succeeds
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockImplementationOnce(async (_url: string, targetPath: string) => {
+          await fs.mkdir(targetPath, { recursive: true });
+          await fs.mkdir(join(targetPath, '@company'), { recursive: true });
+          await fs.writeFile(join(targetPath, '@company', 'base.prs'), '@meta\nname = "base"');
+        });
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      const content = await registry.fetch('@company/base');
+      expect(content).toContain('name = "base"');
+      expect(mockGit.clone).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw combined auth error when both primary and fallback fail', async () => {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('Permission denied (publickey)'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.fetch('@company/base')).rejects.toThrow(GitAuthError);
+      try {
+        await registry.fetch('@company/base');
+      } catch (err) {
+        expect(err).toBeInstanceOf(GitAuthError);
+        expect((err as GitAuthError).message).toContain('both');
+      }
+    });
+
+    it('should not try fallback on non-auth errors', async () => {
+      mockGit.clone.mockRejectedValueOnce(new Error('Network timeout'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.fetch('@company/base')).rejects.toThrow(GitCloneError);
+      expect(mockGit.clone).toHaveBeenCalledTimes(1);
+    });
+
+    it('should try fallback ref-error recovery when fallback clone hits ref error', async () => {
+      // Primary: auth error → fallback: ref error → retry without branch
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('Could not find remote branch feature'))
+        .mockImplementationOnce(async (_url: string, targetPath: string) => {
+          await fs.mkdir(targetPath, { recursive: true });
+          await fs.mkdir(join(targetPath, '@company'), { recursive: true });
+          await fs.writeFile(join(targetPath, '@company', 'base.prs'), '@meta\nname = "base"');
+        });
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        ref: 'feature',
+        cacheDir: testCacheDir,
+      });
+
+      const content = await registry.fetch('@company/base');
+      expect(content).toContain('name = "base"');
+      // 3 clone calls: primary (auth fail), fallback w/ branch (ref fail), fallback w/o branch
+      expect(mockGit.clone).toHaveBeenCalledTimes(3);
+    });
+
+    it('should throw GitRefNotFoundError when fallback ref does not exist at all', async () => {
+      // Primary: auth error → fallback: ref error → retry without branch → fetch also ref error
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('Could not find remote branch nonexistent'))
+        .mockImplementationOnce(async (_url: string, targetPath: string) => {
+          await fs.mkdir(targetPath, { recursive: true });
+        });
+      mockGit.fetch.mockRejectedValueOnce(new Error('Could not find remote branch nonexistent'));
+      mockGit.checkout.mockRejectedValueOnce(new Error("pathspec 'nonexistent' did not match any"));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        ref: 'nonexistent',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.fetch('@company/base')).rejects.toThrow(GitRefNotFoundError);
+    });
+
+    it('should throw GitCloneError when fallback ref-recovery fetch fails with non-ref error', async () => {
+      // Primary: auth error → fallback: ref error → retry without branch → fetch: network error
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Authentication failed'))
+        .mockRejectedValueOnce(new Error('Could not find remote branch feature'))
+        .mockImplementationOnce(async (_url: string, targetPath: string) => {
+          await fs.mkdir(targetPath, { recursive: true });
+        });
+      mockGit.fetch.mockRejectedValueOnce(new Error('Network timeout'));
+
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        fallbackUrl: 'git@github.com:org/repo.git',
+        ref: 'feature',
+        cacheDir: testCacheDir,
+      });
+
+      await expect(registry.fetch('@company/base')).rejects.toThrow(GitCloneError);
+    });
   });
 
   describe('stale cache handling', () => {

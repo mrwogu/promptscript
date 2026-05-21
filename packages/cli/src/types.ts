@@ -24,6 +24,11 @@ export interface InitOptions {
   autoImport?: boolean;
   /** Create backup before migration */
   backup?: boolean;
+  /**
+   * Install auto-compile hooks for selected targets.
+   * Defaults to `true`; pass `--no-hooks` on the CLI to opt out.
+   */
+  hooks?: boolean;
   /** Internal: force migrate flow (used by prs migrate) */
   _forceMigrate?: boolean;
   /** Internal: force LLM flow (used by prs migrate --llm) */
@@ -45,6 +50,8 @@ export interface MigrateOptions {
  * Options for the compile command.
  */
 export interface CompileOptions {
+  /** Named build profile from config.builds */
+  build?: string;
   /** Specific target to compile (github, claude, cursor) */
   target?: string;
   /** Output format (github, claude, cursor) - alias for target */

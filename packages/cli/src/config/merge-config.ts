@@ -48,6 +48,7 @@ function userConfigToProjectRegistry(
   if (userRegistry.git) {
     registry.git = {
       url: userRegistry.git.url,
+      ...(userRegistry.git.fallbackUrl ? { fallbackUrl: userRegistry.git.fallbackUrl } : {}),
       ...(userRegistry.git.ref ? { ref: userRegistry.git.ref } : {}),
       ...(userRegistry.git.path ? { path: userRegistry.git.path } : {}),
       ...(userRegistry.git.auth ? { auth: userRegistry.git.auth } : {}),

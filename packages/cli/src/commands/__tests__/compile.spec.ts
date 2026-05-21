@@ -8,6 +8,7 @@ import type { CliServices } from '../../services.js';
  * private but whose warn path (lines 100-101) must be covered.
  */
 let capturedLogger: Logger | undefined;
+let capturedCompilerOptions: Record<string, unknown> | undefined;
 
 const {
   mockCompile,
@@ -17,6 +18,7 @@ const {
   mockMkdir,
   mockReadFile,
   mockWarn,
+  mockError,
 } = vi.hoisted(() => {
   const mockCompile = vi.fn();
   const mockLoadConfig = vi.fn();
@@ -25,6 +27,7 @@ const {
   const mockMkdir = vi.fn();
   const mockReadFile = vi.fn();
   const mockWarn = vi.fn();
+  const mockError = vi.fn();
   return {
     mockCompile,
     mockLoadConfig,
@@ -33,13 +36,15 @@ const {
     mockMkdir,
     mockReadFile,
     mockWarn,
+    mockError,
   };
 });
 
 vi.mock('@promptscript/compiler', () => ({
   Compiler: class {
-    constructor(opts: { logger?: Logger }) {
+    constructor(opts: { logger?: Logger } & Record<string, unknown>) {
       capturedLogger = opts.logger;
+      capturedCompilerOptions = opts;
     }
     compile = mockCompile;
   },
@@ -81,7 +86,7 @@ vi.mock('../../output/console.js', () => ({
   }),
   ConsoleOutput: {
     success: vi.fn(),
-    error: vi.fn(),
+    error: mockError,
     muted: vi.fn(),
     newline: vi.fn(),
     info: vi.fn(),
@@ -130,6 +135,7 @@ describe('compile command - createCliLogger warn path', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedLogger = undefined;
+    capturedCompilerOptions = undefined;
     process.exitCode = undefined;
 
     mockLoadConfig.mockResolvedValue({
@@ -183,5 +189,94 @@ describe('compile command - createCliLogger warn path', () => {
 
     // Assert: ConsoleOutput.warn was called with the message
     expect(mockWarn).toHaveBeenCalledWith('test warning message');
+  });
+
+  it('should apply a named build profile entry, output, and targets', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: {
+        logstrip: {
+          entry: '.promptscript/logstrip.prs',
+          output: '../logstrip',
+          targets: [
+            {
+              factory: {
+                version: 'full',
+                skillBaseDir: 'plugins/logstrip/.factory/skills',
+                includeSkills: ['logstrip'],
+              },
+            },
+          ],
+        },
+      },
+    });
+    mockExistsSync.mockImplementation((path: string) => String(path).endsWith('logstrip.prs'));
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([['AGENTS.md', { path: 'AGENTS.md', content: '# Agents\n' }]]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ build: 'logstrip', cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockCompile).toHaveBeenCalledWith('/repo/promptscript/.promptscript/logstrip.prs');
+    expect(capturedCompilerOptions?.['formatters']).toEqual([
+      {
+        name: 'factory',
+        config: {
+          version: 'full',
+          skillBaseDir: 'plugins/logstrip/.factory/skills',
+          includeSkills: ['logstrip'],
+        },
+      },
+    ]);
+    expect(mockWriteFile).toHaveBeenCalledWith('/repo/logstrip/AGENTS.md', '# Agents\n', 'utf-8');
+  });
+
+  it('should let --output override a build profile output', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: {
+        logstrip: {
+          entry: '.promptscript/logstrip.prs',
+          output: '../logstrip',
+          targets: ['factory'],
+        },
+      },
+    });
+    mockExistsSync.mockImplementation((path: string) => String(path).endsWith('logstrip.prs'));
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([['AGENTS.md', { path: 'AGENTS.md', content: '# Agents\n' }]]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand(
+      { build: 'logstrip', output: '/tmp/prs-build', cwd: '/repo/promptscript' },
+      mockServices
+    );
+
+    expect(mockWriteFile).toHaveBeenCalledWith('/tmp/prs-build/AGENTS.md', '# Agents\n', 'utf-8');
+  });
+
+  it('should fail for an unknown build profile', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: {
+        known: { targets: ['factory'] },
+      },
+    });
+
+    await compileCommand({ build: 'missing', cwd: '/repo/promptscript' }, mockServices);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      'Unknown build profile: missing. Available build profiles: known.'
+    );
   });
 });

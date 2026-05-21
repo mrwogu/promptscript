@@ -253,14 +253,26 @@ async function discoverContext(dir: string): Promise<TextContent | null> {
  * @param dir - Absolute path to the directory to scan
  * @returns A synthesized Program AST, or null if nothing was found or directory doesn't exist
  */
-export async function discoverNativeContent(dir: string): Promise<Program | null> {
-  // Check the directory exists
+/**
+ * Wrapper directory names commonly used by skill repositories to group skills,
+ * agents and commands one level below the repo root.
+ */
+const SKILL_WRAPPER_DIRS = ['skills'] as const;
+const AGENT_WRAPPER_DIRS = ['agents'] as const;
+const COMMAND_WRAPPER_DIRS = ['commands'] as const;
+
+async function safeIsDirectory(dir: string): Promise<boolean> {
   try {
     const stat = await lstat(dir);
-    if (!stat.isDirectory()) return null;
+    return stat.isDirectory();
   } catch {
-    return null;
+    return false;
   }
+}
+
+export async function discoverNativeContent(dir: string): Promise<Program | null> {
+  // Check the directory exists
+  if (!(await safeIsDirectory(dir))) return null;
 
   const blocks: Block[] = [];
 
@@ -270,22 +282,58 @@ export async function discoverNativeContent(dir: string): Promise<Program | null
   // Discover skills in subdirectories
   const subSkills = await discoverSkills(dir);
 
-  // Merge: subdirectory skills take precedence over root skill (more specific wins)
-  const mergedSkills = { ...rootSkill, ...subSkills };
+  // Also walk known wrapper directories (`skills/`) so registry imports against
+  // a repository root pick up the standard `skills/<name>/SKILL.md` layout.
+  const wrappedSkillResults = await Promise.all(
+    SKILL_WRAPPER_DIRS.map(async (name) => {
+      const candidate = resolve(dir, name);
+      if (!(await safeIsDirectory(candidate))) return null;
+      return discoverSkills(candidate);
+    })
+  );
+
+  const mergedSkills: Record<string, Value> = { ...rootSkill, ...subSkills };
+  for (const wrapped of wrappedSkillResults) {
+    if (wrapped) {
+      for (const [key, value] of Object.entries(wrapped)) {
+        if (!(key in mergedSkills)) {
+          mergedSkills[key] = value;
+        }
+      }
+    }
+  }
   if (Object.keys(mergedSkills).length > 0) {
     blocks.push(makeBlock('skills', makeObjectContent(mergedSkills)));
   }
 
-  // Discover agents
-  const agentProperties = await discoverAgents(dir);
-  if (agentProperties) {
-    blocks.push(makeBlock('agents', makeObjectContent(agentProperties)));
+  // Discover agents (root + agents/ wrapper)
+  const rootAgents = (await discoverAgents(dir)) ?? {};
+  const wrappedAgents: Record<string, Value> = {};
+  for (const name of AGENT_WRAPPER_DIRS) {
+    const candidate = resolve(dir, name);
+    if (await safeIsDirectory(candidate)) {
+      const found = await discoverAgents(candidate);
+      if (found) Object.assign(wrappedAgents, found);
+    }
+  }
+  const mergedAgents = { ...wrappedAgents, ...rootAgents };
+  if (Object.keys(mergedAgents).length > 0) {
+    blocks.push(makeBlock('agents', makeObjectContent(mergedAgents)));
   }
 
-  // Discover commands -> @shortcuts
-  const commandProperties = await discoverCommands(dir);
-  if (commandProperties) {
-    blocks.push(makeBlock('shortcuts', makeObjectContent(commandProperties)));
+  // Discover commands -> @shortcuts (root + commands/ wrapper)
+  const rootCommands = (await discoverCommands(dir)) ?? {};
+  const wrappedCommands: Record<string, Value> = {};
+  for (const name of COMMAND_WRAPPER_DIRS) {
+    const candidate = resolve(dir, name);
+    if (await safeIsDirectory(candidate)) {
+      const found = await discoverCommands(candidate);
+      if (found) Object.assign(wrappedCommands, found);
+    }
+  }
+  const mergedCommands = { ...wrappedCommands, ...rootCommands };
+  if (Object.keys(mergedCommands).length > 0) {
+    blocks.push(makeBlock('shortcuts', makeObjectContent(mergedCommands)));
   }
 
   // Discover context

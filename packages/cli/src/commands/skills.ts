@@ -18,6 +18,38 @@ import { validateRemoteAccess } from '@promptscript/resolver';
 const REMOTE_SOURCE_PATTERN = /^[a-zA-Z0-9][\w.-]*\.[a-zA-Z]{2,}\/.+/;
 
 /**
+ * Normalize a user-provided skill source so the internal representation is
+ * canonical (no scheme, no `.git` suffix, no SSH form, no trailing slash).
+ *
+ * Accepts:
+ *   - `https://github.com/owner/repo/path`
+ *   - `http://github.com/owner/repo/path`
+ *   - `git@github.com:owner/repo.git`
+ *   - `github.com/owner/repo/path`
+ *
+ * Returns the trimmed value when nothing matches, so downstream validation
+ * still produces a deterministic error.
+ */
+export function normalizeSkillSource(input: string): string {
+  let source = input.trim();
+  if (source.length === 0) return source;
+
+  // SSH form: git@host:owner/repo[.git]
+  const sshMatch = source.match(/^git@([^:]+):(.+)$/);
+  if (sshMatch) {
+    source = `${sshMatch[1]}/${sshMatch[2]}`;
+  } else {
+    source = source.replace(/^https?:\/\//i, '');
+  }
+
+  source = source.replace(/\.git(?=\/|$)/i, '');
+  while (source.endsWith('/')) {
+    source = source.slice(0, -1);
+  }
+  return source;
+}
+
+/**
  * Directives that appear in the header section of a `.prs` file.
  * The `@use` insertion point is calculated as the line after the last
  * occurrence of any of these directives.
@@ -51,6 +83,19 @@ function validateRemoteSource(source: string): string | undefined {
   if (!REMOTE_SOURCE_PATTERN.test(source)) {
     return `Invalid source: "${source}". Expected a remote path (e.g., github.com/owner/repo/path/SKILL.md)`;
   }
+
+  // Reject GitHub-style web URLs that include a tree/<ref> or blob/<ref>
+  // segment immediately after host/owner/repo. These come from copying
+  // a URL out of a browser and they are not valid repository paths.
+  const parts = source.split('/');
+  if (parts.length > 4 && (parts[3] === 'tree' || parts[3] === 'blob')) {
+    const kind = parts[3];
+    const ref = parts[4] ?? '<ref>';
+    const stripped = [...parts.slice(0, 3), ...parts.slice(5)].join('/').replace(/\/$/, '');
+    const example = stripped.length > 0 ? stripped : parts.slice(0, 3).join('/');
+    return `Invalid source: "${source}". Drop the "${kind}/${ref}" segment copied from the GitHub web UI (use "${example}" instead).`;
+  }
+
   return undefined;
 }
 
@@ -201,10 +246,18 @@ async function saveLockfile(lockfile: Lockfile): Promise<void> {
  * 3. Inserts `@use <source>` directive
  * 4. Updates promptscript.lock with `source: 'md'` entry
  */
-export async function skillsAddCommand(source: string, options: SkillsAddOptions): Promise<void> {
+export async function skillsAddCommand(
+  rawSource: string,
+  options: SkillsAddOptions
+): Promise<void> {
   const spinner = createSpinner('Adding skill...').start();
 
   try {
+    // Normalize the user-provided source before validating so we treat
+    // `https://github.com/foo/bar`, `git@github.com:foo/bar.git`, and
+    // `github.com/foo/bar` as the same logical identifier.
+    const source = normalizeSkillSource(rawSource);
+
     // Validate source
     const sourceError = validateRemoteSource(source);
     if (sourceError) {
@@ -428,31 +481,68 @@ export async function skillsUpdateCommand(
       return;
     }
 
-    // Reset pins to trigger re-resolution
-    for (const [key] of toUpdate) {
-      lockfile.dependencies[key] = {
-        version: 'latest',
-        commit: '0000000000000000000000000000000000000000',
-        integrity: 'sha256-pending',
-        source: 'md',
-      };
+    // Fetch the latest HEAD commit for each entry by reaching out to the
+    // remote with validateRemoteAccess. The integrity field is preserved from
+    // the previous pin (full re-hash happens during the next compile).
+    const fetchedAt = new Date().toISOString();
+    const updated: string[] = [];
+    const skipped: Array<{ key: string; reason: string }> = [];
+
+    for (const [key, dep] of toUpdate) {
+      const repoUrl = extractRepoUrl(key);
+      try {
+        const validation = await validateRemoteAccess(repoUrl);
+        if (!validation.accessible || !validation.headCommit) {
+          skipped.push({
+            key,
+            reason: validation.error ?? 'remote unreachable',
+          });
+          continue;
+        }
+        lockfile.dependencies[key] = {
+          version: dep.version ?? 'latest',
+          commit: validation.headCommit,
+          integrity: dep.integrity ?? 'sha256-pending',
+          source: 'md',
+          fetchedAt,
+        };
+        updated.push(key);
+      } catch (err) {
+        skipped.push({
+          key,
+          reason: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
 
     if (options.dryRun) {
       spinner.succeed('Dry run — lockfile not written');
       ConsoleOutput.newline();
-      for (const [key] of toUpdate) {
+      for (const key of updated) {
         ConsoleOutput.dryRun(`Would update: ${key}`);
+      }
+      for (const { key, reason } of skipped) {
+        ConsoleOutput.warn(`Would skip ${key}: ${reason}`);
       }
       return;
     }
 
-    await saveLockfile(lockfile);
+    if (updated.length > 0) {
+      await saveLockfile(lockfile);
+    }
 
-    spinner.succeed(`Updated ${toUpdate.length} skill(s)`);
-    ConsoleOutput.newline();
-    for (const [key] of toUpdate) {
-      ConsoleOutput.success(key);
+    if (updated.length > 0) {
+      spinner.succeed(`Updated ${updated.length} skill(s)`);
+      ConsoleOutput.newline();
+      for (const key of updated) {
+        ConsoleOutput.success(key);
+      }
+    } else {
+      spinner.warn('No skills were updated');
+    }
+
+    for (const { key, reason } of skipped) {
+      ConsoleOutput.warn(`Skipped ${key}: ${reason}`);
     }
   } catch (error) {
     spinner.fail('Failed to update skills');

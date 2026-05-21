@@ -4,6 +4,18 @@
 export interface RegistryAliasEntry {
   /** Git repository URL (HTTPS or SSH) */
   url: string;
+  /**
+   * Fallback Git URL to try when the primary `url` fails with an auth error.
+   * Useful when registries reference HTTPS URLs but the user authenticates
+   * via SSH (or vice versa).
+   *
+   * @example
+   * registries:
+   *   '@acme':
+   *     url: 'https://github.com/acme/standards.git'
+   *     fallbackUrl: 'git@github.com:acme/standards.git'
+   */
+  fallbackUrl?: string;
   /** Base path within the repository */
   root?: string;
 }

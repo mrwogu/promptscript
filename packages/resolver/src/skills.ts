@@ -718,7 +718,7 @@ const noopLogger: Logger = {
  * @param logger - Optional logger for reporting skipped files
  * @returns Array of resource files with relative paths and content
  */
-async function discoverSkillResources(
+export async function discoverSkillResources(
   skillDir: string,
   logger: Logger = noopLogger
 ): Promise<SkillResource[]> {

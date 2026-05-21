@@ -91,6 +91,12 @@ export interface TargetConfig {
 
   /** List generated guard skills in main output file (Factory). @default true */
   guardsSkillsListing?: boolean;
+
+  /** Custom base directory for generated skill files. */
+  skillBaseDir?: string;
+
+  /** Controls which skills are emitted for this target. */
+  includeSkills?: boolean | string[];
 }
 
 /**

@@ -90,12 +90,39 @@ export interface TargetConfig {
 
   /** List generated guard skills in main output file (Factory). @default true */
   guardsSkillsListing?: boolean;
+
+  /**
+   * Custom base directory for generated skill files.
+   * When set, skill files are emitted under this directory instead of the
+   * target's native skill directory (for example `.factory/skills`).
+   */
+  skillBaseDir?: string;
+
+  /**
+   * Controls which skills are emitted for this target.
+   * - `true` or omitted: emit all skills
+   * - `false`: emit no skills
+   * - string array: emit only the listed skill names
+   */
+  includeSkills?: boolean | string[];
 }
 
 /**
  * Target can be a simple string name or a full configuration object.
  */
 export type TargetEntry = TargetName | { [key in TargetName]?: TargetConfig };
+
+/**
+ * Named build profile for compiling a specific entry point to specific outputs.
+ */
+export interface BuildProfileConfig {
+  /** Entry file path for this build profile */
+  entry?: string;
+  /** Output directory for this build profile */
+  output?: string;
+  /** Target list for this build profile */
+  targets?: TargetEntry[];
+}
 
 /**
  * PromptScript configuration file (promptscript.yaml).
@@ -146,6 +173,18 @@ export interface PromptScriptConfig {
     git?: {
       /** Git repository URL (HTTPS or SSH) */
       url: string;
+      /**
+       * Fallback Git URL to try when the primary `url` fails with an auth error.
+       * Useful when the registry references an HTTPS URL but the user authenticates
+       * via SSH (or vice versa).
+       *
+       * @example
+       * registry:
+       *   git:
+       *     url: 'https://github.com/org/registry.git'
+       *     fallbackUrl: 'git@github.com:org/registry.git'
+       */
+      fallbackUrl?: string;
       /**
        * Git ref to checkout (branch, tag, or commit hash).
        * @default 'main'
@@ -229,6 +268,27 @@ export interface PromptScriptConfig {
   };
 
   /**
+   * Named per-command build profiles.
+   * Profiles let one repository build multiple instruction artifacts to
+   * different target directories without changing the default project compile.
+   */
+  builds?: Record<string, BuildProfileConfig>;
+
+  /**
+   * Per-source output directories for `@use` imports.
+   *
+   * Maps a `@use` source string (matching the path's `raw` value) to a
+   * relative directory underneath each target's skill output location.
+   * An inline `into "<path>"` on the same `@use` declaration overrides
+   * the configured value.
+   *
+   * @example
+   * skillTargets:
+   *   "github.com/coreyhaines31/marketingskills/skills/seo-audit": "skills/seo-audit"
+   */
+  skillTargets?: Record<string, string>;
+
+  /**
    * Formatting configuration.
    * Controls how generated markdown files are formatted.
    * @example
@@ -308,6 +368,7 @@ export interface UserConfig {
   registry?: {
     git?: {
       url: string;
+      fallbackUrl?: string;
       ref?: string;
       path?: string;
       auth?: {

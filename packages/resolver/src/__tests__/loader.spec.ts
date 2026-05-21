@@ -208,6 +208,25 @@ describe('FileLoader', () => {
       );
     });
 
+    it('should allow .promptscript entries to import sibling project directories', () => {
+      const loader = new FileLoader({
+        registryPath: '/registry',
+        localPath: '/project/.promptscript',
+      });
+
+      const ref = {
+        type: 'PathReference' as const,
+        raw: '../skills/specwire-operator',
+        segments: ['..', 'skills', 'specwire-operator'],
+        isRelative: true,
+        loc: { file: '<test>', line: 1, column: 1 },
+      };
+
+      expect(loader.resolveRef(ref, '/project/.promptscript/project.prs')).toBe(
+        '/project/skills/specwire-operator.prs'
+      );
+    });
+
     it('should allow ../sibling from a deeply nested subdirectory', () => {
       const loader = new FileLoader({
         registryPath: '/registry',
