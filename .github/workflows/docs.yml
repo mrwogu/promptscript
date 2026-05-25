@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Skip main-branch push when release-please just created a tag on the same commit.
     # The tag-push run will deploy both the versioned docs AND dev, so the main run is redundant.
     if: >-
@@ -302,7 +302,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

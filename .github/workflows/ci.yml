@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     strategy:
       matrix:
@@ -108,7 +108,7 @@ jobs:
   cli-smoke-test:
     name: CLI Smoke Test (Node ${{ matrix.node-version }})
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: node:${{ matrix.node-version }}-slim
 
@@ -436,7 +436,7 @@ jobs:
 
   codeql:
     name: CodeQL Analysis
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       security-events: write
       actions: read
@@ -455,7 +455,7 @@ jobs:
 
   dependency-review:
     name: Dependency Review
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event_name == 'pull_request'
 
     steps:
@@ -468,7 +468,7 @@ jobs:
 
   docker-build:
     name: Docker Build & Security Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       security-events: write
       actions: read
