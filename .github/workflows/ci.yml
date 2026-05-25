@@ -109,18 +109,18 @@ jobs:
     name: CLI Smoke Test (Node ${{ matrix.node-version }})
     needs: build
     runs-on: self-hosted
-    container:
-      image: node:${{ matrix.node-version }}-slim
 
     strategy:
       matrix:
         node-version: ['22', '24', '25']
 
     steps:
-      - name: Install git
-        run: |
-          apt-get update && apt-get install -y git
-          git --version
+      - uses: actions/checkout@v6
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
 
       - name: Download CLI artifact
         uses: actions/download-artifact@v8
@@ -521,8 +521,8 @@ jobs:
           mkdir -p /tmp/docker-test
           chmod 777 /tmp/docker-test
           cd /tmp/docker-test
-          docker run --rm -v "$(pwd):/workspace" promptscript:ci-test init --name test --targets github -y
-          docker run --rm -v "$(pwd):/workspace" promptscript:ci-test validate
-          docker run --rm -v "$(pwd):/workspace" promptscript:ci-test compile
+          docker run --rm --user $(id -u):$(id -g) -v "$(pwd):/workspace" promptscript:ci-test init --name test --targets github -y
+          docker run --rm --user $(id -u):$(id -g) -v "$(pwd):/workspace" promptscript:ci-test validate
+          docker run --rm --user $(id -u):$(id -g) -v "$(pwd):/workspace" promptscript:ci-test compile
           test -f .github/copilot-instructions.md
           echo "Docker smoke test passed"
