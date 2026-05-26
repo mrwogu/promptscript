@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-04-06T08:34:33.387Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-05-26T19:54:00.388Z | source: .promptscript/project.prs | target: factory
 description: Write end-to-end tests for critical user journeys
 ---
 

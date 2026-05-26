@@ -806,11 +806,69 @@ describe('FactoryFormatter', () => {
       const result = formatter.format(ast, { version: 'multifile' });
       const skill = result.additionalFiles?.[0];
       expect(skill).toBeDefined();
-      // Should use raw frontmatter instead of reconstructing
-      expect(skill?.content).toContain('custom-field: preserved');
+      // Factory filters unsupported fields — custom-field should be stripped
+      expect(skill?.content).not.toContain('custom-field: preserved');
+      // Supported fields should still appear
+      expect(skill?.content).toContain('name: test-skill');
       expect(skill?.content).toContain('description: A test skill');
-      // Verify frontmatter delimiters wrap raw content
-      expect(skill?.content).toMatch(/^---\n.*custom-field: preserved.*\n---/s);
+      expect(skill?.content).toContain('user-invocable: false');
+      expect(skill?.content).toContain('disable-model-invocation: true');
+    });
+
+    it('should strip unsupported frontmatter fields from raw frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                promptscript: {
+                  description: 'PromptScript language expert',
+                  content: 'Language guide content.',
+                  __rawFrontmatter: [
+                    '# promptscript-generated: 2026-04-06T08:34:33.387Z',
+                    'name: promptscript',
+                    'description: PromptScript language expert',
+                    'license: MIT',
+                    'metadata:',
+                    '  author: PromptScript',
+                    '  homepage: https://getpromptscript.dev',
+                    'compatibility:',
+                    '  - claude-code',
+                    '  - factory-ai',
+                    'allowed-tools:',
+                    '  - Read',
+                    '  - Write',
+                    'user-invocable: true',
+                  ].join('\n'),
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.[0];
+      expect(skill).toBeDefined();
+
+      // Supported fields should be preserved
+      expect(skill?.content).toContain('name: promptscript');
+      expect(skill?.content).toContain('description: PromptScript language expert');
+      expect(skill?.content).toContain('user-invocable: true');
+
+      // Unsupported fields and comments should be stripped
+      expect(skill?.content).not.toContain('# promptscript-generated');
+      expect(skill?.content).not.toContain('license: MIT');
+      expect(skill?.content).not.toContain('metadata:');
+      expect(skill?.content).not.toContain('author: PromptScript');
+      expect(skill?.content).not.toContain('compatibility:');
+      expect(skill?.content).not.toContain('allowed-tools:');
     });
 
     it('should emit allowed-tools in YAML frontmatter', () => {

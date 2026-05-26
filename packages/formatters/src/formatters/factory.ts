@@ -295,10 +295,10 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     // Factory uses hyphens in skill names (e.g. speckit-plan, not speckit.plan)
     const skillName = factoryConfig.name.replace(/\./g, '-');
 
-    // YAML frontmatter
+    // YAML frontmatter — filter raw frontmatter to only Factory-supported fields
     lines.push('---');
     if (factoryConfig.rawFrontmatter) {
-      lines.push(factoryConfig.rawFrontmatter);
+      lines.push(...this.filterFactoryFrontmatter(factoryConfig.rawFrontmatter));
     } else {
       lines.push(`name: ${skillName}`);
       lines.push(`description: ${this.yamlString(factoryConfig.description)}`);
@@ -654,5 +654,81 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
 
     return handoffs;
+  }
+
+  // ============================================================
+  // Frontmatter Filtering (Factory-specific)
+  // ============================================================
+
+  /**
+   * Factory AI supported frontmatter fields for skills.
+   * Fields not in this set are stripped to avoid parsing failures.
+   *
+   * @see https://docs.factory.ai/cli/configuration/skills
+   */
+  private static readonly FACTORY_SKILL_FRONTMATTER_FIELDS = new Set([
+    'name',
+    'description',
+    'user-invocable',
+    'disable-model-invocation',
+  ]);
+
+  /**
+   * Filter raw YAML frontmatter to only include fields that Factory AI
+   * recognizes in skill SKILL.md files. Strips unsupported fields like
+   * `license`, `metadata`, `compatibility`, `allowed-tools`, and comments,
+   * which cause Factory to fail to load the skill.
+   *
+   * @param rawFrontmatter - Raw YAML frontmatter string (between --- markers)
+   * @returns Array of filtered frontmatter lines
+   */
+  private filterFactoryFrontmatter(rawFrontmatter: string): string[] {
+    const lines = rawFrontmatter.split('\n');
+    const filtered: string[] = [];
+    let skipBlock = false;
+    let blockIndent = -1;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      // Skip comment lines
+      if (trimmed.startsWith('#')) continue;
+
+      // Skip empty lines within skipped blocks
+      if (skipBlock) {
+        if (trimmed === '') {
+          // Empty line might end a block — reset skip state and continue
+          skipBlock = false;
+          blockIndent = -1;
+          continue;
+        }
+        // Check if still inside a nested block (more indented than the skipped key)
+        const currentIndent = line.length - line.trimStart().length;
+        if (currentIndent > blockIndent) continue;
+        // Back at same/lower indent — no longer in skipped block
+        skipBlock = false;
+        blockIndent = -1;
+      }
+
+      if (trimmed === '') continue;
+
+      // Detect key at this line
+      const keyMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9_-]*):/);
+      if (keyMatch) {
+        const key = keyMatch[1]!;
+        const indent = line.length - line.trimStart().length;
+
+        if (!FactoryFormatter.FACTORY_SKILL_FRONTMATTER_FIELDS.has(key)) {
+          // Skip this key and its nested block
+          skipBlock = true;
+          blockIndent = indent;
+          continue;
+        }
+      }
+
+      filtered.push(line);
+    }
+
+    return filtered;
   }
 }

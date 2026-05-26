@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-04-06T08:34:33.387Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-05-26T19:54:00.388Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -11,35 +11,6 @@ description: >-
   to PromptScript. Also use when asked about compilation targets (GitHub
   Copilot, Claude Code, Cursor, Antigravity, Factory AI, and 30+ other
   AI coding agents).
-license: MIT
-metadata:
-  author: PromptScript
-  homepage: https://getpromptscript.dev
-compatibility:
-  - claude-code
-  - github-copilot
-  - cursor
-  - factory-ai
-  - gemini-cli
-  - opencode
-  - windsurf
-  - cline
-  - roo
-  - codex
-  - continue
-  - augment
-  - goose
-  - kilo
-  - amp
-  - trae
-  - junie
-  - kiro-cli
-allowed-tools:
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
 user-invocable: true
 ---
 
@@ -66,6 +37,7 @@ A `.prs` file is made of blocks. Order doesn't matter except `@meta` should come
 @knowledge { ... }      # Reference documentation
 @skills { ... }         # Reusable skill definitions
 @agents { ... }         # Subagent definitions
+@examples { ... }       # Few-shot input/output examples (syntax 1.2.0+)
 @params { ... }         # Template parameters
 @guards { ... }         # File globs and priorities
 @local { ... }          # Private config (not committed)
@@ -363,6 +335,45 @@ Factory AI droids support additional properties: `model` (any model ID or "inher
 `reasoningEffort` ("low", "medium", "high"), and `tools` (category name like "read-only"
 or array of tool IDs).
 
+### @examples
+
+Structured few-shot examples for AI assistants (requires syntax `1.2.0`):
+
+```
+@meta {
+  id: "commit-style"
+  syntax: "1.2.0"
+}
+
+@examples {
+  feat-commit: {
+    description: "Feature commit with scope"
+    input: "Added user authentication with JWT tokens"
+    output: "feat(auth): add JWT-based user authentication"
+  }
+}
+```
+
+Each entry is a named example with `input` and `output` (both required),
+plus optional `description`. Multi-line content uses triple-quoted strings.
+
+Examples can also be attached to skills via the `examples` property:
+
+```
+@skills {
+  commit: {
+    description: "Create conventional commits"
+    examples: {
+      basic: {
+        input: "Added dark mode toggle"
+        output: "feat(settings): add dark mode toggle"
+      }
+    }
+    content: (triple-quoted text)
+  }
+}
+```
+
 ### @knowledge
 
 Reference documentation as triple-quoted text. Used for command references,
@@ -444,6 +455,46 @@ Merge rules:
 - Objects: deep merged (target wins on conflicts)
 - Arrays: unique concatenation
 
+### Block Filtering
+
+Control which blocks are imported using the reserved `only` and `exclude` parameters:
+
+```
+@use ./shared-config(only: ["skills", "context"])
+@use ./shared-config(exclude: ["knowledge"])
+@use ./shared-config(exclude: ["knowledge"], mode: "strict")
+```
+
+Rules:
+
+- `only` and `exclude` are mutually exclusive — using both is a validation error (PS021)
+- Values are block type names: `identity`, `context`, `standards`, `knowledge`, `skills`, `shortcuts`, `agents`, etc.
+- Block filtering does not apply to `@inherit` directives
+
+### Markdown Imports
+
+Import skills directly from `.md` files (v1.8+). No external tools needed:
+
+```
+@use ./skills/frontend-design.md
+@use ./shared/commit.md as commit
+@use github.com/anthropics/skills/commit@1.0.0
+@use github.com/repo/skills/gitnexus         # directory → SKILL.md
+```
+
+Content detection: PromptScript blocks in `.md` are parsed as a `.prs` fragment;
+YAML frontmatter with `name`/`description` is loaded as a skill definition;
+otherwise content is treated as free-form knowledge.
+
+CLI management:
+
+```
+prs skills add github.com/anthropics/skills/commit@1.0.0
+prs skills remove commit
+prs skills list
+prs skills update
+```
+
 ### @extend (modify imported blocks)
 
 Requires an aliased @use:
@@ -498,6 +549,21 @@ Use `!` prefix in `@extend` to remove entries from a lower layer's append-strate
 
 Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks
 on `references` and `requires`. Validator PS028 warns about `!` in base definitions.
+
+#### Overlay consistency warnings
+
+The resolver emits warnings during compile when an overlay drifts from its base. Always shown
+(not gated by `--verbose`):
+
+- **Orphaned extend** — `@extend target "X" not found — overlay will be ignored.` Triggered when
+  the targeted block doesn't exist (base removed or renamed).
+- **Stale skill target** — `@extend creates new skill "X" — base does not define it.` Triggered
+  when an `@extend` inside `@skills` would create a new skill instead of extending an existing one.
+- **Negation orphan** — `Negation "!path" did not match any base entry — it may be stale.`
+  Triggered when a `!entry` in references/requires doesn't match anything in the base.
+
+These come from the resolver, not the validator (PS0XX rules). They appear during `prs compile`,
+not `prs validate`.
 
 #### Sealed properties
 
@@ -637,13 +703,55 @@ registries:
   oss:
     url: github.com/prscrpt/community-registry
     ref: v2
+policies:
+  - name: adjacent-layers-only
+    kind: layer-boundary
+    severity: error
+    layers: ['@core', '@team', '@project']
+    maxDistance: 1
 ```
 
 ### Lockfile: `promptscript.lock`
 
 When remote imports are used, `prs compile` automatically generates a lockfile
-recording the exact resolved commit for each dependency. This enables reproducible
-builds across machines and CI. Commit `promptscript.lock` to version control.
+recording the exact resolved commit for each dependency. Integrity hashes
+(SHA-256) are included for registry references to detect tampering or drift.
+This enables reproducible builds across machines and CI. Commit `promptscript.lock`
+to version control.
+
+Use `--ignore-hashes` on `prs compile` or `prs validate` to skip integrity
+hash verification when needed.
+
+### Policy Engine
+
+Define organizational policies in `promptscript.yaml` to validate skill extensions:
+
+```yaml
+policies:
+  - name: adjacent-layers-only
+    kind: layer-boundary
+    description: 'Only adjacent layers can extend each other'
+    severity: error
+    layers: ['@core', '@team', '@project']
+    maxDistance: 1
+
+  - name: protect-content
+    kind: property-protection
+    description: 'Content override requires explicit approval'
+    severity: warning
+    properties: ['content', 'description']
+
+  - name: approved-registries
+    kind: registry-allowlist
+    description: 'Extensions must come from approved registries'
+    severity: error
+    allowed: ['@core', '@team']
+```
+
+Policy kinds: `layer-boundary` (controls layer distance), `property-protection`
+(prevents overriding specific properties), `registry-allowlist` (restricts extension sources).
+Severity: `error` (fails validation) or `warning` (reported only).
+Skip with `--skip-policies` during development (never in CI).
 
 ## Syntax Version Validation
 
@@ -655,16 +763,28 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | ------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
 | `1.1.0` | Adds `@agents` (plus internal `@workflows`, `@prompts` - not user-facing)                                               |
+| `1.2.0` | Adds `@examples` (few-shot input/output pairs)                                                                          |
+
+### Block Version Requirements
+
+| Block       | Minimum Syntax Version |
+| ----------- | ---------------------- |
+| `@agents`   | `1.1.0`                |
+| `@examples` | `1.2.0`                |
+
+All other built-in blocks are available from `1.0.0`.
 
 ### Validation Rules
 
 - **PS018 (`syntax-version-compat`)**: warns when blocks used in a file require a higher syntax version than declared. For example, `@agents` with `syntax: "1.0.0"` triggers PS018. Suggestion: run `prs validate --fix`.
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
+- **PS021 (`use-block-filter`)**: errors when `only` and `exclude` are both specified in `@use` parameters.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
 - **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).
 - **PS027 (`valid-skill-composition`)**: warns about conflicting phase names or excessive phases in composed skills.
 - **PS028 (`valid-append-negation`)**: warns when negation prefix `!` appears in base skill definitions (only effective in `@extend`).
 - **PS029 (`valid-sealed-property`)**: warns when `sealed` contains non-replace-strategy property names.
+- **PS030 (`policy-compliance`)**: validates skill extensions against organizational policies defined in `promptscript.yaml`.
 
 ### Fixing Syntax Versions
 
@@ -687,11 +807,22 @@ prs migrate --static        # Non-interactive static import
 prs migrate --llm           # Generate AI-assisted migration prompt
 prs compile                 # Compile to all targets
 prs compile --watch         # Watch mode
+prs compile --ignore-hashes # Skip integrity hash verification
+prs build <name>            # Compile a named build profile
 prs validate --strict       # Validate syntax
 prs validate --fix          # Auto-fix syntax version declarations
+prs validate --skip-policies # Skip policy engine evaluation
 prs upgrade                 # Upgrade all .prs files to latest syntax version
 prs import CLAUDE.md        # Import existing AI instructions
 prs import --dry-run        # Preview import conversion
+prs inspect <skill>         # Show skill composition provenance
+prs inspect <skill> --layers # Show layer-level breakdown
+prs hooks install           # Install auto-compilation hooks for AI tools
+prs hooks install claude    # Install hooks for a specific tool
+prs skills add <source>     # Add a remote skill (@use + lock update)
+prs skills remove <name>    # Remove a skill (@use line + lock entry)
+prs skills list             # List all imported skills
+prs skills update           # Re-resolve markdown-imported skills
 prs pull                    # Update registry
 prs diff --target claude    # Show compilation diff
 prs lock                    # Generate/update promptscript.lock
@@ -707,7 +838,7 @@ prs registry add <alias> <url>  # Add a registry alias
 
 ## Output Targets
 
-38 supported targets. Key examples:
+38+ supported targets. Key examples:
 
 | Target      | Main File                       | Skills                                             |
 | ----------- | ------------------------------- | -------------------------------------------------- |
@@ -733,6 +864,22 @@ For detailed information about each formatter's output paths, supported features
 - **llms-full.txt:** Available at the docs site root - contains all documentation in a single file for LLM consumption
 - **Dedicated pages exist for:** Claude Code, GitHub Copilot, Cursor, Antigravity, Factory AI, Gemini CLI, OpenCode
 - **All 37 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
+
+### Auto-Compilation Hooks
+
+Instead of running `prs compile --watch` manually, install hooks so your AI tool
+triggers compilation automatically when you edit `.prs` files:
+
+```
+prs hooks install          # Auto-detect and install for all detected tools
+prs hooks install claude   # Install for a specific tool
+prs hooks install --all    # Install for all supported tools
+```
+
+Hooks also protect generated files from direct edits — when an AI agent tries
+to edit a compiled output (e.g., CLAUDE.md), the write is blocked with a message
+pointing to the source `.prs` file. Supported tools: Claude Code, Factory AI,
+Cursor, Windsurf, Cline, GitHub Copilot, Gemini CLI.
 
 ## Project Organization
 
@@ -761,6 +908,8 @@ The entry file uses `@use ./context`, `@use ./standards`, etc. to compose them.
    in a parent file that defines `params` in `@meta`, with values passed by the child
    via `@inherit ./parent(key: value)` or `@use ./fragment(key: value)`. They are NOT
    set from `promptscript.yaml` or CLI flags
+8. Using `@examples` with `syntax: "1.0.0"` or `"1.1.0"` - `@examples` requires
+   syntax version `1.2.0`. Run `prs validate --fix` to auto-upgrade
 
 ## Migrating Existing AI Instructions to PromptScript
 
