@@ -41,13 +41,13 @@ jobs:
         run: pnpm format:check
 
       - name: Lint
-        run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t lint
+        run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t lint --verbose
 
       - name: TypeScript Strict Check
         run: pnpm nx run-many -t typecheck
 
       - name: Test
-        run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t test --coverage
+        run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t test --coverage --verbose
 
       - name: Golden Files Drift Check
         if: matrix.node-version == '25.x'
