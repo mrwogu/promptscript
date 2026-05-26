@@ -627,9 +627,11 @@ function watchForChanges(dir: string, callback: () => void): void {
   let debounceTimer: NodeJS.Timeout | null = null;
   const debounceMs = 100;
 
-  const watcher = chokidar.watch(`${dir}/**/*.prs`, {
+  const watcher = chokidar.watch(dir, {
     persistent: true,
     ignoreInitial: true,
+    ignored: (path: string, stats?: { isFile: () => boolean }) =>
+      stats?.isFile() ? !path.endsWith('.prs') : false,
     awaitWriteFinish: {
       stabilityThreshold: 50,
       pollInterval: 10,

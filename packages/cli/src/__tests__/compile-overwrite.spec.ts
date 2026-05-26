@@ -1466,11 +1466,13 @@ describe('compile command - overwrite protection', () => {
       await compileCommand({ watch: true }, mockServices);
 
       // Should start chokidar watcher (path is resolved to absolute from projectRoot)
+      // chokidar 4.x: directory watch + ignored filter instead of glob pattern
       expect(mockChokidarWatch).toHaveBeenCalledWith(
-        expect.stringContaining('.promptscript/**/*.prs'),
+        expect.stringContaining('.promptscript'),
         expect.objectContaining({
           persistent: true,
           ignoreInitial: true,
+          ignored: expect.any(Function),
         })
       );
 
