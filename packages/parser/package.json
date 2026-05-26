@@ -32,6 +32,6 @@
   "dependencies": {
     "@promptscript/core": "workspace:^",
     "@swc/helpers": "~0.5.21",
-    "chevrotain": "^12.0.0"
+    "chevrotain": "^11.0.0"
   }
 }
