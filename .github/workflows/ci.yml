@@ -6,12 +6,9 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-
 jobs:
   build:
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || 'self-hosted' }}
+    runs-on: self-hosted
 
     strategy:
       matrix:
@@ -111,7 +108,7 @@ jobs:
   cli-smoke-test:
     name: CLI Smoke Test (Node ${{ matrix.node-version }})
     needs: build
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || 'self-hosted' }}
+    runs-on: self-hosted
     container:
       image: node:${{ matrix.node-version }}-slim
 
@@ -439,7 +436,7 @@ jobs:
 
   codeql:
     name: CodeQL Analysis
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || 'self-hosted' }}
+    runs-on: self-hosted
     permissions:
       security-events: write
       actions: read
@@ -458,7 +455,7 @@ jobs:
 
   dependency-review:
     name: Dependency Review
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || 'self-hosted' }}
+    runs-on: self-hosted
     if: github.event_name == 'pull_request'
 
     steps:
@@ -471,7 +468,7 @@ jobs:
 
   docker-build:
     name: Docker Build & Security Scan
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || 'self-hosted' }}
+    runs-on: self-hosted
     permissions:
       security-events: write
       actions: read

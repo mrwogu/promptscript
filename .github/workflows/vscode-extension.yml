@@ -9,12 +9,9 @@ on:
     paths: ['apps/vscode/**', 'packages/parser/src/lexer/**']
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   package:
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || 'self-hosted' }}
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
 
