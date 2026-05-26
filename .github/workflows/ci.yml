@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.x, 22.x, 24.x, 25.x]
+        node-version: [18.x, 20.x, 22.x, 24.x, 25.x]
 
     steps:
       - uses: actions/checkout@v6
@@ -122,7 +122,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['18', '22', '24', '25']
+        node-version: ['18', '20', '22', '24', '25']
 
     steps:
       - name: Install git
