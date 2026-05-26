@@ -1476,6 +1476,15 @@ describe('compile command - overwrite protection', () => {
         })
       );
 
+      // Verify ignored filter logic: only .prs files are watched
+      const ignoredFn = mockChokidarWatch.mock.calls[0][1].ignored as (
+        path: string,
+        stats?: { isFile: () => boolean }
+      ) => boolean;
+      expect(ignoredFn('/some/dir', undefined)).toBe(false);
+      expect(ignoredFn('/some/file.prs', { isFile: () => true })).toBe(false);
+      expect(ignoredFn('/some/file.ts', { isFile: () => true })).toBe(true);
+
       // Should register event handlers
       expect(mockWatcherOn).toHaveBeenCalledWith('change', expect.any(Function));
       expect(mockWatcherOn).toHaveBeenCalledWith('add', expect.any(Function));
