@@ -20,7 +20,7 @@ on:
 jobs:
   integration-test:
     name: Git Registry Integration
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout with submodules

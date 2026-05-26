@@ -11,7 +11,7 @@ on:
 
 jobs:
   package:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
@@ -38,7 +38,7 @@ jobs:
   publish:
     needs: package
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: vscode-marketplace
     steps:
       - uses: actions/checkout@v6

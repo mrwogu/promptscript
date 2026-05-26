@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   publish:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Determine ref
         id: ref
