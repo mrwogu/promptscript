@@ -1477,7 +1477,8 @@ describe('compile command - overwrite protection', () => {
       );
 
       // Verify ignored filter logic: only .prs files are watched
-      const ignoredFn = mockChokidarWatch.mock.calls[0][1].ignored as (
+      const callArgs = mockChokidarWatch.mock.calls[0];
+      const ignoredFn = callArgs?.[1]?.ignored as (
         path: string,
         stats?: { isFile: () => boolean }
       ) => boolean;
