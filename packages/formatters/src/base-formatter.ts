@@ -670,6 +670,15 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Default pass-through for injected skill content. Formatters whose target
+   * tools restrict skill frontmatter (e.g. Factory AI) override this hook to
+   * filter unsupported fields before the compiler writes the file.
+   */
+  transformInjectedSkillContent(content: string): string {
+    return content;
+  }
+
+  /**
    * Generate a provenance comment for a reference file.
    */
   protected referenceProvenance(sourcePath: string): string {

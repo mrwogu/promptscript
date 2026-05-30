@@ -2078,6 +2078,54 @@ describe('FactoryFormatter', () => {
     });
   });
 
+  describe('transformInjectedSkillContent', () => {
+    it('strips unsupported frontmatter fields from injected SKILL.md content', () => {
+      const injected = [
+        '---',
+        'name: promptscript',
+        'description: Test description',
+        'license: MIT',
+        'metadata:',
+        '  author: PromptScript',
+        '  homepage: https://example.com',
+        'compatibility:',
+        '  - claude-code',
+        '  - github-copilot',
+        'allowed-tools:',
+        '  - Read',
+        '  - Write',
+        'user-invocable: true',
+        '---',
+        '',
+        '# Body content',
+        'Body text remains untouched.',
+        '',
+      ].join('\n');
+
+      const transformed = formatter.transformInjectedSkillContent(injected);
+
+      expect(transformed).toContain('name: promptscript');
+      expect(transformed).toContain('description: Test description');
+      expect(transformed).toContain('user-invocable: true');
+      expect(transformed).not.toContain('license:');
+      expect(transformed).not.toContain('metadata:');
+      expect(transformed).not.toContain('compatibility:');
+      expect(transformed).not.toContain('allowed-tools:');
+      expect(transformed).toContain('# Body content');
+      expect(transformed).toContain('Body text remains untouched.');
+    });
+
+    it('returns content unchanged when no frontmatter is present', () => {
+      const content = '# Plain skill\n\nNo frontmatter here.\n';
+      expect(formatter.transformInjectedSkillContent(content)).toBe(content);
+    });
+
+    it('returns content unchanged when frontmatter has no closing delimiter', () => {
+      const content = '---\nname: broken\nno closing delimiter\n';
+      expect(formatter.transformInjectedSkillContent(content)).toBe(content);
+    });
+  });
+
   describe('guards as skills', () => {
     it('should generate skill files from @guards named entries', () => {
       const ast: Program = {

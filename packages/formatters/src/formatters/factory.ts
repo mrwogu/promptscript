@@ -731,4 +731,24 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
     return filtered;
   }
+
+  /**
+   * Filter the frontmatter of an externally-supplied SKILL.md file (such as
+   * the bundled PromptScript skill injected by the compiler) so it only
+   * contains fields Factory AI recognises. The body is preserved verbatim.
+   * Files without a YAML frontmatter block are returned unchanged.
+   */
+  override transformInjectedSkillContent(content: string): string {
+    if (!content.startsWith('---')) return content;
+
+    const closing = content.indexOf('\n---', 3);
+    if (closing === -1) return content;
+
+    const rawFrontmatter = content.slice(4, closing);
+    const body = content.slice(closing + 4); // skip closing ---
+    const filteredLines = this.filterFactoryFrontmatter(rawFrontmatter);
+    const filteredFrontmatter = filteredLines.join('\n');
+
+    return `---\n${filteredFrontmatter}\n---${body}`;
+  }
 }

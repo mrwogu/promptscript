@@ -407,7 +407,9 @@ export class Compiler {
 
         const skillOutput: FormatterOutput = {
           path: skillPath,
-          content: this.options.skillContent,
+          content: formatter.transformInjectedSkillContent
+            ? formatter.transformInjectedSkillContent(this.options.skillContent)
+            : this.options.skillContent,
         };
         outputs.set(skillPath, addMarkerToOutput(skillOutput, sourceLabel, 'promptscript'));
         this.logger.verbose(`  → ${skillPath} (auto-injected promptscript skill)`);

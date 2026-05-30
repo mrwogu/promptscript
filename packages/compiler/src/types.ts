@@ -62,6 +62,13 @@ export interface Formatter {
   getSkillFileName(): string | null;
   /** How this formatter handles skill references: 'directory', 'inline', or 'none' */
   referencesMode(): 'directory' | 'inline' | 'none';
+  /**
+   * Optional hook to transform the raw content of a pass-through skill file
+   * (e.g. the bundled PromptScript SKILL.md) before it is written. Formatters
+   * whose target tools enforce frontmatter schemas can override this to strip
+   * unsupported fields.
+   */
+  transformInjectedSkillContent?(content: string): string;
 }
 
 /**
