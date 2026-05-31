@@ -16,6 +16,9 @@ docs/getting-started.md
 # PromptScript generated files - managed by prs compile
 CHANGELOG.md
 
+# Vendored third-party skill assets (HTML copied verbatim from upstream)
+**/skills/skill-creator/**/*.html
+
 # schema
 schema/config.json
 
