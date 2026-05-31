@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0](https://github.com/mrwogu/promptscript/compare/v1.12.1...v1.13.0) (2026-05-31)
+
+
+### Features
+
+* **cli,resolver:** validate SKILL.md frontmatter on skills add/update ([843020b](https://github.com/mrwogu/promptscript/commit/843020b572242bb581ae28a090fbcd0f8e827e21))
+* **cli:** post-format markdown outputs through project Prettier ([43f05c8](https://github.com/mrwogu/promptscript/commit/43f05c851b55a3e68ecf92273fe4318aa47659b1))
+
+
+### Bug Fixes
+
+* **formatters,compiler:** filter Factory frontmatter on injected PromptScript skill ([#273](https://github.com/mrwogu/promptscript/issues/273)) ([14740d0](https://github.com/mrwogu/promptscript/commit/14740d09704347b129cfeb0dee6bb38a3e28377c))
+
 ## [1.12.1](https://github.com/mrwogu/promptscript/compare/v1.12.0...v1.12.1) (2026-05-26)
 
 
