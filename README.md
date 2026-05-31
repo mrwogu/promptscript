@@ -43,8 +43,9 @@ _Write once. Compile to 37 AI coding agents: GitHub Copilot, Claude Code, Cursor
 ```bash
 npm install -g @promptscript/cli
 
-prs init       # auto-detects your tech stack
-prs compile    # outputs to all AI tools
+prs init             # auto-detects your tech stack
+prs compile          # outputs to all AI tools
+prs hooks install --all  # auto-recompile on save, block AI from overwriting outputs
 ```
 
 ### Or Use Docker
@@ -60,14 +61,14 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
 ### Set Up Hooks
 
 ```bash
-prs hooks install    # auto-compiles on .prs save, protects generated files
+prs hooks install --all  # claude, copilot, cursor, gemini, factory, ...
 ```
 
 From now on, every time you edit a `.prs` file, outputs recompile automatically. AI agents are blocked from overwriting generated configs.
 
 ### Then Let Your AI Agents Take Over
 
-After `prs compile`, a **PromptScript language skill** is automatically injected into your AI agents. They learn the `.prs` syntax and can create, edit, and manage your PromptScript files for you. Just ask your agent to add a new rule, change a standard, or create a shortcut — it already knows how.
+After `prs compile`, a **PromptScript language skill** is automatically injected into your AI agents. They learn the `.prs` syntax and can create, edit, and manage your PromptScript files for you. Just ask your agent to add a new rule, change a standard, or create a shortcut, it already knows how.
 
 ---
 
@@ -152,15 +153,27 @@ One `.prs` file. Every AI tool gets native, idiomatic output. No manual formatti
 @inherit @stacks/typescript-service(projectName: "checkout", port: 8080)
 ```
 
-**Skills** - define reusable AI skills with `SKILL.md` files, resource bundles, and input/output contracts. Compile them to native skill formats for Claude Code, Copilot, Cursor, and more:
+**Skills** - define reusable AI skills with `SKILL.md` files, resource bundles (`references`), input/output contracts, and tool permissions. Compile to native skill formats for Claude Code, Copilot, Factory AI, OpenCode, Gemini CLI, Cursor, and more:
 
 ```promptscript
 @skills {
-  deploy: {
-    description: "Deploy service to production"
+  security-audit: {
+    description: "OWASP Top 10 vulnerability scan"
     userInvocable: true
-    allowedTools: ["Bash", "Read"]
+    allowedTools: ["Read", "Grep", "Bash"]
+    references: ["./refs/owasp-top10.md"]
+    inputs:  { target_path: string }
+    outputs: { findings: array, severity: enum }
   }
+}
+```
+
+**Sub-agents** - declare specialized sub-agents once, compile to Claude Code `.claude/agents/`, Factory AI `.factory/agents/`, and equivalent targets:
+
+```promptscript
+@agents {
+  reviewer: { description: "PR reviewer" }
+  debugger: { description: "Test failure triage" }
 }
 ```
 
@@ -170,7 +183,7 @@ One `.prs` file. Every AI tool gets native, idiomatic output. No manual formatti
 # Alias (configured once in promptscript.yaml)
 @use @company/security
 
-# Or direct URL import — no config needed
+# Or direct URL import, no config needed
 @use github.com/acme/shared-standards/@fragments/security@^1.0.0
 ```
 
@@ -192,7 +205,7 @@ prs init --migrate
 prs compile --watch
 ```
 
-**Zero Learning Curve** - A PromptScript language skill is automatically compiled into your AI agents' native skill format. Your agents learn the syntax, so _they_ manage your `.prs` files — you just tell them what you want in plain language.
+**Zero Learning Curve** - A PromptScript language skill is automatically compiled into your AI agents' native skill format. Your agents learn the syntax, so _they_ manage your `.prs` files, you just tell them what you want in plain language.
 
 **Docker CI/CD** - validate in any pipeline:
 
@@ -220,10 +233,14 @@ Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Ki
 
 ## Enterprise Ready
 
-- 🔒 **Private registries** - host standards on internal Git repos
+- 🔒 **Private registries** - host standards on internal Git repos, SSH and tokens just work
 - 📌 **Version pinning** - `@inherit @company/security@2.1.0`
-- ✅ **CI validation** - `prs validate --strict --output json`
-- 📋 **Full audit trail** - all changes tracked in version control
+- 🔐 **Lockfile + integrity hashes** - `promptscript.lock` for reproducible builds across every repo
+- 📦 **Vendor mode** - `prs vendor sync` mirrors all deps into `.promptscript/vendor/` for offline / air-gapped CI
+- ✅ **CI validation** - `prs validate --strict --format json`
+- 📈 **Drift detection** - `prs compile --dry-run` (and `prs diff`) fails the build when source and generated outputs disagree
+- 🔍 **Skill provenance** - `prs inspect <skill>` shows every inherited layer and where each property came from
+- 📋 **Full audit trail** - every change tracked in version control
 
 ---
 
