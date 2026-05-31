@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-04-06T08:34:33.386Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-05-30T23:22:42.934Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -46,6 +46,13 @@ flowchart TB
 
 ## Code Style
 
+- Use code-review-graph MCP tools BEFORE Grep/Glob/Read when exploring the codebase
+- Exploring code: use semantic_search_nodes or query_graph instead of Grep
+- Understanding impact: use get_impact_radius instead of manually tracing imports
+- Code review: use detect_changes + get_review_context instead of reading entire files
+- Finding relationships: use query_graph with callers_of/callees_of/imports_of/tests_for
+- Architecture questions: use get_architecture_overview + list_communities
+- Fall back to Grep/Glob/Read only when the graph does not cover what you need
 - Strict mode enabled
 - Never use `any` type - use `unknown` with type guards
 - Use `unknown` with type guards instead of any
@@ -141,6 +148,32 @@ pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
 
 - Use Mermaid (exception: packages/\*/README.md must use ASCII art because npm does not render Mermaid) for diagrams
 - Types: flowchart, sequence, class, state, ER, gantt, pie
+
+## MCP Tools: code-review-graph
+
+This project has a knowledge graph built with code-review-graph. The graph is faster,
+cheaper (fewer tokens), and gives structural context (callers, dependents, test coverage)
+that file scanning cannot.
+
+### Key Tools
+
+| Tool                        | Use when                                               |
+| --------------------------- | ------------------------------------------------------ |
+| `detect_changes`            | Reviewing code changes - gives risk-scored analysis    |
+| `get_review_context`        | Need source snippets for review - token-efficient      |
+| `get_impact_radius`         | Understanding blast radius of a change                 |
+| `get_affected_flows`        | Finding which execution paths are impacted             |
+| `query_graph`               | Tracing callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes`     | Finding functions/classes by name or keyword           |
+| `get_architecture_overview` | Understanding high-level codebase structure            |
+| `refactor_tool`             | Planning renames, finding dead code                    |
+
+### Workflow
+
+1. The graph auto-updates on file changes (via hooks).
+2. Use `detect_changes` for code review.
+3. Use `get_affected_flows` to understand impact.
+4. Use `query_graph` pattern="tests_for" to check coverage.
 
 ## Don'ts
 

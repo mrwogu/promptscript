@@ -85,7 +85,7 @@ __pycache__/
 
 # Generated API docs (regenerated in CI)
 docs/api-reference/
-.gitnexus
+.code-review-graph
 .agents/
 
 # Superpowers docs (specs, plans - generated per session)

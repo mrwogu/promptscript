@@ -1,7 +1,8 @@
 {
   "plansDirectory": ".claude/plans",
   "env": {
-    "DISABLE_TELEMETRY": "1"
+    "DISABLE_TELEMETRY": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "attribution": {
     "commit": "",
@@ -13,14 +14,16 @@
     "frontend-design@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
+    "caveman@caveman": true,
+    "remember@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
-    "claude-plugins-official": {
+    "caveman": {
       "source": {
         "source": "github",
-        "repo": "anthropics/claude-plugins"
+        "repo": "JuliusBrussee/caveman"
       }
     }
   },
@@ -51,6 +54,28 @@
             "command": "prs hook post-edit",
             "timeout": 15,
             "statusMessage": "PromptScript: compiling..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph update --skip-flows --repo \"$(pwd)\" || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph status --repo \"$(pwd)\" || echo 'Not a git repo, skipping'",
+            "timeout": 10
           }
         ]
       }

@@ -4,9 +4,9 @@ project:
   id: 'promptscript'
 
 targets:
-  - claude:
-      version: full
+  - claude
   - factory
+  - github
 
 validation:
   rules:

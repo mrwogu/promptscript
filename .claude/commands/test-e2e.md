@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-04-06T08:34:33.386Z | source: .promptscript/project.prs | target: claude
+# promptscript-generated: 2026-05-30T23:22:42.935Z | source: .promptscript/project.prs | target: claude
 description: 'Write end-to-end tests for critical user journeys'
 ---
 

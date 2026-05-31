@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-05-26T19:54:00.388Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-05-30T23:22:42.936Z | source: .promptscript/project.prs | target: factory
 name: debugger
 description: Debugs errors, test failures, and unexpected behavior. Knows PromptScript architecture.
 model: sonnet

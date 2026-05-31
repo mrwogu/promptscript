@@ -1,0 +1,11 @@
+---
+# promptscript-generated: 2026-05-30T23:22:42.939Z | source: .promptscript/project.prs | target: github
+description: 'Analyze test coverage and suggest improvements'
+---
+
+Analyze test coverage and suggest improvements:
+
+1. Run: pnpm nx test <pkg> --coverage
+2. Identify uncovered branches and functions
+3. Prioritize critical paths
+4. Suggest specific test cases to add

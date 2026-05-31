@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-04-02T09:58:21.620Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-05-30T23:22:42.936Z | source: .promptscript/project.prs | target: factory
 description: Generate new package with Nx
 ---
 

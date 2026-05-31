@@ -76,6 +76,11 @@ vi.mock('../prettier/loader.js', () => ({
   resolvePrettierOptions: vi.fn().mockResolvedValue({}),
 }));
 
+// Mock prettier post-format so test fixtures are written verbatim
+vi.mock('../prettier/post-format.js', () => ({
+  postFormatWithPrettier: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Mock ora
 vi.mock('ora', () => ({
   default: vi.fn().mockReturnValue({

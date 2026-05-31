@@ -1,6 +1,13 @@
 packages:
   - packages/*
 
+allowBuilds:
+  '@swc/core': true
+  '@vscode/vsce-sign': true
+  esbuild: true
+  keytar: true
+  nx: true
+
 autoInstallPeers: true
 
 ignoredBuiltDependencies:

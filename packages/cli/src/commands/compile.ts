@@ -17,6 +17,7 @@ import { isValidLockfile } from '@promptscript/core';
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadConfig, CONFIG_FILES } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
+import { postFormatWithPrettier } from '../prettier/post-format.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 import { isTTY } from '../output/pager.js';
@@ -585,6 +586,7 @@ export async function compileCommand(
       ...options,
       output: resolveOutputBase(projectRoot, configuredOutput),
     };
+    await postFormatWithPrettier(result.outputs, projectRoot, logger);
     const writeResult = await writeOutputs(result.outputs, effectiveOptions, config, services);
     if (writeResult.unchanged.length > 0) {
       ConsoleOutput.muted(`Unchanged ${writeResult.unchanged.length} file(s)`);

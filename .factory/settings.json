@@ -1,25 +1,4 @@
 {
-  "extraKnownMarketplaces": {},
-  "enabledPlugins": {
-    "security-engineer@factory-plugins": true,
-    "droid-evolved@factory-plugins": true,
-    "core@factory-plugins": true,
-    "gitnexus@GitNexus": true
-  },
-  "logoAnimation": "off",
-  "includeCoAuthoredByDroid": false,
-  "showThinkingInMainView": true,
-  "cloudSessionSync": false,
-  "autonomyMode": "auto-high",
-  "commandAllowlist": ["ls", "pwd", "dir", "git:*", "npm:*", "docker:*"],
-  "commandDenylist": [
-    "rm -rf /",
-    "mkfs",
-    "shutdown",
-    "chmod 777 /",
-    "chown root:root /",
-    "dd if=/dev/zero of=/dev/sda"
-  ],
   "hooks": {
     "PreToolUse": [
       {
@@ -43,6 +22,28 @@
             "command": "prs hook post-edit",
             "timeout": 15,
             "statusMessage": "PromptScript: compiling..."
+          }
+        ]
+      },
+      {
+        "matcher": "Create|Edit|Execute",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph update --skip-flows --repo \"$(pwd)\" || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph status --repo \"$(pwd)\" || echo 'Not a git repo, skipping'",
+            "timeout": 10
           }
         ]
       }

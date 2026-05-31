@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-04-02T09:58:21.619Z | source: .promptscript/project.prs | target: claude
+# promptscript-generated: 2026-05-30T23:22:42.935Z | source: .promptscript/project.prs | target: claude
 description: 'Generate new package with Nx'
 ---
 

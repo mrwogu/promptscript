@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-05-26T19:54:00.388Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-05-30T23:22:42.936Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -165,6 +165,8 @@ executable prompt/command files for GitHub Copilot and Cursor:
   }
 }
 ```
+
+> `@commands` is a backwards-compatible alias for `@shortcuts` — prefer `@shortcuts` in new files.
 
 ### @skills
 
@@ -819,10 +821,12 @@ prs inspect <skill>         # Show skill composition provenance
 prs inspect <skill> --layers # Show layer-level breakdown
 prs hooks install           # Install auto-compilation hooks for AI tools
 prs hooks install claude    # Install hooks for a specific tool
-prs skills add <source>     # Add a remote skill (@use + lock update)
+prs skills add <source>     # Add a remote skill (@use + lock update + SKILL.md validation)
+prs skills add <source> --strict          # Treat validation warnings as errors
+prs skills add <source> --skip-validation # Bypass Agent Skills spec checks (not recommended)
 prs skills remove <name>    # Remove a skill (@use line + lock entry)
 prs skills list             # List all imported skills
-prs skills update           # Re-resolve markdown-imported skills
+prs skills update           # Re-resolve markdown-imported skills (re-validates + re-hashes)
 prs pull                    # Update registry
 prs diff --target claude    # Show compilation diff
 prs lock                    # Generate/update promptscript.lock

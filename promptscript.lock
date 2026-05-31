@@ -1,0 +1,7 @@
+version: 1
+dependencies:
+  github.com/anthropics/skills/skills/skill-creator/SKILL.md:
+    version: latest
+    commit: da20c92503b2e8ff1cf28ca81a0df4673debdbf7
+    integrity: sha256-pending
+    source: md
