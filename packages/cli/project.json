@@ -35,6 +35,7 @@
           "chalk",
           "chokidar",
           "yaml",
+          "prettier",
           "simple-git",
           "fastify",
           "@fastify/cors",
