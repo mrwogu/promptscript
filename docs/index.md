@@ -29,7 +29,7 @@ hide:
 
 **One source. Every AI agent.**
 
-_Prompt-as-code with inheritance, validation, and a versioned registry. Compiled to 37 targets._
+_Prompt-as-code with **inheritance, skills, sub-agents, and a versioned registry**. Compile once to 37 AI tools, and let your agents edit the source for you._
 
 <div class="hero-ticker" aria-hidden="true">
   <div class="hero-ticker__track">
@@ -131,10 +131,11 @@ _Prompt-as-code with inheritance, validation, and a versioned registry. Compiled
 [:material-book-open-variant: Enterprise Guide](guides/enterprise.md){ .md-button }
 [:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
 
-<!-- <div class="hero-badges" markdown>
+<div class="hero-badges" markdown>
 [![GitHub stars](https://img.shields.io/github/stars/mrwogu/promptscript?style=flat-square&logo=github)](https://github.com/mrwogu/promptscript)
 [![npm downloads](https://img.shields.io/npm/dm/@promptscript/cli?style=flat-square&logo=npm)](https://www.npmjs.com/package/@promptscript/cli)
-</div> -->
+[![npm version](https://img.shields.io/npm/v/@promptscript/cli?style=flat-square&logo=npm&label=cli)](https://www.npmjs.com/package/@promptscript/cli)
+</div>
 
 <div class="hero-install" markdown>
 ```
@@ -180,7 +181,7 @@ document.getElementById('video-play-btn').addEventListener('click', function() {
     </div>
     <pre class="compile-demo__code"><code id="typewriter-target"></code></pre>
     <div class="compile-demo__cursor" id="typing-cursor"></div>
-    <div class="compile-demo__badge">9 lines → 37 agents</div>
+    <div class="compile-demo__badge">1 skill, 1 agent, 1 source &rarr; 37 native formats</div>
   </div>
 
   <div class="compile-demo__arrow">
@@ -812,7 +813,110 @@ Run a comprehensive OWASP Top 10 scan.
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1a6.88 6.88 0 0 0 0 9.79a7.02 7.02 0 0 0 9.88 0A6.85 6.85 0 0 0 19 12.1h2a9 9 0 0 1-2.64 6.36c-3.51 3.48-9.21 3.48-12.73 0c-3.51-3.48-3.51-9.12 0-12.6c3.51-3.48 9.21-3.48 12.73 0L21 3z"/></svg>
   </div>
   <h3>Zero Learning Curve</h3>
-  <p>A PromptScript language skill is automatically compiled into your AI agents. They learn the syntax and manage your <code>.prs</code> files for you — just ask in plain language.</p>
+  <p>A PromptScript language skill is automatically compiled into your AI agents. They learn the syntax and manage your <code>.prs</code> files for you, just ask in plain language.</p>
+</div>
+
+</div>
+
+<!-- Universal Skills Section -->
+<div class="section-divider">
+  <div class="section-divider__line"></div>
+  <div class="section-divider__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+  </div>
+  <div class="section-divider__line"></div>
+</div>
+
+<h2 class="section-title">Universal Skills, Native Output</h2>
+<p class="section-subtitle">Define one skill in PromptScript. Get the correct native skill format for every agent that supports them, including tool permissions, sub-agents, resource bundles, and runtime input/output contracts.</p>
+
+```promptscript
+@skills {
+  security-audit: {
+    description: "OWASP Top 10 vulnerability scan"
+    userInvocable: true              # /security-audit slash command
+    disableModelInvocation: false    # agent can auto-call when relevant
+    context: "fork"                  # isolated sub-conversation (Claude)
+    agent: "general-purpose"
+    allowedTools: ["Read", "Grep", "Bash"]
+    references: [
+      "./refs/owasp-top10.md",
+      "./refs/threat-model.yaml"
+    ]
+    inputs:  { target_path: string }
+    outputs: { findings: array, severity: enum }
+  }
+}
+```
+
+| Capability                                                  | Output                                                                |
+| :---------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **Claude Code** native skill with frontmatter + references  | `.claude/skills/security-audit/SKILL.md` + bundled `refs/*`           |
+| **GitHub Copilot** skill                                    | `.github/copilot-skills/security-audit.md`                            |
+| **Factory AI** skill (with `allowedTools`, `userInvocable`) | `.factory/skills/security-audit/SKILL.md`                             |
+| **OpenCode** skill                                          | `.opencode/skills/security-audit/SKILL.md`                            |
+| **Gemini CLI** skill                                        | `.gemini/skills/security-audit/skill.md`                              |
+| **Cursor / Antigravity** rule                               | `.cursor/rules/security-audit.mdc` / `.agent/rules/security-audit.md` |
+| **Codex / 30 others**                                       | inlined into `AGENTS.md` and equivalents                              |
+
+Import a skill from **any** GitHub repo, no scripts, no downloads:
+
+```promptscript
+@use github.com/anthropics/skills/frontend-design.md@1.0.0
+@use github.com/your-org/skills/gitnexus           # auto-discovers all SKILL.md
+@use ./local-skills/code-review.md
+```
+
+Version-pinned, lockfile-tracked, and (optionally) vendored for air-gapped CI. Run [`prs inspect <skill>`](reference/cli.md) to see the full composition chain.
+
+<div style="text-align: center; margin: 1.5rem 0;">
+  <a href="guides/building-skills/" class="md-button md-button--primary">Building Skills Guide</a>
+  <a href="guides/skill-contracts/" class="md-button md-button--secondary">Skill Contracts</a>
+</div>
+
+<!-- Sub-Agents Section -->
+<div class="section-divider">
+  <div class="section-divider__line"></div>
+  <div class="section-divider__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+  </div>
+  <div class="section-divider__line"></div>
+</div>
+
+<h2 class="section-title">Sub-Agents, Hooks &amp; AI-Managed Source</h2>
+<p class="section-subtitle">Three features that make PromptScript feel native to every AI tool</p>
+
+<div class="feature-grid">
+
+<div class="feature-card">
+  <div class="feature-card__icon feature-card__icon--purple">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+  </div>
+  <h3>Sub-Agents via <code>@agents</code></h3>
+  <p>Declare specialized sub-agents once. Compile to Claude Code <code>.claude/agents/</code>, Factory AI <code>.factory/agents/</code>, and any other target that supports task delegation.</p>
+  <pre><code>@agents {
+  reviewer: { description: "PR reviewer" }
+  debugger: { description: "Test failure triage" }
+}</code></pre>
+</div>
+
+<div class="feature-card">
+  <div class="feature-card__icon feature-card__icon--green">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18z"/></svg>
+  </div>
+  <h3>Hooks: never edit generated files again</h3>
+  <p>One command and every <code>.prs</code> save triggers recompile, while AI agents are blocked from overwriting generated configs.</p>
+  <pre><code>prs hooks install --all
+# claude, copilot, cursor, gemini,
+# factory, windsurf, cline ...</code></pre>
+</div>
+
+<div class="feature-card">
+  <div class="feature-card__icon feature-card__icon--cyan">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  </div>
+  <h3>Agents that edit their own instructions</h3>
+  <p>A PromptScript language skill is auto-bundled into every target. Ask your AI in plain English: <em>"Add a rule that we use Zod for validation"</em>, and the agent updates the <code>.prs</code> source. No syntax to learn.</p>
 </div>
 
 </div>

@@ -8,7 +8,7 @@
 
 [![Watch the video](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
 
-PromptScript is the Terraform for AI instructions. Write your standards once in `.prs` files, compile to GitHub Copilot, Claude Code, Cursor, and 34 more agents - with inheritance, composition, validation, and version control built in.
+PromptScript is the Terraform for AI instructions. Write your standards once in `.prs` files, compile to GitHub Copilot, Claude Code, Cursor, and 34 more agents, with inheritance, composition, **skills, sub-agents**, validation, lockfile, and version control built in.
 
 ---
 
@@ -52,10 +52,10 @@ prs compile       # outputs to all configured AI tools
 Then install hooks for fully automatic workflow:
 
 ```bash
-prs hooks install    # auto-compiles on save, protects generated files
+prs hooks install --all   # auto-compile on .prs save, block AI from overwriting outputs
 ```
 
-Three commands. Every AI tool configured. Your AI agents automatically learn PromptScript syntax via a bundled language skill — they can manage your `.prs` files for you.
+Three commands. Every AI tool configured. Your AI agents automatically learn PromptScript syntax via a bundled language skill, they can manage your `.prs` files for you.
 
 ### Already have CLAUDE.md or .cursorrules?
 
@@ -94,7 +94,7 @@ Import entire skill directories at once:
 
 @inherit @company/backend-security
 @use @fragments/testing
-@use ./skills/security-scan.md
+@use github.com/anthropics/skills/code-review.md@1.0.0
 
 @identity {
   """
@@ -109,11 +109,19 @@ Import entire skill directories at once:
 }
 
 @skills {
-  deploy: {
-    description: "Deploy service to production"
+  security-audit: {
+    description: "OWASP Top 10 vulnerability scan"
     userInvocable: true
-    allowedTools: ["Bash", "Read"]
+    allowedTools: ["Read", "Grep", "Bash"]
+    references: ["./refs/owasp-top10.md"]
+    inputs:  { target_path: string }
+    outputs: { findings: array, severity: enum }
   }
+}
+
+@agents {
+  reviewer: { description: "PR reviewer" }
+  debugger: { description: "Test failure triage" }
 }
 ```
 
@@ -139,37 +147,58 @@ Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, and other
 
 ## Key Features
 
-| Feature                      | What it does                                              |
-| :--------------------------- | :-------------------------------------------------------- |
-| **Inheritance**              | Org -> team -> project configs that cascade like CSS      |
-| **Composition**              | Reuse fragments and skills with `@use`                    |
-| **Markdown imports**         | `@use` plain `.md` files and GitHub skills directly       |
-| **Parameterized templates**  | `@inherit @stacks/node(port: 8080, db: "postgres")`       |
-| **Skills**                   | SKILL.md files with resource bundles and tool permissions |
-| **Multi-target compilation** | One source, any number of AI tools                        |
-| **Watch mode**               | `prs compile -w` for instant recompilation                |
-| **Overwrite protection**     | Never accidentally clobbers hand-written files            |
-| **Validation**               | `prs validate --strict` catches errors before they ship   |
-| **Registry support**         | Share configs via Git registries (private or public)      |
-| **Migration**                | Import existing CLAUDE.md, .cursorrules with `prs import` |
+| Feature                      | What it does                                                                   |
+| :--------------------------- | :----------------------------------------------------------------------------- |
+| **Inheritance**              | Org -> team -> project configs that cascade like CSS                           |
+| **Composition**              | Reuse fragments and skills with `@use`                                         |
+| **Markdown imports**         | `@use` plain `.md` files and GitHub skills directly                            |
+| **Parameterized templates**  | `@inherit @stacks/node(port: 8080, db: "postgres")`                            |
+| **Skills**                   | SKILL.md files with resource bundles, tool permissions, input/output contracts |
+| **Sub-agents**               | `@agents` block compiles to Claude / Factory native agents                     |
+| **Multi-target compilation** | One source, any number of AI tools (37 supported)                              |
+| **Hooks**                    | `prs hooks install --all` auto-recompiles + protects outputs                   |
+| **Watch mode**               | `prs compile -w` for instant recompilation                                     |
+| **Overwrite protection**     | Never accidentally clobbers hand-written files                                 |
+| **Validation**               | `prs validate --strict --format json` for CI                                   |
+| **Registry support**         | Share configs via Git registries (private or public)                           |
+| **Lockfile**                 | `promptscript.lock` for reproducible builds across repos                       |
+| **Vendor mode**              | `prs vendor sync` for offline / air-gapped CI                                  |
+| **Migration**                | Import existing CLAUDE.md, .cursorrules with `prs import`                      |
 
 ## Commands
 
-| Command                 | Description                                   |
-| :---------------------- | :-------------------------------------------- |
-| `prs init`              | Initialize project with auto-detection        |
-| `prs compile`           | Compile to all target formats                 |
-| `prs compile -w`        | Watch mode - recompile on changes             |
-| `prs compile --dry-run` | Preview without writing files                 |
-| `prs validate`          | Validate `.prs` files with detailed errors    |
-| `prs validate --fix`    | Auto-fix syntax version mismatches            |
-| `prs import`            | Import existing AI instruction files          |
-| `prs migrate`           | Migrate all existing instructions at once     |
-| `prs skills add`        | Add skills from GitHub or local paths         |
-| `prs skills list`       | List installed skills                         |
-| `prs diff`              | Show diff between source and compiled output  |
-| `prs upgrade`           | Upgrade `.prs` files to latest syntax version |
-| `prs pull`              | Pull updates from registry                    |
+| Command                               | Description                                            |
+| :------------------------------------ | :----------------------------------------------------- |
+| `prs init`                            | Initialize project with auto-detection                 |
+| `prs compile`                         | Compile to all target formats                          |
+| `prs compile -w`                      | Watch mode, recompile on changes                       |
+| `prs compile --dry-run`               | Preview without writing files                          |
+| `prs compile --strict`                | Fail on output path conflicts                          |
+| `prs build <profile>`                 | Compile a named build profile from `promptscript.yaml` |
+| `prs validate`                        | Validate `.prs` files with detailed errors             |
+| `prs validate --strict --format json` | Machine-readable output for CI pipelines               |
+| `prs validate --fix`                  | Auto-fix syntax version mismatches                     |
+| `prs inspect <skill>`                 | Show skill composition layers and provenance           |
+| `prs diff`                            | Show diff between source and compiled output           |
+| `prs check`                           | Check configuration and dependencies health            |
+| `prs hooks install --all`             | Install auto-compile + overwrite-protection hooks      |
+| `prs hooks uninstall <tool>`          | Remove hooks for a specific tool                       |
+| `prs lock`                            | Generate / update `promptscript.lock`                  |
+| `prs lock --update`                   | Force re-hash of all registry references               |
+| `prs update [package]`                | Re-resolve versions and update lockfile                |
+| `prs vendor sync`                     | Mirror all cached deps to `.promptscript/vendor/`      |
+| `prs vendor check`                    | Verify vendor directory matches lockfile               |
+| `prs skills add <source>`             | Add a remote skill (GitHub URL or alias)               |
+| `prs skills list`                     | List installed skills                                  |
+| `prs skills update [name]`            | Update markdown-sourced skill lock entries             |
+| `prs skills remove <name>`            | Remove a skill from the project                        |
+| `prs registry ...`                    | Manage registries (publish, add, list)                 |
+| `prs resolve <import>`                | Show full resolution chain for an import (debug)       |
+| `prs import`                          | Import existing AI instruction files                   |
+| `prs migrate`                         | Migrate all existing instructions at once              |
+| `prs upgrade`                         | Upgrade `.prs` files to latest syntax version          |
+| `prs pull`                            | Pull updates from registry                             |
+| `prs serve`                           | Start local playground server                          |
 
 ## Configuration
 
