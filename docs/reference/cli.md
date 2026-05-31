@@ -772,10 +772,27 @@ prs skills add <source> [options]
 
 **Options:**
 
-| Option              | Description                     |
-| ------------------- | ------------------------------- |
-| `-f, --file <file>` | Target `.prs` file to modify    |
-| `--dry-run`         | Preview changes without writing |
+| Option              | Description                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `-f, --file <file>` | Target `.prs` file to modify                                                                |
+| `--dry-run`         | Preview changes without writing                                                             |
+| `--skip-validation` | Skip SKILL.md frontmatter validation (not recommended; useful when the upstream is in flux) |
+| `--strict`          | Treat validation warnings as errors                                                         |
+
+**Validation:**
+
+Before writing to the lockfile, `prs skills add` clones the target ref into a temporary directory, recomputes a real `sha256` integrity hash, and runs the [Agent Skills spec](https://agentskills.io/specification) validator against the SKILL.md frontmatter. Checks include:
+
+- `name` present, ≤64 chars, matches `^[a-z0-9]+(-[a-z0-9]+)*$`, and equals the parent directory basename
+- `name` does not collide with another already-installed skill
+- `description` present, ≤1024 chars (warns if shorter than 40 chars or missing a "when/use" hint)
+- `compatibility` ≤500 chars
+- `license` present (warning)
+- `allowed-tools` tokens follow `Tool` or `Tool(scope:pattern)` (warning)
+- Body length sanity check (warning at >500 lines)
+- Markdown references stay inside the skill directory and resolve to existing files
+
+Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`.
 
 **Examples:**
 
@@ -791,6 +808,12 @@ prs skills add github.com/anthropics/skills/commit@1.0.0 --file .promptscript/te
 
 # Preview what would change
 prs skills add github.com/anthropics/skills/commit@1.0.0 --dry-run
+
+# Fail on validation warnings (CI mode)
+prs skills add github.com/anthropics/skills/commit@1.0.0 --strict
+
+# Bypass validation (use sparingly)
+prs skills add github.com/anthropics/skills/commit@1.0.0 --skip-validation
 ```
 
 #### prs skills remove
@@ -857,9 +880,13 @@ prs skills update [name] [options]
 
 **Options:**
 
-| Option      | Description                     |
-| ----------- | ------------------------------- |
-| `--dry-run` | Preview changes without writing |
+| Option              | Description                             |
+| ------------------- | --------------------------------------- |
+| `--dry-run`         | Preview changes without writing         |
+| `--skip-validation` | Skip SKILL.md frontmatter re-validation |
+| `--strict`          | Treat validation warnings as errors     |
+
+Each updated entry is re-cloned, re-hashed (real `sha256` integrity) and re-validated against the Agent Skills spec — see [`prs skills add`](#prs-skills-add) for the full validator rules. Entries that fail validation are skipped with a reason.
 
 **Examples:**
 
@@ -872,6 +899,9 @@ prs skills update github.com/anthropics/skills/commit
 
 # Preview updates
 prs skills update --dry-run
+
+# Refuse to refresh entries with new warnings
+prs skills update --strict
 ```
 
 ---

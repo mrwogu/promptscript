@@ -83,6 +83,8 @@ prs skills update
 # and updates promptscript.lock
 ```
 
+Both `prs skills add` and `prs skills update` clone the referenced ref, recompute the real `sha256` integrity hash, and validate the SKILL.md frontmatter against the [Agent Skills spec](https://agentskills.io/specification) before touching `promptscript.lock`. Use `--strict` to treat warnings as errors (useful in CI) or `--skip-validation` to bypass the check when the upstream is in flux. Plain `http://` sources are rejected to prevent MITM.
+
 ## Lock file: version pinning
 
 When a `.prs` file contains remote markdown imports, `prs compile` (or `prs lock`) generates a `promptscript.lock` file recording the exact resolved commit for each dependency:

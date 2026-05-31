@@ -270,6 +270,8 @@ skills
   .description('Add a remote skill to the project')
   .option('-f, --file <file>', 'Target .prs file to modify')
   .option('--dry-run', 'Preview changes without writing')
+  .option('--skip-validation', 'Skip SKILL.md frontmatter validation (not recommended)')
+  .option('--strict', 'Treat validation warnings as errors')
   .action((source, opts) => skillsAddCommand(source, opts));
 
 skills
@@ -287,6 +289,8 @@ skills
   .command('update [name]')
   .description('Update lock entries for markdown-sourced skills')
   .option('--dry-run', 'Preview changes without writing')
+  .option('--skip-validation', 'Skip SKILL.md frontmatter validation (not recommended)')
+  .option('--strict', 'Treat validation warnings as errors')
   .action((name, opts) => skillsUpdateCommand(name, opts));
 
 const registry = program.command('registry').description('Manage PromptScript registries');

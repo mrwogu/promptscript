@@ -731,6 +731,14 @@ export class Resolver {
             errors.push(new ResolveError(e.message, e.location));
           }
         }
+      } else if (isMdPath) {
+        // Explicit .md path that does not exist — do not fall through to
+        // directory auto-discovery (subPath is a file, not a directory).
+        errors.push(
+          new ResolveError(
+            `Cannot resolve registry import: file '${subPath}' not found in ${repoUrl} (looked for ${resolvedFullPath}). Verify the path inside the repository.`
+          )
+        );
       } else {
         // No file found — try auto-discovery of native content
         const discoverDir = isRoot ? cachePath : join(cachePath, subPath);

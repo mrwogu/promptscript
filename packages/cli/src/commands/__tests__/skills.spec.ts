@@ -11,8 +11,16 @@ const {
   mockWriteFile,
   mockReadFile,
   mockReaddir,
+  mockMkdtemp,
+  mockRm,
   mockValidateRemoteAccess,
+  mockValidateSkillFrontmatter,
+  mockFormatSkillValidationIssues,
+  mockHashContent,
+  mockCreateGitRegistry,
+  mockCloneAtTag,
   mockConsoleWarn,
+  mockConsoleError,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -31,11 +39,19 @@ const {
   const mockWriteFile = vi.fn().mockResolvedValue(undefined);
   const mockReadFile = vi.fn();
   const mockReaddir = vi.fn();
+  const mockMkdtemp = vi.fn().mockRejectedValue(new Error('mkdtemp disabled in tests'));
+  const mockRm = vi.fn().mockResolvedValue(undefined);
   const mockValidateRemoteAccess = vi.fn().mockResolvedValue({
     accessible: true,
     headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
   });
+  const mockValidateSkillFrontmatter = vi.fn().mockReturnValue({ valid: true, issues: [] });
+  const mockFormatSkillValidationIssues = vi.fn().mockReturnValue('');
+  const mockHashContent = vi.fn().mockReturnValue('sha256-deadbeef');
+  const mockCloneAtTag = vi.fn().mockResolvedValue(undefined);
+  const mockCreateGitRegistry = vi.fn(() => ({ cloneAtTag: mockCloneAtTag }));
   const mockConsoleWarn = vi.fn();
+  const mockConsoleError = vi.fn();
   return {
     mockSucceed,
     mockFail,
@@ -48,7 +64,15 @@ const {
     mockReadFile,
     mockReaddir,
     mockValidateRemoteAccess,
+    mockValidateSkillFrontmatter,
+    mockFormatSkillValidationIssues,
+    mockHashContent,
+    mockCreateGitRegistry,
+    mockCloneAtTag,
     mockConsoleWarn,
+    mockConsoleError,
+    mockMkdtemp,
+    mockRm,
   };
 });
 
@@ -56,7 +80,7 @@ vi.mock('../../output/console.js', () => ({
   createSpinner: vi.fn(() => mockSpinner),
   ConsoleOutput: {
     success: vi.fn(),
-    error: vi.fn(),
+    error: mockConsoleError,
     muted: vi.fn(),
     newline: vi.fn(),
     info: vi.fn(),
@@ -79,6 +103,8 @@ vi.mock('fs/promises', () => ({
   writeFile: mockWriteFile,
   readFile: mockReadFile,
   readdir: mockReaddir,
+  mkdtemp: mockMkdtemp,
+  rm: mockRm,
 }));
 
 vi.mock('yaml', () => ({
@@ -88,6 +114,10 @@ vi.mock('yaml', () => ({
 
 vi.mock('@promptscript/resolver', () => ({
   validateRemoteAccess: mockValidateRemoteAccess,
+  validateSkillFrontmatter: mockValidateSkillFrontmatter,
+  formatSkillValidationIssues: mockFormatSkillValidationIssues,
+  hashContent: mockHashContent,
+  createGitRegistry: mockCreateGitRegistry,
 }));
 
 import {
@@ -1269,5 +1299,395 @@ describe('skillsUpdateCommand', () => {
     expect(mockConsoleWarn).toHaveBeenCalledWith(
       expect.stringContaining('Skipped github.com/org/repo/SKILL.md')
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Frontmatter validation paths added in fix(cli): post-format + validation.
+// These exercise extractSubPath / deriveSkillFolderName / collectExistingSkillNames /
+// fetchAndValidateRemoteSkill / printValidationIssues plus the new branches in
+// skillsAddCommand and skillsUpdateCommand.
+// ---------------------------------------------------------------------------
+
+const SAMPLE_PRS_FOR_VALIDATION = `@meta {\n  id: "test"\n  version: "1.0.0"\n}\n\nHello.\n`;
+
+/**
+ * Wire mockExistsSync / mockMkdtemp / mockReadFile so the validation path
+ * runs end-to-end and "clones" a virtual SKILL.md whose content is `skillContent`.
+ */
+function arrangeValidation(opts: {
+  entryFile?: string;
+  lockExists?: boolean;
+  lockContent?: string;
+  skillContent: string;
+  prsContent?: string;
+}): void {
+  const entry = opts.entryFile ?? 'entry.prs';
+  mockMkdtemp.mockReset();
+  mockMkdtemp.mockResolvedValue('/tmp/prs-skill-validate-xyz');
+  mockExistsSync.mockImplementation((p: string) => {
+    if (typeof p !== 'string') return false;
+    if (p === 'promptscript.lock') return Boolean(opts.lockExists);
+    if (p.includes('prs-skill-validate-xyz')) return true;
+    if (p.includes(entry)) return true;
+    return false;
+  });
+  mockReadFile.mockImplementation((p: string) => {
+    if (typeof p !== 'string') return Promise.reject(new Error('bad path'));
+    if (p === 'promptscript.lock') {
+      return Promise.resolve(opts.lockContent ?? '{"version":1,"dependencies":{}}');
+    }
+    if (p.includes('prs-skill-validate-xyz')) {
+      return Promise.resolve(opts.skillContent);
+    }
+    if (p.includes(entry)) {
+      return Promise.resolve(opts.prsContent ?? SAMPLE_PRS_FOR_VALIDATION);
+    }
+    return Promise.reject(new Error(`unexpected read: ${p}`));
+  });
+}
+
+describe('skillsAddCommand frontmatter validation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    // Re-prime defaults that vi.clearAllMocks wipes.
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: 'abc1234567890123456789012345678901234567890'.slice(0, 40),
+    });
+    mockValidateSkillFrontmatter.mockReturnValue({ valid: true, issues: [] });
+    mockFormatSkillValidationIssues.mockReturnValue('');
+    mockHashContent.mockReturnValue('sha256-deadbeef');
+    mockCloneAtTag.mockResolvedValue(undefined);
+    mockCreateGitRegistry.mockImplementation(() => ({ cloneAtTag: mockCloneAtTag }));
+    mockRm.mockResolvedValue(undefined);
+  });
+
+  it('rejects plain http:// sources before any network call', async () => {
+    await skillsAddCommand('http://github.com/foo/bar/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockFail).toHaveBeenCalledWith(expect.stringContaining('Plain HTTP'));
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('https://'));
+    expect(process.exitCode).toBe(1);
+    expect(mockMkdtemp).not.toHaveBeenCalled();
+    expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
+  });
+
+  it('clones, validates and stores the real integrity hash on success', async () => {
+    arrangeValidation({ skillContent: '---\nname: x\n---\nbody' });
+    mockHashContent.mockReturnValue('sha256-realhash');
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockCreateGitRegistry).toHaveBeenCalledWith({ url: 'https://github.com/org/repo' });
+    expect(mockCloneAtTag).toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const lockWriteCall = writeCalls.find((c) => c[0] === 'promptscript.lock');
+    const lock = JSON.parse(lockWriteCall![1] as string) as {
+      dependencies: Record<string, { integrity: string }>;
+    };
+    expect(lock.dependencies['github.com/org/repo/skills/foo/SKILL.md']!.integrity).toBe(
+      'sha256-realhash'
+    );
+    // tmp dir cleaned up
+    expect(mockRm).toHaveBeenCalledWith(
+      '/tmp/prs-skill-validate-xyz',
+      expect.objectContaining({ recursive: true, force: true })
+    );
+  });
+
+  it('aborts on validation errors and prints them', async () => {
+    arrangeValidation({ skillContent: '---\nbad\n---' });
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: false,
+      issues: [{ severity: 'error', code: 'SK001', message: 'name is required' }],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('✗ SK001: name is required');
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockFail).toHaveBeenCalledWith('SKILL.md failed validation');
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('SK001'));
+    expect(process.exitCode).toBe(1);
+    // No write to entry.prs nor lockfile.
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    expect(writeCalls.find((c) => c[0] === 'promptscript.lock')).toBeUndefined();
+  });
+
+  it('surfaces warnings non-strict but still installs', async () => {
+    arrangeValidation({ skillContent: '---\nname: x\n---' });
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: true,
+      issues: [{ severity: 'warning', code: 'SK050', message: 'description short' }],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('⚠ SK050: description short');
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockWarn).toHaveBeenCalledWith('SKILL.md has validation warnings');
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+    expect(process.exitCode).not.toBe(1);
+  });
+
+  it('treats warnings as errors when --strict is set', async () => {
+    arrangeValidation({ skillContent: '---\nname: x\n---' });
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: true,
+      issues: [{ severity: 'warning', code: 'SK050', message: 'description short' }],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('⚠ SK050: description short');
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
+      file: 'entry.prs',
+      strict: true,
+    });
+
+    expect(mockFail).toHaveBeenCalledWith('SKILL.md failed validation');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('errors out when the SKILL.md file is missing from the clone', async () => {
+    mockMkdtemp.mockReset();
+    mockMkdtemp.mockResolvedValue('/tmp/prs-skill-validate-xyz');
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return false;
+      if (p.includes('prs-skill-validate-xyz')) return false; // file NOT in clone
+      if (p.includes('entry.prs')) return true;
+      return false;
+    });
+    mockReadFile.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return Promise.resolve(SAMPLE_PRS_FOR_VALIDATION);
+      return Promise.reject(new Error('bad'));
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('✗ SK000: File does not exist');
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockFail).toHaveBeenCalledWith('SKILL.md failed validation');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('falls back to warn-and-continue when the clone itself throws', async () => {
+    mockMkdtemp.mockReset();
+    mockMkdtemp.mockResolvedValue('/tmp/prs-skill-validate-xyz');
+    mockCloneAtTag.mockRejectedValueOnce(new Error('git unreachable'));
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return false;
+      if (p.includes('entry.prs')) return true;
+      return false;
+    });
+    mockReadFile.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return Promise.resolve(SAMPLE_PRS_FOR_VALIDATION);
+      return Promise.reject(new Error('bad'));
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockWarn).toHaveBeenCalledWith('Could not validate SKILL.md ahead of time');
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('skips validation when --skip-validation is set', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return false;
+      if (p.includes('entry.prs')) return true;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS_FOR_VALIDATION);
+
+    await skillsAddCommand('github.com/org/repo/skills/foo/SKILL.md', {
+      file: 'entry.prs',
+      skipValidation: true,
+    });
+
+    expect(mockMkdtemp).not.toHaveBeenCalled();
+    expect(mockCreateGitRegistry).not.toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('skips ahead-of-time validation for directory imports (no .md target)', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') return false;
+      if (p.includes('entry.prs')) return true;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(SAMPLE_PRS_FOR_VALIDATION);
+
+    await skillsAddCommand('git@github.com:org/repo.git', { file: 'entry.prs' });
+
+    // Directory imports return undefined from fetchAndValidateRemoteSkill, so the
+    // clone path never runs even without --skip-validation.
+    expect(mockMkdtemp).not.toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Skill added');
+  });
+
+  it('passes existing skill folder names to the validator for collision detection', async () => {
+    arrangeValidation({
+      skillContent: '---\nname: foo\n---',
+      lockExists: true,
+      lockContent: JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/a/b/skills/foo/SKILL.md': {
+            version: 'v1',
+            commit: 'a',
+            integrity: 'sha256-x',
+            source: 'md',
+          },
+          'github.com/c/d': {
+            version: 'v1',
+            commit: 'b',
+            integrity: 'sha256-y',
+            source: 'git', // non-md sources must be excluded
+          },
+        },
+      }),
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/bar/SKILL.md', { file: 'entry.prs' });
+
+    expect(mockValidateSkillFrontmatter).toHaveBeenCalledTimes(1);
+    const call = mockValidateSkillFrontmatter.mock.calls[0] as unknown as [
+      string,
+      { existingNames: Set<string> },
+    ];
+    expect(Array.from(call[1].existingNames)).toEqual(['foo']);
+  });
+});
+
+describe('skillsUpdateCommand frontmatter re-validation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: 'newcommit1234567890123456789012345678901234567890'.slice(0, 40),
+    });
+    mockValidateSkillFrontmatter.mockReturnValue({ valid: true, issues: [] });
+    mockFormatSkillValidationIssues.mockReturnValue('');
+    mockHashContent.mockReturnValue('sha256-newhash');
+    mockCloneAtTag.mockResolvedValue(undefined);
+    mockCreateGitRegistry.mockImplementation(() => ({ cloneAtTag: mockCloneAtTag }));
+    mockRm.mockResolvedValue(undefined);
+  });
+
+  const lockEntry = {
+    version: 'v1.0.0',
+    commit: 'old',
+    integrity: 'sha256-old',
+    source: 'md' as const,
+  };
+
+  function arrangeLock(): void {
+    mockMkdtemp.mockReset();
+    mockMkdtemp.mockResolvedValue('/tmp/prs-skill-validate-xyz');
+    mockExistsSync.mockImplementation((p: string) => {
+      if (typeof p !== 'string') return false;
+      if (p === 'promptscript.lock') return true;
+      if (p.includes('prs-skill-validate-xyz')) return true;
+      return false;
+    });
+    mockReadFile.mockImplementation((p: string) => {
+      if (p === 'promptscript.lock') {
+        return Promise.resolve(
+          JSON.stringify({
+            version: 1,
+            dependencies: { 'github.com/org/repo/skills/foo/SKILL.md': lockEntry },
+          })
+        );
+      }
+      if (p.includes('prs-skill-validate-xyz')) return Promise.resolve('---\nname: foo\n---');
+      return Promise.reject(new Error('bad'));
+    });
+  }
+
+  it('refreshes the integrity hash when re-validation succeeds', async () => {
+    arrangeLock();
+
+    await skillsUpdateCommand(undefined, {});
+
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const lockWriteCall = writeCalls.find((c) => c[0] === 'promptscript.lock');
+    const lock = JSON.parse(lockWriteCall![1] as string) as {
+      dependencies: Record<string, { integrity: string }>;
+    };
+    expect(lock.dependencies['github.com/org/repo/skills/foo/SKILL.md']!.integrity).toBe(
+      'sha256-newhash'
+    );
+  });
+
+  it('skips an entry when re-validation reports errors', async () => {
+    arrangeLock();
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: false,
+      issues: [{ severity: 'error', code: 'SK001', message: 'broken' }],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('✗ SK001: broken');
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockConsoleWarn).toHaveBeenCalledWith(
+      expect.stringContaining('SKILL.md failed validation after update')
+    );
+  });
+
+  it('treats warnings as failures under --strict in update', async () => {
+    arrangeLock();
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: true,
+      issues: [{ severity: 'warning', code: 'SK050', message: 'soft' }],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('⚠ SK050: soft');
+
+    await skillsUpdateCommand(undefined, { strict: true });
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('surfaces warnings under update without --strict and still writes', async () => {
+    arrangeLock();
+    mockValidateSkillFrontmatter.mockReturnValue({
+      valid: true,
+      issues: [{ severity: 'warning', code: 'SK050', message: 'soft' }],
+    });
+    mockFormatSkillValidationIssues.mockReturnValue('⚠ SK050: soft');
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockConsoleWarn).toHaveBeenCalledWith(
+      expect.stringContaining('github.com/org/repo/skills/foo/SKILL.md: validation warnings')
+    );
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    expect(writeCalls.find((c) => c[0] === 'promptscript.lock')).toBeDefined();
+  });
+
+  it('warns and continues with old integrity when re-clone throws', async () => {
+    arrangeLock();
+    mockCloneAtTag.mockRejectedValueOnce(new Error('git boom'));
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining('could not re-validate'));
+    const writeCalls = mockWriteFile.mock.calls as unknown[][];
+    const lockWriteCall = writeCalls.find((c) => c[0] === 'promptscript.lock');
+    const lock = JSON.parse(lockWriteCall![1] as string) as {
+      dependencies: Record<string, { integrity: string }>;
+    };
+    // Old integrity preserved.
+    expect(lock.dependencies['github.com/org/repo/skills/foo/SKILL.md']!.integrity).toBe(
+      'sha256-old'
+    );
+  });
+
+  it('skips re-validation when --skip-validation is set', async () => {
+    arrangeLock();
+
+    await skillsUpdateCommand(undefined, { skipValidation: true });
+
+    expect(mockMkdtemp).not.toHaveBeenCalled();
+    expect(mockCreateGitRegistry).not.toHaveBeenCalled();
   });
 });

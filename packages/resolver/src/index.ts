@@ -112,6 +112,15 @@ export {
 } from './skills.js';
 export type { NativeSkillOptions, ParsedSkillMd } from './skills.js';
 
+// Skill frontmatter validation (Agent Skills spec compliance)
+export { validateSkillFrontmatter, formatSkillValidationIssues } from './skill-validation.js';
+export type {
+  SkillValidationIssue,
+  SkillValidationOptions,
+  SkillValidationResult,
+  SkillValidationSeverity,
+} from './skill-validation.js';
+
 // Template interpolation (re-export from core for backwards compatibility)
 export {
   bindParams,

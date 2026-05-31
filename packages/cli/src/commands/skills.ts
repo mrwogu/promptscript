@@ -1,6 +1,7 @@
-import { writeFile, readFile, readdir } from 'fs/promises';
-import { resolve } from 'path';
+import { writeFile, readFile, readdir, mkdtemp, rm } from 'fs/promises';
+import { resolve, join, basename, dirname } from 'path';
 import { existsSync } from 'fs';
+import { tmpdir } from 'os';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { SkillsAddOptions, SkillsRemoveOptions, SkillsUpdateOptions } from '../types.js';
 import { loadConfig, findConfigFile } from '../config/loader.js';
@@ -8,7 +9,14 @@ import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { LOCKFILE_PATH } from './lock.js';
-import { validateRemoteAccess } from '@promptscript/resolver';
+import {
+  validateRemoteAccess,
+  validateSkillFrontmatter,
+  formatSkillValidationIssues,
+  hashContent,
+  createGitRegistry,
+  type SkillValidationIssue,
+} from '@promptscript/resolver';
 
 /**
  * Pattern to match remote source strings.
@@ -47,6 +55,134 @@ export function normalizeSkillSource(input: string): string {
     source = source.slice(0, -1);
   }
   return source;
+}
+
+/**
+ * Extract the sub-path inside the repo from a normalized source.
+ * `github.com/owner/repo/foo/bar/SKILL.md` -> `foo/bar/SKILL.md`
+ * `github.com/owner/repo` -> ''
+ */
+function extractSubPath(source: string): string {
+  const parts = source.replace(/^https?:\/\//, '').split('/');
+  return parts.length > 3 ? parts.slice(3).join('/') : '';
+}
+
+/**
+ * Derive the on-disk skill folder name from a source path. Skills are written
+ * to `<format-dir>/skills/<name>/SKILL.md` where `<name>` is the basename of
+ * the SKILL.md's parent directory (matching the Agent Skills spec — the
+ * frontmatter `name` MUST match this directory).
+ *
+ * Returns `undefined` for sources without a clear single-file target (e.g.
+ * directory imports), which auto-discover names at compile time.
+ */
+function deriveSkillFolderName(source: string): string | undefined {
+  const subPath = extractSubPath(source);
+  if (!subPath) return undefined;
+  if (!subPath.toLowerCase().endsWith('.md')) return undefined;
+  const parent = dirname(subPath);
+  if (parent === '.' || parent === '') return undefined;
+  return basename(parent);
+}
+
+/**
+ * Collect skill folder names already in use by other md-sourced entries in
+ * the lockfile. Used to detect collisions (two skills resolving to the same
+ * `<format>/skills/<name>/` directory).
+ */
+function collectExistingSkillNames(lockfile: Lockfile, exclude?: string): Set<string> {
+  const names = new Set<string>();
+  for (const [key, dep] of Object.entries(lockfile.dependencies)) {
+    if (dep.source !== 'md') continue;
+    if (exclude && key === exclude) continue;
+    const name = deriveSkillFolderName(key);
+    if (name) names.add(name);
+  }
+  return names;
+}
+
+/**
+ * Result of fetching and validating a remote SKILL.md.
+ */
+interface FetchedSkill {
+  /** Raw file content as read from the cloned repo */
+  content: string;
+  /** SRI integrity hash (`sha256-<hex>`) of the content */
+  integrity: string;
+  /** Frontmatter validation issues (errors + warnings) */
+  issues: SkillValidationIssue[];
+  /** True when no errors were reported */
+  valid: boolean;
+}
+
+/**
+ * Fetch a single SKILL.md from a remote source by performing a shallow clone
+ * into an OS tmp directory, then validate its frontmatter and compute the
+ * content integrity hash. Always cleans up the temp clone, even on error.
+ *
+ * Returns `undefined` when the source does not target a single `.md` file
+ * (directory imports auto-discover at compile time and cannot be validated
+ * up-front against a single file).
+ */
+async function fetchAndValidateRemoteSkill(
+  source: string,
+  options: { existingNames: ReadonlySet<string>; version: string }
+): Promise<FetchedSkill | undefined> {
+  const subPath = extractSubPath(source);
+  if (!subPath || !subPath.toLowerCase().endsWith('.md')) {
+    return undefined;
+  }
+
+  const repoUrl = extractRepoUrl(source);
+  const tmp = await mkdtemp(join(tmpdir(), 'prs-skill-validate-'));
+  try {
+    const gitRegistry = createGitRegistry({ url: repoUrl });
+    await gitRegistry.cloneAtTag(repoUrl, options.version, tmp);
+
+    const filePath = join(tmp, subPath);
+    if (!existsSync(filePath)) {
+      return {
+        content: '',
+        integrity: '',
+        valid: false,
+        issues: [
+          {
+            severity: 'error',
+            code: 'SK000',
+            message: `File '${subPath}' does not exist in ${repoUrl} at ${options.version}.`,
+          },
+        ],
+      };
+    }
+
+    const content = await readFile(filePath, 'utf-8');
+    const integrity = hashContent(Buffer.from(content, 'utf-8'));
+    const result = validateSkillFrontmatter(content, {
+      filePath,
+      existingNames: options.existingNames,
+    });
+    return { content, integrity, valid: result.valid, issues: result.issues };
+  } finally {
+    await rm(tmp, { recursive: true, force: true }).catch(() => {
+      // best-effort cleanup
+    });
+  }
+}
+
+/**
+ * Print validation issues to the console, grouped by severity.
+ */
+function printValidationIssues(issues: readonly SkillValidationIssue[]): void {
+  if (issues.length === 0) return;
+  ConsoleOutput.newline();
+  const formatted = formatSkillValidationIssues(issues);
+  for (const line of formatted.split('\n')) {
+    if (line.includes('✗')) {
+      ConsoleOutput.error(line);
+    } else {
+      ConsoleOutput.warn(line);
+    }
+  }
 }
 
 /**
@@ -253,6 +389,17 @@ export async function skillsAddCommand(
   const spinner = createSpinner('Adding skill...').start();
 
   try {
+    // Reject plain HTTP early (security): git over plaintext exposes the
+    // repo to MITM. Always require HTTPS or SSH.
+    if (/^http:\/\//i.test(rawSource.trim())) {
+      spinner.fail('Plain HTTP sources are not allowed (security)');
+      ConsoleOutput.error(
+        'Use https:// or git@host:owner/repo. Cleartext git transport is rejected to prevent man-in-the-middle attacks.'
+      );
+      process.exitCode = 1;
+      return;
+    }
+
     // Normalize the user-provided source before validating so we treat
     // `https://github.com/foo/bar`, `git@github.com:foo/bar.git`, and
     // `github.com/foo/bar` as the same logical identifier.
@@ -297,18 +444,65 @@ export async function skillsAddCommand(
       return;
     }
 
+    // Load lockfile early — we need it for collision detection AND to write
+    // the new entry below.
+    const lockfile = await loadLockfile();
+
+    // Fetch the actual SKILL.md and validate its frontmatter (Agent Skills
+    // spec compliance + collision check). Only runs for single-file imports.
+    let integrity = 'sha256-pending';
+    let validationFailed = false;
+    if (!options.skipValidation) {
+      spinner.text = 'Validating SKILL.md frontmatter...';
+      try {
+        const fetched = await fetchAndValidateRemoteSkill(source, {
+          existingNames: collectExistingSkillNames(lockfile),
+          version: 'main',
+        });
+        if (fetched) {
+          integrity = fetched.integrity || integrity;
+          const hasErrors = !fetched.valid;
+          const hasWarnings = fetched.issues.some((i) => i.severity === 'warning');
+          if (hasErrors || (options.strict && hasWarnings)) {
+            spinner.fail('SKILL.md failed validation');
+            printValidationIssues(fetched.issues);
+            ConsoleOutput.newline();
+            ConsoleOutput.muted(
+              'Re-run with --skip-validation to bypass (not recommended) or fix the upstream SKILL.md.'
+            );
+            process.exitCode = 1;
+            validationFailed = true;
+          } else if (fetched.issues.length > 0) {
+            // Warnings only — surface them but continue
+            spinner.warn('SKILL.md has validation warnings');
+            printValidationIssues(fetched.issues);
+            spinner.start('Adding skill...');
+          }
+        }
+      } catch (err) {
+        // Don't block on fetch failures — log and continue with placeholder
+        // integrity so the user can still install. Compile will redo the work.
+        spinner.warn('Could not validate SKILL.md ahead of time');
+        ConsoleOutput.muted(
+          `Reason: ${err instanceof Error ? err.message : String(err)}. Proceeding without frontmatter check.`
+        );
+        spinner.start('Adding skill...');
+      }
+    }
+
+    if (validationFailed) return;
+
     // Find insertion point and insert
     const insertionPoint = findInsertionPoint(lines);
     const newLine = `@use ${source}`;
     lines.splice(insertionPoint, 0, newLine);
     const updatedContent = lines.join('\n');
 
-    // Load and update lockfile
-    const lockfile = await loadLockfile();
+    // Build lock entry
     const lockEntry: LockfileDependency = {
       version: 'latest',
       commit: validation.headCommit ?? '0000000000000000000000000000000000000000',
-      integrity: 'sha256-pending',
+      integrity,
       source: 'md',
     };
     lockfile.dependencies[source] = lockEntry;
@@ -482,8 +676,8 @@ export async function skillsUpdateCommand(
     }
 
     // Fetch the latest HEAD commit for each entry by reaching out to the
-    // remote with validateRemoteAccess. The integrity field is preserved from
-    // the previous pin (full re-hash happens during the next compile).
+    // remote with validateRemoteAccess. When validation is enabled we also
+    // re-clone the SKILL.md to recompute integrity and re-check the spec.
     const fetchedAt = new Date().toISOString();
     const updated: string[] = [];
     const skipped: Array<{ key: string; reason: string }> = [];
@@ -499,10 +693,42 @@ export async function skillsUpdateCommand(
           });
           continue;
         }
+
+        let integrity = dep.integrity ?? 'sha256-pending';
+
+        if (!options.skipValidation) {
+          try {
+            const fetched = await fetchAndValidateRemoteSkill(key, {
+              existingNames: collectExistingSkillNames(lockfile, key),
+              version: dep.version === 'latest' ? 'main' : dep.version,
+            });
+            if (fetched) {
+              integrity = fetched.integrity || integrity;
+              const hasErrors = !fetched.valid;
+              const hasWarnings = fetched.issues.some((i) => i.severity === 'warning');
+              if (hasErrors || (options.strict && hasWarnings)) {
+                skipped.push({
+                  key,
+                  reason: 'SKILL.md failed validation after update',
+                });
+                printValidationIssues(fetched.issues);
+                continue;
+              } else if (hasWarnings) {
+                ConsoleOutput.warn(`${key}: validation warnings`);
+                printValidationIssues(fetched.issues);
+              }
+            }
+          } catch (err) {
+            ConsoleOutput.warn(
+              `${key}: could not re-validate (${err instanceof Error ? err.message : String(err)})`
+            );
+          }
+        }
+
         lockfile.dependencies[key] = {
           version: dep.version ?? 'latest',
           commit: validation.headCommit,
-          integrity: dep.integrity ?? 'sha256-pending',
+          integrity,
           source: 'md',
           fetchedAt,
         };

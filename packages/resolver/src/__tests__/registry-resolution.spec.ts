@@ -670,6 +670,50 @@ describe('Resolver — registry marker handling', () => {
     }
   });
 
+  it('produces a clear error when .md sub-path does not exist in cloned repo', async () => {
+    // Arrange — import @acme/missing.md but the clone does not contain it
+    const tempDir = join(testCacheDir, 'project-md-missing');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "test-md-missing"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/missing.md',
+      '',
+      '@identity { """test""" }',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    // Mock clone to create a repo without the requested .md file
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(join(targetDir, 'README.md'), '# Repo');
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-md-missing'),
+    });
+
+    // Act
+    const result = await resolver.resolve(prsFile);
+
+    // Assert — error message mentions the missing file and the looked-up path,
+    // and does NOT fall through to generic auto-discovery wording
+    expect(result.errors.length).toBeGreaterThan(0);
+    const message = result.errors.map((e) => e.message).join('\n');
+    expect(message).toContain("file 'missing.md' not found");
+    expect(message).toContain('Verify the path inside the repository');
+    expect(message).not.toContain('no .prs file or native content');
+  });
+
   it('resolves registry import when .prs file exists in cloned repo', async () => {
     // Arrange
     const tempDir = join(testCacheDir, 'project2');

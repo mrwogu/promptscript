@@ -245,6 +245,10 @@ export interface SkillsAddOptions {
   file?: string;
   /** Preview changes without writing */
   dryRun?: boolean;
+  /** Skip post-clone SKILL.md frontmatter validation (not recommended) */
+  skipValidation?: boolean;
+  /** Treat validation warnings as errors */
+  strict?: boolean;
 }
 
 /**
@@ -261,6 +265,10 @@ export interface SkillsRemoveOptions {
 export interface SkillsUpdateOptions {
   /** Preview changes without writing */
   dryRun?: boolean;
+  /** Skip post-clone SKILL.md frontmatter validation (not recommended) */
+  skipValidation?: boolean;
+  /** Treat validation warnings as errors */
+  strict?: boolean;
 }
 
 /**
