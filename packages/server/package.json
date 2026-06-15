@@ -18,6 +18,6 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "@fastify/rate-limit": "^10.3.0"
+    "@fastify/rate-limit": "^11.0.0"
   }
 }
