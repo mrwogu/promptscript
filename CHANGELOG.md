@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1](https://github.com/mrwogu/promptscript/compare/v1.13.0...v1.13.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* **resolver:** report clear error when registry import path does not exist ([2a8c322](https://github.com/mrwogu/promptscript/commit/2a8c32248962dabf62bc43290315019f52712a93))
+* **validator:** remove overly broad warning suppression pattern to prevent false positives in agent skills ([52cd599](https://github.com/mrwogu/promptscript/commit/52cd599a51c2c74daa784c176289a01691f870d6))
+
 ## [1.13.0](https://github.com/mrwogu/promptscript/compare/v1.12.1...v1.13.0) (2026-05-31)
 
 
