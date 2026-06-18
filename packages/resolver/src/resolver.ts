@@ -750,8 +750,10 @@ export class Resolver {
             )
           );
         } else {
-          this.logger.debug(`No .prs found, trying directory scan and auto-discovery: ${discoverDir}`);
-          
+          this.logger.debug(
+            `No .prs found, trying directory scan and auto-discovery: ${discoverDir}`
+          );
+
           const dirResult = await this.tryDirectoryScan(discoverDir, [marker], []);
           if (dirResult?.ast) {
             resolvedAST = dirResult.ast;
