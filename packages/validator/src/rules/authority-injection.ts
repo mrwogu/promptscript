@@ -22,7 +22,8 @@ const AUTHORITY_PATTERNS: RegExp[] = [
   /\[?\s{0,10}EMERGENCY\s{0,10}(?:PROTOCOL|OVERRIDE|MODE)\s{0,10}\]?/i,
 
   // Warning suppression patterns
-  /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
+  // Removed because it triggers false positives on valid agent instructions (e.g., "do not notify user")
+  // /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:WARN|ALERT|NOTIFY|FLAG|REPORT)/i,
   /(?:DO\s{1,10}NOT|NEVER|DON'?T)\s{1,10}(?:PROVIDE|SHOW|DISPLAY|INCLUDE)\s{1,10}(?:SECURITY\s{1,10})?WARNINGS?/i,
   /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s{1,10}(?:ALL\s{1,10})?WARNINGS?/i,
   /(?:SUPPRESS|HIDE|DISABLE|REMOVE|SILENCE)\s{1,10}(?:ALL\s{1,10})?(?:SECURITY\s{1,10})?(?:ALERTS?|NOTIFICATIONS?)/i,
