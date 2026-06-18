@@ -62,7 +62,7 @@
     "tslib": "^2.3.0",
     "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.12.0",
-    "typescript": "~5.9.3",
+    "typescript": "~6.0.3",
     "verdaccio": "^6.7.2",
     "vite": "^8.0.16",
     "vitest": "^4.1.8",
