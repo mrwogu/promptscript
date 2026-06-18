@@ -49,7 +49,7 @@ jobs:
         run: pnpm nx test resolver --testNamePattern="Integration"
         env:
           TEST_GIT_REGISTRY_INTEGRATION: 'true'
-          TEST_GIT_REGISTRY_URL: 'https://github.com/mrwogu/promptscript-registry.git'
+          TEST_GIT_REGISTRY_URL: 'https://github.com/mrwogu/promptscript.git'
           TEST_GIT_REGISTRY_REF: 'main'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -67,7 +67,7 @@ jobs:
             entry: .promptscript/project.prs
           registry:
             git:
-              url: https://github.com/mrwogu/promptscript-registry.git
+              url: https://github.com/mrwogu/promptscript.git
               ref: main
           targets:
             - github
@@ -79,7 +79,7 @@ jobs:
             id: "integration-test"
             syntax: "1.0.0"
           }
-          @inherit @core/base
+          @inherit README.md
           EOF
 
           # Test pull command (dry-run when available, otherwise just verify config)
