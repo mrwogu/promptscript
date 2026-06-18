@@ -740,19 +740,34 @@ export class Resolver {
           )
         );
       } else {
-        // No file found — try auto-discovery of native content
+        // No file found — try directory import and auto-discovery
         const discoverDir = isRoot ? cachePath : join(cachePath, subPath);
-        this.logger.debug(`No .prs found, trying auto-discovery: ${discoverDir}`);
-        resolvedAST = await discoverNativeContent(discoverDir);
 
-        if (!resolvedAST) {
-          const where = isRoot ? '<repository root>' : `'${subPath}'`;
-          const hint = isRoot ? ` Specify a sub-path (e.g. ${repoUrl}/skills/<name>).` : '';
+        if (!isRoot && !existsSync(discoverDir)) {
           errors.push(
             new ResolveError(
-              `Cannot resolve registry import: no .prs file or native content at ${where} in ${repoUrl}.${hint}`
+              `Cannot resolve registry import: path '${subPath}' does not exist in repository ${repoUrl}.`
             )
           );
+        } else {
+          this.logger.debug(`No .prs found, trying directory scan and auto-discovery: ${discoverDir}`);
+          
+          const dirResult = await this.tryDirectoryScan(discoverDir, [marker], []);
+          if (dirResult?.ast) {
+            resolvedAST = dirResult.ast;
+          } else {
+            resolvedAST = await discoverNativeContent(discoverDir);
+
+            if (!resolvedAST) {
+              const where = isRoot ? '<repository root>' : `'${subPath}'`;
+              const hint = isRoot ? ` Specify a sub-path (e.g. ${repoUrl}/skills/<name>).` : '';
+              errors.push(
+                new ResolveError(
+                  `Cannot resolve registry import: no .prs file, .md file, or native content at ${where} in ${repoUrl}.${hint}`
+                )
+              );
+            }
+          }
         }
       }
 
