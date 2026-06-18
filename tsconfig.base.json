@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "importHelpers": true,
     "target": "ES2022",
     "module": "ESNext",
