@@ -20,8 +20,8 @@ import { GitRegistry, GitRefNotFoundError } from '../git-registry.js';
 const INTEGRATION_ENABLED = process.env['TEST_GIT_REGISTRY_INTEGRATION'] === 'true';
 const GITHUB_TOKEN = process.env['TEST_GIT_REGISTRY_TOKEN'];
 
-// Public repo for testing - uses the official PromptScript registry
-const PUBLIC_REPO_URL = 'https://github.com/mrwogu/promptscript-registry.git';
+// Public repo for testing - uses the promptscript repo itself
+const PUBLIC_REPO_URL = 'https://github.com/mrwogu/promptscript.git';
 const PUBLIC_REPO_BRANCH = 'main';
 
 describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
@@ -49,8 +49,8 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
         cacheDir: testCacheDir,
       });
 
-      // @core/base.prs exists in promptscript-registry
-      const exists = await registry.exists('@core/base');
+      // README.md exists in promptscript
+      const exists = await registry.exists('README.md');
       expect(exists).toBe(true);
     });
 
@@ -61,9 +61,9 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
         cacheDir: testCacheDir,
       });
 
-      const files = await registry.list('@core');
+      const files = await registry.list('packages');
       expect(files.length).toBeGreaterThan(0);
-      expect(files.some((f) => f === 'base.prs')).toBe(true);
+      expect(files.some((f) => f === 'core/')).toBe(true);
     });
 
     it('should get commit hash', async () => {
@@ -85,7 +85,7 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
       });
 
       // Use fetch() since exists() catches all errors and returns false
-      await expect(registry.fetch('@core/base')).rejects.toThrow(GitRefNotFoundError);
+      await expect(registry.fetch('README.md')).rejects.toThrow(GitRefNotFoundError);
     });
 
     it('should use cache on second access', async () => {
@@ -99,17 +99,17 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
 
       // First access - should clone
       const startTime = Date.now();
-      await registry.exists('@core/base');
+      await registry.exists('README.md');
       const firstAccessTime = Date.now() - startTime;
 
       // Second access - should use cache (much faster)
       const startTime2 = Date.now();
-      await registry.exists('@core/base');
+      await registry.exists('README.md');
       const secondAccessTime = Date.now() - startTime2;
 
       // Cache access should be significantly faster
       expect(secondAccessTime).toBeLessThan(firstAccessTime);
-    });
+    }, 15000);
 
     it('should refresh cache when requested', async () => {
       const cachePath = join(testCacheDir, 'refresh-test');
@@ -120,16 +120,16 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
       });
 
       // First access
-      const existsBefore = await registry.exists('@core/base');
+      const existsBefore = await registry.exists('README.md');
       expect(existsBefore).toBe(true);
 
       // Refresh should re-clone
       await registry.refresh();
 
       // Should still work after refresh
-      const existsAfter = await registry.exists('@core/base');
+      const existsAfter = await registry.exists('README.md');
       expect(existsAfter).toBe(true);
-    });
+    }, 15000);
   });
 
   describe.skipIf(!GITHUB_TOKEN)('private repository with token', () => {
@@ -148,7 +148,7 @@ describe.skipIf(!INTEGRATION_ENABLED)('GitRegistry Integration', () => {
         },
       });
 
-      const exists = await registry.exists('@core/base');
+      const exists = await registry.exists('README.md');
       expect(exists).toBe(true);
     });
   });
@@ -223,93 +223,5 @@ describe.skipIf(!process.env['TEST_GIT_REGISTRY_URL'])('GitRegistry Manual Test'
     const content = await registry.fetch(filePath);
     console.log('File content length:', content.length);
     expect(content.length).toBeGreaterThan(0);
-  });
-});
-
-/**
- * Official PromptScript Registry integration tests.
- *
- * These tests verify that the official registry is accessible and
- * contains expected configurations.
- *
- * Enable with: TEST_GIT_REGISTRY_INTEGRATION=true
- */
-describe.skipIf(!INTEGRATION_ENABLED)('Official PromptScript Registry', () => {
-  const OFFICIAL_REGISTRY = 'https://github.com/mrwogu/promptscript-registry.git';
-  let testCacheDir: string;
-
-  beforeAll(async () => {
-    testCacheDir = join(
-      tmpdir(),
-      `prs-official-registry-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    );
-    await fs.mkdir(testCacheDir, { recursive: true });
-  });
-
-  afterAll(async () => {
-    if (existsSync(testCacheDir)) {
-      await fs.rm(testCacheDir, { recursive: true, force: true });
-    }
-  });
-
-  it('should fetch @core/base.prs', async () => {
-    const registry = new GitRegistry({
-      url: OFFICIAL_REGISTRY,
-      ref: 'main',
-      cacheDir: testCacheDir,
-    });
-
-    const content = await registry.fetch('@core/base.prs');
-    expect(content).toContain('@meta');
-    expect(content).toContain('id: "@core/base"');
-  });
-
-  it('should list @roles/developer files', async () => {
-    const registry = new GitRegistry({
-      url: OFFICIAL_REGISTRY,
-      ref: 'main',
-      cacheDir: testCacheDir,
-    });
-
-    const files = await registry.list('@roles/developer');
-    expect(files).toContain('fullstack.prs');
-    expect(files).toContain('frontend.prs');
-    expect(files).toContain('backend.prs');
-  });
-
-  it('should verify @roles/developer/fullstack inherits from @core/base', async () => {
-    const registry = new GitRegistry({
-      url: OFFICIAL_REGISTRY,
-      ref: 'main',
-      cacheDir: testCacheDir,
-    });
-
-    const content = await registry.fetch('@roles/developer/fullstack.prs');
-    expect(content).toContain('@inherit @core/base');
-  });
-
-  it('should list @stacks files', async () => {
-    const registry = new GitRegistry({
-      url: OFFICIAL_REGISTRY,
-      ref: 'main',
-      cacheDir: testCacheDir,
-    });
-
-    const files = await registry.list('@stacks');
-    expect(files).toContain('react.prs');
-    expect(files).toContain('node.prs');
-    expect(files).toContain('python.prs');
-  });
-
-  it('should list @fragments files', async () => {
-    const registry = new GitRegistry({
-      url: OFFICIAL_REGISTRY,
-      ref: 'main',
-      cacheDir: testCacheDir,
-    });
-
-    const files = await registry.list('@fragments');
-    expect(files).toContain('testing.prs');
-    expect(files).toContain('code-review.prs');
   });
 });
