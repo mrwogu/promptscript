@@ -36,7 +36,7 @@ jobs:
       || !startsWith(github.event.head_commit.message, 'chore(main): release')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -155,7 +155,7 @@ jobs:
         uses: actions/configure-pages@v6
 
       - name: Checkout gh-pages
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: gh-pages
           path: gh-pages-content
