@@ -695,3 +695,161 @@ describe('resolveSkillComposition — composedFrom metadata', () => {
     expect(composedBlocks).toContain('standards');
   });
 });
+
+describe('resolveSkillComposition — extractBlockText edge cases', () => {
+  it('serializes object values in ObjectContent knowledge blocks', async () => {
+    // Covers line 423: else if (typeof val === 'object' && val !== null) → JSON.stringify
+    const subAst = makeSubSkillProgram('sub', 'Sub content', {}, [
+      makeObjectBlock('knowledge', {
+        topic: 'security',
+        nested: { deep: true } as unknown as Value,
+      }),
+    ]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    const content = deploy['content'] as { value: string };
+    expect(content.value).toContain('nested');
+    expect(content.value).toContain('deep');
+  });
+
+  it('handles non-string non-TextContent values in ObjectContent knowledge blocks', async () => {
+    // Covers line 425: else → String(val) for primitive non-string values
+    const subAst = makeSubSkillProgram('sub', 'Sub content', {}, [
+      makeObjectBlock('knowledge', {
+        count: 42 as unknown as Value,
+        enabled: true as unknown as Value,
+      }),
+    ]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    const content = deploy['content'] as { value: string };
+    expect(content.value).toContain('42');
+    expect(content.value).toContain('true');
+  });
+
+  it('handles TextContent elements in ArrayContent restrictions blocks', async () => {
+    // Covers lines 432-433: isTextContent(el) branch in ArrayContent
+    const subAst = makeSubSkillProgram('sub', 'Sub content', {}, [
+      {
+        type: 'Block',
+        name: 'restrictions',
+        content: {
+          type: 'ArrayContent',
+          elements: [
+            { type: 'TextContent', value: 'Restriction A', loc: defaultLoc },
+            { type: 'TextContent', value: 'Restriction B', loc: defaultLoc },
+          ],
+          loc: defaultLoc,
+        },
+        loc: defaultLoc,
+      },
+    ]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    const content = deploy['content'] as { value: string };
+    expect(content.value).toContain('Restriction A');
+    expect(content.value).toContain('Restriction B');
+  });
+});
+
+describe('resolveSkillComposition — extractTextValue edge cases', () => {
+  it('returns undefined for non-string non-TextContent values', async () => {
+    // Covers line 592: return undefined in extractTextValue
+    // When content is a number, extractTextValue returns undefined
+    // so the skill definition has no content, but composition still works
+    const subAst = makeSubSkillProgram('sub', 'Sub content', {
+      description: 42 as unknown as Value, // non-string description
+    });
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    // Should not crash and should still compose
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    expect(deploy).toBeDefined();
+    const content = deploy['content'] as { value: string };
+    expect(content.value).toContain('Phase 1');
+  });
+
+  it('handles null content value in skill definition', async () => {
+    // Another path to hit extractTextValue returning undefined
+    const subSkillsBlock = makeSkillsBlock({
+      sub: {
+        content: null as unknown as Value,
+      } as unknown as Value,
+    });
+    const subAst = makeProgram([subSkillsBlock]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    // Should still compose, just without sub-skill content
+    const content = deploy['content'] as { value: string };
+    expect(content.value).toContain('base');
+  });
+});

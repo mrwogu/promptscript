@@ -927,4 +927,90 @@ describe('Resolver — registry marker handling', () => {
     expect(paths).toContain('references/checklist.md');
     expect(paths).toContain('data.txt');
   });
+
+  it('detects path traversal in registry subpath (resolved file path)', async () => {
+    // Covers resolver.ts lines 762-769: path traversal detection for resolvedFullPath
+    const tempDir = join(testCacheDir, 'project-traversal-file');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "traversal-file-test"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/../../etc/passwd',
+      '',
+      '@context {',
+      '  """',
+      '  placeholder',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      // Create a fake passwd file at the repo root so the traversal path would exist
+      await fs.writeFile(join(targetDir, 'passwd.prs'), '@meta { id: "fake" syntax: "1.0.0" }');
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-traversal-file'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    const traversalErrors = result.errors.filter((e) => e.message.includes('traversal'));
+    expect(traversalErrors.length).toBeGreaterThan(0);
+    expect(traversalErrors[0]!.message).toContain('Path traversal detected');
+  });
+
+  it('detects path traversal in registry subpath (directory discovery)', async () => {
+    // Covers resolver.ts lines 803-809: path traversal detection for discoverDir
+    const tempDir = join(testCacheDir, 'project-traversal-dir');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    // Use a subpath with ../ that won't resolve to an existing .prs file
+    // but will fall through to directory auto-discovery
+    const prsContent = [
+      '@meta {',
+      '  id: "traversal-dir-test"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/../../../nonexistent-dir',
+      '',
+      '@context {',
+      '  """',
+      '  placeholder',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-traversal-dir'),
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    const traversalErrors = result.errors.filter((e) => e.message.includes('traversal'));
+    expect(traversalErrors.length).toBeGreaterThan(0);
+    expect(traversalErrors[0]!.message).toContain('Path traversal detected');
+  });
 });

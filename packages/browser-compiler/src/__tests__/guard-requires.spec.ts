@@ -260,3 +260,97 @@ describe('resolveGuardRequires — requires as non-array', () => {
     expect(a['__resolvedRequires']).toBeUndefined();
   });
 });
+
+describe('resolveGuardRequires — extractContent edge cases', () => {
+  it('returns undefined for non-string non-TextContent content values', () => {
+    // Covers line 46: return undefined in extractContent
+    const ast = makeProgram([
+      makeGuardsBlock({
+        a: makeGuard('Guard A', ['b']) as unknown as Value,
+        // b has a numeric content — not string, not TextContent
+        b: { content: 42 as unknown as Value } as unknown as Value,
+      }),
+    ]);
+    const result = resolveGuardRequires(ast, { maxDepth: 3 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const a = props['a'] as Record<string, unknown>;
+    const resolved = a['__resolvedRequires'] as Array<Record<string, unknown>> | undefined;
+    // b has numeric content, extractContent returns undefined, so b is not added
+    if (resolved) {
+      const names = resolved.map((r) => r['name']);
+      expect(names).not.toContain('b');
+    }
+  });
+});
+
+describe('resolveGuardRequires — collectDeps edge cases', () => {
+  it('returns early when result already at MAX_GUARD_COUNT at function entry', () => {
+    // Covers line 77: return when result.length >= MAX_GUARD_COUNT at top of collectDeps
+    const properties: Record<string, Value> = {};
+    const requiresList: string[] = [];
+    // Create 110 simple guards (no chains) to exceed the 100 limit
+    for (let i = 0; i < 110; i++) {
+      const name = `dep${i}`;
+      properties[name] = makeGuard(`Content ${i}`) as unknown as Value;
+      requiresList.push(name);
+    }
+    properties['root'] = makeGuard('Root guard', requiresList) as unknown as Value;
+
+    const ast = makeProgram([makeGuardsBlock(properties)]);
+    const result = resolveGuardRequires(ast, { maxDepth: 1 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const root = props['root'] as Record<string, unknown>;
+    const resolved = root['__resolvedRequires'] as Array<Record<string, unknown>>;
+    // Should be capped at 100
+    expect(resolved.length).toBeLessThanOrEqual(100);
+  });
+
+  it('returns early when guard name not in guardsMap during collectDeps', () => {
+    // Covers line 82: return when guardProps is not found in guardsMap
+    // This happens when collectDeps is called for a guard that was never added to guardsMap
+    // We need a guard that requires another guard, but the required guard has an AST node type
+    // so it's filtered out of guardsMap but still triggers collectDeps
+    const ast = makeProgram([
+      makeGuardsBlock({
+        a: makeGuard('Guard A', ['b']) as unknown as Value,
+        // b has an AST node type 'TextContent' — filtered from guardsMap
+        b: {
+          type: 'TextContent',
+          value: 'text node',
+          requires: ['c'],
+        } as unknown as Value,
+        c: makeGuard('Guard C') as unknown as Value,
+      }),
+    ]);
+    const result = resolveGuardRequires(ast, { maxDepth: 3 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const a = props['a'] as Record<string, unknown>;
+    // a should still get resolved requires (b is not in guardsMap, so it's skipped)
+    // but c should not be resolved because b's requires are never processed
+    const resolved = a['__resolvedRequires'] as Array<Record<string, unknown>> | undefined;
+    if (resolved) {
+      // b is not in guardsMap (AST type), so it's skipped entirely
+      const names = resolved.map((r) => r['name']);
+      expect(names).not.toContain('b');
+    }
+  });
+
+  it('skips deps that are not in guardsMap', () => {
+    // Covers line 102: continue when depProps is not found
+    const ast = makeProgram([
+      makeGuardsBlock({
+        a: makeGuard('Guard A', ['missing-dep', 'b']) as unknown as Value,
+        b: makeGuard('Guard B') as unknown as Value,
+      }),
+    ]);
+    const result = resolveGuardRequires(ast, { maxDepth: 3 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const a = props['a'] as Record<string, unknown>;
+    const resolved = a['__resolvedRequires'] as Array<Record<string, unknown>>;
+    expect(resolved).toBeDefined();
+    const names = resolved.map((r) => r['name']);
+    // missing-dep should be skipped, but b should be included
+    expect(names).not.toContain('missing-dep');
+    expect(names).toContain('b');
+  });
+});

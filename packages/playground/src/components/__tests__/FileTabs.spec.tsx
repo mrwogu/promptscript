@@ -64,4 +64,34 @@ describe('FileTabs', () => {
     expect(state.files.some((f) => f.path === 'renamed.prs')).toBe(true);
     expect(state.files.some((f) => f.path === 'test.prs')).toBe(false);
   });
+
+  it('logs error when provider sync fails during rename', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const mockProvider: FileProvider = {
+      listFiles: vi.fn(),
+      readFile: vi.fn(),
+      writeFile: vi.fn(),
+      createFile: vi.fn().mockRejectedValue(new Error('Network error')),
+      deleteFile: vi.fn(),
+      isReadOnly: false,
+    };
+
+    render(<FileTabs provider={mockProvider} />);
+
+    const fileTab = screen.getByText('test.prs');
+    fireEvent.doubleClick(fileTab);
+
+    const input = screen.getByDisplayValue('test.prs');
+    fireEvent.change(input, { target: { value: 'renamed.prs' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    await vi.waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to sync rename to server:',
+        expect.any(Error)
+      );
+    });
+
+    consoleSpy.mockRestore();
+  });
 });
