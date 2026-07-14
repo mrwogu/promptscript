@@ -14,6 +14,7 @@ import {
   buildRegistryMarker,
 } from '../loader.js';
 import { Resolver } from '../resolver.js';
+import { RegistryCache } from '../registry-cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1012,5 +1013,134 @@ describe('Resolver — registry marker handling', () => {
     const traversalErrors = result.errors.filter((e) => e.message.includes('traversal'));
     expect(traversalErrors.length).toBeGreaterThan(0);
     expect(traversalErrors[0]!.message).toContain('Path traversal detected');
+  });
+
+  it('re-clones and checks out locked commit when cached commit mismatches', async () => {
+    // Covers resolver.ts lines 695-713: lockfile commit verification on cache hit
+    const tempDir = join(testCacheDir, 'project-lock-mismatch');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "lock-mismatch"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/standards',
+      '',
+      '@identity {',
+      '  """',
+      '  test',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    const cacheDir = join(testCacheDir, 'regcache-lock-mismatch');
+    const repoUrl = 'https://github.com/acme/prs-standards.git';
+    const lockedCommit = 'a'.repeat(40);
+
+    // Pre-populate cache with a different commit
+    const registryCache = new RegistryCache(cacheDir);
+    await registryCache.set(repoUrl, 'latest', 'b'.repeat(40));
+    // Write a standards.prs in the cached repo so the file exists
+    const cachePath = registryCache.getCachePath(repoUrl, 'latest');
+    await fs.writeFile(
+      join(cachePath, 'standards.prs'),
+      '@meta { id: "old-standards" syntax: "1.0.0" }\n@context { """old""" }'
+    );
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'standards.prs'),
+        '@meta { id: "acme-standards" syntax: "1.0.0" }\n@context { """new standards""" }'
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir,
+      lockfile: {
+        version: 1,
+        dependencies: {
+          [repoUrl]: {
+            version: 'latest',
+            commit: lockedCommit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    // Should have re-cloned due to commit mismatch
+    expect(mockGit.clone).toHaveBeenCalled();
+    // checkoutCommit should have been called with the locked commit
+    expect(mockGit.checkout).toHaveBeenCalledWith(lockedCommit);
+    // Standards content should be from the new clone
+    expect(result.errors).toEqual([]);
+  });
+
+  it('checks out locked commit after fresh clone on cache miss', async () => {
+    // Covers resolver.ts lines 728-729: lockfile commit checkout on cache miss
+    const tempDir = join(testCacheDir, 'project-lock-fresh');
+    await fs.mkdir(tempDir, { recursive: true });
+
+    const prsContent = [
+      '@meta {',
+      '  id: "lock-fresh"',
+      '  syntax: "1.0.0"',
+      '}',
+      '',
+      '@use @acme/standards',
+      '',
+      '@identity {',
+      '  """',
+      '  test',
+      '  """',
+      '}',
+    ].join('\n');
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(prsFile, prsContent);
+
+    const lockedCommit = 'c'.repeat(40);
+
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'standards.prs'),
+        '@meta { id: "acme-standards" syntax: "1.0.0" }\n@context { """fresh standards""" }'
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir: join(testCacheDir, 'regcache-lock-fresh'),
+      lockfile: {
+        version: 1,
+        dependencies: {
+          'https://github.com/acme/prs-standards.git': {
+            version: 'latest',
+            commit: lockedCommit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(prsFile);
+
+    expect(mockGit.clone).toHaveBeenCalled();
+    expect(mockGit.checkout).toHaveBeenCalledWith(lockedCommit);
+    expect(result.errors).toEqual([]);
   });
 });
