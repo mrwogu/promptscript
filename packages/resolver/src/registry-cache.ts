@@ -1,9 +1,22 @@
-import { mkdir, stat, writeFile, readFile } from 'fs/promises';
-import { join } from 'path';
+import { mkdir, stat, writeFile, readFile, lstat } from 'fs/promises';
+import { join, resolve, relative } from 'path';
 
 interface CacheMeta {
   commit: string;
   cachedAt: number;
+}
+
+/**
+ * Validate that a path component does not contain traversal segments
+ * that could escape the cache root.
+ */
+function validatePathComponent(component: string, label: string): void {
+  if (component.includes('..')) {
+    throw new Error(`Invalid ${label}: contains parent directory traversal (..)`);
+  }
+  if (component.startsWith('/')) {
+    throw new Error(`Invalid ${label}: absolute paths are not allowed`);
+  }
 }
 
 /**
@@ -16,7 +29,14 @@ export class RegistryCache {
 
   getCachePath(repoUrl: string, version: string): string {
     const normalized = repoUrl.replace(/^(https?:\/\/|git@|git:\/\/)/, '').replace(':', '/');
-    return join(this.baseDir, 'registries', normalized, version);
+    validatePathComponent(version, 'version');
+    const result = join(this.baseDir, 'registries', normalized, version);
+    // Verify the resolved path stays within baseDir
+    const rel = relative(resolve(this.baseDir), resolve(result));
+    if (rel.startsWith('..')) {
+      throw new Error(`Path traversal detected: version "${version}" escapes cache root`);
+    }
+    return result;
   }
 
   async has(repoUrl: string, version: string): Promise<boolean> {
@@ -32,8 +52,24 @@ export class RegistryCache {
   async set(repoUrl: string, version: string, commit: string): Promise<string> {
     const cachePath = this.getCachePath(repoUrl, version);
     await mkdir(cachePath, { recursive: true });
+    const metaPath = join(cachePath, '.prs-registry-meta.json');
+
+    // Reject symlinks: a cloned repo could contain .prs-registry-meta.json as a
+    // symlink to an arbitrary host path, causing this write to overwrite that target.
+    try {
+      const statResult = await lstat(metaPath);
+      if (statResult.isSymbolicLink()) {
+        throw new Error(
+          `Refusing to write metadata: ${metaPath} is a symlink (possible supply-chain attack)`
+        );
+      }
+    } catch (err) {
+      // ENOENT is expected when no meta file exists yet
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+    }
+
     const meta: CacheMeta = { commit, cachedAt: Date.now() };
-    await writeFile(join(cachePath, '.prs-registry-meta.json'), JSON.stringify(meta, null, 2));
+    await writeFile(metaPath, JSON.stringify(meta, null, 2));
     return cachePath;
   }
 

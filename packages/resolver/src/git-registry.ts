@@ -239,6 +239,30 @@ export class GitRegistry implements Registry {
   }
 
   /**
+   * Checkout a specific commit in an already-cloned repository.
+   * Used to enforce lockfile pinning: after cloning at a tag/branch,
+   * checkout the exact commit recorded in the lockfile.
+   *
+   * @param targetDir - Path to the cloned repository
+   * @param commit - Commit hash to checkout
+   */
+  async checkoutCommit(targetDir: string, commit: string): Promise<void> {
+    const git = this.createGit(targetDir);
+    try {
+      await git.fetch(['origin', commit, '--depth=1']);
+    } catch {
+      // Commit may not be directly fetchable (shallow clone); try unshallow
+      try {
+        await git.fetch(['--unshallow']);
+      } catch {
+        // If unshallow fails, try a full fetch
+        await git.fetch(['origin']);
+      }
+    }
+    await git.checkout(commit);
+  }
+
+  /**
    * Get the current commit hash for a ref.
    *
    * @param ref - Git ref (defaults to defaultRef)

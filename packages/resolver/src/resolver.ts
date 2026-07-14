@@ -1,15 +1,17 @@
 import { existsSync } from 'fs';
 import { lstat, readdir, readFile } from 'fs/promises';
-import { basename, dirname, join } from 'path';
+import { basename, dirname, join, relative, resolve } from 'path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
   type Logger,
   type Program,
   type Value,
+  type Lockfile,
   ResolveError,
   CircularDependencyError,
   FileNotFoundError,
+  ErrorCode,
   bindParams,
   interpolateAST,
   type TemplateContext,
@@ -41,6 +43,7 @@ import { normalizeBlockAliases } from './normalize.js';
 import { resolveSkillComposition } from './skill-composition.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
+import { hashContent } from './reference-hasher.js';
 import { discoverNativeContent } from './auto-discovery.js';
 import { findFallbackUrl } from './alias-resolver.js';
 
@@ -672,6 +675,14 @@ export class Resolver {
       // Determine the Git tag to clone at
       const tag = pinnedTag ?? 'main';
 
+      // Check if lockfile has a valid commit hash for pinning
+      const lockedCommit =
+        lockEntry?.commit &&
+        /^[0-9a-f]{40}$/.test(lockEntry.commit) &&
+        !/^0{40}$/.test(lockEntry.commit)
+          ? lockEntry.commit
+          : null;
+
       // Check RegistryCache for cached version
       const hasCached = await this.registryCache.has(repoUrl, effectiveVersion);
       let cachePath: string;
@@ -679,6 +690,27 @@ export class Resolver {
       if (hasCached) {
         this.logger.debug(`Registry cache hit: ${repoUrl}@${effectiveVersion}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
+
+        // If lockfile pins a specific commit, verify the cached repo matches
+        if (lockedCommit) {
+          try {
+            const cachedMeta = await this.registryCache.getMeta(repoUrl, effectiveVersion);
+            if (cachedMeta && cachedMeta.commit !== lockedCommit) {
+              this.logger.verbose(
+                `Lockfile commit mismatch for ${repoUrl}: cached=${cachedMeta.commit}, locked=${lockedCommit}. Re-cloning.`
+              );
+              // Force re-clone by falling through to the else branch
+              const fallbackRepoUrl = this.options.registries
+                ? findFallbackUrl(repoUrl, this.options.registries)
+                : undefined;
+              await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath, fallbackRepoUrl);
+              await this.gitRegistry.checkoutCommit(cachePath, lockedCommit);
+              await this.registryCache.set(repoUrl, effectiveVersion, lockedCommit);
+            }
+          } catch (err) {
+            this.logger.debug(`Lockfile commit verification failed: ${err}`);
+          }
+        }
       } else {
         this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
@@ -691,8 +723,14 @@ export class Resolver {
         // Clone using GitRegistry
         await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath, fallbackRepoUrl);
 
+        // If lockfile pins a specific commit, checkout that exact commit
+        if (lockedCommit) {
+          this.logger.verbose(`Checking out locked commit: ${lockedCommit}`);
+          await this.gitRegistry.checkoutCommit(cachePath, lockedCommit);
+        }
+
         // Record in RegistryCache
-        const commitHash = lockEntry?.commit ?? 'unknown';
+        const commitHash = lockedCommit ?? lockEntry?.commit ?? 'unknown';
         await this.registryCache.set(repoUrl, effectiveVersion, commitHash);
       }
 
@@ -709,6 +747,21 @@ export class Resolver {
             ? subPath
             : `${subPath}.prs`;
       const resolvedFullPath = isRoot ? '' : join(cachePath, resolvedFileName);
+
+      // Path containment check: ensure resolved path stays within cachePath
+      // to prevent directory traversal via crafted subpaths (e.g. ../../etc/passwd)
+      if (!isRoot) {
+        const rel = relative(resolve(cachePath), resolve(resolvedFullPath));
+        if (rel.startsWith('..') || resolve(resolvedFullPath) === resolve(cachePath)) {
+          errors.push(
+            new ResolveError(
+              `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
+            )
+          );
+          this.resolving.delete(marker);
+          return { ast: null, sources: [marker], errors };
+        }
+      }
 
       let resolvedAST: Program | null = null;
 
@@ -742,6 +795,20 @@ export class Resolver {
       } else {
         // No file found — try directory import and auto-discovery
         const discoverDir = isRoot ? cachePath : join(cachePath, subPath);
+
+        // Containment check for directory discovery path
+        if (!isRoot) {
+          const dirRel = relative(resolve(cachePath), resolve(discoverDir));
+          if (dirRel.startsWith('..')) {
+            errors.push(
+              new ResolveError(
+                `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
+              )
+            );
+            this.resolving.delete(marker);
+            return { ast: null, sources: [marker], errors };
+          }
+        }
 
         if (!isRoot && !existsSync(discoverDir)) {
           errors.push(
@@ -940,6 +1007,47 @@ export class Resolver {
    */
   clearCache(): void {
     this.cache.clear();
+  }
+
+  /**
+   * Verify integrity hashes for registry reference files.
+   * Reads each referenced file from the registry cache and compares its
+   * hash against the lockfile entry.
+   *
+   * @param lockfile - Lockfile with reference hashes
+   * @returns Array of errors for mismatched references
+   */
+  async verifyReferenceHashes(lockfile: Lockfile): Promise<ResolveError[]> {
+    if (!lockfile.references) return [];
+    const errors: ResolveError[] = [];
+
+    for (const [key, entry] of Object.entries(lockfile.references)) {
+      const parts = key.split('\0');
+      if (parts.length !== 3) continue;
+      const [repoUrl, relativePath, version] = parts as [string, string, string];
+
+      try {
+        const cachePath = this.registryCache.getCachePath(repoUrl, version);
+        const fullPath = join(cachePath, relativePath);
+        if (!existsSync(fullPath)) continue;
+
+        const content = await readFile(fullPath);
+        const actualHash = hashContent(content);
+        if (actualHash !== entry.hash) {
+          errors.push(
+            new ResolveError(
+              `Reference file hash mismatch: ${relativePath} has changed since last lock. Run \`prs lock --update\` to accept changes.`,
+              undefined,
+              ErrorCode.LOCKFILE_INTEGRITY
+            )
+          );
+        }
+      } catch {
+        // Skip files that can't be read (may not be cached)
+      }
+    }
+
+    return errors;
   }
 
   /**
