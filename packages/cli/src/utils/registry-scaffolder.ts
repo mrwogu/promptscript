@@ -17,6 +17,8 @@ export interface ScaffoldOptions {
   maintainer?: string;
   /** Whether to seed with starter configs */
   seed: boolean;
+  /** Overwrite existing files without prompting */
+  force?: boolean;
 }
 
 /**
@@ -133,8 +135,38 @@ export async function scaffoldRegistry(
   services: CliServices
 ): Promise<string[]> {
   const { fs } = services;
-  const { directory, name, description, namespaces, seed } = options;
+  const { directory, name, description, namespaces, seed, force } = options;
   const createdFiles: string[] = [];
+
+  // Safety check: refuse to overwrite an existing registry without --force
+  const existingManifestPath = join(directory, 'registry-manifest.yaml');
+  if (fs.existsSync(existingManifestPath) && !force) {
+    throw new Error(
+      `Directory already contains a registry-manifest.yaml. Use --force to overwrite.`
+    );
+  }
+
+  // Also check if the directory has any existing non-hidden files
+  // (hidden files like .git, .gitkeep are ignored, consistent with resolveTargetDirectory)
+  if (!force) {
+    let entries: string[];
+    try {
+      entries = await fs.readdir(directory);
+    } catch (err: unknown) {
+      const nodeErr = err as NodeJS.ErrnoException;
+      // ENOENT is expected - the directory doesn't exist yet, which is fine
+      if (nodeErr.code !== 'ENOENT') {
+        throw err;
+      }
+      entries = [];
+    }
+    const visibleEntries = entries.filter((e) => !e.startsWith('.'));
+    if (visibleEntries.length > 0) {
+      throw new Error(
+        `Directory "${directory}" is not empty. Use --force to overwrite existing files.`
+      );
+    }
+  }
 
   // Create root directory
   await fs.mkdir(directory, { recursive: true });

@@ -34,14 +34,28 @@ function detectTools(): ToolHookConfig[] {
 }
 
 /**
- * Read a JSON settings file, returning an empty object on missing/invalid file.
+ * Read a JSON settings file.
+ * Returns an empty object when the file is missing (ENOENT).
+ * Throws a clear error for parse failures or other filesystem errors.
  */
-async function readSettingsFile(path: string): Promise<Record<string, unknown>> {
+export async function readSettingsFile(path: string): Promise<Record<string, unknown>> {
+  let content: string;
   try {
-    const content = await readFile(path, 'utf-8');
+    content = await readFile(path, 'utf-8');
+  } catch (err: unknown) {
+    const nodeErr = err as NodeJS.ErrnoException;
+    // Only treat "file not found" as an acceptable empty result
+    if (nodeErr.code === 'ENOENT') {
+      return {};
+    }
+    throw err;
+  }
+
+  try {
     return JSON.parse(content) as Record<string, unknown>;
-  } catch {
-    return {};
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to parse settings file ${path}: ${message}`, { cause: err });
   }
 }
 

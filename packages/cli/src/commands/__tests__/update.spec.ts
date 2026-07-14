@@ -64,6 +64,13 @@ vi.mock('yaml', () => ({
   stringify: (o: unknown) => JSON.stringify(o),
 }));
 
+vi.mock('@promptscript/resolver', () => ({
+  validateRemoteAccess: vi.fn().mockResolvedValue({
+    accessible: false,
+    error: 'Mocked: no network in test',
+  }),
+}));
+
 import { updateCommand } from '../update.js';
 
 describe('updateCommand', () => {

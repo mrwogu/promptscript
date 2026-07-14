@@ -150,6 +150,8 @@ export interface RegistryInitOptions {
   output?: string;
   /** Whether to seed with starter configs (default true) */
   seed?: boolean;
+  /** Force overwrite existing files */
+  force?: boolean;
 }
 
 /**

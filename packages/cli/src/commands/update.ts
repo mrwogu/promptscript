@@ -7,6 +7,7 @@ import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { LOCKFILE_PATH } from './lock.js';
+import { validateRemoteAccess } from '@promptscript/resolver';
 
 /**
  * Re-resolve versions (ignoring current lockfile pins) and update promptscript.lock.
@@ -79,12 +80,19 @@ export async function updateCommand(
 
     for (const repoUrl of toUpdate) {
       const before = existing.dependencies[repoUrl]?.version ?? '(none)';
-      // In a full implementation this would fetch the latest commit/tag remotely.
-      // For now we reset pins to "latest" to signal re-resolution is needed.
+      const existingDep = existing.dependencies[repoUrl];
+
+      // Try to fetch the actual latest commit from the remote.
+      // If the remote is not accessible, preserve the existing commit and
+      // integrity so the lock is not destroyed with placeholder values.
+      const validation = await validateRemoteAccess(repoUrl);
       const updated: LockfileDependency = {
         version: 'latest',
-        commit: '0000000000000000000000000000000000000000',
-        integrity: 'sha256-pending',
+        commit:
+          validation.headCommit ??
+          existingDep?.commit ??
+          '0000000000000000000000000000000000000000',
+        integrity: existingDep?.integrity ?? 'sha256-pending',
       };
       dependencies[repoUrl] = updated;
       updates.push({ repoUrl, before, after: updated.version });

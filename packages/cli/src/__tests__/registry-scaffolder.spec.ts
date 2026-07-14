@@ -147,4 +147,77 @@ describe('utils/registry-scaffolder', () => {
     expect(content).toContain('@core');
     expect(content).toContain('@stacks');
   });
+
+  // Issue 6: prevent overwriting existing files without --force
+  it('should throw when directory already contains registry-manifest.yaml without --force', async () => {
+    const options: ScaffoldOptions = {
+      directory: '/test/existing-registry',
+      name: 'New Registry',
+      description: 'Should fail',
+      namespaces: ['@core'],
+      seed: false,
+    };
+
+    // Simulate existing manifest file
+    mockFs.existsSync.mockImplementation((path: string) =>
+      String(path).endsWith('registry-manifest.yaml')
+    );
+
+    await expect(scaffoldRegistry(options, mockServices)).rejects.toThrow(
+      /already contains a registry-manifest.yaml|Use --force/i
+    );
+  });
+
+  it('should throw when directory is non-empty without --force', async () => {
+    const options: ScaffoldOptions = {
+      directory: '/test/non-empty-dir',
+      name: 'New Registry',
+      description: 'Should fail',
+      namespaces: ['@core'],
+      seed: false,
+    };
+
+    // No manifest, but directory has other files
+    mockFs.existsSync.mockReturnValue(false);
+    mockFs.readdir.mockResolvedValue(['README.md', 'some-file.txt']);
+
+    await expect(scaffoldRegistry(options, mockServices)).rejects.toThrow(/not empty|Use --force/i);
+  });
+
+  it('should succeed with --force when directory already has registry-manifest.yaml', async () => {
+    const options: ScaffoldOptions = {
+      directory: '/test/existing-registry',
+      name: 'Overwrite Registry',
+      description: 'Force overwrite',
+      namespaces: ['@core'],
+      seed: false,
+      force: true,
+    };
+
+    mockFs.existsSync.mockImplementation((path: string) =>
+      String(path).endsWith('registry-manifest.yaml')
+    );
+    mockFs.readdir.mockResolvedValue(['registry-manifest.yaml']);
+
+    const files = await scaffoldRegistry(options, mockServices);
+    expect(files).toContain('/test/existing-registry/registry-manifest.yaml');
+  });
+
+  it('should succeed when directory does not exist (ENOENT on readdir)', async () => {
+    const options: ScaffoldOptions = {
+      directory: '/test/new-dir',
+      name: 'New Registry',
+      description: 'Fresh',
+      namespaces: ['@core'],
+      seed: false,
+    };
+
+    mockFs.existsSync.mockReturnValue(false);
+    const enoentError = new Error('ENOENT') as NodeJS.ErrnoException;
+    enoentError.code = 'ENOENT';
+    mockFs.readdir.mockRejectedValue(enoentError);
+
+    const files = await scaffoldRegistry(options, mockServices);
+    expect(files).toContain('/test/new-dir/registry-manifest.yaml');
+  });
 });

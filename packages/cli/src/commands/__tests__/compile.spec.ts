@@ -52,6 +52,7 @@ vi.mock('@promptscript/compiler', () => ({
 
 vi.mock('../../config/loader.js', () => ({
   loadConfig: () => mockLoadConfig(),
+  loadEffectiveConfig: () => mockLoadConfig(),
   CONFIG_FILES: ['promptscript.yaml'],
 }));
 
