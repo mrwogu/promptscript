@@ -222,6 +222,7 @@ export class Compiler {
     }
 
     // Stage 1.5: Reference Integrity
+    const compileErrors: CompileError[] = [];
     if (!this.options.ignoreHashes && this.options.resolver.lockfile?.references) {
       this.logger.verbose('=== Stage 1.5: Reference Integrity ===');
       // Collect registry reference paths for the validator
@@ -248,18 +249,34 @@ export class Compiler {
         }
       }
 
-      // Pass registry references to validator config for PS031
-      if (this.options.validator) {
-        this.options.validator.registryReferences = registryReferences;
-        this.options.validator.lockfile = this.options.resolver.lockfile;
-        this.options.validator.ignoreHashes = this.options.ignoreHashes;
+      // Verify reference file hashes against lockfile
+      const hashErrors = await this.resolver.verifyReferenceHashes(this.options.resolver.lockfile);
+      for (const err of hashErrors) {
+        compileErrors.push(this.toCompileError(err));
       }
+
+      // Pass registry references to validator for PS031 structural check
+      this.validator.updateConfig({
+        registryReferences,
+        lockfile: this.options.resolver.lockfile,
+        ignoreHashes: this.options.ignoreHashes,
+      });
     } else if (this.options.ignoreHashes) {
       this.logger.verbose('--ignore-hashes is set: reference integrity verification is disabled');
       console.error('⚠ --ignore-hashes is set: reference integrity verification is disabled');
-      if (this.options.validator) {
-        this.options.validator.ignoreHashes = true;
-      }
+      this.validator.updateConfig({ ignoreHashes: true });
+    }
+
+    // Check for reference integrity errors
+    if (compileErrors.length > 0) {
+      stats.totalTime = Date.now() - startTotal;
+      return {
+        success: false,
+        outputs: new Map(),
+        errors: compileErrors,
+        warnings: [],
+        stats,
+      };
     }
 
     // Stage 2: Validate

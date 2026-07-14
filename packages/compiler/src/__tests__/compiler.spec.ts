@@ -6,16 +6,20 @@ import { FormatterRegistry } from '@promptscript/formatters';
 // Create mock classes before importing Compiler
 const mockResolve = vi.fn();
 const mockValidate = vi.fn();
+const mockUpdateConfig = vi.fn();
+const mockVerifyReferenceHashes = vi.fn().mockResolvedValue([]);
 
 vi.mock('@promptscript/resolver', () => ({
   Resolver: class MockResolver {
     resolve = mockResolve;
+    verifyReferenceHashes = mockVerifyReferenceHashes;
   },
 }));
 
 vi.mock('@promptscript/validator', () => ({
   Validator: class MockValidator {
     validate = mockValidate;
+    updateConfig = mockUpdateConfig;
   },
 }));
 
@@ -1926,16 +1930,19 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    // Validator config should now have registryReferences populated
-    expect(validatorConfig).toHaveProperty('registryReferences');
-    const regRefs = (validatorConfig as Record<string, unknown>)[
+    // updateConfig should have been called with registryReferences
+    expect(mockUpdateConfig).toHaveBeenCalled();
+    const updateCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'registryReferences' in (c[0] as Record<string, unknown>)
+    );
+    expect(updateCall).toBeDefined();
+    const regRefs = (updateCall![0] as Record<string, unknown>)[
       'registryReferences'
     ] as Set<string>;
     expect(regRefs).toBeInstanceOf(Set);
     expect(regRefs.size).toBe(2);
     expect(regRefs.has('ref1.md')).toBe(true);
     expect(regRefs.has('ref2.md')).toBe(true);
-    expect(validatorConfig).toHaveProperty('lockfile');
   });
 
   it('should skip Stage 1.5 when no lockfile references section', async () => {
@@ -1954,8 +1961,11 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    // registryReferences should NOT be set
-    expect(validatorConfig).not.toHaveProperty('registryReferences');
+    // updateConfig should NOT have been called with registryReferences
+    const refCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'registryReferences' in (c[0] as Record<string, unknown>)
+    );
+    expect(refCall).toBeUndefined();
   });
 
   it('should set ignoreHashes on validator when flag is true', async () => {
@@ -1973,7 +1983,7 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    expect(validatorConfig).toHaveProperty('ignoreHashes', true);
+    expect(mockUpdateConfig).toHaveBeenCalledWith({ ignoreHashes: true });
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('--ignore-hashes is set'));
     errorSpy.mockRestore();
   });
@@ -2016,7 +2026,11 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    const regRefs = (validatorConfig as Record<string, unknown>)[
+    const updateCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'registryReferences' in (c[0] as Record<string, unknown>)
+    );
+    expect(updateCall).toBeDefined();
+    const regRefs = (updateCall![0] as Record<string, unknown>)[
       'registryReferences'
     ] as Set<string>;
     expect(regRefs.size).toBe(1);
@@ -2056,7 +2070,11 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    const regRefs = (validatorConfig as Record<string, unknown>)[
+    const updateCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'registryReferences' in (c[0] as Record<string, unknown>)
+    );
+    expect(updateCall).toBeDefined();
+    const regRefs = (updateCall![0] as Record<string, unknown>)[
       'registryReferences'
     ] as Set<string>;
     expect(regRefs.size).toBe(1);
@@ -2094,7 +2112,11 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    const regRefs = (validatorConfig as Record<string, unknown>)[
+    const updateCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'registryReferences' in (c[0] as Record<string, unknown>)
+    );
+    expect(updateCall).toBeDefined();
+    const regRefs = (updateCall![0] as Record<string, unknown>)[
       'registryReferences'
     ] as Set<string>;
     expect(regRefs.size).toBe(0);
@@ -2132,7 +2154,11 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    const regRefs = (validatorConfig as Record<string, unknown>)[
+    const updateCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'registryReferences' in (c[0] as Record<string, unknown>)
+    );
+    expect(updateCall).toBeDefined();
+    const regRefs = (updateCall![0] as Record<string, unknown>)[
       'registryReferences'
     ] as Set<string>;
     expect(regRefs.size).toBe(1);
