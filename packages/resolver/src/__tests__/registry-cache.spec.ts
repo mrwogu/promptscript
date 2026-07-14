@@ -147,6 +147,49 @@ describe('RegistryCache', () => {
     });
   });
 
+  describe('path traversal prevention', () => {
+    it('rejects version with .. segments in getCachePath', () => {
+      expect(() => cache.getCachePath('https://github.com/org/repo', '../../etc')).toThrow(
+        /traversal|invalid/i
+      );
+    });
+
+    it('rejects version with embedded .. in getCachePath', () => {
+      expect(() => cache.getCachePath('https://github.com/org/repo', 'foo/../../bar')).toThrow(
+        /traversal|invalid/i
+      );
+    });
+
+    it('rejects version with absolute path in getCachePath', () => {
+      expect(() => cache.getCachePath('https://github.com/org/repo', '/etc/passwd')).toThrow(
+        /traversal|invalid|absolute/i
+      );
+    });
+
+    it('accepts normal semver versions in getCachePath', () => {
+      expect(() => cache.getCachePath('https://github.com/org/repo', 'v1.0.0')).not.toThrow();
+      expect(() => cache.getCachePath('https://github.com/org/repo', 'latest')).not.toThrow();
+      expect(() => cache.getCachePath('https://github.com/org/repo', 'main')).not.toThrow();
+    });
+  });
+
+  describe('symlink metadata protection', () => {
+    it('rejects writing metadata when .prs-registry-meta.json is a symlink', async () => {
+      const repoUrl = 'https://github.com/org/repo';
+      const version = 'v1.0.0';
+      const cachePath = cache.getCachePath(repoUrl, version);
+      await fs.mkdir(cachePath, { recursive: true });
+
+      const targetFile = join(testBaseDir, 'target.txt');
+      await fs.writeFile(targetFile, 'original');
+      const metaPath = join(cachePath, '.prs-registry-meta.json');
+      await fs.symlink(targetFile, metaPath);
+
+      await expect(cache.set(repoUrl, version, 'abc123')).rejects.toThrow(/symlink/i);
+      expect(await fs.readFile(targetFile, 'utf-8')).toBe('original');
+    });
+  });
+
   describe('getTagsMeta()', () => {
     it('returns null for uncached repo', async () => {
       // Arrange / Act
