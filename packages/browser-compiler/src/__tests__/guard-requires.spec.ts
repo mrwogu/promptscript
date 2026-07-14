@@ -354,3 +354,31 @@ describe('resolveGuardRequires — collectDeps edge cases', () => {
     expect(names).toContain('b');
   });
 });
+
+describe('resolveGuardRequires — diamond dependency deduplication', () => {
+  it('skips already-visited dependencies in diamond pattern', () => {
+    // Diamond: A requires B and C, both B and C require D
+    // D should only appear once (visited set prevents duplicate)
+    const ast = makeProgram([
+      makeGuardsBlock({
+        a: makeGuard('Guard A', ['b', 'c']) as unknown as Value,
+        b: makeGuard('Guard B', ['d']) as unknown as Value,
+        c: makeGuard('Guard C', ['d']) as unknown as Value,
+        d: makeGuard('Guard D') as unknown as Value,
+      }),
+    ]);
+    const result = resolveGuardRequires(ast, { maxDepth: 3 });
+    const props = (result.blocks[0]!.content as ObjectContent).properties;
+    const a = props['a'] as Record<string, unknown>;
+    const resolved = a['__resolvedRequires'] as Array<Record<string, unknown>>;
+    expect(resolved).toBeDefined();
+    const names = resolved.map((r) => r['name']);
+    // D should appear only once despite being required by both B and C
+    const dCount = names.filter((n) => n === 'd').length;
+    expect(dCount).toBe(1);
+    // B and C should both be present
+    expect(names).toContain('b');
+    expect(names).toContain('c');
+    expect(names).toContain('d');
+  });
+});

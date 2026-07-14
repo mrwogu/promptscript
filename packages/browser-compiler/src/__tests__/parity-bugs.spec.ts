@@ -557,3 +557,60 @@ describe('Issue 4: colliding formatter output paths', () => {
     expect(addlCollisionWarn).toBeDefined();
   });
 });
+
+// ============================================================
+// Issue: Sub-skill resolution with errors (codecov lines 626, 629, 635, 636)
+// ============================================================
+
+describe('Sub-skill resolution with errors', () => {
+  it('pushes sub-skill sources and errors to parent, then catches composition error', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "parent" syntax: "1.2.0" }
+@skills {
+  deploy: {
+    description: "Deploy"
+    content: """Base"""
+  }
+  @use ./missing-sub
+}`,
+    });
+    const resolver = new BrowserResolver({ fs });
+    const result = await resolver.resolve('project.prs');
+
+    // The sub-skill file doesn't exist, so resolveFile returns errors
+    // and the composition error is caught
+    expect(result.errors.length).toBeGreaterThan(0);
+    const errorMsg = result.errors.map((e) => e.message).join('\n');
+    expect(errorMsg).toContain('sub-skill');
+  });
+});
+
+// ============================================================
+// Issue: applyExtends throws non-ResolveError (codecov line 382)
+// ============================================================
+
+describe('applyExtends non-ResolveError handling', () => {
+  it('wraps non-ResolveError from applyExtends into ResolveError', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "test" syntax: "1.2.0" }
+@skills {
+  deploy: {
+    content: """test"""
+  }
+}`,
+    });
+    const resolver = new BrowserResolver({ fs });
+    // Mock applyExtends to throw a non-ResolveError
+    vi.spyOn(
+      resolver as unknown as { applyExtends: (...args: unknown[]) => unknown },
+      'applyExtends'
+    ).mockImplementation(() => {
+      throw new TypeError('extend processing error');
+    });
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]!.message).toContain('Extension resolution failed');
+    expect(result.errors[0]!.message).toContain('extend processing error');
+  });
+});

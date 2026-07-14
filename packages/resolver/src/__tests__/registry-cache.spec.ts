@@ -171,6 +171,11 @@ describe('RegistryCache', () => {
       expect(() => cache.getCachePath('https://github.com/org/repo', 'latest')).not.toThrow();
       expect(() => cache.getCachePath('https://github.com/org/repo', 'main')).not.toThrow();
     });
+
+    it('rejects repoUrl with path traversal segments in getCachePath', () => {
+      // The version is valid, but the repoUrl contains .. that escapes cache root
+      expect(() => cache.getCachePath('https://../../etc/passwd', 'v1.0.0')).toThrow(/traversal/i);
+    });
   });
 
   describe('symlink metadata protection', () => {
