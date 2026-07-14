@@ -203,6 +203,59 @@ describe('createServer', () => {
     server = undefined as unknown as FastifyInstance;
   });
 
+  it('accepts WebSocket connection from allowed origin', async () => {
+    server = await createServer({
+      port: 0,
+      host: '127.0.0.1',
+      workspace,
+      readOnly: false,
+      corsOrigin: 'https://getpromptscript.dev',
+    });
+    await server.listen({ port: 0, host: '127.0.0.1' });
+    const address = server.server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+
+    const { default: WebSocket } = await import('ws');
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`, {
+      headers: { origin: 'https://getpromptscript.dev' },
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      ws.on('open', resolve);
+      ws.on('error', reject);
+    });
+
+    expect(ws.readyState).toBe(WebSocket.OPEN);
+    ws.close();
+  });
+
+  it('rejects WebSocket connection from disallowed origin', async () => {
+    server = await createServer({
+      port: 0,
+      host: '127.0.0.1',
+      workspace,
+      readOnly: false,
+      corsOrigin: 'https://getpromptscript.dev',
+    });
+    await server.listen({ port: 0, host: '127.0.0.1' });
+    const address = server.server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+
+    const { default: WebSocket } = await import('ws');
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`, {
+      headers: { origin: 'https://evil.example.com' },
+    });
+
+    const result = await new Promise<'rejected' | 'opened'>((resolve) => {
+      ws.on('open', () => resolve('opened'));
+      ws.on('error', () => resolve('rejected'));
+      ws.on('close', () => resolve('rejected'));
+    });
+
+    expect(result).toBe('rejected');
+    expect(ws.readyState).toBe(WebSocket.CLOSED);
+  });
+
   it('startServer re-throws non-EADDRINUSE listen errors', async () => {
     // Binding to an invalid host triggers EADDRNOTAVAIL, not EADDRINUSE
     await expect(

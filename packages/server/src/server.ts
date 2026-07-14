@@ -18,7 +18,20 @@ export async function createServer(options: ServerOptions): Promise<FastifyInsta
   });
 
   await app.register(fastifyRateLimit, { max: 1000, timeWindow: '1 minute' });
-  await app.register(fastifyWebsocket);
+  await app.register(fastifyWebsocket, {
+    options: {
+      // Validate Origin header to prevent cross-origin WebSocket connections.
+      // Browser WebSockets don't enforce CORS, so we must check server-side.
+      verifyClient: (info, callback) => {
+        const origin = info.req.headers.origin;
+        if (origin && origin !== options.corsOrigin && options.corsOrigin !== '*') {
+          callback(false, 403, 'Origin not allowed');
+          return;
+        }
+        callback(true);
+      },
+    },
+  });
 
   registerHealthRoute(app);
   registerConfigRoute(

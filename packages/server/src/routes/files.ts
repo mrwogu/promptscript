@@ -30,7 +30,7 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
   app.get<{ Params: { '*': string } }>('/api/files/*', async (request, reply) => {
     const filePath = request.params['*'];
     try {
-      const resolved = resolveSafePath(workspace, filePath);
+      const resolved = await resolveSafePath(workspace, filePath);
       const content = await readFile(resolved, 'utf-8');
       return { path: filePath, content };
     } catch (err) {
@@ -49,7 +49,7 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
       if (readOnly) return reply.status(403).send({ error: 'Read-only mode' });
       const filePath = request.params['*'];
       try {
-        const resolved = resolveSafePath(workspace, filePath);
+        const resolved = await resolveSafePath(workspace, filePath);
         await writeFile(resolved, request.body.content, 'utf-8');
         return { path: filePath, status: 'updated' };
       } catch (err) {
@@ -69,7 +69,7 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
       if (readOnly) return reply.status(403).send({ error: 'Read-only mode' });
       const filePath = request.params['*'];
       try {
-        const resolved = resolveSafePath(workspace, filePath);
+        const resolved = await resolveSafePath(workspace, filePath);
         try {
           await stat(resolved);
           return reply.status(409).send({ error: 'File already exists' });
@@ -93,7 +93,7 @@ export function registerRoutes(app: FastifyInstance, workspace: string, readOnly
     if (readOnly) return reply.status(403).send({ error: 'Read-only mode' });
     const filePath = request.params['*'];
     try {
-      const resolved = resolveSafePath(workspace, filePath);
+      const resolved = await resolveSafePath(workspace, filePath);
       await unlink(resolved);
       return { path: filePath, status: 'deleted' };
     } catch (err) {
