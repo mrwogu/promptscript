@@ -1,4 +1,4 @@
-import { CstParser } from 'chevrotain';
+import { CstParser, EOF } from 'chevrotain';
 import {
   allTokens,
   At,
@@ -70,6 +70,8 @@ export class PromptScriptParser extends CstParser {
         { ALT: () => this.SUBRULE(this.block) },
       ])
     );
+    // Consume EOF to ensure no trailing tokens are silently ignored
+    this.CONSUME(EOF);
   });
 
   /**
