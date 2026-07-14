@@ -492,4 +492,68 @@ describe('Issue 4: colliding formatter output paths', () => {
     const collisionWarn = warnCalls.find((m) => m.includes('collision'));
     expect(collisionWarn).toBeUndefined();
   });
+
+  it('should warn on additional file output path collisions', async () => {
+    // Covers compiler.ts lines 287-288: additional file collision detection
+    const warnCalls: string[] = [];
+    const logger = {
+      debug: vi.fn(),
+      verbose: vi.fn(),
+      info: vi.fn(),
+      warn: (msg: string) => warnCalls.push(msg),
+      error: vi.fn(),
+    };
+
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "addl-collision" syntax: "1.0.0" }
+@identity { """Test.""" }`,
+    });
+
+    // Formatter A outputs to OUTPUT.md and an additional file EXTRA.md
+    const formatterA: Formatter = {
+      name: 'formatter-a',
+      outputPath: 'OUTPUT.md',
+      description: 'Formatter A',
+      defaultConvention: 'markdown',
+      format: (_ast: Program, _options?: FormatOptions): FormatterOutput => ({
+        path: 'OUTPUT.md',
+        content: 'Content A',
+        additionalFiles: [{ path: 'EXTRA.md', content: 'Extra A' }],
+      }),
+      getSupportedVersions: () => ({
+        default: { name: 'default', description: 'Default', outputPath: 'OUTPUT.md' },
+      }),
+    };
+
+    // Formatter B outputs to OUTPUT2.md but also writes EXTRA.md as additional
+    const formatterB: Formatter = {
+      name: 'formatter-b',
+      outputPath: 'OUTPUT2.md',
+      description: 'Formatter B',
+      defaultConvention: 'markdown',
+      format: (_ast: Program, _options?: FormatOptions): FormatterOutput => ({
+        path: 'OUTPUT2.md',
+        content: 'Content B',
+        additionalFiles: [{ path: 'EXTRA.md', content: 'Extra B' }],
+      }),
+      getSupportedVersions: () => ({
+        default: { name: 'default', description: 'Default', outputPath: 'OUTPUT2.md' },
+      }),
+    };
+
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [formatterA, formatterB],
+      logger,
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    // Should warn about EXTRA.md collision (additional file)
+    const addlCollisionWarn = warnCalls.find(
+      (m) => m.includes('EXTRA.md') && m.includes('collision')
+    );
+    expect(addlCollisionWarn).toBeDefined();
+  });
 });

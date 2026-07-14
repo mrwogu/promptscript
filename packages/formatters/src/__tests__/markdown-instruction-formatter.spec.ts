@@ -1094,5 +1094,64 @@ describe('MarkdownInstructionFormatter', () => {
       const cmdFile = result.additionalFiles?.find((f) => f.path === '.test/commands/build.md');
       expect(cmdFile).toBeDefined();
     });
+
+    it('should reject unsafe command names in TextContent multiline path', () => {
+      // Covers isSafeName check at line 307 for TextContent with multiline content
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../evil': {
+                  type: 'TextContent',
+                  value: 'Line one\nLine two',
+                  loc: createLoc(),
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFiles = result.additionalFiles?.filter((f) => f.path.includes('commands')) ?? [];
+      expect(cmdFiles).toHaveLength(0);
+    });
+
+    it('should accept safe command names in TextContent multiline path', () => {
+      // Covers the positive branch of isSafeName at line 307
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  type: 'TextContent',
+                  value: 'Step one\nStep two',
+                  loc: createLoc(),
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFile = result.additionalFiles?.find((f) => f.path === '.test/commands/deploy.md');
+      expect(cmdFile).toBeDefined();
+      expect(cmdFile?.content).toContain('Step one');
+    });
   });
 });

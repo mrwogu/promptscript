@@ -2365,4 +2365,105 @@ describe('BrowserResolver', () => {
       expect(blockNames).toContain('standards');
     });
   });
+
+  describe('mergeValue TextContent concatenation', () => {
+    it('should concatenate TextContent values with newline separator on extend', async () => {
+      // Covers resolver.ts line 1221: isTextContent(existing) && extContent.type === 'TextContent'
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "text-merge" syntax: "1.2.0" }
+@knowledge { """Original knowledge text.""" }
+@extend knowledge { """Additional knowledge text.""" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      expect(result.ast).not.toBeNull();
+      const knowledgeBlock = result.ast?.blocks.find((b) => b.name === 'knowledge');
+      expect(knowledgeBlock).toBeDefined();
+      if (knowledgeBlock?.content.type === 'TextContent') {
+        const value = knowledgeBlock.content.value;
+        expect(value).toContain('Original knowledge text.');
+        expect(value).toContain('Additional knowledge text.');
+        // Should have newline separator
+        expect(value).toContain('\n\n');
+      }
+    });
+  });
+
+  describe('deepMerge ArrayContent case', () => {
+    it('should merge ArrayContent blocks in nested object properties via extend', async () => {
+      // Covers resolver.ts line 1341: ArrayContent case in deepMerge
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "array-merge" syntax: "1.2.0" }
+@context {
+  items: {
+    list: ["a", "b"]
+  }
+}
+@extend context.items { list: ["c", "d"] }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      expect(result.ast).not.toBeNull();
+      const contextBlock = result.ast?.blocks.find((b) => b.name === 'context');
+      if (contextBlock?.content.type === 'ObjectContent') {
+        const items = contextBlock.content.properties['items'] as Record<string, unknown>;
+        const list = items['list'];
+        // ArrayContent merge should concatenate elements
+        if (
+          list &&
+          typeof list === 'object' &&
+          'type' in list &&
+          (list as { type: string }).type === 'ArrayContent'
+        ) {
+          const elements = (list as { elements: unknown[] }).elements;
+          expect(elements).toHaveLength(4);
+          const values = elements.map(String);
+          expect(values).toContain('a');
+          expect(values).toContain('b');
+          expect(values).toContain('c');
+          expect(values).toContain('d');
+        }
+      }
+    });
+  });
+
+  describe('deepCloneValue array cloning', () => {
+    it('should deep clone array values in skill properties', async () => {
+      // Covers resolver.ts line 1443: Array.isArray(value) in deepCloneValue
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "clone-array" syntax: "1.2.0" }
+@skills {
+  base: {
+    description: "Base"
+    content: """Base content"""
+    tags: ["alpha", "beta"]
+  }
+}
+@extend skills.base {
+  description: "Extended"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      expect(result.ast).not.toBeNull();
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        const base = skillsBlock.content.properties['base'] as Record<string, unknown>;
+        // tags array should be preserved (cloned, not lost)
+        const tags = base['tags'];
+        expect(tags).toBeDefined();
+        if (Array.isArray(tags)) {
+          expect(tags).toHaveLength(2);
+          expect(tags).toContain('alpha');
+          expect(tags).toContain('beta');
+        }
+      }
+    });
+  });
 });

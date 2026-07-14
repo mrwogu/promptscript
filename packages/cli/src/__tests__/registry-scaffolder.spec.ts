@@ -220,4 +220,22 @@ describe('utils/registry-scaffolder', () => {
     const files = await scaffoldRegistry(options, mockServices);
     expect(files).toContain('/test/new-dir/registry-manifest.yaml');
   });
+
+  it('should throw non-ENOENT errors from readdir', async () => {
+    // Covers the non-ENOENT error path in the readdir catch block
+    const options: ScaffoldOptions = {
+      directory: '/test/perm-denied',
+      name: 'Perm Registry',
+      description: 'Permission denied',
+      namespaces: ['@core'],
+      seed: false,
+    };
+
+    mockFs.existsSync.mockReturnValue(false);
+    const permError = new Error('Permission denied') as NodeJS.ErrnoException;
+    permError.code = 'EACCES';
+    mockFs.readdir.mockRejectedValue(permError);
+
+    await expect(scaffoldRegistry(options, mockServices)).rejects.toThrow('Permission denied');
+  });
 });
