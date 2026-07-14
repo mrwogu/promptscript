@@ -218,7 +218,13 @@ describe('commands/registry/init', () => {
   });
 
   it('should create slugified subdirectory when CWD is not empty and --yes', async () => {
-    mockFs.readdir.mockResolvedValue(['package.json', 'src']);
+    // CWD has files, but the target subdirectory doesn't exist yet
+    mockFs.readdir.mockImplementation((dir: string) => {
+      if (dir === '/test') return Promise.resolve(['package.json', 'src']);
+      const err = new Error('ENOENT') as NodeJS.ErrnoException;
+      err.code = 'ENOENT';
+      return Promise.reject(err);
+    });
 
     await registryInitCommand(
       undefined,
@@ -233,7 +239,14 @@ describe('commands/registry/init', () => {
   });
 
   it('should use explicit directory arg without slugifying', async () => {
-    mockFs.readdir.mockResolvedValue(['package.json']);
+    // CWD has files, but the target directory doesn't exist yet
+    mockFs.readdir.mockImplementation((dir: string) => {
+      if (dir === '/test') return Promise.resolve(['package.json']);
+      // Target dir doesn't exist yet
+      const err = new Error('ENOENT') as NodeJS.ErrnoException;
+      err.code = 'ENOENT';
+      return Promise.reject(err);
+    });
 
     await registryInitCommand('my-explicit-dir', { yes: true }, mockServices);
 

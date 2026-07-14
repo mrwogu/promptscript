@@ -18,6 +18,7 @@ export function registerRegistryCommands(registry: Command): void {
     .option('-y, --yes', 'Non-interactive mode with defaults')
     .option('-o, --output <dir>', 'Output directory')
     .option('--no-seed', 'Skip seed configurations')
+    .option('-f, --force', 'Force overwrite existing files')
     .action((directory, opts) => registryInitCommand(directory, opts));
 
   registry

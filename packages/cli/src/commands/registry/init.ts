@@ -80,7 +80,7 @@ export async function registryInitCommand(
     const spinner = createSpinner('Creating registry...').start();
 
     const createdFiles = await scaffoldRegistry(
-      { directory: targetDir, name, description, namespaces, seed },
+      { directory: targetDir, name, description, namespaces, seed, force: options.force },
       services
     );
 

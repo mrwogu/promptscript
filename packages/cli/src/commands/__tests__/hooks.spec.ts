@@ -59,7 +59,9 @@ function setupDetectPaths(detected: string[]): void {
  */
 function setupDefaults(): void {
   mockExistsSync.mockReturnValue(false);
-  mockReadFile.mockRejectedValue(new Error('ENOENT'));
+  const enoentError = new Error('ENOENT') as NodeJS.ErrnoException;
+  enoentError.code = 'ENOENT';
+  mockReadFile.mockRejectedValue(enoentError);
   mockWriteFile.mockResolvedValue(undefined);
   mockMkdir.mockResolvedValue(undefined);
   mockChmod.mockResolvedValue(undefined);
@@ -159,7 +161,9 @@ describe('hooksCommand', () => {
     });
 
     it('creates settings file if missing', async () => {
-      mockReadFile.mockRejectedValue(new Error('ENOENT'));
+      const enoentError = new Error('ENOENT') as NodeJS.ErrnoException;
+      enoentError.code = 'ENOENT';
+      mockReadFile.mockRejectedValue(enoentError);
 
       await hooksCommand('install', 'claude', {});
 
@@ -302,7 +306,9 @@ describe('hooksCommand', () => {
     });
 
     it('handles missing settings file gracefully', async () => {
-      mockReadFile.mockRejectedValue(new Error('ENOENT'));
+      const enoentError = new Error('ENOENT') as NodeJS.ErrnoException;
+      enoentError.code = 'ENOENT';
+      mockReadFile.mockRejectedValue(enoentError);
 
       await hooksCommand('uninstall', 'claude', {});
 

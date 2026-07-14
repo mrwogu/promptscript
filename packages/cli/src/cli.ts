@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname } from 'path';
 import { getPackageVersion } from '@promptscript/core';
 import { initCommand } from './commands/init.js';
@@ -304,5 +304,7 @@ export function run(args: string[] = process.argv): void {
   program.parse(args);
 }
 
-// Run if executed directly
-run();
+// Run if executed directly as the entry point
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  run();
+}

@@ -15,7 +15,7 @@ import type {
 import { isValidLockfile } from '@promptscript/core';
 
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
-import { loadConfig, CONFIG_FILES } from '../config/loader.js';
+import { loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
 import { resolvePrettierOptions } from '../prettier/loader.js';
 import { postFormatWithPrettier } from '../prettier/post-format.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
@@ -460,13 +460,22 @@ export async function compileCommand(
       : options.cwd
         ? findConfigInDir(projectRoot)
         : undefined;
-    const config = await loadConfig(configPath);
+    const config = await loadEffectiveConfig(configPath);
     const buildProfile = getBuildProfile(config, options.build);
 
     // --format is an alias for --target
     const selectedTarget = options.target ?? options.format;
     const targetEntries = buildProfile?.targets ?? config.targets;
-    const targets = selectedTarget ? [{ name: selectedTarget }] : parseTargets(targetEntries);
+    const parsedTargets = parseTargets(targetEntries);
+    let targets: { name: string; config?: TargetConfig }[];
+    if (selectedTarget) {
+      // Find the matching target entry to preserve configured options
+      // (version, convention, skillBaseDir, etc.) instead of discarding them
+      const matched = parsedTargets.find((t) => t.name === selectedTarget);
+      targets = matched ? [matched] : [{ name: selectedTarget }];
+    } else {
+      targets = parsedTargets;
+    }
 
     // Detect output path conflicts before doing any work
     const conflicts = detectOutputConflicts(targets);
