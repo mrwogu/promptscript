@@ -614,3 +614,106 @@ describe('applyExtends non-ResolveError handling', () => {
     expect(result.errors[0]!.message).toContain('extend processing error');
   });
 });
+
+// ============================================================
+// Issue #290: Skill composition with @use params doesn't work
+// ============================================================
+
+describe('Skill composition with @use params (issue #290)', () => {
+  it('interpolates params from @use ./sub(severity: "critical") into sub-skill content', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "parent" syntax: "1.1.0" }
+@skills {
+  ops: {
+    description: "Ops"
+    content: """Base ops instructions"""
+  }
+  @use ./phases/triage(severity: "critical")
+}`,
+      'phases/triage.prs': `@meta {
+  id: "triage"
+  syntax: "1.1.0"
+  params: {
+    severity: string = "all"
+  }
+}
+@restrictions {
+  - "Never classify severity higher than {{severity}} threshold"
+}
+@skills {
+  triage: {
+    description: "Triage"
+    content: """Classify findings at {{severity}} level."""
+  }
+}`,
+    });
+    const resolver = new BrowserResolver({ fs });
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.ast).not.toBeNull();
+    expect(result.errors).toEqual([]);
+
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    if (skillsBlock?.content.type !== 'ObjectContent') {
+      throw new Error('expected ObjectContent for skills block');
+    }
+
+    const ops = skillsBlock.content.properties['ops'] as Record<string, unknown>;
+    const content = ops['content'];
+    const contentValue =
+      typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+
+    // The {{severity}} should be interpolated to "critical"
+    expect(contentValue).toContain('critical');
+    expect(contentValue).not.toContain('{{severity}}');
+    // Phase should contain interpolated restriction
+    expect(contentValue).toContain('critical threshold');
+  });
+
+  it('interpolates params with alias @use ./sub(level: 5) as phase', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@meta { id: "parent" syntax: "1.1.0" }
+@skills {
+  deploy: {
+    description: "Deploy"
+    content: """Base deploy"""
+  }
+  @use ./scanner(depth: "full") as deepscan
+}`,
+      'scanner.prs': `@meta {
+  id: "scanner"
+  syntax: "1.1.0"
+  params: {
+    depth: string = "shallow"
+  }
+}
+@skills {
+  scanner: {
+    description: "Scanner"
+    content: """Scan at {{depth}} depth."""
+  }
+}`,
+    });
+    const resolver = new BrowserResolver({ fs });
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.ast).not.toBeNull();
+    expect(result.errors).toEqual([]);
+
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    if (skillsBlock?.content.type !== 'ObjectContent') {
+      throw new Error('expected ObjectContent for skills block');
+    }
+
+    const deploy = skillsBlock.content.properties['deploy'] as Record<string, unknown>;
+    const content = deploy['content'];
+    const contentValue =
+      typeof content === 'string' ? content : ((content as { value?: string })?.value ?? '');
+
+    // The {{depth}} should be interpolated to "full"
+    expect(contentValue).toContain('full');
+    expect(contentValue).not.toContain('{{depth}}');
+    // Phase name should use alias
+    expect(contentValue).toContain('deepscan');
+  });
+});
