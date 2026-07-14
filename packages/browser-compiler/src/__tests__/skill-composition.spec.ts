@@ -853,3 +853,165 @@ describe('resolveSkillComposition — extractTextValue edge cases', () => {
     expect(content.value).toContain('base');
   });
 });
+
+// ── Coverage: edge cases for extractBlockText and extractTextValue ──
+
+describe('resolveSkillComposition — empty phases clears inlineUses', () => {
+  it('returns content with inlineUses cleared when no phases resolved', async () => {
+    // Sub-skill with no skill definition and no context blocks → 0 phases
+    const subAst = makeProgram([makeTextBlock('description', 'no skills here')]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./empty-sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/empty-sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const skillsBlock = result.blocks[0]!;
+    const content = skillsBlock.content as ObjectContent;
+    // inlineUses should be cleared (undefined)
+    expect(content.inlineUses).toBeUndefined();
+    // Properties should be preserved
+    expect(content.properties['deploy']).toBeDefined();
+  });
+});
+
+describe('resolveSkillComposition — extractBlockText with non-string property values', () => {
+  it('handles boolean and number values in ObjectContent blocks', async () => {
+    // Create a sub-skill with a knowledge block containing boolean/number properties
+    const subAst = makeSubSkillProgram('sub', 'Sub instructions', {}, [
+      makeObjectBlock('knowledge', {
+        enabled: true as unknown as Value,
+        level: 42 as unknown as Value,
+        topic: 'security',
+      }),
+    ]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    const content = deploy['content'] as { value: string };
+    // Should include the stringified boolean and number
+    expect(content.value).toContain('enabled');
+    expect(content.value).toContain('true');
+    expect(content.value).toContain('level');
+    expect(content.value).toContain('42');
+  });
+
+  it('handles TextContent property values in ObjectContent blocks', async () => {
+    // Create a sub-skill with a knowledge block containing TextContent property
+    const subAst = makeSubSkillProgram('sub', 'Sub instructions', {}, [
+      makeObjectBlock('knowledge', {
+        topic: { type: 'TextContent', value: 'security guidelines', loc: defaultLoc },
+        category: 'compliance',
+      }),
+    ]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    const content = deploy['content'] as { value: string };
+    // Should extract the TextContent value
+    expect(content.value).toContain('topic');
+    expect(content.value).toContain('security guidelines');
+  });
+});
+
+describe('resolveSkillComposition — extractBlockText with non-string array elements', () => {
+  it('handles non-string elements in ArrayContent blocks', async () => {
+    // Create a sub-skill with a restrictions block containing non-string elements
+    const subAst = makeSubSkillProgram('sub', 'Sub instructions', {}, [
+      {
+        type: 'Block',
+        name: 'restrictions',
+        content: {
+          type: 'ArrayContent',
+          elements: [42, true] as unknown as string[],
+          loc: defaultLoc,
+        },
+        loc: defaultLoc,
+      },
+    ]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    const content = deploy['content'] as { value: string };
+    // Should include stringified non-string elements
+    expect(content.value).toContain('42');
+    expect(content.value).toContain('true');
+  });
+});
+
+describe('resolveSkillComposition — extractTextValue with object content', () => {
+  it('handles skill with non-string non-TextContent content property', async () => {
+    // Create a sub-skill where content is an ObjectContent (not string/TextContent)
+    const subAst = makeProgram([
+      makeSkillsBlock({
+        sub: {
+          content: { type: 'ObjectContent', properties: { nested: 'value' }, loc: defaultLoc },
+        } as unknown as Value,
+      }),
+    ]);
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subAst),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    const deploy = (result.blocks[0]!.content as ObjectContent).properties['deploy'] as Record<
+      string,
+      unknown
+    >;
+    const content = deploy['content'] as { value: string };
+    // Should still compose, with empty existing content for the sub-skill
+    expect(content.value).toContain('Phase 1');
+  });
+});
