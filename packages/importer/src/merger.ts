@@ -84,6 +84,20 @@ function mergeWithAttribution(sections: SourcedSection[]): MergedBlock {
   };
 }
 
+/**
+ * Check if a line is a structural marker that should always be preserved
+ * during deduplication. Removing repeated occurrences of these markers
+ * (e.g. code fences, horizontal rules) would corrupt the Markdown structure.
+ */
+function isStructuralMarker(line: string): boolean {
+  const trimmed = line.trim();
+  // Code fence markers: ``` optionally followed by a language identifier
+  if (/^```[^\s`]*$/.test(trimmed)) return true;
+  // Horizontal rules: ---, ***, ___ (exactly, no trailing text)
+  if (/^(---|\*\*\*|___)$/.test(trimmed)) return true;
+  return false;
+}
+
 function mergeUnion(sections: SourcedSection[]): { block: MergedBlock; deduped: number } {
   const seenLines = new Set<string>();
   const uniqueLines: string[] = [];
@@ -94,6 +108,12 @@ function mergeUnion(sections: SourcedSection[]): { block: MergedBlock; deduped: 
     for (const line of lines) {
       const normalized = line.trim().replace(/\s+/g, ' ');
       if (normalized.length === 0) continue;
+      // Always preserve structural markers (code fences, horizontal rules)
+      // even if they appear multiple times across sections
+      if (isStructuralMarker(line)) {
+        uniqueLines.push(line);
+        continue;
+      }
       if (seenLines.has(normalized)) {
         deduped++;
         continue;

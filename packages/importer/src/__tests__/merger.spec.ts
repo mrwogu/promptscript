@@ -103,4 +103,50 @@ describe('mergeSections', () => {
     expect(result.merged.size).toBe(0);
     expect(result.deduplicatedCount).toBe(0);
   });
+
+  it('preserves repeated code fence markers across sections', () => {
+    const sections = [
+      section('standards', 'Code example:\n```ts\nconst x = 1;\n```', 'CLAUDE.md'),
+      section('standards', 'Another example:\n```python\nx = 1\n```', '.cursorrules'),
+    ];
+    const result = mergeSections(sections);
+    const standards = result.merged.get('standards')!;
+    const fenceCount = (standards.content.match(/```/g) ?? []).length;
+    // 4 code fence markers (2 per section) should all be preserved
+    expect(fenceCount).toBe(4);
+  });
+
+  it('preserves repeated horizontal rules across sections', () => {
+    const sections = [
+      section('restrictions', 'Rule 1\n---\nRule 2', 'CLAUDE.md'),
+      section('restrictions', 'Rule 3\n---\nRule 4', '.cursorrules'),
+    ];
+    const result = mergeSections(sections);
+    const restrictions = result.merged.get('restrictions')!;
+    const hrCount = (restrictions.content.match(/^---$/gm) ?? []).length;
+    // 2 horizontal rules should be preserved
+    expect(hrCount).toBe(2);
+  });
+
+  it('still deduplicates non-structural repeated lines', () => {
+    const sections = [
+      section('restrictions', '- Never use any', 'CLAUDE.md'),
+      section('restrictions', '- Never use any', '.cursorrules'),
+    ];
+    const result = mergeSections(sections);
+    const restrictions = result.merged.get('restrictions')!;
+    const lines = restrictions.content.split('\n').filter((l) => l.trim().length > 0);
+    expect(lines).toHaveLength(1);
+    expect(result.deduplicatedCount).toBe(1);
+  });
+
+  it('preserves code fence markers within a single section', () => {
+    const sections = [
+      section('standards', 'Example 1:\n```\ncode1\n```\nExample 2:\n```\ncode2\n```', 'CLAUDE.md'),
+    ];
+    const result = mergeSections(sections);
+    const standards = result.merged.get('standards')!;
+    const fenceCount = (standards.content.match(/```/g) ?? []).length;
+    expect(fenceCount).toBe(4);
+  });
 });

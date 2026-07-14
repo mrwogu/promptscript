@@ -5,6 +5,19 @@ export interface EmitOptions {
   projectName: string;
 }
 
+/**
+ * Determine the appropriate triple-quote delimiter for a content string.
+ * If the content contains sequences of double quotes, the delimiter is
+ * extended to be one quote longer than the longest run, preventing the
+ * content from prematurely closing the enclosing block.
+ */
+function resolveQuoteDelimiter(content: string): string {
+  const matches = content.match(/"+/g);
+  if (!matches) return '"""';
+  const maxRun = matches.reduce((max, m) => Math.max(max, m.length), 0);
+  return '"'.repeat(Math.max(3, maxRun + 1));
+}
+
 export function emitPrs(sections: ScoredSection[], options: EmitOptions): string {
   const lines: string[] = [];
 
@@ -41,11 +54,12 @@ export function emitPrs(sections: ScoredSection[], options: EmitOptions): string
         lines.push(`  ${entryName}: {`);
         lines.push(`    applyTo: [${applyToStr}]`);
         lines.push(`    description: "${description}"`);
-        lines.push(`    content: """`);
+        const contentDelimiter = resolveQuoteDelimiter(section.content);
+        lines.push(`    content: ${contentDelimiter}`);
         for (const contentLine of section.content.split('\n')) {
           lines.push(`    ${contentLine}`);
         }
-        lines.push(`    """`);
+        lines.push(`    ${contentDelimiter}`);
         lines.push(`  }`);
       }
       lines.push(`}`);
@@ -57,11 +71,12 @@ export function emitPrs(sections: ScoredSection[], options: EmitOptions): string
 
     // Merge content from all sections in this block
     const mergedContent = blockSections.map((s) => s.content).join('\n\n');
-    lines.push(`  """`);
+    const contentDelimiter = resolveQuoteDelimiter(mergedContent);
+    lines.push(`  ${contentDelimiter}`);
     for (const contentLine of mergedContent.split('\n')) {
       lines.push(`    ${contentLine}`);
     }
-    lines.push(`  """`);
+    lines.push(`  ${contentDelimiter}`);
     lines.push('}');
   }
 
@@ -117,11 +132,12 @@ export function emitModularFiles(
         lines.push('# REVIEW: low confidence -- verify this mapping');
       }
       lines.push(`@${block.targetBlock} {`);
-      lines.push('  """');
+      const blockDelimiter = resolveQuoteDelimiter(block.content);
+      lines.push(`  ${blockDelimiter}`);
       for (const contentLine of block.content.split('\n')) {
         lines.push(`    ${contentLine}`);
       }
-      lines.push('  """');
+      lines.push(`  ${blockDelimiter}`);
       lines.push('}');
       lines.push('');
     }
@@ -148,11 +164,12 @@ export function emitModularFiles(
       projectLines.push(comment);
     }
     projectLines.push('@identity {');
-    projectLines.push('  """');
+    const identityDelimiter = resolveQuoteDelimiter(identity.content);
+    projectLines.push(`  ${identityDelimiter}`);
     for (const line of identity.content.split('\n')) {
       projectLines.push(`    ${line}`);
     }
-    projectLines.push('  """');
+    projectLines.push(`  ${identityDelimiter}`);
     projectLines.push('}');
   }
 

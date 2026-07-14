@@ -126,6 +126,80 @@ describe('emitPrs', () => {
     expect(result).not.toContain('@identity');
     expect(result).not.toContain('@standards');
   });
+
+  it('escapes triple quotes in content to prevent premature block close', () => {
+    const sections = [
+      scored({
+        targetBlock: 'context',
+        content: 'Some text with """triple quotes""" inside.',
+      }),
+    ];
+    const result = emitPrs(sections, { projectName: 'test' });
+    // The content should still be present
+    expect(result).toContain('triple quotes');
+    // Delimiter lines should be longer than 3 quotes to avoid premature close
+    const delimiterLines = result
+      .split('\n')
+      .filter((l) => /^\s*"""+\s*$/.test(l))
+      .map((l) => l.trim());
+    expect(delimiterLines.length).toBeGreaterThanOrEqual(2);
+    expect(delimiterLines.every((d) => d.length >= 4)).toBe(true);
+  });
+
+  it('handles content with multiple triple quotes', () => {
+    const sections = [
+      scored({
+        targetBlock: 'standards',
+        content: 'Line with """quotes"""\nAnother """line"""',
+      }),
+    ];
+    const result = emitPrs(sections, { projectName: 'test' });
+    expect(result).toContain('quotes');
+    expect(result).toContain('line');
+    // Should not have exactly 3-quote delimiters (would close early)
+    const lines = result.split('\n');
+    const delimiterLines = lines.filter((l) => /^\s*"""+\s*$/.test(l));
+    expect(delimiterLines.length).toBeGreaterThanOrEqual(2);
+    // All delimiters should be 4+ quotes
+    expect(delimiterLines.every((l) => l.trim().length >= 4)).toBe(true);
+  });
+
+  it('uses longer delimiter for content with 4 consecutive quotes', () => {
+    const sections = [
+      scored({
+        targetBlock: 'context',
+        content: 'Text with """"four quotes"""" here.',
+      }),
+    ];
+    const result = emitPrs(sections, { projectName: 'test' });
+    const delimiterLines = result
+      .split('\n')
+      .filter((l) => /^\s*"""+\s*$/.test(l))
+      .map((l) => l.trim());
+    // Delimiter must be longer than 4 quotes
+    expect(delimiterLines.every((d) => d.length >= 5)).toBe(true);
+  });
+
+  it('escapes triple quotes in guards content', () => {
+    const sections = [
+      scored({
+        targetBlock: 'guards',
+        heading: 'security',
+        content: 'Check for """injection""" attacks.',
+        metadata: { entryName: 'security', applyTo: ['all'], description: 'Security rules' },
+      }),
+    ];
+    const result = emitPrs(sections, { projectName: 'test' });
+    expect(result).toContain('injection');
+    // Guard content delimiters should also be escaped
+    const guardBlock = result.substring(result.indexOf('@guards'));
+    const delimiterLines = guardBlock
+      .split('\n')
+      .filter((l) => /"""+/.test(l))
+      .map((l) => l.trim());
+    expect(delimiterLines.length).toBeGreaterThanOrEqual(2);
+    expect(delimiterLines.every((d) => d.length >= 4)).toBe(true);
+  });
 });
 
 describe('emitModularFiles', () => {
