@@ -16,7 +16,14 @@ import type {
   ComposedPhase,
   SkillContractField,
 } from '@promptscript/core';
-import { deepClone, isTextContent, ResolveError } from '@promptscript/core';
+import {
+  deepClone,
+  isTextContent,
+  ResolveError,
+  bindParams,
+  interpolateAST,
+  type TemplateContext,
+} from '@promptscript/core';
 
 // ── Configuration constants ────────────────────────────────────────
 
@@ -278,6 +285,22 @@ async function resolveInlineUse(
       `Failed to resolve sub-skill '${inlineUse.path.raw}': ${err instanceof Error ? err.message : String(err)}`,
       inlineUse.loc
     );
+  }
+
+  // Apply parameter interpolation when the inline @use has params
+  if (inlineUse.params && inlineUse.params.length > 0) {
+    try {
+      const boundParams = bindParams(inlineUse.params, subAst.meta?.params, absPath, inlineUse.loc);
+      if (boundParams.size > 0) {
+        const ctx: TemplateContext = { params: boundParams, sourceFile: absPath };
+        subAst = interpolateAST(subAst, ctx);
+      }
+    } catch (err) {
+      throw new ResolveError(
+        `Failed to bind params for sub-skill '${inlineUse.path.raw}': ${err instanceof Error ? err.message : String(err)}`,
+        inlineUse.loc
+      );
+    }
   }
 
   // Extract skill definition from the sub-skill's @skills block
