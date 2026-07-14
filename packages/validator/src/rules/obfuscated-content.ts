@@ -179,7 +179,12 @@ function decodeRawHex(hex: string): string | null {
     bytes.push(byte);
   }
 
-  const decoded = String.fromCharCode(...bytes);
+  // Build string incrementally to avoid RangeError from argument spreading
+  // on large payloads (V8 has a ~65536 argument limit for function calls)
+  let decoded = '';
+  for (const byte of bytes) {
+    decoded += String.fromCharCode(byte);
+  }
   // eslint-disable-next-line no-control-regex
   if (/[\x00-\x08\x0E-\x1F]/.test(decoded)) {
     return null;

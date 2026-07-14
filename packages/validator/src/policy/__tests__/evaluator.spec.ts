@@ -559,4 +559,18 @@ describe('extractRegistry', () => {
     expect(extractRegistry('./local.prs')).toBeNull();
     expect(extractRegistry('relative/path.prs')).toBeNull();
   });
+
+  it('extracts registry from resolved cache paths', async () => {
+    const { extractRegistry } = await import('../evaluator.js');
+    expect(
+      extractRegistry('/home/user/.cache/registries/github.com/org/repo/v1.0.0/@core/skills.prs')
+    ).toBe('@core');
+    expect(extractRegistry('/project/.promptscript/registry/@team/overlay.prs')).toBe('@team');
+  });
+
+  it('returns null for absolute paths without registry prefix', async () => {
+    const { extractRegistry } = await import('../evaluator.js');
+    expect(extractRegistry('/home/user/project/local.prs')).toBeNull();
+    expect(extractRegistry('/absolute/path/without/registry.prs')).toBeNull();
+  });
 });

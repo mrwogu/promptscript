@@ -59,6 +59,19 @@ export class Validator {
   }
 
   /**
+   * Update validator configuration after construction.
+   * Allows the compiler to inject runtime data (registry references, lockfile, etc.)
+   * that becomes available only after resolution.
+   */
+  updateConfig(partial: Partial<ValidatorConfig>): void {
+    this.config = { ...this.config, ...partial };
+    // Update disabled rules if changed
+    if (partial.disableRules) {
+      this.disabledRules = new Set(partial.disableRules);
+    }
+  }
+
+  /**
    * Validate an AST.
    *
    * @param ast - The resolved AST to validate
