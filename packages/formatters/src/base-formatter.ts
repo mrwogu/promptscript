@@ -686,10 +686,18 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Check if a name is safe for use in file paths.
+   * Rejects path traversal sequences and path separators.
+   */
+  protected isSafeName(name: string): boolean {
+    return !name.includes('..') && !name.includes('/') && !name.includes('\\');
+  }
+
+  /**
    * Check if a skill name is safe for use in file paths.
    */
   protected isSafeSkillName(name: string): boolean {
-    return !name.includes('..') && !name.includes('/') && !name.includes('\\');
+    return this.isSafeName(name);
   }
 
   /**

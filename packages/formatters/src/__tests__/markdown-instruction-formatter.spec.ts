@@ -981,4 +981,118 @@ describe('MarkdownInstructionFormatter', () => {
       expect(cmdFile?.path).toBe('.custom/commands/test.md');
     });
   });
+
+  describe('command name path traversal', () => {
+    it('should reject command names containing ../', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../evil': {
+                  description: 'Evil cmd',
+                  prompt: true,
+                  content: 'Malicious content.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFiles = result.additionalFiles?.filter((f) => f.path.includes('commands')) ?? [];
+      expect(cmdFiles).toHaveLength(0);
+    });
+
+    it('should reject command names containing forward slash', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'sub/dir': {
+                  description: 'Subdir cmd',
+                  prompt: true,
+                  content: 'Content.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFiles = result.additionalFiles?.filter((f) => f.path.includes('commands')) ?? [];
+      expect(cmdFiles).toHaveLength(0);
+    });
+
+    it('should reject command names containing backslash', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'sub\\dir': {
+                  description: 'Backslash cmd',
+                  prompt: true,
+                  content: 'Content.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFiles = result.additionalFiles?.filter((f) => f.path.includes('commands')) ?? [];
+      expect(cmdFiles).toHaveLength(0);
+    });
+
+    it('should accept safe command names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                build: {
+                  description: 'Build cmd',
+                  prompt: true,
+                  content: 'Build the project.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFile = result.additionalFiles?.find((f) => f.path === '.test/commands/build.md');
+      expect(cmdFile).toBeDefined();
+    });
+  });
 });
