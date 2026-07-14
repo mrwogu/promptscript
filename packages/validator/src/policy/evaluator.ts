@@ -64,14 +64,22 @@ function getComposedFrom(skill: Record<string, unknown>): ComposedFromEntry[] {
 // ============================================================
 
 /**
- * Extracts the registry prefix (e.g. `@core`) from a source path like
- * `@core/skills.prs`. Returns null if the source does not start with `@`.
+ * Extracts the registry prefix (e.g. `@core`) from a source path.
+ * Handles both direct references (`@core/skills.prs`) and resolved cache
+ * paths (`/home/user/.cache/registries/.../@core/skills.prs`).
+ * Returns null if the source does not contain a registry namespace.
  */
 export function extractRegistry(source: string): string | null {
-  if (!source.startsWith('@')) return null;
-  const slash = source.indexOf('/');
-  if (slash === -1) return source;
-  return source.slice(0, slash);
+  // Direct registry reference: @core/skills.prs
+  if (source.startsWith('@')) {
+    const slash = source.indexOf('/');
+    if (slash === -1) return source;
+    return source.slice(0, slash);
+  }
+  // Resolved cache path containing a registry namespace: /.../@core/skills.prs
+  const match = /\/(@[a-zA-Z_][a-zA-Z0-9_-]*)\//.exec(source);
+  if (match) return match[1] ?? null;
+  return null;
 }
 
 /**

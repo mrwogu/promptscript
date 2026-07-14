@@ -1334,6 +1334,23 @@ describe('obfuscated-content rule (PS012)', () => {
       // Should not throw and should not report (control chars are filtered)
       expect(() => obfuscatedContent.validate(ctx)).not.toThrow();
     });
+
+    it('should not throw RangeError on very large hex payloads', () => {
+      // Generate a hex payload large enough to exceed V8's argument spread limit
+      // ~100k bytes = 200k hex chars, well above the ~65k limit
+      const largeHex = Array.from({ length: 100_000 }, () =>
+        Math.floor(Math.random() * 256)
+          .toString(16)
+          .padStart(2, '0')
+      ).join(' ');
+      const ast = createTestProgram({
+        blocks: [createTextBlock('@skills', `Data: ${largeHex}`)],
+      });
+      const { ctx } = createRuleContext(ast);
+
+      // Should not throw RangeError
+      expect(() => obfuscatedContent.validate(ctx)).not.toThrow();
+    });
   });
 
   describe('sanitization pipeline - hex escapes', () => {

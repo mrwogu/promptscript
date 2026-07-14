@@ -153,16 +153,16 @@ function walkValue(
   } else if (Array.isArray(value)) {
     walkArrayElements(value, loc, callback, exclude);
   } else if (value !== null && typeof value === 'object') {
-    // Check if it's a TextContent node
+    // Check if it's a TextContent node (terminal — extract text and stop)
     if ('type' in value) {
       const typed = value as { type: string; value?: string; loc?: SourceLocation };
       if (typed.type === 'TextContent' && typeof typed.value === 'string') {
         callback(typed.value, typed.loc ?? loc);
+        return;
       }
-    } else {
-      // Regular object - walk its properties
-      walkObjectProperties(value as Record<string, Value>, loc, callback, exclude);
     }
+    // Regular object or non-TextContent AST node — recurse into properties
+    walkObjectProperties(value as Record<string, Value>, loc, callback, exclude);
   }
 }
 
