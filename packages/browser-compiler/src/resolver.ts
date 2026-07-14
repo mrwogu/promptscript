@@ -21,6 +21,8 @@ import {
   type TemplateContext,
 } from '@promptscript/core';
 import { VirtualFileSystem } from './virtual-fs.js';
+import { resolveSkillComposition } from './skill-composition.js';
+import { resolveGuardRequires } from './guard-requires.js';
 import type {
   Block,
   BlockContent,
@@ -157,6 +159,24 @@ const SKILL_PRESERVE_PROPERTIES = new Set([
   'sealed',
   '__layerTrace',
 ]);
+
+/**
+ * Resolve the `sealed` property value into a set of enforceable property names.
+ * Only replace-strategy property names are enforceable; others are silently ignored.
+ * Mirrors `resolveSealedKeys` in `@promptscript/resolver/extensions`.
+ */
+function resolveSealedKeys(val: unknown): Set<string> {
+  if (val === true) {
+    return new Set(SKILL_REPLACE_PROPERTIES);
+  }
+  let names: string[];
+  if (Array.isArray(val)) {
+    names = val.filter((el): el is string => typeof el === 'string');
+  } else {
+    return new Set();
+  }
+  return new Set(names.filter((n) => SKILL_REPLACE_PROPERTIES.has(n)));
+}
 
 /**
  * Type guard for values that should be treated as a skill object. The parser
@@ -346,11 +366,29 @@ export class BrowserResolver {
     // Resolve imports
     ast = await this.resolveImports(ast, absPath, sources, errors);
 
+    // Resolve skill composition (inline @use within @skills blocks)
+    ast = await this.resolveComposition(ast, absPath, sources, errors);
+
     // Apply extensions
     if (ast.extends.length > 0) {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
-    ast = this.applyExtends(ast);
+    try {
+      ast = this.applyExtends(ast);
+    } catch (err) {
+      if (err instanceof ResolveError) {
+        errors.push(err);
+      } else {
+        errors.push(
+          new ResolveError(
+            `Extension resolution failed: ${err instanceof Error ? err.message : String(err)}`
+          )
+        );
+      }
+    }
+
+    // Resolve guard requires dependencies
+    ast = resolveGuardRequires(ast, { maxDepth: 3 });
 
     this.logger.debug(`Resolved ${sources.length} source file(s)`);
     return {
@@ -545,6 +583,67 @@ export class BrowserResolver {
     }
 
     return result;
+  }
+
+  /**
+   * Resolve inline @use declarations within @skills blocks (skill composition).
+   *
+   * Mirrors the CLI resolver's resolveComposition: loads each inline @use
+   * sub-skill through the full resolver pipeline, extracts its skill
+   * definition and context blocks, and composes them into the parent skill
+   * as numbered phase sections.
+   */
+  private async resolveComposition(
+    ast: Program,
+    absPath: string,
+    sources: string[],
+    errors: ResolveError[]
+  ): Promise<Program> {
+    try {
+      ast = await resolveSkillComposition(ast, {
+        currentFile: absPath,
+        resolvePath: (ref: string, fromFile: string): string => {
+          // Build a PathReference-like object matching the parser's shape
+          const isRelative = ref.startsWith('./') || ref.startsWith('../');
+          const segments = ref.split('/').filter((s) => s !== '.' && s !== '..');
+
+          const pathRef: PathReference = {
+            type: 'PathReference',
+            raw: ref,
+            segments,
+            isRelative,
+            loc: { file: fromFile, line: 1, column: 1, offset: 0 },
+          };
+
+          return this.resolveRef(pathRef, fromFile);
+        },
+        resolveFile: async (subPath: string): Promise<Program> => {
+          const subResult = await this.resolve(subPath);
+          if (subResult.sources.length > 0) {
+            sources.push(...subResult.sources);
+          }
+          if (subResult.errors.length > 0) {
+            errors.push(...subResult.errors);
+          }
+          if (!subResult.ast) {
+            throw new ResolveError(`Failed to resolve sub-skill: ${subPath}`);
+          }
+          return subResult.ast;
+        },
+      });
+    } catch (err) {
+      if (err instanceof ResolveError) {
+        errors.push(err);
+      } else {
+        errors.push(
+          new ResolveError(
+            `Skill composition failed: ${err instanceof Error ? err.message : String(err)}`
+          )
+        );
+      }
+    }
+
+    return ast;
   }
 
   /**
@@ -1141,6 +1240,14 @@ export class BrowserResolver {
     for (const [key, extVal] of Object.entries(ext.properties)) {
       if (SKILL_PRESERVE_PROPERTIES.has(key)) {
         continue;
+      }
+
+      // Check sealed properties — block overrides of sealed replace-strategy properties
+      const sealedKeys = resolveSealedKeys(base['sealed']);
+      if (sealedKeys.has(key)) {
+        throw new ResolveError(
+          `Cannot override sealed property '${key}' on skill (sealed by base definition)`
+        );
       }
 
       if (SKILL_REPLACE_PROPERTIES.has(key)) {

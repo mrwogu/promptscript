@@ -108,6 +108,10 @@ export interface CompileResult {
   success: boolean;
   /** Formatter outputs keyed by output path */
   outputs: Map<string, FormatterOutput>;
+  /** Maps each output path to the formatter name that produced it.
+   *  Present on results from BrowserCompiler.compile(); may be absent in
+   *  manually constructed results. */
+  outputOwners?: Map<string, string>;
   /** Errors encountered during compilation */
   errors: CompileError[];
   /** Warnings from validation */
@@ -198,6 +202,7 @@ export class BrowserCompiler {
       return {
         success: false,
         outputs: new Map(),
+        outputOwners: new Map(),
         errors: [this.toCompileError(err instanceof Error ? err : new Error(String(err)))],
         warnings: [],
         stats,
@@ -214,6 +219,7 @@ export class BrowserCompiler {
       return {
         success: false,
         outputs: new Map(),
+        outputOwners: new Map(),
         errors: resolved.errors.map((e) => this.toCompileError(e)),
         warnings: [],
         stats,
@@ -234,6 +240,7 @@ export class BrowserCompiler {
       return {
         success: false,
         outputs: new Map(),
+        outputOwners: new Map(),
         errors: validation.errors.map((e) => this.validationToCompileError(e)),
         warnings: validation.warnings,
         stats,
@@ -244,6 +251,7 @@ export class BrowserCompiler {
     this.logger.verbose('=== Stage 3: Format ===');
     const startFormat = Date.now();
     const outputs = new Map<string, FormatterOutput>();
+    const outputOwners = new Map<string, string>();
     const formatErrors: CompileError[] = [];
 
     for (const { formatter, config } of this.loadedFormatters) {
@@ -259,13 +267,31 @@ export class BrowserCompiler {
 
         this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
 
+        // Detect output path collision — warn instead of silently overwriting
+        if (outputs.has(output.path)) {
+          const previousOwner = outputOwners.get(output.path) ?? 'unknown';
+          this.logger.warn(
+            `Output path collision: '${output.path}' is already owned by ` +
+              `'${previousOwner}', now overwritten by '${formatter.name}'. ` +
+              `Last formatter wins — assign a custom output path to avoid data loss.`
+          );
+        }
         outputs.set(output.path, output);
+        outputOwners.set(output.path, formatter.name);
 
         // Also add any additional files
         if (output.additionalFiles) {
           for (const additionalFile of output.additionalFiles) {
             this.logger.verbose(`  → ${additionalFile.path} (additional)`);
+            if (outputs.has(additionalFile.path)) {
+              const prevOwner = outputOwners.get(additionalFile.path) ?? 'unknown';
+              this.logger.warn(
+                `Output path collision: '${additionalFile.path}' is already owned by ` +
+                  `'${prevOwner}', now overwritten by '${formatter.name}' (additional file).`
+              );
+            }
             outputs.set(additionalFile.path, additionalFile);
+            outputOwners.set(additionalFile.path, formatter.name);
           }
         }
       } catch (err) {
@@ -285,6 +311,7 @@ export class BrowserCompiler {
       return {
         success: false,
         outputs,
+        outputOwners,
         errors: formatErrors,
         warnings: validation.warnings,
         stats,
@@ -294,6 +321,7 @@ export class BrowserCompiler {
     return {
       success: true,
       outputs,
+      outputOwners,
       errors: [],
       warnings: validation.warnings,
       stats,
