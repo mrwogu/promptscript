@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.2](https://github.com/mrwogu/promptscript/compare/v1.13.1...v1.13.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* **browser-compiler:** add skill composition, guard requires, sealed props, collision detection ([c8d8763](https://github.com/mrwogu/promptscript/commit/c8d87639b8e526f85a75e9cc902525f2ec1d9180))
+* **browser-compiler:** interpolate params for inline [@use](https://github.com/use) in skill composition ([80887ba](https://github.com/mrwogu/promptscript/commit/80887ba850d993da75c52f0ad0850a555530dde9)), closes [#290](https://github.com/mrwogu/promptscript/issues/290)
+* **cli:** guard import side-effects, use effective config, preserve target options, fix update locks, protect settings and registry dirs ([2453b98](https://github.com/mrwogu/promptscript/commit/2453b9880eaa99178d96cdea7c96e9b5b338a03c))
+* **compiler:** invoke reference hash verification and fix validator config ([aebbfde](https://github.com/mrwogu/promptscript/commit/aebbfde90c22d6352550476409db01bb0e3e0a63))
+* **formatters:** sanitize command names for path traversal ([ccdb3e6](https://github.com/mrwogu/promptscript/commit/ccdb3e6a98c0b978f6796af2ec0e37f62ec7fad5))
+* **importer:** escape triple quotes and preserve structural markers in dedup ([8f6bbdb](https://github.com/mrwogu/promptscript/commit/8f6bbdb90acf0cbdd02c2aa5cb2dc776000c44aa))
+* **parser:** consume EOF token to reject trailing garbage ([5b1dab5](https://github.com/mrwogu/promptscript/commit/5b1dab59cd3da00cb60e9d4aa27d3eff769fa891))
+* **playground:** guard stale loads, sync renames, encode paths, validate formatters ([54c6f6a](https://github.com/mrwogu/promptscript/commit/54c6f6aaeec49c5156cea3a0ac3a430547f54f49))
+* **resolver:** prevent path traversal in registry cache and subpaths ([eec417a](https://github.com/mrwogu/promptscript/commit/eec417a491c95297eb3f5a008674b93b77ce5e2f))
+* **server:** resolve symlinks in path guard and validate WebSocket origins ([b37051b](https://github.com/mrwogu/promptscript/commit/b37051b044883d4dea696ad64949036d95bf3b1a))
+* **validator:** close security bypasses in walker, obfuscated content, and policy ([a96c74b](https://github.com/mrwogu/promptscript/commit/a96c74b6b450ecd372dcc6c45171552f0107590d))
+
 ## [1.13.1](https://github.com/mrwogu/promptscript/compare/v1.13.0...v1.13.1) (2026-06-18)
 
 
