@@ -1,5 +1,13 @@
 import type { FileProvider, FileListEntry } from './file-provider';
 
+/**
+ * Encode each path segment with encodeURIComponent while preserving `/` separators.
+ * This prevents characters like `#`, `?`, and `%` from breaking the URL.
+ */
+function encodePath(path: string): string {
+  return path.split('/').map(encodeURIComponent).join('/');
+}
+
 export class LocalFileProvider implements FileProvider {
   private baseUrl: string;
   readonly isReadOnly: boolean;
@@ -18,14 +26,14 @@ export class LocalFileProvider implements FileProvider {
   }
 
   async readFile(path: string): Promise<string> {
-    const res = await fetch(`${this.baseUrl}/api/files/${path}`);
+    const res = await fetch(`${this.baseUrl}/api/files/${encodePath(path)}`);
     if (!res.ok) throw new Error(`Failed to read file: ${res.statusText}`);
     const data = (await res.json()) as { content: string };
     return data.content;
   }
 
   async writeFile(path: string, content: string): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/api/files/${path}`, {
+    const res = await fetch(`${this.baseUrl}/api/files/${encodePath(path)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content }),
@@ -34,7 +42,7 @@ export class LocalFileProvider implements FileProvider {
   }
 
   async createFile(path: string, content: string): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/api/files/${path}`, {
+    const res = await fetch(`${this.baseUrl}/api/files/${encodePath(path)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content }),
@@ -43,7 +51,7 @@ export class LocalFileProvider implements FileProvider {
   }
 
   async deleteFile(path: string): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/api/files/${path}`, {
+    const res = await fetch(`${this.baseUrl}/api/files/${encodePath(path)}`, {
       method: 'DELETE',
     });
     if (!res.ok) throw new Error(`Failed to delete file: ${res.statusText}`);

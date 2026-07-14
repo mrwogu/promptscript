@@ -250,6 +250,12 @@ export function generateShareUrl(
 }
 
 /**
+ * Set of valid formatter names extracted from the default config targets.
+ * Used to validate the `f` URL parameter before storing it.
+ */
+const VALID_FORMATTERS: ReadonlySet<string> = new Set(Object.keys(DEFAULT_CONFIG.targets));
+
+/**
  * Load state from the current URL if present.
  */
 export function loadStateFromUrl(): ShareableState | null {
@@ -261,10 +267,10 @@ export function loadStateFromUrl(): ShareableState | null {
   const state = decodeState(encoded);
   if (!state) return null;
 
-  // Override formatter if specified in URL
-  const formatter = url.searchParams.get('f') as FormatterName | null;
-  if (formatter) {
-    state.formatter = formatter;
+  // Override formatter if specified in URL and it's a known formatter
+  const formatter = url.searchParams.get('f');
+  if (formatter && VALID_FORMATTERS.has(formatter)) {
+    state.formatter = formatter as FormatterName;
   }
 
   return state;

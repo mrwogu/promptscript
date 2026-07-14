@@ -103,6 +103,8 @@ export function useLocalFiles(
             content: await provider.readFile(entry.path),
           }))
         );
+        // Skip update if provider changed while requests were pending
+        if (providerRef.current !== provider) return;
         if (files.length > 0) {
           setFiles(files);
         }
@@ -114,6 +116,8 @@ export function useLocalFiles(
     const loadConfig = async (): Promise<void> => {
       try {
         const projectConfig = await provider.fetchConfig();
+        // Skip update if provider changed while requests were pending
+        if (providerRef.current !== provider) return;
         if (projectConfig) {
           const currentConfig = usePlaygroundStore.getState().config;
           const newConfig = applyProjectConfig(currentConfig, projectConfig);

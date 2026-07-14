@@ -69,6 +69,7 @@ export function useCompiler() {
       setCompileResult({
         success: true,
         outputs: new Map(),
+        outputOwners: new Map(),
         errors: [],
         warnings: [],
         stats: { resolveTime: 0, validateTime: 0, formatTime: 0, totalTime: 0 },
@@ -95,6 +96,7 @@ export function useCompiler() {
       setCompileResult({
         success: false,
         outputs: new Map(),
+        outputOwners: new Map(),
         errors: [
           {
             name: 'CompileError',

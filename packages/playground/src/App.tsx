@@ -21,7 +21,7 @@ function PlaygroundLayout() {
   const { handleShare, serverParam, clearServerParam } = useUrlState();
 
   const { status, serverHost, error, connect, disconnect, onFileEvent } = useServerConnection();
-  const { saveFile } = useLocalFiles(serverHost, onFileEvent);
+  const { saveFile, provider } = useLocalFiles(serverHost, onFileEvent);
   const isLocalMode = status === 'connected';
 
   const showExamples = usePlaygroundStore((s) => s.showExamples);
@@ -171,7 +171,7 @@ function PlaygroundLayout() {
 
         {/* Editor panel */}
         <div className="flex flex-col border-r border-ps-border" style={{ width: `${leftWidth}%` }}>
-          <FileTabs />
+          <FileTabs provider={provider} />
           <div className="flex-1">
             <Editor />
           </div>
