@@ -2164,4 +2164,89 @@ describe('Stage 1.5: Reference Integrity', () => {
     expect(regRefs.size).toBe(1);
     expect(regRefs.has('valid.md')).toBe(true);
   });
+
+  it('should return compile errors when verifyReferenceHashes finds mismatches', async () => {
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc: { file: 'test.prs', line: 1, column: 1 },
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              mySkill: {
+                references: ['./ref.md'],
+              } as unknown as Record<string, unknown>,
+            },
+            loc: { file: 'test.prs', line: 1, column: 1 },
+          } as unknown as import('@promptscript/core').BlockContent,
+        } as unknown as import('@promptscript/core').Block,
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+
+    // Mock verifyReferenceHashes to return hash mismatch errors
+    const hashError = {
+      message: 'Reference file hash mismatch: ./ref.md has changed since last lock.',
+      code: 'PS_LOCKFILE_INTEGRITY',
+      name: 'ResolveError',
+    };
+    mockVerifyReferenceHashes.mockResolvedValueOnce([hashError]);
+
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1,
+          dependencies: {},
+          references: {
+            'repo\0./ref.md\0v1.0.0': {
+              hash: 'abc',
+              lockedAt: '2026-01-01T00:00:00Z',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    const result = await compiler.compile('./test.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors[0]!.message).toContain('hash mismatch');
+  });
+
+  it('should call updateConfig with ignoreHashes when --ignore-hashes is set', async () => {
+    const ast = createTestProgram();
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue({ valid: true, errors: [], warnings: [], infos: [], all: [] });
+
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1,
+          dependencies: {},
+          references: {
+            'repo\0./ref.md\0v1.0.0': {
+              hash: 'abc',
+              lockedAt: '2026-01-01T00:00:00Z',
+            },
+          },
+        },
+      },
+      ignoreHashes: true,
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    const ignoreCall = mockUpdateConfig.mock.calls.find(
+      (c) => c[0] && 'ignoreHashes' in (c[0] as Record<string, unknown>)
+    );
+    expect(ignoreCall).toBeDefined();
+    expect((ignoreCall![0] as Record<string, unknown>)['ignoreHashes']).toBe(true);
+  });
 });

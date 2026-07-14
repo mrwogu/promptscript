@@ -177,4 +177,53 @@ describe('Validator', () => {
       expect(validator.getConfig().rules).toEqual({ 'empty-block': 'off' });
     });
   });
+
+  describe('updateConfig', () => {
+    it('merges partial config into existing config', () => {
+      const validator = new Validator({ requiredGuards: ['@core/guards/compliance'] });
+      validator.updateConfig({ registryReferences: new Set(['@core/skills.prs']) });
+
+      const config = validator.getConfig();
+      expect(config.requiredGuards).toEqual(['@core/guards/compliance']);
+      expect(config.registryReferences).toBeDefined();
+      expect(config.registryReferences?.has('@core/skills.prs')).toBe(true);
+    });
+
+    it('updates disabledRules when disableRules is provided', () => {
+      const validator = new Validator();
+      validator.updateConfig({ disableRules: ['empty-block', 'naming-convention'] });
+
+      const config = validator.getConfig();
+      expect(config.disableRules).toEqual(['empty-block', 'naming-convention']);
+    });
+
+    it('does not modify disableRules when not in partial', () => {
+      const validator = new Validator({ disableRules: ['some-rule'] });
+      validator.updateConfig({ registryReferences: new Set() });
+
+      const config = validator.getConfig();
+      expect(config.disableRules).toEqual(['some-rule']);
+    });
+
+    it('updates ignoreHashes flag', () => {
+      const validator = new Validator();
+      validator.updateConfig({ ignoreHashes: true });
+
+      const config = validator.getConfig();
+      expect(config.ignoreHashes).toBe(true);
+    });
+
+    it('preserves existing config when updating with partial', () => {
+      const validator = new Validator({
+        requiredGuards: ['@core/guards/compliance'],
+        rules: { 'empty-block': 'warning' },
+      });
+      validator.updateConfig({ lockfile: { version: 1, dependencies: {}, references: {} } });
+
+      const config = validator.getConfig();
+      expect(config.requiredGuards).toEqual(['@core/guards/compliance']);
+      expect(config.rules).toEqual({ 'empty-block': 'warning' });
+      expect(config.lockfile).toBeDefined();
+    });
+  });
 });
