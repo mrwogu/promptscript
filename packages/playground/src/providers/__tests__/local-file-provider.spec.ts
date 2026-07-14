@@ -60,6 +60,77 @@ describe('LocalFileProvider', () => {
     expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/src/team.prs');
   });
 
+  it('readFile encodes # in path segments', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ path: 'file#hash.prs', content: 'hello' }),
+    } as Response);
+
+    await provider.readFile('file#hash.prs');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/file%23hash.prs');
+  });
+
+  it('readFile encodes ? in path segments', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ path: 'file?query.prs', content: 'hello' }),
+    } as Response);
+
+    await provider.readFile('file?query.prs');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/file%3Fquery.prs');
+  });
+
+  it('readFile encodes % in path segments', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ path: '100%done.prs', content: 'hello' }),
+    } as Response);
+
+    await provider.readFile('100%done.prs');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/100%25done.prs');
+  });
+
+  it('readFile encodes spaces but preserves slashes', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ path: 'dir/sub dir/file.prs', content: 'hello' }),
+    } as Response);
+
+    await provider.readFile('dir/sub dir/file.prs');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/dir/sub%20dir/file.prs');
+  });
+
+  it('writeFile encodes special characters in path', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true } as Response);
+
+    await provider.writeFile('file#hash.prs', 'updated');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/file%23hash.prs', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: 'updated' }),
+    });
+  });
+
+  it('createFile encodes special characters in path', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true } as Response);
+
+    await provider.createFile('new?file.prs', 'content');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/new%3Ffile.prs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: 'content' }),
+    });
+  });
+
+  it('deleteFile encodes special characters in path', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true } as Response);
+
+    await provider.deleteFile('100%done.prs');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/api/files/100%25done.prs', {
+      method: 'DELETE',
+    });
+  });
+
   it('writeFile sends PUT to /api/files/*', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true } as Response);
 

@@ -495,6 +495,29 @@ describe('share utilities', () => {
       expect(state?.formatter).toBe('claude');
     });
 
+    it('loadStateFromUrl ignores unknown formatter from URL param', () => {
+      const encoded = encodeState(mockFiles, 'github');
+      Object.defineProperty(window, 'location', {
+        value: { href: `https://example.com/playground?s=${encoded}&f=unknownFormat` },
+        writable: true,
+      });
+
+      const state = loadStateFromUrl();
+      // Should keep the formatter from the encoded state, not the unknown URL param
+      expect(state?.formatter).toBe('github');
+    });
+
+    it('loadStateFromUrl does not set formatter for unknown URL param when no encoded formatter', () => {
+      const encoded = encodeState(mockFiles);
+      Object.defineProperty(window, 'location', {
+        value: { href: `https://example.com/playground?s=${encoded}&f=unknownFormat` },
+        writable: true,
+      });
+
+      const state = loadStateFromUrl();
+      expect(state?.formatter).toBeUndefined();
+    });
+
     it('getExampleIdFromUrl should return example ID', () => {
       Object.defineProperty(window, 'location', {
         value: { href: 'https://example.com/playground?e=minimal' },

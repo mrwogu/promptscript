@@ -41,6 +41,47 @@ describe('useLocalFiles', () => {
     expect(state.files[0]?.path).toBe('test.prs');
   });
 
+  it('does not overwrite state when provider changes during pending load', async () => {
+    // First provider's listFiles returns a deferred promise
+    let resolveFirstLoad!: (value: unknown[]) => void;
+    const firstLoadPromise = new Promise<unknown[]>((resolve) => {
+      resolveFirstLoad = resolve;
+    });
+
+    mockListFiles.mockReturnValueOnce(firstLoadPromise);
+    mockListFiles.mockResolvedValueOnce([{ path: 'fresh.prs', size: 5, modified: '2026-01-01' }]);
+    mockReadFile.mockResolvedValue('fresh content');
+
+    const { rerender } = renderHook(
+      ({ host }: { host: string }) => useLocalFiles(host, mockOnFileEvent),
+      { initialProps: { host: 'localhost:3000' } }
+    );
+
+    // Wait for the first provider's listFiles to be called
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    // Change to a different server - creates new provider
+    rerender({ host: 'localhost:3001' });
+
+    // Let the second provider load
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    // Now resolve the first (stale) provider's listFiles
+    await act(async () => {
+      resolveFirstLoad([{ path: 'stale.prs', size: 5, modified: '2026-01-01' }]);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    // Store should contain the fresh provider's files, not the stale ones
+    const state = usePlaygroundStore.getState();
+    expect(state.files.some((f) => f.path === 'stale.prs')).toBe(false);
+    expect(state.files.some((f) => f.path === 'fresh.prs')).toBe(true);
+  });
+
   it('does not load files when serverHost is null', () => {
     renderHook(() => useLocalFiles(null, mockOnFileEvent));
 

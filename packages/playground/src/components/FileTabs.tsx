@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { usePlaygroundStore } from '../store';
+import type { FileProvider } from '../providers/file-provider';
 
-export function FileTabs() {
+interface FileTabsProps {
+  provider?: FileProvider | null;
+}
+
+export function FileTabs({ provider }: FileTabsProps = {}) {
   const files = usePlaygroundStore((s) => s.files);
   const openTabs = usePlaygroundStore((s) => s.openTabs);
   const activeFile = usePlaygroundStore((s) => s.activeFile);
@@ -60,7 +65,19 @@ export function FileTabs() {
           ? editValue
           : `${editValue}.prs`;
       if (!files.some((f) => f.path === newPath)) {
+        const content = files.find((f) => f.path === oldPath)?.content ?? '';
         renameFile(oldPath, newPath);
+        // Sync rename to disk when connected to a server
+        if (provider) {
+          void (async () => {
+            try {
+              await provider.createFile(newPath, content);
+              await provider.deleteFile(oldPath);
+            } catch (err) {
+              console.error('Failed to sync rename to server:', err);
+            }
+          })();
+        }
       }
     }
     setEditingFile(null);
