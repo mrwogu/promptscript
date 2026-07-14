@@ -519,4 +519,51 @@ describe('GitRegistry — extended methods', () => {
       ).rejects.toThrow(GitAuthError);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // checkoutCommit
+  // -------------------------------------------------------------------------
+
+  describe('checkoutCommit()', () => {
+    it('fetches specific commit with --depth=1 and checks it out', async () => {
+      const targetDir = join(testCacheDir, 'checkout-1');
+      await fs.mkdir(targetDir, { recursive: true });
+
+      await registry.checkoutCommit(targetDir, 'abc123def456');
+
+      expect(mockGit.fetch).toHaveBeenCalledWith(['origin', 'abc123def456', '--depth=1']);
+      expect(mockGit.checkout).toHaveBeenCalledWith('abc123def456');
+    });
+
+    it('falls back to --unshallow when direct fetch fails', async () => {
+      mockGit.fetch
+        .mockRejectedValueOnce(new Error('commit not found in shallow clone'))
+        .mockResolvedValueOnce(undefined);
+
+      const targetDir = join(testCacheDir, 'checkout-2');
+      await fs.mkdir(targetDir, { recursive: true });
+
+      await registry.checkoutCommit(targetDir, 'deadbeef');
+
+      // First fetch fails, second is unshallow
+      expect(mockGit.fetch).toHaveBeenNthCalledWith(1, ['origin', 'deadbeef', '--depth=1']);
+      expect(mockGit.fetch).toHaveBeenNthCalledWith(2, ['--unshallow']);
+      expect(mockGit.checkout).toHaveBeenCalledWith('deadbeef');
+    });
+
+    it('falls back to full fetch when both direct and unshallow fail', async () => {
+      mockGit.fetch
+        .mockRejectedValueOnce(new Error('commit not found'))
+        .mockRejectedValueOnce(new Error('unshallow not supported'))
+        .mockResolvedValueOnce(undefined);
+
+      const targetDir = join(testCacheDir, 'checkout-3');
+      await fs.mkdir(targetDir, { recursive: true });
+
+      await registry.checkoutCommit(targetDir, 'cafe99');
+
+      expect(mockGit.fetch).toHaveBeenNthCalledWith(3, ['origin']);
+      expect(mockGit.checkout).toHaveBeenCalledWith('cafe99');
+    });
+  });
 });
