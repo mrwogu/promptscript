@@ -303,9 +303,11 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
         if ('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent') {
           const content = this.valueToString(value);
           if (content.includes('\n')) {
+            const cmdName = name.replace(/^\/+/, '');
+            if (!this.isSafeName(cmdName)) continue;
             commands.push({
-              name: name.replace(/^\/+/, ''),
-              description: name.replace(/^\/+/, ''),
+              name: cmdName,
+              description: cmdName,
               content,
             });
           }
@@ -316,8 +318,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
         // Generate command file if it has prompt: true or multiline content
         if (obj['prompt'] === true || obj['content']) {
+          const cmdName = name.replace(/^\/+/, '');
+          if (!this.isSafeName(cmdName)) continue;
           commands.push({
-            name: name.replace(/^\/+/, ''),
+            name: cmdName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
             argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
             content: obj['content'] ? this.valueToString(obj['content']) : '',
