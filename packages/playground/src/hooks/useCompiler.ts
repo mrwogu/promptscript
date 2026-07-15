@@ -49,17 +49,23 @@ export function useCompiler() {
     const enabledFormatters = (
       Object.entries(config.targets) as [
         FormatterName,
-        { enabled: boolean; version?: string; convention?: string },
+        {
+          enabled: boolean;
+          version?: string;
+          convention?: string;
+          rulesMode?: 'monolith' | 'split';
+        },
       ][]
     )
       .filter(([, settings]) => settings.enabled)
       .map(([name, settings]) => ({
         name,
         config:
-          settings.version || settings.convention
+          settings.version || settings.convention || settings.rulesMode
             ? {
                 ...(settings.version && { version: settings.version }),
                 ...(settings.convention && { convention: settings.convention }),
+                ...(settings.rulesMode && { rulesMode: settings.rulesMode }),
               }
             : undefined,
       }));

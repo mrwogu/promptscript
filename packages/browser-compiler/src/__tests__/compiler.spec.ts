@@ -234,6 +234,58 @@ describe('BrowserCompiler advanced', () => {
     expect(result.outputs.has('CLAUDE.md')).toBe(true);
   });
 
+  it('should compile Factory split rules in the browser', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "factory-split" syntax: "1.0.0" }
+        @identity { """You are a Factory assistant.""" }
+        @standards {
+          security: ["Validate all inputs"]
+          git: { format: "Conventional Commits" }
+        }
+      `,
+    });
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [
+        {
+          name: 'factory',
+          config: { version: 'multifile', rulesMode: 'split' },
+        },
+      ],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('AGENTS.md')).toBe(true);
+    expect(result.outputs.has('.factory/rules/standards/security.md')).toBe(true);
+    expect(result.outputs.has('.factory/rules/git-workflows.md')).toBe(true);
+    expect(result.outputOwners?.get('.factory/rules/standards/security.md')).toBe('factory');
+  });
+
+  it('should report an actionable error for Factory simple split rules', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': '@meta { id: "factory-split" syntax: "1.0.0" }',
+    });
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [
+        {
+          name: 'factory',
+          config: { version: 'simple', rulesMode: 'split' },
+        },
+      ],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors[0]?.message).toContain(
+      "Factory rulesMode 'split' requires version 'multifile' or 'full'"
+    );
+  });
+
   it('should throw for unknown formatter name', () => {
     const fs = new VirtualFileSystem({});
 

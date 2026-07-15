@@ -334,7 +334,19 @@ export class Compiler {
         outputPathOwners.set(output.path, formatter.name);
 
         // Add PromptScript marker to all outputs for overwrite detection
-        outputs.set(output.path, addMarkerToOutput(output, sourceLabel, formatter.name));
+        const markedOutput = addMarkerToOutput(output, sourceLabel, formatter.name);
+        const previousManagedDirectories = outputs.get(output.path)?.managedOutputDirectories ?? [];
+        const managedOutputDirectories = [
+          ...new Set([
+            ...previousManagedDirectories,
+            ...(markedOutput.managedOutputDirectories ?? []),
+          ]),
+        ];
+        outputs.set(output.path, {
+          ...markedOutput,
+          managedOutputDirectories:
+            managedOutputDirectories.length > 0 ? managedOutputDirectories : undefined,
+        });
 
         // Also add any additional files (e.g., .cursor/commands/, .github/prompts/)
         // Recursively collect nested additionalFiles (e.g., skill resource files)

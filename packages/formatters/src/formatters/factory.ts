@@ -1,4 +1,5 @@
 import type { Program, Value } from '@promptscript/core';
+import { posix } from 'path';
 import {
   MarkdownInstructionFormatter,
   type MarkdownAgentConfig,
@@ -93,6 +94,18 @@ interface FactoryDroidConfig extends MarkdownAgentConfig {
 }
 
 /**
+ * Always-on rule file emitted for Factory split rules mode.
+ */
+interface FactoryRuleFile {
+  /** Human-readable label used in the AGENTS.md index */
+  label: string;
+  /** Safe path relative to the project root */
+  path: string;
+  /** Markdown file content */
+  content: string;
+}
+
+/**
  * Formatter for Factory AI instructions.
  *
  * Factory AI uses AGENTS.md as its main configuration file and
@@ -149,6 +162,54 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
   override referencesMode(): 'directory' | 'inline' | 'none' {
     return 'directory';
+  }
+
+  override format(ast: Program, options?: FormatOptions): FormatterOutput {
+    if (
+      options?.version !== undefined &&
+      !Object.prototype.hasOwnProperty.call(FACTORY_VERSIONS, options.version)
+    ) {
+      throw new Error(
+        `Unsupported Factory version '${options.version}'. Expected 'simple', 'multifile', or 'full'.`
+      );
+    }
+
+    const version = this.resolveVersion(options?.version);
+    const configuredRulesMode: unknown = options?.targetConfig?.rulesMode;
+    if (
+      configuredRulesMode !== undefined &&
+      configuredRulesMode !== 'monolith' &&
+      configuredRulesMode !== 'split'
+    ) {
+      throw new Error(
+        `Invalid Factory rulesMode '${String(configuredRulesMode)}'. Expected 'monolith' or 'split'.`
+      );
+    }
+    const rulesMode = configuredRulesMode ?? 'monolith';
+
+    if (rulesMode === 'split' && this.createRenderer(options).getConvention().name !== 'markdown') {
+      throw new Error(
+        "Factory rulesMode 'split' requires the Markdown convention. Change the Factory target convention or use rulesMode 'monolith'."
+      );
+    }
+
+    if (rulesMode === 'split' && !this.isProjectRelativeOutputPath(this.getOutputPath(options))) {
+      throw new Error(
+        "Factory rulesMode 'split' requires a project-relative outputPath without parent traversal so AGENTS.md can link to generated rules."
+      );
+    }
+
+    if (rulesMode === 'split' && version === 'simple') {
+      throw new Error(
+        "Factory rulesMode 'split' requires version 'multifile' or 'full'. Change the Factory target version or use rulesMode 'monolith'."
+      );
+    }
+
+    const output = super.format(ast, options);
+    return {
+      ...output,
+      managedOutputDirectories: ['.factory/rules'],
+    };
   }
 
   // ============================================================
@@ -518,6 +579,198 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
   }
 
   // ============================================================
+  // Always-on Rule File Generation (Factory-specific)
+  // ============================================================
+
+  /**
+   * Generate deterministic always-on rule files in source property order.
+   */
+  private generateRuleFiles(ast: Program, options?: FormatOptions): FactoryRuleFile[] {
+    if (options?.targetConfig?.rulesMode !== 'split') return [];
+
+    const renderer = this.createRenderer(options);
+    const files: FactoryRuleFile[] = [];
+    const standards = this.findBlock(ast, 'standards');
+
+    if (standards) {
+      const usedSlugs = new Set<string>();
+      for (const [topic, value] of Object.entries(this.getProps(standards.content))) {
+        const items = this.extractRuleItems(value);
+        if (items.length === 0) continue;
+
+        const semantic = this.getSemanticRuleInfo(topic);
+        const label = semantic?.label ?? this.humanizeRuleLabel(topic);
+        const path =
+          semantic?.path ??
+          `.factory/rules/standards/${this.createStableRuleSlug(topic, usedSlugs)}.md`;
+        const content = `# ${label}\n\n${renderer.renderList(items)}\n`;
+        files.push({ label, path, content });
+      }
+    }
+
+    const knowledge = this.knowledgeContent(ast, renderer);
+    if (knowledge) {
+      files.push({
+        label: 'Knowledge',
+        path: '.factory/rules/knowledge.md',
+        content: `# Knowledge\n\n${knowledge.trim()}\n`,
+      });
+    }
+
+    const restrictions = this.restrictions(ast, renderer);
+    if (restrictions) {
+      files.push({
+        label: 'Restrictions',
+        path: '.factory/rules/restrictions.md',
+        content: this.promoteSectionHeading(restrictions, this.getSectionName('restrictions')),
+      });
+    }
+
+    const examples = this.examples(ast, renderer);
+    if (examples) {
+      files.push({
+        label: 'Examples',
+        path: '.factory/rules/examples.md',
+        content: this.promoteSectionHeading(examples, 'Examples'),
+      });
+    }
+
+    return files;
+  }
+
+  private addSplitRulesIndex(
+    sections: string[],
+    ruleFiles: FactoryRuleFile[],
+    options?: FormatOptions
+  ): void {
+    if (ruleFiles.length === 0) return;
+
+    const outputPath = this.getOutputPath(options).replace(/\\/g, '/');
+    const outputDirectory = posix.dirname(outputPath);
+    const links = ruleFiles.map((rule) => {
+      const relativePath = posix.relative(outputDirectory, rule.path);
+      return `- [${rule.label}](${relativePath})`;
+    });
+    sections.push(`## Rules\n\n${links.join('\n')}\n`);
+  }
+
+  private isProjectRelativeOutputPath(outputPath: string): boolean {
+    const normalized = outputPath.replace(/\\/g, '/');
+    return (
+      normalized.length > 0 &&
+      !posix.isAbsolute(normalized) &&
+      !/^[a-z]:/i.test(normalized) &&
+      !normalized.split('/').some((segment) => segment === '..')
+    );
+  }
+
+  private addLeanSections(ast: Program, sections: string[], options?: FormatOptions): void {
+    const renderer = this.createRenderer(options);
+    this.addSection(sections, this.project(ast, renderer));
+    this.addSection(sections, this.techStack(ast, renderer));
+    this.addSection(sections, this.architecture(ast, renderer));
+    this.addSection(sections, this.commands(ast, renderer));
+    this.addSection(sections, this.postWork(ast, renderer));
+  }
+
+  private getSemanticRuleInfo(topic: string): { label: string; path: string } | undefined {
+    const semanticRules: Record<string, { label: string; path: string }> = {
+      git: { label: 'Git Workflows', path: '.factory/rules/git-workflows.md' },
+      config: { label: 'Configuration', path: '.factory/rules/configuration.md' },
+      documentation: { label: 'Documentation', path: '.factory/rules/documentation.md' },
+      diagrams: { label: 'Diagrams', path: '.factory/rules/diagrams.md' },
+    };
+    return semanticRules[topic];
+  }
+
+  private extractRuleItems(value: Value): string[] {
+    if (value === null || value === undefined || value === false) return [];
+    if (Array.isArray(value)) {
+      return value.map((item) => this.ruleValueToString(item)).filter((item) => item.length > 0);
+    }
+    if (typeof value === 'object' && !('type' in value)) {
+      const items: string[] = [];
+      for (const [key, nestedValue] of Object.entries(value as Record<string, Value>)) {
+        if (nestedValue === null || nestedValue === undefined || nestedValue === false) continue;
+        const label = this.humanizeRuleLabel(key);
+        if (nestedValue === true) {
+          items.push(label);
+          continue;
+        }
+        const rendered = this.ruleValueToString(nestedValue);
+        if (rendered) items.push(`${label}: ${rendered}`);
+      }
+      return items;
+    }
+
+    const rendered = this.ruleValueToString(value);
+    return rendered ? [rendered] : [];
+  }
+
+  private ruleValueToString(value: Value): string {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') return value.trim();
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => this.ruleValueToString(item))
+        .filter((item) => item.length > 0)
+        .join(', ');
+    }
+    if ('type' in value) {
+      return this.valueToString(value);
+    }
+    return Object.entries(value as Record<string, Value>)
+      .map(([key, nestedValue]) => {
+        const rendered = this.ruleValueToString(nestedValue);
+        return rendered ? `${this.humanizeRuleLabel(key)}: ${rendered}` : '';
+      })
+      .filter((item) => item.length > 0)
+      .join(', ');
+  }
+
+  private humanizeRuleLabel(value: string): string {
+    return value
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .split(/[-_\s]+/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  private createStableRuleSlug(topic: string, usedSlugs: Set<string>): string {
+    let base =
+      topic
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'topic';
+
+    if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(base)) {
+      base = `rule-${base}`;
+    }
+
+    let slug = base;
+    let suffix = 2;
+    while (usedSlugs.has(slug)) {
+      slug = `${base}-${suffix}`;
+      suffix += 1;
+    }
+    usedSlugs.add(slug);
+    return slug;
+  }
+
+  private promoteSectionHeading(section: string, label: string): string {
+    const heading = `## ${label}`;
+    const trimmed = section.trim();
+    const content = trimmed.startsWith(heading)
+      ? `# ${label}${trimmed.slice(heading.length)}`
+      : `# ${label}\n\n${trimmed}`;
+    return `${content}\n`;
+  }
+
+  // ============================================================
   // Multifile & Full Mode Overrides (adds guard skill extraction)
   // ============================================================
 
@@ -546,18 +799,27 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       additionalFiles.push(this.generateSkillFile(skill, options));
     }
 
+    const ruleFiles = this.generateRuleFiles(ast, options);
+    additionalFiles.push(...ruleFiles);
+
     // Main file content
     const sections: string[] = [];
     if (renderer.getConvention().name === 'markdown') {
       sections.push(`${this.config.mainFileHeader}\n`);
     }
-    this.addCommonSections(ast, renderer, sections);
+    if (options?.targetConfig?.rulesMode === 'split') {
+      this.addLeanSections(ast, sections, options);
+      this.addSplitRulesIndex(sections, ruleFiles, options);
+    } else {
+      this.addCommonSections(ast, renderer, sections);
+    }
     this.maybeAddGuardSkillsListing(guardSkills, sections, options);
 
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+      managedOutputDirectories: ['.factory/rules'],
     };
   }
 
@@ -593,18 +855,27 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       }
     }
 
+    const ruleFiles = this.generateRuleFiles(ast, options);
+    additionalFiles.push(...ruleFiles);
+
     // Main file content
     const sections: string[] = [];
     if (renderer.getConvention().name === 'markdown') {
       sections.push(`${this.config.mainFileHeader}\n`);
     }
-    this.addCommonSections(ast, renderer, sections);
+    if (options?.targetConfig?.rulesMode === 'split') {
+      this.addLeanSections(ast, sections, options);
+      this.addSplitRulesIndex(sections, ruleFiles, options);
+    } else {
+      this.addCommonSections(ast, renderer, sections);
+    }
     this.maybeAddGuardSkillsListing(guardSkills, sections, options);
 
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+      managedOutputDirectories: ['.factory/rules'],
     };
   }
 

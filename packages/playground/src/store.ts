@@ -58,6 +58,7 @@ export interface TargetSettings {
   enabled: boolean;
   version?: string;
   convention?: ConventionType;
+  rulesMode?: 'monolith' | 'split';
 }
 
 /**
@@ -471,7 +472,12 @@ export const selectOutputsForFormatter = (
     ],
     cursor: [/\.cursor\/rules\/.*\.mdc$/, /\.cursorrules$/],
     antigravity: [/\.agent\/rules\/.*\.md$/, /\.agent\/workflows\/.*\.md$/],
-    factory: [/^AGENTS\.md$/, /\.factory\/skills\/.*\/SKILL\.md$/, /\.factory\/droids\/.*\.md$/],
+    factory: [
+      /^AGENTS\.md$/,
+      /\.factory\/rules\/.*\.md$/,
+      /\.factory\/skills\/.*\/SKILL\.md$/,
+      /\.factory\/droids\/.*\.md$/,
+    ],
     opencode: [
       /^OPENCODE\.md$/,
       /\.opencode\/commands\/.*\.md$/,

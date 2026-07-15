@@ -364,6 +364,12 @@ function generateOutputFiles(f: FormatterInfo): string {
     `| Main instructions | \`${f.outputPath}\` | Primary rule file |`,
   ];
 
+  if (f.name === 'factory') {
+    lines.push(
+      `| Always-on rules | \`.factory/rules/**/*.md\` | Split rule files when \`rulesMode: split\` |`
+    );
+  }
+
   if (f.hasLocal) {
     lines.push(`| Local overrides | \`CLAUDE.local.md\` | Private instructions (gitignored) |`);
   }

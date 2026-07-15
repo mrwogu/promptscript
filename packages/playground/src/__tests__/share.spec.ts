@@ -324,6 +324,27 @@ describe('share utilities', () => {
       expect(decoded?.config?.targets?.github?.version).toBeUndefined(); // version is default
     });
 
+    it('should include Factory rules mode in target settings', () => {
+      const config: PlaygroundConfig = {
+        ...defaultConfig,
+        targets: {
+          ...defaultConfig.targets,
+          factory: {
+            enabled: true,
+            version: 'multifile',
+            rulesMode: 'split',
+          },
+        },
+      };
+
+      const encoded = encodeState(mockFiles, 'factory', undefined, config);
+      const decoded = decodeState(encoded);
+      const merged = mergeConfigWithDefaults(decoded?.config);
+
+      expect(decoded?.config?.targets?.factory?.rulesMode).toBe('split');
+      expect(merged.targets.factory.rulesMode).toBe('split');
+    });
+
     it('should not include convention when undefined (default)', () => {
       const config: PlaygroundConfig = {
         ...defaultConfig,

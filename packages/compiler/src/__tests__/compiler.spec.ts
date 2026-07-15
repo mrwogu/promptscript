@@ -717,6 +717,11 @@ describe('Compiler', () => {
       const ast = createTestProgram();
       const formatter1 = createMockFormatter('codex', 'AGENTS.md');
       const formatter2 = createMockFormatter('amp', 'AGENTS.md');
+      vi.mocked(formatter1.format).mockReturnValue({
+        path: 'AGENTS.md',
+        content: '# Codex output',
+        managedOutputDirectories: ['.factory/rules'],
+      });
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
       mockValidate.mockReturnValue(createValidationSuccess());
@@ -738,6 +743,7 @@ describe('Compiler', () => {
       expect(collisionWarning?.message).toContain('AGENTS.md');
       expect(collisionWarning?.message).toContain('codex');
       expect(collisionWarning?.message).toContain('amp');
+      expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toEqual(['.factory/rules']);
     });
 
     it('should warn and skip when additional file collides with existing output (PS4001)', async () => {
@@ -1657,6 +1663,44 @@ describe('marker source and target metadata', () => {
     expect(additionalOutput).toBeDefined();
     expect(additionalOutput?.content).toContain('| source: .promptscript/project.prs');
     expect(additionalOutput?.content).toContain('| target: cursor');
+  });
+
+  it('should preserve managed output directory declarations', async () => {
+    const ast = createTestProgram();
+    const formatterWithManagedDirectory: Formatter = {
+      name: 'factory',
+      outputPath: 'AGENTS.md',
+      description: 'Factory formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({
+        path: 'AGENTS.md',
+        content: '# AGENTS.md',
+        managedOutputDirectories: ['.factory/rules'],
+        additionalFiles: [
+          {
+            path: '.factory/rules/security.md',
+            content: '# Security',
+          },
+        ],
+      })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    mockValidate.mockReturnValue(createValidationSuccess());
+
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [formatterWithManagedDirectory],
+    });
+    const result = await compiler.compile('.promptscript/project.prs');
+
+    expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toEqual(['.factory/rules']);
+    expect(result.outputs.get('.factory/rules/security.md')?.content).toContain(
+      '| target: factory'
+    );
   });
 
   it('should use "promptscript" as target for auto-injected skill files', async () => {

@@ -59,6 +59,13 @@ export type GithubVersion = 'simple' | 'multifile' | 'full';
 export type ClaudeVersion = 'simple' | 'multifile' | 'full';
 
 /**
+ * Factory always-on rules output mode.
+ * - `monolith`: Keep all rule content in AGENTS.md
+ * - `split`: Emit rule content under .factory/rules
+ */
+export type FactoryRulesMode = 'monolith' | 'split';
+
+/**
  * Configuration for a single target.
  */
 export interface TargetConfig {
@@ -84,6 +91,13 @@ export interface TargetConfig {
    * @example 'legacy' | '1.0' | '2.0'
    */
   version?: string;
+
+  /**
+   * Factory always-on rules output mode.
+   * Split mode requires Factory's `multifile` or `full` version.
+   * @default 'monolith'
+   */
+  rulesMode?: FactoryRulesMode;
 
   /** Generate skills from @guards named entries (Factory). @default true */
   guardsAsSkills?: boolean;

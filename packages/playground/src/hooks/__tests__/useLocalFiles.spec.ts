@@ -277,6 +277,48 @@ describe('applyProjectConfig', () => {
       expect(result.targets.claude.convention).toBe('xml');
     });
 
+    it('applies Factory rules mode from project config', () => {
+      const projectConfig = {
+        targets: [
+          {
+            factory: {
+              version: 'multifile',
+              rulesMode: 'split' as const,
+            },
+          },
+        ],
+      };
+
+      const result = applyProjectConfig(DEFAULT_CONFIG, projectConfig);
+
+      expect(result.targets.factory).toMatchObject({
+        enabled: true,
+        version: 'multifile',
+        rulesMode: 'split',
+      });
+    });
+
+    it.each([{ targets: ['factory'] }, { targets: [{ factory: { version: 'full' } }] }])(
+      'resets omitted Factory rules mode to monolith',
+      (projectConfig) => {
+        const current: PlaygroundConfig = {
+          ...DEFAULT_CONFIG,
+          targets: {
+            ...DEFAULT_CONFIG.targets,
+            factory: {
+              ...DEFAULT_CONFIG.targets.factory,
+              enabled: true,
+              rulesMode: 'split',
+            },
+          },
+        };
+
+        const result = applyProjectConfig(current, projectConfig);
+
+        expect(result.targets.factory.rulesMode).toBe('monolith');
+      }
+    );
+
     it('handles mixed string and object targets', () => {
       // Arrange
       const projectConfig = {

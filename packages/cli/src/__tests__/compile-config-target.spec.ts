@@ -160,6 +160,7 @@ describe('compile config/target - Issues 2 and 3', () => {
         'github',
         { claude: { convention: 'xml', version: '1.0' } },
         { cursor: { skillBaseDir: '.cursor/rules' } },
+        { factory: { version: 'multifile', rulesMode: 'split' } },
       ],
       registries: {},
     };
@@ -212,6 +213,26 @@ describe('compile config/target - Issues 2 and 3', () => {
       );
     });
 
+    it('should preserve Factory split rules config for --target factory', async () => {
+      const { compileCommand } = await import('../commands/compile.js');
+
+      await compileCommand({ target: 'factory', dryRun: true } as never, mockServices);
+
+      expect(mockCompilerConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          formatters: [
+            {
+              name: 'factory',
+              config: {
+                version: 'multifile',
+                rulesMode: 'split',
+              },
+            },
+          ],
+        })
+      );
+    });
+
     it('should preserve skillBaseDir for --target cursor', async () => {
       const { compileCommand } = await import('../commands/compile.js');
 
@@ -252,7 +273,7 @@ describe('compile config/target - Issues 2 and 3', () => {
       const formatters = (callArgs[0] as { formatters: { name: string; config?: unknown }[] })
         .formatters;
 
-      expect(formatters).toHaveLength(3);
+      expect(formatters).toHaveLength(4);
       expect(formatters[0]).toEqual({ name: 'github' });
       expect(formatters[1]).toEqual({
         name: 'claude',
@@ -261,6 +282,10 @@ describe('compile config/target - Issues 2 and 3', () => {
       expect(formatters[2]).toEqual({
         name: 'cursor',
         config: { skillBaseDir: '.cursor/rules' },
+      });
+      expect(formatters[3]).toEqual({
+        name: 'factory',
+        config: { version: 'multifile', rulesMode: 'split' },
       });
     });
   });

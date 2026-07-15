@@ -25,7 +25,11 @@ export function applyProjectConfig(
       if (typeof entry === 'string') {
         const name = entry as FormatterName;
         if (targets[name]) {
-          targets[name] = { ...targets[name], enabled: true };
+          targets[name] = {
+            ...targets[name],
+            enabled: true,
+            ...(name === 'factory' && { rulesMode: 'monolith' }),
+          };
         }
       } else {
         for (const [name, settings] of Object.entries(entry)) {
@@ -37,6 +41,9 @@ export function applyProjectConfig(
               ...(settings?.version && { version: settings.version }),
               ...(settings?.convention && {
                 convention: settings.convention as 'markdown' | 'xml',
+              }),
+              ...(key === 'factory' && {
+                rulesMode: settings?.rulesMode ?? 'monolith',
               }),
             };
           }

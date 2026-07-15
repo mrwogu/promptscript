@@ -180,11 +180,13 @@ describe('PromptScriptConfig', () => {
         output: './custom/output.md',
         convention: 'markdown',
         version: 'legacy',
+        rulesMode: 'split',
       };
 
-      const targets: TargetEntry[] = [{ github: config }];
+      const targets: TargetEntry[] = [{ factory: config }];
 
-      expect((targets[0] as { github: TargetConfig }).github.output).toBe('./custom/output.md');
+      expect((targets[0] as { factory: TargetConfig }).factory.output).toBe('./custom/output.md');
+      expect((targets[0] as { factory: TargetConfig }).factory.rulesMode).toBe('split');
     });
 
     it('should accept mixed targets', () => {
