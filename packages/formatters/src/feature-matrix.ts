@@ -462,7 +462,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       cursor: 'supported',
       claude: 'not-supported',
       antigravity: 'planned', // was 'supported', downgraded per antigravity-plan.md
-      factory: 'not-supported',
+      factory: 'supported',
       opencode: 'not-supported',
       gemini: 'not-supported',
       // Tier 1

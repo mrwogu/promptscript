@@ -108,6 +108,9 @@ function getConfigDiff(config: PlaygroundConfig): PartialConfig | undefined {
     if (settings.convention !== defaultSettings.convention) {
       settingsDiff.convention = settings.convention;
     }
+    if (settings.rulesMode !== defaultSettings.rulesMode) {
+      settingsDiff.rulesMode = settings.rulesMode;
+    }
 
     if (Object.keys(settingsDiff).length > 0) {
       targetsDiff[name] = settingsDiff;

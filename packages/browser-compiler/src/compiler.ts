@@ -9,6 +9,7 @@
 
 import {
   noopLogger,
+  type FactoryRulesMode,
   type Logger,
   type PSError,
   type OutputConvention,
@@ -36,6 +37,11 @@ export interface TargetConfig {
   convention?: string;
   /** Target version or format variant */
   version?: string;
+  /**
+   * Factory always-on rules output mode.
+   * Split mode requires Factory's `multifile` or `full` version.
+   */
+  rulesMode?: FactoryRulesMode;
   /** Custom base directory for generated skill files */
   skillBaseDir?: string;
   /** Controls which skills are emitted for this target */

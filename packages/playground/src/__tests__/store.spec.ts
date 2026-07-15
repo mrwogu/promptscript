@@ -593,6 +593,10 @@ describe('PlaygroundStore', () => {
           '.factory/skills/review/SKILL.md',
           { path: '.factory/skills/review/SKILL.md', content: 'factory skill' },
         ],
+        [
+          '.factory/rules/standards/security.md',
+          { path: '.factory/rules/standards/security.md', content: 'factory rule' },
+        ],
         ['CLAUDE.md', { path: 'CLAUDE.md', content: 'claude' }],
       ]);
       setCompileResult({
@@ -604,9 +608,12 @@ describe('PlaygroundStore', () => {
       });
 
       const outputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'factory');
-      expect(outputs).toHaveLength(2);
+      expect(outputs).toHaveLength(3);
       expect(outputs[0].path).toBe('AGENTS.md');
-      expect(outputs[1].path).toBe('.factory/skills/review/SKILL.md');
+      expect(outputs.map((output) => output.path)).toContain(
+        '.factory/rules/standards/security.md'
+      );
+      expect(outputs.map((output) => output.path)).toContain('.factory/skills/review/SKILL.md');
     });
 
     it('selectOutputsForFormatter should match Cursor output files', () => {

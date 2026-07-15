@@ -77,6 +77,7 @@ export interface ProjectTargetConfig {
   enabled?: boolean;
   version?: string;
   convention?: string;
+  rulesMode?: 'monolith' | 'split';
 }
 
 export interface ProjectConfig {

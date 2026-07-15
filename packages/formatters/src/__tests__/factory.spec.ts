@@ -305,6 +305,302 @@ describe('FactoryFormatter', () => {
     });
   });
 
+  describe('split rules mode', () => {
+    it('should preserve monolith content by default', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                typescript: ['Use strict mode'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const implicit = formatter.format(ast, { version: 'multifile' });
+      const explicit = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'monolith' },
+      });
+
+      expect(implicit.content).toBe(explicit.content);
+      expect(implicit.additionalFiles).toEqual(explicit.additionalFiles);
+      expect(implicit.content).toContain('Use strict mode');
+      expect(implicit.managedOutputDirectories).toEqual(['.factory/rules']);
+    });
+
+    it('should reject split rules with the simple version', () => {
+      const ast = createMinimalProgram();
+
+      expect(() =>
+        formatter.format(ast, {
+          version: 'simple',
+          targetConfig: { rulesMode: 'split' },
+        })
+      ).toThrow(
+        "Factory rulesMode 'split' requires version 'multifile' or 'full'. Change the Factory target version or use rulesMode 'monolith'."
+      );
+    });
+
+    it('should reject unknown Factory versions', () => {
+      expect(() =>
+        formatter.format(createMinimalProgram(), {
+          version: 'enterprise',
+          targetConfig: { rulesMode: 'split' },
+        })
+      ).toThrow(
+        "Unsupported Factory version 'enterprise'. Expected 'simple', 'multifile', or 'full'."
+      );
+    });
+
+    it('should reject invalid rules mode values', () => {
+      expect(() =>
+        formatter.format(createMinimalProgram(), {
+          version: 'multifile',
+          targetConfig: { rulesMode: 'separate' as 'split' },
+        })
+      ).toThrow("Invalid Factory rulesMode 'separate'. Expected 'monolith' or 'split'.");
+    });
+
+    it.each([
+      '/tmp/AGENTS.md',
+      'C:\\workspace\\AGENTS.md',
+      'C:AGENTS.md',
+      '../AGENTS.md',
+      'config/../../AGENTS.md',
+    ])('should reject unsafe split output path %s', (outputPath) => {
+      expect(() =>
+        formatter.format(createMinimalProgram(), {
+          version: 'multifile',
+          outputPath,
+          targetConfig: { rulesMode: 'split' },
+        })
+      ).toThrow(
+        "Factory rulesMode 'split' requires a project-relative outputPath without parent traversal so AGENTS.md can link to generated rules."
+      );
+    });
+
+    it('should reject non-Markdown split output', () => {
+      expect(() =>
+        formatter.format(createMinimalProgram(), {
+          version: 'multifile',
+          convention: 'xml',
+          targetConfig: { rulesMode: 'split' },
+        })
+      ).toThrow(
+        "Factory rulesMode 'split' requires the Markdown convention. Change the Factory target convention or use rulesMode 'monolith'."
+      );
+    });
+
+    it('should escape Windows reserved device names in rule file slugs', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                CON: ['Use safe console handling'],
+                nul: ['Use portable null devices'],
+                com1: ['Use portable serial device names'],
+                lpt9: ['Use portable printer device names'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+      const paths = (result.additionalFiles ?? []).map((file) => file.path);
+
+      expect(paths).toEqual([
+        '.factory/rules/standards/rule-con.md',
+        '.factory/rules/standards/rule-nul.md',
+        '.factory/rules/standards/rule-com1.md',
+        '.factory/rules/standards/rule-lpt9.md',
+      ]);
+    });
+
+    it('should emit deterministic rule files and a lean indexed AGENTS.md', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are an enterprise TypeScript developer.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'MixedContent',
+              properties: {
+                languages: ['TypeScript'],
+                runtime: 'Node.js 20+',
+              },
+              text: {
+                type: 'TextContent',
+                value: '## Architecture\n\n```text\napi -> service\n```',
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                security: ['Validate all inputs', 'Log access decisions'],
+                git: {
+                  format: 'Conventional Commits',
+                  example: 'feat(factory): split rules',
+                },
+                config: {
+                  eslint: 'inherit from base config',
+                },
+                documentation: ['Review docs before changes'],
+                diagrams: {
+                  format: 'Mermaid',
+                  types: ['flowchart', 'sequence'],
+                },
+                'Team API': ['Prefer stable contracts'],
+                'team-api': ['Version breaking changes'],
+                empty: [],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/test': 'Run all tests',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'knowledge',
+            content: {
+              type: 'TextContent',
+              value:
+                '## Development Commands\n\n```bash\npnpm test\n```\n\n## Post-Work Verification\n\n```bash\npnpm lint\n```\n\n## Operations Notes\n\nDeploy safely.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ArrayContent',
+              elements: ['Never expose secrets'],
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  input: 'Review this change',
+                  output: 'Report actionable findings',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'full',
+        outputPath: 'config/AGENTS.md',
+        targetConfig: { rulesMode: 'split' },
+      });
+      const ruleFiles = (result.additionalFiles ?? []).filter((file) =>
+        file.path.startsWith('.factory/rules/')
+      );
+
+      expect(ruleFiles.map((file) => file.path)).toEqual([
+        '.factory/rules/standards/security.md',
+        '.factory/rules/git-workflows.md',
+        '.factory/rules/configuration.md',
+        '.factory/rules/documentation.md',
+        '.factory/rules/diagrams.md',
+        '.factory/rules/standards/team-api.md',
+        '.factory/rules/standards/team-api-2.md',
+        '.factory/rules/knowledge.md',
+        '.factory/rules/restrictions.md',
+        '.factory/rules/examples.md',
+      ]);
+      expect(ruleFiles.find((file) => file.path.endsWith('security.md'))?.content).toContain(
+        '# Security\n\n- Validate all inputs\n- Log access decisions'
+      );
+      expect(ruleFiles.find((file) => file.path.endsWith('knowledge.md'))?.content).toContain(
+        '## Operations Notes'
+      );
+      expect(ruleFiles.find((file) => file.path.endsWith('knowledge.md'))?.content).not.toContain(
+        'Development Commands'
+      );
+
+      expect(result.content).toContain('## Project');
+      expect(result.content).toContain('## Tech Stack');
+      expect(result.content).toContain('## Architecture');
+      expect(result.content).toContain('## Commands');
+      expect(result.content).toContain('## Build & Test');
+      expect(result.content).toContain('[Security](../.factory/rules/standards/security.md)');
+      expect(result.content).toContain('[Restrictions](../.factory/rules/restrictions.md)');
+      expect(result.content).not.toContain('Validate all inputs');
+      expect(result.content).not.toContain('Conventional Commits');
+      expect(result.content).not.toContain("## Don'ts");
+      expect(result.managedOutputDirectories).toEqual(['.factory/rules']);
+    });
+
+    it('should omit the rules index when no rule files are emitted', () => {
+      const result = formatter.format(createMinimalProgram(), {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      expect(result.content).not.toContain('## Rules');
+      expect(result.additionalFiles).toBeUndefined();
+    });
+  });
+
   describe('full version', () => {
     it('should generate skill files same as multifile', () => {
       const ast: Program = {

@@ -10,6 +10,12 @@ export interface FormatterOutput {
   content: string;
   /** Additional files to generate (e.g., workflows) */
   additionalFiles?: FormatterOutput[];
+  /**
+   * Relative directories exclusively managed by this output.
+   * Writers may remove obsolete PromptScript-generated files within these
+   * directories, but must preserve unmarked files and symlinks.
+   */
+  managedOutputDirectories?: string[];
 }
 
 /**

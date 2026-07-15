@@ -26,6 +26,7 @@ import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { parse as parseYaml } from 'yaml';
 import { stripMarkers } from '../utils/markers.js';
 import { detectOutputConflicts } from '../utils/conflict-detector.js';
+import { cleanupManagedOutputs } from '../utils/managed-output-cleanup.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -597,6 +598,17 @@ export async function compileCommand(
     };
     await postFormatWithPrettier(result.outputs, projectRoot, logger);
     const writeResult = await writeOutputs(result.outputs, effectiveOptions, config, services);
+    const cleanupResult = await cleanupManagedOutputs(result.outputs, {
+      outputRoot: effectiveOptions.output,
+      dryRun: options.dryRun,
+    });
+    for (const removedPath of cleanupResult.removed) {
+      if (options.dryRun) {
+        ConsoleOutput.dryRun(`Would remove obsolete generated file: ${removedPath}`);
+      } else {
+        ConsoleOutput.muted(`Removed obsolete generated file: ${removedPath}`);
+      }
+    }
     if (writeResult.unchanged.length > 0) {
       ConsoleOutput.muted(`Unchanged ${writeResult.unchanged.length} file(s)`);
     }
