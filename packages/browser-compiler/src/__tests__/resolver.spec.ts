@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { SYNTAX_FEATURES } from '@promptscript/core';
 import { BrowserResolver } from '../resolver.js';
 import { VirtualFileSystem } from '../virtual-fs.js';
 
@@ -338,6 +339,247 @@ describe('BrowserResolver', () => {
       expect(result.ast).not.toBeNull();
       const standardsBlock = result.ast?.blocks.find((b) => b.name === 'standards');
       expect(standardsBlock).toBeDefined();
+    });
+
+    it('should replace marked inherited values and merge unmarked values', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@inherit ./base
+@extend standards {
+  testing!: ["Use Vitest"]
+  linting: ["Use Biome"]
+  deployment!: ["Use Fly"]
+}
+@extend standards {
+  testing!: ["Use Node test runner"]
+}`,
+        'base.prs': `@meta { id: "base" syntax: "1.0.0" }
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+  linting: ["Use ESLint"]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+      if (standards?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for standards block');
+      }
+
+      expect(result.errors).toEqual([]);
+      expect(standards.content.properties['testing']).toEqual(['Use Node test runner']);
+      expect(standards.content.properties['linting']).toEqual(['Use ESLint', 'Use Biome']);
+      expect(standards.content.properties['deployment']).toEqual(['Use Fly']);
+    });
+
+    it('should preserve object fields when an extension also contains text', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@standards {
+  testing: ["Use Jest"]
+  linting: ["Use ESLint"]
+  security: ["Use OWASP"]
+}
+@extend standards {
+  """
+  Project-specific standards.
+  """
+  testing!: ["Use Vitest"]
+  linting: ["Use Biome"]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+      if (standards?.content.type !== 'MixedContent') {
+        throw new Error('expected MixedContent for standards block');
+      }
+
+      expect(result.errors).toEqual([]);
+      expect(standards.content.text?.value).toContain('Project-specific standards.');
+      expect(standards.content.properties['testing']).toEqual(['Use Vitest']);
+      expect(standards.content.properties['linting']).toEqual(['Use ESLint', 'Use Biome']);
+      expect(standards.content.properties['security']).toEqual(['Use OWASP']);
+    });
+
+    it('should retain inherited replacement feature usage', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.2.0" }
+@inherit ./base`,
+        'base.prs': `@meta { id: "base" syntax: "1.3.0" }
+@standards { testing: ["Use Jest"] }
+@extend standards { testing!: ["Use Vitest"] }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast?.extends).toEqual([]);
+      expect(result.ast?.syntaxFeatures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+          }),
+        ])
+      );
+    });
+
+    it('should replace values from aliased @use at a nested target path', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@use ./base as shared
+@extend shared.standards.tooling {
+  frameworks!: ["Vue"]
+  runtime: ["Bun"]
+}`,
+        'base.prs': `@meta { id: "base" syntax: "1.0.0" }
+@standards {
+  tooling: {
+    frameworks: ["React", "Angular"]
+    runtime: ["Node.js"]
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+      if (standards?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for standards block');
+      }
+      const tooling = standards.content.properties['tooling'] as Record<string, unknown>;
+
+      expect(result.errors).toEqual([]);
+      expect(tooling['frameworks']).toEqual(['Vue']);
+      expect(tooling['runtime']).toEqual(['Node.js', 'Bun']);
+    });
+
+    it('should report an actionable error when the modifier targets a skill', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@use ./base as shared
+@extend shared.skills.review {
+  description!: "Replacement"
+}`,
+        'base.prs': `@meta { id: "base" syntax: "1.2.0" }
+@skills { review: { description: "Review code" } }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain('only supported for regular block fields');
+      expect(result.errors[0]?.message).toContain('skill-specific merge');
+    });
+
+    it('should reject the modifier when the skill target is missing', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@extend skills.review {
+  description!: "Replacement"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain('only supported for regular block fields');
+    });
+
+    it('should reject mixed content for whole-skill extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Review code"
+    content: "Critical instructions"
+    sealed: ["content"]
+  }
+}
+@extend skills.review {
+  """
+  Ambiguous skill text.
+  """
+  content: "Override attempt"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain('must use named object fields');
+    });
+
+    it('should prevent deep paths from bypassing sealed skill properties', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Review code"
+    allowedTools: ["Read"]
+    sealed: ["allowedTools"]
+  }
+}
+@extend skills.review.allowedTools {
+  - "Bash"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain("Cannot override sealed property 'allowedTools'");
+    });
+
+    it('should enforce sealed properties when extending the skills block root', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Review code"
+    content: "Critical instructions"
+    sealed: ["content"]
+  }
+}
+@extend skills {
+  review: {
+    content: "Override attempt"
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain("Cannot override sealed property 'content'");
+    });
+
+    it('should reject non-object overlays at the skills block root', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Review code"
+    sealed: true
+  }
+}
+@extend skills {
+  review: null
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain('must use named object fields');
     });
 
     it('should apply @extend to nested path', async () => {

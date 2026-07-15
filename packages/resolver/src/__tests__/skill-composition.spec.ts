@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { Resolver } from '../resolver.js';
 import { resolveSkillComposition } from '../skill-composition.js';
 import type { ObjectContent, TextContent, ComposedPhase, Program } from '@promptscript/core';
-import { ResolveError } from '@promptscript/core';
+import { ResolveError, SYNTAX_FEATURES } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -329,6 +329,26 @@ function makeSubSkillProgram(skillName: string, extraProps: Record<string, unkno
 // ── Edge-case unit tests ────────────────────────────────────────────
 
 describe('resolveSkillComposition — edge cases', () => {
+  it('retains syntax features from composed skills', async () => {
+    const subSkill = {
+      ...makeSubSkillProgram('sub'),
+      syntaxFeatures: [
+        {
+          feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+          location: LOC,
+        },
+      ],
+    };
+
+    const result = await resolveSkillComposition(makeSkillsProgram('ops'), {
+      currentFile: '/project/parent.prs',
+      resolvePath: () => '/project/sub.prs',
+      resolveFile: async () => subSkill,
+    });
+
+    expect(result.syntaxFeatures).toEqual(subSkill.syntaxFeatures);
+  });
+
   describe('depth limit exceeded', () => {
     it('throws ResolveError when depth >= MAX_COMPOSITION_DEPTH (3)', async () => {
       const ast = makeSkillsProgram('ops');

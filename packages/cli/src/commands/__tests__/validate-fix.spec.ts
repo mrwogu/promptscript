@@ -167,6 +167,89 @@ describe('validateCommand --fix', () => {
     expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Fixed'));
   });
 
+  it('should fix syntax version when the replace modifier requires 1.3.0', async () => {
+    mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'project.prs'),
+      `@meta {
+  id: "test"
+  syntax: "1.2.0"
+}
+
+@standards {
+  testing: ["Use Jest"]
+}
+
+@extend standards {
+  testing!: ["Use Vitest"]
+}
+`
+    );
+
+    await validateCommand({ fix: true });
+
+    const content = readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8');
+    expect(content).toContain('syntax: "1.3.0"');
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Fixed'));
+  });
+
+  it('should fix syntax version for inherited replacement usage', async () => {
+    mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'base.prs'),
+      `@meta { id: "base" syntax: "1.3.0" }
+@standards { testing: ["Use Jest"] }
+@extend standards { testing!: ["Use Vitest"] }
+`
+    );
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'project.prs'),
+      `@meta { id: "project" syntax: "1.2.0" }
+@inherit ./base
+`
+    );
+
+    await validateCommand({ fix: true });
+
+    const content = readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8');
+    expect(content).toContain('syntax: "1.3.0"');
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('project.prs'));
+  });
+
+  it('should fix syntax version for replacement usage from a composed skill', async () => {
+    mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'phase.prs'),
+      `@meta { id: "phase" syntax: "1.3.0" }
+@skills {
+  phase: {
+    description: "Run a phase"
+    content: "Run phase instructions"
+  }
+}
+@standards { testing: ["Use Jest"] }
+@extend standards { testing!: ["Use Vitest"] }
+`
+    );
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'project.prs'),
+      `@meta { id: "project" syntax: "1.2.0" }
+@skills {
+  project: {
+    description: "Run project"
+    content: "Run project instructions"
+  }
+  @use ./phase
+}
+`
+    );
+
+    await validateCommand({ fix: true });
+
+    const content = readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8');
+    expect(content).toContain('syntax: "1.3.0"');
+  });
+
   it('should report no fixes needed when syntax is correct', async () => {
     mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
     writeFileSync(

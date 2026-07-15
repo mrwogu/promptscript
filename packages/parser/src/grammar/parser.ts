@@ -29,6 +29,7 @@ import {
   Comma,
   Equals,
   Question,
+  Bang,
   Dot,
   DotDot,
   Dash,
@@ -130,15 +131,30 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * extendBlock
-   *   : '@' 'extend' dotPath '{' blockContent '}'
+   *   : '@' 'extend' dotPath '{' extendBlockContent '}'
    */
   private extendBlock = this.RULE('extendBlock', () => {
     this.CONSUME(At);
     this.CONSUME(Extend);
     this.SUBRULE(this.dotPath);
     this.CONSUME(LBrace);
-    this.SUBRULE(this.blockContent);
+    this.SUBRULE(this.extendBlockContent);
     this.CONSUME(RBrace);
+  });
+
+  /**
+   * extendBlockContent
+   *   : (TextBlock | restrictionItem | inlineUse | extendField)*
+   */
+  private extendBlockContent = this.RULE('extendBlockContent', () => {
+    this.MANY(() =>
+      this.OR([
+        { ALT: () => this.CONSUME(TextBlock) },
+        { ALT: () => this.SUBRULE(this.restrictionItem) },
+        { ALT: () => this.SUBRULE(this.inlineUse), GATE: () => this.isInlineUseAhead() },
+        { ALT: () => this.SUBRULE(this.extendField) },
+      ])
+    );
   });
 
   /**
@@ -201,6 +217,31 @@ export class PromptScriptParser extends CstParser {
       { ALT: () => this.CONSUME(BooleanType) },
     ]);
     this.OPTION(() => this.CONSUME(Question));
+    this.CONSUME(Colon);
+    this.SUBRULE(this.value);
+    this.OPTION2(() => {
+      this.CONSUME(Equals);
+      this.SUBRULE2(this.value);
+    });
+  });
+
+  /**
+   * extendField
+   *   : (Identifier | StringLiteral | StringType | NumberType | BooleanType) ('?' | '!')? ':' value ('=' value)?
+   *
+   * The replace modifier is accepted only for top-level fields inside @extend.
+   */
+  private extendField = this.RULE('extendField', () => {
+    this.OR([
+      { ALT: () => this.CONSUME(Identifier) },
+      { ALT: () => this.CONSUME(StringLiteral) },
+      { ALT: () => this.CONSUME(StringType) },
+      { ALT: () => this.CONSUME(NumberType) },
+      { ALT: () => this.CONSUME(BooleanType) },
+    ]);
+    this.OPTION(() =>
+      this.OR2([{ ALT: () => this.CONSUME(Question) }, { ALT: () => this.CONSUME(Bang) }])
+    );
     this.CONSUME(Colon);
     this.SUBRULE(this.value);
     this.OPTION2(() => {

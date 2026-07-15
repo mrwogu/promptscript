@@ -39,7 +39,7 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
   ],
 
   // Operators and symbols
-  operators: [':'],
+  operators: [':', '!'],
   symbols: /[=><!~?:&|+\-*/^%]+/,
 
   // Escapes in strings
@@ -81,6 +81,7 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
 
       // Delimiters and operators
       [/[{}()[\]]/, '@brackets'],
+      [/!(?=\s*:)/, 'operator.replace'],
       [/:/, 'delimiter'],
       [/,/, 'delimiter'],
 
@@ -180,6 +181,7 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'comment', foreground: '6b7280', fontStyle: 'italic' },
   { token: 'number', foreground: 'f472b6' },
   { token: 'identifier', foreground: 'f8fafc' },
+  { token: 'operator.replace', foreground: 'facc15', fontStyle: 'bold' },
   { token: 'delimiter', foreground: '94a3b8' },
   { token: 'variable.template', foreground: 'f472b6', fontStyle: 'bold' },
   { token: 'variable.name', foreground: 'fb923c' },

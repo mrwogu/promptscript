@@ -10,7 +10,13 @@ import type {
   Value,
   Logger,
 } from '@promptscript/core';
-import { deepMerge, deepClone, isTextContent, ResolveError } from '@promptscript/core';
+import {
+  deepMerge,
+  deepClone,
+  isTextContent,
+  ResolveError,
+  getSyntaxFeatureUsages,
+} from '@promptscript/core';
 import { IMPORT_MARKER_PREFIX, getOriginalBlockName } from './imports.js';
 
 // ── Skill-aware merge strategy sets ──────────────────────────────────
@@ -145,6 +151,7 @@ export function applyExtends(ast: Program, logger?: Logger): Program {
     ...ast,
     blocks,
     extends: [],
+    syntaxFeatures: getSyntaxFeatureUsages(ast),
   };
 }
 
@@ -171,6 +178,24 @@ function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[
     deepPath = pathParts.slice(2);
   }
 
+  const resolvedBlockName = targetName ? (getOriginalBlockName(targetName) ?? targetName) : '';
+  const skillContext = resolvedBlockName === 'skills';
+  const replacementKeys = new Set(ext.replacements?.map((modifier) => modifier.property) ?? []);
+
+  if (skillContext && replacementKeys.size > 0) {
+    throw new ResolveError(
+      'The ! replace modifier is only supported for regular block fields and cannot target @skills. Remove ! and use the documented skill-specific merge and sealed property semantics.',
+      ext.replacements?.[0]?.loc ?? ext.loc
+    );
+  }
+
+  if (skillContext && deepPath.length <= 1 && ext.content.type !== 'ObjectContent') {
+    throw new ResolveError(
+      'Skill extensions must use named object fields so skill-specific merge and sealed property semantics can be enforced.',
+      ext.loc
+    );
+  }
+
   const idx = blocks.findIndex((b) => b.name === targetName);
   if (idx === -1) {
     logger?.warn(
@@ -185,13 +210,42 @@ function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[
     return blocks;
   }
 
-  // Determine if the extend target is inside a @skills block
-  const resolvedBlockName = targetName ? (getOriginalBlockName(targetName) ?? targetName) : '';
-  const skillContext = resolvedBlockName === 'skills';
+  if (skillContext) {
+    assertSkillPathCanExtend(target.content, deepPath, ext);
+  }
 
-  const merged = mergeExtension(target, deepPath, ext, skillContext, logger);
+  const merged = mergeExtension(target, deepPath, ext, replacementKeys, skillContext, logger);
 
   return [...blocks.slice(0, idx), merged, ...blocks.slice(idx + 1)];
+}
+
+function assertSkillPathCanExtend(content: BlockContent, path: string[], ext: ExtendBlock): void {
+  const skillName = path[0];
+  const propertyName = path[1];
+  if (!skillName || !propertyName) {
+    return;
+  }
+
+  if (propertyName === 'sealed') {
+    throw new ResolveError("Cannot override protected property 'sealed' on skill", ext.loc);
+  }
+
+  if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') {
+    return;
+  }
+
+  const skill = content.properties[skillName];
+  if (!isSkillRecordCandidate(skill)) {
+    return;
+  }
+
+  const properties = isObjectContent(skill) ? skill.properties : skill;
+  if (resolveSealedKeys(properties['sealed']).has(propertyName)) {
+    throw new ResolveError(
+      `Cannot override sealed property '${propertyName}' on skill (sealed by base definition)`,
+      ext.loc
+    );
+  }
 }
 
 /**
@@ -201,21 +255,69 @@ function mergeExtension(
   block: Block,
   path: string[],
   ext: ExtendBlock,
+  replacementKeys: ReadonlySet<string>,
   skillContext: boolean,
   logger?: Logger
 ): Block {
   if (path.length === 0) {
-    // Direct merge at block level
     return {
       ...block,
-      content: mergeContent(block.content, ext.content),
+      content: skillContext
+        ? mergeSkillsBlockContent(block.content, ext.content, logger)
+        : mergeContent(block.content, ext.content, replacementKeys),
     };
   }
 
   // Deep path merge - navigate into ObjectContent or MixedContent
   return {
     ...block,
-    content: mergeAtPath(block.content, path, ext.content, skillContext, logger),
+    content: mergeAtPath(block.content, path, ext.content, replacementKeys, skillContext, logger),
+  };
+}
+
+function mergeSkillsBlockContent(
+  target: BlockContent,
+  ext: BlockContent,
+  logger?: Logger
+): BlockContent {
+  if (
+    (target.type !== 'ObjectContent' && target.type !== 'MixedContent') ||
+    ext.type !== 'ObjectContent'
+  ) {
+    return mergeContent(target, ext);
+  }
+
+  const properties = { ...target.properties };
+  for (const [skillName, extValue] of Object.entries(ext.properties)) {
+    const extContent = isObjectContent(extValue)
+      ? extValue
+      : isSkillRecordCandidate(extValue)
+        ? ({
+            type: 'ObjectContent',
+            properties: extValue,
+            loc: ext.loc,
+          } as ObjectContent)
+        : undefined;
+
+    if (!extContent) {
+      throw new ResolveError(
+        `Skill '${skillName}' extension must use named object fields so sealed property semantics can be enforced.`,
+        ext.loc
+      );
+    }
+
+    if (properties[skillName] === undefined) {
+      logger?.warn(
+        `@extend creates new skill "${skillName}" — base does not define it. ` +
+          `If this was an overlay targeting an existing skill, verify the base still defines "${skillName}".`
+      );
+    }
+    properties[skillName] = mergeValue(properties[skillName], extContent, new Set(), true, logger);
+  }
+
+  return {
+    ...target,
+    properties,
   };
 }
 
@@ -226,16 +328,17 @@ function mergeAtPath(
   content: BlockContent,
   path: string[],
   extContent: BlockContent,
+  replacementKeys: ReadonlySet<string>,
   skillContext: boolean,
   logger?: Logger
 ): BlockContent {
   if (path.length === 0) {
-    return mergeContent(content, extContent);
+    return mergeContent(content, extContent, replacementKeys);
   }
 
   const currentKey = path[0];
   if (!currentKey) {
-    return mergeContent(content, extContent);
+    return mergeContent(content, extContent, replacementKeys);
   }
 
   const rest = path.slice(1);
@@ -255,7 +358,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeValue(existing, extContent, skillContext, logger),
+          [currentKey]: mergeValue(existing, extContent, replacementKeys, skillContext, logger),
         },
       };
     }
@@ -266,7 +369,14 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext, logger),
+          [currentKey]: mergeAtPathValue(
+            existing as Value,
+            rest,
+            extContent,
+            replacementKeys,
+            skillContext,
+            logger
+          ),
         },
       };
     }
@@ -295,7 +405,7 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeValue(existing, extContent, skillContext, logger),
+          [currentKey]: mergeValue(existing, extContent, replacementKeys, skillContext, logger),
         },
       };
     }
@@ -305,7 +415,14 @@ function mergeAtPath(
         ...content,
         properties: {
           ...content.properties,
-          [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext, logger),
+          [currentKey]: mergeAtPathValue(
+            existing as Value,
+            rest,
+            extContent,
+            replacementKeys,
+            skillContext,
+            logger
+          ),
         },
       };
     }
@@ -330,6 +447,7 @@ function mergeAtPathValue(
   value: Value,
   path: string[],
   extContent: BlockContent,
+  replacementKeys: ReadonlySet<string>,
   skillContext: boolean,
   logger?: Logger
 ): Value {
@@ -340,7 +458,7 @@ function mergeAtPathValue(
 
   const currentKey = path[0];
   if (!currentKey) {
-    return mergeValue(value, extContent, skillContext, logger);
+    return mergeValue(value, extContent, replacementKeys, skillContext, logger);
   }
 
   const rest = path.slice(1);
@@ -350,14 +468,21 @@ function mergeAtPathValue(
   if (rest.length === 0) {
     return {
       ...obj,
-      [currentKey]: mergeValue(existing, extContent, skillContext, logger),
+      [currentKey]: mergeValue(existing, extContent, replacementKeys, skillContext, logger),
     };
   }
 
   if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
     return {
       ...obj,
-      [currentKey]: mergeAtPathValue(existing as Value, rest, extContent, skillContext, logger),
+      [currentKey]: mergeAtPathValue(
+        existing as Value,
+        rest,
+        extContent,
+        replacementKeys,
+        skillContext,
+        logger
+      ),
     };
   }
 
@@ -417,6 +542,7 @@ function extractValue(content: BlockContent): Value {
 function mergeValue(
   existing: Value | undefined,
   extContent: BlockContent,
+  replacementKeys: ReadonlySet<string> = new Set(),
   skillContext: boolean = false,
   logger?: Logger
 ): Value {
@@ -446,11 +572,11 @@ function mergeValue(
     !Array.isArray(existing) &&
     extContent.type === 'ObjectContent'
   ) {
-    const merged = deepMerge(
-      existing as Record<string, unknown>,
-      extContent.properties as Record<string, unknown>
+    return mergeRegularProperties(
+      existing as Record<string, Value>,
+      extContent.properties,
+      replacementKeys
     );
-    return merged as unknown as Value;
   }
 
   // TextContent merging
@@ -593,7 +719,11 @@ function mergeSkillValue(
 /**
  * Merge two BlockContent objects - handles same types.
  */
-function mergeSameTypeContent(target: BlockContent, ext: BlockContent): BlockContent {
+function mergeSameTypeContent(
+  target: BlockContent,
+  ext: BlockContent,
+  replacementKeys: ReadonlySet<string>
+): BlockContent {
   switch (ext.type) {
     case 'TextContent':
       return {
@@ -603,7 +733,11 @@ function mergeSameTypeContent(target: BlockContent, ext: BlockContent): BlockCon
     case 'ObjectContent':
       return {
         ...ext,
-        properties: deepMerge((target as ObjectContent).properties, ext.properties),
+        properties: mergeRegularProperties(
+          (target as ObjectContent).properties,
+          ext.properties,
+          replacementKeys
+        ),
       } as ObjectContent;
     case 'ArrayContent':
       return {
@@ -611,14 +745,18 @@ function mergeSameTypeContent(target: BlockContent, ext: BlockContent): BlockCon
         elements: uniqueConcat((target as ArrayContent).elements, ext.elements),
       };
     case 'MixedContent':
-      return mergeMixedContent(target as MixedContent, ext);
+      return mergeMixedContent(target as MixedContent, ext, replacementKeys);
   }
 }
 
 /**
  * Merge two MixedContent objects.
  */
-function mergeMixedContent(target: MixedContent, ext: MixedContent): MixedContent {
+function mergeMixedContent(
+  target: MixedContent,
+  ext: MixedContent,
+  replacementKeys: ReadonlySet<string>
+): MixedContent {
   const mergedText =
     target.text && ext.text
       ? {
@@ -630,17 +768,38 @@ function mergeMixedContent(target: MixedContent, ext: MixedContent): MixedConten
   return {
     ...ext,
     text: mergedText,
-    properties: deepMerge(target.properties, ext.properties),
+    properties: mergeRegularProperties(target.properties, ext.properties, replacementKeys),
   } as MixedContent;
+}
+
+/**
+ * Merge regular block properties, replacing fields explicitly marked with !.
+ */
+function mergeRegularProperties(
+  target: Record<string, Value>,
+  ext: Record<string, Value>,
+  replacementKeys: ReadonlySet<string>
+): Record<string, Value> {
+  const merged = deepMerge(target, ext);
+  for (const key of replacementKeys) {
+    if (Object.prototype.hasOwnProperty.call(ext, key)) {
+      merged[key] = deepClone(ext[key]!);
+    }
+  }
+  return merged;
 }
 
 /**
  * Merge two BlockContent objects.
  */
-function mergeContent(target: BlockContent, ext: BlockContent): BlockContent {
+function mergeContent(
+  target: BlockContent,
+  ext: BlockContent,
+  replacementKeys: ReadonlySet<string> = new Set()
+): BlockContent {
   // Same type merging
   if (target.type === ext.type) {
-    return mergeSameTypeContent(target, ext);
+    return mergeSameTypeContent(target, ext, replacementKeys);
   }
 
   // Mixed type merging - Object + Text -> Mixed
@@ -676,7 +835,14 @@ function mergeContent(target: BlockContent, ext: BlockContent): BlockContent {
     const mixed = target as MixedContent;
     return {
       ...mixed,
-      properties: deepMerge(mixed.properties, ext.properties),
+      properties: mergeRegularProperties(mixed.properties, ext.properties, replacementKeys),
+    };
+  }
+
+  if (target.type === 'ObjectContent' && ext.type === 'MixedContent') {
+    return {
+      ...ext,
+      properties: mergeRegularProperties(target.properties, ext.properties, replacementKeys),
     };
   }
 

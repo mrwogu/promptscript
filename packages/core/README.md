@@ -55,20 +55,25 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 
 ```
 SyntaxVersionDef
-  blocks  : string[]      -- block type names available in this version
+  blocks   : string[]         -- block type names available in this version
+  features : SyntaxFeature[]  -- non-block syntax available in this version
 ```
 
 The version string is the key in `SYNTAX_VERSIONS`, not a property of `SyntaxVersionDef`.
 
-| Export                            | Description                                                              |
-| :-------------------------------- | :----------------------------------------------------------------------- |
-| `SYNTAX_VERSIONS`                 | Registry of all known syntax versions and the blocks each one introduces |
-| `SyntaxVersionDef`                | Interface describing a single version entry (see above)                  |
-| `LATEST_SYNTAX_VERSION`           | String constant holding the most recent known syntax version             |
-| `getLatestSyntaxVersion()`        | Returns `LATEST_SYNTAX_VERSION`                                          |
-| `isKnownSyntaxVersion(v)`         | Returns `true` if `v` is a key in `SYNTAX_VERSIONS`                      |
-| `getBlocksForVersion(v)`          | Returns the array of block names available in version `v`                |
-| `getMinimumVersionForBlock(name)` | Returns the earliest version string that introduced block `name`         |
+| Export                                 | Description                                                                |
+| :------------------------------------- | :------------------------------------------------------------------------- |
+| `SYNTAX_VERSIONS`                      | Registry of known versions, blocks, and non-block syntax features          |
+| `SYNTAX_FEATURES`                      | Stable identifiers for independently versioned syntax features             |
+| `SyntaxVersionDef`                     | Interface describing a single version entry (see above)                    |
+| `LATEST_SYNTAX_VERSION`                | String constant holding the most recent known syntax version               |
+| `getLatestSyntaxVersion()`             | Returns `LATEST_SYNTAX_VERSION`                                            |
+| `isKnownSyntaxVersion(v)`              | Returns `true` if `v` is a key in `SYNTAX_VERSIONS`                        |
+| `getBlocksForVersion(v)`               | Returns the block names available in version `v`                           |
+| `getFeaturesForVersion(v)`             | Returns non-block syntax features available in version `v`                 |
+| `getMinimumVersionForBlock(name)`      | Returns the earliest version that introduced block `name`                  |
+| `getMinimumVersionForFeature(feature)` | Returns the earliest version that introduced non-block syntax `feature`    |
+| `getSyntaxFeatureUsages(ast)`          | Returns versioned non-block syntax usage retained in a parsed/resolved AST |
 
 ### String-matching utilities
 

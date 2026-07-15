@@ -8,6 +8,7 @@ import type {
   InlineUseDeclaration,
   Block,
   ExtendBlock,
+  ReplaceModifier,
   BlockContent,
   PathReference,
   Value,
@@ -74,12 +75,19 @@ interface BlockCstCtx {
 interface ExtendBlockCstCtx {
   At: IToken[];
   dotPath: CstNode[];
-  blockContent: CstNode[];
+  extendBlockContent: CstNode[];
 }
 
 interface BlockContentCstCtx {
   TextBlock?: IToken[];
   field?: CstNode[];
+  restrictionItem?: CstNode[];
+  inlineUse?: CstNode[];
+}
+
+interface ExtendBlockContentCstCtx {
+  TextBlock?: IToken[];
+  extendField?: CstNode[];
   restrictionItem?: CstNode[];
   inlineUse?: CstNode[];
 }
@@ -95,6 +103,7 @@ interface FieldCstCtx {
   NumberType?: IToken[];
   BooleanType?: IToken[];
   Question?: IToken[];
+  Bang?: IToken[];
   value: CstNode[];
 }
 
@@ -403,14 +412,56 @@ class PromptScriptVisitor extends BaseVisitor {
    */
   extendBlock(ctx: ExtendBlockCstCtx): ExtendBlock {
     const targetPath = this.visit(ctx.dotPath[0]!) as string;
-    const content = this.visit(ctx.blockContent[0]!);
+    const { content, replacements } = this.visit(ctx.extendBlockContent[0]!) as {
+      content: BlockContent;
+      replacements: ReplaceModifier[];
+    };
 
-    return {
+    const block: ExtendBlock = {
       type: 'ExtendBlock',
       targetPath,
       content,
       loc: this.loc(ctx.At[0]!),
     };
+
+    if (replacements.length > 0) {
+      block.replacements = replacements;
+    }
+
+    return block;
+  }
+
+  /**
+   * extendBlockContent → content and explicit replacement modifiers
+   */
+  extendBlockContent(ctx: ExtendBlockContentCstCtx): {
+    content: BlockContent;
+    replacements: ReplaceModifier[];
+  } {
+    const content = this.blockContent({
+      TextBlock: ctx.TextBlock,
+      field: ctx.extendField,
+      restrictionItem: ctx.restrictionItem,
+      inlineUse: ctx.inlineUse,
+    });
+    const replacements: ReplaceModifier[] = [];
+
+    for (const fieldNode of ctx.extendField ?? []) {
+      const field = this.visit(fieldNode) as {
+        name: string;
+        replace?: boolean;
+        replaceLoc?: SourceLocation;
+      };
+      if (field.replace && field.replaceLoc) {
+        replacements.push({
+          type: 'ReplaceModifier',
+          property: field.name,
+          loc: field.replaceLoc,
+        });
+      }
+    }
+
+    return { content, replacements };
   }
 
   /**
@@ -586,6 +637,28 @@ class PromptScriptVisitor extends BaseVisitor {
     }
 
     return { name, value: valueResult, optional, defaultValue };
+  }
+
+  /**
+   * extendField → field with optional replacement metadata
+   */
+  extendField(ctx: FieldCstCtx): {
+    name: string;
+    value: Value;
+    optional?: boolean;
+    defaultValue?: Value;
+    replace?: boolean;
+    replaceLoc?: SourceLocation;
+  } {
+    const field = this.field(ctx);
+    if (!ctx.Bang) {
+      return field;
+    }
+    return {
+      ...field,
+      replace: true,
+      replaceLoc: this.loc(ctx.Bang[0]!),
+    };
   }
 
   /**

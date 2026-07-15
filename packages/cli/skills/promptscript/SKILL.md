@@ -537,6 +537,26 @@ Requires an aliased @use:
 }
 ```
 
+#### Replacing regular block fields
+
+Syntax `1.3.0` supports explicit replacement of complete regular block field values:
+
+```
+@meta { id: "project" syntax: "1.3.0" }
+
+@inherit ./company-base
+
+@extend standards {
+  testing!: ["Use Vitest"]
+  linting: ["Use ESLint"]
+}
+```
+
+`testing!` replaces the inherited value. Fields without `!` keep normal merge behavior.
+Replacement works after `@inherit` and `@use`, including aliases and nested target paths.
+A missing field is set. The modifier is rejected for `@skills`, which retain their dedicated
+merge and sealing semantics.
+
 #### Skill-aware @extend semantics
 
 When extending a skill definition via `@extend`, individual skill properties follow specific merge
@@ -794,6 +814,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
 | `1.1.0` | Adds `@agents` (plus internal `@workflows`, `@prompts` - not user-facing)                                               |
 | `1.2.0` | Adds `@examples` (few-shot input/output pairs)                                                                          |
+| `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
 
 ### Block Version Requirements
 
@@ -803,10 +824,11 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `@examples` | `1.2.0`                |
 
 All other built-in blocks are available from `1.0.0`.
+Regular block field replacement with `field!: value` requires syntax `1.3.0`.
 
 ### Validation Rules
 
-- **PS018 (`syntax-version-compat`)**: warns when blocks used in a file require a higher syntax version than declared. For example, `@agents` with `syntax: "1.0.0"` triggers PS018. Suggestion: run `prs validate --fix`.
+- **PS018 (`syntax-version-compat`)**: warns when resolved blocks or syntax features require a higher version than declared. Requirements from inheritance, imports, and skill composition are included. Suggestion: run `prs validate --fix`.
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
 - **PS021 (`use-block-filter`)**: errors when `only` and `exclude` are both specified in `@use` parameters.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
@@ -823,7 +845,7 @@ prs validate --fix          # Auto-fix syntax versions in .prs files
 prs upgrade                 # Upgrade all .prs files to the latest version
 ```
 
-`--fix` rewrites the `syntax: "..."` line in each file's `@meta` block to match the minimum version required by the blocks used. It only upgrades, never downgrades.
+`--fix` rewrites the `syntax: "..."` line in each file's `@meta` block to match the minimum version required by resolved blocks and syntax features. It follows inheritance, imports, and skill composition. It only upgrades, never downgrades.
 
 `prs upgrade` upgrades all files to the latest known syntax version regardless of what blocks they use.
 

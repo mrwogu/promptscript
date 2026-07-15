@@ -11,6 +11,7 @@ from pygments.token import (
     Keyword,
     Name,
     Number,
+    Operator,
     Punctuation,
     String,
     Text,
@@ -76,13 +77,13 @@ class PromptScriptLexer(RegexLexer):
             (r"-\s+", Punctuation),
             # Known property names (highlighted as attributes)
             (
-                r"(id|name|syntax|description|version|author|license|homepage|repository|keywords|extends|type|content|convention|trigger|enabled|path|prompt|model|tools)\s*(:)",
-                bygroups(Name.Attribute, Punctuation),
+                r"(id|name|syntax|description|version|author|license|homepage|repository|keywords|extends|type|content|convention|trigger|enabled|path|prompt|model|tools)(!)?\s*(:)",
+                bygroups(Name.Attribute, Operator, Punctuation),
             ),
             # Any identifier followed by colon (category/key names)
             (
-                r"([\w\-]+)\s*(:)",
-                bygroups(Name.Label, Punctuation),
+                r"([\w\-]+)(!)?\s*(:)",
+                bygroups(Name.Label, Operator, Punctuation),
             ),
             # Inline @use statement within blocks (e.g., inside @skills)
             (
