@@ -1,5 +1,6 @@
 import type { Program, Value } from '@promptscript/core';
 import { posix } from 'path';
+import type { ConventionRenderer } from '../convention-renderer.js';
 import {
   MarkdownInstructionFormatter,
   type MarkdownAgentConfig,
@@ -162,6 +163,28 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
   override referencesMode(): 'directory' | 'inline' | 'none' {
     return 'directory';
+  }
+
+  protected override codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return null;
+
+    const extracted = this.standardsExtractor.extract(standards.content);
+    const subsections: string[] = [];
+
+    for (const key of Object.keys(this.getProps(standards.content))) {
+      const entry = extracted.codeStandards.get(key);
+      if (!entry) continue;
+      if (entry.items.length === 0) continue;
+
+      subsections.push(renderer.renderSection(entry.title, renderer.renderList(entry.items), 2));
+    }
+
+    if (subsections.length === 0) return null;
+
+    return (
+      renderer.renderSection(this.getSectionName('codeStandards'), subsections.join('\n\n')) + '\n'
+    );
   }
 
   override format(ast: Program, options?: FormatOptions): FormatterOutput {

@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { FactoryFormatter, FACTORY_VERSIONS } from '../formatters/factory.js';
 
 const createLoc = (): SourceLocation => ({
@@ -14,6 +14,22 @@ const createMinimalProgram = (): Program => ({
   blocks: [],
   extends: [],
   loc: createLoc(),
+});
+
+const createStandardsProgram = (properties: Record<string, Value>): Program => ({
+  ...createMinimalProgram(),
+  blocks: [
+    {
+      type: 'Block',
+      name: 'standards',
+      content: {
+        type: 'ObjectContent',
+        properties,
+        loc: createLoc(),
+      },
+      loc: createLoc(),
+    },
+  ],
 });
 
 describe('FactoryFormatter', () => {
@@ -245,6 +261,89 @@ describe('FactoryFormatter', () => {
       // Should not contain sections for absent blocks
       expect(result.content).not.toContain('## Git Workflows');
       expect(result.content).not.toContain("## Don'ts");
+    });
+  });
+
+  describe('standards grouping', () => {
+    it('should group multiple custom entries under titled subsections', () => {
+      const ast = createStandardsProgram({
+        native_sql: ['Use parameterized queries', 'Avoid SELECT *'],
+        'DDL-types': ['Use explicit column types'],
+      });
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content.match(/^### .+$/gm)).toEqual(['### Native Sql', '### DDL Types']);
+      expect(result.content).toContain(
+        '### Native Sql\n\n- Use parameterized queries\n- Avoid SELECT *'
+      );
+      expect(result.content).toContain('### DDL Types\n\n- Use explicit column types');
+    });
+
+    it('should use known human-readable title mappings', () => {
+      const ast = createStandardsProgram({
+        sql: ['Prefer ANSI SQL'],
+        errors: ['Return actionable errors'],
+      });
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content).toContain('### SQL\n\n- Prefer ANSI SQL');
+      expect(result.content).toContain('### Error Handling\n\n- Return actionable errors');
+    });
+
+    it('should omit empty entries while preserving source order', () => {
+      const ast = createStandardsProgram({
+        first_rules: ['First rule'],
+        empty_array: [],
+        'empty-object': { enabled: false },
+        'second-rules': ['Second rule'],
+      });
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content.match(/^### .+$/gm)).toEqual(['### First Rules', '### Second Rules']);
+      expect(result.content.indexOf('### First Rules')).toBeLessThan(
+        result.content.indexOf('### Second Rules')
+      );
+      expect(result.content).not.toContain('Empty Array');
+      expect(result.content).not.toContain('Empty Object');
+    });
+
+    it('should preserve source order when legacy code standards are present', () => {
+      const ast = createStandardsProgram({
+        typescript: ['Use strict mode'],
+        code: {
+          style: ['Prefer immutable data'],
+          patterns: ['Use dependency injection'],
+        },
+        testing: ['Use Vitest'],
+      });
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content.match(/^### .+$/gm)).toEqual([
+        '### TypeScript',
+        '### Code Style',
+        '### Testing',
+      ]);
+    });
+
+    it('should preserve grouped standards across all Factory versions', () => {
+      const ast = createStandardsProgram({
+        typescript: ['Use strict mode'],
+        testing: ['Use Vitest'],
+      });
+
+      const versions = ['simple', 'multifile', 'full'] as const;
+      const contents = versions.map((version) => formatter.format(ast, { version }).content);
+
+      for (const content of contents) {
+        expect(content).toContain('## Conventions & Patterns');
+        expect(content).toContain('### TypeScript\n\n- Use strict mode');
+        expect(content).toContain('### Testing\n\n- Use Vitest');
+      }
+      expect(new Set(contents).size).toBe(1);
     });
   });
 
