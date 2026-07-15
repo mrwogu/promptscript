@@ -12,6 +12,7 @@ import type {
   Value,
   InlineUseDeclaration,
 } from '@promptscript/core';
+import { SYNTAX_FEATURES } from '@promptscript/core';
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -160,6 +161,33 @@ describe('resolveSkillComposition — no-op cases', () => {
       currentFile: 'test.prs',
     });
     expect(result).toBe(ast);
+  });
+});
+
+describe('resolveSkillComposition — syntax features', () => {
+  it('retains syntax features from composed skills', async () => {
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'base' } as unknown as Value }, [
+        makeInlineUse('./sub'),
+      ]),
+    ]);
+    const subSkill = {
+      ...makeSubSkillProgram('sub', 'sub content'),
+      syntaxFeatures: [
+        {
+          feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+          location: defaultLoc,
+        },
+      ],
+    };
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(subSkill),
+      resolvePath: vi.fn().mockReturnValue('/abs/sub.prs'),
+      currentFile: 'test.prs',
+    });
+
+    expect(result.syntaxFeatures).toEqual(subSkill.syntaxFeatures);
   });
 });
 

@@ -4,8 +4,13 @@ import {
   getLatestSyntaxVersion,
   isKnownSyntaxVersion,
   getBlocksForVersion,
+  getFeaturesForVersion,
   getMinimumVersionForBlock,
+  getMinimumVersionForFeature,
+  getSyntaxFeatureUsages,
+  SYNTAX_FEATURES,
 } from '../syntax-versions.js';
+import type { Program } from '../types/ast.js';
 import { BLOCK_TYPES } from '../types/constants.js';
 
 describe('SYNTAX_VERSIONS', () => {
@@ -49,7 +54,7 @@ describe('registry consistency', () => {
 
 describe('getLatestSyntaxVersion', () => {
   it('should return the highest known version', () => {
-    expect(getLatestSyntaxVersion()).toBe('1.2.0');
+    expect(getLatestSyntaxVersion()).toBe('1.3.0');
   });
 });
 
@@ -94,5 +99,40 @@ describe('getMinimumVersionForBlock', () => {
   it('should return undefined for unknown block names', () => {
     expect(getMinimumVersionForBlock('foobar')).toBeUndefined();
     expect(getMinimumVersionForBlock('my-custom-block')).toBeUndefined();
+  });
+});
+
+describe('syntax feature capabilities', () => {
+  it('should expose cumulative features by syntax version', () => {
+    expect(getFeaturesForVersion('1.2.0')).toEqual([]);
+    expect(getFeaturesForVersion('1.3.0')).toContain(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE);
+    expect(getFeaturesForVersion('9.9.9')).toBeUndefined();
+  });
+
+  it('should return the minimum version for registered features', () => {
+    expect(getMinimumVersionForFeature(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE)).toBe('1.3.0');
+  });
+
+  it('should detect feature usage from explicit AST modifiers', () => {
+    const loc = { file: 'test.prs', line: 3, column: 10 };
+    const ast: Program = {
+      type: 'Program',
+      loc,
+      uses: [],
+      blocks: [],
+      extends: [
+        {
+          type: 'ExtendBlock',
+          targetPath: 'standards',
+          content: { type: 'ObjectContent', properties: { testing: ['Vitest'] }, loc },
+          replacements: [{ type: 'ReplaceModifier', property: 'testing', loc }],
+          loc,
+        },
+      ],
+    };
+
+    expect(getSyntaxFeatureUsages(ast)).toEqual([
+      { feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: loc },
+    ]);
   });
 });

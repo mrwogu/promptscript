@@ -15,9 +15,11 @@ import type {
   InlineUseDeclaration,
   ComposedPhase,
   SkillContractField,
+  SyntaxFeatureUsage,
 } from '@promptscript/core';
 import {
   deepClone,
+  getSyntaxFeatureUsages,
   isTextContent,
   ResolveError,
   bindParams,
@@ -101,6 +103,7 @@ export async function resolveSkillComposition(
 
   // Process each skills block
   const updatedBlocks = [...ast.blocks];
+  const syntaxFeatures = [...(ast.syntaxFeatures ?? [])];
 
   for (const skillsBlock of skillsBlocks) {
     const idx = updatedBlocks.indexOf(skillsBlock);
@@ -115,7 +118,7 @@ export async function resolveSkillComposition(
     // whose ObjectContent contains the inlineUses.
     // We process per-skill: iterate skill properties and find which ones
     // have ObjectContent with inlineUses attached.
-    const updatedContent = await resolveSkillsBlockComposition(
+    const resolvedComposition = await resolveSkillsBlockComposition(
       content,
       inlineUses,
       options,
@@ -125,13 +128,15 @@ export async function resolveSkillComposition(
 
     updatedBlocks[idx] = {
       ...skillsBlock,
-      content: updatedContent,
+      content: resolvedComposition.content,
     };
+    syntaxFeatures.push(...resolvedComposition.syntaxFeatures);
   }
 
   return {
     ...ast,
     blocks: updatedBlocks,
+    syntaxFeatures,
   };
 }
 
@@ -151,7 +156,7 @@ async function resolveSkillsBlockComposition(
   options: CompositionOptions,
   depth: number,
   resolutionStack: Set<string>
-): Promise<ObjectContent> {
+): Promise<{ content: ObjectContent; syntaxFeatures: SyntaxFeatureUsage[] }> {
   // Collect resolved phases
   const phases: ResolvedPhase[] = [];
 
@@ -166,9 +171,12 @@ async function resolveSkillsBlockComposition(
   if (phases.length === 0) {
     // Nothing resolved — just clear inlineUses
     return {
-      ...content,
-      properties: { ...content.properties },
-      inlineUses: undefined,
+      content: {
+        ...content,
+        properties: { ...content.properties },
+        inlineUses: undefined,
+      },
+      syntaxFeatures: [],
     };
   }
 
@@ -188,9 +196,12 @@ async function resolveSkillsBlockComposition(
   }
 
   return {
-    ...content,
-    properties: updatedProperties,
-    inlineUses: undefined, // consumed
+    content: {
+      ...content,
+      properties: updatedProperties,
+      inlineUses: undefined,
+    },
+    syntaxFeatures: phases.flatMap((phase) => phase.syntaxFeatures),
   };
 }
 
@@ -222,6 +233,8 @@ interface ResolvedPhase {
   outputs?: Record<string, Value>;
   /** Context blocks extracted (knowledge, restrictions, standards) */
   contextBlocks: ExtractedContext[];
+  /** Versioned syntax used by the resolved sub-skill */
+  syntaxFeatures: SyntaxFeatureUsage[];
 }
 
 /**
@@ -325,6 +338,7 @@ async function resolveInlineUse(
     inputs: skillDef.inputs,
     outputs: skillDef.outputs,
     contextBlocks,
+    syntaxFeatures: getSyntaxFeatureUsages(subAst),
   };
 }
 

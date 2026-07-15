@@ -220,6 +220,11 @@ export const Question = createToken({
   pattern: /\?/,
 });
 
+export const Bang = createToken({
+  name: 'Bang',
+  pattern: /!/,
+});
+
 export const DotDot = createToken({
   name: 'DotDot',
   pattern: /\.\./,
@@ -305,6 +310,7 @@ export const allTokens: TokenType[] = [
   Comma,
   Equals,
   Question,
+  Bang,
   Dot,
   Dash,
 

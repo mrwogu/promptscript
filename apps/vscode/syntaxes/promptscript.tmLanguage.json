@@ -15,6 +15,7 @@
     { "include": "#env-variable" },
     { "include": "#template-expression" },
     { "include": "#range-operator" },
+    { "include": "#replace-operator" },
     { "include": "#number" },
     { "include": "#restriction-dash" },
     { "include": "#boolean" },
@@ -135,6 +136,10 @@
     "range-operator": {
       "match": "\\.\\.",
       "name": "keyword.operator.range.prs"
+    },
+    "replace-operator": {
+      "match": "!(?=\\s*:)",
+      "name": "keyword.operator.replace.prs"
     },
     "number": {
       "match": "-?\\d+(?:\\.\\d+)?",

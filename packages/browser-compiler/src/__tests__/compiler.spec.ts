@@ -51,6 +51,31 @@ describe('compile', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
+  it('should report replace modifiers declared with syntax 1.2.0 after resolution', async () => {
+    const files = {
+      'project.prs': `@meta { id: "test" syntax: "1.2.0" }
+@standards {
+  testing: ["Use Jest"]
+}
+@extend standards {
+  testing!: ["Use Vitest"]
+}
+`,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleId: 'PS018',
+          message: expect.stringContaining('regular-block-replace'),
+        }),
+      ])
+    );
+  });
+
   it('should return error for missing entry file', async () => {
     const files = {
       'other.prs': '@meta { id: "other" syntax: "1.0.0" }',

@@ -276,6 +276,50 @@ describe('parse', () => {
     });
   });
 
+  describe('regular block replacement modifier', () => {
+    it('should represent replacement fields explicitly on @extend', () => {
+      const source = `
+        @meta { id: "test" syntax: "1.3.0" }
+        @extend standards {
+          testing!: ["Use Vitest"]
+          linting: ["Use ESLint"]
+        }
+      `;
+
+      const result = parse(source, { filename: 'replace.prs' });
+
+      expect(result.errors).toHaveLength(0);
+      const extension = result.ast?.extends[0];
+      expect(extension?.content.type).toBe('ObjectContent');
+      expect(extension?.replacements).toEqual([
+        expect.objectContaining({
+          type: 'ReplaceModifier',
+          property: 'testing',
+          loc: expect.objectContaining({ file: 'replace.prs' }),
+        }),
+      ]);
+      if (extension?.content.type === 'ObjectContent') {
+        expect(extension.content.properties).toEqual({
+          testing: ['Use Vitest'],
+          linting: ['Use ESLint'],
+        });
+        expect(extension.content.properties).not.toHaveProperty('testing!');
+      }
+    });
+
+    it('should reject the replace modifier outside @extend', () => {
+      const result = parse(`
+        @meta { id: "test" syntax: "1.3.0" }
+        @standards {
+          testing!: ["Use Vitest"]
+        }
+      `);
+
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.ast).toBeNull();
+    });
+  });
+
   describe('literal values', () => {
     it('should parse boolean values', () => {
       const source = `

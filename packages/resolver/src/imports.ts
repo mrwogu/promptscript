@@ -10,7 +10,7 @@ import type {
   Value,
   ParamArgument,
 } from '@promptscript/core';
-import { deepClone, isTextContent, ResolveError } from '@promptscript/core';
+import { deepClone, isTextContent, ResolveError, getSyntaxFeatureUsages } from '@promptscript/core';
 
 /**
  * Import marker block prefix for storing imported content.
@@ -112,6 +112,7 @@ export function resolveUses(target: Program, use: UseDeclaration, source: Progra
   return {
     ...target,
     blocks: [...mergedBlocks, ...aliasedBlocks],
+    syntaxFeatures: [...getSyntaxFeatureUsages(target), ...getSyntaxFeatureUsages(source)],
   };
 }
 

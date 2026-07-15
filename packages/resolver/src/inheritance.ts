@@ -8,7 +8,7 @@ import type {
   MixedContent,
   Value,
 } from '@promptscript/core';
-import { deepMerge, deepClone, isTextContent } from '@promptscript/core';
+import { deepMerge, deepClone, isTextContent, getSyntaxFeatureUsages } from '@promptscript/core';
 
 /**
  * Resolve inheritance by merging a parent program into a child program.
@@ -39,6 +39,7 @@ export function resolveInheritance(parent: Program, child: Program): Program {
     inherit: undefined,
     uses: child.uses,
     extends: child.extends,
+    syntaxFeatures: [...getSyntaxFeatureUsages(parent), ...getSyntaxFeatureUsages(child)],
   };
 }
 

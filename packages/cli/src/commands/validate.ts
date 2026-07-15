@@ -2,12 +2,18 @@ import { resolve, join } from 'path';
 import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
 import type { ValidateOptions } from '../types.js';
 import type { CompileResult } from '@promptscript/compiler';
-import { loadConfig } from '../config/loader.js';
+import { findConfigFile, loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
-import { getMinimumVersionForBlock, compareVersions } from '@promptscript/core';
+import {
+  getMinimumVersionForBlock,
+  getMinimumVersionForFeature,
+  getSyntaxFeatureUsages,
+  compareVersions,
+} from '@promptscript/core';
 import { parse } from '@promptscript/parser';
+import { Resolver } from '@promptscript/resolver';
 
 /**
  * JSON output structure for validation results.
@@ -311,27 +317,50 @@ function outputJsonResult(result: ValidationJsonOutput): void {
 async function runFix(): Promise<void> {
   const files = discoverPrsFiles('.promptscript');
   let fixedCount = 0;
+  const configPath = findConfigFile();
+  const registryPath = configPath
+    ? (await resolveRegistryPath(await loadConfig(configPath))).path
+    : resolve('./registry');
+  const resolver = new Resolver({
+    registryPath,
+    localPath: resolve('./.promptscript'),
+    cache: false,
+  });
 
   for (const filePath of files) {
     const content = readFileSync(filePath, 'utf-8');
-    const result = parse(content);
-    if (!result.ast?.meta?.fields?.['syntax']) continue;
+    const parseResult = parse(content);
+    if (!parseResult.ast?.meta?.fields?.['syntax']) continue;
 
-    const declaredVersion = result.ast.meta.fields['syntax'];
+    const declaredVersion = parseResult.ast.meta.fields['syntax'];
     if (typeof declaredVersion !== 'string') continue;
 
+    let ast = parseResult.ast;
+    try {
+      const resolved = await resolver.resolve(resolve(filePath));
+      ast = resolved.ast ?? ast;
+    } catch {
+      // Preserve direct fixes when unrelated imports cannot be resolved.
+    }
+
     let minRequired = '1.0.0';
-    for (const block of result.ast.blocks) {
+    for (const block of ast.blocks) {
       const blockMin = getMinimumVersionForBlock(block.name);
       if (blockMin && compareVersions(blockMin, minRequired) > 0) {
         minRequired = blockMin;
       }
     }
-    for (const ext of result.ast.extends) {
+    for (const ext of ast.extends) {
       const blockName = ext.targetPath.split('.')[0]!;
       const blockMin = getMinimumVersionForBlock(blockName);
       if (blockMin && compareVersions(blockMin, minRequired) > 0) {
         minRequired = blockMin;
+      }
+    }
+    for (const usage of getSyntaxFeatureUsages(ast)) {
+      const featureMin = getMinimumVersionForFeature(usage.feature);
+      if (featureMin && compareVersions(featureMin, minRequired) > 0) {
+        minRequired = featureMin;
       }
     }
 

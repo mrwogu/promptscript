@@ -1024,6 +1024,77 @@ describe('skill-aware @extend semantics', () => {
       expect(() => applyExtends(ast)).toThrow("Cannot override sealed property 'content'");
     });
 
+    it('should reject deep paths that bypass sealed property merging', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                allowedTools: ['Read'] as unknown as Value,
+                sealed: ['allowedTools'] as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [createExtendBlock('skills.expert.allowedTools', createArrayContent(['Bash']))],
+      });
+
+      expect(() => applyExtends(ast)).toThrow(ResolveError);
+      expect(() => applyExtends(ast)).toThrow("Cannot override sealed property 'allowedTools'");
+    });
+
+    it('should enforce sealed properties when extending the skills block root', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                content: createTextContent('Critical instructions'),
+                sealed: ['content'] as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                content: createTextContent('Override attempt'),
+              }) as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      expect(() => applyExtends(ast)).toThrow(ResolveError);
+      expect(() => applyExtends(ast)).toThrow("Cannot override sealed property 'content'");
+    });
+
+    it('should reject non-object overlays at the skills block root', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              expert: createObjectContent({
+                description: 'Base expert',
+                sealed: true as unknown as Value,
+              }) as unknown as Value,
+            })
+          ),
+        ],
+        extends: [createExtendBlock('skills', createObjectContent({ expert: null }))],
+      });
+
+      expect(() => applyExtends(ast)).toThrow(ResolveError);
+      expect(() => applyExtends(ast)).toThrow(/must use named object fields/);
+    });
+
     it('should throw when sealed: true and any replace-strategy property is overridden', () => {
       const ast = createProgram({
         blocks: [

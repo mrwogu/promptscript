@@ -56,7 +56,7 @@ describe('PS018: syntax-version-compat', () => {
     const messages = validate(makeAst('1.4.7'));
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('Unknown syntax version "1.4.7"');
-    expect(messages[0]!.message).toContain('1.2.0');
+    expect(messages[0]!.message).toContain('1.3.0');
   });
 
   it('should warn when block requires higher version', () => {
@@ -105,5 +105,48 @@ describe('PS018: syntax-version-compat', () => {
     const messages = validate(ast);
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('@agents');
+  });
+
+  it('should warn when the replace modifier requires a higher syntax version', () => {
+    const ast = makeAst('1.2.0');
+    ast.extends = [
+      {
+        type: 'ExtendBlock',
+        targetPath: 'standards',
+        loc,
+        content: {
+          type: 'ObjectContent',
+          properties: { testing: ['Use Vitest'] },
+          loc,
+        },
+        replacements: [{ type: 'ReplaceModifier', property: 'testing', loc }],
+      },
+    ];
+
+    const messages = validate(ast);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('regular-block-replace');
+    expect(messages[0]!.message).toContain('1.3.0');
+    expect(messages[0]!.suggestion).toContain('validate --fix');
+  });
+
+  it('should accept the replace modifier with syntax 1.3.0', () => {
+    const ast = makeAst('1.3.0');
+    ast.extends = [
+      {
+        type: 'ExtendBlock',
+        targetPath: 'standards',
+        loc,
+        content: {
+          type: 'ObjectContent',
+          properties: { testing: ['Use Vitest'] },
+          loc,
+        },
+        replacements: [{ type: 'ReplaceModifier', property: 'testing', loc }],
+      },
+    ];
+
+    expect(validate(ast)).toHaveLength(0);
   });
 });

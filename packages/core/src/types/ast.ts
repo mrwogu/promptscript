@@ -1,4 +1,5 @@
 import type { SourceLocation } from './source.js';
+import type { SyntaxFeatureUsage } from '../syntax-versions.js';
 
 // ============================================================
 // Base Types
@@ -104,6 +105,8 @@ export interface Program extends BaseNode {
   blocks: Block[];
   /** Extension blocks (@extend) */
   extends: ExtendBlock[];
+  /** Versioned syntax features retained after destructive resolution passes */
+  syntaxFeatures?: SyntaxFeatureUsage[];
 }
 
 // ============================================================
@@ -294,6 +297,24 @@ export interface ExtendBlock extends BaseNode {
   targetPath: string;
   /** Content to merge */
   content: BlockContent;
+  /** Fields whose complete prior values must be replaced */
+  replacements?: ReplaceModifier[];
+}
+
+/**
+ * Explicit replacement modifier on a regular block field within @extend.
+ *
+ * @example
+ * ```promptscript
+ * @extend standards {
+ *   testing!: ["Use Vitest"]
+ * }
+ * ```
+ */
+export interface ReplaceModifier extends BaseNode {
+  readonly type: 'ReplaceModifier';
+  /** Property whose prior value is replaced */
+  property: string;
 }
 
 // ============================================================

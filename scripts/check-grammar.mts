@@ -51,6 +51,7 @@ const TOKEN_SCOPE_MAP: Record<string, string> = {
   Comma: 'punctuation',
   Equals: 'punctuation',
   Question: 'punctuation',
+  Bang: 'keyword.operator',
   Dot: 'punctuation',
 };
 

@@ -22,6 +22,7 @@ import {
   Comma,
   Equals,
   Question,
+  Bang,
   Dot,
   DotDot,
   Dash,
@@ -93,6 +94,7 @@ describe('PSLexer', () => {
         { text: ',', type: Comma },
         { text: '=', type: Equals },
         { text: '?', type: Question },
+        { text: '!', type: Bang },
         { text: '.', type: Dot },
         { text: '..', type: DotDot },
       ];

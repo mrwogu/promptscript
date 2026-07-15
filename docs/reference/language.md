@@ -118,11 +118,12 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 
 ### Known Versions
 
-| Version | Status  | Blocks                                                                                                                                     |
+| Version | Status  | Blocks and features                                                                                                                        |
 | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
 | `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`                                                                                                               |
-| `1.2.0` | Current | All 1.1.0 blocks + `@examples`                                                                                                             |
+| `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
+| `1.3.0` | Current | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 
 !!! note "Internal Block Types"
 `@workflows` and `@prompts` are registered in version `1.1.0` but are **internal, not user-facing**. They are generated automatically from `@shortcuts` (see [Antigravity Workflows](#antigravity-workflows) and [GitHub Copilot Prompts](#github-copilot-prompts)). Do not write `@workflows` or `@prompts` blocks directly.
@@ -136,23 +137,25 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 
 All other built-in blocks are available from `1.0.0`.
 
+Regular block field replacement with `field!: value` requires syntax `1.3.0`.
+
 ### Validation (PS018, PS019)
 
 The validator enforces syntax version compatibility:
 
-- **PS018 (`syntax-version-compat`)**: warns when a file uses blocks that require a higher syntax version than declared in `@meta`. For example, using `@agents` with `syntax: "1.0.0"` triggers this warning.
+- **PS018 (`syntax-version-compat`)**: warns when the resolved program uses blocks or syntax features that require a higher version than declared in `@meta`. This includes requirements inherited, imported, or included through skill composition.
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, and suggests the closest match for typos.
 
 ### Upgrading
 
-To automatically update the `syntax` field to the required version for the blocks you use:
+To automatically update the `syntax` field to the required version for the resolved syntax you use:
 
 ```bash
 prs validate --fix          # Fix syntax versions in .prs files
 prs upgrade                 # Upgrade all .prs files to the latest syntax version
 ```
 
-`prs validate --fix` rewrites the `syntax: "..."` line in each `@meta` block to the minimum version required by the blocks used in that file.
+`prs validate --fix` rewrites the `syntax: "..."` line in each `@meta` block to the minimum version required by resolved blocks and syntax features. It follows inheritance, imports, and skill composition.
 
 `prs upgrade` upgrades all files to the latest known syntax version regardless of what blocks they use.
 
@@ -1169,6 +1172,37 @@ Modify inherited or existing blocks:
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+### Replacing Regular Block Fields
+
+Syntax `1.3.0` adds explicit replacement for regular block fields. Add `!` after a field name
+inside `@extend` to replace its complete prior value:
+
+```promptscript
+@meta { id: "project" syntax: "1.3.0" }
+
+@inherit ./company-base
+
+@extend standards {
+  testing!: ["Use Vitest"]
+  linting: ["Use ESLint"]
+}
+```
+
+`testing!` replaces the inherited `testing` value. Unmarked `linting` keeps the normal merge
+behavior. Replacement also works after `@use`, with aliased imports, and at nested target paths:
+
+```promptscript
+@use ./shared as shared
+
+@extend shared.standards.tooling {
+  frameworks!: ["Vue"]
+}
+```
+
+If the field does not exist, replacement sets it. Later overlays operate on the resulting value.
+The modifier applies only to direct fields in regular block extensions. Skill properties retain
+their dedicated merge and sealing semantics, so `!` is rejected when `@extend` targets `@skills`.
 
 ### Skill-Specific Extend Semantics
 

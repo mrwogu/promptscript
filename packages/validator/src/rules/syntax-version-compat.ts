@@ -5,6 +5,8 @@ import {
   isKnownSyntaxVersion,
   getLatestSyntaxVersion,
   getMinimumVersionForBlock,
+  getMinimumVersionForFeature,
+  getSyntaxFeatureUsages,
   compareVersions,
 } from '@promptscript/core';
 
@@ -14,7 +16,7 @@ import {
 export const syntaxVersionCompat: ValidationRule = {
   id: 'PS018',
   name: 'syntax-version-compat',
-  description: 'Check syntax version compatibility with used blocks',
+  description: 'Check syntax version compatibility with used blocks and features',
   defaultSeverity: 'warning',
   validate: (ctx) => {
     const meta = ctx.ast.meta;
@@ -45,5 +47,16 @@ export const syntaxVersionCompat: ValidationRule = {
         });
       }
     });
+
+    for (const usage of getSyntaxFeatureUsages(ctx.ast)) {
+      const minVersion = getMinimumVersionForFeature(usage.feature);
+      if (!minVersion || compareVersions(syntax, minVersion) >= 0) continue;
+
+      ctx.report({
+        message: `Syntax feature "${usage.feature}" requires syntax >= ${minVersion}, but the resolved program declares "${syntax}".`,
+        location: meta.loc ?? ctx.ast.loc,
+        suggestion: 'Use "prs validate --fix" to update the syntax version.',
+      });
+    }
   },
 };

@@ -18,6 +18,7 @@ import {
   isTextContent,
   bindParams,
   interpolateAST,
+  getSyntaxFeatureUsages,
   type TemplateContext,
 } from '@promptscript/core';
 import { VirtualFileSystem } from './virtual-fs.js';
@@ -674,6 +675,7 @@ export class BrowserResolver {
       inherit: undefined,
       uses: child.uses,
       extends: child.extends,
+      syntaxFeatures: [...getSyntaxFeatureUsages(parent), ...getSyntaxFeatureUsages(child)],
     };
   }
 
@@ -894,6 +896,7 @@ export class BrowserResolver {
     return {
       ...target,
       blocks: [...mergedBlocks, ...aliasedBlocks],
+      syntaxFeatures: [...getSyntaxFeatureUsages(target), ...getSyntaxFeatureUsages(source)],
     };
   }
 
@@ -944,6 +947,7 @@ export class BrowserResolver {
       ...ast,
       blocks,
       extends: [],
+      syntaxFeatures: getSyntaxFeatureUsages(ast),
     };
   }
 
@@ -967,6 +971,23 @@ export class BrowserResolver {
       deepPath = pathParts.slice(2);
     }
 
+    const skillContext = targetName === 'skills';
+    const replacementKeys = new Set(ext.replacements?.map((modifier) => modifier.property) ?? []);
+
+    if (skillContext && replacementKeys.size > 0) {
+      throw new ResolveError(
+        'The ! replace modifier is only supported for regular block fields and cannot target @skills. Remove ! and use the documented skill-specific merge and sealed property semantics.',
+        ext.replacements?.[0]?.loc ?? ext.loc
+      );
+    }
+
+    if (skillContext && deepPath.length <= 1 && ext.content.type !== 'ObjectContent') {
+      throw new ResolveError(
+        'Skill extensions must use named object fields so skill-specific merge and sealed property semantics can be enforced.',
+        ext.loc
+      );
+    }
+
     const idx = blocks.findIndex((b) => b.name === targetName);
     if (idx === -1) {
       return blocks;
@@ -977,14 +998,45 @@ export class BrowserResolver {
       return blocks;
     }
 
-    // Skill-aware merging fires when the (un-aliased) target block is the
-    // `skills` block — both `@extend skills.<name>` and the post-fix
-    // `@extend alias.skills.<name>` resolve to targetName === 'skills'.
-    const skillContext = targetName === 'skills';
+    if (skillContext) {
+      this.assertSkillPathCanExtend(target.content, deepPath, ext);
+    }
 
-    const merged = this.mergeExtension(target, deepPath, ext, skillContext);
+    const merged = this.mergeExtension(target, deepPath, ext, replacementKeys, skillContext);
 
     return [...blocks.slice(0, idx), merged, ...blocks.slice(idx + 1)];
+  }
+
+  private assertSkillPathCanExtend(content: BlockContent, path: string[], ext: ExtendBlock): void {
+    const skillName = path[0];
+    const propertyName = path[1];
+    if (!skillName || !propertyName) {
+      return;
+    }
+
+    if (propertyName === 'sealed') {
+      throw new ResolveError("Cannot override protected property 'sealed' on skill", ext.loc);
+    }
+
+    if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') {
+      return;
+    }
+
+    const skill = content.properties[skillName];
+    if (!isSkillRecordCandidate(skill)) {
+      return;
+    }
+
+    const properties =
+      (skill as Record<string, unknown>)['type'] === 'ObjectContent'
+        ? ((skill as unknown as ObjectContent).properties as Record<string, Value>)
+        : skill;
+    if (resolveSealedKeys(properties['sealed']).has(propertyName)) {
+      throw new ResolveError(
+        `Cannot override sealed property '${propertyName}' on skill (sealed by base definition)`,
+        ext.loc
+      );
+    }
   }
 
   /**
@@ -994,18 +1046,62 @@ export class BrowserResolver {
     block: Block,
     path: string[],
     ext: ExtendBlock,
+    replacementKeys: ReadonlySet<string>,
     skillContext: boolean
   ): Block {
     if (path.length === 0) {
       return {
         ...block,
-        content: this.mergeExtendContent(block.content, ext.content),
+        content: skillContext
+          ? this.mergeSkillsBlockContent(block.content, ext.content)
+          : this.mergeExtendContent(block.content, ext.content, replacementKeys),
       };
     }
 
     return {
       ...block,
-      content: this.mergeAtPath(block.content, path, ext.content, skillContext),
+      content: this.mergeAtPath(block.content, path, ext.content, replacementKeys, skillContext),
+    };
+  }
+
+  private mergeSkillsBlockContent(target: BlockContent, ext: BlockContent): BlockContent {
+    if (
+      (target.type !== 'ObjectContent' && target.type !== 'MixedContent') ||
+      ext.type !== 'ObjectContent'
+    ) {
+      return this.mergeExtendContent(target, ext);
+    }
+
+    const properties = { ...target.properties };
+    for (const [skillName, extValue] of Object.entries(ext.properties)) {
+      const extContent =
+        (extValue as Record<string, unknown>)?.['type'] === 'ObjectContent'
+          ? (extValue as unknown as ObjectContent)
+          : isSkillRecordCandidate(extValue)
+            ? ({
+                type: 'ObjectContent',
+                properties: extValue,
+                loc: ext.loc,
+              } as ObjectContent)
+            : undefined;
+
+      if (!extContent) {
+        throw new ResolveError(
+          `Skill '${skillName}' extension must use named object fields so sealed property semantics can be enforced.`,
+          ext.loc
+        );
+      }
+      properties[skillName] = this.mergeExtendValue(
+        properties[skillName],
+        extContent,
+        new Set(),
+        true
+      );
+    }
+
+    return {
+      ...target,
+      properties,
     };
   }
 
@@ -1016,15 +1112,16 @@ export class BrowserResolver {
     content: BlockContent,
     path: string[],
     extContent: BlockContent,
+    replacementKeys: ReadonlySet<string>,
     skillContext: boolean
   ): BlockContent {
     if (path.length === 0) {
-      return this.mergeExtendContent(content, extContent);
+      return this.mergeExtendContent(content, extContent, replacementKeys);
     }
 
     const currentKey = path[0];
     if (!currentKey) {
-      return this.mergeExtendContent(content, extContent);
+      return this.mergeExtendContent(content, extContent, replacementKeys);
     }
 
     const rest = path.slice(1);
@@ -1037,7 +1134,12 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeExtendValue(existing, extContent, skillContext),
+            [currentKey]: this.mergeExtendValue(
+              existing,
+              extContent,
+              replacementKeys,
+              skillContext
+            ),
           },
         };
       }
@@ -1047,7 +1149,13 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent, skillContext),
+            [currentKey]: this.mergeAtPathValue(
+              existing as Value,
+              rest,
+              extContent,
+              replacementKeys,
+              skillContext
+            ),
           },
         };
       }
@@ -1069,7 +1177,12 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeExtendValue(existing, extContent, skillContext),
+            [currentKey]: this.mergeExtendValue(
+              existing,
+              extContent,
+              replacementKeys,
+              skillContext
+            ),
           },
         };
       }
@@ -1079,7 +1192,13 @@ export class BrowserResolver {
           ...content,
           properties: {
             ...content.properties,
-            [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent, skillContext),
+            [currentKey]: this.mergeAtPathValue(
+              existing as Value,
+              rest,
+              extContent,
+              replacementKeys,
+              skillContext
+            ),
           },
         };
       }
@@ -1103,6 +1222,7 @@ export class BrowserResolver {
     value: Value,
     path: string[],
     extContent: BlockContent,
+    replacementKeys: ReadonlySet<string>,
     skillContext: boolean
   ): Value {
     // Caller (mergeAtPath / self-recursion) guarantees path is non-empty
@@ -1119,14 +1239,20 @@ export class BrowserResolver {
     if (rest.length === 0) {
       return {
         ...obj,
-        [currentKey]: this.mergeExtendValue(existing, extContent, skillContext),
+        [currentKey]: this.mergeExtendValue(existing, extContent, replacementKeys, skillContext),
       };
     }
 
     if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
       return {
         ...obj,
-        [currentKey]: this.mergeAtPathValue(existing as Value, rest, extContent, skillContext),
+        [currentKey]: this.mergeAtPathValue(
+          existing as Value,
+          rest,
+          extContent,
+          replacementKeys,
+          skillContext
+        ),
       };
     }
 
@@ -1186,6 +1312,7 @@ export class BrowserResolver {
   private mergeExtendValue(
     existing: Value | undefined,
     extContent: BlockContent,
+    replacementKeys: ReadonlySet<string> = new Set(),
     skillContext: boolean = false
   ): Value {
     if (existing === undefined) {
@@ -1210,11 +1337,11 @@ export class BrowserResolver {
       !Array.isArray(existing) &&
       extContent.type === 'ObjectContent'
     ) {
-      const merged = deepMerge(
-        existing as Record<string, unknown>,
-        extContent.properties as Record<string, unknown>
+      return this.mergeRegularProperties(
+        existing as Record<string, Value>,
+        extContent.properties,
+        replacementKeys
       );
-      return merged as unknown as Value;
     }
 
     if (isTextContent(existing) && extContent.type === 'TextContent') {
@@ -1322,9 +1449,30 @@ export class BrowserResolver {
   }
 
   /**
+   * Merge regular block properties, replacing fields explicitly marked with !.
+   */
+  private mergeRegularProperties(
+    target: Record<string, Value>,
+    ext: Record<string, Value>,
+    replacementKeys: ReadonlySet<string>
+  ): Record<string, Value> {
+    const merged = deepMerge(target, ext);
+    for (const key of replacementKeys) {
+      if (Object.prototype.hasOwnProperty.call(ext, key)) {
+        merged[key] = this.deepCloneValue(ext[key]!);
+      }
+    }
+    return merged;
+  }
+
+  /**
    * Merge two BlockContent objects for extensions.
    */
-  private mergeExtendContent(target: BlockContent, ext: BlockContent): BlockContent {
+  private mergeExtendContent(
+    target: BlockContent,
+    ext: BlockContent,
+    replacementKeys: ReadonlySet<string> = new Set()
+  ): BlockContent {
     if (target.type === ext.type) {
       switch (ext.type) {
         case 'TextContent':
@@ -1335,7 +1483,11 @@ export class BrowserResolver {
         case 'ObjectContent':
           return {
             ...ext,
-            properties: deepMerge((target as ObjectContent).properties, ext.properties),
+            properties: this.mergeRegularProperties(
+              (target as ObjectContent).properties,
+              ext.properties,
+              replacementKeys
+            ),
           } as ObjectContent;
         case 'ArrayContent':
           return {
@@ -1354,7 +1506,11 @@ export class BrowserResolver {
           return {
             ...ext,
             text: mergedText,
-            properties: deepMerge(targetMixed.properties, ext.properties),
+            properties: this.mergeRegularProperties(
+              targetMixed.properties,
+              ext.properties,
+              replacementKeys
+            ),
           } as MixedContent;
         }
       }
@@ -1390,7 +1546,14 @@ export class BrowserResolver {
       const mixed = target as MixedContent;
       return {
         ...mixed,
-        properties: deepMerge(mixed.properties, ext.properties),
+        properties: this.mergeRegularProperties(mixed.properties, ext.properties, replacementKeys),
+      };
+    }
+
+    if (target.type === 'ObjectContent' && ext.type === 'MixedContent') {
+      return {
+        ...ext,
+        properties: this.mergeRegularProperties(target.properties, ext.properties, replacementKeys),
       };
     }
 
