@@ -662,6 +662,9 @@ describe('FactoryFormatter', () => {
       expect(result.content).toContain('## Build & Test');
       expect(result.content).toContain('[Security](../.factory/rules/standards/security.md)');
       expect(result.content).toContain('[Restrictions](../.factory/rules/restrictions.md)');
+      expect(result.content).toContain(
+        '## Rules\n\nAlways-on rules live in `.factory/rules/`. Review the relevant rule file before editing related code:'
+      );
       expect(result.content).not.toContain('Validate all inputs');
       expect(result.content).not.toContain('Conventional Commits');
       expect(result.content).not.toContain("## Don'ts");

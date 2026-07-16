@@ -651,7 +651,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       const relativePath = posix.relative(outputDirectory, rule.path);
       return `- [${rule.label}](${relativePath})`;
     });
-    sections.push(`## Rules\n\n${links.join('\n')}\n`);
+    const intro =
+      'Always-on rules live in `.factory/rules/`. Review the relevant rule file before editing related code:';
+    sections.push(`## Rules\n\n${intro}\n\n${links.join('\n')}\n`);
   }
 
   private isProjectRelativeOutputPath(outputPath: string): boolean {
