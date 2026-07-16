@@ -580,6 +580,11 @@
           "description": "Target version or format variant. Use 'legacy' for deprecated formats (e.g., Cursor's .cursorrules).",
           "example": "'legacy' | '1.0' | '2.0'"
         },
+        "rulesMode": {
+          "$ref": "#/definitions/FactoryRulesMode",
+          "description": "Factory always-on rules output mode. Split mode requires Factory's `multifile` or `full` version.",
+          "default": "monolith"
+        },
         "guardsAsSkills": {
           "type": "boolean",
           "description": "Generate skills from",
@@ -630,6 +635,14 @@
         "markdown"
       ],
       "description": "Built-in convention names."
+    },
+    "FactoryRulesMode": {
+      "type": "string",
+      "enum": [
+        "monolith",
+        "split"
+      ],
+      "description": "Factory always-on rules output mode.\n- `monolith`: Keep all rule content in AGENTS.md\n- `split`: Emit rule content under .factory/rules"
     },
     "FormattingConfig": {
       "type": "object",

@@ -70,6 +70,9 @@ targets:
   - github
   - claude
   - cursor
+  - factory:
+      version: multifile
+      rulesMode: split
 
 # =============================
 # Named Build Profiles
@@ -396,6 +399,7 @@ targets:
 | `claude`      | `CLAUDE.md`                       | `markdown`         | simple / multifile / full   |
 | `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy |
 | `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter        |
+| `factory`     | `AGENTS.md`                       | `markdown`         | simple / multifile / full   |
 | `opencode`    | `OPENCODE.md`                     | `markdown`         | simple / multifile / full   |
 | `gemini`      | `GEMINI.md`                       | `markdown`         | simple / multifile / full   |
 
@@ -464,6 +468,11 @@ targets:
   - claude:
       version: full # Multifile + skills + CLAUDE.local.md (default)
 
+  # Factory AI versions and split always-on rules
+  - factory:
+      version: multifile
+      rulesMode: split
+
   # OpenCode versions
   - opencode:
       version: simple # Single OPENCODE.md
@@ -497,6 +506,16 @@ targets:
 | `multifile` | Main + `.claude/rules/*.md` with path-specific rules (from `@guards.globs`)                       |
 | `full`      | Multifile + `.claude/skills/<name>/SKILL.md` (from `@skills`) + `CLAUDE.local.md` (from `@local`) |
 
+**Factory AI Versions:**
+
+| Version     | Output Files                                               |
+| ----------- | ---------------------------------------------------------- |
+| `simple`    | `AGENTS.md` only                                           |
+| `multifile` | `AGENTS.md` + commands + `.factory/skills/<name>/SKILL.md` |
+| `full`      | Multifile output + `.factory/droids/<name>.md`             |
+
+Factory defaults to `rulesMode: monolith`, which preserves the existing single-file rules content in `AGENTS.md`. Set `rulesMode: split` with `multifile` or `full` to emit always-on files under `.factory/rules/` and a discoverability index in `AGENTS.md`. `rulesMode: split` with `simple` is an error.
+
 **OpenCode Versions:**
 
 | Version     | Output Files                                                                  |
@@ -515,14 +534,15 @@ targets:
 
 **Target Options:**
 
-| Field           | Type                | Default         | Description                                            |
-| --------------- | ------------------- | --------------- | ------------------------------------------------------ |
-| `enabled`       | boolean             | `true`          | Whether target is enabled                              |
-| `output`        | string              | (see above)     | Custom output path                                     |
-| `convention`    | string              | `markdown`      | Output convention ('xml' or 'markdown')                |
-| `version`       | string              | `full`          | Format version (varies by target, see below)           |
-| `skillBaseDir`  | string              | target-specific | Custom base directory for generated skill files        |
-| `includeSkills` | boolean or string[] | `true`          | Emit all skills, no skills, or only listed skill names |
+| Field           | Type                    | Default         | Description                                            |
+| --------------- | ----------------------- | --------------- | ------------------------------------------------------ |
+| `enabled`       | boolean                 | `true`          | Whether target is enabled                              |
+| `output`        | string                  | (see above)     | Custom output path                                     |
+| `convention`    | string                  | `markdown`      | Output convention (`xml` or `markdown`)                |
+| `version`       | string                  | `full`          | Format version (varies by target, see below)           |
+| `rulesMode`     | `monolith` or `split`   | `monolith`      | Factory always-on rule layout                          |
+| `skillBaseDir`  | string                  | target-specific | Custom base directory for generated skill files        |
+| `includeSkills` | boolean or string array | `true`          | Emit all skills, no skills, or only listed skill names |
 
 Disabling Targets
 
