@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { FormatterOutput } from '@promptscript/compiler';
-import { cleanupManagedOutputs } from '../managed-output-cleanup.js';
+import { cleanupManagedOutputs, removeIfUnchanged } from '../managed-output-cleanup.js';
 
 const GENERATED_MARKER =
   '<!-- PromptScript 2026-07-15T00:00:00.000Z | source: project.prs | target: factory - do not edit -->';
@@ -240,6 +240,55 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(readFile(staleFile, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
     await expect(readFile(keptFile, 'utf-8')).resolves.toBe('# Team-owned rules\n');
+  });
+
+  describe('removeIfUnchanged fallback', () => {
+    it('should remove a regular file whose identity is unchanged', async () => {
+      const directory = await createTemporaryDirectory('promptscript-remove-ok-');
+      const file = join(directory, 'generated.md');
+      await writeFile(file, `${GENERATED_MARKER}\n`);
+      const stat = await lstat(file);
+
+      await expect(removeIfUnchanged(file, { dev: stat.dev, ino: stat.ino })).resolves.toBe(true);
+      await expect(readFile(file, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
+    });
+
+    it('should keep a file whose identity no longer matches', async () => {
+      const directory = await createTemporaryDirectory('promptscript-remove-mismatch-');
+      const file = join(directory, 'generated.md');
+      await writeFile(file, `${GENERATED_MARKER}\n`);
+
+      await expect(removeIfUnchanged(file, { dev: 0, ino: 0 })).resolves.toBe(false);
+      await expect(readFile(file, 'utf-8')).resolves.toContain('PromptScript');
+    });
+
+    it('should ignore a missing entry', async () => {
+      const directory = await createTemporaryDirectory('promptscript-remove-missing-');
+
+      await expect(
+        removeIfUnchanged(join(directory, 'absent.md'), { dev: 1, ino: 1 })
+      ).resolves.toBe(false);
+    });
+
+    it('should ignore directories and symlinks', async () => {
+      const directory = await createTemporaryDirectory('promptscript-remove-nonfile-');
+      const nested = join(directory, 'nested');
+      await mkdir(nested);
+      const directoryStat = await lstat(nested);
+      await expect(
+        removeIfUnchanged(nested, { dev: directoryStat.dev, ino: directoryStat.ino })
+      ).resolves.toBe(false);
+
+      const target = join(directory, 'target.md');
+      await writeFile(target, `${GENERATED_MARKER}\n`);
+      const link = join(directory, 'link.md');
+      await symlink(target, link, 'file');
+      const linkStat = await lstat(link);
+      await expect(removeIfUnchanged(link, { dev: linkStat.dev, ino: linkStat.ino })).resolves.toBe(
+        false
+      );
+      await expect(readFile(target, 'utf-8')).resolves.toContain('PromptScript');
+    });
   });
 
   async function createTemporaryDirectory(prefix: string): Promise<string> {
