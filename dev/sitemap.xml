@@ -449,6 +449,10 @@
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getFeaturesForVersion/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getFileName/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
@@ -461,11 +465,19 @@
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getMinimumVersionForFeature/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getPackageInfo/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getPackageVersion/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getSyntaxFeatureUsages/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
@@ -701,6 +713,10 @@
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ReplaceModifier/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SectionRenderer/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
@@ -742,6 +758,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SuggestionRule/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SyntaxFeatureUsage/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
@@ -857,6 +877,10 @@
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/SyntaxFeature/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/TargetEntry/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
@@ -902,6 +926,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/RESERVED_WORDS/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/SYNTAX_FEATURES/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
@@ -1706,6 +1734,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/parser/src/variables/At/</loc>
+         <lastmod>2026-07-16</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/parser/src/variables/Bang/</loc>
          <lastmod>2026-07-16</lastmod>
     </url>
     <url>
