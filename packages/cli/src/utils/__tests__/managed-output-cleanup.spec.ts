@@ -105,6 +105,50 @@ describe('cleanupManagedOutputs', () => {
     await expect(readFile(staleFile, 'utf-8')).resolves.toContain('# Stale');
   });
 
+  it('should support a project-root managed directory without deleting desired output', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-root-');
+    const staleFile = join(project, 'stale.md');
+    const desiredFile = join(project, 'AGENTS.md');
+    await writeFile(staleFile, `${GENERATED_MARKER}\n\n# Stale\n`);
+    await writeFile(desiredFile, `${GENERATED_MARKER}\n\n# Current\n`);
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputDirectories: ['.'],
+        },
+      ],
+    ]);
+
+    const result = await cleanupManagedOutputs(outputs, { outputRoot: project });
+
+    expect(result.removed).toEqual([staleFile]);
+    await expect(readFile(desiredFile, 'utf-8')).resolves.toContain('# Current');
+  });
+
+  it('should recognize marked headings and BOMs without following file symlinks', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-marker-layout-');
+    const outside = await createTemporaryDirectory('promptscript-cleanup-file-link-');
+    const rules = join(project, '.factory', 'rules');
+    const outsideFile = join(outside, 'outside.md');
+    const headingFile = join(rules, 'heading.md');
+    const bomFile = join(rules, 'bom.md');
+    await mkdir(rules, { recursive: true });
+    await writeFile(outsideFile, `${GENERATED_MARKER}\n\n# Outside\n`);
+    await writeFile(headingFile, `# Security\n\n${GENERATED_MARKER}\n`);
+    await writeFile(bomFile, `\uFEFF${GENERATED_MARKER}\n\n# BOM\n`);
+    await symlink(outsideFile, join(rules, 'linked.md'), 'file');
+
+    const result = await cleanupManagedOutputs(createMonolithOutputs(), {
+      outputRoot: project,
+    });
+
+    expect(result.removed).toEqual([bomFile, headingFile]);
+    await expect(readFile(outsideFile, 'utf-8')).resolves.toContain('# Outside');
+  });
+
   it('should ignore missing managed directories', async () => {
     const project = await createTemporaryDirectory('promptscript-cleanup-missing-');
 
@@ -151,7 +195,19 @@ describe('cleanupManagedOutputs', () => {
         {
           path: 'AGENTS.md',
           content: '# AGENTS.md\n',
-          managedOutputDirectories: ['../promptscript-cleanup-unsafe-outside-', outside],
+          managedOutputDirectories: [
+            '',
+            '..\\promptscript-cleanup-unsafe-outside-',
+            '../promptscript-cleanup-unsafe-outside-',
+            outside,
+          ],
+        },
+      ],
+      [
+        outsideFile,
+        {
+          path: outsideFile,
+          content: '# Outside\n',
         },
       ],
     ]);
