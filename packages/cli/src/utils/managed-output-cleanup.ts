@@ -193,10 +193,6 @@ async function guardedUnlink(
   directoryStat: FileIdentity,
   fileStat: FileIdentity
 ): Promise<boolean> {
-  if (await isPackagedRuntime()) {
-    return guardedUnlinkInProcess(directory, name, directoryStat, fileStat);
-  }
-
   try {
     const result = await execFileAsync(
       process.execPath,
@@ -217,81 +213,37 @@ async function guardedUnlink(
       }
     );
     return result.stdout === 'removed';
-  } catch (error: unknown) {
-    if (!isSpawnUnavailable(error)) throw error;
-    // The runtime cannot evaluate a child script (e.g. SEA/pkg single
-    // executables where process.execPath does not accept -e). Fall back to an
-    // in-process guarded unlink that repeats the directory and file identity
-    // checks immediately before removing the file.
-    return guardedUnlinkInProcess(directory, name, directoryStat, fileStat);
+  } catch {
+    // Runtimes where process.execPath cannot evaluate a child script (packaged
+    // binaries or restricted spawn environments) fall back to an in-process
+    // guarded unlink that re-verifies the file identity immediately before
+    // removing it.
+    return removeIfUnchanged(resolve(directory, name), fileStat);
   }
 }
 
-async function guardedUnlinkInProcess(
-  directory: string,
-  name: string,
-  directoryStat: FileIdentity,
+/**
+ * Remove a file only when it is still a regular (non-symlink) file whose device
+ * and inode match the previously observed identity. Used as an in-process
+ * fallback when a child process cannot perform the cwd-relative guarded unlink.
+ */
+export async function removeIfUnchanged(
+  entryPath: string,
   fileStat: FileIdentity
 ): Promise<boolean> {
-  if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
-    return false;
-  }
-
-  const currentDirectory = await safeLstat(directory);
-  if (
-    !currentDirectory?.isDirectory() ||
-    currentDirectory.isSymbolicLink() ||
-    !isSameIdentity(currentDirectory, directoryStat)
-  ) {
-    return false;
-  }
-
-  const entryPath = resolve(directory, name);
-  const currentFile = await safeLstat(entryPath);
-  if (
-    !currentFile?.isFile() ||
-    currentFile.isSymbolicLink() ||
-    !isSameIdentity(currentFile, fileStat)
-  ) {
+  const current = await safeLstat(entryPath);
+  if (!current?.isFile() || current.isSymbolicLink() || !isSameIdentity(current, fileStat)) {
     return false;
   }
 
   try {
     await unlink(entryPath);
   } catch (error: unknown) {
+    /* v8 ignore next 2 -- unlink races with external removal between check and delete */
     if (isNodeError(error) && error.code === 'ENOENT') return false;
     throw error;
   }
   return true;
-}
-
-function isSpawnUnavailable(error: unknown): boolean {
-  return (
-    isNodeError(error) &&
-    (error.code === 'ENOENT' || error.code === 'EACCES' || error.code === 'ENOEXEC')
-  );
-}
-
-let packagedRuntimeCache: boolean | undefined;
-
-async function isPackagedRuntime(): Promise<boolean> {
-  if (packagedRuntimeCache === undefined) {
-    packagedRuntimeCache = await detectPackagedRuntime();
-  }
-  return packagedRuntimeCache;
-}
-
-async function detectPackagedRuntime(): Promise<boolean> {
-  if ((process as unknown as { pkg?: unknown }).pkg !== undefined) return true;
-  if (typeof (process.versions as { bun?: string }).bun === 'string') return true;
-  try {
-    const seaModule = 'node:sea';
-    const sea = (await import(seaModule)) as { isSea?: () => boolean };
-    if (typeof sea.isSea === 'function' && sea.isSea()) return true;
-  } catch {
-    // node:sea is unavailable on this runtime; treat it as a standard Node build.
-  }
-  return false;
 }
 
 async function openAncestorDirectories(
