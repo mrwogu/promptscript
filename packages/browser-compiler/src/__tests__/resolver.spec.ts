@@ -1,5 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { SYNTAX_FEATURES } from '@promptscript/core';
+import {
+  SYNTAX_FEATURES,
+  type Block,
+  type ExtendBlock,
+  type Program,
+  type Value,
+} from '@promptscript/core';
 import { BrowserResolver } from '../resolver.js';
 import { VirtualFileSystem } from '../virtual-fs.js';
 
@@ -612,6 +618,53 @@ describe('BrowserResolver', () => {
       );
     });
 
+    it('should enforce sealing for synthetic ObjectContent skill AST values', () => {
+      const loc = { file: 'test.prs', line: 1, column: 1 };
+      const ast: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  type: 'ObjectContent',
+                  properties: {
+                    description: 'Review code',
+                    sealed: ['description'],
+                  },
+                  loc,
+                } as unknown as Value,
+              },
+              loc,
+            },
+            loc,
+          },
+        ],
+        uses: [],
+        extends: [
+          {
+            type: 'ExtendBlock',
+            targetPath: 'skills.review.description',
+            content: {
+              type: 'TextContent',
+              value: 'Override attempt.',
+              loc,
+            },
+            loc,
+          },
+        ],
+        loc,
+      };
+      const resolver = new BrowserResolver({ fs: new VirtualFileSystem({}) });
+
+      expect(() =>
+        (resolver as unknown as { applyExtends(program: Program): Program }).applyExtends(ast)
+      ).toThrow("Cannot override sealed property 'description' on skill");
+    });
+
     it('should preserve text-only skills content when adding a root skill overlay', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@meta { id: "project" syntax: "1.3.0" }
@@ -661,6 +714,60 @@ describe('BrowserResolver', () => {
         throw new Error('expected ObjectContent for skills block');
       }
       expect(skills.content.properties['deploy']).toBeDefined();
+    });
+
+    it('should merge synthetic ObjectContent root skill overlays', () => {
+      const loc = { file: 'test.prs', line: 1, column: 1 };
+      const skillsBlock: Block = {
+        type: 'Block',
+        name: 'skills',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            review: { description: 'Review code' },
+          },
+          loc,
+        },
+        loc,
+      };
+      const extension: ExtendBlock = {
+        type: 'ExtendBlock',
+        targetPath: 'skills',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            deploy: {
+              type: 'ObjectContent',
+              properties: {
+                description: 'Deploy safely',
+              },
+              loc,
+            } as unknown as Value,
+          },
+          loc,
+        },
+        loc,
+      };
+      const ast: Program = {
+        type: 'Program',
+        blocks: [skillsBlock],
+        uses: [],
+        extends: [extension],
+        loc,
+      };
+      const resolver = new BrowserResolver({ fs: new VirtualFileSystem({}) });
+
+      const result = (
+        resolver as unknown as { applyExtends(program: Program): Program }
+      ).applyExtends(ast);
+      const skills = result.blocks.find((block) => block.name === 'skills');
+
+      if (skills?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      expect(skills.content.properties['deploy']).toEqual({
+        description: 'Deploy safely',
+      });
     });
 
     it('should extend a skill whose custom type argument resembles an AST node', async () => {
