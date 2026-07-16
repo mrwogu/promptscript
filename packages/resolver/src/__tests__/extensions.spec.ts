@@ -800,6 +800,35 @@ describe('overlay consistency warnings', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent-skill"'));
     });
 
+    it('should warn when a root @skills overlay creates a new skill', () => {
+      const logger = createMockLogger();
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'skills',
+            createObjectContent({
+              'existing-skill': { description: 'exists' } as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'skills',
+            createObjectContent({
+              'nonexistent-skill': {
+                description: 'overlay for removed skill',
+              } as unknown as Value,
+            })
+          ),
+        ],
+      });
+
+      applyExtends(ast, logger);
+
+      expect(logger.warn).toHaveBeenCalledOnce();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"nonexistent-skill"'));
+    });
+
     it('should warn when @extend creates new skill in MixedContent @skills block', () => {
       const logger = createMockLogger();
       const ast = createProgram({

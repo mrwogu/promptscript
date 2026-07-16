@@ -9,6 +9,7 @@ import {
   getMinimumVersionForFeature,
   getSyntaxFeatureUsages,
   SYNTAX_FEATURES,
+  type SyntaxFeature,
 } from '../syntax-versions.js';
 import type { Program } from '../types/ast.js';
 import { BLOCK_TYPES } from '../types/constants.js';
@@ -111,6 +112,7 @@ describe('syntax feature capabilities', () => {
 
   it('should return the minimum version for registered features', () => {
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE)).toBe('1.3.0');
+    expect(getMinimumVersionForFeature('unknown-feature' as SyntaxFeature)).toBeUndefined();
   });
 
   it('should detect feature usage from explicit AST modifiers', () => {
@@ -120,6 +122,30 @@ describe('syntax feature capabilities', () => {
       loc,
       uses: [],
       blocks: [],
+      extends: [
+        {
+          type: 'ExtendBlock',
+          targetPath: 'standards',
+          content: { type: 'ObjectContent', properties: { testing: ['Vitest'] }, loc },
+          replacements: [{ type: 'ReplaceModifier', property: 'testing', loc }],
+          loc,
+        },
+      ],
+    };
+
+    expect(getSyntaxFeatureUsages(ast)).toEqual([
+      { feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: loc },
+    ]);
+  });
+
+  it('should deduplicate retained and explicit feature usage at the same location', () => {
+    const loc = { file: 'test.prs', line: 3, column: 10, offset: 24 };
+    const ast: Program = {
+      type: 'Program',
+      loc,
+      uses: [],
+      blocks: [],
+      syntaxFeatures: [{ feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: loc }],
       extends: [
         {
           type: 'ExtendBlock',

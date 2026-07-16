@@ -404,10 +404,61 @@ describe('BrowserResolver', () => {
       expect(standards.content.properties['security']).toEqual(['Use OWASP']);
     });
 
+    it('should replace marked fields when both base and extension contain text', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@standards {
+  """Base standards."""
+  testing: ["Use Jest"]
+  linting: ["Use ESLint"]
+}
+@extend standards {
+  """Project standards."""
+  testing!: ["Use Vitest"]
+  linting: ["Use Biome"]
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+      if (standards?.content.type !== 'MixedContent') {
+        throw new Error('expected MixedContent for standards block');
+      }
+
+      expect(result.errors).toEqual([]);
+      expect(standards.content.text?.value).toContain('Base standards.');
+      expect(standards.content.text?.value).toContain('Project standards.');
+      expect(standards.content.properties['testing']).toEqual(['Use Vitest']);
+      expect(standards.content.properties['linting']).toEqual(['Use ESLint', 'Use Biome']);
+    });
+
     it('should retain inherited replacement feature usage', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@meta { id: "project" syntax: "1.2.0" }
 @inherit ./base`,
+        'base.prs': `@meta { id: "base" syntax: "1.3.0" }
+@standards { testing: ["Use Jest"] }
+@extend standards { testing!: ["Use Vitest"] }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.ast?.extends).toEqual([]);
+      expect(result.ast?.syntaxFeatures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+          }),
+        ])
+      );
+    });
+
+    it('should retain imported replacement feature usage', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.2.0" }
+@use ./base`,
         'base.prs': `@meta { id: "base" syntax: "1.3.0" }
 @standards { testing: ["Use Jest"] }
 @extend standards { testing!: ["Use Vitest"] }`,
@@ -513,6 +564,132 @@ describe('BrowserResolver', () => {
 
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]?.message).toContain('must use named object fields');
+    });
+
+    it('should reject attempts to override the protected sealed field directly', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Review code"
+    sealed: ["description"]
+  }
+}
+@extend skills.review.sealed {
+  - "content"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain(
+        "Cannot override protected property 'sealed' on skill"
+      );
+    });
+
+    it('should enforce sealed true for direct property extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Review code"
+    sealed: true
+  }
+}
+@extend skills.review.description {
+  """Override attempt."""
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain(
+        "Cannot override sealed property 'description' on skill"
+      );
+    });
+
+    it('should preserve text-only skills content when adding a root skill overlay', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills { """Shared skill guidance.""" }
+@extend skills {
+  review: {
+    description: "Review code"
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const skills = result.ast?.blocks.find((block) => block.name === 'skills');
+
+      expect(result.errors).toEqual([]);
+      expect(skills?.content.type).toBe('MixedContent');
+      if (skills?.content.type !== 'MixedContent') {
+        throw new Error('expected MixedContent for skills block');
+      }
+      expect(skills.content.text?.value).toContain('Shared skill guidance.');
+      expect(skills.content.properties['review']).toBeDefined();
+    });
+
+    it('should add a missing skill through a root skill overlay', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Review code"
+  }
+}
+@extend skills {
+  deploy: {
+    description: "Deploy safely"
+  }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const skills = result.ast?.blocks.find((block) => block.name === 'skills');
+
+      expect(result.errors).toEqual([]);
+      expect(skills?.content.type).toBe('ObjectContent');
+      if (skills?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      expect(skills.content.properties['deploy']).toBeDefined();
+    });
+
+    it('should extend a skill whose custom type argument resembles an AST node', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "project" syntax: "1.3.0" }
+@skills {
+  review: {
+    description: "Original review"
+    type: "TextContent"
+  }
+}
+@extend skills.review.description {
+  """Review code"""
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const skills = result.ast?.blocks.find((block) => block.name === 'skills');
+
+      expect(result.errors).toEqual([]);
+      expect(skills?.content.type).toBe('ObjectContent');
+      if (skills?.content.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for skills block');
+      }
+      expect(skills.content.properties['review']).toEqual({
+        description: 'Review code',
+        type: 'TextContent',
+      });
     });
 
     it('should prevent deep paths from bypassing sealed skill properties', async () => {
