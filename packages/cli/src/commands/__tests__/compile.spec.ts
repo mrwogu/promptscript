@@ -19,6 +19,9 @@ const {
   mockReadFile,
   mockWarn,
   mockError,
+  mockMuted,
+  mockDryRun,
+  mockCleanupManagedOutputs,
 } = vi.hoisted(() => {
   const mockCompile = vi.fn();
   const mockLoadConfig = vi.fn();
@@ -28,6 +31,9 @@ const {
   const mockReadFile = vi.fn();
   const mockWarn = vi.fn();
   const mockError = vi.fn();
+  const mockMuted = vi.fn();
+  const mockDryRun = vi.fn();
+  const mockCleanupManagedOutputs = vi.fn();
   return {
     mockCompile,
     mockLoadConfig,
@@ -37,6 +43,9 @@ const {
     mockReadFile,
     mockWarn,
     mockError,
+    mockMuted,
+    mockDryRun,
+    mockCleanupManagedOutputs,
   };
 });
 
@@ -88,13 +97,13 @@ vi.mock('../../output/console.js', () => ({
   ConsoleOutput: {
     success: vi.fn(),
     error: mockError,
-    muted: vi.fn(),
+    muted: mockMuted,
     newline: vi.fn(),
     info: vi.fn(),
     warning: vi.fn(),
     verbose: vi.fn(),
     debug: vi.fn(),
-    dryRun: vi.fn(),
+    dryRun: mockDryRun,
     warn: mockWarn,
   },
   isVerbose: vi.fn().mockReturnValue(false),
@@ -128,6 +137,10 @@ vi.mock('../../utils/registry-resolver.js', () => ({
   resolveRegistryPath: vi.fn().mockResolvedValue({ path: '/mock/registry', isRemote: false }),
 }));
 
+vi.mock('../../utils/managed-output-cleanup.js', () => ({
+  cleanupManagedOutputs: (...args: unknown[]) => mockCleanupManagedOutputs(...args),
+}));
+
 import { compileCommand } from '../compile.js';
 
 describe('compile command - createCliLogger warn path', () => {
@@ -152,6 +165,7 @@ describe('compile command - createCliLogger warn path', () => {
     mockWriteFile.mockResolvedValue(undefined);
     mockMkdir.mockResolvedValue(undefined);
     mockReadFile.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
+    mockCleanupManagedOutputs.mockResolvedValue({ removed: [] });
 
     mockCompile.mockResolvedValue({
       success: true,
@@ -190,6 +204,34 @@ describe('compile command - createCliLogger warn path', () => {
 
     // Assert: ConsoleOutput.warn was called with the message
     expect(mockWarn).toHaveBeenCalledWith('test warning message');
+  });
+
+  it('should report obsolete generated files removed after compilation', async () => {
+    const obsoleteFile = '/mock/project/.factory/rules/obsolete.md';
+    mockCleanupManagedOutputs.mockResolvedValue({ removed: [obsoleteFile] });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockCleanupManagedOutputs).toHaveBeenCalledWith(expect.any(Map), {
+      outputRoot: '/mock/project',
+      dryRun: undefined,
+    });
+    expect(mockMuted).toHaveBeenCalledWith(`Removed obsolete generated file: ${obsoleteFile}`);
+  });
+
+  it('should preview obsolete generated file removal in dry-run mode', async () => {
+    const obsoleteFile = '/mock/project/.factory/rules/obsolete.md';
+    mockCleanupManagedOutputs.mockResolvedValue({ removed: [obsoleteFile] });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockCleanupManagedOutputs).toHaveBeenCalledWith(expect.any(Map), {
+      outputRoot: '/mock/project',
+      dryRun: true,
+    });
+    expect(mockDryRun).toHaveBeenCalledWith(
+      `Would remove obsolete generated file: ${obsoleteFile}`
+    );
   });
 
   it('should apply a named build profile entry, output, and targets', async () => {

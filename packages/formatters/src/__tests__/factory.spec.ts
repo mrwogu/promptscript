@@ -371,6 +371,7 @@ describe('FactoryFormatter', () => {
     });
 
     it.each([
+      '',
       '/tmp/AGENTS.md',
       'C:\\workspace\\AGENTS.md',
       'C:AGENTS.md',
@@ -434,6 +435,83 @@ describe('FactoryFormatter', () => {
         '.factory/rules/standards/rule-com1.md',
         '.factory/rules/standards/rule-lpt9.md',
       ]);
+    });
+
+    it('should render primitive and nested rule values with portable fallback slugs', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                primitives: {
+                  enabled: true,
+                  count: 3,
+                  tags: ['strict', 'safe'],
+                  metadata: {
+                    mode: 'strict',
+                    empty: null,
+                    audit: {
+                      level: 2,
+                      ignored: null,
+                    },
+                  },
+                  note: {
+                    type: 'TextContent',
+                    value: 'Keep checks explicit',
+                    loc: createLoc(),
+                  },
+                  disabled: false,
+                  missing: null,
+                },
+                retryCount: 3,
+                experimental: true,
+                guidance: {
+                  type: 'TextContent',
+                  value: 'Prefer focused checks',
+                  loc: createLoc(),
+                },
+                'Résumé API': ['Preserve stable contracts'],
+                '🔥': ['Handle punctuation-only topics'],
+                ignored: false,
+                ignoredNull: null,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+      const ruleFiles = (result.additionalFiles ?? []).filter((file) =>
+        file.path.startsWith('.factory/rules/standards/')
+      );
+
+      expect(ruleFiles.map((file) => file.path)).toEqual([
+        '.factory/rules/standards/primitives.md',
+        '.factory/rules/standards/retrycount.md',
+        '.factory/rules/standards/experimental.md',
+        '.factory/rules/standards/guidance.md',
+        '.factory/rules/standards/resume-api.md',
+        '.factory/rules/standards/topic.md',
+      ]);
+      expect(ruleFiles[0]?.content).toContain('- Enabled');
+      expect(ruleFiles[0]?.content).toContain('- Count: 3');
+      expect(ruleFiles[0]?.content).toContain('- Tags: strict, safe');
+      expect(ruleFiles[0]?.content).toContain('- Metadata: Mode: strict, Audit: Level: 2');
+      expect(ruleFiles[0]?.content).toContain('- Note: Keep checks explicit');
+      expect(ruleFiles[0]?.content).not.toContain('Disabled');
+      expect(ruleFiles[0]?.content).not.toContain('Missing');
+      expect(ruleFiles[1]?.content).toContain('- 3');
+      expect(ruleFiles[2]?.content).toContain('- true');
+      expect(ruleFiles[3]?.content).toContain('- Prefer focused checks');
     });
 
     it('should emit deterministic rule files and a lean indexed AGENTS.md', () => {
