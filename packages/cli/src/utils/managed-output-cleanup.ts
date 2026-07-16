@@ -1,6 +1,6 @@
 import { constants } from 'node:fs';
 import { execFile } from 'node:child_process';
-import { lstat, open, readFile, readdir, type FileHandle } from 'node:fs/promises';
+import { lstat, open, readFile, readdir, unlink, type FileHandle } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
@@ -193,25 +193,105 @@ async function guardedUnlink(
   directoryStat: FileIdentity,
   fileStat: FileIdentity
 ): Promise<boolean> {
-  const result = await execFileAsync(
-    process.execPath,
-    [
-      '-e',
-      GUARDED_UNLINK_SCRIPT,
-      '--',
-      name,
-      String(directoryStat.dev),
-      String(directoryStat.ino),
-      String(fileStat.dev),
-      String(fileStat.ino),
-    ],
-    {
-      cwd: directory,
-      encoding: 'utf-8',
-      windowsHide: true,
-    }
+  if (await isPackagedRuntime()) {
+    return guardedUnlinkInProcess(directory, name, directoryStat, fileStat);
+  }
+
+  try {
+    const result = await execFileAsync(
+      process.execPath,
+      [
+        '-e',
+        GUARDED_UNLINK_SCRIPT,
+        '--',
+        name,
+        String(directoryStat.dev),
+        String(directoryStat.ino),
+        String(fileStat.dev),
+        String(fileStat.ino),
+      ],
+      {
+        cwd: directory,
+        encoding: 'utf-8',
+        windowsHide: true,
+      }
+    );
+    return result.stdout === 'removed';
+  } catch (error: unknown) {
+    if (!isSpawnUnavailable(error)) throw error;
+    // The runtime cannot evaluate a child script (e.g. SEA/pkg single
+    // executables where process.execPath does not accept -e). Fall back to an
+    // in-process guarded unlink that repeats the directory and file identity
+    // checks immediately before removing the file.
+    return guardedUnlinkInProcess(directory, name, directoryStat, fileStat);
+  }
+}
+
+async function guardedUnlinkInProcess(
+  directory: string,
+  name: string,
+  directoryStat: FileIdentity,
+  fileStat: FileIdentity
+): Promise<boolean> {
+  if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
+    return false;
+  }
+
+  const currentDirectory = await safeLstat(directory);
+  if (
+    !currentDirectory?.isDirectory() ||
+    currentDirectory.isSymbolicLink() ||
+    !isSameIdentity(currentDirectory, directoryStat)
+  ) {
+    return false;
+  }
+
+  const entryPath = resolve(directory, name);
+  const currentFile = await safeLstat(entryPath);
+  if (
+    !currentFile?.isFile() ||
+    currentFile.isSymbolicLink() ||
+    !isSameIdentity(currentFile, fileStat)
+  ) {
+    return false;
+  }
+
+  try {
+    await unlink(entryPath);
+  } catch (error: unknown) {
+    if (isNodeError(error) && error.code === 'ENOENT') return false;
+    throw error;
+  }
+  return true;
+}
+
+function isSpawnUnavailable(error: unknown): boolean {
+  return (
+    isNodeError(error) &&
+    (error.code === 'ENOENT' || error.code === 'EACCES' || error.code === 'ENOEXEC')
   );
-  return result.stdout === 'removed';
+}
+
+let packagedRuntimeCache: boolean | undefined;
+
+async function isPackagedRuntime(): Promise<boolean> {
+  if (packagedRuntimeCache === undefined) {
+    packagedRuntimeCache = await detectPackagedRuntime();
+  }
+  return packagedRuntimeCache;
+}
+
+async function detectPackagedRuntime(): Promise<boolean> {
+  if ((process as unknown as { pkg?: unknown }).pkg !== undefined) return true;
+  if (typeof (process.versions as { bun?: string }).bun === 'string') return true;
+  try {
+    const seaModule = 'node:sea';
+    const sea = (await import(seaModule)) as { isSea?: () => boolean };
+    if (typeof sea.isSea === 'function' && sea.isSea()) return true;
+  } catch {
+    // node:sea is unavailable on this runtime; treat it as a standard Node build.
+  }
+  return false;
 }
 
 async function openAncestorDirectories(
@@ -278,6 +358,13 @@ function isSameFile(
   right: Awaited<ReturnType<typeof lstat>>
 ): boolean {
   return left.dev === right.dev && left.ino === right.ino;
+}
+
+function isSameIdentity(
+  stat: { dev: number | bigint; ino: number | bigint },
+  identity: FileIdentity
+): boolean {
+  return stat.dev === identity.dev && stat.ino === identity.ino;
 }
 
 async function safeLstat(path: string): Promise<Awaited<ReturnType<typeof lstat>> | undefined> {
