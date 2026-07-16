@@ -87,7 +87,9 @@ description: PromptScript output format for Factory AI
 ## Split Rules
 
 Use `rulesMode: split` to keep `AGENTS.md` focused on operational context while
-Factory automatically loads always-on rule files from `.factory/rules/`.
+moving the always-on standards into rule files under `.factory/rules/`. `AGENTS.md`
+links to each rule file so an agent can open the relevant one before editing
+related code.
 
 ```yaml
 targets:
@@ -100,6 +102,10 @@ Split mode emits one file for each non-empty `@standards` topic, plus semantic
 files for git workflows, configuration, documentation, diagrams, remaining
 knowledge, restrictions, and examples when those sections exist. `AGENTS.md`
 contains a readable index of only the emitted files.
+
+When a custom `outputPath` is configured for the target, the rule files still
+live in `.factory/rules/` at the project root and the index links are rewritten
+relative to the custom `AGENTS.md` location.
 
 When rules are removed or the target returns to `rulesMode: monolith`, the CLI
 removes obsolete files only when they carry a PromptScript generated marker.
