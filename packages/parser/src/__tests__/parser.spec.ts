@@ -318,6 +318,19 @@ describe('parse', () => {
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.ast).toBeNull();
     });
+
+    it('should reject the replace modifier combined with a default value', () => {
+      const result = parse(`
+        @meta { id: "test" syntax: "1.3.0" }
+        @extend standards {
+          testing!: ["Use Vitest"] = ["Use Jest"]
+        }
+      `);
+
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]?.message).toContain("'!' replace modifier cannot be combined");
+      expect(result.ast).toBeNull();
+    });
   });
 
   describe('literal values', () => {

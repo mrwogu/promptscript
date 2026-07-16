@@ -654,6 +654,12 @@ class PromptScriptVisitor extends BaseVisitor {
     if (!ctx.Bang) {
       return field;
     }
+    if (ctx.value.length > 1) {
+      throw new Error(
+        "The '!' replace modifier cannot be combined with a '= default' value. " +
+          "Remove the default value or the '!' modifier."
+      );
+    }
     return {
       ...field,
       replace: true,
