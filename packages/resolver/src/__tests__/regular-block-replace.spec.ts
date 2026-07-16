@@ -86,6 +86,38 @@ describe('regular block replace modifier', () => {
     expect(standards.content.properties['security']).toEqual(['Use OWASP']);
   });
 
+  it('should replace marked fields when both base and extension contain text', () => {
+    const ast = parseOrThrow(`
+      @meta { id: "mixed-layers" syntax: "1.3.0" }
+      @standards {
+        """
+        Base standards.
+        """
+        testing: ["Use Jest"]
+        linting: ["Use ESLint"]
+      }
+      @extend standards {
+        """
+        Project standards.
+        """
+        testing!: ["Use Vitest"]
+        linting: ["Use Biome"]
+      }
+    `);
+
+    const result = applyExtends(ast);
+    const standards = result.blocks.find((block) => block.name === 'standards');
+
+    expect(standards?.content.type).toBe('MixedContent');
+    if (standards?.content.type !== 'MixedContent') {
+      throw new Error('Expected @standards to contain mixed content');
+    }
+    expect(standards.content.text?.value).toContain('Base standards.');
+    expect(standards.content.text?.value).toContain('Project standards.');
+    expect(standards.content.properties['testing']).toEqual(['Use Vitest']);
+    expect(standards.content.properties['linting']).toEqual(['Use ESLint', 'Use Biome']);
+  });
+
   it('should replace inherited regular block values', async () => {
     const directory = await createTestDirectory();
     await writeFile(
@@ -240,6 +272,97 @@ ${directive}`
     `);
 
     expect(() => applyExtends(ast)).toThrowError(/must use named object fields/);
+  });
+
+  it('should reject attempts to override the protected sealed field directly', () => {
+    const ast = parseOrThrow(`
+      @meta { id: "skills" syntax: "1.3.0" }
+      @skills {
+        review: {
+          description: "Review code"
+          sealed: ["description"]
+        }
+      }
+      @extend skills.review.sealed {
+        - "content"
+      }
+    `);
+
+    expect(() => applyExtends(ast)).toThrowError(
+      "Cannot override protected property 'sealed' on skill"
+    );
+  });
+
+  it('should enforce sealed true for direct property extensions', () => {
+    const ast = parseOrThrow(`
+      @meta { id: "skills" syntax: "1.3.0" }
+      @skills {
+        review: {
+          description: "Review code"
+          sealed: true
+        }
+      }
+      @extend skills.review.description {
+        """
+        Override attempt.
+        """
+      }
+    `);
+
+    expect(() => applyExtends(ast)).toThrowError(
+      "Cannot override sealed property 'description' on skill"
+    );
+  });
+
+  it('should preserve text-only skills content when adding a root skill overlay', () => {
+    const ast = parseOrThrow(`
+      @meta { id: "skills" syntax: "1.3.0" }
+      @skills {
+        """
+        Shared skill guidance.
+        """
+      }
+      @extend skills {
+        review: {
+          description: "Review code"
+        }
+      }
+    `);
+
+    const result = applyExtends(ast);
+    const skills = result.blocks.find((block) => block.name === 'skills');
+
+    expect(skills?.content.type).toBe('MixedContent');
+    if (skills?.content.type !== 'MixedContent') {
+      throw new Error('Expected @skills to contain mixed content');
+    }
+    expect(skills.content.text?.value).toContain('Shared skill guidance.');
+    expect(skills.content.properties['review']).toBeDefined();
+  });
+
+  it('should extend a skill whose custom type argument resembles an AST node', () => {
+    const ast = parseOrThrow(`
+      @meta { id: "skills" syntax: "1.3.0" }
+      @skills {
+        review: {
+          description: "Original review"
+          type: "TextContent"
+        }
+      }
+      @extend skills.review.description {
+        """
+        Review code
+        """
+      }
+    `);
+
+    const result = applyExtends(ast);
+    const skills = getObjectProperties(result.blocks, 'skills');
+
+    expect(skills['review']).toEqual({
+      description: 'Review code',
+      type: 'TextContent',
+    });
   });
 
   it('should reject the modifier for aliased skill targets', async () => {
