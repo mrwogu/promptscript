@@ -218,6 +218,30 @@ describe('cleanupManagedOutputs', () => {
     await expect(readFile(outsideFile, 'utf-8')).resolves.toContain('# Outside');
   });
 
+  it('should remove obsolete files via in-process fallback when child eval is unavailable', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-fallback-');
+    const rules = join(project, '.factory', 'rules');
+    await mkdir(rules, { recursive: true });
+    const staleFile = join(rules, 'stale.md');
+    const keptFile = join(rules, 'team.md');
+    await writeFile(staleFile, `${GENERATED_MARKER}\n\n# Stale\n`);
+    await writeFile(keptFile, '# Team-owned rules\n');
+
+    const originalExecPath = process.execPath;
+    process.execPath = join(project, 'nonexistent-node-binary');
+    try {
+      const result = await cleanupManagedOutputs(createMonolithOutputs(), {
+        outputRoot: project,
+      });
+      expect(result.removed).toEqual([staleFile]);
+    } finally {
+      process.execPath = originalExecPath;
+    }
+
+    await expect(readFile(staleFile, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
+    await expect(readFile(keptFile, 'utf-8')).resolves.toBe('# Team-owned rules\n');
+  });
+
   async function createTemporaryDirectory(prefix: string): Promise<string> {
     const directory = await mkdtemp(join(tmpdir(), prefix));
     temporaryDirectories.push(directory);
