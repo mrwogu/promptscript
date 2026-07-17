@@ -1204,6 +1204,9 @@ If the field does not exist, replacement sets it. Later overlays operate on the 
 The modifier applies only to direct fields in regular block extensions. Skill properties retain
 their dedicated merge and sealing semantics, so `!` is rejected when `@extend` targets `@skills`.
 
+The `!` modifier cannot be combined with a default value: `field!: value = default` is rejected,
+because a replacement and a fallback default are mutually exclusive.
+
 ### Skill-Specific Extend Semantics
 
 When `@extend` targets a skill definition inside `@skills`, properties follow dedicated merge strategies:
