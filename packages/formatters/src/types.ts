@@ -1,4 +1,5 @@
 import type { OutputConvention, PrettierMarkdownOptions, Program } from '@promptscript/core';
+import type { StructuredMergePlan } from './structured-output.js';
 
 /**
  * Output from a formatter.
@@ -8,6 +9,10 @@ export interface FormatterOutput {
   path: string;
   /** Formatted content */
   content: string;
+  /** File mode (e.g. 0o755 for executable scripts) */
+  mode?: number;
+  /** Structured merge plan for JSON/TOML settings files */
+  merge?: StructuredMergePlan;
   /** Additional files to generate (e.g., workflows) */
   additionalFiles?: FormatterOutput[];
   /**

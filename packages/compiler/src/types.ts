@@ -16,6 +16,10 @@ export interface FormatterOutput {
   path: string;
   /** Formatted content */
   content: string;
+  /** File mode (e.g. 0o755 for executable scripts) */
+  mode?: number;
+  /** Structured merge plan for JSON/TOML settings files */
+  merge?: import('@promptscript/formatters').StructuredMergePlan;
   /** Additional files to generate (e.g., .cursor/commands/, .github/prompts/) */
   additionalFiles?: FormatterOutput[];
   /**

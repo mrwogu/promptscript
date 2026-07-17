@@ -31,7 +31,7 @@ function findAllIndexFiles(dir: string): string[] {
 function extractField(content: string, field: string): string | null {
   const regex = new RegExp(`^${field}:\\s*(.+)$`, 'mi');
   const match = content.match(regex);
-  return match ? match[1].trim() : null;
+  return match?.[1]?.trim() ?? null;
 }
 
 const VALID_SCOPES = ['formatter-scope', 'out-of-scope', 'rejected'];
