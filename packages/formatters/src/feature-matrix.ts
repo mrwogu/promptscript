@@ -10,51 +10,13 @@
  * @module feature-matrix
  */
 
+import type { KnownTarget } from '@promptscript/core';
+
 /**
  * Tool/Formatter names.
+ * @deprecated Use `KnownTarget` from `@promptscript/core` directly.
  */
-export type ToolName =
-  // Original 7
-  | 'github'
-  | 'cursor'
-  | 'claude'
-  | 'antigravity'
-  | 'factory'
-  | 'opencode'
-  | 'gemini'
-  // Tier 1
-  | 'windsurf'
-  | 'cline'
-  | 'roo'
-  | 'codex'
-  | 'continue'
-  // Tier 2
-  | 'augment'
-  | 'goose'
-  | 'kilo'
-  | 'amp'
-  | 'trae'
-  | 'junie'
-  | 'kiro'
-  // Tier 3
-  | 'cortex'
-  | 'crush'
-  | 'command-code'
-  | 'kode'
-  | 'mcpjam'
-  | 'mistral-vibe'
-  | 'mux'
-  | 'openhands'
-  | 'pi'
-  | 'qoder'
-  | 'qwen-code'
-  | 'zencoder'
-  | 'neovate'
-  | 'pochi'
-  | 'adal'
-  | 'iflow'
-  | 'openclaw'
-  | 'codebuddy';
+export type ToolName = KnownTarget;
 
 /**
  * Feature implementation status.

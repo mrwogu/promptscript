@@ -28,3 +28,6 @@ export * from './template.js';
 
 // Syntax version registry
 export * from './syntax-versions.js';
+
+// Target catalog
+export * from './target-catalog.js';

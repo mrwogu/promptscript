@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { FormatterRegistry } from '../index.js';
 
 /**
- * Complete inventory of expected skill paths for all 37 formatters.
+ * Complete inventory of expected skill paths for all known target formatters.
  * Source of truth: docs/superpowers/specs/2026-03-13-auto-inject-promptscript-skill-design.md
  */
 const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: string | null }> = {
@@ -12,15 +12,15 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   github: { basePath: '.github/skills', fileName: 'SKILL.md' },
   cursor: { basePath: null, fileName: null },
   antigravity: { basePath: null, fileName: null },
-  // MarkdownInstructionFormatter subclasses
+  // MarkdownInstructionFormatter subclasses (hasSkills: false targets return null)
   adal: { basePath: '.adal/skills', fileName: 'SKILL.md' },
   amp: { basePath: '.agents/skills', fileName: 'SKILL.md' },
-  augment: { basePath: '.augment/skills', fileName: 'SKILL.md' },
-  cline: { basePath: '.clinerules/skills', fileName: 'SKILL.md' },
+  augment: { basePath: null, fileName: null },
+  cline: { basePath: null, fileName: null },
   codebuddy: { basePath: '.codebuddy/skills', fileName: 'SKILL.md' },
   codex: { basePath: '.agents/skills', fileName: 'SKILL.md' },
   'command-code': { basePath: '.commandcode/skills', fileName: 'SKILL.md' },
-  continue: { basePath: '.continue/skills', fileName: 'SKILL.md' },
+  continue: { basePath: null, fileName: null },
   cortex: { basePath: '.cortex/skills', fileName: 'SKILL.md' },
   crush: { basePath: '.crush/skills', fileName: 'SKILL.md' },
   factory: { basePath: '.factory/skills', fileName: 'SKILL.md' },
@@ -33,16 +33,16 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   kode: { basePath: '.kode/skills', fileName: 'SKILL.md' },
   mcpjam: { basePath: '.mcpjam/skills', fileName: 'SKILL.md' },
   'mistral-vibe': { basePath: '.vibe/skills', fileName: 'SKILL.md' },
-  mux: { basePath: '.mux/skills', fileName: 'SKILL.md' },
-  neovate: { basePath: '.neovate/skills', fileName: 'SKILL.md' },
+  mux: { basePath: null, fileName: null },
+  neovate: { basePath: null, fileName: null },
   openclaw: { basePath: '.openclaw/skills', fileName: 'SKILL.md' },
   opencode: { basePath: '.opencode/skills', fileName: 'SKILL.md' },
   openhands: { basePath: '.openhands/skills', fileName: 'SKILL.md' },
   pi: { basePath: '.pi/skills', fileName: 'SKILL.md' },
   pochi: { basePath: '.pochi/skills', fileName: 'SKILL.md' },
-  qoder: { basePath: '.qoder/skills', fileName: 'SKILL.md' },
+  qoder: { basePath: null, fileName: null },
   'qwen-code': { basePath: '.qwen/skills', fileName: 'SKILL.md' },
-  roo: { basePath: '.roo/skills', fileName: 'SKILL.md' },
+  roo: { basePath: null, fileName: null },
   trae: { basePath: '.trae/skills', fileName: 'SKILL.md' },
   windsurf: { basePath: '.windsurf/skills', fileName: 'SKILL.md' },
   zencoder: { basePath: '.zencoder/skills', fileName: 'SKILL.md' },

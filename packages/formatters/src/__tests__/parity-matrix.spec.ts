@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
+import { KNOWN_TARGETS } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 import { ClaudeFormatter } from '../formatters/claude.js';
 import { CursorFormatter } from '../formatters/cursor.js';
@@ -268,7 +269,7 @@ function getAvailableBlocks(ast: Program): string[] {
 }
 
 /**
- * All 37 formatter names.
+ * All known target names.
  */
 const ALL_FORMATTER_NAMES: FormatterName[] = [
   // Tier 0
@@ -370,7 +371,7 @@ describe('Parity Matrix Tests', () => {
   });
 
   describe('Matrix Specification Integrity', () => {
-    it('should have all 37 formatters represented in the matrix', () => {
+    it('should have all known targets represented in the matrix', () => {
       for (const name of ALL_FORMATTER_NAMES) {
         // Every formatter must appear in at least one section's requiredBy or optionalFor
         const appearsInMatrix = PARITY_MATRIX.some(
@@ -382,8 +383,8 @@ describe('Parity Matrix Tests', () => {
       }
     });
 
-    it('all 37 formatters should be instantiable and registered in test map', () => {
-      expect(formatters.size).toBe(37);
+    it('all known targets should be instantiable and registered in test map', () => {
+      expect(formatters.size).toBe(KNOWN_TARGETS.length);
       for (const name of ALL_FORMATTER_NAMES) {
         expect(formatters.has(name), `${name} should be in formatters map`).toBe(true);
       }
@@ -840,7 +841,7 @@ No technology mentioned here at all.
       expect(matchesSectionHeader(content, 'tech-stack', 'github')).toBe(false);
     });
 
-    it('matchesSectionHeader should work for all 37 formatters on project-identity', () => {
+    it('matchesSectionHeader should work for all known targets on project-identity', () => {
       for (const name of ALL_FORMATTER_NAMES) {
         const spec = PARITY_MATRIX.find((s) => s.id === 'project-identity');
         if (!spec) continue;

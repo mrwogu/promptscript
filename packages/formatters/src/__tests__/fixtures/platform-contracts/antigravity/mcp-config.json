@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "remote-indexer": {
+      "serverUrl": "https://mcp.internal.enterprise.com/sse",
+      "env": {
+        "AUTH_TOKEN": "secure_alpha_token"
+      }
+    }
+  }
+}
