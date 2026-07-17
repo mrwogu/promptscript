@@ -1,0 +1,11 @@
+{
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "Source control: github.example.com/acme-corp and all repos under it",
+      "Trusted cloud buckets: s3://acme-build-artifacts",
+      "Trusted internal domains: *.corp.example.com"
+    ],
+    "classifyAllShell": true
+  }
+}

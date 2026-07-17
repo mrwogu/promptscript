@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": ".cursor/hooks/validate-shell.sh",
+        "matcher": "Shell"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/format.sh"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/approve-network.sh",
+        "timeout": 30,
+        "matcher": "curl|wget|nc"
+      }
+    ],
+    "stop": [
+      {
+        "command": ".cursor/hooks/audit.sh",
+        "loop_limit": 10
+      }
+    ]
+  }
+}
