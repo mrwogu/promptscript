@@ -557,6 +557,98 @@ export const TARGET_DEFINITIONS = {
       hasCommands: false,
     },
   },
+  // AGENTS.md-only targets
+  aider: {
+    name: 'aider',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  'amazon-q': {
+    name: 'amazon-q',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  warp: {
+    name: 'warp',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  zed: {
+    name: 'zed',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  jules: {
+    name: 'jules',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  devin: {
+    name: 'devin',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: null, fileName: null },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  grok: {
+    name: 'grok',
+    outputPath: 'AGENTS.md',
+    family: 'base',
+    skillPath: { basePath: '.claude/skills', fileName: 'SKILL.md' },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'full',
+      hasSkills: true,
+      hasAgents: true,
+      hasCommands: true,
+    },
+  },
 } as const satisfies Record<KnownTarget, TargetDefinition>;
 
 /**

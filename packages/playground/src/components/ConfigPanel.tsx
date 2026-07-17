@@ -191,6 +191,18 @@ const TARGET_INFO: Record<
     versions: ['simple', 'multifile', 'full'],
     supportsXml: false,
   },
+  // AGENTS.md-only targets
+  aider: { label: 'Aider', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  'amazon-q': {
+    label: 'Amazon Q',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  warp: { label: 'Warp', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  zed: { label: 'Zed', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  jules: { label: 'Jules', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  devin: { label: 'Devin', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  grok: { label: 'Grok Build', versions: ['simple', 'multifile', 'full'], supportsXml: false },
 };
 
 const POPULAR_TARGETS: FormatterName[] = [

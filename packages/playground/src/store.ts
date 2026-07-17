@@ -476,6 +476,14 @@ export const selectOutputsForFormatter = (
     iflow: [/^\.iflow\/rules\/.*\.md$/, /^\.iflow\/skills\/.*\.md$/],
     openclaw: [/^INSTRUCTIONS\.md$/, /^skills\/.*\.md$/],
     codebuddy: [/^\.codebuddy\/rules\/.*\.md$/, /^\.codebuddy\/skills\/.*\.md$/],
+    // AGENTS.md-only targets
+    aider: [/^AGENTS\.md$/],
+    'amazon-q': [/^AGENTS\.md$/],
+    warp: [/^AGENTS\.md$/],
+    zed: [/^AGENTS\.md$/],
+    jules: [/^AGENTS\.md$/],
+    devin: [/^AGENTS\.md$/],
+    grok: [/^AGENTS\.md$/, /^CLAUDE\.md$/, /\.claude\//],
   };
 
   const patterns = formatterPatterns[formatter];
@@ -524,6 +532,14 @@ export const selectOutputsForFormatter = (
     iflow: 'project.md',
     openclaw: 'INSTRUCTIONS.md',
     codebuddy: 'project.md',
+    // AGENTS.md-only targets
+    aider: 'AGENTS.md',
+    'amazon-q': 'AGENTS.md',
+    warp: 'AGENTS.md',
+    zed: 'AGENTS.md',
+    jules: 'AGENTS.md',
+    devin: 'AGENTS.md',
+    grok: 'AGENTS.md',
   };
 
   const mainPattern = mainFilePatterns[formatter];

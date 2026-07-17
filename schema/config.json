@@ -492,6 +492,27 @@
             },
             "codebuddy": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "aider": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "amazon-q": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "warp": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "zed": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "jules": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "devin": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "grok": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
@@ -551,7 +572,14 @@
         "adal",
         "iflow",
         "openclaw",
-        "codebuddy"
+        "codebuddy",
+        "aider",
+        "amazon-q",
+        "warp",
+        "zed",
+        "jules",
+        "devin",
+        "grok"
       ],
       "description": "Known built-in output targets. These are the targets with first-class formatter support."
     },
