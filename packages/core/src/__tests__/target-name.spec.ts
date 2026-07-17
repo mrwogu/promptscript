@@ -50,6 +50,15 @@ describe('TargetName branded type', () => {
         'iflow',
         'openclaw',
         'codebuddy',
+        // AGENTS.md-only targets
+        'aider',
+        'amazon-q',
+        'warp',
+        'zed',
+        'jules',
+        'devin',
+        // Grok Build
+        'grok',
       ];
 
       // Assert

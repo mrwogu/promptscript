@@ -41,6 +41,15 @@ import { AdalFormatter } from '../formatters/adal.js';
 import { IflowFormatter } from '../formatters/iflow.js';
 import { OpenClawFormatter } from '../formatters/openclaw.js';
 import { CodeBuddyFormatter } from '../formatters/codebuddy.js';
+// AGENTS.md-only targets
+import { AiderFormatter } from '../formatters/aider.js';
+import { AmazonQFormatter } from '../formatters/amazon-q.js';
+import { WarpFormatter } from '../formatters/warp.js';
+import { ZedFormatter } from '../formatters/zed.js';
+import { JulesFormatter } from '../formatters/jules.js';
+import { DevinFormatter } from '../formatters/devin.js';
+// Grok Build
+import { GrokFormatter } from '../formatters/grok.js';
 import {
   extractSectionsFromOutput,
   normalizeSectionName,
@@ -262,6 +271,15 @@ function buildAllFormatters(): Formatter[] {
     new IflowFormatter(),
     new OpenClawFormatter(),
     new CodeBuddyFormatter(),
+    // AGENTS.md-only targets
+    new AiderFormatter(),
+    new AmazonQFormatter(),
+    new WarpFormatter(),
+    new ZedFormatter(),
+    new JulesFormatter(),
+    new DevinFormatter(),
+    // Grok Build
+    new GrokFormatter(),
   ];
 }
 

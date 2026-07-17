@@ -918,7 +918,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     category: 'content',
     tools: {
       // Tier 0
-      github: 'planned', // was 'not-supported', updated per github-plan.md
+      github: 'not-supported', // character limit removed June 2026
       cursor: 'not-supported', // No known limit
       claude: 'not-supported', // No known limit
       antigravity: 'supported', // 12,000 chars
@@ -1440,7 +1440,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       windsurf: 'not-supported',
       cline: 'not-supported',
       roo: 'not-supported',
-      codex: 'supported',
+      codex: 'planned', // until native Codex formatter (Task 12) passes
       continue: 'not-supported',
       // Tier 2
       augment: 'supported',
@@ -1539,7 +1539,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       antigravity: 'planned', // was 'supported', downgraded per antigravity-plan.md
       factory: 'not-supported',
       opencode: 'not-supported',
-      gemini: 'not-supported',
+      gemini: 'planned', // nested GEMINI.md support planned
       // Tier 1
       windsurf: 'not-supported',
       cline: 'not-supported',

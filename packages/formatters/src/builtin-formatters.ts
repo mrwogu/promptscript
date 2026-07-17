@@ -56,6 +56,15 @@ import { AdalFormatter } from './formatters/adal.js';
 import { IflowFormatter } from './formatters/iflow.js';
 import { OpenClawFormatter } from './formatters/openclaw.js';
 import { CodeBuddyFormatter } from './formatters/codebuddy.js';
+// AGENTS.md-only targets
+import { AiderFormatter } from './formatters/aider.js';
+import { AmazonQFormatter } from './formatters/amazon-q.js';
+import { WarpFormatter } from './formatters/warp.js';
+import { ZedFormatter } from './formatters/zed.js';
+import { JulesFormatter } from './formatters/jules.js';
+import { DevinFormatter } from './formatters/devin.js';
+// Grok Build
+import { GrokFormatter } from './formatters/grok.js';
 
 /**
  * Exhaustive map of built-in target names to their formatter classes.
@@ -104,4 +113,12 @@ export const BUILTIN_FORMATTERS = {
   iflow: IflowFormatter,
   openclaw: OpenClawFormatter,
   codebuddy: CodeBuddyFormatter,
+  // AGENTS.md-only targets
+  aider: AiderFormatter,
+  'amazon-q': AmazonQFormatter,
+  warp: WarpFormatter,
+  zed: ZedFormatter,
+  jules: JulesFormatter,
+  devin: DevinFormatter,
+  grok: GrokFormatter,
 } as const satisfies Record<KnownTarget, FormatterClass>;

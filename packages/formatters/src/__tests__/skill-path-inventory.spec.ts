@@ -46,6 +46,14 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   trae: { basePath: '.trae/skills', fileName: 'SKILL.md' },
   windsurf: { basePath: '.windsurf/skills', fileName: 'SKILL.md' },
   zencoder: { basePath: '.zencoder/skills', fileName: 'SKILL.md' },
+  // AGENTS.md-only targets (no skill support)
+  aider: { basePath: null, fileName: null },
+  'amazon-q': { basePath: null, fileName: null },
+  warp: { basePath: null, fileName: null },
+  zed: { basePath: null, fileName: null },
+  jules: { basePath: null, fileName: null },
+  devin: { basePath: null, fileName: null },
+  grok: { basePath: '.claude/skills', fileName: 'SKILL.md' },
 };
 
 describe('Skill path inventory verification', () => {

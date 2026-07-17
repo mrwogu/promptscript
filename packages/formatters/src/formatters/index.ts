@@ -75,3 +75,21 @@ export { OpenClawFormatter, OPENCLAW_VERSIONS } from './openclaw.js';
 export type { OpenClawVersion } from './openclaw.js';
 export { CodeBuddyFormatter, CODEBUDDY_VERSIONS } from './codebuddy.js';
 export type { CodeBuddyVersion } from './codebuddy.js';
+
+// AGENTS.md-only targets
+export { AiderFormatter, AIDER_VERSIONS } from './aider.js';
+export type { AiderVersion } from './aider.js';
+export { AmazonQFormatter, AMAZON_Q_VERSIONS } from './amazon-q.js';
+export type { AmazonQVersion } from './amazon-q.js';
+export { WarpFormatter, WARP_VERSIONS } from './warp.js';
+export type { WarpVersion } from './warp.js';
+export { ZedFormatter, ZED_VERSIONS } from './zed.js';
+export type { ZedVersion } from './zed.js';
+export { JulesFormatter, JULES_VERSIONS } from './jules.js';
+export type { JulesVersion } from './jules.js';
+export { DevinFormatter, DEVIN_VERSIONS } from './devin.js';
+export type { DevinVersion } from './devin.js';
+
+// Grok Build
+export { GrokFormatter, GROK_VERSIONS } from './grok.js';
+export type { GrokVersion } from './grok.js';

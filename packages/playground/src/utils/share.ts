@@ -75,6 +75,13 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     iflow: { enabled: false, version: 'full' },
     openclaw: { enabled: false, version: 'full' },
     codebuddy: { enabled: false, version: 'full' },
+    aider: { enabled: false, version: 'full' },
+    'amazon-q': { enabled: false, version: 'full' },
+    warp: { enabled: false, version: 'full' },
+    zed: { enabled: false, version: 'full' },
+    jules: { enabled: false, version: 'full' },
+    devin: { enabled: false, version: 'full' },
+    grok: { enabled: false, version: 'full' },
   },
   formatting: {
     tabWidth: 2,

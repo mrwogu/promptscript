@@ -449,7 +449,16 @@ export type KnownTarget =
   | 'adal'
   | 'iflow'
   | 'openclaw'
-  | 'codebuddy';
+  | 'codebuddy'
+  // AGENTS.md-only targets
+  | 'aider'
+  | 'amazon-q'
+  | 'warp'
+  | 'zed'
+  | 'jules'
+  | 'devin'
+  // Grok Build
+  | 'grok';
 
 /**
  * Branded type for custom (user-registered) target names.
@@ -514,6 +523,15 @@ export const KNOWN_TARGETS: readonly KnownTarget[] = [
   'iflow',
   'openclaw',
   'codebuddy',
+  // AGENTS.md-only targets
+  'aider',
+  'amazon-q',
+  'warp',
+  'zed',
+  'jules',
+  'devin',
+  // Grok Build
+  'grok',
 ] as const;
 
 /**
@@ -584,4 +602,12 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   iflow: '.iflow/rules/project.md',
   openclaw: 'INSTRUCTIONS.md',
   codebuddy: '.codebuddy/rules/project.md',
+  // AGENTS.md-only targets
+  aider: 'AGENTS.md',
+  'amazon-q': 'AGENTS.md',
+  warp: 'AGENTS.md',
+  zed: 'AGENTS.md',
+  jules: 'AGENTS.md',
+  devin: 'AGENTS.md',
+  grok: 'AGENTS.md',
 };
