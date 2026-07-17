@@ -62,6 +62,7 @@
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
 - Three output modes: `simple`, `multifile`, `full`
 - Always-on rules default to the byte-compatible `monolith` mode
+- In `monolith` mode, `@standards` render as grouped `###` subsections (one per topic) under `Conventions & Patterns`, preserving the source topic structure
 - Split rules require the `multifile` or `full` output version
 
 ## Split Rules
