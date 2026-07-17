@@ -1,8 +1,10 @@
 import type { Program } from '@promptscript/core';
+import { KNOWN_TARGETS } from '@promptscript/core';
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { FormatterRegistry } from '../registry.js';
 import { BaseFormatter } from '../base-formatter.js';
 import type { Formatter, FormatterOutput, FormatterVersionMap, FormatOptions } from '../types.js';
+import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
 
 // Import the main module to trigger auto-registration of built-in formatters
 import '../index.js';
@@ -570,5 +572,26 @@ describe('FormatterRegistry', () => {
         expect(FormatterRegistry.has(name)).toBe(true);
       }
     });
+  });
+});
+
+describe('Builtin formatter catalog integrity', () => {
+  it('should register exactly one formatter per known target', () => {
+    for (const target of KNOWN_TARGETS) {
+      expect(FormatterRegistry.has(target), `Missing formatter for ${target}`).toBe(true);
+    }
+  });
+
+  it('should have BUILTIN_FORMATTERS covering all known targets', () => {
+    for (const target of KNOWN_TARGETS) {
+      expect(
+        BUILTIN_FORMATTERS[target],
+        `Missing BUILTIN_FORMATTERS entry for ${target}`
+      ).toBeDefined();
+    }
+  });
+
+  it('should have no extra entries in BUILTIN_FORMATTERS beyond known targets', () => {
+    expect(Object.keys(BUILTIN_FORMATTERS)).toHaveLength(KNOWN_TARGETS.length);
   });
 });

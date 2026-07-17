@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Program, SourceLocation } from '@promptscript/core';
+import { KNOWN_TARGETS } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1439,7 +1440,7 @@ describe('Golden Files Tests', () => {
       }
     );
 
-    it('all 37 formatters should produce output with a valid path', () => {
+    it('all known targets should produce output with a valid path', () => {
       const ast = createCanonicalAST();
 
       const allFormatters = [
@@ -1482,7 +1483,7 @@ describe('Golden Files Tests', () => {
         new CodeBuddyFormatter(),
       ];
 
-      expect(allFormatters.length).toBe(37);
+      expect(allFormatters.length).toBe(KNOWN_TARGETS.length);
 
       for (const formatter of allFormatters) {
         const result = formatter.format(ast);

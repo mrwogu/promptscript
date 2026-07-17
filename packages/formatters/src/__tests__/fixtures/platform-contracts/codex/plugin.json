@@ -1,0 +1,4 @@
+{
+  "name": "repo-policy",
+  "hooks": "./hooks/hooks.json"
+}

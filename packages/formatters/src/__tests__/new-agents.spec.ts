@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
+import { KNOWN_TARGETS } from '@promptscript/core';
 // Import from index.ts to trigger side-effect registrations
 import { FormatterRegistry } from '../index.js';
 
@@ -470,9 +471,9 @@ describe('New Agent Formatters', () => {
       }
     );
 
-    it('should have 37 total formatters registered (7 original + 30 new)', () => {
+    it('should have all known targets registered', () => {
       const all = FormatterRegistry.list();
-      expect(all.length).toBe(37);
+      expect(all.length).toBe(KNOWN_TARGETS.length);
     });
   });
 });

@@ -1,45 +1,14 @@
 import { create } from 'zustand';
 import type { CompileResult, CompileError } from '@promptscript/browser-compiler';
 import type { FormatterOutput } from '@promptscript/formatters';
+import type { KnownTarget } from '@promptscript/core';
+import { TARGET_DEFINITIONS } from '@promptscript/core';
 
-export type FormatterName =
-  | 'github'
-  | 'claude'
-  | 'cursor'
-  | 'antigravity'
-  | 'factory'
-  | 'opencode'
-  | 'gemini'
-  | 'windsurf'
-  | 'cline'
-  | 'roo'
-  | 'codex'
-  | 'continue'
-  | 'augment'
-  | 'goose'
-  | 'kilo'
-  | 'amp'
-  | 'trae'
-  | 'junie'
-  | 'kiro'
-  | 'cortex'
-  | 'crush'
-  | 'command-code'
-  | 'kode'
-  | 'mcpjam'
-  | 'mistral-vibe'
-  | 'mux'
-  | 'openhands'
-  | 'pi'
-  | 'qoder'
-  | 'qwen-code'
-  | 'zencoder'
-  | 'neovate'
-  | 'pochi'
-  | 'adal'
-  | 'iflow'
-  | 'openclaw'
-  | 'codebuddy';
+/**
+ * Target/formatter name.
+ * @deprecated Use `KnownTarget` from `@promptscript/core` directly.
+ */
+export type FormatterName = KnownTarget;
 
 export interface FileState {
   path: string;
@@ -216,46 +185,38 @@ const DEFAULT_FILE = `@meta {
 }
 `;
 
+/**
+ * Explicit Playground overrides for targets that differ from the catalog
+ * defaults (e.g. enabled by default, non-'full' default version).
+ */
+const PLAYGROUND_OVERRIDES: Partial<Record<KnownTarget, Partial<TargetSettings>>> = {
+  github: { enabled: true, version: 'full' },
+  claude: { enabled: true, version: 'full' },
+  cursor: { enabled: true, version: 'standard' },
+  antigravity: { enabled: true, version: 'frontmatter' },
+};
+
+/**
+ * Build default Playground target settings from catalog metadata plus
+ * the small explicit override map above.
+ */
+function createDefaultTargets(): Record<KnownTarget, TargetSettings> {
+  const targets = {} as Record<KnownTarget, TargetSettings>;
+  for (const [name, def] of Object.entries(TARGET_DEFINITIONS) as [
+    KnownTarget,
+    (typeof TARGET_DEFINITIONS)[KnownTarget],
+  ][]) {
+    const override = PLAYGROUND_OVERRIDES[name];
+    targets[name] = {
+      enabled: override?.enabled ?? def.features.defaultEnabled,
+      version: override?.version ?? def.features.defaultVersion,
+    };
+  }
+  return targets;
+}
+
 const DEFAULT_CONFIG: PlaygroundConfig = {
-  targets: {
-    github: { enabled: true, version: 'full' },
-    claude: { enabled: true, version: 'full' },
-    cursor: { enabled: true, version: 'standard' },
-    antigravity: { enabled: true, version: 'frontmatter' },
-    factory: { enabled: false, version: 'full' },
-    opencode: { enabled: false, version: 'full' },
-    gemini: { enabled: false, version: 'full' },
-    windsurf: { enabled: false, version: 'full' },
-    cline: { enabled: false, version: 'full' },
-    roo: { enabled: false, version: 'full' },
-    codex: { enabled: false, version: 'full' },
-    continue: { enabled: false, version: 'full' },
-    augment: { enabled: false, version: 'full' },
-    goose: { enabled: false, version: 'full' },
-    kilo: { enabled: false, version: 'full' },
-    amp: { enabled: false, version: 'full' },
-    trae: { enabled: false, version: 'full' },
-    junie: { enabled: false, version: 'full' },
-    kiro: { enabled: false, version: 'full' },
-    cortex: { enabled: false, version: 'full' },
-    crush: { enabled: false, version: 'full' },
-    'command-code': { enabled: false, version: 'full' },
-    kode: { enabled: false, version: 'full' },
-    mcpjam: { enabled: false, version: 'full' },
-    'mistral-vibe': { enabled: false, version: 'full' },
-    mux: { enabled: false, version: 'full' },
-    openhands: { enabled: false, version: 'full' },
-    pi: { enabled: false, version: 'full' },
-    qoder: { enabled: false, version: 'full' },
-    'qwen-code': { enabled: false, version: 'full' },
-    zencoder: { enabled: false, version: 'full' },
-    neovate: { enabled: false, version: 'full' },
-    pochi: { enabled: false, version: 'full' },
-    adal: { enabled: false, version: 'full' },
-    iflow: { enabled: false, version: 'full' },
-    openclaw: { enabled: false, version: 'full' },
-    codebuddy: { enabled: false, version: 'full' },
-  },
+  targets: createDefaultTargets(),
   formatting: {
     tabWidth: 2,
     proseWrap: 'preserve',

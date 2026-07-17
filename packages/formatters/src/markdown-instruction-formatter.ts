@@ -140,11 +140,17 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   }
 
   override getSkillBasePath(): string | null {
+    if (!this.config.hasSkills) return null;
     return `${this.config.dotDir}/skills`;
   }
 
   override getSkillFileName(): string | null {
+    if (!this.config.hasSkills) return null;
     return this.config.skillFileName;
+  }
+
+  override referencesMode(): 'directory' | 'inline' | 'none' {
+    return this.config.hasSkills ? 'directory' : 'none';
   }
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {

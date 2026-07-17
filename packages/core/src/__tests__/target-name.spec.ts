@@ -6,6 +6,7 @@ import {
   customTarget,
   DEFAULT_OUTPUT_PATHS,
 } from '../types/config.js';
+import { TARGET_DEFINITIONS } from '../target-catalog.js';
 
 describe('TargetName branded type', () => {
   describe('KnownTarget', () => {
@@ -305,5 +306,56 @@ describe('TargetName branded type', () => {
       // Assert
       expect(targets).toHaveLength(2);
     });
+  });
+});
+
+describe('Target catalog integrity', () => {
+  it('should have a TARGET_DEFINITIONS entry for every KNOWN_TARGET', () => {
+    for (const target of KNOWN_TARGETS) {
+      expect(TARGET_DEFINITIONS[target], `Missing catalog entry for ${target}`).toBeDefined();
+    }
+  });
+
+  it('should have a non-empty outputPath for every target', () => {
+    for (const target of KNOWN_TARGETS) {
+      const def = TARGET_DEFINITIONS[target];
+      expect(def.outputPath.length, `${target} has empty outputPath`).toBeGreaterThan(0);
+    }
+  });
+
+  it('should have a valid family for every target', () => {
+    const validFamilies = ['base', 'markdown-instruction', 'simple', 'agents-md-only'];
+    for (const target of KNOWN_TARGETS) {
+      const def = TARGET_DEFINITIONS[target];
+      expect(validFamilies, `${target} has invalid family`).toContain(def.family);
+    }
+  });
+
+  it('should have a default feature profile for every target', () => {
+    for (const target of KNOWN_TARGETS) {
+      const def = TARGET_DEFINITIONS[target];
+      expect(def.features.defaultEnabled, `${target} missing defaultEnabled`).toBeDefined();
+      expect(def.features.defaultVersion, `${target} missing defaultVersion`).toBeDefined();
+      expect(typeof def.features.hasSkills).toBe('boolean');
+      expect(typeof def.features.hasAgents).toBe('boolean');
+      expect(typeof def.features.hasCommands).toBe('boolean');
+    }
+  });
+
+  it('should have DEFAULT_OUTPUT_PATHS consistent with TARGET_DEFINITIONS', () => {
+    const mismatches: string[] = [];
+    for (const target of KNOWN_TARGETS) {
+      const catalogPath = TARGET_DEFINITIONS[target].outputPath;
+      const configPath = DEFAULT_OUTPUT_PATHS[target];
+      if (configPath !== catalogPath) {
+        mismatches.push(`${target}: catalog=${catalogPath} config=${configPath}`);
+      }
+    }
+    expect(mismatches, `Path mismatches:\n${mismatches.join('\n')}`).toHaveLength(0);
+  });
+
+  it('should have no extra entries in TARGET_DEFINITIONS beyond KNOWN_TARGETS', () => {
+    const catalogKeys = Object.keys(TARGET_DEFINITIONS);
+    expect(catalogKeys).toHaveLength(KNOWN_TARGETS.length);
   });
 });

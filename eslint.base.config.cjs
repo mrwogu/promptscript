@@ -94,10 +94,10 @@ const moduleBoundaryRules = [
     sourceTag: 'scope:browser-compiler',
     onlyDependOnLibsWithTags: ['scope:core', 'scope:parser', 'scope:validator', 'scope:formatters'],
   },
-  // Playground depends on browser-compiler and formatters (for types)
+  // Playground depends on browser-compiler, formatters (for types), and core (for target catalog)
   {
     sourceTag: 'scope:playground',
-    onlyDependOnLibsWithTags: ['scope:browser-compiler', 'scope:formatters'],
+    onlyDependOnLibsWithTags: ['scope:browser-compiler', 'scope:formatters', 'scope:core'],
   },
 ];
 
