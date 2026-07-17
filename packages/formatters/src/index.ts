@@ -18,6 +18,17 @@ export type {
   FormatOptions,
 } from './types.js';
 
+// Structured output merge types and helpers
+export type { StructuredMergePlan, StructuredMergeOperation } from './structured-output.js';
+export {
+  OWNERSHIP_KEY,
+  applyMergeOperations,
+  removeStaleOwned,
+  serializeMerged,
+  hasOwnedEntries,
+  parsePath,
+} from './structured-output.js';
+
 // Base classes
 export { BaseFormatter } from './base-formatter.js';
 export { MarkdownInstructionFormatter } from './markdown-instruction-formatter.js';

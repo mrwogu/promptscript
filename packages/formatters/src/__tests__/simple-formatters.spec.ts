@@ -2,12 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { createSimpleMarkdownFormatter } from '../create-simple-formatter.js';
 import type { Program } from '@promptscript/core';
 
+function createLoc() {
+  return { file: 'test.prs', line: 1, column: 0 };
+}
+
 function createMinimalProgram(): Program {
   return {
     type: 'Program',
-    syntax: '1.0.0',
     blocks: [],
-    loc: { start: { line: 1, column: 0, offset: 0 }, end: { line: 1, column: 0, offset: 0 } },
+    uses: [],
+    extends: [],
+    loc: createLoc(),
   };
 }
 
@@ -20,9 +25,9 @@ const programWithIdentity: Program = {
       content: {
         type: 'TextContent',
         value: 'You are a test assistant.',
-        loc: { start: { line: 1, column: 0, offset: 0 }, end: { line: 1, column: 0, offset: 0 } },
+        loc: createLoc(),
       },
-      loc: { start: { line: 1, column: 0, offset: 0 }, end: { line: 1, column: 0, offset: 0 } },
+      loc: createLoc(),
     },
   ],
 };
