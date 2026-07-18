@@ -502,7 +502,12 @@ export type KnownTarget =
   | 'jules'
   | 'devin'
   // Grok Build
-  | 'grok';
+  | 'grok'
+  // Priority B CLI agents
+  | 'kimi'
+  | 'mimo'
+  | 'deep-agents'
+  | 'forgecode';
 
 /**
  * Branded type for custom (user-registered) target names.
@@ -576,6 +581,11 @@ export const KNOWN_TARGETS: readonly KnownTarget[] = [
   'devin',
   // Grok Build
   'grok',
+  // Priority B CLI agents
+  'kimi',
+  'mimo',
+  'deep-agents',
+  'forgecode',
 ] as const;
 
 /**
@@ -654,4 +664,9 @@ export const DEFAULT_OUTPUT_PATHS: Record<string, string> = {
   jules: 'AGENTS.md',
   devin: 'AGENTS.md',
   grok: 'AGENTS.md',
+  // Priority B CLI agents
+  kimi: 'AGENTS.md',
+  mimo: 'AGENTS.md',
+  'deep-agents': 'AGENTS.md',
+  forgecode: 'AGENTS.md',
 };

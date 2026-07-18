@@ -57,6 +57,10 @@ import { JulesFormatter } from '../formatters/jules.js';
 import { DevinFormatter } from '../formatters/devin.js';
 // Grok Build
 import { GrokFormatter } from '../formatters/grok.js';
+import { KimiFormatter } from '../formatters/kimi.js';
+import { MimoFormatter } from '../formatters/mimo.js';
+import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
+import { ForgecodeFormatter } from '../formatters/forgecode.js';
 import type { Formatter, FormatOptions } from '../types.js';
 
 /**
@@ -1499,6 +1503,11 @@ describe('Golden Files Tests', () => {
         new DevinFormatter(),
         // Grok Build
         new GrokFormatter(),
+        // Priority B CLI agents
+        new KimiFormatter(),
+        new MimoFormatter(),
+        new DeepAgentsFormatter(),
+        new ForgecodeFormatter(),
       ];
 
       expect(allFormatters.length).toBe(KNOWN_TARGETS.length);

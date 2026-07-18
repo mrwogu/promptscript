@@ -379,7 +379,10 @@ export class CursorFormatter extends BaseFormatter {
 
           const skillLines: string[] = ['---'];
           skillLines.push(`name: ${skillName}`);
-          if (description) skillLines.push(`description: ${this.yamlString(description)}`);
+          if (description)
+            skillLines.push(
+              `description: "${description.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+            );
           skillLines.push('---');
           skillLines.push('');
           if (content) skillLines.push(this.dedent(content));
@@ -405,7 +408,10 @@ export class CursorFormatter extends BaseFormatter {
 
           const agentLines: string[] = ['---'];
           agentLines.push(`name: ${agentName}`);
-          if (description) agentLines.push(`description: ${this.yamlString(description)}`);
+          if (description)
+            agentLines.push(
+              `description: "${description.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+            );
           const model = obj['model'];
           if (typeof model === 'string') agentLines.push(`model: ${model}`);
           agentLines.push('---');

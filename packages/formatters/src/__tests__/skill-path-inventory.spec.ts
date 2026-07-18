@@ -54,6 +54,11 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   jules: { basePath: null, fileName: null },
   devin: { basePath: null, fileName: null },
   grok: { basePath: '.claude/skills', fileName: 'SKILL.md' },
+  // Priority B CLI agents (AGENTS.md-only, no skills by default)
+  kimi: { basePath: null, fileName: null },
+  mimo: { basePath: null, fileName: null },
+  'deep-agents': { basePath: null, fileName: null },
+  forgecode: { basePath: null, fileName: null },
 };
 
 describe('Skill path inventory verification', () => {

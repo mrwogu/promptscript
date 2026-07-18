@@ -484,6 +484,10 @@ export const selectOutputsForFormatter = (
     jules: [/^AGENTS\.md$/],
     devin: [/^AGENTS\.md$/],
     grok: [/^AGENTS\.md$/, /^CLAUDE\.md$/, /\.claude\//],
+    kimi: [/^AGENTS\.md$/],
+    mimo: [/^AGENTS\.md$/],
+    'deep-agents': [/^AGENTS\.md$/],
+    forgecode: [/^AGENTS\.md$/],
   };
 
   const patterns = formatterPatterns[formatter];
@@ -540,6 +544,10 @@ export const selectOutputsForFormatter = (
     jules: 'AGENTS.md',
     devin: 'AGENTS.md',
     grok: 'AGENTS.md',
+    kimi: 'AGENTS.md',
+    mimo: 'AGENTS.md',
+    'deep-agents': 'AGENTS.md',
+    forgecode: 'AGENTS.md',
   };
 
   const mainPattern = mainFilePatterns[formatter];

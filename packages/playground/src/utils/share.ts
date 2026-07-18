@@ -82,6 +82,10 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
     jules: { enabled: false, version: 'full' },
     devin: { enabled: false, version: 'full' },
     grok: { enabled: false, version: 'full' },
+    kimi: { enabled: false, version: 'simple' },
+    mimo: { enabled: false, version: 'simple' },
+    'deep-agents': { enabled: false, version: 'simple' },
+    forgecode: { enabled: false, version: 'simple' },
   },
   formatting: {
     tabWidth: 2,
