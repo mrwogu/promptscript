@@ -6,7 +6,7 @@ import type { FormatOptions, FormatterOutput } from '../types.js';
 /**
  * Supported Antigravity format versions.
  */
-export type AntigravityVersion = 'simple' | 'frontmatter';
+export type AntigravityVersion = 'simple' | 'frontmatter' | 'agents-md';
 
 /**
  * Activation types for Antigravity rules.
@@ -26,6 +26,11 @@ export const ANTIGRAVITY_VERSIONS = {
     name: 'frontmatter',
     description: 'Markdown with YAML frontmatter for activation',
     outputPath: '.agent/rules/project.md',
+  },
+  'agents-md': {
+    name: 'agents-md',
+    description: 'Root AGENTS.md (interoperable with Codex, Cursor, etc.)',
+    outputPath: 'AGENTS.md',
   },
 } as const;
 
@@ -129,6 +134,12 @@ export class AntigravityFormatter extends BaseFormatter {
       sections.push(this.generateFrontmatter(ast, activationType));
     }
 
+    // For agents-md version, output as plain AGENTS.md without frontmatter
+    const outputPath =
+      version === 'agents-md'
+        ? (options?.outputPath ?? ANTIGRAVITY_VERSIONS['agents-md'].outputPath)
+        : (options?.outputPath ?? this.outputPath);
+
     // Add header
     sections.push(this.header(ast));
 
@@ -192,7 +203,7 @@ export class AntigravityFormatter extends BaseFormatter {
 
     // Generate main output
     const mainOutput: FormatterOutput = {
-      path: this.getOutputPath(options),
+      path: outputPath,
       content,
     };
 
@@ -217,6 +228,9 @@ export class AntigravityFormatter extends BaseFormatter {
   private resolveVersion(version?: string): AntigravityVersion {
     if (version === 'frontmatter') {
       return 'frontmatter';
+    }
+    if (version === 'agents-md') {
+      return 'agents-md';
     }
     return 'simple';
   }

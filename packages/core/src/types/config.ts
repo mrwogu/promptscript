@@ -146,6 +146,23 @@ export interface TargetConfig {
    * Defaults to `AGENTS.md`. Use `AGENTS.override.md` only for scoped builds.
    */
   agentsFile?: string;
+
+  /**
+   * AGENTS.md v1.1 frontmatter mode.
+   * - `experimental`: emit YAML frontmatter with `description` and `tags` from @meta
+   * - omitted: no frontmatter (default, byte-compatible with existing output)
+   *
+   * Only valid for targets whose fixture accepts frontmatter.
+   * @default undefined (no frontmatter)
+   */
+  agentsFrontmatter?: 'experimental';
+
+  /**
+   * Claude: auto mode setting for project settings.json.
+   * Maps to `.claude/settings.json` `autoMode` field.
+   * Only valid for Claude target with fixture-confirmed project-local schema.
+   */
+  autoMode?: 'acceptEdits' | 'plan' | 'bypassPermissions';
 }
 
 /**

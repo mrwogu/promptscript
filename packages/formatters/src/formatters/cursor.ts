@@ -15,7 +15,7 @@ import type { FormatOptions, FormatterOutput } from '../types.js';
  * accepted by the formatter as a silent fallback to `modern` for backward
  * compatibility, but it no longer appears in autocomplete.
  */
-export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'agents-md';
+export type CursorVersion = 'modern' | 'legacy' | 'multifile' | 'agents-md' | 'full';
 
 /**
  * Cursor formatter version information.
@@ -34,6 +34,14 @@ export const CURSOR_VERSIONS = {
     description: 'Plain markdown at AGENTS.md (Cursor 2.4+) — no frontmatter required',
     outputPath: 'AGENTS.md',
     cursorVersion: '2.4+',
+    introduced: '2025-06',
+  },
+  full: {
+    name: 'full',
+    description:
+      'MDC + skills (.agents/skills/<name>/SKILL.md) + subagents (.cursor/agents/<name>.md)',
+    outputPath: '.cursor/rules/project.mdc',
+    cursorVersion: '2.5+',
     introduced: '2025-06',
   },
   multifile: {
@@ -151,6 +159,10 @@ export class CursorFormatter extends BaseFormatter {
 
     if (version === 'agents-md') {
       return this.formatAgentsMd(ast, options);
+    }
+
+    if (version === 'full') {
+      return this.formatFull(ast, options);
     }
 
     return this.formatModern(ast, options);
@@ -342,6 +354,74 @@ export class CursorFormatter extends BaseFormatter {
     return {
       path: options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath,
       content: mainSections.join('\n\n') + '\n' + inlineRefs,
+      additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  /**
+   * Full mode: multifile + native skill files + subagent files.
+   * Emits .agents/skills/<name>/SKILL.md and .cursor/agents/<name>.md.
+   */
+  private formatFull(ast: Program, options?: FormatOptions): FormatterOutput {
+    const result = this.formatMultifile(ast, options);
+    const additionalFiles = [...(result.additionalFiles ?? [])];
+
+    // Generate native skill files (.agents/skills/<name>/SKILL.md)
+    const skillsBlock = this.findBlock(ast, 'skills');
+    if (skillsBlock) {
+      const props = this.getProps(skillsBlock.content);
+      for (const [skillName, value] of Object.entries(props)) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          const obj = value as Record<string, Value>;
+          const description = obj['description'] ? this.valueToString(obj['description']) : '';
+          const content = obj['content'] ? this.valueToString(obj['content']) : '';
+          if (!description && !content) continue;
+
+          const skillLines: string[] = ['---'];
+          skillLines.push(`name: ${skillName}`);
+          if (description) skillLines.push(`description: ${this.yamlString(description)}`);
+          skillLines.push('---');
+          skillLines.push('');
+          if (content) skillLines.push(this.dedent(content));
+
+          additionalFiles.push({
+            path: `.agents/skills/${skillName}/SKILL.md`,
+            content: skillLines.join('\n') + '\n',
+          });
+        }
+      }
+    }
+
+    // Generate subagent files (.cursor/agents/<name>.md)
+    const agentsBlock = this.findBlock(ast, 'agents');
+    if (agentsBlock) {
+      const props = this.getProps(agentsBlock.content);
+      for (const [agentName, value] of Object.entries(props)) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          const obj = value as Record<string, Value>;
+          const description = obj['description'] ? this.valueToString(obj['description']) : '';
+          const content = obj['content'] ? this.valueToString(obj['content']) : '';
+          if (!description && !content) continue;
+
+          const agentLines: string[] = ['---'];
+          agentLines.push(`name: ${agentName}`);
+          if (description) agentLines.push(`description: ${this.yamlString(description)}`);
+          const model = obj['model'];
+          if (typeof model === 'string') agentLines.push(`model: ${model}`);
+          agentLines.push('---');
+          agentLines.push('');
+          if (content) agentLines.push(this.dedent(content));
+
+          additionalFiles.push({
+            path: `.cursor/agents/${agentName}.md`,
+            content: agentLines.join('\n') + '\n',
+          });
+        }
+      }
+    }
+
+    return {
+      ...result,
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
     };
   }

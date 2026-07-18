@@ -1376,7 +1376,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     tools: {
       // Tier 0
       github: 'supported', // .github/skills/<name>/SKILL.md
-      cursor: 'planned', // was 'not-supported', updated per cursor-plan.md
+      cursor: 'supported', // .agents/skills/<name>/SKILL.md (full mode)
       claude: 'supported', // .claude/skills/<name>/SKILL.md
       antigravity: 'not-supported',
       factory: 'supported',
@@ -1430,7 +1430,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
     tools: {
       // Tier 0
       github: 'supported', // AGENTS.md + .github/agents/<name>.md
-      cursor: 'planned', // was 'not-supported', updated per cursor-plan.md
+      cursor: 'supported', // .cursor/agents/<name>.md (full mode)
       claude: 'supported', // .claude/agents/<name>.md
       antigravity: 'not-supported',
       factory: 'supported', // .factory/droids/<name>.md

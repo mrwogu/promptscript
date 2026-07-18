@@ -192,6 +192,11 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     const renderer = this.createRenderer(options);
     const sections: string[] = [];
 
+    const frontmatter = this.generateFrontmatter(ast, options);
+    if (frontmatter) {
+      sections.push(frontmatter);
+    }
+
     if (renderer.getConvention().name === 'markdown') {
       sections.push(`${this.config.mainFileHeader}\n`);
     }
@@ -228,6 +233,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     // Main file content
     const sections: string[] = [];
+
+    const frontmatter = this.generateFrontmatter(ast, options);
+    if (frontmatter) {
+      sections.push(frontmatter);
+    }
+
     if (renderer.getConvention().name === 'markdown') {
       sections.push(`${this.config.mainFileHeader}\n`);
     }
@@ -271,6 +282,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     // Main file content
     const sections: string[] = [];
+
+    const frontmatter = this.generateFrontmatter(ast, options);
+    if (frontmatter) {
+      sections.push(frontmatter);
+    }
+
     if (renderer.getConvention().name === 'markdown') {
       sections.push(`${this.config.mainFileHeader}\n`);
     }
@@ -281,6 +298,19 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       content: sections.join('\n'),
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
     };
+  }
+
+  // ============================================================
+  // Frontmatter Generation (AGENTS.md v1.1 experimental)
+  // ============================================================
+
+  /**
+   * Generate optional YAML frontmatter for the main output file.
+   * Returns undefined by default (no frontmatter, byte-compatible with existing output).
+   * Override in subclasses that support AGENTS.md v1.1 frontmatter.
+   */
+  protected generateFrontmatter(_ast: Program, _options?: FormatOptions): string | undefined {
+    return undefined;
   }
 
   // ============================================================

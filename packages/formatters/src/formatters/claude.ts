@@ -305,13 +305,25 @@ export class ClaudeFormatter extends BaseFormatter {
 
     // Generate hook settings from @hooks block
     const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
-    if (hooksBlock) {
-      const hooks = extractHooks(hooksBlock);
-      if (hooks.length > 0) {
-        const claudeHooks = generateClaudeHooks(hooks);
+    const autoMode = options?.targetConfig?.autoMode;
+    if (hooksBlock || autoMode) {
+      const settings: Record<string, unknown> = {};
+
+      if (hooksBlock) {
+        const hooks = extractHooks(hooksBlock);
+        if (hooks.length > 0) {
+          settings['hooks'] = generateClaudeHooks(hooks);
+        }
+      }
+
+      if (autoMode) {
+        settings['autoMode'] = autoMode;
+      }
+
+      if (Object.keys(settings).length > 0) {
         additionalFiles.push({
           path: '.claude/settings.json',
-          content: JSON.stringify({ hooks: claudeHooks }, null, 2) + '\n',
+          content: JSON.stringify(settings, null, 2) + '\n',
         });
       }
     }
