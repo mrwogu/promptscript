@@ -245,4 +245,90 @@ describe('PS034: valid-hooks', () => {
       expect(messages).toHaveLength(0);
     }
   });
+
+  it('should reject non-array command', () => {
+    const messages = validate(
+      makeAst({
+        'bad-cmd': {
+          event: 'pre-tool-use',
+          command: 'not-array' as unknown as Value[],
+        },
+      })
+    );
+    expect(messages.some((m) => m.message.includes('command must be an array'))).toBe(true);
+  });
+
+  it('should reject non-number timeoutMs', () => {
+    const messages = validate(
+      makeAst({
+        'bad-timeout': {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+          timeoutMs: 'not-number' as unknown as number,
+        },
+      })
+    );
+    expect(messages.some((m) => m.message.includes('timeoutMs must be a number'))).toBe(true);
+  });
+
+  it('should reject non-string matcher', () => {
+    const messages = validate(
+      makeAst({
+        'bad-matcher': {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+          matcher: 123 as unknown as string,
+        },
+      })
+    );
+    expect(messages.some((m) => m.message.includes('matcher must be a string'))).toBe(true);
+  });
+
+  it('should reject non-string statusMessage', () => {
+    const messages = validate(
+      makeAst({
+        'bad-status': {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+          statusMessage: 456 as unknown as string,
+        },
+      })
+    );
+    expect(messages.some((m) => m.message.includes('statusMessage must be a string'))).toBe(true);
+  });
+
+  it('should reject empty hook ID', () => {
+    const messages = validate(
+      makeAst({
+        '': {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+        },
+      })
+    );
+    expect(messages.some((m) => m.message.includes('Hook ID must be a non-empty string'))).toBe(
+      true
+    );
+  });
+
+  it('should reject non-object hook value', () => {
+    const messages = validate(
+      makeAst({
+        'bad-hook': 'not-object' as unknown as Record<string, Value>,
+      })
+    );
+    expect(messages.some((m) => m.message.includes('must be an object'))).toBe(true);
+  });
+
+  it('should reject non-string event', () => {
+    const messages = validate(
+      makeAst({
+        'bad-event': {
+          event: 123 as unknown as string,
+          command: ['prs', 'hook'],
+        },
+      })
+    );
+    expect(messages.some((m) => m.message.includes('event must be a string'))).toBe(true);
+  });
 });

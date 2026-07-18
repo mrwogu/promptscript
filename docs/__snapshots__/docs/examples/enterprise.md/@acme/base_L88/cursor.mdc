@@ -25,11 +25,6 @@ Code style:
 - Environments: dev, staging, prod
 - Production requires team-lead and security approval
 
-Commands:
-/standards - Review against ACME standards
-/security - Security review
-/perf - Performance review
-
 Never:
 - Never commit secrets, credentials, or API keys
 - Never bypass code review for production changes

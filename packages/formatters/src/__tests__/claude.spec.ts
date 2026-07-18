@@ -1843,4 +1843,162 @@ describe('ClaudeFormatter', () => {
       expect(skillFile?.path).toBe('.claude/skills/custom/deploy/SKILL.md');
     });
   });
+
+  describe('workflows', () => {
+    it('should emit workflow files when @workflows block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy workflow',
+                  content: 'Run deployment steps',
+                },
+                review: {
+                  description: 'Review workflow',
+                  content: 'Review code changes',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const deployFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/workflows/deploy.md'
+      );
+      const reviewFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/workflows/review.md'
+      );
+      expect(deployFile).toBeDefined();
+      expect(deployFile?.content).toContain('# deploy');
+      expect(deployFile?.content).toContain('> Deploy workflow');
+      expect(reviewFile).toBeDefined();
+    });
+
+    it('should skip workflows with invalid names', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'bad name!': {
+                  description: 'Invalid',
+                  content: 'test',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const badFile = result.additionalFiles?.find((f) => f.path.includes('bad name'));
+      expect(badFile).toBeUndefined();
+    });
+
+    it('should skip workflows without description and content', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                empty: {},
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const emptyFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/workflows/empty.md'
+      );
+      expect(emptyFile).toBeUndefined();
+    });
+  });
+
+  describe('hooks', () => {
+    it('should emit settings.json with hooks when @hooks block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'pre-commit': {
+                  event: 'pre-commit',
+                  command: ['echo', 'running pre-commit'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const settingsFile = result.additionalFiles?.find((f) => f.path === '.claude/settings.json');
+      expect(settingsFile).toBeDefined();
+      const parsed = JSON.parse(settingsFile!.content) as Record<string, unknown>;
+      expect(parsed).toHaveProperty('hooks');
+    });
+  });
+
+  describe('autoMode', () => {
+    it('should include autoMode in settings when targetConfig.autoMode is set', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast, {
+        version: 'full',
+        targetConfig: { autoMode: 'acceptEdits' },
+      });
+      const settingsFile = result.additionalFiles?.find((f) => f.path === '.claude/settings.json');
+      expect(settingsFile).toBeDefined();
+      const parsed = JSON.parse(settingsFile!.content) as Record<string, unknown>;
+      expect(parsed).toHaveProperty('autoMode');
+      expect(parsed['autoMode']).toBe('acceptEdits');
+    });
+
+    it('should not include autoMode when targetConfig.autoMode is not set', () => {
+      const ast = createMinimalProgram();
+      const result = formatter.format(ast, { version: 'full' });
+      const settingsFile = result.additionalFiles?.find((f) => f.path === '.claude/settings.json');
+      if (settingsFile) {
+        const parsed = JSON.parse(settingsFile.content) as Record<string, unknown>;
+        expect(parsed).not.toHaveProperty('autoMode');
+      }
+    });
+  });
 });

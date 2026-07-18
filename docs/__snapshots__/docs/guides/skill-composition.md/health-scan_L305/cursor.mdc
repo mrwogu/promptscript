@@ -4,9 +4,3 @@ alwaysApply: true
 ---
 
 You are working on the project.
-
-Health check endpoints:
-
-- /health for HTTP services
-- /ready for Kubernetes readiness
-- /metrics for Prometheus scraping

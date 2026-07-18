@@ -269,4 +269,473 @@ describe('CodexFormatter', () => {
       expect(configFile!.content).toContain('max_threads = 8');
     });
   });
+
+  describe('AGENTS.md frontmatter', () => {
+    it('should not emit frontmatter by default', () => {
+      const result = formatter.format(createProgramWithAgent(), { version: 'multifile' });
+      expect(result.content).not.toMatch(/^---/);
+    });
+
+    it('should emit frontmatter when agentsFrontmatter is experimental', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'meta',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                id: 'test',
+                syntax: '1.4.0',
+                description: 'Test project',
+                tags: ['typescript', 'testing'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, {
+        version: 'multifile',
+        targetConfig: { agentsFrontmatter: 'experimental' },
+      });
+      expect(result.content).toMatch(/^---/);
+      expect(result.content).toContain('description: "Test project"');
+      expect(result.content).toContain('tags: ["typescript", "testing"]');
+    });
+
+    it('should not emit frontmatter when agentsFrontmatter is not set', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'meta',
+            content: {
+              type: 'ObjectContent',
+              properties: { id: 'test', syntax: '1.4.0', description: 'Test' },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      expect(result.content).not.toMatch(/^---/);
+    });
+  });
+
+  describe('TOML edge cases', () => {
+    it('should handle agent with mcpServers', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                worker: {
+                  description: 'Worker agent',
+                  content: 'Do work',
+                  mcpServers: {
+                    fs: { command: ['node', 'fs.mjs'] },
+                  },
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/worker.toml'
+      );
+      expect(agentToml).toBeDefined();
+      expect(agentToml!.content).toContain('[mcp_servers.fs]');
+      expect(agentToml!.content).toContain('command = ["node", "fs.mjs"]');
+    });
+
+    it('should handle agent with skills array', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                skilled: {
+                  description: 'Skilled agent',
+                  content: 'Use skills',
+                  skills: ['review', 'test'],
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/skilled.toml'
+      );
+      expect(agentToml).toBeDefined();
+      expect(agentToml!.content).toContain('[skills]');
+      expect(agentToml!.content).toContain('config = ["review", "test"]');
+    });
+
+    it('should reject unsafe agent name with path traversal', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '../escape': {
+                  description: 'Bad agent',
+                  content: 'escape',
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find((f) => f.path.includes('escape'));
+      expect(agentToml).toBeUndefined();
+    });
+
+    it('should reject agent name with special characters', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'bad name!': {
+                  description: 'Bad name',
+                  content: 'test',
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find((f) => f.path.includes('bad'));
+      expect(agentToml).toBeUndefined();
+    });
+
+    it('should handle agent with model field', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                modeled: {
+                  description: 'Modeled agent',
+                  content: 'Use model',
+                  model: 'gpt-4',
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/modeled.toml'
+      );
+      expect(agentToml).toBeDefined();
+      expect(agentToml!.content).toContain('model = "gpt-4"');
+    });
+
+    it('should handle multiple agents', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                first: { description: 'First', content: 'A' } as Record<string, Value>,
+                second: { description: 'Second', content: 'B' } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const additional = result.additionalFiles ?? [];
+      expect(additional.find((f) => f.path === '.codex/agents/first.toml')).toBeDefined();
+      expect(additional.find((f) => f.path === '.codex/agents/second.toml')).toBeDefined();
+    });
+
+    it('should truncate AGENTS.md when exceeding 32 KiB limit', () => {
+      // Create a program with a very large identity block
+      const hugeContent = 'A'.repeat(40000);
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: hugeContent,
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      // Content should be truncated to 32 KiB
+      expect(result.content.length).toBeLessThanOrEqual(32768);
+    });
+
+    it('should include hooks in config.toml when @hooks block present', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-hook': {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const configFile = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/config.toml'
+      );
+      expect(configFile).toBeDefined();
+      expect(configFile!.content).toContain('pre_tool_use');
+    });
+
+    it('should skip agents with invalid names', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'valid-agent': {
+                  description: 'Valid',
+                  content: 'OK',
+                } as Record<string, Value>,
+                'invalid name!': {
+                  description: 'Invalid',
+                  content: 'Bad',
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const additional = result.additionalFiles ?? [];
+      expect(additional.find((f) => f.path === '.codex/agents/valid-agent.toml')).toBeDefined();
+      expect(additional.find((f) => f.path.includes('invalid'))).toBeUndefined();
+    });
+
+    it('should serialize boolean and number fields in agent TOML', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                configured: {
+                  description: 'Configured agent',
+                  content: 'Test',
+                  mcpServers: {
+                    fs: {
+                      command: ['node', 'fs.mjs'],
+                      enabled: true,
+                      timeout: 30,
+                      config: { key: 'value' },
+                    } as Record<string, Value>,
+                  },
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/configured.toml'
+      );
+      expect(agentToml).toBeDefined();
+      // boolean, number, and inline table should be serialized
+      expect(agentToml!.content).toContain('true');
+      expect(agentToml!.content).toContain('30');
+      expect(agentToml!.content).toContain('{');
+    });
+
+    it('should serialize inline table for nested object fields', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                nested: {
+                  description: 'Nested agent',
+                  content: 'Test',
+                  mcpServers: {
+                    api: {
+                      command: ['node', 'api.mjs'],
+                      config: {
+                        team: 'platform',
+                        priority: 'high',
+                      },
+                    } as Record<string, Value>,
+                  },
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/nested.toml'
+      );
+      expect(agentToml).toBeDefined();
+      expect(agentToml!.content).toContain('{');
+      expect(agentToml!.content).toContain('team');
+    });
+
+    it('should serialize empty object as inline table', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                emptyobj: {
+                  description: 'Empty obj agent',
+                  content: 'Test',
+                  mcpServers: {
+                    empty: {
+                      command: ['node', 'empty.mjs'],
+                      config: {},
+                    } as Record<string, Value>,
+                  },
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (f) => f.path === '.codex/agents/emptyobj.toml'
+      );
+      expect(agentToml).toBeDefined();
+      expect(agentToml!.content).toContain('{}');
+    });
+  });
 });

@@ -15,12 +15,6 @@ Code style:
 - Use vitest as test framework
 - Maintain 90% code coverage
 
-Commands:
-/review - Review code for quality and best practices
-/test - Write comprehensive unit tests
-/docs - Generate documentation
-/deploy - Deploy to production
-
 Never:
 - Never use any type - use unknown with type guards
 - Never use default exports - only named exports
