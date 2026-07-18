@@ -67,9 +67,9 @@ describe('GrokFormatter', () => {
 
     it('should support simple, multifile, and full versions', () => {
       const versions = GrokFormatter.getSupportedVersions();
-      expect(versions.simple).toBeDefined();
-      expect(versions.multifile).toBeDefined();
-      expect(versions.full).toBeDefined();
+      expect(versions['simple']).toBeDefined();
+      expect(versions['multifile']).toBeDefined();
+      expect(versions['full']).toBeDefined();
     });
   });
 

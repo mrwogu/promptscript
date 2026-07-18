@@ -1440,7 +1440,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       windsurf: 'not-supported',
       cline: 'not-supported',
       roo: 'not-supported',
-      codex: 'planned', // until native Codex formatter (Task 12) passes
+      codex: 'supported', // native Codex formatter emits .codex/agents/<name>.toml
       continue: 'not-supported',
       // Tier 2
       augment: 'supported',
