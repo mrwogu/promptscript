@@ -1250,4 +1250,137 @@ describe('CursorFormatter', () => {
       expect(result.content).not.toContain('Examples:');
     });
   });
+
+  describe('full version', () => {
+    it('should emit native skill files in full mode', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                review: {
+                  description: 'Code review skill',
+                  content: 'Review code for bugs and security.',
+                },
+                test: {
+                  description: 'Testing skill',
+                  content: 'Write and run tests.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const reviewSkill = result.additionalFiles?.find(
+        (f) => f.path === '.agents/skills/review/SKILL.md'
+      );
+      const testSkill = result.additionalFiles?.find(
+        (f) => f.path === '.agents/skills/test/SKILL.md'
+      );
+      expect(reviewSkill).toBeDefined();
+      expect(reviewSkill?.content).toContain('Code review skill');
+      expect(testSkill).toBeDefined();
+      expect(testSkill?.content).toContain('Testing skill');
+    });
+
+    it('should emit subagent files in full mode', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Code reviewer',
+                  content: 'Review code changes.',
+                  reasoningEffort: 'high',
+                },
+                tester: {
+                  description: 'Test writer',
+                  content: 'Write tests for code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const reviewerFile = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/agents/reviewer.md'
+      );
+      const testerFile = result.additionalFiles?.find((f) => f.path === '.cursor/agents/tester.md');
+      expect(reviewerFile).toBeDefined();
+      expect(reviewerFile?.content).toContain('Code reviewer');
+      expect(testerFile).toBeDefined();
+      expect(testerFile?.content).toContain('Test writer');
+    });
+
+    it('should emit both skills and subagents in full mode', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy skill',
+                  content: 'Deploy the app.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deployer: {
+                  description: 'Deploy agent',
+                  content: 'Handle deployments.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const skillFile = result.additionalFiles?.find(
+        (f) => f.path === '.agents/skills/deploy/SKILL.md'
+      );
+      const agentFile = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/agents/deployer.md'
+      );
+      expect(skillFile).toBeDefined();
+      expect(agentFile).toBeDefined();
+    });
+  });
 });

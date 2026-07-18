@@ -14,11 +14,6 @@ Code style:
 - Use migrations for schema changes
 - Use transactions for multi-step operations
 
-Commands:
-/endpoint - Design a new API endpoint
-/migration - Create a database migration
-/test - Write API tests
-
 Never:
 - Never expose internal errors to clients
 - Always validate request body

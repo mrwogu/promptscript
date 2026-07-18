@@ -185,6 +185,9 @@ export class CursorFormatter extends BaseFormatter {
     if (version === 'agents-md') {
       return 'agents-md';
     }
+    if (version === 'full') {
+      return 'full';
+    }
     // 'frontmatter' is kept as a silent backward-compat alias for 'modern'
     if (version === 'frontmatter') {
       return 'modern';

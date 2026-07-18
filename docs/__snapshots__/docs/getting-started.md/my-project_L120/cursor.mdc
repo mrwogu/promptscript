@@ -10,8 +10,3 @@ Code style:
 - Use functional programming style
 - Prefer hooks and composition patterns
 - Write tests for all code
-
-Commands:
-/review - Review code for quality and best practices
-/test - Write unit tests
-/refactor - Suggest refactoring improvements

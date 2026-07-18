@@ -322,4 +322,54 @@ describe('compile command - createCliLogger warn path', () => {
       'Unknown build profile: missing. Available build profiles: known.'
     );
   });
+
+  it('should reject --build combined with --all-builds', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: { claude: {} },
+      builds: { known: { targets: ['factory'] } },
+    });
+
+    await compileCommand(
+      { build: 'known', allBuilds: true, cwd: '/repo/promptscript' },
+      mockServices
+    );
+
+    expect(process.exitCode).toBe(1);
+    expect(mockError).toHaveBeenCalledWith('Cannot use --build with --all-builds');
+  });
+
+  it('should compile all build profiles with --all-builds', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: { claude: {}, factory: {} },
+      builds: {
+        alpha: { targets: ['claude'] },
+        beta: { targets: ['factory'] },
+      },
+    });
+    mockCompile.mockResolvedValue({
+      outputs: [
+        {
+          target: 'claude',
+          format: 'markdown',
+          content: '# Claude',
+          mainPath: '/repo/promptscript/.claude/CLAUDE.md',
+        },
+      ],
+    });
+
+    await compileCommand({ allBuilds: true, cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockCompile).toHaveBeenCalledTimes(2);
+  });
+
+  it('should warn when no build profiles found with --all-builds', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: { claude: {} },
+      builds: {},
+    });
+
+    await compileCommand({ allBuilds: true, cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockCompile).not.toHaveBeenCalled();
+  });
 });

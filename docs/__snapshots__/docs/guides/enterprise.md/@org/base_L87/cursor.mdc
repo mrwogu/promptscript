@@ -16,10 +16,6 @@ Code style:
 - Documentation required
 - Testing required
 
-Commands:
-/security - Review code for security vulnerabilities
-/docs - Generate or update documentation
-
 Never:
 - Never commit secrets or credentials
 - Never bypass security reviews

@@ -13,10 +13,6 @@ Code style:
 - Validate all user input
 - Never hardcode secrets
 
-Commands:
-/security - Review code for security vulnerabilities
-/docs - Generate documentation for this code
-
 Never:
 - Never expose API keys or secrets in code
 - Never commit sensitive data to version control

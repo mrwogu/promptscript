@@ -190,5 +190,23 @@ describe('hook-adapters', () => {
       const toml = generateCodexHooks(hooks);
       expect(toml.trim()).toBe('');
     });
+
+    it('should include statusMessage in Claude hooks', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          'status-hook': {
+            event: 'pre-tool-use',
+            command: ['prs', 'hook'],
+            statusMessage: 'Running pre-tool hook',
+          },
+        })
+      );
+      const claudeHooks = generateClaudeHooks(hooks);
+      expect(claudeHooks).toBeDefined();
+      // Verify statusMessage is included somewhere in the structure
+      const json = JSON.stringify(claudeHooks);
+      expect(json).toContain('statusMessage');
+      expect(json).toContain('Running pre-tool hook');
+    });
   });
 });

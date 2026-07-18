@@ -163,4 +163,66 @@ describe('GrokFormatter', () => {
       }
     });
   });
+
+  describe('additionalFiles propagation', () => {
+    it('should propagate additionalFiles from Claude multifile', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                deploy: {
+                  description: 'Deploy skill',
+                  content: 'Deploy the app.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const formatter = new GrokFormatter();
+      const result = formatter.format(program, { version: 'multifile' });
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles!.length).toBeGreaterThan(0);
+    });
+
+    it('should propagate additionalFiles from Claude full', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviewer agent',
+                  content: 'Review code.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+      const formatter = new GrokFormatter();
+      const result = formatter.format(program, { version: 'full' });
+      expect(result.additionalFiles).toBeDefined();
+      expect(result.additionalFiles!.length).toBeGreaterThan(0);
+    });
+  });
 });
