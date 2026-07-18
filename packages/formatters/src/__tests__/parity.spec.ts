@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
+import { KNOWN_TARGETS } from '@promptscript/core';
 import { GitHubFormatter } from '../formatters/github.js';
 import { ClaudeFormatter } from '../formatters/claude.js';
 import { CursorFormatter } from '../formatters/cursor.js';
@@ -216,7 +217,7 @@ pnpm lint
 }
 
 /**
- * Build the full list of all 37 formatters.
+ * Build the full list of all known target formatters.
  */
 function buildAllFormatters(): Formatter[] {
   return [
@@ -278,8 +279,8 @@ describe('Formatter Parity Tests', () => {
   });
 
   describe('Formatter Count', () => {
-    it('should have all 37 formatters registered', () => {
-      expect(formatters.length).toBe(37);
+    it('should have all known targets registered', () => {
+      expect(formatters.length).toBe(KNOWN_TARGETS.length);
     });
 
     it('all formatters should have unique names', () => {
