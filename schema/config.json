@@ -640,6 +640,16 @@
             }
           ],
           "description": "Controls which skills are emitted for this target.\n- `true` or omitted: emit all skills\n- `false`: emit no skills\n- string array: emit only the listed skill names"
+        },
+        "skillPath": {
+          "type": "string",
+          "enum": [
+            "agents",
+            "gemini",
+            "both"
+          ],
+          "description": "Gemini skill path selection.\n- `agents`: use `.agents/skills/` (interoperable, fixture-confirmed default)\n- `gemini`: use `.gemini/skills/` (legacy)\n- `both`: emit to both paths (requires explicit opt-in, deduplicates content)",
+          "default": "agents"
         }
       },
       "additionalProperties": false,

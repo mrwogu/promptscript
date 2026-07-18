@@ -21,6 +21,10 @@ export interface SkillResource {
   relativePath: string;
   /** File content (utf-8) */
   content: string;
+  /** Absolute source path (non-serializable resolver metadata, stripped from public AST) */
+  origin?: string;
+  /** Whether the source file had executable mode bits set */
+  executable?: boolean;
 }
 
 /**
@@ -34,6 +38,8 @@ export interface ParsedSkillMd {
   inputs?: Record<string, SkillContractField>;
   outputs?: Record<string, SkillContractField>;
   references?: string[];
+  scripts?: string[];
+  license?: string;
   rawFrontmatter?: string;
 }
 
@@ -68,6 +74,8 @@ export function parseSkillMd(content: string): ParsedSkillMd {
   let inputs: Record<string, SkillContractField> | undefined;
   let outputs: Record<string, SkillContractField> | undefined;
   let references: string[] | undefined;
+  let scripts: string[] | undefined;
+  let license: string | undefined;
   let rawFrontmatter: string | undefined;
   let bodyContent: string;
 
@@ -80,6 +88,8 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     inputs = parsed.inputs;
     outputs = parsed.outputs;
     references = parsed.references;
+    scripts = parsed.scripts;
+    license = parsed.license;
     rawFrontmatter = frontmatterLines.join('\n');
 
     bodyContent = lines
@@ -98,6 +108,8 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     inputs,
     outputs,
     references,
+    scripts,
+    license,
     rawFrontmatter,
   };
 }
@@ -122,6 +134,8 @@ function parseFrontmatterFields(lines: string[]): {
   inputs?: Record<string, SkillContractField>;
   outputs?: Record<string, SkillContractField>;
   references?: string[];
+  scripts?: string[];
+  license?: string;
 } {
   let name: string | undefined;
   let description: string | undefined;
@@ -129,6 +143,8 @@ function parseFrontmatterFields(lines: string[]): {
   let inputs: Record<string, SkillContractField> | undefined;
   let outputs: Record<string, SkillContractField> | undefined;
   let references: string[] | undefined;
+  let scripts: string[] | undefined;
+  let license: string | undefined;
 
   let i = 0;
   while (i < lines.length) {
@@ -185,10 +201,30 @@ function parseFrontmatterFields(lines: string[]): {
       continue;
     }
 
+    if (line.match(/^scripts:\s*$/)) {
+      i++;
+      scripts = [];
+      while (i < lines.length) {
+        const itemLine = lines[i] ?? '';
+        const itemMatch = itemLine.match(/^ {2}-\s+(.+)$/);
+        if (!itemMatch) break;
+        scripts.push(itemMatch[1]!.trim());
+        i++;
+      }
+      continue;
+    }
+
+    const licenseMatch = line.match(/^license:\s*(?:"([^"]+)"|'([^']+)'|(.+))\s*$/);
+    if (licenseMatch) {
+      license = (licenseMatch[1] ?? licenseMatch[2] ?? licenseMatch[3])?.trim();
+      i++;
+      continue;
+    }
+
     i++;
   }
 
-  return { name, description, params, inputs, outputs, references };
+  return { name, description, params, inputs, outputs, references, scripts, license };
 }
 
 /**
@@ -425,6 +461,8 @@ const SKILL_RESERVED_KEYS = new Set([
   'loc',
   'resources',
   'references',
+  'scripts',
+  'license',
 ]);
 
 function extractSkillArgs(skillObj: Record<string, Value>): Record<string, Value> {
@@ -910,6 +948,103 @@ export async function resolveSkillReferences(
 }
 
 /**
+ * Load script files listed in a SKILL.md `scripts` frontmatter array.
+ *
+ * Scripts are loaded under `scripts/<basename>` in the skill resource tree.
+ * Source executable mode bits are recorded in the `SkillResource.executable`
+ * field for downstream formatter propagation.
+ *
+ * @param scripts - Relative paths listed in the SKILL.md frontmatter
+ * @param basePath - Absolute path to the skill directory
+ * @param logger - Optional logger for warnings
+ * @returns Array of loaded SkillResource objects with origin and executable metadata
+ */
+export async function resolveSkillScripts(
+  scripts: string[],
+  basePath: string,
+  logger?: Logger
+): Promise<SkillResource[]> {
+  const resources: SkillResource[] = [];
+  let totalSize = 0;
+  const seenBasenames = new Set<string>();
+
+  for (const scriptPath of scripts) {
+    if (!isSafeRelativePath(scriptPath)) {
+      throw new ResolveError(`Unsafe path in scripts: ${scriptPath} — path traversal not allowed`, {
+        file: basePath,
+        line: 0,
+        column: 0,
+      });
+    }
+
+    const fullPath = resolve(basePath, scriptPath);
+    const basenameStr = basename(scriptPath);
+
+    // Reject duplicate basenames
+    if (seenBasenames.has(basenameStr)) {
+      throw new ResolveError(`Duplicate script basename: ${basenameStr}`, {
+        file: basePath,
+        line: 0,
+        column: 0,
+      });
+    }
+    seenBasenames.add(basenameStr);
+
+    let content: string;
+    try {
+      content = await readFile(fullPath, 'utf-8');
+    } catch {
+      throw new ResolveError(`Script file not found: ${scriptPath}`, {
+        file: basePath,
+        line: 0,
+        column: 0,
+      });
+    }
+
+    const stat = await lstat(fullPath);
+    // Check executable mode bits (any of user/group/other execute)
+    const executable = Boolean(stat.mode & 0o111);
+
+    const size = Buffer.byteLength(content, 'utf-8');
+
+    if (size > MAX_RESOURCE_SIZE) {
+      throw new ResolveError(
+        `Script file exceeds ${MAX_RESOURCE_SIZE / 1_048_576}MB limit: ${scriptPath}`,
+        { file: basePath, line: 0, column: 0 }
+      );
+    }
+
+    totalSize += size;
+    if (totalSize > MAX_TOTAL_RESOURCE_SIZE) {
+      throw new ResolveError(
+        `Total script size exceeds ${MAX_TOTAL_RESOURCE_SIZE / 1_048_576}MB limit for skill`,
+        { file: basePath, line: 0, column: 0 }
+      );
+    }
+
+    if (size === 0) {
+      logger?.verbose(`Empty script file: ${scriptPath}`);
+    }
+
+    resources.push({
+      relativePath: `scripts/${basenameStr}`,
+      content,
+      origin: fullPath,
+      executable,
+    });
+  }
+
+  if (resources.length > MAX_RESOURCE_COUNT) {
+    throw new ResolveError(
+      `Too many script files (${resources.length}, max ${MAX_RESOURCE_COUNT})`,
+      { file: basePath, line: 0, column: 0 }
+    );
+  }
+
+  return resources;
+}
+
+/**
  * Check if a file exists.
  */
 async function fileExists(path: string): Promise<boolean> {
@@ -1147,6 +1282,11 @@ export async function resolveNativeSkills(
           updatedSkill['__rawFrontmatter'] = parsed.rawFrontmatter;
         }
 
+        // Set license from SKILL.md frontmatter if present
+        if (parsed.license && !skillObj['license']) {
+          updatedSkill['license'] = parsed.license;
+        }
+
         // Discover resource files alongside SKILL.md
         const skillDir = dirname(skillMdPath);
         const resources = await discoverSkillResources(skillDir, logger);
@@ -1164,6 +1304,8 @@ export async function resolveNativeSkills(
           const resourceValues: Value[] = allResources.map((r) => ({
             relativePath: r.relativePath,
             content: r.content,
+            ...(r.origin ? { origin: r.origin } : {}),
+            ...(r.executable ? { executable: r.executable } : {}),
           }));
           updatedSkill['resources'] = resourceValues;
         }
@@ -1181,6 +1323,27 @@ export async function resolveNativeSkills(
             ...refResources.map((r) => ({
               relativePath: r.relativePath,
               content: r.content,
+              ...(r.origin ? { origin: r.origin } : {}),
+              ...(r.executable ? { executable: r.executable } : {}),
+            })),
+          ];
+        }
+
+        // Load script files listed in the SKILL.md frontmatter
+        const skillScripts = parsed.scripts;
+        if (skillScripts && skillScripts.length > 0) {
+          const scriptResources = await resolveSkillScripts(skillScripts, skillDir, logger);
+          const existingResources =
+            (updatedSkill['resources'] as
+              | Array<{ relativePath: string; content: string }>
+              | undefined) ?? [];
+          updatedSkill['resources'] = [
+            ...existingResources,
+            ...scriptResources.map((r) => ({
+              relativePath: r.relativePath,
+              content: r.content,
+              ...(r.origin ? { origin: r.origin } : {}),
+              ...(r.executable ? { executable: r.executable } : {}),
             })),
           ];
         }
