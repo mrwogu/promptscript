@@ -9,4 +9,6 @@ export const { Formatter: OpenHandsFormatter, VERSIONS: OPENHANDS_VERSIONS } =
     description: 'OpenHands rules (Markdown)',
     mainFileHeader: '# Project Rules',
     dotDir: '.openhands',
+    mcpConfigPath: '.openhands/mcp_config.toml',
+    mcpConfigFormat: 'toml',
   });

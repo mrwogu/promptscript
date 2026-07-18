@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { resolveNativeSkills, resolveNativeCommands, parseSkillMd } from '../skills.js';
-import { mkdir, writeFile, rm, symlink } from 'fs/promises';
+import {
+  resolveNativeSkills,
+  resolveNativeCommands,
+  parseSkillMd,
+  resolveSkillScripts,
+} from '../skills.js';
+import { chmod, mkdir, writeFile, rm, symlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import type { Program, Block, ObjectContent, TextContent } from '@promptscript/core';
@@ -650,6 +655,57 @@ Skill content.
       const skill = skillsContent.properties['bare-skill'] as Record<string, unknown>;
 
       expect(skill['resources']).toBeUndefined();
+    });
+
+    it('should merge native scripts with discovered resources and license', async () => {
+      const skillDir = join(registryPath, '@skills', 'native-resources');
+      const binDir = join(skillDir, 'bin');
+      await mkdir(binDir, { recursive: true });
+
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: native-resources
+license: MIT
+scripts:
+  - bin/run.sh
+---
+
+Native resource content.
+`
+      );
+      const scriptPath = join(binDir, 'run.sh');
+      await writeFile(scriptPath, '#!/bin/sh\necho native\n');
+      await chmod(scriptPath, 0o755);
+      await writeFile(join(skillDir, 'data.txt'), 'native data');
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'native-resources': {},
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(ast, registryPath, join(testDir, 'test.prs'));
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['native-resources'] as Record<string, unknown>;
+      const resources = skill['resources'] as Array<{
+        relativePath: string;
+        content: string;
+        origin?: string;
+        executable?: boolean;
+      }>;
+
+      expect(skill['license']).toBe('MIT');
+      expect(resources.map((resource) => resource.relativePath)).toEqual(
+        expect.arrayContaining(['bin/run.sh', 'data.txt', 'scripts/run.sh'])
+      );
+      expect(resources.find((resource) => resource.relativePath === 'scripts/run.sh')).toEqual({
+        relativePath: 'scripts/run.sh',
+        content: '#!/bin/sh\necho native\n',
+        origin: scriptPath,
+        executable: true,
+      });
     });
   });
 
@@ -1436,6 +1492,95 @@ Content.
 
       expect(result.blocks.find((b) => b.name === 'skills')).toBeUndefined();
     });
+  });
+});
+
+describe('resolveSkillScripts', () => {
+  let testDir: string;
+
+  beforeEach(async () => {
+    testDir = join(
+      tmpdir(),
+      `skill-scripts-test-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    );
+    await mkdir(testDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await rm(testDir, { recursive: true, force: true });
+  });
+
+  it('should load executable and empty scripts with metadata', async () => {
+    const binDir = join(testDir, 'bin');
+    await mkdir(binDir, { recursive: true });
+    const executablePath = join(binDir, 'run.sh');
+    await writeFile(executablePath, '#!/bin/sh\necho run\n');
+    await chmod(executablePath, 0o755);
+    await writeFile(join(binDir, 'empty.sh'), '');
+
+    const resources = await resolveSkillScripts(['bin/run.sh', 'bin/empty.sh'], testDir);
+
+    expect(resources).toEqual([
+      {
+        relativePath: 'scripts/run.sh',
+        content: '#!/bin/sh\necho run\n',
+        origin: executablePath,
+        executable: true,
+      },
+      {
+        relativePath: 'scripts/empty.sh',
+        content: '',
+        origin: join(binDir, 'empty.sh'),
+        executable: false,
+      },
+    ]);
+  });
+
+  it('should reject unsafe script paths', async () => {
+    await expect(resolveSkillScripts(['../run.sh'], testDir)).rejects.toThrow(
+      'Unsafe path in scripts'
+    );
+  });
+
+  it('should reject duplicate script basenames', async () => {
+    const firstDir = join(testDir, 'first');
+    const secondDir = join(testDir, 'second');
+    await mkdir(firstDir, { recursive: true });
+    await mkdir(secondDir, { recursive: true });
+    await writeFile(join(firstDir, 'run.sh'), 'first');
+    await writeFile(join(secondDir, 'run.sh'), 'second');
+
+    await expect(resolveSkillScripts(['first/run.sh', 'second/run.sh'], testDir)).rejects.toThrow(
+      'Duplicate script basename: run.sh'
+    );
+  });
+
+  it('should reject missing script files', async () => {
+    await expect(resolveSkillScripts(['missing.sh'], testDir)).rejects.toThrow(
+      'Script file not found: missing.sh'
+    );
+  });
+
+  it('should reject oversized script files', async () => {
+    await writeFile(join(testDir, 'large.sh'), 'x'.repeat(1_048_577));
+
+    await expect(resolveSkillScripts(['large.sh'], testDir)).rejects.toThrow(
+      'Script file exceeds 1MB limit: large.sh'
+    );
+  });
+
+  it('should reject scripts exceeding the aggregate size limit', async () => {
+    const scriptPaths: string[] = [];
+    const content = 'x'.repeat(900_000);
+    for (let index = 0; index < 12; index++) {
+      const scriptPath = `script-${index}.sh`;
+      scriptPaths.push(scriptPath);
+      await writeFile(join(testDir, scriptPath), content);
+    }
+
+    await expect(resolveSkillScripts(scriptPaths, testDir)).rejects.toThrow(
+      'Total script size exceeds 10MB limit for skill'
+    );
   });
 });
 
@@ -2271,6 +2416,26 @@ Content with {{braces}} that should stay as-is.
 });
 
 describe('parseSkillMd', () => {
+  describe('scripts and license fields', () => {
+    it('should parse scripts and quoted license values', () => {
+      const input = `---
+name: scripted-skill
+scripts:
+  - bin/run.sh
+  - tools/check.js
+license: "Apache-2.0"
+---
+
+Scripted skill content.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.scripts).toEqual(['bin/run.sh', 'tools/check.js']);
+      expect(result.license).toBe('Apache-2.0');
+    });
+  });
+
   describe('rawFrontmatter field', () => {
     it('should capture raw frontmatter text when frontmatter is present', () => {
       const input = `---

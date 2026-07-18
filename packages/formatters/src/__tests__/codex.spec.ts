@@ -334,6 +334,82 @@ describe('CodexFormatter', () => {
   });
 
   describe('TOML edge cases', () => {
+    it('should emit top-level MCP and plugins while skipping primitive agents', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                remote: { url: 'https://example.com/mcp' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'plugins',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                audit: { version: '1.0.0', source: 'npm' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                primitive: 'skip me',
+                worker: {
+                  description: 'Worker agent',
+                  content: 'Do work',
+                  mcpServers: {
+                    nullable: null,
+                    configured: {
+                      command: ['node', 'server.mjs'],
+                      enabled: false,
+                    },
+                  },
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      const result = formatter.format(program, { version: 'multifile' });
+      const additional = result.additionalFiles ?? [];
+      const mcpFile = additional.find((f) => f.path === '.codex/mcp.json');
+      const pluginsFile = additional.find((f) => f.path === '.codex/plugins.json');
+      const workerFile = additional.find((f) => f.path === '.codex/agents/worker.toml');
+
+      expect(mcpFile).toBeDefined();
+      expect(mcpFile!.content).toContain('"url": "https://example.com/mcp"');
+      expect(pluginsFile).toBeDefined();
+      expect(pluginsFile!.content).toContain('"audit"');
+      expect(workerFile).toBeDefined();
+      expect(workerFile!.content).toContain('[mcp_servers.configured]');
+      expect(workerFile!.content).toContain('enabled = false');
+      expect(workerFile!.content).not.toContain('[mcp_servers.nullable]');
+      expect(additional.find((f) => f.path.includes('primitive'))).toBeUndefined();
+      expect(result.managedOutputDirectories).toContain('.codex');
+      expect(result.managedOutputDirectories).toContain('.codex/agents');
+    });
+
     it('should handle agent with mcpServers', () => {
       const program: Program = {
         type: 'Program',

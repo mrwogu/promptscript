@@ -170,7 +170,12 @@ describe('findConfigInDir', () => {
 });
 
 // Import the real function — tests exercise the actual implementation
-import { detectOutputConflicts } from '../utils/conflict-detector.js';
+import {
+  detectBuildOutputCollisions,
+  detectOutputConflicts,
+  resolveOutputPath,
+  validateOutputPath,
+} from '../utils/conflict-detector.js';
 
 describe('detectOutputConflicts', () => {
   it('should detect factory and codex conflicting on AGENTS.md', () => {
@@ -203,5 +208,62 @@ describe('detectOutputConflicts', () => {
     const conflicts = detectOutputConflicts(targets);
     expect(conflicts.size).toBe(1);
     expect(conflicts.get('CLAUDE.md')).toEqual(['claude', 'opencode']);
+  });
+});
+
+describe('validateOutputPath', () => {
+  it('should reject an absolute path outside the project root', () => {
+    const result = validateOutputPath('/outside/generated.md', '/repo/project');
+
+    expect(result).toBe('Output path "/outside/generated.md" escapes project root');
+  });
+
+  it('should reject a relative path containing traversal', () => {
+    const result = validateOutputPath('../generated.md', '/repo/project');
+
+    expect(result).toBe('Output path "../generated.md" contains path traversal');
+  });
+
+  it.each(['/repo/project/generated.md', 'generated/output.md'])(
+    'should accept project-local path %s',
+    (outputPath) => {
+      expect(validateOutputPath(outputPath, '/repo/project')).toBeUndefined();
+    }
+  );
+});
+
+describe('detectBuildOutputCollisions', () => {
+  it('should return only paths shared by multiple profiles', () => {
+    const profiles = new Map([
+      ['AGENTS.md', ['factory', 'codex']],
+      ['CLAUDE.md', ['claude']],
+    ]);
+
+    expect(detectBuildOutputCollisions(profiles)).toEqual(
+      new Map([['AGENTS.md', ['factory', 'codex']]])
+    );
+  });
+
+  it('should return no collisions for unique profile outputs', () => {
+    const profiles = new Map([
+      ['AGENTS.md', ['factory']],
+      ['CLAUDE.md', ['claude']],
+    ]);
+
+    expect(detectBuildOutputCollisions(profiles)).toEqual(new Map());
+  });
+});
+
+describe('resolveOutputPath', () => {
+  it('should preserve an absolute output path', () => {
+    expect(resolveOutputPath('/repo/output/AGENTS.md', '/repo/project')).toBe(
+      '/repo/output/AGENTS.md'
+    );
+  });
+
+  it('should resolve a relative output path from the project root', () => {
+    expect(resolveOutputPath('dist/AGENTS.md', '/repo/project')).toBe(
+      '/repo/project/dist/AGENTS.md'
+    );
   });
 });

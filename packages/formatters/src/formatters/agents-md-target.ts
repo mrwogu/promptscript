@@ -17,7 +17,11 @@ import type { SimpleFormatterResult } from '../create-simple-formatter.js';
  * @param description - Human-readable description for the formatter
  * @returns Formatter class and VERSIONS constant
  */
-export function createAgentsMdTarget(name: string, description: string): SimpleFormatterResult {
+export function createAgentsMdTarget(
+  name: string,
+  description: string,
+  options?: { mcpConfigPath?: string; mcpConfigFormat?: 'json' | 'toml' }
+): SimpleFormatterResult {
   return createSimpleMarkdownFormatter({
     name,
     outputPath: 'AGENTS.md',
@@ -27,5 +31,7 @@ export function createAgentsMdTarget(name: string, description: string): SimpleF
     hasSkills: false,
     hasAgents: false,
     hasCommands: false,
+    ...(options?.mcpConfigPath ? { mcpConfigPath: options.mcpConfigPath } : {}),
+    ...(options?.mcpConfigFormat ? { mcpConfigFormat: options.mcpConfigFormat } : {}),
   });
 }

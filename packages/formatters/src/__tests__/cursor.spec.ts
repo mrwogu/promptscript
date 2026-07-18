@@ -1382,5 +1382,168 @@ describe('CursorFormatter', () => {
       expect(skillFile).toBeDefined();
       expect(agentFile).toBeDefined();
     });
+
+    it('should emit hooks.json when @hooks block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-hook': {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const hooksFile = result.additionalFiles?.find((f) => f.path === '.cursor/hooks.json');
+      expect(hooksFile).toBeDefined();
+      const parsed = JSON.parse(hooksFile!.content) as Record<string, unknown>;
+      expect(parsed).toHaveProperty('preEdit');
+    });
+
+    it('should emit mcp.json when @mcpServers block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                fs: {
+                  transport: 'stdio',
+                  command: ['node', 'fs.mjs'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const mcpFile = result.additionalFiles?.find((f) => f.path === '.cursor/mcp.json');
+      expect(mcpFile).toBeDefined();
+      const parsed = JSON.parse(mcpFile!.content) as { mcpServers: Record<string, unknown> };
+      expect(parsed.mcpServers).toHaveProperty('fs');
+    });
+
+    it('should emit plugins.json when @plugins block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'plugins',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-plugin': {
+                  version: '1.0.0',
+                  source: 'npm',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const pluginsFile = result.additionalFiles?.find((f) => f.path === '.cursor/plugins.json');
+      expect(pluginsFile).toBeDefined();
+      const parsed = JSON.parse(pluginsFile!.content) as { plugins: Record<string, unknown> };
+      expect(parsed.plugins).toHaveProperty('my-plugin');
+    });
+
+    it('should add mcpServers to subagent frontmatter', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviewer',
+                  content: 'Review code.',
+                  mcpServers: ['scanner', 'linear'],
+                } as unknown as Record<string, import('@promptscript/core').Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/agents/reviewer.md'
+      );
+      expect(agentFile).toBeDefined();
+      expect(agentFile!.content).toContain('mcpServers: ["scanner", "linear"]');
+    });
+
+    it('should add object-form mcpServers keys to subagent frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviewer',
+                  content: 'Review code.',
+                  mcpServers: {
+                    scanner: true,
+                    linear: {
+                      scope: 'project',
+                    },
+                  },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find(
+        (file) => file.path === '.cursor/agents/reviewer.md'
+      );
+
+      expect(agentFile).toBeDefined();
+      expect(agentFile!.content).toContain('mcpServers: ["scanner", "linear"]');
+    });
   });
 });

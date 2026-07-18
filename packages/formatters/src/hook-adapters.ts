@@ -118,27 +118,46 @@ const CODEX_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 /**
+ * Factory Droid hook event names.
+ * Factory uses camelCase event names similar to Claude.
+ */
+const FACTORY_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-tool-use': 'preToolUse',
+  'post-tool-use': 'postToolUse',
+  'session-start': 'sessionStart',
+  setup: 'sessionStart',
+  'subagent-start': 'subagentStart',
+  notification: 'notification',
+  stop: 'stop',
+};
+
+/**
  * Get the target-native event name for a portable event.
  */
 export function mapEvent(
   event: PortableHookEvent,
-  target: 'claude' | 'cursor' | 'codex'
+  target: 'claude' | 'cursor' | 'codex' | 'factory'
 ): string | null {
   const map =
     target === 'claude'
       ? CLAUDE_EVENT_MAP
       : target === 'cursor'
         ? CURSOR_EVENT_MAP
-        : CODEX_EVENT_MAP;
+        : target === 'factory'
+          ? FACTORY_EVENT_MAP
+          : CODEX_EVENT_MAP;
   return map[event] ?? null;
 }
 
 /**
  * Convert timeout from milliseconds to target units.
  */
-export function convertTimeout(timeoutMs: number, target: 'claude' | 'cursor' | 'codex'): number {
-  if (target === 'claude') return Math.floor(timeoutMs / 1000);
-  if (target === 'cursor') return Math.floor(timeoutMs / 1000);
+export function convertTimeout(
+  timeoutMs: number,
+  target: 'claude' | 'cursor' | 'codex' | 'factory'
+): number {
+  if (target === 'claude' || target === 'cursor' || target === 'factory')
+    return Math.floor(timeoutMs / 1000);
   return timeoutMs;
 }
 
@@ -171,6 +190,65 @@ export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unk
     }
 
     result[nativeEvent].push(entry);
+  }
+
+  return result;
+}
+
+/**
+ * Generate Cursor hooks.json entries from portable hook definitions.
+ *
+ * Cursor uses a flat JSON structure keyed by event name.
+ */
+export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
+  const result: Record<string, unknown[]> = {};
+
+  for (const hook of hooks) {
+    if (hook.enabled === false) continue;
+    const nativeEvent = mapEvent(hook.event, 'cursor');
+    if (!nativeEvent) continue;
+
+    if (!result[nativeEvent]) result[nativeEvent] = [];
+
+    result[nativeEvent].push({
+      matcher: hook.matcher ?? '.*',
+      command: hook.command.join(' '),
+      timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'cursor') : 10,
+      ...(hook.statusMessage ? { statusMessage: hook.statusMessage } : {}),
+      ...(hook.continueOnFailure !== undefined
+        ? { continueOnFailure: hook.continueOnFailure }
+        : {}),
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Generate Factory Droid hooks for .factory/settings.json.
+ * Factory uses a structure similar to Claude (event -> array of entries).
+ */
+export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
+  const result: Record<string, unknown[]> = {};
+
+  for (const hook of hooks) {
+    if (hook.enabled === false) continue;
+    const nativeEvent = mapEvent(hook.event, 'factory');
+    if (!nativeEvent) continue;
+
+    if (!result[nativeEvent]) result[nativeEvent] = [];
+
+    result[nativeEvent].push({
+      matcher: hook.matcher ?? '.*',
+      hooks: [
+        {
+          type: 'command',
+          command: hook.command.join(' '),
+          timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'factory') : 10,
+          ...(hook.statusMessage ? { statusMessage: hook.statusMessage } : {}),
+        },
+      ],
+    });
   }
 
   return result;

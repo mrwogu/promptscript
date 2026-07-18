@@ -96,6 +96,36 @@ describe('GrokFormatter', () => {
       expect(result.additionalFiles).toBeDefined();
       expect(result.additionalFiles!.length).toBeGreaterThan(0);
     });
+
+    it('should propagate guard rule files from Claude multifile', () => {
+      const program: Program = {
+        ...createTestProgram(),
+        blocks: [
+          ...createTestProgram().blocks,
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(program, { version: 'multifile' });
+      const ruleFile = result.additionalFiles?.find(
+        (file) => file.path === '.claude/rules/code-style.md'
+      );
+
+      expect(ruleFile).toBeDefined();
+      expect(ruleFile?.content).toContain('paths:');
+      expect(ruleFile?.content).toContain('**/*.ts');
+    });
   });
 
   describe('full version', () => {
@@ -108,6 +138,42 @@ describe('GrokFormatter', () => {
       const result = formatter.format(createTestProgram(), { version: 'full' });
       expect(result.additionalFiles).toBeDefined();
       expect(result.additionalFiles!.length).toBeGreaterThan(0);
+    });
+
+    it('should emit Grok plugin config in full mode', () => {
+      const program: Program = {
+        ...createTestProgram(),
+        blocks: [
+          ...createTestProgram().blocks,
+          {
+            type: 'Block',
+            name: 'plugins',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'security-suite': {
+                  version: '1.0.0',
+                  source: 'npm',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(program, { version: 'full' });
+      const pluginFile = result.additionalFiles?.find((file) => file.path === '.grok/plugins.json');
+
+      expect(pluginFile).toBeDefined();
+      const parsed = JSON.parse(pluginFile!.content) as {
+        plugins: Record<string, unknown>;
+      };
+      expect(parsed.plugins['security-suite']).toEqual({
+        version: '1.0.0',
+        source: 'npm',
+      });
     });
   });
 

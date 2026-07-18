@@ -2,6 +2,12 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from './base-formatter.js';
 import type { ConventionRenderer } from './convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from './types.js';
+import {
+  findMcpServersBlock,
+  extractMcpServers,
+  serializeMcpServersToJsonString,
+  serializeMcpServersToToml,
+} from './mcp-helpers.js';
 
 /**
  * Configuration for a markdown-based command file.
@@ -112,6 +118,14 @@ export interface MarkdownFormatterConfig {
   sectionNames?: Partial<Record<SectionNameKey, string>>;
   /** Transform function for restriction items */
   restrictionsTransform?: (s: string) => string;
+  /** MCP config file path (e.g. '.windsurf/mcp_config.json'). If set, @mcpServers block is emitted to this path. */
+  mcpConfigPath?: string;
+  /** MCP config format (default: 'json') */
+  mcpConfigFormat?: 'json' | 'toml';
+  /** Hook settings file path (e.g. '.cursor/hooks.json'). If set, @hooks block is emitted to this path. */
+  hooksConfigPath?: string;
+  /** Hook adapter target name (default: same as formatter name) */
+  hookAdapterTarget?: 'claude' | 'cursor' | 'codex' | 'factory';
 }
 
 /**
@@ -244,6 +258,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     }
     this.addCommonSections(ast, renderer, sections);
 
+    // Generate MCP config if configured
+    const mcpConfig = this.generateMcpConfig(ast);
+    if (mcpConfig) additionalFiles.push(mcpConfig);
+
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
@@ -293,6 +311,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     }
     this.addCommonSections(ast, renderer, sections);
 
+    // Generate MCP config if configured
+    const mcpConfig = this.generateMcpConfig(ast);
+    if (mcpConfig) additionalFiles.push(mcpConfig);
+
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
@@ -309,6 +331,33 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
    * Returns undefined by default (no frontmatter, byte-compatible with existing output).
    * Override in subclasses that support AGENTS.md v1.1 frontmatter.
    */
+  /**
+   * Generate MCP config file from @mcpServers block if configured.
+   * Returns FormatterOutput or undefined if no MCP block or no config path.
+   */
+  protected generateMcpConfig(ast: Program): FormatterOutput | undefined {
+    if (!this.config.mcpConfigPath) return undefined;
+
+    const mcpServersBlock = findMcpServersBlock(ast);
+    if (!mcpServersBlock) return undefined;
+
+    const servers = extractMcpServers(mcpServersBlock);
+    if (servers.length === 0) return undefined;
+
+    const format = this.config.mcpConfigFormat ?? 'json';
+    if (format === 'toml') {
+      return {
+        path: this.config.mcpConfigPath,
+        content: serializeMcpServersToToml(servers),
+      };
+    }
+
+    return {
+      path: this.config.mcpConfigPath,
+      content: serializeMcpServersToJsonString(servers),
+    };
+  }
+
   protected generateFrontmatter(_ast: Program, _options?: FormatOptions): string | undefined {
     return undefined;
   }

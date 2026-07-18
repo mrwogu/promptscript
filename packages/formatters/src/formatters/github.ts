@@ -3,6 +3,12 @@ import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import { GlobCategorizer } from '../extractors/glob-categorizer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
+import type { McpServerDefinition } from '../mcp-helpers.js';
+import {
+  findMcpServersBlock,
+  extractMcpServers,
+  serializeMcpServersToYamlInline,
+} from '../mcp-helpers.js';
 
 /**
  * GitHub formatter version information.
@@ -103,6 +109,8 @@ interface GitHubAgentConfig {
   content: string;
   /** Handoff definitions for delegation to other agents */
   handoffs?: GitHubHandoff[];
+  /** MCP server definitions (inline in frontmatter) */
+  mcpServers?: McpServerDefinition[];
 }
 
 /**
@@ -337,6 +345,31 @@ export class GitHubFormatter extends BaseFormatter {
     const agentsFile = this.generateAgentsFile(ast);
     if (agentsFile) {
       additionalFiles.push(agentsFile);
+    }
+
+    // Generate .vscode/mcp.json from @mcpServers block
+    const mcpServersBlock = findMcpServersBlock(ast);
+    if (mcpServersBlock) {
+      const servers = extractMcpServers(mcpServersBlock);
+      if (servers.length > 0) {
+        additionalFiles.push({
+          path: '.vscode/mcp.json',
+          content:
+            JSON.stringify(
+              {
+                mcpServers: servers.reduce(
+                  (acc, s) => {
+                    acc[s.name] = s;
+                    return acc;
+                  },
+                  {} as Record<string, unknown>
+                ),
+              },
+              null,
+              2
+            ) + '\n',
+        });
+      }
     }
 
     // Main file content
@@ -902,6 +935,12 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (config.handoffs && config.handoffs.length > 0) {
       lines.push(...this.renderHandoffsYaml(config.handoffs));
+    }
+
+    // Render MCP servers inline in frontmatter (GitHub Copilot format)
+    if (config.mcpServers && config.mcpServers.length > 0) {
+      lines.push('mcp-servers:');
+      lines.push(serializeMcpServersToYamlInline(config.mcpServers, '  '));
     }
 
     lines.push('---');

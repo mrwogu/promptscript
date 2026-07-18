@@ -1244,6 +1244,20 @@ Defines project-local MCP (Model Context Protocol) server configurations. Requir
 
 Secret-bearing fields (`token`, `secret`, `password`, `apiKey`, etc.) must use `{ fromEnv: "VAR_NAME" }` references, not plaintext values.
 
+**Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](config.md#mcp--hooks--plugins-support) for the full list of supported targets and their output paths.
+
+Agents can reference MCP servers by name via the `mcpServers` field in `@agents`:
+
+```promptscript
+@agents {
+  reviewer: {
+    description: "Code reviewer"
+    content: "Review code changes."
+    mcpServers: ["security-scanner", "linear"]
+  }
+}
+```
+
 ### @plugins
 
 Defines portable plugin bundles that group skills, hooks, and MCP servers. Requires syntax `1.4.0`.
@@ -1269,6 +1283,8 @@ Defines portable plugin bundles that group skills, hooks, and MCP servers. Requi
 | `mcpServers`  | No       | string[] | Referenced MCP server names     |
 
 Marketplace publishing and installation are outside the compiler scope.
+
+**Target Support:** Plugins are emitted to `.factory/plugins.json` (Factory), `.cursor/plugins.json` (Cursor), `.codex/plugins.json` (Codex), and `.grok/plugins.json` (Grok).
 
 ## @extend Block
 

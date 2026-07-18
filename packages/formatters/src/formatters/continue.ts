@@ -42,6 +42,7 @@ export class ContinueFormatter extends MarkdownInstructionFormatter {
       hasAgents: false,
       hasCommands: false,
       hasSkills: false,
+      mcpConfigPath: '.continue/config.json',
     });
   }
 

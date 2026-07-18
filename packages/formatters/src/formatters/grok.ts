@@ -2,6 +2,7 @@ import type { Program } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import { ClaudeFormatter } from './claude.js';
 import type { FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
+import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 
 /**
  * Supported Grok Build output format versions.
@@ -148,6 +149,18 @@ export class GrokFormatter extends BaseFormatter {
     }
     if (claudeFull.additionalFiles) {
       additionalFiles.push(...claudeFull.additionalFiles);
+    }
+
+    // Generate .grok/plugins.json from @plugins block
+    const pluginsBlock = findPluginsBlock(ast);
+    if (pluginsBlock) {
+      const plugins = extractPlugins(pluginsBlock);
+      if (plugins.length > 0) {
+        additionalFiles.push({
+          path: '.grok/plugins.json',
+          content: serializePluginsToJson(plugins),
+        });
+      }
     }
 
     return {

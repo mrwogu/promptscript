@@ -9,4 +9,5 @@ export const { Formatter: QwenCodeFormatter, VERSIONS: QWEN_CODE_VERSIONS } =
     description: 'Qwen Code rules (Markdown)',
     mainFileHeader: '# Project Rules',
     dotDir: '.qwen',
+    mcpConfigPath: '.qwen/mcp.json',
   });

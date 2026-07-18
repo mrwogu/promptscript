@@ -5,6 +5,12 @@ import {
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
 import { extractHooks, generateCodexHooks } from '../hook-adapters.js';
+import {
+  findMcpServersBlock,
+  extractMcpServers,
+  serializeMcpServersToJsonString,
+} from '../mcp-helpers.js';
+import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 
 /**
  * Supported Codex output format versions.
@@ -351,6 +357,32 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
           content: configLines.join('\n') + '\n',
         });
         managedDirs.push('.codex');
+      }
+    }
+
+    // Generate .codex/mcp.json from top-level @mcpServers block
+    const mcpServersBlock = findMcpServersBlock(ast);
+    if (mcpServersBlock) {
+      const servers = extractMcpServers(mcpServersBlock);
+      if (servers.length > 0) {
+        extraFiles.push({
+          path: '.codex/mcp.json',
+          content: serializeMcpServersToJsonString(servers),
+        });
+        managedDirs.push('.codex');
+      }
+    }
+
+    // Generate .codex/plugins.json from @plugins block
+    const pluginsBlock = findPluginsBlock(ast);
+    if (pluginsBlock) {
+      const plugins = extractPlugins(pluginsBlock);
+      if (plugins.length > 0) {
+        extraFiles.push({
+          path: '.codex/plugins.json',
+          content: serializePluginsToJson(plugins),
+        });
+        if (!managedDirs.includes('.codex')) managedDirs.push('.codex');
       }
     }
 
