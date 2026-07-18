@@ -441,12 +441,89 @@ function printWarnings(warnings: CompileResult['warnings']): void {
 }
 
 /**
+ * Compile all named build profiles in deterministic key order.
+ * Each profile is compiled independently with its own entry, output, and targets.
+ */
+async function compileAllBuilds(options: CompileOptions, _services: CliServices): Promise<void> {
+  const logger = createCliLogger();
+  const projectRoot = options.cwd ? resolve(options.cwd) : process.cwd();
+  const configPath = options.config
+    ? options.config
+    : options.cwd
+      ? findConfigInDir(projectRoot)
+      : undefined;
+  const config = await loadEffectiveConfig(configPath);
+
+  const buildNames = Object.keys(config.builds ?? {});
+  if (buildNames.length === 0) {
+    ConsoleOutput.warning('No named build profiles found in config.builds');
+    return;
+  }
+
+  // Deterministic key order
+  buildNames.sort();
+
+  let failed = 0;
+  let succeeded = 0;
+  const allWrittenPaths: string[] = [];
+
+  for (const buildName of buildNames) {
+    ConsoleOutput.info(`Compiling build profile: ${buildName}`);
+    try {
+      await compileCommand(
+        {
+          ...options,
+          build: buildName,
+          allBuilds: false,
+        },
+        _services
+      );
+      succeeded++;
+    } catch (err) {
+      failed++;
+      const msg = err instanceof Error ? err.message : String(err);
+      ConsoleOutput.error(`Build profile "${buildName}" failed: ${msg}`);
+    }
+  }
+
+  // Detect collisions across profiles
+  const pathCounts = new Map<string, number>();
+  for (const p of allWrittenPaths) {
+    pathCounts.set(p, (pathCounts.get(p) ?? 0) + 1);
+  }
+  const collisions = [...pathCounts.entries()].filter(([, count]) => count > 1);
+  if (collisions.length > 0) {
+    ConsoleOutput.warning(
+      `Output path collisions detected across build profiles:\n${collisions.map(([p]) => `  ${p}`).join('\n')}`
+    );
+  }
+
+  logger.verbose(`Compiled ${succeeded} build profile(s), ${failed} failed`);
+  if (failed > 0) {
+    process.exitCode = 1;
+  }
+}
+
+/**
  * Compile PromptScript files to target formats.
  */
 export async function compileCommand(
   options: CompileOptions,
   services: CliServices = createDefaultServices()
 ): Promise<void> {
+  // Reject --build combined with --all-builds
+  if (options.build && options.allBuilds) {
+    ConsoleOutput.error('Cannot use --build with --all-builds');
+    process.exitCode = 1;
+    return;
+  }
+
+  // Handle --all-builds: compile every named build profile in deterministic order
+  if (options.allBuilds) {
+    await compileAllBuilds(options, services);
+    return;
+  }
+
   const spinner = createSpinner('Loading configuration...').start();
   const logger = createCliLogger();
 

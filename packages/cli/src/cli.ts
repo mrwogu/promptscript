@@ -102,6 +102,7 @@ program
   .command('compile')
   .description('Compile PromptScript to target formats')
   .option('-b, --build <name>', 'Named build profile from config.builds')
+  .option('--all-builds', 'Compile all named build profiles in deterministic order')
   .option('-t, --target <target>', 'Specific target (github, claude, cursor)')
   .option('-f, --format <format>', 'Output format (alias for --target)')
   .option('-a, --all', 'All configured targets', true)

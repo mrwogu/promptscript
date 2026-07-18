@@ -52,6 +52,8 @@ export interface MigrateOptions {
 export interface CompileOptions {
   /** Named build profile from config.builds */
   build?: string;
+  /** Compile all named build profiles in deterministic key order */
+  allBuilds?: boolean;
   /** Specific target to compile (github, claude, cursor) */
   target?: string;
   /** Output format (github, claude, cursor) - alias for target */
