@@ -649,6 +649,59 @@ export const TARGET_DEFINITIONS = {
       hasCommands: true,
     },
   },
+  // Priority B CLI agents
+  kimi: {
+    name: 'kimi',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: '.kimi/skills', fileName: 'SKILL.md' },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'simple',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  mimo: {
+    name: 'mimo',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: '.agents/skills', fileName: 'SKILL.md' },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'simple',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  'deep-agents': {
+    name: 'deep-agents',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: '.agents/skills', fileName: 'SKILL.md' },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'simple',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
+  forgecode: {
+    name: 'forgecode',
+    outputPath: 'AGENTS.md',
+    family: 'agents-md-only',
+    skillPath: { basePath: '.forge/skills', fileName: 'SKILL.md' },
+    features: {
+      defaultEnabled: false,
+      defaultVersion: 'simple',
+      hasSkills: false,
+      hasAgents: false,
+      hasCommands: false,
+    },
+  },
 } as const satisfies Record<KnownTarget, TargetDefinition>;
 
 /**

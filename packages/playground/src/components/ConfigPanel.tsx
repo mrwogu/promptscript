@@ -203,6 +203,14 @@ const TARGET_INFO: Record<
   jules: { label: 'Jules', versions: ['simple', 'multifile', 'full'], supportsXml: false },
   devin: { label: 'Devin', versions: ['simple', 'multifile', 'full'], supportsXml: false },
   grok: { label: 'Grok Build', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  kimi: { label: 'Kimi CLI', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  mimo: { label: 'MiMo Code', versions: ['simple', 'multifile', 'full'], supportsXml: false },
+  'deep-agents': {
+    label: 'Deep Agents',
+    versions: ['simple', 'multifile', 'full'],
+    supportsXml: false,
+  },
+  forgecode: { label: 'ForgeCode', versions: ['simple', 'multifile', 'full'], supportsXml: false },
 };
 
 const POPULAR_TARGETS: FormatterName[] = [

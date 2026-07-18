@@ -59,6 +59,11 @@ describe('TargetName branded type', () => {
         'devin',
         // Grok Build
         'grok',
+        // Priority B CLI agents
+        'kimi',
+        'mimo',
+        'deep-agents',
+        'forgecode',
       ];
 
       // Assert

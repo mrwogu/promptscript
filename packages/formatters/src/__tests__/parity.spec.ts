@@ -50,6 +50,10 @@ import { JulesFormatter } from '../formatters/jules.js';
 import { DevinFormatter } from '../formatters/devin.js';
 // Grok Build
 import { GrokFormatter } from '../formatters/grok.js';
+import { KimiFormatter } from '../formatters/kimi.js';
+import { MimoFormatter } from '../formatters/mimo.js';
+import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
+import { ForgecodeFormatter } from '../formatters/forgecode.js';
 import {
   extractSectionsFromOutput,
   normalizeSectionName,
@@ -280,6 +284,11 @@ function buildAllFormatters(): Formatter[] {
     new DevinFormatter(),
     // Grok Build
     new GrokFormatter(),
+    // Priority B CLI agents
+    new KimiFormatter(),
+    new MimoFormatter(),
+    new DeepAgentsFormatter(),
+    new ForgecodeFormatter(),
   ];
 }
 

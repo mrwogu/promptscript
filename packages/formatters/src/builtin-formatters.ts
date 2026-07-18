@@ -65,6 +65,10 @@ import { JulesFormatter } from './formatters/jules.js';
 import { DevinFormatter } from './formatters/devin.js';
 // Grok Build
 import { GrokFormatter } from './formatters/grok.js';
+import { KimiFormatter } from './formatters/kimi.js';
+import { MimoFormatter } from './formatters/mimo.js';
+import { DeepAgentsFormatter } from './formatters/deep-agents.js';
+import { ForgecodeFormatter } from './formatters/forgecode.js';
 
 /**
  * Exhaustive map of built-in target names to their formatter classes.
@@ -121,4 +125,9 @@ export const BUILTIN_FORMATTERS = {
   jules: JulesFormatter,
   devin: DevinFormatter,
   grok: GrokFormatter,
+  // Priority B CLI agents
+  kimi: KimiFormatter,
+  mimo: MimoFormatter,
+  'deep-agents': DeepAgentsFormatter,
+  forgecode: ForgecodeFormatter,
 } as const satisfies Record<KnownTarget, FormatterClass>;

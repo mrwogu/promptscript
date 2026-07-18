@@ -513,6 +513,18 @@
             },
             "grok": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "kimi": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "mimo": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "deep-agents": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "forgecode": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
@@ -579,7 +591,11 @@
         "zed",
         "jules",
         "devin",
-        "grok"
+        "grok",
+        "kimi",
+        "mimo",
+        "deep-agents",
+        "forgecode"
       ],
       "description": "Known built-in output targets. These are the targets with first-class formatter support."
     },

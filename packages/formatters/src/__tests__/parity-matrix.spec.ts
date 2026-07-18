@@ -50,6 +50,10 @@ import { JulesFormatter } from '../formatters/jules.js';
 import { DevinFormatter } from '../formatters/devin.js';
 // Grok Build
 import { GrokFormatter } from '../formatters/grok.js';
+import { KimiFormatter } from '../formatters/kimi.js';
+import { MimoFormatter } from '../formatters/mimo.js';
+import { DeepAgentsFormatter } from '../formatters/deep-agents.js';
+import { ForgecodeFormatter } from '../formatters/forgecode.js';
 import type { Formatter } from '../types.js';
 import {
   PARITY_MATRIX,
@@ -382,6 +386,11 @@ describe('Parity Matrix Tests', () => {
     formatters.set('devin', new DevinFormatter());
     // Grok Build
     formatters.set('grok', new GrokFormatter());
+    // Priority B CLI agents
+    formatters.set('kimi', new KimiFormatter());
+    formatters.set('mimo', new MimoFormatter());
+    formatters.set('deep-agents', new DeepAgentsFormatter());
+    formatters.set('forgecode', new ForgecodeFormatter());
   });
 
   afterEach(() => {

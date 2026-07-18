@@ -93,3 +93,13 @@ export type { DevinVersion } from './devin.js';
 // Grok Build
 export { GrokFormatter, GROK_VERSIONS } from './grok.js';
 export type { GrokVersion } from './grok.js';
+
+// Priority B CLI agents
+export { KimiFormatter, KIMI_VERSIONS } from './kimi.js';
+export type { KimiVersion } from './kimi.js';
+export { MimoFormatter, MIMO_VERSIONS } from './mimo.js';
+export type { MimoVersion } from './mimo.js';
+export { DeepAgentsFormatter, DEEP_AGENTS_VERSIONS } from './deep-agents.js';
+export type { DeepAgentsVersion } from './deep-agents.js';
+export { ForgecodeFormatter, FORGECODE_VERSIONS } from './forgecode.js';
+export type { ForgecodeVersion } from './forgecode.js';
