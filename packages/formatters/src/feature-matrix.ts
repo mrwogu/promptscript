@@ -372,7 +372,7 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       // Tier 0
       github: 'not-supported',
       cursor: 'not-supported',
-      claude: 'not-supported',
+      claude: 'supported', // .claude/workflows/<name>.md
       antigravity: 'supported',
       factory: 'not-supported',
       opencode: 'not-supported',

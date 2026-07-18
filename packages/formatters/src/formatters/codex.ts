@@ -4,6 +4,7 @@ import {
   type MarkdownAgentConfig,
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
+import { extractHooks, generateCodexHooks } from '../hook-adapters.js';
 
 /**
  * Supported Codex output format versions.
@@ -272,21 +273,28 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     const extraFiles: FormatterOutput[] = [];
     const managedDirs: string[] = [];
 
-    // Emit .codex/config.toml when project config options are set
+    // Emit .codex/config.toml when project config options or hooks are set
     const targetConfig = options?.targetConfig;
+    const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
+    const hooksToml = hooksBlock ? generateCodexHooks(extractHooks(hooksBlock)) : '';
+
     if (
-      targetConfig &&
-      (targetConfig.maxThreads || targetConfig.maxDepth || targetConfig.agentsFile)
+      (targetConfig &&
+        (targetConfig.maxThreads || targetConfig.maxDepth || targetConfig.agentsFile)) ||
+      hooksToml
     ) {
       const configLines: string[] = [];
-      if (typeof targetConfig.maxThreads === 'number' && targetConfig.maxThreads > 0) {
+      if (typeof targetConfig?.maxThreads === 'number' && targetConfig.maxThreads > 0) {
         configLines.push(`max_threads = ${Math.floor(targetConfig.maxThreads)}`);
       }
-      if (typeof targetConfig.maxDepth === 'number' && targetConfig.maxDepth > 0) {
+      if (typeof targetConfig?.maxDepth === 'number' && targetConfig.maxDepth > 0) {
         configLines.push(`max_depth = ${Math.floor(targetConfig.maxDepth)}`);
       }
-      if (typeof targetConfig.agentsFile === 'string' && targetConfig.agentsFile.length > 0) {
+      if (typeof targetConfig?.agentsFile === 'string' && targetConfig.agentsFile.length > 0) {
         configLines.push(`agents_file = "${escapeTomlString(targetConfig.agentsFile)}"`);
+      }
+      if (hooksToml) {
+        configLines.push(hooksToml);
       }
       if (configLines.length > 0) {
         extraFiles.push({

@@ -55,7 +55,7 @@ describe('registry consistency', () => {
 
 describe('getLatestSyntaxVersion', () => {
   it('should return the highest known version', () => {
-    expect(getLatestSyntaxVersion()).toBe('1.3.0');
+    expect(getLatestSyntaxVersion()).toBe('1.4.0');
   });
 });
 

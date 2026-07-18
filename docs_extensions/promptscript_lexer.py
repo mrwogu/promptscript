@@ -48,7 +48,7 @@ class PromptScriptLexer(RegexLexer):
             ),
             # Block declarations (e.g., @identity, @context, @examples)
             (
-                r"(@)(identity|context|standards|restrictions|knowledge|shortcuts|commands|guards|params|skills|local|agents|workflows|prompts|examples)\b",
+                r"(@)(identity|context|standards|restrictions|knowledge|shortcuts|commands|guards|params|skills|local|agents|workflows|hooks|prompts|examples)\b",
                 bygroups(Punctuation, Keyword.Declaration),
             ),
             # Inherit statement with path (registry @path, relative ./path, or URL host/path)

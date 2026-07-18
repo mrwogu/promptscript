@@ -2,6 +2,7 @@ import type { Block, ClaudeVersion, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
+import { extractHooks, generateClaudeHooks } from '../hook-adapters.js';
 
 /**
  * Claude formatter version information.
@@ -284,6 +285,12 @@ export class ClaudeFormatter extends BaseFormatter {
       additionalFiles.push(this.generateAgentFile(agent));
     }
 
+    // Generate workflow files
+    const workflows = this.extractWorkflows(ast);
+    for (const workflow of workflows) {
+      additionalFiles.push(this.generateWorkflowFile(workflow));
+    }
+
     // Generate command files
     const commands = this.extractCommands(ast);
     for (const command of commands) {
@@ -294,6 +301,19 @@ export class ClaudeFormatter extends BaseFormatter {
     const localFile = this.generateLocalFile(ast);
     if (localFile) {
       additionalFiles.push(localFile);
+    }
+
+    // Generate hook settings from @hooks block
+    const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
+    if (hooksBlock) {
+      const hooks = extractHooks(hooksBlock);
+      if (hooks.length > 0) {
+        const claudeHooks = generateClaudeHooks(hooks);
+        additionalFiles.push({
+          path: '.claude/settings.json',
+          content: JSON.stringify({ hooks: claudeHooks }, null, 2) + '\n',
+        });
+      }
     }
 
     // Main file content
@@ -869,6 +889,64 @@ export class ClaudeFormatter extends BaseFormatter {
 
     return {
       path: `.claude/agents/${config.name}.md`,
+      content: lines.join('\n') + '\n',
+    };
+  }
+
+  // ============================================================
+  // Workflow File Generation
+  // ============================================================
+
+  /**
+   * Extract workflow definitions from @workflows block.
+   */
+  private extractWorkflows(ast: Program): { name: string; description: string; content: string }[] {
+    const workflowsBlock = this.findBlock(ast, 'workflows');
+    if (!workflowsBlock) return [];
+
+    const workflows: { name: string; description: string; content: string }[] = [];
+    const props = this.getProps(workflowsBlock.content);
+
+    for (const [name, value] of Object.entries(props)) {
+      if (!name || !/^[a-zA-Z0-9._-]+$/.test(name)) continue;
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const obj = value as Record<string, Value>;
+        const description = obj['description'] ? this.valueToString(obj['description']) : '';
+        const content = obj['content'] ? this.valueToString(obj['content']) : '';
+        if (!description && !content) continue;
+        workflows.push({ name, description, content });
+      }
+    }
+
+    return workflows;
+  }
+
+  /**
+   * Generate a workflow Markdown file.
+   */
+  private generateWorkflowFile(config: {
+    name: string;
+    description: string;
+    content: string;
+  }): FormatterOutput {
+    const lines: string[] = [];
+
+    lines.push(`# ${config.name}`);
+    lines.push('');
+
+    if (config.description) {
+      lines.push(`> ${config.description}`);
+      lines.push('');
+    }
+
+    if (config.content) {
+      const dedentedContent = this.dedent(config.content);
+      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
+      lines.push(normalizedContent);
+    }
+
+    return {
+      path: `.claude/workflows/${config.name}.md`,
       content: lines.join('\n') + '\n',
     };
   }
