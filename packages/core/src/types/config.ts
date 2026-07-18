@@ -128,6 +128,24 @@ export interface TargetConfig {
    * @default 'agents'
    */
   skillPath?: 'agents' | 'gemini' | 'both';
+
+  /**
+   * Codex: maximum number of parallel agent threads.
+   * Positive integer. Maps to Codex config, never to AGENTS.md.
+   */
+  maxThreads?: number;
+
+  /**
+   * Codex: maximum nesting depth for agent delegation.
+   * Positive integer. Maps to Codex config, never to AGENTS.md.
+   */
+  maxDepth?: number;
+
+  /**
+   * Codex: override the agents file name for scoped build profiles.
+   * Defaults to `AGENTS.md`. Use `AGENTS.override.md` only for scoped builds.
+   */
+  agentsFile?: string;
 }
 
 /**

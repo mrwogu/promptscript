@@ -650,6 +650,18 @@
           ],
           "description": "Gemini skill path selection.\n- `agents`: use `.agents/skills/` (interoperable, fixture-confirmed default)\n- `gemini`: use `.gemini/skills/` (legacy)\n- `both`: emit to both paths (requires explicit opt-in, deduplicates content)",
           "default": "agents"
+        },
+        "maxThreads": {
+          "type": "number",
+          "description": "Codex: maximum number of parallel agent threads. Positive integer. Maps to Codex config, never to AGENTS.md."
+        },
+        "maxDepth": {
+          "type": "number",
+          "description": "Codex: maximum nesting depth for agent delegation. Positive integer. Maps to Codex config, never to AGENTS.md."
+        },
+        "agentsFile": {
+          "type": "string",
+          "description": "Codex: override the agents file name for scoped build profiles. Defaults to `AGENTS.md`. Use `AGENTS.override.md` only for scoped builds."
         }
       },
       "additionalProperties": false,

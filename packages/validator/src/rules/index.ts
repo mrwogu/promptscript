@@ -32,6 +32,7 @@ import { validSealedProperty } from './valid-sealed-property.js';
 import { policyCompliance } from './policy-compliance.js';
 import { referenceIntegrity } from './reference-integrity.js';
 import { validSkillResources } from './valid-skill-resources.js';
+import { validAgentConfig } from './valid-agent-config.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -95,6 +96,7 @@ export { validSealedProperty } from './valid-sealed-property.js';
 export { policyCompliance } from './policy-compliance.js';
 export { referenceIntegrity } from './reference-integrity.js';
 export { validSkillResources } from './valid-skill-resources.js';
+export { validAgentConfig } from './valid-agent-config.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -153,6 +155,8 @@ export const allRules: ValidationRule[] = [
   referenceIntegrity,
   // Valid skill resources (PS032)
   validSkillResources,
+  // Valid agent config (PS033)
+  validAgentConfig,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

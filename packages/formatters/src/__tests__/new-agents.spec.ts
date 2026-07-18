@@ -109,7 +109,7 @@ const NEW_FORMATTERS = [
     Formatter: CodexFormatter,
     VERSIONS: CODEX_VERSIONS,
     outputPath: 'AGENTS.md',
-    description: 'Codex instructions (Markdown)',
+    description: 'Codex instructions (AGENTS.md + agent TOML)',
     mainHeader: '',
     dotDir: '.agents',
   },
