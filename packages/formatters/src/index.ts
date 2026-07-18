@@ -126,6 +126,14 @@ export * from './formatters/index.js';
 
 // Built-in formatter map
 export { BUILTIN_FORMATTERS } from './builtin-formatters.js';
+export {
+  extractHooks,
+  generateClaudeHooks,
+  generateCodexHooks,
+  mapEvent,
+  convertTimeout,
+} from './hook-adapters.js';
+export type { HookDefinition, PortableHookEvent } from './hook-adapters.js';
 
 // Register built-in formatters by iterating the exhaustive formatter map
 import { FormatterRegistry } from './registry.js';

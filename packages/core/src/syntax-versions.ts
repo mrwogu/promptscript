@@ -108,10 +108,31 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
     ],
     features: [SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE],
   },
+  '1.4.0': {
+    blocks: [
+      'identity',
+      'context',
+      'standards',
+      'restrictions',
+      'knowledge',
+      'shortcuts',
+      'commands',
+      'guards',
+      'params',
+      'skills',
+      'local',
+      'agents',
+      'workflows',
+      'hooks',
+      'prompts',
+      'examples',
+    ],
+    features: [SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE],
+  },
 };
 
 /** Latest known syntax version. */
-export const LATEST_SYNTAX_VERSION = '1.3.0';
+export const LATEST_SYNTAX_VERSION = '1.4.0';
 
 /**
  * Get the latest known syntax version.
