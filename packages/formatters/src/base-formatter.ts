@@ -483,10 +483,16 @@ export abstract class BaseFormatter implements Formatter {
    * dot-directory without escaping it.
    */
   protected normalizeOutputDir(dir: string): string {
-    return dir
-      .replace(/\\/g, '/')
-      .replace(/^\/+/, '')
-      .replace(/\/+$/g, '')
+    let normalized = dir.replace(/\\/g, '/');
+    // Strip leading slashes (avoid regex for CodeQL ReDoS false positive)
+    while (normalized.startsWith('/')) {
+      normalized = normalized.slice(1);
+    }
+    // Strip trailing slashes
+    while (normalized.endsWith('/') && normalized.length > 0) {
+      normalized = normalized.slice(0, -1);
+    }
+    return normalized
       .split('/')
       .filter((segment) => segment.length > 0 && segment !== '.' && segment !== '..')
       .join('/');

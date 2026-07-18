@@ -396,15 +396,31 @@ targets:
 
 **Available Targets:**
 
-| Target        | Default Output                    | Default Convention | Supported Versions          |
-| ------------- | --------------------------------- | ------------------ | --------------------------- |
-| `github`      | `.github/copilot-instructions.md` | `markdown`         | simple / multifile / full   |
-| `claude`      | `CLAUDE.md`                       | `markdown`         | simple / multifile / full   |
-| `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy |
-| `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter        |
-| `factory`     | `AGENTS.md`                       | `markdown`         | simple / multifile / full   |
-| `opencode`    | `OPENCODE.md`                     | `markdown`         | simple / multifile / full   |
-| `gemini`      | `GEMINI.md`                       | `markdown`         | simple / multifile / full   |
+| Target        | Default Output                    | Default Convention | Supported Versions                             |
+| ------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
+| `github`      | `.github/copilot-instructions.md` | `markdown`         | simple / multifile / full                      |
+| `claude`      | `CLAUDE.md`                       | `markdown`         | simple / multifile / full                      |
+| `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy / agents-md / full |
+| `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter / agents-md               |
+| `factory`     | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `opencode`    | `OPENCODE.md`                     | `markdown`         | simple / multifile / full                      |
+| `gemini`      | `GEMINI.md`                       | `markdown`         | simple / multifile / full                      |
+| `codex`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `grok`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `windsurf`    | `.windsurf/rules/project.md`      | `markdown`         | simple / multifile / full                      |
+| `cline`       | `.cline/rules/project.md`         | `markdown`         | simple / multifile / full                      |
+| `roo`         | `.roo/rules/project.md`           | `markdown`         | simple / multifile / full                      |
+| `continue`    | `.continue/rules/project.md`      | `markdown`         | simple / multifile / full                      |
+| `aider`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `amazon-q`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `warp`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `zed`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `jules`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `devin`       | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `kimi`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `mimo`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `deep-agents` | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `forgecode`   | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
 
 **Cursor Versions:**
 
@@ -413,6 +429,8 @@ targets:
 | `modern`    | `.cursor/rules/project.mdc` + `.cursor/commands/*.md` for multi-line shortcuts                      |
 | `multifile` | Main + `.cursor/rules/*.mdc` (glob-based) + `.cursor/rules/shortcuts.mdc` + `.cursor/commands/*.md` |
 | `legacy`    | `.cursorrules` (deprecated, no slash commands)                                                      |
+| `agents-md` | `AGENTS.md` (Cursor 2.4+, no frontmatter required)                                                  |
+| `full`      | Multifile + `.agents/skills/<name>/SKILL.md` + `.cursor/agents/<name>.md` (Cursor 2.5+)             |
 
 !!! tip "Cursor Slash Commands"
 Multi-line `@shortcuts` are automatically converted to executable slash commands in `.cursor/commands/`.
@@ -595,6 +613,39 @@ its default directory. For example, this writes Factory skills under
 | `markdown` | `## Section Name`                      | Markdown headers          |
 | `xml`      | `<section-name>content</section-name>` | XML tags wrapping content |
 
+**Target-Specific Options:**
+
+| Option              | Targets           | Type   | Description                                                                                  |
+| ------------------- | ----------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `skillPath`         | `gemini`          | string | Skill path: `agents` (.agents/skills/), `gemini` (.gemini/skills/), `both`                   |
+| `maxThreads`        | `codex`           | number | Max parallel agent threads (positive integer, maps to .codex/config.toml)                    |
+| `maxDepth`          | `codex`           | number | Max nesting depth for agent delegation (positive integer)                                    |
+| `agentsFile`        | `codex`           | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md)            |
+| `agentsFrontmatter` | AGENTS.md targets | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from @meta)         |
+| `autoMode`          | `claude`          | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json) |
+
+**Codex Native Output:**
+
+The `codex` target emits native Codex agent TOML files in addition to `AGENTS.md`:
+
+```
+AGENTS.md                          # Root instructions
+.codex/agents/<name>.toml          # Agent definitions (TOML)
+.codex/config.toml                 # Project config (maxThreads, maxDepth, agentsFile, hooks)
+.agents/skills/<name>/SKILL.md     # Skills (interoperable path)
+```
+
+Agent field mapping (PRS -> Codex TOML):
+
+| PRS Field            | Codex TOML Field         |
+| -------------------- | ------------------------ |
+| `content`            | `developer_instructions` |
+| `reasoningEffort`    | `model_reasoning_effort` |
+| `sandboxMode`        | `sandbox_mode`           |
+| `nicknameCandidates` | `nickname_candidates`    |
+| `mcpServers`         | `mcp_servers`            |
+| `skills`             | `skills.config`          |
+
 ### customConventions
 
 Define custom output conventions for specialized formatting needs.
@@ -666,7 +717,31 @@ Run a profile with either command:
 ```bash
 prs compile --build logstrip-factory
 prs build logstrip-factory
+
+# Compile all named build profiles in deterministic order
+prs compile --all-builds
 ```
+
+**Nested AGENTS.md via Build Profiles:**
+
+Build profiles with `output` directories produce scoped AGENTS.md files. This enables nested instruction files for monorepo packages:
+
+```yaml
+builds:
+  api:
+    entry: .promptscript/packages/api.prs
+    output: packages/api
+    targets:
+      - factory
+  codex-api-override:
+    entry: .promptscript/packages/api-override.prs
+    output: packages/api
+    targets:
+      - codex:
+          agentsFile: AGENTS.override.md
+```
+
+Output paths are validated against project root - path traversal (`..`) is rejected. Codex-only `AGENTS.override.md` is supported via the `agentsFile` option.
 
 **Build Profile Fields:**
 
