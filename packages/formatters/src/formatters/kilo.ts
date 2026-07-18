@@ -8,4 +8,5 @@ export const { Formatter: KiloFormatter, VERSIONS: KILO_VERSIONS } = createSimpl
   description: 'Kilo Code rules (Markdown)',
   mainFileHeader: '# Project Rules',
   dotDir: '.kilocode',
+  mcpConfigPath: '.kilocode/mcp_settings.json',
 });

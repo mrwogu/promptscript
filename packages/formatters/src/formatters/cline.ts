@@ -10,4 +10,5 @@ export const { Formatter: ClineFormatter, VERSIONS: CLINE_VERSIONS } =
     mainFileHeader: '# Project Rules',
     dotDir: '.clinerules',
     hasSkills: false,
+    mcpConfigPath: '.cline/cline_mcp_settings.json',
   });

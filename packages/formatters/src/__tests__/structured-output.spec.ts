@@ -3,6 +3,7 @@ import {
   OWNERSHIP_KEY,
   applyMergeOperations,
   removeStaleOwned,
+  serializeMerged,
   hasOwnedEntries,
   parsePath,
   type StructuredMergePlan,
@@ -156,6 +157,18 @@ describe('Structured output merge', () => {
       removeStaleOwned(target, plan);
       const hooks = target['hooks'] as Record<string, unknown>;
       expect(get(hooks, 'ActiveKey')).toBeDefined();
+    });
+  });
+
+  describe('serializeMerged', () => {
+    it('should serialize JSON with indentation and trailing newline', () => {
+      expect(serializeMerged({ enabled: true }, 'json')).toBe('{\n  "enabled": true\n}\n');
+    });
+
+    it('should reject unsupported TOML serialization', () => {
+      expect(() => serializeMerged({}, 'toml')).toThrow(
+        'TOML serialization requires a TOML library; use the writer implementation'
+      );
     });
   });
 

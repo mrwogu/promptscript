@@ -39,6 +39,12 @@ class TestFormatter extends MarkdownInstructionFormatter {
   }
 }
 
+class FrontmatterTestFormatter extends TestFormatter {
+  protected override generateFrontmatter(): string {
+    return '---\nscope: test\n---';
+  }
+}
+
 describe('MarkdownInstructionFormatter', () => {
   let formatter: TestFormatter;
 
@@ -101,6 +107,82 @@ describe('MarkdownInstructionFormatter', () => {
       const ast = createMinimalProgram();
       const result = formatter.format(ast, { version: 'full' });
       expect(result.path).toBe('TEST.md');
+    });
+  });
+
+  describe('frontmatter generation', () => {
+    it.each(['simple', 'full'] as const)(
+      'should include subclass frontmatter in %s mode',
+      (version) => {
+        const frontmatterFormatter = new FrontmatterTestFormatter();
+
+        const result = frontmatterFormatter.format(createMinimalProgram(), { version });
+
+        expect(result.content).toMatch(/^---\nscope: test\n---/);
+      }
+    );
+  });
+
+  describe('MCP config generation', () => {
+    it('should generate JSON config with the configured path', () => {
+      const mcpFormatter = new TestFormatter({ mcpConfigPath: '.test/mcp.json' });
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                remote: { url: 'https://example.com/mcp' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = mcpFormatter.format(ast, { version: 'multifile' });
+      const mcpFile = result.additionalFiles?.find((file) => file.path === '.test/mcp.json');
+      const parsed = JSON.parse(mcpFile!.content) as {
+        mcpServers: Record<string, Record<string, unknown>>;
+      };
+
+      expect(mcpFile).toBeDefined();
+      expect(parsed.mcpServers['remote']!['url']).toBe('https://example.com/mcp');
+    });
+
+    it('should generate TOML config with the configured path', () => {
+      const mcpFormatter = new TestFormatter({
+        mcpConfigPath: '.test/mcp.toml',
+        mcpConfigFormat: 'toml',
+      });
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                local: { command: ['node', 'server.mjs'] },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = mcpFormatter.format(ast, { version: 'full' });
+      const mcpFile = result.additionalFiles?.find((file) => file.path === '.test/mcp.toml');
+
+      expect(mcpFile).toBeDefined();
+      expect(mcpFile!.content).toContain('[mcp_servers.local]');
+      expect(mcpFile!.content).toContain('command = ["node", "server.mjs"]');
     });
   });
 

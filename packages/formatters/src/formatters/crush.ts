@@ -9,4 +9,5 @@ export const { Formatter: CrushFormatter, VERSIONS: CRUSH_VERSIONS } =
     description: 'Crush instructions (Markdown)',
     mainFileHeader: '# AGENTS.md',
     dotDir: '.crush',
+    mcpConfigPath: '.crush/mcp.json',
   });

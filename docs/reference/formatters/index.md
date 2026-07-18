@@ -169,6 +169,33 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 
 <!-- generated:end:formatter-table -->
 
+## MCP / Hooks / Plugins Support
+
+PromptScript emits `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) to target-native config files. The table below shows which formatters support each feature.
+
+| Formatter      | MCP Servers                            | Hooks                    | Plugins                 |
+| -------------- | -------------------------------------- | ------------------------ | ----------------------- |
+| Claude Code    | `.mcp.json`                            | `.claude/settings.json`  | -                       |
+| Cursor         | `.cursor/mcp.json`                     | `.cursor/hooks.json`     | `.cursor/plugins.json`  |
+| Factory Droid  | `.factory/mcp.json`                    | `.factory/settings.json` | `.factory/plugins.json` |
+| Codex          | `.codex/mcp.json`                      | `.codex/config.toml`     | `.codex/plugins.json`   |
+| Grok Build     | `.mcp.json` (via Claude)               | `.claude/settings.json`  | `.grok/plugins.json`    |
+| GitHub Copilot | `.vscode/mcp.json` + agent frontmatter | -                        | -                       |
+| Antigravity    | `.agents/mcp_config.json`              | -                        | -                       |
+| Gemini CLI     | `.gemini/mcp_config.json`              | -                        | -                       |
+| Windsurf       | `.windsurf/mcp_config.json`            | -                        | -                       |
+| Cline          | `.cline/cline_mcp_settings.json`       | -                        | -                       |
+| Roo Code       | `.roo/mcp_settings.json`               | -                        | -                       |
+| Continue       | `.continue/config.json`                | -                        | -                       |
+| Goose          | `.goose/mcp_config.json`               | -                        | -                       |
+| Kilo Code      | `.kilocode/mcp_settings.json`          | -                        | -                       |
+| OpenHands      | `.openhands/mcp_config.toml`           | -                        | -                       |
+| Qwen Code      | `.qwen/mcp.json`                       | -                        | -                       |
+| Zed            | `.zed/settings.json`                   | -                        | -                       |
+| Crush          | `.crush/mcp.json`                      | -                        | -                       |
+
+Agent-level `mcpServers` is supported by Claude Code, Cursor, Factory Droid, and GitHub Copilot (inline in agent frontmatter).
+
 ## MarkdownInstructionFormatter Agents
 
 The remaining 30 agents use a shared `MarkdownInstructionFormatter` base with consistent markdown output. Each agent has a unique output path and dot directory, but the rendering logic is identical. All Tier 1-3 formatters support **skills** via the shared formatter.

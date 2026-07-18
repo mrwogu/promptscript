@@ -1977,6 +1977,43 @@ describe('ClaudeFormatter', () => {
     });
   });
 
+  describe('MCP servers', () => {
+    it('should emit .mcp.json in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                linear: {
+                  transport: 'http',
+                  url: 'https://mcp.linear.app/mcp',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const mcpFile = result.additionalFiles?.find((file) => file.path === '.mcp.json');
+
+      expect(mcpFile).toBeDefined();
+      const parsed = JSON.parse(mcpFile!.content) as {
+        mcpServers: Record<string, { type: string; url: string }>;
+      };
+      expect(parsed.mcpServers['linear']).toEqual({
+        type: 'http',
+        url: 'https://mcp.linear.app/mcp',
+      });
+    });
+  });
+
   describe('autoMode', () => {
     it('should include autoMode in settings when targetConfig.autoMode is set', () => {
       const ast = createMinimalProgram();

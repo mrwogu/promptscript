@@ -2,6 +2,11 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
+import {
+  findMcpServersBlock,
+  extractMcpServers,
+  serializeMcpServersToJsonString,
+} from '../mcp-helpers.js';
 
 /**
  * Supported Antigravity format versions.
@@ -210,12 +215,27 @@ export class AntigravityFormatter extends BaseFormatter {
     // Generate workflow outputs if present
     const workflowOutputs = this.workflows(ast);
 
-    // If there are workflows, return multi-file output
-    if (workflowOutputs && workflowOutputs.length > 0) {
+    // Generate MCP config from @mcpServers block
+    const mcpServersBlock = findMcpServersBlock(ast);
+    const mcpOutput: FormatterOutput[] = [];
+    if (mcpServersBlock) {
+      const servers = extractMcpServers(mcpServersBlock);
+      if (servers.length > 0) {
+        mcpOutput.push({
+          path: '.agents/mcp_config.json',
+          content: serializeMcpServersToJsonString(servers),
+        });
+      }
+    }
+
+    const allAdditional = [...(workflowOutputs ?? []), ...mcpOutput];
+
+    // If there are additional files, return multi-file output
+    if (allAdditional.length > 0) {
       return {
         path: mainOutput.path,
         content: mainOutput.content,
-        additionalFiles: workflowOutputs,
+        additionalFiles: allAdditional,
       };
     }
 

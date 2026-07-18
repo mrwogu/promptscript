@@ -44,6 +44,10 @@ export interface SimpleFormatterOptions {
   hasSkills?: boolean;
   /** Skill file name (default: 'SKILL.md') */
   skillFileName?: string;
+  /** MCP config file path. If set, @mcpServers block is emitted to this path. */
+  mcpConfigPath?: string;
+  /** MCP config format (default: 'json') */
+  mcpConfigFormat?: 'json' | 'toml';
 }
 
 /**
@@ -114,6 +118,8 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
     hasCommands = false,
     hasSkills = true,
     skillFileName = 'SKILL.md',
+    mcpConfigPath,
+    mcpConfigFormat,
   } = opts;
 
   const versions = buildVersions(outputPath, dotDir);
@@ -132,6 +138,8 @@ export function createSimpleMarkdownFormatter(opts: SimpleFormatterOptions): Sim
         hasAgents,
         hasCommands,
         hasSkills,
+        ...(mcpConfigPath ? { mcpConfigPath } : {}),
+        ...(mcpConfigFormat ? { mcpConfigFormat } : {}),
       });
     }
 

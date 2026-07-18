@@ -490,6 +490,42 @@ describe('GitHubFormatter', () => {
       expect(agentsFile?.content).toContain('# Agent Instructions');
     });
 
+    it('should emit top-level MCP servers in full mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                filesystem: {
+                  transport: 'stdio',
+                  command: ['node', 'filesystem.mjs'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const mcpFile = result.additionalFiles?.find((file) => file.path === '.vscode/mcp.json');
+
+      expect(mcpFile).toBeDefined();
+      const parsed = JSON.parse(mcpFile!.content) as {
+        mcpServers: Record<string, unknown>;
+      };
+      expect(parsed.mcpServers['filesystem']).toMatchObject({
+        name: 'filesystem',
+        transport: 'stdio',
+        command: ['node', 'filesystem.mjs'],
+      });
+    });
+
     it('should generate skill files in full mode', () => {
       const ast: Program = {
         ...createMinimalProgram(),

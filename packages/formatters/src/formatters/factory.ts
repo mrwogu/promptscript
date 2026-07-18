@@ -8,6 +8,13 @@ import {
   type MarkdownSkillConfig,
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
+import { extractHooks, generateFactoryHooks } from '../hook-adapters.js';
+import {
+  findMcpServersBlock,
+  extractMcpServers,
+  serializeMcpServersToJsonString,
+} from '../mcp-helpers.js';
+import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 
 /**
  * Supported Factory AI format versions.
@@ -92,6 +99,8 @@ interface FactoryDroidConfig extends MarkdownAgentConfig {
   specReasoningEffort?: FactoryReasoningEffort;
   /** Tool access: category name or array of tool IDs */
   tools?: string | string[];
+  /** MCP server names this droid can access */
+  mcpServers?: string[];
 }
 
 /**
@@ -466,6 +475,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
           specModel: obj['specModel'] ? this.valueToString(obj['specModel']) : undefined,
           specReasoningEffort: this.parseReasoningEffort(obj['specReasoningEffort']),
           tools: this.parseDroidTools(obj['tools']),
+          mcpServers: this.parseMcpServerNames(obj['mcpServers']),
         });
       }
     }
@@ -508,6 +518,11 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
         const toolsArray = droidConfig.tools.map((t) => `"${t}"`).join(', ');
         lines.push(`tools: [${toolsArray}]`);
       }
+    }
+
+    if (droidConfig.mcpServers && droidConfig.mcpServers.length > 0) {
+      const mcpArray = droidConfig.mcpServers.map((s) => `"${s}"`).join(', ');
+      lines.push(`mcpServers: [${mcpArray}]`);
     }
 
     lines.push('---');
@@ -840,6 +855,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
     this.maybeAddGuardSkillsListing(guardSkills, sections, options);
 
+    // Generate MCP config and hook settings
+    additionalFiles.push(...this.generateFactoryConfigFiles(ast));
+
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
@@ -896,12 +914,64 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
     this.maybeAddGuardSkillsListing(guardSkills, sections, options);
 
+    // Generate MCP config and hook settings
+    additionalFiles.push(...this.generateFactoryConfigFiles(ast));
+
     return {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
       managedOutputDirectories: ['.factory/rules'],
     };
+  }
+
+  /**
+   * Generate MCP config and hook settings files for Factory.
+   * Returns additional FormatterOutput entries to merge into the output.
+   */
+  private generateFactoryConfigFiles(ast: Program): FormatterOutput[] {
+    const files: FormatterOutput[] = [];
+
+    // Generate .factory/mcp.json from @mcpServers block
+    const mcpServersBlock = findMcpServersBlock(ast);
+    if (mcpServersBlock) {
+      const servers = extractMcpServers(mcpServersBlock);
+      if (servers.length > 0) {
+        files.push({
+          path: '.factory/mcp.json',
+          content: serializeMcpServersToJsonString(servers),
+        });
+      }
+    }
+
+    // Generate .factory/settings.json from @hooks block
+    const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
+    if (hooksBlock) {
+      const hooks = extractHooks(hooksBlock);
+      if (hooks.length > 0) {
+        const factoryHooks = generateFactoryHooks(hooks);
+        if (Object.keys(factoryHooks).length > 0) {
+          files.push({
+            path: '.factory/settings.json',
+            content: JSON.stringify({ hooks: factoryHooks }, null, 2) + '\n',
+          });
+        }
+      }
+    }
+
+    // Generate .factory/plugins.json from @plugins block
+    const pluginsBlock = findPluginsBlock(ast);
+    if (pluginsBlock) {
+      const plugins = extractPlugins(pluginsBlock);
+      if (plugins.length > 0) {
+        files.push({
+          path: '.factory/plugins.json',
+          content: serializePluginsToJson(plugins),
+        });
+      }
+    }
+
+    return files;
   }
 
   private parseReasoningEffort(value: Value | undefined): FactoryReasoningEffort | undefined {
@@ -921,6 +991,23 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       return arr.length > 0 ? arr : undefined;
     }
     return this.valueToString(value);
+  }
+
+  /**
+   * Parse mcpServers field from agent config.
+   * Accepts array of strings or object with server names as keys.
+   */
+  private parseMcpServerNames(value: Value | undefined): string[] | undefined {
+    if (!value) return undefined;
+    if (Array.isArray(value)) {
+      const names = value.filter((v): v is string => typeof v === 'string');
+      return names.length > 0 ? names : undefined;
+    }
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const names = Object.keys(value as Record<string, Value>);
+      return names.length > 0 ? names : undefined;
+    }
+    return undefined;
   }
 
   // ============================================================

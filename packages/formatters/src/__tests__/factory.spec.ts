@@ -3023,6 +3023,37 @@ describe('FactoryFormatter', () => {
       expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/logstrip/SKILL.md');
     });
 
+    it('normalizes leading and trailing slashes in skillBaseDir', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                logstrip: {
+                  description: 'Logstrip skill',
+                  content: 'Compress logs.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { skillBaseDir: '/plugins/logstrip/.factory/skills/' },
+      });
+      const skillFile = result.additionalFiles?.find((file) => file.path.endsWith('SKILL.md'));
+
+      expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/logstrip/SKILL.md');
+    });
+
     it('combines skillBaseDir with __outputDir without duplicating skills segment', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -3207,6 +3238,189 @@ describe('FactoryFormatter', () => {
       const skillFile = result.additionalFiles?.find((f) => f.path.endsWith('SKILL.md'));
       // "skills" as outputDir strips the skills prefix, leaving empty → falls back to skillName
       expect(skillFile?.path).toBe('plugins/logstrip/.factory/skills/myskill/SKILL.md');
+    });
+  });
+
+  describe('MCP server support', () => {
+    it('should emit .factory/mcp.json when @mcpServers block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                linear: {
+                  transport: 'http',
+                  url: 'https://mcp.linear.app/mcp',
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const formatter = new FactoryFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+      const mcpFile = result.additionalFiles?.find((f) => f.path === '.factory/mcp.json');
+      expect(mcpFile).toBeDefined();
+      const parsed = JSON.parse(mcpFile!.content) as { mcpServers: Record<string, unknown> };
+      expect(parsed.mcpServers).toHaveProperty('linear');
+    });
+  });
+
+  describe('hooks support', () => {
+    it('should emit .factory/settings.json when @hooks block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-hook': {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const formatter = new FactoryFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+      const settingsFile = result.additionalFiles?.find((f) => f.path === '.factory/settings.json');
+      expect(settingsFile).toBeDefined();
+      const parsed = JSON.parse(settingsFile!.content) as { hooks: Record<string, unknown> };
+      expect(parsed.hooks).toBeDefined();
+    });
+  });
+
+  describe('plugins support', () => {
+    it('should emit .factory/plugins.json when @plugins block present', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'plugins',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'security-suite': {
+                  version: '1.0.0',
+                  source: 'npm',
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const formatter = new FactoryFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+      const pluginsFile = result.additionalFiles?.find((f) => f.path === '.factory/plugins.json');
+      expect(pluginsFile).toBeDefined();
+      const parsed = JSON.parse(pluginsFile!.content) as { plugins: Record<string, unknown> };
+      expect(parsed.plugins).toHaveProperty('security-suite');
+    });
+  });
+
+  describe('agent-level mcpServers', () => {
+    it('should add mcpServers to droid frontmatter', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviewer droid',
+                  content: 'Review code.',
+                  mcpServers: ['scanner', 'linear'],
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const formatter = new FactoryFormatter();
+      const result = formatter.format(ast, { version: 'full' });
+      const droidFile = result.additionalFiles?.find(
+        (f) => f.path === '.factory/droids/reviewer.md'
+      );
+      expect(droidFile).toBeDefined();
+      expect(droidFile!.content).toContain('mcpServers: ["scanner", "linear"]');
+    });
+
+    it('should parse object mcpServers and ignore scalar values', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                reviewer: {
+                  description: 'Reviewer droid',
+                  content: 'Review code.',
+                  mcpServers: {
+                    scanner: true,
+                    linear: {
+                      scope: 'project',
+                    },
+                  },
+                },
+                helper: {
+                  description: 'Helper droid',
+                  content: 'Help with code.',
+                  mcpServers: 'scanner',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const reviewerFile = result.additionalFiles?.find(
+        (file) => file.path === '.factory/droids/reviewer.md'
+      );
+      const helperFile = result.additionalFiles?.find(
+        (file) => file.path === '.factory/droids/helper.md'
+      );
+
+      expect(reviewerFile?.content).toContain('mcpServers: ["scanner", "linear"]');
+      expect(helperFile?.content).not.toContain('mcpServers:');
     });
   });
 });

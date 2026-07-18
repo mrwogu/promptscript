@@ -9,4 +9,5 @@ export const { Formatter: GooseFormatter, VERSIONS: GOOSE_VERSIONS } =
     description: 'Goose rules (Markdown)',
     mainFileHeader: '# .goosehints',
     dotDir: '.goose',
+    mcpConfigPath: '.goose/mcp_config.json',
   });

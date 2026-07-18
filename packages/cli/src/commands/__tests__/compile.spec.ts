@@ -18,6 +18,7 @@ const {
   mockMkdir,
   mockReadFile,
   mockWarn,
+  mockWarning,
   mockError,
   mockMuted,
   mockDryRun,
@@ -30,6 +31,7 @@ const {
   const mockMkdir = vi.fn();
   const mockReadFile = vi.fn();
   const mockWarn = vi.fn();
+  const mockWarning = vi.fn();
   const mockError = vi.fn();
   const mockMuted = vi.fn();
   const mockDryRun = vi.fn();
@@ -42,6 +44,7 @@ const {
     mockMkdir,
     mockReadFile,
     mockWarn,
+    mockWarning,
     mockError,
     mockMuted,
     mockDryRun,
@@ -100,7 +103,7 @@ vi.mock('../../output/console.js', () => ({
     muted: mockMuted,
     newline: vi.fn(),
     info: vi.fn(),
-    warning: vi.fn(),
+    warning: mockWarning,
     verbose: vi.fn(),
     debug: vi.fn(),
     dryRun: mockDryRun,
@@ -347,19 +350,49 @@ describe('compile command - createCliLogger warn path', () => {
       },
     });
     mockCompile.mockResolvedValue({
-      outputs: [
-        {
-          target: 'claude',
-          format: 'markdown',
-          content: '# Claude',
-          mainPath: '/repo/promptscript/.claude/CLAUDE.md',
-        },
-      ],
+      success: true,
+      outputs: new Map(),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
     });
 
     await compileCommand({ allBuilds: true, cwd: '/repo/promptscript' }, mockServices);
 
     expect(mockCompile).toHaveBeenCalledTimes(2);
+  });
+
+  it('should continue compiling build profiles after one compilation fails', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: {
+        alpha: { entry: '.promptscript/alpha.prs', targets: ['claude'] },
+        beta: { entry: '.promptscript/beta.prs', targets: ['claude'] },
+      },
+    });
+    mockExistsSync.mockImplementation((path: string) => String(path).endsWith('.prs'));
+    mockCompile
+      .mockResolvedValueOnce({
+        success: false,
+        outputs: new Map(),
+        stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+        warnings: [],
+        errors: [{ message: 'Alpha compilation failed' }],
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        outputs: new Map(),
+        stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+        warnings: [],
+        errors: [],
+      });
+
+    await compileCommand({ allBuilds: true, cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockCompile).toHaveBeenNthCalledWith(1, '/repo/promptscript/.promptscript/alpha.prs');
+    expect(mockCompile).toHaveBeenNthCalledWith(2, '/repo/promptscript/.promptscript/beta.prs');
+    expect(mockError).toHaveBeenCalledWith('Alpha compilation failed');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should warn when no build profiles found with --all-builds', async () => {
@@ -371,5 +404,6 @@ describe('compile command - createCliLogger warn path', () => {
     await compileCommand({ allBuilds: true, cwd: '/repo/promptscript' }, mockServices);
 
     expect(mockCompile).not.toHaveBeenCalled();
+    expect(mockWarning).toHaveBeenCalledWith('No named build profiles found in config.builds');
   });
 });

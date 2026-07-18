@@ -68,6 +68,7 @@ export class GeminiFormatter extends MarkdownInstructionFormatter {
       hasCommands: true,
       hasSkills: true,
       skillsInMultifile: true,
+      mcpConfigPath: '.gemini/mcp_config.json',
     });
   }
 

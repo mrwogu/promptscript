@@ -638,6 +638,45 @@ Never leave TODO without issue reference`,
 
       expect(result.content).not.toMatch(/^---\n/);
     });
+
+    it('should emit MCP config with agents-md output', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                filesystem: {
+                  transport: 'stdio',
+                  command: ['node', 'server.mjs'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'agents-md' });
+      const mcpFile = result.additionalFiles?.find(
+        (file) => file.path === '.agents/mcp_config.json'
+      );
+
+      expect(result.path).toBe('AGENTS.md');
+      expect(result.content).not.toMatch(/^---\n/);
+      expect(mcpFile).toBeDefined();
+      const parsed = JSON.parse(mcpFile!.content) as {
+        mcpServers: Record<string, { type: string; command: string[] }>;
+      };
+      expect(parsed.mcpServers['filesystem']).toEqual({
+        type: 'stdio',
+        command: ['node', 'server.mjs'],
+      });
+    });
   });
 
   describe('frontmatter generation', () => {

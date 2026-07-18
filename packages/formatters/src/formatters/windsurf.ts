@@ -42,6 +42,7 @@ export class WindsurfFormatter extends MarkdownInstructionFormatter {
       hasAgents: false,
       hasCommands: false,
       hasSkills: true,
+      mcpConfigPath: '.windsurf/mcp_config.json',
     });
   }
 

@@ -3,6 +3,11 @@ import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
 import { extractHooks, generateClaudeHooks } from '../hook-adapters.js';
+import {
+  findMcpServersBlock,
+  extractMcpServers,
+  serializeMcpServersToJsonString,
+} from '../mcp-helpers.js';
 
 /**
  * Claude formatter version information.
@@ -324,6 +329,18 @@ export class ClaudeFormatter extends BaseFormatter {
         additionalFiles.push({
           path: '.claude/settings.json',
           content: JSON.stringify(settings, null, 2) + '\n',
+        });
+      }
+    }
+
+    // Generate .mcp.json from @mcpServers block
+    const mcpServersBlock = findMcpServersBlock(ast);
+    if (mcpServersBlock) {
+      const servers = extractMcpServers(mcpServersBlock);
+      if (servers.length > 0) {
+        additionalFiles.push({
+          path: '.mcp.json',
+          content: serializeMcpServersToJsonString(servers),
         });
       }
     }

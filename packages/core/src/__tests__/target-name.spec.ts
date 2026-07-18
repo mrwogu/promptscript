@@ -6,7 +6,13 @@ import {
   customTarget,
   DEFAULT_OUTPUT_PATHS,
 } from '../types/config.js';
-import { TARGET_DEFINITIONS } from '../target-catalog.js';
+import {
+  TARGET_DEFINITIONS,
+  getDefaultOutputPath,
+  getTargetDefinition,
+  getTargetFeatures,
+  getTargetSkillPath,
+} from '../target-catalog.js';
 
 describe('TargetName branded type', () => {
   describe('KnownTarget', () => {
@@ -324,6 +330,28 @@ describe('TargetName branded type', () => {
 });
 
 describe('Target catalog integrity', () => {
+  it('should expose target catalog values through accessors', () => {
+    expect(getTargetDefinition('claude')).toEqual(TARGET_DEFINITIONS.claude);
+    expect(getDefaultOutputPath('claude')).toBe('CLAUDE.md');
+    expect(getTargetSkillPath('claude')).toEqual({
+      basePath: '.claude/skills',
+      fileName: 'SKILL.md',
+    });
+    expect(getTargetFeatures('claude')).toEqual({
+      defaultEnabled: true,
+      defaultVersion: 'full',
+      hasSkills: true,
+      hasAgents: true,
+      hasCommands: true,
+    });
+  });
+
+  it('should reject unknown targets through the catalog accessor', () => {
+    const unknownTarget = 'unknown-target' as unknown as KnownTarget;
+
+    expect(() => getTargetDefinition(unknownTarget)).toThrow('Unknown target: unknown-target');
+  });
+
   it('should have a TARGET_DEFINITIONS entry for every KNOWN_TARGET', () => {
     for (const target of KNOWN_TARGETS) {
       expect(TARGET_DEFINITIONS[target], `Missing catalog entry for ${target}`).toBeDefined();

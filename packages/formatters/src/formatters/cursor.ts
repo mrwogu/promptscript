@@ -2,6 +2,13 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import { GlobCategorizer } from '../extractors/glob-categorizer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
+import { extractHooks, generateCursorHooks } from '../hook-adapters.js';
+import {
+  findMcpServersBlock,
+  extractMcpServers,
+  serializeMcpServersToJsonString,
+} from '../mcp-helpers.js';
+import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 
 /**
  * Supported Cursor format versions.
@@ -417,6 +424,21 @@ export class CursorFormatter extends BaseFormatter {
             );
           const model = obj['model'];
           if (typeof model === 'string') agentLines.push(`model: ${model}`);
+
+          // Agent-level mcpServers (references to top-level @mcpServers names)
+          const agentMcp = obj['mcpServers'];
+          if (agentMcp && typeof agentMcp === 'object' && !Array.isArray(agentMcp)) {
+            const mcpNames = Object.keys(agentMcp as Record<string, Value>);
+            if (mcpNames.length > 0) {
+              agentLines.push(`mcpServers: [${mcpNames.map((n) => `"${n}"`).join(', ')}]`);
+            }
+          } else if (Array.isArray(agentMcp)) {
+            const names = agentMcp.filter((v): v is string => typeof v === 'string');
+            if (names.length > 0) {
+              agentLines.push(`mcpServers: [${names.map((n) => `"${n}"`).join(', ')}]`);
+            }
+          }
+
           agentLines.push('---');
           agentLines.push('');
           if (content) agentLines.push(this.dedent(content));
@@ -426,6 +448,45 @@ export class CursorFormatter extends BaseFormatter {
             content: agentLines.join('\n') + '\n',
           });
         }
+      }
+    }
+
+    // Generate hooks (.cursor/hooks.json) from @hooks block
+    const hooksBlock = this.findBlock(ast, 'hooks');
+    if (hooksBlock) {
+      const hooks = extractHooks(hooksBlock);
+      if (hooks.length > 0) {
+        const cursorHooks = generateCursorHooks(hooks);
+        if (Object.keys(cursorHooks).length > 0) {
+          additionalFiles.push({
+            path: '.cursor/hooks.json',
+            content: JSON.stringify(cursorHooks, null, 2) + '\n',
+          });
+        }
+      }
+    }
+
+    // Generate .cursor/mcp.json from @mcpServers block
+    const mcpServersBlock = findMcpServersBlock(ast);
+    if (mcpServersBlock) {
+      const servers = extractMcpServers(mcpServersBlock);
+      if (servers.length > 0) {
+        additionalFiles.push({
+          path: '.cursor/mcp.json',
+          content: serializeMcpServersToJsonString(servers),
+        });
+      }
+    }
+
+    // Generate .cursor/plugins.json from @plugins block
+    const pluginsBlock = findPluginsBlock(ast);
+    if (pluginsBlock) {
+      const plugins = extractPlugins(pluginsBlock);
+      if (plugins.length > 0) {
+        additionalFiles.push({
+          path: '.cursor/plugins.json',
+          content: serializePluginsToJson(plugins),
+        });
       }
     }
 
