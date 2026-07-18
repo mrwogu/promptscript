@@ -226,6 +226,55 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
   }
 
   /**
+   * Generate optional AGENTS.md v1.1 frontmatter when agentsFrontmatter is 'experimental'.
+   * Reads description and tags from the @meta block.
+   */
+  protected override generateFrontmatter(
+    ast: Program,
+    options?: FormatOptions
+  ): string | undefined {
+    const mode = options?.targetConfig?.agentsFrontmatter;
+    if (mode !== 'experimental') return undefined;
+
+    const metaBlock = ast.blocks.find((b) => b.name === 'meta');
+    if (!metaBlock || metaBlock.content.type !== 'ObjectContent') return undefined;
+
+    const props = metaBlock.content.properties;
+    const description = props['description'];
+    const tags = props['tags'];
+
+    const lines: string[] = ['---'];
+
+    if (typeof description === 'string') {
+      // Enforce description length (max 500 chars per AGENTS.md spec)
+      const truncated = description.slice(0, 500);
+      lines.push(`description: "${truncated.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`);
+    }
+
+    if (Array.isArray(tags)) {
+      const uniqueTags = [...new Set(tags.filter((t): t is string => typeof t === 'string'))];
+      if (uniqueTags.length > 0) {
+        // Normalize tags to lowercase kebab-case
+        const normalized = uniqueTags.map((t) =>
+          t
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+        );
+        const valid = normalized.filter((t) => t.length > 0);
+        if (valid.length > 0) {
+          lines.push(`tags: [${valid.map((t) => `"${t}"`).join(', ')}]`);
+        }
+      }
+    }
+
+    lines.push('---');
+    lines.push('');
+
+    return lines.join('\n');
+  }
+
+  /**
    * Generate agent TOML files for Codex.
    * Overrides the base agent file generation to emit TOML instead of Markdown.
    * This is a fallback for when the full AST data is not available;

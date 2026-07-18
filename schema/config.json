@@ -662,6 +662,21 @@
         "agentsFile": {
           "type": "string",
           "description": "Codex: override the agents file name for scoped build profiles. Defaults to `AGENTS.md`. Use `AGENTS.override.md` only for scoped builds."
+        },
+        "agentsFrontmatter": {
+          "type": "string",
+          "const": "experimental",
+          "description": "AGENTS.md v1.1 frontmatter mode.\n- `experimental`: emit YAML frontmatter with `description` and `tags` from",
+          "default": "undefined (no frontmatter)"
+        },
+        "autoMode": {
+          "type": "string",
+          "enum": [
+            "acceptEdits",
+            "plan",
+            "bypassPermissions"
+          ],
+          "description": "Claude: auto mode setting for project settings.json. Maps to `.claude/settings.json` `autoMode` field. Only valid for Claude target with fixture-confirmed project-local schema."
         }
       },
       "additionalProperties": false,
