@@ -145,10 +145,11 @@ const SKILL_REPLACE_PROPERTIES = new Set([
   'disableModelInvocation',
   'context',
   'agent',
+  'license',
 ]);
 
 /** Properties where array elements are appended (deduplicated). */
-const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires']);
+const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires', 'scripts']);
 
 /** Properties where objects are shallow-merged (extension wins per key). */
 const SKILL_MERGE_PROPERTIES = new Set(['params', 'inputs', 'outputs']);

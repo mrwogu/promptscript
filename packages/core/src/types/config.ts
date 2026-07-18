@@ -119,6 +119,15 @@ export interface TargetConfig {
    * - string array: emit only the listed skill names
    */
   includeSkills?: boolean | string[];
+
+  /**
+   * Gemini skill path selection.
+   * - `agents`: use `.agents/skills/` (interoperable, fixture-confirmed default)
+   * - `gemini`: use `.gemini/skills/` (legacy)
+   * - `both`: emit to both paths (requires explicit opt-in, deduplicates content)
+   * @default 'agents'
+   */
+  skillPath?: 'agents' | 'gemini' | 'both';
 }
 
 /**

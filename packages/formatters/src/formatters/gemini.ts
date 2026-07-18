@@ -79,6 +79,25 @@ export class GeminiFormatter extends MarkdownInstructionFormatter {
   }
 
   /**
+   * Resolve the skill base path based on the `skillPath` target option.
+   * - `agents` (default): `.agents/skills/` (interoperable)
+   * - `gemini`: `.gemini/skills/` (legacy)
+   * - `both`: `.agents/skills/` (primary; `both` mode handled in format)
+   */
+  override getSkillBasePath(): string | null {
+    return '.agents/skills';
+  }
+
+  /**
+   * Resolve skill base path from target config option.
+   */
+  private resolveSkillBasePath(options?: FormatOptions): string {
+    const skillPath = options?.targetConfig?.skillPath ?? 'agents';
+    if (skillPath === 'gemini') return '.gemini/skills';
+    return '.agents/skills';
+  }
+
+  /**
    * Gemini treats full mode as multifile (no agents).
    */
   protected override formatFull(ast: Program, options?: FormatOptions): FormatterOutput {

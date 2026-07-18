@@ -30,9 +30,16 @@ export interface MarkdownSkillConfig {
   /** Skill content/instructions */
   content: string;
   /** Resource files to copy alongside the skill file */
-  resources?: Array<{ relativePath: string; content: string }>;
+  resources?: Array<{
+    relativePath: string;
+    content: string;
+    origin?: string;
+    executable?: boolean;
+  }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
+  /** License identifier from SKILL.md frontmatter */
+  license?: string;
   /** Pre-extracted examples from the skill's nested examples property */
   examples?: Array<{ name: string; input: string; output: string; description?: string }>;
   /**
