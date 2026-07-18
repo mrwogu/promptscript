@@ -23,6 +23,8 @@ export const BLOCK_TYPES = [
   'agents',
   'workflows',
   'hooks',
+  'mcpServers',
+  'plugins',
   'prompts',
   'examples',
 ] as const;

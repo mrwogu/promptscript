@@ -35,6 +35,8 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     '@agents',
     '@workflows',
     '@hooks',
+    '@mcpServers',
+    '@plugins',
     '@prompts',
     '@examples',
   ],

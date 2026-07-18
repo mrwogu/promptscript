@@ -124,6 +124,8 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
       'agents',
       'workflows',
       'hooks',
+      'mcpServers',
+      'plugins',
       'prompts',
       'examples',
     ],

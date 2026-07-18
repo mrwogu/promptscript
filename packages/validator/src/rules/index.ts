@@ -34,6 +34,8 @@ import { referenceIntegrity } from './reference-integrity.js';
 import { validSkillResources } from './valid-skill-resources.js';
 import { validAgentConfig } from './valid-agent-config.js';
 import { validHooks } from './valid-hooks.js';
+import { validMcpServers } from './valid-mcp-servers.js';
+import { validPlugins } from './valid-plugins.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -99,6 +101,8 @@ export { referenceIntegrity } from './reference-integrity.js';
 export { validSkillResources } from './valid-skill-resources.js';
 export { validAgentConfig } from './valid-agent-config.js';
 export { validHooks } from './valid-hooks.js';
+export { validMcpServers } from './valid-mcp-servers.js';
+export { validPlugins } from './valid-plugins.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -161,6 +165,10 @@ export const allRules: ValidationRule[] = [
   validAgentConfig,
   // Valid hooks (PS034)
   validHooks,
+  // Valid MCP servers (PS035)
+  validMcpServers,
+  // Valid plugins (PS036)
+  validPlugins,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
