@@ -123,21 +123,29 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
 | `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`                                                                                                               |
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
-| `1.3.0` | Current | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
+| `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
+| `1.4.0` | Current | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
 
-!!! note "Internal Block Types"
-`@workflows` and `@prompts` are registered in version `1.1.0` but are **internal, not user-facing**. They are generated automatically from `@shortcuts` (see [Antigravity Workflows](#antigravity-workflows) and [GitHub Copilot Prompts](#github-copilot-prompts)). Do not write `@workflows` or `@prompts` blocks directly.
+!!! note "Block Availability"
+`@workflows` and `@prompts` are registered in version `1.1.0` as user-facing blocks. `@workflows` emits workflow files for targets that support them (e.g. `.claude/workflows/<name>.md`). `@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
 
 ### Block Version Requirements
 
-| Block       | Minimum Syntax Version |
-| ----------- | ---------------------- |
-| `@agents`   | `1.1.0`                |
-| `@examples` | `1.2.0`                |
+| Block         | Minimum Syntax Version |
+| ------------- | ---------------------- |
+| `@agents`     | `1.1.0`                |
+| `@workflows`  | `1.1.0`                |
+| `@prompts`    | `1.1.0`                |
+| `@examples`   | `1.2.0`                |
+| `@hooks`      | `1.4.0`                |
+| `@mcpServers` | `1.4.0`                |
+| `@plugins`    | `1.4.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
+
+`@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
 
 ### Validation (PS018, PS019)
 
@@ -1011,7 +1019,7 @@ Review checklist:
 <!-- /output -->
 
 !!! note "Hooks Support"
-Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are planned but not yet implemented. See [Roadmap](https://github.com/mrwogu/promptscript#roadmap).
+Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are supported via the `@hooks` block (syntax `1.4.0+`). See [Hooks](#hooks-block) for details.
 
 ### @local
 
@@ -1143,6 +1151,125 @@ Examples can also be defined inline within a `@skills` entry via the `examples` 
 
 See the [Examples guide](../guides/examples.md) for a full walkthrough.
 
+### @workflows
+
+Defines portable workflow definitions. Available since syntax `1.1.0`. Targets that support workflows emit dedicated workflow files (e.g. Claude emits `.claude/workflows/<name>.md`).
+
+```promptscript
+@workflows {
+  release: {
+    description: "Prepare release"
+    content: """
+      Review changes, validate packages, and prepare release metadata.
+    """
+  }
+}
+```
+
+Each workflow entry is an object with:
+
+| Field         | Required | Description                       |
+| ------------- | -------- | --------------------------------- |
+| `description` | No       | Short description of the workflow |
+| `content`     | No       | Workflow instructions (multiline) |
+
+### @hooks
+
+Defines portable lifecycle hooks. Requires syntax `1.4.0`. Hooks are mapped to target-native event systems (e.g. Claude `PreToolUse`, Codex `pre_tool_use`, Cursor `preEdit`).
+
+```promptscript
+@hooks {
+  protect-generated-files: {
+    event: "pre-tool-use"
+    matcher: "Edit|Write"
+    command: ["prs", "hook", "pre-edit"]
+    timeoutMs: 5000
+    statusMessage: "Checking generated files"
+    continueOnFailure: false
+    enabled: true
+  }
+}
+```
+
+Portable events:
+
+| Event            | Description                       |
+| ---------------- | --------------------------------- |
+| `pre-tool-use`   | Fires before a tool invocation    |
+| `post-tool-use`  | Fires after a tool invocation     |
+| `session-start`  | Fires when a session begins       |
+| `setup`          | Alias for `session-start`         |
+| `subagent-start` | Fires when a subagent is launched |
+| `notification`   | Fires on notification events      |
+| `stop`           | Fires when the agent stops        |
+
+Each hook entry is an object with:
+
+| Field               | Required | Type     | Description                                       |
+| ------------------- | -------- | -------- | ------------------------------------------------- |
+| `event`             | Yes      | string   | Portable event name (see above)                   |
+| `command`           | Yes      | string[] | Non-empty argument array (no shell interpolation) |
+| `matcher`           | No       | string   | Tool name matcher pattern                         |
+| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                        |
+| `statusMessage`     | No       | string   | Status message shown during execution             |
+| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                 |
+| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)       |
+
+Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command arguments.
+
+### @mcpServers
+
+Defines project-local MCP (Model Context Protocol) server configurations. Requires syntax `1.4.0`. Servers are mapped to target-native MCP config files.
+
+```promptscript
+@mcpServers {
+  security-scanner: {
+    transport: "stdio"
+    command: ["node", "./tools/security-scanner.mjs"]
+    env: {
+      API_TOKEN: {
+        fromEnv: "SECURITY_SCANNER_TOKEN"
+      }
+    }
+  }
+}
+```
+
+| Field       | Required | Type     | Description                           |
+| ----------- | -------- | -------- | ------------------------------------- |
+| `transport` | Yes      | string   | `stdio`, `http`, or `sse`             |
+| `command`   | Yes\*    | string[] | Non-empty argument array (stdio only) |
+| `url`       | Yes\*    | string   | HTTP(S) URL (http/sse only)           |
+| `env`       | No       | object   | Environment variable references       |
+
+Secret-bearing fields (`token`, `secret`, `password`, `apiKey`, etc.) must use `{ fromEnv: "VAR_NAME" }` references, not plaintext values.
+
+### @plugins
+
+Defines portable plugin bundles that group skills, hooks, and MCP servers. Requires syntax `1.4.0`.
+
+```promptscript
+@plugins {
+  security-suite: {
+    description: "Security review tooling"
+    version: "1.0.0"
+    skills: ["security-review"]
+    hooks: ["protect-generated-files"]
+    mcpServers: ["security-scanner"]
+  }
+}
+```
+
+| Field         | Required | Type     | Description                     |
+| ------------- | -------- | -------- | ------------------------------- |
+| `description` | No       | string   | Plugin description              |
+| `version`     | No       | string   | Semantic version (e.g. `1.0.0`) |
+| `skills`      | No       | string[] | Referenced skill names          |
+| `hooks`       | No       | string[] | Referenced hook IDs             |
+| `mcpServers`  | No       | string[] | Referenced MCP server names     |
+
+Marketplace publishing and installation are outside the compiler scope.
+
 ## @extend Block
 
 Modify inherited or existing blocks:
@@ -1179,7 +1306,7 @@ Syntax `1.3.0` adds explicit replacement for regular block fields. Add `!` after
 inside `@extend` to replace its complete prior value:
 
 ```promptscript
-@meta { id: "project" syntax: "1.3.0" }
+@meta { id: "project" syntax: "1.4.0" }
 
 @inherit ./company-base
 

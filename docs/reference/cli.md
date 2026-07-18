@@ -128,21 +128,24 @@ prs compile [options]
 
 **Options:**
 
-| Option                  | Description                                    |
-| ----------------------- | ---------------------------------------------- |
-| `-b, --build <name>`    | Compile a named build profile from config      |
-| `-t, --target <target>` | Compile to specific target                     |
-| `-f, --format <format>` | Output format (alias for `--target`)           |
-| `-a, --all`             | Compile to all configured targets              |
-| `-w, --watch`           | Watch mode for continuous compilation          |
-| `-o, --output <dir>`    | Override output directory                      |
-| `--dry-run`             | Preview changes without writing                |
-| `-c, --config <path>`   | Path to config file                            |
-| `--force`               | Force overwrite existing files without prompts |
-| `--strict`              | Treat output path conflicts as errors          |
-| `--ignore-hashes`       | Skip reference integrity hash verification     |
-| `--verbose`             | Show detailed compilation progress             |
-| `--debug`               | Show debug information (includes verbose)      |
+| Option                  | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `-b, --build <name>`    | Compile a named build profile from config               |
+| `--all-builds`          | Compile all named build profiles in deterministic order |
+| `-t, --target <target>` | Compile to specific target                              |
+| `-f, --format <format>` | Output format (alias for `--target`)                    |
+| `-a, --all`             | Compile to all configured targets                       |
+| `-w, --watch`           | Watch mode for continuous compilation                   |
+| `-o, --output <dir>`    | Override output directory                               |
+| `--dry-run`             | Preview changes without writing                         |
+| `-c, --config <path>`   | Path to config file                                     |
+| `--force`               | Force overwrite existing files without prompts          |
+| `--strict`              | Treat output path conflicts as errors                   |
+| `--ignore-hashes`       | Skip reference integrity hash verification              |
+| `--verbose`             | Show detailed compilation progress                      |
+| `--debug`               | Show debug information (includes verbose)               |
+
+`--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, aggregating errors per profile.
 
 **Examples:**
 
@@ -158,6 +161,9 @@ prs compile --target cursor
 # Using --format (alias for --target)
 prs compile --format github
 prs compile -f claude
+
+# Compile all named build profiles
+prs compile --all-builds
 
 # Watch mode
 prs compile --watch
