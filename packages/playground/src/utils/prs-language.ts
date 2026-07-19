@@ -3,8 +3,11 @@
  */
 
 import type * as Monaco from 'monaco-editor';
+import { BLOCK_TYPES } from '@promptscript/core';
 
 export const PRS_LANGUAGE_ID = 'promptscript';
+const CONTROL_DIRECTIVES = ['@meta', '@inherit', '@extend', '@use'];
+const BLOCK_DIRECTIVES = BLOCK_TYPES.map((blockType) => `@${blockType}`);
 
 /**
  * PRS language tokens configuration for Monaco editor.
@@ -13,33 +16,10 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
   defaultToken: '',
   tokenPostfix: '.prs',
 
-  keywords: ['true', 'false', 'null', 'string', 'number', 'boolean', 'enum', 'as', 'into'],
+  keywords: ['true', 'false', 'null', 'string', 'number', 'boolean', 'range', 'enum', 'as', 'into'],
 
   // Directive names
-  directives: [
-    '@meta',
-    '@inherit',
-    '@extend',
-    '@use',
-    '@identity',
-    '@context',
-    '@standards',
-    '@restrictions',
-    '@knowledge',
-    '@shortcuts',
-    '@commands',
-    '@guards',
-    '@params',
-    '@skills',
-    '@local',
-    '@agents',
-    '@workflows',
-    '@hooks',
-    '@mcpServers',
-    '@plugins',
-    '@prompts',
-    '@examples',
-  ],
+  directives: [...CONTROL_DIRECTIVES, ...BLOCK_DIRECTIVES],
 
   // Operators and symbols
   operators: [':', '!'],
@@ -54,19 +34,25 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       // Comments
       [/#.*$/, 'comment'],
 
+      // Registry paths (@scope/path@version)
+      [/@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?:@[a-zA-Z0-9^~./-]+)?/, 'string.url'],
+
       // Directives
       [
-        /@\w+/,
+        /@[a-zA-Z_][\w-]*/,
         {
           cases: {
             '@directives': 'keyword.directive',
-            '@default': 'keyword.directive',
+            '@default': 'identifier.directive',
           },
         },
       ],
 
       // URL paths (github.com/org/repo/@path@version)
       [/[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[a-zA-Z0-9_./@^~-]+/, 'string.url'],
+
+      // Relative paths
+      [/(?:\.\.\/|\.\/)[a-zA-Z0-9_/.-]+/, 'string.url'],
 
       // Identifiers and keywords
       [
@@ -82,26 +68,28 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       // Whitespace
       { include: '@whitespace' },
 
-      // Delimiters and operators
-      [/[{}()[\]]/, '@brackets'],
-      [/!(?=\s*:)/, 'operator.replace'],
-      [/:/, 'delimiter'],
-      [/,/, 'delimiter'],
-
       // Template expressions {{variable}}
       [/\{\{/, 'variable.template', '@templateExpression'],
 
       // Environment variables ${VAR} or ${VAR:-default}
-      [/\$\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
+      [/\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
 
       // Numbers
-      [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
-      [/\d+/, 'number'],
+      [/-?\d+(?:\.\d+)?/, 'number'],
+
+      // Delimiters and operators
+      [/[{}()[\]]/, '@brackets'],
+      [/!(?=\s*:)/, 'operator.replace'],
+      [/\.\./, 'operator.range'],
+      [/-(?!\d)/, 'operator.restriction'],
+      [/[:,.=?]/, 'delimiter'],
 
       // Strings
       [/"""/, 'string', '@multilineString'],
       [/"([^"\\]|\\.)*$/, 'string.invalid'],
       [/"/, 'string', '@string'],
+      [/'([^'\\]|\\.)*$/, 'string.invalid'],
+      [/'/, 'string', '@stringSingle'],
     ],
 
     templateExpression: [
@@ -115,21 +103,38 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
     ],
 
     string: [
+      // Template expressions inside strings
+      [/\{\{/, 'variable.template', '@templateExpressionInString'],
       // Environment variables inside strings
-      [/\$\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
-      [/[^\\"$]+/, 'string'],
+      [/\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
+      [/[^\\"${]+/, 'string'],
       [/@escapes/, 'string.escape'],
       [/\\./, 'string.escape.invalid'],
       [/\$(?!\{)/, 'string'],
+      [/\{(?!\{)/, 'string'],
       [/"/, 'string', '@pop'],
+    ],
+
+    stringSingle: [
+      // Template expressions inside strings
+      [/\{\{/, 'variable.template', '@templateExpressionInString'],
+      // Environment variables inside strings
+      [/\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
+      [/[^\\'${]+/, 'string'],
+      [/@escapes/, 'string.escape'],
+      [/\\./, 'string.escape.invalid'],
+      [/\$(?!\{)/, 'string'],
+      [/\{(?!\{)/, 'string'],
+      [/'/, 'string', '@pop'],
     ],
 
     multilineString: [
       [/\{\{/, 'variable.template', '@templateExpressionInString'],
       // Environment variables inside multiline strings
-      [/\$\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
+      [/\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}/, 'variable.env'],
       [/[^"{$]+/, 'string'],
       [/\$(?!\{)/, 'string'],
+      [/\{(?!\{)/, 'string'],
       [/"""/, 'string', '@pop'],
       [/"/, 'string'],
     ],
@@ -158,16 +163,19 @@ export const prsLanguageConfiguration: Monaco.languages.LanguageConfiguration = 
     { open: '[', close: ']' },
     { open: '(', close: ')' },
     { open: '"', close: '"', notIn: ['string'] },
+    { open: "'", close: "'", notIn: ['string'] },
+    { open: '{{', close: '}}' },
   ],
   surroundingPairs: [
     { open: '{', close: '}' },
     { open: '[', close: ']' },
     { open: '(', close: ')' },
     { open: '"', close: '"' },
+    { open: "'", close: "'" },
   ],
   folding: {
     markers: {
-      start: /^\s*@\w+\s*\{/,
+      start: /^\s*@[a-zA-Z_][a-zA-Z0-9_-]*\s*\{/,
       end: /^\s*\}/,
     },
   },
@@ -178,6 +186,7 @@ export const prsLanguageConfiguration: Monaco.languages.LanguageConfiguration = 
  */
 export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'keyword.directive', foreground: '818cf8', fontStyle: 'bold' },
+  { token: 'identifier.directive', foreground: 'a78bfa' },
   { token: 'keyword', foreground: '93c5fd' },
   { token: 'string', foreground: 'a3e635' },
   { token: 'string.escape', foreground: 'facc15' },
@@ -185,6 +194,8 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'number', foreground: 'f472b6' },
   { token: 'identifier', foreground: 'f8fafc' },
   { token: 'operator.replace', foreground: 'facc15', fontStyle: 'bold' },
+  { token: 'operator.range', foreground: 'facc15' },
+  { token: 'operator.restriction', foreground: 'facc15' },
   { token: 'delimiter', foreground: '94a3b8' },
   { token: 'variable.template', foreground: 'f472b6', fontStyle: 'bold' },
   { token: 'variable.name', foreground: 'fb923c' },
