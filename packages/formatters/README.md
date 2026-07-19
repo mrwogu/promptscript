@@ -2,7 +2,7 @@
 
 > **Internal package** - Part of the [PromptScript](https://github.com/mrwogu/promptscript) monorepo.
 
-Output formatters for 37 AI coding agents.
+Output formatters for 48 AI coding targets.
 
 ## Supported Formatters
 
@@ -17,6 +17,7 @@ Output formatters for 37 AI coding agents.
 | Factory AI         | `AGENTS.md`                       |
 | OpenCode           | `OPENCODE.md`                     |
 | Gemini CLI         | `GEMINI.md`                       |
+| Grok               | `AGENTS.md`                       |
 
 **Tier 1 -- High priority agents** (via `MarkdownInstructionFormatter`):
 
@@ -33,19 +34,19 @@ Output formatters for 37 AI coding agents.
 | Formatter | Output Path                  |
 | :-------- | :--------------------------- |
 | Augment   | `.augment/rules/project.md`  |
-| Goose     | `.goose/rules/project.md`    |
+| Goose     | `.goosehints`                |
 | Kilo Code | `.kilocode/rules/project.md` |
 | Amp       | `AGENTS.md`                  |
 | Trae      | `.trae/rules/project.md`     |
-| Junie     | `.junie/rules/project.md`    |
-| Kiro CLI  | `.kiro/rules/project.md`     |
+| Junie     | `.junie/guidelines.md`       |
+| Kiro CLI  | `.kiro/steering/project.md`  |
 
 **Tier 3 -- Additional agents:**
 
 | Formatter    | Output Path                     |
 | :----------- | :------------------------------ |
 | Cortex       | `.cortex/rules/project.md`      |
-| Crush        | `.crush/rules/project.md`       |
+| Crush        | `AGENTS.md`                     |
 | Command Code | `.commandcode/rules/project.md` |
 | Kode         | `.kode/rules/project.md`        |
 | MCPJam       | `.mcpjam/rules/project.md`      |
@@ -63,6 +64,21 @@ Output formatters for 37 AI coding agents.
 | OpenClaw     | `INSTRUCTIONS.md`               |
 | CodeBuddy    | `.codebuddy/rules/project.md`   |
 
+**AGENTS.md targets:**
+
+| Formatter   | Output Path |
+| :---------- | :---------- |
+| Aider       | `AGENTS.md` |
+| Amazon Q    | `AGENTS.md` |
+| Deep Agents | `AGENTS.md` |
+| Devin       | `AGENTS.md` |
+| ForgeCode   | `AGENTS.md` |
+| Jules       | `AGENTS.md` |
+| Kimi        | `AGENTS.md` |
+| Mimo        | `AGENTS.md` |
+| Warp        | `AGENTS.md` |
+| Zed         | `AGENTS.md` |
+
 ## Public API
 
 The package exports the following key classes, functions, and types.
@@ -77,7 +93,7 @@ Formatter (interface)
         |
         +-- MarkdownInstructionFormatter (abstract)
         |     |
-        |     +-- 30 simple markdown formatters (Windsurf, Cline, ...)
+        |     +-- 40 shared markdown target formatters (Windsurf, Cline, ...)
         |
         +-- GitHubFormatter, ClaudeFormatter, CursorFormatter, ...
 ```

@@ -4,11 +4,11 @@
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**One compiler. 37 AI coding agents. Zero manual syncing.**
+**One compiler. 48 AI coding targets. Zero manual syncing.**
 
 [![Watch the video](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
 
-PromptScript is the Terraform for AI instructions. Write your standards once in `.prs` files, compile to GitHub Copilot, Claude Code, Cursor, and 34 more agents, with inheritance, composition, **skills, sub-agents**, validation, lockfile, and version control built in.
+PromptScript is the Terraform for AI instructions. Write your standards once in `.prs` files, compile to GitHub Copilot, Claude Code, Cursor, and 45 more targets, with inheritance, composition, **skills, sub-agents**, validation, lockfile, and version control built in.
 
 ---
 
@@ -30,10 +30,10 @@ Write once  ──>  prs compile  ──>  .github/copilot-instructions.md
                                     AGENTS.md
                                     GEMINI.md
                                     OPENCODE.md
-                                    ... 31 more
+                                    ... 42 more
 ```
 
-- ✅ Single source of truth for **all 37 agents**
+- ✅ Single source of truth for **all 48 targets**
 - ✅ Hierarchical inheritance - org, team, and project levels cascade like CSS
 - ✅ Full validation catches errors before they reach your AI tools
 - ✅ Version-pinned registries for reproducible builds
@@ -52,7 +52,7 @@ prs compile       # outputs to all configured AI tools
 Then install hooks for fully automatic workflow:
 
 ```bash
-prs hooks install --all   # auto-compile on .prs save, block AI from overwriting outputs
+prs hooks install         # install for detected AI tools
 ```
 
 Three commands. Every AI tool configured. Your AI agents automatically learn PromptScript syntax via a bundled language skill, they can manage your `.prs` files for you.
@@ -155,8 +155,8 @@ Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, and other
 | **Parameterized templates**  | `@inherit @stacks/node(port: 8080, db: "postgres")`                            |
 | **Skills**                   | SKILL.md files with resource bundles, tool permissions, input/output contracts |
 | **Sub-agents**               | `@agents` block compiles to Claude / Factory native agents                     |
-| **Multi-target compilation** | One source, any number of AI tools (37 supported)                              |
-| **Hooks**                    | `prs hooks install --all` auto-recompiles + protects outputs                   |
+| **Multi-target compilation** | One source, any number of AI tools (48 supported)                              |
+| **Hooks**                    | `prs hooks install` integrates detected AI tools                               |
 | **Watch mode**               | `prs compile -w` for instant recompilation                                     |
 | **Overwrite protection**     | Never accidentally clobbers hand-written files                                 |
 | **Validation**               | `prs validate --strict --format json` for CI                                   |
@@ -181,7 +181,7 @@ Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, and other
 | `prs inspect <skill>`                 | Show skill composition layers and provenance           |
 | `prs diff`                            | Show diff between source and compiled output           |
 | `prs check`                           | Check configuration and dependencies health            |
-| `prs hooks install --all`             | Install auto-compile + overwrite-protection hooks      |
+| `prs hooks install`                   | Install hooks for detected AI tools                    |
 | `prs hooks uninstall <tool>`          | Remove hooks for a specific tool                       |
 | `prs lock`                            | Generate / update `promptscript.lock`                  |
 | `prs lock --update`                   | Force re-hash of all registry references               |

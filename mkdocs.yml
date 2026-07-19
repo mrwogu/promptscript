@@ -83,20 +83,29 @@ plugins:
   - llmstxt:
       full_output: llms-full.txt
       markdown_description: |
-        PromptScript is a language and toolchain for standardizing AI coding
-        assistant instructions across enterprise organizations. It compiles
-        .prs files to native formats for 37 AI agent platforms including
-        GitHub Copilot, Claude Code, Cursor, Windsurf, and more.
+        PromptScript is an agent platform configuration language. It defines
+        instructions, skills, agents, MCP servers, plugins, hooks, workflows,
+        and policies once, then compiles native output for 48 AI coding agent
+        targets.
       sections:
         Getting Started:
           - getting-started.md
           - tutorial.md
+        Agent Platform:
+          - features/index.md: Agent platform concepts and complete feature model
+          - features/agents.md: Native agents, tools, skills, and MCP access
+          - features/skills.md: Portable skills, resources, scripts, and contracts
+          - features/integrations.md: MCP servers and plugin bundles
+          - features/automation.md: Lifecycle hooks, workflows, and build automation
+          - features/target-platforms.md: All 48 target platforms and output families
         Reference:
           - reference/language.md: Complete PromptScript language specification
           - reference/cli.md: CLI commands and options
+          - reference/cli/hooks.md: AI tool hook installation and removal
+          - reference/cli/hook.md: Low-level hook runtime contract
           - reference/config.md: Configuration file format
-        Formatters:
-          - reference/formatters/index.md: All 37 supported AI agent formatters
+        Target Platforms:
+          - reference/formatters/index.md: All 48 supported AI agent targets
           - reference/formatters/claude.md: Claude Code output format, skills, agents, local files
           - reference/formatters/github.md: GitHub Copilot output format, instructions, prompts, skills
           - reference/formatters/cursor.md: Cursor output format, MDC frontmatter, commands
@@ -104,20 +113,25 @@ plugins:
           - reference/formatters/factory.md: Factory AI output format, droids, skills
           - reference/formatters/gemini.md: Gemini CLI output format, commands, skills
           - reference/formatters/opencode.md: OpenCode output format, commands, skills, agents
-        Guides:
-          - guides/formatter-architecture.md: Internal architecture of formatters
+        Composition and Governance:
           - guides/inheritance.md: PromptScript inheritance system
           - guides/multi-file.md: Multi-file organization
-          - guides/ci.md: CI/CD integration
           - guides/registry.md: Building a PromptScript registry
+          - guides/policy-engine.md: Organization policy enforcement
+          - guides/security.md: Security controls and best practices
+          - guides/ci.md: CI/CD integration
           - guides/enterprise.md: Enterprise setup
+        Migration and Operations:
           - guides/migration.md: Migration guide
+          - guides/hooks.md: Automatic source compilation hooks
+          - guides/import.md: Import existing agent instructions
+          - guides/formatter-architecture.md: Internal architecture of formatters
         Examples:
           - examples/minimal.md: Minimal project setup
           - examples/team-setup.md: Team configuration
           - examples/enterprise.md: Enterprise example
           - examples/skills-and-local.md: Skills and local overrides
-          - examples/agents.md: Claude agent configuration
+          - examples/agents.md: Agent configuration
         Optional:
           - guides/faq.md: Frequently asked questions
           - guides/vs-manual.md: Comparison with manual configuration
@@ -202,65 +216,79 @@ nav:
   - Getting Started:
       - getting-started.md
       - tutorial.md
-  - Reference:
-      - reference/index.md
-      - Language: reference/language.md
-      - CLI: reference/cli.md
-      - Configuration: reference/config.md
-      - Formatters:
-          - reference/formatters/index.md
-          - Claude Code: reference/formatters/claude.md
-          - GitHub Copilot: reference/formatters/github.md
-          - Cursor: reference/formatters/cursor.md
-          - Antigravity: reference/formatters/antigravity.md
-          - Factory AI: reference/formatters/factory.md
-          - Gemini CLI: reference/formatters/gemini.md
-          - OpenCode: reference/formatters/opencode.md
-  - Guides:
-      - guides/index.md
-      - Using npx skills: guides/npx-skills.md
+  - Agent Platform:
+      - Overview: features/index.md
+      - Agents: features/agents.md
+      - Skills and Resources: features/skills.md
+      - MCP Servers and Plugins: features/integrations.md
+      - Hooks and Workflows: features/automation.md
+      - Target Platforms: features/target-platforms.md
+  - Composition:
+      - Overview: guides/index.md
       - Building Skills: guides/building-skills.md
       - Skill Composition: guides/skill-composition.md
       - Skill Overlays: guides/skill-overlays.md
       - Local Skills: guides/local-skills.md
       - Skill Contracts: guides/skill-contracts.md
       - Shared Resources: guides/shared-resources.md
-      - Build Your Registry: guides/registry.md
-      - CI/CD Integration: guides/ci.md
-      - Docker: guides/docker.md
       - Inheritance: guides/inheritance.md
       - Multi-File Organization: guides/multi-file.md
-      - Enterprise Setup: guides/enterprise.md
-      - Migration: guides/migration.md
-      - FAQ: guides/faq.md
       - Markdown Imports: guides/markdown-imports.md
-      - AI Tool Hooks: guides/hooks.md
-      - Importing Instructions: guides/import.md
+      - Build Your Registry: guides/registry.md
+  - Governance:
+      - Enterprise Setup: guides/enterprise.md
       - Security: guides/security.md
-      - User Configuration: guides/user-config.md
-      - Examples (Few-Shot): guides/examples.md
       - Policy Engine: guides/policy-engine.md
+      - CI/CD Integration: guides/ci.md
+      - User Configuration: guides/user-config.md
       - Guard Dependencies: guides/guard-dependencies.md
+  - Target Reference:
+      - Platform Matrix: reference/formatters/index.md
+      - Claude Code: reference/formatters/claude.md
+      - GitHub Copilot: reference/formatters/github.md
+      - Cursor: reference/formatters/cursor.md
+      - Antigravity: reference/formatters/antigravity.md
+      - Factory AI: reference/formatters/factory.md
+      - Gemini CLI: reference/formatters/gemini.md
+      - OpenCode: reference/formatters/opencode.md
+  - Reference:
+      - reference/index.md
+      - Language: reference/language.md
+      - CLI:
+          - Overview: reference/cli.md
+          - Hook Management: reference/cli/hooks.md
+          - Hook Runtime: reference/cli/hook.md
+      - Configuration: reference/config.md
+  - Operations:
+      - AI Tool Hooks: guides/hooks.md
+      - Docker: guides/docker.md
+      - Importing Instructions: guides/import.md
+      - Migration: guides/migration.md
       - AI Migration Best Practices: guides/ai-migration-best-practices.md
+      - Using npx skills: guides/npx-skills.md
+      - Examples (Few-Shot): guides/examples.md
+      - FAQ: guides/faq.md
       - Comparison: guides/vs-manual.md
-  - API:
-      - api-reference/README.md
-      - Core: api-reference/core/src/README.md
-      - Parser: api-reference/parser/src/README.md
-      - Resolver: api-reference/resolver/src/README.md
-      - Validator: api-reference/validator/src/README.md
-      - Compiler: api-reference/compiler/src/README.md
-      - Formatters: api-reference/formatters/src/README.md
-      - CLI: api-reference/cli/src/README.md
   - Examples:
       - examples/index.md
       - Minimal: examples/minimal.md
       - Team Setup: examples/team-setup.md
       - Enterprise: examples/enterprise.md
       - Skills & Local: examples/skills-and-local.md
-      - Claude Agents: examples/agents.md
-  - Testing:
-      - testing/index.md
-      - Parity Testing: testing/parity-testing.md
-      - Feature Coverage: testing/feature-coverage.md
+      - Agents: examples/agents.md
+  - Developer:
+      - API:
+          - api-reference/README.md
+          - Core: api-reference/core/src/README.md
+          - Parser: api-reference/parser/src/README.md
+          - Resolver: api-reference/resolver/src/README.md
+          - Validator: api-reference/validator/src/README.md
+          - Compiler: api-reference/compiler/src/README.md
+          - Formatters: api-reference/formatters/src/README.md
+          - CLI: api-reference/cli/src/README.md
+      - Formatter Architecture: guides/formatter-architecture.md
+      - Testing:
+          - testing/index.md
+          - Parity Testing: testing/parity-testing.md
+          - Feature Coverage: testing/feature-coverage.md
   - Changelog: https://github.com/mrwogu/promptscript/releases

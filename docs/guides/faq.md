@@ -7,11 +7,15 @@ description: Frequently asked questions about PromptScript
 
 ## What is PromptScript?
 
-PromptScript is a language and toolchain for standardizing AI coding instructions across enterprise organizations. You write `.prs` files once and compile them to native formats for 37 AI coding agents - GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more.
+PromptScript is an agent platform configuration language and toolchain. You define instructions,
+skills, agents, integrations, automation, and policy once, then compile native output for 48 AI
+coding agent targets.
 
 ## How many AI tools are supported?
 
-PromptScript currently compiles to **37 AI coding agents**. See the full list in the [formatter architecture guide](formatter-architecture.md) or the [ROADMAP](https://github.com/mrwogu/promptscript/blob/main/ROADMAP.md).
+PromptScript currently compiles to **48 AI coding agent targets**. See the full list in
+[Target Platforms](../features/target-platforms.md) or the
+[formatter matrix](../reference/formatters/index.md).
 
 ## How do I install PromptScript?
 
@@ -57,8 +61,8 @@ See the [Registry guide](registry.md) for full setup instructions.
 Add PromptScript to your pipeline:
 
 ```bash
-prs compile --check   # Fail if outputs are out of date
 prs validate --strict  # Fail on any validation warnings
+prs compile --strict   # Compile configured targets and fail on output conflicts
 ```
 
 See the [CI/CD guide](ci.md).

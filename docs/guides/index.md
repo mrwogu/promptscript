@@ -7,6 +7,18 @@ description: PromptScript guides and best practices
 
 Learn best practices and patterns for using PromptScript effectively.
 
+## Build an Agent Platform
+
+Start with product capabilities, then use the guides below for composition, governance, and
+delivery:
+
+- [Agent Platform Overview](../features/index.md)
+- [Agents](../features/agents.md)
+- [Skills and Resources](../features/skills.md)
+- [MCP Servers and Plugins](../features/integrations.md)
+- [Hooks and Workflows](../features/automation.md)
+- [Target Platforms](../features/target-platforms.md)
+
 <div class="ref-list">
 
 <a href="registry/" class="ref-item">

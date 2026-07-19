@@ -7,9 +7,9 @@ description: >-
   @restrictions, @shortcuts, @skills, or @agents, configuring
   promptscript.yaml, resolving compilation errors, understanding inheritance
   (@inherit) and composition (@use, @extend), or migrating AI instructions
-  to PromptScript. Also use when asked about compilation targets (GitHub
-  Copilot, Claude Code, Cursor, Antigravity, Factory AI, and 30+ other
-  AI coding agents).
+  to PromptScript. Also use when asked about the 48 built-in compilation
+  targets, including GitHub Copilot, Claude Code, Cursor, Antigravity,
+  Factory AI, and AGENTS.md-based platforms.
 license: MIT
 metadata:
   author: PromptScript
@@ -525,9 +525,17 @@ prs skills list
 prs skills update
 ```
 
-### @extend (modify imported blocks)
+### @extend (modify existing or imported blocks)
 
-Requires an aliased @use:
+Use a direct path for inherited or local blocks:
+
+```
+@extend standards.testing {
+  coverage: 95
+}
+```
+
+Use an alias when targeting a specific imported block:
 
 ```
 @use @core/typescript as ts
@@ -740,7 +748,7 @@ targets:
     version: frontmatter
   factory:
     version: full
-  windsurf:             # 31 additional agents supported
+  windsurf:             # 41 additional targets supported
     version: simple
   cline:
     version: simple
@@ -812,16 +820,21 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | Version | What it adds                                                                                                            |
 | ------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `1.0.0` | Core blocks (identity, context, standards, restrictions, knowledge, shortcuts, commands, guards, params, skills, local) |
-| `1.1.0` | Adds `@agents` (plus internal `@workflows`, `@prompts` - not user-facing)                                               |
+| `1.1.0` | Adds `@agents` and `@workflows`; reserves internal `@prompts`                                                           |
 | `1.2.0` | Adds `@examples` (few-shot input/output pairs)                                                                          |
 | `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
+| `1.4.0` | Adds `@hooks`, `@mcpServers`, and `@plugins`                                                                            |
 
 ### Block Version Requirements
 
-| Block       | Minimum Syntax Version |
-| ----------- | ---------------------- |
-| `@agents`   | `1.1.0`                |
-| `@examples` | `1.2.0`                |
+| Block         | Minimum Syntax Version |
+| ------------- | ---------------------- |
+| `@agents`     | `1.1.0`                |
+| `@workflows`  | `1.1.0`                |
+| `@examples`   | `1.2.0`                |
+| `@hooks`      | `1.4.0`                |
+| `@mcpServers` | `1.4.0`                |
+| `@plugins`    | `1.4.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
@@ -866,7 +879,7 @@ prs validate --fix          # Auto-fix syntax version declarations
 prs validate --skip-policies # Skip policy engine evaluation
 prs upgrade                 # Upgrade all .prs files to latest syntax version
 prs import CLAUDE.md        # Import existing AI instructions
-prs import --dry-run        # Preview import conversion
+prs import CLAUDE.md --dry-run # Preview import conversion
 prs inspect <skill>         # Show skill composition provenance
 prs inspect <skill> --layers # Show layer-level breakdown
 prs hooks install           # Install auto-compilation hooks for AI tools
@@ -892,32 +905,32 @@ prs registry add <alias> <url>  # Add a registry alias
 
 ## Output Targets
 
-38+ supported targets. Key examples:
+48 supported targets. Key examples:
 
 | Target      | Main File                       | Skills                                             |
 | ----------- | ------------------------------- | -------------------------------------------------- |
 | GitHub      | .github/copilot-instructions.md | .github/skills/\*/SKILL.md                         |
 | Claude      | CLAUDE.md                       | .claude/skills/\*/SKILL.md                         |
-| Cursor      | .cursor/rules/project.mdc       | .cursor/commands/\*.md                             |
-| Antigravity | .agent/rules/project.md         | .agent/rules/\*.md                                 |
+| Cursor      | .cursor/rules/project.mdc       | .agents/skills/\*/SKILL.md                         |
+| Antigravity | .agent/rules/project.md         | -                                                  |
 | Factory     | AGENTS.md                       | .factory/skills/\*/SKILL.md, .factory/droids/\*.md |
 | OpenCode    | OPENCODE.md                     | .opencode/skills/\*/SKILL.md                       |
-| Gemini      | GEMINI.md                       | .gemini/skills/\*/skill.md                         |
+| Gemini      | GEMINI.md                       | .agents/skills/\*/skill.md                         |
 | Windsurf    | .windsurf/rules/project.md      | .windsurf/skills/\*/SKILL.md                       |
-| Cline       | .clinerules                     | .agents/skills/\*/SKILL.md                         |
-| Roo Code    | .roorules                       | .roo/skills/\*/SKILL.md                            |
+| Cline       | .clinerules                     | -                                                  |
+| Roo Code    | .roorules                       | -                                                  |
 | Codex       | AGENTS.md                       | .agents/skills/\*/SKILL.md                         |
-| Continue    | .continue/rules/project.md      | .continue/skills/\*/SKILL.md                       |
-| + 26 more   |                                 | See full list in documentation                     |
+| Continue    | .continue/rules/project.md      | -                                                  |
+| + 36 more   |                                 | See full list in documentation                     |
 
 ### Formatter Documentation
 
 For detailed information about each formatter's output paths, supported features, quirks, and example outputs:
 
-- **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 37)
+- **Full formatter reference:** `docs/reference/formatters/` (7 dedicated pages + index of all 48)
 - **llms-full.txt:** Available at the docs site root - contains all documentation in a single file for LLM consumption
 - **Dedicated pages exist for:** Claude Code, GitHub Copilot, Cursor, Antigravity, Factory AI, Gemini CLI, OpenCode
-- **All 37 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
+- **All 48 formatters indexed at:** `docs/reference/formatters/index.md` with output paths, tier, and feature flags
 
 ### Auto-Compilation Hooks
 
@@ -927,7 +940,6 @@ triggers compilation automatically when you edit `.prs` files:
 ```
 prs hooks install          # Auto-detect and install for all detected tools
 prs hooks install claude   # Install for a specific tool
-prs hooks install --all    # Install for all supported tools
 ```
 
 Hooks also protect generated files from direct edits — when an AI agent tries
@@ -954,7 +966,7 @@ The entry file uses `@use ./context`, `@use ./standards`, etc. to compose them.
 
 1. Missing @meta block - every .prs file needs `@meta` with `id` and `syntax`
 2. Multiple @inherit - only one per file; use `@use` for additional imports
-3. @extend without alias - requires prior `@use ... as alias`
+3. Extending an unknown path - target an inherited or local block, or use an imported alias
 4. Unquoted strings with special chars - quote strings containing `:`, `#`, `{`, `}`
 5. Forgetting to compile - `.prs` changes need `prs compile` to take effect
 6. Triple quotes inside triple quotes - not supported; describe content textually instead

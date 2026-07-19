@@ -13,7 +13,7 @@ description: PromptScript output format for Gemini CLI
 | **Tier**          | Custom                                 |
 | **Main output**   | `GEMINI.md`                            |
 | **Dot directory** | `.gemini/`                             |
-| **Skills**        | Yes (`.gemini/skills/<name>/skill.md`) |
+| **Skills**        | Yes (`.agents/skills/<name>/skill.md`) |
 | **Agents**        | No                                     |
 | **Commands**      | Yes (`.gemini/commands/<name>.toml`)   |
 | **Local files**   | No                                     |
@@ -28,7 +28,7 @@ description: PromptScript output format for Gemini CLI
 | File              | Path                             | Purpose                    |
 | ----------------- | -------------------------------- | -------------------------- |
 | Main instructions | `GEMINI.md`                      | Primary rule file          |
-| Skills            | `.gemini/skills/<name>/skill.md` | Reusable skill definitions |
+| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions |
 | Commands          | `.gemini/commands/<name>.toml`   | Slash commands             |
 
 <!-- generated:end:output-files -->
@@ -56,8 +56,10 @@ description: PromptScript output format for Gemini CLI
 | Always Apply Rules         | Yes       |
 | Manual Activation          | No        |
 | Auto/Model Activation      | No        |
+| Structured Examples        | Yes       |
 | Character Limit Validation | No        |
 | Content Section Splitting  | Yes       |
+| Guard Dependencies         | Yes       |
 | Context File Inclusion     | No        |
 | @-Mentions                 | No        |
 | Tool Integration           | No        |
@@ -67,7 +69,7 @@ description: PromptScript output format for Gemini CLI
 | Skills                     | Yes       |
 | Agent Instructions         | No        |
 | Local Memory               | No        |
-| Nested Memory              | No        |
+| Nested Memory              | Planned   |
 
 <!-- generated:end:features -->
 
@@ -75,7 +77,7 @@ description: PromptScript output format for Gemini CLI
 
 - Main file is `GEMINI.md` at project root
 - Commands use TOML format (`.gemini/commands/<name>.toml`), not markdown
-- Skills use lowercase `skill.md` (not `SKILL.md`) at `.gemini/skills/<name>/skill.md`
+- Skills use lowercase `skill.md` (not `SKILL.md`) at `.agents/skills/<name>/skill.md`
 - Does not support agents
 - Three output modes: `simple`, `multifile`, `full`
 
@@ -84,9 +86,10 @@ description: PromptScript output format for Gemini CLI
 ```
 project-root/
 ├── GEMINI.md                          # Main instructions
-└── .gemini/
-    ├── commands/
-    │   └── review.toml                # Command (TOML format)
+├── .gemini/
+│   └── commands/
+│       └── review.toml                # Command (TOML format)
+└── .agents/
     └── skills/
         └── my-skill/
             └── skill.md               # Skill definition

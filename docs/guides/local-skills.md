@@ -21,7 +21,7 @@ Local skills solve a real problem: skills from the open-source ecosystem come as
 - **Zero config** - put a folder in `skills/`, reference it in `@skills {}`, done
 - **Resource files preserved** - CSV data, Python scripts, shell scripts, images - everything alongside `SKILL.md` gets copied to all targets automatically
 - **Works with any skill source** - [Skills.sh](https://github.com/anthropics/skills), [OpenSkills](https://github.com/numman-ali/openskills), [SkillKit](https://github.com/rohitg00/skillkit), manual downloads, or your own creations
-- **Multi-target** - one skill directory compiles to `.claude/skills/`, `.factory/skills/`, `.gemini/skills/`, `.opencode/skills/`, `.github/skills/` simultaneously
+- **Multi-target** - one skill directory compiles to `.claude/skills/`, `.factory/skills/`, `.agents/skills/`, `.opencode/skills/`, `.github/skills/` simultaneously
 - **No registry needed** - works alongside registry-based inheritance without conflicts
 
 ## Directory Structure
@@ -148,9 +148,9 @@ PromptScript will:
 ✓ .factory/skills/ui-ux-pro-max/SKILL.md
 ✓ .factory/skills/ui-ux-pro-max/data/colors.csv
 ✓ .factory/skills/ui-ux-pro-max/scripts/search.py
-✓ .gemini/skills/ui-ux-pro-max/skill.md
-✓ .gemini/skills/ui-ux-pro-max/data/colors.csv
-✓ .gemini/skills/ui-ux-pro-max/scripts/search.py
+✓ .agents/skills/ui-ux-pro-max/skill.md
+✓ .agents/skills/ui-ux-pro-max/data/colors.csv
+✓ .agents/skills/ui-ux-pro-max/scripts/search.py
 ```
 
 ## How Resolution Works
