@@ -1,6 +1,6 @@
 import { resolve, dirname, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
-import { writeFile, mkdir, readFile } from 'fs/promises';
+import { chmod, writeFile, mkdir, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import chokidar from 'chokidar';
 import type { CompileOptions } from '../types.js';
@@ -240,10 +240,13 @@ async function writeOutputs(
   const targetErrors: string[] = [];
 
   /** Write a file with graceful handling for ENOTDIR/EEXIST conflicts. */
-  async function safeWrite(path: string, content: string): Promise<boolean> {
+  async function safeWrite(path: string, content: string, mode?: number): Promise<boolean> {
     try {
       await mkdir(dirname(path), { recursive: true });
       await writeFile(path, content, 'utf-8');
+      if (mode !== undefined) {
+        await chmod(path, mode);
+      }
       return true;
     } catch (err: unknown) {
       const nodeErr = err as NodeJS.ErrnoException;
@@ -307,7 +310,7 @@ async function writeOutputs(
 
     // File doesn't exist - write normally
     if (!fileExists) {
-      if (await safeWrite(outputPath, output.content)) {
+      if (await safeWrite(outputPath, output.content, output.mode)) {
         ConsoleOutput.success(outputPath);
         result.written.push(outputPath);
       }
@@ -325,13 +328,16 @@ async function writeOutputs(
 
       if (!options.force && existingWithoutMarker === newWithoutMarker) {
         // Content unchanged - skip writing to preserve original timestamp
+        if (output.mode !== undefined) {
+          await chmod(outputPath, output.mode);
+        }
         ConsoleOutput.unchanged(outputPath);
         result.unchanged.push(outputPath);
         continue;
       }
 
       // Content changed - write with new marker
-      if (await safeWrite(outputPath, output.content)) {
+      if (await safeWrite(outputPath, output.content, output.mode)) {
         ConsoleOutput.success(outputPath);
         result.written.push(outputPath);
       }
@@ -350,6 +356,9 @@ async function writeOutputs(
     }
 
     if (!options.force && contentMatches) {
+      if (output.mode !== undefined) {
+        await chmod(outputPath, output.mode);
+      }
       ConsoleOutput.unchanged(outputPath);
       result.unchanged.push(outputPath);
       continue;
@@ -358,7 +367,7 @@ async function writeOutputs(
     // Content differs or can't be read — could be a resource file we wrote before
     // or a user-created file (needs protection). Check for --force flag or overwriteAll.
     if (options.force || overwriteAll) {
-      if (await safeWrite(outputPath, output.content)) {
+      if (await safeWrite(outputPath, output.content, output.mode)) {
         ConsoleOutput.success(outputPath);
         result.written.push(outputPath);
       }
@@ -377,7 +386,7 @@ async function writeOutputs(
 
     switch (response) {
       case 'yes':
-        if (await safeWrite(outputPath, output.content)) {
+        if (await safeWrite(outputPath, output.content, output.mode)) {
           ConsoleOutput.success(outputPath);
           result.written.push(outputPath);
         }
@@ -388,7 +397,7 @@ async function writeOutputs(
         break;
       case 'all':
         overwriteAll = true;
-        if (await safeWrite(outputPath, output.content)) {
+        if (await safeWrite(outputPath, output.content, output.mode)) {
           ConsoleOutput.success(outputPath);
           result.written.push(outputPath);
         }

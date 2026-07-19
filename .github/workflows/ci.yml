@@ -164,6 +164,148 @@ jobs:
           grep -q "<!-- PromptScript" .github/copilot-instructions.md
           grep -q "GitHub Copilot Instructions" .github/copilot-instructions.md
 
+      - name: Smoke test - agent platform and build profiles
+        run: |
+          mkdir -p /tmp/test-agent-platform/.promptscript/skills/security-review/references
+          mkdir -p /tmp/test-agent-platform/.promptscript/skills/security-review/bin
+          cd /tmp/test-agent-platform
+
+          cat > promptscript.yaml << 'EOF'
+          version: '1'
+          project:
+            id: agent-platform-smoke
+          input:
+            entry: .promptscript/project.prs
+          targets:
+            - claude:
+                version: full
+            - cursor:
+                version: full
+            - factory:
+                version: full
+          builds:
+            factory-package:
+              entry: .promptscript/project.prs
+              output: build-output
+              targets:
+                - factory:
+                    version: full
+          EOF
+
+          cat > .promptscript/project.prs << 'EOF'
+          @meta {
+            id: "agent-platform-smoke"
+            syntax: "1.4.0"
+          }
+
+          @identity {
+            """
+            You are a platform engineering assistant.
+            """
+          }
+
+          @skills {
+            security-review: {}
+          }
+
+          @mcpServers {
+            issue-tracker: {
+              transport: "stdio"
+              command: ["node", "./tools/issues.mjs"]
+            }
+          }
+
+          @agents {
+            reviewer: {
+              description: "Review pull requests"
+              skills: ["security-review"]
+              mcpServers: ["issue-tracker"]
+              content: "Review code, tests, and security."
+            }
+          }
+
+          @hooks {
+            validate-types: {
+              event: "post-tool-use"
+              matcher: "Edit|Write"
+              command: ["pnpm", "run", "typecheck"]
+            }
+          }
+
+          @workflows {
+            release: {
+              description: "Prepare release"
+              content: "Run validation and summarize changes."
+            }
+          }
+
+          @plugins {
+            engineering: {
+              description: "Engineering capabilities"
+              version: "1.0.0"
+              skills: ["security-review"]
+              hooks: ["validate-types"]
+              mcpServers: ["issue-tracker"]
+            }
+          }
+          EOF
+
+          cat > .promptscript/skills/security-review/SKILL.md << 'EOF'
+          ---
+          name: security-review
+          description: Review code security
+          references:
+            - references/checklist.md
+          scripts:
+            - bin/check.sh
+            - bin/report.sh
+          ---
+
+          Inspect changes for security risks.
+          EOF
+          printf '# Security checklist\n' > .promptscript/skills/security-review/references/checklist.md
+          printf '#!/bin/sh\necho checking\n' > .promptscript/skills/security-review/bin/check.sh
+          printf '#!/bin/sh\necho report\n' > .promptscript/skills/security-review/bin/report.sh
+          chmod +x .promptscript/skills/security-review/bin/check.sh
+
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js validate --strict
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile
+
+          test -f .claude/agents/reviewer.md
+          test -f .claude/skills/security-review/SKILL.md
+          test -f .claude/workflows/release.md
+          test -f .claude/settings.json
+          test -f .mcp.json
+          test -f .cursor/agents/reviewer.md
+          test -f .cursor/hooks.json
+          test -f .cursor/mcp.json
+          test -f .cursor/plugins.json
+          test -f .factory/droids/reviewer.md
+          test -f .factory/mcp.json
+          test -f .factory/settings.json
+          test -f .factory/plugins.json
+          test -f .factory/skills/security-review/references/checklist.md
+          test -x .factory/skills/security-review/scripts/check.sh
+          test ! -x .factory/skills/security-review/scripts/report.sh
+          grep -q "issue-tracker" .factory/mcp.json
+          grep -q "engineering" .factory/plugins.json
+
+          chmod -x .factory/skills/security-review/scripts/check.sh
+          chmod +x .factory/skills/security-review/scripts/report.sh
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile
+          test -x .factory/skills/security-review/scripts/check.sh
+          test ! -x .factory/skills/security-review/scripts/report.sh
+
+          node $GITHUB_WORKSPACE/cli-package/bin/prs.js compile --all-builds
+          test -f build-output/AGENTS.md
+          test -f build-output/.factory/droids/reviewer.md
+          test -f build-output/.factory/mcp.json
+          test -f build-output/.factory/settings.json
+          test -f build-output/.factory/plugins.json
+          test -f build-output/.factory/skills/security-review/references/checklist.md
+          test -x build-output/.factory/skills/security-review/scripts/check.sh
+          test ! -x build-output/.factory/skills/security-review/scripts/report.sh
+
       - name: Smoke test - init with --migrate flag
         run: |
           mkdir -p /tmp/test-migrate

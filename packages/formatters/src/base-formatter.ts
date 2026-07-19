@@ -547,7 +547,7 @@ export abstract class BaseFormatter implements Formatter {
    * Rejects paths with traversal, absolute paths, and unsafe names.
    */
   protected sanitizeResourceFiles(
-    resources: Array<{ relativePath: string; content: string }> | undefined,
+    resources: Array<{ relativePath: string; content: string; executable?: boolean }> | undefined,
     targetDir: string
   ): FormatterOutput[] {
     if (!resources || resources.length === 0) return [];
@@ -562,6 +562,7 @@ export abstract class BaseFormatter implements Formatter {
       .map((r) => ({
         path: `${targetDir}/${r.relativePath}`,
         content: r.content,
+        mode: r.executable === undefined ? undefined : r.executable ? 0o755 : 0o644,
       }));
   }
 

@@ -1306,7 +1306,7 @@ export async function resolveNativeSkills(
             relativePath: r.relativePath,
             content: r.content,
             ...(r.origin ? { origin: r.origin } : {}),
-            ...(r.executable ? { executable: r.executable } : {}),
+            ...(r.executable !== undefined ? { executable: r.executable } : {}),
           }));
           updatedSkill['resources'] = resourceValues;
         }
@@ -1325,7 +1325,7 @@ export async function resolveNativeSkills(
               relativePath: r.relativePath,
               content: r.content,
               ...(r.origin ? { origin: r.origin } : {}),
-              ...(r.executable ? { executable: r.executable } : {}),
+              ...(r.executable !== undefined ? { executable: r.executable } : {}),
             })),
           ];
         }
@@ -1344,9 +1344,25 @@ export async function resolveNativeSkills(
               relativePath: r.relativePath,
               content: r.content,
               ...(r.origin ? { origin: r.origin } : {}),
-              ...(r.executable ? { executable: r.executable } : {}),
+              ...(r.executable !== undefined ? { executable: r.executable } : {}),
             })),
           ];
+        }
+
+        const mergedResources = updatedSkill['resources'];
+        if (Array.isArray(mergedResources)) {
+          const resourcesByPath = new Map<string, Value>();
+          for (const resource of mergedResources) {
+            if (typeof resource !== 'object' || resource === null || Array.isArray(resource)) {
+              continue;
+            }
+            const resourceRecord = resource as Record<string, Value>;
+            const relativePath = resourceRecord['relativePath'];
+            if (typeof relativePath === 'string') {
+              resourcesByPath.set(relativePath, resourceRecord);
+            }
+          }
+          updatedSkill['resources'] = [...resourcesByPath.values()];
         }
 
         updatedProperties[skillName] = updatedSkill;

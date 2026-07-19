@@ -72,7 +72,7 @@ interface ClaudeSkillConfig {
   /** Skill content/instructions */
   content: string;
   /** Resource files to copy alongside SKILL.md */
-  resources?: Array<{ relativePath: string; content: string }>;
+  resources?: Array<{ relativePath: string; content: string; executable?: boolean }>;
   /** Raw frontmatter from source SKILL.md for pass-through */
   rawFrontmatter?: string;
   /** Optional relative output directory underneath .claude/ */
@@ -585,6 +585,7 @@ export class ClaudeFormatter extends BaseFormatter {
               ? (obj['resources'] as Array<Record<string, Value>>).map((r) => ({
                   relativePath: r['relativePath'] as string,
                   content: r['content'] as string,
+                  executable: typeof r['executable'] === 'boolean' ? r['executable'] : undefined,
                 }))
               : undefined,
           rawFrontmatter:

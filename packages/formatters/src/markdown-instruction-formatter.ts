@@ -474,6 +474,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
               ? (obj['resources'] as Array<Record<string, Value>>).map((r) => ({
                   relativePath: r['relativePath'] as string,
                   content: r['content'] as string,
+                  executable: typeof r['executable'] === 'boolean' ? r['executable'] : undefined,
                 }))
               : undefined,
           rawFrontmatter:

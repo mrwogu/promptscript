@@ -15,6 +15,7 @@ const {
   mockLoadConfig,
   mockExistsSync,
   mockWriteFile,
+  mockChmod,
   mockMkdir,
   mockReadFile,
   mockWarn,
@@ -30,6 +31,7 @@ const {
   const mockLoadConfig = vi.fn();
   const mockExistsSync = vi.fn();
   const mockWriteFile = vi.fn();
+  const mockChmod = vi.fn();
   const mockMkdir = vi.fn();
   const mockReadFile = vi.fn();
   const mockWarn = vi.fn();
@@ -52,6 +54,7 @@ const {
     mockLoadConfig,
     mockExistsSync,
     mockWriteFile,
+    mockChmod,
     mockMkdir,
     mockReadFile,
     mockWarn,
@@ -83,6 +86,7 @@ vi.mock('../../config/loader.js', () => ({
 
 vi.mock('fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
+  chmod: (...args: unknown[]) => mockChmod(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
   readFile: (...args: unknown[]) => mockReadFile(...args),
   readdir: vi.fn().mockResolvedValue([]),
@@ -175,6 +179,7 @@ describe('compile command - createCliLogger warn path', () => {
     });
 
     mockWriteFile.mockResolvedValue(undefined);
+    mockChmod.mockResolvedValue(undefined);
     mockMkdir.mockResolvedValue(undefined);
     mockReadFile.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
     mockCleanupManagedOutputs.mockResolvedValue({ removed: [] });
@@ -316,6 +321,65 @@ describe('compile command - createCliLogger warn path', () => {
     );
 
     expect(mockWriteFile).toHaveBeenCalledWith('/tmp/prs-build/AGENTS.md', '# Agents\n', 'utf-8');
+  });
+
+  it('should preserve executable output modes', async () => {
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          '.factory/skills/review/scripts/check.sh',
+          {
+            path: '.factory/skills/review/scripts/check.sh',
+            content: '#!/bin/sh\necho checking\n',
+            mode: 0o755,
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockChmod).toHaveBeenCalledWith(
+      '/mock/project/.factory/skills/review/scripts/check.sh',
+      0o755
+    );
+  });
+
+  it('should restore non-executable mode when output content is unchanged', async () => {
+    const content = '#!/bin/sh\necho report\n';
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return value.includes('project.prs') || value.endsWith('report.sh');
+    });
+    mockReadFile.mockResolvedValue(content);
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          '.factory/skills/review/scripts/report.sh',
+          {
+            path: '.factory/skills/review/scripts/report.sh',
+            content,
+            mode: 0o644,
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockChmod).toHaveBeenCalledWith(
+      '/mock/project/.factory/skills/review/scripts/report.sh',
+      0o644
+    );
   });
 
   it('should fail for an unknown build profile', async () => {
