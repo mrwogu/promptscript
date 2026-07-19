@@ -2,8 +2,18 @@
 - define agents, skills, MCP servers, hooks, and workflows once in <code>.prs</code> and compile to
 48 native targets.
 <a href="{{ 'features/' | url }}">Read the guide &rarr;</a>
-{% endblock %} {% block extrahead %} {{ super() }} {# Open Graph image - use page-specific or
-default #} {% if page.meta and page.meta.image %}
+{% endblock %} {% block extrahead %} {{ super() }} {# Open Graph and Twitter metadata #} {% set
+og_title = (page.meta.get('title') if page.meta else None) or page.title or config.site_name %} {%
+set og_desc = (page.meta.get('description') if page.meta else None) or config.site_description %} {%
+set og_url = page.canonical_url or config.site_url %}
+<meta property="og:type" content="{% if page.is_homepage %}website{% else %}article{% endif %}" />
+<meta property="og:site_name" content="{{ config.site_name }}" />
+<meta property="og:title" content="{{ og_title }}" />
+<meta property="og:description" content="{{ og_desc }}" />
+<meta property="og:url" content="{{ og_url }}" />
+<meta name="twitter:title" content="{{ og_title }}" />
+<meta name="twitter:description" content="{{ og_desc }}" />
+{# Open Graph image - use page-specific or default #} {% if page.meta and page.meta.image %}
 <meta property="og:image" content="{{ page.meta.image }}" />
 <meta name="twitter:image" content="{{ page.meta.image }}" />
 {% else %}
@@ -15,7 +25,40 @@ default #} {% if page.meta and page.meta.image %}
 {% endif %}
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-
-{# Twitter card defaults #} {% if not page.meta or not page.meta.get('name') == 'twitter:card' %}
+<meta property="og:image:alt" content="PromptScript - agent platform configuration as code" />
 <meta name="twitter:card" content="summary_large_image" />
+{# Structured data (schema.org) for search engines and generative engines #}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{ config.site_name }}",
+    "url": "{{ config.site_url }}",
+    "description": "{{ config.site_description }}",
+    "inLanguage": "en",
+    "publisher": {
+      "@type": "Organization",
+      "name": "PromptScript",
+      "url": "{{ config.site_url }}",
+      "logo": "{{ config.site_url }}latest/assets/images/logo.svg",
+      "sameAs": ["https://github.com/mrwogu/promptscript", "https://www.npmjs.com/org/promptscript"]
+    }
+  }
+</script>
+{% if page.is_homepage %}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PromptScript",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Linux, macOS, Windows",
+    "description": "{{ config.site_description }}",
+    "url": "{{ config.site_url }}",
+    "softwareHelp": "{{ config.site_url }}getting-started/",
+    "codeRepository": "https://github.com/mrwogu/promptscript",
+    "license": "https://github.com/mrwogu/promptscript/blob/main/LICENSE",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+</script>
 {% endif %} {% endblock %}
