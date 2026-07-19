@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { BLOCK_TYPES } from '@promptscript/core';
 import {
   PRS_LANGUAGE_ID,
   prsLanguageDefinition,
@@ -7,6 +8,52 @@ import {
   registerPrsLanguage,
   createPrsCompletionProvider,
 } from '../utils/prs-language';
+
+interface RootToken {
+  image: string;
+  token: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function resolveRootToken(source: string): RootToken {
+  const rootRules = prsLanguageDefinition.tokenizer.root as unknown[];
+
+  for (const candidate of rootRules) {
+    if (!Array.isArray(candidate)) continue;
+
+    const [pattern, action] = candidate as unknown[];
+    if (!(pattern instanceof RegExp)) continue;
+
+    const anchoredPattern = new RegExp(`^(?:${pattern.source})`, pattern.flags.replace('g', ''));
+    const match = anchoredPattern.exec(source);
+    if (!match) continue;
+
+    if (typeof action === 'string') {
+      return { image: match[0], token: action };
+    }
+    if (!isRecord(action) || !isRecord(action['cases'])) {
+      throw new Error(`Unsupported Monarch action for ${match[0]}`);
+    }
+
+    const cases = action['cases'];
+    const directives = prsLanguageDefinition.directives as string[];
+    const keywords = prsLanguageDefinition.keywords as string[];
+    if (directives.includes(match[0]) && typeof cases['@directives'] === 'string') {
+      return { image: match[0], token: cases['@directives'] };
+    }
+    if (keywords.includes(match[0]) && typeof cases['@keywords'] === 'string') {
+      return { image: match[0], token: cases['@keywords'] };
+    }
+    if (typeof cases['@default'] === 'string') {
+      return { image: match[0], token: cases['@default'] };
+    }
+  }
+
+  throw new Error(`No root token matched ${source}`);
+}
 
 describe('prs-language', () => {
   describe('PRS_LANGUAGE_ID', () => {
@@ -32,6 +79,10 @@ describe('prs-language', () => {
       expect(directives).toContain('@commands');
       expect(directives).toContain('@skills');
       expect(directives).toContain('@examples');
+      expect(directives).toContain('@hooks');
+      expect(directives).toContain('@mcpServers');
+      expect(directives).toContain('@plugins');
+      expect(BLOCK_TYPES.every((blockType) => directives.includes(`@${blockType}`))).toBe(true);
     });
 
     it('should have root tokenizer rules', () => {
@@ -53,6 +104,12 @@ describe('prs-language', () => {
       expect(Array.isArray(tokenizer.multilineString)).toBe(true);
     });
 
+    it('should have single-quoted string tokenizer rules', () => {
+      const tokenizer = prsLanguageDefinition.tokenizer;
+      expect(tokenizer.stringSingle).toBeDefined();
+      expect(Array.isArray(tokenizer.stringSingle)).toBe(true);
+    });
+
     it('should have whitespace tokenizer rules', () => {
       const tokenizer = prsLanguageDefinition.tokenizer;
       expect(tokenizer.whitespace).toBeDefined();
@@ -64,6 +121,49 @@ describe('prs-language', () => {
       expect(keywords).toContain('true');
       expect(keywords).toContain('false');
       expect(keywords).toContain('null');
+      expect(keywords).toContain('range');
+    });
+
+    it('should tokenize directives and import paths without splitting them', () => {
+      expect(resolveRootToken('@mcpServers')).toEqual({
+        image: '@mcpServers',
+        token: 'keyword.directive',
+      });
+      expect(resolveRootToken('@custom-name')).toEqual({
+        image: '@custom-name',
+        token: 'identifier.directive',
+      });
+      expect(resolveRootToken('@scope/path@^1.0.0')).toEqual({
+        image: '@scope/path@^1.0.0',
+        token: 'string.url',
+      });
+      expect(resolveRootToken('../shared/base.prs')).toEqual({
+        image: '../shared/base.prs',
+        token: 'string.url',
+      });
+    });
+
+    it('should prioritize compound values over punctuation', () => {
+      expect(resolveRootToken('{{name}}')).toEqual({
+        image: '{{',
+        token: 'variable.template',
+      });
+      expect(resolveRootToken('${lower_name}')).toEqual({
+        image: '${lower_name}',
+        token: 'variable.env',
+      });
+      expect(resolveRootToken('-3.14')).toEqual({
+        image: '-3.14',
+        token: 'number',
+      });
+      expect(resolveRootToken('..')).toEqual({
+        image: '..',
+        token: 'operator.range',
+      });
+      expect(resolveRootToken("'text'")).toEqual({
+        image: "'",
+        token: 'string',
+      });
     });
   });
 
@@ -90,6 +190,13 @@ describe('prs-language', () => {
       const quotes = pairs?.find((p) => p.open === '"');
       expect(quotes?.close).toBe('"');
       expect(quotes?.notIn).toContain('string');
+
+      const singleQuotes = pairs?.find((p) => p.open === "'");
+      expect(singleQuotes?.close).toBe("'");
+      expect(singleQuotes?.notIn).toContain('string');
+
+      const templates = pairs?.find((p) => p.open === '{{');
+      expect(templates?.close).toBe('}}');
     });
 
     it('should define surrounding pairs', () => {
@@ -103,6 +210,7 @@ describe('prs-language', () => {
       expect(folding?.markers).toBeDefined();
       expect(folding?.markers?.start).toBeInstanceOf(RegExp);
       expect(folding?.markers?.end).toBeInstanceOf(RegExp);
+      expect(folding?.markers?.start?.test('@custom-block {')).toBe(true);
     });
   });
 

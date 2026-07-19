@@ -68,13 +68,21 @@
       "begin": "\"",
       "end": "\"",
       "name": "string.quoted.double.prs",
-      "patterns": [{ "include": "#escape-sequence" }, { "include": "#env-variable" }]
+      "patterns": [
+        { "include": "#template-in-string" },
+        { "include": "#escape-sequence" },
+        { "include": "#env-variable" }
+      ]
     },
     "single-string": {
       "begin": "'",
       "end": "'",
       "name": "string.quoted.single.prs",
-      "patterns": [{ "include": "#escape-sequence" }]
+      "patterns": [
+        { "include": "#template-in-string" },
+        { "include": "#escape-sequence" },
+        { "include": "#env-variable" }
+      ]
     },
     "escape-sequence": {
       "patterns": [
@@ -97,7 +105,7 @@
       ]
     },
     "env-variable": {
-      "match": "\\$\\{[A-Z_][A-Z0-9_]*(?::-[^}]*)?\\}",
+      "match": "\\$\\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\\}",
       "name": "variable.other.env.prs"
     },
     "template-expression": {
@@ -142,35 +150,35 @@
       "name": "keyword.operator.replace.prs"
     },
     "number": {
-      "match": "-?\\d+(?:\\.\\d+)?",
+      "match": "(?<![A-Za-z0-9_-])-?\\d+(?:\\.\\d+)?(?![A-Za-z0-9_-])",
       "name": "constant.numeric.prs"
     },
     "restriction-dash": {
-      "match": "-(?!\\d)",
+      "match": "(?<![A-Za-z0-9_-])-(?![A-Za-z0-9_-])",
       "name": "keyword.operator.restriction.prs"
     },
     "boolean": {
-      "match": "\\b(?:true|false)\\b",
+      "match": "(?<![A-Za-z0-9_-])(?:true|false)(?![A-Za-z0-9_-])",
       "name": "constant.language.boolean.prs"
     },
     "null": {
-      "match": "\\bnull\\b",
+      "match": "(?<![A-Za-z0-9_-])null(?![A-Za-z0-9_-])",
       "name": "constant.language.null.prs"
     },
     "keyword-as": {
-      "match": "\\bas\\b",
+      "match": "(?<![A-Za-z0-9_-])as(?![A-Za-z0-9_-])",
       "name": "keyword.control.as.prs"
     },
     "keyword-into": {
-      "match": "\\binto\\b",
+      "match": "(?<![A-Za-z0-9_-])into(?![A-Za-z0-9_-])",
       "name": "keyword.control.into.prs"
     },
     "keyword-type": {
-      "match": "\\b(?:range|enum)\\b",
+      "match": "(?<![A-Za-z0-9_-])(?:range|enum)(?![A-Za-z0-9_-])",
       "name": "keyword.other.type.prs"
     },
     "type-keywords": {
-      "match": "\\b(?:string|number|boolean)\\b",
+      "match": "(?<![A-Za-z0-9_-])(?:string|number|boolean)(?![A-Za-z0-9_-])",
       "name": "support.type.prs"
     },
     "punctuation": {
@@ -180,7 +188,7 @@
           "name": "punctuation.bracket.prs"
         },
         {
-          "match": "[:,.=?]",
+          "match": "[:,=?]",
           "name": "punctuation.delimiter.prs"
         },
         {
