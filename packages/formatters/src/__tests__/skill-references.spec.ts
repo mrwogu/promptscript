@@ -5,6 +5,7 @@ import { CursorFormatter } from '../formatters/cursor.js';
 import { FactoryFormatter } from '../formatters/factory.js';
 import { AntigravityFormatter } from '../formatters/antigravity.js';
 import { RooFormatter } from '../formatters/roo.js';
+import { GeminiFormatter } from '../formatters/gemini.js';
 import type { Program, SourceLocation, Value } from '@promptscript/core';
 
 const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
@@ -41,9 +42,12 @@ function makeAst(skills: Record<string, unknown>): Program {
 function collectAllFiles(output: {
   path: string;
   content: string;
+  mode?: number;
   additionalFiles?: unknown[];
-}): Array<{ path: string; content: string }> {
-  const files = [{ path: output.path, content: output.content }];
+}): Array<{ path: string; content: string; mode?: number }> {
+  const files: Array<{ path: string; content: string; mode?: number }> = [
+    { path: output.path, content: output.content, mode: output.mode },
+  ];
   for (const af of (output.additionalFiles ?? []) as Array<typeof output>) {
     files.push(...collectAllFiles(af));
   }
@@ -55,6 +59,25 @@ const skillWithRefs = {
     description: 'Expert skill',
     content: 'Help users.',
     resources: [{ relativePath: 'references/arch.md', content: '# Architecture\nMicroservices.' }],
+  },
+};
+
+const skillWithExecutable = {
+  expert: {
+    description: 'Expert skill',
+    content: 'Help users.',
+    resources: [
+      {
+        relativePath: 'scripts/check.sh',
+        content: '#!/bin/sh\necho checking\n',
+        executable: true,
+      },
+      {
+        relativePath: 'scripts/report.sh',
+        content: '#!/bin/sh\necho report\n',
+        executable: false,
+      },
+    ],
   },
 };
 
@@ -77,6 +100,25 @@ describe('formatter skill references', () => {
         expect(refFile).toBeDefined();
         expect(refFile!.content).toMatch(/<!-- from:.*arch\.md -->/);
       });
+    });
+  }
+
+  for (const [name, FormatterClass] of [
+    ['Claude', ClaudeFormatter],
+    ['GitHub', GitHubFormatter],
+    ['Factory', FactoryFormatter],
+    ['Gemini', GeminiFormatter],
+  ] as const) {
+    it(`${name} should preserve skill resource modes`, () => {
+      const result = new FormatterClass().format(makeAst(skillWithExecutable), {
+        version: 'full',
+      });
+      const files = collectAllFiles(result);
+      const executableScript = files.find((file) => file.path.endsWith('/scripts/check.sh'));
+      const regularScript = files.find((file) => file.path.endsWith('/scripts/report.sh'));
+
+      expect(executableScript?.mode).toBe(0o755);
+      expect(regularScript?.mode).toBe(0o644);
     });
   }
 
