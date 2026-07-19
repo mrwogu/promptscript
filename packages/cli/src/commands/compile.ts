@@ -465,7 +465,6 @@ async function compileAllBuilds(options: CompileOptions, _services: CliServices)
 
   let failed = 0;
   let succeeded = 0;
-  const allWrittenPaths: string[] = [];
 
   for (const buildName of buildNames) {
     ConsoleOutput.info(`Compiling build profile: ${buildName}`);
@@ -484,18 +483,6 @@ async function compileAllBuilds(options: CompileOptions, _services: CliServices)
       const msg = err instanceof Error ? err.message : String(err);
       ConsoleOutput.error(`Build profile "${buildName}" failed: ${msg}`);
     }
-  }
-
-  // Detect collisions across profiles
-  const pathCounts = new Map<string, number>();
-  for (const p of allWrittenPaths) {
-    pathCounts.set(p, (pathCounts.get(p) ?? 0) + 1);
-  }
-  const collisions = [...pathCounts.entries()].filter(([, count]) => count > 1);
-  if (collisions.length > 0) {
-    ConsoleOutput.warning(
-      `Output path collisions detected across build profiles:\n${collisions.map(([p]) => `  ${p}`).join('\n')}`
-    );
   }
 
   logger.verbose(`Compiled ${succeeded} build profile(s), ${failed} failed`);

@@ -964,6 +964,14 @@ export async function resolveSkillScripts(
   basePath: string,
   logger?: Logger
 ): Promise<SkillResource[]> {
+  if (scripts.length > MAX_RESOURCE_COUNT) {
+    throw new ResolveError(`Too many script files (${scripts.length}, max ${MAX_RESOURCE_COUNT})`, {
+      file: basePath,
+      line: 0,
+      column: 0,
+    });
+  }
+
   const resources: SkillResource[] = [];
   let totalSize = 0;
   const seenBasenames = new Set<string>();
@@ -1032,13 +1040,6 @@ export async function resolveSkillScripts(
       origin: fullPath,
       executable,
     });
-  }
-
-  if (resources.length > MAX_RESOURCE_COUNT) {
-    throw new ResolveError(
-      `Too many script files (${resources.length}, max ${MAX_RESOURCE_COUNT})`,
-      { file: basePath, line: 0, column: 0 }
-    );
   }
 
   return resources;

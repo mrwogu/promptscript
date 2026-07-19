@@ -281,9 +281,28 @@ describe('mcp-helpers', () => {
       expect(yaml).toContain('- --arg1');
       expect(yaml).toContain('remote:');
       expect(yaml).toContain('type: http');
-      expect(yaml).toContain('url: https://example.com/mcp');
+      expect(yaml).toContain('url: "https://example.com/mcp"');
       expect(yaml).toContain('env:');
       expect(yaml).toContain('API_KEY: secret');
+    });
+
+    it('should quote unsafe YAML scalar values', () => {
+      const servers = extractMcpServers(
+        findMcpServersBlock(
+          makeMcpBlock({
+            custom: {
+              command: ['node', 'script name.js', 'value: #unsafe\nnext'],
+              env: { TOKEN: 'value: #unsafe' },
+            },
+          })
+        )!
+      );
+
+      const yaml = serializeMcpServersToYamlInline(servers);
+
+      expect(yaml).toContain('- "script name.js"');
+      expect(yaml).toContain('- "value: #unsafe\\nnext"');
+      expect(yaml).toContain('TOKEN: "value: #unsafe"');
     });
   });
 
