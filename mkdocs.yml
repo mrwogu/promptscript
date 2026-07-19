@@ -207,7 +207,6 @@ extra_css:
   - assets/stylesheets/extra.css
 
 extra_javascript:
-  - assets/javascripts/compile-demo.js
   - assets/javascripts/init-demo.js
 
 nav:

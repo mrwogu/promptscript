@@ -1,21 +1,21 @@
 ---
 title: 'PromptScript - Agent Platform Configuration as Code'
-description: 'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and plugins once. Compile native configuration for 48 AI coding agent platforms.'
+description: 'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile native configuration for 48 AI coding agent platforms.'
 meta:
   - name: keywords
-    content: PromptScript, PromptOps, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
+    content: PromptScript, agent platform, configuration as code, AI instructions, AI agents, AI skills, MCP servers, GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, AI governance, PromptOps
   - name: robots
     content: index, follow
   - property: og:title
-    content: PromptScript - One Source, Every AI Agent
+    content: PromptScript - Define Once, Compile Everywhere
   - property: og:description
-    content: Define AI instructions, skills, agents, MCP servers, hooks, workflows, and plugins once. Compile native configuration for 48 AI coding agent platforms.
+    content: One validated source for your complete AI agent platform. Native output for 48 coding agents.
   - property: og:type
     content: website
   - name: twitter:card
     content: summary_large_image
   - name: twitter:title
-    content: PromptScript - One Source, Every AI Agent
+    content: PromptScript - Define Once, Compile Everywhere
 hide:
   - navigation
   - toc
@@ -23,1478 +23,327 @@ hide:
   - view
 ---
 
-<div class="hero" markdown>
-
-# PromptScript
-
-**One source. Complete agent platform.**
-
-_Define **instructions, skills, agents, tools, integrations, and automation** as code. Compile once to native configuration for 48 AI coding agent platforms._
-
-<div class="hero-ticker" aria-hidden="true">
-  <div class="hero-ticker__track">
-    <!-- Half 1: 55 chips (48 targets, custom targets repeated with SVG logos) -->
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4l5 4-5 4M9 12h5"/></svg>Cline</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8 1l5.66 3.27v6.46L8 14l-5.66-3.27V4.27L8 1z"/></svg>Codex</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M4 2v12l5-6zm5 0v12l5-6z"/></svg>Continue</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 14V2h4.5a3.5 3.5 0 010 7H4m4.5-1L13 14"/></svg>Roo Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M1 5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 8.5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 12c2.5-2 5-2 7.5 0s5 2 7.5 0"/></svg>Windsurf</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Aider</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Amazon Q</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Warp</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zed</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Jules</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Devin</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Grok</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kimi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mimo</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Deep Agents</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>ForgeCode</span>
-    <!-- Half 2: identical copy for seamless loop -->
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4l5 4-5 4M9 12h5"/></svg>Cline</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8 1l5.66 3.27v6.46L8 14l-5.66-3.27V4.27L8 1z"/></svg>Codex</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M4 2v12l5-6zm5 0v12l5-6z"/></svg>Continue</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 14V2h4.5a3.5 3.5 0 010 7H4m4.5-1L13 14"/></svg>Roo Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M1 5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 8.5c2.5-2 5-2 7.5 0s5 2 7.5 0M1 12c2.5-2 5-2 7.5 0s5 2 7.5 0"/></svg>Windsurf</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Amp</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Augment</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Goose</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Junie</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kilo Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Kiro CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t2"><span class="hero-ticker__dot"></span>Trae</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Adal</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>CodeBuddy</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Command Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Cortex</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Crush</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 18v-5.5c0-.667.167-1.333.5-2M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2M20 18v-5.5c0-.667-.167-1.333-.5-2M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>GitHub Copilot</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>iFlow</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>Cursor</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>MCPJam</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mistral Vibe</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 014.9 3H3.1A5.5 5.5 0 018 2.5zM2.5 8a5.5 5.5 0 001.6 3.9L8 8l3.9 3.9A5.5 5.5 0 008 13.5 5.5 5.5 0 012.5 8z" fill-rule="evenodd"/></svg>Antigravity</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mux</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Neovate</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>Factory AI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenClaw</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>OpenHands</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="M8 0a8.9 8.9 0 00-8 8 8.9 8.9 0 008 8 8.9 8.9 0 008-8 8.9 8.9 0 00-8-8z"/></svg>Gemini CLI</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Pochi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>OpenCode</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Aider</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Amazon Q</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Warp</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zed</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Jules</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Devin</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Grok</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kimi</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mimo</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Deep Agents</span>
-    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>ForgeCode</span>
-  </div>
+<!-- prettier-ignore -->
+<div class="home-page">
+<section class="home-hero">
+<div class="home-hero__copy">
+<div class="home-eyebrow">Agent platform configuration as code</div>
+<h1>Define your agent platform once.<br><span>Compile it everywhere.</span></h1>
+<p class="home-hero__lead">One composable source for instructions, skills, agents, MCP servers, hooks, workflows, and policies. Inherit it across teams and compile native configuration for 48 AI coding platforms.</p>
+<div class="home-hero__actions">
+<a href="getting-started/" class="home-button home-button--primary">Get started</a>
+<a href="#native-output" class="home-button home-button--secondary">See native output</a>
 </div>
-
-[:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
-[:material-robot-outline: Explore Agent Platform](features/index.md){ .md-button .md-button--secondary }
-[:material-format-list-checks: See All 48 Targets](reference/formatters/index.md){ .md-button }
-[:material-book-open-variant: Enterprise Guide](guides/enterprise.md){ .md-button }
-[:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
-
-<div class="hero-badges" markdown>
-[![GitHub stars](https://img.shields.io/github/stars/mrwogu/promptscript?style=flat-square&logo=github)](https://github.com/mrwogu/promptscript)
-[![npm downloads](https://img.shields.io/npm/dm/@promptscript/cli?style=flat-square&logo=npm)](https://www.npmjs.com/package/@promptscript/cli)
-[![npm version](https://img.shields.io/npm/v/@promptscript/cli?style=flat-square&logo=npm&label=cli)](https://www.npmjs.com/package/@promptscript/cli)
-</div>
-
-<div class="hero-install" markdown>
-```
-npm install -g @promptscript/cli
-```
-</div>
-
-<p style="text-align: center; margin-top: -0.5rem; margin-bottom: 1rem;">
-  <a href="https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language" style="font-size: 0.85rem; opacity: 0.7;">VS Code Extension available &rarr;</a>
-</p>
-
-</div>
-
-<div class="video-wrapper">
-  <div class="video-wrapper__label">
-    <svg class="video-wrapper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-    Watch Introduction
-  </div>
-  <div class="video-embed" id="video-embed">
-    <img class="video-embed__thumb" src="https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg" alt="PromptScript Introduction" loading="lazy">
-    <button class="video-embed__play" aria-label="Play video" id="video-play-btn">
-      <svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="rgba(0,0,0,.75)"/><path d="M45 24L27 14v20" fill="#fff"/></svg>
-    </button>
-    <iframe class="video-embed__iframe" id="video-iframe" src="" title="PromptScript Introduction" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  </div>
-</div>
-<script>
-document.getElementById('video-play-btn').addEventListener('click', function() {
-  var embed = document.getElementById('video-embed');
-  var iframe = document.getElementById('video-iframe');
-  iframe.src = 'https://www.youtube.com/embed/7sHMn-DbZig?autoplay=1';
-  embed.classList.add('video-embed--active');
-});
-</script>
-
-<div class="compile-demo" id="compile-demo">
-  <div class="compile-demo__source">
-    <div class="compile-demo__header">
-      <span class="compile-demo__dot compile-demo__dot--red"></span>
-      <span class="compile-demo__dot compile-demo__dot--yellow"></span>
-      <span class="compile-demo__dot compile-demo__dot--green"></span>
-      <span class="compile-demo__filename">project.prs</span>
-    </div>
-    <pre class="compile-demo__code"><code id="typewriter-target"></code></pre>
-    <div class="compile-demo__cursor" id="typing-cursor"></div>
-    <div class="compile-demo__badge">1 platform definition &rarr; 48 native targets</div>
-  </div>
-
-  <div class="compile-demo__arrow">
-    <div class="compile-demo__arrow-icon" id="compile-button">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-    </div>
-    <span class="compile-demo__command">prs compile</span>
-  </div>
-
-  <div class="compile-demo__output" id="output-panel">
-    <div class="compile-demo__placeholder" id="compile-placeholder">
-      <div class="compile-demo__placeholder-icons">
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--copilot" title="GitHub Copilot">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18v-5.5c0-.667.167-1.333.5-2"/><path d="M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2"/><path d="M20 18v-5.5c0-.667-.167-1.333-.5-2"/><path d="M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>
-        </span>
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--claude" title="Claude Code">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>
-        </span>
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--cursor" title="Cursor">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>
-        </span>
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--codex" title="Codex">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        </span>
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--factory" title="Factory AI">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM12 9.95L5 13v7h14v-9h-3l-1.04-4H14l-.96 4L12 11v-1.05zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>
-        </span>
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--opencode" title="OpenCode">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-        </span>
-        <span class="compile-demo__placeholder-icon compile-demo__placeholder-icon--gemini" title="Gemini CLI">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
-        </span>
-      </div>
-      <div class="compile-demo__placeholder-text">Awaiting compilation...</div>
-    </div>
-    <div class="compile-demo__tabs">
-      <span class="compile-demo__tab compile-demo__tab--active" data-target="claude">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--claude">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>
-        </span> Claude <span class="compile-demo__tab-count">4 files</span>
-      </span>
-      <span class="compile-demo__tab" data-target="copilot">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--copilot">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18v-5.5c0-.667.167-1.333.5-2"/><path d="M12 7.5c0-1-.01-4.07-4-3.5c-3.5.5-4 2.5-4 3.5c0 1.5 0 4 3 4c4 0 5-2.5 5-4zM4 12c-1.333.667-2 1.333-2 2c0 1 0 3 1.5 4c3 2 6.5 3 8.5 3s5.499-1 8.5-3c1.5-1 1.5-3 1.5-4c0-.667-.667-1.333-2-2"/><path d="M20 18v-5.5c0-.667-.167-1.333-.5-2"/><path d="M12 7.5c0-1 .01-4.07 4-3.5c3.5.5 4 2.5 4 3.5c0 1.5 0 4-3 4c-4 0-5-2.5-5-4zM10 15v2m4-2v2"/></svg>
-        </span> Copilot <span class="compile-demo__tab-count">4 files</span>
-      </span>
-      <span class="compile-demo__tab" data-target="codex">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--codex">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        </span> Codex <span class="compile-demo__tab-count">1 file</span>
-      </span>
-      <span class="compile-demo__tab" data-target="opencode">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--opencode">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-        </span> OpenCode <span class="compile-demo__tab-count">3 files</span>
-      </span>
-      <span class="compile-demo__tab" data-target="gemini">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--gemini">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
-        </span> Gemini <span class="compile-demo__tab-count">3 files</span>
-      </span>
-      <span class="compile-demo__tab" data-target="factory">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--factory">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 22H2V10l7-3v2l5-3v3h3l1-8h3l1 8v13zM12 9.95L5 13v7h14v-9h-3l-1.04-4H14l-.96 4L12 11v-1.05zM9 17v-2H7v2h2zm4 0v-2h-2v2h2zm4 0v-2h-2v2h2z"/></svg>
-        </span> Factory <span class="compile-demo__tab-count">2 files</span>
-      </span>
-      <span class="compile-demo__tab" data-target="cursor">
-        <span class="compile-demo__tab-icon compile-demo__tab-icon--cursor">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8l-6 3.5L6 8l6-3.5zM5 9.5l6 3.5v7l-6-3.5v-7zm14 0v7l-6 3.5v-7l6-3.5z"/></svg>
-        </span> Cursor <span class="compile-demo__tab-count">2 files</span>
-      </span>
-    </div>
-
-    <div class="compile-demo__panel" data-panel="copilot">
-      <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">instructions.md</span>
-        <span class="compile-demo__subfile" data-file="1">review.prompt</span>
-        <span class="compile-demo__subfile" data-file="2">migrate.prompt</span>
-        <span class="compile-demo__subfile" data-file="3">security.skill</span>
-      </div>
-      <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--copilot">
-          <span class="compile-demo__filename">.github/copilot-instructions.md</span>
-        </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
-
-<span class="inherited">← @acme/platform</span>
-<span class="inherited">← @stacks/node-typescript</span>
-
-<span class="hl">## Identity</span>
-Senior Engineer specializing in the
-Checkout Service.
-
-<span class="hl">## Tech Stack</span>
-TypeScript 5.x · Node 20+ · PostgreSQL
-Prisma ORM · Zod · Vitest
-
-<span class="hl">## Standards</span>
-<span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">✓</span> Zod for all input validation
-<span class="rule">✓</span> 90% test coverage target
-<span class="rule">✓</span> Conventional Commits
-
-<span class="hl">## Security</span>
-<span class="warn">⛔</span> Never log PII or card data
-<span class="warn">⛔</span> Parameterized SQL only
-<span class="warn">⛔</span> No secrets in source code
-
-<span class="hl">## Commands</span>
-<span class="str">/review</span> Security code review
-<span class="str">/migrate</span> Safe DB migration
-
-<span class="hl">## Skills</span>
-<span class="rule">►</span> <span class="str">security-audit</span> OWASP scan</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="1">
-<div class="compile-demo__header compile-demo__header--copilot">
-<span class="compile-demo__filename">.github/prompts/review.prompt.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">mode:</span> <span class="str">agent</span>
-<span class="key">tools:</span> <span class="str">[codebase, terminal]</span>
-<span class="key">description:</span> <span class="str">Security code review</span>
-<span class="key">---</span>
-
-Perform security-focused code review
-on the Checkout Service.
-
-<span class="hl">Check for:</span>
-• SQL injection vulnerabilities
-• XSS attack vectors
-• Exposed secrets and API keys
-• Input validation gaps
-• IDOR vulnerabilities</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="2">
-<div class="compile-demo__header compile-demo__header--copilot">
-<span class="compile-demo__filename">.github/prompts/migrate.prompt.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">mode:</span> <span class="str">agent</span>
-<span class="key">tools:</span> <span class="str">[terminal, codebase]</span>
-<span class="key">description:</span> <span class="str">Database migration</span>
-<span class="key">---</span>
-
-Generate Prisma migration safely.
-
-<span class="hl">Steps:</span>
-<span class="rule">1.</span> Analyze schema changes
-<span class="rule">2.</span> Generate migration file
-<span class="rule">3.</span> Review for data loss risks
-<span class="rule">4.</span> Create rollback plan
-<span class="rule">5.</span> Validate with dry run</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="3">
-<div class="compile-demo__header compile-demo__header--copilot">
-<span class="compile-demo__filename">.github/skills/security-audit/SKILL.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">security-audit</span>
-<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
-<span class="key">---</span>
-
-<span class="cm"># Security Audit</span>
-
-Run a comprehensive OWASP Top 10 scan.
-
-<span class="hl">Scan for:</span>
-• Injection (SQL, NoSQL, OS)
-• Broken authentication
-• Sensitive data exposure
-• Security misconfiguration
-• Insecure dependencies</code></pre>
-
+<div class="home-install" aria-label="Install PromptScript CLI">
+<code>npm install -g @promptscript/cli</code>
+<span>Open source · Git-native · CI-ready</span>
 </div>
 </div>
-
-    <div class="compile-demo__panel compile-demo__panel--active" data-panel="claude">
-      <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">CLAUDE.md</span>
-        <span class="compile-demo__subfile" data-file="1">/review</span>
-        <span class="compile-demo__subfile" data-file="2">/migrate</span>
-        <span class="compile-demo__subfile" data-file="3">security.skill</span>
-      </div>
-      <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--claude">
-          <span class="compile-demo__filename">CLAUDE.md</span>
-        </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
-
-<span class="inherited">← @acme/platform</span>
-<span class="inherited">← @stacks/node-typescript</span>
-
-<span class="hl">## Identity</span>
-Senior Engineer specializing in the
-Checkout Service.
-
-<span class="hl">## Tech</span>
-TypeScript 5.x · Node 20+ · Prisma
-Zod validation · Vitest
-
-<span class="hl">## Commands</span>
-<span class="str">/review</span> Security code review
-<span class="str">/migrate</span> Safe DB migration
-
-<span class="hl">## Standards</span>
-<span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">✓</span> Zod for all input validation
-<span class="rule">✓</span> Conventional Commits
-
-<span class="hl">## Don'ts</span>
-<span class="warn">✗</span> Don't log PII or card data
-<span class="warn">✗</span> Don't use raw SQL queries
-<span class="warn">✗</span> Don't commit secrets</code></pre>
-
+<div class="home-hero__visual" aria-label="PromptScript source compiled to native platform files">
+<div class="home-code-window">
+<div class="home-window-bar">
+<span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+<span>project.prs</span>
+<span class="home-window-status">source</span>
 </div>
-<div class="compile-demo__file" data-file="1">
-<div class="compile-demo__header compile-demo__header--claude">
-<span class="compile-demo__filename">.claude/commands/review.md</span>
-</div>
-<pre class="compile-demo__code"><code>Perform security-focused code review
-on the Checkout Service.
-
-<span class="hl">Check for:</span>
-• SQL injection vulnerabilities
-• XSS attack vectors
-• Exposed secrets and API keys
-• Input validation gaps
-• IDOR vulnerabilities</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="2">
-<div class="compile-demo__header compile-demo__header--claude">
-<span class="compile-demo__filename">.claude/commands/migrate.md</span>
-</div>
-<pre class="compile-demo__code"><code>Generate Prisma migration safely.
-
-<span class="hl">Steps:</span>
-<span class="rule">1.</span> Analyze schema changes
-<span class="rule">2.</span> Generate migration file
-<span class="rule">3.</span> Review for data loss risks
-<span class="rule">4.</span> Create rollback plan
-<span class="rule">5.</span> Validate with dry run</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="3">
-<div class="compile-demo__header compile-demo__header--claude">
-<span class="compile-demo__filename">.claude/skills/security-audit/SKILL.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">security-audit</span>
-<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
-<span class="key">---</span>
-
-<span class="cm"># Security Audit</span>
-
-Run a comprehensive OWASP Top 10 scan.
-
-<span class="hl">Scan for:</span>
-• Injection (SQL, NoSQL, OS)
-• Broken authentication
-• Sensitive data exposure
-• Security misconfiguration</code></pre>
-
-</div>
-</div>
-
-    <div class="compile-demo__panel" data-panel="cursor">
-      <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">checkout.mdc</span>
-        <span class="compile-demo__subfile" data-file="1">security.mdc</span>
-      </div>
-      <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--cursor">
-          <span class="compile-demo__filename">.cursor/rules/checkout.mdc</span>
-        </div>
-        <pre class="compile-demo__code"><code><span class="key">---</span>
-
-<span class="key">description:</span> <span class="str">Checkout Service v2.1</span>
-<span class="key">globs:</span> <span class="str">["src/**/*.ts"]</span>
-<span class="key">alwaysApply:</span> <span class="bool">true</span>
-<span class="key">---</span>
-
-<span class="cm"># Checkout Service</span>
-<span class="inherited">← @acme/platform</span>
-<span class="inherited">← @stacks/node-typescript</span>
-
-<span class="hl">## Identity</span>
-Senior Engineer specializing in the
-Checkout Service.
-
-<span class="hl">## Stack</span>
-TypeScript 5.x · Node 20+ · Prisma
-Zod validation · Vitest
-
-<span class="hl">## Standards</span>
-<span class="rule">✓</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">✓</span> Zod for all input validation
-<span class="rule">✓</span> 90% test coverage
-
-<span class="hl">## Security</span>
-<span class="warn">⛔</span> Never log PII or card data
-<span class="warn">⛔</span> Parameterized queries only
-<span class="warn">⛔</span> No secrets in source code</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="1">
-<div class="compile-demo__header compile-demo__header--cursor">
-<span class="compile-demo__filename">.cursor/rules/security-audit.mdc</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
-<span class="key">globs:</span> <span class="str">["src/**/*.ts"]</span>
-<span class="key">---</span>
-
-<span class="cm"># Security Audit</span>
-
-Run a comprehensive OWASP Top 10 scan.
-
-<span class="hl">Scan for:</span>
-• Injection (SQL, NoSQL, OS)
-• Broken authentication
-• Sensitive data exposure
-• Security misconfiguration
-• Insecure dependencies</code></pre>
-
-</div>
-</div>
-
-    <div class="compile-demo__panel" data-panel="codex">
-      <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">AGENTS.md</span>
-      </div>
-      <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--codex">
-          <span class="compile-demo__filename">AGENTS.md</span>
-        </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
-
-<span class="inherited">&larr; @acme/platform</span>
-<span class="inherited">&larr; @stacks/node-typescript</span>
-
-<span class="hl">## Identity</span>
-Senior Engineer specializing in the
-Checkout Service.
-
-<span class="hl">## Tech</span>
-TypeScript 5.x &middot; Node 20+ &middot; Prisma
-Zod validation &middot; Vitest
-
-<span class="hl">## Standards</span>
-<span class="rule">&#10003;</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">&#10003;</span> Zod for all input validation
-<span class="rule">&#10003;</span> Conventional Commits
-
-<span class="hl">## Security</span>
-<span class="warn">&#9940;</span> Never log PII or card data
-<span class="warn">&#9940;</span> Parameterized queries only
-<span class="warn">&#9940;</span> No secrets in source code</code></pre>
-
-</div>
-</div>
-
-    <div class="compile-demo__panel" data-panel="factory">
-      <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">AGENTS.md</span>
-        <span class="compile-demo__subfile" data-file="1">security.skill</span>
-      </div>
-      <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--factory">
-          <span class="compile-demo__filename">AGENTS.md</span>
-        </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service Agent</span> <span class="inherited">v2.1</span>
-
-<span class="inherited">&larr; @acme/platform</span>
-<span class="inherited">&larr; @stacks/node-typescript</span>
-
-<span class="hl">## Role</span>
-Senior Engineer specializing in the
-Checkout Service.
-
-<span class="hl">## Commands</span>
-<span class="str">/review</span> Security code review
-<span class="str">/migrate</span> Safe DB migration
-
-<span class="hl">## Handoffs</span>
-<span class="rule">&#10140;</span> <span class="str">security-audit</span> OWASP scan
-
-<span class="hl">## Standards</span>
-<span class="rule">&#10003;</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">&#10003;</span> Zod for all input validation</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="1">
-<div class="compile-demo__header compile-demo__header--factory">
-<span class="compile-demo__filename">.factory/skills/security-audit/SKILL.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">security-audit</span>
-<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
-<span class="key">---</span>
-
-<span class="cm"># Security Audit</span>
-
-Run a comprehensive OWASP Top 10 scan.
-
-<span class="hl">Scan for:</span>
-&bull; Injection (SQL, NoSQL, OS)
-&bull; Broken authentication
-&bull; Sensitive data exposure
-&bull; Security misconfiguration</code></pre>
-
-</div>
-</div>
-
-    <div class="compile-demo__panel" data-panel="opencode">
-      <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">OPENCODE.md</span>
-        <span class="compile-demo__subfile" data-file="1">/review</span>
-        <span class="compile-demo__subfile" data-file="2">security.skill</span>
-      </div>
-      <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--opencode">
-          <span class="compile-demo__filename">OPENCODE.md</span>
-        </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
-
-<span class="inherited">&larr; @acme/platform</span>
-<span class="inherited">&larr; @stacks/node-typescript</span>
-
-<span class="hl">## Identity</span>
-Senior Engineer specializing in the
-Checkout Service.
-
-<span class="hl">## Tech</span>
-TypeScript 5.x &middot; Node 20+ &middot; Prisma
-
-<span class="hl">## Commands</span>
-<span class="str">/review</span> Security code review
-<span class="str">/migrate</span> Safe DB migration
-
-<span class="hl">## Skills</span>
-<span class="rule">&#9654;</span> <span class="str">security-audit</span> OWASP scan
-
-<span class="hl">## Standards</span>
-<span class="rule">&#10003;</span> Strict mode, no <span class="str">`any`</span>
-<span class="rule">&#10003;</span> Zod for all input validation</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="1">
-<div class="compile-demo__header compile-demo__header--opencode">
-<span class="compile-demo__filename">.opencode/commands/review.md</span>
-</div>
-<pre class="compile-demo__code"><code>Perform security-focused code review
-on the Checkout Service.
-
-<span class="hl">Check for:</span>
-&bull; SQL injection vulnerabilities
-&bull; XSS attack vectors
-&bull; Exposed secrets and API keys
-&bull; Input validation gaps
-&bull; IDOR vulnerabilities</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="2">
-<div class="compile-demo__header compile-demo__header--opencode">
-<span class="compile-demo__filename">.opencode/skills/security-audit/SKILL.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">security-audit</span>
-<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
-<span class="key">---</span>
-
-<span class="cm"># Security Audit</span>
-
-Run a comprehensive OWASP Top 10 scan.
-
-<span class="hl">Scan for:</span>
-&bull; Injection (SQL, NoSQL, OS)
-&bull; Broken authentication
-&bull; Sensitive data exposure</code></pre>
-
-</div>
-</div>
-
-    <div class="compile-demo__panel" data-panel="gemini">
-      <div class="compile-demo__subfiles">
-        <span class="compile-demo__subfile compile-demo__subfile--active" data-file="0">GEMINI.md</span>
-        <span class="compile-demo__subfile" data-file="1">review.toml</span>
-        <span class="compile-demo__subfile" data-file="2">security.skill</span>
-      </div>
-      <div class="compile-demo__file compile-demo__file--active" data-file="0">
-        <div class="compile-demo__header compile-demo__header--gemini">
-          <span class="compile-demo__filename">GEMINI.md</span>
-        </div>
-        <pre class="compile-demo__code"><code><span class="cm"># Checkout Service</span> <span class="inherited">v2.1</span>
-
-<span class="inherited">&larr; @acme/platform</span>
-<span class="inherited">&larr; @stacks/node-typescript</span>
-
-<span class="hl">## Identity</span>
-Senior Engineer specializing in the
-Checkout Service.
-
-<span class="hl">## Tech</span>
-TypeScript 5.x &middot; Node 20+ &middot; Prisma
-
-<span class="hl">## Commands</span>
-<span class="str">/review</span> Security code review
-<span class="str">/migrate</span> Safe DB migration
-
-<span class="hl">## Don'ts</span>
-<span class="warn">&#10007;</span> Don't log PII or card data
-<span class="warn">&#10007;</span> Don't use raw SQL queries
-<span class="warn">&#10007;</span> Don't commit secrets</code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="1">
-<div class="compile-demo__header compile-demo__header--gemini">
-<span class="compile-demo__filename">.gemini/commands/review.toml</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">[command]</span>
-<span class="key">name</span> = <span class="str">"review"</span>
-<span class="key">description</span> = <span class="str">"Security code review"</span>
-
-<span class="key">[command.steps]</span>
-<span class="key">action</span> = <span class="str">"review"</span>
-
-<span class="hl"># Check for:</span>
-<span class="cm"># SQL injection vulnerabilities</span>
-<span class="cm"># XSS attack vectors</span>
-<span class="cm"># Exposed secrets/API keys</span>
-<span class="cm"># Input validation gaps</span></code></pre>
-
-</div>
-<div class="compile-demo__file" data-file="2">
-<div class="compile-demo__header compile-demo__header--gemini">
-<span class="compile-demo__filename">.agents/skills/security-audit/skill.md</span>
-</div>
-<pre class="compile-demo__code"><code><span class="key">---</span>
-<span class="key">name:</span> <span class="str">security-audit</span>
-<span class="key">description:</span> <span class="str">OWASP vulnerability scan</span>
-<span class="key">---</span>
-
-<span class="cm"># Security Audit</span>
-
-Run a comprehensive OWASP Top 10 scan.
-
-<span class="hl">Scan for:</span>
-&bull; Injection (SQL, NoSQL, OS)
-&bull; Broken authentication
-&bull; Sensitive data exposure</code></pre>
-
-</div>
-</div>
-
-  </div>
-</div>
-
-<!-- Section Separator -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
-</div>
-
-<h2 class="section-title">Why PromptScript?</h2>
-<p class="section-subtitle">Enterprise-grade features for managing AI instructions at scale</p>
-
-<div class="feature-grid">
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
-  </div>
-  <h3>Write Once, Compile to <a href="reference/formatters/">48 AI Targets</a></h3>
-  <p>Define your complete agent platform in PromptScript. Compile native output for GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, Gemini CLI, and 42 more.</p>
-  <p class="feature-card__note">48 built-in targets - <a href="features/target-platforms/">explore target platforms</a></p>
-</div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--blue">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h6v4H3zm0 18h6v-4H3zm8 0h6v-4h-6zm8-18h2v18h-2v-4h-4v-2h4V9h-4V7h4zm-8 4h6V3h-6zm0 6h6v-4h-6z"/></svg>
-  </div>
-  <h3>Hierarchical Inheritance at Scale</h3>
-  <p>Org-wide policies inherit into team standards, which inherit into projects. Change once at the top, propagate everywhere.</p>
-</div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--amber">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-6.45 9-12V5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-  </div>
-  <h3>Audit Trails & Policy Enforcement</h3>
-  <p>Every standard versioned and traceable. Run <code>prs validate --strict</code> in CI to block non-compliant configs before production.</p>
-</div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 17.93c-3.95-.49-7-3.85-7-7.93c0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41c0 2.08-.8 3.97-2.1 5.39"/></svg>
-  </div>
-  <h3>Your Private Standards Registry</h3>
-  <p>Host standards in a private Git registry. Teams inherit from <code>@company/security</code>, <code>@company/react-app</code> - your standards, your control.</p>
-</div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m10 17l-4-4l1.41-1.41L10 14.17l7.59-7.59L19 8m0-5H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2"/></svg>
-  </div>
-  <h3>CI/CD Pipeline Integration</h3>
-  <p>Add <code>prs validate --strict</code> to your pipeline. Validate sources and enforce standards before compilation.</p>
-</div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--orange">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M2 10.96a.985.985 0 0 1-.37-1.37L3.13 7c.11-.2.28-.34.47-.42l7.83-4.4c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.19.1.35.26.44.46l1.45 2.52c.28.48.11 1.09-.36 1.36l-1 .58v4.96c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.99.99 0 0 1 3 16.5v-5.54c-.3.17-.68.18-1 0M12 4.15L5 8.09l7 3.94l7-3.94zM5 15.91l6 3.38v-6.71L5 9.21zm14 0v-6.7l-6 3.37v6.71z"/></svg>
-  </div>
-  <h3>Zero-Touch Rollout to 100+ Repos</h3>
-  <p>Update a security policy once. Every repo gets the latest standards compiled to every AI tool - no manual PRs.</p>
-</div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1a6.88 6.88 0 0 0 0 9.79a7.02 7.02 0 0 0 9.88 0A6.85 6.85 0 0 0 19 12.1h2a9 9 0 0 1-2.64 6.36c-3.51 3.48-9.21 3.48-12.73 0c-3.51-3.48-3.51-9.12 0-12.6c3.51-3.48 9.21-3.48 12.73 0L21 3z"/></svg>
-  </div>
-  <h3>Zero Learning Curve</h3>
-  <p>A PromptScript language skill is automatically compiled into your AI agents. They learn the syntax and manage your <code>.prs</code> files for you, just ask in plain language.</p>
-</div>
-
-</div>
-
-<!-- Universal Skills Section -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
-</div>
-
-<h2 class="section-title">Universal Skills, Native Output</h2>
-<p class="section-subtitle">Define one skill in PromptScript. Get the correct native skill format for every agent that supports them, including tool permissions, sub-agents, resource bundles, and runtime input/output contracts.</p>
-
-```promptscript
-@skills {
-  security-audit: {
-    description: "OWASP Top 10 vulnerability scan"
-    userInvocable: true              # /security-audit slash command
-    disableModelInvocation: false    # agent can auto-call when relevant
-    context: "fork"                  # isolated sub-conversation (Claude)
-    agent: "general-purpose"
-    allowedTools: ["Read", "Grep", "Bash"]
-    references: [
-      "./refs/owasp-top10.md",
-      "./refs/threat-model.yaml"
-    ]
-    inputs: {
-      target_path: {
-        type: "string"
-        description: "Path to scan"
-      }
-    }
-    outputs: {
-      findings: {
-        type: "list"
-        description: "Security findings"
-      }
-      severity: {
-        type: "string"
-        description: "Highest severity"
-      }
-    }
-  }
+<pre><code><span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@company/platform</span>
+<span class="home-code-keyword">@identity</span> {
+&#32;&#32;<span class="home-code-string">"Checkout service"</span>
 }
-```
-
-| Capability                                                  | Output                                                      |
-| :---------------------------------------------------------- | :---------------------------------------------------------- |
-| **Claude Code** native skill with frontmatter + references  | `.claude/skills/security-audit/SKILL.md` + bundled `refs/*` |
-| **GitHub Copilot** skill                                    | `.github/skills/security-audit/SKILL.md`                    |
-| **Factory AI** skill (with `allowedTools`, `userInvocable`) | `.factory/skills/security-audit/SKILL.md`                   |
-| **OpenCode** skill                                          | `.opencode/skills/security-audit/SKILL.md`                  |
-| **Gemini CLI** skill                                        | `.agents/skills/security-audit/skill.md`                    |
-| **Cursor / Codex** portable skill                           | `.agents/skills/security-audit/SKILL.md`                    |
-| **Other targets**                                           | native skill files or inline guidance where supported       |
-
-Import a skill from **any** GitHub repo, no scripts, no downloads:
-
-```promptscript
-@use github.com/anthropics/skills/frontend-design.md@1.0.0
-@use github.com/your-org/skills/gitnexus           # auto-discovers all SKILL.md
-@use ./local-skills/code-review.md
-```
-
-Version-pinned, lockfile-tracked, and (optionally) vendored for air-gapped CI. Run [`prs inspect <skill>`](reference/cli.md) to see the full composition chain.
-
-<div style="text-align: center; margin: 1.5rem 0;">
-  <a href="guides/building-skills/" class="md-button md-button--primary">Building Skills Guide</a>
-  <a href="guides/skill-contracts/" class="md-button md-button--secondary">Skill Contracts</a>
-</div>
-
-<!-- Agent Platform Section -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
-</div>
-
-<h2 class="section-title">Complete Agent Platform</h2>
-<p class="section-subtitle">Instructions, skills, agents, integrations, and automation from one source</p>
-
-<div class="feature-grid">
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--purple">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-  </div>
-  <h3><a href="features/agents/">Agents and Tool Policies</a></h3>
-  <p>Declare specialized agents once. Compile native definitions for Claude Code, GitHub Copilot, Cursor, Factory AI, Codex, OpenCode, and other targets with delegation support.</p>
-  <pre><code>@agents {
-  reviewer: { description: "PR reviewer" }
-  debugger: { description: "Test failure triage" }
+<span class="home-code-keyword">@skills</span> {
+&#32;&#32;security-review: {
+&#32;&#32;&#32;&#32;description: <span class="home-code-string">"Review code"</span>
+&#32;&#32;}
+}
+<span class="home-code-keyword">@agents</span> {
+&#32;&#32;reviewer: {
+&#32;&#32;&#32;&#32;skills: [<span class="home-code-string">"security-review"</span>]
+&#32;&#32;&#32;&#32;mcpServers: [<span class="home-code-string">"issues"</span>]
+&#32;&#32;}
+}
+<span class="home-code-keyword">@hooks</span> {
+&#32;&#32;validate: {
+&#32;&#32;&#32;&#32;event: <span class="home-code-string">"post-tool-use"</span>
+&#32;&#32;}
 }</code></pre>
 </div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--green">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18z"/></svg>
-  </div>
-  <h3><a href="features/integrations/">MCP Servers and Plugins</a></h3>
-  <p>Define project MCP servers, assign them to agents, then bundle skills, hooks, and integrations into reusable plugins.</p>
-  <pre><code>@mcpServers { issue-tracker: { ... } }
-@plugins { engineering: { ... } }</code></pre>
+<div class="home-compile-flow" aria-hidden="true">
+<span>prs compile</span>
+<i></i>
 </div>
-
-<div class="feature-card">
-  <div class="feature-card__icon feature-card__icon--cyan">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-  </div>
-  <h3><a href="features/automation/">Hooks, Workflows, and Builds</a></h3>
-  <p>Map portable lifecycle hooks to native agent events, publish reusable workflows, and compile scoped configuration for every package in a monorepo.</p>
-  <pre><code>@hooks { validate: { ... } }
-@workflows { release: { ... } }
-prs compile --all-builds</code></pre>
+<div class="home-output-stack">
+<div class="home-output-file home-output-file--claude">
+<span>Claude Code</span>
+<code>CLAUDE.md</code>
 </div>
-
+<div class="home-output-file home-output-file--github">
+<span>GitHub Copilot</span>
+<code>.github/agents/reviewer.md</code>
 </div>
-
-<div style="text-align: center; margin: 1.5rem 0;">
-  <a href="features/" class="md-button md-button--primary">Explore the Agent Platform</a>
+<div class="home-output-file home-output-file--factory">
+<span>Factory AI</span>
+<code>.factory/skills/security-review/</code>
 </div>
-
-<!-- Registry Section -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
+<div class="home-output-file home-output-file--cursor">
+<span>Cursor</span>
+<code>.cursor/rules/project.mdc</code>
 </div>
-
-<h2 class="section-title">Import from Anywhere</h2>
-<p class="section-subtitle">Use packages from Git repositories - or import skills directly from any AI coding plugin</p>
-
-```promptscript
-# Company-wide security rules
-@use @company/security
-
-# Team-specific standards
-@use @company/standards/code-quality
-
-# Open-source skills (auto-discovered from SKILL.md)
-@use github.com/some-org/claude-skills/skills/tdd-workflow
-
-# Pin to a version
-@use @company/security@^1.0.0
-```
-
-Configure aliases once, use everywhere:
-
-```yaml
-# promptscript.yaml
-registries:
-  '@company': github.com/acme/promptscript-base
-  '@team': github.com/acme/team-frontend
-```
-
-> **Zero infrastructure required** - uses Git directly. Private repo? Your existing SSH keys and tokens just work.
-
-<div style="text-align: center; margin: 1.5rem 0;">
-  <a href="guides/registry/" class="md-button md-button--primary">Registry Guide</a>
-  <a href="examples/git-registry/" class="md-button md-button--secondary">See Examples</a>
+<div class="home-output-more">+ 44 targets</div>
 </div>
-
-<!-- Problem Section -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v4m0 4h.01M5.313 20h13.374c1.505 0 2.471-1.6 1.77-2.931L13.77 4.363c-.75-1.425-2.79-1.425-3.54 0L3.543 17.068C2.842 18.4 3.808 20 5.313 20"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
 </div>
-
-<h2 class="section-title">The Problem: AI Instructions Don't Scale</h2>
-<p class="section-subtitle">Your organization adopted AI coding tools. Without infrastructure, every team configures differently.</p>
-
-<div class="problem-grid">
-
-<div class="problem-card">
-  <div class="problem-card__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>
-  </div>
-  <h3>Scale Problem</h3>
-  <p>Updating a security policy across <strong>100 microservices</strong> takes weeks of manual PRs. One change = 100 commits.</p>
+</section>
+<div class="home-platforms" aria-label="Supported platforms">
+<span class="home-platforms__label">Native output for</span>
+<span>Claude Code</span>
+<span>GitHub Copilot</span>
+<span>Cursor</span>
+<span>Codex</span>
+<span>Factory AI</span>
+<span>Gemini CLI</span>
+<span>OpenCode</span>
+<a href="reference/formatters/">and 41 more</a>
 </div>
-
-<div class="problem-card">
-  <div class="problem-card__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
-  </div>
-  <h3>Tool Fragmentation</h3>
-  <p>Your teams use Copilot, Claude, and Cursor. Each has its own format. Keeping them <strong>in sync is a full-time job</strong>.</p>
+<section class="home-section home-section--capabilities">
+<div class="home-section__intro">
+<div class="home-eyebrow">One language, complete platform</div>
+<h2>More than instruction files</h2>
+<p>Model the complete operating environment for AI coding agents, then let each formatter emit the richest native representation its platform supports.</p>
 </div>
-
-<div class="problem-card">
-  <div class="problem-card__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-6.45 9-12V5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-  </div>
-  <h3>Governance Void</h3>
-  <p>No audit trail. Junior devs miss critical security context. <strong>Unvetted instructions</strong> everywhere.</p>
-</div>
-
-<div class="problem-card">
-  <div class="problem-card__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
-  </div>
-  <h3>Vendor Lock-in Risk</h3>
-  <p>You went all-in on Cursor rules. Now leadership evaluates Claude Code. <strong>Rewriting 200 repos</strong> is not an option.</p>
-</div>
-
-</div>
-
-<div class="problem-result">
-  <span class="problem-result__icon">&#9888;&#65039;</span>
-  <span class="problem-result__text">Result: <strong>Inconsistent code quality, security risks, and operational chaos.</strong></span>
-</div>
-
-<!-- Solution Section -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m9 12l2 2l4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622c5.176-1.332 9-6.03 9-11.622c0-1.042-.133-2.052-.382-3.016"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
-</div>
-
-<h2 class="section-title">The Solution: PromptOps</h2>
-<p class="section-subtitle">PromptOps is the practice of managing AI instructions as versioned, auditable infrastructure. Treat your AI instructions as managed infrastructure - compiled, validated, and deployed.</p>
-
-```mermaid
-flowchart TB
-    subgraph org["🏢 Organization Registry"]
-        direction TB
-        OrgSec["@company/security<br/>(Security team)"]
-        OrgTS["@company/typescript<br/>(Platform team)"]
-        OrgJava["@company/java<br/>(Platform team)"]
-    end
-
-    subgraph teams["👥 Team Standards"]
-        direction TB
-        Backend["@backend/standards"]
-        Frontend["@frontend/standards"]
-        Data["@data/standards"]
-    end
-
-    subgraph projects["📦 Project Repos (100+)"]
-        direction TB
-        P1["checkout-service/.prs"]
-        P2["user-api/.prs"]
-        P3["dashboard/.prs"]
-        Pn["...more repos"]
-    end
-
-    OrgSec --> Backend & Frontend & Data
-    OrgTS --> Backend & Frontend
-    OrgJava --> Data
-
-    Backend --> P1 & P2
-    Frontend --> P3
-    Data --> Pn
-
-    subgraph compile["⚙️ prs compile"]
-        Compiler
-    end
-
-    P1 & P2 & P3 --> Compiler
-
-    Compiler --> Copilot["GitHub Copilot"]
-    Compiler --> Claude["Claude Code"]
-    Compiler --> Cursor["Cursor"]
-    Compiler --> Antigravity["Antigravity"]
-    Compiler --> Factory["Factory AI"]
-    Compiler --> OpenCode["OpenCode"]
-    Compiler --> Gemini["Gemini CLI"]
-    Compiler --> CI["CI/CD Audit"]
-```
-
-<!-- Example Section -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
-</div>
-
-<h2 class="section-title">See It In Action</h2>
-<p class="section-subtitle">Write once, compile to all major AI tools</p>
-
-=== "PromptScript (.prs)"
-
-    ```promptscript
-    @meta { id: "checkout-service" syntax: "1.0.0" }
-
-    @inherit @company/backend-standards
-
-    @identity {
-      """
-      You are an expert Fullstack Engineer working on the Checkout Service.
-      This service handles payments using hexagonal architecture.
-      """
-    }
-
-    @standards {
-      typescript: [
-        "Strict mode enabled",
-        "Never use any type"
-      ]
-      testing: [
-        "Use vitest as test framework",
-        "Maintain 90% code coverage"
-      ]
-    }
-
-    @restrictions {
-      - "Never expose API keys in code"
-      - "Never skip input validation"
-    }
-
-    @shortcuts {
-      "/review": "Security-focused code review"
-      "/test": "Write unit tests with Vitest"
-    }
-
-    @skills {
-      security-audit: {
-        description: "Audit code for vulnerabilities"
-        content: "Check for: SQL injection, XSS, IDOR, PII leaks."
-      }
-    }
-    ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdJjhiMA1swCuWALRwY1AG4RGMGYLgBPdhkKSZARgoAGO4YC+U1i4DEggJKtB1GBihBGmYAK3ksODpBYxUAcjFRVjlqCCxBFjIMVmMjAVYxDGoxOER3QW4IJK1U8ozMbIB6ACMMRU4xDTyCorhBQQ8ACj8Acwg4LGoctUExMYwm2ASwZmogqAxjYeoVfIBKFwqxTixUnOAXPpkrkAvBAE0VQUKYJ58iNC00gCFWhXbBACirFGrBgWkEAHcVgpKsNBGxBLgXgBhOSKFRpADKWl0+gotwAKjgxkYcXoXjgsmJYL1MMY+Oxeso4LDBHJiMM2AEntRGMSOIwsMo-PifNIbhKXM5XKxuOMqYVisJblhjB84IwUmgsJJkLdLiBMRM9GkSMwjoJOPNFjI6PrxQA5GDacHMl5ZHKqj5XMUAXRV8BOwN19pkAFVNIJdBxxk9ejG0mBqKQYFDqApbaGQABZDCVASVQQATlsAFJ0uaXiwXcnhgYbn6pS4Dn5xilBRA2L1zmLpjInTXLYQ0MxIwBBAAKnkEf2MvULLCOPr6fZAA-BcBhaESaFUUYC4mwndcDelBzgOBWWEYqm7txkDT8ulTMkshvkwtOamWN80CUXLxPhAL4NgaDQJq+4oAOopBwgjKKwNQJr0EKpDgggAGqpIGPpnrKm7QFAd5ipoN6wcYagYMosw6sqYp9EcGpaicbBvmO1E1ABgjLKs2jKFAoLJk00CpMBcDLn0FbsMcb6ovICjcSskiYgAigAMokYQdmwUQABqYpiUSeAAIgA8gASlEU7TrAGAKHA+KgYI0qOCAji+gwxyTPgRCkOQMBULQIAMDWLJsPgVhuUAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+<div class="home-capability-grid">
+<a href="reference/language/#identity" class="home-capability">
+<span class="home-capability__token">@identity</span>
+<h3>Instructions and policy</h3>
+<p>Project context, standards, restrictions, examples, and path-specific rules.</p>
 </a>
-<!-- playground-link-end -->
-
-=== "GitHub Copilot"
-
-    **Generated file tree:**
-    ```
-    .github/
-    ├── copilot-instructions.md
-    ├── prompts/
-    │   ├── review.prompt.md
-    │   └── test.prompt.md
-    └── skills/
-        └── security-audit/
-            └── SKILL.md
-    ```
-
-    ---
-
-    **`.github/copilot-instructions.md`**
-    ```markdown
-    # GitHub Copilot Instructions
-
-    > Auto-generated from project.prs
-
-    ## Project
-    You are an expert Fullstack Engineer working on the Checkout Service.
-    This service handles payments using hexagonal architecture.
-
-    ## Code Standards
-    - TypeScript: strict mode, no `any` types
-    - Testing: vitest, 90% coverage
-
-    ## Restrictions
-    - Never expose API keys in code
-    - Never skip input validation
-
-    <!-- Inherited from @company/backend-standards -->
-    ```
-
-    **`.github/prompts/review.prompt.md`**
-    ```markdown
-    ---
-    mode: agent
-    description: Security-focused code review
-    ---
-
-    Perform a security-focused code review on the selected code.
-    Check for: SQL injection, XSS, IDOR, PII leaks.
-    ```
-
-    **`.github/prompts/test.prompt.md`**
-    ```markdown
-    ---
-    mode: agent
-    description: Write unit tests with Vitest
-    ---
-
-    Write comprehensive unit tests for the selected code using Vitest.
-    Target coverage: 90%.
-    ```
-
-    **`.github/skills/security-audit/SKILL.md`**
-    ```markdown
-    ---
-    name: security-audit
-    description: Audit code for vulnerabilities
-    ---
-
-    # Security Audit Skill
-
-    Check for: SQL injection, XSS, IDOR, PII leaks.
-    ```
-
-=== "Claude Code"
-
-    **Generated file tree:**
-    ```
-    CLAUDE.md
-    .claude/
-    └── skills/
-        ├── review.md
-        ├── test.md
-        └── security-audit.md
-    ```
-
-    ---
-
-    **`CLAUDE.md`**
-    ```markdown
-    # CLAUDE.md
-
-    ## Project
-    You are an expert Fullstack Engineer working on the Checkout Service.
-    This service handles payments using hexagonal architecture.
-
-    ## Code Style
-    - Strict TypeScript, no `any`
-    - Testing: vitest, >90% coverage
-
-    ## Don'ts
-    - Don't expose API keys in code
-    - Don't skip input validation
-
-    ## Commands
-    /review - Security-focused code review
-    /test - Write unit tests with Vitest
-    ```
-
-    **`.claude/skills/review.md`**
-    ```markdown
-    ---
-    name: review
-    description: Security-focused code review
-    ---
-
-    Perform a security-focused code review.
-    Check for: SQL injection, XSS, IDOR, PII leaks.
-    ```
-
-    **`.claude/skills/test.md`**
-    ```markdown
-    ---
-    name: test
-    description: Write unit tests with Vitest
-    ---
-
-    Write comprehensive unit tests using Vitest.
-    Target coverage: 90%.
-    ```
-
-    **`.claude/skills/security-audit.md`**
-    ```markdown
-    ---
-    name: security-audit
-    description: Audit code for vulnerabilities
-    ---
-
-    Check for: SQL injection, XSS, IDOR, PII leaks.
-    ```
-
-=== "Cursor"
-
-    **Generated file tree:**
-    ```
-    .cursor/
-    └── rules/
-        ├── checkout-service.mdc
-        └── security-audit.mdc
-    ```
-
-    ---
-
-    **`.cursor/rules/checkout-service.mdc`**
-    ```markdown
-    ---
-    description: Checkout Service standards
-    globs: ["src/**/*.ts"]
-    alwaysApply: true
-    ---
-
-    You are working on the Checkout Service.
-    This service handles payments using hexagonal architecture.
-
-    ## Code Style
-    - TypeScript: strict mode, no `any`
-    - Testing: vitest, 90% coverage
-
-    ## Never
-    - Expose API keys in code
-    - Skip input validation
-    ```
-
-    **`.cursor/rules/security-audit.mdc`**
-    ```markdown
-    ---
-    description: Security audit skill
-    globs: ["src/**/*.ts"]
-    ---
-
-    # Security Audit
-
-    Check for: SQL injection, XSS, IDOR, PII leaks.
-    ```
-
-=== "Antigravity"
-
-    **Generated file tree:**
-    ```
-    .agent/
-    └── rules/
-        ├── checkout-service.md
-        └── security-audit.md
-    ```
-
-    ---
-
-    **`.agent/rules/checkout-service.md`**
-    ```markdown
-    ---
-    description: Checkout Service standards
-    activation: always
-    ---
-
-    You are working on the Checkout Service.
-    This service handles payments using hexagonal architecture.
-
-    ## Code Style
-    - TypeScript: strict mode, no `any`
-    - Testing: vitest, 90% coverage
-
-    ## Never
-    - Expose API keys in code
-    - Skip input validation
-    ```
-
-    **`.agent/rules/security-audit.md`**
-    ```markdown
-    ---
-    description: Security audit skill
-    activation: manual
-    ---
-
-    # Security Audit
-
-    Check for: SQL injection, XSS, IDOR, PII leaks.
-    ```
-
-<!-- Before/After Comparison -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
+<a href="features/skills/" class="home-capability">
+<span class="home-capability__token">@skills</span>
+<h3>Portable skills</h3>
+<p>Reusable capabilities with resources, scripts, dependencies, and typed contracts.</p>
+</a>
+<a href="features/agents/" class="home-capability">
+<span class="home-capability__token">@agents</span>
+<h3>Specialized agents</h3>
+<p>Roles, models, tool policies, skills, permissions, and MCP access.</p>
+</a>
+<a href="features/integrations/" class="home-capability">
+<span class="home-capability__token">@mcpServers</span>
+<h3>Tools and integrations</h3>
+<p>MCP servers and reusable plugins defined once at project level.</p>
+</a>
+<a href="features/automation/" class="home-capability">
+<span class="home-capability__token">@hooks</span>
+<h3>Automation</h3>
+<p>Lifecycle hooks, repeatable workflows, and scoped monorepo builds.</p>
+</a>
+<a href="guides/policy-engine/" class="home-capability">
+<span class="home-capability__token">policies</span>
+<h3>Governance</h3>
+<p>Inheritance boundaries, protected properties, registry controls, and CI validation.</p>
+</a>
 </div>
-
-<h2 class="section-title">Before & After</h2>
-<p class="section-subtitle">See the difference PromptScript makes</p>
-
-=== "Without PromptScript"
-
-    Maintain **separate config files** for each AI tool in every repo:
-
-    ```
-    .github/copilot-instructions.md   # GitHub Copilot
-    CLAUDE.md                          # Claude Code
-    .cursor/rules/project.mdc         # Cursor
-    AGENTS.md                          # Codex / Factory
-    GEMINI.md                          # Gemini CLI
-    ```
-
-    - No validation - instructions drift silently
-    - No inheritance - copy-paste across repos
-    - No audit trail - who changed what?
-    - Switching tools = rewrite instructions, READMEs, and docs everywhere
-
-=== "With PromptScript"
-
-    Write **one `.prs` file**, compile to all 48 targets:
-
-    ```promptscript
-    @meta { id: "my-project" syntax: "1.0.0" }
-    @inherit @company/standards
-    @identity { """You are an expert developer.""" }
-    ```
-
-    ```bash
-    prs compile  # Generates target-native output
-    ```
-
-    - Validated at compile time and in CI/CD
-    - Hierarchical inheritance from org → team → project
-    - Full audit trail via Git
-    - New tools supported automatically
-
-<!-- Video/Demo Placeholder -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
+</section>
+<section class="home-section home-compose">
+<div class="home-section__intro">
+<div class="home-eyebrow">Prompts as code</div>
+<h2>Inherit, compose, and extend</h2>
+<p>Configuration is composable source, not copied text. Inherit a shared base, mix in reusable fragments, and override only what changes - with deterministic, reviewable merges.</p>
 </div>
-
-<h2 class="section-title">See It Live</h2>
-<p class="section-subtitle">Try PromptScript right in your browser - no installation needed</p>
-
-<div style="text-align: center; margin: 2rem 0;">
-  <a href="/playground/" class="md-button md-button--primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;">Open the Playground</a>
-  <p style="margin-top: 1rem; color: var(--md-default-fg-color--lighter); font-size: 0.9rem;">Video walkthrough coming soon</p>
+<div class="home-compose__layout">
+<div class="home-code-window home-compose__code">
+<div class="home-window-bar">
+<span class="home-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+<span>project.prs</span>
+<span class="home-window-status">source</span>
 </div>
+<pre><code><span class="home-code-comment"># IS-A: inherit the organization base</span>
+<span class="home-code-keyword">@inherit</span> <span class="home-code-reference">@company/platform</span>
 
-<!-- Community -->
-<div class="section-divider">
-  <div class="section-divider__line"></div>
-  <div class="section-divider__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3m-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3m0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5m8 0c-.29 0-.62.02-.97.05c1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5"/></svg>
-  </div>
-  <div class="section-divider__line"></div>
+<span class="home-code-comment"># HAS-A: compose reusable fragments</span>
+<span class="home-code-keyword">@use</span> <span class="home-code-reference">@core/security</span>
+<span class="home-code-keyword">@use</span> <span class="home-code-reference">@fragments/testing</span>
+
+<span class="home-code-comment"># override only what changes</span>
+<span class="home-code-keyword">@extend</span> standards.code {
+&#32;&#32;framework: <span class="home-code-string">"react"</span>
+}
+
+<span class="home-code-keyword">@extend</span> restrictions {
+&#32;&#32;- <span class="home-code-string">"Use functional components only"</span>
+}</code></pre>
+
 </div>
-
-<h2 class="section-title">Join the Community</h2>
-<p class="section-subtitle">PromptScript is open source and early-adopter friendly</p>
-
-<div style="text-align: center; margin: 2rem 0;">
-  <p style="font-size: 1.1rem; color: var(--md-default-fg-color--light);">We're building the future of AI instruction management in the open.</p>
-  <p style="margin-top: 0.5rem;">
-    <a href="https://github.com/mrwogu/promptscript" class="md-button">Star us on GitHub</a>
-    <a href="https://github.com/mrwogu/promptscript/issues" class="md-button md-button--secondary">Report Issues</a>
-  </p>
+<div class="home-compose__ops">
+<a href="guides/inheritance/" class="home-compose__op">
+<span class="home-compose__op-token">@inherit</span>
+<div>
+<h3>Inherit a base</h3>
+<p>Single-parent "IS-A" chains from organization to team to project. Blocks merge with predictable rules.</p>
 </div>
-
-<!-- CTA Section -->
-<div class="cta-section">
-  <h2 class="cta-section__title">Ready to Standardize Your AI Instructions?</h2>
-  <p class="cta-section__subtitle">Join engineering teams using PromptScript to manage AI context at scale</p>
-  <a href="getting-started/" class="md-button md-button--primary">Get Started in 5 Minutes</a>
-  <a href="guides/enterprise/" class="md-button md-button--secondary">Enterprise? Let's Talk</a>
-  <a href="https://github.com/mrwogu/promptscript" class="md-button">View on GitHub</a>
+</a>
+<a href="guides/inheritance/#composition-with-use" class="home-compose__op">
+<span class="home-compose__op-token">@use</span>
+<div>
+<h3>Compose fragments</h3>
+<p>Mix in multiple "HAS-A" capabilities like security or testing. Later imports win on conflicts.</p>
+</div>
+</a>
+<a href="guides/inheritance/#using-extend" class="home-compose__op">
+<span class="home-compose__op-token">@extend</span>
+<div>
+<h3>Extend and override</h3>
+<p>Patch specific paths, append or negate references, and seal properties that layers cannot change.</p>
+</div>
+</a>
+</div>
+</div>
+</section>
+<section class="home-section home-section--steps">
+<div class="home-section__intro">
+<div class="home-eyebrow">A deterministic toolchain</div>
+<h2>From intent to native files</h2>
+<p>PromptScript brings compiler guarantees to agent configuration without hiding platform-specific capabilities.</p>
+</div>
+<div class="home-step-grid">
+<div class="home-step">
+<span class="home-step__number">01</span>
+<h3>Define</h3>
+<p>Compose organization, team, and project configuration from versioned <code>.prs</code> sources.</p>
+<code class="home-step__command">@inherit @company/platform</code>
+</div>
+<div class="home-step">
+<span class="home-step__number">02</span>
+<h3>Validate</h3>
+<p>Catch syntax, broken references, policy violations, and unsafe referenced content before deployment.</p>
+<code class="home-step__command">prs validate --strict</code>
+</div>
+<div class="home-step">
+<span class="home-step__number">03</span>
+<h3>Compile</h3>
+<p>Generate deterministic, reviewable files that every selected agent platform understands natively.</p>
+<code class="home-step__command">prs compile</code>
+</div>
+</div>
+</section>
+<section class="home-section home-native" id="native-output">
+<div class="home-native__copy">
+<div class="home-eyebrow">Native, not lowest common denominator</div>
+<h2>Every platform gets the files it expects</h2>
+<p>PromptScript preserves one source model while formatters map supported capabilities to native instructions, agents, skills, commands, hooks, and integrations.</p>
+<ul class="home-check-list">
+<li>Rich target-specific output where supported</li>
+<li>Deterministic diffs ready for code review</li>
+<li>No runtime proxy between developers and their tools</li>
+<li>New targets without rewriting source configuration</li>
+</ul>
+<a href="reference/formatters/" class="home-text-link">Explore all 48 target formats <span>→</span></a>
+</div>
+<div class="home-native__files">
+<div class="home-target-card">
+<div><strong>Claude Code</strong><span>full native output</span></div>
+<code>CLAUDE.md</code>
+<code>.claude/agents/reviewer.md</code>
+<code>.claude/skills/security-review/SKILL.md</code>
+<code>.claude/settings.json</code>
+</div>
+<div class="home-target-card">
+<div><strong>GitHub Copilot</strong><span>full native output</span></div>
+<code>.github/copilot-instructions.md</code>
+<code>.github/agents/reviewer.md</code>
+<code>.github/skills/security-review/SKILL.md</code>
+<code>.github/prompts/review.prompt.md</code>
+</div>
+<div class="home-target-card">
+<div><strong>Factory AI</strong><span>full native output</span></div>
+<code>AGENTS.md</code>
+<code>.factory/droids/reviewer.md</code>
+<code>.factory/skills/security-review/SKILL.md</code>
+</div>
+</div>
+</section>
+<section class="home-scale">
+<div class="home-scale__copy">
+<div class="home-eyebrow">Built for one repo or an organization</div>
+<h2>Change policy once. Propagate with control.</h2>
+<p>Keep shared standards in Git, inherit them through explicit layers, pin remote dependencies, and enforce the result in CI.</p>
+<div class="home-scale__links">
+<a href="guides/enterprise/">Enterprise setup</a>
+<a href="guides/registry/">Git registry</a>
+<a href="guides/security/">Security model</a>
+</div>
+</div>
+<div class="home-scale__diagram" aria-label="Organization policies flow to teams, projects, and native platform files">
+<div class="home-scale__node home-scale__node--org">
+<span>Organization</span>
+<code>@company/platform</code>
+</div>
+<div class="home-scale__connector"><i></i><i></i><i></i></div>
+<div class="home-scale__row">
+<div class="home-scale__node"><span>Frontend</span><code>@team/web</code></div>
+<div class="home-scale__node"><span>Backend</span><code>@team/services</code></div>
+<div class="home-scale__node"><span>Data</span><code>@team/data</code></div>
+</div>
+<div class="home-scale__down">↓</div>
+<div class="home-scale__projects">100+ project repositories</div>
+<div class="home-scale__outputs">
+<span>Policies</span><span>Skills</span><span>Agents</span><span>Native files</span>
+</div>
+</div>
+</section>
+<section class="home-section home-section--adopt">
+<div class="home-section__intro">
+<div class="home-eyebrow">Adopt without a rewrite</div>
+<h2>Start from where you are</h2>
+<p>Create a new platform definition, import existing agent files, or establish shared configuration for many repositories.</p>
+</div>
+<div class="home-path-grid">
+<a href="getting-started/" class="home-path-card">
+<span>New project</span>
+<h3>Initialize in minutes</h3>
+<code>prs init</code>
+<p>Detect the stack, choose targets, and generate a validated starting point.</p>
+<strong>Start the tutorial →</strong>
+</a>
+<a href="guides/import/" class="home-path-card">
+<span>Existing setup</span>
+<h3>Import what already works</h3>
+<code>prs import CLAUDE.md</code>
+<p>Convert current Claude, Copilot, Cursor, AGENTS.md, and other instruction files.</p>
+<strong>See import options →</strong>
+</a>
+<a href="guides/enterprise/" class="home-path-card">
+<span>Organization</span>
+<h3>Build a control plane</h3>
+<code>@inherit @company/platform</code>
+<p>Layer organization policy, team capabilities, and project context with Git-native governance.</p>
+<strong>Plan the rollout →</strong>
+</a>
+</div>
+</section>
+<section class="home-proof">
+<a class="home-video-card" href="https://www.youtube.com/watch?v=7sHMn-DbZig" target="_blank" rel="noopener noreferrer">
+<img src="https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg" alt="PromptScript introduction video" loading="lazy" width="1280" height="720">
+<span class="home-video-card__play" aria-hidden="true">▶</span>
+<span class="home-video-card__label">Watch the introduction</span>
+</a>
+<div class="home-proof__copy">
+<div class="home-eyebrow">See it before installing</div>
+<h2>Explore PromptScript in your browser</h2>
+<p>Edit a real PromptScript source and inspect generated output without changing your local environment.</p>
+<div class="home-proof__actions">
+<a href="/playground/" class="home-button home-button--primary">Open playground</a>
+<a href="examples/" class="home-text-link">Browse examples <span>→</span></a>
+</div>
+</div>
+</section>
+<section class="home-final-cta">
+<div>
+<div class="home-eyebrow">One source of truth</div>
+<h2>Give every AI agent the right context.</h2>
+<p>Start with one repository today. Scale the same model across teams when you are ready.</p>
+</div>
+<div class="home-final-cta__actions">
+<a href="getting-started/" class="home-button home-button--primary">Get started</a>
+<a href="https://github.com/mrwogu/promptscript" class="home-button home-button--secondary">View on GitHub</a>
+</div>
+</section>
 </div>
