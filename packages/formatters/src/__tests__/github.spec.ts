@@ -685,6 +685,57 @@ describe('GitHubFormatter', () => {
       expect(agentFile?.content).toContain('You specialize in code reviews.');
     });
 
+    it('should generate agent file with MCP servers', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'mcpServers',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                filesystem: {
+                  transport: 'stdio',
+                  command: ['node', 'filesystem.mjs'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'mcp-agent': {
+                  description: 'Agent with MCP access',
+                  content: 'Use the configured server.',
+                  mcpServers: ['filesystem'],
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find(
+        (file) => file.path === '.github/agents/mcp-agent.md'
+      );
+
+      expect(agentFile).toBeDefined();
+      expect(agentFile!.content).toContain('mcp-servers:');
+      expect(agentFile!.content).toContain('  filesystem:');
+      expect(agentFile!.content).toContain('    type: local');
+      expect(agentFile!.content).toContain('    command: node');
+      expect(agentFile!.content).toContain('      - filesystem.mjs');
+    });
+
     it('should generate agent file with minimal config', () => {
       const ast: Program = {
         ...createMinimalProgram(),

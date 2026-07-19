@@ -23,6 +23,8 @@ const {
   mockMuted,
   mockDryRun,
   mockCleanupManagedOutputs,
+  mockSpinner,
+  mockSpinnerStart,
 } = vi.hoisted(() => {
   const mockCompile = vi.fn();
   const mockLoadConfig = vi.fn();
@@ -36,6 +38,15 @@ const {
   const mockMuted = vi.fn();
   const mockDryRun = vi.fn();
   const mockCleanupManagedOutputs = vi.fn();
+  const mockSpinnerStart = vi.fn();
+  const mockSpinner = {
+    start: mockSpinnerStart,
+    succeed: vi.fn().mockReturnThis(),
+    fail: vi.fn().mockReturnThis(),
+    stop: vi.fn().mockReturnThis(),
+    text: '',
+  };
+  mockSpinnerStart.mockReturnValue(mockSpinner);
   return {
     mockCompile,
     mockLoadConfig,
@@ -49,6 +60,8 @@ const {
     mockMuted,
     mockDryRun,
     mockCleanupManagedOutputs,
+    mockSpinner,
+    mockSpinnerStart,
   };
 });
 
@@ -63,8 +76,8 @@ vi.mock('@promptscript/compiler', () => ({
 }));
 
 vi.mock('../../config/loader.js', () => ({
-  loadConfig: () => mockLoadConfig(),
-  loadEffectiveConfig: () => mockLoadConfig(),
+  loadConfig: (...args: unknown[]) => mockLoadConfig(...args),
+  loadEffectiveConfig: (...args: unknown[]) => mockLoadConfig(...args),
   CONFIG_FILES: ['promptscript.yaml'],
 }));
 
@@ -90,13 +103,7 @@ vi.mock('ora', () => ({
 }));
 
 vi.mock('../../output/console.js', () => ({
-  createSpinner: vi.fn().mockReturnValue({
-    start: vi.fn().mockReturnThis(),
-    succeed: vi.fn().mockReturnThis(),
-    fail: vi.fn().mockReturnThis(),
-    stop: vi.fn().mockReturnThis(),
-    text: '',
-  }),
+  createSpinner: vi.fn().mockReturnValue(mockSpinner),
   ConsoleOutput: {
     success: vi.fn(),
     error: mockError,
@@ -154,6 +161,8 @@ describe('compile command - createCliLogger warn path', () => {
     capturedLogger = undefined;
     capturedCompilerOptions = undefined;
     process.exitCode = undefined;
+    mockSpinnerStart.mockReturnValue(mockSpinner);
+    mockSpinner.text = '';
 
     mockLoadConfig.mockResolvedValue({
       targets: ['claude'],
@@ -405,5 +414,52 @@ describe('compile command - createCliLogger warn path', () => {
 
     expect(mockCompile).not.toHaveBeenCalled();
     expect(mockWarning).toHaveBeenCalledWith('No named build profiles found in config.builds');
+  });
+
+  it('should resolve all builds without cwd or config options', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+    });
+
+    await compileCommand({ allBuilds: true }, mockServices);
+
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(mockWarning).toHaveBeenCalledWith('No named build profiles found in config.builds');
+  });
+
+  it('should resolve all builds from an explicit config path', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: {},
+    });
+
+    await compileCommand({ allBuilds: true, config: '/repo/custom.yaml' }, mockServices);
+
+    expect(mockLoadConfig).toHaveBeenCalledWith('/repo/custom.yaml');
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(mockWarning).toHaveBeenCalledWith('No named build profiles found in config.builds');
+  });
+
+  it('should continue after build setup throws', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: {
+        alpha: { targets: ['claude'] },
+        beta: { targets: ['claude'] },
+      },
+    });
+    mockSpinnerStart
+      .mockImplementationOnce(() => {
+        throw new Error('alpha setup failed');
+      })
+      .mockImplementationOnce(() => {
+        throw { reason: 'beta setup failed' };
+      });
+
+    await compileCommand({ allBuilds: true, cwd: '/repo/promptscript' }, mockServices);
+
+    expect(mockError).toHaveBeenCalledWith('Build profile "alpha" failed: alpha setup failed');
+    expect(mockError).toHaveBeenCalledWith('Build profile "beta" failed: [object Object]');
+    expect(process.exitCode).toBe(1);
   });
 });

@@ -1561,6 +1561,19 @@ describe('resolveSkillScripts', () => {
     );
   });
 
+  it('should reject too many script files', async () => {
+    const scriptPaths: string[] = [];
+    for (let index = 0; index < 101; index++) {
+      const scriptPath = `script-${index}.sh`;
+      scriptPaths.push(scriptPath);
+      await writeFile(join(testDir, scriptPath), 'x');
+    }
+
+    await expect(resolveSkillScripts(scriptPaths, testDir)).rejects.toThrow(
+      'Too many script files (101, max 100)'
+    );
+  });
+
   it('should reject oversized script files', async () => {
     await writeFile(join(testDir, 'large.sh'), 'x'.repeat(1_048_577));
 

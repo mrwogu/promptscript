@@ -334,6 +334,48 @@ describe('CodexFormatter', () => {
   });
 
   describe('TOML edge cases', () => {
+    it('should serialize null, undefined, and unsupported MCP fields as empty strings', () => {
+      const program: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                worker: {
+                  description: 'Worker agent',
+                  mcpServers: {
+                    edge: {
+                      nullValue: null as unknown as Value,
+                      undefinedValue: undefined as unknown as Value,
+                      unsupportedValue: Symbol('unsupported') as unknown as Value,
+                    },
+                  },
+                } as Record<string, Value>,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+      };
+
+      const result = formatter.format(program, { version: 'multifile' });
+      const agentToml = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.codex/agents/worker.toml'
+      );
+
+      expect(agentToml).toBeDefined();
+      expect(agentToml!.content).toContain('nullValue = ""');
+      expect(agentToml!.content).toContain('undefinedValue = ""');
+      expect(agentToml!.content).toContain('unsupportedValue = ""');
+    });
+
     it('should emit top-level MCP and plugins while skipping primitive agents', () => {
       const program: Program = {
         type: 'Program',

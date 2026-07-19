@@ -3,6 +3,8 @@ import {
   extractHooks,
   generateClaudeHooks,
   generateCodexHooks,
+  generateCursorHooks,
+  generateFactoryHooks,
   mapEvent,
   convertTimeout,
 } from '../hook-adapters.js';
@@ -92,6 +94,10 @@ describe('hook-adapters', () => {
     it('should map pre-tool-use to Cursor preEdit', () => {
       expect(mapEvent('pre-tool-use', 'cursor')).toBe('preEdit');
     });
+
+    it('should map post-tool-use to Factory postToolUse', () => {
+      expect(mapEvent('post-tool-use', 'factory')).toBe('postToolUse');
+    });
   });
 
   describe('convertTimeout', () => {
@@ -105,6 +111,10 @@ describe('hook-adapters', () => {
 
     it('should keep ms for Codex', () => {
       expect(convertTimeout(5000, 'codex')).toBe(5000);
+    });
+
+    it('should convert ms to seconds for Factory', () => {
+      expect(convertTimeout(15000, 'factory')).toBe(15);
     });
   });
 
@@ -207,6 +217,76 @@ describe('hook-adapters', () => {
       const json = JSON.stringify(claudeHooks);
       expect(json).toContain('statusMessage');
       expect(json).toContain('Running pre-tool hook');
+    });
+  });
+
+  describe('generateCursorHooks', () => {
+    it('should generate enabled hooks with Cursor options', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          active: {
+            event: 'pre-tool-use',
+            matcher: 'Edit|Write',
+            command: ['prs', 'hook', 'pre-edit'],
+            timeoutMs: 5000,
+            statusMessage: 'Checking files',
+            continueOnFailure: true,
+          },
+          disabled: {
+            event: 'pre-tool-use',
+            command: ['prs', 'hook'],
+            enabled: false,
+          },
+        })
+      );
+
+      expect(generateCursorHooks(hooks)).toEqual({
+        preEdit: [
+          {
+            matcher: 'Edit|Write',
+            command: 'prs hook pre-edit',
+            timeout: 5,
+            statusMessage: 'Checking files',
+            continueOnFailure: true,
+          },
+        ],
+      });
+    });
+  });
+
+  describe('generateFactoryHooks', () => {
+    it('should generate enabled hooks with Factory options', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          active: {
+            event: 'pre-tool-use',
+            command: ['prs', 'hook', 'pre-edit'],
+            timeoutMs: 5000,
+            statusMessage: 'Checking files',
+          },
+          disabled: {
+            event: 'pre-tool-use',
+            command: ['prs', 'hook'],
+            enabled: false,
+          },
+        })
+      );
+
+      expect(generateFactoryHooks(hooks)).toEqual({
+        preToolUse: [
+          {
+            matcher: '.*',
+            hooks: [
+              {
+                type: 'command',
+                command: 'prs hook pre-edit',
+                timeout: 5,
+                statusMessage: 'Checking files',
+              },
+            ],
+          },
+        ],
+      });
     });
   });
 });

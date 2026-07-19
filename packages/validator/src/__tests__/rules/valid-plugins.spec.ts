@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { validPlugins } from '../../rules/valid-plugins.js';
 import type { RuleContext, ValidationMessage } from '../../types.js';
 import type { Program, SourceLocation, Block, ObjectContent, Value } from '@promptscript/core';
@@ -70,15 +70,6 @@ describe('PS036: valid-plugins', () => {
     });
     expect(messages.length).toBeGreaterThan(0);
     expect(messages[0]!.message).toContain('must be alphanumeric');
-  });
-
-  it('should reject duplicate plugin names', () => {
-    const messages = validate({
-      dup: { version: '1.0.0' },
-      other: { version: '2.0.0' },
-    });
-    // No duplicates in this case - test with same name in different entries
-    expect(messages).toHaveLength(0);
   });
 
   it('should reject non-object plugin value', () => {
@@ -208,18 +199,23 @@ describe('PS036: valid-plugins', () => {
   });
 
   it('should reject duplicate plugin names', () => {
-    const messages = validate({
-      'my-plugin': {
-        version: '1.0.0',
-        source: 'npm',
-      },
-      'my-plugin-dup': {
-        version: '2.0.0',
-        source: 'npm',
-      },
-    });
-    // The rule checks for duplicate basenames or exact names
-    // This test verifies the duplicate detection path is covered
-    expect(messages).toBeDefined();
+    const entriesSpy = vi.spyOn(Object, 'entries').mockReturnValueOnce([
+      ['dup', { version: '1.0.0' }],
+      ['dup', { version: '2.0.0' }],
+    ]);
+    const messages = (() => {
+      try {
+        return validate({ dup: { version: '1.0.0' } });
+      } finally {
+        entriesSpy.mockRestore();
+      }
+    })();
+
+    expect(messages).toContainEqual(
+      expect.objectContaining({
+        message: 'Duplicate plugin name "dup"',
+        severity: 'error',
+      })
+    );
   });
 });

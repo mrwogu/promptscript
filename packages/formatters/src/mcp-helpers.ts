@@ -274,6 +274,10 @@ export function serializeMcpServerNamesToYaml(servers: McpServerDefinition[]): s
   return `[${names.map((n) => `"${n}"`).join(', ')}]`;
 }
 
+function serializeYamlScalar(value: string): string {
+  return /^[a-zA-Z0-9_./-]+$/.test(value) ? value : JSON.stringify(value);
+}
+
 /**
  * Serialize MCP servers inline for YAML frontmatter (used by GitHub Copilot).
  * Output: mcp-servers:\n  <name>:\n    type: ...\n    command: ...
@@ -285,28 +289,28 @@ export function serializeMcpServersToYamlInline(
   const lines: string[] = [];
 
   for (const server of servers) {
-    lines.push(`${indent}${server.name}:`);
+    lines.push(`${indent}${serializeYamlScalar(server.name)}:`);
 
     if (server.transport === 'stdio') {
       if (server.command && server.command.length > 0) {
         lines.push(`${indent}  type: local`);
-        lines.push(`${indent}  command: ${server.command[0]}`);
+        lines.push(`${indent}  command: ${serializeYamlScalar(server.command[0]!)}`);
         if (server.command.length > 1) {
           lines.push(`${indent}  args:`);
           for (const arg of server.command.slice(1)) {
-            lines.push(`${indent}    - ${arg}`);
+            lines.push(`${indent}    - ${serializeYamlScalar(arg)}`);
           }
         }
       }
     } else {
       lines.push(`${indent}  type: ${server.transport}`);
-      if (server.url) lines.push(`${indent}  url: ${server.url}`);
+      if (server.url) lines.push(`${indent}  url: ${serializeYamlScalar(server.url)}`);
     }
 
     if (server.env) {
       lines.push(`${indent}  env:`);
       for (const [k, v] of Object.entries(server.env)) {
-        lines.push(`${indent}    ${k}: ${v}`);
+        lines.push(`${indent}    ${serializeYamlScalar(k)}: ${serializeYamlScalar(v)}`);
       }
     }
   }

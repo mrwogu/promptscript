@@ -792,6 +792,8 @@ export class GitHubFormatter extends BaseFormatter {
 
     const agents: GitHubAgentConfig[] = [];
     const props = this.getProps(agentsBlock.content);
+    const mcpServersBlock = findMcpServersBlock(ast);
+    const availableMcpServers = mcpServersBlock ? extractMcpServers(mcpServersBlock) : [];
 
     for (const [name, value] of Object.entries(props)) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -800,6 +802,15 @@ export class GitHubFormatter extends BaseFormatter {
         if (!description) continue; // description is required
 
         const handoffs = this.extractHandoffs(obj['handoffs']);
+        const mcpServersValue = obj['mcpServers'];
+        const mcpServerNames = Array.isArray(mcpServersValue)
+          ? mcpServersValue.filter(
+              (serverName): serverName is string => typeof serverName === 'string'
+            )
+          : [];
+        const mcpServers = availableMcpServers.filter((server) =>
+          mcpServerNames.includes(server.name)
+        );
         agents.push({
           name,
           description,
@@ -807,6 +818,7 @@ export class GitHubFormatter extends BaseFormatter {
           model: obj['model'] ? this.valueToString(obj['model']) : undefined,
           specModel: obj['specModel'] ? this.valueToString(obj['specModel']) : undefined,
           handoffs: handoffs.length > 0 ? handoffs : undefined,
+          mcpServers: mcpServers.length > 0 ? mcpServers : undefined,
           content: obj['content'] ? this.valueToString(obj['content']) : '',
         });
       }
