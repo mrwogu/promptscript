@@ -5,7 +5,7 @@
 
 **One Source of Truth for All Your AI Coding Assistants**
 
-_Write once. Compile to 37 AI coding agents: GitHub Copilot, Claude Code, Cursor, and more._
+_Write once. Compile to 48 AI coding targets: GitHub Copilot, Claude Code, Cursor, and more._
 
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
@@ -29,7 +29,7 @@ _Write once. Compile to 37 AI coding agents: GitHub Copilot, Claude Code, Cursor
 
 ## The Fix
 
-- ✅ Write once in `.prs` → compile to **all 37 agents**
+- ✅ Write once in `.prs` → compile to **any of 48 targets**
 - ✅ Update the source → propagates everywhere automatically
 - ✅ Hierarchical inheritance like code, not copy-paste
 - ✅ Full validation, audit trail, and version pinning
@@ -44,8 +44,8 @@ _Write once. Compile to 37 AI coding agents: GitHub Copilot, Claude Code, Cursor
 npm install -g @promptscript/cli
 
 prs init             # auto-detects your tech stack
-prs compile          # outputs to all AI tools
-prs hooks install --all  # auto-recompile on save, block AI from overwriting outputs
+prs compile          # outputs to configured AI targets
+prs hooks install      # install for detected AI tools
 ```
 
 ### Or Use Docker
@@ -61,14 +61,17 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
 ### Set Up Hooks
 
 ```bash
-prs hooks install --all  # claude, copilot, cursor, gemini, factory, ...
+prs hooks install  # auto-detect supported AI tools
 ```
 
-From now on, every time you edit a `.prs` file, outputs recompile automatically. AI agents are blocked from overwriting generated configs.
+Supported AI tools now recompile after their edit events and block direct writes to generated
+configs. Use `prs compile --watch` for changes made in a general-purpose editor.
 
 ### Then Let Your AI Agents Take Over
 
-After `prs compile`, a **PromptScript language skill** is automatically injected into your AI agents. They learn the `.prs` syntax and can create, edit, and manage your PromptScript files for you. Just ask your agent to add a new rule, change a standard, or create a shortcut, it already knows how.
+After `prs compile`, targets whose formatter exposes a bundled-skill path receive a
+**PromptScript language skill**. Those agents learn the `.prs` syntax and can manage your
+PromptScript files.
 
 ---
 
@@ -99,7 +102,7 @@ After `prs compile`, a **PromptScript language skill** is automatically injected
 }
 ```
 
-**Run:** `prs compile` generates native config files for every AI tool:
+**Run:** `prs compile` generates native config files for configured AI targets:
 
 ```
 📄 .github/copilot-instructions.md
@@ -109,7 +112,7 @@ After `prs compile`, a **PromptScript language skill** is automatically injected
 📄 AGENTS.md
 📄 OPENCODE.md
 📄 GEMINI.md
-   ... and 30 more agent formats
+   ... and 41 more target formats
 ```
 
 **Example output** - the generated `CLAUDE.md`:
@@ -143,8 +146,8 @@ One `.prs` file. Every AI tool gets native, idiomatic output. No manual formatti
 
 ```promptscript
 @inherit @company/global-security
-@inherit @team/backend-standards
-@extend @standards.testing { coverage: "95%" }
+@use @team/backend-standards
+@extend standards.testing { coverage: "95%" }
 ```
 
 **Parameterized Templates** - reusable stacks with typed parameters, like Infrastructure as Code:
@@ -162,13 +165,27 @@ One `.prs` file. Every AI tool gets native, idiomatic output. No manual formatti
     userInvocable: true
     allowedTools: ["Read", "Grep", "Bash"]
     references: ["./refs/owasp-top10.md"]
-    inputs:  { target_path: string }
-    outputs: { findings: array, severity: enum }
+    inputs: {
+      target_path: {
+        type: "string"
+        description: "Path to scan"
+      }
+    }
+    outputs: {
+      findings: {
+        type: "list"
+        description: "Security findings"
+      }
+      severity: {
+        type: "string"
+        description: "Highest severity"
+      }
+    }
   }
 }
 ```
 
-**Sub-agents** - declare specialized sub-agents once, compile to Claude Code `.claude/agents/`, Factory AI `.factory/agents/`, and equivalent targets:
+**Sub-agents** - declare specialized sub-agents once, compile to Claude Code `.claude/agents/`, Factory AI `.factory/droids/`, and equivalent targets:
 
 ```promptscript
 @agents {
@@ -196,7 +213,7 @@ registries:
 **AI-Assisted Migration** - already have `CLAUDE.md` or `.cursorrules`? Convert automatically:
 
 ```bash
-prs init --migrate
+prs migrate
 ```
 
 **Watch Mode** - auto-recompile on every change:
@@ -205,7 +222,8 @@ prs init --migrate
 prs compile --watch
 ```
 
-**Zero Learning Curve** - A PromptScript language skill is automatically compiled into your AI agents' native skill format. Your agents learn the syntax, so _they_ manage your `.prs` files, you just tell them what you want in plain language.
+**Zero Learning Curve** - Targets with bundled-skill output receive a PromptScript language skill.
+Those agents learn the syntax, so _they_ manage your `.prs` files from plain-language requests.
 
 **Docker CI/CD** - validate in any pipeline:
 
@@ -215,7 +233,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest validate
 
 ---
 
-## 37 AI Agents, One Source
+## 48 AI Targets, One Source
 
 PromptScript compiles to native config formats for every major AI coding agent:
 
@@ -227,7 +245,7 @@ PromptScript compiles to native config formats for every major AI coding agent:
 - 🟢 **OpenCode** → `OPENCODE.md`
 - 🟢 **Gemini CLI** → `GEMINI.md`
 
-Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI, and others. Each outputs to its native config path. See the [full list of formatters](https://getpromptscript.dev/formatters/).
+Plus **41 more**: Windsurf, Cline, Roo Code, Codex, Grok, Aider, Amazon Q, Warp, Zed, and others. Each outputs to its native config path. See the [full list of formatters](https://getpromptscript.dev/reference/formatters/).
 
 ---
 
@@ -238,7 +256,7 @@ Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Ki
 - 🔐 **Lockfile + integrity hashes** - `promptscript.lock` for reproducible builds across every repo
 - 📦 **Vendor mode** - `prs vendor sync` mirrors all deps into `.promptscript/vendor/` for offline / air-gapped CI
 - ✅ **CI validation** - `prs validate --strict --format json`
-- 📈 **Drift detection** - `prs compile --dry-run` (and `prs diff`) fails the build when source and generated outputs disagree
+- 📈 **Drift review** - `prs compile --dry-run` and `prs diff` preview generated changes before writing
 - 🔍 **Skill provenance** - `prs inspect <skill>` shows every inherited layer and where each property came from
 - 📋 **Full audit trail** - every change tracked in version control
 
@@ -249,7 +267,7 @@ Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Ki
 | Resource                                                                                                        | Description                                |
 | :-------------------------------------------------------------------------------------------------------------- | :----------------------------------------- |
 | [**Getting Started**](https://getpromptscript.dev/getting-started/)                                             | 5-minute quickstart guide                  |
-| [**Language Reference**](https://getpromptscript.dev/reference/syntax/)                                         | Full syntax documentation                  |
+| [**Language Reference**](https://getpromptscript.dev/reference/language/)                                       | Full syntax documentation                  |
 | [**Guides**](https://getpromptscript.dev/guides/)                                                               | Inheritance, registry, migration, and more |
 | [**Enterprise**](https://getpromptscript.dev/guides/enterprise/)                                                | Scaling across organizations               |
 | [**VS Code Extension**](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language) | Syntax highlighting for `.prs` files       |

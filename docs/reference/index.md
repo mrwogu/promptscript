@@ -9,6 +9,17 @@ Complete reference documentation for PromptScript.
 
 <div class="ref-list">
 
+<a href="../features/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--purple">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a5 5 0 0 1 5 5v1h1a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4h1V7a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3v1h6V7a3 3 0 0 0-3-3m-4 8a2 2 0 1 0 0 4a2 2 0 0 0 0-4m8 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4m-7 6v2h6v-2H9z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Agent Platform</h3>
+    <p>Core features for instructions, skills, agents, MCP servers, plugins, hooks, workflows, and target delivery.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
+
 <a href="language/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5zM9 13v2h6v-2zm0 4v2h6v-2z"/></svg>
@@ -48,7 +59,7 @@ Complete reference documentation for PromptScript.
   </div>
   <div class="ref-item__content">
     <h3>Formatters</h3>
-    <p>All 37 supported AI agent formatters - output paths, features, quirks, and examples.</p>
+    <p>All 48 supported AI agent targets - output paths, features, quirks, and examples.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>

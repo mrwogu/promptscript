@@ -48,7 +48,7 @@ description: PromptScript output format for Claude Code
 | Mermaid Diagrams | Yes |
 | Single File Output | Yes |
 | Multiple Rule Files | Yes |
-| Workflow Files | No |
+| Workflow Files | Yes |
 | Nested Directory Structure | No |
 | YAML Frontmatter | Yes |
 | Description in Frontmatter | No |
@@ -58,8 +58,10 @@ description: PromptScript output format for Claude Code
 | Always Apply Rules | Yes |
 | Manual Activation | No |
 | Auto/Model Activation | No |
+| Structured Examples | Yes |
 | Character Limit Validation | No |
 | Content Section Splitting | Yes |
+| Guard Dependencies | Yes |
 | Context File Inclusion | Planned |
 | @-Mentions | No |
 | Tool Integration | Yes |
@@ -99,15 +101,3 @@ project-root/
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
-
-
-<claude-mem-context>
-# Recent Activity
-
-### Mar 17, 2026
-
-| ID | Time | T | Title | Read |
-|----|------|---|-------|------|
-| #2423 | 7:06 PM | 🔵 | All 37 Formatter Names Extracted for Homepage Display | ~324 |
-| #2422 | " | 🔵 | Complete 37 Formatter List Confirmed in Documentation | ~434 |
-</claude-mem-context>

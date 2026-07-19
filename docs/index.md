@@ -1,6 +1,6 @@
 ---
-title: 'PromptScript - One Source, Every AI Agent | Enterprise AI Standards'
-description: 'Write AI instructions once, compile to 37 AI coding agents. One source for GitHub Copilot, Claude Code, Cursor, Windsurf, and 33 more. Enterprise prompt standardization with inheritance, validation, and CI/CD.'
+title: 'PromptScript - Agent Platform Configuration as Code'
+description: 'Define AI instructions, skills, agents, MCP servers, hooks, workflows, and plugins once. Compile native configuration for 48 AI coding agent platforms.'
 meta:
   - name: keywords
     content: PromptScript, PromptOps, AI instructions, GitHub Copilot, Claude Code, Cursor, Antigravity, Factory AI, OpenCode, Gemini CLI, AI context, AI governance, prompt drift, developer experience, enterprise AI, developer tools, code generation, AI standardization
@@ -9,7 +9,7 @@ meta:
   - property: og:title
     content: PromptScript - One Source, Every AI Agent
   - property: og:description
-    content: Write AI instructions once, compile to 37 AI coding agents. One source for GitHub Copilot, Claude Code, Cursor, Windsurf, and 33 more. Enterprise prompt standardization with inheritance, validation, and CI/CD.
+    content: Define AI instructions, skills, agents, MCP servers, hooks, workflows, and plugins once. Compile native configuration for 48 AI coding agent platforms.
   - property: og:type
     content: website
   - name: twitter:card
@@ -27,13 +27,13 @@ hide:
 
 # PromptScript
 
-**One source. Every AI agent.**
+**One source. Complete agent platform.**
 
-_Prompt-as-code with **inheritance, skills, sub-agents, and a versioned registry**. Compile once to 37 AI tools, and let your agents edit the source for you._
+_Define **instructions, skills, agents, tools, integrations, and automation** as code. Compile once to native configuration for 48 AI coding agent platforms._
 
 <div class="hero-ticker" aria-hidden="true">
   <div class="hero-ticker__track">
-    <!-- Half 1: 44 chips (custom x2 interspersed, with SVG logos) -->
+    <!-- Half 1: 55 chips (48 targets, custom targets repeated with SVG logos) -->
     <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4l5 4-5 4M9 12h5"/></svg>Cline</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8 1l5.66 3.27v6.46L8 14l-5.66-3.27V4.27L8 1z"/></svg>Codex</span>
@@ -78,6 +78,17 @@ _Prompt-as-code with **inheritance, skills, sub-agents, and a versioned registry
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Aider</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Amazon Q</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Warp</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zed</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Jules</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Devin</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Grok</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kimi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mimo</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Deep Agents</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>ForgeCode</span>
     <!-- Half 2: identical copy for seamless loop -->
     <span class="hero-ticker__chip hero-ticker__chip--custom"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/></svg>Claude Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t1"><svg class="hero-ticker__icon" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4l5 4-5 4M9 12h5"/></svg>Cline</span>
@@ -123,11 +134,23 @@ _Prompt-as-code with **inheritance, skills, sub-agents, and a versioned registry
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qoder</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Qwen Code</span>
     <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zencoder</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Aider</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Amazon Q</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Warp</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Zed</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Jules</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Devin</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Grok</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Kimi</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Mimo</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>Deep Agents</span>
+    <span class="hero-ticker__chip hero-ticker__chip--t3"><span class="hero-ticker__dot"></span>ForgeCode</span>
   </div>
 </div>
 
 [:material-rocket-launch: Get Started in 5 Minutes](getting-started.md){ .md-button .md-button--primary }
-[:material-format-list-checks: See All 37 Formatters](reference/formatters/index.md){ .md-button .md-button--secondary }
+[:material-robot-outline: Explore Agent Platform](features/index.md){ .md-button .md-button--secondary }
+[:material-format-list-checks: See All 48 Targets](reference/formatters/index.md){ .md-button }
 [:material-book-open-variant: Enterprise Guide](guides/enterprise.md){ .md-button }
 [:material-github: GitHub](https://github.com/mrwogu/promptscript){ .md-button }
 
@@ -181,7 +204,7 @@ document.getElementById('video-play-btn').addEventListener('click', function() {
     </div>
     <pre class="compile-demo__code"><code id="typewriter-target"></code></pre>
     <div class="compile-demo__cursor" id="typing-cursor"></div>
-    <div class="compile-demo__badge">1 skill, 1 agent, 1 source &rarr; 37 native formats</div>
+    <div class="compile-demo__badge">1 platform definition &rarr; 48 native targets</div>
   </div>
 
   <div class="compile-demo__arrow">
@@ -342,7 +365,7 @@ Generate Prisma migration safely.
 </div>
 <div class="compile-demo__file" data-file="3">
 <div class="compile-demo__header compile-demo__header--copilot">
-<span class="compile-demo__filename">.github/copilot-skills/security-audit.md</span>
+<span class="compile-demo__filename">.github/skills/security-audit/SKILL.md</span>
 </div>
 <pre class="compile-demo__code"><code><span class="key">---</span>
 <span class="key">name:</span> <span class="str">security-audit</span>
@@ -723,7 +746,7 @@ TypeScript 5.x &middot; Node 20+ &middot; Prisma
 </div>
 <div class="compile-demo__file" data-file="2">
 <div class="compile-demo__header compile-demo__header--gemini">
-<span class="compile-demo__filename">.gemini/skills/security-audit/skill.md</span>
+<span class="compile-demo__filename">.agents/skills/security-audit/skill.md</span>
 </div>
 <pre class="compile-demo__code"><code><span class="key">---</span>
 <span class="key">name:</span> <span class="str">security-audit</span>
@@ -763,9 +786,9 @@ Run a comprehensive OWASP Top 10 scan.
   <div class="feature-card__icon feature-card__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"/></svg>
   </div>
-  <h3>Write Once, Compile to <a href="reference/formatters/">37 AI Agents</a></h3>
-  <p>Define standards in PromptScript. Compile to GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, Roo Code, and 31 more. Add new agents without rewriting.</p>
-  <p class="feature-card__note">37 agents and counting - <a href="reference/formatters/">see all supported formatters</a></p>
+  <h3>Write Once, Compile to <a href="reference/formatters/">48 AI Targets</a></h3>
+  <p>Define your complete agent platform in PromptScript. Compile native output for GitHub Copilot, Claude Code, Cursor, Factory AI, Codex, Gemini CLI, and 42 more.</p>
+  <p class="feature-card__note">48 built-in targets - <a href="features/target-platforms/">explore target platforms</a></p>
 </div>
 
 <div class="feature-card">
@@ -797,7 +820,7 @@ Run a comprehensive OWASP Top 10 scan.
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m10 17l-4-4l1.41-1.41L10 14.17l7.59-7.59L19 8m0-5H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2"/></svg>
   </div>
   <h3>CI/CD Pipeline Integration</h3>
-  <p>Add <code>prs compile --check</code> to your pipeline. Detect drift, enforce standards, fail builds on non-compliance.</p>
+  <p>Add <code>prs validate --strict</code> to your pipeline. Validate sources and enforce standards before compilation.</p>
 </div>
 
 <div class="feature-card">
@@ -843,21 +866,35 @@ Run a comprehensive OWASP Top 10 scan.
       "./refs/owasp-top10.md",
       "./refs/threat-model.yaml"
     ]
-    inputs:  { target_path: string }
-    outputs: { findings: array, severity: enum }
+    inputs: {
+      target_path: {
+        type: "string"
+        description: "Path to scan"
+      }
+    }
+    outputs: {
+      findings: {
+        type: "list"
+        description: "Security findings"
+      }
+      severity: {
+        type: "string"
+        description: "Highest severity"
+      }
+    }
   }
 }
 ```
 
-| Capability                                                  | Output                                                                |
-| :---------------------------------------------------------- | :-------------------------------------------------------------------- |
-| **Claude Code** native skill with frontmatter + references  | `.claude/skills/security-audit/SKILL.md` + bundled `refs/*`           |
-| **GitHub Copilot** skill                                    | `.github/copilot-skills/security-audit.md`                            |
-| **Factory AI** skill (with `allowedTools`, `userInvocable`) | `.factory/skills/security-audit/SKILL.md`                             |
-| **OpenCode** skill                                          | `.opencode/skills/security-audit/SKILL.md`                            |
-| **Gemini CLI** skill                                        | `.gemini/skills/security-audit/skill.md`                              |
-| **Cursor / Antigravity** rule                               | `.cursor/rules/security-audit.mdc` / `.agent/rules/security-audit.md` |
-| **Codex / 30 others**                                       | inlined into `AGENTS.md` and equivalents                              |
+| Capability                                                  | Output                                                      |
+| :---------------------------------------------------------- | :---------------------------------------------------------- |
+| **Claude Code** native skill with frontmatter + references  | `.claude/skills/security-audit/SKILL.md` + bundled `refs/*` |
+| **GitHub Copilot** skill                                    | `.github/skills/security-audit/SKILL.md`                    |
+| **Factory AI** skill (with `allowedTools`, `userInvocable`) | `.factory/skills/security-audit/SKILL.md`                   |
+| **OpenCode** skill                                          | `.opencode/skills/security-audit/SKILL.md`                  |
+| **Gemini CLI** skill                                        | `.agents/skills/security-audit/skill.md`                    |
+| **Cursor / Codex** portable skill                           | `.agents/skills/security-audit/SKILL.md`                    |
+| **Other targets**                                           | native skill files or inline guidance where supported       |
 
 Import a skill from **any** GitHub repo, no scripts, no downloads:
 
@@ -874,7 +911,7 @@ Version-pinned, lockfile-tracked, and (optionally) vendored for air-gapped CI. R
   <a href="guides/skill-contracts/" class="md-button md-button--secondary">Skill Contracts</a>
 </div>
 
-<!-- Sub-Agents Section -->
+<!-- Agent Platform Section -->
 <div class="section-divider">
   <div class="section-divider__line"></div>
   <div class="section-divider__icon">
@@ -883,8 +920,8 @@ Version-pinned, lockfile-tracked, and (optionally) vendored for air-gapped CI. R
   <div class="section-divider__line"></div>
 </div>
 
-<h2 class="section-title">Sub-Agents, Hooks &amp; AI-Managed Source</h2>
-<p class="section-subtitle">Three features that make PromptScript feel native to every AI tool</p>
+<h2 class="section-title">Complete Agent Platform</h2>
+<p class="section-subtitle">Instructions, skills, agents, integrations, and automation from one source</p>
 
 <div class="feature-grid">
 
@@ -892,8 +929,8 @@ Version-pinned, lockfile-tracked, and (optionally) vendored for air-gapped CI. R
   <div class="feature-card__icon feature-card__icon--purple">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
   </div>
-  <h3>Sub-Agents via <code>@agents</code></h3>
-  <p>Declare specialized sub-agents once. Compile to Claude Code <code>.claude/agents/</code>, Factory AI <code>.factory/agents/</code>, and any other target that supports task delegation.</p>
+  <h3><a href="features/agents/">Agents and Tool Policies</a></h3>
+  <p>Declare specialized agents once. Compile native definitions for Claude Code, GitHub Copilot, Cursor, Factory AI, Codex, OpenCode, and other targets with delegation support.</p>
   <pre><code>@agents {
   reviewer: { description: "PR reviewer" }
   debugger: { description: "Test failure triage" }
@@ -904,21 +941,27 @@ Version-pinned, lockfile-tracked, and (optionally) vendored for air-gapped CI. R
   <div class="feature-card__icon feature-card__icon--green">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18z"/></svg>
   </div>
-  <h3>Hooks: never edit generated files again</h3>
-  <p>One command and every <code>.prs</code> save triggers recompile, while AI agents are blocked from overwriting generated configs.</p>
-  <pre><code>prs hooks install --all
-# claude, copilot, cursor, gemini,
-# factory, windsurf, cline ...</code></pre>
+  <h3><a href="features/integrations/">MCP Servers and Plugins</a></h3>
+  <p>Define project MCP servers, assign them to agents, then bundle skills, hooks, and integrations into reusable plugins.</p>
+  <pre><code>@mcpServers { issue-tracker: { ... } }
+@plugins { engineering: { ... } }</code></pre>
 </div>
 
 <div class="feature-card">
   <div class="feature-card__icon feature-card__icon--cyan">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
   </div>
-  <h3>Agents that edit their own instructions</h3>
-  <p>A PromptScript language skill is auto-bundled into every target. Ask your AI in plain English: <em>"Add a rule that we use Zod for validation"</em>, and the agent updates the <code>.prs</code> source. No syntax to learn.</p>
+  <h3><a href="features/automation/">Hooks, Workflows, and Builds</a></h3>
+  <p>Map portable lifecycle hooks to native agent events, publish reusable workflows, and compile scoped configuration for every package in a monorepo.</p>
+  <pre><code>@hooks { validate: { ... } }
+@workflows { release: { ... } }
+prs compile --all-builds</code></pre>
 </div>
 
+</div>
+
+<div style="text-align: center; margin: 1.5rem 0;">
+  <a href="features/" class="md-button md-button--primary">Explore the Agent Platform</a>
 </div>
 
 <!-- Registry Section -->
@@ -1146,8 +1189,9 @@ flowchart TB
     ├── prompts/
     │   ├── review.prompt.md
     │   └── test.prompt.md
-    └── copilot-skills/
-        └── security-audit.md
+    └── skills/
+        └── security-audit/
+            └── SKILL.md
     ```
 
     ---
@@ -1195,7 +1239,7 @@ flowchart TB
     Target coverage: 90%.
     ```
 
-    **`.github/copilot-skills/security-audit.md`**
+    **`.github/skills/security-audit/SKILL.md`**
     ```markdown
     ---
     name: security-audit
@@ -1392,7 +1436,7 @@ flowchart TB
 
 === "With PromptScript"
 
-    Write **one `.prs` file**, compile to all 37 agents:
+    Write **one `.prs` file**, compile to all 48 targets:
 
     ```promptscript
     @meta { id: "my-project" syntax: "1.0.0" }
@@ -1401,7 +1445,7 @@ flowchart TB
     ```
 
     ```bash
-    prs compile  # Generates all 37 output files
+    prs compile  # Generates target-native output
     ```
 
     - Validated at compile time and in CI/CD

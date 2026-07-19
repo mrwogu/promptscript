@@ -17,7 +17,7 @@ prs hooks <action> [tool] [options]
 
 `prs hooks` manages the hook configuration files that connect PromptScript to the event system of your AI coding tool. After installation, the tool calls `prs hook pre-edit` before any file write and `prs hook post-edit` after any file write, enabling:
 
-- **Auto-compilation** — `.prs` saves trigger `prs compile` automatically.
+- **Auto-compilation** - supported AI tool writes to `.prs` files trigger `prs compile`.
 - **Output protection** — writes to generated files are blocked with an actionable error.
 
 ## Actions
@@ -42,37 +42,39 @@ Writes hook configuration for the specified tool, or for all auto-detected tools
 
 **Options**
 
-| Option  | Description                                                  |
-| ------- | ------------------------------------------------------------ |
-| `--all` | Install for all supported tools regardless of auto-detection |
+| Option  | Description                                                            |
+| ------- | ---------------------------------------------------------------------- |
+| `--all` | Accepted for compatibility; current behavior still uses auto-detection |
 
 **Auto-detection logic**
 
-When no tool name is given and `--all` is not set, `prs hooks install` checks the project root for config directories and files associated with each tool:
+When no tool name is given, `prs hooks install` checks the project root for files associated with
+each tool:
 
-| Tool        | Detected by presence of |
-| ----------- | ----------------------- |
-| Claude Code | `.claude/`              |
-| Factory AI  | `.factory/`             |
-| Cursor      | `.cursor/`              |
-| Windsurf    | `.windsurf/`            |
-| Cline       | `.cline/`               |
-| Copilot     | `.github/copilot/`      |
-| Gemini CLI  | `.gemini/`              |
+| Tool        | Detected by presence of                         |
+| ----------- | ----------------------------------------------- |
+| Claude Code | `.claude/`                                      |
+| Factory AI  | `.factory/`                                     |
+| Cursor      | `.cursor/`                                      |
+| Windsurf    | `.windsurf/`                                    |
+| Cline       | `.clinerules`                                   |
+| Copilot     | `.vscode/` or `.github/copilot-instructions.md` |
+| Gemini CLI  | `.gemini/`                                      |
 
-If none of the above are found, the command prints a warning and exits 0 without writing any files. Use `--all` or specify a tool name explicitly to install regardless.
+If none are found, the command reports an error and exits with code 1. Specify a tool name to install
+its integration explicitly.
 
 **Config files written**
 
-| Tool        | Config file                  |
-| ----------- | ---------------------------- |
-| Claude Code | `.claude/settings.json`      |
-| Factory AI  | `.factory/hooks.yaml`        |
-| Cursor      | `.cursor/hooks.json`         |
-| Windsurf    | `.windsurf/hooks.json`       |
-| Cline       | `.cline/hooks.json`          |
-| Copilot     | `.github/copilot/hooks.json` |
-| Gemini CLI  | `.gemini/hooks.json`         |
+| Tool        | Config file                                |
+| ----------- | ------------------------------------------ |
+| Claude Code | `.claude/settings.json`                    |
+| Factory AI  | `.factory/settings.json`                   |
+| Cursor      | `.cursor/hooks.json`                       |
+| Windsurf    | `.windsurf/hooks.json`                     |
+| Cline       | `.clinerules/hooks/prs-{pre,post}-edit.sh` |
+| Copilot     | `.vscode/hooks.json`                       |
+| Gemini CLI  | `.gemini/settings.json`                    |
 
 If a config file already exists, the command merges the hook entries rather than overwriting the whole file.
 
@@ -92,13 +94,14 @@ Removes PromptScript hook entries from the config file of the specified tool, or
 | -------- | ----------------------------------------------------------- |
 | `[tool]` | Tool name to uninstall for. Omit to uninstall all detected. |
 
-If removing the hook entries leaves a config file empty (or with only an empty `hooks` object), the file is deleted.
+For JSON integrations, uninstall removes PromptScript entries and preserves the settings file.
+Cline hook scripts are deleted.
 
 ## Options
 
-| Option  | Short | Description                                    |
-| ------- | ----- | ---------------------------------------------- |
-| `--all` |       | Install for all supported tools (install only) |
+| Option  | Short | Description                                                            |
+| ------- | ----- | ---------------------------------------------------------------------- |
+| `--all` |       | Accepted for compatibility; current behavior still uses auto-detection |
 
 ## Examples
 
@@ -112,9 +115,6 @@ prs hooks install claude
 # Install hooks for Cursor only
 prs hooks install cursor
 
-# Install for all supported tools
-prs hooks install --all
-
 # Remove hooks from all detected tools
 prs hooks uninstall
 
@@ -125,4 +125,4 @@ prs hooks uninstall windsurf
 ## See Also
 
 - [`prs hook`](hook.md) — the hook handler invoked at runtime
-- [Hooks Guide](../../guides/hooks.md) — end-to-end setup, manual configuration, and troubleshooting
+- [Hooks Guide](../../guides/hooks.md) - setup, generated configuration, and troubleshooting

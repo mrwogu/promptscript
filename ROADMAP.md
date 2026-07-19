@@ -42,11 +42,11 @@
 - [x] **Basic parameters** — `(key: value)` syntax, string interpolation `{{var}}` in `@inherit`, `@use`, and `@skills`
 - [x] **Type validation** — Validate param types at compile time (PS009 for `@params`, PS015 for `@skills`)
 
-### 37 AI Agent Formatters
+### 48 AI Agent Targets
 
 **Goal:** Support all major AI coding assistants — **done.**
 
-GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, Gemini CLI, Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI, Cortex, Crush, Command Code, Kode, MCPJam, Mistral Vibe, Mux, OpenHands, Pi, Qoder, Qwen Code, Zencoder, Neovate, Pochi, AdaL, iFlow, OpenClaw, CodeBuddy.
+GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, Gemini CLI, Windsurf, Cline, Roo Code, Codex, Continue, Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI, Cortex, Crush, Command Code, Kode, MCPJam, Mistral Vibe, Mux, OpenHands, Pi, Qoder, Qwen Code, Zencoder, Neovate, Pochi, AdaL, iFlow, OpenClaw, CodeBuddy, Aider, Amazon Q, Deep Agents, Devin, ForgeCode, Grok, Jules, Kimi, Mimo, Warp, Zed.
 
 ### Remote Git Registry
 

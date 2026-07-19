@@ -93,7 +93,7 @@ Each skill (with all its resource files) is copied to every target:
 .factory/skills/frontend-design/SKILL.md
 .factory/skills/frontend-design/data/colors.csv
 .factory/skills/frontend-design/scripts/search.py
-.gemini/skills/frontend-design/skill.md
+.agents/skills/frontend-design/skill.md
 ...
 ```
 

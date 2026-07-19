@@ -13,6 +13,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FEATURE_MATRIX, type ToolName } from '@promptscript/formatters';
+import { TARGET_DEFINITIONS } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -111,6 +112,7 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   codebuddy: 'CodeBuddy',
   mcpjam: 'MCPJam',
   iflow: 'iFlow',
+  forgecode: 'ForgeCode',
 };
 
 /** Custom formatters with dedicated pages and hand-written overrides. */
@@ -136,8 +138,8 @@ const CUSTOM_OVERRIDES: Record<string, Partial<FormatterInfo>> = {
   cursor: {
     outputPath: '.cursor/rules/project.mdc',
     dotDir: '.cursor',
-    hasSkills: false,
-    hasAgents: false,
+    hasSkills: true,
+    hasAgents: true,
     hasCommands: true,
     hasLocal: false,
     skillFileName: 'SKILL.md',
@@ -147,7 +149,7 @@ const CUSTOM_OVERRIDES: Record<string, Partial<FormatterInfo>> = {
     dotDir: '.agent',
     hasSkills: false,
     hasAgents: false,
-    hasCommands: false,
+    hasCommands: true,
     hasLocal: false,
     skillFileName: 'SKILL.md',
   },
@@ -235,11 +237,75 @@ function buildFormatterRegistry(): FormatterInfo[] {
     });
   }
 
+  // Add targets that use shared formatter factories and therefore do not expose
+  // parseable metadata directly in their thin source modules.
+  const registeredNames = new Set(formatters.map((formatter) => formatter.name));
+  for (const definition of Object.values(TARGET_DEFINITIONS)) {
+    if (registeredNames.has(definition.name)) continue;
+
+    const displayName =
+      DISPLAY_NAME_OVERRIDES[definition.name] ??
+      definition.name
+        .split('-')
+        .map((word) => word[0].toUpperCase() + word.slice(1))
+        .join(' ');
+    const skillBasePath = definition.skillPath.basePath;
+    const dotDir = skillBasePath?.endsWith('/skills')
+      ? skillBasePath.slice(0, -'/skills'.length)
+      : (skillBasePath ?? '');
+
+    formatters.push({
+      name: definition.name,
+      displayName,
+      tier: tiers[definition.name] ?? 'tier-3',
+      outputPath: definition.outputPath,
+      dotDir,
+      hasSkills: definition.features.hasSkills,
+      hasAgents: definition.features.hasAgents,
+      hasCommands: definition.features.hasCommands,
+      hasLocal: false,
+      skillFileName: definition.skillPath.fileName ?? 'SKILL.md',
+      hasDedicatedPage: DEDICATED_PAGES.has(definition.name),
+    });
+  }
+
   // Sort: custom first, then tier-1, tier-2, tier-3; alphabetical within each tier
   const tierOrder = { custom: 0, 'tier-1': 1, 'tier-2': 2, 'tier-3': 3 };
   formatters.sort((a, b) => tierOrder[a.tier] - tierOrder[b.tier] || a.name.localeCompare(b.name));
 
   return formatters;
+}
+
+function validateAgainstTargetCatalog(formatters: FormatterInfo[]): void {
+  const registryNames = formatters.map((formatter) => formatter.name);
+  const uniqueNames = new Set(registryNames);
+  const catalog = Object.values(TARGET_DEFINITIONS);
+  const catalogNames = new Set(catalog.map((definition) => definition.name));
+  const catalogByName = new Map(catalog.map((definition) => [definition.name, definition]));
+  const duplicates = registryNames.filter((name, index) => registryNames.indexOf(name) !== index);
+  const missing = [...catalogNames].filter((name) => !uniqueNames.has(name));
+  const unknown = [...uniqueNames].filter((name) => !catalogNames.has(name));
+  const outputMismatches = formatters
+    .filter((formatter) => catalogByName.get(formatter.name)?.outputPath !== formatter.outputPath)
+    .map((formatter) => formatter.name);
+
+  if (
+    duplicates.length > 0 ||
+    missing.length > 0 ||
+    unknown.length > 0 ||
+    outputMismatches.length > 0
+  ) {
+    throw new Error(
+      [
+        duplicates.length > 0 ? `duplicate targets: ${[...new Set(duplicates)].join(', ')}` : '',
+        missing.length > 0 ? `missing targets: ${missing.join(', ')}` : '',
+        unknown.length > 0 ? `unknown targets: ${unknown.join(', ')}` : '',
+        outputMismatches.length > 0 ? `output path mismatches: ${outputMismatches.join(', ')}` : '',
+      ]
+        .filter(Boolean)
+        .join('; ')
+    );
+  }
 }
 
 /**
@@ -326,6 +392,23 @@ function tierLabel(tier: FormatterInfo['tier']): string {
   }
 }
 
+function skillPath(f: FormatterInfo): string {
+  const basePath = f.name === 'cursor' || f.name === 'gemini' ? '.agents' : f.dotDir;
+  return `${basePath}/skills/<name>/${f.skillFileName}`;
+}
+
+function agentPath(f: FormatterInfo): string {
+  const directory = f.name === 'factory' ? 'droids' : 'agents';
+  return `${f.dotDir}/${directory}/<name>.md`;
+}
+
+function commandPath(f: FormatterInfo): string {
+  if (f.name === 'github') return '.github/prompts/<name>.prompt.md';
+  if (f.name === 'antigravity') return '.agent/workflows/<name>.md';
+  const extension = f.name === 'gemini' ? 'toml' : 'md';
+  return `${f.dotDir}/commands/<name>.${extension}`;
+}
+
 function generateFormatterTable(formatters: FormatterInfo[]): string {
   const lines: string[] = [
     '| Formatter | Tier | Output File | Skills | Agents | Local | Commands |',
@@ -349,9 +432,9 @@ function generateOverview(f: FormatterInfo): string {
     `| **Tier** | ${tierLabel(f.tier)} |`,
     `| **Main output** | \`${f.outputPath}\` |`,
     `| **Dot directory** | \`${f.dotDir}/\` |`,
-    `| **Skills** | ${yn(f.hasSkills)}${f.hasSkills ? ` (\`${f.dotDir}/skills/<name>/${f.skillFileName}\`)` : ''} |`,
-    `| **Agents** | ${yn(f.hasAgents)}${f.hasAgents ? ` (\`${f.dotDir}/${f.name === 'factory' ? 'droids' : 'agents'}/<name>.md\`)` : ''} |`,
-    `| **Commands** | ${yn(f.hasCommands)}${f.hasCommands ? ` (\`${f.name === 'github' ? '.github/prompts/<name>.prompt.md' : `${f.dotDir}/commands/<name>.${f.name === 'gemini' ? 'toml' : 'md'}`}\`)` : ''} |`,
+    `| **Skills** | ${yn(f.hasSkills)}${f.hasSkills ? ` (\`${skillPath(f)}\`)` : ''} |`,
+    `| **Agents** | ${yn(f.hasAgents)}${f.hasAgents ? ` (\`${agentPath(f)}\`)` : ''} |`,
+    `| **Commands** | ${yn(f.hasCommands)}${f.hasCommands ? ` (\`${commandPath(f)}\`)` : ''} |`,
     `| **Local files** | ${yn(f.hasLocal)}${f.hasLocal ? ' (`CLAUDE.local.md`)' : ''} |`,
   ];
   return lines.join('\n');
@@ -375,22 +458,21 @@ function generateOutputFiles(f: FormatterInfo): string {
   }
 
   if (f.hasSkills) {
-    const ext = f.skillFileName;
-    lines.push(`| Skills | \`${f.dotDir}/skills/<name>/${ext}\` | Reusable skill definitions |`);
+    lines.push(`| Skills | \`${skillPath(f)}\` | Reusable skill definitions |`);
   }
 
   if (f.hasCommands) {
-    if (f.name === 'github') {
-      lines.push(`| Prompts | \`.github/prompts/<name>.prompt.md\` | Slash commands |`);
-    } else {
-      const ext = f.name === 'gemini' ? 'toml' : 'md';
-      lines.push(`| Commands | \`${f.dotDir}/commands/<name>.${ext}\` | Slash commands |`);
-    }
+    const label =
+      f.name === 'github' ? 'Prompts' : f.name === 'antigravity' ? 'Workflows' : 'Commands';
+    const purpose =
+      f.name === 'antigravity'
+        ? 'Workflow shortcuts; simple commands remain inline'
+        : 'Slash commands';
+    lines.push(`| ${label} | \`${commandPath(f)}\` | ${purpose} |`);
   }
 
   if (f.hasAgents) {
-    const dir = f.name === 'factory' ? 'droids' : 'agents';
-    lines.push(`| Agents | \`${f.dotDir}/${dir}/<name>.md\` | Agent configurations |`);
+    lines.push(`| Agents | \`${agentPath(f)}\` | Agent configurations |`);
 
     // GitHub also has top-level AGENTS.md
     if (f.name === 'github') {
@@ -450,8 +532,9 @@ function main(): void {
 
   // 0. Build registry from source and validate
   const FORMATTERS = buildFormatterRegistry();
+  validateAgainstTargetCatalog(FORMATTERS);
   validateAgainstFeatureMatrix(FORMATTERS);
-  console.log(`Found ${FORMATTERS.length} formatters from source files\n`);
+  console.log(`Found ${FORMATTERS.length} formatters in the target registry\n`);
 
   // 1. Generate index page table
   const indexPath = join(DOCS_DIR, 'index.md');
