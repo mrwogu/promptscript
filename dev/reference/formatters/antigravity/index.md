@@ -1,20 +1,21 @@
 # Antigravity Formatter
 
-| Property          | Value                     |
-| ----------------- | ------------------------- |
-| **Tier**          | Custom                    |
-| **Main output**   | `.agent/rules/project.md` |
-| **Dot directory** | `.agent/`                 |
-| **Skills**        | No                        |
-| **Agents**        | No                        |
-| **Commands**      | No                        |
-| **Local files**   | No                        |
+| Property          | Value                              |
+| ----------------- | ---------------------------------- |
+| **Tier**          | Custom                             |
+| **Main output**   | `.agent/rules/project.md`          |
+| **Dot directory** | `.agent/`                          |
+| **Skills**        | No                                 |
+| **Agents**        | No                                 |
+| **Commands**      | Yes (`.agent/workflows/<name>.md`) |
+| **Local files**   | No                                 |
 
 ## Output Files
 
-| File              | Path                      | Purpose           |
-| ----------------- | ------------------------- | ----------------- |
-| Main instructions | `.agent/rules/project.md` | Primary rule file |
+| File              | Path                         | Purpose                                           |
+| ----------------- | ---------------------------- | ------------------------------------------------- |
+| Main instructions | `.agent/rules/project.md`    | Primary rule file                                 |
+| Workflows         | `.agent/workflows/<name>.md` | Workflow shortcuts; simple commands remain inline |
 
 ## Supported Features
 
@@ -36,8 +37,10 @@
 | Always Apply Rules         | Yes       |
 | Manual Activation          | Yes       |
 | Auto/Model Activation      | Yes       |
+| Structured Examples        | Yes       |
 | Character Limit Validation | Yes       |
 | Content Section Splitting  | Yes       |
+| Guard Dependencies         | Yes       |
 | Context File Inclusion     | No        |
 | @-Mentions                 | No        |
 | Tool Integration           | No        |
@@ -53,10 +56,10 @@
 
 - Has a 12,000 character limit per rule file - content validation warns when exceeded
 - Three activation types: `always` (default), `auto` (model decides), `manual` (user invokes)
-- Supports workflows (`.agent/workflows/*.yaml`) generated from `@shortcuts` blocks with steps
+- Supports workflows (`.agent/workflows/*.md`) generated from `@shortcuts` blocks with steps
 - Uses nested directory structure: `.agent/rules/` with glob-based file targeting
 - YAML frontmatter includes `description`, `globs`, and `alwaysApply` fields
-- `@shortcuts` with `steps` array produce YAML workflow files; without `steps` they produce markdown rules
+- `@shortcuts` with `steps` arrays produce Markdown workflow files; without `steps` they remain inline
 
 ## Example Output
 
@@ -67,7 +70,7 @@ project-root/
     │   ├── project.md                 # Main rules
     │   └── frontend.md                # Path-specific rules
     └── workflows/
-        └── deploy.yaml                # Workflow definition
+        └── deploy.md                  # Workflow definition
 ```
 
 ## Official Documentation

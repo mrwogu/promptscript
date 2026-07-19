@@ -40,8 +40,10 @@
 | Always Apply Rules         | Yes       |
 | Manual Activation          | No        |
 | Auto/Model Activation      | No        |
-| Character Limit Validation | Planned   |
+| Structured Examples        | Yes       |
+| Character Limit Validation | No        |
 | Content Section Splitting  | Yes       |
+| Guard Dependencies         | Yes       |
 | Context File Inclusion     | No        |
 | @-Mentions                 | No        |
 | Tool Integration           | No        |

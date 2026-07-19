@@ -4,7 +4,7 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 
 ## Overview
 
-PromptScript compiles to 37 AI agent targets (GitHub Copilot, Claude Code, Cursor, Windsurf, Cline, and more). Each formatter must produce semantically equivalent output from the same input. To ensure this parity, formatters share common extraction and rendering logic.
+PromptScript compiles to 48 AI agent targets. Rich native formatters, AGENTS.md targets, and shared Markdown formatters map the same PromptScript source to each platform's instruction and capability contracts. Shared extraction and rendering logic preserves semantic parity where native platforms support equivalent features.
 
 ```
 flowchart TB
@@ -35,29 +35,30 @@ flowchart TB
             FA["FactoryFormatter"]
             OC["OpenCodeFormatter"]
             GE["GeminiFormatter"]
+            GR["GrokFormatter"]
         end
 
-        subgraph "MarkdownInstructionFormatter (31 agents)"
+        subgraph "Shared Markdown Targets (40 targets)"
             MI["MarkdownInstructionFormatter"]
             T1["Tier 1: Windsurf, Cline, Roo Code, Codex, Continue"]
             T2["Tier 2: Augment, Goose, Kilo Code, Amp, Trae, Junie, Kiro CLI"]
-            T3["Tier 3: Cortex, Crush, Command Code, Kode, + 15 more"]
+            T3["Tier 3 and AGENTS.md target families"]
         end
     end
 
     subgraph Output
         GHO["copilot-instructions.md"]
         CLO["CLAUDE.md"]
-        CUO[".cursorrules"]
-        AGO["antigravity.md"]
+        CUO[".cursor/rules/project.mdc"]
+        AGO[".agent/rules/project.md"]
     end
 
     PRS --> Parser --> Resolver --> Validator --> AST
     AST --> BR
     BR --> SE
     BR --> SR
-    SE --> GH & CL & CU & AG & FA & OC & GE & MI
-    SR --> GH & CL & CU & AG & FA & OC & GE & MI
+    SE --> GH & CL & CU & AG & FA & OC & GE & GR & MI
+    SR --> GH & CL & CU & AG & FA & OC & GE & GR & MI
     MI --> T1 & T2 & T3
     GH --> GHO
     CL --> CLO
@@ -262,7 +263,7 @@ export class MyAgentFormatter extends MarkdownInstructionFormatter {
 }
 ```
 
-This is how 31 of the 38 supported agents are implemented. Each formatter is a thin subclass that only provides constructor configuration. The `MarkdownInstructionFormatter` base class handles all standard sections (`@identity`, `@standards`, `@shortcuts`, etc.) and outputs well-structured markdown to the configured path.
+Most supported targets use a thin formatter class that provides constructor configuration. The `MarkdownInstructionFormatter` base class handles standard sections (`@identity`, `@standards`, `@shortcuts`, and others) and outputs structured Markdown to the configured path.
 
 ### Advanced Case: Custom Formatter
 

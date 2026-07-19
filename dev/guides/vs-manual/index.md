@@ -24,7 +24,7 @@ GEMINI.md                          # Gemini CLI
 
 ## The PromptScript Approach
 
-With PromptScript, you write one `.prs` file and compile to all 37 agents:
+With PromptScript, you write one `.prs` file and compile to all 48 targets:
 
 ```
 @meta { id: "my-project" syntax: "1.0.0" }
@@ -61,23 +61,23 @@ CLAUDE.md
 .clinerules
 AGENTS.md
 GEMINI.md
-... all 37 targets
+... all configured targets
 ```
 
-| Benefit                      | How                               |
-| ---------------------------- | --------------------------------- |
-| **Single source of truth**   | One `.prs` file, 37 outputs       |
-| **Compile-time validation**  | Errors caught before deployment   |
-| **Hierarchical inheritance** | Org → Team → Project              |
-| **Full audit trail**         | Git history on `.prs` files       |
-| **Automated updates**        | Change registry, all repos update |
-| **Tool-agnostic**            | Switch tools without rewriting    |
+| Benefit                      | How                                      |
+| ---------------------------- | ---------------------------------------- |
+| **Single source of truth**   | One `.prs` file, up to 48 target outputs |
+| **Compile-time validation**  | Errors caught before deployment          |
+| **Hierarchical inheritance** | Org → Team → Project                     |
+| **Full audit trail**         | Git history on `.prs` files              |
+| **Automated updates**        | Change registry, all repos update        |
+| **Tool-agnostic**            | Switch tools without rewriting           |
 
 ## Side-by-Side Comparison
 
 | Aspect          | Manual                | PromptScript         |
 | --------------- | --------------------- | -------------------- |
-| Files per repo  | 5-37                  | 1                    |
+| Files per repo  | 5-48                  | 1                    |
 | Update a policy | 100+ PRs              | 1 registry update    |
 | Add new tool    | Write new file format | `prs compile`        |
 | Validation      | None                  | Compile-time + CI/CD |

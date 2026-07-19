@@ -50,7 +50,10 @@ prs init [options]
 | `-i, --interactive`      | Force interactive mode with prompts                             |
 | `-y, --yes`              | Skip prompts, use defaults                                      |
 | `-f, --force`            | Force reinitialize even if already initialized                  |
-| `-m, --migrate`          | Install migration skill for AI-assisted migration               |
+| `--auto-import`          | Statically import detected instruction files                    |
+| `--backup`               | Back up detected instruction files before migration             |
+| `--no-hooks`             | Skip automatic hook installation                                |
+| `-m, --migrate`          | Deprecated migration flag; use interactive `prs init`           |
 
 **Examples:**
 
@@ -70,8 +73,8 @@ prs init --team frontend --inherit @frontend/team
 # Initialize with specific targets only
 prs init --targets github claude
 
-# Initialize with migration skill for existing projects
-prs init --migrate
+# Initialize and statically import detected instructions
+prs init --auto-import --backup
 
 # Full non-interactive setup
 prs init -n my-project --inherit @company/team --targets github claude cursor
@@ -107,6 +110,54 @@ If no Prettier configuration is found:
 
 ______________________________________________________________________
 
+### prs migrate
+
+Migrate existing AI instructions to PromptScript.
+
+```bash
+prs migrate [options]
+```
+
+| Option               | Description                               |
+| -------------------- | ----------------------------------------- |
+| `--static`           | Statically import all detected files      |
+| `--llm`              | Generate an AI-assisted migration prompt  |
+| `--files <files...>` | Migrate only the listed instruction files |
+
+```bash
+prs migrate
+prs migrate --static
+prs migrate --llm --files CLAUDE.md AGENTS.md
+```
+
+### prs upgrade
+
+Upgrade `.prs` files to the latest supported syntax version.
+
+```bash
+prs upgrade [--dry-run]
+```
+
+Use `--dry-run` to preview changes without writing files.
+
+### prs hooks
+
+Install or uninstall PromptScript integrations for supported AI tools.
+
+```bash
+prs hooks <install|uninstall> [tool]
+```
+
+```bash
+prs hooks install
+prs hooks install claude
+prs hooks uninstall cursor
+```
+
+Installed integrations run compilation after supported AI tool edit events and protect generated files from direct tool writes. Use `prs compile --watch` for changes from a general-purpose editor.
+
+______________________________________________________________________
+
 ### prs compile
 
 Compile PromptScript to target formats.
@@ -117,21 +168,26 @@ prs compile [options]
 
 **Options:**
 
-| Option                  | Description                                    |
-| ----------------------- | ---------------------------------------------- |
-| `-b, --build <name>`    | Compile a named build profile from config      |
-| `-t, --target <target>` | Compile to specific target                     |
-| `-f, --format <format>` | Output format (alias for `--target`)           |
-| `-a, --all`             | Compile to all configured targets              |
-| `-w, --watch`           | Watch mode for continuous compilation          |
-| `-o, --output <dir>`    | Override output directory                      |
-| `--dry-run`             | Preview changes without writing                |
-| `-c, --config <path>`   | Path to config file                            |
-| `--force`               | Force overwrite existing files without prompts |
-| `--strict`              | Treat output path conflicts as errors          |
-| `--ignore-hashes`       | Skip reference integrity hash verification     |
-| `--verbose`             | Show detailed compilation progress             |
-| `--debug`               | Show debug information (includes verbose)      |
+| Option                  | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `-b, --build <name>`    | Compile a named build profile from config               |
+| `--all-builds`          | Compile all named build profiles in deterministic order |
+| `-t, --target <target>` | Compile to specific target                              |
+| `-f, --format <format>` | Output format (alias for `--target`)                    |
+| `-a, --all`             | Compile to all configured targets                       |
+| `-w, --watch`           | Watch mode for continuous compilation                   |
+| `-o, --output <dir>`    | Override output directory                               |
+| `--dry-run`             | Preview changes without writing                         |
+| `--registry <path>`     | Override the configured registry path                   |
+| `-c, --config <path>`   | Path to config file                                     |
+| `--force`               | Force overwrite existing files without prompts          |
+| `--strict`              | Treat output path conflicts as errors                   |
+| `--ignore-hashes`       | Skip reference integrity hash verification              |
+| `--cwd <dir>`           | Set the project working directory                       |
+| `--verbose`             | Show detailed compilation progress                      |
+| `--debug`               | Show debug information (includes verbose)               |
+
+`--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, aggregating errors per profile.
 
 **Examples:**
 
@@ -147,6 +203,9 @@ prs compile --target cursor
 # Using --format (alias for --target)
 prs compile --format github
 prs compile -f claude
+
+# Compile all named build profiles
+prs compile --all-builds
 
 # Watch mode
 prs compile --watch
@@ -171,7 +230,7 @@ Automatic compilation with hooks
 
 Instead of running `prs compile --watch` in a terminal, you can let your AI tool trigger compilation automatically. Run `prs hooks install` once to wire `prs compile` into your tool's native hook system — no manual watch process needed. See the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for details.
 
-**Available Targets:**
+**Common Targets:**
 
 | Target        | Output File                       | Description        |
 | ------------- | --------------------------------- | ------------------ |
@@ -182,6 +241,8 @@ Instead of running `prs compile --watch` in a terminal, you can let your AI tool
 | `opencode`    | `OPENCODE.md`                     | OpenCode           |
 | `gemini`      | `GEMINI.md`                       | Gemini CLI         |
 | `factory`     | `AGENTS.md`                       | Factory AI         |
+
+See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for all 48 built-in targets.
 
 ### prs build
 

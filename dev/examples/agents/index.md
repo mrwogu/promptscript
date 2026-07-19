@@ -1,6 +1,6 @@
 # Agents Example
 
-This example demonstrates how to define AI subagents using the `@agents` block in PromptScript. Both **GitHub Copilot** and **Claude Code** support custom agents.
+This example demonstrates how to define AI subagents using the `@agents` block in PromptScript. Rich target formatters compile them to platform-native agent files.
 
 ## Overview
 
@@ -18,7 +18,7 @@ Benefits of using subagents:
 ```
 @meta {
   id: "my-project"
-  syntax: "1.0.0"
+  syntax: "1.4.0"
 }
 
 @identity {
@@ -147,22 +147,26 @@ Benefits of using subagents:
 
 ### Required Fields
 
-| Field         | Description                                    |
-| ------------- | ---------------------------------------------- |
-| `description` | When the agent should be invoked               |
-| `content`     | System prompt that guides the agent's behavior |
+| Field         | Description                      |
+| ------------- | -------------------------------- |
+| `description` | When the agent should be invoked |
 
 ### Optional Fields
 
-| Field                 | Type     | Platform        | Description                                              |
-| --------------------- | -------- | --------------- | -------------------------------------------------------- |
-| `tools`               | string[] | Both            | Tools the agent can use (inherits all if omitted)        |
-| `model`               | string   | Both            | AI model to use (platform-specific values)               |
-| `specModel`           | string   | GitHub, Factory | Model for Specification/planning mode (mixed models)     |
-| `specReasoningEffort` | string   | Factory         | Reasoning effort for spec mode (`low`, `medium`, `high`) |
-| `disallowedTools`     | string[] | Claude          | Tools to deny, removed from inherited list               |
-| `permissionMode`      | string   | Claude          | How to handle permission prompts                         |
-| `skills`              | string[] | Claude          | Skills to preload into subagent context                  |
+| Field                 | Type     | Platform         | Description                                              |
+| --------------------- | -------- | ---------------- | -------------------------------------------------------- |
+| `content`             | string   | All              | Additional system prompt for the agent                   |
+| `tools`               | string[] | Target-dependent | Tools the agent can use (inherits all if omitted)        |
+| `model`               | string   | Target-dependent | AI model to use                                          |
+| `reasoningEffort`     | string   | Factory, Codex   | Target-native reasoning level                            |
+| `specModel`           | string   | GitHub, Factory  | Model for Specification/planning mode (mixed models)     |
+| `specReasoningEffort` | string   | Factory          | Reasoning effort for spec mode (`low`, `medium`, `high`) |
+| `disallowedTools`     | string[] | Claude           | Tools to deny, removed from inherited list               |
+| `permissionMode`      | string   | Claude           | How to handle permission prompts                         |
+| `skills`              | string[] | Claude           | Skills to preload into subagent context                  |
+| `mcpServers`          | string[] | Target-dependent | Named top-level MCP servers available to the agent       |
+| `sandboxMode`         | string   | Codex            | Target-native sandbox policy                             |
+| `nicknameCandidates`  | string[] | Codex            | Display names for spawned agents                         |
 
 ### Model Options
 
@@ -243,7 +247,7 @@ Claude-specific fields like `disallowedTools`, `permissionMode`, and `skills` ar
 ---
 name: code-reviewer
 description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability.
-tools: Read, Grep, Glob, Bash
+tools: ['Read', 'Grep', 'Glob', 'Bash']
 model: sonnet
 ---
 
@@ -261,8 +265,8 @@ When invoked:
 ---
 name: db-reader
 description: Execute read-only database queries. Use when analyzing data or generating reports.
-tools: Bash, Read
-disallowedTools: Write, Edit
+tools: ['Bash', 'Read']
+disallowedTools: ['Write', 'Edit']
 model: haiku
 permissionMode: dontAsk
 ---
@@ -270,9 +274,9 @@ permissionMode: dontAsk
 You are a database analyst with read-only access...
 ```
 
-## Using with Skills (Claude only)
+## Using with Skills and MCP Servers
 
-You can preload skills into subagents using the `skills` field:
+Agents can reference reusable skills and project MCP servers:
 
 ```
 @skills {
@@ -284,10 +288,18 @@ You can preload skills into subagents using the `skills` field:
   }
 }
 
+@mcpServers {
+  issue-tracker: {
+    transport: "stdio"
+    command: ["node", "./tools/issues.mjs"]
+  }
+}
+
 @agents {
   debugger: {
     description: "Debug specialist"
     skills: ["error-handling"]
+    mcpServers: ["issue-tracker"]
     content: "You are an expert debugger."
   }
 }
@@ -305,28 +317,31 @@ targets:
       version: full # Required for agents
   - claude:
       version: full # Required for agents
+  - cursor:
+      version: full
+  - factory:
+      version: full
+  - codex:
+      version: full
 ```
 
 ## Platform Comparison
 
-| Feature           | GitHub Copilot      | Claude Code |
-| ----------------- | ------------------- | ----------- |
-| Custom agents     | ✅                  | ✅          |
-| Agent `tools`     | ✅                  | ✅          |
-| Model selection   | ✅                  | ✅          |
-| `disallowedTools` | ❌                  | ✅          |
-| Permission modes  | ❌                  | ✅          |
-| Skills preload    | ❌                  | ✅          |
-| MCP servers       | ✅ (org/enterprise) | ❌          |
-| Lifecycle hooks   | ❌                  | 🔜 Planned  |
+| Target         | Native agent output          | Notable capabilities                                   |
+| -------------- | ---------------------------- | ------------------------------------------------------ |
+| GitHub Copilot | `.github/agents/<name>.md`   | Tools, model mapping, specification model              |
+| Claude Code    | `.claude/agents/<name>.md`   | Tools, deny lists, permissions, skills, MCP references |
+| Cursor         | `.cursor/agents/<name>.md`   | Model, tools, MCP references                           |
+| Factory AI     | `.factory/droids/<name>.md`  | Models, reasoning effort, tools, MCP references        |
+| Codex          | `.codex/agents/<name>.toml`  | Reasoning effort, sandbox, nicknames, skills           |
+| OpenCode       | `.opencode/agents/<name>.md` | Models, tools, permissions                             |
 
-## Future: Hooks Support
-
-Claude Code supports lifecycle hooks for subagents (`PreToolUse`, `PostToolUse`, `Stop`). This feature is planned but not yet implemented in PromptScript. See the [Roadmap](https://github.com/mrwogu/promptscript#roadmap) for updates.
+Project lifecycle hooks are defined separately through `@hooks`. Agents can reference shared capabilities from `@skills` and `@mcpServers`.
 
 ## See Also
 
 - [Language Reference - @agents](https://getpromptscript.dev/dev/reference/language/#agents)
+- [Agent Platform - Agents](https://getpromptscript.dev/dev/features/agents/index.md)
 - [Skills & Local Example](https://getpromptscript.dev/dev/examples/skills-and-local/index.md)
 - [GitHub Copilot Custom Agents Documentation](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents)
 - [Claude Code Subagents Documentation](https://code.claude.com/docs/en/sub-agents)

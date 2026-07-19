@@ -119,7 +119,7 @@ Create `.promptscript/project.prs` in your project:
 ```
 @meta {
   id: "checkout-app"
-  syntax: "1.0.0"
+  syntax: "1.4.0"
 }
 
 # In a multi-file setup, you would inherit from frontend team:
@@ -206,7 +206,45 @@ validation:
   strict: true
 ```
 
-## Step 5: Compile and Verify
+## Step 5: Add Agent Platform Capabilities
+
+Add reusable capabilities to `.promptscript/project.prs`:
+
+```
+@skills {
+  checkout-review: {
+    description: "Review checkout changes"
+    content: "Review payment safety, validation, tests, and user impact."
+  }
+}
+
+@agents {
+  checkout-reviewer: {
+    description: "Review checkout pull requests"
+    skills: ["checkout-review"]
+    content: "Review changed checkout code against project standards."
+  }
+}
+
+@hooks {
+  validate-checkout: {
+    event: "post-tool-use"
+    matcher: "Edit|Write"
+    command: ["pnpm", "test"]
+  }
+}
+
+@workflows {
+  release: {
+    description: "Prepare checkout release"
+    content: "Run validation, summarize risk, and prepare release metadata."
+  }
+}
+```
+
+See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) for MCP servers, plugins, and target-specific capabilities.
+
+## Step 6: Compile and Verify
 
 Compile all targets:
 
@@ -253,7 +291,7 @@ flowchart TD
 | `@shortcuts`    | Merges, child overrides parent       |
 | `@knowledge`    | Concatenates text                    |
 
-## Step 6: Add to CI/CD
+## Step 7: Add to CI/CD
 
 Add validation to your CI pipeline:
 
@@ -290,6 +328,7 @@ jobs:
 You now have a complete PromptScript setup! Here's what to explore next:
 
 - [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md) - Full syntax documentation
+- [Agent Platform](https://getpromptscript.dev/dev/features/index.md) - Agents, skills, integrations, and automation
 - [Inheritance Guide](https://getpromptscript.dev/dev/guides/inheritance/index.md) - Advanced inheritance patterns
 - [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - Organization-wide deployment
 - [CLI Reference](https://getpromptscript.dev/dev/reference/cli/index.md) - All available commands

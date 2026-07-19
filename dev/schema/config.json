@@ -492,6 +492,39 @@
             },
             "codebuddy": {
               "$ref": "#/definitions/TargetConfig"
+            },
+            "aider": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "amazon-q": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "warp": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "zed": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "jules": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "devin": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "grok": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "kimi": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "mimo": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "deep-agents": {
+              "$ref": "#/definitions/TargetConfig"
+            },
+            "forgecode": {
+              "$ref": "#/definitions/TargetConfig"
             }
           },
           "additionalProperties": {
@@ -551,7 +584,18 @@
         "adal",
         "iflow",
         "openclaw",
-        "codebuddy"
+        "codebuddy",
+        "aider",
+        "amazon-q",
+        "warp",
+        "zed",
+        "jules",
+        "devin",
+        "grok",
+        "kimi",
+        "mimo",
+        "deep-agents",
+        "forgecode"
       ],
       "description": "Known built-in output targets. These are the targets with first-class formatter support."
     },
@@ -612,6 +656,43 @@
             }
           ],
           "description": "Controls which skills are emitted for this target.\n- `true` or omitted: emit all skills\n- `false`: emit no skills\n- string array: emit only the listed skill names"
+        },
+        "skillPath": {
+          "type": "string",
+          "enum": [
+            "agents",
+            "gemini",
+            "both"
+          ],
+          "description": "Gemini skill path selection.\n- `agents`: use `.agents/skills/` (interoperable, fixture-confirmed default)\n- `gemini`: use `.gemini/skills/` (legacy)\n- `both`: emit to both paths (requires explicit opt-in, deduplicates content)",
+          "default": "agents"
+        },
+        "maxThreads": {
+          "type": "number",
+          "description": "Codex: maximum number of parallel agent threads. Positive integer. Maps to Codex config, never to AGENTS.md."
+        },
+        "maxDepth": {
+          "type": "number",
+          "description": "Codex: maximum nesting depth for agent delegation. Positive integer. Maps to Codex config, never to AGENTS.md."
+        },
+        "agentsFile": {
+          "type": "string",
+          "description": "Codex: override the agents file name for scoped build profiles. Defaults to `AGENTS.md`. Use `AGENTS.override.md` only for scoped builds."
+        },
+        "agentsFrontmatter": {
+          "type": "string",
+          "const": "experimental",
+          "description": "AGENTS.md v1.1 frontmatter mode.\n- `experimental`: emit YAML frontmatter with `description` and `tags` from",
+          "default": "undefined (no frontmatter)"
+        },
+        "autoMode": {
+          "type": "string",
+          "enum": [
+            "acceptEdits",
+            "plan",
+            "bypassPermissions"
+          ],
+          "description": "Claude: auto mode setting for project settings.json. Maps to `.claude/settings.json` `autoMode` field. Only valid for Claude target with fixture-confirmed project-local schema."
         }
       },
       "additionalProperties": false,

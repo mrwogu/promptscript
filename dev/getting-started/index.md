@@ -92,7 +92,7 @@ Open `.promptscript/project.prs` and customize:
 ```
 @meta {
   id: "my-project"
-  syntax: "1.0.0"
+  syntax: "1.4.0"
 }
 
 @identity {
@@ -134,7 +134,54 @@ Open `.promptscript/project.prs` and customize:
 }
 ```
 
-### 3. Compile to Native Formats
+### 3. Define Agent Capabilities
+
+Add reusable skills, specialist agents, tool integrations, and automation to the same source:
+
+```
+@skills {
+  code-review: {
+    description: "Review code changes before merge"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: "Review correctness, security, tests, and maintainability."
+  }
+}
+
+@mcpServers {
+  issue-tracker: {
+    transport: "stdio"
+    command: ["node", "./tools/issues.mjs"]
+  }
+}
+
+@agents {
+  reviewer: {
+    description: "Review pull requests"
+    skills: ["code-review"]
+    mcpServers: ["issue-tracker"]
+    content: "Review the current diff against active requirements."
+  }
+}
+
+@hooks {
+  validate-types: {
+    event: "post-tool-use"
+    matcher: "Edit|Write"
+    command: ["pnpm", "run", "typecheck"]
+  }
+}
+
+@workflows {
+  release: {
+    description: "Prepare a validated release"
+    content: "Run project quality gates and prepare release metadata."
+  }
+}
+```
+
+PromptScript compiles each capability to the native representation supported by every configured target. See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) for feature details.
+
+### 4. Compile to Native Formats
 
 Transform your universal `.prs` definition into platform-specific optimization formats.
 
@@ -150,7 +197,7 @@ By default, this generates:
 
 #### Bundled PromptScript Skill
 
-When you compile, PromptScript automatically includes a language skill in each target's output. This skill teaches AI coding agents how to read, write, and troubleshoot `.prs` files - so your AI tools understand PromptScript syntax without any extra setup.
+When you compile, PromptScript automatically includes a language skill for targets whose formatter exposes a bundled-skill output path. This skill teaches supported AI coding agents how to read, write, and troubleshoot `.prs` files.
 
 To disable this behavior, add to `promptscript.yaml`:
 
@@ -158,7 +205,7 @@ To disable this behavior, add to `promptscript.yaml`:
 includePromptScriptSkill: false
 ```
 
-### 4. Commit to Git
+### 5. Commit to Git
 
 Commit your configuration and the generated files. Your AI context is now version-controlled infrastructure.
 
@@ -179,12 +226,12 @@ Terminal ↻ Replay
 - **Skill installation** - Installs migration skills for each enabled target
 - **Non-destructive** - Your existing files remain untouched until you compile
 
-### 1. Initialize with Migration Support
+### 1. Start Migration
 
-Initialize PromptScript with the `--migrate` flag to install the migration skill:
+Run the migration flow and choose static or AI-assisted import:
 
 ```bash
-prs init --migrate
+prs migrate
 ```
 
 This creates:
@@ -440,7 +487,7 @@ targets:
 
 ## Set Up Hooks (Optional)
 
-Once your targets are configured, install hooks so that PromptScript compiles automatically whenever a `.prs` file is saved — and so AI agents cannot accidentally overwrite generated outputs.
+Once your targets are configured, install hooks so PromptScript compiles after supported AI tool edit events and prevents those tools from overwriting generated outputs. Use `prs compile --watch` for changes made in a general-purpose editor.
 
 ```bash
 prs hooks install
@@ -451,7 +498,6 @@ PromptScript detects which AI tools are present in the project and writes the ap
 ```bash
 prs hooks install claude    # Claude Code only
 prs hooks install cursor    # Cursor only
-prs hooks install --all     # All supported tools
 ```
 
 Supported tools: Claude Code, Factory AI, Cursor, Windsurf, Cline, Copilot, Gemini CLI.

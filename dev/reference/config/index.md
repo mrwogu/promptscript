@@ -172,7 +172,7 @@ universalDir: true # default: '.agents'
 
 # Include the bundled PromptScript language skill in compilation output.
 # When enabled, a SKILL.md that teaches AI agents how to work with .prs
-# files is automatically added to each target's native skill directory.
+# files is added when the formatter exposes a bundled-skill output path.
 includePromptScriptSkill: true # default: true
 ```
 
@@ -393,15 +393,83 @@ targets:
 
 **Available Targets:**
 
-| Target        | Default Output                    | Default Convention | Supported Versions          |
-| ------------- | --------------------------------- | ------------------ | --------------------------- |
-| `github`      | `.github/copilot-instructions.md` | `markdown`         | simple / multifile / full   |
-| `claude`      | `CLAUDE.md`                       | `markdown`         | simple / multifile / full   |
-| `cursor`      | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy |
-| `antigravity` | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter        |
-| `factory`     | `AGENTS.md`                       | `markdown`         | simple / multifile / full   |
-| `opencode`    | `OPENCODE.md`                     | `markdown`         | simple / multifile / full   |
-| `gemini`      | `GEMINI.md`                       | `markdown`         | simple / multifile / full   |
+PromptScript ships 48 built-in targets. See [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md) for platform families and [Supported Formatters](https://getpromptscript.dev/dev/reference/formatters/index.md) for the full capability matrix.
+
+| Target         | Default Output                    | Default Convention | Supported Versions                             |
+| -------------- | --------------------------------- | ------------------ | ---------------------------------------------- |
+| `github`       | `.github/copilot-instructions.md` | `markdown`         | simple / multifile / full                      |
+| `claude`       | `CLAUDE.md`                       | `markdown`         | simple / multifile / full                      |
+| `cursor`       | `.cursor/rules/project.mdc`       | `markdown`         | modern / multifile / legacy / agents-md / full |
+| `antigravity`  | `.agent/rules/project.md`         | `markdown`         | simple / frontmatter / agents-md               |
+| `factory`      | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `opencode`     | `OPENCODE.md`                     | `markdown`         | simple / multifile / full                      |
+| `gemini`       | `GEMINI.md`                       | `markdown`         | simple / multifile / full                      |
+| `codex`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `grok`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `windsurf`     | `.windsurf/rules/project.md`      | `markdown`         | simple / multifile / full                      |
+| `cline`        | `.clinerules`                     | `markdown`         | simple / multifile / full                      |
+| `roo`          | `.roorules`                       | `markdown`         | simple / multifile / full                      |
+| `continue`     | `.continue/rules/project.md`      | `markdown`         | simple / multifile / full                      |
+| `amp`          | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `augment`      | `.augment/rules/project.md`       | `markdown`         | simple / multifile / full                      |
+| `goose`        | `.goosehints`                     | `markdown`         | simple / multifile / full                      |
+| `kilo`         | `.kilocode/rules/project.md`      | `markdown`         | simple / multifile / full                      |
+| `trae`         | `.trae/rules/project_rules.md`    | `markdown`         | simple / multifile / full                      |
+| `junie`        | `.junie/guidelines.md`            | `markdown`         | simple / multifile / full                      |
+| `kiro`         | `.kiro/steering/project.md`       | `markdown`         | simple / multifile / full                      |
+| `cortex`       | `.cortex/rules/project.md`        | `markdown`         | simple / multifile / full                      |
+| `crush`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `command-code` | `.commandcode/rules/project.md`   | `markdown`         | simple / multifile / full                      |
+| `kode`         | `.kode/rules/project.md`          | `markdown`         | simple / multifile / full                      |
+| `mcpjam`       | `.mcpjam/rules/project.md`        | `markdown`         | simple / multifile / full                      |
+| `mistral-vibe` | `.vibe/rules/project.md`          | `markdown`         | simple / multifile / full                      |
+| `mux`          | `.mux/rules/project.md`           | `markdown`         | simple / multifile / full                      |
+| `openhands`    | `.openhands/rules/project.md`     | `markdown`         | simple / multifile / full                      |
+| `pi`           | `.pi/rules/project.md`            | `markdown`         | simple / multifile / full                      |
+| `qoder`        | `.qoder/rules/project.md`         | `markdown`         | simple / multifile / full                      |
+| `qwen-code`    | `.qwen/rules/project.md`          | `markdown`         | simple / multifile / full                      |
+| `zencoder`     | `.zencoder/rules/project.md`      | `markdown`         | simple / multifile / full                      |
+| `neovate`      | `.neovate/rules/project.md`       | `markdown`         | simple / multifile / full                      |
+| `pochi`        | `.pochi/rules/project.md`         | `markdown`         | simple / multifile / full                      |
+| `adal`         | `.adal/rules/project.md`          | `markdown`         | simple / multifile / full                      |
+| `iflow`        | `.iflow/rules/project.md`         | `markdown`         | simple / multifile / full                      |
+| `openclaw`     | `INSTRUCTIONS.md`                 | `markdown`         | simple / multifile / full                      |
+| `codebuddy`    | `.codebuddy/rules/project.md`     | `markdown`         | simple / multifile / full                      |
+| `aider`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `amazon-q`     | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `warp`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `zed`          | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `jules`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `devin`        | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `kimi`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `mimo`         | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `deep-agents`  | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+| `forgecode`    | `AGENTS.md`                       | `markdown`         | simple / multifile / full                      |
+
+### MCP, Hooks, and Plugins Support
+
+The `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) are emitted to target-native config files. Not all targets support all features.
+
+| Target        | MCP Config File                  | Hooks Config             | Plugins Config          |
+| ------------- | -------------------------------- | ------------------------ | ----------------------- |
+| `claude`      | `.mcp.json`                      | `.claude/settings.json`  | -                       |
+| `cursor`      | `.cursor/mcp.json`               | `.cursor/hooks.json`     | `.cursor/plugins.json`  |
+| `factory`     | `.factory/mcp.json`              | `.factory/settings.json` | `.factory/plugins.json` |
+| `codex`       | `.codex/mcp.json`                | `.codex/config.toml`     | `.codex/plugins.json`   |
+| `grok`        | `.mcp.json` (via Claude)         | `.claude/settings.json`  | `.grok/plugins.json`    |
+| `github`      | `.vscode/mcp.json`               | -                        | -                       |
+| `antigravity` | `.agents/mcp_config.json`        | -                        | -                       |
+| `gemini`      | `.gemini/mcp_config.json`        | -                        | -                       |
+| `windsurf`    | `.windsurf/mcp_config.json`      | -                        | -                       |
+| `cline`       | `.cline/cline_mcp_settings.json` | -                        | -                       |
+| `roo`         | `.roo/mcp_settings.json`         | -                        | -                       |
+| `continue`    | `.continue/config.json`          | -                        | -                       |
+| `goose`       | `.goose/mcp_config.json`         | -                        | -                       |
+| `kilo`        | `.kilocode/mcp_settings.json`    | -                        | -                       |
+| `openhands`   | `.openhands/mcp_config.toml`     | -                        | -                       |
+| `qwen-code`   | `.qwen/mcp.json`                 | -                        | -                       |
+| `zed`         | `.zed/settings.json`             | -                        | -                       |
+| `crush`       | `.crush/mcp.json`                | -                        | -                       |
 
 **Cursor Versions:**
 
@@ -410,6 +478,8 @@ targets:
 | `modern`    | `.cursor/rules/project.mdc` + `.cursor/commands/*.md` for multi-line shortcuts                      |
 | `multifile` | Main + `.cursor/rules/*.mdc` (glob-based) + `.cursor/rules/shortcuts.mdc` + `.cursor/commands/*.md` |
 | `legacy`    | `.cursorrules` (deprecated, no slash commands)                                                      |
+| `agents-md` | `AGENTS.md` (Cursor 2.4+, no frontmatter required)                                                  |
+| `full`      | Multifile + `.agents/skills/<name>/SKILL.md` + `.cursor/agents/<name>.md` (Cursor 2.5+)             |
 
 Cursor Slash Commands
 
@@ -529,7 +599,7 @@ Factory defaults to `rulesMode: monolith`, which preserves the existing single-f
 | Version     | Output Files                                                             |
 | ----------- | ------------------------------------------------------------------------ |
 | `simple`    | `GEMINI.md` (single file)                                                |
-| `multifile` | Main + `.gemini/commands/<name>.toml` + `.gemini/skills/<name>/skill.md` |
+| `multifile` | Main + `.gemini/commands/<name>.toml` + `.agents/skills/<name>/skill.md` |
 | `full`      | Same as multifile (Gemini CLI has no agent concept)                      |
 
 **Target Options:**
@@ -597,6 +667,38 @@ prs build logstrip-factory
 | `markdown` | `## Section Name` | Markdown headers |
 | `xml` | `<section-name>content</section-name>` | XML tags wrapping content |
 
+**Target-Specific Options:**
+
+| Option | Targets | Type | Description |
+| --- | --- | --- | --- |
+| `maxThreads` | `codex` | number | Max parallel agent threads (positive integer, maps to .codex/config.toml) |
+| `maxDepth` | `codex` | number | Max nesting depth for agent delegation (positive integer) |
+| `agentsFile` | `codex` | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md) |
+| `agentsFrontmatter` | AGENTS.md targets | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from [@meta](https://github.com/meta "GitHub User: meta")) |
+| `autoMode` | `claude` | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json) |
+
+**Codex Native Output:**
+
+The `codex` target emits native Codex agent TOML files in addition to `AGENTS.md`:
+
+```text
+AGENTS.md                          # Root instructions
+.codex/agents/<name>.toml          # Agent definitions (TOML)
+.codex/config.toml                 # Project config (maxThreads, maxDepth, agentsFile, hooks)
+.agents/skills/<name>/SKILL.md     # Skills (interoperable path)
+````
+
+Agent field mapping (PRS -> Codex TOML):
+
+| PRS Field            | Codex TOML Field         |
+| -------------------- | ------------------------ |
+| `content`            | `developer_instructions` |
+| `reasoningEffort`    | `model_reasoning_effort` |
+| `sandboxMode`        | `sandbox_mode`           |
+| `nicknameCandidates` | `nickname_candidates`    |
+| `mcpServers`         | `mcp_servers`            |
+| `skills`             | `skills.config`          |
+
 ### customConventions
 
 Define custom output conventions for specialized formatting needs.
@@ -624,7 +726,7 @@ customConventions:
 targets:
   - github:
       convention: my-format
-````
+```
 
 **Custom Convention Structure:**
 
@@ -665,7 +767,31 @@ Run a profile with either command:
 ```bash
 prs compile --build logstrip-factory
 prs build logstrip-factory
+
+# Compile all named build profiles in deterministic order
+prs compile --all-builds
 ```
+
+**Nested AGENTS.md via Build Profiles:**
+
+Build profiles with `output` directories produce scoped AGENTS.md files. This enables nested instruction files for monorepo packages:
+
+```yaml
+builds:
+  api:
+    entry: .promptscript/packages/api.prs
+    output: packages/api
+    targets:
+      - factory
+  codex-api-override:
+    entry: .promptscript/packages/api-override.prs
+    output: packages/api
+    targets:
+      - codex:
+          agentsFile: AGENTS.override.md
+```
+
+Output paths are validated against project root - path traversal (`..`) is rejected. Codex-only `AGENTS.override.md` is supported via the `agentsFile` option.
 
 **Build Profile Fields:**
 
@@ -804,7 +930,7 @@ universalDir: false
 
 ### includePromptScriptSkill
 
-Controls whether the bundled PromptScript language skill is included in compilation output. When enabled, a `SKILL.md` that teaches AI agents how to work with `.prs` files is automatically added to each target's native skill directory.
+Controls whether the bundled PromptScript language skill is included in compilation output. When enabled, the compiler adds it only when the formatter exposes a bundled-skill output path.
 
 ```yaml
 # Include the PromptScript skill (default)

@@ -104,20 +104,26 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | Version | Status  | Blocks and features                                                                                                                        |
 | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `1.0.0` | Stable  | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@shortcuts`, `@commands`, `@guards`, `@params`, `@skills`, `@local` |
-| `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`                                                                                                               |
+| `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`, `@workflows`; reserves internal `@prompts`                                                                   |
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
-| `1.3.0` | Current | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
+| `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
+| `1.4.0` | Current | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
 
-Internal Block Types
+Block Availability
 
-`@workflows` and `@prompts` are registered in version `1.1.0` but are **internal, not user-facing**. They are generated automatically from `@shortcuts` (see [Antigravity Workflows](#antigravity-workflows) and [GitHub Copilot Prompts](#github-copilot-prompts)). Do not write `@workflows` or `@prompts` blocks directly.
+`@workflows` is user-facing and emits workflow files for targets that support them, such as `.claude/workflows/<name>.md`. `@prompts` is reserved for internal prompt output. `@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
 
 ### Block Version Requirements
 
-| Block       | Minimum Syntax Version |
-| ----------- | ---------------------- |
-| `@agents`   | `1.1.0`                |
-| `@examples` | `1.2.0`                |
+| Block         | Minimum Syntax Version |
+| ------------- | ---------------------- |
+| `@agents`     | `1.1.0`                |
+| `@workflows`  | `1.1.0`                |
+| `@prompts`    | `1.1.0`                |
+| `@examples`   | `1.2.0`                |
+| `@hooks`      | `1.4.0`                |
+| `@mcpServers` | `1.4.0`                |
+| `@plugins`    | `1.4.0`                |
 
 All other built-in blocks are available from `1.0.0`.
 
@@ -722,7 +728,7 @@ When creating commits:
 
 ### [@agents](https://github.com/agents "GitHub User: agents")
 
-Define specialized AI subagents for GitHub Copilot and Claude Code:
+Define specialized AI agents for target platforms with native agent support:
 
 ```
 @meta { id: "agents-example" syntax: "1.1.0" }
@@ -765,14 +771,18 @@ Define specialized AI subagents for GitHub Copilot and Claude Code:
 | Property              | Type     | Required | Description                                                                    |
 | --------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
 | `description`         | string   | Yes      | When the agent should be invoked                                               |
-| `content`             | string   | Yes      | System prompt for the subagent                                                 |
+| `content`             | string   | No       | Additional system prompt for the subagent                                      |
 | `tools`               | string[] | No       | Allowed tools (inherits all if omitted)                                        |
 | `model`               | string   | No       | AI model to use (platform-specific values)                                     |
+| `reasoningEffort`     | string   | No       | Target-native reasoning level                                                  |
 | `specModel`           | string   | No       | Model for Specification/planning mode (GitHub, Factory only)                   |
 | `specReasoningEffort` | string   | No       | Reasoning effort for spec mode: `low`, `medium`, `high` (Factory only)         |
 | `disallowedTools`     | string[] | No       | Tools to deny (Claude only)                                                    |
 | `permissionMode`      | string   | No       | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` (Claude only) |
-| `skills`              | string[] | No       | Skills to preload into subagent context (Claude only)                          |
+| `skills`              | string[] | No       | Named skills available to the agent                                            |
+| `mcpServers`          | string[] | No       | Named top-level MCP servers available to the agent                             |
+| `sandboxMode`         | string   | No       | Target-native sandbox policy                                                   |
+| `nicknameCandidates`  | string[] | No       | Candidate display names for spawned agents                                     |
 
 Agents output by platform:
 
@@ -835,9 +845,9 @@ Review checklist:
 - Proper error handling
 ```
 
-Hooks Support
+Agent Platform Features
 
-Claude Code agent hooks (`PreToolUse`, `PostToolUse`, `Stop`) are planned but not yet implemented. See [Roadmap](https://github.com/mrwogu/promptscript#roadmap).
+Agents can reference `@skills` and `@mcpServers`. Project lifecycle automation is defined separately through `@hooks`. Target-native support varies by formatter.
 
 ### [@local](https://github.com/local "GitHub User: local")
 
@@ -952,6 +962,139 @@ Examples can also be defined inline within a `@skills` entry via the `examples` 
 
 See the [Examples guide](https://getpromptscript.dev/dev/guides/examples/index.md) for a full walkthrough.
 
+### [@workflows](https://github.com/workflows "GitHub User: workflows")
+
+Defines portable workflow definitions. Available since syntax `1.1.0`. Targets that support workflows emit dedicated workflow files (e.g. Claude emits `.claude/workflows/<name>.md`).
+
+```
+@workflows {
+  release: {
+    description: "Prepare release"
+    content: """
+      Review changes, validate packages, and prepare release metadata.
+    """
+  }
+}
+```
+
+Each workflow entry is an object with:
+
+| Field         | Required | Description                       |
+| ------------- | -------- | --------------------------------- |
+| `description` | No       | Short description of the workflow |
+| `content`     | No       | Workflow instructions (multiline) |
+
+### [@hooks](https://github.com/hooks "GitHub User: hooks")
+
+Defines portable lifecycle hooks. Requires syntax `1.4.0`. Formatters map portable events to each target's native event system and configuration format.
+
+```
+@hooks {
+  protect-generated-files: {
+    event: "pre-tool-use"
+    matcher: "Edit|Write"
+    command: ["prs", "hook", "pre-edit"]
+    timeoutMs: 5000
+    statusMessage: "Checking generated files"
+    continueOnFailure: false
+    enabled: true
+  }
+}
+```
+
+Portable events:
+
+| Event            | Description                       |
+| ---------------- | --------------------------------- |
+| `pre-tool-use`   | Fires before a tool invocation    |
+| `post-tool-use`  | Fires after a tool invocation     |
+| `session-start`  | Fires when a session begins       |
+| `setup`          | Alias for `session-start`         |
+| `subagent-start` | Fires when a subagent is launched |
+| `notification`   | Fires on notification events      |
+| `stop`           | Fires when the agent stops        |
+
+Each hook entry is an object with:
+
+| Field               | Required | Type     | Description                                 |
+| ------------------- | -------- | -------- | ------------------------------------------- |
+| `event`             | Yes      | string   | Portable event name (see above)             |
+| `command`           | Yes      | string[] | Non-empty source argument array             |
+| `matcher`           | No       | string   | Tool name matcher pattern                   |
+| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                  |
+| `statusMessage`     | No       | string   | Status message shown during execution       |
+| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails           |
+| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true) |
+
+Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command arguments. Target adapters may serialize the array as one native command string, so verify argument quoting in generated hook configuration.
+
+### [@mcpServers](https://github.com/mcpServers "GitHub User: mcpServers")
+
+Defines project-local MCP (Model Context Protocol) server configurations. Requires syntax `1.4.0`. Servers are mapped to target-native MCP config files.
+
+```
+@mcpServers {
+  security-scanner: {
+    transport: "stdio"
+    command: ["node", "./tools/security-scanner.mjs"]
+    env: {
+      LOG_LEVEL: "info"
+    }
+  }
+}
+```
+
+| Field       | Required | Type     | Description                           |
+| ----------- | -------- | -------- | ------------------------------------- |
+| `transport` | Yes      | string   | `stdio`, `http`, or `sse`             |
+| `command`   | Yes\*    | string[] | Non-empty argument array (stdio only) |
+| `url`       | Yes\*    | string   | HTTP(S) URL (http/sse only)           |
+| `env`       | No       | object   | Non-secret environment values         |
+
+Plaintext values are rejected for secret-bearing environment keys. Current target serializers emit string environment values only, so provide credentials through target-native runtime or secret management rather than `.prs` source.
+
+**Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](https://getpromptscript.dev/dev/reference/config/#mcp-hooks-plugins-support) for the full list of supported targets and their output paths.
+
+Agents can reference MCP servers by name via the `mcpServers` field in `@agents`:
+
+```
+@agents {
+  reviewer: {
+    description: "Code reviewer"
+    content: "Review code changes."
+    mcpServers: ["security-scanner", "linear"]
+  }
+}
+```
+
+### [@plugins](https://github.com/plugins "GitHub User: plugins")
+
+Defines portable plugin bundles that group skills, hooks, and MCP servers. Requires syntax `1.4.0`.
+
+```
+@plugins {
+  security-suite: {
+    description: "Security review tooling"
+    version: "1.0.0"
+    skills: ["security-review"]
+    hooks: ["protect-generated-files"]
+    mcpServers: ["security-scanner"]
+  }
+}
+```
+
+| Field         | Required | Type     | Description                     |
+| ------------- | -------- | -------- | ------------------------------- |
+| `description` | No       | string   | Plugin description              |
+| `version`     | No       | string   | Semantic version (e.g. `1.0.0`) |
+| `skills`      | No       | string[] | Referenced skill names          |
+| `hooks`       | No       | string[] | Referenced hook IDs             |
+| `mcpServers`  | No       | string[] | Referenced MCP server names     |
+
+Marketplace publishing and installation are outside the compiler scope.
+
+**Target Support:** Plugins are emitted to `.factory/plugins.json` (Factory), `.cursor/plugins.json` (Cursor), `.codex/plugins.json` (Codex), and `.grok/plugins.json` (Grok).
+
 ## [@extend](https://github.com/extend "GitHub User: extend") Block
 
 Modify inherited or existing blocks:
@@ -981,7 +1124,7 @@ Modify inherited or existing blocks:
 Syntax `1.3.0` adds explicit replacement for regular block fields. Add `!` after a field name inside `@extend` to replace its complete prior value:
 
 ```
-@meta { id: "project" syntax: "1.3.0" }
+@meta { id: "project" syntax: "1.4.0" }
 
 @inherit ./company-base
 
@@ -1351,11 +1494,12 @@ The following are reserved and cannot be used as identifiers:
 - `identity`, `context`, `standards`, `restrictions`
 - `knowledge`, `shortcuts`, `commands`, `guards`, `params`
 - `skills`, `agents`, `local`
-- `workflows`, `prompts` (internal, not user-facing)
+- `workflows`, `hooks`, `mcpServers`, `plugins`, `examples`
+- `prompts` (reserved for internal prompt output)
 
-Internal Block Types
+Internal Block Type
 
-The names `workflows` and `prompts` are reserved but not user-facing blocks. Workflow files are generated from `@shortcuts` with `steps` property (Antigravity). Prompt files are generated from `@shortcuts` with `prompt: true` (GitHub Copilot).
+The name `prompts` is reserved but is not a user-facing block. Prompt files are generated from `@shortcuts` with `prompt: true` for targets such as GitHub Copilot. Use the user-facing `@workflows` block for reusable procedures.
 
 ## File Extensions
 

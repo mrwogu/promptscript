@@ -30,7 +30,7 @@
 | Mermaid Diagrams           | Yes       |
 | Single File Output         | Yes       |
 | Multiple Rule Files        | Yes       |
-| Workflow Files             | No        |
+| Workflow Files             | Yes       |
 | Nested Directory Structure | No        |
 | YAML Frontmatter           | Yes       |
 | Description in Frontmatter | No        |
@@ -40,8 +40,10 @@
 | Always Apply Rules         | Yes       |
 | Manual Activation          | No        |
 | Auto/Model Activation      | No        |
+| Structured Examples        | Yes       |
 | Character Limit Validation | No        |
 | Content Section Splitting  | Yes       |
+| Guard Dependencies         | Yes       |
 | Context File Inclusion     | Planned   |
 | @-Mentions                 | No        |
 | Tool Integration           | Yes       |
@@ -79,13 +81,3 @@ project-root/
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
-
-# Recent Activity
-
-### Mar 17, 2026
-
-| ID                                                                                                    | Time    | T   | Title                                                 | Read |
-| ----------------------------------------------------------------------------------------------------- | ------- | --- | ----------------------------------------------------- | ---- |
-| [#2423](https://github.com/mrwogu/promptscript/issues/2423 "GitHub Issue: mrwogu/promptscript #2423") | 7:06 PM | 🔵  | All 37 Formatter Names Extracted for Homepage Display | ~324 |
-| [#2422](https://github.com/mrwogu/promptscript/issues/2422 "GitHub Issue: mrwogu/promptscript #2422") | "       | 🔵  | Complete 37 Formatter List Confirmed in Documentation | ~434 |
-|                                                                                                       |         |     |                                                       |      |
