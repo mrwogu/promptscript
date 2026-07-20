@@ -1874,7 +1874,8 @@ pre.init-demo__file-preview-content {
 .home-scale__connector {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  width: 74%;
+  gap: 0.65rem;
+  width: 100%;
   height: 2.6rem;
 }
 
