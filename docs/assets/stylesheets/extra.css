@@ -1361,10 +1361,10 @@ pre.init-demo__file-preview-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
-  color: var(--home-muted);
+  gap: 0.75rem;
+  color: #aab8cc;
   font-family: var(--md-code-font-family);
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   text-align: center;
 }
 
@@ -1372,18 +1372,18 @@ pre.init-demo__file-preview-content {
   position: relative;
   display: block;
   width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(109, 40, 217, 0.35), rgba(37, 99, 235, 0.8));
+  height: 2px;
+  background: linear-gradient(90deg, rgba(109, 40, 217, 0.65), rgba(37, 99, 235, 1));
 }
 
 .home-compile-flow i::after {
   position: absolute;
-  top: -3px;
+  top: -4px;
   right: -1px;
-  width: 7px;
-  height: 7px;
-  border-top: 1px solid #2563eb;
-  border-right: 1px solid #2563eb;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid #3b82f6;
+  border-right: 2px solid #3b82f6;
   content: '';
   transform: rotate(45deg);
 }
