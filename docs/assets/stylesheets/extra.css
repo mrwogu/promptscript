@@ -1854,6 +1854,7 @@ pre.init-demo__file-preview-content {
 }
 
 .home-scale__node--org {
+  width: 100%;
   min-width: 190px;
   border-color: rgba(139, 92, 246, 0.7);
   box-shadow: 0 8px 30px rgba(109, 40, 217, 0.17);
