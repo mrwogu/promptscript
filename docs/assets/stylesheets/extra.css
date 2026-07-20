@@ -1089,7 +1089,7 @@ pre.init-demo__file-preview-content {
   --home-violet: #6d28d9;
   --home-blue: #2563eb;
   --home-cyan: #0891b2;
-  max-width: 1120px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -1136,8 +1136,8 @@ pre.init-demo__file-preview-content {
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(520px, 1.08fr);
   align-items: center;
-  gap: 2.5rem;
-  min-height: 480px;
+  gap: 3rem;
+  min-height: 520px;
   padding: 2.5rem 0 2rem;
 }
 
@@ -1251,10 +1251,10 @@ pre.init-demo__file-preview-content {
 .home-hero__visual {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 55px minmax(130px, 0.62fr);
+  grid-template-columns: minmax(0, 1fr) 70px minmax(150px, 0.62fr);
   align-items: center;
-  min-height: 360px;
-  padding: 1rem;
+  min-height: 380px;
+  padding: 1.25rem;
   isolation: isolate;
 }
 
