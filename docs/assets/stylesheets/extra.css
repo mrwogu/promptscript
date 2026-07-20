@@ -1393,14 +1393,6 @@ pre.init-demo__file-preview-content {
   content: '';
 }
 
-.home-compile-arrow--more {
-  color: #64748b;
-  font-family: var(--md-code-font-family);
-  font-size: 0.55rem;
-  font-weight: 700;
-  text-align: center;
-}
-
 .home-output-stack {
   display: flex;
   flex-direction: column;
