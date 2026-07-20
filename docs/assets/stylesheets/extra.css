@@ -1648,7 +1648,9 @@ pre.init-demo__file-preview-content {
 
 .home-step {
   position: relative;
-  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
   padding: 1.35rem;
   background: var(--home-panel);
   border-right: 1px solid var(--home-line);
@@ -1676,19 +1678,16 @@ pre.init-demo__file-preview-content {
 }
 
 .md-typeset .home-step p {
-  margin: 0 0 1rem;
+  margin: 0;
   color: var(--home-muted);
   font-size: 0.72rem;
   line-height: 1.55;
 }
 
 .md-typeset .home-step__command {
-  position: absolute;
-  right: 1.75rem;
-  bottom: 1.75rem;
-  left: 1.75rem;
   display: block;
   overflow: hidden;
+  margin-top: auto;
   padding: 0.55rem 0.65rem;
   color: var(--home-ink);
   background: rgba(100, 116, 139, 0.08);
