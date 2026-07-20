@@ -1710,7 +1710,8 @@ pre.init-demo__file-preview-content {
   max-width: 510px;
 }
 
-.home-check-list {
+.home-check-list,
+.md-typeset .home-check-list {
   display: grid;
   gap: 0.65rem;
   padding: 0;
