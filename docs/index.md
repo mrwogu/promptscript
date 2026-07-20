@@ -270,15 +270,24 @@ hide:
 </div>
 </div>
 <div class="home-scale__diagram" aria-label="Organization policies flow to teams, projects, and native platform files">
+<div class="home-scale__top">
+<svg class="home-scale__lines" aria-hidden="true" viewBox="0 0 100 40" preserveAspectRatio="none">
+<line x1="15" y1="0" x2="15" y2="22" stroke="#475569" stroke-width="0.6"/>
+<line x1="85" y1="0" x2="85" y2="22" stroke="#475569" stroke-width="0.6"/>
+<line x1="15" y1="22" x2="85" y2="22" stroke="#475569" stroke-width="0.6"/>
+<line x1="16.7" y1="22" x2="16.7" y2="40" stroke="#475569" stroke-width="0.6"/>
+<line x1="50" y1="22" x2="50" y2="40" stroke="#475569" stroke-width="0.6"/>
+<line x1="83.3" y1="22" x2="83.3" y2="40" stroke="#475569" stroke-width="0.6"/>
+</svg>
 <div class="home-scale__node home-scale__node--org">
 <span>Organization</span>
 <code>@company/platform</code>
 </div>
-<div class="home-scale__connector"><i></i><i></i><i></i></div>
 <div class="home-scale__row">
 <div class="home-scale__node"><span>Frontend</span><code>@team/web</code></div>
 <div class="home-scale__node"><span>Backend</span><code>@team/services</code></div>
 <div class="home-scale__node"><span>Data</span><code>@team/data</code></div>
+</div>
 </div>
 <div class="home-scale__down">↓</div>
 <div class="home-scale__projects">100+ project repositories</div>
