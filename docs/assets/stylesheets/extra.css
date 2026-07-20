@@ -1252,10 +1252,18 @@ pre.init-demo__file-preview-content {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 70px minmax(150px, 0.62fr);
+  grid-template-rows: repeat(5, auto);
   align-items: center;
   min-height: 380px;
   padding: 1.25rem;
   isolation: isolate;
+  gap: 0.5rem 0.75rem;
+}
+
+.home-hero__visual > .home-code-window {
+  grid-column: 1;
+  grid-row: 1 / span 5;
+  align-self: stretch;
 }
 
 .home-hero__visual::before {
@@ -1357,35 +1365,40 @@ pre.init-demo__file-preview-content {
   font-style: italic;
 }
 
-.home-compile-flow {
+.home-compile-arrow {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  color: #aab8cc;
-  font-family: var(--md-code-font-family);
-  font-size: 0.68rem;
-  text-align: center;
+  justify-content: center;
+  width: 100%;
 }
 
-.home-compile-flow i {
+.home-compile-arrow i {
   position: relative;
   display: block;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, rgba(109, 40, 217, 0.65), rgba(37, 99, 235, 1));
+  background: linear-gradient(90deg, rgba(109, 40, 217, 0.6), rgba(37, 99, 235, 0.9));
+  border-radius: 1px;
 }
 
-.home-compile-flow i::after {
+.home-compile-arrow i::after {
   position: absolute;
-  top: -4px;
+  top: -3px;
   right: -1px;
-  width: 9px;
-  height: 9px;
-  border-top: 2px solid #3b82f6;
-  border-right: 2px solid #3b82f6;
+  width: 0;
+  height: 0;
+  border-left: 7px solid #3b82f6;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
   content: '';
-  transform: rotate(45deg);
+}
+
+.home-compile-arrow--more {
+  color: #64748b;
+  font-family: var(--md-code-font-family);
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .home-output-stack {
@@ -2149,18 +2162,19 @@ pre.init-demo__file-preview-content {
 
   .home-hero__visual {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
     gap: 0.9rem;
     min-height: 0;
     padding: 0;
   }
 
-  .home-compile-flow {
-    flex-direction: row;
-    justify-content: center;
+  .home-hero__visual > .home-code-window {
+    grid-column: auto;
+    grid-row: auto;
   }
 
-  .home-compile-flow i {
-    width: 70px;
+  .home-compile-arrow {
+    display: none;
   }
 
   .home-output-stack {

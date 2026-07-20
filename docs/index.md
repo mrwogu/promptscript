@@ -67,29 +67,28 @@ hide:
 &#32;&#32;}
 }</code></pre>
 </div>
-<div class="home-compile-flow" aria-hidden="true">
-<span>prs compile</span>
-<i></i>
-</div>
-<div class="home-output-stack">
+<div class="home-compile-arrow" aria-hidden="true"><i></i></div>
 <div class="home-output-file home-output-file--claude">
 <span>Claude Code</span>
 <code>CLAUDE.md</code>
 </div>
+<div class="home-compile-arrow" aria-hidden="true"><i></i></div>
 <div class="home-output-file home-output-file--github">
 <span>GitHub Copilot</span>
 <code>.github/agents/reviewer.md</code>
 </div>
+<div class="home-compile-arrow" aria-hidden="true"><i></i></div>
 <div class="home-output-file home-output-file--factory">
 <span>Factory AI</span>
 <code>.factory/skills/security-review/</code>
 </div>
+<div class="home-compile-arrow" aria-hidden="true"><i></i></div>
 <div class="home-output-file home-output-file--cursor">
 <span>Cursor</span>
 <code>.cursor/rules/project.mdc</code>
 </div>
+<div class="home-compile-arrow home-compile-arrow--more" aria-hidden="true"><span>+44</span></div>
 <div class="home-output-more">+ 44 targets</div>
-</div>
 </div>
 </section>
 <div class="home-platforms" aria-label="Supported platforms">
