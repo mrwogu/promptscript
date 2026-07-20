@@ -87,7 +87,6 @@ hide:
 <span>Cursor</span>
 <code>.cursor/rules/project.mdc</code>
 </div>
-<div class="home-compile-arrow home-compile-arrow--more" aria-hidden="true"><span>+44</span></div>
 <div class="home-output-more">+ 44 targets</div>
 </div>
 </section>
