@@ -84,8 +84,16 @@ prs init
 
 This creates the scaffolding for your AI infrastructure:
 
-- `promptscript.yaml` - **Compiler Configuration** (targets, input paths)
+- `promptscript.yaml` - **Compiler Configuration** (minimal, comment-free YAML)
 - `.promptscript/project.prs` - **Source of Truth** (your rules, identity, and skills)
+
+Detected AI tools are preselected. If none are detected, choose targets interactively. For non-interactive setup, pass targets explicitly:
+
+```bash
+prs init --yes --targets claude factory
+```
+
+PromptScript does not infer Copilot from `.github/workflows` and does not assign `AGENTS.md` to a specific tool.
 
 ### 2. Define Your Policy
 
@@ -227,9 +235,9 @@ Terminal ↻ Replay
 
 **Key features:**
 
-- **Auto-discovery** - Finds all existing AI instruction files in your project
-- **Skill installation** - Installs migration skills for each enabled target
-- **Non-destructive** - Your existing files remain untouched until you compile
+- **Auto-discovery** - Finds supported root and scoped AI instruction files
+- **Skill installation** - AI-assisted mode installs the PromptScript skill for enabled targets
+- **Non-destructive** - Preserves source instructions and existing `promptscript.yaml`
 
 ### 1. Start Migration
 
@@ -249,11 +257,15 @@ This creates:
 
 Your existing AI instruction files remain untouched.
 
+When `promptscript.yaml` already exists, static migration preserves it byte-for-byte, writes imported modules under `.promptscript/migrated/`, and adds one idempotent `@use` to the configured entry file. No candidates means no writes. Run `prs migrate --static --dry-run` to preview every path first.
+
 For AI-assisted migration, generate a migration prompt and install the PromptScript skill:
 
 ```bash
 prs migrate --llm
 ```
+
+AI-assisted migration writes `.promptscript/migration-prompt.md` without changing existing PromptScript sources. In non-interactive mode, the prompt is also emitted to stdout.
 
 ### 2. Invoke the Migration Skill
 

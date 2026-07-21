@@ -51,7 +51,8 @@ prs init [options]
 | `-y, --yes`              | Skip prompts, use defaults                                      |
 | `-f, --force`            | Force reinitialize even if already initialized                  |
 | `--auto-import`          | Statically import detected instruction files                    |
-| `--backup`               | Back up detected instruction files before migration             |
+| `--backup`               | Back up generated files before replacing them                   |
+| `--dry-run`              | Preview every planned file without writing                      |
 | `--no-hooks`             | Skip automatic hook installation                                |
 | `-m, --migrate`          | Deprecated migration flag; use interactive `prs init`           |
 
@@ -61,8 +62,8 @@ prs init [options]
 # Interactive initialization (default)
 prs init
 
-# Quick initialization with defaults
-prs init -y
+# Non-interactive initialization with explicit targets
+prs init -y --targets claude factory
 
 # Initialize with custom project name
 prs init --name my-project
@@ -73,11 +74,14 @@ prs init --team frontend --inherit @frontend/team
 # Initialize with specific targets only
 prs init --targets github claude
 
-# Initialize and statically import detected instructions
-prs init --auto-import --backup
+# Initialize and select detected files for static import
+prs init --auto-import
+
+# Preview initialization
+prs init -y --targets claude --dry-run
 
 # Full non-interactive setup
-prs init -n my-project --inherit @company/team --targets github claude cursor
+prs init -y -n my-project --inherit @company/team --targets github claude
 ```
 
 **Auto-detection:**
@@ -87,8 +91,10 @@ The `init` command automatically detects:
 - **Project name** from `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod`
 - **Languages** (TypeScript, Python, Rust, Go, etc.)
 - **Frameworks** (React, Next.js, Django, FastAPI, etc.)
-- **Existing AI tools** (GitHub Copilot, Claude, Cursor configurations)
+- **Existing AI tools** from dedicated configuration files and directories
 - **Prettier configuration** (`.prettierrc`, `.prettierrc.json`, `.prettierrc.yaml`, `.prettierrc.yml`)
+
+Detection never treats `.github/` or `AGENTS.md` alone as proof that a specific AI tool is in use. Detected tools are preselected in interactive mode. Other registered targets remain available but unchecked. `prs init --yes` requires `--targets`, detected tools, or targets configured in user defaults. It never invents GitHub, Claude, or Cursor defaults.
 
 **Prettier Integration:**
 
@@ -105,8 +111,13 @@ If no Prettier configuration is found:
 
 **Created Files:**
 
-- `promptscript.yaml` - Configuration file (includes formatting settings)
+- `promptscript.yaml` - Minimal, comment-free compiler configuration
 - `.promptscript/project.prs` - Main instructions file
+- `.promptscript/skills/promptscript/SKILL.md` - Canonical language skill
+- Native skill copies for explicitly selected targets that support skills
+- Hook settings for selected targets, unless `--no-hooks` or `--dry-run` is used
+
+Initialization performs conflict checks before writing. User-owned files are not overwritten unless `--force` or `--backup` explicitly authorizes replacement. Writes use temporary files and rollback completed writes after failures.
 
 ______________________________________________________________________
 
@@ -118,19 +129,35 @@ Migrate existing AI instructions to PromptScript.
 prs migrate [options]
 ```
 
-| Option               | Description                               |
-| -------------------- | ----------------------------------------- |
-| `--static`           | Statically import all detected files      |
-| `--llm`              | Generate an AI-assisted migration prompt  |
-| `--files <files...>` | Migrate only the listed instruction files |
+| Option                   | Description                                         |
+| ------------------------ | --------------------------------------------------- |
+| `--static`               | Statically import all detected files                |
+| `--llm`                  | Generate an AI-assisted migration prompt            |
+| `--files <files...>`     | Migrate only the listed instruction files           |
+| `--targets <targets...>` | Targets when migration also initializes the project |
+| `--backup`               | Back up files that will be updated                  |
+| `--force`                | Overwrite conflicting migration outputs             |
+| `--dry-run`              | Preview migration without writing                   |
 
 ```bash
 prs migrate
 prs migrate --static
 prs migrate --llm --files CLAUDE.md AGENTS.md
+prs migrate --static --dry-run
 ```
 
-`prs migrate` defaults to static migration. Use `--llm` to generate the AI-assisted migration prompt and install the bundled `promptscript` skill.
+`prs migrate` prompts for static or AI-assisted migration. `--static` and `--llm` select a non-interactive strategy and cannot be combined.
+
+For an initialized project:
+
+- `promptscript.yaml` remains byte-for-byte unchanged.
+- Static output is written under `.promptscript/migrated/`.
+- Existing entry file gains one idempotent `@use` for the migrated project.
+- AI-assisted mode writes `.promptscript/migration-prompt.md` and installs the PromptScript skill.
+- Existing instruction files remain unchanged.
+- No hooks are installed.
+
+No detected candidates means success with zero writes. An empty interactive selection cancels successfully with zero writes. Unknown `--files`, unreadable inputs, or conflicting outputs fail before any project file is changed. Human-readable output uses stderr. Explicit `--llm` writes the generated prompt to stdout for shell pipelines.
 
 ### prs upgrade
 
