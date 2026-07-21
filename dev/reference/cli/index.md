@@ -1087,39 +1087,15 @@ The CLI uses `promptscript.yaml` by default. Override with `--config`:
 id: my-project
 syntax: '1.4.0'
 
-# Input settings
 input:
   entry: .promptscript/project.prs
 
-# Registry configuration
-registry:
-  path: ./registry
-  # Or remote URL
-  # url: https://github.com/org/registry
-
-# Output targets
 targets:
-  - github:
-      output: .github/copilot-instructions.md
-  - claude:
-      output: CLAUDE.md
-  - cursor:
-      output: .cursor/rules/project.mdc
-  - antigravity:
-      output: .agent/rules/project.md
-
-# Validation settings
-validation:
-  rules:
-    empty-block: warning
-
-# Watch settings
-watch:
-  include:
-    - '.promptscript/**/*.prs'
-  exclude:
-    - '**/node_modules/**'
+  - github
+  - claude
 ```
+
+See the [Configuration Reference](https://getpromptscript.dev/dev/reference/config/index.md) for every field, default, and advanced option (registry, builds, validation, watch, formatting, customConventions, universalDir). The JSON schema is the source of truth: <https://getpromptscript.dev/latest/schema/config.json>.
 
 ## Environment Variables
 
