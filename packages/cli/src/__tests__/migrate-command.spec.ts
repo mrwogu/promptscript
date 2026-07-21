@@ -181,6 +181,36 @@ describe('migrateCommand', () => {
     expect(mockFs.writeFile).not.toHaveBeenCalled();
   });
 
+  it('backs up interactive static migration updates', async () => {
+    vi.mocked(services.prompts.confirm).mockResolvedValue(true);
+    mockCreateBackup.mockResolvedValue({
+      dir: '.prs-backup/test',
+      files: ['.promptscript/project.prs'],
+    });
+
+    await migrateCommand({}, services);
+
+    expect(mockImportMultipleFiles).toHaveBeenCalledWith(
+      ['/project/CLAUDE.md'],
+      expect.any(Object)
+    );
+    expect(mockCreateBackup).toHaveBeenCalledWith(
+      expect.arrayContaining(['.promptscript/project.prs']),
+      services
+    );
+  });
+
+  it('handles interactive prompt cancellation', async () => {
+    const error = new Error('cancelled');
+    error.name = 'ExitPromptError';
+    mockDetectAITools.mockRejectedValueOnce(error);
+
+    await migrateCommand({}, services);
+
+    expect(process.exitCode).toBeUndefined();
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
   it('delegates uninitialized migration to init without hooks', async () => {
     mockFs.existsSync.mockImplementation((path: string) => path === 'CLAUDE.md');
 
@@ -212,6 +242,15 @@ describe('migrateCommand', () => {
     expect(mockFs.writeFile).not.toHaveBeenCalled();
   });
 
+  it('normalizes and deduplicates requested files', async () => {
+    await migrateCommand({ static: true, files: ['./CLAUDE.md', 'CLAUDE.md'] }, services);
+
+    expect(mockImportMultipleFiles).toHaveBeenCalledWith(
+      ['/project/CLAUDE.md'],
+      expect.any(Object)
+    );
+  });
+
   it('rejects partial imports before writing', async () => {
     mockImportMultipleFiles.mockResolvedValue({
       files: new Map([['project.prs', '@meta { id: "preserved" syntax: "1.4.0" }\n']]),
@@ -219,6 +258,39 @@ describe('migrateCommand', () => {
       deduplicatedCount: 0,
       overallConfidence: 0,
       warnings: ['Could not import CLAUDE.md: unreadable'],
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
+  it('rejects unsafe importer output paths', async () => {
+    mockImportMultipleFiles.mockResolvedValue({
+      files: new Map([
+        ['project.prs', '@meta { id: "preserved" syntax: "1.4.0" }\n'],
+        ['../outside.prs', '@context { project: "preserved" }\n'],
+      ]),
+      perFileReports: [{ file: 'CLAUDE.md', sectionCount: 1, confidence: 1 }],
+      deduplicatedCount: 0,
+      overallConfidence: 1,
+      warnings: [],
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
+  it('rejects importer output without a project entry', async () => {
+    mockImportMultipleFiles.mockResolvedValue({
+      files: new Map([['context.prs', '@context { project: "preserved" }\n']]),
+      perFileReports: [{ file: 'CLAUDE.md', sectionCount: 1, confidence: 1 }],
+      deduplicatedCount: 0,
+      overallConfidence: 1,
+      warnings: [],
     });
 
     await migrateCommand({ static: true }, services);
@@ -260,6 +332,28 @@ describe('migrateCommand', () => {
           '  - claude',
           'input:',
           '  entry: .promptscript/migrated/project.prs',
+          '',
+        ].join('\n');
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ static: true }, services);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
+  it('rejects an entry path outside the project', async () => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'targets:',
+          '  - claude',
+          'input:',
+          '  entry: ../outside.prs',
           '',
         ].join('\n');
       }
@@ -399,5 +493,37 @@ describe('migrateCommand', () => {
     );
     expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('<!-- PromptScript'));
     consoleSpy.mockRestore();
+  });
+
+  it('copies an interactive LLM prompt to the clipboard', async () => {
+    mockSelectMigrationStrategy.mockResolvedValueOnce('llm');
+
+    await migrateCommand({}, services);
+
+    expect(mockCopyToClipboard).toHaveBeenCalledWith(
+      expect.stringContaining('Migrate my existing AI instructions')
+    );
+  });
+
+  it('uses enabled object-form targets for LLM skill writes', async () => {
+    mockFs.readFile.mockImplementation(async (path: string) => {
+      if (path === 'promptscript.yaml') {
+        return [
+          'id: preserved',
+          'syntax: "1.4.0"',
+          'targets:',
+          '  - claude:',
+          '      enabled: true',
+          '  - cursor:',
+          '      enabled: false',
+          '',
+        ].join('\n');
+      }
+      return '# Existing instructions';
+    });
+
+    await migrateCommand({ llm: true }, services);
+
+    expect(mockGetSkillWrites).toHaveBeenCalledWith(['claude']);
   });
 });

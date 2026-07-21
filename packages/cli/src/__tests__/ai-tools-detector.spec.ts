@@ -91,6 +91,20 @@ describe('utils/ai-tools-detector', () => {
       expect(mockFs.readFile).not.toHaveBeenCalled();
     });
 
+    it('should reject instruction candidates that resolve outside the project', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'CLAUDE.md');
+      mockServices.fs.lstat = vi.fn().mockResolvedValue({
+        isFile: () => true,
+        isSymbolicLink: () => false,
+      }) as unknown as NonNullable<CliServices['fs']['lstat']>;
+      mockServices.fs.realpath = vi.fn(async (path: unknown) =>
+        String(path) === '/test' ? '/test' : '/outside/CLAUDE.md'
+      ) as NonNullable<CliServices['fs']['realpath']>;
+
+      await expect(detectAITools(mockServices)).rejects.toThrow('must stay inside the project');
+      expect(mockFs.readFile).not.toHaveBeenCalled();
+    });
+
     it('should detect Cursor configuration', async () => {
       mockFs.existsSync.mockImplementation((path: string) => path === '.cursor/rules/project.mdc');
 
@@ -161,6 +175,40 @@ describe('utils/ai-tools-detector', () => {
       expect(result.migrationCandidates.map((candidate) => candidate.path)).toContain(
         '.github/instructions/api.instructions.md'
       );
+    });
+
+    it('should discover scoped instruction files for directory-based tools', async () => {
+      const filesByDirectory: Record<string, string> = {
+        '.cursor/rules': 'team.mdc',
+        '.windsurf/rules': 'team.md',
+        '.roo/rules': 'team.md',
+        '.cline/rules': 'team.md',
+      };
+      const paths = Object.entries(filesByDirectory).map(
+        ([directory, file]) => `${directory}/${file}`
+      );
+      mockFs.existsSync.mockImplementation(
+        (path: string) => path in filesByDirectory || paths.includes(path)
+      );
+      mockFs.readdir.mockImplementation(async (path: string) => [
+        filesByDirectory[path] ?? 'ignored.txt',
+        'ignored.txt',
+      ]);
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.migrationCandidates.map((candidate) => candidate.path)).toEqual(
+        expect.arrayContaining(paths)
+      );
+    });
+
+    it('should skip unreadable scoped instruction directories', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === '.cursor/rules');
+      mockFs.readdir.mockRejectedValue(new Error('permission denied'));
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.migrationCandidates).toEqual([]);
     });
 
     it('should detect Factory AI via .factory directory', async () => {

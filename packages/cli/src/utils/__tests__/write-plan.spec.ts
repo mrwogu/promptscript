@@ -63,6 +63,43 @@ describe('executeWritePlan', () => {
     }
   );
 
+  it('rejects duplicate normalized paths', async () => {
+    const files: Record<string, string> = {};
+    const { services, writeFile } = createServices(files);
+
+    await expect(
+      executeWritePlan(
+        [
+          { path: 'same.md', content: 'first' },
+          { path: 'same.md', content: 'second' },
+        ],
+        services
+      )
+    ).rejects.toThrow('duplicate path');
+
+    expect(writeFile).not.toHaveBeenCalled();
+  });
+
+  it('rejects an existing symbolic-link destination', async () => {
+    const files: Record<string, string> = {};
+    const { services, writeFile } = createServices(files);
+    services.fs.existsSync = vi.fn((path: unknown) =>
+      ['/project', '/project/link.md'].includes(String(path))
+    ) as unknown as CliServices['fs']['existsSync'];
+    services.fs.realpath = vi.fn(async (path: unknown) => String(path)) as NonNullable<
+      CliServices['fs']['realpath']
+    >;
+    services.fs.lstat = vi.fn().mockResolvedValue({
+      isSymbolicLink: () => true,
+    }) as unknown as NonNullable<CliServices['fs']['lstat']>;
+
+    await expect(executeWritePlan([{ path: 'link.md', content: 'new' }], services)).rejects.toThrow(
+      'Refusing to replace symbolic link'
+    );
+
+    expect(writeFile).not.toHaveBeenCalled();
+  });
+
   it('rejects writes through a symlinked parent outside the project', async () => {
     const files: Record<string, string> = {};
     const { services, writeFile } = createServices(files);
@@ -173,6 +210,65 @@ describe('executeWritePlan', () => {
     const { services, writeFile, rm } = createServices(files);
     writeFile.mockRejectedValue(new Error('disk full'));
     rm.mockRejectedValue(new Error('permission denied'));
+
+    await expect(
+      executeWritePlan([{ path: 'partial.md', content: 'new' }], services)
+    ).rejects.toThrow('disk full. Rollback failed for 1 operation(s).');
+  });
+
+  it('reports temporary-file cleanup failures', async () => {
+    const files: Record<string, string> = {};
+    const { services, writeFile, rm } = createServices(files);
+    services.fs.rename = vi.fn().mockResolvedValue(undefined);
+    writeFile.mockImplementation(async (path: string, content: string) => {
+      if (path.startsWith('second.md.tmp-')) {
+        throw new Error('disk full');
+      }
+      files[path] = content;
+    });
+    rm.mockRejectedValue(new Error('permission denied'));
+
+    await expect(
+      executeWritePlan(
+        [
+          { path: 'first.md', content: 'new' },
+          { path: 'second.md', content: 'new' },
+        ],
+        services
+      )
+    ).rejects.toThrow('disk full. Rollback failed for 2 operation(s).');
+  });
+
+  it('reports failure to restore an updated file', async () => {
+    const files: Record<string, string> = { 'first.md': 'old' };
+    const { services, writeFile } = createServices(files);
+    writeFile.mockImplementation(async (path: string, content: string) => {
+      if (path === 'second.md') {
+        throw new Error('disk full');
+      }
+      if (path === 'first.md' && content === 'old') {
+        throw new Error('restore denied');
+      }
+      files[path] = content;
+    });
+
+    await expect(
+      executeWritePlan(
+        [
+          { path: 'first.md', content: 'new' },
+          { path: 'second.md', content: 'new' },
+        ],
+        services,
+        { force: true }
+      )
+    ).rejects.toThrow('disk full. Rollback failed for 1 operation(s).');
+  });
+
+  it('reports unavailable cleanup for a failed new file', async () => {
+    const files: Record<string, string> = {};
+    const { services, writeFile } = createServices(files);
+    services.fs.rm = undefined;
+    writeFile.mockRejectedValue(new Error('disk full'));
 
     await expect(
       executeWritePlan([{ path: 'partial.md', content: 'new' }], services)

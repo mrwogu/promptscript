@@ -215,6 +215,21 @@ describe('init migration flow', () => {
       );
     });
 
+    it('should reject an empty static migration selection', async () => {
+      setupMigrationCandidates();
+      mockPrompts.select
+        .mockResolvedValueOnce('migrate')
+        .mockResolvedValueOnce('static')
+        .mockResolvedValueOnce('skip');
+      mockPrompts.confirm.mockResolvedValue(false);
+      mockPrompts.checkbox.mockResolvedValueOnce(['github']).mockResolvedValueOnce([]);
+
+      await initCommand({}, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+    });
+
     it('should skip migration when user picks fresh start', async () => {
       setupMigrationCandidates();
 
@@ -267,6 +282,25 @@ describe('init migration flow', () => {
       expect(process.exitCode).toBe(1);
       expect(mockFs.writeFile).not.toHaveBeenCalled();
     });
+
+    it('should reject unsafe importer output paths', async () => {
+      setupMigrationCandidates();
+      mockImportMultipleFiles.mockResolvedValue({
+        files: new Map([
+          ['project.prs', '@meta { id: "test" }'],
+          ['../outside.prs', '@context { project: "test" }'],
+        ]),
+        perFileReports: [{ file: '/mock/project/CLAUDE.md', sectionCount: 3, confidence: 0.85 }],
+        deduplicatedCount: 0,
+        overallConfidence: 0.85,
+        warnings: [],
+      });
+
+      await initCommand({ yes: true, autoImport: true }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+    });
   });
 
   describe('-y without --auto-import', () => {
@@ -282,6 +316,20 @@ describe('init migration flow', () => {
         expect.stringContaining('@meta'),
         'utf-8'
       );
+    });
+  });
+
+  describe('validation', () => {
+    it('should reject unknown configured targets', async () => {
+      mockLoadUserConfig.mockResolvedValue({
+        version: '1',
+        defaults: { targets: ['unknown'] },
+      });
+
+      await initCommand({ yes: true }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
     });
   });
 
