@@ -1,5 +1,8 @@
 # Intelligent `prs init` Implementation Plan
 
+> Superseded historical plan. Current behavior is documented in
+> [`docs/reference/cli.md`](../reference/cli.md).
+
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Redesign `prs init` to auto-detect existing AI instruction files and offer inline migration (static import or AI-assisted), producing modular .prs output.

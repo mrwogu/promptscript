@@ -63,9 +63,10 @@ prs validate --strict
 prs compile
 ```
 
-`prs init` detects the project stack, creates `promptscript.yaml` and
-`.promptscript/project.prs`, helps select targets, and installs supported AI-tool hooks by default.
-Pass `--no-hooks` to skip hook installation.
+`prs init` detects the project stack and installed AI tools, then creates a clean
+`promptscript.yaml` and `.promptscript/project.prs`. Detected targets are preselected, while other
+targets remain explicit choices. For automation, use `prs init --yes --targets claude factory`.
+Pass `--no-hooks` to skip hook installation or `--dry-run` to preview all writes.
 
 Generated output can include:
 
@@ -312,13 +313,15 @@ prs compile --all-builds
 ```bash
 prs import CLAUDE.md
 prs import .github/copilot-instructions.md
+prs migrate --static --dry-run
 prs migrate --static
 prs migrate --llm
 ```
 
 Static migration deterministically imports detected instruction files. AI-assisted migration
-installs the PromptScript skill and generates a migration prompt. Existing files remain untouched
-until compilation.
+generates a migration prompt and installs the PromptScript skill. Existing source instructions
+remain untouched, and existing PromptScript configuration is preserved byte-for-byte. Static output is isolated under
+`.promptscript/migrated/`; no detected candidates means no writes.
 
 Preview before writing:
 

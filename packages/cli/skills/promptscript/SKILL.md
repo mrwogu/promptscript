@@ -866,10 +866,13 @@ prs upgrade                 # Upgrade all .prs files to the latest version
 
 ```
 prs init                    # Initialize project (auto-detects existing files)
+prs init --yes --targets claude factory
+prs init --dry-run          # Preview initialization
 prs init --auto-import      # Initialize + static import of existing files
 prs migrate                 # Interactive migration flow
 prs migrate --static        # Non-interactive static import
 prs migrate --llm           # Generate AI-assisted migration prompt
+prs migrate --static --dry-run
 prs compile                 # Compile to all targets
 prs compile --watch         # Watch mode
 prs compile --ignore-hashes # Skip integrity hash verification
@@ -902,6 +905,11 @@ prs resolve @alias/path     # Debug: show how an import resolves
 prs registry list           # Show configured registries and aliases
 prs registry add <alias> <url>  # Add a registry alias
 ```
+
+`prs init --yes` requires explicit, detected, or user-configured targets. It does not invent
+default tools. For existing projects, `prs migrate` preserves `promptscript.yaml`, isolates static
+output under `.promptscript/migrated/`, leaves source instructions untouched, and performs no
+writes when no candidates are detected.
 
 ## Output Targets
 
