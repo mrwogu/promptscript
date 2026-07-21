@@ -525,7 +525,7 @@ prs serve [options]
 
 | Option                   | Description                                | Default                       |
 | ------------------------ | ------------------------------------------ | ----------------------------- |
-| `-p, --port <port>`      | Port to listen on                          | `3000`                        |
+| `-p, --port <port>`      | Port to listen on (`1` to `65535`)         | `3000`                        |
 | `--host <host>`          | Host to bind to                            | `127.0.0.1`                   |
 | `--read-only`            | Disable file modifications from playground | `false`                       |
 | `--cors-origin <origin>` | Allowed CORS origin                        | `https://getpromptscript.dev` |
