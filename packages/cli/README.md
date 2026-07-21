@@ -1,236 +1,393 @@
-# Stop configuring AI tools manually. Start compiling.
+<div align="center">
+
+# @promptscript/cli
+
+**Agent platform configuration as code**
+
+Define instructions, skills, agents, MCP servers, hooks, workflows, and policies once. Compile
+native configuration for 48 AI coding platforms.
 
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/mrwogu/promptscript/blob/main/LICENSE)
 
-**One compiler. 48 AI coding targets. Zero manual syncing.**
+[**Get started**](https://getpromptscript.dev/getting-started/) ·
+[**Documentation**](https://getpromptscript.dev/) ·
+[**Playground**](https://getpromptscript.dev/playground/) ·
+[**GitHub**](https://github.com/mrwogu/promptscript)
 
-[![Watch the video](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
+</div>
 
-PromptScript is the Terraform for AI instructions. Write your standards once in `.prs` files, compile to GitHub Copilot, Claude Code, Cursor, and 45 more targets, with inheritance, composition, **skills, sub-agents**, validation, lockfile, and version control built in.
+[![Watch the PromptScript introduction](https://img.youtube.com/vi/7sHMn-DbZig/maxresdefault.jpg)](https://youtu.be/7sHMn-DbZig)
 
----
+AI coding platforms use different files for instructions, skills, agents, commands, MCP
+integrations, hooks, and settings. PromptScript replaces hand-maintained copies with one validated,
+composable, Git-native source and target-specific compilers.
 
-## The Problem You Already Have
-
-Maintaining `.cursorrules`, `CLAUDE.md`, `.github/copilot-instructions.md` separately?
-
-- ❌ Even 2–3 AI tools × many repos = **dozens of config files** drifting out of sync
-- ❌ Security policy update? Manual changes across every repo, for every tool
-- ❌ Switching AI tools? Rewrite instructions, READMEs, and docs everywhere
-- ❌ No inheritance, no validation, no audit trail
-
-## The Fix: Prompt-as-Code
-
-```
-Write once  ──>  prs compile  ──>  .github/copilot-instructions.md
-                                    CLAUDE.md
-                                    .cursor/rules/*.mdc
-                                    AGENTS.md
-                                    GEMINI.md
-                                    OPENCODE.md
-                                    ... 42 more
+```text
+.promptscript/project.prs
+    -> resolve inheritance, imports, and policies
+    -> validate language and capabilities
+    -> compile deterministic native files
 ```
 
-- ✅ Single source of truth for **all 48 targets**
-- ✅ Hierarchical inheritance - org, team, and project levels cascade like CSS
-- ✅ Full validation catches errors before they reach your AI tools
-- ✅ Version-pinned registries for reproducible builds
+No runtime proxy. Each selected platform keeps consuming its own native configuration.
 
----
+## Install
 
-## Quick Start
+Requires Node.js 20 or later.
 
 ```bash
 npm install -g @promptscript/cli
-
-prs init          # auto-detects your tech stack
-prs compile       # outputs to all configured AI tools
 ```
 
-Then install hooks for fully automatic workflow:
+Also available through pnpm or yarn:
 
 ```bash
-prs hooks install         # install for detected AI tools
+pnpm add -g @promptscript/cli
+yarn global add @promptscript/cli
 ```
 
-Three commands. Every AI tool configured. Your AI agents automatically learn PromptScript syntax via a bundled language skill, they can manage your `.prs` files for you.
-
-### Already have CLAUDE.md or .cursorrules?
+Verify installation:
 
 ```bash
-prs import CLAUDE.md        # converts existing files to .prs
-prs migrate                 # or migrate everything at once
+prs --version
 ```
 
----
+## 60-Second Quick Start
 
-## Use Skills from Anywhere
-
-Import skills directly from GitHub - no scripts, no downloads, no manual steps:
-
-```promptscript
-@use github.com/anthropics/skills/frontend-design.md@1.0.0
-@use github.com/your-org/standards/security-scan.md
-@use ./local-skills/code-review.md
+```bash
+prs init
+# Edit .promptscript/project.prs
+prs validate --strict
+prs compile
 ```
 
-One line per skill. Version-pinned. Lock-filed. Done.
+`prs init` detects the project stack, creates `promptscript.yaml` and
+`.promptscript/project.prs`, helps select targets, and installs supported AI-tool hooks by default.
+Pass `--no-hooks` to skip hook installation.
 
-Import entire skill directories at once:
+Generated output can include:
 
-```promptscript
-@use github.com/your-org/skills/gitnexus
-# Resolves all skills: exploring, debugging, refactoring, impact
+```text
+.github/copilot-instructions.md
+.github/prompts/review.prompt.md
+CLAUDE.md
+.claude/agents/reviewer.md
+.claude/skills/security-review/SKILL.md
+.cursor/rules/project.mdc
+.opencode/agents/reviewer.md
 ```
 
----
+## Define the Platform
 
-## What a .prs File Looks Like
+`.promptscript/project.prs`:
 
 ```promptscript
-@meta { id: "checkout-service" syntax: "1.0.0" }
-
-@inherit @company/backend-security
-@use @fragments/testing
-@use github.com/anthropics/skills/code-review.md@1.0.0
+@meta {
+  id: "checkout-service"
+  syntax: "1.4.0"
+}
 
 @identity {
   """
-  You are an expert Backend Engineer working on the Checkout Service.
-  This service handles payments using hexagonal architecture.
+  You are working on the checkout service.
+  Preserve transaction integrity and auditability.
   """
 }
 
+@standards {
+  code: ["Use strict TypeScript", "Test every business rule"]
+}
+
 @shortcuts {
-  "/review": "Security-focused code review"
-  "/test": "Write unit tests with Vitest"
+  "/review": {
+    prompt: true
+    description: "Review current changes"
+    content: "Review correctness, security, tests, and operational impact."
+  }
 }
 
 @skills {
-  security-audit: {
-    description: "OWASP Top 10 vulnerability scan"
-    userInvocable: true
+  security-review: {
+    description: "Review payment changes for security risks"
     allowedTools: ["Read", "Grep", "Bash"]
-    references: ["./refs/owasp-top10.md"]
-    inputs:  { target_path: string }
-    outputs: { findings: array, severity: enum }
+    content: "Inspect authentication, authorization, secrets, and payment data handling."
+    inputs: {
+      targetPath: {
+        description: "Path to review"
+        type: "string"
+      }
+    }
+    outputs: {
+      report: {
+        description: "Review report"
+        type: "string"
+      }
+      highestSeverity: {
+        description: "Highest detected severity"
+        type: "enum"
+        options: [low, medium, high, critical]
+      }
+    }
+  }
+}
+
+@mcpServers {
+  issue-tracker: {
+    transport: "stdio"
+    command: ["node", "./tools/issues.mjs"]
   }
 }
 
 @agents {
-  reviewer: { description: "PR reviewer" }
-  debugger: { description: "Test failure triage" }
+  reviewer: {
+    description: "Review changes before merge"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    skills: ["security-review"]
+    mcpServers: ["issue-tracker"]
+    content: "Review changed code, tests, and operational impact."
+  }
+}
+
+@hooks {
+  validate-changes: {
+    event: "post-tool-use"
+    matcher: "Edit|Write"
+    command: ["npm", "run", "typecheck"]
+  }
+}
+
+@workflows {
+  release: {
+    description: "Prepare a validated release"
+    content: "Run quality gates, summarize changes, and prepare release metadata."
+  }
 }
 ```
-
-Run `prs compile` and get correctly formatted output for every AI tool your team uses.
-
----
-
-## Supported Targets
-
-| AI Tool                | Output                                                |
-| :--------------------- | :---------------------------------------------------- |
-| **GitHub Copilot**     | `.github/copilot-instructions.md`, agents, prompts    |
-| **Claude Code**        | `CLAUDE.md`, `.claude/skills/*.md`                    |
-| **Cursor**             | `.cursor/rules/*.mdc`                                 |
-| **Google Antigravity** | `.agent/rules/*.md`                                   |
-| **Factory AI**         | `AGENTS.md`, `.factory/skills/`, `.factory/commands/` |
-| **OpenCode**           | `OPENCODE.md`, `.opencode/commands/*.md`              |
-| **Gemini CLI**         | `GEMINI.md`, `.gemini/commands/*.toml`                |
-
-Plus **30 more**: Windsurf, Cline, Roo Code, Codex, Continue, Augment, and others. See the [full list](https://getpromptscript.dev/formatters/).
-
----
-
-## Key Features
-
-| Feature                      | What it does                                                                   |
-| :--------------------------- | :----------------------------------------------------------------------------- |
-| **Inheritance**              | Org -> team -> project configs that cascade like CSS                           |
-| **Composition**              | Reuse fragments and skills with `@use`                                         |
-| **Markdown imports**         | `@use` plain `.md` files and GitHub skills directly                            |
-| **Parameterized templates**  | `@inherit @stacks/node(port: 8080, db: "postgres")`                            |
-| **Skills**                   | SKILL.md files with resource bundles, tool permissions, input/output contracts |
-| **Sub-agents**               | `@agents` block compiles to Claude / Factory native agents                     |
-| **Multi-target compilation** | One source, any number of AI tools (48 supported)                              |
-| **Hooks**                    | `prs hooks install` integrates detected AI tools                               |
-| **Watch mode**               | `prs compile -w` for instant recompilation                                     |
-| **Overwrite protection**     | Never accidentally clobbers hand-written files                                 |
-| **Validation**               | `prs validate --strict --format json` for CI                                   |
-| **Registry support**         | Share configs via Git registries (private or public)                           |
-| **Lockfile**                 | `promptscript.lock` for reproducible builds across repos                       |
-| **Vendor mode**              | `prs vendor sync` for offline / air-gapped CI                                  |
-| **Migration**                | Import existing CLAUDE.md, .cursorrules with `prs import`                      |
-
-## Commands
-
-| Command                               | Description                                            |
-| :------------------------------------ | :----------------------------------------------------- |
-| `prs init`                            | Initialize project with auto-detection                 |
-| `prs compile`                         | Compile to all target formats                          |
-| `prs compile -w`                      | Watch mode, recompile on changes                       |
-| `prs compile --dry-run`               | Preview without writing files                          |
-| `prs compile --strict`                | Fail on output path conflicts                          |
-| `prs build <profile>`                 | Compile a named build profile from `promptscript.yaml` |
-| `prs validate`                        | Validate `.prs` files with detailed errors             |
-| `prs validate --strict --format json` | Machine-readable output for CI pipelines               |
-| `prs validate --fix`                  | Auto-fix syntax version mismatches                     |
-| `prs inspect <skill>`                 | Show skill composition layers and provenance           |
-| `prs diff`                            | Show diff between source and compiled output           |
-| `prs check`                           | Check configuration and dependencies health            |
-| `prs hooks install`                   | Install hooks for detected AI tools                    |
-| `prs hooks uninstall <tool>`          | Remove hooks for a specific tool                       |
-| `prs lock`                            | Generate / update `promptscript.lock`                  |
-| `prs lock --update`                   | Force re-hash of all registry references               |
-| `prs update [package]`                | Re-resolve versions and update lockfile                |
-| `prs vendor sync`                     | Mirror all cached deps to `.promptscript/vendor/`      |
-| `prs vendor check`                    | Verify vendor directory matches lockfile               |
-| `prs skills add <source>`             | Add a remote skill (GitHub URL or alias)               |
-| `prs skills list`                     | List installed skills                                  |
-| `prs skills update [name]`            | Update markdown-sourced skill lock entries             |
-| `prs skills remove <name>`            | Remove a skill from the project                        |
-| `prs registry ...`                    | Manage registries (publish, add, list)                 |
-| `prs resolve <import>`                | Show full resolution chain for an import (debug)       |
-| `prs import`                          | Import existing AI instruction files                   |
-| `prs migrate`                         | Migrate all existing instructions at once              |
-| `prs upgrade`                         | Upgrade `.prs` files to latest syntax version          |
-| `prs pull`                            | Pull updates from registry                             |
-| `prs serve`                           | Start local playground server                          |
-
-## Configuration
 
 `promptscript.yaml`:
 
 ```yaml
-version: '1'
+id: checkout-service
+syntax: '1.4.0'
+
 input:
-  entry: '.promptscript/project.prs'
+  entry: .promptscript/project.prs
+
 targets:
-  - github
-  - claude
-  - cursor
+  - github:
+      version: multifile
+  - claude:
+      version: full
+  - cursor:
+      version: full
+  - opencode:
+      version: full
+  - gemini:
+      version: full
 ```
+
+Run `prs compile`. Formatters map each supported capability to native target files and omit
+unsupported platform-specific features.
+
+## What PromptScript Manages
+
+| Capability              | Source                                                            | Result                                                                           |
+| :---------------------- | :---------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| Instructions and policy | `@identity`, `@context`, `@standards`, `@restrictions`, `@guards` | Main instructions and scoped rules                                               |
+| Portable skills         | `@skills`                                                         | Native skill directories with references, assets, scripts, and contracts         |
+| Specialist agents       | `@agents`                                                         | Native Markdown, TOML, or droid files with models, tools, skills, and MCP access |
+| User commands           | `@shortcuts`                                                      | Native prompts, commands, or documented shortcuts                                |
+| Tool integrations       | `@mcpServers`                                                     | Platform-specific MCP configuration                                              |
+| Capability bundles      | `@plugins`                                                        | Native plugin manifests where supported                                          |
+| Automation              | `@hooks`, `@workflows`                                            | Lifecycle hooks and repeatable workflow files                                    |
+| Monorepo delivery       | `builds` in `promptscript.yaml`                                   | Scoped output for packages and applications                                      |
+
+## 48 Built-In Targets
+
+| Platform       | Primary and rich output                                          |
+| :------------- | :--------------------------------------------------------------- |
+| GitHub Copilot | `.github/copilot-instructions.md`, agents, skills, prompts       |
+| Claude Code    | `CLAUDE.md`, `.claude/agents/`, `.claude/skills/<name>/SKILL.md` |
+| Cursor         | `.cursor/rules/`, `.cursor/agents/`, commands, MCP and hooks     |
+| Factory AI     | `AGENTS.md`, `.factory/droids/`, skills, MCP, hooks and plugins  |
+| Codex          | `AGENTS.md`, `.codex/agents/*.toml`, skills and config           |
+| OpenCode       | `OPENCODE.md`, agents, skills and commands                       |
+| Gemini CLI     | `GEMINI.md`, commands and interoperable skills                   |
+| Antigravity    | `.agent/rules/`, workflows and MCP configuration                 |
+| Grok           | `AGENTS.md`, agents, skills, commands and integrations           |
+
+PromptScript also supports 10 AGENTS.md targets and 29 Markdown instruction targets, including
+Windsurf, Cline, Roo Code, Continue, Aider, Amazon Q, Warp, Zed, OpenHands, Qwen Code, Kimi, Mimo,
+Deep Agents, and ForgeCode.
+
+See the [complete target and capability matrix](https://getpromptscript.dev/reference/formatters/).
+
+## Skills from Local Files, Registries, or Git
+
+```promptscript
+@use ./skills/security-review.md
+@use @company/skills/release@^2.0.0
+@use github.com/acme/agent-skills/database-review@1.3.0
+```
+
+Skill directories can bundle `SKILL.md`, references, scripts, assets, and licenses while preserving
+their directory structure:
+
+```text
+security-review/
+├── SKILL.md
+├── references/threat-model.md
+├── scripts/scan.sh
+└── assets/report-template.md
+```
+
+Manage remote skills from the CLI:
+
+```bash
+prs skills add github.com/acme/agent-skills/security-review@2.1.0
+prs skills list
+prs skills update
+prs skills remove security-review
+```
+
+Remote imports are recorded in `promptscript.lock` with commit and SHA-256 integrity data.
+
+## Composition and Governance
+
+```promptscript
+@inherit @company/platform
+@use @team/backend
+
+@extend standards {
+  testing!: ["Use Vitest", "Require 95% coverage"]
+}
+```
+
+- Inherit organization, team, and project layers.
+- Compose local files, Markdown skills, aliases, and direct Git imports.
+- Extend selected paths with deterministic merges, explicit replacement, negation, and sealed
+  properties.
+- Pass typed parameters to reusable templates.
+- Enforce layer boundaries, protected properties, and registry allowlists with policies.
+- Inspect skill provenance with `prs inspect <skill>`.
+- Build reproducibly with version pins, lockfile integrity, and vendor mode.
+
+## Monorepo Build Profiles
+
+Create scoped builds in `promptscript.yaml`:
+
+```yaml
+builds:
+  api:
+    entry: .promptscript/packages/api.prs
+    output: packages/api
+    targets:
+      - factory
+  codex-api:
+    entry: .promptscript/packages/api.prs
+    output: packages/api
+    targets:
+      - codex:
+          output: AGENTS.override.md
+          agentsFile: AGENTS.override.md
+  web:
+    entry: .promptscript/packages/web.prs
+    output: packages/web
+    targets:
+      - cursor:
+          version: full
+```
+
+```bash
+prs build api
+prs build codex-api
+prs compile --build web
+prs compile --all-builds
+```
+
+## Migrate Existing Instructions
+
+```bash
+prs import CLAUDE.md
+prs import .github/copilot-instructions.md
+prs migrate --static
+prs migrate --llm
+```
+
+Static migration deterministically imports detected instruction files. AI-assisted migration
+installs the PromptScript skill and generates a migration prompt. Existing files remain untouched
+until compilation.
+
+Preview before writing:
+
+```bash
+prs compile --dry-run
+prs diff --all
+```
+
+## CLI Commands
+
+| Command                                             | Purpose                                                  |
+| :-------------------------------------------------- | :------------------------------------------------------- |
+| `prs init`                                          | Detect project context and initialize PromptScript       |
+| `prs compile`                                       | Compile all configured targets                           |
+| `prs compile --watch`                               | Recompile when source changes                            |
+| `prs build <name>`                                  | Compile one named build profile                          |
+| `prs compile --all-builds`                          | Compile every named profile                              |
+| `prs validate --strict`                             | Validate source, references, policies, and capabilities  |
+| `prs validate --fix`                                | Upgrade outdated syntax declarations when possible       |
+| `prs diff --all`                                    | Preview compiled output differences                      |
+| `prs inspect <skill>`                               | Show skill layers and property provenance                |
+| `prs hooks install [tool]`                          | Integrate supported AI tools and protect generated files |
+| `prs skills <add\|remove\|list\|update>`            | Manage remote Markdown skills                            |
+| `prs registry <init\|validate\|publish\|list\|add>` | Manage registries and aliases                            |
+| `prs lock` / `prs update`                           | Pin or refresh remote dependencies                       |
+| `prs vendor sync` / `prs vendor check`              | Prepare and verify offline dependencies                  |
+| `prs resolve <import>`                              | Explain import resolution                                |
+| `prs import <file>` / `prs migrate`                 | Adopt existing instruction files                         |
+| `prs upgrade`                                       | Upgrade `.prs` syntax versions                           |
+| `prs serve`                                         | Connect local files to the online playground             |
+
+See the [complete CLI reference](https://getpromptscript.dev/reference/cli/) for every option.
+
+## Hooks and Generated-File Protection
+
+PromptScript has two separate automation layers:
+
+- `@hooks` compiles portable lifecycle events to native target hook configuration.
+- `prs hooks install` integrates supported AI tools, recompiles after their `.prs` edit events, and
+  redirects direct edits of generated files back to PromptScript source.
+
+Use `prs compile --watch` for changes made in a general-purpose editor.
+
+Targets with native skill support can receive the bundled PromptScript language skill, allowing
+compatible agents to work with `.prs` source. Disable it with
+`includePromptScriptSkill: false`.
 
 ## Docker
 
 ```bash
-docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest compile
+docker run --rm -v "$(pwd):/workspace" ghcr.io/mrwogu/promptscript:latest compile
 ```
 
 ## Editor Support
 
-Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language) for syntax highlighting, bracket matching, code folding, and file icons for `.prs` files.
+Install the
+[PromptScript VS Code extension](https://marketplace.visualstudio.com/items?itemName=promptscript.promptscript-language)
+for syntax highlighting, bracket matching, code folding, and file icons.
 
 ## Documentation
 
-- [Getting Started](https://getpromptscript.dev/getting-started/) - 5-minute quickstart
-- [Language Reference](https://getpromptscript.dev/reference/syntax/) - full syntax docs
-- [Guides](https://getpromptscript.dev/guides/) - inheritance, registry, migration, and more
-- [Enterprise](https://getpromptscript.dev/guides/enterprise/) - scaling across organizations
+- [Getting Started](https://getpromptscript.dev/getting-started/)
+- [Agent Platform](https://getpromptscript.dev/features/)
+- [Language Reference](https://getpromptscript.dev/reference/language/)
+- [Configuration Reference](https://getpromptscript.dev/reference/config/)
+- [Target Matrix](https://getpromptscript.dev/reference/formatters/)
+- [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)
+- [Playground](https://getpromptscript.dev/playground/)
 
 ## License
 
-MIT
+[MIT](https://github.com/mrwogu/promptscript/blob/main/LICENSE)
