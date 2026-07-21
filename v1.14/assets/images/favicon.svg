@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="ps_grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6D28D9"/>
+      <stop offset="55%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#0B1220"/>
+  <rect width="32" height="32" rx="6" stroke="url(#ps_grad)" stroke-width="1.5" fill="none"/>
+  
+  <!-- Code brackets < /> -->
+  <path d="M10 12l-4 4 4 4" stroke="#E8F0FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M22 12l4 4-4 4" stroke="#E8F0FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M18 10l-4 12" stroke="url(#ps_grad)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+</svg>
