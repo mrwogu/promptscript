@@ -214,6 +214,25 @@ describe('commands/inspect', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should resolve config and entry from --cwd', async () => {
+    mockLoadConfig.mockResolvedValue({
+      input: { entry: 'custom/main.prs' },
+      registries: {},
+    });
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        review: { description: 'Review code' },
+      })
+    );
+
+    const { inspectCommand } = await import('../commands/inspect.js');
+    await inspectCommand('review', { cwd: '/workspace' } as InspectOptions);
+
+    expect(mockLoadConfig).toHaveBeenCalledWith('/workspace/promptscript.yaml');
+    expect(mockResolve).toHaveBeenCalledWith('/workspace/custom/main.prs');
+    expect(process.exitCode).toBeUndefined();
+  });
+
   it('should error when resolution fails', async () => {
     mockResolve.mockResolvedValue({
       ast: null,
