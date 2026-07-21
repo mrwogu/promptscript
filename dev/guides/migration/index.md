@@ -352,22 +352,19 @@ You are a senior developer working on the checkout service.
 
 ```yaml
 # promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 ### Compile and Compare
@@ -388,21 +385,23 @@ prs validate
 
 ## Step 6: Update Git
 
-### Remove Old Files from Source Control
-
-```bash
-# Keep generated files, but don't edit manually
-git rm --cached .github/copilot-instructions.md CLAUDE.md .cursorrules
-
-# Add to .gitignore if you want (optional)
-# Or keep them tracked but generated
-```
-
-### Commit Migration
+### Keep Generated Files Tracked
 
 ```bash
 git add .promptscript/ promptscript.yaml
-git add .github/copilot-instructions.md CLAUDE.md .cursorrules
+git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
+git commit -m "chore: migrate AI instructions to PromptScript"
+```
+
+This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers to generate outputs locally, use one consistent ignored-output workflow instead:
+
+```bash
+printf '%s\n' \
+  '.github/copilot-instructions.md' \
+  'CLAUDE.md' \
+  '.cursor/rules/project.mdc' >> .gitignore
+git rm --cached .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
+git add .gitignore .promptscript/ promptscript.yaml
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
 
@@ -770,15 +769,15 @@ If compiled output is missing content:
 
 ## AI-Assisted Migration
 
-For automated migration using AI assistants, PromptScript provides a dedicated skill that guides the AI through the migration process.
+For automated migration using AI assistants, PromptScript installs its bundled `promptscript` skill, which includes migration guidance.
 
-### Using the Migration Skill
+### Using the PromptScript Skill
 
 **Claude Code:**
 
 ```bash
-# Use the migrate skill
-/migrate
+# Use the PromptScript skill
+/promptscript
 
 # Or ask directly
 "migrate my existing instructions to PromptScript"
@@ -786,7 +785,7 @@ For automated migration using AI assistants, PromptScript provides a dedicated s
 
 **GitHub Copilot:**
 
-Reference the migrate skill in your prompt or use Chat with the migration context.
+Ask Chat to use the `promptscript` skill and migrate the existing instruction files.
 
 **Cursor:**
 

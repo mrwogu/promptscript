@@ -396,10 +396,9 @@ For enterprise environments, use a private Git registry:
 ```yaml
 # promptscript.yaml
 registry:
-  source:
-    type: git
+  git:
     url: git@github.com:your-org/private-stacks.git
-    branch: main
+    ref: main
 ```
 
 ### 5. Review CI/CD Pipeline Changes

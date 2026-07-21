@@ -155,6 +155,9 @@ workspace/
 ### project-a/promptscript.yaml
 
 ```yaml
+id: customer-dashboard
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -162,18 +165,12 @@ registry:
   path: ../registry
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 ### project-b/.promptscript/project.prs
@@ -228,6 +225,9 @@ validation:
 ### project-b/promptscript.yaml
 
 ```yaml
+id: admin-portal
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -235,12 +235,9 @@ registry:
   path: ../registry
 
 targets:
-  github:
-    enabled: true
-  claude:
-    enabled: true
-  cursor:
-    enabled: true
+  - github
+  - claude
+  - cursor
 ```
 
 ## Inheritance Visualization

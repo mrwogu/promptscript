@@ -312,6 +312,9 @@ The full content of each skill is injected into the subagent's context at startu
 Enable agents in your `promptscript.yaml`:
 
 ```yaml
+id: agents-example
+syntax: '1.4.0'
+
 targets:
   - github:
       version: full # Required for agents

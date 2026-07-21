@@ -47,15 +47,17 @@ Generated Files
 promptscript.yaml
 
 ```
-version: '1'
-
-input:
-  entry: .promptscript/project.prs
+id: my-app
+syntax: "1.4.0"
 
 targets:
   - github
   - claude
   - cursor
+
+validation:
+  rules:
+    empty-block: warning
 ```
 
 .promptscript/project.prs
@@ -141,7 +143,10 @@ Open `.promptscript/project.prs` and customize:
   "/refactor": {
     prompt: true
     description: "Suggest refactoring improvements"
-    content: "Analyze the code and suggest refactoring improvements for better maintainability."
+    content: """
+      Analyze the code and suggest refactoring improvements for better maintainability.
+      Preserve behavior and explain each recommended change.
+    """
   }
 }
 ```
@@ -191,7 +196,7 @@ Add reusable skills, specialist agents, tool integrations, and automation to the
 }
 ```
 
-PromptScript compiles each capability to the native representation supported by every configured target. See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) for feature details.
+PromptScript compiles each capability where the configured target supports it. See [Agent Platform](https://getpromptscript.dev/dev/features/index.md) and the [feature coverage matrix](https://getpromptscript.dev/dev/testing/feature-coverage/index.md) for target-specific support.
 
 ### 4. Compile to Native Formats
 
@@ -240,46 +245,49 @@ Terminal ↻ Replay
 
 ### 1. Start Migration
 
-Run the migration flow and choose static or AI-assisted import:
+Run deterministic static migration:
 
 ```bash
-prs migrate
+prs migrate --static
 ```
 
 This creates:
 
 - `promptscript.yaml` - Compiler configuration
-- `.promptscript/project.prs` - Empty project template
-- `.claude/skills/migrate-to-promptscript/SKILL.md` - Migration skill (if Claude target)
-- `.github/skills/migrate-to-promptscript/SKILL.md` - Migration skill (if GitHub target)
-- `.cursor/commands/migrate.md` - Migration command (if Cursor target)
-- `.agent/rules/migrate.md` - Migration rule (if Antigravity target)
+- `.promptscript/*.prs` - Deterministically imported instruction files
+- `.promptscript/project.prs` - Entry point that composes imported files
+- `.promptscript/skills/promptscript/SKILL.md` - Canonical PromptScript language skill
+- Native copies of the `promptscript` skill for targets that support skills
 
 Your existing AI instruction files remain untouched.
+
+For AI-assisted migration, generate a migration prompt and install the PromptScript skill:
+
+```bash
+prs migrate --llm
+```
 
 ### 2. Invoke the Migration Skill
 
 Use your AI assistant to migrate existing content. The migration skill analyzes your files and generates proper PromptScript.
 
 ```bash
-# Use the migrate skill
-/migrate
+# Use the PromptScript skill
+/promptscript
 
 # Or describe what you want
 "Migrate my existing CLAUDE.md to PromptScript"
 ```
 
 ```text
-@workspace /migrate
+@workspace Use the promptscript skill to migrate my existing instructions
 ```
 
 ```bash
-# Use the migrate command
-/migrate
+"Use the PromptScript skill to migrate my existing instructions"
 ```
 
 ```text
-# Ask to migrate using the installed rule
 "Migrate my existing AI instructions to PromptScript"
 ```
 
@@ -430,7 +438,8 @@ your-project/
 The `promptscript.yaml` file controls compilation:
 
 ```yaml
-version: '1'
+id: my-project
+syntax: "1.4.0"
 
 # Input settings
 input:
@@ -497,9 +506,11 @@ targets:
       version: frontmatter
 ```
 
-## Set Up Hooks (Optional)
+## Manage Hooks
 
-Once your targets are configured, install hooks so PromptScript compiles after supported AI tool edit events and prevents those tools from overwriting generated outputs. Use `prs compile --watch` for changes made in a general-purpose editor.
+`prs init` installs hooks for supported detected targets by default. Pass `--no-hooks` during initialization to skip them.
+
+Use the hook command to reinstall hooks, add hooks after initialization, or target one tool:
 
 ```bash
 prs hooks install
@@ -540,7 +551,7 @@ Browse real-world configuration examples for various use cases.
 
 # Tutorial: Building Enterprise AI Infrastructure
 
-In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt-you will build a **hierarchical context system** that scales.
+In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt - you will build a **hierarchical context system** that scales.
 
 ## Learning Objectives
 
@@ -578,11 +589,13 @@ Create `registry/@acme/org.prs`:
 }
 
 @standards {
-  code: [
-    "Follow clean code principles",
-    "Document all public APIs",
-    "Write tests for all code"
-  ]
+  code: {
+    principles: [
+      "Follow clean code principles",
+      "Document all public APIs",
+      "Write tests for all code"
+    ]
+  }
 
   security: [
     "Validate all user input",
@@ -723,6 +736,9 @@ Create `.promptscript/project.prs` in your project:
 Create `promptscript.yaml`:
 
 ```yaml
+id: checkout-app
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -730,20 +746,12 @@ registry:
   path: ./registry
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 ## Step 5: Add Agent Platform Capabilities
@@ -801,7 +809,7 @@ prs compile --dry-run
 Validate your configuration:
 
 ```bash
-prs validate
+prs validate --strict
 ```
 
 ## Understanding Inheritance
@@ -1148,6 +1156,9 @@ Agent-level MCP references only apply to targets whose native agent format suppo
 Native agent files normally require a target's richest output mode:
 
 ```yaml
+id: native-agents-project
+syntax: '1.4.0'
+
 targets:
   - github:
       version: full
@@ -1280,6 +1291,9 @@ Gemini full mode emits interoperable `.agents/skills/<name>/skill.md` files alon
 ## Filter Skills Per Target
 
 ```yaml
+id: filtered-skills-project
+syntax: '1.4.0'
+
 targets:
   - factory:
       version: full
@@ -1665,6 +1679,9 @@ Targets using platform-specific instruction paths with shared rendering:
 Simple configuration:
 
 ```yaml
+id: multi-target-project
+syntax: '1.4.0'
+
 targets:
   - github
   - claude
@@ -1676,6 +1693,9 @@ targets:
 Feature-rich configuration:
 
 ```yaml
+id: rich-target-project
+syntax: '1.4.0'
+
 targets:
   - github:
       version: full
@@ -3548,6 +3568,8 @@ prs migrate --static
 prs migrate --llm --files CLAUDE.md AGENTS.md
 ```
 
+`prs migrate` defaults to static migration. Use `--llm` to generate the AI-assisted migration prompt and install the bundled `promptscript` skill.
+
 ### prs upgrade
 
 Upgrade `.prs` files to the latest supported syntax version.
@@ -4473,6 +4495,9 @@ ______________________________________________________________________
 The CLI uses `promptscript.yaml` by default. Override with `--config`:
 
 ```yaml
+id: my-project
+syntax: '1.4.0'
+
 # Input settings
 input:
   entry: .promptscript/project.prs
@@ -4485,26 +4510,19 @@ registry:
 
 # Output targets
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-  antigravity:
-    enabled: true
-    output: .agent/rules/project.md
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
+  - antigravity:
+      output: .agent/rules/project.md
 
 # Validation settings
 validation:
-  strict: false
-  ignoreWarnings: []
+  rules:
+    empty-block: warning
 
 # Watch settings
 watch:
@@ -4858,6 +4876,9 @@ The CLI looks for configuration in this order:
 ## Full Configuration
 
 ```yaml
+id: full-example
+syntax: '1.4.0'
+
 # ===================
 # Input Configuration
 # ===================
@@ -4939,18 +4960,16 @@ builds:
 # Validation Configuration
 # =========================
 validation:
-  # Treat warnings as errors
-  strict: false
+  # Require named guards to be present
+  requiredGuards:
+    - security
 
-  # Warnings to ignore
-  ignoreWarnings:
-    - 'unused-shortcut'
+  # Maximum recursion depth for guard dependencies
+  guardRequiresDepth: 3
 
   # Custom rules
   rules:
-    require-syntax: error
-    require-identity: warning
-    max-shortcuts: 20
+    empty-block: warning
 
 # ====================
 # Watch Configuration
@@ -5019,6 +5038,32 @@ includePromptScriptSkill: true # default: true
 ```
 
 ## Configuration Sections
+
+### Top-level fields
+
+| Field                      | Type                    | Required | Description                                     |
+| -------------------------- | ----------------------- | -------- | ----------------------------------------------- |
+| `id`                       | string                  | Yes      | Project identifier                              |
+| `syntax`                   | string                  | Yes      | PromptScript syntax version                     |
+| `targets`                  | `TargetEntry[]`         | Yes      | Output targets and target-specific options      |
+| `description`              | string                  | No       | Project description                             |
+| `extends`                  | string                  | No       | Base configuration file to merge                |
+| `inherit`                  | string                  | No       | Registry configuration inherited by the project |
+| `input`                    | object                  | No       | Entry point and source file globs               |
+| `registry`                 | object                  | No       | Default local, HTTP, or Git registry            |
+| `registries`               | object                  | No       | Named Git registry aliases                      |
+| `watch`                    | object                  | No       | Watch mode behavior                             |
+| `output`                   | object                  | No       | Global output directory, header, and overwrite  |
+| `builds`                   | object                  | No       | Named build profiles                            |
+| `skillTargets`             | `Record<string,string>` | No       | Per-source skill output directories             |
+| `formatting`               | object                  | No       | Markdown formatting settings                    |
+| `customConventions`        | object                  | No       | User-defined output conventions                 |
+| `universalDir`             | string or boolean       | No       | Universal skills and commands directory         |
+| `includePromptScriptSkill` | boolean                 | No       | Include the bundled language skill              |
+| `validation`               | object                  | No       | Guard and validation rule settings              |
+| `policies`                 | array                   | No       | Extension compliance policies                   |
+
+`id`, `syntax`, and `targets` are required even when `input.entry` uses its default. See the [Policy Engine guide](https://getpromptscript.dev/dev/guides/policy-engine/index.md) for `policies` syntax.
 
 ### input
 
@@ -5124,20 +5169,15 @@ registries:
   '@shared': gitlab.com/acme/shared-libs
 ```
 
-#### Extended Form (with auth)
+#### Extended Form
 
 ```yaml
 registries:
   '@company':
     url: github.com/acme/promptscript-base
-    auth:
-      type: token
-      tokenEnvVar: GITHUB_TOKEN
   '@internal':
     url: git@gitlab.internal.acme.com:platform/prs-registry
-    auth:
-      type: ssh
-      sshKeyPath: *****************
+    root: packages/promptscript
 ```
 
 #### Extended Form (with fallback URL)
@@ -5157,15 +5197,12 @@ registries:
 
 **Alias Fields:**
 
-| Field              | Type   | Description                                    |
-| ------------------ | ------ | ---------------------------------------------- |
-| (simple string)    | string | Bare Git host path, e.g. `github.com/org/repo` |
-| `url`              | string | Bare Git host path (extended form)             |
-| `fallbackUrl`      | string | Fallback Git URL (tried on auth failure)       |
-| `root`             | string | Base path within the repository                |
-| `auth.type`        | string | `token` or `ssh`                               |
-| `auth.tokenEnvVar` | string | Env var containing a personal access token     |
-| `auth.sshKeyPath`  | string | Path to SSH private key                        |
+| Field           | Type   | Description                                    |
+| --------------- | ------ | ---------------------------------------------- |
+| (simple string) | string | Bare Git host path, e.g. `github.com/org/repo` |
+| `url`           | string | Bare Git host path (extended form)             |
+| `fallbackUrl`   | string | Fallback Git URL (tried on auth failure)       |
+| `root`          | string | Base path within the repository                |
 
 #### Three-Level Merge
 
@@ -5183,17 +5220,21 @@ Project aliases override user aliases, which override system aliases. This allow
 
 ```yaml
 # ~/.promptscript/config.yaml
+version: '1'
+
 registries:
   '@company': github.com/acme/promptscript-base
   '@shared': github.com/acme/shared-libs
 
-auth:
-  github.com:
-    type: token
-    tokenEnvVar: GITHUB_TOKEN
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 ```
 
-Setting aliases in user config makes them available in every project on the machine without adding them to individual `promptscript.yaml` files.
+Setting aliases in user config makes them available in every project on the machine without adding them to individual `promptscript.yaml` files. Alias entries do not contain credentials. Use `registry.git.auth`, SSH configuration, or the Git credential helper for authentication.
 
 #### Usage in .prs Files
 
@@ -5546,23 +5587,25 @@ Agent field mapping (PRS -> Codex TOML):
 Define custom output conventions for specialized formatting needs.
 
 ```yaml
+id: custom-convention-example
+syntax: '1.4.0'
+
 customConventions:
   my-format:
     name: my-format
+    description: Custom Markdown headings and fenced code
     section:
-      prefix: '### '
-      suffix: ''
-      contentPrefix: "\n"
-      contentSuffix: "\n\n"
-    list:
-      itemPrefix: '→ '
-      itemSuffix: ''
-      listPrefix: ''
-      listSuffix: "\n"
-    codeBlock:
-      prefix: '~~~'
-      suffix: '~~~'
-      languageSupport: true
+      start: '### {{name}}'
+      end: ''
+      nameTransform: none
+      indent: ''
+    subsection:
+      start: '#### {{name}}'
+      end: ''
+      nameTransform: none
+      indent: ''
+    listStyle: bullet
+    codeBlockDelimiter: '~~~'
 
 # Use custom convention in target
 targets:
@@ -5572,20 +5615,18 @@ targets:
 
 **Custom Convention Structure:**
 
-| Field                       | Type    | Description                            |
-| --------------------------- | ------- | -------------------------------------- |
-| `name`                      | string  | Convention identifier                  |
-| `section.prefix`            | string  | Text before section name               |
-| `section.suffix`            | string  | Text after section name                |
-| `section.contentPrefix`     | string  | Text before section content            |
-| `section.contentSuffix`     | string  | Text after section content             |
-| `list.itemPrefix`           | string  | Text before each list item             |
-| `list.itemSuffix`           | string  | Text after each list item              |
-| `list.listPrefix`           | string  | Text before the list                   |
-| `list.listSuffix`           | string  | Text after the list                    |
-| `codeBlock.prefix`          | string  | Code block start marker                |
-| `codeBlock.suffix`          | string  | Code block end marker                  |
-| `codeBlock.languageSupport` | boolean | Whether to include language identifier |
+| Field                   | Type   | Description                                        |
+| ----------------------- | ------ | -------------------------------------------------- |
+| `name`                  | string | Convention identifier                              |
+| `description`           | string | Human-readable purpose                             |
+| `section.start`         | string | Section opening template, supports `{{name}}`      |
+| `section.end`           | string | Optional section closing template                  |
+| `section.nameTransform` | string | `kebab-case`, `camelCase`, `PascalCase`, or `none` |
+| `section.indent`        | string | Indentation per nesting level                      |
+| `subsection`            | object | Optional subsection renderer                       |
+| `listStyle`             | string | `dash`, `asterisk`, `bullet`, or `numbered`        |
+| `codeBlockDelimiter`    | string | Code fence delimiter                               |
+| `rootWrapper`           | object | Optional `start` and `end` templates               |
 
 ### builds
 
@@ -5651,18 +5692,18 @@ Configures validation behavior.
 
 ```yaml
 validation:
-  strict: false
-  ignoreWarnings:
-    - 'unused-shortcut'
+  requiredGuards:
+    - security
+  guardRequiresDepth: 3
   rules:
-    require-syntax: error
+    empty-block: warning
 ```
 
-| Field            | Type     | Default | Description             |
-| ---------------- | -------- | ------- | ----------------------- |
-| `strict`         | boolean  | `false` | Warnings as errors      |
-| `ignoreWarnings` | string[] | `[]`    | Warning codes to ignore |
-| `rules`          | object   | `{}`    | Rule severity overrides |
+| Field                | Type     | Default | Description                               |
+| -------------------- | -------- | ------- | ----------------------------------------- |
+| `requiredGuards`     | string[] | `[]`    | Guards every resolved project must define |
+| `rules`              | object   | `{}`    | Rule severity overrides                   |
+| `guardRequiresDepth` | number   | `3`     | Maximum guard dependency recursion depth  |
 
 ### watch
 
@@ -5791,13 +5832,17 @@ includePromptScriptSkill: false
 Configuration values can reference environment variables:
 
 ```yaml
+id: environment-example
+syntax: '1.4.0'
+
 registry:
   auth:
+    type: bearer
     token: ${REGISTRY_TOKEN}
 
 targets:
-  github:
-    output: ${OUTPUT_DIR:-.github}/copilot-instructions.md
+  - github:
+      output: ${OUTPUT_DIR:-.github}/copilot-instructions.md
 ```
 
 | Syntax            | Description           |
@@ -5810,6 +5855,9 @@ targets:
 The simplest valid configuration:
 
 ```yaml
+id: minimal-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -5822,11 +5870,13 @@ targets:
 You can extend another configuration file:
 
 ```yaml
+id: extended-project
+syntax: '1.4.0'
 extends: ./base.config.yaml
 
 targets:
-  github:
-    output: custom/path.md
+  - github:
+      output: custom/path.md
 ```
 
 Extended configurations are deep-merged.
@@ -5838,8 +5888,12 @@ The configuration file is validated against a JSON schema. Enable editor support
 ```yaml
 # yaml-language-server: $schema=https://getpromptscript.dev/latest/schema/config.json
 
+id: schema-example
+syntax: '1.4.0'
 input:
   entry: .promptscript/project.prs
+targets:
+  - github
 ```
 
 This provides:
@@ -5861,6 +5915,9 @@ Schema URL: [`schema/config.json`](https://getpromptscript.dev/latest/schema/con
 ### Minimal Project
 
 ```yaml
+id: minimal-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -5871,6 +5928,9 @@ targets:
 ### Multi-Team Setup
 
 ```yaml
+id: multi-team-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/${TEAM}/project.prs
 
@@ -5887,6 +5947,9 @@ targets:
 ### CI/CD Configuration
 
 ```yaml
+id: ci-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -5900,9 +5963,6 @@ registry:
   cache:
     enabled: true
     ttl: 3600000
-
-validation:
-  strict: true
 
 targets:
   - github
@@ -8019,11 +8079,8 @@ my-project/
 ### Configuration (promptscript.yaml)
 
 ```yaml
-version: '1'
-
-project:
-  id: my-project
-  team: platform
+id: my-project
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs
@@ -8789,20 +8846,21 @@ The `tokenEnvVar` field names the environment variable that holds the token - it
 
 ### User-Level Token Configuration
 
-Set up credentials once in `~/.promptscript/config.yaml` and they apply to all projects:
+Set up credentials for the default Git registry in `~/.promptscript/config.yaml`:
 
 ```yaml
 # ~/.promptscript/config.yaml
+version: '1'
+
 registries:
   '@company': github.com/acme/promptscript-base
 
-auth:
-  github.com:
-    type: token
-    tokenEnvVar: GITHUB_TOKEN
-  gitlab.com:
-    type: token
-    tokenEnvVar: GITLAB_TOKEN
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 ```
 
 ### CI Configuration
@@ -9375,10 +9433,9 @@ For enterprise environments, use a private Git registry:
 ```yaml
 # promptscript.yaml
 registry:
-  source:
-    type: git
+  git:
     url: git@github.com:your-org/private-stacks.git
-    branch: main
+    ref: main
 ```
 
 ### 5. Review CI/CD Pipeline Changes
@@ -10281,8 +10338,8 @@ npx husky init
 # Only run if .prs files are staged
 if git diff --cached --name-only | grep -qE '\.prs$|promptscript\.yaml$'; then
   echo "🔍 Validating PromptScript files..."
-  npx prs validate --strict
-  npx prs compile
+  npx --package=@promptscript/cli prs validate --strict
+  npx --package=@promptscript/cli prs compile
 
   # Check if compile changed any files
   if ! git diff --quiet; then
@@ -10303,14 +10360,14 @@ repos:
     hooks:
       - id: promptscript-validate
         name: Validate PromptScript
-        entry: npx prs validate --strict
+        entry: npx --package=@promptscript/cli prs validate --strict
         language: system
         files: '\.prs$|promptscript\.yaml$'
         pass_filenames: false
 
       - id: promptscript-compile
         name: Compile PromptScript
-        entry: bash -c 'npx prs compile && git diff --exit-code'
+        entry: bash -c 'npx --package=@promptscript/cli prs compile && git diff --exit-code'
         language: system
         files: '\.prs$|promptscript\.yaml$'
         pass_filenames: false
@@ -10835,6 +10892,9 @@ promptscript-registry/
 
 ```yaml
 # promptscript.yaml
+id: enterprise-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -10850,18 +10910,12 @@ registry:
     ttl: 3600000
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 Version Pinning with Git Tags
@@ -11063,10 +11117,11 @@ PromptScript supports the following Node.js versions:
 
 | Node.js Version | Support Status |
 | --------------- | -------------- |
+| 20.x            | Full support   |
 | 22.x (LTS)      | Full support   |
 | 24.x            | Full support   |
 | 25.x (Current)  | Full support   |
-| < 22            | Not supported  |
+| < 20            | Not supported  |
 
 We follow Node.js's [release schedule](https://nodejs.org/en/about/releases/) and support active LTS and current versions.
 
@@ -11121,18 +11176,22 @@ Security vulnerabilities are handled according to our [Security Policy](https://
 IT or platform teams can provision organization-wide registry aliases before developers touch the tool. Place a config file at `/etc/promptscript/config.yaml` on all developer machines (via MDM, Ansible, or similar provisioning):
 
 ```yaml
-# /etc/promptscript/config.yaml  — provisioned by IT
+# /etc/promptscript/config.yaml - provisioned by IT
+version: '1'
+
 registries:
   '@company': github.com/acme/promptscript-base
   '@security': github.com/acme/security-standards
 
-auth:
-  github.com:
-    type: token
-    tokenEnvVar: GITHUB_TOKEN
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 ```
 
-Developers run `prs init` and the `@company` alias resolves automatically — no manual configuration required.
+Developers run `prs init` and the `@company` alias resolves automatically - no manual configuration required.
 
 ### Three-Level Config Precedence
 
@@ -11155,12 +11214,9 @@ For enterprises using GitHub Enterprise Server, GitLab Self-Managed, or Azure De
 registries:
   '@company':
     url: github.your-company.com/acme/promptscript-base
-    auth:
-      type: token
-      tokenEnvVar: GHE_TOKEN
 ```
 
-For SSO-gated repositories, use a service account PAT or a deploy key stored in your secrets manager (Vault, AWS Secrets Manager, etc.) and surfaced as an environment variable.
+Registry aliases do not carry credentials. For SSO-gated repositories, configure authentication under `registry.git.auth` for the default registry, or expose the host credential through the Git credential helper. Store service account tokens or deploy keys in a secrets manager.
 
 ### Vendor Mode for Air-Gapped Environments
 
@@ -11584,22 +11640,19 @@ You are a senior developer working on the checkout service.
 
 ```yaml
 # promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 ### Compile and Compare
@@ -11620,21 +11673,23 @@ prs validate
 
 ## Step 6: Update Git
 
-### Remove Old Files from Source Control
-
-```bash
-# Keep generated files, but don't edit manually
-git rm --cached .github/copilot-instructions.md CLAUDE.md .cursorrules
-
-# Add to .gitignore if you want (optional)
-# Or keep them tracked but generated
-```
-
-### Commit Migration
+### Keep Generated Files Tracked
 
 ```bash
 git add .promptscript/ promptscript.yaml
-git add .github/copilot-instructions.md CLAUDE.md .cursorrules
+git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
+git commit -m "chore: migrate AI instructions to PromptScript"
+```
+
+This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers to generate outputs locally, use one consistent ignored-output workflow instead:
+
+```bash
+printf '%s\n' \
+  '.github/copilot-instructions.md' \
+  'CLAUDE.md' \
+  '.cursor/rules/project.mdc' >> .gitignore
+git rm --cached .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
+git add .gitignore .promptscript/ promptscript.yaml
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
 
@@ -12002,15 +12057,15 @@ If compiled output is missing content:
 
 ## AI-Assisted Migration
 
-For automated migration using AI assistants, PromptScript provides a dedicated skill that guides the AI through the migration process.
+For automated migration using AI assistants, PromptScript installs its bundled `promptscript` skill, which includes migration guidance.
 
-### Using the Migration Skill
+### Using the PromptScript Skill
 
 **Claude Code:**
 
 ```bash
-# Use the migrate skill
-/migrate
+# Use the PromptScript skill
+/promptscript
 
 # Or ask directly
 "migrate my existing instructions to PromptScript"
@@ -12018,7 +12073,7 @@ For automated migration using AI assistants, PromptScript provides a dedicated s
 
 **GitHub Copilot:**
 
-Reference the migrate skill in your prompt or use Chat with the migration context.
+Ask Chat to use the `promptscript` skill and migrate the existing instruction files.
 
 **Cursor:**
 
@@ -12051,7 +12106,7 @@ PromptScript hooks integrate directly with supported AI coding tool event system
 There are two complementary behaviours:
 
 - **Auto-compilation** - when the AI tool writes a `.prs` file, `post-edit` runs `prs compile`.
-- **Output protection** — when an AI agent tries to edit a generated file directly, `pre-edit` blocks the write and explains that the file is managed by PromptScript.
+- **Output protection** - when an AI agent tries to edit a generated file directly, `pre-edit` blocks the write and explains that the file is managed by PromptScript.
 
 ```
 flowchart LR
@@ -12138,7 +12193,8 @@ sequenceDiagram
     Hook->>Hook: check extension (.prs only)
     Hook->>Compiler: prs compile
     Compiler-->>Hook: stdout/stderr
-    Hook-->>Agent: exit 0 (always)
+    Hook-->>Agent: exit 0 on success or irrelevant file
+    Hook-->>Agent: exit 1 on invalid input or compile failure
 ```
 
 ## Generated Configuration
@@ -12153,11 +12209,7 @@ For AI tools that do not support hooks, run `prs compile --watch` in a terminal 
 prs compile --watch
 ```
 
-This does not provide the output-protection behaviour of `pre-edit`. To protect generated files without hooks, consider making them read-only:
-
-```bash
-chmod 444 CLAUDE.md .cursor/rules/project.mdc
-```
+This does not provide the output-protection behaviour of `pre-edit`. Keep generated files writable so watch mode can replace them, and rely on generation markers plus code review to prevent manual edits.
 
 See [`prs compile`](https://getpromptscript.dev/dev/reference/cli/#prs-compile) for full watch options.
 
@@ -12180,22 +12232,16 @@ Then update the hook command to e.g. `/usr/local/bin/prs hook pre-edit`.
 Alternatively, use `npx`:
 
 ```bash
-npx prs hook pre-edit
+npx --package=@promptscript/cli prs hook pre-edit
 ```
 
 ### Generated file is still editable
 
 Check that the compiler is writing the marker. Run `prs compile` and inspect the first line of a generated output. If the marker is absent, ensure you are on version 1.5+ of the CLI.
 
-### Stale lock file
+### Hook compilation is temporarily skipped
 
-If compilation fails with a lock error after the hook fires:
-
-```bash
-prs lock
-```
-
-This regenerates the lockfile from the current imports. See [`prs lock`](https://getpromptscript.dev/dev/reference/cli/#prs-lock) for details.
+Hook-triggered compilation uses a short-lived mutex under `/tmp` to prevent overlapping runs. A stale mutex expires automatically after 30 seconds. The `prs lock` command manages registry dependency resolution and does not clear this hook mutex.
 
 ### Uninstalling hooks
 
@@ -12216,6 +12262,12 @@ The `prs import` command converts existing AI instruction files into PromptScrip
 | GitHub Copilot   | `.github/copilot-instructions.md`  |
 | Cursor           | `.cursorrules`, `.cursor/rules.md` |
 | Generic Markdown | Any `.md` file                     |
+
+Modern Cursor `.cursor/rules/*.mdc` files are not auto-detected. Import one with `--format cursor`, then manually map its frontmatter globs to named `@guards` entries:
+
+```bash
+prs import .cursor/rules/project.mdc --format cursor
+```
 
 ## Quick Start
 
@@ -12662,13 +12714,15 @@ my-project/
 ### promptscript.yaml
 
 ```yaml
+id: minimal-example
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
+  - github:
+      output: .github/copilot-instructions.md
 ```
 
 ## Usage
@@ -12783,21 +12837,19 @@ To also generate for Claude and Cursor:
 
 ```yaml
 # promptscript.yaml
+id: minimal-example
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 Then:
@@ -12969,6 +13021,9 @@ workspace/
 ### project-a/promptscript.yaml
 
 ```yaml
+id: customer-dashboard
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -12976,18 +13031,12 @@ registry:
   path: ../registry
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 ### project-b/.promptscript/project.prs
@@ -13042,6 +13091,9 @@ validation:
 ### project-b/promptscript.yaml
 
 ```yaml
+id: admin-portal
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -13049,12 +13101,9 @@ registry:
   path: ../registry
 
 targets:
-  github:
-    enabled: true
-  claude:
-    enabled: true
-  cursor:
-    enabled: true
+  - github
+  - claude
+  - cursor
 ```
 
 ## Inheritance Visualization
@@ -13688,27 +13737,28 @@ acme-promptscript-registry/
 
 ```yaml
 # checkout-app/promptscript.yaml
+id: checkout-app
+syntax: '1.4.0'
+
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 registry:
-  url: https://github.com/acme/promptscript-registry
-  auth:
-    token: ${GITHUB_TOKEN}
+  git:
+    url: https://github.com/acme/promptscript-registry.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 
 validation:
-  strict: true
   rules:
     require-knowledge: warning
 
@@ -14173,7 +14223,8 @@ my-project/
 
 ```yaml
 # promptscript.yaml
-version: '1'
+id: skills-and-local
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs
@@ -14629,6 +14680,9 @@ The full content of each skill is injected into the subagent's context at startu
 Enable agents in your `promptscript.yaml`:
 
 ```yaml
+id: agents-example
+syntax: '1.4.0'
+
 targets:
   - github:
       version: full # Required for agents
@@ -14726,7 +14780,7 @@ See the [CI/CD guide](https://getpromptscript.dev/dev/guides/ci/index.md).
 
 ## Common Errors
 
-### `PS1001: File not found`
+### `PS2001: File not found`
 
 The `@inherit` or `@use` target cannot be resolved. Check:
 
@@ -14734,13 +14788,13 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 - The registry is configured if using `@scope/package` syntax
 - Run `prs registry list` to verify configured registries
 
-### `PS2001: Unknown directive`
+### `PS1001: Unexpected token`
 
-You used a directive that PromptScript doesn't recognize. Check the [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md) for valid directives.
+The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the reported location and compare it with the [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md).
 
-### `PS3001: Validation error`
+### `PS3001: Required field`
 
-A validation rule failed. The error message includes details on what's wrong and how to fix it. Run with `--verbose` for more context.
+A required field is missing. The error message identifies the block and field to add. Other validation failures use `PS3000` or a more specific `PS300x` code.
 
 ### Compiled output doesn't match expected format
 
@@ -14826,26 +14880,26 @@ GEMINI.md
 ... all configured targets
 ```
 
-| Benefit                      | How                                      |
-| ---------------------------- | ---------------------------------------- |
-| **Single source of truth**   | One `.prs` file, up to 48 target outputs |
-| **Compile-time validation**  | Errors caught before deployment          |
-| **Hierarchical inheritance** | Org → Team → Project                     |
-| **Full audit trail**         | Git history on `.prs` files              |
-| **Automated updates**        | Change registry, all repos update        |
-| **Tool-agnostic**            | Switch tools without rewriting           |
+| Benefit                      | How                                                               |
+| ---------------------------- | ----------------------------------------------------------------- |
+| **Single source of truth**   | One `.prs` file, up to 48 target outputs                          |
+| **Compile-time validation**  | Errors caught before deployment                                   |
+| **Hierarchical inheritance** | Org → Team → Project                                              |
+| **Full audit trail**         | Git history on `.prs` files                                       |
+| **Controlled updates**       | Change registry, then run `prs update` and recompile in each repo |
+| **Tool-agnostic**            | Switch tools without rewriting                                    |
 
 ## Side-by-Side Comparison
 
-| Aspect          | Manual                | PromptScript         |
-| --------------- | --------------------- | -------------------- |
-| Files per repo  | 5-48                  | 1                    |
-| Update a policy | 100+ PRs              | 1 registry update    |
-| Add new tool    | Write new file format | `prs compile`        |
-| Validation      | None                  | Compile-time + CI/CD |
-| Inheritance     | Copy-paste            | `@inherit` / `@use`  |
-| Consistency     | Hope for the best     | Guaranteed           |
-| Onboarding time | Hours per tool        | Minutes              |
+| Aspect          | Manual                | PromptScript                                  |
+| --------------- | --------------------- | --------------------------------------------- |
+| Files per repo  | 5-48                  | 2 source files plus generated outputs         |
+| Update a policy | 100+ manual edits     | Registry update, dependency update, recompile |
+| Add new tool    | Write new file format | `prs compile`                                 |
+| Validation      | None                  | Compile-time + CI/CD                          |
+| Inheritance     | Copy-paste            | `@inherit` / `@use`                           |
+| Consistency     | Hope for the best     | Validated in CI                               |
+| Onboarding time | Hours per tool        | Minutes                                       |
 
 ## Getting Started
 
@@ -15196,7 +15250,7 @@ This document describes the Feature Coverage Matrix and testing mechanism for Pr
 
 The Feature Coverage Matrix is a specification that tracks:
 
-1. **Tool Capabilities** - What features each AI tool (GitHub Copilot, Cursor, Claude, Antigravity) supports
+1. **Tool Capabilities** - What features each classified AI target supports
 1. **Formatter Implementation** - Which features our formatters implement
 1. **Coverage Gaps** - Features supported by tools but not yet implemented
 
@@ -15224,7 +15278,7 @@ interface FeatureSpec {
   name: string; // Human-readable name
   description: string; // Feature description
   category: FeatureCategory; // Grouping category
-  tools: Record<ToolName, FeatureStatus>; // Support per tool
+  tools: Partial<Record<ToolName, FeatureStatus>>; // Support for classified tools
   testStrategy?: string; // How to test
   docsUrl?: Record<ToolName, string>; // Documentation links
 }
@@ -15235,6 +15289,8 @@ type FeatureStatus =
   | 'planned' // Tool supports, not yet implemented
   | 'partial'; // Partially implemented
 ```
+
+The target catalog contains 48 formatters. The matrix currently classifies 37 of them. A missing entry means the target has not been classified for that feature, not that the feature is unsupported. The formatter registry and generated [platform matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) remain the source of truth for target availability.
 
 ### Categories
 
@@ -15276,12 +15332,12 @@ import { getFeatureCoverage } from '@promptscript/formatters';
 const coverage = getFeatureCoverage('cursor');
 // {
 //   tool: 'cursor',
-//   supported: 15,
-//   partial: 1,
-//   planned: 0,
-//   notSupported: 4,
-//   total: 20,
-//   coveragePercent: 78
+//   supported: 20,
+//   partial: 3,
+//   planned: 2,
+//   notSupported: 5,
+//   total: 30,
+//   coveragePercent: 72
 // }
 ```
 

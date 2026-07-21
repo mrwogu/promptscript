@@ -54,13 +54,15 @@ my-project/
 ### promptscript.yaml
 
 ```yaml
+id: minimal-example
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
+  - github:
+      output: .github/copilot-instructions.md
 ```
 
 ## Usage
@@ -175,21 +177,19 @@ To also generate for Claude and Cursor:
 
 ```yaml
 # promptscript.yaml
+id: minimal-example
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 Then:

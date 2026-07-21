@@ -11,6 +11,12 @@ The `prs import` command converts existing AI instruction files into PromptScrip
 | Cursor           | `.cursorrules`, `.cursor/rules.md` |
 | Generic Markdown | Any `.md` file                     |
 
+Modern Cursor `.cursor/rules/*.mdc` files are not auto-detected. Import one with `--format cursor`, then manually map its frontmatter globs to named `@guards` entries:
+
+```bash
+prs import .cursor/rules/project.mdc --format cursor
+```
+
 ## Quick Start
 
 ```bash

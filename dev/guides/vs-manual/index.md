@@ -64,26 +64,26 @@ GEMINI.md
 ... all configured targets
 ```
 
-| Benefit                      | How                                      |
-| ---------------------------- | ---------------------------------------- |
-| **Single source of truth**   | One `.prs` file, up to 48 target outputs |
-| **Compile-time validation**  | Errors caught before deployment          |
-| **Hierarchical inheritance** | Org → Team → Project                     |
-| **Full audit trail**         | Git history on `.prs` files              |
-| **Automated updates**        | Change registry, all repos update        |
-| **Tool-agnostic**            | Switch tools without rewriting           |
+| Benefit                      | How                                                               |
+| ---------------------------- | ----------------------------------------------------------------- |
+| **Single source of truth**   | One `.prs` file, up to 48 target outputs                          |
+| **Compile-time validation**  | Errors caught before deployment                                   |
+| **Hierarchical inheritance** | Org → Team → Project                                              |
+| **Full audit trail**         | Git history on `.prs` files                                       |
+| **Controlled updates**       | Change registry, then run `prs update` and recompile in each repo |
+| **Tool-agnostic**            | Switch tools without rewriting                                    |
 
 ## Side-by-Side Comparison
 
-| Aspect          | Manual                | PromptScript         |
-| --------------- | --------------------- | -------------------- |
-| Files per repo  | 5-48                  | 1                    |
-| Update a policy | 100+ PRs              | 1 registry update    |
-| Add new tool    | Write new file format | `prs compile`        |
-| Validation      | None                  | Compile-time + CI/CD |
-| Inheritance     | Copy-paste            | `@inherit` / `@use`  |
-| Consistency     | Hope for the best     | Guaranteed           |
-| Onboarding time | Hours per tool        | Minutes              |
+| Aspect          | Manual                | PromptScript                                  |
+| --------------- | --------------------- | --------------------------------------------- |
+| Files per repo  | 5-48                  | 2 source files plus generated outputs         |
+| Update a policy | 100+ manual edits     | Registry update, dependency update, recompile |
+| Add new tool    | Write new file format | `prs compile`                                 |
+| Validation      | None                  | Compile-time + CI/CD                          |
+| Inheritance     | Copy-paste            | `@inherit` / `@use`                           |
+| Consistency     | Hope for the best     | Validated in CI                               |
+| Onboarding time | Hours per tool        | Minutes                                       |
 
 ## Getting Started
 

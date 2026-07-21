@@ -371,6 +371,9 @@ promptscript-registry/
 
 ```yaml
 # promptscript.yaml
+id: enterprise-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -386,18 +389,12 @@ registry:
     ttl: 3600000
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 Version Pinning with Git Tags
@@ -599,10 +596,11 @@ PromptScript supports the following Node.js versions:
 
 | Node.js Version | Support Status |
 | --------------- | -------------- |
+| 20.x            | Full support   |
 | 22.x (LTS)      | Full support   |
 | 24.x            | Full support   |
 | 25.x (Current)  | Full support   |
-| < 22            | Not supported  |
+| < 20            | Not supported  |
 
 We follow Node.js's [release schedule](https://nodejs.org/en/about/releases/) and support active LTS and current versions.
 
@@ -657,18 +655,22 @@ Security vulnerabilities are handled according to our [Security Policy](https://
 IT or platform teams can provision organization-wide registry aliases before developers touch the tool. Place a config file at `/etc/promptscript/config.yaml` on all developer machines (via MDM, Ansible, or similar provisioning):
 
 ```yaml
-# /etc/promptscript/config.yaml  — provisioned by IT
+# /etc/promptscript/config.yaml - provisioned by IT
+version: '1'
+
 registries:
   '@company': github.com/acme/promptscript-base
   '@security': github.com/acme/security-standards
 
-auth:
-  github.com:
-    type: token
-    tokenEnvVar: GITHUB_TOKEN
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 ```
 
-Developers run `prs init` and the `@company` alias resolves automatically — no manual configuration required.
+Developers run `prs init` and the `@company` alias resolves automatically - no manual configuration required.
 
 ### Three-Level Config Precedence
 
@@ -691,12 +693,9 @@ For enterprises using GitHub Enterprise Server, GitLab Self-Managed, or Azure De
 registries:
   '@company':
     url: github.your-company.com/acme/promptscript-base
-    auth:
-      type: token
-      tokenEnvVar: GHE_TOKEN
 ```
 
-For SSO-gated repositories, use a service account PAT or a deploy key stored in your secrets manager (Vault, AWS Secrets Manager, etc.) and surfaced as an environment variable.
+Registry aliases do not carry credentials. For SSO-gated repositories, configure authentication under `registry.git.auth` for the default registry, or expose the host credential through the Git credential helper. Store service account tokens or deploy keys in a secrets manager.
 
 ### Vendor Mode for Air-Gapped Environments
 

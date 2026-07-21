@@ -703,20 +703,21 @@ The `tokenEnvVar` field names the environment variable that holds the token - it
 
 ### User-Level Token Configuration
 
-Set up credentials once in `~/.promptscript/config.yaml` and they apply to all projects:
+Set up credentials for the default Git registry in `~/.promptscript/config.yaml`:
 
 ```yaml
 # ~/.promptscript/config.yaml
+version: '1'
+
 registries:
   '@company': github.com/acme/promptscript-base
 
-auth:
-  github.com:
-    type: token
-    tokenEnvVar: GITHUB_TOKEN
-  gitlab.com:
-    type: token
-    tokenEnvVar: GITLAB_TOKEN
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 ```
 
 ### CI Configuration

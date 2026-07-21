@@ -16,6 +16,9 @@ The CLI looks for configuration in this order:
 ## Full Configuration
 
 ```yaml
+id: full-example
+syntax: '1.4.0'
+
 # ===================
 # Input Configuration
 # ===================
@@ -97,18 +100,16 @@ builds:
 # Validation Configuration
 # =========================
 validation:
-  # Treat warnings as errors
-  strict: false
+  # Require named guards to be present
+  requiredGuards:
+    - security
 
-  # Warnings to ignore
-  ignoreWarnings:
-    - 'unused-shortcut'
+  # Maximum recursion depth for guard dependencies
+  guardRequiresDepth: 3
 
   # Custom rules
   rules:
-    require-syntax: error
-    require-identity: warning
-    max-shortcuts: 20
+    empty-block: warning
 
 # ====================
 # Watch Configuration
@@ -177,6 +178,32 @@ includePromptScriptSkill: true # default: true
 ```
 
 ## Configuration Sections
+
+### Top-level fields
+
+| Field                      | Type                    | Required | Description                                     |
+| -------------------------- | ----------------------- | -------- | ----------------------------------------------- |
+| `id`                       | string                  | Yes      | Project identifier                              |
+| `syntax`                   | string                  | Yes      | PromptScript syntax version                     |
+| `targets`                  | `TargetEntry[]`         | Yes      | Output targets and target-specific options      |
+| `description`              | string                  | No       | Project description                             |
+| `extends`                  | string                  | No       | Base configuration file to merge                |
+| `inherit`                  | string                  | No       | Registry configuration inherited by the project |
+| `input`                    | object                  | No       | Entry point and source file globs               |
+| `registry`                 | object                  | No       | Default local, HTTP, or Git registry            |
+| `registries`               | object                  | No       | Named Git registry aliases                      |
+| `watch`                    | object                  | No       | Watch mode behavior                             |
+| `output`                   | object                  | No       | Global output directory, header, and overwrite  |
+| `builds`                   | object                  | No       | Named build profiles                            |
+| `skillTargets`             | `Record<string,string>` | No       | Per-source skill output directories             |
+| `formatting`               | object                  | No       | Markdown formatting settings                    |
+| `customConventions`        | object                  | No       | User-defined output conventions                 |
+| `universalDir`             | string or boolean       | No       | Universal skills and commands directory         |
+| `includePromptScriptSkill` | boolean                 | No       | Include the bundled language skill              |
+| `validation`               | object                  | No       | Guard and validation rule settings              |
+| `policies`                 | array                   | No       | Extension compliance policies                   |
+
+`id`, `syntax`, and `targets` are required even when `input.entry` uses its default. See the [Policy Engine guide](https://getpromptscript.dev/dev/guides/policy-engine/index.md) for `policies` syntax.
 
 ### input
 
@@ -282,20 +309,15 @@ registries:
   '@shared': gitlab.com/acme/shared-libs
 ```
 
-#### Extended Form (with auth)
+#### Extended Form
 
 ```yaml
 registries:
   '@company':
     url: github.com/acme/promptscript-base
-    auth:
-      type: token
-      tokenEnvVar: GITHUB_TOKEN
   '@internal':
     url: git@gitlab.internal.acme.com:platform/prs-registry
-    auth:
-      type: ssh
-      sshKeyPath: *****************
+    root: packages/promptscript
 ```
 
 #### Extended Form (with fallback URL)
@@ -315,15 +337,12 @@ registries:
 
 **Alias Fields:**
 
-| Field              | Type   | Description                                    |
-| ------------------ | ------ | ---------------------------------------------- |
-| (simple string)    | string | Bare Git host path, e.g. `github.com/org/repo` |
-| `url`              | string | Bare Git host path (extended form)             |
-| `fallbackUrl`      | string | Fallback Git URL (tried on auth failure)       |
-| `root`             | string | Base path within the repository                |
-| `auth.type`        | string | `token` or `ssh`                               |
-| `auth.tokenEnvVar` | string | Env var containing a personal access token     |
-| `auth.sshKeyPath`  | string | Path to SSH private key                        |
+| Field           | Type   | Description                                    |
+| --------------- | ------ | ---------------------------------------------- |
+| (simple string) | string | Bare Git host path, e.g. `github.com/org/repo` |
+| `url`           | string | Bare Git host path (extended form)             |
+| `fallbackUrl`   | string | Fallback Git URL (tried on auth failure)       |
+| `root`          | string | Base path within the repository                |
 
 #### Three-Level Merge
 
@@ -341,17 +360,21 @@ Project aliases override user aliases, which override system aliases. This allow
 
 ```yaml
 # ~/.promptscript/config.yaml
+version: '1'
+
 registries:
   '@company': github.com/acme/promptscript-base
   '@shared': github.com/acme/shared-libs
 
-auth:
-  github.com:
-    type: token
-    tokenEnvVar: GITHUB_TOKEN
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 ```
 
-Setting aliases in user config makes them available in every project on the machine without adding them to individual `promptscript.yaml` files.
+Setting aliases in user config makes them available in every project on the machine without adding them to individual `promptscript.yaml` files. Alias entries do not contain credentials. Use `registry.git.auth`, SSH configuration, or the Git credential helper for authentication.
 
 #### Usage in .prs Files
 
@@ -704,23 +727,25 @@ Agent field mapping (PRS -> Codex TOML):
 Define custom output conventions for specialized formatting needs.
 
 ```yaml
+id: custom-convention-example
+syntax: '1.4.0'
+
 customConventions:
   my-format:
     name: my-format
+    description: Custom Markdown headings and fenced code
     section:
-      prefix: '### '
-      suffix: ''
-      contentPrefix: "\n"
-      contentSuffix: "\n\n"
-    list:
-      itemPrefix: '→ '
-      itemSuffix: ''
-      listPrefix: ''
-      listSuffix: "\n"
-    codeBlock:
-      prefix: '~~~'
-      suffix: '~~~'
-      languageSupport: true
+      start: '### {{name}}'
+      end: ''
+      nameTransform: none
+      indent: ''
+    subsection:
+      start: '#### {{name}}'
+      end: ''
+      nameTransform: none
+      indent: ''
+    listStyle: bullet
+    codeBlockDelimiter: '~~~'
 
 # Use custom convention in target
 targets:
@@ -730,20 +755,18 @@ targets:
 
 **Custom Convention Structure:**
 
-| Field                       | Type    | Description                            |
-| --------------------------- | ------- | -------------------------------------- |
-| `name`                      | string  | Convention identifier                  |
-| `section.prefix`            | string  | Text before section name               |
-| `section.suffix`            | string  | Text after section name                |
-| `section.contentPrefix`     | string  | Text before section content            |
-| `section.contentSuffix`     | string  | Text after section content             |
-| `list.itemPrefix`           | string  | Text before each list item             |
-| `list.itemSuffix`           | string  | Text after each list item              |
-| `list.listPrefix`           | string  | Text before the list                   |
-| `list.listSuffix`           | string  | Text after the list                    |
-| `codeBlock.prefix`          | string  | Code block start marker                |
-| `codeBlock.suffix`          | string  | Code block end marker                  |
-| `codeBlock.languageSupport` | boolean | Whether to include language identifier |
+| Field                   | Type   | Description                                        |
+| ----------------------- | ------ | -------------------------------------------------- |
+| `name`                  | string | Convention identifier                              |
+| `description`           | string | Human-readable purpose                             |
+| `section.start`         | string | Section opening template, supports `{{name}}`      |
+| `section.end`           | string | Optional section closing template                  |
+| `section.nameTransform` | string | `kebab-case`, `camelCase`, `PascalCase`, or `none` |
+| `section.indent`        | string | Indentation per nesting level                      |
+| `subsection`            | object | Optional subsection renderer                       |
+| `listStyle`             | string | `dash`, `asterisk`, `bullet`, or `numbered`        |
+| `codeBlockDelimiter`    | string | Code fence delimiter                               |
+| `rootWrapper`           | object | Optional `start` and `end` templates               |
 
 ### builds
 
@@ -809,18 +832,18 @@ Configures validation behavior.
 
 ```yaml
 validation:
-  strict: false
-  ignoreWarnings:
-    - 'unused-shortcut'
+  requiredGuards:
+    - security
+  guardRequiresDepth: 3
   rules:
-    require-syntax: error
+    empty-block: warning
 ```
 
-| Field            | Type     | Default | Description             |
-| ---------------- | -------- | ------- | ----------------------- |
-| `strict`         | boolean  | `false` | Warnings as errors      |
-| `ignoreWarnings` | string[] | `[]`    | Warning codes to ignore |
-| `rules`          | object   | `{}`    | Rule severity overrides |
+| Field                | Type     | Default | Description                               |
+| -------------------- | -------- | ------- | ----------------------------------------- |
+| `requiredGuards`     | string[] | `[]`    | Guards every resolved project must define |
+| `rules`              | object   | `{}`    | Rule severity overrides                   |
+| `guardRequiresDepth` | number   | `3`     | Maximum guard dependency recursion depth  |
 
 ### watch
 
@@ -949,13 +972,17 @@ includePromptScriptSkill: false
 Configuration values can reference environment variables:
 
 ```yaml
+id: environment-example
+syntax: '1.4.0'
+
 registry:
   auth:
+    type: bearer
     token: ${REGISTRY_TOKEN}
 
 targets:
-  github:
-    output: ${OUTPUT_DIR:-.github}/copilot-instructions.md
+  - github:
+      output: ${OUTPUT_DIR:-.github}/copilot-instructions.md
 ```
 
 | Syntax            | Description           |
@@ -968,6 +995,9 @@ targets:
 The simplest valid configuration:
 
 ```yaml
+id: minimal-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -980,11 +1010,13 @@ targets:
 You can extend another configuration file:
 
 ```yaml
+id: extended-project
+syntax: '1.4.0'
 extends: ./base.config.yaml
 
 targets:
-  github:
-    output: custom/path.md
+  - github:
+      output: custom/path.md
 ```
 
 Extended configurations are deep-merged.
@@ -996,8 +1028,12 @@ The configuration file is validated against a JSON schema. Enable editor support
 ```yaml
 # yaml-language-server: $schema=https://getpromptscript.dev/latest/schema/config.json
 
+id: schema-example
+syntax: '1.4.0'
 input:
   entry: .promptscript/project.prs
+targets:
+  - github
 ```
 
 This provides:
@@ -1019,6 +1055,9 @@ Schema URL: [`schema/config.json`](https://getpromptscript.dev/latest/schema/con
 ### Minimal Project
 
 ```yaml
+id: minimal-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -1029,6 +1068,9 @@ targets:
 ### Multi-Team Setup
 
 ```yaml
+id: multi-team-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/${TEAM}/project.prs
 
@@ -1045,6 +1087,9 @@ targets:
 ### CI/CD Configuration
 
 ```yaml
+id: ci-project
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -1058,9 +1103,6 @@ registry:
   cache:
     enabled: true
     ttl: 3600000
-
-validation:
-  strict: true
 
 targets:
   - github

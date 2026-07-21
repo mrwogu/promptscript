@@ -130,6 +130,8 @@ prs migrate --static
 prs migrate --llm --files CLAUDE.md AGENTS.md
 ```
 
+`prs migrate` defaults to static migration. Use `--llm` to generate the AI-assisted migration prompt and install the bundled `promptscript` skill.
+
 ### prs upgrade
 
 Upgrade `.prs` files to the latest supported syntax version.
@@ -1055,6 +1057,9 @@ ______________________________________________________________________
 The CLI uses `promptscript.yaml` by default. Override with `--config`:
 
 ```yaml
+id: my-project
+syntax: '1.4.0'
+
 # Input settings
 input:
   entry: .promptscript/project.prs
@@ -1067,26 +1072,19 @@ registry:
 
 # Output targets
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-  antigravity:
-    enabled: true
-    output: .agent/rules/project.md
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
+  - antigravity:
+      output: .agent/rules/project.md
 
 # Validation settings
 validation:
-  strict: false
-  ignoreWarnings: []
+  rules:
+    empty-block: warning
 
 # Watch settings
 watch:

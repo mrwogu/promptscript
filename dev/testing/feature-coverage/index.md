@@ -6,7 +6,7 @@ This document describes the Feature Coverage Matrix and testing mechanism for Pr
 
 The Feature Coverage Matrix is a specification that tracks:
 
-1. **Tool Capabilities** - What features each AI tool (GitHub Copilot, Cursor, Claude, Antigravity) supports
+1. **Tool Capabilities** - What features each classified AI target supports
 1. **Formatter Implementation** - Which features our formatters implement
 1. **Coverage Gaps** - Features supported by tools but not yet implemented
 
@@ -34,7 +34,7 @@ interface FeatureSpec {
   name: string; // Human-readable name
   description: string; // Feature description
   category: FeatureCategory; // Grouping category
-  tools: Record<ToolName, FeatureStatus>; // Support per tool
+  tools: Partial<Record<ToolName, FeatureStatus>>; // Support for classified tools
   testStrategy?: string; // How to test
   docsUrl?: Record<ToolName, string>; // Documentation links
 }
@@ -45,6 +45,8 @@ type FeatureStatus =
   | 'planned' // Tool supports, not yet implemented
   | 'partial'; // Partially implemented
 ```
+
+The target catalog contains 48 formatters. The matrix currently classifies 37 of them. A missing entry means the target has not been classified for that feature, not that the feature is unsupported. The formatter registry and generated [platform matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) remain the source of truth for target availability.
 
 ### Categories
 
@@ -86,12 +88,12 @@ import { getFeatureCoverage } from '@promptscript/formatters';
 const coverage = getFeatureCoverage('cursor');
 // {
 //   tool: 'cursor',
-//   supported: 15,
-//   partial: 1,
-//   planned: 0,
-//   notSupported: 4,
-//   total: 20,
-//   coveragePercent: 78
+//   supported: 20,
+//   partial: 3,
+//   planned: 2,
+//   notSupported: 5,
+//   total: 30,
+//   coveragePercent: 72
 // }
 ```
 

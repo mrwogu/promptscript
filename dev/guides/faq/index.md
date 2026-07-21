@@ -60,7 +60,7 @@ See the [CI/CD guide](https://getpromptscript.dev/dev/guides/ci/index.md).
 
 ## Common Errors
 
-### `PS1001: File not found`
+### `PS2001: File not found`
 
 The `@inherit` or `@use` target cannot be resolved. Check:
 
@@ -68,13 +68,13 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 - The registry is configured if using `@scope/package` syntax
 - Run `prs registry list` to verify configured registries
 
-### `PS2001: Unknown directive`
+### `PS1001: Unexpected token`
 
-You used a directive that PromptScript doesn't recognize. Check the [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md) for valid directives.
+The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the reported location and compare it with the [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md).
 
-### `PS3001: Validation error`
+### `PS3001: Required field`
 
-A validation rule failed. The error message includes details on what's wrong and how to fix it. Run with `--verbose` for more context.
+A required field is missing. The error message identifies the block and field to add. Other validation failures use `PS3000` or a more specific `PS300x` code.
 
 ### Compiled output doesn't match expected format
 

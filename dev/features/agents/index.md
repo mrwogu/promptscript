@@ -116,6 +116,9 @@ Agent-level MCP references only apply to targets whose native agent format suppo
 Native agent files normally require a target's richest output mode:
 
 ```yaml
+id: native-agents-project
+syntax: '1.4.0'
+
 targets:
   - github:
       version: full

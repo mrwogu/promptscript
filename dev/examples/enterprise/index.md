@@ -509,27 +509,28 @@ acme-promptscript-registry/
 
 ```yaml
 # checkout-app/promptscript.yaml
+id: checkout-app
+syntax: '1.4.0'
+
 input:
-  entry: promptscript/project.prs
+  entry: .promptscript/project.prs
 
 registry:
-  url: https://github.com/acme/promptscript-registry
-  auth:
-    token: ${GITHUB_TOKEN}
+  git:
+    url: https://github.com/acme/promptscript-registry.git
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 
 validation:
-  strict: true
   rules:
     require-knowledge: warning
 

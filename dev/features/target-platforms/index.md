@@ -72,6 +72,9 @@ Targets using platform-specific instruction paths with shared rendering:
 Simple configuration:
 
 ```yaml
+id: multi-target-project
+syntax: '1.4.0'
+
 targets:
   - github
   - claude
@@ -83,6 +86,9 @@ targets:
 Feature-rich configuration:
 
 ```yaml
+id: rich-target-project
+syntax: '1.4.0'
+
 targets:
   - github:
       version: full
