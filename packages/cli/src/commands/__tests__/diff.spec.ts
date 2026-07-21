@@ -11,6 +11,11 @@ const {
   mockReadFile,
   mockPagerWrite,
   mockPagerFlush,
+  mockIsVerbose,
+  mockIsDebug,
+  mockConsoleVerbose,
+  mockConsoleDebug,
+  mockConsoleWarn,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -30,6 +35,11 @@ const {
   const mockReadFile = vi.fn();
   const mockPagerWrite = vi.fn();
   const mockPagerFlush = vi.fn().mockResolvedValue(undefined);
+  const mockIsVerbose = vi.fn().mockReturnValue(false);
+  const mockIsDebug = vi.fn().mockReturnValue(false);
+  const mockConsoleVerbose = vi.fn();
+  const mockConsoleDebug = vi.fn();
+  const mockConsoleWarn = vi.fn();
   return {
     mockSucceed,
     mockFail,
@@ -41,16 +51,26 @@ const {
     mockReadFile,
     mockPagerWrite,
     mockPagerFlush,
+    mockIsVerbose,
+    mockIsDebug,
+    mockConsoleVerbose,
+    mockConsoleDebug,
+    mockConsoleWarn,
   };
 });
 
 vi.mock('../../output/console.js', () => ({
   createSpinner: vi.fn(() => mockSpinner),
+  isVerbose: mockIsVerbose,
+  isDebug: mockIsDebug,
   ConsoleOutput: {
     success: vi.fn(),
     error: vi.fn(),
     muted: vi.fn(),
     newline: vi.fn(),
+    verbose: mockConsoleVerbose,
+    debug: mockConsoleDebug,
+    warn: mockConsoleWarn,
   },
 }));
 
@@ -115,7 +135,7 @@ vi.mock('chalk', () => {
   };
 });
 
-import { diffCommand } from '../diff.js';
+import { diffCommand, createDiffLogger } from '../diff.js';
 import { ConsoleOutput } from '../../output/console.js';
 
 describe('diffCommand', () => {
@@ -124,6 +144,8 @@ describe('diffCommand', () => {
     process.exitCode = undefined;
     mockSpinner.text = '';
     mockPostFormatTransform.apply = false;
+    mockIsVerbose.mockReturnValue(false);
+    mockIsDebug.mockReturnValue(false);
   });
 
   it('should detect changes between compiled output and existing files', async () => {
@@ -289,5 +311,53 @@ describe('diffCommand', () => {
     expect(mockPagerWrite).toHaveBeenCalledWith(
       expect.stringContaining('All files are up to date')
     );
+  });
+});
+
+describe('createDiffLogger', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockIsVerbose.mockReturnValue(false);
+    mockIsDebug.mockReturnValue(false);
+  });
+
+  it('verbose forwards to ConsoleOutput.verbose when --verbose or --debug is set', () => {
+    mockIsVerbose.mockReturnValue(true);
+    const logger = createDiffLogger();
+    logger.verbose('post-format note');
+    expect(mockConsoleVerbose).toHaveBeenCalledWith('post-format note');
+  });
+
+  it('verbose forwards when --debug is set even without --verbose', () => {
+    mockIsDebug.mockReturnValue(true);
+    const logger = createDiffLogger();
+    logger.verbose('post-format note');
+    expect(mockConsoleVerbose).toHaveBeenCalledWith('post-format note');
+  });
+
+  it('verbose is silent when neither --verbose nor --debug is set', () => {
+    const logger = createDiffLogger();
+    logger.verbose('post-format note');
+    expect(mockConsoleVerbose).not.toHaveBeenCalled();
+  });
+
+  it('debug forwards to ConsoleOutput.debug only when --debug is set', () => {
+    mockIsDebug.mockReturnValue(true);
+    const logger = createDiffLogger();
+    logger.debug('prettier rejected X');
+    expect(mockConsoleDebug).toHaveBeenCalledWith('prettier rejected X');
+  });
+
+  it('debug is silent when --debug is not set', () => {
+    mockIsVerbose.mockReturnValue(true);
+    const logger = createDiffLogger();
+    logger.debug('prettier rejected X');
+    expect(mockConsoleDebug).not.toHaveBeenCalled();
+  });
+
+  it('warn always forwards to ConsoleOutput.warn', () => {
+    const logger = createDiffLogger();
+    logger.warn('post-format warning');
+    expect(mockConsoleWarn).toHaveBeenCalledWith('post-format warning');
   });
 });
