@@ -31,7 +31,7 @@ function configureColors(options: DiffOptions): void {
  * Mirrors createCliLogger in compile.ts so diff and compile report Prettier
  * post-format warnings consistently.
  */
-function createDiffLogger(): Logger {
+export function createDiffLogger(): Logger {
   return {
     verbose: (message: string) => {
       if (isVerbose() || isDebug()) {
