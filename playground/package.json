@@ -12,6 +12,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
     "@promptscript/browser-compiler": "workspace:^",
+    "@promptscript/core": "workspace:^",
     "@promptscript/formatters": "workspace:^",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.0",
