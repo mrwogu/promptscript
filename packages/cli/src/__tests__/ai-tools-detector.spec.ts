@@ -51,6 +51,23 @@ describe('utils/ai-tools-detector', () => {
       expect(result.details['claude']).toContain('CLAUDE.md');
     });
 
+    it('should deduplicate instruction paths that reference the same file', async () => {
+      mockFs.existsSync.mockImplementation(
+        (path: string) => path === 'CLAUDE.md' || path === 'claude.md'
+      );
+      mockServices.fs.lstat = vi.fn().mockResolvedValue({
+        dev: 1,
+        ino: 2,
+        isFile: () => true,
+        isSymbolicLink: () => false,
+      }) as unknown as NonNullable<CliServices['fs']['lstat']>;
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.migrationCandidates).toHaveLength(1);
+      expect(result.migrationCandidates[0]?.path).toBe('CLAUDE.md');
+    });
+
     it('should migrate user instructions that merely mention PromptScript', async () => {
       mockFs.existsSync.mockImplementation((path: string) => path === 'CLAUDE.md');
       mockFs.readFile.mockResolvedValue('# Project\n\nUse PromptScript for shared instructions.');
