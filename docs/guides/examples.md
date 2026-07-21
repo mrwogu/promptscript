@@ -208,29 +208,25 @@ Given this source:
 
 The compiled output includes:
 
-```markdown
+````markdown
 ## Examples
 
-### camel-case
+### Example: camel-case
 
 Variable naming convention
 
 **Input:**
+
 ```
-
 const user_name = 'Alice'
-
 ```
 
 **Output:**
 
 ```
-
 const userName = 'Alice'
-
 ```
-
-```
+````
 
 ## Syntax Version
 

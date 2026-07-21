@@ -60,15 +60,17 @@ Generated Files
 <div class="init-demo__files-grid">
 <div class="init-demo__file-preview">
 <div class="init-demo__file-preview-header">promptscript.yaml</div>
-<pre class="init-demo__file-preview-content"><span class="key">version:</span> <span class="str">'1'</span>
-
-<span class="key">input:</span>
-  <span class="key">entry:</span> <span class="str">.promptscript/project.prs</span>
+<pre class="init-demo__file-preview-content"><span class="key">id:</span> <span class="str">my-app</span>
+<span class="key">syntax:</span> <span class="str">"1.4.0"</span>
 
 <span class="key">targets:</span>
   - <span class="str">github</span>
   - <span class="str">claude</span>
-  - <span class="str">cursor</span></pre>
+  - <span class="str">cursor</span>
+
+<span class="key">validation:</span>
+  <span class="key">rules:</span>
+    <span class="key">empty-block:</span> <span class="str">warning</span></pre>
 </div>
 <div class="init-demo__file-preview">
 <div class="init-demo__file-preview-header">.promptscript/project.prs</div>
@@ -157,7 +159,10 @@ Open `.promptscript/project.prs` and customize:
   "/refactor": {
     prompt: true
     description: "Suggest refactoring improvements"
-    content: "Analyze the code and suggest refactoring improvements for better maintainability."
+    content: """
+      Analyze the code and suggest refactoring improvements for better maintainability.
+      Preserve behavior and explain each recommended change.
+    """
   }
 }
 ```
@@ -213,8 +218,9 @@ Add reusable skills, specialist agents, tool integrations, and automation to the
 }
 ```
 
-PromptScript compiles each capability to the native representation supported by every configured
-target. See [Agent Platform](features/index.md) for feature details.
+PromptScript compiles each capability where the configured target supports it. See
+[Agent Platform](features/index.md) and the
+[feature coverage matrix](testing/feature-coverage.md) for target-specific support.
 
 ### 4. Compile to Native Formats
 
@@ -279,22 +285,27 @@ Already have `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`? Use AI-a
 
 ### 1. Start Migration
 
-Run the migration flow and choose static or AI-assisted import:
+Run deterministic static migration:
 
 ```bash
-prs migrate
+prs migrate --static
 ```
 
 This creates:
 
 - `promptscript.yaml` - Compiler configuration
-- `.promptscript/project.prs` - Empty project template
-- `.claude/skills/migrate-to-promptscript/SKILL.md` - Migration skill (if Claude target)
-- `.github/skills/migrate-to-promptscript/SKILL.md` - Migration skill (if GitHub target)
-- `.cursor/commands/migrate.md` - Migration command (if Cursor target)
-- `.agent/rules/migrate.md` - Migration rule (if Antigravity target)
+- `.promptscript/*.prs` - Deterministically imported instruction files
+- `.promptscript/project.prs` - Entry point that composes imported files
+- `.promptscript/skills/promptscript/SKILL.md` - Canonical PromptScript language skill
+- Native copies of the `promptscript` skill for targets that support skills
 
 Your existing AI instruction files remain untouched.
+
+For AI-assisted migration, generate a migration prompt and install the PromptScript skill:
+
+```bash
+prs migrate --llm
+```
 
 ### 2. Invoke the Migration Skill
 
@@ -303,8 +314,8 @@ Use your AI assistant to migrate existing content. The migration skill analyzes 
 === "Claude Code"
 
     ```bash
-    # Use the migrate skill
-    /migrate
+    # Use the PromptScript skill
+    /promptscript
 
     # Or describe what you want
     "Migrate my existing CLAUDE.md to PromptScript"
@@ -313,20 +324,18 @@ Use your AI assistant to migrate existing content. The migration skill analyzes 
 === "GitHub Copilot"
 
     ```
-    @workspace /migrate
+    @workspace Use the promptscript skill to migrate my existing instructions
     ```
 
 === "Cursor"
 
     ```bash
-    # Use the migrate command
-    /migrate
+    "Use the PromptScript skill to migrate my existing instructions"
     ```
 
 === "Antigravity"
 
     ```
-    # Ask to migrate using the installed rule
     "Migrate my existing AI instructions to PromptScript"
     ```
 
@@ -485,7 +494,8 @@ your-project/
 The `promptscript.yaml` file controls compilation:
 
 ```yaml
-version: '1'
+id: my-project
+syntax: "1.4.0"
 
 # Input settings
 input:
@@ -552,11 +562,12 @@ targets:
       version: frontmatter
 ```
 
-## Set Up Hooks (Optional)
+## Manage Hooks
 
-Once your targets are configured, install hooks so PromptScript compiles after supported AI tool
-edit events and prevents those tools from overwriting generated outputs. Use `prs compile --watch`
-for changes made in a general-purpose editor.
+`prs init` installs hooks for supported detected targets by default. Pass `--no-hooks` during
+initialization to skip them.
+
+Use the hook command to reinstall hooks, add hooks after initialization, or target one tool:
 
 ```bash
 prs hooks install

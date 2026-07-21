@@ -6,7 +6,7 @@ description: Step-by-step tutorial for deploying PromptScript infrastructure
 # Tutorial: Building Enterprise AI Infrastructure
 
 In this tutorial, you will simulate a PromptOps deployment for a software team.
-You won't just write a prompt-you will build a **hierarchical context system** that scales.
+You won't just write a prompt - you will build a **hierarchical context system** that scales.
 
 ## Learning Objectives
 
@@ -44,11 +44,13 @@ Create `registry/@acme/org.prs`:
 }
 
 @standards {
-  code: [
-    "Follow clean code principles",
-    "Document all public APIs",
-    "Write tests for all code"
-  ]
+  code: {
+    principles: [
+      "Follow clean code principles",
+      "Document all public APIs",
+      "Write tests for all code"
+    ]
+  }
 
   security: [
     "Validate all user input",
@@ -207,6 +209,9 @@ Create `.promptscript/project.prs` in your project:
 Create `promptscript.yaml`:
 
 ```yaml
+id: checkout-app
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -214,20 +219,12 @@ registry:
   path: ./registry
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-
-  claude:
-    enabled: true
-    output: CLAUDE.md
-
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 ```
 
 ## Step 5: Add Agent Platform Capabilities
@@ -285,7 +282,7 @@ prs compile --dry-run
 Validate your configuration:
 
 ```bash
-prs validate
+prs validate --strict
 ```
 
 ## Understanding Inheritance

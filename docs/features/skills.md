@@ -109,6 +109,9 @@ commands under `.gemini/commands/`.
 ## Filter Skills Per Target
 
 ```yaml
+id: filtered-skills-project
+syntax: '1.4.0'
+
 targets:
   - factory:
       version: full

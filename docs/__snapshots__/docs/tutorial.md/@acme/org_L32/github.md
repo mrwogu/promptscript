@@ -9,9 +9,7 @@ Follow company coding standards and best practices.
 
 ### code
 
-- Follow clean code principles
-- Document all public APIs
-- Write tests for all code
+- principles: Follow clean code principles, Document all public APIs, Write tests for all code
 
 ### security
 

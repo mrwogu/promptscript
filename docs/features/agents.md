@@ -126,6 +126,9 @@ targets continue using project-level MCP configuration.
 Native agent files normally require a target's richest output mode:
 
 ```yaml
+id: native-agents-project
+syntax: '1.4.0'
+
 targets:
   - github:
       version: full

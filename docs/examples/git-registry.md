@@ -20,10 +20,8 @@ This example shows how to use a Git repository as a PromptScript registry for sh
 
 ```yaml
 # promptscript.yaml
-version: '1'
-
-project:
-  id: my-project
+id: my-project
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs
@@ -42,10 +40,8 @@ targets:
 
 ```yaml
 # promptscript.yaml
-version: '1'
-
-project:
-  id: my-project
+id: my-project
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs
@@ -70,10 +66,8 @@ targets:
 
 ```yaml
 # promptscript.yaml
-version: '1'
-
-project:
-  id: my-project
+id: my-project
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs
@@ -99,10 +93,8 @@ PromptScript works with **any Git server**, not just GitHub. This includes self-
 
 ```yaml
 # promptscript.yaml
-version: '1'
-
-project:
-  id: my-project
+id: my-project
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs
@@ -418,11 +410,8 @@ For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories
 **promptscript.yaml**
 
 ```yaml
-version: '1'
-
-project:
-  id: customer-portal
-  team: frontend
+id: customer-portal
+syntax: '1.4.0'
 
 inherit: '@teams/frontend'
 
@@ -485,6 +474,9 @@ Add aliases to `promptscript.yaml` once:
 
 ```yaml
 # promptscript.yaml
+id: customer-portal
+syntax: '1.4.0'
+
 registries:
   '@company': github.com/acme/promptscript-base
   '@team': github.com/acme/team-frontend

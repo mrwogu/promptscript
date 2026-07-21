@@ -10,7 +10,7 @@ PromptScript hooks integrate directly with supported AI coding tool event system
 There are two complementary behaviours:
 
 - **Auto-compilation** - when the AI tool writes a `.prs` file, `post-edit` runs `prs compile`.
-- **Output protection** — when an AI agent tries to edit a generated file directly, `pre-edit` blocks the write and explains that the file is managed by PromptScript.
+- **Output protection** - when an AI agent tries to edit a generated file directly, `pre-edit` blocks the write and explains that the file is managed by PromptScript.
 
 ```mermaid
 flowchart LR
@@ -99,7 +99,8 @@ sequenceDiagram
     Hook->>Hook: check extension (.prs only)
     Hook->>Compiler: prs compile
     Compiler-->>Hook: stdout/stderr
-    Hook-->>Agent: exit 0 (always)
+    Hook-->>Agent: exit 0 on success or irrelevant file
+    Hook-->>Agent: exit 1 on invalid input or compile failure
 ```
 
 ## Generated Configuration
@@ -116,11 +117,9 @@ For AI tools that do not support hooks, run `prs compile --watch` in a terminal 
 prs compile --watch
 ```
 
-This does not provide the output-protection behaviour of `pre-edit`. To protect generated files without hooks, consider making them read-only:
-
-```bash
-chmod 444 CLAUDE.md .cursor/rules/project.mdc
-```
+This does not provide the output-protection behaviour of `pre-edit`. Keep generated files writable
+so watch mode can replace them, and rely on generation markers plus code review to prevent manual
+edits.
 
 See [`prs compile`](../reference/cli.md#prs-compile) for full watch options.
 
@@ -143,22 +142,18 @@ Then update the hook command to e.g. `/usr/local/bin/prs hook pre-edit`.
 Alternatively, use `npx`:
 
 ```bash
-npx prs hook pre-edit
+npx --package=@promptscript/cli prs hook pre-edit
 ```
 
 ### Generated file is still editable
 
 Check that the compiler is writing the marker. Run `prs compile` and inspect the first line of a generated output. If the marker is absent, ensure you are on version 1.5+ of the CLI.
 
-### Stale lock file
+### Hook compilation is temporarily skipped
 
-If compilation fails with a lock error after the hook fires:
-
-```bash
-prs lock
-```
-
-This regenerates the lockfile from the current imports. See [`prs lock`](../reference/cli.md#prs-lock) for details.
+Hook-triggered compilation uses a short-lived mutex under `/tmp` to prevent overlapping runs. A
+stale mutex expires automatically after 30 seconds. The `prs lock` command manages registry
+dependency resolution and does not clear this hook mutex.
 
 ### Uninstalling hooks
 
