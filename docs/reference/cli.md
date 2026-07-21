@@ -425,12 +425,14 @@ prs diff [options]
 
 **Options:**
 
-| Option                  | Description                   |
-| ----------------------- | ----------------------------- |
-| `-t, --target <target>` | Show diff for specific target |
-| `-a, --all`             | Show diff for all targets     |
-| `--color`               | Force colored output          |
-| `--no-color`            | Disable colored output        |
+| Option                  | Description                       |
+| ----------------------- | --------------------------------- |
+| `-t, --target <target>` | Show diff for specific target     |
+| `-a, --all`             | Show diff for all targets         |
+| `--full`                | Show full diff without truncation |
+| `--no-pager`            | Disable pager output              |
+| `--color`               | Force colored output              |
+| `--no-color`            | Disable colored output            |
 
 **Examples:**
 
