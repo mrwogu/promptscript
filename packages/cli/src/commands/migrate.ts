@@ -342,10 +342,6 @@ async function createStaticMigrationWrites(
     });
   }
 
-  if (writes.length === 0) {
-    throw new Error('Migration produced no new changes');
-  }
-
   return deduplicateWrites(writes);
 }
 

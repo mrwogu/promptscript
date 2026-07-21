@@ -1,4 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+import { existsSync } from 'node:fs';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const promptMocks = vi.hoisted(() => ({
   input: vi.fn().mockResolvedValue('value'),
@@ -9,7 +13,7 @@ const promptMocks = vi.hoisted(() => ({
 
 vi.mock('@inquirer/prompts', () => promptMocks);
 
-import { defaultPrompts } from '../services.js';
+import { defaultFileSystem, defaultPrompts } from '../services.js';
 
 describe('defaultPrompts', () => {
   it('routes interactive output to stderr', async () => {
@@ -29,6 +33,22 @@ describe('defaultPrompts', () => {
         expect.any(Object),
         expect.objectContaining({ output: process.stderr })
       );
+    }
+  });
+});
+
+describe('defaultFileSystem', () => {
+  it('removes files through the lazy filesystem adapter', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'promptscript-services-'));
+    const file = join(directory, 'remove-me');
+
+    try {
+      await writeFile(file, 'content');
+      await defaultFileSystem.rm?.(file);
+
+      expect(existsSync(file)).toBe(false);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
     }
   });
 });
