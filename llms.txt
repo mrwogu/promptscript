@@ -10,66 +10,66 @@ targets.
 
 ## Getting Started
 
-- [Getting Started](https://getpromptscript.dev/v1.14/getting-started/index.md)
-- [Tutorial](https://getpromptscript.dev/v1.14/tutorial/index.md)
+- [Getting Started](https://getpromptscript.dev/dev/getting-started/index.md)
+- [Tutorial](https://getpromptscript.dev/dev/tutorial/index.md)
 
 ## Agent Platform
 
-- [Overview](https://getpromptscript.dev/v1.14/features/index.md): Agent platform concepts and complete feature model
-- [Agents](https://getpromptscript.dev/v1.14/features/agents/index.md): Native agents, tools, skills, and MCP access
-- [Skills and Resources](https://getpromptscript.dev/v1.14/features/skills/index.md): Portable skills, resources, scripts, and contracts
-- [MCP Servers and Plugins](https://getpromptscript.dev/v1.14/features/integrations/index.md): MCP servers and plugin bundles
-- [Hooks and Workflows](https://getpromptscript.dev/v1.14/features/automation/index.md): Lifecycle hooks, workflows, and build automation
-- [Target Platforms](https://getpromptscript.dev/v1.14/features/target-platforms/index.md): All 48 target platforms and output families
+- [Overview](https://getpromptscript.dev/dev/features/index.md): Agent platform concepts and complete feature model
+- [Agents](https://getpromptscript.dev/dev/features/agents/index.md): Native agents, tools, skills, and MCP access
+- [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md): Portable skills, resources, scripts, and contracts
+- [MCP Servers and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md): MCP servers and plugin bundles
+- [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md): Lifecycle hooks, workflows, and build automation
+- [Target Platforms](https://getpromptscript.dev/dev/features/target-platforms/index.md): All 48 target platforms and output families
 
 ## Reference
 
-- [Language](https://getpromptscript.dev/v1.14/reference/language/index.md): Complete PromptScript language specification
-- [Overview](https://getpromptscript.dev/v1.14/reference/cli/index.md): CLI commands and options
-- [Hook Management](https://getpromptscript.dev/v1.14/reference/cli/hooks/index.md): AI tool hook installation and removal
-- [Hook Runtime](https://getpromptscript.dev/v1.14/reference/cli/hook/index.md): Low-level hook runtime contract
-- [Configuration](https://getpromptscript.dev/v1.14/reference/config/index.md): Configuration file format
+- [Language](https://getpromptscript.dev/dev/reference/language/index.md): Complete PromptScript language specification
+- [Overview](https://getpromptscript.dev/dev/reference/cli/index.md): CLI commands and options
+- [Hook Management](https://getpromptscript.dev/dev/reference/cli/hooks/index.md): AI tool hook installation and removal
+- [Hook Runtime](https://getpromptscript.dev/dev/reference/cli/hook/index.md): Low-level hook runtime contract
+- [Configuration](https://getpromptscript.dev/dev/reference/config/index.md): Configuration file format
 
 ## Target Platforms
 
-- [Platform Matrix](https://getpromptscript.dev/v1.14/reference/formatters/index.md): All 48 supported AI agent targets
-- [Claude Code](https://getpromptscript.dev/v1.14/reference/formatters/claude/index.md): Claude Code output format, skills, agents, local files
-- [GitHub Copilot](https://getpromptscript.dev/v1.14/reference/formatters/github/index.md): GitHub Copilot output format, instructions, prompts, skills
-- [Cursor](https://getpromptscript.dev/v1.14/reference/formatters/cursor/index.md): Cursor output format, MDC frontmatter, commands
-- [Antigravity](https://getpromptscript.dev/v1.14/reference/formatters/antigravity/index.md): Antigravity output format, workflows, activation types
-- [Factory AI](https://getpromptscript.dev/v1.14/reference/formatters/factory/index.md): Factory AI output format, droids, skills
-- [Gemini CLI](https://getpromptscript.dev/v1.14/reference/formatters/gemini/index.md): Gemini CLI output format, commands, skills
-- [OpenCode](https://getpromptscript.dev/v1.14/reference/formatters/opencode/index.md): OpenCode output format, commands, skills, agents
+- [Platform Matrix](https://getpromptscript.dev/dev/reference/formatters/index.md): All 48 supported AI agent targets
+- [Claude Code](https://getpromptscript.dev/dev/reference/formatters/claude/index.md): Claude Code output format, skills, agents, local files
+- [GitHub Copilot](https://getpromptscript.dev/dev/reference/formatters/github/index.md): GitHub Copilot output format, instructions, prompts, skills
+- [Cursor](https://getpromptscript.dev/dev/reference/formatters/cursor/index.md): Cursor output format, MDC frontmatter, commands
+- [Antigravity](https://getpromptscript.dev/dev/reference/formatters/antigravity/index.md): Antigravity output format, workflows, activation types
+- [Factory AI](https://getpromptscript.dev/dev/reference/formatters/factory/index.md): Factory AI output format, droids, skills
+- [Gemini CLI](https://getpromptscript.dev/dev/reference/formatters/gemini/index.md): Gemini CLI output format, commands, skills
+- [OpenCode](https://getpromptscript.dev/dev/reference/formatters/opencode/index.md): OpenCode output format, commands, skills, agents
 
 ## Composition and Governance
 
-- [Inheritance](https://getpromptscript.dev/v1.14/guides/inheritance/index.md): PromptScript inheritance system
-- [Multi-File Organization](https://getpromptscript.dev/v1.14/guides/multi-file/index.md): Multi-file organization
-- [Build Your Registry](https://getpromptscript.dev/v1.14/guides/registry/index.md): Building a PromptScript registry
-- [Policy Engine](https://getpromptscript.dev/v1.14/guides/policy-engine/index.md): Organization policy enforcement
-- [Security](https://getpromptscript.dev/v1.14/guides/security/index.md): Security controls and best practices
-- [CI/CD Integration](https://getpromptscript.dev/v1.14/guides/ci/index.md): CI/CD integration
-- [Enterprise Setup](https://getpromptscript.dev/v1.14/guides/enterprise/index.md): Enterprise setup
+- [Inheritance](https://getpromptscript.dev/dev/guides/inheritance/index.md): PromptScript inheritance system
+- [Multi-File Organization](https://getpromptscript.dev/dev/guides/multi-file/index.md): Multi-file organization
+- [Build Your Registry](https://getpromptscript.dev/dev/guides/registry/index.md): Building a PromptScript registry
+- [Policy Engine](https://getpromptscript.dev/dev/guides/policy-engine/index.md): Organization policy enforcement
+- [Security](https://getpromptscript.dev/dev/guides/security/index.md): Security controls and best practices
+- [CI/CD Integration](https://getpromptscript.dev/dev/guides/ci/index.md): CI/CD integration
+- [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md): Enterprise setup
 
 ## Migration and Operations
 
-- [Migration](https://getpromptscript.dev/v1.14/guides/migration/index.md): Migration guide
-- [AI Tool Hooks](https://getpromptscript.dev/v1.14/guides/hooks/index.md): Automatic source compilation hooks
-- [Importing Instructions](https://getpromptscript.dev/v1.14/guides/import/index.md): Import existing agent instructions
-- [Formatter Architecture](https://getpromptscript.dev/v1.14/guides/formatter-architecture/index.md): Internal architecture of formatters
+- [Migration](https://getpromptscript.dev/dev/guides/migration/index.md): Migration guide
+- [AI Tool Hooks](https://getpromptscript.dev/dev/guides/hooks/index.md): Automatic source compilation hooks
+- [Importing Instructions](https://getpromptscript.dev/dev/guides/import/index.md): Import existing agent instructions
+- [Formatter Architecture](https://getpromptscript.dev/dev/guides/formatter-architecture/index.md): Internal architecture of formatters
 
 ## Examples
 
-- [Minimal](https://getpromptscript.dev/v1.14/examples/minimal/index.md): Minimal project setup
-- [Team Setup](https://getpromptscript.dev/v1.14/examples/team-setup/index.md): Team configuration
-- [Enterprise](https://getpromptscript.dev/v1.14/examples/enterprise/index.md): Enterprise example
-- [Skills & Local](https://getpromptscript.dev/v1.14/examples/skills-and-local/index.md): Skills and local overrides
-- [Agents](https://getpromptscript.dev/v1.14/examples/agents/index.md): Agent configuration
+- [Minimal](https://getpromptscript.dev/dev/examples/minimal/index.md): Minimal project setup
+- [Team Setup](https://getpromptscript.dev/dev/examples/team-setup/index.md): Team configuration
+- [Enterprise](https://getpromptscript.dev/dev/examples/enterprise/index.md): Enterprise example
+- [Skills & Local](https://getpromptscript.dev/dev/examples/skills-and-local/index.md): Skills and local overrides
+- [Agents](https://getpromptscript.dev/dev/examples/agents/index.md): Agent configuration
 
 ## Optional
 
-- [FAQ](https://getpromptscript.dev/v1.14/guides/faq/index.md): Frequently asked questions
-- [Comparison](https://getpromptscript.dev/v1.14/guides/vs-manual/index.md): Comparison with manual configuration
-- [Parity Testing](https://getpromptscript.dev/v1.14/testing/parity-testing/index.md): Formatter parity testing
-- [Feature Coverage](https://getpromptscript.dev/v1.14/testing/feature-coverage/index.md): Feature coverage matrix
+- [FAQ](https://getpromptscript.dev/dev/guides/faq/index.md): Frequently asked questions
+- [Comparison](https://getpromptscript.dev/dev/guides/vs-manual/index.md): Comparison with manual configuration
+- [Parity Testing](https://getpromptscript.dev/dev/testing/parity-testing/index.md): Formatter parity testing
+- [Feature Coverage](https://getpromptscript.dev/dev/testing/feature-coverage/index.md): Feature coverage matrix
 
