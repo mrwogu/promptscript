@@ -53,13 +53,24 @@ Real-world PromptScript configuration examples.
   <div class="ref-item__arrow">→</div>
 </a>
 
+<a href="agent-platform/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--green">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6zM10 6h4v2h-4zm-4 4h2v4H6zm10 0h2v4h-2zm-6 6h4v2h-4z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Agent Platform</h3>
+    <p>Runnable examples for MCP, hooks, workflows, plugins, field replacement, skills, and build profiles.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
+
 <a href="agents/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--cyan">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17.753 14a2.25 2.25 0 0 1 2.25 2.25v.904A3.75 3.75 0 0 1 18.696 20c-1.565 1.344-3.806 2-6.696 2s-5.128-.656-6.69-2a3.75 3.75 0 0 1-1.306-2.843v-.907A2.25 2.25 0 0 1 6.254 14zM12 2a5 5 0 1 1 0 10a5 5 0 0 1 0-10z"/></svg>
   </div>
   <div class="ref-item__content">
-    <h3>Claude Agents</h3>
-    <p>Define specialized AI subagents for Claude Code with custom tools and models.</p>
+    <h3>Agents</h3>
+    <p>Define portable AI subagents with custom tools, models, skills, and MCP access.</p>
   </div>
   <div class="ref-item__arrow">→</div>
 </a>
