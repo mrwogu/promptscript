@@ -101,4 +101,21 @@ describe('importCommand directory mode', () => {
     consoleSpy.mockRestore();
     await rm(outputDir, { recursive: true, force: true });
   });
+
+  it('should preserve an existing output without --force', async () => {
+    const { importCommand } = await import('../commands/import.js');
+    const outputDir = join(tmpdir(), 'prs-import-cmd-conflict-' + Date.now());
+    await mkdir(outputDir, { recursive: true });
+    await writeFile(join(outputDir, 'imported.prs'), 'user content');
+    process.exitCode = undefined;
+
+    await importCommand(testDir, { output: outputDir });
+
+    const { readFile: rf } = await import('fs/promises');
+    expect(await rf(join(outputDir, 'imported.prs'), 'utf-8')).toBe('user content');
+    expect(process.exitCode).toBe(2);
+
+    process.exitCode = undefined;
+    await rm(outputDir, { recursive: true, force: true });
+  });
 });

@@ -1,6 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { resolve } from 'path';
 
+const mockValidateRoundtrip = vi.hoisted(() => vi.fn());
+
+vi.mock('@promptscript/importer', async () => {
+  const actual =
+    await vi.importActual<typeof import('@promptscript/importer')>('@promptscript/importer');
+  return {
+    ...actual,
+    validateRoundtrip: mockValidateRoundtrip,
+  };
+});
+
 // Mock ora
 vi.mock('ora', () => ({
   default: vi.fn(() => ({
@@ -59,6 +70,14 @@ const fixturesDir = resolve(__dirname, '../../../importer/src/__tests__/fixtures
 describe('importCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockExistsSync.mockReturnValue(false);
+    mockValidateRoundtrip.mockResolvedValue({
+      valid: true,
+      errors: [],
+      warnings: [],
+      sectionCount: { imported: 1, parsed: 1 },
+      hasMeta: true,
+    });
     process.exitCode = undefined;
   });
 
@@ -99,5 +118,37 @@ describe('importCommand', () => {
       expect.any(String),
       'utf-8'
     );
+  });
+
+  it('does not overwrite an existing output without --force', async () => {
+    mockExistsSync.mockReturnValue(true);
+
+    await importCommand(resolve(fixturesDir, 'sample-claude.md'), {});
+
+    expect(mockWriteFileSync).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(2);
+  });
+
+  it('overwrites an existing output with --force', async () => {
+    mockExistsSync.mockReturnValue(true);
+
+    await importCommand(resolve(fixturesDir, 'sample-claude.md'), { force: true });
+
+    expect(mockWriteFileSync).toHaveBeenCalled();
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('fails when roundtrip validation fails', async () => {
+    mockValidateRoundtrip.mockResolvedValue({
+      valid: false,
+      errors: ['Generated PRS is invalid'],
+      warnings: [],
+      sectionCount: { imported: 1, parsed: 0 },
+      hasMeta: false,
+    });
+
+    await importCommand(resolve(fixturesDir, 'sample-claude.md'), { validate: true });
+
+    expect(process.exitCode).toBe(1);
   });
 });

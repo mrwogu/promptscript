@@ -79,6 +79,7 @@ export interface ImportCommandOptions {
   output?: string;
   dryRun?: boolean;
   validate?: boolean;
+  force?: boolean;
 }
 
 export async function importCommand(file: string, options: ImportCommandOptions): Promise<void> {
@@ -86,16 +87,27 @@ export async function importCommand(file: string, options: ImportCommandOptions)
 
   const inputStat = await stat(filepath).catch(() => null);
   if (inputStat?.isDirectory()) {
-    const prsContent = await importDirectory(filepath);
-    if (options.dryRun) {
-      console.log(prsContent);
-      return;
+    try {
+      const prsContent = await importDirectory(filepath);
+      if (options.dryRun) {
+        console.log(prsContent);
+        return;
+      }
+      const outputDir = resolve(options.output ?? '.promptscript');
+      const outputPath = join(outputDir, 'imported.prs');
+      if (existsSync(outputPath) && !options.force) {
+        reportOutputConflict(outputPath);
+        return;
+      }
+      await mkdir(outputDir, { recursive: true });
+      await writeFile(outputPath, prsContent);
+      console.log(`✔ Imported directory to ${outputPath}`);
+    } catch (error) {
+      ConsoleOutput.error(
+        `Import failed: ${error instanceof Error ? error.message : String(error)}`
+      );
+      process.exitCode = 1;
     }
-    const outputDir = options.output ?? '.promptscript';
-    await mkdir(outputDir, { recursive: true });
-    const outputPath = join(outputDir, 'imported.prs');
-    await writeFile(outputPath, prsContent);
-    console.log(`✔ Imported directory to ${outputPath}`);
     return;
   }
 
@@ -131,6 +143,11 @@ export async function importCommand(file: string, options: ImportCommandOptions)
     }
 
     const outputPath = resolve(outputDir, 'imported.prs');
+    if (existsSync(outputPath) && !options.force) {
+      spinner.stop();
+      reportOutputConflict(outputPath);
+      return;
+    }
     writeFileSync(outputPath, result.prsContent, 'utf-8');
     ConsoleOutput.success(`Written to ${outputPath}`);
 
@@ -146,6 +163,7 @@ export async function importCommand(file: string, options: ImportCommandOptions)
         for (const err of valResult.errors) {
           ConsoleOutput.error(err);
         }
+        process.exitCode = 1;
       }
     }
   } catch (error) {
@@ -153,4 +171,10 @@ export async function importCommand(file: string, options: ImportCommandOptions)
     ConsoleOutput.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   }
+}
+
+function reportOutputConflict(outputPath: string): void {
+  ConsoleOutput.error(`Output file already exists: ${outputPath}`);
+  ConsoleOutput.muted('Use --force to overwrite it or choose a different --output directory.');
+  process.exitCode = 2;
 }

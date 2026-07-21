@@ -590,6 +590,7 @@ prs import <file> [options]
 | `-o, --output <dir>`    | Output directory                                | `.promptscript` |
 | `--dry-run`             | Preview output without writing files            |                 |
 | `--validate`            | Run roundtrip validation after import           |                 |
+| `--force`               | Overwrite an existing `imported.prs` output     |                 |
 
 **Examples:**
 
@@ -609,6 +610,8 @@ prs import CLAUDE.md --validate
 # Import to custom output directory
 prs import CLAUDE.md --output ./my-prompts
 ```
+
+The command refuses to replace an existing `imported.prs` unless `--force` is provided.
 
 ---
 

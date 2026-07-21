@@ -201,6 +201,7 @@ program
   .option('-o, --output <dir>', 'Output directory', '.promptscript')
   .option('--dry-run', 'Preview output without writing files')
   .option('--validate', 'Run roundtrip validation after import')
+  .option('--force', 'Overwrite an existing imported.prs output')
   .action(importCommand);
 
 program
