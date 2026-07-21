@@ -514,6 +514,51 @@ export const EXAMPLES: Example[] = [
       },
     ],
   },
+  {
+    id: 'regular-field-replacement',
+    name: 'Regular Field Replacement',
+    description: 'Replace previous field values explicitly with the field! modifier',
+    complexity: 'intermediate',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "field-replacement"
+  syntax: "1.3.0"
+}
+
+@identity {
+  """
+  You are a TypeScript development assistant.
+  """
+}
+
+@standards {
+  testing: ["Use Jest", "Use integration tests"]
+  linting: ["Use ESLint"]
+  deployment: {
+    platform: "Kubernetes"
+    regions: ["us-east-1"]
+  }
+}
+
+@extend standards {
+  # Replace the complete previous value.
+  testing!: ["Use Vitest", "Follow the AAA pattern"]
+
+  # Unmarked arrays keep the normal merge behavior.
+  linting: ["Run lint checks before commits"]
+
+  # Replacement also works for nested objects.
+  deployment!: {
+    platform: "Cloud Run"
+    regions: ["us-central1", "europe-west1"]
+  }
+}
+`,
+      },
+    ],
+  },
 
   // === ADVANCED ===
   {
@@ -936,6 +981,96 @@ export const EXAMPLES: Example[] = [
   "/implement": "Start implementing a feature"
   "/review": "Review recent changes"
   "/test": "Write tests for current code"
+}
+`,
+      },
+    ],
+  },
+  {
+    id: 'agent-platform',
+    name: 'Complete Agent Platform',
+    description: 'Skills, agents, MCP servers, hooks, workflows, and plugins in one source',
+    complexity: 'advanced',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "checkout-agent-platform"
+  syntax: "1.4.0"
+  tags: ["payments", "typescript"]
+}
+
+@identity {
+  """
+  You are working on a payment service.
+  Preserve transaction integrity and auditability.
+  """
+}
+
+@standards {
+  code: ["Use strict TypeScript", "Write tests for business rules"]
+}
+
+@skills {
+  security-review: {
+    description: "Review payment changes for security risks"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: """
+      Inspect authentication, authorization, secrets, and payment data handling.
+      Report findings by severity and include concrete remediation steps.
+    """
+  }
+}
+
+@mcpServers {
+  issue-tracker: {
+    transport: "stdio"
+    command: ["node", "./tools/issues.mjs"]
+    timeoutMs: 30000
+  }
+}
+
+@agents {
+  reviewer: {
+    description: "Review changes before merge"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    skills: ["security-review"]
+    mcpServers: ["issue-tracker"]
+    content: "Review changed code, tests, and operational impact."
+  }
+}
+
+@hooks {
+  validate-changes: {
+    event: "post-tool-use"
+    matcher: "Edit|Write"
+    command: ["pnpm", "run", "typecheck"]
+    timeoutMs: 120000
+    statusMessage: "Checking TypeScript"
+  }
+}
+
+@workflows {
+  release: {
+    description: "Validate and prepare a release"
+    content: """
+      1. Review changes since the previous release
+      2. Run formatting, linting, type checks, and tests
+      3. Summarize changes and prepare release metadata
+      4. Stop before publishing and request approval
+    """
+  }
+}
+
+@plugins {
+  payment-engineering: {
+    description: "Payment engineering capability bundle"
+    version: "1.0.0"
+    skills: ["security-review"]
+    hooks: ["validate-changes"]
+    mcpServers: ["issue-tracker"]
+  }
 }
 `,
       },
@@ -1422,6 +1557,21 @@ export function ExampleGallery() {
         {example.files.some((f) => f.content.includes('@agents')) && (
           <span className="text-xs px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded">agents</span>
         )}
+        {example.files.some((f) => f.content.includes('@mcpServers')) && (
+          <span className="text-xs px-2 py-0.5 bg-sky-500/20 text-sky-400 rounded">mcp</span>
+        )}
+        {example.files.some(
+          (f) => f.content.includes('@hooks') || f.content.includes('@workflows')
+        ) && (
+          <span className="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">
+            automation
+          </span>
+        )}
+        {example.files.some((f) => f.content.includes('@plugins')) && (
+          <span className="text-xs px-2 py-0.5 bg-violet-500/20 text-violet-400 rounded">
+            plugins
+          </span>
+        )}
         {example.files.some((f) => f.content.includes('@examples')) && (
           <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
             examples
@@ -1455,6 +1605,11 @@ export function ExampleGallery() {
         {example.files.some((f) => /["'`]!\.?\//.test(f.content)) && (
           <span className="text-xs px-2 py-0.5 bg-orange-600/20 text-orange-300 rounded">
             negation
+          </span>
+        )}
+        {example.files.some((f) => /\b[\w-]+!\s*:/.test(f.content)) && (
+          <span className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-300 rounded">
+            replacement
           </span>
         )}
         {example.files.some((f) => f.content.includes('@commands')) && (

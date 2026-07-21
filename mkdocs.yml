@@ -274,6 +274,7 @@ nav:
       - Team Setup: examples/team-setup.md
       - Enterprise: examples/enterprise.md
       - Skills & Local: examples/skills-and-local.md
+      - Agent Platform: examples/agent-platform.md
       - Agents: examples/agents.md
   - Developer:
       - API:

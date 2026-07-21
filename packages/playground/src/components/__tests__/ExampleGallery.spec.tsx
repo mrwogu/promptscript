@@ -70,6 +70,16 @@ describe('ExampleGallery — rendering', () => {
     expect(screen.getAllByText('negation').length).toBeGreaterThan(0);
   });
 
+  it('renders the post-release platform examples with capability badges', () => {
+    render(<ExampleGallery />);
+    expect(screen.getByText('Regular Field Replacement')).toBeTruthy();
+    expect(screen.getByText('Complete Agent Platform')).toBeTruthy();
+    expect(screen.getAllByText('replacement').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('mcp').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('automation').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('plugins').length).toBeGreaterThan(0);
+  });
+
   it('loads an example into the store on click and closes the modal', () => {
     render(<ExampleGallery />);
     fireEvent.click(screen.getByText('Hello World'));
