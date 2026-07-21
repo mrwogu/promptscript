@@ -3,7 +3,7 @@ import { resolve, basename } from 'path';
 import type { ObjectContent, TextContent } from '@promptscript/core';
 import { Resolver } from '@promptscript/resolver';
 import type { InspectOptions } from '../types.js';
-import { loadConfig } from '../config/loader.js';
+import { CONFIG_FILES, loadConfig } from '../config/loader.js';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { ConsoleOutput, createSpinner } from '../output/console.js';
 
@@ -22,16 +22,28 @@ export async function inspectCommand(skillName: string, options: InspectOptions)
   const spinner = isJson ? createSpinner('').stop() : createSpinner('Resolving...').start();
 
   try {
-    const config = await loadConfig(options.config);
+    const projectRoot = options.cwd ? resolve(options.cwd) : process.cwd();
+    const configPath = options.config
+      ? resolve(projectRoot, options.config)
+      : options.cwd
+        ? CONFIG_FILES.map((file) => resolve(projectRoot, file)).find((file) => existsSync(file))
+        : undefined;
+    if (options.cwd && !configPath) {
+      throw new Error(`No PromptScript configuration found in ${projectRoot}. Run: prs init`);
+    }
+
+    const config = await loadConfig(configPath);
     const registry = await resolveRegistryPath(config);
+    const localPath = resolve(projectRoot, '.promptscript');
 
     const resolver = new Resolver({
-      registryPath: registry.path,
-      localPath: './.promptscript',
+      registryPath: registry.isRemote ? registry.path : resolve(projectRoot, registry.path),
+      localPath,
+      projectRoot,
       registries: config.registries,
     });
 
-    const entryPath = resolve('./.promptscript/project.prs');
+    const entryPath = resolve(projectRoot, config.input?.entry ?? '.promptscript/project.prs');
     if (!existsSync(entryPath)) {
       spinner.stop();
       ConsoleOutput.error(`Entry file not found: ${entryPath}`);

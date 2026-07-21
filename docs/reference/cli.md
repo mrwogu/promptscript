@@ -393,11 +393,12 @@ prs inspect <skill-name> [options]
 
 **Options:**
 
-| Option                | Description                |
-| --------------------- | -------------------------- |
-| `--layers`            | Show layer-level breakdown |
-| `--format <format>`   | Output format (text, json) |
-| `-c, --config <path>` | Path to custom config file |
+| Option                | Description                       |
+| --------------------- | --------------------------------- |
+| `--layers`            | Show layer-level breakdown        |
+| `--format <format>`   | Output format (text, json)        |
+| `-c, --config <path>` | Path to custom config file        |
+| `--cwd <dir>`         | Set the project working directory |
 
 **Examples:**
 
