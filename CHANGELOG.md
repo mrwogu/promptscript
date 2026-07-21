@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0](https://github.com/mrwogu/promptscript/compare/v1.13.2...v1.14.0) (2026-07-21)
+
+
+### Features
+
+* **cli:** compile scoped build profiles ([c2995ac](https://github.com/mrwogu/promptscript/commit/c2995ac6eefc57d2c2a6c9f4b57fcc8e26a1f046))
+* **compiler:** support structured output merges ([1580b79](https://github.com/mrwogu/promptscript/commit/1580b7933d2ceb46f245438440c7318dc3e58548))
+* **core:** add MCP servers and plugins ([1484260](https://github.com/mrwogu/promptscript/commit/1484260de33b100097ad75c6415c21b58255c262))
+* **core:** add portable hooks and workflows ([f5f9f61](https://github.com/mrwogu/promptscript/commit/f5f9f619518ccbd455186e2fadb1d52437c2c048))
+* **formatters:** add AGENTS.md and Grok targets ([0fd1d4e](https://github.com/mrwogu/promptscript/commit/0fd1d4eaadd67bf7de715da5701ae4297253bc49))
+* **formatters:** add modern CLI agent targets ([79b2809](https://github.com/mrwogu/promptscript/commit/79b2809883e98c98ec072805b69c4db32941ea3d))
+* **formatters:** add portable skill resources ([4d08407](https://github.com/mrwogu/promptscript/commit/4d084078841b0aa613b997052dfab57b407c55dd))
+* **formatters:** add split Factory rules output ([0fa39bb](https://github.com/mrwogu/promptscript/commit/0fa39bb5d72db43d3b2783fc3a41be54c68bd4d8))
+* **formatters:** emit advanced agent capabilities ([bc4e7cd](https://github.com/mrwogu/promptscript/commit/bc4e7cda955320c2b33dced2f429a417efadca13))
+* **formatters:** emit agent mcpServers and harden MCP YAML ([1234254](https://github.com/mrwogu/promptscript/commit/1234254c013eabdf87d04e34778800e3a8ea709d))
+* **formatters:** emit MCP and plugin outputs ([6a703e4](https://github.com/mrwogu/promptscript/commit/6a703e4dba45d6dd809e8b6bd42f80ddcf865bcc))
+* **formatters:** emit native Codex agents ([c92a1c4](https://github.com/mrwogu/promptscript/commit/c92a1c4526f8287a3c7df6b032779cd3588a3fd5))
+* **formatters:** guide agents to factory split-rule files from index ([1e18cbf](https://github.com/mrwogu/promptscript/commit/1e18cbfaf3f4573b8adfed8a1c99877efbee9662))
+* **parser:** add regular block replacement syntax ([2b2c053](https://github.com/mrwogu/promptscript/commit/2b2c053f60ce66f6343c0acd3a8d209d17550ab6))
+* **playground:** add agent platform examples ([c5e54cb](https://github.com/mrwogu/promptscript/commit/c5e54cb6a1ccb92ef739ebb47aa60cf1a7a515a4))
+
+
+### Bug Fixes
+
+* **cli:** apply Prettier post-format in diff for compile parity ([9cfac35](https://github.com/mrwogu/promptscript/commit/9cfac35f13a3c80437200edbd6f5afc2d61f04d8)), closes [#307](https://github.com/mrwogu/promptscript/issues/307)
+* **cli:** fall back to in-process guarded unlink on packaged runtimes ([9723349](https://github.com/mrwogu/promptscript/commit/97233492f71133ef483c424de629369c4cdb2982))
+* **cli:** make init and migrate non-destructive ([52b2182](https://github.com/mrwogu/promptscript/commit/52b218249470bc769eb491bcf8920daba96beba8))
+* **compiler:** preserve agent platform resources ([cf4aa62](https://github.com/mrwogu/promptscript/commit/cf4aa6265df42dbfadb9356aeea6f237e4639003))
+* **formatters:** preserve Factory standards grouping ([ea44794](https://github.com/mrwogu/promptscript/commit/ea44794b77a7ddbf3e73709f0335095fcf4c25a8))
+* **formatters:** stabilize agent platform integration ([a8905bf](https://github.com/mrwogu/promptscript/commit/a8905bf61a6d7352e761a6d4c5c3c47095b11c99))
+* **parser:** reject ! replace modifier combined with default value ([5154420](https://github.com/mrwogu/promptscript/commit/51544201ec1360f27718a0cb1bc3a6dedc4ef1ca))
+* **parser:** sync syntax highlighters ([276d80c](https://github.com/mrwogu/promptscript/commit/276d80cf9616f0894d78d56b0c082e75ff79671d))
+
 ## [1.13.2](https://github.com/mrwogu/promptscript/compare/v1.13.1...v1.13.2) (2026-07-14)
 
 
