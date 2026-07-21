@@ -2,14 +2,15 @@ import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import type { DiffOptions } from '../types.js';
-import type { PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
+import type { Logger, PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader.js';
-import { createSpinner, ConsoleOutput } from '../output/console.js';
+import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
 import { createPager, Pager } from '../output/pager.js';
 import { Compiler } from '@promptscript/compiler';
 import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { stripMarkers } from '../utils/markers.js';
+import { postFormatWithPrettier } from '../prettier/post-format.js';
 import chalk from 'chalk';
 
 /**
@@ -23,6 +24,29 @@ function configureColors(options: DiffOptions): void {
     chalk.level = 3; // Full color support
   }
   // Otherwise use chalk's auto-detection (respects NO_COLOR env var)
+}
+
+/**
+ * Logger that surfaces post-format diagnostics only when --verbose/--debug is set.
+ * Mirrors createCliLogger in compile.ts so diff and compile report Prettier
+ * post-format warnings consistently.
+ */
+function createDiffLogger(): Logger {
+  return {
+    verbose: (message: string) => {
+      if (isVerbose() || isDebug()) {
+        ConsoleOutput.verbose(message);
+      }
+    },
+    debug: (message: string) => {
+      if (isDebug()) {
+        ConsoleOutput.debug(message);
+      }
+    },
+    warn: (message: string) => {
+      ConsoleOutput.warn(message);
+    },
+  };
 }
 
 /**
@@ -157,6 +181,13 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       process.exitCode = 1;
       return;
     }
+
+    // Apply the same Prettier post-format pass as compile.ts so diff compares
+    // against the canonical form that compile --force actually writes to disk.
+    // Without this, Prettier-normalised markdown (list-continuation indent,
+    // YAML frontmatter quote style, etc.) on disk would always mismatch the
+    // raw formatter output, producing permanent false drift. See issue #307.
+    await postFormatWithPrettier(result.outputs, process.cwd(), createDiffLogger());
 
     spinner.succeed('Diff computed');
     ConsoleOutput.newline();

@@ -83,6 +83,24 @@ vi.mock('../../output/pager.js', () => ({
   })),
 }));
 
+const { mockPostFormatWithPrettier, mockPostFormatTransform } = vi.hoisted(() => {
+  // postFormatWithPrettier mutates outputs in place. The default transform is
+  // a no-op so existing tests are unaffected; tests that exercise the
+  // post-format parity fix set mockPostFormatTransform.apply to true.
+  const mockPostFormatTransform = { apply: false };
+  const mockPostFormatWithPrettier = vi.fn(async (outputs: Map<string, { content: string }>) => {
+    if (!mockPostFormatTransform.apply) return;
+    for (const output of outputs.values()) {
+      output.content = `prettier-normalised\n${output.content}`;
+    }
+  });
+  return { mockPostFormatWithPrettier, mockPostFormatTransform };
+});
+
+vi.mock('../../prettier/post-format.js', () => ({
+  postFormatWithPrettier: mockPostFormatWithPrettier,
+}));
+
 vi.mock('chalk', () => {
   const identity = (s: string): string => s;
   return {
@@ -105,6 +123,7 @@ describe('diffCommand', () => {
     vi.clearAllMocks();
     process.exitCode = undefined;
     mockSpinner.text = '';
+    mockPostFormatTransform.apply = false;
   });
 
   it('should detect changes between compiled output and existing files', async () => {
@@ -232,5 +251,43 @@ describe('diffCommand', () => {
     expect(mockFail).toHaveBeenCalledWith('Error');
     expect(ConsoleOutput.error).toHaveBeenCalledWith('Config load failure');
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should apply Prettier post-format before comparing (issue #307 drift fix)', async () => {
+    // Arrange: disk content matches what compile writes AFTER prettier post-format.
+    // Without the post-format call, diff would compare raw formatter output
+    // (no "prettier-normalised" prefix) against the canonicalised disk file
+    // and falsely report a modification.
+    const prettierCanonicalised = 'prettier-normalised\nsame content';
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        ['github', { path: '.github/copilot-instructions.md', content: 'same content' }],
+      ]),
+    });
+    mockReadFile.mockResolvedValue(prettierCanonicalised);
+    mockPostFormatTransform.apply = true;
+
+    // Act
+    await diffCommand({ noPager: true });
+
+    // Assert: post-format ran, and the canonicalised output matches disk → no drift
+    expect(mockPostFormatWithPrettier).toHaveBeenCalledTimes(1);
+    expect(mockSucceed).toHaveBeenCalledWith('Diff computed');
+    expect(mockPagerWrite).toHaveBeenCalledWith(
+      expect.stringContaining('All files are up to date')
+    );
   });
 });
