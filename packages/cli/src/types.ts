@@ -90,6 +90,8 @@ export interface CompileOptions {
  * Options for the validate command.
  */
 export interface ValidateOptions {
+  /** Specific PromptScript files to validate */
+  files?: string[];
   /** Treat warnings as errors */
   strict?: boolean;
   /** Output format (text, json) */

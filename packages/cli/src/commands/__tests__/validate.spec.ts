@@ -224,6 +224,33 @@ describe('validateCommand', () => {
     expect(mockCompile).toHaveBeenCalledWith(resolve('custom/main.prs'));
   });
 
+  it('should validate each explicitly requested file', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    // Act
+    await validateCommand({ files: ['one.prs', 'nested/two.prs'] });
+
+    // Assert
+    expect(mockCompile).toHaveBeenNthCalledWith(1, resolve('one.prs'));
+    expect(mockCompile).toHaveBeenNthCalledWith(2, resolve('nested/two.prs'));
+  });
+
   it('should output JSON error when entry file is not found with --format json', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({

@@ -135,14 +135,14 @@ program
   .action((name, opts) => compileCommand({ ...opts, build: name }));
 
 program
-  .command('validate')
+  .command('validate [files...]')
   .description('Validate PromptScript files')
   .option('--strict', 'Treat warnings as errors')
   .option('--format <format>', 'Output format (text, json)', 'text')
   .option('--fix', 'Auto-fix syntax version issues')
   .option('--skip-policies', 'Skip extension compliance policy evaluation')
   .option('--ignore-hashes', 'Skip reference integrity checks')
-  .action(validateCommand);
+  .action((files, opts) => validateCommand({ ...opts, files }));
 
 program
   .command('inspect <skill-name>')
