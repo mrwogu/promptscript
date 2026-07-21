@@ -10,7 +10,7 @@ export interface InitOptions {
   inherit?: string;
   /** Registry path or URL */
   registry?: string;
-  /** Target AI tools (github, claude, cursor) */
+  /** Target AI tools */
   targets?: string[];
   /** Interactive mode (prompts for all options) */
   interactive?: boolean;
@@ -24,6 +24,8 @@ export interface InitOptions {
   autoImport?: boolean;
   /** Create backup before migration */
   backup?: boolean;
+  /** Preview planned files without writing */
+  dryRun?: boolean;
   /**
    * Install auto-compile hooks for selected targets.
    * Defaults to `true`; pass `--no-hooks` on the CLI to opt out.
@@ -44,6 +46,10 @@ export interface MigrateOptions {
   static?: boolean;
   llm?: boolean;
   files?: string[];
+  targets?: string[];
+  backup?: boolean;
+  force?: boolean;
+  dryRun?: boolean;
 }
 
 /**

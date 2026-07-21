@@ -23,6 +23,8 @@ export interface CLIContext {
   logLevel: LogLevel;
   /** Whether colors are enabled */
   colors: boolean;
+  /** Stream for human-readable command output */
+  outputStream: 'stdout' | 'stderr';
 }
 
 /**
@@ -31,7 +33,18 @@ export interface CLIContext {
 let globalContext: CLIContext = {
   logLevel: LogLevel.Normal,
   colors: !process.env['NO_COLOR'],
+  outputStream: 'stdout',
 };
+
+function writeLine(message?: string): void {
+  if (globalContext.outputStream === 'stderr') {
+    if (message === undefined) console.error();
+    else console.error(message);
+  } else {
+    if (message === undefined) console.log();
+    else console.log(message);
+  }
+}
 
 /**
  * Set the global CLI context.
@@ -94,7 +107,7 @@ export const ConsoleOutput = {
    */
   success(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.green(`  ✓ ${message}`));
+    writeLine(chalk.green(`  ✓ ${message}`));
   },
 
   /**
@@ -110,7 +123,7 @@ export const ConsoleOutput = {
    */
   warning(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.yellow(`  ⚠ ${message}`));
+    writeLine(chalk.yellow(`  ⚠ ${message}`));
   },
 
   /**
@@ -118,7 +131,7 @@ export const ConsoleOutput = {
    */
   warn(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.yellow(`  ⚠ ${message}`));
+    writeLine(chalk.yellow(`  ⚠ ${message}`));
   },
 
   /**
@@ -126,7 +139,7 @@ export const ConsoleOutput = {
    */
   skipped(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.yellow(`  ⊘ ${message}`));
+    writeLine(chalk.yellow(`  ⊘ ${message}`));
   },
 
   /**
@@ -134,7 +147,7 @@ export const ConsoleOutput = {
    */
   unchanged(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.gray(`  ○ ${message}`));
+    writeLine(chalk.gray(`  ○ ${message}`));
   },
 
   /**
@@ -142,7 +155,7 @@ export const ConsoleOutput = {
    */
   info(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.blue(`  ℹ ${message}`));
+    writeLine(chalk.blue(`  ℹ ${message}`));
   },
 
   /**
@@ -150,7 +163,7 @@ export const ConsoleOutput = {
    */
   muted(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.gray(`    ${message}`));
+    writeLine(chalk.gray(`    ${message}`));
   },
 
   /**
@@ -158,7 +171,7 @@ export const ConsoleOutput = {
    */
   verbose(message: string): void {
     if (!isVerbose()) return;
-    console.log(chalk.gray(`  [verbose] ${message}`));
+    writeLine(chalk.gray(`  [verbose] ${message}`));
   },
 
   /**
@@ -166,7 +179,7 @@ export const ConsoleOutput = {
    */
   debug(message: string): void {
     if (!isVerbose()) return;
-    console.log(chalk.dim(`  [debug] ${message}`));
+    writeLine(chalk.dim(`  [debug] ${message}`));
   },
 
   /**
@@ -174,7 +187,7 @@ export const ConsoleOutput = {
    */
   dryRun(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.blue(`  [dry-run] ${message}`));
+    writeLine(chalk.blue(`  [dry-run] ${message}`));
   },
 
   /**
@@ -182,7 +195,7 @@ export const ConsoleOutput = {
    */
   newline(): void {
     if (isQuiet()) return;
-    console.log();
+    writeLine();
   },
 
   /**
@@ -190,7 +203,7 @@ export const ConsoleOutput = {
    */
   header(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.bold(message));
+    writeLine(chalk.bold(message));
   },
 
   /**
@@ -198,7 +211,7 @@ export const ConsoleOutput = {
    */
   stats(message: string): void {
     if (isQuiet()) return;
-    console.log(chalk.gray(message));
+    writeLine(chalk.gray(message));
   },
 
   /**
