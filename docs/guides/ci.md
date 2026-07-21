@@ -856,8 +856,8 @@ Catch issues before they reach CI with local pre-commit hooks.
    # Only run if .prs files are staged
    if git diff --cached --name-only | grep -qE '\.prs$|promptscript\.yaml$'; then
      echo "🔍 Validating PromptScript files..."
-     npx prs validate --strict
-     npx prs compile
+     npx --package=@promptscript/cli prs validate --strict
+     npx --package=@promptscript/cli prs compile
 
      # Check if compile changed any files
      if ! git diff --quiet; then
@@ -878,14 +878,14 @@ repos:
     hooks:
       - id: promptscript-validate
         name: Validate PromptScript
-        entry: npx prs validate --strict
+        entry: npx --package=@promptscript/cli prs validate --strict
         language: system
         files: '\.prs$|promptscript\.yaml$'
         pass_filenames: false
 
       - id: promptscript-compile
         name: Compile PromptScript
-        entry: bash -c 'npx prs compile && git diff --exit-code'
+        entry: bash -c 'npx --package=@promptscript/cli prs compile && git diff --exit-code'
         language: system
         files: '\.prs$|promptscript\.yaml$'
         pass_filenames: false

@@ -277,12 +277,11 @@ hide:
 </div>
 <div class="home-scale__spacer" aria-hidden="true">
 <svg class="home-scale__lines" viewBox="0 0 100 40" preserveAspectRatio="none">
-<line x1="15" y1="0" x2="15" y2="20" stroke="#475569" stroke-width="1"/>
-<line x1="85" y1="0" x2="85" y2="20" stroke="#475569" stroke-width="1"/>
-<line x1="15" y1="20" x2="85" y2="20" stroke="#475569" stroke-width="1"/>
-<line x1="16.7" y1="20" x2="16.7" y2="40" stroke="#475569" stroke-width="1"/>
-<line x1="50" y1="20" x2="50" y2="40" stroke="#475569" stroke-width="1"/>
-<line x1="83.3" y1="20" x2="83.3" y2="40" stroke="#475569" stroke-width="1"/>
+<line x1="50" y1="0" x2="50" y2="14" stroke="#475569" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="16.5" y1="14" x2="83.5" y2="14" stroke="#475569" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="16.5" y1="14" x2="16.5" y2="40" stroke="#475569" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="50" y1="14" x2="50" y2="40" stroke="#475569" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="83.5" y1="14" x2="83.5" y2="40" stroke="#475569" stroke-width="1" vector-effect="non-scaling-stroke"/>
 </svg>
 </div>
 <div class="home-scale__row">

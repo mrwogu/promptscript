@@ -205,18 +205,23 @@ Real-world PromptScript configuration examples.
 
 ```yaml
 # promptscript.yaml
+id: basic-example
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
 targets:
-  github:
-    enabled: true
+  - github
 ```
 
 ### Full Config (Local Registry)
 
 ```yaml
 # promptscript.yaml
+id: local-registry-example
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
   include:
@@ -226,18 +231,12 @@ registry:
   path: ./registry
 
 targets:
-  github:
-    enabled: true
-    output: .github/copilot-instructions.md
-  claude:
-    enabled: true
-    output: CLAUDE.md
-  cursor:
-    enabled: true
-    output: .cursor/rules/project.mdc
-
-validation:
-  strict: true
+  - github:
+      output: .github/copilot-instructions.md
+  - claude:
+      output: CLAUDE.md
+  - cursor:
+      output: .cursor/rules/project.mdc
 
 watch:
   debounce: 300
@@ -247,6 +246,9 @@ watch:
 
 ```yaml
 # promptscript.yaml
+id: git-registry-example
+syntax: '1.4.0'
+
 input:
   entry: .promptscript/project.prs
 
@@ -265,7 +267,4 @@ targets:
   - github
   - claude
   - cursor
-
-validation:
-  strict: true
 ```

@@ -594,11 +594,8 @@ my-project/
 ### Configuration (promptscript.yaml)
 
 ```yaml
-version: '1'
-
-project:
-  id: my-project
-  team: platform
+id: my-project
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs

@@ -46,7 +46,7 @@ docker pull ghcr.io/mrwogu/promptscript:1.0.0
 
 ```bash
 docker run --rm -v $(pwd):/workspace ghcr.io/mrwogu/promptscript:latest \
-  init --name myproject --targets github,claude,opencode,gemini
+  init --name myproject --targets github claude opencode gemini
 ```
 
 ### Validate PromptScript Files
@@ -135,10 +135,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Validate
-        run: prs validate --strict
+        run: node /app/bin/prs.js validate --strict
 
       - name: Compile
-        run: prs compile
+        run: node /app/bin/prs.js compile
 
       - name: Check drift
         run: |
@@ -155,8 +155,8 @@ jobs:
 promptscript:
   image: ghcr.io/mrwogu/promptscript:latest
   script:
-    - prs validate --strict
-    - prs compile
+    - node /app/bin/prs.js validate --strict
+    - node /app/bin/prs.js compile
     - git diff --exit-code
   rules:
     - changes:
@@ -176,12 +176,12 @@ pipeline {
     stages {
         stage('Validate') {
             steps {
-                sh 'prs validate --strict'
+                sh 'node /app/bin/prs.js validate --strict'
             }
         }
         stage('Compile') {
             steps {
-                sh 'prs compile'
+                sh 'node /app/bin/prs.js compile'
             }
         }
         stage('Check Drift') {
@@ -204,10 +204,10 @@ container: ghcr.io/mrwogu/promptscript:latest
 steps:
   - checkout: self
 
-  - script: prs validate --strict
+  - script: node /app/bin/prs.js validate --strict
     displayName: 'Validate PromptScript'
 
-  - script: prs compile
+  - script: node /app/bin/prs.js compile
     displayName: 'Compile PromptScript'
 
   - script: git diff --exit-code
@@ -372,7 +372,7 @@ docker run --rm -it --entrypoint sh ghcr.io/mrwogu/promptscript:latest
 | ----------------- | ---------------------------- |
 | Base image        | `node:25-alpine`             |
 | Working directory | `/workspace`                 |
-| User              | `prs` (UID 1000)             |
+| User              | `node` (UID 1000)            |
 | Entrypoint        | `node /app/bin/prs.js`       |
 | Platforms         | `linux/amd64`, `linux/arm64` |
 

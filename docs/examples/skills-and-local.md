@@ -263,7 +263,8 @@ my-project/
 
 ```yaml
 # promptscript.yaml
-version: '1'
+id: skills-and-local
+syntax: '1.4.0'
 
 input:
   entry: .promptscript/project.prs

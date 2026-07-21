@@ -7,9 +7,7 @@ Follow company coding standards and best practices.
 
 ## Code Style
 
-- Follow clean code principles
-- Document all public APIs
-- Write tests for all code
+- principles: Follow clean code principles, Document all public APIs, Write tests for all code
 - Validate all user input
 - Never hardcode secrets
 

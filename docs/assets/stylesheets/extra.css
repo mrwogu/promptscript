@@ -1347,6 +1347,10 @@ pre.init-demo__file-preview-content {
   line-height: 1.75;
 }
 
+.home-code-window .md-code__button {
+  display: none;
+}
+
 .home-code-keyword {
   color: #c084fc;
   font-weight: 700;
@@ -1892,9 +1896,11 @@ pre.init-demo__file-preview-content {
 }
 
 .home-scale__lines {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: 100%;
+  height: 100% !important;
 }
 
 .home-scale__row {

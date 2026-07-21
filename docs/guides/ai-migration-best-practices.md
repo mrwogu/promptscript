@@ -411,7 +411,9 @@ Files in `.github/instructions/` with `applyTo` frontmatter should be migrated u
 }
 ```
 
-`prs import` can now detect `.github/instructions/*.instructions.md` files with `applyTo` frontmatter and convert them to named `@guards` entries automatically. Run `prs import` in your project root to let the importer discover and convert these files.
+`prs migrate --static` discovers project instruction files and converts
+`.github/instructions/*.instructions.md` files with `applyTo` frontmatter to named `@guards`
+entries. Review the generated files before compilation.
 
 ### Cursor
 

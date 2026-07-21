@@ -84,7 +84,8 @@ You only need the skill name and optional metadata. PromptScript loads content f
 prs compile
 ```
 
-Each skill (with all its resource files) is copied to every target:
+Each skill, including its resource files, is copied to every configured target with native skill
+support:
 
 ```
 .claude/skills/frontend-design/SKILL.md
@@ -202,6 +203,15 @@ npx skills add anthropics/skills \
 ```
 
 This overwrites the existing skill directory with the latest version.
+
+## Security
+
+Treat third-party skills as executable dependencies. Before installing or updating one:
+
+1. Review `SKILL.md`, scripts, hooks, and bundled resources.
+2. Pin the repository to a reviewed commit or release when the installer supports it.
+3. Inspect the resulting git diff before running any bundled script.
+4. Review updates independently instead of assuming a previously trusted repository is unchanged.
 
 ## Version control
 
