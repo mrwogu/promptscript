@@ -7,10 +7,13 @@ vi.mock('@promptscript/server', () => ({
 }));
 
 import { serveCommand } from '../serve.js';
+import { ConsoleOutput } from '../../output/console.js';
 
 describe('serveCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockStartServer.mockResolvedValue(undefined);
+    process.exitCode = undefined;
   });
 
   it('calls startServer with default options', async () => {
@@ -28,6 +31,28 @@ describe('serveCommand', () => {
   it('passes custom port', async () => {
     await serveCommand({ port: '8080' });
     expect(mockStartServer).toHaveBeenCalledWith(expect.objectContaining({ port: 8080 }));
+  });
+
+  it('rejects an invalid port', async () => {
+    const errorSpy = vi.spyOn(ConsoleOutput, 'error').mockImplementation(() => undefined);
+
+    await serveCommand({ port: 'nope' });
+
+    expect(mockStartServer).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Invalid port "nope". Expected an integer from 1 to 65535.'
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('reports server startup errors', async () => {
+    const errorSpy = vi.spyOn(ConsoleOutput, 'error').mockImplementation(() => undefined);
+    mockStartServer.mockRejectedValue(new Error('address already in use'));
+
+    await serveCommand({ port: '8080' });
+
+    expect(errorSpy).toHaveBeenCalledWith('Failed to start server: address already in use');
+    expect(process.exitCode).toBe(1);
   });
 
   it('passes host option', async () => {
