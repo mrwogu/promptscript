@@ -51,9 +51,11 @@ prs validate --strict
 prs compile
 ```
 
-`prs init` detects the project stack, creates `promptscript.yaml` and
-`.promptscript/project.prs`, selects target platforms, and installs supported AI-tool hooks by
-default. Use `prs init --no-hooks` to skip hook installation.
+`prs init` detects the project stack and installed AI tools, then creates a clean
+`promptscript.yaml` and `.promptscript/project.prs`. Detected targets are preselected, while other
+targets remain explicit choices. For automation, use `prs init --yes --targets claude factory`.
+Hooks are installed by default. Use `--no-hooks` to skip hook installation or `--dry-run` to
+preview all writes.
 
 Prefer no local installation?
 
@@ -281,13 +283,15 @@ See exact output paths and feature support in the
 
 ```bash
 prs import CLAUDE.md
+prs migrate --static --dry-run
 prs migrate --static
 prs migrate --llm
 ```
 
 Import existing Claude Code, GitHub Copilot, Cursor, AGENTS.md, and other instruction files. Review
 the generated `.prs` source, preview output with `prs compile --dry-run`, then migrate targets at
-your own pace.
+your own pace. Migration preserves existing PromptScript configuration and source instructions;
+if no candidates are detected, it changes nothing.
 
 Targets with native skill support can also receive the bundled PromptScript language skill. This
 lets compatible agents read and maintain `.prs` files from plain-language requests. Disable it

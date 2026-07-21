@@ -1,8 +1,13 @@
 # Intelligent `prs init` & Migration Flow
 
 **Date:** 2026-03-20
-**Status:** Implemented
+**Status:** Superseded
 **Scope:** `packages/cli`, `packages/importer`
+
+> Historical design record. Current command contract lives in
+> [`docs/reference/cli.md`](../reference/cli.md). In particular, current `prs migrate` preserves an
+> existing configuration, writes imported modules under `.promptscript/migrated/`, performs no
+> writes when no candidates exist, and never installs hooks.
 
 ## Problem
 
