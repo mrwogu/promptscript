@@ -250,7 +250,7 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
       formatters: [], // No formatters needed for validation only
     });
 
-    const entryPath = resolve('./.promptscript/project.prs');
+    const entryPath = resolve(config.input?.entry ?? './.promptscript/project.prs');
 
     if (!existsSync(entryPath)) {
       handleEntryNotFound(entryPath, isJsonFormat, spinner);

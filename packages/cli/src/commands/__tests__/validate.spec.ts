@@ -66,6 +66,7 @@ vi.mock('fs', () => ({
 
 import { validateCommand } from '../validate.js';
 import { ConsoleOutput } from '../../output/console.js';
+import { resolve } from 'path';
 
 describe('validateCommand', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
@@ -193,6 +194,34 @@ describe('validateCommand', () => {
     expect(mockFail).toHaveBeenCalledWith('Entry file not found');
     expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('File not found'));
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should validate the configured entry file', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      input: { entry: 'custom/main.prs' },
+      targets: [],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    // Act
+    await validateCommand({});
+
+    // Assert
+    expect(mockExistsSync).toHaveBeenCalledWith(resolve('custom/main.prs'));
+    expect(mockCompile).toHaveBeenCalledWith(resolve('custom/main.prs'));
   });
 
   it('should output JSON error when entry file is not found with --format json', async () => {
