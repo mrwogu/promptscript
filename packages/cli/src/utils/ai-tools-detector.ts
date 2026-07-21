@@ -254,13 +254,15 @@ function isPromptScriptGenerated(content: string): boolean {
   return PROMPTSCRIPT_MARKERS.some((marker) => header.includes(marker));
 }
 
-async function assertSafeInstructionFile(filePath: string, services: CliServices): Promise<void> {
+async function assertSafeInstructionFile(filePath: string, services: CliServices): Promise<string> {
   const absolutePath = resolve(services.cwd, filePath);
+  let identity = absolutePath;
   if (services.fs.lstat) {
     const stat = await services.fs.lstat(absolutePath);
     if (!stat.isFile() || stat.isSymbolicLink()) {
       throw new Error(`Instruction candidate must be a regular file: ${filePath}`);
     }
+    identity = `${stat.dev}:${stat.ino}`;
   }
   if (services.fs.realpath) {
     const [projectRoot, candidatePath] = await Promise.all([
@@ -275,7 +277,11 @@ async function assertSafeInstructionFile(filePath: string, services: CliServices
     ) {
       throw new Error(`Instruction candidate must stay inside the project: ${filePath}`);
     }
+    if (!services.fs.lstat) {
+      identity = candidatePath;
+    }
   }
+  return identity;
 }
 
 async function discoverInstructionFiles(services: CliServices): Promise<string[]> {
@@ -333,9 +339,14 @@ export async function detectAITools(
 
   // Check for instruction files that are NOT PromptScript-generated
   const instructionFiles = await discoverInstructionFiles(services);
+  const seenInstructionFiles = new Set<string>();
   for (const file of instructionFiles) {
     if (services.fs.existsSync(file)) {
-      await assertSafeInstructionFile(file, services);
+      const identity = await assertSafeInstructionFile(file, services);
+      if (seenInstructionFiles.has(identity)) {
+        continue;
+      }
+      seenInstructionFiles.add(identity);
       let content: string;
       try {
         content = await services.fs.readFile(file, 'utf-8');
