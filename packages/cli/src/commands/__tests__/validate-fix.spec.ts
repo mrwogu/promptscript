@@ -167,6 +167,31 @@ describe('validateCommand --fix', () => {
     expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Fixed'));
   });
 
+  it('should only fix explicitly requested files', async () => {
+    mkdirSync(join(tmpDir, 'custom'), { recursive: true });
+    const requestedPath = join(tmpDir, 'custom', 'requested.prs');
+    const otherPath = join(tmpDir, 'custom', 'other.prs');
+    const content = `@meta {
+  id: "test"
+  syntax: "1.0.0"
+}
+
+@agents {
+  helper: {
+    description: "A helper"
+    content: "You are a helper."
+  }
+}
+`;
+    writeFileSync(requestedPath, content);
+    writeFileSync(otherPath, content);
+
+    await validateCommand({ fix: true, files: ['custom/requested.prs'] });
+
+    expect(readFileSync(requestedPath, 'utf-8')).toContain('syntax: "1.1.0"');
+    expect(readFileSync(otherPath, 'utf-8')).toContain('syntax: "1.0.0"');
+  });
+
   it('should fix syntax version when the replace modifier requires 1.3.0', async () => {
     mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
     writeFileSync(

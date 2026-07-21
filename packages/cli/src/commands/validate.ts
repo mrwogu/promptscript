@@ -36,10 +36,12 @@ interface ValidationJsonOutput {
   };
 }
 
+type ValidationResult = Pick<CompileResult, 'errors' | 'warnings'>;
+
 /**
  * Print validation errors.
  */
-function printValidationErrors(errors: CompileResult['errors']): void {
+function printValidationErrors(errors: ValidationResult['errors']): void {
   if (errors.length === 0) return;
 
   console.log(`Errors (${errors.length}):`);
@@ -55,7 +57,7 @@ function printValidationErrors(errors: CompileResult['errors']): void {
 /**
  * Print validation warnings.
  */
-function printValidationWarnings(warnings: CompileResult['warnings'], strict: boolean): void {
+function printValidationWarnings(warnings: ValidationResult['warnings'], strict: boolean): void {
   if (warnings.length === 0) return;
 
   const warningLabel = strict ? 'Errors (--strict)' : 'Warnings';
@@ -102,7 +104,7 @@ function handleEntryNotFound(
  * Output validation results in text format.
  */
 function outputTextResult(
-  result: CompileResult,
+  result: ValidationResult,
   failed: boolean,
   strict: boolean,
   spinner: ReturnType<typeof createSpinner>
@@ -127,7 +129,7 @@ function outputTextResult(
 /**
  * Convert compile result to JSON output format.
  */
-function toJsonOutput(result: CompileResult, success: boolean): ValidationJsonOutput {
+function toJsonOutput(result: ValidationResult, success: boolean): ValidationJsonOutput {
   return {
     success,
     errors: result.errors.map((e) => ({
@@ -218,7 +220,7 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
   }
 
   if (options.fix) {
-    await runFix();
+    await runFix(options.files);
     return;
   }
 
@@ -250,14 +252,26 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
       formatters: [], // No formatters needed for validation only
     });
 
-    const entryPath = resolve(config.input?.entry ?? './.promptscript/project.prs');
+    const entryPaths =
+      options.files && options.files.length > 0
+        ? options.files.map((file) => resolve(file))
+        : [resolve(config.input?.entry ?? './.promptscript/project.prs')];
 
-    if (!existsSync(entryPath)) {
-      handleEntryNotFound(entryPath, isJsonFormat, spinner);
-      return;
+    for (const entryPath of entryPaths) {
+      if (!existsSync(entryPath)) {
+        handleEntryNotFound(entryPath, isJsonFormat, spinner);
+        return;
+      }
     }
 
-    const result = await compiler.compile(entryPath);
+    const results: ValidationResult[] = [];
+    for (const entryPath of entryPaths) {
+      results.push(await compiler.compile(entryPath));
+    }
+    const result: ValidationResult = {
+      errors: results.flatMap((entry) => entry.errors),
+      warnings: results.flatMap((entry) => entry.warnings),
+    };
 
     const hasErrors = result.errors.length > 0;
     const hasWarnings = result.warnings.length > 0;
@@ -314,8 +328,11 @@ function outputJsonResult(result: ValidationJsonOutput): void {
 /**
  * Auto-fix syntax version issues in .prs files.
  */
-async function runFix(): Promise<void> {
-  const files = discoverPrsFiles('.promptscript');
+async function runFix(requestedFiles?: string[]): Promise<void> {
+  const files =
+    requestedFiles && requestedFiles.length > 0
+      ? requestedFiles.map((file) => resolve(file))
+      : discoverPrsFiles('.promptscript');
   let fixedCount = 0;
   const configPath = findConfigFile();
   const registryPath = configPath

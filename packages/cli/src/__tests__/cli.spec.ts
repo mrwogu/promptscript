@@ -126,7 +126,7 @@ describe('cli', () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', 'validate']);
 
-      expect(mockCommand).toHaveBeenCalledWith('validate');
+      expect(mockCommand).toHaveBeenCalledWith('validate [files...]');
     });
 
     it('should register pull command', async () => {
