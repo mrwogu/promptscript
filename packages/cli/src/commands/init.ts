@@ -1,7 +1,12 @@
 import { fileURLToPath } from 'url';
 import { basename, dirname, resolve } from 'path';
 import { readFileSync, existsSync } from 'fs';
-import { getLatestSyntaxVersion, type RegistryManifest } from '@promptscript/core';
+import {
+  getLatestSyntaxVersion,
+  type PromptScriptConfig,
+  type RegistryManifest,
+} from '@promptscript/core';
+import { stringify as stringifyYaml } from 'yaml';
 import { type CliServices, createDefaultServices } from '../services.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +28,7 @@ const BUNDLED_SKILLS_DIR = findSkillsDir();
 
 import { importMultipleFiles } from '@promptscript/importer';
 import type { InitOptions } from '../types.js';
-import { createSpinner, ConsoleOutput } from '../output/console.js';
+import { createSpinner, ConsoleOutput, getContext, setContext } from '../output/console.js';
 import { detectProject, type ProjectInfo } from '../utils/project-detector.js';
 import {
   detectAITools,
@@ -38,6 +43,12 @@ import {
 import { copyToClipboard } from '../utils/clipboard.js';
 import { isGitRepo, createBackup } from '../utils/backup.js';
 import { generateMigrationPrompt } from '../utils/migration-prompt.js';
+import {
+  assertSafeWritePath,
+  executeWritePlan,
+  type PlannedWrite,
+  type WritePlanResult,
+} from '../utils/write-plan.js';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { findPrettierConfig } from '../prettier/loader.js';
 import { hooksCommand } from './hooks.js';
@@ -60,6 +71,7 @@ import {
 } from '../utils/manifest-loader.js';
 import { loadUserConfig } from '../config/user-config.js';
 import { loadEnvOverrides } from '../config/env-config.js';
+import { CONFIG_FILES } from '../config/loader.js';
 import {
   buildProjectContext,
   calculateSuggestions,
@@ -104,11 +116,26 @@ export async function initCommand(
   options: InitOptions,
   services: CliServices = createDefaultServices()
 ): Promise<void> {
+  const previousOutputStream = getContext().outputStream;
+  setContext({ outputStream: 'stderr' });
+  try {
+    await runInitCommand(options, services);
+  } finally {
+    setContext({ outputStream: previousOutputStream });
+  }
+}
+
+async function runInitCommand(options: InitOptions, services: CliServices): Promise<void> {
   const { fs } = services;
-  // Check if already initialized
-  if (fs.existsSync('promptscript.yaml') && !options.force) {
+  const envConfigPath = process.env['PROMPTSCRIPT_CONFIG'];
+  const existingConfigPath =
+    envConfigPath && fs.existsSync(envConfigPath)
+      ? envConfigPath
+      : CONFIG_FILES.find((path) => fs.existsSync(path));
+  if (existingConfigPath && !options.force && !options.backup) {
     ConsoleOutput.warn('PromptScript already initialized');
-    ConsoleOutput.muted('Use --force to reinitialize');
+    ConsoleOutput.muted(`Found: ${existingConfigPath}`);
+    ConsoleOutput.muted('Use --force or --backup to reinitialize');
     process.exitCode = 2;
     return;
   }
@@ -122,14 +149,23 @@ export async function initCommand(
 
     if (hasMigrationCandidates(aiToolsDetection)) {
       if (options._forceMigrate) {
-        migrationMode = options._forceLlm ? 'llm' : 'static';
-      } else if (options.yes && options.autoImport) {
+        if (options._forceLlm) {
+          migrationMode = 'llm';
+        } else if (options.yes) {
+          migrationMode = 'static';
+        } else {
+          migrationMode = await selectMigrationStrategy(services);
+        }
+      } else if (options.autoImport) {
         migrationMode = 'static';
       } else if (options.yes) {
         migrationMode = 'skip';
       } else {
         migrationMode = await showGatewayPrompt(aiToolsDetection, services);
       }
+    }
+    if ((migrationMode === 'static' || migrationMode === 'llm') && !isGitRepo(services)) {
+      ConsoleOutput.warn('Not a git repository. Changes are not version-controlled.');
     }
 
     // Detect Prettier configuration
@@ -157,16 +193,13 @@ export async function initCommand(
       manifest,
       services
     );
+    config.targets = Array.from(new Set(config.targets));
+    validateTargets(config.targets);
+    validateDirectives(config);
 
-    // Create files
-    const spinner = createSpinner('Creating PromptScript configuration...').start();
-
-    await fs.mkdir('.promptscript', { recursive: true });
-
-    const configContent = generateConfig(config);
-    await fs.writeFile('promptscript.yaml', configContent, 'utf-8');
-
-    // Branch on migration mode for file creation
+    const writes: PlannedWrite[] = [
+      { path: existingConfigPath ?? 'promptscript.yaml', content: generateConfig(config) },
+    ];
     let importedFiles: Map<string, string> | undefined;
     if (migrationMode === 'static') {
       importedFiles = await handleStaticMigration(
@@ -175,25 +208,74 @@ export async function initCommand(
         options,
         services
       );
-      // Write imported files to .promptscript/
       for (const [fileName, content] of importedFiles) {
-        await fs.writeFile(`.promptscript/${fileName}`, content, 'utf-8');
+        if (
+          fileName.includes('/') ||
+          fileName.includes('\\') ||
+          fileName.includes('..') ||
+          fileName.length === 0
+        ) {
+          throw new Error(`Importer returned unsafe output path: ${fileName}`);
+        }
+        writes.push({ path: `.promptscript/${fileName}`, content });
       }
     } else {
-      // For 'llm', 'skip', and 'none' modes, write scaffold project.prs
-      const projectPsContent = generateProjectPs(config, projectInfo);
-      await fs.writeFile('.promptscript/project.prs', projectPsContent, 'utf-8');
+      writes.push({
+        path: '.promptscript/project.prs',
+        content: generateProjectPs(config, projectInfo),
+      });
     }
 
+    let migrationPrompt: string | undefined;
     if (migrationMode === 'llm') {
-      await handleLlmMigration(aiToolsDetection.migrationCandidates, options, services);
+      migrationPrompt = prepareLlmMigration(aiToolsDetection.migrationCandidates, options);
+      writes.push({ path: '.promptscript/migration-prompt.md', content: migrationPrompt });
     }
 
-    // Install migration skill to targets
-    // Copies bundled SKILL.md to both .promptscript/skills/ (source) AND
-    // directly to each target's skill directory so AI tools can discover
-    // the skill without running `prs compile` first.
-    const installedSkillPaths = await installSkillToTargets(config.targets, services);
+    const skillWrites = getSkillWrites(config.targets);
+    writes.push(...skillWrites);
+
+    const existingPaths = writes.map((write) => write.path).filter((path) => fs.existsSync(path));
+    let shouldBackup = options.backup === true;
+    if (
+      !options.dryRun &&
+      !shouldBackup &&
+      !options.yes &&
+      existingPaths.length > 0 &&
+      (migrationMode === 'static' || migrationMode === 'llm')
+    ) {
+      shouldBackup = await services.prompts.confirm({
+        message: 'Back up files that will be updated?',
+        default: !isGitRepo(services),
+      });
+    }
+    if (!options.dryRun && shouldBackup && existingPaths.length > 0) {
+      for (const path of existingPaths) {
+        await assertSafeWritePath(path, services);
+      }
+      const backupResult = await createBackup(existingPaths, services);
+      ConsoleOutput.info(`Backup created: ${backupResult.dir}`);
+    }
+
+    const spinner = createSpinner(
+      options.dryRun
+        ? 'Planning PromptScript configuration...'
+        : 'Creating PromptScript configuration...'
+    ).start();
+    const writeResult = await executeWritePlan(writes, services, {
+      dryRun: options.dryRun,
+      force: options.force === true || shouldBackup,
+    });
+
+    if (options.dryRun) {
+      spinner.succeed('PromptScript initialization plan ready');
+      showWritePlan(writeResult);
+      return;
+    }
+
+    if (migrationPrompt) {
+      deliverMigrationPrompt(migrationPrompt);
+    }
 
     // Install auto-compile hooks for the selected targets unless --no-hooks.
     // commander maps `--no-hooks` to options.hooks === false, so any other value
@@ -227,20 +309,15 @@ export async function initCommand(
 
     // Show summary
     ConsoleOutput.newline();
-    console.log('Created:');
-    ConsoleOutput.success('promptscript.yaml');
-    if (importedFiles) {
-      for (const fileName of importedFiles.keys()) {
-        ConsoleOutput.success(`.promptscript/${fileName}`);
-      }
-    } else {
-      ConsoleOutput.success('.promptscript/project.prs');
+    ConsoleOutput.stats('Created:');
+    for (const path of writeResult.created) {
+      ConsoleOutput.success(path);
     }
-    for (const skillPath of installedSkillPaths) {
-      ConsoleOutput.success(skillPath);
+    for (const path of writeResult.updated) {
+      ConsoleOutput.success(`${path} (updated)`);
     }
     ConsoleOutput.newline();
-    console.log('Configuration:');
+    ConsoleOutput.stats('Configuration:');
     ConsoleOutput.muted(`  Project: ${config.projectId}`);
     ConsoleOutput.muted(`  Targets: ${config.targets.join(', ')}`);
     if (config.inherit) {
@@ -268,7 +345,7 @@ export async function initCommand(
     }
 
     ConsoleOutput.newline();
-    console.log('Next steps:');
+    ConsoleOutput.stats('Next steps:');
 
     if (migrationMode === 'llm') {
       ConsoleOutput.muted('1. Use the migration skill in your AI tool:');
@@ -299,7 +376,7 @@ export async function initCommand(
           } else if (line.trim().startsWith('-')) {
             ConsoleOutput.muted(line);
           } else if (line.trim()) {
-            console.log(line);
+            ConsoleOutput.stats(line);
           }
         }
       }
@@ -339,7 +416,7 @@ async function showGatewayPrompt(
   services: CliServices
 ): Promise<'static' | 'llm' | 'skip'> {
   ConsoleOutput.newline();
-  console.log('Found existing instruction files:');
+  ConsoleOutput.stats('Found existing instruction files:');
   for (const c of detection.migrationCandidates) {
     ConsoleOutput.muted(`  ${c.path} (${c.sizeHuman}, ${c.toolName})`);
   }
@@ -355,6 +432,10 @@ async function showGatewayPrompt(
 
   if (gateway === 'fresh-start') return 'skip';
 
+  return selectMigrationStrategy(services);
+}
+
+export async function selectMigrationStrategy(services: CliServices): Promise<'static' | 'llm'> {
   const strategy = await services.prompts.select({
     message: 'How do you want to migrate?',
     choices: [
@@ -367,37 +448,6 @@ async function showGatewayPrompt(
 }
 
 /**
- * Handle backup before migration if needed.
- */
-async function handleMigrationBackup(
-  candidates: MigrationCandidate[],
-  options: InitOptions,
-  services: CliServices
-): Promise<void> {
-  const gitRepo = isGitRepo(services);
-  if (!gitRepo) {
-    ConsoleOutput.warn('Not a git repository. Files are not version-controlled.');
-  }
-
-  const shouldBackup =
-    options.backup ??
-    (options.yes
-      ? false
-      : await services.prompts.confirm({
-          message: 'Create backup to .prs-backup/?',
-          default: !gitRepo,
-        }));
-
-  if (shouldBackup) {
-    const backupResult = await createBackup(
-      candidates.map((c) => c.path),
-      services
-    );
-    ConsoleOutput.info(`Backup created: ${backupResult.dir}`);
-  }
-}
-
-/**
  * Handle static (deterministic) migration of instruction files.
  */
 async function handleStaticMigration(
@@ -406,8 +456,6 @@ async function handleStaticMigration(
   options: InitOptions,
   services: CliServices
 ): Promise<Map<string, string>> {
-  await handleMigrationBackup(candidates, options, services);
-
   // If specific files were requested (prs migrate --files), filter candidates
   const effectiveCandidates =
     options._migrateFiles && options._migrateFiles.length > 0
@@ -415,7 +463,7 @@ async function handleStaticMigration(
       : candidates;
 
   let selectedPaths = effectiveCandidates.map((c) => c.path);
-  if (!options.yes) {
+  if (!options.yes && (!options._migrateFiles || options._migrateFiles.length === 0)) {
     selectedPaths = await services.prompts.checkbox({
       message: 'Select files to import:',
       choices: effectiveCandidates.map((c) => ({
@@ -425,18 +473,38 @@ async function handleStaticMigration(
       })),
     });
   }
+  if (selectedPaths.length === 0) {
+    throw new Error('No instruction files selected for migration');
+  }
 
   const spinner = createSpinner('Importing instruction files...').start();
 
-  const result = await importMultipleFiles(
-    selectedPaths.map((f) => resolve(process.cwd(), f)),
-    { projectName: config.projectId }
-  );
+  let result: Awaited<ReturnType<typeof importMultipleFiles>>;
+  try {
+    result = await importMultipleFiles(
+      selectedPaths.map((f) => resolve(services.cwd, f)),
+      {
+        projectName: config.projectId,
+        syntaxVersion: getLatestSyntaxVersion(),
+      }
+    );
+
+    if (
+      result.perFileReports.length !== selectedPaths.length ||
+      result.perFileReports.some((report) => report.sectionCount === 0)
+    ) {
+      const details = result.warnings.length > 0 ? ` ${result.warnings.join(' ')}` : '';
+      throw new Error(`Not all selected instruction files could be imported.${details}`);
+    }
+  } catch (error) {
+    spinner.fail?.('Instruction import failed');
+    throw error;
+  }
 
   spinner.succeed(`Imported ${result.perFileReports.length} files`);
 
   ConsoleOutput.newline();
-  console.log('Import Summary:');
+  ConsoleOutput.stats('Import Summary:');
   for (const report of result.perFileReports) {
     const pct = Math.round(report.confidence * 100);
     ConsoleOutput.muted(`  ${basename(report.file)} -> ${report.sectionCount} sections (${pct}%)`);
@@ -452,42 +520,33 @@ async function handleStaticMigration(
   return result.files;
 }
 
-/**
- * Handle LLM-assisted migration by generating a prompt.
- */
-async function handleLlmMigration(
-  candidates: MigrationCandidate[],
-  options: InitOptions,
-  services: CliServices
-): Promise<void> {
-  await handleMigrationBackup(candidates, options, services);
+function prepareLlmMigration(candidates: MigrationCandidate[], options: InitOptions): string {
+  const effectiveCandidates =
+    options._migrateFiles && options._migrateFiles.length > 0
+      ? candidates.filter((candidate) => options._migrateFiles?.includes(candidate.path))
+      : candidates;
 
-  const prompt = generateMigrationPrompt(
-    candidates.map((c) => ({ path: c.path, sizeHuman: c.sizeHuman, toolName: c.toolName }))
+  return generateMigrationPrompt(
+    effectiveCandidates.map((candidate) => ({
+      path: candidate.path,
+      sizeHuman: candidate.sizeHuman,
+      toolName: candidate.toolName,
+    }))
   );
+}
 
-  await services.fs.writeFile('.promptscript/migration-prompt.md', prompt, 'utf-8');
-
+function deliverMigrationPrompt(prompt: string): void {
   const copied = copyToClipboard(prompt);
   if (copied) {
     ConsoleOutput.success('Migration prompt copied to clipboard!');
   } else {
-    ConsoleOutput.newline();
     console.log(prompt);
   }
-
   ConsoleOutput.info('Saved to .promptscript/migration-prompt.md');
 }
 
-/**
- * Install the bundled PromptScript skill to .promptscript/skills/ and all targets.
- * Returns array of installed skill file paths.
- */
-async function installSkillToTargets(
-  targets: AIToolTarget[],
-  services: CliServices
-): Promise<string[]> {
-  const installedSkillPaths: string[] = [];
+export function getSkillWrites(targets: AIToolTarget[]): PlannedWrite[] {
+  const writes: PlannedWrite[] = [];
   const skillName = 'promptscript';
   const skillSource = resolve(BUNDLED_SKILLS_DIR, skillName, 'SKILL.md');
   try {
@@ -500,30 +559,26 @@ async function installSkillToTargets(
       rawSkillContent.includes('<!-- PromptScript') ||
       rawSkillContent.includes('# promptscript-generated:');
     if (!hasMarker && rawSkillContent.startsWith('---')) {
-      const yamlMarker = `# promptscript-generated: ${new Date().toISOString()}`;
+      const yamlMarker = '# promptscript-generated: true';
       skillContent = `---\n${yamlMarker}${rawSkillContent.slice(3)}`;
     }
 
-    // Install to .promptscript/skills/ (canonical source)
-    const skillDest = `.promptscript/skills/${skillName}`;
-    await services.fs.mkdir(skillDest, { recursive: true });
-    await services.fs.writeFile(`${skillDest}/SKILL.md`, skillContent, 'utf-8');
-    installedSkillPaths.push(`${skillDest}/SKILL.md`);
+    writes.push({
+      path: `.promptscript/skills/${skillName}/SKILL.md`,
+      content: skillContent,
+    });
 
-    // Install directly to each target's skill directory
     for (const target of targets) {
       const targetSkillDir = getTargetSkillDir(target, skillName);
-      if (targetSkillDir) {
-        await services.fs.mkdir(targetSkillDir.dir, { recursive: true });
-        await services.fs.writeFile(targetSkillDir.path, skillContent, 'utf-8');
-        installedSkillPaths.push(targetSkillDir.path);
+      if (targetSkillDir && !writes.some((write) => write.path === targetSkillDir.path)) {
+        writes.push({ path: targetSkillDir.path, content: skillContent });
       }
     }
   } catch {
     ConsoleOutput.warn(`Could not install migration skill from ${skillSource}`);
   }
 
-  return installedSkillPaths;
+  return writes;
 }
 
 /**
@@ -646,7 +701,7 @@ async function runInteractivePrompts(
 ): Promise<ResolvedConfig> {
   const { prompts } = services;
   ConsoleOutput.newline();
-  console.log('🚀 PromptScript Setup');
+  ConsoleOutput.stats('PromptScript Setup');
   ConsoleOutput.newline();
 
   // Show detected info
@@ -744,7 +799,7 @@ async function runInteractivePrompts(
     // Show suggestions
     if (suggestions.inherit || suggestions.use.length > 0 || suggestions.skills.length > 0) {
       ConsoleOutput.newline();
-      console.log('📦 Suggested configurations based on your project:');
+      ConsoleOutput.stats('Suggested configurations based on your project:');
       const suggestionLines = formatSuggestionResult(suggestions);
       for (const line of suggestionLines) {
         ConsoleOutput.muted(`  ${line}`);
@@ -794,16 +849,35 @@ async function runInteractivePrompts(
   }
 
   // 5. Targets
-  const suggestedTargets = getSuggestedTargets(aiToolsDetection);
+  const userConfig = await loadUserConfig();
+  const configuredTargets =
+    (options.targets as AIToolTarget[] | undefined) ??
+    (userConfig.defaults?.targets as AIToolTarget[] | undefined) ??
+    [];
+  if (configuredTargets.length > 0) {
+    validateTargets(configuredTargets);
+  }
+  const detectedTargets = getSuggestedTargets(aiToolsDetection);
+  const suggestedTargets = Array.from(new Set([...configuredTargets, ...detectedTargets]));
   const allTargets = getAllTargets();
 
   const targets = await prompts.checkbox({
-    message: 'Select target AI tools:',
-    choices: allTargets.map((target) => ({
-      name: formatTargetName(target),
-      value: target,
-      checked: suggestedTargets.includes(target),
-    })),
+    message:
+      suggestedTargets.length > 0
+        ? 'Select target AI tools (detected and configured tools preselected):'
+        : 'Select target AI tools (none detected):',
+    choices: allTargets.map((target) => {
+      const suffix = detectedTargets.includes(target)
+        ? ' (detected)'
+        : configuredTargets.includes(target)
+          ? ' (configured)'
+          : '';
+      return {
+        name: `${formatTargetName(target)}${suffix}`,
+        value: target,
+        checked: suggestedTargets.includes(target),
+      };
+    }),
     validate: (value) => {
       if (value.length === 0) {
         return 'Please select at least one target';
@@ -832,6 +906,50 @@ async function runInteractivePrompts(
     targets,
     prettierConfigPath,
   };
+}
+
+function validateTargets(targets: AIToolTarget[]): void {
+  if (targets.length === 0) {
+    throw new Error(
+      'No AI tools detected. Pass --targets <target...> or configure defaults in ~/.promptscript/config.yaml.'
+    );
+  }
+
+  const available = new Set(getAllTargets());
+  const unknown = targets.filter((target) => !available.has(target));
+  if (unknown.length > 0) {
+    throw new Error(
+      `Unknown target${unknown.length === 1 ? '' : 's'}: ${unknown.join(', ')}. Available: ${Array.from(available).join(', ')}`
+    );
+  }
+}
+
+function validateDirectives(config: ResolvedConfig): void {
+  const directives = [
+    ...(config.inherit ? [['inherit', config.inherit] as const] : []),
+    ...(config.use ?? []).map((value) => ['use', value] as const),
+    ...(config.skills ?? []).map((value) => ['skill', value] as const),
+  ];
+
+  for (const [name, value] of directives) {
+    if (value.length === 0 || /[\r\n]/.test(value)) {
+      throw new Error(`Invalid ${name} directive: values must be non-empty single lines`);
+    }
+  }
+}
+
+function showWritePlan(result: WritePlanResult): void {
+  ConsoleOutput.newline();
+  ConsoleOutput.stats('Planned changes:');
+  for (const path of result.created) {
+    ConsoleOutput.dryRun(`create ${path}`);
+  }
+  for (const path of result.updated) {
+    ConsoleOutput.dryRun(`update ${path}`);
+  }
+  for (const path of result.unchanged) {
+    ConsoleOutput.unchanged(path);
+  }
 }
 
 /**
@@ -886,84 +1004,50 @@ function getSkillInvocationHints(targets: AIToolTarget[]): string[] {
  * Generate the config file content.
  */
 function generateConfig(config: ResolvedConfig): string {
-  // Get PromptScript syntax version for the config
   const syntaxVersion = getLatestSyntaxVersion();
-
-  const lines: string[] = [`id: ${config.projectId}`, `syntax: "${syntaxVersion}"`];
-
-  lines.push('');
+  const output: PromptScriptConfig = {
+    id: config.projectId,
+    syntax: syntaxVersion,
+    targets: config.targets,
+    validation: {
+      rules: {
+        'empty-block': 'warning',
+      },
+    },
+  };
 
   if (config.inherit) {
-    lines.push(`inherit: '${config.inherit}'`);
-  } else {
-    lines.push("# inherit: '@stacks/react'");
+    output.inherit = config.inherit;
   }
-
-  lines.push('');
-
-  // Add use array if configured
-  if (config.use && config.use.length > 0) {
-    lines.push('use:');
-    for (const useItem of config.use) {
-      lines.push(`  - '${useItem}'`);
-    }
-  } else {
-    lines.push('# use:', "#   - '@fragments/testing'", "#   - '@fragments/typescript'");
-  }
-
-  lines.push('');
-
   if (config.registry) {
     if (config.registry.type === 'git') {
-      lines.push('registry:', '  git:', `    url: '${config.registry.url}'`);
-      if (config.registry.ref) {
-        lines.push(`    ref: '${config.registry.ref}'`);
-      }
+      output.registry = {
+        git: {
+          url: config.registry.url ?? '',
+          ref: config.registry.ref,
+        },
+      };
     } else {
-      lines.push('registry:', `  path: '${config.registry.path}'`);
+      output.registry = { path: config.registry.path };
     }
-  } else {
-    lines.push(
-      '# registry:',
-      '#   git:',
-      "#     url: 'https://github.com/your-org/your-registry.git'",
-      "#     ref: 'main'"
-    );
   }
 
-  lines.push('', 'targets:');
-  for (const target of config.targets) {
-    lines.push(`  - ${target}`);
-  }
-
-  lines.push('', 'validation:', '  rules:', '    empty-block: warning');
-
-  // Add formatting configuration
-  lines.push('');
   if (config.prettierConfigPath) {
-    // Prettier config detected - enable auto-detection
-    lines.push('formatting:', '  prettier: true  # Auto-detected from project');
+    output.formatting = { prettier: true };
   } else {
-    // No Prettier config - add default options
-    lines.push(
-      'formatting:',
-      '  tabWidth: 2',
-      "  proseWrap: preserve  # 'always' | 'never' | 'preserve'"
-    );
+    output.formatting = {
+      tabWidth: 2,
+      proseWrap: 'preserve',
+    };
   }
 
-  lines.push('');
-
-  return lines.join('\n');
+  return stringifyYaml(output, { lineWidth: 0 });
 }
 
 /**
  * Generate the project.prs file content.
  */
 function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): string {
-  const inheritLine = config.inherit ? `@inherit ${config.inherit}` : '# @inherit @stacks/react';
-
-  // Generate @use directives (imports + skills)
   const useEntries: string[] = [];
   if (config.use && config.use.length > 0) {
     useEntries.push(...config.use.map((u) => `@use ${u}`));
@@ -971,62 +1055,36 @@ function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): st
   if (config.skills && config.skills.length > 0) {
     useEntries.push(...config.skills.map((s) => `@use ${s}`));
   }
-  const useLines =
-    useEntries.length > 0
-      ? useEntries.join('\n')
-      : '# @use @fragments/testing\n# @use @fragments/typescript';
-
-  const languagesLine =
-    projectInfo.languages.length > 0
-      ? `  languages: [${projectInfo.languages.join(', ')}]`
-      : '  # languages: [typescript]';
-
-  const frameworksLine =
-    projectInfo.frameworks.length > 0
-      ? `  frameworks: [${projectInfo.frameworks.join(', ')}]`
-      : '  # frameworks: []';
-
-  // Get PromptScript syntax version
   const syntaxVersion = getLatestSyntaxVersion();
+  const directives = [
+    config.inherit ? `@inherit ${config.inherit}` : undefined,
+    ...useEntries,
+  ].filter((line): line is string => line !== undefined);
+  const contextLines = [`  project: ${JSON.stringify(config.projectId)}`];
+  if (projectInfo.languages.length > 0) {
+    contextLines.push(`  languages: ${JSON.stringify(projectInfo.languages)}`);
+  }
+  if (projectInfo.frameworks.length > 0) {
+    contextLines.push(`  frameworks: ${JSON.stringify(projectInfo.frameworks)}`);
+  }
 
-  return `# Project Configuration
-# Edit this file to customize AI instructions for your project
-
-@meta {
-  id: "${config.projectId}"
-  syntax: "${syntaxVersion}"
+  return `@meta {
+  id: ${JSON.stringify(config.projectId)}
+  syntax: ${JSON.stringify(syntaxVersion)}
 }
-
-${inheritLine}
-${useLines}
-
+${directives.length > 0 ? `\n${directives.join('\n')}\n` : ''}
 @identity {
   """
-  You are working on the ${config.projectId} project.
-
-  [Describe your project here]
+  You are working in this project. Follow its documented architecture and conventions.
   """
 }
 
 @context {
-  project: "${config.projectId}"
-${languagesLine}
-${frameworksLine}
-}
-
-@standards {
-  code: {
-    # Add your coding standards here
-  }
+${contextLines.join('\n')}
 }
 
 @restrictions {
   - "Follow security best practices"
-}
-
-@shortcuts {
-  "/review": "Review this code for quality and best practices"
-  "/test": "Write comprehensive unit tests"
 }
 `;
 }

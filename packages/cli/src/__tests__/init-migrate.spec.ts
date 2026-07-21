@@ -75,6 +75,7 @@ vi.spyOn(process, 'cwd').mockReturnValue('/mock/project');
 
 describe('init migration flow', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
   let mockServices: CliServices;
   let mockFs: {
     existsSync: ReturnType<typeof vi.fn>;
@@ -95,8 +96,12 @@ describe('init migration flow', () => {
     vi.clearAllMocks();
     process.exitCode = undefined;
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFindPrettierConfig.mockReturnValue(null);
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockLoadUserConfig.mockResolvedValue({
+      version: '1',
+      defaults: { targets: ['github'] },
+    });
     mockLoadManifestFromUrl.mockRejectedValue(new Error('not available'));
     mockIsGitRepo.mockReturnValue(true);
     mockCreateBackup.mockResolvedValue({ dir: '.prs-backup/2026-01-01', files: [] });
@@ -134,6 +139,7 @@ describe('init migration flow', () => {
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   /**
@@ -245,6 +251,22 @@ describe('init migration flow', () => {
         'utf-8'
       );
     });
+
+    it('should reject partial imports before writing project files', async () => {
+      setupMigrationCandidates();
+      mockImportMultipleFiles.mockResolvedValue({
+        files: new Map([['project.prs', '@meta { id: "test" }']]),
+        perFileReports: [],
+        deduplicatedCount: 0,
+        overallConfidence: 0,
+        warnings: ['Could not import CLAUDE.md: unreadable'],
+      });
+
+      await initCommand({ yes: true, autoImport: true }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+    });
   });
 
   describe('-y without --auto-import', () => {
@@ -312,7 +334,9 @@ describe('init migration flow', () => {
 
       await initCommand({ yes: true, autoImport: true }, mockServices);
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Deduplicated: 5 lines'));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Deduplicated: 5 lines')
+      );
     });
   });
 
@@ -337,12 +361,12 @@ describe('init migration flow', () => {
   });
 
   describe('backup', () => {
-    it('should create backup when --backup flag is set', async () => {
+    it('should not back up source instructions that are never overwritten', async () => {
       setupMigrationCandidates();
 
       await initCommand({ yes: true, autoImport: true, backup: true }, mockServices);
 
-      expect(mockCreateBackup).toHaveBeenCalledWith(['CLAUDE.md'], mockServices);
+      expect(mockCreateBackup).not.toHaveBeenCalled();
     });
 
     it('should not create backup when -y without --backup', async () => {
@@ -353,17 +377,14 @@ describe('init migration flow', () => {
       expect(mockCreateBackup).not.toHaveBeenCalled();
     });
 
-    it('should prompt for backup in interactive mode', async () => {
+    it('should not prompt for backup when no generated file exists yet', async () => {
       setupMigrationCandidates();
 
       mockPrompts.select
         .mockResolvedValueOnce('migrate') // gateway
         .mockResolvedValueOnce('static') // strategy
         .mockResolvedValueOnce('skip'); // registry
-      // Order: inherit prompt (from resolveConfig) then backup prompt (from handleMigrationBackup)
-      mockPrompts.confirm
-        .mockResolvedValueOnce(false) // inherit
-        .mockResolvedValueOnce(true); // backup prompt
+      mockPrompts.confirm.mockResolvedValueOnce(false);
       // Order: targets (from resolveConfig) then file selection (from handleStaticMigration)
       mockPrompts.checkbox
         .mockResolvedValueOnce(['github']) // targets
@@ -371,12 +392,10 @@ describe('init migration flow', () => {
 
       await initCommand({}, mockServices);
 
-      expect(mockPrompts.confirm).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'Create backup to .prs-backup/?',
-        })
+      expect(mockPrompts.confirm).not.toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Back up files that will be updated?' })
       );
-      expect(mockCreateBackup).toHaveBeenCalled();
+      expect(mockCreateBackup).not.toHaveBeenCalled();
     });
   });
 

@@ -51,6 +51,46 @@ describe('utils/ai-tools-detector', () => {
       expect(result.details['claude']).toContain('CLAUDE.md');
     });
 
+    it('should migrate user instructions that merely mention PromptScript', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'CLAUDE.md');
+      mockFs.readFile.mockResolvedValue('# Project\n\nUse PromptScript for shared instructions.');
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.migrationCandidates.map((candidate) => candidate.path)).toContain('CLAUDE.md');
+    });
+
+    it('should exclude files with generated ownership markers', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'CLAUDE.md');
+      mockFs.readFile.mockResolvedValue(
+        '<!-- PromptScript 2026-01-01T00:00:00.000Z | source: project.prs | target: claude - do not edit -->'
+      );
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.migrationCandidates).toEqual([]);
+    });
+
+    it('should fail when a detected instruction file is unreadable', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'CLAUDE.md');
+      mockFs.readFile.mockRejectedValue(new Error('permission denied'));
+
+      await expect(detectAITools(mockServices)).rejects.toThrow(
+        'Cannot read instruction candidate CLAUDE.md'
+      );
+    });
+
+    it('should reject symbolic-link instruction candidates', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'CLAUDE.md');
+      mockServices.fs.lstat = vi.fn().mockResolvedValue({
+        isFile: () => false,
+        isSymbolicLink: () => true,
+      }) as unknown as NonNullable<CliServices['fs']['lstat']>;
+
+      await expect(detectAITools(mockServices)).rejects.toThrow('must be a regular file');
+      expect(mockFs.readFile).not.toHaveBeenCalled();
+    });
+
     it('should detect Cursor configuration', async () => {
       mockFs.existsSync.mockImplementation((path: string) => path === '.cursor/rules/project.mdc');
 
@@ -86,13 +126,41 @@ describe('utils/ai-tools-detector', () => {
       expect(result.detected).toContain('cursor');
     });
 
-    it('should detect Factory AI via AGENTS.md', async () => {
+    it('should treat AGENTS.md as shared instructions without guessing a target', async () => {
       mockFs.existsSync.mockImplementation((path: string) => path === 'AGENTS.md');
 
       const result = await detectAITools(mockServices);
 
-      expect(result.detected).toContain('factory');
-      expect(result.details['factory']).toContain('AGENTS.md');
+      expect(result.detected).toEqual([]);
+      expect(result.migrationCandidates.map((candidate) => candidate.path)).toContain('AGENTS.md');
+    });
+
+    it('should not detect Copilot from GitHub workflows alone', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === '.github');
+      mockFs.readdir.mockImplementation(async (path: string) =>
+        path === '.github' ? ['workflows'] : []
+      );
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.detected).not.toContain('github');
+    });
+
+    it('should discover scoped GitHub instruction files', async () => {
+      mockFs.existsSync.mockImplementation(
+        (path: string) =>
+          path === '.github/instructions' || path === '.github/instructions/api.instructions.md'
+      );
+      mockFs.readdir.mockImplementation(async (path: string) =>
+        path === '.github/instructions' ? ['api.instructions.md', 'README.md'] : []
+      );
+
+      const result = await detectAITools(mockServices);
+
+      expect(result.detected).toContain('github');
+      expect(result.migrationCandidates.map((candidate) => candidate.path)).toContain(
+        '.github/instructions/api.instructions.md'
+      );
     });
 
     it('should detect Factory AI via .factory directory', async () => {
@@ -168,7 +236,7 @@ describe('utils/ai-tools-detector', () => {
       expect(suggested).toEqual(['github', 'claude']);
     });
 
-    it('should return common defaults when none detected', () => {
+    it('should not invent defaults when no tools are detected', () => {
       const detection: AIToolsDetection = {
         detected: [],
         details: {},
@@ -177,7 +245,7 @@ describe('utils/ai-tools-detector', () => {
 
       const suggested = getSuggestedTargets(detection);
 
-      expect(suggested).toEqual(['github', 'claude', 'cursor']);
+      expect(suggested).toEqual([]);
     });
   });
 

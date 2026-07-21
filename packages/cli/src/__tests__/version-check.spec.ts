@@ -190,7 +190,7 @@ describe('version-check', () => {
 
   describe('printUpdateNotification', () => {
     it('should print update notification', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { printUpdateNotification } = await import('../utils/version-check.js');
       printUpdateNotification({

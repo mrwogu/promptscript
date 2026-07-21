@@ -83,13 +83,14 @@ program
   .option('-t, --team <team>', 'Team namespace')
   .option('--inherit <path>', 'Inheritance path (e.g., @company/team)')
   .option('--registry <path>', 'Registry path')
-  .option('--targets <targets...>', 'Target AI tools (github, claude, cursor)')
+  .option('--targets <targets...>', 'Target AI tools (for example: github, claude, cursor)')
   .option('-i, --interactive', 'Force interactive mode')
-  .option('-y, --yes', 'Skip prompts, use defaults')
+  .option('-y, --yes', 'Skip prompts; requires explicit, detected, or configured targets')
   .option('-f, --force', 'Force reinitialize even if already initialized')
-  .option('-m, --migrate', 'Install migration skill for AI-assisted migration')
+  .option('-m, --migrate', 'Deprecated: run migration during initialization')
   .option('--auto-import', 'Automatically import existing instruction files (static)')
-  .option('--backup', 'Create .prs-backup/ before migration')
+  .option('--backup', 'Create .prs-backup/ before replacing files')
+  .option('--dry-run', 'Preview files without writing')
   .option('--no-hooks', 'Skip auto-compile hook installation for AI tools')
   .action((opts) => {
     if (opts.migrate) {
@@ -208,6 +209,10 @@ program
   .option('--static', 'Non-interactive static import of all detected files')
   .option('--llm', 'Generate AI-assisted migration prompt')
   .option('--files <files...>', 'Specific files to import')
+  .option('--targets <targets...>', 'Targets for an uninitialized project')
+  .option('--backup', 'Back up files that will be updated')
+  .option('--force', 'Overwrite conflicting migration outputs')
+  .option('--dry-run', 'Preview files without writing')
   .action(async (opts) => {
     const { migrateCommand } = await import('./commands/migrate.js');
     await migrateCommand(opts);

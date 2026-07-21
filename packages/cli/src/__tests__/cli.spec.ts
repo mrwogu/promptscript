@@ -159,7 +159,7 @@ describe('cli', () => {
       // Verify --migrate option is registered (among other options)
       expect(mockOption).toHaveBeenCalledWith(
         '-m, --migrate',
-        'Install migration skill for AI-assisted migration'
+        'Deprecated: run migration during initialization'
       );
     });
 

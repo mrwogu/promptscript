@@ -249,7 +249,7 @@ export async function forceCheckForUpdates(
  * Print the update notification message.
  */
 export function printUpdateNotification(info: UpdateInfo): void {
-  console.log(
+  console.error(
     `Update available: ${info.currentVersion} \u2192 ${info.latestVersion} (npm i -g @promptscript/cli)`
   );
 }

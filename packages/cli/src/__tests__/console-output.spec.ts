@@ -42,12 +42,12 @@ describe('output/console', () => {
   beforeEach(() => {
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     // Reset context to default
-    setContext({ logLevel: LogLevel.Normal, colors: true });
+    setContext({ logLevel: LogLevel.Normal, colors: true, outputStream: 'stdout' });
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
-    setContext({ logLevel: LogLevel.Normal, colors: true });
+    setContext({ logLevel: LogLevel.Normal, colors: true, outputStream: 'stdout' });
   });
 
   describe('LogLevel', () => {
@@ -70,6 +70,17 @@ describe('output/console', () => {
       const ctx = getContext();
       expect(ctx.colors).toBe(false);
       expect(ctx.logLevel).toBe(LogLevel.Normal);
+    });
+
+    it('should route human-readable output to stderr', () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      setContext({ outputStream: 'stderr' });
+
+      ConsoleOutput.info('status');
+
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('status'));
+      expect(consoleSpy).not.toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
   });
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { parse as parseYaml } from 'yaml';
 import { initCommand } from '../commands/init.js';
 import { type CliServices } from '../services.js';
 
@@ -70,11 +71,15 @@ describe('commands/init', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = undefined;
-    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    delete process.env['PROMPTSCRIPT_CONFIG'];
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     // Default: no Prettier config found
     mockFindPrettierConfig.mockReturnValue(null);
     // Default: no user config
-    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockLoadUserConfig.mockResolvedValue({
+      version: '1',
+      defaults: { targets: ['github'] },
+    });
     // Default: manifest fetch fails
     mockLoadManifestFromUrl.mockRejectedValue(new Error('not available'));
 
@@ -103,6 +108,7 @@ describe('commands/init', () => {
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    delete process.env['PROMPTSCRIPT_CONFIG'];
   });
 
   describe('initCommand', () => {
@@ -112,6 +118,25 @@ describe('commands/init', () => {
       await initCommand({}, mockServices);
 
       expect(mockFs.existsSync).toHaveBeenCalledWith('promptscript.yaml');
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(2);
+    });
+
+    it('should recognize alternate configuration file names', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === '.promptscriptrc.yml');
+
+      await initCommand({}, mockServices);
+
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(2);
+    });
+
+    it('should recognize PROMPTSCRIPT_CONFIG', async () => {
+      process.env['PROMPTSCRIPT_CONFIG'] = 'custom-config.yaml';
+      mockFs.existsSync.mockImplementation((path: string) => path === 'custom-config.yaml');
+
+      await initCommand({}, mockServices);
+
       expect(mockFs.writeFile).not.toHaveBeenCalled();
       expect(process.exitCode).toBe(2);
     });
@@ -134,6 +159,42 @@ describe('commands/init', () => {
       );
     });
 
+    it('should preserve the existing configuration file name when forced', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === '.promptscriptrc.yml');
+
+      await initCommand({ yes: true, force: true }, mockServices);
+
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        '.promptscriptrc.yml',
+        expect.stringContaining('syntax:'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).not.toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.anything(),
+        'utf-8'
+      );
+    });
+
+    it('should back up an existing configuration before reinitializing', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'promptscript.yaml');
+      mockFs.readFile.mockResolvedValue('id: existing\nsyntax: "1.4.0"\ntargets:\n  - github\n');
+      mockFs.readFileSync.mockReturnValue('id: existing\nsyntax: "1.4.0"\ntargets:\n  - github\n');
+
+      await initCommand({ yes: true, backup: true }, mockServices);
+
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        expect.stringMatching(/\.prs-backup\/.+\/promptscript\.yaml$/),
+        expect.stringContaining('id: existing'),
+        'utf-8'
+      );
+      expect(mockFs.writeFile).toHaveBeenCalledWith(
+        'promptscript.yaml',
+        expect.stringContaining('syntax:'),
+        'utf-8'
+      );
+    });
+
     it('should create config and project files with --yes flag', async () => {
       await initCommand({ yes: true }, mockServices);
 
@@ -148,6 +209,66 @@ describe('commands/init', () => {
         expect.stringContaining('@meta'),
         'utf-8'
       );
+    });
+
+    it('should require explicit targets in --yes mode when none are detected or configured', async () => {
+      mockLoadUserConfig.mockResolvedValue({ version: '1' });
+
+      await initCommand({ yes: true }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('should preview all files without writing in dry-run mode', async () => {
+      await initCommand({ yes: true, dryRun: true }, mockServices);
+
+      expect(process.exitCode).toBeUndefined();
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('should not create backups during dry-run', async () => {
+      mockFs.existsSync.mockImplementation((path: string) => path === 'promptscript.yaml');
+      mockFs.readFile.mockResolvedValue('id: existing\nsyntax: "1.4.0"\ntargets:\n  - github\n');
+
+      await initCommand({ yes: true, backup: true, dryRun: true }, mockServices);
+
+      expect(process.exitCode).toBeUndefined();
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+      expect(mockFs.mkdir).not.toHaveBeenCalled();
+    });
+
+    it('should serialize special project names as valid YAML and PromptScript strings', async () => {
+      const projectName = 'api: "quoted" # service';
+
+      await initCommand({ yes: true, name: projectName }, mockServices);
+
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
+      );
+      const prsCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === '.promptscript/project.prs'
+      );
+      expect(parseYaml(yamlCall?.[1] as string)).toMatchObject({ id: projectName });
+      expect(prsCall?.[1]).toContain(JSON.stringify(projectName));
+    });
+
+    it('should reject multiline PromptScript directives before writing', async () => {
+      await initCommand({ yes: true, inherit: '@company/base\n@use @malicious' }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('should generate promptscript.yaml without comments or placeholder sections', async () => {
+      await initCommand({ yes: true }, mockServices);
+
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
+      );
+      expect(yamlCall?.[1]).not.toContain('#');
+      expect(yamlCall?.[1]).not.toContain('inherit:');
+      expect(yamlCall?.[1]).not.toContain('registry:');
     });
 
     it('should not include top-level entry field (default path is implicit)', async () => {
@@ -188,11 +309,12 @@ describe('commands/init', () => {
     it('should include inherit when provided', async () => {
       await initCommand({ yes: true, inherit: '@company/team' }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("inherit: '@company/team'"),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(parseYaml(yamlCall?.[1] as string)).toMatchObject({
+        inherit: '@company/team',
+      });
     });
 
     it('should exit with error when write fails', async () => {
@@ -216,33 +338,33 @@ describe('commands/init', () => {
     it('should include registry when provided', async () => {
       await initCommand({ yes: true, registry: './custom-registry' }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("path: './custom-registry'"),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(parseYaml(yamlCall?.[1] as string)).toMatchObject({
+        registry: { path: './custom-registry' },
+      });
     });
 
-    it('should skip registry when --yes flag without registry option', async () => {
+    it('should omit registry when --yes flag has no registry option', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      // No registry configured by default - should show commented-out placeholder
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining('# registry:'),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(yamlCall?.[1]).not.toContain('registry:');
     });
 
     it('should use local registry when --yes flag with --registry option', async () => {
       await initCommand({ yes: true, registry: './my-registry' }, mockServices);
 
       // Local registry when --registry is specified
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("path: './my-registry'"),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(parseYaml(yamlCall?.[1] as string)).toMatchObject({
+        registry: { path: './my-registry' },
+      });
     });
 
     it('should use env var PROMPTSCRIPT_REGISTRY_GIT_URL when --yes flag', async () => {
@@ -382,19 +504,35 @@ describe('commands/init', () => {
       }
     });
 
-    it('should skip registry and suggestions in --yes mode without local manifest', async () => {
+    it('should omit inheritance in --yes mode without local manifest', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      // Check that promptscript.yaml was written with commented-out inherit (no manifest available)
       const yamlCall = mockFs.writeFile.mock.calls.find(
         (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
       expect(yamlCall).toBeDefined();
-      expect(yamlCall![1]).toContain("# inherit: '@stacks/react'");
+      expect(yamlCall![1]).not.toContain('inherit:');
     });
   });
 
   describe('interactive mode', () => {
+    it('should preselect explicit targets', async () => {
+      await initCommand({ targets: ['claude'] }, mockServices);
+
+      const targetPrompt = mockPrompts.checkbox.mock.calls
+        .map((call: unknown[]) => call[0] as { message?: string; choices?: unknown[] })
+        .find((config) => config.message?.startsWith('Select target AI tools'));
+      expect(targetPrompt?.choices).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            value: 'claude',
+            checked: true,
+            name: expect.stringContaining('(configured)'),
+          }),
+        ])
+      );
+    });
+
     it('should run interactive prompts when no --yes flag', async () => {
       mockPrompts.input.mockResolvedValue('interactive-project');
       mockPrompts.select.mockResolvedValue('skip'); // skip registry
@@ -423,12 +561,12 @@ describe('commands/init', () => {
 
       await initCommand({}, mockServices);
 
-      // Verify inheritance path was included
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("inherit: '@company/team'"),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(parseYaml(yamlCall?.[1] as string)).toMatchObject({
+        inherit: '@company/team',
+      });
     });
 
     it('should ask for registry path when user wants local registry', async () => {
@@ -441,11 +579,12 @@ describe('commands/init', () => {
 
       await initCommand({}, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining("path: './my-registry'"),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(parseYaml(yamlCall?.[1] as string)).toMatchObject({
+        registry: { path: './my-registry' },
+      });
     });
 
     it('should configure git registry when user selects custom-git', async () => {
@@ -472,7 +611,7 @@ describe('commands/init', () => {
       );
     });
 
-    it('should not include registry when user skips', async () => {
+    it('should omit registry when user skips', async () => {
       mockPrompts.input.mockResolvedValueOnce('my-project');
       mockPrompts.select.mockResolvedValue('skip'); // skip registry
       mockPrompts.confirm.mockResolvedValue(false); // no inherit
@@ -480,12 +619,10 @@ describe('commands/init', () => {
 
       await initCommand({}, mockServices);
 
-      // Should have commented out registry
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining('# registry:'),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(yamlCall?.[1]).not.toContain('registry:');
     });
 
     it('should use provided options as defaults in interactive prompts', async () => {
@@ -534,14 +671,13 @@ describe('commands/init', () => {
       );
     });
 
-    it('should comment out languages when none detected', async () => {
+    it('should omit languages when none detected', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.promptscript/project.prs',
-        expect.stringContaining('# languages:'),
-        'utf-8'
+      const prsCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === '.promptscript/project.prs'
       );
+      expect(prsCall?.[1]).not.toContain('languages:');
     });
 
     it('should include detected frameworks in project.prs', async () => {
@@ -568,14 +704,13 @@ describe('commands/init', () => {
       );
     });
 
-    it('should comment out frameworks when none detected', async () => {
+    it('should omit frameworks when none detected', async () => {
       await initCommand({ yes: true }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '.promptscript/project.prs',
-        expect.stringContaining('# frameworks:'),
-        'utf-8'
+      const prsCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === '.promptscript/project.prs'
       );
+      expect(prsCall?.[1]).not.toContain('frameworks:');
     });
   });
 
@@ -678,16 +813,15 @@ describe('commands/init', () => {
       );
     });
 
-    it('should include Auto-detected comment when Prettier config found', async () => {
+    it('should generate comment-free YAML when Prettier config is found', async () => {
       mockFindPrettierConfig.mockReturnValue('/mock/project/.prettierrc.json');
 
       await initCommand({ yes: true }, mockServices);
 
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.stringContaining('# Auto-detected from project'),
-        'utf-8'
+      const yamlCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'promptscript.yaml'
       );
+      expect(yamlCall?.[1]).not.toContain('#');
     });
 
     it('should show Prettier detection in interactive mode', async () => {

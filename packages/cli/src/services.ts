@@ -1,5 +1,6 @@
 import { writeFile, mkdir, readFile, readdir } from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
+import type { PathLike, Stats } from 'fs';
 import * as prompts from '@inquirer/prompts';
 
 export interface FileSystem {
@@ -9,6 +10,10 @@ export interface FileSystem {
   readdir: typeof readdir;
   existsSync: typeof existsSync;
   readFileSync: typeof readFileSync;
+  rename?: typeof import('fs/promises').rename;
+  rm?: typeof import('fs/promises').rm;
+  lstat?: (path: PathLike) => Promise<Stats>;
+  realpath?: (path: PathLike) => Promise<string>;
 }
 
 export interface PromptSystem {
@@ -31,13 +36,33 @@ export const defaultFileSystem: FileSystem = {
   readdir,
   existsSync,
   readFileSync,
+  rename: async (...args) => {
+    const { rename } = await import('node:fs/promises');
+    return rename(...args);
+  },
+  rm: async (...args) => {
+    const { rm } = await import('node:fs/promises');
+    return rm(...args);
+  },
+  lstat: async (path) => {
+    const { lstat } = await import('node:fs/promises');
+    return lstat(path);
+  },
+  realpath: async (path) => {
+    const { realpath } = await import('node:fs/promises');
+    return realpath(path);
+  },
 };
 
 export const defaultPrompts: PromptSystem = {
-  input: prompts.input,
-  confirm: prompts.confirm,
-  checkbox: prompts.checkbox,
-  select: prompts.select,
+  input: (config, context) =>
+    prompts.input(config, { ...context, output: context?.output ?? process.stderr }),
+  confirm: (config, context) =>
+    prompts.confirm(config, { ...context, output: context?.output ?? process.stderr }),
+  checkbox: (config, context) =>
+    prompts.checkbox(config, { ...context, output: context?.output ?? process.stderr }),
+  select: (config, context) =>
+    prompts.select(config, { ...context, output: context?.output ?? process.stderr }),
 };
 
 export const createDefaultServices = (): CliServices => ({

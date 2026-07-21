@@ -60,7 +60,10 @@ describe('initCommand', () => {
   });
 
   it('should initialize if promptscript.yaml exists and forced', async () => {
-    vi.mocked(mockFs.existsSync).mockReturnValue(true);
+    vi.mocked(mockFs.existsSync).mockImplementation((path) => path === 'promptscript.yaml');
+    vi.mocked(mockFs.readFile).mockResolvedValue(
+      'id: existing\nsyntax: "1.4.0"\ntargets:\n  - github\n'
+    );
     const options = {
       ...defaultOptions,
       force: true,

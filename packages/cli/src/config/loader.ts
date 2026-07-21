@@ -21,7 +21,7 @@ export const CONFIG_FILES = [
  * Supports ${VAR} and ${VAR:-default} syntax.
  * For missing variables without default: warns and returns empty string.
  */
-function interpolateEnvVars(text: string): string {
+export function interpolateEnvVars(text: string): string {
   // Match ${VAR} or ${VAR:-default}
   // VAR must start with letter or underscore, followed by word characters
   const envVarPattern = /\$\{([A-Za-z_]\w*)(?::-([^}]*))?\}/g;

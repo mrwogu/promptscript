@@ -59,17 +59,12 @@ describe('detectAITools -- enriched migration candidates', () => {
     expect(hasMigrationCandidates(detection)).toBe(false);
   });
 
-  it('sets sizeBytes to 0 when readFile throws during enrichment', async () => {
-    let claudeReadCount = 0;
+  it('rejects unreadable instruction candidates', async () => {
     const mockServices = {
       fs: {
         existsSync: vi.fn().mockImplementation((p: string) => p === 'CLAUDE.md'),
         readFile: vi.fn().mockImplementation(async (p: string) => {
           if (p === 'CLAUDE.md') {
-            claudeReadCount++;
-            // First call: isPromptScriptGenerated check — return non-PS content
-            // Second call: size enrichment — throw
-            if (claudeReadCount <= 1) return 'No marker here';
             throw new Error('permission denied');
           }
           return '{}';
@@ -81,10 +76,8 @@ describe('detectAITools -- enriched migration candidates', () => {
       cwd: '/mock',
     } as unknown as CliServices;
 
-    const result = await detectAITools(mockServices);
-    const candidate = result.migrationCandidates.find((c) => c.path === 'CLAUDE.md');
-    expect(candidate).toBeDefined();
-    expect(candidate!.sizeBytes).toBe(0);
-    expect(candidate!.sizeHuman).toBe('0 B');
+    await expect(detectAITools(mockServices)).rejects.toThrow(
+      'Cannot read instruction candidate CLAUDE.md'
+    );
   });
 });

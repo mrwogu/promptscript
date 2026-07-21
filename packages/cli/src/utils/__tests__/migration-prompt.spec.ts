@@ -43,4 +43,15 @@ describe('generateMigrationPrompt', () => {
     expect(prompt).toContain('CLAUDE.md');
     expect(prompt).not.toContain('.cursorrules');
   });
+
+  it('protects existing projects and isolates migrated output', () => {
+    const prompt = generateMigrationPrompt(candidates, {
+      outputDirectory: '.promptscript/migrated',
+      existingEntry: '.promptscript/project.prs',
+    });
+
+    expect(prompt).toContain('Do not modify promptscript.yaml');
+    expect(prompt).toContain('.promptscript/migrated/');
+    expect(prompt).toContain('Add one @use directive to .promptscript/project.prs');
+  });
 });
