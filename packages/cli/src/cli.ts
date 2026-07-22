@@ -229,7 +229,7 @@ program
   .command('lock')
   .description('Generate or update promptscript.lock by resolving all remote imports')
   .option('--dry-run', 'Preview lockfile without writing')
-  .option('--update', 'Force fresh clone and re-hash all registry references')
+  .option('--update', 'Re-resolve remote commits even when pins exist')
   .action((opts) => lockCommand(opts));
 
 program

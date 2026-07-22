@@ -9,11 +9,15 @@ import {
   GitAuthError,
   GitRefNotFoundError,
   createGitRegistry,
+  isSemverRange,
   validateRemoteAccess,
+  versionSatisfiesRange,
 } from '../git-registry.js';
 
 // Define mock object at module level
 const mockGit = {
+  init: vi.fn().mockResolvedValue(undefined),
+  addRemote: vi.fn().mockResolvedValue(undefined),
   clone: vi.fn().mockResolvedValue(undefined),
   fetch: vi.fn().mockResolvedValue(undefined),
   checkout: vi.fn().mockResolvedValue(undefined),
@@ -38,6 +42,8 @@ describe('GitRegistry', () => {
     vi.clearAllMocks();
 
     // Reset mock implementations
+    mockGit.init.mockResolvedValue(undefined);
+    mockGit.addRemote.mockResolvedValue(undefined);
     mockGit.clone.mockResolvedValue(undefined);
     mockGit.fetch.mockResolvedValue(undefined);
     mockGit.checkout.mockResolvedValue(undefined);
@@ -768,6 +774,35 @@ describe('validateRemoteAccess', () => {
     expect(result.headCommit).toBe('deadbeef1234567890123456789012345678abcd');
   });
 
+  it('should resolve a requested ref', async () => {
+    mockGit.listRemote.mockResolvedValue(
+      [
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\trefs/tags/v2.0.0',
+        'feedfacefeedfacefeedfacefeedfacefeedface\trefs/tags/v2.0.0^{}',
+      ].join('\n')
+    );
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', 'v2.0.0');
+
+    expect(mockGit.listRemote).toHaveBeenCalledWith([
+      'https://github.com/org/repo.git',
+      'v2.0.0',
+      'v2.0.0^{}',
+    ]);
+    expect(result.headCommit).toBe('feedfacefeedfacefeedfacefeedfacefeedface');
+  });
+
+  it('should verify a requested commit with a targeted fetch', async () => {
+    const commit = 'feedfacefeedfacefeedfacefeedfacefeedface';
+    mockGit.revparse.mockResolvedValue(commit);
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', commit);
+
+    expect(mockGit.addRemote).toHaveBeenCalledWith('origin', 'https://github.com/org/repo.git');
+    expect(mockGit.fetch).toHaveBeenCalledWith(['origin', commit, '--depth=1']);
+    expect(result.headCommit).toBe(commit);
+  });
+
   it('should return accessible: false with auth error message for authentication failures', async () => {
     // Arrange
     mockGit.listRemote.mockRejectedValue(
@@ -809,5 +844,24 @@ describe('validateRemoteAccess', () => {
     expect(result.error).toContain('Failed to reach');
     expect(result.error).toContain('https://github.com/org/repo.git');
     expect(result.error).toContain('network');
+  });
+});
+
+describe('versionSatisfiesRange', () => {
+  it('should accept equivalent prefixed versions and compatible ranges', () => {
+    expect(versionSatisfiesRange('v1.2.0', '1.2.0')).toBe(true);
+    expect(versionSatisfiesRange('1.2.0', '^1.0.0')).toBe(true);
+    expect(versionSatisfiesRange('v2.0.0', '^1.0.0')).toBe(false);
+    expect(versionSatisfiesRange('v0.9.0', '^0.1.0')).toBe(false);
+  });
+
+  it('should distinguish semver ranges from numeric refs and commit hashes', () => {
+    expect(isSemverRange('1.x')).toBe(true);
+    expect(isSemverRange('v1.x')).toBe(true);
+    expect(versionSatisfiesRange('v1.2.0', 'v1.x')).toBe(true);
+    expect(isSemverRange('^1.2.3')).toBe(true);
+    expect(isSemverRange('1.x.3')).toBe(false);
+    expect(isSemverRange('123-feature')).toBe(false);
+    expect(isSemverRange('1234567890abcdef1234567890abcdef12345678')).toBe(false);
   });
 });

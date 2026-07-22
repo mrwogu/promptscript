@@ -805,9 +805,10 @@ prs lock [options]
 
 **Options:**
 
-| Option      | Description                            |
-| ----------- | -------------------------------------- |
-| `--dry-run` | Show what would change without writing |
+| Option      | Description                                    |
+| ----------- | ---------------------------------------------- |
+| `--dry-run` | Show what would change without writing         |
+| `--update`  | Re-resolve remote commits even when pins exist |
 
 **Examples:**
 
@@ -819,7 +820,8 @@ prs lock
 prs lock --dry-run
 ```
 
-The lockfile is also written automatically during `prs compile` when remote imports are present. Commit `promptscript.lock` to version control.
+`prs lock` fails without writing when a remote dependency cannot be resolved. Commit
+`promptscript.lock` to version control.
 
 ---
 

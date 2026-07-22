@@ -202,7 +202,7 @@ export interface RegistryAddOptions {
 export interface LockOptions {
   /** Preview without writing lockfile */
   dryRun?: boolean;
-  /** Force fresh clone and re-hash all registry references */
+  /** Re-resolve remote commits even when pins exist */
   update?: boolean;
 }
 

@@ -11,6 +11,8 @@ const {
   mockWriteFile,
   mockReadFile,
   mockCollectRemoteImports,
+  mockResolveVersion,
+  mockValidateRemoteAccess,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -29,6 +31,8 @@ const {
   const mockWriteFile = vi.fn().mockResolvedValue(undefined);
   const mockReadFile = vi.fn();
   const mockCollectRemoteImports = vi.fn().mockResolvedValue([]);
+  const mockResolveVersion = vi.fn();
+  const mockValidateRemoteAccess = vi.fn();
   return {
     mockSucceed,
     mockFail,
@@ -40,6 +44,8 @@ const {
     mockWriteFile,
     mockReadFile,
     mockCollectRemoteImports,
+    mockResolveVersion,
+    mockValidateRemoteAccess,
   };
 });
 
@@ -64,6 +70,18 @@ vi.mock('../lock-scanner.js', () => ({
   collectRemoteImports: mockCollectRemoteImports,
 }));
 
+vi.mock('@promptscript/resolver', () => ({
+  createGitRegistry: vi.fn(() => ({ resolveVersion: mockResolveVersion })),
+  normalizeGitUrl: vi.fn((url: string) =>
+    url.endsWith('.git') || url.startsWith('file:') || url.startsWith('git@') ? url : `${url}.git`
+  ),
+  validateRemoteAccess: mockValidateRemoteAccess,
+  isSemverRange: vi.fn((range: string) => /^(?:v?\d|\^|~|[<>=]|[*xX])/.test(range)),
+  versionSatisfiesRange: vi.fn(
+    (version: string, range: string) => version.replace(/^v/, '') === range.replace(/^[v^~]/, '')
+  ),
+}));
+
 vi.mock('yaml', () => ({
   parse: (s: string) => JSON.parse(s),
   stringify: (o: unknown) => JSON.stringify(o),
@@ -74,6 +92,13 @@ import { lockCommand } from '../lock.js';
 describe('lockCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockResolveVersion.mockImplementation(async (_repoUrl: string, version: string | string[]) =>
+      Array.isArray(version) ? version[0] : version
+    );
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: true,
+      headCommit: '1234567890abcdef1234567890abcdef12345678',
+    });
     process.exitCode = undefined;
   });
 
@@ -108,6 +133,13 @@ describe('lockCommand', () => {
 
     expect(mockWriteFile).toHaveBeenCalledWith('promptscript.lock', expect.any(String), 'utf-8');
     expect(mockSucceed).toHaveBeenCalledWith('Lockfile generated');
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { commit: string }>;
+    };
+    expect(parsed.dependencies['github.com/company/base']?.commit).toBe(
+      '1234567890abcdef1234567890abcdef12345678'
+    );
   });
 
   it('should preserve existing pins', async () => {
@@ -123,7 +155,7 @@ describe('lockCommand', () => {
         dependencies: {
           'github.com/company/base': {
             version: 'v1.2.0',
-            commit: 'abc123',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
             integrity: 'sha256-xyz',
           },
         },
@@ -135,6 +167,58 @@ describe('lockCommand', () => {
     const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
     const parsed = JSON.parse(written) as { dependencies: Record<string, { version: string }> };
     expect(parsed.dependencies['github.com/company/base']!.version).toBe('v1.2.0');
+    expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
+  });
+
+  it('should refresh existing pins with --update', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'latest',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            integrity: 'sha256-old',
+          },
+        },
+      })
+    );
+
+    await lockCommand({ update: true });
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { commit: string }>;
+    };
+    expect(parsed.dependencies['github.com/company/base']?.commit).toBe(
+      '1234567890abcdef1234567890abcdef12345678'
+    );
+    expect(mockValidateRemoteAccess).toHaveBeenCalled();
+  });
+
+  it('should fail when a remote dependency cannot be resolved', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(false);
+    mockValidateRemoteAccess.mockResolvedValue({
+      accessible: false,
+      error: 'remote unavailable',
+    });
+
+    await lockCommand({});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should not write file in dry-run mode', async () => {
@@ -195,6 +279,51 @@ describe('lockCommand', () => {
     expect(parsed.dependencies['github.com/company/base']).toBeDefined();
   });
 
+  it('should use a configured fallback URL when the primary remote fails', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: {
+        '@company': {
+          url: 'https://github.com/company/base.git',
+          fallbackUrl: 'git@github.com:company/base.git',
+        },
+        '@mirror': 'https://github.com/company/base.git',
+      },
+    });
+    mockExistsSync.mockReturnValue(false);
+    mockValidateRemoteAccess
+      .mockResolvedValueOnce({ accessible: false, error: 'authentication failed' })
+      .mockResolvedValueOnce({
+        accessible: true,
+        headCommit: '1234567890abcdef1234567890abcdef12345678',
+      });
+
+    await lockCommand({});
+
+    expect(mockWriteFile).toHaveBeenCalled();
+    expect(mockValidateRemoteAccess).toHaveBeenLastCalledWith(
+      'git@github.com:company/base.git',
+      undefined
+    );
+  });
+
+  it('should preserve SSH transport when resolving a dependency', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'git@github.com:company/base.git' },
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await lockCommand({});
+
+    expect(mockValidateRemoteAccess).toHaveBeenCalledWith(
+      'git@github.com:company/base.git',
+      undefined
+    );
+  });
+
   it('should preserve md-sourced entries from previous lockfile', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
@@ -208,7 +337,7 @@ describe('lockCommand', () => {
         dependencies: {
           'github.com/company/base': {
             version: 'v1.0.0',
-            commit: 'abc123',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
             integrity: 'sha256-xyz',
           },
           'github.com/org/skills/SKILL.md': {
@@ -263,6 +392,11 @@ describe('lockCommand', () => {
     // Scanned @use import dependency
     expect(parsed.dependencies['https://github.com/org/repo']).toBeDefined();
     expect(parsed.dependencies['https://github.com/org/repo']!.version).toBe('v2.0.0');
+    expect(mockResolveVersion).toHaveBeenCalledWith('https://github.com/org/repo.git', ['v2.0.0']);
+    expect(mockValidateRemoteAccess).toHaveBeenCalledWith(
+      'https://github.com/org/repo.git',
+      'v2.0.0'
+    );
   });
 
   it('should generate lockfile even without registries when @use imports exist', async () => {
@@ -320,6 +454,85 @@ describe('lockCommand', () => {
     expect(repoKeys).toHaveLength(1);
   });
 
+  it('should reject conflicting versions for one repository', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockExistsSync.mockReturnValue(false);
+    mockResolveVersion.mockResolvedValue(null);
+    mockCollectRemoteImports.mockResolvedValue([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'guards/safety.prs',
+        version: 'v1.0.0',
+      },
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'prompts/base.prs',
+        version: 'v2.0.0',
+      },
+    ]);
+
+    await lockCommand({});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should accept selectors that resolve to the same version', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockExistsSync.mockReturnValue(false);
+    mockResolveVersion.mockResolvedValue('v1.2.0');
+    mockCollectRemoteImports.mockResolvedValue([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'guards/safety.prs',
+        version: '1.2.0',
+      },
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'prompts/base.prs',
+        version: 'v1.2.0',
+      },
+    ]);
+
+    await lockCommand({});
+
+    expect(mockWriteFile).toHaveBeenCalled();
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('should reuse an existing pin that satisfies a requested range', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'https://github.com/org/repo': {
+            version: 'v1.2.0',
+            commit: 'abcdefabcdefabcdefabcdefabcdefabcdefabcd',
+            integrity: 'sha256-existing',
+          },
+        },
+      })
+    );
+    mockCollectRemoteImports.mockResolvedValue([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'guards/safety.prs',
+        version: '1.2.0',
+      },
+    ]);
+
+    await lockCommand({});
+
+    expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
+    expect(mockWriteFile).toHaveBeenCalled();
+  });
+
   it('should reuse existing lockfile entry for scanned imports', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
@@ -330,7 +543,7 @@ describe('lockCommand', () => {
         dependencies: {
           'https://github.com/org/repo': {
             version: 'v2.0.0',
-            commit: 'abc123def',
+            commit: 'abcdefabcdefabcdefabcdefabcdefabcdefabcd',
             integrity: 'sha256-existing',
           },
         },
@@ -351,7 +564,9 @@ describe('lockCommand', () => {
       dependencies: Record<string, { version: string; commit: string; integrity: string }>;
     };
     // Should preserve the existing pinned entry, not create a fresh one
-    expect(parsed.dependencies['https://github.com/org/repo']!.commit).toBe('abc123def');
+    expect(parsed.dependencies['https://github.com/org/repo']!.commit).toBe(
+      'abcdefabcdefabcdefabcdefabcdefabcdefabcd'
+    );
     expect(parsed.dependencies['https://github.com/org/repo']!.integrity).toBe('sha256-existing');
   });
 

@@ -8,9 +8,23 @@ import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency, LockfileReference } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { collectRemoteImports } from './lock-scanner.js';
+import {
+  createGitRegistry,
+  isSemverRange,
+  normalizeGitUrl,
+  validateRemoteAccess,
+  versionSatisfiesRange,
+} from '@promptscript/resolver';
 
 /** Path to the lockfile relative to cwd. */
 export const LOCKFILE_PATH = 'promptscript.lock';
+const UNRESOLVED_COMMIT = '0000000000000000000000000000000000000000';
+const UNRESOLVED_INTEGRITY = 'sha256-pending';
+
+interface RequestedDependency {
+  versions: Set<string>;
+  fallbackUrl?: string;
+}
 
 /**
  * Generate or update promptscript.lock by resolving all remote imports.
@@ -19,9 +33,7 @@ export const LOCKFILE_PATH = 'promptscript.lock';
  * global config, then writes a lockfile that pins each dependency to a
  * resolved version and commit hash for reproducible builds.
  *
- * NOTE: Full remote resolution (actual git fetching) requires the registry
- * resolver pipeline. This implementation records the configured aliases as
- * pending dependencies and preserves any previously-resolved entries.
+ * Existing pins are preserved unless --update is used.
  */
 export async function lockCommand(options: LockOptions): Promise<void> {
   const spinner = createSpinner('Generating lockfile...').start();
@@ -72,38 +84,38 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       }
     }
 
-    // Build dependencies map
-    const dependencies: Record<string, LockfileDependency> = {};
+    const requestedDependencies = new Map<string, RequestedDependency>();
 
     for (const [, entry] of aliasEntries) {
       const repoUrl = typeof entry === 'string' ? entry : entry.url;
-
-      // Preserve existing pin if present; otherwise record a placeholder
-      // (a real implementation would resolve the latest commit here)
-      if (repoUrl in existing.dependencies) {
-        dependencies[repoUrl] = existing.dependencies[repoUrl]!;
-      } else {
-        dependencies[repoUrl] = {
-          version: 'latest',
-          commit: '0000000000000000000000000000000000000000',
-          integrity: 'sha256-pending',
-        };
+      const requested = requestedDependencies.get(repoUrl) ?? {
+        versions: new Set<string>(),
+      };
+      requested.versions.add('latest');
+      if (typeof entry !== 'string' && entry.fallbackUrl) {
+        requested.fallbackUrl = entry.fallbackUrl;
       }
+      requestedDependencies.set(repoUrl, requested);
     }
 
-    // Add scanned @use imports (deduplicated by repoUrl — lockfile pins at
-    // repo granularity since all paths within a repo share the same commit)
     for (const imp of scannedImports) {
-      if (imp.repoUrl in dependencies) continue;
-      if (imp.repoUrl in existing.dependencies) {
-        dependencies[imp.repoUrl] = existing.dependencies[imp.repoUrl]!;
-      } else {
-        dependencies[imp.repoUrl] = {
-          version: imp.version || 'latest',
-          commit: '0000000000000000000000000000000000000000',
-          integrity: 'sha256-pending',
-        };
-      }
+      const requestedVersion = imp.version || 'latest';
+      const requested = requestedDependencies.get(imp.repoUrl) ?? {
+        versions: new Set<string>(),
+      };
+      requested.versions.add(requestedVersion);
+      requestedDependencies.set(imp.repoUrl, requested);
+    }
+
+    const dependencies: Record<string, LockfileDependency> = {};
+    for (const [repoUrl, requested] of requestedDependencies) {
+      dependencies[repoUrl] = await resolveDependency(
+        repoUrl,
+        [...requested.versions],
+        existing.dependencies[repoUrl],
+        options.update === true,
+        requested.fallbackUrl
+      );
     }
 
     // Preserve .md-sourced entries from previous lock (managed by `prs skills add`)
@@ -115,7 +127,6 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       }
     }
 
-    // Hash registry reference files (placeholder for full resolution)
     const references: Record<string, LockfileReference> = {};
 
     const lockfile: Lockfile = {
@@ -143,4 +154,99 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     ConsoleOutput.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   }
+}
+
+function hasResolvedPin(dependency: LockfileDependency | undefined): boolean {
+  return (
+    dependency !== undefined &&
+    dependency.commit !== UNRESOLVED_COMMIT &&
+    /^[0-9a-f]{40}$/i.test(dependency.commit)
+  );
+}
+
+function toRemoteUrl(repoUrl: string): string {
+  if (repoUrl.startsWith('git@') || /^ssh:\/\//i.test(repoUrl) || /^file:\/\//i.test(repoUrl)) {
+    return repoUrl;
+  }
+  const withProtocol = /^[a-z][a-z\d+.-]*:\/\//i.test(repoUrl) ? repoUrl : `https://${repoUrl}`;
+  return normalizeGitUrl(withProtocol);
+}
+
+async function resolveDependency(
+  repoUrl: string,
+  requestedVersions: string[],
+  existing: LockfileDependency | undefined,
+  forceUpdate: boolean,
+  fallbackUrl?: string
+): Promise<LockfileDependency> {
+  const canReuse =
+    !forceUpdate &&
+    hasResolvedPin(existing) &&
+    requestedVersions.every(
+      (version) =>
+        version === 'latest' ||
+        existing?.version === version ||
+        (existing !== undefined &&
+          isSemverRange(version) &&
+          versionSatisfiesRange(existing.version, version))
+    );
+  if (canReuse && existing) {
+    return existing;
+  }
+
+  const remoteUrls = [repoUrl, fallbackUrl].filter(
+    (candidate): candidate is string => candidate !== undefined
+  );
+  let lastError: Error | undefined;
+
+  for (const candidate of remoteUrls) {
+    try {
+      const remoteUrl = toRemoteUrl(candidate);
+      const resolvedVersion = await resolveRequestedVersion(repoUrl, remoteUrl, requestedVersions);
+      const validation = await validateRemoteAccess(
+        remoteUrl,
+        resolvedVersion === 'latest' ? undefined : resolvedVersion
+      );
+      if (!validation.accessible || !validation.headCommit) {
+        throw new Error(validation.error ?? `Could not resolve a commit for ${repoUrl}`);
+      }
+
+      return {
+        version: resolvedVersion,
+        commit: validation.headCommit,
+        integrity:
+          existing?.commit === validation.headCommit ? existing.integrity : UNRESOLVED_INTEGRITY,
+      };
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  throw lastError ?? new Error(`Could not resolve ${repoUrl}`);
+}
+
+async function resolveRequestedVersion(
+  repoUrl: string,
+  remoteUrl: string,
+  requestedVersions: string[]
+): Promise<string> {
+  const explicitVersions = [
+    ...new Set(requestedVersions.filter((version) => version !== 'latest')),
+  ];
+  if (explicitVersions.length === 0) {
+    return 'latest';
+  }
+
+  if (explicitVersions.every(isSemverRange)) {
+    const registry = createGitRegistry({ url: remoteUrl });
+    const matchedVersion = await registry.resolveVersion(remoteUrl, explicitVersions);
+    if (!matchedVersion) {
+      throw new Error(`No remote version of ${repoUrl} matches ${explicitVersions.join(', ')}`);
+    }
+    return matchedVersion;
+  } else if (explicitVersions.length === 1) {
+    return explicitVersions[0]!;
+  }
+
+  throw new Error(`Conflicting versions requested for ${repoUrl}: ${explicitVersions.join(', ')}`);
 }
