@@ -677,14 +677,14 @@ Vendor mode copies all remote dependencies into a local `.promptscript/vendor/` 
 ### Syncing the Vendor Directory
 
 ```bash
-# Download all lockfile-resolved packages to vendor/
+# Download the exact lockfile-resolved packages to vendor/
 prs vendor sync
 
 # Check that vendor/ is in sync with the lockfile
 prs vendor check
 ```
 
-After running `prs vendor sync`, compilation never performs network requests. The vendor directory is used as-is.
+`prs vendor sync` fails if an exact locked commit cannot be downloaded. After a successful sync, compilation resolves locked remote imports from the vendor directory without network requests.
 
 ### Vendor Directory Structure
 
@@ -694,6 +694,7 @@ After running `prs vendor sync`, compilation never performs network requests. Th
     ├── github.com/
     │   ├── acme/
     │   │   └── promptscript-base/
+    │   │       ├── .promptscript-git/
     │   │       ├── @org/base.prs
     │   │       └── @org/security.prs
     │   └── some-org/
@@ -701,16 +702,13 @@ After running `prs vendor sync`, compilation never performs network requests. Th
     │           └── skills/
     │               └── tdd-workflow/
     │                   └── SKILL.md
-    └── .vendor-manifest.yaml
+    └── .vendor-manifest.json
 ```
 
 ### CI Pipeline with Vendor
 
 ```yaml
 # .github/workflows/promptscript.yml
-- name: Sync vendor
-  run: prs vendor sync
-
 - name: Validate
   run: prs vendor check && prs validate --strict
 
@@ -718,7 +716,7 @@ After running `prs vendor sync`, compilation never performs network requests. Th
   run: prs compile
 ```
 
-Commit the vendor directory to your repository if you want fully self-contained, network-free builds. Otherwise, regenerate it in CI from the lockfile.
+Commit the vendor directory to your repository for fully self-contained, network-free builds. Regenerating it requires network access to the locked repositories.
 
 ---
 

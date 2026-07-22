@@ -322,9 +322,13 @@ describe('GitRegistry', () => {
       await registry.fetch('@company/base');
 
       expect(mockGit.clone).toHaveBeenCalledWith(
-        'https://ghp_test_token@github.com/org/repo.git',
+        'https://github.com/org/repo.git',
         expect.any(String),
         expect.any(Array)
+      );
+      expect(mockGit.env).toHaveBeenCalledWith(
+        'GIT_CONFIG_VALUE_0',
+        'Authorization: Basic Z2hwX3Rlc3RfdG9rZW46'
       );
     });
 
@@ -343,9 +347,13 @@ describe('GitRegistry', () => {
       await registry.fetch('@company/base');
 
       expect(mockGit.clone).toHaveBeenCalledWith(
-        'https://env_token_value@github.com/org/repo.git',
+        'https://github.com/org/repo.git',
         expect.any(String),
         expect.any(Array)
+      );
+      expect(mockGit.env).toHaveBeenCalledWith(
+        'GIT_CONFIG_VALUE_0',
+        `Authorization: Basic ${Buffer.from('env_token_value:').toString('base64')}`
       );
 
       delete process.env['TEST_GIT_TOKEN'];
@@ -363,9 +371,18 @@ describe('GitRegistry', () => {
 
       await registry.fetch('@company/base');
 
+      expect(mockGit.clone).toHaveBeenCalledWith(
+        'git@github.com:org/repo.git',
+        expect.any(String),
+        expect.any(Array)
+      );
       expect(mockGit.env).toHaveBeenCalledWith(
         'GIT_SSH_COMMAND',
         expect.stringContaining('/path/to/key')
+      );
+      expect(mockGit.env).not.toHaveBeenCalledWith(
+        'GIT_SSH_COMMAND',
+        expect.stringContaining('StrictHostKeyChecking=no')
       );
     });
   });

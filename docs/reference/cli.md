@@ -1032,13 +1032,13 @@ Manage the vendor directory for offline builds. Vendor mode copies all lockfile-
 
 #### prs vendor sync
 
-Download all dependencies from the lockfile into the vendor directory.
+Download exact lockfile dependencies into the vendor directory.
 
 ```bash
 prs vendor sync
 ```
 
-After syncing, compilation uses the vendored files and makes no network requests.
+Sync fails if any locked commit cannot be downloaded. After syncing, compilation uses the vendored files and makes no network requests for locked remote imports.
 
 #### prs vendor check
 

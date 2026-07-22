@@ -5,22 +5,39 @@ import { join } from 'path';
 const mockCacheManager = {
   getCachePath: vi.fn().mockReturnValue('/home/user/.promptscript/.cache/git/test-key'),
   isValid: vi.fn().mockResolvedValue(false),
+  remove: vi.fn().mockResolvedValue(undefined),
+  touch: vi.fn().mockResolvedValue(undefined),
 };
 
 const mockGitRegistry = {
   exists: vi.fn().mockResolvedValue(true),
   fetch: vi.fn().mockResolvedValue('version: "1"'),
+  checkoutCommit: vi.fn().mockResolvedValue(undefined),
 };
+const { mockLoadVendorManifest, mockResolveVendoredRepository, mockVerifyGitRepository } =
+  vi.hoisted(() => ({
+    mockLoadVendorManifest: vi.fn().mockResolvedValue(null),
+    mockResolveVendoredRepository: vi.fn().mockResolvedValue('/project/.promptscript/vendor/repo'),
+    mockVerifyGitRepository: vi.fn().mockResolvedValue(undefined),
+  }));
 
 // Mock the resolver module - this gets hoisted
 vi.mock('@promptscript/resolver', () => ({
   normalizeGitUrl: (url: string) => url.replace(/\.git$/, ''),
   getCacheKey: (url: string, ref: string) => `${url.replace(/[^a-z0-9]/gi, '-')}-${ref}`,
+  isSemverRange: (value: string) => value.startsWith('^'),
+  isRealPathInside: vi.fn().mockResolvedValue(true),
+  versionSatisfiesRange: () => true,
   GitCacheManager: class {
     getCachePath = mockCacheManager.getCachePath;
     isValid = mockCacheManager.isValid;
+    remove = mockCacheManager.remove;
+    touch = mockCacheManager.touch;
   },
   createGitRegistry: () => mockGitRegistry,
+  loadVendorManifest: mockLoadVendorManifest,
+  resolveVendoredRepository: mockResolveVendoredRepository,
+  verifyGitRepositoryCheckout: mockVerifyGitRepository,
 }));
 
 // Import after mocking
@@ -59,6 +76,10 @@ describe('utils/registry-resolver', () => {
     mockCacheManager.isValid.mockResolvedValue(false);
     mockGitRegistry.exists.mockResolvedValue(true);
     mockGitRegistry.fetch.mockResolvedValue('version: "1"');
+    mockGitRegistry.checkoutCommit.mockResolvedValue(undefined);
+    mockVerifyGitRepository.mockResolvedValue(undefined);
+    mockLoadVendorManifest.mockResolvedValue(null);
+    mockResolveVendoredRepository.mockResolvedValue('/project/.promptscript/vendor/repo');
   });
 
   afterEach(() => {
@@ -180,6 +201,132 @@ describe('utils/registry-resolver', () => {
   });
 
   describe('resolveRegistryPath', () => {
+    it('uses a pinned vendored git registry without cache or network access', async () => {
+      mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: {
+            url: 'https://github.com/org/registry.git',
+            ref: 'v1.0.0',
+            path: 'configs',
+          },
+        },
+      };
+
+      const result = await resolveRegistryPath(config, {
+        vendorDir: '/project/.promptscript/vendor',
+        lockfile: {
+          version: 1,
+          dependencies: {
+            'https://github.com/org/registry.git': {
+              version: 'v1.0.0',
+              commit: 'a'.repeat(40),
+              integrity: 'sha256-test',
+            },
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        path: join('/project/.promptscript/vendor/repo', 'configs'),
+        isRemote: false,
+        source: 'git',
+      });
+      expect(mockResolveVendoredRepository).toHaveBeenCalledWith(
+        '/project/.promptscript/vendor',
+        'https://github.com/org/registry.git',
+        'v1.0.0',
+        'a'.repeat(40)
+      );
+      expect(mockGitRegistry.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects a vendored registry whose lock version does not match the configured ref', async () => {
+      mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: {
+            url: 'https://github.com/org/registry.git',
+            ref: 'v2.0.0',
+          },
+        },
+      };
+
+      await expect(
+        resolveRegistryPath(config, {
+          vendorDir: '/project/.promptscript/vendor',
+          lockfile: {
+            version: 1,
+            dependencies: {
+              'https://github.com/org/registry.git': {
+                version: 'v1.0.0',
+                commit: 'a'.repeat(40),
+                integrity: 'sha256-test',
+              },
+            },
+          },
+        })
+      ).rejects.toThrow('does not match configured ref');
+    });
+
+    it('rejects a configured registry path outside the vendored repository', async () => {
+      mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: {
+            url: 'https://github.com/org/registry.git',
+            ref: 'v1.0.0',
+            path: '../outside',
+          },
+        },
+      };
+
+      await expect(
+        resolveRegistryPath(config, {
+          vendorDir: '/project/.promptscript/vendor',
+          lockfile: {
+            version: 1,
+            dependencies: {
+              'https://github.com/org/registry.git': {
+                version: 'v1.0.0',
+                commit: 'a'.repeat(40),
+                integrity: 'sha256-test',
+              },
+            },
+          },
+        })
+      ).rejects.toThrow('Registry path escapes its repository');
+    });
+
+    it('does not fall back to network when an existing vendor directory lacks a manifest', async () => {
+      mockLoadVendorManifest.mockResolvedValue(null);
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: { url: 'https://github.com/org/registry.git' },
+        },
+      };
+
+      await expect(
+        resolveRegistryPath(config, {
+          vendorDir: process.cwd(),
+          lockfile: { version: 1, dependencies: {} },
+        })
+      ).rejects.toThrow('Vendor manifest is missing');
+      expect(mockGitRegistry.fetch).not.toHaveBeenCalled();
+    });
+
     it('should resolve git registry with valid cache', async () => {
       mockCacheManager.isValid.mockResolvedValue(true);
 
@@ -197,6 +344,40 @@ describe('utils/registry-resolver', () => {
       expect(result.source).toBe('git');
       expect(result.isRemote).toBe(true);
       expect(result.path).toBe('/home/user/.promptscript/.cache/git/test-key');
+    });
+
+    it('verifies a cached Git registry against its locked commit', async () => {
+      mockCacheManager.isValid.mockResolvedValue(true);
+      const commit = 'a'.repeat(40);
+      const config: PromptScriptConfig = {
+        id: 'test',
+        syntax: '1.0.0',
+        targets: ['github'],
+        registry: {
+          git: { url: 'https://github.com/org/registry.git' },
+        },
+      };
+
+      await resolveRegistryPath(config, {
+        lockfile: {
+          version: 1,
+          dependencies: {
+            'https://github.com/org/registry.git': {
+              version: 'main',
+              commit,
+              integrity: 'sha256-test',
+            },
+          },
+        },
+      });
+
+      expect(mockVerifyGitRepository).toHaveBeenCalledWith(
+        '/home/user/.promptscript/.cache/git/test-key',
+        '.git',
+        commit,
+        new Set(['.prs-cache-meta.json'])
+      );
+      expect(mockGitRegistry.fetch).not.toHaveBeenCalled();
     });
 
     it('should clone git registry when cache is invalid', async () => {

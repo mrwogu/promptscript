@@ -211,6 +211,25 @@ describe('compile command - createCliLogger warn path', () => {
     };
   });
 
+  it('fails closed when an existing lockfile is malformed', async () => {
+    mockExistsSync.mockImplementation(
+      (path: string) =>
+        String(path).includes('project.prs') || String(path).endsWith('promptscript.lock')
+    );
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('promptscript.lock')) {
+        return 'invalid: true';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    await compileCommand({}, mockServices);
+
+    expect(mockSpinner.fail).toHaveBeenCalledWith('Error');
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should route logger.warn() through ConsoleOutput.warn', async () => {
     // Arrange: run compileCommand to capture the logger created internally
     await compileCommand({}, mockServices);

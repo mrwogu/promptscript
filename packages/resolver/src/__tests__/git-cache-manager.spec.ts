@@ -81,6 +81,19 @@ describe('GitCacheManager', () => {
       // createdAt should be preserved
       expect(entry2?.metadata.createdAt).toBe(entry1?.metadata.createdAt);
     });
+
+    it('should reject cache metadata symbolic links', async () => {
+      if (process.platform === 'win32') return;
+      const url = 'https://github.com/org/repo.git';
+      const cachePath = cacheManager.getCachePath(url, 'main');
+      const outsidePath = join(testCacheDir, 'outside.txt');
+      await fs.mkdir(cachePath, { recursive: true });
+      await fs.writeFile(outsidePath, 'unchanged');
+      await fs.symlink(outsidePath, join(cachePath, '.prs-cache-meta.json'));
+
+      await expect(cacheManager.set(url, 'main', 'abc123')).rejects.toThrow('symbolic link');
+      await expect(fs.readFile(outsidePath, 'utf-8')).resolves.toBe('unchanged');
+    });
   });
 
   describe('isValid', () => {

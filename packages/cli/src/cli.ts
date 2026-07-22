@@ -242,8 +242,8 @@ const vendor = program.command('vendor').description('Manage vendored dependenci
 
 vendor
   .command('sync')
-  .description('Copy all cached dependencies to .promptscript/vendor/')
-  .option('--dry-run', 'Preview without copying files')
+  .description('Download locked dependencies to .promptscript/vendor/')
+  .option('--dry-run', 'Preview without downloading files')
   .action((opts) => vendorSyncCommand(opts));
 
 vendor

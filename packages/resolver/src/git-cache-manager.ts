@@ -311,6 +311,9 @@ export class GitCacheManager {
     }
 
     try {
+      if ((await fs.lstat(metadataPath)).isSymbolicLink()) {
+        return null;
+      }
       const content = await fs.readFile(metadataPath, 'utf-8');
       return JSON.parse(content) as CacheMetadata;
     } catch {
@@ -323,7 +326,37 @@ export class GitCacheManager {
    */
   private async writeMetadata(cachePath: string, metadata: CacheMetadata): Promise<void> {
     const metadataPath = join(cachePath, METADATA_FILE);
-    await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2), 'utf-8');
+    const temporaryPath = join(
+      cachePath,
+      `${METADATA_FILE}.${process.pid}.${Date.now()}.temporary`
+    );
+    try {
+      try {
+        if ((await fs.lstat(metadataPath)).isSymbolicLink()) {
+          throw new Error(
+            `Refusing to write cache metadata through a symbolic link: ${metadataPath}`
+          );
+        }
+      } catch (error) {
+        if (
+          !(
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            error.code === 'ENOENT'
+          )
+        ) {
+          throw error;
+        }
+      }
+      await fs.writeFile(temporaryPath, JSON.stringify(metadata, null, 2), {
+        encoding: 'utf-8',
+        flag: 'wx',
+      });
+      await fs.rename(temporaryPath, metadataPath);
+    } finally {
+      await fs.rm(temporaryPath, { force: true });
+    }
   }
 }
 

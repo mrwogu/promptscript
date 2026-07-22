@@ -116,7 +116,7 @@ vi.mock('chalk', () => ({
 
 // Mock fs.existsSync for the entry file check
 vi.mock('fs', () => ({
-  existsSync: (...args: unknown[]) => mockExistsSync(...args),
+  existsSync: (path: string) => (path.endsWith('promptscript.lock') ? false : mockExistsSync(path)),
   readFileSync: vi.fn().mockReturnValue(''),
 }));
 

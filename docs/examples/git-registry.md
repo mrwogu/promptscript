@@ -594,7 +594,7 @@ This example uses vendor mode so CI never needs network access to the registry.
 ### Local Setup (run once or on updates)
 
 ```bash
-# Sync vendor from lockfile
+# Sync vendor from the lockfile
 prs vendor sync
 
 # Commit vendor directory and lockfile

@@ -80,6 +80,18 @@ export { RegistryCache } from './registry-cache.js';
 
 // Vendor registry (offline / CI builds)
 export { VendorRegistry, createVendorRegistry } from './vendor-registry.js';
+export {
+  VENDOR_MANIFEST_FILE,
+  VENDOR_GIT_DIR,
+  getVendorRepositoryRelativePath,
+  hashVendorRepository,
+  isValidVendorManifest,
+  loadVendorManifest,
+  verifyGitRepositoryCheckout,
+  resolveVendoredRepository,
+  verifyVendoredGitRepository,
+} from './vendor-manifest.js';
+export type { VendorManifest, VendorManifestEntry } from './vendor-manifest.js';
 
 // Inheritance resolution
 export { resolveInheritance } from './inheritance.js';
@@ -153,7 +165,12 @@ export { discoverNativeContent } from './auto-discovery.js';
 export { makeBlock, makeObjectContent, makeTextContent, VIRTUAL_LOC } from './ast-factory.js';
 
 // Reference integrity hashing
-export { hashContent, buildReferenceKey, isInsideCachePath } from './reference-hasher.js';
+export {
+  hashContent,
+  buildReferenceKey,
+  isInsideCachePath,
+  isRealPathInside,
+} from './reference-hasher.js';
 
 // Standalone resolve function
 import type { ResolvedAST, ResolverOptions } from './resolver.js';
