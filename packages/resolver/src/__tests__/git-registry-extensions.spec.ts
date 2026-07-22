@@ -97,6 +97,16 @@ describe('GitRegistry — extended methods', () => {
       ]);
     });
 
+    it('clones the default branch when no tag is provided', async () => {
+      const targetDir = join(testCacheDir, 'default-target');
+
+      await registry.cloneAtTag('https://github.com/org/repo.git', undefined, targetDir);
+
+      expect(mockGit.clone).toHaveBeenCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+      ]);
+    });
+
     it('removes an existing target directory before cloning', async () => {
       // Arrange
       const targetDir = join(testCacheDir, 'existing-dir');
@@ -256,6 +266,25 @@ describe('GitRegistry — extended methods', () => {
 
       // Assert
       expect(resolved).toBe('v2.0.0');
+    });
+
+    it('resolves the highest version satisfying every range', async () => {
+      const resolved = await registry.resolveVersion('https://github.com/org/repo.git', [
+        '^1.0.0',
+        '>=1.1.0',
+      ]);
+
+      expect(resolved).toBe('v1.2.0');
+    });
+
+    it('applies caret bounds for zero-major versions', async () => {
+      mockGit.listRemote.mockResolvedValue(
+        buildLsRemoteOutput(['v0.1.0', 'v0.1.5', 'v0.2.0', 'v0.9.0'])
+      );
+
+      const resolved = await registry.resolveVersion('https://github.com/org/repo.git', '^0.1.0');
+
+      expect(resolved).toBe('v0.1.5');
     });
 
     it('returns null when no tag satisfies the range', async () => {

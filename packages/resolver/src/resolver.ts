@@ -670,18 +670,21 @@ export class Resolver {
     try {
       // Check lockfile for pinned commit
       const lockEntry = this.options.lockfile?.dependencies[repoUrl];
-      const pinnedTag = lockEntry?.version ?? (version || undefined);
-
-      // Determine the Git tag to clone at
-      const tag = pinnedTag ?? 'main';
-
-      // Check if lockfile has a valid commit hash for pinning
-      const lockedCommit =
+      const lockfileCommit =
         lockEntry?.commit &&
         /^[0-9a-f]{40}$/.test(lockEntry.commit) &&
         !/^0{40}$/.test(lockEntry.commit)
           ? lockEntry.commit
           : null;
+      const markerCommit =
+        version && /^[0-9a-f]{40}$/.test(version) && !/^0{40}$/.test(version) ? version : null;
+      const lockedCommit = lockfileCommit ?? markerCommit;
+
+      const requestedRef = lockEntry?.version ?? (version || undefined);
+      const tag =
+        requestedRef && requestedRef !== 'latest' && !/^[0-9a-f]{40}$/.test(requestedRef)
+          ? requestedRef
+          : undefined;
 
       // Check RegistryCache for cached version
       const hasCached = await this.registryCache.has(repoUrl, effectiveVersion);
@@ -712,7 +715,7 @@ export class Resolver {
           }
         }
       } else {
-        this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag}`);
+        this.logger.verbose(`Registry cache miss, cloning: ${repoUrl}@${tag ?? 'default'}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
         // Look up fallback URL from registries config (for HTTPS→SSH auth retry)

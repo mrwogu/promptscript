@@ -13,6 +13,7 @@
 
 import { existsSync, promises as fs } from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 import type { SimpleGit, SimpleGitOptions } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import { FileNotFoundError } from '@promptscript/core';
@@ -283,13 +284,13 @@ export class GitRegistry implements Registry {
    * retry with the fallback URL.
    *
    * @param repoUrl - Repository URL to clone
-   * @param tag - Git tag to check out
+   * @param tag - Git tag to check out, or undefined for the default branch
    * @param targetDir - Directory to clone into
    * @param fallbackRepoUrl - Optional fallback URL to try on auth failure
    */
   async cloneAtTag(
     repoUrl: string,
-    tag: string,
+    tag: string | undefined,
     targetDir: string,
     fallbackRepoUrl?: string
   ): Promise<void> {
@@ -299,21 +300,18 @@ export class GitRegistry implements Registry {
     await fs.mkdir(targetDir, { recursive: true });
 
     const git = this.createGit();
+    const cloneOptions = tag ? ['--depth=1', `--branch=${tag}`, '--single-branch'] : ['--depth=1'];
     try {
-      await git.clone(repoUrl, targetDir, ['--depth=1', `--branch=${tag}`, '--single-branch']);
+      await git.clone(repoUrl, targetDir, cloneOptions);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      if (this.isRefError(error)) {
+      if (tag && this.isRefError(error)) {
         throw new GitRefNotFoundError(tag, repoUrl);
       }
       if (this.isAuthError(error)) {
         if (fallbackRepoUrl) {
           try {
-            await git.clone(fallbackRepoUrl, targetDir, [
-              '--depth=1',
-              `--branch=${tag}`,
-              '--single-branch',
-            ]);
+            await git.clone(fallbackRepoUrl, targetDir, cloneOptions);
             return;
           } catch (fallbackErr) {
             const fbError =
@@ -326,7 +324,7 @@ export class GitRegistry implements Registry {
               );
             }
             throw new GitCloneError(
-              `Failed to clone ${fallbackRepoUrl} at tag ${tag}: ${fbError.message}`,
+              `Failed to clone ${fallbackRepoUrl} at ${tag ?? 'default branch'}: ${fbError.message}`,
               fallbackRepoUrl,
               fbError
             );
@@ -335,7 +333,7 @@ export class GitRegistry implements Registry {
         throw new GitAuthError(`Authentication failed for ${repoUrl}`, repoUrl, error);
       }
       throw new GitCloneError(
-        `Failed to clone ${repoUrl} at tag ${tag}: ${error.message}`,
+        `Failed to clone ${repoUrl} at ${tag ?? 'default branch'}: ${error.message}`,
         repoUrl,
         error
       );
@@ -385,13 +383,13 @@ export class GitRegistry implements Registry {
    * Resolve a semver range against available tags from a remote repo.
    *
    * @param repoUrl - Repository URL
-   * @param range - Semver range string (e.g. "^1.0.0", ">=2.0.0 <3.0.0", "1.x")
+   * @param range - One or more semver ranges that the resolved tag must satisfy
    * @param cache - Optional RegistryCache passed through to listTags
    * @returns Best-matching tag string, or null if no tag satisfies the range
    */
   async resolveVersion(
     repoUrl: string,
-    range: string,
+    range: string | string[],
     cache?: RegistryCache
   ): Promise<string | null> {
     const tags = await this.listTags(repoUrl, cache);
@@ -847,13 +845,41 @@ function compareSemver(a: SemverParts, b: SemverParts): number {
  * tilde ranges (~1.2.3), wildcards (1.x, 1.*), and
  * comparison operators (>=1.0.0 <2.0.0).
  */
-function maxSatisfying(tags: string[], range: string): string | null {
+function maxSatisfying(tags: string[], range: string | string[]): string | null {
+  const ranges = Array.isArray(range) ? range : [range];
   const parsed = tags.map(parseSemver).filter((v): v is SemverParts => v !== null);
-  const satisfying = parsed.filter((v) => satisfiesRange(v, range));
+  const satisfying = parsed.filter((v) => ranges.every((item) => satisfiesRange(v, item)));
   if (satisfying.length === 0) return null;
   satisfying.sort(compareSemver);
   const best = satisfying[satisfying.length - 1];
   return best ? best.raw : null;
+}
+
+export function versionSatisfiesRange(version: string, range: string): boolean {
+  const parsed = parseSemver(version);
+  return parsed !== null && satisfiesRange(parsed, range);
+}
+
+function parseXRange(range: string): RegExpExecArray | null {
+  const match = /^v?(\d+)(?:\.([0-9xX*]+))?(?:\.([0-9xX*]+))?$/.exec(range);
+  if (match?.[2] && /^[xX*]$/.test(match[2]) && match[3]) {
+    return null;
+  }
+  return match;
+}
+
+export function isSemverRange(range: string): boolean {
+  const trimmed = range.trim();
+  if (/^[*xX]$/.test(trimmed) || trimmed === '') return true;
+  if (parseSemver(trimmed)) return true;
+  if (parseXRange(trimmed)) return true;
+  const unaryMatch = /^(\^|~)(.+)$/.exec(trimmed);
+  if (unaryMatch) return parseSemver(unaryMatch[2] ?? '') !== null;
+  if (trimmed.includes(' ')) {
+    return trimmed.split(/\s+/).every(isSemverRange);
+  }
+  const comparatorMatch = /^(>=|<=|>|<|=)(.+)$/.exec(trimmed);
+  return comparatorMatch ? parseSemver(comparatorMatch[2] ?? '') !== null : false;
 }
 
 function satisfiesRange(v: SemverParts, range: string): boolean {
@@ -862,7 +888,7 @@ function satisfiesRange(v: SemverParts, range: string): boolean {
   // Wildcard / x-range
   if (/^[*xX]$/.test(trimmed) || trimmed === '') return true;
 
-  const xRangeMatch = /^(\d+)(?:\.([0-9xX*]+))?(?:\.([0-9xX*]+))?$/.exec(trimmed);
+  const xRangeMatch = parseXRange(trimmed);
   if (xRangeMatch) {
     const maj = xRangeMatch[1] ?? '0';
     const min = xRangeMatch[2];
@@ -879,8 +905,10 @@ function satisfiesRange(v: SemverParts, range: string): boolean {
   if (caretMatch) {
     const base = parseSemver(caretMatch[1] ?? '');
     if (!base) return false;
-    if (v.major !== base.major) return false;
-    return compareSemver(v, base) >= 0;
+    if (compareSemver(v, base) < 0) return false;
+    if (base.major > 0) return v.major === base.major;
+    if (base.minor > 0) return v.major === 0 && v.minor === base.minor;
+    return v.major === 0 && v.minor === 0 && v.patch === base.patch;
   }
 
   // Tilde range: ~1.2.3
@@ -969,19 +997,45 @@ export interface RemoteValidation {
  * and surface actionable error messages rather than failing silently at clone time.
  *
  * @param repoUrl - Repository URL to check (HTTPS or SSH)
+ * @param ref - Optional branch, tag, or commit to resolve
  * @returns RemoteValidation result with accessibility status and optional commit hash
  */
-export async function validateRemoteAccess(repoUrl: string): Promise<RemoteValidation> {
+export async function validateRemoteAccess(
+  repoUrl: string,
+  ref?: string
+): Promise<RemoteValidation> {
   const git = simpleGit();
   try {
-    const result = await git.listRemote([repoUrl]);
+    const isCommit = ref !== undefined && /^[0-9a-f]{40}$/i.test(ref);
+    if (isCommit) {
+      const probeDir = await fs.mkdtemp(join(tmpdir(), 'promptscript-ref-'));
+      try {
+        const probe = simpleGit(probeDir);
+        await probe.init();
+        await probe.addRemote('origin', repoUrl);
+        await probe.fetch(['origin', ref, '--depth=1']);
+        const fetchedCommit = (await probe.revparse(['FETCH_HEAD'])).trim();
+        const matches = fetchedCommit.toLowerCase() === ref.toLowerCase();
+        return {
+          accessible: matches,
+          headCommit: matches ? ref : undefined,
+        };
+      } finally {
+        await fs.rm(probeDir, { recursive: true, force: true });
+      }
+    }
+
+    const result = await git.listRemote(ref ? [repoUrl, ref, `${ref}^{}`] : [repoUrl]);
 
     // Parse HEAD commit from ls-remote output
     const lines = result.split('\n').filter(Boolean);
+    const peeledTagLine = lines.find((l) => l.endsWith('^{}'));
     const headLine = lines.find((l) => l.endsWith('\tHEAD'));
     const mainLine = lines.find((l) => l.includes('refs/heads/main'));
     const masterLine = lines.find((l) => l.includes('refs/heads/master'));
-    const commitLine = headLine ?? mainLine ?? masterLine ?? lines[0];
+    const commitLine = ref
+      ? (peeledTagLine ?? lines[0])
+      : (headLine ?? mainLine ?? masterLine ?? lines[0]);
     const commitHash = commitLine?.split('\t')[0]?.trim();
 
     return {

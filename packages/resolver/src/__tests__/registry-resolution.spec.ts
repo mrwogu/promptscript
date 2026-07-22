@@ -1139,7 +1139,11 @@ describe('Resolver — registry marker handling', () => {
 
     const result = await resolver.resolve(prsFile);
 
-    expect(mockGit.clone).toHaveBeenCalled();
+    expect(mockGit.clone).toHaveBeenCalledWith(
+      'https://github.com/acme/prs-standards.git',
+      expect.any(String),
+      ['--depth=1']
+    );
     expect(mockGit.checkout).toHaveBeenCalledWith(lockedCommit);
     expect(result.errors).toEqual([]);
   });

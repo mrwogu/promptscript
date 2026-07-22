@@ -39,6 +39,8 @@ export {
   GitRegistry,
   createGitRegistry,
   validateRemoteAccess,
+  isSemverRange,
+  versionSatisfiesRange,
   GitCloneError,
   GitAuthError,
   GitRefNotFoundError,
