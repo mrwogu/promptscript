@@ -155,7 +155,7 @@ export const TARGET_DEFINITIONS = {
     name: 'gemini',
     outputPath: 'GEMINI.md',
     family: 'base',
-    skillPath: { basePath: '.agents/skills', fileName: 'skill.md' },
+    skillPath: { basePath: '.gemini/skills', fileName: 'skill.md' },
     features: {
       defaultEnabled: false,
       defaultVersion: 'full',

@@ -80,13 +80,17 @@ export class GeminiFormatter extends MarkdownInstructionFormatter {
   }
 
   /**
-   * Resolve the skill base path based on the `skillPath` target option.
-   * - `agents` (default): `.agents/skills/` (interoperable)
-   * - `gemini`: `.gemini/skills/` (legacy)
-   * - `both`: `.agents/skills/` (primary; `both` mode handled in format)
+   * Skill base path for auto-injected skills.
+   * Returns `.gemini/skills` to match the path used by generateSkillFile()
+   * (which derives from `this.config.dotDir`). This keeps the auto-injected
+   * PromptScript skill consistent with user-defined @skills blocks and
+   * avoids creating an unexpected `.agents/` directory.
+   *
+   * The `skillPath` target option (`agents` | `gemini` | `both`) is planned
+   * but not yet implemented; when it lands, this method should respect it.
    */
   override getSkillBasePath(): string | null {
-    return '.agents/skills';
+    return '.gemini/skills';
   }
 
   /**
