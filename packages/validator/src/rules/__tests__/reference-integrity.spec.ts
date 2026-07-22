@@ -71,6 +71,19 @@ describe('PS031: reference-integrity', () => {
     expect(messages).toHaveLength(0);
   });
 
+  it('should warn for a registry reference when the references section is absent', () => {
+    const ref = './patterns.md';
+    const lockfile = { version: LOCKFILE_VERSION, dependencies: {} };
+    const registryReferencePaths = new Map([
+      ['test.prs', new Map([[ref, 'https://github.com/org/repo\0rules/patterns.md\0v1.0.0']])],
+    ]);
+    const ast = makeAst([makeSkillsBlock({ mySkill: { references: [ref] } })]);
+
+    const messages = validate(ast, { lockfile, registryReferencePaths });
+
+    expect(messages).toHaveLength(1);
+  });
+
   it('should produce no messages when ignoreHashes is true', () => {
     const lockfile = { version: LOCKFILE_VERSION, dependencies: {}, references: {} };
     const registryReferences = new Set(['/cache/registries/org/repo/v1/ref.md']);
@@ -116,6 +129,48 @@ describe('PS031: reference-integrity', () => {
     const ast = makeAst([makeSkillsBlock({ mySkill: { references: [refPath] } })]);
     const messages = validate(ast, { lockfile, registryReferences });
     expect(messages).toHaveLength(0);
+  });
+
+  it('matches relative references against their canonical lock key', () => {
+    const ref = './references/patterns.md';
+    const key = 'https://github.com/org/repo\0rules/references/patterns.md\0v1.0.0';
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+      references: {
+        [key]: {
+          hash: 'sha256-abc123',
+          lockedAt: '2026-04-01T12:00:00Z',
+        },
+      },
+    };
+    const registryReferencePaths = new Map([['test.prs', new Map([[ref, key]])]]);
+    const ast = makeAst([makeSkillsBlock({ mySkill: { references: [ref] } })]);
+
+    const messages = validate(ast, { lockfile, registryReferencePaths });
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it('does not accept the same relative path from another repository', () => {
+    const ref = './patterns.md';
+    const expectedKey = 'https://github.com/org/repo-a\0rules/patterns.md\0v1.0.0';
+    const lockfile = {
+      version: LOCKFILE_VERSION,
+      dependencies: {},
+      references: {
+        ['https://github.com/org/repo-b\0rules/patterns.md\0v1.0.0']: {
+          hash: 'sha256-abc123',
+          lockedAt: '2026-04-01T12:00:00Z',
+        },
+      },
+    };
+    const registryReferencePaths = new Map([['test.prs', new Map([[ref, expectedKey]])]]);
+    const ast = makeAst([makeSkillsBlock({ mySkill: { references: [ref] } })]);
+
+    const messages = validate(ast, { lockfile, registryReferencePaths });
+
+    expect(messages).toHaveLength(1);
   });
 
   it('should skip skills blocks without references', () => {

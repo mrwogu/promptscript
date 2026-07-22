@@ -1371,6 +1371,51 @@ describe('Resolver — registry marker handling', () => {
     expect(mockGit.checkout).toHaveBeenCalledWith(lockedCommit);
   });
 
+  it('uses the locked version as the registry cache key', async () => {
+    const tempDir = join(testCacheDir, 'project-lock-version');
+    await fs.mkdir(tempDir, { recursive: true });
+    const prsFile = join(tempDir, 'test.prs');
+    await fs.writeFile(
+      prsFile,
+      '@meta { id: "lock-version" syntax: "1.0.0" }\n@use @acme/standards'
+    );
+    const cacheDir = join(testCacheDir, 'regcache-lock-version');
+    const lockedCommit = 'f'.repeat(40);
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.writeFile(
+        join(targetDir, 'standards.prs'),
+        '@meta { id: "standards" syntax: "1.0.0" }'
+      );
+    });
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      cache: false,
+      cacheDir,
+      lockfile: {
+        version: 1,
+        dependencies: {
+          'https://github.com/acme/prs-standards.git': {
+            version: 'main',
+            commit: lockedCommit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    await resolver.resolve(prsFile);
+
+    expect(mockGit.clone).toHaveBeenCalledWith(
+      'https://github.com/acme/prs-standards.git',
+      new RegistryCache(cacheDir).getCachePath('https://github.com/acme/prs-standards.git', 'main'),
+      ['--depth=1', '--branch=main', '--single-branch']
+    );
+  });
+
   it('reports errors during cached lockfile commit verification', async () => {
     const tempDir = join(testCacheDir, 'project-lock-error');
     await fs.mkdir(tempDir, { recursive: true });

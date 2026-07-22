@@ -99,6 +99,8 @@ export interface ValidatorConfig {
   lockfile?: Lockfile;
   /** Set of resolved absolute paths that came from registry cache */
   registryReferences?: Set<string>;
+  /** Canonical lock keys keyed by source file and declared reference */
+  registryReferencePaths?: Map<string, Map<string, string>>;
   /** Skip reference integrity checks */
   ignoreHashes?: boolean;
 }

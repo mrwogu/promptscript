@@ -241,6 +241,10 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
             registryPath: resolve(registry.path),
             localPath: resolve('.promptscript'),
             vendorDir,
+            referenceRoots:
+              registry.repositoryUrl && registry.repositoryPath
+                ? { [registry.repositoryUrl]: [registry.repositoryPath] }
+                : undefined,
             lockfile,
             registries: config.registries,
           },

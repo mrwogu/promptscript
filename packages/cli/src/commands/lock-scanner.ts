@@ -29,6 +29,8 @@ export interface RemoteImport {
 export interface ScanOptions {
   /** Base path for local/relative file resolution */
   localPath: string;
+  /** Base path for unaliased registry references */
+  registryPath?: string;
   /** Registry alias configuration (from promptscript.yaml) */
   registries?: RegistriesConfig;
   /** Throw when imports cannot be read, parsed, or resolved */
@@ -66,7 +68,7 @@ export async function collectRemoteImports(
   }
 
   const loader = new FileLoader({
-    registryPath: options.localPath,
+    registryPath: options.registryPath ?? options.localPath,
     localPath: options.localPath,
     registries: options.registries,
   });

@@ -15,6 +15,7 @@ const {
   mockGetCommitHash,
   mockCreateRegistryOptions,
   mockValidateRemoteAccess,
+  mockGenerateLockfileReferences,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -37,6 +38,7 @@ const {
   const mockGetCommitHash = vi.fn();
   const mockCreateRegistryOptions = vi.fn();
   const mockValidateRemoteAccess = vi.fn();
+  const mockGenerateLockfileReferences = vi.fn().mockResolvedValue({});
   return {
     mockSucceed,
     mockFail,
@@ -52,6 +54,7 @@ const {
     mockGetCommitHash,
     mockCreateRegistryOptions,
     mockValidateRemoteAccess,
+    mockGenerateLockfileReferences,
   };
 });
 
@@ -74,6 +77,18 @@ vi.mock('fs/promises', () => ({
 
 vi.mock('../lock-scanner.js', () => ({
   collectRemoteImports: mockCollectRemoteImports,
+}));
+
+vi.mock('../lock-references.js', () => ({
+  generateLockfileReferences: mockGenerateLockfileReferences,
+}));
+
+vi.mock('../../utils/registry-resolver.js', () => ({
+  resolveRegistryPath: vi.fn().mockResolvedValue({
+    path: '/registry',
+    isRemote: false,
+    source: 'local',
+  }),
 }));
 
 vi.mock('@promptscript/resolver', () => ({
@@ -109,6 +124,7 @@ describe('lockCommand', () => {
       headCommit: '1234567890abcdef1234567890abcdef12345678',
     });
     mockGetCommitHash.mockResolvedValue('1234567890abcdef1234567890abcdef12345678');
+    mockGenerateLockfileReferences.mockResolvedValue({});
     process.exitCode = undefined;
   });
 
@@ -146,6 +162,17 @@ describe('lockCommand', () => {
       expect.any(String),
       expect.objectContaining({ strict: true })
     );
+    expect(mockGenerateLockfileReferences).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(String),
+      expect.any(String),
+      expect.objectContaining({
+        dependencies: expect.objectContaining({
+          'github.com/company/base': expect.any(Object),
+        }),
+      }),
+      []
+    );
     expect(mockSucceed).toHaveBeenCalledWith('Lockfile generated');
     const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
     const parsed = JSON.parse(written) as {
@@ -153,6 +180,30 @@ describe('lockCommand', () => {
     };
     expect(parsed.dependencies['github.com/company/base']?.commit).toBe(
       '1234567890abcdef1234567890abcdef12345678'
+    );
+  });
+
+  it('should include generated reference hashes', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockGenerateLockfileReferences.mockResolvedValue({
+      'github.com/company/base\0references/guide.md\0latest': {
+        hash: `sha256-${'a'.repeat(64)}`,
+        lockedAt: '2026-01-01T00:00:00.000Z',
+      },
+    });
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      references: Record<string, { hash: string }>;
+    };
+    expect(parsed.references['github.com/company/base\0references/guide.md\0latest']?.hash).toBe(
+      `sha256-${'a'.repeat(64)}`
     );
   });
 

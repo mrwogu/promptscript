@@ -32,6 +32,10 @@ export interface ResolvedRegistry {
   isRemote: boolean;
   /** Source type of the registry */
   source: 'local' | 'git' | 'http';
+  /** Canonical lockfile repository key for remote Git registries */
+  repositoryUrl?: string;
+  /** Repository root before any configured registry subpath */
+  repositoryPath?: string;
 }
 
 export interface ResolveRegistryOptions {
@@ -114,6 +118,8 @@ export async function resolveRegistryPath(
         path: await resolveRegistrySubPath(repositoryPath, gitConfig.path),
         isRemote: false,
         source: 'git',
+        repositoryUrl: repoUrl,
+        repositoryPath,
       };
     }
 
@@ -133,6 +139,8 @@ export async function resolveRegistryPath(
           path: await resolveRegistrySubPath(cachePath, gitConfig.path),
           isRemote: true,
           source: 'git',
+          repositoryUrl: gitConfig.url,
+          repositoryPath: cachePath,
         };
       }
       try {
@@ -146,6 +154,8 @@ export async function resolveRegistryPath(
           path: await resolveRegistrySubPath(cachePath, gitConfig.path),
           isRemote: true,
           source: 'git',
+          repositoryUrl: lockedRepository[0],
+          repositoryPath: cachePath,
         };
       } catch {
         await cacheManager.remove(normalizedUrl, ref);
@@ -201,6 +211,8 @@ export async function resolveRegistryPath(
       path: await resolveRegistrySubPath(cachePath, gitConfig.path),
       isRemote: true,
       source: 'git',
+      repositoryUrl: lockedRepository?.[0] ?? gitConfig.url,
+      repositoryPath: cachePath,
     };
   }
 

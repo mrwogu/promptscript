@@ -1,8 +1,13 @@
 import { noopLogger, type Logger, type PSError } from '@promptscript/core';
 import { FormatterRegistry } from '@promptscript/formatters';
-import { Resolver, type ResolvedAST } from '@promptscript/resolver';
+import {
+  getVendorRepositoryRelativePath,
+  RegistryCache,
+  Resolver,
+  type ResolvedAST,
+} from '@promptscript/resolver';
 import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
-import { relative, isAbsolute } from 'path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
 import { verifyReferenceIntegrity } from './reference-verifier.js';
 import type {
@@ -24,6 +29,13 @@ import type {
 interface LoadedFormatter {
   formatter: Formatter;
   config?: TargetConfig;
+}
+
+function normalizeRepositoryKey(value: string): string {
+  return value
+    .replace(/^(?:https?:\/\/|git:\/\/)/i, '')
+    .replace(/^git@([^:]+):/, '$1/')
+    .replace(/\.git(?=\/|$)/, '');
 }
 
 /**
@@ -223,13 +235,64 @@ export class Compiler {
 
     // Stage 1.5: Reference Integrity
     const compileErrors: CompileError[] = [];
-    if (!this.options.ignoreHashes && this.options.resolver.lockfile?.references) {
+    if (!this.options.ignoreHashes && this.options.resolver.lockfile) {
       this.logger.verbose('=== Stage 1.5: Reference Integrity ===');
       // Collect registry reference paths for the validator
       const registryReferences = new Set<string>();
+      const registryReferencePaths = new Map<string, Map<string, string>>();
+      const cacheDir =
+        this.options.resolver.cacheDir ??
+        join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.promptscript', 'cache');
+      const registryCache = new RegistryCache(cacheDir);
+      const referenceRoots: Array<{ repoUrl: string; version: string; path: string }> = [];
+      for (const [repoUrl, dependency] of Object.entries(
+        this.options.resolver.lockfile.dependencies
+      )) {
+        try {
+          referenceRoots.push({
+            repoUrl,
+            version: dependency.version,
+            path: registryCache.getCachePath(repoUrl, dependency.version),
+          });
+        } catch {
+          // Invalid cache keys are reported by reference hash verification.
+        }
+        if (this.options.resolver.vendorDir) {
+          try {
+            referenceRoots.push({
+              repoUrl,
+              version: dependency.version,
+              path: resolve(
+                this.options.resolver.vendorDir,
+                getVendorRepositoryRelativePath(repoUrl)
+              ),
+            });
+          } catch {
+            // Non-vendor repository URLs can still use configured reference roots.
+          }
+        }
+        const configuredRoots = Object.entries(this.options.resolver.referenceRoots ?? {}).find(
+          ([configuredRepoUrl]) =>
+            normalizeRepositoryKey(configuredRepoUrl) === normalizeRepositoryKey(repoUrl)
+        )?.[1];
+        for (const path of configuredRoots ?? []) {
+          referenceRoots.push({ repoUrl, version: dependency.version, path });
+        }
+      }
+      referenceRoots.sort((left, right) => resolve(right.path).length - resolve(left.path).length);
 
       for (const block of resolved.ast.blocks) {
         if (block.name !== 'skills' || block.content.type !== 'ObjectContent') continue;
+        const sourceFile = block.loc.file;
+        const referenceRoot = sourceFile
+          ? referenceRoots.find((root) => {
+              const relation = relative(resolve(root.path), resolve(sourceFile));
+              return (
+                relation === '' ||
+                (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+              );
+            })
+          : undefined;
 
         for (const [, skillValue] of Object.entries(block.content.properties)) {
           if (
@@ -245,6 +308,40 @@ export class Compiler {
           for (const ref of refs) {
             if (typeof ref !== 'string') continue;
             registryReferences.add(ref);
+            if (sourceFile && referenceRoot) {
+              const resolvedReference = resolve(dirname(sourceFile), ref);
+              const relation = relative(resolve(referenceRoot.path), resolvedReference);
+              if (
+                relation !== '' &&
+                relation !== '..' &&
+                !relation.startsWith(`..${sep}`) &&
+                !isAbsolute(relation)
+              ) {
+                const sourceReferences =
+                  registryReferencePaths.get(sourceFile) ?? new Map<string, string>();
+                const relativePath = relation.replaceAll('\\', '/');
+                const referenceKey = `${referenceRoot.repoUrl}\0${relativePath}\0${referenceRoot.version}`;
+                sourceReferences.set(ref, referenceKey);
+                registryReferencePaths.set(sourceFile, sourceReferences);
+                if (!Object.hasOwn(this.options.resolver.lockfile.references ?? {}, referenceKey)) {
+                  compileErrors.push({
+                    name: 'ResolveError',
+                    code: 'PS2023',
+                    message:
+                      `Reference file "${relativePath}" has no integrity hash in lockfile. ` +
+                      'Run `prs lock` to generate integrity hashes for registry references.',
+                    location: block.loc,
+                  });
+                }
+              } else {
+                compileErrors.push({
+                  name: 'ResolveError',
+                  code: 'PS2023',
+                  message: `Reference path escapes its repository: ${ref}`,
+                  location: block.loc,
+                });
+              }
+            }
           }
         }
       }
@@ -258,6 +355,7 @@ export class Compiler {
       // Pass registry references to validator for PS031 structural check
       this.validator.updateConfig({
         registryReferences,
+        registryReferencePaths,
         lockfile: this.options.resolver.lockfile,
         ignoreHashes: this.options.ignoreHashes,
       });

@@ -83,6 +83,23 @@ describe('collectRemoteImports', () => {
     expect(result).toEqual([]);
   });
 
+  it('should follow unaliased imports from the configured registry path', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('@meta { id: "test" }');
+    mockParse
+      .mockReturnValueOnce({ ast: program([useDecl('@core/rules')]), errors: [] })
+      .mockReturnValueOnce({ ast: program([]), errors: [] });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+      registryPath: '/registry',
+      strict: true,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockReadFile).toHaveBeenCalledWith('/registry/@core/rules.prs', 'utf-8');
+  });
+
   it('should collect direct github.com @use imports', async () => {
     mockExistsSync.mockReturnValue(true);
     mockReadFile.mockResolvedValue('@use github.com/org/repo/skills');
