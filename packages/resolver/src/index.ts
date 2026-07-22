@@ -20,6 +20,9 @@ export {
 } from './loader.js';
 export type { LoaderOptions } from './loader.js';
 
+// Markdown content detection
+export { detectContentType, type ContentType } from './content-detector.js';
+
 // Registry implementations
 export {
   FileSystemRegistry,

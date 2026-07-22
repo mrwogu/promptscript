@@ -132,6 +132,10 @@ describe('lockCommand', () => {
     await lockCommand({});
 
     expect(mockWriteFile).toHaveBeenCalledWith('promptscript.lock', expect.any(String), 'utf-8');
+    expect(mockCollectRemoteImports).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ strict: true })
+    );
     expect(mockSucceed).toHaveBeenCalledWith('Lockfile generated');
     const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
     const parsed = JSON.parse(written) as {
@@ -140,6 +144,22 @@ describe('lockCommand', () => {
     expect(parsed.dependencies['github.com/company/base']?.commit).toBe(
       '1234567890abcdef1234567890abcdef12345678'
     );
+  });
+
+  it('should preserve a malformed existing lockfile', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('{ malformed');
+
+    await lockCommand({});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should preserve existing pins', async () => {
@@ -201,6 +221,41 @@ describe('lockCommand', () => {
     );
     expect(mockValidateRemoteAccess).toHaveBeenCalled();
     expect(mockSucceed).toHaveBeenCalledWith('Lockfile updated');
+  });
+
+  it('should reject owner-only refreshes for managed skills', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'latest',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            integrity: 'sha256-old',
+            source: 'md',
+            skills: ['github.com/company/base/skills/foo'],
+          },
+          'github.com/company/base/skills/foo': {
+            version: 'latest',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            integrity: 'sha256-skill',
+            source: 'md',
+          },
+        },
+      })
+    );
+
+    await lockCommand({ command: 'update', update: true });
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to update lockfile');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should refresh only the dependency matching updatePackage', async () => {
@@ -304,21 +359,20 @@ describe('lockCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
-  it('should handle malformed existing lockfile gracefully', async () => {
+  it('should preserve an unreadable existing lockfile', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
       targets: [],
       registries: { '@company': 'github.com/company/base' },
     });
     mockExistsSync.mockReturnValue(true);
-    // Return content that will throw during parse (invalid JSON for our mock)
     mockReadFile.mockRejectedValue(new Error('read failure'));
 
     await lockCommand({});
 
-    // Should still succeed — malformed lockfile is ignored and starts fresh
-    expect(mockWriteFile).toHaveBeenCalled();
-    expect(mockSucceed).toHaveBeenCalledWith('Lockfile generated');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should handle object-form registry entry', async () => {
@@ -405,6 +459,13 @@ describe('lockCommand', () => {
             integrity: 'sha256-pending',
             source: 'md',
           },
+          'https://github.com/org/skills': {
+            version: 'latest',
+            commit: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+            integrity: 'sha256-pending',
+            source: 'md',
+            skills: ['github.com/org/skills/SKILL.md'],
+          },
         },
       })
     );
@@ -422,6 +483,7 @@ describe('lockCommand', () => {
     // md-sourced entry should also be preserved
     expect(parsed.dependencies['github.com/org/skills/SKILL.md']).toBeDefined();
     expect(parsed.dependencies['github.com/org/skills/SKILL.md']!.source).toBe('md');
+    expect(parsed.dependencies['https://github.com/org/skills']!.source).toBe('md');
   });
 
   it('should discover and lock @use github.com imports from .prs files', async () => {

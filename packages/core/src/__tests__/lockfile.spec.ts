@@ -142,6 +142,7 @@ describe('isValidLockfile', () => {
           source: 'md',
           fetchedAt: '2026-03-26T12:00:00.000Z',
           skills: ['commit'],
+          gitUrl: 'git@github.com:org/repo.git',
         },
       },
     };
@@ -181,6 +182,46 @@ describe('isValidLockfile', () => {
     };
 
     expect(isValidLockfile(lockfile)).toBe(false);
+  });
+
+  it('should reject non-object dependencies', () => {
+    expect(
+      isValidLockfile({
+        version: LOCKFILE_VERSION,
+        dependencies: [],
+      })
+    ).toBe(false);
+  });
+
+  it('should reject malformed dependency entries', () => {
+    expect(
+      isValidLockfile({
+        version: LOCKFILE_VERSION,
+        dependencies: {
+          repo: {
+            version: 'v1.0.0',
+            commit: 123,
+            integrity: 'sha256-abc',
+          },
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('should reject malformed dependency metadata', () => {
+    expect(
+      isValidLockfile({
+        version: LOCKFILE_VERSION,
+        dependencies: {
+          repo: {
+            version: 'v1.0.0',
+            commit: 'abc123',
+            integrity: 'sha256-abc',
+            skills: ['valid', 123],
+          },
+        },
+      })
+    ).toBe(false);
   });
 
   it('should accept valid lockfile with references section', () => {

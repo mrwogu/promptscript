@@ -14,6 +14,8 @@ export interface LockfileDependency {
   fetchedAt?: string;
   /** Discovered skill names for directory imports (advisory) */
   skills?: string[];
+  /** Original SSH clone URL for repositories that require SSH transport */
+  gitUrl?: string;
 }
 
 /**
@@ -43,6 +45,10 @@ export interface Lockfile {
 /** Current lockfile format version */
 export const LOCKFILE_VERSION = 1;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 /** Type guard: validates parsed lockfile has correct version and shape */
 export function isValidLockfile(data: unknown): data is Lockfile {
   if (
@@ -53,6 +59,29 @@ export function isValidLockfile(data: unknown): data is Lockfile {
     !('dependencies' in data)
   ) {
     return false;
+  }
+
+  const dependencies = (data as Record<string, unknown>)['dependencies'];
+  if (!isRecord(dependencies)) {
+    return false;
+  }
+  for (const dependency of Object.values(dependencies)) {
+    if (!isRecord(dependency)) {
+      return false;
+    }
+    if (
+      typeof dependency['version'] !== 'string' ||
+      typeof dependency['commit'] !== 'string' ||
+      typeof dependency['integrity'] !== 'string' ||
+      (dependency['source'] !== undefined && dependency['source'] !== 'md') ||
+      (dependency['fetchedAt'] !== undefined && typeof dependency['fetchedAt'] !== 'string') ||
+      (dependency['gitUrl'] !== undefined && typeof dependency['gitUrl'] !== 'string') ||
+      (dependency['skills'] !== undefined &&
+        (!Array.isArray(dependency['skills']) ||
+          !dependency['skills'].every((skill) => typeof skill === 'string')))
+    ) {
+      return false;
+    }
   }
 
   // Validate optional references section shape

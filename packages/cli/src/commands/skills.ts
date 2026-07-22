@@ -3,18 +3,20 @@ import { resolve, join, basename, dirname } from 'path';
 import { existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
+import { parse } from '@promptscript/parser';
 import type { SkillsAddOptions, SkillsRemoveOptions, SkillsUpdateOptions } from '../types.js';
 import { loadConfig, findConfigFile } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
 import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
-import { LOCKFILE_PATH } from './lock.js';
+import { LOCKFILE_PATH, resolveRemoteDependency } from './lock.js';
+import { collectRemoteImports, type RemoteImport } from './lock-scanner.js';
 import {
-  validateRemoteAccess,
   validateSkillFrontmatter,
   formatSkillValidationIssues,
   hashContent,
   createGitRegistry,
+  normalizeGitUrl,
   type SkillValidationIssue,
 } from '@promptscript/resolver';
 
@@ -24,6 +26,139 @@ import {
  * Rejects local paths starting with `./` or `../`.
  */
 const REMOTE_SOURCE_PATTERN = /^[a-zA-Z0-9][\w.-]*\.[a-zA-Z]{2,}\/.+/;
+
+interface ParsedSkillSource {
+  path: string;
+  version: string;
+}
+
+function parseSkillSource(source: string): ParsedSkillSource {
+  const versionSeparator = source.lastIndexOf('@');
+  if (versionSeparator === -1) {
+    return { path: source, version: 'latest' };
+  }
+
+  const version = source.slice(versionSeparator + 1);
+  if (version.length === 0) {
+    throw new Error(`Invalid source: "${source}". Version after @ cannot be empty.`);
+  }
+  return { path: source.slice(0, versionSeparator), version };
+}
+
+function toDependencyPin(dependency: LockfileDependency): LockfileDependency {
+  return {
+    version: dependency.version,
+    commit: dependency.commit,
+    integrity: dependency.integrity,
+  };
+}
+
+function resolveSkillDependency(
+  repoUrl: string,
+  requestedVersions: string[],
+  existing: LockfileDependency | undefined,
+  forceUpdate: boolean,
+  gitUrl: string | undefined
+): Promise<LockfileDependency> {
+  return gitUrl
+    ? resolveRemoteDependency(repoUrl, requestedVersions, existing, forceUpdate, gitUrl)
+    : resolveRemoteDependency(repoUrl, requestedVersions, existing, forceUpdate);
+}
+
+function isSkillMetadataEntry(key: string, dependency: LockfileDependency): boolean {
+  return dependency.source === 'md' && !key.includes('://');
+}
+
+function canonicalRepoUrl(repoUrl: string): string {
+  const withProtocol =
+    /^[a-z][a-z\d+.-]*:\/\//i.test(repoUrl) || repoUrl.startsWith('git@')
+      ? repoUrl
+      : `https://${repoUrl}`;
+  return normalizeGitUrl(withProtocol).replace(/\.git$/i, '');
+}
+
+function findSkillOwnerEntry(
+  lockfile: Lockfile,
+  repoUrl: string
+): [string, LockfileDependency] | undefined {
+  return Object.entries(lockfile.dependencies).find(
+    ([key, dependency]) =>
+      dependency.skills !== undefined && canonicalRepoUrl(key) === canonicalRepoUrl(repoUrl)
+  );
+}
+
+function findRepoEntry(
+  lockfile: Lockfile,
+  repoUrl: string
+): [string, LockfileDependency] | undefined {
+  return Object.entries(lockfile.dependencies).find(
+    ([key]) => canonicalRepoUrl(key) === canonicalRepoUrl(repoUrl)
+  );
+}
+
+async function collectProjectRemoteImports(entryFile?: string): Promise<RemoteImport[]> {
+  const configFile = findConfigFile();
+  const config = configFile ? await loadConfig() : undefined;
+  const projectRoot = process.cwd();
+  const entryFiles = new Set<string>();
+  if (entryFile) {
+    entryFiles.add(resolve(entryFile));
+  }
+  if (config) {
+    if (config.input?.entry) {
+      entryFiles.add(resolve(projectRoot, config.input.entry));
+    }
+    for (const build of Object.values(config.builds ?? {})) {
+      if (build.entry) {
+        entryFiles.add(resolve(projectRoot, build.entry));
+      }
+    }
+    const defaultEntry = resolve(projectRoot, '.promptscript/project.prs');
+    if (!config.input?.entry && (existsSync(defaultEntry) || entryFiles.size === 0)) {
+      entryFiles.add(defaultEntry);
+    }
+  } else if (!entryFile) {
+    const defaultEntry = resolve(projectRoot, '.promptscript/project.prs');
+    if (existsSync(defaultEntry)) {
+      entryFiles.add(defaultEntry);
+    } else {
+      const promptscriptDir = resolve(projectRoot, '.promptscript');
+      if (existsSync(promptscriptDir)) {
+        const entries = await readdir(promptscriptDir);
+        const prsFiles = entries.filter((entry) => entry.endsWith('.prs'));
+        if (prsFiles.length === 1) {
+          entryFiles.add(resolve(promptscriptDir, prsFiles[0]!));
+        }
+      }
+    }
+  }
+
+  const imports: RemoteImport[] = [];
+  for (const projectEntry of entryFiles) {
+    imports.push(
+      ...(await collectRemoteImports(projectEntry, {
+        localPath: resolve(projectRoot, '.promptscript'),
+        registries: config?.registries,
+        strict: true,
+        deduplicate: false,
+        includeLocations: true,
+      }))
+    );
+  }
+
+  return imports.filter(
+    (remoteImport, index) =>
+      imports.findIndex(
+        (candidate) =>
+          candidate.repoUrl === remoteImport.repoUrl &&
+          candidate.path === remoteImport.path &&
+          candidate.version === remoteImport.version &&
+          candidate.rawSource === remoteImport.rawSource &&
+          candidate.sourceFile === remoteImport.sourceFile &&
+          candidate.sourceLine === remoteImport.sourceLine
+      ) === index
+  );
+}
 
 /**
  * Normalize a user-provided skill source so the internal representation is
@@ -50,11 +185,20 @@ export function normalizeSkillSource(input: string): string {
     source = source.replace(/^https?:\/\//i, '');
   }
 
-  source = source.replace(/\.git(?=\/|$)/i, '');
+  source = source.replace(/\.git(?=\/|@|$)/i, '');
   while (source.endsWith('/')) {
     source = source.slice(0, -1);
   }
   return source;
+}
+
+function extractSshCloneUrl(input: string): string | undefined {
+  const match = input.trim().match(/^git@([^:]+):([^/]+)\/([^/@]+)/);
+  if (!match) {
+    return undefined;
+  }
+  const repo = match[3]!.replace(/\.git$/i, '');
+  return `git@${match[1]}:${match[2]}/${repo}.git`;
 }
 
 /**
@@ -63,25 +207,32 @@ export function normalizeSkillSource(input: string): string {
  * `github.com/owner/repo` -> ''
  */
 function extractSubPath(source: string): string {
-  const parts = source.replace(/^https?:\/\//, '').split('/');
+  const parts = parseSkillSource(source)
+    .path.replace(/^https?:\/\//, '')
+    .split('/');
   return parts.length > 3 ? parts.slice(3).join('/') : '';
+}
+
+function extractSkillFilePath(source: string): string | undefined {
+  const subPath = extractSubPath(source);
+  if (!subPath) return 'SKILL.md';
+  return subPath.toLowerCase().endsWith('.md') ? subPath : `${subPath}/SKILL.md`;
 }
 
 /**
  * Derive the on-disk skill folder name from a source path. Skills are written
  * to `<format-dir>/skills/<name>/SKILL.md` where `<name>` is the basename of
- * the SKILL.md's parent directory (matching the Agent Skills spec — the
+ * the SKILL.md's parent directory (matching the Agent Skills spec - the
  * frontmatter `name` MUST match this directory).
  *
- * Returns `undefined` for sources without a clear single-file target (e.g.
- * directory imports), which auto-discover names at compile time.
+ * Returns `undefined` for imports that target the repository root.
  */
 function deriveSkillFolderName(source: string): string | undefined {
   const subPath = extractSubPath(source);
-  if (!subPath) return undefined;
-  if (!subPath.toLowerCase().endsWith('.md')) return undefined;
+  if (!subPath) return basename(parseSkillSource(source).path);
+  if (!subPath.toLowerCase().endsWith('.md')) return basename(subPath);
   const parent = dirname(subPath);
-  if (parent === '.' || parent === '') return undefined;
+  if (parent === '.' || parent === '') return basename(parseSkillSource(source).path);
   return basename(parent);
 }
 
@@ -93,7 +244,7 @@ function deriveSkillFolderName(source: string): string | undefined {
 function collectExistingSkillNames(lockfile: Lockfile, exclude?: string): Set<string> {
   const names = new Set<string>();
   for (const [key, dep] of Object.entries(lockfile.dependencies)) {
-    if (dep.source !== 'md') continue;
+    if (!isSkillMetadataEntry(key, dep)) continue;
     if (exclude && key === exclude) continue;
     const name = deriveSkillFolderName(key);
     if (name) names.add(name);
@@ -120,27 +271,38 @@ interface FetchedSkill {
  * into an OS tmp directory, then validate its frontmatter and compute the
  * content integrity hash. Always cleans up the temp clone, even on error.
  *
- * Returns `undefined` when the source does not target a single `.md` file
- * (directory imports auto-discover at compile time and cannot be validated
- * up-front against a single file).
+ * Repository-root imports validate `<repo>/SKILL.md`.
  */
 async function fetchAndValidateRemoteSkill(
   source: string,
-  options: { existingNames: ReadonlySet<string>; version: string }
+  options: {
+    commit: string;
+    existingNames: ReadonlySet<string>;
+    gitUrl?: string;
+    validateFrontmatter: boolean;
+    version: string;
+  }
 ): Promise<FetchedSkill | undefined> {
-  const subPath = extractSubPath(source);
-  if (!subPath || !subPath.toLowerCase().endsWith('.md')) {
+  const skillFilePath = extractSkillFilePath(source);
+  if (!skillFilePath || !deriveSkillFolderName(source)) {
     return undefined;
   }
 
-  const repoUrl = extractRepoUrl(source);
+  const repoUrl = options.gitUrl ?? extractRepoUrl(source);
   const tmp = await mkdtemp(join(tmpdir(), 'prs-skill-validate-'));
+  const repoName = basename(parseSkillSource(source).path.split('/')[2]!);
+  const cloneDir = !skillFilePath.includes('/') ? join(tmp, repoName) : tmp;
   try {
     const gitRegistry = createGitRegistry({ url: repoUrl });
-    await gitRegistry.cloneAtTag(repoUrl, options.version, tmp);
+    const cloneRef =
+      options.version === 'latest' || /^[0-9a-f]{40}$/i.test(options.version)
+        ? undefined
+        : options.version;
+    await gitRegistry.cloneAtTag(repoUrl, cloneRef, cloneDir);
+    await gitRegistry.checkoutCommit(cloneDir, options.commit);
 
-    const filePath = join(tmp, subPath);
-    if (!existsSync(filePath)) {
+    const subPath = extractSubPath(source);
+    if (!subPath.toLowerCase().endsWith('.md') && existsSync(join(cloneDir, `${subPath}.prs`))) {
       return {
         content: '',
         integrity: '',
@@ -149,14 +311,34 @@ async function fetchAndValidateRemoteSkill(
           {
             severity: 'error',
             code: 'SK000',
-            message: `File '${subPath}' does not exist in ${repoUrl} at ${options.version}.`,
+            message: `Path '${subPath}' resolves to PromptScript source '${subPath}.prs', not a SKILL.md directory.`,
           },
         ],
       };
     }
 
-    const content = await readFile(filePath, 'utf-8');
+    const filePath = join(cloneDir, skillFilePath);
+    let content: string;
+    try {
+      content = await readFile(filePath, 'utf-8');
+    } catch {
+      return {
+        content: '',
+        integrity: '',
+        valid: false,
+        issues: [
+          {
+            severity: 'error',
+            code: 'SK000',
+            message: `File '${skillFilePath}' does not exist in ${repoUrl} at ${options.version}.`,
+          },
+        ],
+      };
+    }
     const integrity = hashContent(Buffer.from(content, 'utf-8'));
+    if (!options.validateFrontmatter) {
+      return { content, integrity, valid: true, issues: [] };
+    }
     const result = validateSkillFrontmatter(content, {
       filePath,
       existingNames: options.existingNames,
@@ -201,7 +383,9 @@ const HEADER_DIRECTIVES = ['@use ', '@inherit ', '@meta '];
  *   `github.com/owner/repo/path/to/skill` → `https://github.com/owner/repo`
  */
 function extractRepoUrl(source: string): string {
-  const parts = source.replace(/^https?:\/\//, '').split('/');
+  const parts = parseSkillSource(source)
+    .path.replace(/^https?:\/\//, '')
+    .split('/');
   if (parts.length >= 3) {
     return `https://${parts[0]}/${parts[1]}/${parts[2]}`;
   }
@@ -218,6 +402,14 @@ function validateRemoteSource(source: string): string | undefined {
   }
   if (!REMOTE_SOURCE_PATTERN.test(source)) {
     return `Invalid source: "${source}". Expected a remote path (e.g., github.com/owner/repo/path/SKILL.md)`;
+  }
+  const sourcePath = parseSkillSource(source).path;
+  if (sourcePath.split('/').length < 4) {
+    return `Invalid source: "${source}". Include the path to a skill file or directory inside the repository.`;
+  }
+  const pathSegments = sourcePath.replace(/\\/g, '/').split('/').slice(1);
+  if (pathSegments.some((segment) => segment === '.' || segment === '..')) {
+    return `Invalid source: "${source}". Path traversal segments are not allowed.`;
   }
 
   // Reject GitHub-style web URLs that include a tree/<ref> or blob/<ref>
@@ -301,31 +493,60 @@ async function resolveEntryFile(fileFlag?: string): Promise<string> {
  */
 function findInsertionPoint(lines: string[]): number {
   let lastDirectiveLine = -1;
-  let inMetaBlock = false;
+  let metaBraceDepth = 0;
+  let inString = false;
+  let inTripleString = false;
+
+  const braceDelta = (line: string): number => {
+    let depth = 0;
+    for (let index = 0; index < line.length; index++) {
+      if (!inString && line.slice(index, index + 3) === '"""') {
+        inTripleString = !inTripleString;
+        index += 2;
+        continue;
+      }
+      if (inTripleString) {
+        continue;
+      }
+      if (line[index] === '"' && line[index - 1] !== '\\') {
+        inString = !inString;
+        continue;
+      }
+      if (!inString) {
+        if (line[index] === '#' || line.slice(index, index + 2) === '//') {
+          break;
+        }
+        if (line[index] === '{') depth++;
+        if (line[index] === '}') depth--;
+      }
+    }
+    return depth;
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const trimmed = lines[i]!.trim();
+    if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith('//')) {
+      continue;
+    }
 
     if (trimmed.startsWith('@meta ') || trimmed === '@meta{' || trimmed === '@meta {') {
-      inMetaBlock = true;
+      lastDirectiveLine = i;
+      metaBraceDepth = braceDelta(trimmed);
+      continue;
+    }
+
+    if (metaBraceDepth > 0) {
+      metaBraceDepth += braceDelta(trimmed);
       lastDirectiveLine = i;
       continue;
     }
 
-    if (inMetaBlock) {
-      if (trimmed === '}') {
-        inMetaBlock = false;
-        lastDirectiveLine = i;
-      }
+    if (HEADER_DIRECTIVES.some((directive) => trimmed.startsWith(directive))) {
+      lastDirectiveLine = i;
       continue;
     }
 
-    for (const directive of HEADER_DIRECTIVES) {
-      if (trimmed.startsWith(directive)) {
-        lastDirectiveLine = i;
-        break;
-      }
-    }
+    break;
   }
 
   // Insert after the last directive line.
@@ -347,6 +568,39 @@ function extractUsePath(line: string): string | undefined {
   return parts[0]?.trim();
 }
 
+function findUseEndLine(lines: string[], startLine: number): number {
+  let depth = 0;
+  let foundParams = false;
+  let inString = false;
+
+  for (let lineIndex = startLine; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex]!;
+    for (let index = 0; index < line.length; index++) {
+      if (line[index] === '"' && line[index - 1] !== '\\') {
+        inString = !inString;
+        continue;
+      }
+      if (inString) {
+        continue;
+      }
+      if (line[index] === '#' || line.slice(index, index + 2) === '//') {
+        break;
+      }
+      if (line[index] === '(') {
+        foundParams = true;
+        depth++;
+      } else if (line[index] === ')') {
+        depth--;
+      }
+    }
+    if (!foundParams || depth === 0) {
+      return lineIndex;
+    }
+  }
+
+  return startLine;
+}
+
 /**
  * Load the lockfile from disk.
  */
@@ -355,16 +609,20 @@ async function loadLockfile(): Promise<Lockfile> {
   if (!existsSync(LOCKFILE_PATH)) {
     return defaultLockfile;
   }
+  let parsed: unknown;
   try {
     const raw = await readFile(LOCKFILE_PATH, 'utf-8');
-    const parsed: unknown = parseYaml(raw, { maxAliasCount: 100 });
-    if (isValidLockfile(parsed)) {
-      return parsed;
-    }
-  } catch {
-    // Malformed lockfile — start fresh
+    parsed = parseYaml(raw, { maxAliasCount: 100 });
+  } catch (error) {
+    throw new Error(
+      `Cannot read ${LOCKFILE_PATH}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error }
+    );
   }
-  return defaultLockfile;
+  if (!isValidLockfile(parsed)) {
+    throw new Error(`Invalid ${LOCKFILE_PATH}. Run "prs lock" to regenerate it.`);
+  }
+  return parsed;
 }
 
 /**
@@ -403,6 +661,7 @@ export async function skillsAddCommand(
     // Normalize the user-provided source before validating so we treat
     // `https://github.com/foo/bar`, `git@github.com:foo/bar.git`, and
     // `github.com/foo/bar` as the same logical identifier.
+    const sshCloneUrl = extractSshCloneUrl(rawSource);
     const source = normalizeSkillSource(rawSource);
 
     // Validate source
@@ -432,65 +691,90 @@ export async function skillsAddCommand(
       return;
     }
 
-    // Validate remote repository is accessible
-    spinner.text = 'Validating remote repository...';
-    const repoUrl = extractRepoUrl(source);
-    const validation = await validateRemoteAccess(repoUrl);
-
-    if (!validation.accessible) {
-      spinner.fail('Cannot reach remote repository');
-      ConsoleOutput.error(validation.error ?? `Failed to connect to ${repoUrl}`);
-      process.exitCode = 1;
-      return;
-    }
-
     // Load lockfile early — we need it for collision detection AND to write
     // the new entry below.
     const lockfile = await loadLockfile();
-
-    // Fetch the actual SKILL.md and validate its frontmatter (Agent Skills
-    // spec compliance + collision check). Only runs for single-file imports.
-    let integrity = 'sha256-pending';
-    let validationFailed = false;
-    if (!options.skipValidation) {
-      spinner.text = 'Validating SKILL.md frontmatter...';
-      try {
-        const fetched = await fetchAndValidateRemoteSkill(source, {
-          existingNames: collectExistingSkillNames(lockfile),
-          version: 'main',
-        });
-        if (fetched) {
-          integrity = fetched.integrity || integrity;
-          const hasErrors = !fetched.valid;
-          const hasWarnings = fetched.issues.some((i) => i.severity === 'warning');
-          if (hasErrors || (options.strict && hasWarnings)) {
-            spinner.fail('SKILL.md failed validation');
-            printValidationIssues(fetched.issues);
-            ConsoleOutput.newline();
-            ConsoleOutput.muted(
-              'Re-run with --skip-validation to bypass (not recommended) or fix the upstream SKILL.md.'
-            );
-            process.exitCode = 1;
-            validationFailed = true;
-          } else if (fetched.issues.length > 0) {
-            // Warnings only — surface them but continue
-            spinner.warn('SKILL.md has validation warnings');
-            printValidationIssues(fetched.issues);
-            spinner.start('Adding skill...');
-          }
-        }
-      } catch (err) {
-        // Don't block on fetch failures — log and continue with placeholder
-        // integrity so the user can still install. Compile will redo the work.
-        spinner.warn('Could not validate SKILL.md ahead of time');
-        ConsoleOutput.muted(
-          `Reason: ${err instanceof Error ? err.message : String(err)}. Proceeding without frontmatter check.`
-        );
-        spinner.start('Adding skill...');
+    const parsedSource = parseSkillSource(source);
+    const repoUrl = extractRepoUrl(source);
+    const ownerEntry = findSkillOwnerEntry(lockfile, repoUrl);
+    const existingRepoEntry = findRepoEntry(lockfile, repoUrl);
+    const gitUrl = sshCloneUrl ?? ownerEntry?.[1].gitUrl ?? existingRepoEntry?.[1].gitUrl;
+    const requestedVersions = [parsedSource.version];
+    const repoSkills: string[] = [];
+    for (const [key, dependency] of Object.entries(lockfile.dependencies)) {
+      if (
+        isSkillMetadataEntry(key, dependency) &&
+        key !== source &&
+        canonicalRepoUrl(extractRepoUrl(key)) === canonicalRepoUrl(repoUrl)
+      ) {
+        repoSkills.push(key);
+        requestedVersions.push(parseSkillSource(key).version);
+      }
+    }
+    const projectImports = await collectProjectRemoteImports(entryFile);
+    for (const remoteImport of projectImports) {
+      if (canonicalRepoUrl(remoteImport.repoUrl) === canonicalRepoUrl(repoUrl)) {
+        requestedVersions.push(remoteImport.version || 'latest');
       }
     }
 
-    if (validationFailed) return;
+    spinner.text = 'Resolving remote version...';
+    const resolvedDependency = await resolveSkillDependency(
+      repoUrl,
+      requestedVersions,
+      ownerEntry?.[1] ?? existingRepoEntry?.[1],
+      false,
+      gitUrl
+    );
+    const resolvedPin = toDependencyPin(resolvedDependency);
+
+    spinner.text = options.skipValidation
+      ? 'Fetching SKILL.md...'
+      : 'Validating SKILL.md frontmatter...';
+    const fetchedSkills = new Map<string, FetchedSkill>();
+    for (const skillSource of [...repoSkills, source]) {
+      let fetched: FetchedSkill | undefined;
+      try {
+        fetched = await fetchAndValidateRemoteSkill(skillSource, {
+          commit: resolvedPin.commit,
+          existingNames: collectExistingSkillNames(lockfile, skillSource),
+          ...(gitUrl ? { gitUrl } : {}),
+          validateFrontmatter: !options.skipValidation,
+          version: resolvedPin.version,
+        });
+      } catch (err) {
+        throw new Error(
+          `Could not fetch SKILL.md for ${skillSource}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+          { cause: err }
+        );
+      }
+
+      if (!fetched) {
+        throw new Error(`Cannot locate a SKILL.md for ${skillSource}`);
+      }
+      const hasErrors = !fetched.valid;
+      const hasWarnings = fetched.issues.some((issue) => issue.severity === 'warning');
+      if (hasErrors || (options.strict && hasWarnings)) {
+        spinner.fail('SKILL.md failed validation');
+        ConsoleOutput.error(skillSource);
+        printValidationIssues(fetched.issues);
+        process.exitCode = 1;
+        return;
+      }
+      if (hasWarnings) {
+        spinner.warn(
+          skillSource === source
+            ? 'SKILL.md has validation warnings'
+            : `${skillSource}: SKILL.md has validation warnings`
+        );
+        printValidationIssues(fetched.issues);
+        spinner.start('Adding skill...');
+      }
+      fetchedSkills.set(skillSource, fetched);
+    }
+    const fetched = fetchedSkills.get(source)!;
 
     // Find insertion point and insert
     const insertionPoint = findInsertionPoint(lines);
@@ -500,12 +784,29 @@ export async function skillsAddCommand(
 
     // Build lock entry
     const lockEntry: LockfileDependency = {
-      version: 'latest',
-      commit: validation.headCommit ?? '0000000000000000000000000000000000000000',
-      integrity,
+      ...resolvedPin,
+      integrity: fetched.integrity,
       source: 'md',
     };
-    lockfile.dependencies[source] = lockEntry;
+    const fetchedAt = new Date().toISOString();
+    for (const skillSource of repoSkills) {
+      lockfile.dependencies[skillSource] = {
+        ...resolvedPin,
+        integrity: fetchedSkills.get(skillSource)!.integrity,
+        source: 'md',
+        fetchedAt,
+      };
+    }
+    lockfile.dependencies[source] = { ...lockEntry, fetchedAt };
+    if (ownerEntry && ownerEntry[0] !== repoUrl) {
+      delete lockfile.dependencies[ownerEntry[0]];
+    }
+    lockfile.dependencies[repoUrl] = {
+      ...resolvedPin,
+      source: 'md',
+      skills: [...repoSkills, source],
+      ...(gitUrl ? { gitUrl } : {}),
+    };
 
     if (options.dryRun) {
       spinner.succeed('Dry run — no files modified');
@@ -552,47 +853,131 @@ export async function skillsRemoveCommand(
     // Read the file
     const content = await readFile(entryFile, 'utf-8');
     const lines = content.split('\n');
+    const parsed = parse(content, { filename: entryFile, tolerant: true });
+    if (!parsed.ast || parsed.errors.length > 0) {
+      throw new Error(`Cannot remove a skill from invalid PromptScript: ${entryFile}`);
+    }
+    const matches = parsed.ast.uses
+      .map((use) => ({
+        index: use.path.loc.line - 1,
+        endIndex: findUseEndLine(lines, use.path.loc.line - 1),
+        path: normalizeSkillSource(use.path.raw),
+      }))
+      .filter((candidate) => candidate.path.includes(name));
+    const exactMatches = matches.filter((candidate) => candidate.path === name);
+    const uniquePartialMatches = [
+      ...new Map(matches.map((candidate) => [candidate.path, candidate])).values(),
+    ];
+    const candidates = exactMatches.length > 0 ? [exactMatches[0]!] : uniquePartialMatches;
 
-    // Find the @use line matching the name
-    const lineIndex = lines.findIndex((line) => {
-      const usePath = extractUsePath(line);
-      return usePath !== undefined && (usePath === name || usePath.includes(name));
-    });
-
-    if (lineIndex === -1) {
+    if (candidates.length === 0) {
       spinner.fail(`Skill not found: ${name}`);
       ConsoleOutput.muted('Use "prs skills list" to see available skills');
       process.exitCode = 1;
       return;
     }
+    if (candidates.length > 1) {
+      spinner.fail(`Multiple skills matched: ${name}`);
+      for (const candidate of candidates) {
+        ConsoleOutput.muted(candidate.path);
+      }
+      process.exitCode = 1;
+      return;
+    }
 
-    const removedLine = lines[lineIndex]!.trim();
-    const removedPath = extractUsePath(removedLine)!;
+    const candidate = candidates[0]!;
+    const lineIndex = candidate.index;
+    const removedLine = lines
+      .slice(lineIndex, candidate.endIndex + 1)
+      .join('\n')
+      .trim();
+    const removedPath = candidate.path;
+    const lockfile = await loadLockfile();
+    const projectImports = await collectProjectRemoteImports(entryFile);
+    let lockfileChanged = false;
+    let removedRepoUrl: string | undefined;
+    let remainingRepoSkills: string[] | undefined;
+    let hasOtherRepoImports = false;
+    let hasSameImportRemaining = false;
+    let ownerEntry: [string, LockfileDependency] | undefined;
+    if (REMOTE_SOURCE_PATTERN.test(removedPath)) {
+      removedRepoUrl = extractRepoUrl(removedPath);
+      let ignoredRemovedOccurrence = false;
+      for (const remoteImport of projectImports) {
+        if (canonicalRepoUrl(remoteImport.repoUrl) !== canonicalRepoUrl(removedRepoUrl!)) {
+          continue;
+        }
+        const matchesRemovedImport =
+          remoteImport.rawSource !== undefined &&
+          normalizeSkillSource(remoteImport.rawSource) === removedPath;
+        if (matchesRemovedImport && !ignoredRemovedOccurrence) {
+          ignoredRemovedOccurrence = true;
+          continue;
+        }
+        if (matchesRemovedImport) {
+          hasSameImportRemaining = true;
+        }
+        hasOtherRepoImports = true;
+      }
+      ownerEntry = findSkillOwnerEntry(lockfile, removedRepoUrl);
+      const repoDependency = ownerEntry?.[1];
+      remainingRepoSkills = hasSameImportRemaining
+        ? repoDependency?.skills
+        : repoDependency?.skills?.filter((skill) => skill !== removedPath);
+      if (
+        repoDependency &&
+        (!hasOtherRepoImports ||
+          (repoDependency.skills !== undefined &&
+            remainingRepoSkills?.length !== repoDependency.skills.length))
+      ) {
+        lockfileChanged = true;
+      }
+    }
+    if (removedPath in lockfile.dependencies && !hasSameImportRemaining) {
+      lockfileChanged = true;
+    }
 
     if (options.dryRun) {
       spinner.succeed('Dry run — no files modified');
       ConsoleOutput.newline();
       ConsoleOutput.dryRun(`Would remove from ${entryFile}:`);
       ConsoleOutput.dryRun(`  ${removedLine}`);
-      ConsoleOutput.dryRun(`Would update ${LOCKFILE_PATH}`);
+      if (lockfileChanged) {
+        ConsoleOutput.dryRun(`Would update ${LOCKFILE_PATH}`);
+      }
       return;
     }
 
-    // Remove the line
-    lines.splice(lineIndex, 1);
+    lines.splice(lineIndex, candidate.endIndex - lineIndex + 1);
     await writeFile(entryFile, lines.join('\n'), 'utf-8');
 
-    // Update lockfile — remove the matching entry
-    const lockfile = await loadLockfile();
-    if (removedPath in lockfile.dependencies) {
+    // Update lockfile - remove the matching entry
+    if (removedPath in lockfile.dependencies && !hasSameImportRemaining) {
       delete lockfile.dependencies[removedPath];
+    }
+    if (removedRepoUrl) {
+      const repoDependency = ownerEntry?.[1];
+      if (repoDependency) {
+        if (!hasOtherRepoImports) {
+          delete lockfile.dependencies[ownerEntry![0]];
+        } else if (remainingRepoSkills?.length) {
+          repoDependency.skills = remainingRepoSkills;
+        } else {
+          delete repoDependency.skills;
+          delete repoDependency.source;
+        }
+      }
+    }
+    if (lockfileChanged) {
       await saveLockfile(lockfile);
     }
 
     spinner.succeed('Skill removed');
     ConsoleOutput.newline();
     ConsoleOutput.success(`Removed: ${removedLine}`);
-    ConsoleOutput.muted(`Lockfile updated: ${LOCKFILE_PATH}`);
+    if (lockfileChanged) {
+      ConsoleOutput.muted(`Lockfile updated: ${LOCKFILE_PATH}`);
+    }
   } catch (error) {
     spinner.fail('Failed to remove skill');
     ConsoleOutput.error(error instanceof Error ? error.message : String(error));
@@ -655,8 +1040,8 @@ export async function skillsUpdateCommand(
     const lockfile = await loadLockfile();
 
     // Filter to md-sourced entries
-    const mdEntries = Object.entries(lockfile.dependencies).filter(
-      ([, dep]) => dep.source === 'md'
+    const mdEntries = Object.entries(lockfile.dependencies).filter(([key, dep]) =>
+      isSkillMetadataEntry(key, dep)
     );
 
     if (mdEntries.length === 0) {
@@ -665,8 +1050,9 @@ export async function skillsUpdateCommand(
       return;
     }
 
-    // Filter by name if provided
-    const toUpdate = name ? mdEntries.filter(([key]) => key.includes(name)) : mdEntries;
+    const partialMatches = name ? mdEntries.filter(([key]) => key.includes(name)) : mdEntries;
+    const exactMatches = name ? partialMatches.filter(([key]) => key === name) : [];
+    const toUpdate = exactMatches.length > 0 ? exactMatches : partialMatches;
 
     if (name && toUpdate.length === 0) {
       spinner.fail(`No skill matched: ${name}`);
@@ -674,70 +1060,95 @@ export async function skillsUpdateCommand(
       process.exitCode = 1;
       return;
     }
+    if (name && toUpdate.length > 1) {
+      spinner.fail(`Multiple skills matched: ${name}`);
+      for (const [key] of toUpdate) {
+        ConsoleOutput.muted(key);
+      }
+      process.exitCode = 1;
+      return;
+    }
 
-    // Fetch the latest HEAD commit for each entry by reaching out to the
-    // remote with validateRemoteAccess. When validation is enabled we also
-    // re-clone the SKILL.md to recompute integrity and re-check the spec.
     const fetchedAt = new Date().toISOString();
     const updated: string[] = [];
     const skipped: Array<{ key: string; reason: string }> = [];
+    const repoUrls = new Set(toUpdate.map(([key]) => extractRepoUrl(key)));
+    const projectImports = await collectProjectRemoteImports();
 
-    for (const [key, dep] of toUpdate) {
-      const repoUrl = extractRepoUrl(key);
+    for (const repoUrl of repoUrls) {
+      const repoEntries = mdEntries.filter(([key]) => extractRepoUrl(key) === repoUrl);
       try {
-        const validation = await validateRemoteAccess(repoUrl);
-        if (!validation.accessible || !validation.headCommit) {
-          skipped.push({
-            key,
-            reason: validation.error ?? 'remote unreachable',
-          });
-          continue;
-        }
-
-        let integrity = dep.integrity ?? 'sha256-pending';
-
-        if (!options.skipValidation) {
-          try {
-            const fetched = await fetchAndValidateRemoteSkill(key, {
-              existingNames: collectExistingSkillNames(lockfile, key),
-              version: dep.version === 'latest' ? 'main' : dep.version,
-            });
-            if (fetched) {
-              integrity = fetched.integrity || integrity;
-              const hasErrors = !fetched.valid;
-              const hasWarnings = fetched.issues.some((i) => i.severity === 'warning');
-              if (hasErrors || (options.strict && hasWarnings)) {
-                skipped.push({
-                  key,
-                  reason: 'SKILL.md failed validation after update',
-                });
-                printValidationIssues(fetched.issues);
-                continue;
-              } else if (hasWarnings) {
-                ConsoleOutput.warn(`${key}: validation warnings`);
-                printValidationIssues(fetched.issues);
-              }
-            }
-          } catch (err) {
-            ConsoleOutput.warn(
-              `${key}: could not re-validate (${err instanceof Error ? err.message : String(err)})`
-            );
+        const ownerEntry = findSkillOwnerEntry(lockfile, repoUrl);
+        const existingRepoEntry = findRepoEntry(lockfile, repoUrl);
+        const gitUrl = ownerEntry?.[1].gitUrl ?? existingRepoEntry?.[1].gitUrl;
+        const requestedVersions = repoEntries.map(([key]) => parseSkillSource(key).version);
+        for (const remoteImport of projectImports) {
+          if (canonicalRepoUrl(remoteImport.repoUrl) === canonicalRepoUrl(repoUrl)) {
+            requestedVersions.push(remoteImport.version || 'latest');
           }
         }
+        const resolvedDependency = await resolveSkillDependency(
+          repoUrl,
+          requestedVersions,
+          ownerEntry?.[1] ?? existingRepoEntry?.[1],
+          true,
+          gitUrl
+        );
+        const resolvedPin = toDependencyPin(resolvedDependency);
+        const stagedEntries: Array<[string, LockfileDependency]> = [];
 
-        lockfile.dependencies[key] = {
-          version: dep.version ?? 'latest',
-          commit: validation.headCommit,
-          integrity,
+        for (const [key] of repoEntries) {
+          const fetched = await fetchAndValidateRemoteSkill(key, {
+            commit: resolvedPin.commit,
+            existingNames: collectExistingSkillNames(lockfile, key),
+            ...(gitUrl ? { gitUrl } : {}),
+            validateFrontmatter: !options.skipValidation,
+            version: resolvedPin.version,
+          });
+          if (!fetched) {
+            throw new Error(`Cannot locate a SKILL.md for ${key}`);
+          }
+
+          const hasErrors = !fetched.valid;
+          const hasWarnings = fetched.issues.some((issue) => issue.severity === 'warning');
+          if (hasErrors || (options.strict && hasWarnings)) {
+            printValidationIssues(fetched.issues);
+            throw new Error(`${key}: SKILL.md failed validation after update`);
+          }
+          if (hasWarnings) {
+            ConsoleOutput.warn(`${key}: validation warnings`);
+            printValidationIssues(fetched.issues);
+          }
+
+          stagedEntries.push([
+            key,
+            {
+              ...resolvedPin,
+              integrity: fetched.integrity,
+              source: 'md',
+              fetchedAt,
+            },
+          ]);
+        }
+
+        for (const [key, dependency] of stagedEntries) {
+          lockfile.dependencies[key] = dependency;
+          updated.push(key);
+        }
+        if (ownerEntry && ownerEntry[0] !== repoUrl) {
+          delete lockfile.dependencies[ownerEntry[0]];
+        }
+        lockfile.dependencies[repoUrl] = {
+          ...resolvedPin,
           source: 'md',
-          fetchedAt,
+          skills: repoEntries.map(([key]) => key),
+          ...(gitUrl ? { gitUrl } : {}),
         };
-        updated.push(key);
       } catch (err) {
-        skipped.push({
-          key,
-          reason: err instanceof Error ? err.message : String(err),
-        });
+        const reason = err instanceof Error ? err.message : String(err);
+        for (const [key] of repoEntries) {
+          skipped.push({ key, reason });
+        }
       }
     }
 
@@ -749,6 +1160,9 @@ export async function skillsUpdateCommand(
       }
       for (const { key, reason } of skipped) {
         ConsoleOutput.warn(`Would skip ${key}: ${reason}`);
+      }
+      if (skipped.length > 0) {
+        process.exitCode = 1;
       }
       return;
     }
@@ -769,6 +1183,9 @@ export async function skillsUpdateCommand(
 
     for (const { key, reason } of skipped) {
       ConsoleOutput.warn(`Skipped ${key}: ${reason}`);
+    }
+    if (skipped.length > 0) {
+      process.exitCode = 1;
     }
   } catch (error) {
     spinner.fail('Failed to update skills');

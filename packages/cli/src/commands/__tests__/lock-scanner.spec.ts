@@ -356,10 +356,143 @@ describe('collectRemoteImports', () => {
       localPath: LOCAL_PATH,
     });
 
-    // resolveRef splits raw by '/' so the sub-path includes the @version suffix;
-    // the version field comes from ref.version
     expect(result).toEqual([
-      { repoUrl: 'https://github.com/org/repo', path: 'skills@1.2.0', version: '1.2.0' },
+      { repoUrl: 'https://github.com/org/repo', path: 'skills', version: '1.2.0' },
     ]);
+  });
+
+  it('should reject a missing entry in strict mode', async () => {
+    mockExistsSync.mockReturnValue(false);
+
+    await expect(
+      collectRemoteImports('/project/missing.prs', {
+        localPath: LOCAL_PATH,
+        strict: true,
+      })
+    ).rejects.toThrow('entry file not found');
+  });
+
+  it('should reject parser errors in strict mode', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('@use ???');
+    mockParse.mockReturnValue({
+      ast: program([]),
+      errors: [{ message: 'invalid import' }],
+    });
+
+    await expect(
+      collectRemoteImports('/project/project.prs', {
+        localPath: LOCAL_PATH,
+        strict: true,
+      })
+    ).rejects.toThrow('invalid PromptScript file');
+  });
+
+  it('should retain duplicate imports and locations when requested', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      '@use github.com/org/repo/skills\n@use github.com/org/repo/skills'
+    );
+    mockParse.mockReturnValue({
+      ast: program([
+        useDecl('github.com/org/repo/skills', {
+          segments: ['github.com', 'org', 'repo', 'skills'],
+          loc: { file: 'test.prs', line: 1, column: 1 },
+        }),
+        useDecl('github.com/org/repo/skills', {
+          segments: ['github.com', 'org', 'repo', 'skills'],
+          loc: { file: 'test.prs', line: 2, column: 1 },
+        }),
+      ]),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+      deduplicate: false,
+      includeLocations: true,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result.map((entry) => entry.sourceLine)).toEqual([1, 2]);
+  });
+
+  it('should not parse local markdown imports in strict mode', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('@use ./skills/foo.md');
+    mockParse.mockReturnValue({
+      ast: program([useDecl('./skills/foo.md')]),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+      strict: true,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockReadFile).toHaveBeenCalledTimes(2);
+    expect(mockParse).toHaveBeenCalledTimes(1);
+  });
+
+  it('should scan local markdown detected as PromptScript', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile
+      .mockResolvedValueOnce('@use ./skills/foo.md')
+      .mockResolvedValueOnce(
+        '@identity {\n  role: "shared"\n}\n@use github.com/org/repo/skills/foo'
+      );
+    mockParse
+      .mockReturnValueOnce({
+        ast: program([useDecl('./skills/foo.md')]),
+        errors: [],
+      })
+      .mockReturnValueOnce({
+        ast: program([
+          useDecl('github.com/org/repo/skills/foo', {
+            segments: ['github.com', 'org', 'repo', 'skills', 'foo'],
+          }),
+        ]),
+        errors: [],
+      });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+      strict: true,
+    });
+
+    expect(result).toEqual([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'skills/foo',
+        version: '',
+      },
+    ]);
+    expect(mockReadFile).toHaveBeenCalledTimes(2);
+  });
+
+  it('should accept extensionless local skill directories in strict mode', async () => {
+    mockExistsSync.mockImplementation(
+      (path: string) =>
+        path === '/project/project.prs' ||
+        path === '/project/skills/foo' ||
+        path === '/project/skills/foo/SKILL.md'
+    );
+    mockReadFile
+      .mockResolvedValueOnce('@use ./skills/foo')
+      .mockResolvedValueOnce('---\nname: foo\ndescription: Test skill\n---\nBody');
+    mockParse.mockReturnValueOnce({
+      ast: program([useDecl('./skills/foo')]),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+      strict: true,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockReadFile).toHaveBeenCalledTimes(2);
+    expect(mockParse).toHaveBeenCalledTimes(1);
   });
 });

@@ -672,17 +672,17 @@ export class Resolver {
       const lockEntry = this.options.lockfile?.dependencies[repoUrl];
       const lockfileCommit =
         lockEntry?.commit &&
-        /^[0-9a-f]{40}$/.test(lockEntry.commit) &&
+        /^[0-9a-f]{40}$/i.test(lockEntry.commit) &&
         !/^0{40}$/.test(lockEntry.commit)
           ? lockEntry.commit
           : null;
       const markerCommit =
-        version && /^[0-9a-f]{40}$/.test(version) && !/^0{40}$/.test(version) ? version : null;
+        version && /^[0-9a-f]{40}$/i.test(version) && !/^0{40}$/.test(version) ? version : null;
       const lockedCommit = lockfileCommit ?? markerCommit;
 
       const requestedRef = lockEntry?.version ?? (version || undefined);
       const tag =
-        requestedRef && requestedRef !== 'latest' && !/^[0-9a-f]{40}$/.test(requestedRef)
+        requestedRef && requestedRef !== 'latest' && !/^[0-9a-f]{40}$/i.test(requestedRef)
           ? requestedRef
           : undefined;
 
@@ -696,22 +696,20 @@ export class Resolver {
 
         // If lockfile pins a specific commit, verify the cached repo matches
         if (lockedCommit) {
-          try {
-            const cachedMeta = await this.registryCache.getMeta(repoUrl, effectiveVersion);
-            if (cachedMeta && cachedMeta.commit !== lockedCommit) {
-              this.logger.verbose(
-                `Lockfile commit mismatch for ${repoUrl}: cached=${cachedMeta.commit}, locked=${lockedCommit}. Re-cloning.`
-              );
-              // Force re-clone by falling through to the else branch
-              const fallbackRepoUrl = this.options.registries
+          const cachedMeta = await this.registryCache.getMeta(repoUrl, effectiveVersion);
+          if (cachedMeta && cachedMeta.commit !== lockedCommit) {
+            this.logger.verbose(
+              `Lockfile commit mismatch for ${repoUrl}: cached=${cachedMeta.commit}, locked=${lockedCommit}. Re-cloning.`
+            );
+            const cloneRepoUrl = lockEntry?.gitUrl ?? repoUrl;
+            const fallbackRepoUrl = lockEntry?.gitUrl
+              ? repoUrl
+              : this.options.registries
                 ? findFallbackUrl(repoUrl, this.options.registries)
                 : undefined;
-              await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath, fallbackRepoUrl);
-              await this.gitRegistry.checkoutCommit(cachePath, lockedCommit);
-              await this.registryCache.set(repoUrl, effectiveVersion, lockedCommit);
-            }
-          } catch (err) {
-            this.logger.debug(`Lockfile commit verification failed: ${err}`);
+            await this.gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl);
+            await this.gitRegistry.checkoutCommit(cachePath, lockedCommit);
+            await this.registryCache.set(repoUrl, effectiveVersion, lockedCommit);
           }
         }
       } else {
@@ -719,12 +717,15 @@ export class Resolver {
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
         // Look up fallback URL from registries config (for HTTPS→SSH auth retry)
-        const fallbackRepoUrl = this.options.registries
-          ? findFallbackUrl(repoUrl, this.options.registries)
-          : undefined;
+        const cloneRepoUrl = lockEntry?.gitUrl ?? repoUrl;
+        const fallbackRepoUrl = lockEntry?.gitUrl
+          ? repoUrl
+          : this.options.registries
+            ? findFallbackUrl(repoUrl, this.options.registries)
+            : undefined;
 
         // Clone using GitRegistry
-        await this.gitRegistry.cloneAtTag(repoUrl, tag, cachePath, fallbackRepoUrl);
+        await this.gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl);
 
         // If lockfile pins a specific commit, checkout that exact commit
         if (lockedCommit) {

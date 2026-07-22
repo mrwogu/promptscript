@@ -65,6 +65,7 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     const scannedImports = await collectRemoteImports(entryPath, {
       localPath,
       registries: config.registries,
+      strict: true,
     });
 
     if (aliasEntries.length === 0 && scannedImports.length === 0) {
@@ -79,11 +80,14 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       try {
         const raw = await readFile(LOCKFILE_PATH, 'utf-8');
         const parsed: unknown = parseYaml(raw, { maxAliasCount: 100 });
-        if (isValidLockfile(parsed)) {
-          existing = parsed;
+        if (!isValidLockfile(parsed)) {
+          throw new Error('Invalid lockfile structure');
         }
-      } catch {
-        // Ignore malformed lockfile — start fresh
+        existing = parsed;
+      } catch (error) {
+        throw new Error(`Cannot read ${LOCKFILE_PATH}. Fix or remove the malformed lockfile.`, {
+          cause: error,
+        });
       }
     }
 
@@ -120,20 +124,35 @@ export async function lockCommand(options: LockOptions): Promise<void> {
 
     const dependencies: Record<string, LockfileDependency> = {};
     for (const [repoUrl, requested] of requestedDependencies) {
-      dependencies[repoUrl] = await resolveDependency(
+      const previous = existing.dependencies[repoUrl];
+      const resolved = await resolveRemoteDependency(
         repoUrl,
         [...requested.versions],
-        existing.dependencies[repoUrl],
+        previous,
         options.update === true && matchingRepos.includes(repoUrl),
         requested.fallbackUrl
       );
+      if (previous?.skills?.length && previous.commit !== resolved.commit) {
+        throw new Error(
+          `${repoUrl} contains managed skills. Run "prs skills update" to refresh it atomically.`
+        );
+      }
+      dependencies[repoUrl] = resolved;
     }
 
     // Preserve .md-sourced entries from previous lock (managed by `prs skills add`)
     if (existing.dependencies) {
       for (const [key, dep] of Object.entries(existing.dependencies)) {
         if (dep.source === 'md') {
-          dependencies[key] = dep;
+          const resolved = dependencies[key];
+          dependencies[key] = resolved
+            ? {
+                ...resolved,
+                source: 'md',
+                ...(dep.skills ? { skills: dep.skills } : {}),
+                ...(dep.gitUrl ? { gitUrl: dep.gitUrl } : {}),
+              }
+            : dep;
         }
       }
     }
@@ -185,7 +204,7 @@ function toRemoteUrl(repoUrl: string): string {
   return normalizeGitUrl(withProtocol);
 }
 
-async function resolveDependency(
+export async function resolveRemoteDependency(
   repoUrl: string,
   requestedVersions: string[],
   existing: LockfileDependency | undefined,
@@ -229,6 +248,8 @@ async function resolveDependency(
         commit: validation.headCommit,
         integrity:
           existing?.commit === validation.headCommit ? existing.integrity : UNRESOLVED_INTEGRITY,
+        ...(existing?.source ? { source: existing.source } : {}),
+        ...(existing?.skills ? { skills: existing.skills } : {}),
       };
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
