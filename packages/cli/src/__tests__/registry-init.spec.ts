@@ -157,6 +157,13 @@ describe('commands/registry/init', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should reject an explicitly empty namespace list', async () => {
+    await registryInitCommand('test-registry', { yes: true, namespaces: [] }, mockServices);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should run interactive prompts when --yes is not set', async () => {
     mockPrompts.input
       .mockResolvedValueOnce('Interactive Registry') // name

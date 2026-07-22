@@ -87,6 +87,28 @@ async function initializeVendoredGitRepository(directory: string): Promise<strin
   return result.stdout.trim();
 }
 
+async function initializeCacheGitRepository(directory: string): Promise<string> {
+  await execFileAsync('git', ['init', directory]);
+  await execFileAsync('git', ['-C', directory, 'add', '.']);
+  await execFileAsync(
+    'git',
+    [
+      '-C',
+      directory,
+      '-c',
+      'user.name=PromptScript Tests',
+      '-c',
+      'user.email=tests@promptscript.dev',
+      'commit',
+      '-m',
+      'fixture',
+    ],
+    { env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' } }
+  );
+  const result = await execFileAsync('git', ['-C', directory, 'rev-parse', 'HEAD']);
+  return result.stdout.trim();
+}
+
 const TEST_REGISTRIES: RegistriesConfig = {
   '@acme': 'https://github.com/acme/prs-standards.git',
   '@internal': {
@@ -504,6 +526,141 @@ describe('Resolver — registry marker handling', () => {
     const result = await resolver.resolve(entryPath);
 
     expect(result.errors.some((error) => error.message.includes('not pinned'))).toBe(true);
+    expect(mockGit.clone).not.toHaveBeenCalled();
+  });
+
+  it('rejects remote dependencies omitted from an existing lockfile', async () => {
+    const tempDir = join(testCacheDir, 'missing-lock-entry');
+    await fs.mkdir(tempDir, { recursive: true });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      '@meta { id: "missing-lock-entry" syntax: "1.0.0" }\n@use github.com/org/repo/standards'
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'missing-lock-entry-cache'),
+      lockfile: { version: 1, dependencies: {} },
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(
+      result.errors.some((error) => error.message.includes('not pinned by the lockfile'))
+    ).toBe(true);
+    expect(mockGit.clone).not.toHaveBeenCalled();
+  });
+
+  it('rejects an existing vendor directory without a manifest', async () => {
+    const tempDir = join(testCacheDir, 'missing-vendor-manifest');
+    const vendorDir = join(tempDir, 'vendor');
+    await fs.mkdir(vendorDir, { recursive: true });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      '@meta { id: "missing-vendor-manifest" syntax: "1.0.0" }\n@use github.com/org/repo/standards'
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      vendorDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'missing-vendor-manifest-cache'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(
+      result.errors.some((error) => error.message.includes('Vendor manifest is missing'))
+    ).toBe(true);
+    expect(mockGit.clone).not.toHaveBeenCalled();
+  });
+
+  it('matches Markdown lock entries keyed by repository subpath', async () => {
+    const tempDir = join(testCacheDir, 'markdown-lock-entry');
+    const vendorDir = join(tempDir, 'vendor');
+    const repoUrl = TEST_REGISTRIES['@acme'] as string;
+    const path = getVendorRepositoryRelativePath(repoUrl);
+    const repositoryDir = join(vendorDir, path);
+    await fs.mkdir(repositoryDir, { recursive: true });
+    await fs.writeFile(
+      join(repositoryDir, 'standards.prs'),
+      '@meta { id: "markdown-lock-entry" syntax: "1.0.0" }'
+    );
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    const integrity = await hashVendorRepository(repositoryDir);
+    const manifest: VendorManifest = {
+      version: 1,
+      dependencies: {
+        [repoUrl]: { version: 'v1.2.0', commit, integrity, path },
+      },
+    };
+    await fs.writeFile(join(vendorDir, VENDOR_MANIFEST_FILE), JSON.stringify(manifest));
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      '@meta { id: "markdown-lock-project" syntax: "1.0.0" }\n@use @acme/standards'
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      vendorDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'markdown-lock-cache'),
+      lockfile: {
+        version: 1,
+        dependencies: {
+          [`${repoUrl}/standards`]: {
+            version: 'v1.2.0',
+            commit,
+            integrity,
+            source: 'md',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors).toEqual([]);
+    expect(result.ast).not.toBeNull();
+  });
+
+  it('accepts a cached repository matching a commit marker', async () => {
+    const tempDir = join(testCacheDir, 'matching-commit-cache');
+    const sourceRepository = join(tempDir, 'source');
+    await fs.mkdir(sourceRepository, { recursive: true });
+    await fs.writeFile(
+      join(sourceRepository, 'standards.prs'),
+      '@meta { id: "matching-commit" syntax: "1.0.0" }'
+    );
+    const commit = await initializeCacheGitRepository(sourceRepository);
+    const repoUrl = 'https://github.com/org/repo';
+    const cacheDir = join(testCacheDir, 'matching-commit-registry-cache');
+    const registryCache = new RegistryCache(cacheDir);
+    const cachePath = registryCache.getCachePath(repoUrl, commit);
+    await fs.mkdir(dirname(cachePath), { recursive: true });
+    await fs.rename(sourceRepository, cachePath);
+    await registryCache.set(repoUrl, commit, commit);
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      `@meta { id: "matching-commit-project" syntax: "1.0.0" }\n@use github.com/org/repo/standards@${commit}`
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir,
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors).toEqual([]);
+    expect(result.ast).not.toBeNull();
     expect(mockGit.clone).not.toHaveBeenCalled();
   });
 
@@ -1236,6 +1393,111 @@ describe('Resolver — registry marker handling', () => {
     const traversalErrors = result.errors.filter((e) => e.message.includes('traversal'));
     expect(traversalErrors.length).toBeGreaterThan(0);
     expect(traversalErrors[0]!.message).toContain('Path traversal detected');
+  });
+
+  it('rejects a registry file symlink that escapes the cache', async () => {
+    const tempDir = join(testCacheDir, 'project-symlink-file-traversal');
+    await fs.mkdir(tempDir, { recursive: true });
+    const outsideFile = join(tempDir, 'outside.prs');
+    await fs.writeFile(outsideFile, '@meta { id: "outside" syntax: "1.0.0" }');
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      '@meta { id: "symlink-file-project" syntax: "1.0.0" }\n@use github.com/org/repo/linked'
+    );
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.symlink(outsideFile, join(targetDir, 'linked.prs'));
+    });
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'symlink-file-registry-cache'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(
+      result.errors.some((error) => error.message.includes('resolves outside the repository cache'))
+    ).toBe(true);
+  });
+
+  it('rejects a registry directory symlink that escapes the cache', async () => {
+    const tempDir = join(testCacheDir, 'project-symlink-directory-traversal');
+    const outsideDir = join(tempDir, 'outside');
+    await fs.mkdir(outsideDir, { recursive: true });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      '@meta { id: "symlink-directory-project" syntax: "1.0.0" }\n@use github.com/org/repo/linked'
+    );
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.mkdir(targetDir, { recursive: true });
+      await fs.symlink(outsideDir, join(targetDir, 'linked'));
+    });
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'symlink-directory-registry-cache'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(
+      result.errors.some((error) => error.message.includes('resolves outside the repository cache'))
+    ).toBe(true);
+  });
+
+  it('replaces a mismatched cached checkout with the locked commit', async () => {
+    const tempDir = join(testCacheDir, 'successful-cache-recovery');
+    const sourceRepository = join(tempDir, 'source');
+    await fs.mkdir(sourceRepository, { recursive: true });
+    await fs.writeFile(
+      join(sourceRepository, 'standards.prs'),
+      '@meta { id: "recovered-cache" syntax: "1.0.0" }'
+    );
+    const lockedCommit = await initializeCacheGitRepository(sourceRepository);
+    const repoUrl = 'https://github.com/org/repo';
+    const cacheDir = join(testCacheDir, 'successful-cache-recovery-registry');
+    const registryCache = new RegistryCache(cacheDir);
+    await registryCache.set(repoUrl, 'latest', 'a'.repeat(40));
+    await fs.writeFile(
+      join(registryCache.getCachePath(repoUrl, 'latest'), 'standards.prs'),
+      '@meta { id: "stale-cache" syntax: "1.0.0" }'
+    );
+    mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
+      await fs.cp(join(sourceRepository, '.git'), join(targetDir, '.git'), { recursive: true });
+      await fs.copyFile(join(sourceRepository, 'standards.prs'), join(targetDir, 'standards.prs'));
+    });
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      '@meta { id: "cache-recovery-project" syntax: "1.0.0" }\n@use github.com/org/repo/standards'
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      cache: false,
+      cacheDir,
+      lockfile: {
+        version: 1,
+        dependencies: {
+          [repoUrl]: {
+            version: 'latest',
+            commit: lockedCommit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors).toEqual([]);
+    expect(result.ast).not.toBeNull();
+    expect(mockGit.clone).toHaveBeenCalledOnce();
   });
 
   it('reports checkout failure when a cached commit mismatches the lock', async () => {

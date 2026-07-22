@@ -289,6 +289,27 @@ describe('collectRemoteImports', () => {
     expect(result).toEqual([]);
   });
 
+  it('should reject when resolveRef throws in strict mode', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('@use ../../../../etc/passwd');
+    mockParse.mockReturnValue({
+      ast: program([
+        useDecl('../../../../etc/passwd', {
+          isRelative: true,
+          segments: ['..', '..', '..', '..', 'etc', 'passwd'],
+        }),
+      ]),
+      errors: [],
+    });
+
+    await expect(
+      collectRemoteImports('/project/project.prs', {
+        localPath: LOCAL_PATH,
+        strict: true,
+      })
+    ).rejects.toThrow("Cannot resolve import '../../../../etc/passwd'");
+  });
+
   it('should handle circular local imports without infinite loop', async () => {
     const knownFiles = new Set(['/project/a.prs', '/project/b.prs']);
     mockExistsSync.mockImplementation((p: string) => knownFiles.has(p));
@@ -342,6 +363,18 @@ describe('collectRemoteImports', () => {
 
     expect(result).toEqual([]);
     expect(mockReadFile).toHaveBeenCalledTimes(2);
+  });
+
+  it('should reject read failures in strict mode', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockRejectedValue(new Error('EACCES: permission denied'));
+
+    await expect(
+      collectRemoteImports('/project/project.prs', {
+        localPath: LOCAL_PATH,
+        strict: true,
+      })
+    ).rejects.toThrow('Cannot read PromptScript file: /project/project.prs');
   });
 
   it('should skip gracefully when parse returns null AST', async () => {
@@ -452,6 +485,23 @@ describe('collectRemoteImports', () => {
     expect(mockParse).toHaveBeenCalledTimes(1);
   });
 
+  it('should skip local imports with irrelevant extensions', async () => {
+    mockExistsSync.mockImplementation((path: string) => path === '/project/project.prs');
+    mockReadFile.mockResolvedValue('@use /project/notes.txt');
+    mockParse.mockReturnValue({
+      ast: program([useDecl('/project/notes.txt')]),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+      strict: true,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockReadFile).toHaveBeenCalledTimes(1);
+  });
+
   it('should scan local markdown detected as PromptScript', async () => {
     mockExistsSync.mockReturnValue(true);
     mockReadFile
@@ -511,5 +561,71 @@ describe('collectRemoteImports', () => {
     expect(result).toEqual([]);
     expect(mockReadFile).toHaveBeenCalledTimes(2);
     expect(mockParse).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reject missing local PromptScript imports in strict mode', async () => {
+    mockExistsSync.mockImplementation((path: string) => path === '/project/project.prs');
+    mockReadFile.mockResolvedValue('@use ./skills/missing');
+    mockParse.mockReturnValue({
+      ast: program([useDecl('./skills/missing')]),
+      errors: [],
+    });
+
+    await expect(
+      collectRemoteImports('/project/project.prs', {
+        localPath: LOCAL_PATH,
+        strict: true,
+      })
+    ).rejects.toThrow('Imported PromptScript file not found: /project/skills/missing.prs');
+  });
+
+  it('should reject missing local markdown imports in strict mode', async () => {
+    mockExistsSync.mockImplementation((path: string) => path === '/project/project.prs');
+    mockReadFile.mockResolvedValue('@use ./missing.md');
+    mockParse.mockReturnValue({
+      ast: program([useDecl('./missing.md')]),
+      errors: [],
+    });
+
+    await expect(
+      collectRemoteImports('/project/project.prs', {
+        localPath: LOCAL_PATH,
+        strict: true,
+      })
+    ).rejects.toThrow('Imported PromptScript file not found: /project/missing.md');
+  });
+
+  it('should ignore missing local PromptScript imports outside strict mode', async () => {
+    mockExistsSync.mockImplementation((path: string) => path === '/project/project.prs');
+    mockReadFile.mockResolvedValue('@use ./missing');
+    mockParse.mockReturnValue({
+      ast: program([useDecl('./missing')]),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it('should skip skill directories without SKILL.md in strict mode', async () => {
+    mockExistsSync.mockImplementation(
+      (path: string) => path === '/project/project.prs' || path === '/project/skills/missing'
+    );
+    mockReadFile.mockResolvedValue('@use ./skills/missing');
+    mockParse.mockReturnValue({
+      ast: program([useDecl('./skills/missing')]),
+      errors: [],
+    });
+
+    const result = await collectRemoteImports('/project/project.prs', {
+      localPath: LOCAL_PATH,
+      strict: true,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockReadFile).toHaveBeenCalledTimes(1);
   });
 });

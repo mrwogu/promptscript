@@ -117,6 +117,16 @@ describe('hookCommand', () => {
       expect(process.exitCode).toBe(1);
       expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('permission denied'));
     });
+
+    it('reports non-Error generated-file detection failures', async () => {
+      mockExtractFilePath.mockReturnValue('/out/CLAUDE.md');
+      mockDetectMarker.mockRejectedValue('permission denied');
+
+      await callHook('pre-edit', '{"tool_input":{"file_path":"/out/CLAUDE.md"}}');
+
+      expect(process.exitCode).toBe(1);
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('permission denied'));
+    });
   });
 
   describe('post-edit', () => {

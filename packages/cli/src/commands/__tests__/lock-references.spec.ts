@@ -112,6 +112,20 @@ describe('generateLockfileReferences', () => {
     ).rejects.toThrow('Remote import failed');
   });
 
+  it('should reject a missing AST without error details', async () => {
+    mockResolve.mockResolvedValue({ ast: null, sources: [], errors: [] });
+
+    await expect(
+      generateLockfileReferences(
+        { id: 'test', syntax: '1.4.0', targets: [] },
+        '/project/.promptscript/project.prs',
+        '/project/.promptscript',
+        { version: 1, dependencies: {} },
+        []
+      )
+    ).rejects.toThrow('Cannot resolve project references');
+  });
+
   it('should use the resolved lock version for cache paths', async () => {
     await generateLockfileReferences(
       {
@@ -148,6 +162,38 @@ describe('generateLockfileReferences', () => {
         [{ repoUrl: 'github.com/company/base', path: 'rules', version: '' }]
       )
     ).rejects.toThrow('unpinned repository');
+  });
+
+  it('should match markdown-sourced pins to their remote import paths', async () => {
+    await generateLockfileReferences(
+      { id: 'test', syntax: '1.4.0', targets: [] },
+      '/project/.promptscript/project.prs',
+      '/project/.promptscript',
+      {
+        version: 1,
+        dependencies: {
+          'github.com/company/base/rules': {
+            version: 'main',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-pending',
+            source: 'md',
+          },
+        },
+      },
+      [{ repoUrl: 'https://github.com/company/base.git', path: 'rules', version: '' }]
+    );
+
+    expect(mockCollectRegistryReferences).toHaveBeenCalledWith(
+      ast,
+      [
+        {
+          repoUrl: 'github.com/company/base/rules',
+          version: 'main',
+          cachePath: '/cache/https://github.com/company/base.git/main',
+        },
+      ],
+      undefined
+    );
   });
 
   it('should hash references from the default Git registry root', async () => {
@@ -187,6 +233,28 @@ describe('generateLockfileReferences', () => {
         },
       ],
       undefined
+    );
+  });
+
+  it('should reject an unpinned default Git registry root', async () => {
+    mockResolveRegistryPath.mockResolvedValue({
+      path: '/cache/default/configs',
+      isRemote: true,
+      source: 'git',
+      repositoryUrl: 'git@github.com:company/registry.git',
+      repositoryPath: '/cache/default',
+    });
+
+    await expect(
+      generateLockfileReferences(
+        { id: 'test', syntax: '1.4.0', targets: [] },
+        '/project/.promptscript/project.prs',
+        '/project/.promptscript',
+        { version: 1, dependencies: {} },
+        []
+      )
+    ).rejects.toThrow(
+      'Cannot lock references for unpinned repository: git@github.com:company/registry.git'
     );
   });
 

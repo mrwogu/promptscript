@@ -9,8 +9,10 @@ vi.mock('../commands/compile', () => ({
   compileCommand: vi.fn(),
 }));
 
+const mockValidate = vi.fn();
+
 vi.mock('../commands/validate', () => ({
-  validateCommand: vi.fn(),
+  validateCommand: mockValidate,
 }));
 
 vi.mock('../commands/pull', () => ({
@@ -127,6 +129,22 @@ describe('cli', () => {
       run(['node', 'prs', 'validate']);
 
       expect(mockCommand).toHaveBeenCalledWith('validate [files...]');
+    });
+
+    it('should pass files and options to the validate command', async () => {
+      const { run } = await import('../cli.js');
+      run(['node', 'prs', '--help']);
+
+      const validateAction = capturedActions[3];
+      expect(validateAction).toBeDefined();
+
+      validateAction?.(['project.prs'], { strict: true, format: 'json' });
+
+      expect(mockValidate).toHaveBeenCalledWith({
+        strict: true,
+        format: 'json',
+        files: ['project.prs'],
+      });
     });
 
     it('should register pull command', async () => {

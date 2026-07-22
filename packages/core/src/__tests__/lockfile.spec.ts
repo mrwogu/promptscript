@@ -208,6 +208,17 @@ describe('isValidLockfile', () => {
     ).toBe(false);
   });
 
+  it('should reject null dependency entries', () => {
+    expect(
+      isValidLockfile({
+        version: LOCKFILE_VERSION,
+        dependencies: {
+          repo: null,
+        },
+      })
+    ).toBe(false);
+  });
+
   it('should reject malformed dependency metadata', () => {
     expect(
       isValidLockfile({

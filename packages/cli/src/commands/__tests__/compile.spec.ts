@@ -26,6 +26,8 @@ const {
   mockCleanupManagedOutputs,
   mockSpinner,
   mockSpinnerStart,
+  mockWatch,
+  mockWatcherOn,
 } = vi.hoisted(() => {
   const mockCompile = vi.fn();
   const mockLoadConfig = vi.fn();
@@ -41,6 +43,8 @@ const {
   const mockDryRun = vi.fn();
   const mockCleanupManagedOutputs = vi.fn();
   const mockSpinnerStart = vi.fn();
+  const mockWatch = vi.fn();
+  const mockWatcherOn = vi.fn();
   const mockSpinner = {
     start: mockSpinnerStart,
     succeed: vi.fn().mockReturnThis(),
@@ -65,6 +69,8 @@ const {
     mockCleanupManagedOutputs,
     mockSpinner,
     mockSpinnerStart,
+    mockWatch,
+    mockWatcherOn,
   };
 });
 
@@ -117,6 +123,7 @@ vi.mock('../../output/console.js', () => ({
     warning: mockWarning,
     verbose: vi.fn(),
     debug: vi.fn(),
+    stats: vi.fn(),
     dryRun: mockDryRun,
     warn: mockWarn,
   },
@@ -144,7 +151,7 @@ vi.mock('../../output/pager.js', () => ({
 }));
 
 vi.mock('chokidar', () => ({
-  default: { watch: vi.fn().mockReturnValue({ on: vi.fn().mockReturnThis() }) },
+  default: { watch: (...args: unknown[]) => mockWatch(...args) },
 }));
 
 vi.mock('../../utils/registry-resolver.js', () => ({
@@ -165,8 +172,12 @@ describe('compile command - createCliLogger warn path', () => {
     capturedLogger = undefined;
     capturedCompilerOptions = undefined;
     process.exitCode = undefined;
+    mockSpinnerStart.mockReset();
     mockSpinnerStart.mockReturnValue(mockSpinner);
     mockSpinner.text = '';
+    const watcher = { on: mockWatcherOn };
+    mockWatcherOn.mockReturnValue(watcher);
+    mockWatch.mockReturnValue(watcher);
 
     mockLoadConfig.mockResolvedValue({
       targets: ['claude'],
@@ -229,6 +240,27 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockSpinner.fail).toHaveBeenCalledWith('Error');
     expect(mockCompile).not.toHaveBeenCalled();
     expect(process.exitCode).toBe(1);
+  });
+
+  it('loads a valid lockfile into the compiler resolver', async () => {
+    mockExistsSync.mockImplementation(
+      (path: string) =>
+        String(path).includes('project.prs') || String(path).endsWith('promptscript.lock')
+    );
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('promptscript.lock')) {
+        return JSON.stringify({ version: 1, dependencies: {} });
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    await compileCommand({}, mockServices);
+
+    expect(capturedCompilerOptions?.['resolver']).toEqual(
+      expect.objectContaining({
+        lockfile: { version: 1, dependencies: {} },
+      })
+    );
   });
 
   it('should route logger.warn() through ConsoleOutput.warn', async () => {
@@ -373,6 +405,7 @@ describe('compile command - createCliLogger warn path', () => {
               '---\n# promptscript-generated: 2026-01-01T00:00:00.000Z | source: project.prs | target: claude\nname: test\n---\n\nBody\n',
           },
         ],
+        ['README.md', { path: 'README.md', content: '# Unmanaged\n' }],
       ]),
       stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
       warnings: [],
@@ -393,6 +426,7 @@ describe('compile command - createCliLogger warn path', () => {
       expect.stringContaining('name: test\n---\n\nManaged by the platform team.\n\nBody'),
       'utf-8'
     );
+    expect(mockWriteFile).toHaveBeenCalledWith('/mock/project/README.md', '# Unmanaged\n', 'utf-8');
   });
 
   it('should preserve executable output modes', async () => {
@@ -556,6 +590,32 @@ describe('compile command - createCliLogger warn path', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should warn for non-strict target output conflicts', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: [{ claude: { output: 'shared.md' } }, { github: { output: 'shared.md' } }],
+    });
+
+    await compileCommand({}, mockServices);
+
+    expect(mockWarning).toHaveBeenCalledWith(
+      'Output path conflict: shared.md <- claude, github. Last target processed wins.'
+    );
+  });
+
+  it('should reject strict target output conflicts', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: [{ claude: { output: 'shared.md' } }, { github: { output: 'shared.md' } }],
+    });
+
+    await compileCommand({ strict: true }, mockServices);
+
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('Output path conflict detected')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should warn when no build profiles found with --all-builds', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: { claude: {} },
@@ -648,6 +708,105 @@ describe('compile command - createCliLogger warn path', () => {
 
     expect(mockError).toHaveBeenCalledWith('Invalid build configuration');
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should start one watcher for all build profiles', async () => {
+    vi.useFakeTimers();
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      builds: {
+        alpha: { targets: ['claude'] },
+      },
+      watch: { debounce: 1 },
+    });
+
+    try {
+      await compileCommand(
+        { allBuilds: true, watch: true, cwd: '/repo/promptscript' },
+        mockServices
+      );
+
+      expect(mockWatch).toHaveBeenCalledWith(
+        '/repo/promptscript',
+        expect.objectContaining({
+          persistent: true,
+          ignoreInitial: true,
+          followSymlinks: false,
+        })
+      );
+      expect(mockWatch).toHaveBeenCalledTimes(1);
+
+      const changeHandler = mockWatcherOn.mock.calls.find(([event]) => event === 'change')?.[1] as
+        | ((path: string) => void)
+        | undefined;
+      changeHandler?.('/repo/promptscript/.promptscript/project.prs');
+      await vi.runAllTimersAsync();
+
+      expect(mockCompile).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('should apply watch filters and report rebuild failures', async () => {
+    vi.useFakeTimers();
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      watch: {
+        include: ['src/**/*.prs'],
+        exclude: ['**/ignored/**'],
+        debounce: 1,
+        clearScreen: false,
+      },
+    });
+
+    try {
+      await compileCommand({ watch: true, cwd: '/repo/promptscript' }, mockServices);
+
+      const watchOptions = [...mockWatch.mock.calls]
+        .reverse()
+        .find((call) => call.length > 1)?.[1] as {
+        ignored: (
+          path: string,
+          stats?: { isDirectory: () => boolean; isFile: () => boolean }
+        ) => boolean;
+      };
+      expect(mockWatch).toHaveBeenCalled();
+      expect(watchOptions).toBeDefined();
+      expect(
+        watchOptions.ignored('/repo/promptscript/src/ignored/', {
+          isDirectory: () => true,
+          isFile: () => false,
+        })
+      ).toBe(true);
+      expect(
+        watchOptions.ignored('/repo/promptscript/src/readme.md', {
+          isDirectory: () => false,
+          isFile: () => true,
+        })
+      ).toBe(true);
+      expect(
+        watchOptions.ignored('/repo/promptscript/src/project.prs', {
+          isDirectory: () => false,
+          isFile: () => true,
+        })
+      ).toBe(false);
+
+      const changeHandler = mockWatcherOn.mock.calls.find(([event]) => event === 'change')?.[1] as
+        | ((path: string) => void)
+        | undefined;
+      expect(changeHandler).toBeDefined();
+      mockSpinnerStart.mockImplementationOnce(() => {
+        throw 'watch rebuild failed';
+      });
+      changeHandler?.('/repo/promptscript/src/project.prs');
+      await vi.runAllTimersAsync();
+
+      expect(mockError).toHaveBeenCalledWith('Watch compilation failed: watch rebuild failed');
+      expect(process.exitCode).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('should continue after build setup throws', async () => {

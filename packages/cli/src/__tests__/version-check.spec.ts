@@ -95,13 +95,26 @@ describe('version-check', () => {
     });
 
     it('should return null on timeout', async () => {
-      const mockFetch = vi.fn().mockRejectedValue(new DOMException('Aborted', 'AbortError'));
+      vi.useFakeTimers();
+      const mockFetch = vi.fn(
+        (_url: string, init: { signal: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            init.signal.addEventListener('abort', () => {
+              reject(new DOMException('Aborted', 'AbortError'));
+            });
+          })
+      );
       vi.stubGlobal('fetch', mockFetch);
 
-      const { fetchLatestVersion } = await import('../utils/version-check.js');
-      const result = await fetchLatestVersion();
+      try {
+        const { fetchLatestVersion } = await import('../utils/version-check.js');
+        const resultPromise = fetchLatestVersion();
+        await vi.advanceTimersByTimeAsync(3000);
 
-      expect(result).toBeNull();
+        await expect(resultPromise).resolves.toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('should return null on invalid JSON', async () => {
@@ -360,6 +373,31 @@ describe('version-check', () => {
 
       expect(result.info?.updateAvailable).toBe(true);
     });
+
+    it.each([
+      ['current prerelease identifiers end first', '1.0.0-alpha', '1.0.0-alpha.1', true],
+      ['latest prerelease identifiers end first', '1.0.0-alpha.1', '1.0.0-alpha', false],
+      ['latest identifier is nonnumeric', '1.0.0-1', '1.0.0-alpha', true],
+      ['latest identifier is numeric', '1.0.0-alpha', '1.0.0-1', false],
+      ['latest numeric identifier is higher', '1.0.0-alpha.1', '1.0.0-alpha.2', true],
+      ['latest numeric identifier is lower', '1.0.0-alpha.2', '1.0.0-alpha.1', false],
+      ['latest numeric identifier has fewer digits', '1.0.0-alpha.10', '1.0.0-alpha.2', false],
+      ['latest lexical identifier is lower', '1.0.0-beta', '1.0.0-alpha', false],
+      ['prerelease identifiers are equal', '1.0.0-alpha.1', '1.0.0-alpha.1', false],
+      ['latest version is prerelease', '1.0.0', '1.0.0-alpha', false],
+    ])('should compare when %s', async (_case, currentVersion, latestVersion, expected) => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: latestVersion }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { forceCheckForUpdates } = await import('../utils/version-check.js');
+      const result = await forceCheckForUpdates(currentVersion);
+
+      expect(result.error).toBe(false);
+      expect(result.info?.updateAvailable).toBe(expected);
+    });
   });
 
   describe('fetchLatestVersion edge cases', () => {
@@ -396,6 +434,22 @@ describe('version-check', () => {
 
       expect(result).toBeNull();
     });
+
+    it.each(['1.0.0-alpha.01', '9007199254740992.0.0'])(
+      'should return null for invalid semver %s',
+      async (version) => {
+        const mockFetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ version }),
+        });
+        vi.stubGlobal('fetch', mockFetch);
+
+        const { fetchLatestVersion } = await import('../utils/version-check.js');
+        const result = await fetchLatestVersion();
+
+        expect(result).toBeNull();
+      }
+    );
 
     it('should handle error with code property', async () => {
       const error = new Error('Connection refused') as NodeJS.ErrnoException;
@@ -568,6 +622,28 @@ describe('version-check', () => {
       const result = await checkForUpdates('1.0.0');
 
       // Should return null (no update) without fetching
+      expect(result).toBeNull();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['invalid current version', 'invalid', '2.0.0'],
+      ['invalid latest version', '1.0.0', 'invalid'],
+    ])('should ignore cache with %s', async (_case, currentVersion, latestVersion) => {
+      mockFsPromisesModule.readFile.mockResolvedValue(
+        JSON.stringify({
+          lastCheck: new Date().toISOString(),
+          latestVersion,
+          currentVersion,
+        })
+      );
+
+      const mockFetch = vi.fn();
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { checkForUpdates } = await import('../utils/version-check.js');
+      const result = await checkForUpdates(currentVersion);
+
       expect(result).toBeNull();
       expect(mockFetch).not.toHaveBeenCalled();
     });

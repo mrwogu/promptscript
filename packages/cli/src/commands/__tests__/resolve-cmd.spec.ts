@@ -14,6 +14,8 @@ const {
   mockResolveVendoredRepository,
   mockCacheHas,
   mockVerifyGitRepository,
+  mockIsInsideCachePath,
+  mockIsRealPathInside,
 } = vi.hoisted(() => {
   const mockLoadConfig = vi.fn();
   const mockFindConfigFile = vi.fn();
@@ -28,6 +30,8 @@ const {
   const mockResolveVendoredRepository = vi.fn();
   const mockCacheHas = vi.fn().mockResolvedValue(false);
   const mockVerifyGitRepository = vi.fn().mockResolvedValue(undefined);
+  const mockIsInsideCachePath = vi.fn().mockReturnValue(true);
+  const mockIsRealPathInside = vi.fn().mockResolvedValue(true);
   return {
     mockLoadConfig,
     mockFindConfigFile,
@@ -42,6 +46,8 @@ const {
     mockResolveVendoredRepository,
     mockCacheHas,
     mockVerifyGitRepository,
+    mockIsInsideCachePath,
+    mockIsRealPathInside,
   };
 });
 
@@ -85,8 +91,8 @@ vi.mock('@promptscript/resolver', () => ({
     }
     has = mockCacheHas;
   },
-  isInsideCachePath: vi.fn().mockReturnValue(true),
-  isRealPathInside: vi.fn().mockResolvedValue(true),
+  isInsideCachePath: mockIsInsideCachePath,
+  isRealPathInside: mockIsRealPathInside,
   parseRegistryMarker: (value: string) =>
     value.startsWith('__test_registry__')
       ? JSON.parse(value.slice('__test_registry__'.length))
@@ -111,10 +117,13 @@ describe('resolveCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockLoadVendorManifest.mockResolvedValue(null);
+    mockExistsSync.mockReturnValue(false);
     mockStatSync.mockReturnValue({ isDirectory: () => false });
     mockLockfileExists.mockReturnValue(false);
     mockCacheHas.mockResolvedValue(false);
     mockVerifyGitRepository.mockResolvedValue(undefined);
+    mockIsInsideCachePath.mockReturnValue(true);
+    mockIsRealPathInside.mockResolvedValue(true);
     process.exitCode = undefined;
   });
 
@@ -173,7 +182,7 @@ describe('resolveCommand', () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
     mockLoadUserConfig.mockResolvedValue({ version: '1' });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -234,6 +243,19 @@ describe('resolveCommand', () => {
 
     expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Resolution failed'));
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should handle resolution exceptions in JSON format', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockRejectedValue(new Error('config parse error'));
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('@company/path', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({ success: false, error: 'config parse error' });
+    expect(process.exitCode).toBe(1);
+    consoleSpy.mockRestore();
   });
 
   it('should error when no registries are configured for alias import', async () => {
@@ -437,7 +459,7 @@ describe('resolveCommand', () => {
     );
     mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
     mockResolveVendoredRepository.mockResolvedValue('/project/.promptscript/vendor/repository');
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
     await resolveCommand('@company/security', { format: 'json' });
@@ -450,6 +472,229 @@ describe('resolveCommand', () => {
     });
     expect(mockResolveVendoredRepository).toHaveBeenCalled();
     consoleSpy.mockRestore();
+  });
+
+  it('should reject an invalid lockfile', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockLockfileExists.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(JSON.stringify({ invalid: true }));
+
+    await resolveCommand('github.com/company/base/security', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Invalid lockfile'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should match markdown child lock entries', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockLockfileExists.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base/security': {
+            version: 'v3.0.0',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-test',
+            source: 'md',
+          },
+        },
+      })
+    );
+    mockExistsSync.mockReturnValue(false);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('github.com/company/base/security', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      lockedVersion: 'v3.0.0',
+      commit: 'a'.repeat(40),
+    });
+    consoleSpy.mockRestore();
+  });
+
+  it('should reject an empty import path', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+
+    await resolveCommand('', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Resolution failed'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject an existing vendor directory without a manifest', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExistsSync.mockImplementation((path: string) => path.endsWith('.promptscript/vendor'));
+
+    await resolveCommand('github.com/company/base/security', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Vendor manifest is missing')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject an unpinned vendored dependency', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
+
+    await resolveCommand('github.com/company/base/security', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('not pinned by the lockfile')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject a missing vendored dependency', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockLockfileExists.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'v1.0.0',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-test',
+          },
+        },
+      })
+    );
+    mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
+    mockResolveVendoredRepository.mockResolvedValue(null);
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
+
+    await resolveCommand('github.com/company/base/security', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Vendored dependency is missing')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should report stale cache when locked checkout verification fails', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockLockfileExists.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'v1.0.0',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-test',
+          },
+        },
+      })
+    );
+    mockCacheHas.mockResolvedValue(true);
+    mockVerifyGitRepository.mockRejectedValue(new Error('tampered cache'));
+    mockExistsSync.mockReturnValue(false);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('github.com/company/base/security', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({ source: 'stale cache', type: 'not found' });
+    consoleSpy.mockRestore();
+  });
+
+  it('should reject lexical and real-path repository escapes', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExpandAlias.mockReturnValue({
+      repoUrl: 'github.com/company/base',
+      path: '../outside',
+      version: '',
+    });
+    mockIsInsideCachePath.mockReturnValue(false);
+
+    await resolveCommand('@company/outside', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Resolved path escapes its repository')
+    );
+    expect(process.exitCode).toBe(1);
+
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExpandAlias.mockReturnValue({
+      repoUrl: 'github.com/company/base',
+      path: 'security',
+      version: '',
+    });
+    mockIsInsideCachePath.mockReturnValue(true);
+    mockIsRealPathInside.mockResolvedValue(false);
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
+
+    await resolveCommand('@company/security', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Resolved path escapes its repository')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it.each([
+    ['github.com/company/base', 'repository root', true],
+    ['github.com/company/base/readme.md', 'markdown', false],
+    ['github.com/company/base/security', 'directory', true],
+  ])('should classify %s as %s', async (importPath, expectedType, directory) => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
+    mockStatSync.mockReturnValue({ isDirectory: () => directory });
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand(importPath, { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({ type: expectedType, exists: true });
+    consoleSpy.mockRestore();
+  });
+
+  it('should reject a resolved file whose real path escapes after extension resolution', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
+    mockStatSync.mockReturnValue({ isDirectory: () => false });
+    mockIsRealPathInside.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+
+    await resolveCommand('github.com/company/base/security', {});
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Resolved path escapes its repository')
+    );
+    expect(process.exitCode).toBe(1);
   });
 
   it('should reject unsupported output formats', async () => {

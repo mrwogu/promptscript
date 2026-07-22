@@ -34,7 +34,11 @@ vi.spyOn(console, 'warn').mockImplementation(() => {});
 const mockFindConfigFile = vi.fn();
 const mockLoadConfig = vi.fn();
 const mockCompile = vi.fn();
+const mockCompilerConstructor = vi.fn();
 const mockResolveRegistryPath = vi.fn();
+const { mockReadFile } = vi.hoisted(() => ({
+  mockReadFile: vi.fn().mockResolvedValue('version: 1\ndependencies: {}\n'),
+}));
 
 vi.mock('../config/loader', () => ({
   findConfigFile: () => mockFindConfigFile(),
@@ -44,6 +48,10 @@ vi.mock('../config/loader', () => ({
 
 vi.mock('@promptscript/compiler', () => ({
   Compiler: class {
+    constructor(options: unknown) {
+      mockCompilerConstructor(options);
+    }
+
     compile = mockCompile;
   },
 }));
@@ -60,7 +68,7 @@ vi.mock('fs', () => ({
 }));
 
 vi.mock('fs/promises', () => ({
-  readFile: vi.fn().mockResolvedValue('version: 1\ndependencies: {}\n'),
+  readFile: mockReadFile,
 }));
 
 describe('commands/check', () => {
@@ -126,6 +134,45 @@ describe('commands/check', () => {
     it('should fail when project identifier is missing', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should accept a legacy project identifier', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        project: { id: 'legacy-test' },
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBeUndefined();
+    });
+
+    it.each([
+      ['non-object', 'legacy'],
+      ['null', null],
+      ['array', []],
+      ['missing id', {}],
+      ['non-string id', { id: 1 }],
+      ['empty id', { id: ' ' }],
+    ])('should reject a %s legacy project identifier', async (_case, project) => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        project,
         syntax: '1.0.0',
         input: { entry: './project.prs' },
         targets: ['github'],
@@ -282,6 +329,42 @@ describe('commands/check', () => {
       expect(process.exitCode).toBe(1);
     });
 
+    it.each([
+      ['non-object', 42],
+      ['null', null],
+      ['array', []],
+    ])('should fail when a target is %s', async (_case, target) => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: [target],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should fail when a target entry is empty', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: [{}],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
     it('should handle inherit configuration', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
@@ -319,6 +402,103 @@ describe('commands/check', () => {
       expect(process.exitCode).toBe(1);
     });
 
+    it('should report project resolution warnings without failing', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+      mockCompile.mockResolvedValue({
+        errors: [],
+        warnings: [{ message: 'Deprecated syntax' }],
+      });
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(0);
+    });
+
+    it('should pass registry repository roots to the compiler', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+      mockResolveRegistryPath.mockResolvedValue({
+        path: '/cache/registry',
+        isRemote: true,
+        source: 'git',
+        repositoryUrl: 'https://github.com/org/registry.git',
+        repositoryPath: '/cache/registry',
+      });
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(mockCompilerConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resolver: expect.objectContaining({
+            referenceRoots: {
+              'https://github.com/org/registry.git': ['/cache/registry'],
+            },
+          }),
+        })
+      );
+    });
+
+    it('should omit registry repository roots when the repository path is missing', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+      mockResolveRegistryPath.mockResolvedValue({
+        path: '/cache/registry',
+        isRemote: true,
+        source: 'git',
+        repositoryUrl: 'https://github.com/org/registry.git',
+      });
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(mockCompilerConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resolver: expect.objectContaining({
+            referenceRoots: undefined,
+          }),
+        })
+      );
+    });
+
+    it('should fail before resolution when the lockfile is invalid', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValueOnce('not-a-lockfile');
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockResolveRegistryPath).not.toHaveBeenCalled();
+    });
+
     it('should fail when registry resolution throws', async () => {
       mockFindConfigFile.mockReturnValue('promptscript.yaml');
       mockLoadConfig.mockResolvedValue({
@@ -329,6 +509,23 @@ describe('commands/check', () => {
       });
       mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
       mockResolveRegistryPath.mockRejectedValue(new Error('Registry unavailable'));
+
+      const { checkCommand } = await import('../commands/check.js');
+      await checkCommand({} as CheckOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('should handle non-error registry resolution failures', async () => {
+      mockFindConfigFile.mockReturnValue('promptscript.yaml');
+      mockLoadConfig.mockResolvedValue({
+        id: 'test',
+        syntax: '1.0.0',
+        input: { entry: './project.prs' },
+        targets: ['github'],
+      });
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('project.prs'));
+      mockResolveRegistryPath.mockRejectedValue('Registry unavailable');
 
       const { checkCommand } = await import('../commands/check.js');
       await checkCommand({} as CheckOptions);

@@ -7,6 +7,7 @@ const {
   mockLoadConfig,
   mockResolveRegistryPath,
   mockCompile,
+  mockCompilerOptions,
   mockExistsSync,
   mockReadFile,
   mockPagerWrite,
@@ -31,6 +32,7 @@ const {
   const mockLoadConfig = vi.fn();
   const mockResolveRegistryPath = vi.fn();
   const mockCompile = vi.fn();
+  const mockCompilerOptions = vi.fn();
   const mockExistsSync = vi.fn();
   const mockReadFile = vi.fn();
   const mockPagerWrite = vi.fn();
@@ -47,6 +49,7 @@ const {
     mockLoadConfig,
     mockResolveRegistryPath,
     mockCompile,
+    mockCompilerOptions,
     mockExistsSync,
     mockReadFile,
     mockPagerWrite,
@@ -83,7 +86,8 @@ vi.mock('../../utils/registry-resolver.js', () => ({
 }));
 
 vi.mock('@promptscript/compiler', () => ({
-  Compiler: vi.fn().mockImplementation(function () {
+  Compiler: vi.fn().mockImplementation(function (options: unknown) {
+    mockCompilerOptions(options);
     return { compile: mockCompile };
   }),
 }));
@@ -210,6 +214,110 @@ describe('diffCommand', () => {
     expect(mockPagerWrite).toHaveBeenCalledWith(
       expect.stringContaining('All files are up to date')
     );
+  });
+
+  it('should read a valid lockfile and configure complete repository roots', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: true,
+      source: 'remote',
+      repositoryUrl: 'https://github.com/company/registry',
+      repositoryPath: '/cache/registry',
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      if (value.endsWith('promptscript.lock')) return true;
+      if (value.endsWith('/.promptscript/project.prs')) return true;
+      if (value.endsWith('/.github/copilot-instructions.md')) return false;
+      return false;
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('promptscript.lock')) {
+        return 'version: 1\ndependencies: {}';
+      }
+      throw new Error(`Unexpected read: ${String(path)}`);
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map([
+        ['github', { path: '.github/copilot-instructions.md', content: 'new content' }],
+      ]),
+    });
+
+    await diffCommand({ noPager: true });
+
+    const lockfile = { version: 1, dependencies: {} };
+    expect(mockResolveRegistryPath).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ lockfile })
+    );
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolver: expect.objectContaining({
+          lockfile,
+          referenceRoots: {
+            'https://github.com/company/registry': ['/cache/registry'],
+          },
+        }),
+      })
+    );
+    expect(mockCompile).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fail before registry resolution when lockfile is invalid', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+    });
+    mockExistsSync.mockImplementation((path: string) => String(path).endsWith('promptscript.lock'));
+    mockReadFile.mockResolvedValue('invalid: true');
+
+    await diffCommand({ noPager: true });
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Invalid lockfile'));
+    expect(mockResolveRegistryPath).not.toHaveBeenCalled();
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should omit repository roots when repository path is missing', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['github'],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: true,
+      source: 'remote',
+      repositoryUrl: 'https://github.com/company/registry',
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      if (value.endsWith('promptscript.lock')) return false;
+      return value.endsWith('/.promptscript/project.prs');
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await diffCommand({ noPager: true });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolver: expect.objectContaining({ referenceRoots: undefined }),
+      })
+    );
+    expect(mockCompile).toHaveBeenCalledTimes(1);
   });
 
   it('should fail when entry file is not found', async () => {

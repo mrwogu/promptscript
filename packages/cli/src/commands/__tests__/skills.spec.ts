@@ -24,6 +24,7 @@ const {
   mockCollectRemoteImports,
   mockConsoleWarn,
   mockConsoleError,
+  mockParse,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
   const mockSucceed = vi.fn().mockReturnThis();
@@ -72,6 +73,7 @@ const {
   const mockCollectRemoteImports = vi.fn().mockResolvedValue([]);
   const mockConsoleWarn = vi.fn();
   const mockConsoleError = vi.fn();
+  const mockParse = vi.fn();
   return {
     mockSucceed,
     mockFail,
@@ -94,6 +96,7 @@ const {
     mockCollectRemoteImports,
     mockConsoleWarn,
     mockConsoleError,
+    mockParse,
     mockMkdtemp,
     mockRm,
   };
@@ -154,6 +157,12 @@ vi.mock('@promptscript/resolver', () => ({
     return normalized.endsWith('.git') ? normalized : `${normalized}.git`;
   },
 }));
+
+vi.mock('@promptscript/parser', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@promptscript/parser')>();
+  mockParse.mockImplementation(actual.parse);
+  return { ...actual, parse: mockParse };
+});
 
 import {
   skillsAddCommand,
@@ -499,6 +508,32 @@ describe('findInsertionPoint edge cases', () => {
     const useIdx = lines.indexOf('@use github.com/org/repo/SKILL.md');
     const inheritIdx = lines.indexOf('@inherit ./base');
     expect(useIdx).toBe(inheritIdx + 1);
+  });
+
+  it('should ignore braces inside triple-quoted metadata', async () => {
+    mockExistsSync.mockImplementation((p: string) => {
+      if (p.includes('entry.prs')) return true;
+      return false;
+    });
+    mockReadFile.mockResolvedValue(
+      [
+        '@meta {',
+        '  description: """',
+        '  { this brace is text',
+        '  """',
+        '}',
+        '@identity { role: "dev" }',
+      ].join('\n')
+    );
+
+    await skillsAddCommand('github.com/org/repo/SKILL.md', {
+      file: 'entry.prs',
+    });
+
+    const prsWriteCall = mockWriteFile.mock.calls.find((call) =>
+      String(call[0]).includes('entry.prs')
+    )!;
+    expect(String(prsWriteCall[1]).split('\n')[5]).toBe('@use github.com/org/repo/SKILL.md');
   });
 });
 
@@ -1412,6 +1447,102 @@ describe('skillsRemoveCommand', () => {
     expect(String(prsWriteCall[1])).not.toContain('mode:');
   });
 
+  it('should stop an unterminated parameter scan at the declaration line', async () => {
+    const source = 'github.com/org/repo/skills/foo';
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      input: { entry: 'project.prs' },
+    });
+    mockExistsSync.mockImplementation((p: string) => p.includes('project.prs'));
+    mockReadFile.mockResolvedValue(`@use ${source}(\n  // no closing parenthesis`);
+    mockParse.mockReturnValueOnce({
+      ast: {
+        uses: [{ path: { raw: source, loc: { line: 1 } } }],
+      },
+      errors: [],
+    });
+
+    await skillsRemoveCommand('foo', {});
+
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      expect.stringContaining('project.prs'),
+      '  // no closing parenthesis',
+      'utf-8'
+    );
+  });
+
+  it('should reject invalid PromptScript before removal', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      input: { entry: 'project.prs' },
+    });
+    mockExistsSync.mockImplementation((p: string) => p.includes('project.prs'));
+    mockReadFile.mockResolvedValue('@use (');
+
+    await skillsRemoveCommand('foo', {});
+
+    expect(mockFail).toHaveBeenCalledWith('Failed to remove skill');
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Cannot remove a skill from invalid PromptScript')
+    );
+  });
+
+  it('should ignore imports from a different repository during removal', async () => {
+    const source = 'github.com/org/repo/skills/foo';
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      input: { entry: 'project.prs' },
+    });
+    mockExistsSync.mockImplementation((p: string) => p.includes('project.prs'));
+    mockReadFile.mockResolvedValue(`@use ${source}\n`);
+    mockCollectRemoteImports.mockResolvedValue([
+      {
+        repoUrl: 'https://github.com/other/repo',
+        path: 'skills/bar',
+        version: 'latest',
+        sourceFile: '/project/other.prs',
+        sourceLine: 1,
+      },
+    ]);
+
+    await skillsRemoveCommand('foo', {});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Skill removed');
+  });
+
+  it('should report a lockfile update during a removal dry run', async () => {
+    const source = 'github.com/org/repo/skills/foo';
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      input: { entry: 'project.prs' },
+    });
+    mockExistsSync.mockImplementation(
+      (p: string) => p.includes('project.prs') || p === 'promptscript.lock'
+    );
+    mockReadFile.mockResolvedValueOnce(`@use ${source}\n`).mockResolvedValueOnce(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          [source]: {
+            version: 'latest',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-foo',
+            source: 'md',
+          },
+        },
+      })
+    );
+
+    await skillsRemoveCommand('foo', { dryRun: true });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Dry run — no files modified');
+    expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
   it('should fail when skill not found', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
@@ -1746,6 +1877,35 @@ describe('skillsUpdateCommand', () => {
     expect(mockSucceed).toHaveBeenCalledWith('Updated 1 skill(s)');
   });
 
+  it('should update a repository-root skill entry', async () => {
+    const key = 'github.com/org/repo';
+    mockExistsSync.mockImplementation((p: string) => p === 'promptscript.lock');
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          [key]: {
+            version: 'latest',
+            commit: 'abc123',
+            integrity: 'sha256-xyz',
+            source: 'md',
+          },
+          'github.com/other/repo/skills/foo': {
+            version: 'latest',
+            commit: 'def456',
+            integrity: 'sha256-other',
+            source: 'md',
+          },
+        },
+      })
+    );
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockReadFile).toHaveBeenCalledWith(expect.stringMatching(/repo\/SKILL\.md$/), 'utf-8');
+    expect(mockSucceed).toHaveBeenCalledWith('Updated 2 skill(s)');
+  });
+
   it('should scan a single non-default entry without project configuration', async () => {
     const lockContent = JSON.stringify({
       version: 1,
@@ -1772,6 +1932,32 @@ describe('skillsUpdateCommand', () => {
       expect.objectContaining({ strict: true })
     );
     expect(mockSucceed).toHaveBeenCalledWith('Updated 1 skill(s)');
+  });
+
+  it('should scan an existing default entry without project configuration', async () => {
+    const lockContent = JSON.stringify({
+      version: 1,
+      dependencies: {
+        'github.com/org/repo/skills/foo': {
+          version: 'latest',
+          commit: 'a'.repeat(40),
+          integrity: 'sha256-foo',
+          source: 'md',
+        },
+      },
+    });
+    mockExistsSync.mockImplementation(
+      (p: string) => p === 'promptscript.lock' || p.endsWith('.promptscript/project.prs')
+    );
+    mockReadFile.mockResolvedValue(lockContent);
+    mockFindConfigFile.mockReturnValue(null);
+
+    await skillsUpdateCommand(undefined, {});
+
+    expect(mockCollectRemoteImports).toHaveBeenCalledWith(
+      expect.stringMatching(/\.promptscript\/project\.prs$/),
+      expect.objectContaining({ strict: true })
+    );
   });
 
   it('should fail when name filter matches nothing', async () => {
@@ -2000,6 +2186,66 @@ describe('skillsUpdateCommand', () => {
     );
     expect(process.exitCode).toBe(1);
   });
+
+  it('should report skipped skills and fail a dry-run update', async () => {
+    const key = 'github.com/org/repo/SKILL.md';
+    mockExistsSync.mockImplementation((p: string) => p === 'promptscript.lock');
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          [key]: {
+            version: 'v1.0.0',
+            commit: 'abc123',
+            integrity: 'sha256-xyz',
+            source: 'md',
+          },
+        },
+      })
+    );
+    mockResolveRemoteDependency.mockRejectedValueOnce(new Error('network failure'));
+
+    await skillsUpdateCommand(undefined, { dryRun: true });
+
+    expect(mockSucceed).toHaveBeenCalledWith('Dry run — lockfile not written');
+    expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining(`Would skip ${key}`));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should migrate a canonical repository owner during update', async () => {
+    const key = 'github.com/org/repo/skills/foo';
+    const oldOwner = 'https://github.com/org/repo.git';
+    mockExistsSync.mockImplementation((p: string) => p === 'promptscript.lock');
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          [key]: {
+            version: 'v1.0.0',
+            commit: 'old',
+            integrity: 'sha256-old',
+            source: 'md',
+          },
+          [oldOwner]: {
+            version: 'v1.0.0',
+            commit: 'old',
+            integrity: 'sha256-pending',
+            source: 'md',
+            skills: [key],
+          },
+        },
+      })
+    );
+
+    await skillsUpdateCommand(undefined, {});
+
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lock = JSON.parse(lockWriteCall[1] as string) as {
+      dependencies: Record<string, unknown>;
+    };
+    expect(lock.dependencies[oldOwner]).toBeUndefined();
+    expect(lock.dependencies['https://github.com/org/repo']).toBeDefined();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -2191,6 +2437,46 @@ describe('skillsAddCommand frontmatter validation', () => {
     expect(mockWriteFile).not.toHaveBeenCalled();
     expect(mockFail).toHaveBeenCalledWith('SKILL.md failed validation');
     expect(process.exitCode).toBe(1);
+  });
+
+  it('updates sibling skill pins when adding to a shared repository', async () => {
+    const sibling = 'github.com/org/repo/skills/foo';
+    arrangeValidation({
+      skillContent: '---\nname: skill\n---\nbody',
+      lockExists: true,
+      lockContent: JSON.stringify({
+        version: 1,
+        dependencies: {
+          [sibling]: {
+            version: 'v1.0.0',
+            commit: 'old',
+            integrity: 'sha256-old',
+            source: 'md',
+          },
+          'https://github.com/org/repo': {
+            version: 'v1.0.0',
+            commit: 'old',
+            integrity: 'sha256-pending',
+            source: 'md',
+            skills: [sibling],
+          },
+        },
+      }),
+    });
+
+    await skillsAddCommand('github.com/org/repo/skills/bar@v1.0.0', {
+      file: 'entry.prs',
+    });
+
+    const lockWriteCall = mockWriteFile.mock.calls.find((call) => call[0] === 'promptscript.lock')!;
+    const lock = JSON.parse(lockWriteCall[1] as string) as {
+      dependencies: Record<string, { integrity?: string; skills?: string[] }>;
+    };
+    expect(lock.dependencies[sibling]?.integrity).toBe('sha256-deadbeef');
+    expect(lock.dependencies['https://github.com/org/repo']?.skills).toEqual([
+      sibling,
+      'github.com/org/repo/skills/bar@v1.0.0',
+    ]);
   });
 
   it('clones the default branch before checking out a commit selector', async () => {

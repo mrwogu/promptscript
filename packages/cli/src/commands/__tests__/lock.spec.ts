@@ -111,7 +111,7 @@ vi.mock('yaml', () => ({
   stringify: (o: unknown) => JSON.stringify(o),
 }));
 
-import { lockCommand } from '../lock.js';
+import { lockCommand, resolveRemoteDependency } from '../lock.js';
 
 describe('lockCommand', () => {
   beforeEach(() => {
@@ -281,6 +281,22 @@ describe('lockCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should reject an existing lockfile with an invalid structure', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue('{}');
+
+    await lockCommand({});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should preserve existing pins', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
@@ -306,6 +322,25 @@ describe('lockCommand', () => {
     const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
     const parsed = JSON.parse(written) as { dependencies: Record<string, { version: string }> };
     expect(parsed.dependencies['github.com/company/base']!.version).toBe('v1.2.0');
+    expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
+  });
+
+  it('should retain fallback URL when reusing an existing pin', async () => {
+    const existing = {
+      version: 'v1.2.0',
+      commit: 'a'.repeat(40),
+      integrity: 'sha256-existing',
+    };
+
+    const result = await resolveRemoteDependency(
+      'github.com/company/base',
+      ['v1.2.0'],
+      existing,
+      false,
+      'git@github.com:company/base.git'
+    );
+
+    expect(result).toEqual({ ...existing, gitUrl: 'git@github.com:company/base.git' });
     expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
   });
 
@@ -547,6 +582,36 @@ describe('lockCommand', () => {
     );
   });
 
+  it('should use a default registry fallback URL when its primary remote fails', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registry: {
+        git: {
+          url: 'https://github.com/company/registry.git',
+          fallbackUrl: 'git@github.com:company/registry.git',
+        },
+      },
+    });
+    mockExistsSync.mockReturnValue(false);
+    mockValidateRemoteAccess
+      .mockResolvedValueOnce({ accessible: false, error: 'primary unavailable' })
+      .mockResolvedValueOnce({
+        accessible: true,
+        headCommit: '1234567890abcdef1234567890abcdef12345678',
+      });
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { gitUrl?: string }>;
+    };
+    expect(parsed.dependencies['https://github.com/company/registry.git']?.gitUrl).toBe(
+      'git@github.com:company/registry.git'
+    );
+  });
+
   it('should preserve SSH transport when resolving a dependency', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
@@ -612,6 +677,81 @@ describe('lockCommand', () => {
     expect(parsed.dependencies['https://github.com/org/skills']!.source).toBe('md');
   });
 
+  it('should merge metadata for an md-sourced dependency that is still requested', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'latest',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            integrity: 'sha256-existing',
+            source: 'md',
+            gitUrl: 'git@github.com:company/base.git',
+          },
+        },
+      })
+    );
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { source?: string; gitUrl?: string }>;
+    };
+    expect(parsed.dependencies['github.com/company/base']).toEqual(
+      expect.objectContaining({
+        source: 'md',
+        gitUrl: 'git@github.com:company/base.git',
+      })
+    );
+  });
+
+  it('should pass existing reference locks into reference generation', async () => {
+    const referenceKey = 'github.com/company/base\0references/guide.md\0latest';
+    const references = {
+      [referenceKey]: {
+        hash: `sha256-${'a'.repeat(64)}`,
+        lockedAt: '2026-01-01T00:00:00.000Z',
+      },
+    };
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'latest',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            integrity: 'sha256-existing',
+          },
+        },
+        references,
+      })
+    );
+
+    await lockCommand({});
+
+    expect(mockGenerateLockfileReferences).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(String),
+      expect.any(String),
+      expect.objectContaining({ references }),
+      []
+    );
+  });
+
   it('should discover and lock @use github.com imports from .prs files', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({
@@ -670,6 +810,31 @@ describe('lockCommand', () => {
     expect(parsed.dependencies['https://github.com/org/repo']).toBeDefined();
   });
 
+  it('should treat an unversioned remote import as latest', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockExistsSync.mockReturnValue(false);
+    mockCollectRemoteImports.mockResolvedValue([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'guards/safety.prs',
+        version: '',
+      },
+    ]);
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { version: string }>;
+    };
+    expect(parsed.dependencies['https://github.com/org/repo']?.version).toBe('latest');
+    expect(mockValidateRemoteAccess).toHaveBeenCalledWith(
+      'https://github.com/org/repo.git',
+      undefined
+    );
+  });
+
   it('should deduplicate repos from @use imports with same repoUrl', async () => {
     mockFindConfigFile.mockReturnValue('promptscript.yaml');
     mockLoadConfig.mockResolvedValue({ targets: [] });
@@ -716,6 +881,30 @@ describe('lockCommand', () => {
         repoUrl: 'https://github.com/org/repo',
         path: 'prompts/base.prs',
         version: 'v2.0.0',
+      },
+    ]);
+
+    await lockCommand({});
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject conflicting non-semver refs for one repository', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockExistsSync.mockReturnValue(false);
+    mockCollectRemoteImports.mockResolvedValue([
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'guards/safety.prs',
+        version: 'main',
+      },
+      {
+        repoUrl: 'https://github.com/org/repo',
+        path: 'prompts/base.prs',
+        version: 'develop',
       },
     ]);
 
@@ -826,5 +1015,46 @@ describe('lockCommand', () => {
 
     expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
     expect(process.exitCode).toBe(1);
+  });
+
+  it('should preserve integrity when a forced refresh resolves the same commit', async () => {
+    const existing = {
+      version: 'latest',
+      commit: '1234567890abcdef1234567890abcdef12345678',
+      integrity: 'sha256-existing',
+    };
+
+    const result = await resolveRemoteDependency(
+      'github.com/company/base',
+      ['latest'],
+      existing,
+      true
+    );
+
+    expect(result.integrity).toBe('sha256-existing');
+  });
+
+  it('should provide a default error when remote validation gives no reason', async () => {
+    mockValidateRemoteAccess.mockResolvedValue({ accessible: false });
+
+    await expect(
+      resolveRemoteDependency('github.com/company/base', ['latest'], undefined, false)
+    ).rejects.toThrow('Could not resolve a commit for github.com/company/base');
+  });
+
+  it('should normalize non-Error remote failures', async () => {
+    mockValidateRemoteAccess.mockRejectedValue('network unavailable');
+
+    await expect(
+      resolveRemoteDependency('github.com/company/base', ['latest'], undefined, false)
+    ).rejects.toThrow('network unavailable');
+  });
+
+  it('should reject a missing repository URL before remote validation', async () => {
+    await expect(
+      resolveRemoteDependency(undefined as unknown as string, ['latest'], undefined, false)
+    ).rejects.toThrow('Could not resolve undefined');
+
+    expect(mockValidateRemoteAccess).not.toHaveBeenCalled();
   });
 });

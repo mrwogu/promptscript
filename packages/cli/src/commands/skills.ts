@@ -213,7 +213,7 @@ function extractSubPath(source: string): string {
   return parts.length > 3 ? parts.slice(3).join('/') : '';
 }
 
-function extractSkillFilePath(source: string): string | undefined {
+function extractSkillFilePath(source: string): string {
   const subPath = extractSubPath(source);
   if (!subPath) return 'SKILL.md';
   return subPath.toLowerCase().endsWith('.md') ? subPath : `${subPath}/SKILL.md`;
@@ -225,9 +225,8 @@ function extractSkillFilePath(source: string): string | undefined {
  * the SKILL.md's parent directory (matching the Agent Skills spec - the
  * frontmatter `name` MUST match this directory).
  *
- * Returns `undefined` for imports that target the repository root.
  */
-function deriveSkillFolderName(source: string): string | undefined {
+function deriveSkillFolderName(source: string): string {
   const subPath = extractSubPath(source);
   if (!subPath) return basename(parseSkillSource(source).path);
   if (!subPath.toLowerCase().endsWith('.md')) return basename(subPath);
@@ -282,11 +281,8 @@ async function fetchAndValidateRemoteSkill(
     validateFrontmatter: boolean;
     version: string;
   }
-): Promise<FetchedSkill | undefined> {
+): Promise<FetchedSkill> {
   const skillFilePath = extractSkillFilePath(source);
-  if (!skillFilePath || !deriveSkillFolderName(source)) {
-    return undefined;
-  }
 
   const repoUrl = options.gitUrl ?? extractRepoUrl(source);
   const tmp = await mkdtemp(join(tmpdir(), 'prs-skill-validate-'));
@@ -733,7 +729,7 @@ export async function skillsAddCommand(
       : 'Validating SKILL.md frontmatter...';
     const fetchedSkills = new Map<string, FetchedSkill>();
     for (const skillSource of [...repoSkills, source]) {
-      let fetched: FetchedSkill | undefined;
+      let fetched: FetchedSkill;
       try {
         fetched = await fetchAndValidateRemoteSkill(skillSource, {
           commit: resolvedPin.commit,
@@ -751,9 +747,6 @@ export async function skillsAddCommand(
         );
       }
 
-      if (!fetched) {
-        throw new Error(`Cannot locate a SKILL.md for ${skillSource}`);
-      }
       const hasErrors = !fetched.valid;
       const hasWarnings = fetched.issues.some((issue) => issue.severity === 'warning');
       if (hasErrors || (options.strict && hasWarnings)) {
@@ -1105,10 +1098,6 @@ export async function skillsUpdateCommand(
             validateFrontmatter: !options.skipValidation,
             version: resolvedPin.version,
           });
-          if (!fetched) {
-            throw new Error(`Cannot locate a SKILL.md for ${key}`);
-          }
-
           const hasErrors = !fetched.valid;
           const hasWarnings = fetched.issues.some((issue) => issue.severity === 'warning');
           if (hasErrors || (options.strict && hasWarnings)) {

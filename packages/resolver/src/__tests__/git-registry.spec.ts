@@ -820,6 +820,41 @@ describe('validateRemoteAccess', () => {
     expect(result.headCommit).toBe(commit);
   });
 
+  it('should reject a requested commit when the fetched commit differs', async () => {
+    const commit = 'feedfacefeedfacefeedfacefeedfacefeedface';
+    mockGit.revparse.mockResolvedValue('deadbeefdeadbeefdeadbeefdeadbeefdeadbeef');
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', commit);
+
+    expect(result).toEqual({ accessible: false, headCommit: undefined });
+  });
+
+  it('should use the first result when a requested ref has no peeled tag', async () => {
+    mockGit.listRemote.mockResolvedValue(
+      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\trefs/tags/v2.0.0'
+    );
+
+    const result = await validateRemoteAccess('https://github.com/org/repo.git', 'v2.0.0');
+
+    expect(result.headCommit).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+  });
+
+  it('should fall back to master and then the first remote result', async () => {
+    mockGit.listRemote.mockResolvedValue(
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\trefs/heads/master'
+    );
+    await expect(validateRemoteAccess('https://github.com/org/repo.git')).resolves.toMatchObject({
+      headCommit: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    });
+
+    mockGit.listRemote.mockResolvedValue(
+      'cccccccccccccccccccccccccccccccccccccccc\trefs/heads/develop'
+    );
+    await expect(validateRemoteAccess('https://github.com/org/repo.git')).resolves.toMatchObject({
+      headCommit: 'cccccccccccccccccccccccccccccccccccccccc',
+    });
+  });
+
   it('should return accessible: false with auth error message for authentication failures', async () => {
     // Arrange
     mockGit.listRemote.mockRejectedValue(
@@ -880,5 +915,19 @@ describe('versionSatisfiesRange', () => {
     expect(isSemverRange('1.x.3')).toBe(false);
     expect(isSemverRange('123-feature')).toBe(false);
     expect(isSemverRange('1234567890abcdef1234567890abcdef12345678')).toBe(false);
+  });
+
+  it('should recognize wildcard, tilde, compound, and comparator ranges', () => {
+    expect(isSemverRange('')).toBe(true);
+    expect(isSemverRange('*')).toBe(true);
+    expect(isSemverRange('1.2.3')).toBe(true);
+    expect(isSemverRange('~1.2.3')).toBe(true);
+    expect(isSemverRange('>=1.0.0 <2.0.0')).toBe(true);
+    expect(isSemverRange('>=invalid')).toBe(false);
+  });
+
+  it('should enforce exact zero-major caret bounds', () => {
+    expect(versionSatisfiesRange('0.0.5', '^0.0.5')).toBe(true);
+    expect(versionSatisfiesRange('0.0.6', '^0.0.5')).toBe(false);
   });
 });

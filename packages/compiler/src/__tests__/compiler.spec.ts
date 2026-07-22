@@ -1,13 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Program, SourceLocation } from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
+import { join } from 'node:path';
 
 // Create mock classes before importing Compiler
 const mockResolve = vi.fn();
 const mockValidate = vi.fn();
 const mockUpdateConfig = vi.fn();
 const mockVerifyReferenceHashes = vi.fn().mockResolvedValue([]);
+const mockRegistryCacheConstructor = vi.fn();
 
 vi.mock('@promptscript/resolver', () => ({
   Resolver: class MockResolver {
@@ -15,6 +17,10 @@ vi.mock('@promptscript/resolver', () => ({
     verifyReferenceHashes = mockVerifyReferenceHashes;
   },
   RegistryCache: class MockRegistryCache {
+    constructor(cacheDir: string) {
+      mockRegistryCacheConstructor(cacheDir);
+    }
+
     getCachePath(repoUrl: string, version: string): string {
       return `/cache/registries/${repoUrl}/${version}`;
     }
@@ -36,6 +42,10 @@ vi.mock('@promptscript/validator', () => ({
 
 // Import after mocks are set up
 import { Compiler, createCompiler, compile } from '../compiler.js';
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 /**
  * Create a minimal valid AST for testing.
@@ -1944,6 +1954,44 @@ describe('Stage 1.5: Reference Integrity', () => {
     mockValidate.mockReturnValue(createValidationSuccess());
   });
 
+  it('should fall back to USERPROFILE for the default registry cache', async () => {
+    vi.stubEnv('HOME', undefined);
+    vi.stubEnv('USERPROFILE', '/users/test');
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: { version: 1, dependencies: {} },
+      },
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    expect(mockRegistryCacheConstructor).toHaveBeenCalledWith(
+      join('/users/test', '.promptscript', 'cache')
+    );
+  });
+
+  it('should fall back to the temporary directory for the default registry cache', async () => {
+    vi.stubEnv('HOME', undefined);
+    vi.stubEnv('USERPROFILE', undefined);
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: { version: 1, dependencies: {} },
+      },
+      formatters: [],
+    });
+
+    await compiler.compile('./test.prs');
+
+    expect(mockRegistryCacheConstructor).toHaveBeenCalledWith(
+      join('/tmp', '.promptscript', 'cache')
+    );
+  });
+
   it('should collect registry references from skills blocks and pass to validator', async () => {
     const loc: SourceLocation = { file: 'test.prs', line: 1, column: 1 };
     const ast = createTestProgram({
@@ -2068,6 +2116,109 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     expect(result.success).toBe(false);
     expect(result.errors[0]?.message).toContain('no integrity hash');
+  });
+
+  it('should accept a registry reference with a matching lockfile entry', async () => {
+    const repoUrl = 'github.com/org/repo';
+    const version = 'v1.0.0';
+    const loc: SourceLocation = {
+      file: `/cache/registries/${repoUrl}/${version}/rules/main.prs`,
+      line: 1,
+      column: 1,
+    };
+    const referenceKey = `${repoUrl}\0rules/references/guide.md\0${version}`;
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              skill: { description: 'test', references: ['./references/guide.md'] },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1,
+          dependencies: {
+            [repoUrl]: {
+              version,
+              commit: 'a'.repeat(40),
+              integrity: 'sha256-test',
+            },
+          },
+          references: {
+            [referenceKey]: {
+              hash: 'sha256-reference',
+              lockedAt: '2026-04-01T12:00:00Z',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    const result = await compiler.compile('./test.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should collect references from blocks without source files', async () => {
+    const locWithoutFile = { line: 1, column: 1 } as SourceLocation;
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc: locWithoutFile,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              skill: { description: 'test', references: ['./guide.md'] },
+            },
+            loc: locWithoutFile,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1,
+          dependencies: {
+            'github.com/org/repo': {
+              version: 'v1.0.0',
+              commit: 'a'.repeat(40),
+              integrity: 'sha256-test',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    const result = await compiler.compile('./test.prs');
+
+    expect(result.success).toBe(true);
+    const updateCall = mockUpdateConfig.mock.calls.find(
+      (call) => call[0] && 'registryReferences' in (call[0] as Record<string, unknown>)
+    );
+    const registryReferences = (updateCall?.[0] as Record<string, unknown> | undefined)?.[
+      'registryReferences'
+    ];
+    expect(registryReferences).toEqual(new Set(['./guide.md']));
   });
 
   it('should use configured roots when a repository cannot be vendored', async () => {

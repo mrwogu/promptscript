@@ -33,6 +33,29 @@ describe('detectAITools -- enriched migration candidates', () => {
     expect(typeof candidate!.sizeHuman).toBe('string');
   });
 
+  it('deduplicates candidates by real path when file metadata is unavailable', async () => {
+    const mockServices = {
+      fs: {
+        existsSync: vi
+          .fn()
+          .mockImplementation((p: string) => p === 'CLAUDE.md' || p === 'claude.md'),
+        readFile: vi.fn().mockResolvedValue('# My instructions'),
+        readdir: vi.fn().mockResolvedValue([]),
+        realpath: vi.fn().mockImplementation(async (p: string) => {
+          if (p === '/mock') return '/mock';
+          return '/mock/CLAUDE.md';
+        }),
+      },
+      prompts: {} as CliServices['prompts'],
+      cwd: '/mock',
+    } as unknown as CliServices;
+
+    const result = await detectAITools(mockServices);
+
+    expect(result.migrationCandidates).toHaveLength(1);
+    expect(result.migrationCandidates[0]?.path).toBe('CLAUDE.md');
+  });
+
   it('hasMigrationCandidates works with enriched type', () => {
     const detection: AIToolsDetection = {
       detected: ['claude'],
