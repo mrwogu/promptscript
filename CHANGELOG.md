@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.1](https://github.com/mrwogu/promptscript/compare/v1.14.0...v1.14.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* **cli:** align registry command behavior ([8907061](https://github.com/mrwogu/promptscript/commit/890706129a837c0aa28ff7681c0287422e86924b))
+* **cli:** align resolve diagnostics with resolver ([6b9c85b](https://github.com/mrwogu/promptscript/commit/6b9c85b517b720384486f8e22519f329fc29a365))
+* **cli:** deduplicate migration candidates ([15f4cb4](https://github.com/mrwogu/promptscript/commit/15f4cb42a2b5a0b7949cffc962cb803dbcf9e3af))
+* **cli:** harden health and update checks ([84e4167](https://github.com/mrwogu/promptscript/commit/84e4167a279961849fb9ae456deac08a45aa8783))
+* **cli:** harden markdown skill workflows ([8352600](https://github.com/mrwogu/promptscript/commit/8352600f5cb6de3857dce7a28723aed6a3b21432))
+* **cli:** harden registry pull handling ([47d63a3](https://github.com/mrwogu/promptscript/commit/47d63a3ac271c3205f7d4c06851fe61ea338e326))
+* **cli:** honor init options and hook failures ([0b62983](https://github.com/mrwogu/promptscript/commit/0b62983269ddd9ef5d19a74b6dcb105d7aa985b5))
+* **cli:** honor inspect project paths ([c23c4c5](https://github.com/mrwogu/promptscript/commit/c23c4c502c7226b39b71b9992a4a768074150538))
+* **cli:** lock registry reference integrity ([c117778](https://github.com/mrwogu/promptscript/commit/c117778372d60e906c68897819e240130a7aefce))
+* **cli:** make syntax upgrades fail safely ([9e17003](https://github.com/mrwogu/promptscript/commit/9e170037e4c783f9d311b7622c5c8a4d6719a332))
+* **cli:** make vendored builds deterministic offline ([15ac0be](https://github.com/mrwogu/promptscript/commit/15ac0bec613d29c67019e4141b9c6952ba731544))
+* **cli:** protect imported output files ([adde458](https://github.com/mrwogu/promptscript/commit/adde458ddb354473a535bc99fb5b4a5a1d6dbfb1))
+* **cli:** repair compile paths and watch mode ([62281a0](https://github.com/mrwogu/promptscript/commit/62281a08aa4124146cfae85a90de0edd06431c2d))
+* **cli:** resolve dependency updates safely ([efc2049](https://github.com/mrwogu/promptscript/commit/efc2049694c587181168f4124fe2f7d235ea335a))
+* **cli:** resolve lockfile commit pins ([14c1b82](https://github.com/mrwogu/promptscript/commit/14c1b8295b722ff01587bd93e7d27110fc33424b))
+* **cli:** respect configured validation entry ([2c57346](https://github.com/mrwogu/promptscript/commit/2c57346bac1512c57cc802c3f0d718fc6ff9683a))
+* **cli:** support validation file arguments ([91d7fa2](https://github.com/mrwogu/promptscript/commit/91d7fa2998b12476d8b9cefaf6e8bd335eaf8e54))
+* **cli:** surface hook integration failures ([8958b2b](https://github.com/mrwogu/promptscript/commit/8958b2bc955957374ac91c9a58e4c844e506e7c9))
+* **cli:** validate serve port and startup ([fb04b6d](https://github.com/mrwogu/promptscript/commit/fb04b6d87a6d981591817cea4d8244df4481f195))
+* **formatters:** use .gemini/skills for auto-injected skill path ([3f2bcab](https://github.com/mrwogu/promptscript/commit/3f2bcab550abd5207c318d7ec5d3e120de0d18cb)), closes [#312](https://github.com/mrwogu/promptscript/issues/312)
+* **resolver:** verify vendored file modes ([b4fcf01](https://github.com/mrwogu/promptscript/commit/b4fcf01d8e0e58c4f80af06173e36bdff3f0a51a))
+
 ## [1.14.0](https://github.com/mrwogu/promptscript/compare/v1.13.2...v1.14.0) (2026-07-21)
 
 
