@@ -96,6 +96,8 @@ The `init` command automatically detects:
 
 Detection never treats `.github/` or `AGENTS.md` alone as proof that a specific AI tool is in use. Detected tools are preselected in interactive mode. Other registered targets remain available but unchecked. `prs init --yes` requires `--targets`, detected tools, or targets configured in user defaults. It never invents GitHub, Claude, or Cursor defaults.
 
+`--interactive` and `--yes` are mutually exclusive. When `--team` is provided (or configured as a user default for `--yes`), its value is written to the generated `@meta.team` field.
+
 **Prettier Integration:**
 
 If a Prettier configuration file is detected:
@@ -161,13 +163,13 @@ No detected candidates means success with zero writes. An empty interactive sele
 
 ### prs upgrade
 
-Upgrade `.prs` files to the latest supported syntax version.
+Upgrade `.prs` files under `.promptscript/` to the latest supported syntax version. The command parses every discovered file before writing, so parse errors, malformed versions, and versions newer than the installed CLI abort the upgrade before any file changes. Symbolic links are skipped.
 
 ```bash
 prs upgrade [--dry-run]
 ```
 
-Use `--dry-run` to preview changes without writing files.
+Use `--dry-run` to preview changes without writing files. Normal upgrades use atomic replacement and preserve file permissions.
 
 ### prs hooks
 
@@ -176,6 +178,8 @@ Install or uninstall PromptScript integrations for supported AI tools.
 ```bash
 prs hooks <install|uninstall> [tool]
 ```
+
+Omit `[tool]` to operate on all detected tools. `--all` makes that auto-detected behavior explicit. Supported tool names are `claude`, `gemini`, `copilot`, `cursor`, `windsurf`, `factory`, and `cline`.
 
 ```bash
 prs hooks install
@@ -216,7 +220,11 @@ prs compile [options]
 | `--verbose`             | Show detailed compilation progress                      |
 | `--debug`               | Show debug information (includes verbose)               |
 
-`--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, aggregating errors per profile.
+`--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, reports failures per profile, and uses one watcher for the full build set when combined with `--watch`.
+
+Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
+
+The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
 
 **Examples:**
 
@@ -306,7 +314,7 @@ builds:
 prs build logstrip-factory
 ```
 
-The command accepts the same compile options as `prs compile`, including `--target`, `--format`, `--output`, `--dry-run`, `--config`, `--force`, `--strict`, `--ignore-hashes`, and `--cwd`.
+The command accepts the applicable compile options from `prs compile`, including `--target`, `--format`, `--output`, `--dry-run`, `--config`, `--force`, `--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
 
 ______________________________________________________________________
 
@@ -370,11 +378,12 @@ prs inspect <skill-name> [options]
 
 **Options:**
 
-| Option                | Description                |
-| --------------------- | -------------------------- |
-| `--layers`            | Show layer-level breakdown |
-| `--format <format>`   | Output format (text, json) |
-| `-c, --config <path>` | Path to custom config file |
+| Option                | Description                       |
+| --------------------- | --------------------------------- |
+| `--layers`            | Show layer-level breakdown        |
+| `--format <format>`   | Output format (text, json)        |
+| `-c, --config <path>` | Path to custom config file        |
+| `--cwd <dir>`         | Set the project working directory |
 
 **Examples:**
 
@@ -401,12 +410,14 @@ prs diff [options]
 
 **Options:**
 
-| Option                  | Description                   |
-| ----------------------- | ----------------------------- |
-| `-t, --target <target>` | Show diff for specific target |
-| `-a, --all`             | Show diff for all targets     |
-| `--color`               | Force colored output          |
-| `--no-color`            | Disable colored output        |
+| Option                  | Description                       |
+| ----------------------- | --------------------------------- |
+| `-t, --target <target>` | Show diff for specific target     |
+| `-a, --all`             | Show diff for all targets         |
+| `--full`                | Show full diff without truncation |
+| `--no-pager`            | Disable pager output              |
+| `--color`               | Force colored output              |
+| `--no-color`            | Disable colored output            |
 
 **Examples:**
 
@@ -466,13 +477,13 @@ prs pull --refresh
 
 Git Registry Options
 
-The `--branch`, `--tag`, `--commit`, and `--refresh` options only apply to Git registries. For local or HTTP registries, these options are ignored.
+The `--branch`, `--tag`, and `--commit` options are mutually exclusive. These options and `--refresh` only apply to Git registries. For local or HTTP registries, these options are ignored.
 
 ______________________________________________________________________
 
 ### prs check
 
-Check configuration and dependencies.
+Check the effective configuration, entry file, lockfile, registry, imports, inheritance, and PromptScript validation without generating output. Configuration and validation warnings do not fail the command, while health-check errors exit with status 1.
 
 ```bash
 prs check [options]
@@ -499,7 +510,7 @@ prs serve [options]
 
 | Option                   | Description                                | Default                       |
 | ------------------------ | ------------------------------------------ | ----------------------------- |
-| `-p, --port <port>`      | Port to listen on                          | `3000`                        |
+| `-p, --port <port>`      | Port to listen on (`1` to `65535`)         | `3000`                        |
 | `--host <host>`          | Host to bind to                            | `127.0.0.1`                   |
 | `--read-only`            | Disable file modifications from playground | `false`                       |
 | `--cors-origin <origin>` | Allowed CORS origin                        | `https://getpromptscript.dev` |
@@ -566,6 +577,7 @@ prs import <file> [options]
 | `-o, --output <dir>`    | Output directory                                | `.promptscript` |
 | `--dry-run`             | Preview output without writing files            |                 |
 | `--validate`            | Run roundtrip validation after import           |                 |
+| `--force`               | Overwrite an existing `imported.prs` output     |                 |
 
 **Examples:**
 
@@ -585,6 +597,8 @@ prs import CLAUDE.md --validate
 # Import to custom output directory
 prs import CLAUDE.md --output ./my-prompts
 ```
+
+The command refuses to replace an existing `imported.prs` unless `--force` is provided.
 
 ______________________________________________________________________
 
@@ -610,6 +624,7 @@ prs registry init [directory] [options]
 | `-y, --yes`                | Non-interactive mode with defaults      |
 | `-o, --output <dir>`       | Output directory                        |
 | `--no-seed`                | Skip seed configurations                |
+| `-f, --force`              | Overwrite existing registry files       |
 
 **Examples:**
 
@@ -697,9 +712,11 @@ prs registry publish --tag v1.0.0
 prs registry publish --force
 ```
 
+The registry path must be the root of its Git repository. Dry runs do not modify the manifest or Git working tree.
+
 #### prs registry list
 
-List all configured registry alias mappings, showing the merged result from project, user, and system sources.
+List configured registry alias mappings, showing the merged project and global user result.
 
 ```bash
 prs registry list [options]
@@ -707,10 +724,10 @@ prs registry list [options]
 
 **Options:**
 
-| Option              | Description                                           |
-| ------------------- | ----------------------------------------------------- |
-| `--source <source>` | Show only aliases from `project`, `user`, or `system` |
-| `--format <format>` | Output format (text, json)                            |
+| Option              | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `--source <source>` | Show aliases from `all`, `project`, or `global`   |
+| `--format <format>` | Output format (`text` or `json`, default: `text`) |
 
 **Examples:**
 
@@ -728,11 +745,9 @@ prs registry list --format json
 **Example output:**
 
 ```text
-Registry aliases (merged: project > user > system)
-
-  @company  github.com/acme/promptscript-base   [project]
-  @team     github.com/acme/team-frontend        [project]
-  @shared   github.com/acme/shared-libs          [user]
+  @company  →  github.com/acme/promptscript-base  (project)
+  @team     →  github.com/acme/team-frontend      (project)
+  @shared   →  github.com/acme/shared-libs        (global)
 ```
 
 #### prs registry add
@@ -778,9 +793,10 @@ prs lock [options]
 
 **Options:**
 
-| Option      | Description                            |
-| ----------- | -------------------------------------- |
-| `--dry-run` | Show what would change without writing |
+| Option      | Description                                    |
+| ----------- | ---------------------------------------------- |
+| `--dry-run` | Show what would change without writing         |
+| `--update`  | Re-resolve remote commits even when pins exist |
 
 **Examples:**
 
@@ -792,7 +808,7 @@ prs lock
 prs lock --dry-run
 ```
 
-The lockfile is also written automatically during `prs compile` when remote imports are present. Commit `promptscript.lock` to version control.
+`prs lock` fails without writing when a remote dependency cannot be resolved. Commit `promptscript.lock` to version control.
 
 ______________________________________________________________________
 
@@ -871,7 +887,7 @@ Before writing to the lockfile, `prs skills add` clones the target ref into a te
 - Body length sanity check (warning at >500 lines)
 - Markdown references stay inside the skill directory and resolve to existing files
 
-Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`.
+Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`. For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access.
 
 **Examples:**
 
@@ -881,6 +897,9 @@ prs skills add github.com/anthropics/skills/commit@1.0.0
 
 # Add a skill directory (auto-discovers SKILL.md)
 prs skills add github.com/repo/skills/gitnexus
+
+# Add from an SSH-only repository
+prs skills add git@github.com:org/repo.git/skills/private-tool
 
 # Add to a specific .prs file
 prs skills add github.com/anthropics/skills/commit@1.0.0 --file .promptscript/team.prs
@@ -897,7 +916,7 @@ prs skills add github.com/anthropics/skills/commit@1.0.0 --skip-validation
 
 #### prs skills remove
 
-Remove a skill from the project. Removes the matching `@use` line and its lock entry.
+Remove a skill from the project. Removes the matching `@use` line and its lock entry. Partial names must match exactly one imported skill.
 
 ```bash
 prs skills remove <name> [options]
@@ -945,7 +964,7 @@ prs skills list
 
 #### prs skills update
 
-Update lock entries for markdown-sourced skills. Resets lock pins so the next `prs compile` re-resolves to the latest matching versions.
+Update lock entries for markdown-sourced skills. Re-resolves each requested ref to an exact commit and refreshes its integrity hash.
 
 ```bash
 prs skills update [name] [options]
@@ -965,7 +984,7 @@ prs skills update [name] [options]
 | `--skip-validation` | Skip SKILL.md frontmatter re-validation |
 | `--strict`          | Treat validation warnings as errors     |
 
-Each updated entry is re-cloned, re-hashed (real `sha256` integrity) and re-validated against the Agent Skills spec — see [`prs skills add`](#prs-skills-add) for the full validator rules. Entries that fail validation are skipped with a reason.
+Each updated entry is re-cloned, re-hashed (real `sha256` integrity) and re-validated against the Agent Skills spec - see [`prs skills add`](#prs-skills-add) for the full validator rules. Entries that cannot be resolved or fail validation are skipped with a reason, and the command exits with status 1.
 
 **Examples:**
 
@@ -991,13 +1010,13 @@ Manage the vendor directory for offline builds. Vendor mode copies all lockfile-
 
 #### prs vendor sync
 
-Download all dependencies from the lockfile into the vendor directory.
+Download exact lockfile dependencies into the vendor directory.
 
 ```bash
 prs vendor sync
 ```
 
-After syncing, compilation uses the vendored files and makes no network requests.
+Sync fails if any locked commit cannot be downloaded. After syncing, compilation uses the vendored files and makes no network requests for locked remote imports.
 
 #### prs vendor check
 
@@ -1017,7 +1036,7 @@ ______________________________________________________________________
 
 ### prs resolve
 
-Debug the resolution chain for an import. Shows how an import path is resolved step-by-step: alias expansion, URL construction, cache lookup, and file path within the repository.
+Show how an import resolves locally without making network requests. The command reports its repository, lockfile pin, vendor or cache source, and resolved path.
 
 ```bash
 prs resolve <import> [options]
@@ -1051,20 +1070,23 @@ prs resolve @company/security --format json
 **Example output:**
 
 ```text
-Resolving: @company/security
-
-  1. Alias lookup:     @company -> github.com/acme/promptscript-base  [project config]
-  2. URL construction: https://github.com/acme/promptscript-base.git
-  3. Cache status:     HIT (commit: a3f8c2d, age: 12m)
-  4. File path:        security.prs
-  5. Resolved to:      ~/.promptscript/.cache/git/abc123/security.prs
+  Import:   @company/security
+  Type:     native .prs
+  Alias:    @company
+  Repo:     github.com/acme/promptscript-base
+  Path:     security
+  Version:  v1.3.0
+  Commit:   a3f8c2d9f6e5b4a32100123456789abcdef01234
+  Source:   vendor
+  Location: /workspace/.promptscript/vendor/github.com/acme/promptscript-base/security.prs
+  Exists:   yes
 ```
 
 ______________________________________________________________________
 
 ### prs update-check
 
-Check for CLI updates.
+Check npm for CLI updates, bypassing the automatic check's 24-hour cache. Network errors and malformed registry responses exit with status 1. Set `PROMPTSCRIPT_NO_UPDATE_CHECK` to disable the request.
 
 ```bash
 prs update-check
