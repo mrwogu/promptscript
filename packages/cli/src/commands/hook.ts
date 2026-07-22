@@ -30,7 +30,11 @@ function parseInput(raw: string): Record<string, unknown> | null {
   if (raw.trim() === '') return null;
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== 'object' || parsed === null) return null;
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      process.exitCode = 1;
+      process.stderr.write('prs hook: expected a JSON object on stdin\n');
+      return null;
+    }
     return parsed as Record<string, unknown>;
   } catch {
     process.exitCode = 1;
@@ -79,6 +83,7 @@ async function handlePostEdit(payload: Record<string, unknown>): Promise<void> {
     await compileCommand({ cwd });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
+    process.exitCode = 1;
     process.stderr.write(`prs hook: compile error: ${message}\n`);
   } finally {
     releaseLock(cwd);
@@ -95,6 +100,12 @@ export async function hookCommand(
   action: string,
   internalOpts?: HookInternalOptions
 ): Promise<void> {
+  if (action !== 'pre-edit' && action !== 'post-edit') {
+    process.exitCode = 1;
+    process.stderr.write(`prs hook: unknown action "${action}"\n`);
+    return;
+  }
+
   if (internalOpts?.stdin === undefined && process.stdin.isTTY) {
     process.exitCode = 1;
     process.stderr.write(
@@ -108,15 +119,18 @@ export async function hookCommand(
   const payload = parseInput(raw);
   if (!payload) return;
 
-  switch (action) {
-    case 'pre-edit':
-      await handlePreEdit(payload);
-      break;
-    case 'post-edit':
-      await handlePostEdit(payload);
-      break;
-    default:
-      process.exitCode = 1;
-      process.stderr.write(`prs hook: unknown action "${action}"\n`);
+  try {
+    switch (action) {
+      case 'pre-edit':
+        await handlePreEdit(payload);
+        break;
+      case 'post-edit':
+        await handlePostEdit(payload);
+        break;
+    }
+  } catch (error) {
+    process.exitCode = 1;
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`prs hook: ${action} error: ${message}\n`);
   }
 }

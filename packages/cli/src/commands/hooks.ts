@@ -52,7 +52,11 @@ export async function readSettingsFile(path: string): Promise<Record<string, unk
   }
 
   try {
-    return JSON.parse(content) as Record<string, unknown>;
+    const parsed: unknown = JSON.parse(content);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      throw new Error('expected a JSON object');
+    }
+    return parsed as Record<string, unknown>;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     throw new Error(`Failed to parse settings file ${path}: ${message}`, { cause: err });
@@ -76,6 +80,19 @@ function settingsUnchanged(
   merged: Record<string, unknown>
 ): boolean {
   return JSON.stringify(original) === JSON.stringify(merged);
+}
+
+function countPromptScriptHooks(value: unknown): number {
+  if (typeof value === 'string') {
+    return value.includes('prs hook') ? 1 : 0;
+  }
+  if (Array.isArray(value)) {
+    return value.reduce((count, item) => count + countPromptScriptHooks(item), 0);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return Object.values(value).reduce((count, item) => count + countPromptScriptHooks(item), 0);
+  }
+  return 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -139,13 +156,36 @@ async function uninstallForTool(config: ToolHookConfig): Promise<void> {
   let existing: Record<string, unknown>;
   try {
     const content = await readFile(settingsPath, 'utf-8');
-    existing = JSON.parse(content) as Record<string, unknown>;
-  } catch {
-    ConsoleOutput.info(`${config.name}: hooks not installed (no settings file)`);
-    return;
+    const parsed: unknown = JSON.parse(content);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      throw new Error('expected a JSON object');
+    }
+    existing = parsed as Record<string, unknown>;
+  } catch (error: unknown) {
+    const nodeError = error as NodeJS.ErrnoException;
+    if (nodeError.code === 'ENOENT') {
+      ConsoleOutput.info(`${config.name}: hooks not installed (no settings file)`);
+      return;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to read settings file ${settingsPath}: ${message}`, {
+      cause: error,
+    });
   }
 
+  const existingHookCount = countPromptScriptHooks(existing);
+  if (existingHookCount === 0) {
+    ConsoleOutput.info(`${config.name}: hooks not installed`);
+    return;
+  }
   const cleaned = config.removeFromSettings(existing);
+  if (
+    settingsUnchanged(existing, cleaned) ||
+    countPromptScriptHooks(cleaned) >= existingHookCount
+  ) {
+    ConsoleOutput.info(`${config.name}: hooks not installed`);
+    return;
+  }
   await writeSettingsFile(settingsPath, cleaned);
   ConsoleOutput.success(`${config.name}: hooks uninstalled`);
 }
@@ -223,11 +263,18 @@ export async function hooksCommand(
 
   const prsPath = resolvePrsPath();
 
-  for (const config of tools) {
-    if (action === 'install') {
-      await installForTool(config, prsPath);
-    } else {
-      await uninstallForTool(config);
+  try {
+    for (const config of tools) {
+      if (action === 'install') {
+        await installForTool(config, prsPath);
+      } else {
+        await uninstallForTool(config);
+      }
     }
+  } catch (error) {
+    ConsoleOutput.error(
+      `Failed to ${action} hooks: ${error instanceof Error ? error.message : String(error)}`
+    );
+    process.exitCode = 1;
   }
 }

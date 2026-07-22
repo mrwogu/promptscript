@@ -197,6 +197,10 @@ Install or uninstall PromptScript integrations for supported AI tools.
 prs hooks <install|uninstall> [tool]
 ```
 
+Omit `[tool]` to operate on all detected tools. `--all` makes that auto-detected behavior
+explicit. Supported tool names are `claude`, `gemini`, `copilot`, `cursor`, `windsurf`,
+`factory`, and `cline`.
+
 ```bash
 prs hooks install
 prs hooks install claude

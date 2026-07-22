@@ -175,6 +175,18 @@ describe('hooksCommand', () => {
       );
     });
 
+    it('reports malformed settings without overwriting them', async () => {
+      mockReadFile.mockResolvedValue('[]');
+
+      await hooksCommand('install', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to install hooks')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
     it('errors when no tools detected and no tool specified', async () => {
       // No detect paths match
       mockExistsSync.mockReturnValue(false);
@@ -312,6 +324,41 @@ describe('hooksCommand', () => {
 
       await hooksCommand('uninstall', 'claude', {});
 
+      expect(mockConsole.info).toHaveBeenCalledWith(expect.stringContaining('not installed'));
+    });
+
+    it('reports unreadable settings instead of treating hooks as absent', async () => {
+      const permissionError = new Error('permission denied') as NodeJS.ErrnoException;
+      permissionError.code = 'EACCES';
+      mockReadFile.mockRejectedValue(permissionError);
+
+      await hooksCommand('uninstall', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to uninstall hooks')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('does not rewrite settings when PromptScript hooks are absent', async () => {
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          note: 'Run prs hook manually when debugging',
+          hooks: {
+            PreToolUse: [
+              {
+                matcher: 'OtherTool',
+                hooks: [{ type: 'command', command: 'echo other' }],
+              },
+            ],
+          },
+        })
+      );
+
+      await hooksCommand('uninstall', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
       expect(mockConsole.info).toHaveBeenCalledWith(expect.stringContaining('not installed'));
     });
 
