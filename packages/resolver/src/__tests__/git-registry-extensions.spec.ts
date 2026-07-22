@@ -107,6 +107,36 @@ describe('GitRegistry — extended methods', () => {
       ]);
     });
 
+    it('uses configured token authentication for an explicit clone', async () => {
+      const authenticatedRegistry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+        auth: { type: 'token', token: 'test-token' },
+      });
+      const targetDir = join(testCacheDir, 'authenticated-target');
+
+      await authenticatedRegistry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        'v1.0.0',
+        targetDir
+      );
+
+      expect(mockGit.clone).toHaveBeenCalledWith('https://github.com/org/repo.git', targetDir, [
+        '--depth=1',
+        '--branch=v1.0.0',
+        '--single-branch',
+      ]);
+      expect(mockGit.env).toHaveBeenCalledWith('GIT_CONFIG_COUNT', '1');
+      expect(mockGit.env).toHaveBeenCalledWith(
+        'GIT_CONFIG_KEY_0',
+        'http.https://github.com/org/repo.git.extraHeader'
+      );
+      expect(mockGit.env).toHaveBeenCalledWith(
+        'GIT_CONFIG_VALUE_0',
+        'Authorization: Basic dGVzdC10b2tlbjo='
+      );
+    });
+
     it('removes an existing target directory before cloning', async () => {
       // Arrange
       const targetDir = join(testCacheDir, 'existing-dir');
@@ -394,6 +424,26 @@ describe('GitRegistry — extended methods', () => {
   // -------------------------------------------------------------------------
 
   describe('cloneAtTag() — fallbackUrl', () => {
+    it('retries with fallback URL when a private primary hides access as not found', async () => {
+      mockGit.clone
+        .mockRejectedValueOnce(new Error('Repository not found'))
+        .mockResolvedValueOnce(undefined);
+
+      await registry.cloneAtTag(
+        'https://github.com/org/repo.git',
+        'v1.0.0',
+        join(testCacheDir, 'hidden-private-repo'),
+        'git@github.com:org/repo.git'
+      );
+
+      expect(mockGit.clone).toHaveBeenNthCalledWith(
+        2,
+        'git@github.com:org/repo.git',
+        expect.any(String),
+        ['--depth=1', '--branch=v1.0.0', '--single-branch']
+      );
+    });
+
     it('retries with fallback URL on auth error', async () => {
       // Arrange — primary URL fails with auth error, fallback succeeds
       mockGit.clone
@@ -562,6 +612,9 @@ describe('GitRegistry — extended methods', () => {
 
       expect(mockGit.fetch).toHaveBeenCalledWith(['origin', 'abc123def456', '--depth=1']);
       expect(mockGit.checkout).toHaveBeenCalledWith('abc123def456');
+      expect(mockGit.raw).toHaveBeenCalledWith(['config', 'core.autocrlf', 'false']);
+      expect(mockGit.raw).toHaveBeenCalledWith(['config', 'core.eol', 'lf']);
+      expect(mockGit.reset).toHaveBeenCalledWith(['--hard', 'abc123def456']);
     });
 
     it('falls back to --unshallow when direct fetch fails', async () => {
@@ -593,6 +646,16 @@ describe('GitRegistry — extended methods', () => {
 
       expect(mockGit.fetch).toHaveBeenNthCalledWith(3, ['origin']);
       expect(mockGit.checkout).toHaveBeenCalledWith('cafe99');
+    });
+  });
+
+  describe('removeRemote()', () => {
+    it('removes the origin URL from retained repository metadata', async () => {
+      const targetDir = join(testCacheDir, 'remove-remote');
+
+      await registry.removeRemote(targetDir);
+
+      expect(mockGit.raw).toHaveBeenCalledWith(['remote', 'remove', 'origin']);
     });
   });
 });

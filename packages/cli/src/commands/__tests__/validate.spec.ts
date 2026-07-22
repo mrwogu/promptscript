@@ -7,6 +7,7 @@ const {
   mockLoadConfig,
   mockResolveRegistryPath,
   mockCompile,
+  mockCompilerOptions,
   mockExistsSync,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
@@ -23,6 +24,7 @@ const {
   const mockLoadConfig = vi.fn();
   const mockResolveRegistryPath = vi.fn();
   const mockCompile = vi.fn();
+  const mockCompilerOptions = vi.fn();
   const mockExistsSync = vi.fn();
   return {
     mockSucceed,
@@ -31,6 +33,7 @@ const {
     mockLoadConfig,
     mockResolveRegistryPath,
     mockCompile,
+    mockCompilerOptions,
     mockExistsSync,
   };
 });
@@ -55,7 +58,8 @@ vi.mock('../../utils/registry-resolver.js', () => ({
 }));
 
 vi.mock('@promptscript/compiler', () => ({
-  Compiler: vi.fn().mockImplementation(function () {
+  Compiler: vi.fn().mockImplementation(function (options: unknown) {
+    mockCompilerOptions(options);
     return { compile: mockCompile };
   }),
 }));
@@ -89,7 +93,7 @@ describe('validateCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],
@@ -106,6 +110,28 @@ describe('validateCommand', () => {
     expect(process.exitCode).toBeUndefined();
   });
 
+  it('passes ignore-hashes to the compiler integrity stage', async () => {
+    mockLoadConfig.mockResolvedValue({ targets: [], validation: {} });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({
+      success: true,
+      errors: [],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    await validateCommand({ ignoreHashes: true });
+
+    expect(mockCompilerOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ ignoreHashes: true })
+    );
+  });
+
   it('should output JSON format when --format json is specified', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({
@@ -117,7 +143,7 @@ describe('validateCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],
@@ -152,7 +178,7 @@ describe('validateCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],
@@ -208,7 +234,7 @@ describe('validateCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],
@@ -235,7 +261,7 @@ describe('validateCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],
@@ -287,7 +313,7 @@ describe('validateCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: false,
       errors: [

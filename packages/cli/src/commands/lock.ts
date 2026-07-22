@@ -14,6 +14,7 @@ import {
   normalizeGitUrl,
   validateRemoteAccess,
   versionSatisfiesRange,
+  type GitAuthOptions,
 } from '@promptscript/resolver';
 
 /** Path to the lockfile relative to cwd. */
@@ -24,6 +25,7 @@ const UNRESOLVED_INTEGRITY = 'sha256-pending';
 interface RequestedDependency {
   versions: Set<string>;
   fallbackUrl?: string;
+  auth?: GitAuthOptions;
 }
 
 /**
@@ -55,6 +57,7 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     // Collect registry aliases from config
     const aliases = config.registries ?? {};
     const aliasEntries = Object.entries(aliases);
+    const defaultGitRegistry = config.registry?.git;
 
     // Scan .prs files for remote @use imports
     const projectRoot = process.cwd();
@@ -68,7 +71,7 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       strict: true,
     });
 
-    if (aliasEntries.length === 0 && scannedImports.length === 0) {
+    if (aliasEntries.length === 0 && scannedImports.length === 0 && !defaultGitRegistry) {
       spinner.warn('No remote dependencies found');
       ConsoleOutput.muted('Add registries to promptscript.yaml or use @use github.com/... imports');
       return;
@@ -92,6 +95,14 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     }
 
     const requestedDependencies = new Map<string, RequestedDependency>();
+
+    if (defaultGitRegistry) {
+      requestedDependencies.set(defaultGitRegistry.url, {
+        versions: new Set([defaultGitRegistry.ref ?? 'main']),
+        ...(defaultGitRegistry.fallbackUrl ? { fallbackUrl: defaultGitRegistry.fallbackUrl } : {}),
+        ...(defaultGitRegistry.auth ? { auth: defaultGitRegistry.auth } : {}),
+      });
+    }
 
     for (const [, entry] of aliasEntries) {
       const repoUrl = typeof entry === 'string' ? entry : entry.url;
@@ -130,7 +141,8 @@ export async function lockCommand(options: LockOptions): Promise<void> {
         [...requested.versions],
         previous,
         options.update === true && matchingRepos.includes(repoUrl),
-        requested.fallbackUrl
+        requested.fallbackUrl,
+        requested.auth
       );
       if (previous?.skills?.length && previous.commit !== resolved.commit) {
         throw new Error(
@@ -209,7 +221,8 @@ export async function resolveRemoteDependency(
   requestedVersions: string[],
   existing: LockfileDependency | undefined,
   forceUpdate: boolean,
-  fallbackUrl?: string
+  fallbackUrl?: string,
+  auth?: GitAuthOptions
 ): Promise<LockfileDependency> {
   const canReuse =
     !forceUpdate &&
@@ -223,7 +236,7 @@ export async function resolveRemoteDependency(
           versionSatisfiesRange(existing.version, version))
     );
   if (canReuse && existing) {
-    return existing;
+    return fallbackUrl ? { ...existing, gitUrl: fallbackUrl } : existing;
   }
 
   const remoteUrls = [repoUrl, fallbackUrl].filter(
@@ -234,11 +247,23 @@ export async function resolveRemoteDependency(
   for (const candidate of remoteUrls) {
     try {
       const remoteUrl = toRemoteUrl(candidate);
-      const resolvedVersion = await resolveRequestedVersion(repoUrl, remoteUrl, requestedVersions);
-      const validation = await validateRemoteAccess(
+      const candidateAuth = candidate === repoUrl ? auth : undefined;
+      const resolvedVersion = await resolveRequestedVersion(
+        repoUrl,
         remoteUrl,
-        resolvedVersion === 'latest' ? undefined : resolvedVersion
+        requestedVersions,
+        candidateAuth
       );
+      const resolvedRef = resolvedVersion === 'latest' ? undefined : resolvedVersion;
+      const validation = candidateAuth
+        ? {
+            accessible: true,
+            headCommit: await createGitRegistry({
+              url: remoteUrl,
+              auth: candidateAuth,
+            }).getCommitHash(resolvedRef),
+          }
+        : await validateRemoteAccess(remoteUrl, resolvedRef);
       if (!validation.accessible || !validation.headCommit) {
         throw new Error(validation.error ?? `Could not resolve a commit for ${repoUrl}`);
       }
@@ -250,6 +275,7 @@ export async function resolveRemoteDependency(
           existing?.commit === validation.headCommit ? existing.integrity : UNRESOLVED_INTEGRITY,
         ...(existing?.source ? { source: existing.source } : {}),
         ...(existing?.skills ? { skills: existing.skills } : {}),
+        ...(fallbackUrl ? { gitUrl: fallbackUrl } : {}),
       };
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
@@ -262,7 +288,8 @@ export async function resolveRemoteDependency(
 async function resolveRequestedVersion(
   repoUrl: string,
   remoteUrl: string,
-  requestedVersions: string[]
+  requestedVersions: string[],
+  auth?: GitAuthOptions
 ): Promise<string> {
   const explicitVersions = [
     ...new Set(requestedVersions.filter((version) => version !== 'latest')),
@@ -272,7 +299,7 @@ async function resolveRequestedVersion(
   }
 
   if (explicitVersions.every(isSemverRange)) {
-    const registry = createGitRegistry({ url: remoteUrl });
+    const registry = createGitRegistry({ url: remoteUrl, auth });
     const matchedVersion = await registry.resolveVersion(remoteUrl, explicitVersions);
     if (!matchedVersion) {
       throw new Error(`No remote version of ${repoUrl} matches ${explicitVersions.join(', ')}`);

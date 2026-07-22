@@ -1,5 +1,21 @@
-import { describe, it, expect } from 'vitest';
-import { hashContent, buildReferenceKey, isInsideCachePath } from '../reference-hasher.js';
+import { afterEach, describe, it, expect } from 'vitest';
+import { mkdtemp, mkdir, rm, symlink, writeFile } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import {
+  hashContent,
+  buildReferenceKey,
+  isInsideCachePath,
+  isRealPathInside,
+} from '../reference-hasher.js';
+
+const tempDirectories: string[] = [];
+
+afterEach(async () => {
+  await Promise.all(
+    tempDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true }))
+  );
+});
 
 describe('hashContent', () => {
   it('should produce sha256- prefixed hash', () => {
@@ -66,5 +82,20 @@ describe('isInsideCachePath', () => {
 
   it('should normalize paths before comparison', () => {
     expect(isInsideCachePath('/cache/./registries/../registries/file.md', '/cache')).toBe(true);
+  });
+});
+
+describe('isRealPathInside', () => {
+  it('rejects a symlink that escapes the cache path', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'prs-reference-hasher-'));
+    tempDirectories.push(directory);
+    const cachePath = join(directory, 'cache');
+    const outsidePath = join(directory, 'outside.md');
+    await mkdir(cachePath);
+    await writeFile(outsidePath, 'outside');
+    const linkedPath = join(cachePath, 'linked.md');
+    await symlink(outsidePath, linkedPath);
+
+    await expect(isRealPathInside(linkedPath, cachePath)).resolves.toBe(false);
   });
 });

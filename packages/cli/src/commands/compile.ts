@@ -62,6 +62,27 @@ async function loadBundledSkillContent(logger: Logger): Promise<string | undefin
   return undefined;
 }
 
+async function loadCompileLockfile(
+  projectRoot: string,
+  logger: Logger
+): Promise<Lockfile | undefined> {
+  const lockfilePath = resolve(projectRoot, 'promptscript.lock');
+  if (!existsSync(lockfilePath)) {
+    return undefined;
+  }
+  try {
+    const lockfileContent = await readFile(lockfilePath, 'utf-8');
+    const parsed: unknown = parseYaml(lockfileContent, { maxAliasCount: 100 });
+    if (!isValidLockfile(parsed)) {
+      throw new Error(`Invalid lockfile: ${lockfilePath}`);
+    }
+    logger.verbose(`Loaded lockfile from ${lockfilePath}`);
+    return parsed;
+  } catch (error) {
+    throw new Error(`Unable to read lockfile: ${lockfilePath}`, { cause: error });
+  }
+}
+
 /**
  * Find a config file in the given directory by checking all known config file names.
  */
@@ -570,33 +591,20 @@ export async function compileCommand(
       }
     }
 
+    const lockfile = await loadCompileLockfile(projectRoot, logger);
+    const vendorDir = resolve(projectRoot, '.promptscript/vendor');
+
     // Resolve registry path - use CLI flag override, or resolve from config (handles git registries)
     let registryPath: string;
     if (options.registry) {
       registryPath = options.registry;
     } else {
       spinner.text = 'Resolving registry...';
-      const registry = await resolveRegistryPath(config);
+      const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
       registryPath = registry.path;
       if (registry.isRemote) {
         logger.verbose(`Using cached git registry: ${registryPath}`);
       }
-    }
-
-    // Read lockfile if it exists
-    let lockfile: Lockfile | undefined;
-    const lockfilePath = resolve(projectRoot, 'promptscript.lock');
-    try {
-      const lockfileContent = await readFile(lockfilePath, 'utf-8');
-      const parsed = parseYaml(lockfileContent, { maxAliasCount: 100 });
-      if (isValidLockfile(parsed)) {
-        lockfile = parsed;
-        logger.verbose(`Loaded lockfile from ${lockfilePath}`);
-      } else {
-        logger.verbose(`Lockfile at ${lockfilePath} has invalid format — ignoring`);
-      }
-    } catch {
-      // No lockfile present, that's fine
     }
 
     spinner.text = 'Compiling...';
@@ -621,6 +629,7 @@ export async function compileCommand(
         registryPath,
         localPath,
         projectRoot,
+        vendorDir,
         skills: resolveUniversalDir(config.universalDir),
         registries: config.registries,
         lockfile,

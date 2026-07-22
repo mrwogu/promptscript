@@ -6,13 +6,20 @@
  */
 
 import { homedir } from 'os';
-import { join } from 'path';
-import type { PromptScriptConfig } from '@promptscript/core';
+import { existsSync } from 'fs';
+import { isAbsolute, join, relative, resolve, sep } from 'path';
+import type { Lockfile, PromptScriptConfig } from '@promptscript/core';
 import {
   createGitRegistry,
   GitCacheManager,
+  loadVendorManifest,
   normalizeGitUrl,
   getCacheKey,
+  isSemverRange,
+  isRealPathInside,
+  resolveVendoredRepository,
+  verifyGitRepositoryCheckout,
+  versionSatisfiesRange,
 } from '@promptscript/resolver';
 
 /**
@@ -27,6 +34,29 @@ export interface ResolvedRegistry {
   source: 'local' | 'git' | 'http';
 }
 
+export interface ResolveRegistryOptions {
+  vendorDir?: string;
+  lockfile?: Lockfile;
+}
+
+async function resolveRegistrySubPath(
+  repositoryPath: string,
+  subPath: string | undefined
+): Promise<string> {
+  if (!subPath) {
+    return repositoryPath;
+  }
+  const result = resolve(repositoryPath, subPath);
+  const relation = relative(resolve(repositoryPath), result);
+  if (relation === '..' || relation.startsWith(`..${sep}`) || isAbsolute(relation)) {
+    throw new Error(`Registry path escapes its repository: ${subPath}`);
+  }
+  if (existsSync(result) && !(await isRealPathInside(result, repositoryPath))) {
+    throw new Error(`Registry path escapes its repository: ${subPath}`);
+  }
+  return result;
+}
+
 /**
  * Resolve the registry configuration to a local path.
  *
@@ -36,31 +66,90 @@ export interface ResolvedRegistry {
  * @param config - The PromptScript configuration
  * @returns Resolved registry information with local path
  */
-export async function resolveRegistryPath(config: PromptScriptConfig): Promise<ResolvedRegistry> {
+export async function resolveRegistryPath(
+  config: PromptScriptConfig,
+  options: ResolveRegistryOptions = {}
+): Promise<ResolvedRegistry> {
   // Priority 1: Git registry
   if (config.registry?.git) {
     const gitConfig = config.registry.git;
     const ref = gitConfig.ref ?? 'main';
+    const normalizedUrl = normalizeGitUrl(gitConfig.url);
+    const lockedRepository = Object.entries(options.lockfile?.dependencies ?? {}).find(
+      ([repoUrl, dependency]) =>
+        normalizeGitUrl(repoUrl) === normalizedUrl ||
+        (dependency.gitUrl !== undefined && normalizeGitUrl(dependency.gitUrl) === normalizedUrl)
+    );
+    if (
+      lockedRepository &&
+      lockedRepository[1].version !== ref &&
+      !(isSemverRange(ref) && versionSatisfiesRange(lockedRepository[1].version, ref))
+    ) {
+      throw new Error(
+        `Locked registry version ${lockedRepository[1].version} does not match configured ref ${ref}`
+      );
+    }
+    const vendorManifest = options.vendorDir ? await loadVendorManifest(options.vendorDir) : null;
+    if (options.vendorDir && existsSync(options.vendorDir) && !vendorManifest) {
+      throw new Error(`Vendor manifest is missing: ${options.vendorDir}`);
+    }
+    if (options.lockfile && !lockedRepository) {
+      throw new Error(`Git registry is not pinned by the lockfile: ${gitConfig.url}`);
+    }
+    if (options.vendorDir && vendorManifest) {
+      if (!lockedRepository) {
+        throw new Error(`Vendored registry is not pinned by the lockfile: ${gitConfig.url}`);
+      }
+      const [repoUrl, dependency] = lockedRepository;
+      const repositoryPath = await resolveVendoredRepository(
+        options.vendorDir,
+        repoUrl,
+        dependency.version,
+        dependency.commit
+      );
+      if (!repositoryPath) {
+        throw new Error(`Vendored registry is missing: ${gitConfig.url}`);
+      }
+      return {
+        path: await resolveRegistrySubPath(repositoryPath, gitConfig.path),
+        isRemote: false,
+        source: 'git',
+      };
+    }
 
     // First check if we already have a valid cache
     const cacheManager = new GitCacheManager({
       ttl: config.registry.cache?.ttl,
     });
 
-    const normalizedUrl = normalizeGitUrl(gitConfig.url);
     const cachePath = cacheManager.getCachePath(normalizedUrl, ref);
 
     // Check if cache exists and is valid
     const isValid = await cacheManager.isValid(normalizedUrl, ref);
 
     if (isValid) {
-      // Use existing cache
-      const subPath = gitConfig.path ?? '';
-      return {
-        path: subPath ? join(cachePath, subPath) : cachePath,
-        isRemote: true,
-        source: 'git',
-      };
+      if (!lockedRepository) {
+        return {
+          path: await resolveRegistrySubPath(cachePath, gitConfig.path),
+          isRemote: true,
+          source: 'git',
+        };
+      }
+      try {
+        await verifyGitRepositoryCheckout(
+          cachePath,
+          '.git',
+          lockedRepository[1].commit,
+          new Set(['.prs-cache-meta.json'])
+        );
+        return {
+          path: await resolveRegistrySubPath(cachePath, gitConfig.path),
+          isRemote: true,
+          source: 'git',
+        };
+      } catch {
+        await cacheManager.remove(normalizedUrl, ref);
+      }
     }
 
     // Need to clone/update - use GitRegistry
@@ -96,11 +185,20 @@ export async function resolveRegistryPath(config: PromptScriptConfig): Promise<R
       }
       // Manifest not found is OK - just means registry doesn't have one
     }
+    if (lockedRepository) {
+      await registry.checkoutCommit(cachePath, lockedRepository[1].commit);
+      await cacheManager.touch(normalizedUrl, ref, lockedRepository[1].commit);
+      await verifyGitRepositoryCheckout(
+        cachePath,
+        '.git',
+        lockedRepository[1].commit,
+        new Set(['.prs-cache-meta.json'])
+      );
+    }
 
     // Return the cache path
-    const subPath = gitConfig.path ?? '';
     return {
-      path: subPath ? join(cachePath, subPath) : cachePath,
+      path: await resolveRegistrySubPath(cachePath, gitConfig.path),
       isRemote: true,
       source: 'git',
     };

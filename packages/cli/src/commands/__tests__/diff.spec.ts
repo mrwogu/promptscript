@@ -159,7 +159,7 @@ describe('diffCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],
@@ -193,7 +193,7 @@ describe('diffCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],
@@ -245,7 +245,7 @@ describe('diffCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: false,
       errors: [{ message: 'Parse error in project.prs' }],
@@ -290,7 +290,7 @@ describe('diffCommand', () => {
       isRemote: false,
       source: 'local',
     });
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
     mockCompile.mockResolvedValue({
       success: true,
       errors: [],

@@ -2,7 +2,14 @@ import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import type { DiffOptions } from '../types.js';
-import type { Logger, PromptScriptConfig, TargetEntry, TargetConfig } from '@promptscript/core';
+import {
+  isValidLockfile,
+  type Lockfile,
+  type Logger,
+  type PromptScriptConfig,
+  type TargetEntry,
+  type TargetConfig,
+} from '@promptscript/core';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose, isDebug } from '../output/console.js';
@@ -12,6 +19,7 @@ import { resolveRegistryPath } from '../utils/registry-resolver.js';
 import { stripMarkers } from '../utils/markers.js';
 import { postFormatWithPrettier } from '../prettier/post-format.js';
 import chalk from 'chalk';
+import { parse as parseYaml } from 'yaml';
 
 /**
  * Configure chalk color level based on options.
@@ -65,6 +73,18 @@ function parseTargets(targets: TargetEntry[]): { name: string; config?: TargetCo
     const [name, config] = entries[0] as [string, TargetConfig | undefined];
     return { name, config };
   });
+}
+
+async function loadDiffLockfile(): Promise<Lockfile | undefined> {
+  const lockfilePath = resolve('promptscript.lock');
+  if (!existsSync(lockfilePath)) {
+    return undefined;
+  }
+  const parsed: unknown = parseYaml(await readFile(lockfilePath, 'utf-8'), { maxAliasCount: 100 });
+  if (!isValidLockfile(parsed)) {
+    throw new Error(`Invalid lockfile: ${lockfilePath}`);
+  }
+  return parsed;
 }
 
 /**
@@ -138,10 +158,12 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
 
   try {
     const config = await loadConfig();
+    const lockfile = await loadDiffLockfile();
+    const vendorDir = resolve('.promptscript/vendor');
 
     // Resolve registry path (handles git registries)
     spinner.text = 'Resolving registry...';
-    const registry = await resolveRegistryPath(config);
+    const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
 
     spinner.text = 'Compiling...';
 
@@ -152,6 +174,9 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       resolver: {
         registryPath: registry.path,
         localPath: './.promptscript',
+        vendorDir,
+        lockfile,
+        registries: config.registries,
       },
       validator: config.validation,
       formatters: targets,

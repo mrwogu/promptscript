@@ -43,9 +43,14 @@ import { normalizeBlockAliases } from './normalize.js';
 import { resolveSkillComposition } from './skill-composition.js';
 import { GitRegistry } from './git-registry.js';
 import { RegistryCache } from './registry-cache.js';
-import { hashContent } from './reference-hasher.js';
+import { hashContent, isRealPathInside } from './reference-hasher.js';
 import { discoverNativeContent } from './auto-discovery.js';
 import { findFallbackUrl } from './alias-resolver.js';
+import {
+  loadVendorManifest,
+  resolveVendoredRepository,
+  verifyGitRepositoryCheckout,
+} from './vendor-manifest.js';
 
 /**
  * Options for the resolver.
@@ -61,6 +66,8 @@ export interface ResolverOptions extends LoaderOptions {
   guardRequiresDepth?: number;
   /** Base directory for the registry cache (defaults to ~/.promptscript/cache) */
   cacheDir?: string;
+  /** Vendored registry directory to prefer over cache and network access */
+  vendorDir?: string;
   /**
    * Map from `@use` source `path.raw` to a target output directory.
    * Provides a config-driven default for skills imported via @use when no
@@ -669,7 +676,21 @@ export class Resolver {
 
     try {
       // Check lockfile for pinned commit
-      const lockEntry = this.options.lockfile?.dependencies[repoUrl];
+      const normalizeLockKey = (value: string): string =>
+        value
+          .replace(/^(?:https?:\/\/|git:\/\/)/i, '')
+          .replace(/^git@([^:]+):/, '$1/')
+          .replace(/\.git(?=\/|$)/, '');
+      const normalizedRepoUrl = normalizeLockKey(repoUrl);
+      const lockEntry = Object.entries(this.options.lockfile?.dependencies ?? {}).find(
+        ([key, dependency]) => {
+          const normalizedKey = normalizeLockKey(key);
+          return (
+            normalizedKey === normalizedRepoUrl ||
+            (dependency.source === 'md' && normalizedKey === `${normalizedRepoUrl}/${subPath}`)
+          );
+        }
+      )?.[1];
       const lockfileCommit =
         lockEntry?.commit &&
         /^[0-9a-f]{40}$/i.test(lockEntry.commit) &&
@@ -679,6 +700,9 @@ export class Resolver {
       const markerCommit =
         version && /^[0-9a-f]{40}$/i.test(version) && !/^0{40}$/.test(version) ? version : null;
       const lockedCommit = lockfileCommit ?? markerCommit;
+      if (this.options.lockfile && !lockfileCommit) {
+        throw new Error(`Remote dependency is not pinned by the lockfile: ${repoUrl}`);
+      }
 
       const requestedRef = lockEntry?.version ?? (version || undefined);
       const tag =
@@ -686,30 +710,66 @@ export class Resolver {
           ? requestedRef
           : undefined;
 
-      // Check RegistryCache for cached version
-      const hasCached = await this.registryCache.has(repoUrl, effectiveVersion);
       let cachePath: string;
+      let vendoredPath: string | null = null;
+      const vendorManifest = this.options.vendorDir
+        ? await loadVendorManifest(this.options.vendorDir)
+        : null;
+      if (this.options.vendorDir && existsSync(this.options.vendorDir) && !vendorManifest) {
+        throw new Error(`Vendor manifest is missing: ${this.options.vendorDir}`);
+      }
+      if (this.options.vendorDir && vendorManifest) {
+        if (!lockEntry || !lockedCommit) {
+          throw new Error(`Vendored dependency is not pinned by the lockfile: ${repoUrl}`);
+        }
+        vendoredPath = await resolveVendoredRepository(
+          this.options.vendorDir,
+          repoUrl,
+          lockEntry.version,
+          lockedCommit
+        );
+      }
 
-      if (hasCached) {
+      if (vendoredPath) {
+        this.logger.debug(`Vendor hit: ${repoUrl}@${effectiveVersion}`);
+        cachePath = vendoredPath;
+      } else if (await this.registryCache.has(repoUrl, effectiveVersion)) {
         this.logger.debug(`Registry cache hit: ${repoUrl}@${effectiveVersion}`);
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
         // If lockfile pins a specific commit, verify the cached repo matches
         if (lockedCommit) {
-          const cachedMeta = await this.registryCache.getMeta(repoUrl, effectiveVersion);
-          if (cachedMeta && cachedMeta.commit !== lockedCommit) {
-            this.logger.verbose(
-              `Lockfile commit mismatch for ${repoUrl}: cached=${cachedMeta.commit}, locked=${lockedCommit}. Re-cloning.`
+          let cacheMatchesLock = false;
+          try {
+            await verifyGitRepositoryCheckout(
+              cachePath,
+              '.git',
+              lockedCommit,
+              new Set(['.prs-registry-meta.json'])
             );
-            const cloneRepoUrl = lockEntry?.gitUrl ?? repoUrl;
-            const fallbackRepoUrl = lockEntry?.gitUrl
-              ? repoUrl
-              : this.options.registries
+            cacheMatchesLock = true;
+          } catch {
+            cacheMatchesLock = false;
+          }
+          if (!cacheMatchesLock) {
+            this.logger.verbose(
+              `Registry cache does not match locked commit for ${repoUrl}. Re-cloning.`
+            );
+            const cloneRepoUrl = repoUrl;
+            const fallbackRepoUrl =
+              lockEntry?.gitUrl ??
+              (this.options.registries
                 ? findFallbackUrl(repoUrl, this.options.registries)
-                : undefined;
+                : undefined);
             await this.gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl);
             await this.gitRegistry.checkoutCommit(cachePath, lockedCommit);
             await this.registryCache.set(repoUrl, effectiveVersion, lockedCommit);
+            await verifyGitRepositoryCheckout(
+              cachePath,
+              '.git',
+              lockedCommit,
+              new Set(['.prs-registry-meta.json'])
+            );
           }
         }
       } else {
@@ -717,12 +777,10 @@ export class Resolver {
         cachePath = this.registryCache.getCachePath(repoUrl, effectiveVersion);
 
         // Look up fallback URL from registries config (for HTTPS→SSH auth retry)
-        const cloneRepoUrl = lockEntry?.gitUrl ?? repoUrl;
-        const fallbackRepoUrl = lockEntry?.gitUrl
-          ? repoUrl
-          : this.options.registries
-            ? findFallbackUrl(repoUrl, this.options.registries)
-            : undefined;
+        const cloneRepoUrl = repoUrl;
+        const fallbackRepoUrl =
+          lockEntry?.gitUrl ??
+          (this.options.registries ? findFallbackUrl(repoUrl, this.options.registries) : undefined);
 
         // Clone using GitRegistry
         await this.gitRegistry.cloneAtTag(cloneRepoUrl, tag, cachePath, fallbackRepoUrl);
@@ -736,6 +794,14 @@ export class Resolver {
         // Record in RegistryCache
         const commitHash = lockedCommit ?? lockEntry?.commit ?? 'unknown';
         await this.registryCache.set(repoUrl, effectiveVersion, commitHash);
+        if (lockedCommit) {
+          await verifyGitRepositoryCheckout(
+            cachePath,
+            '.git',
+            lockedCommit,
+            new Set(['.prs-registry-meta.json'])
+          );
+        }
       }
 
       // Resolve the file path within the cached repo. An empty sub-path means
@@ -760,6 +826,18 @@ export class Resolver {
           errors.push(
             new ResolveError(
               `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
+            )
+          );
+          this.resolving.delete(marker);
+          return { ast: null, sources: [marker], errors };
+        }
+        if (
+          existsSync(resolvedFullPath) &&
+          !(await isRealPathInside(resolvedFullPath, cachePath))
+        ) {
+          errors.push(
+            new ResolveError(
+              `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
             )
           );
           this.resolving.delete(marker);
@@ -807,6 +885,15 @@ export class Resolver {
             errors.push(
               new ResolveError(
                 `Path traversal detected: subpath '${subPath}' escapes repository cache boundary.`
+              )
+            );
+            this.resolving.delete(marker);
+            return { ast: null, sources: [marker], errors };
+          }
+          if (existsSync(discoverDir) && !(await isRealPathInside(discoverDir, cachePath))) {
+            errors.push(
+              new ResolveError(
+                `Path traversal detected: subpath '${subPath}' resolves outside the repository cache boundary.`
               )
             );
             this.resolving.delete(marker);
@@ -1024,6 +1111,21 @@ export class Resolver {
   async verifyReferenceHashes(lockfile: Lockfile): Promise<ResolveError[]> {
     if (!lockfile.references) return [];
     const errors: ResolveError[] = [];
+    let hasVendorManifest: boolean;
+    try {
+      hasVendorManifest = Boolean(
+        this.options.vendorDir && (await loadVendorManifest(this.options.vendorDir))
+      );
+    } catch (error) {
+      errors.push(
+        new ResolveError(
+          error instanceof Error ? error.message : String(error),
+          undefined,
+          ErrorCode.LOCKFILE_INTEGRITY
+        )
+      );
+      return errors;
+    }
 
     for (const [key, entry] of Object.entries(lockfile.references)) {
       const parts = key.split('\0');
@@ -1031,9 +1133,35 @@ export class Resolver {
       const [repoUrl, relativePath, version] = parts as [string, string, string];
 
       try {
-        const cachePath = this.registryCache.getCachePath(repoUrl, version);
-        const fullPath = join(cachePath, relativePath);
-        if (!existsSync(fullPath)) continue;
+        let repositoryPath: string;
+        if (hasVendorManifest && this.options.vendorDir) {
+          const dependency = lockfile.dependencies[repoUrl];
+          if (!dependency) {
+            throw new Error(`Vendored reference repository is not pinned: ${repoUrl}`);
+          }
+          const vendoredPath = await resolveVendoredRepository(
+            this.options.vendorDir,
+            repoUrl,
+            dependency.version,
+            dependency.commit
+          );
+          if (!vendoredPath) {
+            throw new Error(`Vendored reference repository is missing: ${repoUrl}`);
+          }
+          repositoryPath = vendoredPath;
+        } else {
+          repositoryPath = this.registryCache.getCachePath(repoUrl, version);
+        }
+        const fullPath = join(repositoryPath, relativePath);
+        if (!(await isRealPathInside(fullPath, repositoryPath))) {
+          throw new Error(`Reference path escapes its repository: ${relativePath}`);
+        }
+        if (!existsSync(fullPath)) {
+          if (hasVendorManifest) {
+            throw new Error(`Vendored reference file is missing: ${relativePath}`);
+          }
+          continue;
+        }
 
         const content = await readFile(fullPath);
         const actualHash = hashContent(content);
@@ -1046,8 +1174,16 @@ export class Resolver {
             )
           );
         }
-      } catch {
-        // Skip files that can't be read (may not be cached)
+      } catch (error) {
+        if (hasVendorManifest) {
+          errors.push(
+            new ResolveError(
+              error instanceof Error ? error.message : String(error),
+              undefined,
+              ErrorCode.LOCKFILE_INTEGRITY
+            )
+          );
+        }
       }
     }
 

@@ -20,12 +20,7 @@ import { FileNotFoundError } from '@promptscript/core';
 import type { Registry } from './registry.js';
 import { GitCacheManager } from './git-cache-manager.js';
 import type { RegistryCache } from './registry-cache.js';
-import {
-  parseGitUrl,
-  buildAuthenticatedUrl,
-  parseVersionedPath,
-  normalizeGitUrl,
-} from './git-url-utils.js';
+import { parseGitUrl, parseVersionedPath, normalizeGitUrl } from './git-url-utils.js';
 
 /** 24-hour TTL for cached tag lists */
 const TAGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -130,6 +125,7 @@ export class GitRefNotFoundError extends Error {
  */
 export class GitRegistry implements Registry {
   private readonly url: string;
+  private readonly transportUrl: string;
   private readonly originalUrl: string;
   private readonly fallbackUrl: string | undefined;
   private readonly defaultRef: string;
@@ -143,6 +139,10 @@ export class GitRegistry implements Registry {
   constructor(options: GitRegistryOptions) {
     this.originalUrl = options.url;
     this.url = normalizeGitUrl(options.url);
+    this.transportUrl =
+      options.url.startsWith('git@') || /^[a-z][a-z\d+.-]*:\/\//i.test(options.url)
+        ? options.url
+        : this.url;
     this.fallbackUrl = options.fallbackUrl;
     this.defaultRef = options.ref ?? 'main';
     this.subPath = options.path ?? '';
@@ -249,6 +249,8 @@ export class GitRegistry implements Registry {
    */
   async checkoutCommit(targetDir: string, commit: string): Promise<void> {
     const git = this.createGit(targetDir);
+    await git.raw(['config', 'core.autocrlf', 'false']);
+    await git.raw(['config', 'core.eol', 'lf']);
     try {
       await git.fetch(['origin', commit, '--depth=1']);
     } catch {
@@ -261,6 +263,12 @@ export class GitRegistry implements Registry {
       }
     }
     await git.checkout(commit);
+    await git.reset(['--hard', commit]);
+  }
+
+  /** Remove clone transport metadata before a repository is vendored. */
+  async removeRemote(targetDir: string): Promise<void> {
+    await this.createGit(targetDir).raw(['remote', 'remove', 'origin']);
   }
 
   /**
@@ -301,14 +309,15 @@ export class GitRegistry implements Registry {
 
     const git = this.createGit();
     const cloneOptions = tag ? ['--depth=1', `--branch=${tag}`, '--single-branch'] : ['--depth=1'];
+    const cloneUrl = this.auth ? this.transportUrl : repoUrl;
     try {
-      await git.clone(repoUrl, targetDir, cloneOptions);
+      await git.clone(cloneUrl, targetDir, cloneOptions);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       if (tag && this.isRefError(error)) {
         throw new GitRefNotFoundError(tag, repoUrl);
       }
-      if (this.isAuthError(error)) {
+      if (this.isAccessError(error)) {
         if (fallbackRepoUrl) {
           try {
             await git.clone(fallbackRepoUrl, targetDir, cloneOptions);
@@ -316,7 +325,7 @@ export class GitRegistry implements Registry {
           } catch (fallbackErr) {
             const fbError =
               fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
-            if (this.isAuthError(fbError)) {
+            if (this.isAccessError(fbError)) {
               throw new GitAuthError(
                 `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
                 fallbackRepoUrl,
@@ -358,7 +367,7 @@ export class GitRegistry implements Registry {
     }
 
     const git = this.createGit();
-    const raw = await git.listRemote(['--tags', repoUrl]);
+    const raw = await git.listRemote(['--tags', this.auth ? this.transportUrl : repoUrl]);
 
     // Parse "abc123\trefs/tags/v1.0.0" lines; strip peeled tag suffixes (^{})
     const tags = [
@@ -424,14 +433,14 @@ export class GitRegistry implements Registry {
       await this.doCloneSparse(git, repoUrl, ref, targetDir, sparsePath);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      if (this.isAuthError(error) && fallbackRepoUrl) {
+      if (this.isAccessError(error) && fallbackRepoUrl) {
         try {
           await this.doCloneSparse(git, fallbackRepoUrl, ref, targetDir, sparsePath);
           return;
         } catch (fallbackErr) {
           const fbError =
             fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
-          if (this.isAuthError(fbError)) {
+          if (this.isAccessError(fbError)) {
             throw new GitAuthError(
               `Authentication failed for both ${repoUrl} and fallback ${fallbackRepoUrl}`,
               fallbackRepoUrl,
@@ -537,7 +546,7 @@ export class GitRegistry implements Registry {
     // Create parent directory
     await fs.mkdir(targetPath, { recursive: true });
 
-    const cloneUrl = this.getAuthenticatedUrl();
+    const cloneUrl = this.transportUrl;
     const git = this.createGit();
 
     try {
@@ -570,7 +579,7 @@ export class GitRegistry implements Registry {
       }
 
       // Check if it's an auth error — try fallback URL if available
-      if (this.isAuthError(error)) {
+      if (this.isAccessError(error)) {
         if (this.fallbackUrl) {
           try {
             await this.cloneWithUrl(this.fallbackUrl, targetPath, ref, git);
@@ -579,7 +588,7 @@ export class GitRegistry implements Registry {
             const fbError =
               fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
             // If fallback also fails with auth error, throw combined message
-            if (this.isAuthError(fbError)) {
+            if (this.isAccessError(fbError)) {
               throw new GitAuthError(
                 `Authentication failed for both ${this.url} and fallback ${this.fallbackUrl}`,
                 this.fallbackUrl,
@@ -677,25 +686,6 @@ export class GitRegistry implements Registry {
   }
 
   /**
-   * Build the authenticated URL for cloning.
-   */
-  private getAuthenticatedUrl(): string {
-    if (!this.auth) {
-      return this.url;
-    }
-
-    if (this.auth.type === 'token') {
-      const token = this.resolveToken();
-      if (token) {
-        return buildAuthenticatedUrl(this.url, token);
-      }
-    }
-
-    // For SSH, the URL should already be in SSH format or will be used as-is
-    return this.url;
-  }
-
-  /**
    * Resolve the authentication token.
    */
   private resolveToken(): string | undefined {
@@ -726,11 +716,23 @@ export class GitRegistry implements Registry {
 
     const git = simpleGit(options);
 
-    // Configure SSH key if using SSH auth
+    if (this.auth?.type === 'token') {
+      const token = this.resolveToken();
+      if (token) {
+        git.env('GIT_CONFIG_COUNT', '1');
+        git.env('GIT_CONFIG_KEY_0', `http.${this.url}.extraHeader`);
+        git.env(
+          'GIT_CONFIG_VALUE_0',
+          `Authorization: Basic ${Buffer.from(`${token}:`).toString('base64')}`
+        );
+      }
+    }
+
     if (this.auth?.type === 'ssh' && this.auth.sshKeyPath) {
       const parsed = parseGitUrl(this.originalUrl);
       if (parsed?.protocol === 'ssh') {
-        git.env('GIT_SSH_COMMAND', `ssh -i ${this.auth.sshKeyPath} -o StrictHostKeyChecking=no`);
+        const keyPath = `'${this.auth.sshKeyPath.replace(/'/g, `'\\''`)}'`;
+        git.env('GIT_SSH_COMMAND', `ssh -i ${keyPath}`);
       }
     }
 
@@ -786,6 +788,15 @@ export class GitRegistry implements Registry {
       message.includes('invalid credentials') ||
       message.includes('401') ||
       message.includes('403')
+    );
+  }
+
+  private isAccessError(error: Error): boolean {
+    const message = error.message.toLowerCase();
+    return (
+      this.isAuthError(error) ||
+      message.includes('repository not found') ||
+      message.includes('project not found')
     );
   }
 

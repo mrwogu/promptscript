@@ -11,9 +11,12 @@ import {
   getMinimumVersionForFeature,
   getSyntaxFeatureUsages,
   compareVersions,
+  isValidLockfile,
+  type Lockfile,
 } from '@promptscript/core';
 import { parse } from '@promptscript/parser';
 import { Resolver } from '@promptscript/resolver';
+import { parse as parseYaml } from 'yaml';
 
 /**
  * JSON output structure for validation results.
@@ -211,6 +214,18 @@ export function discoverPrsFiles(dir: string): string[] {
   return results;
 }
 
+function loadValidationLockfile(): Lockfile | undefined {
+  const lockfilePath = resolve('promptscript.lock');
+  if (!existsSync(lockfilePath)) {
+    return undefined;
+  }
+  const parsed: unknown = parseYaml(readFileSync(lockfilePath, 'utf-8'), { maxAliasCount: 100 });
+  if (!isValidLockfile(parsed)) {
+    throw new Error(`Invalid lockfile: ${lockfilePath}`);
+  }
+  return parsed;
+}
+
 /**
  * Validate PromptScript files without generating output.
  */
@@ -231,10 +246,12 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
 
   try {
     const config = await loadConfig();
+    const lockfile = loadValidationLockfile();
+    const vendorDir = resolve('.promptscript/vendor');
 
     // Resolve registry path (handles git registries)
     if (!isJsonFormat) spinner.text = 'Resolving registry...';
-    const registry = await resolveRegistryPath(config);
+    const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
 
     if (!isJsonFormat) spinner.text = 'Validating...';
 
@@ -242,13 +259,16 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
       resolver: {
         registryPath: registry.path,
         localPath: './.promptscript',
+        vendorDir,
+        lockfile,
+        registries: config.registries,
       },
       validator: {
         ...config.validation,
         policies: options.skipPolicies ? undefined : config.policies,
         skipPolicies: options.skipPolicies,
-        ignoreHashes: options.ignoreHashes,
       },
+      ignoreHashes: options.ignoreHashes,
       formatters: [], // No formatters needed for validation only
     });
 
@@ -335,12 +355,18 @@ async function runFix(requestedFiles?: string[]): Promise<void> {
       : discoverPrsFiles('.promptscript');
   let fixedCount = 0;
   const configPath = findConfigFile();
-  const registryPath = configPath
-    ? (await resolveRegistryPath(await loadConfig(configPath))).path
+  const config = configPath ? await loadConfig(configPath) : undefined;
+  const lockfile = loadValidationLockfile();
+  const vendorDir = resolve('.promptscript/vendor');
+  const registryPath = config
+    ? (await resolveRegistryPath(config, { vendorDir, lockfile })).path
     : resolve('./registry');
   const resolver = new Resolver({
     registryPath,
     localPath: resolve('./.promptscript'),
+    vendorDir,
+    lockfile,
+    registries: config?.registries,
     cache: false,
   });
 

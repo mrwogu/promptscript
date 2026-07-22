@@ -12,6 +12,8 @@ const {
   mockReadFile,
   mockCollectRemoteImports,
   mockResolveVersion,
+  mockGetCommitHash,
+  mockCreateRegistryOptions,
   mockValidateRemoteAccess,
 } = vi.hoisted(() => {
   const mockStart = vi.fn().mockReturnThis();
@@ -32,6 +34,8 @@ const {
   const mockReadFile = vi.fn();
   const mockCollectRemoteImports = vi.fn().mockResolvedValue([]);
   const mockResolveVersion = vi.fn();
+  const mockGetCommitHash = vi.fn();
+  const mockCreateRegistryOptions = vi.fn();
   const mockValidateRemoteAccess = vi.fn();
   return {
     mockSucceed,
@@ -45,6 +49,8 @@ const {
     mockReadFile,
     mockCollectRemoteImports,
     mockResolveVersion,
+    mockGetCommitHash,
+    mockCreateRegistryOptions,
     mockValidateRemoteAccess,
   };
 });
@@ -71,7 +77,10 @@ vi.mock('../lock-scanner.js', () => ({
 }));
 
 vi.mock('@promptscript/resolver', () => ({
-  createGitRegistry: vi.fn(() => ({ resolveVersion: mockResolveVersion })),
+  createGitRegistry: vi.fn((options: unknown) => {
+    mockCreateRegistryOptions(options);
+    return { resolveVersion: mockResolveVersion, getCommitHash: mockGetCommitHash };
+  }),
   normalizeGitUrl: vi.fn((url: string) =>
     url.endsWith('.git') || url.startsWith('file:') || url.startsWith('git@') ? url : `${url}.git`
   ),
@@ -99,6 +108,7 @@ describe('lockCommand', () => {
       accessible: true,
       headCommit: '1234567890abcdef1234567890abcdef12345678',
     });
+    mockGetCommitHash.mockResolvedValue('1234567890abcdef1234567890abcdef12345678');
     process.exitCode = undefined;
   });
 
@@ -144,6 +154,64 @@ describe('lockCommand', () => {
     expect(parsed.dependencies['github.com/company/base']?.commit).toBe(
       '1234567890abcdef1234567890abcdef12345678'
     );
+  });
+
+  it('should lock the default Git registry for vendor workflows', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registry: {
+        git: {
+          url: 'https://github.com/company/registry.git',
+          ref: 'v2.0.0',
+        },
+      },
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { version: string; commit: string }>;
+    };
+    expect(parsed.dependencies['https://github.com/company/registry.git']).toEqual(
+      expect.objectContaining({
+        version: 'v2.0.0',
+        commit: '1234567890abcdef1234567890abcdef12345678',
+      })
+    );
+  });
+
+  it('uses the default registry ref and authentication when resolving its lock', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registry: {
+        git: {
+          url: 'https://github.com/company/registry.git',
+          auth: { type: 'token', tokenEnvVar: 'REGISTRY_TOKEN' },
+        },
+      },
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await lockCommand({});
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { version: string; commit: string }>;
+    };
+    expect(parsed.dependencies['https://github.com/company/registry.git']).toEqual(
+      expect.objectContaining({
+        version: 'main',
+        commit: '1234567890abcdef1234567890abcdef12345678',
+      })
+    );
+    expect(mockCreateRegistryOptions).toHaveBeenCalledWith({
+      url: 'https://github.com/company/registry.git',
+      auth: { type: 'token', tokenEnvVar: 'REGISTRY_TOKEN' },
+    });
   });
 
   it('should preserve a malformed existing lockfile', async () => {
@@ -418,6 +486,13 @@ describe('lockCommand', () => {
     expect(mockValidateRemoteAccess).toHaveBeenLastCalledWith(
       'git@github.com:company/base.git',
       undefined
+    );
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { gitUrl?: string }>;
+    };
+    expect(parsed.dependencies['https://github.com/company/base.git']?.gitUrl).toBe(
+      'git@github.com:company/base.git'
     );
   });
 

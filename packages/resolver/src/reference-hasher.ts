@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
-import { resolve, normalize } from 'path';
+import { realpath } from 'fs/promises';
+import { isAbsolute, normalize, relative, resolve, sep } from 'path';
 
 /**
  * Compute SHA-256 hash of in-memory content.
@@ -28,5 +29,24 @@ export function buildReferenceKey(repoUrl: string, relativePath: string, version
 export function isInsideCachePath(filePath: string, cachePath: string): boolean {
   const normalizedFile = resolve(normalize(filePath));
   const normalizedCache = resolve(normalize(cachePath));
-  return normalizedFile.startsWith(normalizedCache + '/') || normalizedFile === normalizedCache;
+  const relation = relative(normalizedCache, normalizedFile);
+  return (
+    relation === '' ||
+    (relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation))
+  );
+}
+
+export async function isRealPathInside(filePath: string, cachePath: string): Promise<boolean> {
+  if (!isInsideCachePath(filePath, cachePath)) {
+    return false;
+  }
+  try {
+    const [realFilePath, realCachePath] = await Promise.all([
+      realpath(filePath),
+      realpath(cachePath),
+    ]);
+    return isInsideCachePath(realFilePath, realCachePath) && realFilePath !== realCachePath;
+  } catch {
+    return false;
+  }
 }

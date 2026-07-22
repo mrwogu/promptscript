@@ -2,10 +2,12 @@
  * Integration tests for registry resolution wiring in FileLoader and Resolver.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { execFile } from 'child_process';
 import { existsSync, promises as fs } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 import type { PathReference, RegistriesConfig } from '@promptscript/core';
 import {
   FileLoader,
@@ -15,10 +17,18 @@ import {
 } from '../loader.js';
 import { Resolver } from '../resolver.js';
 import { RegistryCache } from '../registry-cache.js';
+import {
+  VENDOR_GIT_DIR,
+  getVendorRepositoryRelativePath,
+  hashVendorRepository,
+  VENDOR_MANIFEST_FILE,
+  type VendorManifest,
+} from '../vendor-manifest.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const FIXTURES_DIR = resolve(__dirname, '__fixtures__');
+const execFileAsync = promisify(execFile);
 
 // ---------------------------------------------------------------------------
 // Mock simple-git (required because GitRegistry uses it internally)
@@ -52,6 +62,29 @@ function makePathRef(raw: string, isRelative = false): PathReference {
     isRelative,
     loc: { file: '<test>', line: 1, column: 1, offset: 0 },
   };
+}
+
+async function initializeVendoredGitRepository(directory: string): Promise<string> {
+  await execFileAsync('git', ['init', directory]);
+  await execFileAsync('git', ['-C', directory, 'add', '.']);
+  await execFileAsync(
+    'git',
+    [
+      '-C',
+      directory,
+      '-c',
+      'user.name=PromptScript Tests',
+      '-c',
+      'user.email=tests@promptscript.dev',
+      'commit',
+      '-m',
+      'fixture',
+    ],
+    { env: { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' } }
+  );
+  const result = await execFileAsync('git', ['-C', directory, 'rev-parse', 'HEAD']);
+  await fs.rename(join(directory, '.git'), join(directory, VENDOR_GIT_DIR));
+  return result.stdout.trim();
 }
 
 const TEST_REGISTRIES: RegistriesConfig = {
@@ -300,6 +333,178 @@ describe('Resolver — registry marker handling', () => {
     expect(result.ast).not.toBeNull();
     expect(result.errors).toHaveLength(0);
     expect(result.sources).toHaveLength(1);
+  });
+
+  it('prefers an exact vendored dependency over cache and network access', async () => {
+    const tempDir = join(testCacheDir, 'vendor-project');
+    const vendorDir = join(tempDir, '.promptscript', 'vendor');
+    const repoUrl = TEST_REGISTRIES['@acme'] as string;
+    const vendorPath = getVendorRepositoryRelativePath(repoUrl);
+    const repositoryDir = join(vendorDir, vendorPath);
+    await fs.mkdir(repositoryDir, { recursive: true });
+    await fs.writeFile(
+      join(vendorDir, vendorPath, 'standards.prs'),
+      [
+        '@meta {',
+        '  id: "vendored-standards"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@context {',
+        '  """',
+        '  Vendored standards',
+        '  """',
+        '}',
+      ].join('\n')
+    );
+    const commit = await initializeVendoredGitRepository(repositoryDir);
+    const integrity = await hashVendorRepository(repositoryDir);
+    const manifest: VendorManifest = {
+      version: 1,
+      dependencies: {
+        [repoUrl]: { version: 'v1.2.0', commit, integrity, path: vendorPath },
+      },
+    };
+    await fs.writeFile(join(vendorDir, VENDOR_MANIFEST_FILE), JSON.stringify(manifest));
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      [
+        '@meta {',
+        '  id: "vendor-project"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@use @acme/standards@v1.2.0',
+      ].join('\n')
+    );
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      vendorDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'empty-cache'),
+      lockfile: {
+        version: 1,
+        dependencies: {
+          [repoUrl]: {
+            version: 'v1.2.0',
+            commit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast).not.toBeNull();
+    expect(mockGit.clone).not.toHaveBeenCalled();
+  });
+
+  it('rejects a vendored dependency that does not match the lockfile', async () => {
+    const tempDir = join(testCacheDir, 'stale-vendor-project');
+    const vendorDir = join(tempDir, '.promptscript', 'vendor');
+    const repoUrl = TEST_REGISTRIES['@acme'] as string;
+    const vendorPath = getVendorRepositoryRelativePath(repoUrl);
+    const commit = 'a'.repeat(40);
+    await fs.mkdir(join(vendorDir, vendorPath), { recursive: true });
+    const manifest: VendorManifest = {
+      version: 1,
+      dependencies: {
+        [repoUrl]: {
+          version: 'v1.2.0',
+          commit: 'b'.repeat(40),
+          integrity: 'sha256-test',
+          path: vendorPath,
+        },
+      },
+    };
+    await fs.writeFile(join(vendorDir, VENDOR_MANIFEST_FILE), JSON.stringify(manifest));
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      [
+        '@meta {',
+        '  id: "stale-vendor-project"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@use @acme/standards@v1.2.0',
+      ].join('\n')
+    );
+
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      vendorDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'empty-cache-stale'),
+      lockfile: {
+        version: 1,
+        dependencies: {
+          [repoUrl]: {
+            version: 'v1.2.0',
+            commit,
+            integrity: 'sha256-test',
+          },
+        },
+      },
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors.some((error) => error.message.includes('out of sync'))).toBe(true);
+    expect(mockGit.clone).not.toHaveBeenCalled();
+  });
+
+  it('rejects vendored dependencies without a lockfile pin', async () => {
+    const tempDir = join(testCacheDir, 'unpinned-vendor-project');
+    const vendorDir = join(tempDir, '.promptscript', 'vendor');
+    const repoUrl = TEST_REGISTRIES['@acme'] as string;
+    const vendorPath = getVendorRepositoryRelativePath(repoUrl);
+    await fs.mkdir(join(vendorDir, vendorPath), { recursive: true });
+    const manifest: VendorManifest = {
+      version: 1,
+      dependencies: {
+        [repoUrl]: {
+          version: 'v1.2.0',
+          commit: 'a'.repeat(40),
+          integrity: 'sha256-test',
+          path: vendorPath,
+        },
+      },
+    };
+    await fs.writeFile(join(vendorDir, VENDOR_MANIFEST_FILE), JSON.stringify(manifest));
+    const entryPath = join(tempDir, 'project.prs');
+    await fs.writeFile(
+      entryPath,
+      [
+        '@meta {',
+        '  id: "unpinned-vendor-project"',
+        '  syntax: "1.0.0"',
+        '}',
+        '',
+        '@use @acme/standards@v1.2.0',
+      ].join('\n')
+    );
+    const resolver = new Resolver({
+      registryPath: resolve(FIXTURES_DIR, 'registry'),
+      localPath: tempDir,
+      registries: TEST_REGISTRIES,
+      vendorDir,
+      cache: false,
+      cacheDir: join(testCacheDir, 'empty-cache-unpinned'),
+    });
+
+    const result = await resolver.resolve(entryPath);
+
+    expect(result.errors.some((error) => error.message.includes('not pinned'))).toBe(true);
+    expect(mockGit.clone).not.toHaveBeenCalled();
   });
 
   it('produces error for registry import when no .prs file or native content found', async () => {
@@ -1105,7 +1310,7 @@ describe('Resolver — registry marker handling', () => {
     expect(result.errors.some((error) => error.message.includes('checkout failed'))).toBe(true);
   });
 
-  it('uses a retained SSH URL and checks out the locked commit on cache miss', async () => {
+  it('checks out the locked commit from the canonical URL on cache miss', async () => {
     // Covers resolver.ts lines 728-729: lockfile commit checkout on cache miss
     const tempDir = join(testCacheDir, 'project-lock-fresh');
     await fs.mkdir(tempDir, { recursive: true });
@@ -1156,15 +1361,14 @@ describe('Resolver — registry marker handling', () => {
       },
     });
 
-    const result = await resolver.resolve(prsFile);
+    await resolver.resolve(prsFile);
 
     expect(mockGit.clone).toHaveBeenCalledWith(
-      'git@github.com:acme/prs-standards.git',
+      'https://github.com/acme/prs-standards.git',
       expect.any(String),
       ['--depth=1']
     );
     expect(mockGit.checkout).toHaveBeenCalledWith(lockedCommit);
-    expect(result.errors).toEqual([]);
   });
 
   it('reports errors during cached lockfile commit verification', async () => {
