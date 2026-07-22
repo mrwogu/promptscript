@@ -68,6 +68,8 @@ export interface ResolverOptions extends LoaderOptions {
   cacheDir?: string;
   /** Vendored registry directory to prefer over cache and network access */
   vendorDir?: string;
+  /** Repository roots that use a cache layout other than RegistryCache */
+  referenceRoots?: Record<string, string[]>;
   /**
    * Map from `@use` source `path.raw` to a target output directory.
    * Provides a config-driven default for skills imported via @use when no
@@ -658,7 +660,6 @@ export class Resolver {
     }
 
     const { repoUrl, path: subPath, version } = parsed;
-    const effectiveVersion = version || 'latest';
 
     // Add to resolving set for circular dependency detection
     if (this.resolving.has(marker)) {
@@ -691,6 +692,7 @@ export class Resolver {
           );
         }
       )?.[1];
+      const effectiveVersion = lockEntry?.version ?? (version || 'latest');
       const lockfileCommit =
         lockEntry?.commit &&
         /^[0-9a-f]{40}$/i.test(lockEntry.commit) &&
@@ -1150,17 +1152,29 @@ export class Resolver {
           }
           repositoryPath = vendoredPath;
         } else {
-          repositoryPath = this.registryCache.getCachePath(repoUrl, version);
+          const configuredRoots = Object.entries(this.options.referenceRoots ?? {}).find(
+            ([configuredRepoUrl]) =>
+              configuredRepoUrl
+                .replace(/^(?:https?:\/\/|git:\/\/)/i, '')
+                .replace(/^git@([^:]+):/, '$1/')
+                .replace(/\.git(?=\/|$)/, '') ===
+              repoUrl
+                .replace(/^(?:https?:\/\/|git:\/\/)/i, '')
+                .replace(/^git@([^:]+):/, '$1/')
+                .replace(/\.git(?=\/|$)/, '')
+          )?.[1];
+          repositoryPath =
+            configuredRoots?.find((root) => existsSync(root)) ??
+            this.registryCache.getCachePath(repoUrl, version);
         }
         const fullPath = join(repositoryPath, relativePath);
+        if (!existsSync(fullPath)) {
+          throw new Error(
+            `${hasVendorManifest ? 'Vendored reference' : 'Reference'} file is missing: ${relativePath}`
+          );
+        }
         if (!(await isRealPathInside(fullPath, repositoryPath))) {
           throw new Error(`Reference path escapes its repository: ${relativePath}`);
-        }
-        if (!existsSync(fullPath)) {
-          if (hasVendorManifest) {
-            throw new Error(`Vendored reference file is missing: ${relativePath}`);
-          }
-          continue;
         }
 
         const content = await readFile(fullPath);
@@ -1175,15 +1189,13 @@ export class Resolver {
           );
         }
       } catch (error) {
-        if (hasVendorManifest) {
-          errors.push(
-            new ResolveError(
-              error instanceof Error ? error.message : String(error),
-              undefined,
-              ErrorCode.LOCKFILE_INTEGRITY
-            )
-          );
-        }
+        errors.push(
+          new ResolveError(
+            error instanceof Error ? error.message : String(error),
+            undefined,
+            ErrorCode.LOCKFILE_INTEGRITY
+          )
+        );
       }
     }
 

@@ -671,12 +671,17 @@ async function compileCommandWithResult(
 
     // Resolve registry path - use CLI flag override, or resolve from config (handles git registries)
     let registryPath: string;
+    let referenceRoots: Record<string, string[]> | undefined;
     if (options.registry) {
       registryPath = resolveProjectPath(projectRoot, options.registry);
     } else {
       spinner.text = 'Resolving registry...';
       const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
       registryPath = resolveProjectPath(projectRoot, registry.path);
+      referenceRoots =
+        registry.repositoryUrl && registry.repositoryPath
+          ? { [registry.repositoryUrl]: [registry.repositoryPath] }
+          : undefined;
       if (registry.isRemote) {
         logger.verbose(`Using cached git registry: ${registryPath}`);
       }
@@ -705,6 +710,7 @@ async function compileCommandWithResult(
         localPath,
         projectRoot,
         vendorDir,
+        referenceRoots,
         skills: resolveUniversalDir(config.universalDir),
         registries: config.registries,
         lockfile,

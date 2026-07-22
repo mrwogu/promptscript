@@ -599,37 +599,34 @@ prs lock            # Create or update promptscript.lock
 prs lock --dry-run  # Show what would change without writing
 ```
 
-The lockfile is also written automatically during `prs compile` when remote imports are present.
+Compilation never rewrites the lockfile. Run `prs lock` after adding or changing
+remote imports, then commit the result.
 
 ### Lockfile Format
 
 ```yaml
 # promptscript.lock
 version: 1
-packages:
+dependencies:
   github.com/acme/promptscript-base:
-    url: https://github.com/acme/promptscript-base.git
-    ref: main
+    version: main
     commit: a3f8c2d91b4e6f7890123456789abcdef0123456
-    resolved: '2026-03-23T10:00:00Z'
-    references:
-      '@stacks/react.prs':
-        hash: sha256:a1b2c3d4e5f6...
-      '@fragments/testing.prs':
-        hash: sha256:f6e5d4c3b2a1...
-  github.com/some-org/claude-skills:
-    url: https://github.com/some-org/claude-skills.git
-    ref: v1.2.0
-    commit: deadbeef12345678901234567890abcdef012345
-    resolved: '2026-03-22T08:30:00Z'
-    references:
-      'skills/tdd-workflow/SKILL.md':
-        hash: sha256:1234abcd5678...
+    integrity: sha256-pending
+references:
+  "github.com/acme/promptscript-base\0references/testing.md\0main":
+    hash: sha256-f6e5d4c3b2a1...
+    lockedAt: 2026-03-23T10:00:00.000Z
 ```
 
 ### Integrity Hashes
 
-Each lockfile entry includes SHA-256 hashes for the individual files resolved from that package. During compilation and validation, these hashes are verified against the actual file contents. If a file has been modified since it was locked, a reference integrity error is raised.
+The `dependencies` map pins each remote repository to an exact commit.
+Registry-sourced files listed by `@skills.references` are recorded separately in
+the top-level `references` map using the repository URL, relative path, and
+locked version as the key. This applies to aliased imports and the default Git
+registry. During compilation and validation, these SHA-256
+hashes are verified against the actual file contents. If a reference has been
+modified since it was locked, a reference integrity error is raised.
 
 This protects against:
 

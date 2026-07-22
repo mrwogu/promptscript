@@ -14,6 +14,17 @@ vi.mock('@promptscript/resolver', () => ({
     resolve = mockResolve;
     verifyReferenceHashes = mockVerifyReferenceHashes;
   },
+  RegistryCache: class MockRegistryCache {
+    getCachePath(repoUrl: string, version: string): string {
+      return `/cache/registries/${repoUrl}/${version}`;
+    }
+  },
+  getVendorRepositoryRelativePath: (repoUrl: string): string => {
+    if (repoUrl.startsWith('file:')) {
+      throw new Error('Unsupported vendor URL');
+    }
+    return repoUrl;
+  },
 }));
 
 vi.mock('@promptscript/validator', () => ({
@@ -1989,7 +2000,7 @@ describe('Stage 1.5: Reference Integrity', () => {
     expect(regRefs.has('ref2.md')).toBe(true);
   });
 
-  it('should skip Stage 1.5 when no lockfile references section', async () => {
+  it('should check Stage 1.5 when the lockfile references section is absent', async () => {
     const ast = createTestProgram();
     mockResolve.mockResolvedValue(createResolveSuccess(ast));
 
@@ -2005,11 +2016,157 @@ describe('Stage 1.5: Reference Integrity', () => {
 
     await compiler.compile('./test.prs');
 
-    // updateConfig should NOT have been called with registryReferences
     const refCall = mockUpdateConfig.mock.calls.find(
       (c) => c[0] && 'registryReferences' in (c[0] as Record<string, unknown>)
     );
-    expect(refCall).toBeUndefined();
+    expect(refCall).toBeDefined();
+  });
+
+  it('should reject registry references missing from the lockfile', async () => {
+    const repoUrl = 'github.com/org/repo';
+    const version = 'v1.0.0';
+    const loc: SourceLocation = {
+      file: `/cache/registries/${repoUrl}/${version}/rules/main.prs`,
+      line: 1,
+      column: 1,
+    };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              skill: { description: 'test', references: ['./references/guide.md'] },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1,
+          dependencies: {
+            [repoUrl]: {
+              version,
+              commit: 'a'.repeat(40),
+              integrity: 'sha256-test',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    const result = await compiler.compile('./test.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors[0]?.message).toContain('no integrity hash');
+  });
+
+  it('should use configured roots when a repository cannot be vendored', async () => {
+    const repoUrl = 'file:///tmp/registry';
+    const version = 'main';
+    const repositoryPath = '/custom/default-registry';
+    const loc: SourceLocation = {
+      file: `${repositoryPath}/rules.prs`,
+      line: 1,
+      column: 1,
+    };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              skill: { description: 'test', references: ['./guide.md'] },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: repositoryPath,
+        vendorDir: '/vendor',
+        referenceRoots: { [repoUrl]: [repositoryPath] },
+        lockfile: {
+          version: 1,
+          dependencies: {
+            [repoUrl]: {
+              version,
+              commit: 'a'.repeat(40),
+              integrity: 'sha256-test',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    const result = await compiler.compile('./test.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors[0]?.message).toContain('no integrity hash');
+  });
+
+  it('should reject registry reference paths that escape their repository', async () => {
+    const repoUrl = 'github.com/org/repo';
+    const version = 'v1.0.0';
+    const loc: SourceLocation = {
+      file: `/cache/registries/${repoUrl}/${version}/rules.prs`,
+      line: 1,
+      column: 1,
+    };
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'skills',
+          loc,
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              skill: { description: 'test', references: ['../outside.md'] },
+            },
+            loc,
+          },
+        },
+      ],
+    });
+    mockResolve.mockResolvedValue(createResolveSuccess(ast));
+    const compiler = createTestCompiler({
+      resolver: {
+        registryPath: '/registry',
+        lockfile: {
+          version: 1,
+          dependencies: {
+            [repoUrl]: {
+              version,
+              commit: 'a'.repeat(40),
+              integrity: 'sha256-test',
+            },
+          },
+        },
+      },
+      formatters: [],
+    });
+
+    const result = await compiler.compile('./test.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors[0]?.message).toContain('escapes its repository');
   });
 
   it('should set ignoreHashes on validator when flag is true', async () => {

@@ -1,18 +1,32 @@
-import type { Program } from '@promptscript/core';
-import { normalize, resolve } from 'path';
+import type { LockfileReference, Program } from '@promptscript/core';
+import {
+  buildReferenceKey,
+  hashContent,
+  isInsideCachePath,
+  isRealPathInside,
+} from '@promptscript/resolver';
+import { readFile } from 'fs/promises';
+import { dirname, isAbsolute, relative, resolve, sep } from 'path';
+
+export interface RegistryReferenceRoot {
+  repoUrl: string;
+  version: string;
+  cachePath: string;
+}
 
 /**
- * Walk resolved ASTs and collect all skill reference paths that come from
- * a registry cache directory.
- *
- * @param ast - Resolved program AST
- * @param cacheBasePath - Base path of the registry cache
- * @returns Deduplicated list of absolute paths to registry-sourced reference files
+ * Collect and hash registry-sourced skill references from a resolved AST.
  */
-export function collectRegistryReferences(ast: Program, cacheBasePath: string): string[] {
-  const normalizedCache = resolve(normalize(cacheBasePath));
-  const seen = new Set<string>();
-  const results: string[] = [];
+export async function collectRegistryReferences(
+  ast: Program,
+  roots: RegistryReferenceRoot[],
+  existing: Record<string, LockfileReference> = {},
+  lockedAt: string = new Date().toISOString()
+): Promise<Record<string, LockfileReference>> {
+  const references: Record<string, LockfileReference> = {};
+  const sortedRoots = [...roots].sort(
+    (left, right) => resolve(right.cachePath).length - resolve(left.cachePath).length
+  );
 
   for (const block of ast.blocks) {
     if (block.name !== 'skills' || block.content.type !== 'ObjectContent') {
@@ -30,14 +44,28 @@ export function collectRegistryReferences(ast: Program, cacheBasePath: string): 
       for (const ref of refs) {
         if (typeof ref !== 'string') continue;
 
-        const normalizedRef = resolve(normalize(ref));
-        if (normalizedRef.startsWith(normalizedCache + '/') && !seen.has(normalizedRef)) {
-          seen.add(normalizedRef);
-          results.push(ref);
+        const referencePath = isAbsolute(ref)
+          ? resolve(ref)
+          : resolve(dirname(block.loc.file), ref);
+        const root = sortedRoots.find((candidate) =>
+          isInsideCachePath(referencePath, candidate.cachePath)
+        );
+        if (!root) continue;
+        if (!(await isRealPathInside(referencePath, root.cachePath))) {
+          throw new Error(`Registry reference is missing or escapes its repository: ${ref}`);
         }
+
+        const relativePath = relative(resolve(root.cachePath), referencePath).split(sep).join('/');
+        const key = buildReferenceKey(root.repoUrl, relativePath, root.version);
+        const hash = hashContent(await readFile(referencePath));
+        const previous = existing[key];
+        references[key] = {
+          hash,
+          lockedAt: previous?.hash === hash ? previous.lockedAt : lockedAt,
+        };
       }
     }
   }
 
-  return results;
+  return references;
 }

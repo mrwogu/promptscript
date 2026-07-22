@@ -234,6 +234,8 @@ describe('utils/registry-resolver', () => {
         path: join('/project/.promptscript/vendor/repo', 'configs'),
         isRemote: false,
         source: 'git',
+        repositoryUrl: 'https://github.com/org/registry.git',
+        repositoryPath: '/project/.promptscript/vendor/repo',
       });
       expect(mockResolveVendoredRepository).toHaveBeenCalledWith(
         '/project/.promptscript/vendor',

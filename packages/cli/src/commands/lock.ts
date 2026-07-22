@@ -5,7 +5,7 @@ import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { LockOptions } from '../types.js';
 import { loadConfig, findConfigFile } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
-import type { Lockfile, LockfileDependency, LockfileReference } from '@promptscript/core';
+import type { Lockfile, LockfileDependency } from '@promptscript/core';
 import { LOCKFILE_VERSION, isValidLockfile } from '@promptscript/core';
 import { collectRemoteImports } from './lock-scanner.js';
 import {
@@ -16,6 +16,8 @@ import {
   versionSatisfiesRange,
   type GitAuthOptions,
 } from '@promptscript/resolver';
+import { generateLockfileReferences } from './lock-references.js';
+import { resolveRegistryPath } from '../utils/registry-resolver.js';
 
 /** Path to the lockfile relative to cwd. */
 export const LOCKFILE_PATH = 'promptscript.lock';
@@ -59,24 +61,6 @@ export async function lockCommand(options: LockOptions): Promise<void> {
     const aliasEntries = Object.entries(aliases);
     const defaultGitRegistry = config.registry?.git;
 
-    // Scan .prs files for remote @use imports
-    const projectRoot = process.cwd();
-    const localPath = resolve(projectRoot, '.promptscript');
-    const entryPath = config.input?.entry
-      ? resolve(projectRoot, config.input.entry)
-      : resolve(localPath, 'project.prs');
-    const scannedImports = await collectRemoteImports(entryPath, {
-      localPath,
-      registries: config.registries,
-      strict: true,
-    });
-
-    if (aliasEntries.length === 0 && scannedImports.length === 0 && !defaultGitRegistry) {
-      spinner.warn('No remote dependencies found');
-      ConsoleOutput.muted('Add registries to promptscript.yaml or use @use github.com/... imports');
-      return;
-    }
-
     // Load existing lockfile to preserve already-resolved entries
     let existing: Lockfile = { version: LOCKFILE_VERSION, dependencies: {} };
     if (existsSync(LOCKFILE_PATH)) {
@@ -92,6 +76,30 @@ export async function lockCommand(options: LockOptions): Promise<void> {
           cause: error,
         });
       }
+    }
+
+    // Scan .prs files for remote @use imports
+    const projectRoot = process.cwd();
+    const localPath = resolve(projectRoot, '.promptscript');
+    const entryPath = config.input?.entry
+      ? resolve(projectRoot, config.input.entry)
+      : resolve(localPath, 'project.prs');
+    const registry = await resolveRegistryPath(config, {
+      ...(!options.update && Object.keys(existing.dependencies).length > 0
+        ? { lockfile: existing }
+        : {}),
+    });
+    const scannedImports = await collectRemoteImports(entryPath, {
+      localPath,
+      registryPath: resolve(registry.path),
+      registries: config.registries,
+      strict: true,
+    });
+
+    if (aliasEntries.length === 0 && scannedImports.length === 0 && !defaultGitRegistry) {
+      spinner.warn('No remote dependencies found');
+      ConsoleOutput.muted('Add registries to promptscript.yaml or use @use github.com/... imports');
+      return;
     }
 
     const requestedDependencies = new Map<string, RequestedDependency>();
@@ -169,7 +177,17 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       }
     }
 
-    const references: Record<string, LockfileReference> = {};
+    const references = await generateLockfileReferences(
+      config,
+      entryPath,
+      localPath,
+      {
+        version: LOCKFILE_VERSION,
+        dependencies,
+        ...(existing.references ? { references: existing.references } : {}),
+      },
+      scannedImports
+    );
 
     const lockfile: Lockfile = {
       version: LOCKFILE_VERSION,

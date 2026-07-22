@@ -98,7 +98,7 @@ describe('Resolver.verifyReferenceHashes', () => {
     expect(errors).toEqual([]);
   });
 
-  it('returns empty array when referenced file does not exist in cache', async () => {
+  it('reports when a locked reference file is missing from cache', async () => {
     const lockfile: Lockfile = {
       version: 1,
       dependencies: {},
@@ -110,7 +110,8 @@ describe('Resolver.verifyReferenceHashes', () => {
       },
     };
     const errors = await resolver.verifyReferenceHashes(lockfile);
-    expect(errors).toEqual([]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('Reference file is missing');
   });
 
   it('reports error when hash does not match', async () => {
@@ -169,20 +170,49 @@ describe('Resolver.verifyReferenceHashes', () => {
     expect(errors).toEqual([]);
   });
 
-  it('skips entries that throw during file read', async () => {
+  it('verifies references from a configured repository root', async () => {
+    const repoUrl = 'https://github.com/org/default-registry.git';
+    const repositoryPath = join(testCacheDir, 'default-registry');
+    const relativePath = 'references/guide.md';
+    const content = 'default registry guide';
+    await fs.mkdir(join(repositoryPath, 'references'), { recursive: true });
+    await fs.writeFile(join(repositoryPath, relativePath), content);
+    const customResolver = new Resolver({
+      registryPath: repositoryPath,
+      localPath: testCacheDir,
+      cacheDir: testCacheDir,
+      referenceRoots: { [repoUrl]: [repositoryPath] },
+    });
     const lockfile: Lockfile = {
       version: 1,
       dependencies: {},
       references: {
-        'https://github.com/org/repo.git\0@core/skills.prs\0v1.0.0': {
+        [`${repoUrl}\0${relativePath}\0main`]: {
+          hash: hashContent(Buffer.from(content)),
+          lockedAt: '2026-01-01T00:00:00Z',
+        },
+      },
+    };
+
+    const errors = await customResolver.verifyReferenceHashes(lockfile);
+
+    expect(errors).toEqual([]);
+  });
+
+  it('reports entries that cannot be verified', async () => {
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: {},
+      references: {
+        'https://github.com/org/repo.git\0@core/skills.prs\0../outside': {
           hash: 'abc',
           lockedAt: '2026-01-01T00:00:00Z',
         },
       },
     };
-    // File doesn't exist, so it will throw — should be caught and skipped
     const errors = await resolver.verifyReferenceHashes(lockfile);
-    expect(errors).toEqual([]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('Invalid version');
   });
 
   it('verifies reference hashes from the vendored repository', async () => {

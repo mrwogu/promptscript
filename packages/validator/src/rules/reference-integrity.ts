@@ -13,12 +13,13 @@ export const referenceIntegrity: ValidationRule = {
   description: 'Registry reference files must have integrity hashes in lockfile',
   defaultSeverity: 'warning',
   validate: (ctx) => {
-    const { lockfile, registryReferences, ignoreHashes } = ctx.config;
+    const { lockfile, registryReferences, registryReferencePaths, ignoreHashes } = ctx.config;
 
-    // Skip if no lockfile, no references section, or hashes disabled
-    if (ignoreHashes || !lockfile || !lockfile.references || !registryReferences) {
+    // Skip if no lockfile, no registry references, or hashes are disabled
+    if (ignoreHashes || !lockfile || (!registryReferences && !registryReferencePaths)) {
       return;
     }
+    const lockedReferences = lockfile.references ?? {};
 
     // Walk @skills blocks looking for references arrays
     for (const block of ctx.ast.blocks) {
@@ -41,14 +42,16 @@ export const referenceIntegrity: ValidationRule = {
         for (const ref of refs) {
           if (typeof ref !== 'string') continue;
 
-          // Only check registry-sourced references
-          if (!registryReferences.has(ref)) continue;
+          const canonicalKey = block.loc.file
+            ? registryReferencePaths?.get(block.loc.file)?.get(ref)
+            : undefined;
+          if (registryReferencePaths ? !canonicalKey : !registryReferences?.has(ref)) {
+            continue;
+          }
 
-          // Check if any lockfile reference key has this path as its second component
-          const hasEntry = Object.keys(lockfile.references).some((key) => {
-            const parts = key.split('\0');
-            return parts[1] === ref;
-          });
+          const hasEntry = canonicalKey
+            ? Object.hasOwn(lockedReferences, canonicalKey)
+            : Object.keys(lockedReferences).some((key) => key.split('\0')[1] === ref);
 
           if (!hasEntry) {
             ctx.report({

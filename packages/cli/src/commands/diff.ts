@@ -175,6 +175,10 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
         registryPath: registry.path,
         localPath: './.promptscript',
         vendorDir,
+        referenceRoots:
+          registry.repositoryUrl && registry.repositoryPath
+            ? { [registry.repositoryUrl]: [registry.repositoryPath] }
+            : undefined,
         lockfile,
         registries: config.registries,
       },
