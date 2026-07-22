@@ -908,6 +908,7 @@ Before writing to the lockfile, `prs skills add` clones the target ref into a te
 - Markdown references stay inside the skill directory and resolve to existing files
 
 Plain `http://` sources are rejected to prevent MITM. Use `https://`, `git@`, or `github.com/...` form. The fetched commit's integrity hash is written to `promptscript.lock`.
+For SSH input, the lockfile retains the SSH clone URL so later skill updates do not require HTTPS access.
 
 **Examples:**
 
@@ -917,6 +918,9 @@ prs skills add github.com/anthropics/skills/commit@1.0.0
 
 # Add a skill directory (auto-discovers SKILL.md)
 prs skills add github.com/repo/skills/gitnexus
+
+# Add from an SSH-only repository
+prs skills add git@github.com:org/repo.git/skills/private-tool
 
 # Add to a specific .prs file
 prs skills add github.com/anthropics/skills/commit@1.0.0 --file .promptscript/team.prs
@@ -934,6 +938,7 @@ prs skills add github.com/anthropics/skills/commit@1.0.0 --skip-validation
 #### prs skills remove
 
 Remove a skill from the project. Removes the matching `@use` line and its lock entry.
+Partial names must match exactly one imported skill.
 
 ```bash
 prs skills remove <name> [options]
@@ -981,7 +986,7 @@ prs skills list
 
 #### prs skills update
 
-Update lock entries for markdown-sourced skills. Resets lock pins so the next `prs compile` re-resolves to the latest matching versions.
+Update lock entries for markdown-sourced skills. Re-resolves each requested ref to an exact commit and refreshes its integrity hash.
 
 ```bash
 prs skills update [name] [options]
@@ -1001,7 +1006,7 @@ prs skills update [name] [options]
 | `--skip-validation` | Skip SKILL.md frontmatter re-validation |
 | `--strict`          | Treat validation warnings as errors     |
 
-Each updated entry is re-cloned, re-hashed (real `sha256` integrity) and re-validated against the Agent Skills spec — see [`prs skills add`](#prs-skills-add) for the full validator rules. Entries that fail validation are skipped with a reason.
+Each updated entry is re-cloned, re-hashed (real `sha256` integrity) and re-validated against the Agent Skills spec - see [`prs skills add`](#prs-skills-add) for the full validator rules. Entries that cannot be resolved or fail validation are skipped with a reason, and the command exits with status 1.
 
 **Examples:**
 

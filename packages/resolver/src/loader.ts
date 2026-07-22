@@ -180,7 +180,11 @@ export class FileLoader {
     if (!ref.raw.startsWith('@') && ref.segments.length > 0 && ref.segments[0]?.includes('.')) {
       // Extract repo host + path and sub-path from the URL segments
       // Convention: first 3 segments = host/owner/repo, rest = path within repo
-      const segments = ref.raw.split('/');
+      const rawPath =
+        ref.version && ref.raw.endsWith(`@${ref.version}`)
+          ? ref.raw.slice(0, -ref.version.length - 1)
+          : ref.raw;
+      const segments = rawPath.split('/');
       if (segments.length >= 3) {
         const repoUrl = `https://${segments.slice(0, 3).join('/')}`;
         const subPath = segments.slice(3).join('/');

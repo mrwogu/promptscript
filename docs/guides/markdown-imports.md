@@ -76,30 +76,36 @@ prs skills remove commit
 # Removes the @use line and lock entry for the skill
 
 prs skills list
-# Lists all markdown-imported skills with their resolved versions
+# Lists imported skill paths
 
 prs skills update
 # Re-resolves all markdown-imported skills to their latest matching versions
 # and updates promptscript.lock
 ```
 
-Both `prs skills add` and `prs skills update` clone the referenced ref, recompute the real `sha256` integrity hash, and validate the SKILL.md frontmatter against the [Agent Skills spec](https://agentskills.io/specification) before touching `promptscript.lock`. Use `--strict` to treat warnings as errors (useful in CI) or `--skip-validation` to bypass the check when the upstream is in flux. Plain `http://` sources are rejected to prevent MITM.
+Both `prs skills add` and `prs skills update` resolve the requested tag, branch, commit, or semver range to an exact commit. They clone that resolved ref, recompute the real `sha256` integrity hash, and validate the SKILL.md frontmatter against the [Agent Skills spec](https://agentskills.io/specification) before touching `promptscript.lock`. Use `--strict` to treat warnings as errors (useful in CI) or `--skip-validation` to bypass the check when the upstream is in flux. Plain `http://` sources are rejected to prevent MITM.
+When a skill is added with a `git@` source, its canonical repository entry also stores `gitUrl` so later updates continue using SSH.
 
 ## Lock file: version pinning
 
-When a `.prs` file contains remote markdown imports, `prs compile` (or `prs lock`) generates a `promptscript.lock` file recording the exact resolved commit for each dependency:
+When a `.prs` file contains remote markdown imports, `prs skills add` or `prs lock` generates a `promptscript.lock` file recording the exact resolved commit for each dependency:
 
 ```yaml
-# promptscript.lock (auto-generated — commit to version control)
-imports:
-  github.com/anthropics/skills/commit@1.0.0:
-    resolved: github.com/anthropics/skills
+# promptscript.lock (auto-generated - commit to version control)
+version: 1
+dependencies:
+  https://github.com/anthropics/skills:
+    version: 1.0.0
     commit: a3f8c2d1b0e94567890abcdef1234567890abcde
-    path: commit
-  github.com/repo/skills/gitnexus:
-    resolved: github.com/repo/skills
-    commit: 9b2e1f0a3c84512367890abcdef1234567890abc
-    path: gitnexus
+    integrity: sha256-pending
+    source: md
+    skills:
+      - github.com/anthropics/skills/commit@1.0.0
+  github.com/anthropics/skills/commit@1.0.0:
+    version: 1.0.0
+    commit: a3f8c2d1b0e94567890abcdef1234567890abcde
+    integrity: sha256-4a74f088efbf7dc1df7cac0877869c26f6119db1f9f5f2703f5de7388ca36d9f
+    source: md
 ```
 
 Commit `promptscript.lock` to version control. This ensures every machine and CI run resolves to the same content, regardless of what has been pushed to the remote since.

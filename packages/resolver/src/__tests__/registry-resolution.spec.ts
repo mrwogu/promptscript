@@ -189,6 +189,24 @@ describe('FileLoader.resolveRef — registry integration', () => {
     expect(parsed!.path).toBe('standards/base');
   });
 
+  it('removes the version suffix from URL-like registry paths', () => {
+    const loader = new FileLoader({
+      registryPath: '/registry',
+      localPath: '/local',
+    });
+    const ref = makePathRef('github.com/org/repo/standards/base@^1.2.0');
+    ref.segments = ['github.com', 'org', 'repo', 'standards', 'base'];
+    ref.version = '^1.2.0';
+
+    const parsed = parseRegistryMarker(loader.resolveRef(ref, '/local/file.prs'));
+
+    expect(parsed).toEqual({
+      repoUrl: 'https://github.com/org/repo',
+      path: 'standards/base',
+      version: '^1.2.0',
+    });
+  });
+
   it('still resolves relative paths correctly (regression)', () => {
     // Arrange
     const loader = new FileLoader({
@@ -1015,7 +1033,7 @@ describe('Resolver — registry marker handling', () => {
     expect(traversalErrors[0]!.message).toContain('Path traversal detected');
   });
 
-  it('re-clones and checks out locked commit when cached commit mismatches', async () => {
+  it('reports checkout failure when a cached commit mismatches the lock', async () => {
     // Covers resolver.ts lines 695-713: lockfile commit verification on cache hit
     const tempDir = join(testCacheDir, 'project-lock-mismatch');
     await fs.mkdir(tempDir, { recursive: true });
@@ -1058,6 +1076,7 @@ describe('Resolver — registry marker handling', () => {
         '@meta { id: "acme-standards" syntax: "1.0.0" }\n@context { """new standards""" }'
       );
     });
+    mockGit.checkout.mockRejectedValueOnce(new Error('checkout failed'));
 
     const resolver = new Resolver({
       registryPath: resolve(FIXTURES_DIR, 'registry'),
@@ -1083,11 +1102,10 @@ describe('Resolver — registry marker handling', () => {
     expect(mockGit.clone).toHaveBeenCalled();
     // checkoutCommit should have been called with the locked commit
     expect(mockGit.checkout).toHaveBeenCalledWith(lockedCommit);
-    // Standards content should be from the new clone
-    expect(result.errors).toEqual([]);
+    expect(result.errors.some((error) => error.message.includes('checkout failed'))).toBe(true);
   });
 
-  it('checks out locked commit after fresh clone on cache miss', async () => {
+  it('uses a retained SSH URL and checks out the locked commit on cache miss', async () => {
     // Covers resolver.ts lines 728-729: lockfile commit checkout on cache miss
     const tempDir = join(testCacheDir, 'project-lock-fresh');
     await fs.mkdir(tempDir, { recursive: true });
@@ -1109,7 +1127,7 @@ describe('Resolver — registry marker handling', () => {
     const prsFile = join(tempDir, 'test.prs');
     await fs.writeFile(prsFile, prsContent);
 
-    const lockedCommit = 'c'.repeat(40);
+    const lockedCommit = 'C'.repeat(40);
 
     mockGit.clone.mockImplementation(async (_url: string, targetDir: string) => {
       await fs.mkdir(targetDir, { recursive: true });
@@ -1132,6 +1150,7 @@ describe('Resolver — registry marker handling', () => {
             version: 'latest',
             commit: lockedCommit,
             integrity: 'sha256-test',
+            gitUrl: 'git@github.com:acme/prs-standards.git',
           },
         },
       },
@@ -1140,7 +1159,7 @@ describe('Resolver — registry marker handling', () => {
     const result = await resolver.resolve(prsFile);
 
     expect(mockGit.clone).toHaveBeenCalledWith(
-      'https://github.com/acme/prs-standards.git',
+      'git@github.com:acme/prs-standards.git',
       expect.any(String),
       ['--depth=1']
     );
@@ -1148,8 +1167,7 @@ describe('Resolver — registry marker handling', () => {
     expect(result.errors).toEqual([]);
   });
 
-  it('catches errors during lockfile commit verification and continues', async () => {
-    // Covers resolver.ts line 711: catch block during lockfile commit verification
+  it('reports errors during cached lockfile commit verification', async () => {
     const tempDir = join(testCacheDir, 'project-lock-error');
     await fs.mkdir(tempDir, { recursive: true });
 
@@ -1204,12 +1222,9 @@ describe('Resolver — registry marker handling', () => {
       },
     });
 
-    // Should not throw — the catch block handles the error
     const result = await resolver.resolve(prsFile);
 
-    // The resolver should still work (using cached version despite clone failure)
-    // or have errors about the failed import, but not crash
-    expect(result).toBeDefined();
+    expect(result.errors.some((error) => error.message.includes('clone failed'))).toBe(true);
   });
 
   it('skips symlinked directories during auto-discovery', async () => {
