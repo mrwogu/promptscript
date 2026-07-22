@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { type CliServices, type FileSystem, type PromptSystem } from '../../services.js';
 import type { InitOptions } from '../../types.js';
+import { ConsoleOutput } from '../../output/console.js';
 
 const { hooksCommandMock } = vi.hoisted(() => ({
   hooksCommandMock: vi.fn().mockResolvedValue(undefined),
@@ -18,6 +19,7 @@ describe('initCommand', () => {
   let mockServices: CliServices;
 
   beforeEach(() => {
+    process.exitCode = undefined;
     mockFs = {
       writeFile: vi.fn(),
       mkdir: vi.fn(),
@@ -196,6 +198,33 @@ describe('initCommand', () => {
       await initCommand(options, mockServices);
 
       expect(hooksCommandMock).not.toHaveBeenCalled();
+    });
+
+    it('should not report hooks as installed when the hooks command fails', async () => {
+      vi.mocked(mockFs.existsSync).mockReturnValue(false);
+      hooksCommandMock.mockImplementation(async () => {
+        process.exitCode = 1;
+      });
+      const warnSpy = vi.spyOn(ConsoleOutput, 'warn').mockImplementation(() => {});
+      const infoSpy = vi.spyOn(ConsoleOutput, 'info').mockImplementation(() => {});
+
+      await initCommand(
+        {
+          ...defaultOptions,
+          yes: true,
+          name: 'test-project',
+          targets: ['claude'],
+        },
+        mockServices
+      );
+
+      expect(warnSpy).toHaveBeenCalledWith('Failed to install claude hooks');
+      expect(infoSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('Auto-compile hooks installed for')
+      );
+      expect(process.exitCode).toBeUndefined();
+      warnSpy.mockRestore();
+      infoSpy.mockRestore();
     });
   });
 

@@ -110,6 +110,9 @@ Detected tools are preselected in interactive mode. Other registered targets rem
 unchecked. `prs init --yes` requires `--targets`, detected tools, or targets configured in user
 defaults. It never invents GitHub, Claude, or Cursor defaults.
 
+`--interactive` and `--yes` are mutually exclusive. When `--team` is provided (or configured as a
+user default for `--yes`), its value is written to the generated `@meta.team` field.
+
 **Prettier Integration:**
 
 If a Prettier configuration file is detected:

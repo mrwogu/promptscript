@@ -220,6 +220,16 @@ describe('commands/init', () => {
       expect(mockFs.writeFile).not.toHaveBeenCalled();
     });
 
+    it('should reject --interactive combined with --yes', async () => {
+      await initCommand({ interactive: true, yes: true }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Cannot use --interactive with --yes')
+      );
+    });
+
     it('should preview all files without writing in dry-run mode', async () => {
       await initCommand({ yes: true, dryRun: true }, mockServices);
 
@@ -251,6 +261,19 @@ describe('commands/init', () => {
       );
       expect(parseYaml(yamlCall?.[1] as string)).toMatchObject({ id: projectName });
       expect(prsCall?.[1]).toContain(JSON.stringify(projectName));
+    });
+
+    it('should reject empty and multiline project metadata before writing', async () => {
+      await initCommand({ yes: true, name: '   ' }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
+
+      process.exitCode = undefined;
+      await initCommand({ yes: true, name: 'valid', team: 'team\nother' }, mockServices);
+
+      expect(process.exitCode).toBe(1);
+      expect(mockFs.writeFile).not.toHaveBeenCalled();
     });
 
     it('should reject multiline PromptScript directives before writing', async () => {
@@ -324,15 +347,27 @@ describe('commands/init', () => {
       expect(process.exitCode).toBe(1);
     });
 
-    it('should accept team option without error', async () => {
+    it('should include the team namespace in project metadata', async () => {
       await initCommand({ yes: true, team: 'myteam' }, mockServices);
 
-      // Team is used internally but not output to promptscript.yaml
-      expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'promptscript.yaml',
-        expect.any(String),
-        'utf-8'
+      const projectCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === '.promptscript/project.prs'
       );
+      expect(projectCall?.[1]).toContain('team: "myteam"');
+    });
+
+    it('should use the configured team default with --yes', async () => {
+      mockLoadUserConfig.mockResolvedValue({
+        version: '1',
+        defaults: { targets: ['github'], team: 'platform' },
+      });
+
+      await initCommand({ yes: true }, mockServices);
+
+      const projectCall = mockFs.writeFile.mock.calls.find(
+        (call: unknown[]) => call[0] === '.promptscript/project.prs'
+      );
+      expect(projectCall?.[1]).toContain('team: "platform"');
     });
 
     it('should include registry when provided', async () => {
