@@ -1058,7 +1058,7 @@ prs vendor check && prs compile
 
 ### prs resolve
 
-Debug the resolution chain for an import. Shows how an import path is resolved step-by-step: alias expansion, URL construction, cache lookup, and file path within the repository.
+Show how an import resolves locally without making network requests. The command reports its repository, lockfile pin, vendor or cache source, and resolved path.
 
 ```bash
 prs resolve <import> [options]
@@ -1092,13 +1092,16 @@ prs resolve @company/security --format json
 **Example output:**
 
 ```
-Resolving: @company/security
-
-  1. Alias lookup:     @company -> github.com/acme/promptscript-base  [project config]
-  2. URL construction: https://github.com/acme/promptscript-base.git
-  3. Cache status:     HIT (commit: a3f8c2d, age: 12m)
-  4. File path:        security.prs
-  5. Resolved to:      ~/.promptscript/.cache/git/abc123/security.prs
+  Import:   @company/security
+  Type:     native .prs
+  Alias:    @company
+  Repo:     github.com/acme/promptscript-base
+  Path:     security
+  Version:  v1.3.0
+  Commit:   a3f8c2d9f6e5b4a32100123456789abcdef01234
+  Source:   vendor
+  Location: /workspace/.promptscript/vendor/github.com/acme/promptscript-base/security.prs
+  Exists:   yes
 ```
 
 ---
