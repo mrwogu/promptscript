@@ -102,6 +102,28 @@ describe('importCommand directory mode', () => {
     await rm(outputDir, { recursive: true, force: true });
   });
 
+  it('should use .promptscript as the default directory output', async () => {
+    const { importCommand } = await import('../commands/import.js');
+    const workingDir = join(tmpdir(), 'prs-import-cmd-cwd-' + Date.now());
+    const originalCwd = process.cwd();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    await mkdir(workingDir, { recursive: true });
+
+    try {
+      process.chdir(workingDir);
+      await importCommand(testDir, {});
+
+      const { readFile: rf } = await import('fs/promises');
+      expect(await rf(join(workingDir, '.promptscript', 'imported.prs'), 'utf-8')).toContain(
+        '@guards'
+      );
+    } finally {
+      process.chdir(originalCwd);
+      consoleSpy.mockRestore();
+      await rm(workingDir, { recursive: true, force: true });
+    }
+  });
+
   it('should preserve an existing output without --force', async () => {
     const { importCommand } = await import('../commands/import.js');
     const outputDir = join(tmpdir(), 'prs-import-cmd-conflict-' + Date.now());
@@ -117,5 +139,19 @@ describe('importCommand directory mode', () => {
 
     process.exitCode = undefined;
     await rm(outputDir, { recursive: true, force: true });
+  });
+
+  it('should report directory import failures', async () => {
+    const { importCommand } = await import('../commands/import.js');
+    const emptyDir = join(tmpdir(), 'prs-import-cmd-empty-' + Date.now());
+    await mkdir(emptyDir, { recursive: true });
+    process.exitCode = undefined;
+
+    await importCommand(emptyDir, {});
+
+    expect(process.exitCode).toBe(1);
+
+    process.exitCode = undefined;
+    await rm(emptyDir, { recursive: true, force: true });
   });
 });

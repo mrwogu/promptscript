@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { execFile } from 'child_process';
 import { join } from 'path';
-import { promises as fs, existsSync } from 'fs';
+import { promises as fs, existsSync, unlinkSync } from 'fs';
 import { tmpdir } from 'os';
 import { promisify } from 'util';
 import { Resolver } from '../resolver.js';
@@ -215,6 +215,182 @@ describe('Resolver.verifyReferenceHashes', () => {
     expect(errors[0]!.message).toContain('Invalid version');
   });
 
+  it('reports an invalid vendor manifest before checking references', async () => {
+    const vendorDir = join(testCacheDir, 'invalid-vendor');
+    await fs.mkdir(vendorDir, { recursive: true });
+    await fs.writeFile(join(vendorDir, VENDOR_MANIFEST_FILE), '{');
+    const vendorResolver = new Resolver({
+      registryPath: testCacheDir,
+      localPath: testCacheDir,
+      cacheDir: testCacheDir,
+      vendorDir,
+    });
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: {},
+      references: {
+        'https://github.com/org/repo.git\0reference.md\0v1.0.0': {
+          hash: 'sha256-test',
+          lockedAt: '2026-01-01T00:00:00Z',
+        },
+      },
+    };
+
+    const errors = await vendorResolver.verifyReferenceHashes(lockfile);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('Invalid vendor manifest');
+  });
+
+  it('reports a vendored reference without a dependency pin', async () => {
+    const vendorDir = join(testCacheDir, 'unpinned-reference-vendor');
+    await fs.mkdir(vendorDir, { recursive: true });
+    await fs.writeFile(
+      join(vendorDir, VENDOR_MANIFEST_FILE),
+      JSON.stringify({ version: 1, dependencies: {} })
+    );
+    const repoUrl = 'https://github.com/org/repo.git';
+    const vendorResolver = new Resolver({
+      registryPath: testCacheDir,
+      localPath: testCacheDir,
+      cacheDir: testCacheDir,
+      vendorDir,
+    });
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: {},
+      references: {
+        [`${repoUrl}\0reference.md\0v1.0.0`]: {
+          hash: 'sha256-test',
+          lockedAt: '2026-01-01T00:00:00Z',
+        },
+      },
+    };
+
+    const errors = await vendorResolver.verifyReferenceHashes(lockfile);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('Vendored reference repository is not pinned');
+  });
+
+  it('reports a vendor manifest removed while references are checked', async () => {
+    const vendorDir = join(testCacheDir, 'removed-reference-vendor');
+    await fs.mkdir(vendorDir, { recursive: true });
+    const manifestPath = join(vendorDir, VENDOR_MANIFEST_FILE);
+    const repoUrl = 'https://github.com/org/repo.git';
+    const dependency = {
+      version: 'v1.0.0',
+      commit: 'a'.repeat(40),
+      integrity: 'sha256-test',
+    };
+    await fs.writeFile(
+      manifestPath,
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          [repoUrl]: {
+            ...dependency,
+            path: getVendorRepositoryRelativePath(repoUrl),
+          },
+        },
+      })
+    );
+    const references: NonNullable<Lockfile['references']> = {};
+    Object.defineProperty(references, `${repoUrl}\0reference.md\0v1.0.0`, {
+      enumerable: true,
+      get: () => {
+        unlinkSync(manifestPath);
+        return {
+          hash: 'sha256-test',
+          lockedAt: '2026-01-01T00:00:00Z',
+        };
+      },
+    });
+    const vendorResolver = new Resolver({
+      registryPath: testCacheDir,
+      localPath: testCacheDir,
+      cacheDir: testCacheDir,
+      vendorDir,
+    });
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: { [repoUrl]: dependency },
+      references,
+    };
+
+    const errors = await vendorResolver.verifyReferenceHashes(lockfile);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('Vendored reference repository is missing');
+  });
+
+  it('reports a reference symlink that escapes its repository', async () => {
+    const repoUrl = 'https://github.com/org/repo.git';
+    const version = 'v1.0.0';
+    const repositoryPath = join(testCacheDir, 'reference-root');
+    const outsidePath = join(testCacheDir, 'outside.md');
+    await fs.mkdir(repositoryPath, { recursive: true });
+    await fs.writeFile(outsidePath, 'outside');
+    await fs.symlink(outsidePath, join(repositoryPath, 'linked.md'));
+    const customResolver = new Resolver({
+      registryPath: repositoryPath,
+      localPath: testCacheDir,
+      cacheDir: testCacheDir,
+      referenceRoots: { [repoUrl]: [repositoryPath] },
+    });
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: {},
+      references: {
+        [`${repoUrl}\0linked.md\0${version}`]: {
+          hash: hashContent(Buffer.from('outside')),
+          lockedAt: '2026-01-01T00:00:00Z',
+        },
+      },
+    };
+
+    const errors = await customResolver.verifyReferenceHashes(lockfile);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('Reference path escapes its repository');
+  });
+
+  it('stringifies non-Error failures while checking a reference hash', async () => {
+    const repoUrl = 'https://github.com/org/repo.git';
+    const version = 'v1.0.0';
+    const relativePath = 'reference.md';
+    const repositoryPath = join(testCacheDir, 'throwing-reference-root');
+    await fs.mkdir(repositoryPath, { recursive: true });
+    await fs.writeFile(join(repositoryPath, relativePath), 'content');
+    const entry = {
+      hash: '',
+      lockedAt: '2026-01-01T00:00:00Z',
+    };
+    Object.defineProperty(entry, 'hash', {
+      get: () => {
+        throw 'hash getter failed';
+      },
+    });
+    const customResolver = new Resolver({
+      registryPath: repositoryPath,
+      localPath: testCacheDir,
+      cacheDir: testCacheDir,
+      referenceRoots: { [repoUrl]: [repositoryPath] },
+    });
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: {},
+      references: {
+        [`${repoUrl}\0${relativePath}\0${version}`]: entry,
+      },
+    };
+
+    const errors = await customResolver.verifyReferenceHashes(lockfile);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('hash getter failed');
+  });
+
   it('verifies reference hashes from the vendored repository', async () => {
     const repoUrl = 'https://github.com/org/repo.git';
     const version = 'v1.0.0';
@@ -260,5 +436,52 @@ describe('Resolver.verifyReferenceHashes', () => {
     const errors = await vendorResolver.verifyReferenceHashes(lockfile);
 
     expect(errors).toEqual([]);
+  });
+
+  it('reports a missing reference from a valid vendored repository', async () => {
+    const repoUrl = 'https://github.com/org/repo.git';
+    const version = 'v1.0.0';
+    const relativePath = 'missing.md';
+    const vendorDir = join(testCacheDir, 'missing-reference-vendor');
+    const repositoryPath = join(vendorDir, getVendorRepositoryRelativePath(repoUrl));
+    await fs.mkdir(repositoryPath, { recursive: true });
+    await fs.writeFile(join(repositoryPath, 'base.prs'), '@meta { id: "base" }');
+    const commit = await initializeVendoredGitRepository(repositoryPath);
+    const integrity = await hashVendorRepository(repositoryPath);
+    const manifest: VendorManifest = {
+      version: 1,
+      dependencies: {
+        [repoUrl]: {
+          version,
+          commit,
+          integrity,
+          path: getVendorRepositoryRelativePath(repoUrl),
+        },
+      },
+    };
+    await fs.writeFile(join(vendorDir, VENDOR_MANIFEST_FILE), JSON.stringify(manifest));
+    const vendorResolver = new Resolver({
+      registryPath: testCacheDir,
+      localPath: testCacheDir,
+      cacheDir: testCacheDir,
+      vendorDir,
+    });
+    const lockfile: Lockfile = {
+      version: 1,
+      dependencies: {
+        [repoUrl]: { version, commit, integrity },
+      },
+      references: {
+        [`${repoUrl}\0${relativePath}\0${version}`]: {
+          hash: 'sha256-test',
+          lockedAt: '2026-01-01T00:00:00Z',
+        },
+      },
+    };
+
+    const errors = await vendorResolver.verifyReferenceHashes(lockfile);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.message).toContain('Vendored reference file is missing');
   });
 });

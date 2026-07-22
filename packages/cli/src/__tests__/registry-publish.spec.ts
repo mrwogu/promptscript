@@ -147,6 +147,14 @@ catalog:
     expect(writeCall?.[1]).toContain(today);
   });
 
+  it('should leave a manifest without lastUpdated unchanged', async () => {
+    mockFs.readFile.mockResolvedValue("version: '1'\nmeta:\n  name: Test\n");
+
+    await registryPublishCommand('.', { force: true }, mockServices);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
   it('should use custom commit message', async () => {
     await registryPublishCommand('.', { dryRun: true, message: 'Custom commit' }, mockServices);
 
@@ -322,6 +330,28 @@ catalog:
     await registryPublishCommand('.', { force: true, tag: 'v1.0.0' }, mockServices);
 
     expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject an existing remote tag before mutating the repository', async () => {
+    mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'show-ref') {
+        throw new Error('missing ref');
+      }
+      if (Array.isArray(args) && args[0] === 'ls-remote') {
+        return 'abc123\trefs/tags/v1.0.0' as unknown as ReturnType<typeof execFileSync>;
+      }
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
+
+    await registryPublishCommand('.', { force: true, tag: 'v1.0.0' }, mockServices);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(mockExecFileSync).not.toHaveBeenCalledWith(
+      'git',
+      ['add', '-A', '--', '.'],
+      expect.any(Object)
+    );
     expect(process.exitCode).toBe(1);
   });
 

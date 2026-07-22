@@ -46,8 +46,10 @@ vi.mock('../utils/registry-resolver', () => ({
 
 // Mock Resolver
 const mockResolve = vi.fn();
+const mockResolverOptions = vi.fn();
 vi.mock('@promptscript/resolver', () => ({
-  Resolver: function MockResolver() {
+  Resolver: function MockResolver(options: unknown) {
+    mockResolverOptions(options);
     return { resolve: mockResolve };
   },
 }));
@@ -230,6 +232,44 @@ describe('commands/inspect', () => {
 
     expect(mockLoadConfig).toHaveBeenCalledWith('/workspace/promptscript.yaml');
     expect(mockResolve).toHaveBeenCalledWith('/workspace/custom/main.prs');
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('should error when --cwd contains no PromptScript config', async () => {
+    mockExistsSync.mockReturnValue(false);
+
+    const { inspectCommand } = await import('../commands/inspect.js');
+    await inspectCommand('review', { cwd: '/workspace' } as InspectOptions);
+
+    expect(mockLoadConfig).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should resolve an explicit config and remote registry path from --cwd', async () => {
+    mockLoadConfig.mockResolvedValue({
+      input: { entry: 'custom/main.prs' },
+      registries: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: '/cache/remote-registry',
+      isRemote: true,
+    });
+    mockResolve.mockResolvedValue(
+      makeResolvedAst({
+        review: { description: 'Review code' },
+      })
+    );
+
+    const { inspectCommand } = await import('../commands/inspect.js');
+    await inspectCommand('review', {
+      cwd: '/workspace',
+      config: 'config/custom.yaml',
+    } as InspectOptions);
+
+    expect(mockLoadConfig).toHaveBeenCalledWith('/workspace/config/custom.yaml');
+    expect(mockResolverOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ registryPath: '/cache/remote-registry' })
+    );
     expect(process.exitCode).toBeUndefined();
   });
 

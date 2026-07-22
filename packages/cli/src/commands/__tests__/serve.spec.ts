@@ -55,6 +55,16 @@ describe('serveCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('reports non-Error server startup failures', async () => {
+    const errorSpy = vi.spyOn(ConsoleOutput, 'error').mockImplementation(() => undefined);
+    mockStartServer.mockRejectedValue('address already in use');
+
+    await serveCommand({ port: '8080' });
+
+    expect(errorSpy).toHaveBeenCalledWith('Failed to start server: address already in use');
+    expect(process.exitCode).toBe(1);
+  });
+
   it('passes host option', async () => {
     await serveCommand({ host: '0.0.0.0' });
     expect(mockStartServer).toHaveBeenCalledWith(expect.objectContaining({ host: '0.0.0.0' }));

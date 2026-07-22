@@ -4,6 +4,7 @@ const {
   mockSucceed,
   mockFail,
   mockConsoleError,
+  mockWarn,
   mockSpinner,
   mockExistsSync,
   mockReadFile,
@@ -88,7 +89,7 @@ vi.mock('../../output/console.js', () => ({
     error: mockConsoleError,
     muted: vi.fn(),
     newline: vi.fn(),
-    warn: vi.fn(),
+    warn: mockWarn,
   },
 }));
 
@@ -157,6 +158,8 @@ describe('vendorSyncCommand', () => {
     mockCheckoutCommit.mockResolvedValue(undefined);
     mockLoadConfig.mockResolvedValue({});
     mockReaddir.mockResolvedValue([]);
+    mockRename.mockResolvedValue(undefined);
+    mockRm.mockResolvedValue(undefined);
   });
 
   it('should fail when no lockfile exists', async () => {
@@ -354,6 +357,95 @@ describe('vendorSyncCommand', () => {
     );
   });
 
+  it('warns when the previous vendor backup cannot be removed', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockRm.mockRejectedValue(new Error('backup busy'));
+
+    await vendorSyncCommand({});
+
+    expect(mockWarn).toHaveBeenCalledWith(
+      expect.stringContaining('Old vendor backup could not be removed')
+    );
+    expect(mockSucceed).toHaveBeenCalledWith('Vendor synced (1 dependencies downloaded)');
+  });
+
+  it('restores the previous vendor directory when replacement fails', async () => {
+    const stagingDir = '/project/.promptscript/.vendor-stage-test';
+    mockExistsSync
+      .mockReturnValueOnce(true)
+      .mockReturnValueOnce(true)
+      .mockReturnValueOnce(true)
+      .mockReturnValueOnce(false);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockRename.mockImplementation(async (source: string, destination: string) => {
+      if (source === stagingDir && destination.endsWith('.promptscript/vendor')) {
+        throw new Error('replacement failed');
+      }
+    });
+
+    await vendorSyncCommand({});
+
+    expect(mockRename).toHaveBeenCalledWith(
+      expect.stringContaining('.backup-'),
+      expect.stringMatching(/\.promptscript[/\\]vendor$/)
+    );
+    expect(mockRm).toHaveBeenCalledWith(stagingDir, { recursive: true, force: true });
+    expect(mockFail).toHaveBeenCalledWith('Vendor sync failed');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('rejects dependencies without an exact nonzero commit', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'v1.0.0',
+            commit: '0'.repeat(40),
+            integrity: 'sha256-x',
+          },
+        },
+      })
+    );
+
+    await vendorSyncCommand({ dryRun: true });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('not pinned to an exact commit')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('rejects different commits mapped to the same vendor path', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'https://github.com/company/base': {
+            version: 'v1.0.0',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-a',
+          },
+          'git@github.com:company/base': {
+            version: 'v2.0.0',
+            commit: 'b'.repeat(40),
+            integrity: 'sha256-b',
+          },
+        },
+      })
+    );
+
+    await vendorSyncCommand({ dryRun: true });
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Conflicting lockfile entries')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should handle exception in vendor sync', async () => {
     mockExistsSync.mockReturnValue(true);
     mockReadFile.mockResolvedValue(VALID_LOCKFILE);
@@ -384,6 +476,8 @@ describe('vendorCheckCommand', () => {
     mockResolveVendoredRepository.mockResolvedValue(
       '/project/.promptscript/vendor/github.com/company/base'
     );
+    mockReaddir.mockResolvedValue([]);
+    mockRename.mockResolvedValue(undefined);
   });
 
   it('should fail when no lockfile exists', async () => {
@@ -445,6 +539,63 @@ describe('vendorCheckCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should report a non-Error vendor resolution failure', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockResolveVendoredRepository.mockRejectedValue('vendor unavailable');
+
+    await vendorCheckCommand({});
+
+    expect(mockConsoleError).toHaveBeenCalledWith('github.com/company/base: vendor unavailable');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should report lockfile version mismatches', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockLoadVendorManifest.mockResolvedValue({
+      version: 1,
+      dependencies: {
+        'github.com/company/base': {
+          version: 'v2.0.0',
+          commit: 'a'.repeat(40),
+          integrity: 'sha256-vendor',
+          path: 'github.com/company/base',
+        },
+      },
+    });
+
+    await vendorCheckCommand({});
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      'github.com/company/base: version does not match lockfile'
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should report lockfile commit mismatches', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockLoadVendorManifest.mockResolvedValue({
+      version: 1,
+      dependencies: {
+        'github.com/company/base': {
+          version: 'v1.0.0',
+          commit: 'b'.repeat(40),
+          integrity: 'sha256-vendor',
+          path: 'github.com/company/base',
+        },
+      },
+    });
+
+    await vendorCheckCommand({});
+
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      'github.com/company/base: commit does not match lockfile'
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should reject extra manifest entries', async () => {
     mockExistsSync.mockReturnValue(true);
     mockReadFile.mockResolvedValue(VALID_LOCKFILE);
@@ -481,6 +632,57 @@ describe('vendorCheckCommand', () => {
     await vendorCheckCommand({});
 
     expect(mockSucceed).toHaveBeenCalledWith('Vendor directory matches lockfile');
+  });
+
+  it('should accept an absent vendor directory for an empty lockfile', async () => {
+    mockExistsSync.mockReturnValueOnce(true).mockReturnValueOnce(false).mockReturnValueOnce(false);
+    mockReadFile.mockResolvedValue(JSON.stringify({ version: 1, dependencies: {} }));
+
+    await vendorCheckCommand({});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Vendor directory matches lockfile');
+  });
+
+  it('should recover the newest interrupted backup before checking', async () => {
+    mockExistsSync.mockReturnValueOnce(true).mockReturnValueOnce(false).mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockReaddir.mockResolvedValue([
+      { name: 'vendor.backup-1-100', isDirectory: () => true },
+      { name: 'vendor.backup-1-300', isDirectory: () => true },
+      { name: 'ignored', isDirectory: () => false },
+    ]);
+
+    await vendorCheckCommand({});
+
+    expect(mockRename).toHaveBeenCalledWith(
+      expect.stringContaining('vendor.backup-1-300'),
+      expect.stringMatching(/\.promptscript[/\\]vendor$/)
+    );
+    expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('Recovered interrupted'));
+  });
+
+  it('should continue when interrupted backup discovery fails', async () => {
+    mockExistsSync.mockReturnValueOnce(true).mockReturnValueOnce(false).mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockReaddir.mockRejectedValue(new Error('cannot scan backups'));
+
+    await vendorCheckCommand({});
+
+    expect(mockSucceed).toHaveBeenCalledWith('Vendor directory matches lockfile');
+  });
+
+  it('should fail when the vendor manifest is missing', async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(VALID_LOCKFILE);
+    mockLoadVendorManifest.mockResolvedValue(null);
+
+    await vendorCheckCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Vendor check failed');
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      'Vendor manifest is missing: .vendor-manifest.json'
+    );
+    expect(process.exitCode).toBe(1);
   });
 
   it('should handle exception in vendor check', async () => {

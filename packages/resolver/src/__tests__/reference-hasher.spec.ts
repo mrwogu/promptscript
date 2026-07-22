@@ -86,6 +86,30 @@ describe('isInsideCachePath', () => {
 });
 
 describe('isRealPathInside', () => {
+  it('rejects paths outside the cache before resolving real paths', async () => {
+    await expect(isRealPathInside('/outside/file.md', '/cache')).resolves.toBe(false);
+  });
+
+  it('returns false when an inside path does not exist', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'prs-reference-hasher-'));
+    tempDirectories.push(directory);
+    const cachePath = join(directory, 'cache');
+    await mkdir(cachePath);
+
+    await expect(isRealPathInside(join(cachePath, 'missing.md'), cachePath)).resolves.toBe(false);
+  });
+
+  it('accepts an existing file inside the cache path', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'prs-reference-hasher-'));
+    tempDirectories.push(directory);
+    const cachePath = join(directory, 'cache');
+    const filePath = join(cachePath, 'nested', 'file.md');
+    await mkdir(join(cachePath, 'nested'), { recursive: true });
+    await writeFile(filePath, 'inside');
+
+    await expect(isRealPathInside(filePath, cachePath)).resolves.toBe(true);
+  });
+
   it('rejects a symlink that escapes the cache path', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'prs-reference-hasher-'));
     tempDirectories.push(directory);

@@ -166,6 +166,22 @@ describe('pullCommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('should reject inheritance paths whose resolved relative path starts with dots', async () => {
+    mockLoadConfig.mockResolvedValue({
+      inherit: '@..outside',
+      registry: { path: './registry' },
+      targets: [],
+    });
+    mockExistsSync.mockReturnValue(true);
+
+    await pullCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should reject multiple Git ref options', async () => {
     await pullCommand({ branch: 'main', tag: 'v1.0.0' });
 
@@ -184,6 +200,34 @@ describe('pullCommand', () => {
     await pullCommand({ dryRun: true });
 
     expect(createGitRegistry).toHaveBeenCalledWith(expect.objectContaining({ ref: 'v2.0.0' }));
+  });
+
+  it.each([
+    ['branch', 'feature'],
+    ['tag', 'v3.0.0'],
+    ['commit', 'a'.repeat(40)],
+  ] as const)('should use the selected --%s Git ref', async (option, value) => {
+    mockLoadConfig.mockResolvedValue({
+      inherit: '@team/base@v2.0.0',
+      registry: { git: { url: 'https://github.com/team/registry.git', ref: 'main' } },
+      targets: [],
+    });
+
+    await pullCommand({ [option]: value, dryRun: true });
+
+    expect(createGitRegistry).toHaveBeenCalledWith(expect.objectContaining({ ref: value }));
+  });
+
+  it('should fall back to the configured Git ref for an empty inherit version', async () => {
+    mockLoadConfig.mockResolvedValue({
+      inherit: '@team/base@',
+      registry: { git: { url: 'https://github.com/team/registry.git', ref: 'main' } },
+      targets: [],
+    });
+
+    await pullCommand({ dryRun: true });
+
+    expect(createGitRegistry).toHaveBeenCalledWith(expect.objectContaining({ ref: 'main' }));
   });
 
   it('should fail when inheritance source is not found in registry', async () => {

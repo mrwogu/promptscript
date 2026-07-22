@@ -187,6 +187,29 @@ describe('hooksCommand', () => {
       expect(process.exitCode).toBe(1);
     });
 
+    it('reports non-Error settings parse failures', async () => {
+      mockReadFile.mockResolvedValue('{}');
+      const parseSpy = vi.spyOn(JSON, 'parse').mockImplementationOnce(() => {
+        throw 'parse failed';
+      });
+
+      await hooksCommand('install', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockConsole.error).toHaveBeenCalledWith(expect.stringContaining('parse failed'));
+      expect(process.exitCode).toBe(1);
+      parseSpy.mockRestore();
+    });
+
+    it('reports non-Error install failures', async () => {
+      mockWriteFile.mockRejectedValue('write failed');
+
+      await hooksCommand('install', 'claude', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(expect.stringContaining('write failed'));
+      expect(process.exitCode).toBe(1);
+    });
+
     it('errors when no tools detected and no tool specified', async () => {
       // No detect paths match
       mockExistsSync.mockReturnValue(false);
@@ -339,6 +362,46 @@ describe('hooksCommand', () => {
         expect.stringContaining('Failed to uninstall hooks')
       );
       expect(process.exitCode).toBe(1);
+    });
+
+    it('reports non-Error settings read failures', async () => {
+      mockReadFile.mockRejectedValue('read failed');
+
+      await hooksCommand('uninstall', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockConsole.error).toHaveBeenCalledWith(expect.stringContaining('read failed'));
+      expect(process.exitCode).toBe(1);
+    });
+
+    it.each(['[]', 'null', '42'])('reports malformed uninstall settings %s', async (content) => {
+      mockReadFile.mockResolvedValue(content);
+
+      await hooksCommand('uninstall', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to uninstall hooks')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('treats primitive and null settings values as non-hooks', async () => {
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          hooks: {
+            enabled: true,
+            retries: 3,
+            fallback: null,
+            nested: [false, 0, null],
+          },
+        })
+      );
+
+      await hooksCommand('uninstall', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockConsole.info).toHaveBeenCalledWith(expect.stringContaining('not installed'));
     });
 
     it('does not rewrite settings when PromptScript hooks are absent', async () => {

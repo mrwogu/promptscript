@@ -86,6 +86,53 @@ describe('fixSyntaxVersion', () => {
     expect(result).toContain('id: "test\\\\"');
     expect(result).toContain('syntax: "1.1.0"');
   });
+
+  it('should ignore text blocks and nested objects before the syntax field', () => {
+    const content = `@meta {
+  description: """
+  syntax: "1.0.0"
+  """
+  nested: { syntax: "1.0.0" }
+  syntax: "1.0.0"
+}
+`;
+
+    const result = fixSyntaxVersion(content, '1.0.0', '1.1.0');
+
+    expect(result).toBe(`@meta {
+  description: """
+  syntax: "1.0.0"
+  """
+  nested: { syntax: "1.0.0" }
+  syntax: "1.1.0"
+}
+`);
+  });
+
+  it('should ignore syntax text embedded in field names', () => {
+    const content = `@meta {
+  presyntax: "1.0.0"
+  syntax-extra: "1.0.0"
+  syntax: "1.0.0"
+}
+`;
+
+    const result = fixSyntaxVersion(content, '1.0.0', '1.1.0');
+
+    expect(result).toContain('presyntax: "1.0.0"');
+    expect(result).toContain('syntax-extra: "1.0.0"');
+    expect(result).toContain('syntax: "1.1.0"');
+  });
+
+  it.each([
+    '@meta { syntax = "1.0.0" }',
+    '@meta { syntax: 1.0.0 }',
+    '@meta { syntax: "2.0.0" }',
+    '@meta { syntax: "1.0.0 }',
+    '@meta # no opening brace',
+  ])('should reject malformed or mismatched syntax fields: %s', (content) => {
+    expect(fixSyntaxVersion(content, '1.0.0', '1.1.0')).toBeNull();
+  });
 });
 
 describe('discoverPrsFiles', () => {
@@ -139,6 +186,22 @@ describe('discoverPrsFiles', () => {
     const files = discoverPrsFiles(tmpDir);
 
     expect(files).toHaveLength(0);
+  });
+
+  it('should include symbolic links when requested', () => {
+    const outsidePath = join(tmpDir, 'outside.txt');
+    const linkedPath = join(tmpDir, 'linked.prs');
+    writeFileSync(outsidePath, '@meta { id: "outside" syntax: "1.0.0" }');
+    symlinkSync(outsidePath, linkedPath);
+
+    expect(discoverPrsFiles(tmpDir, false, true)).toEqual([linkedPath]);
+  });
+
+  it('should propagate non-missing directory errors in strict mode', () => {
+    const filePath = join(tmpDir, 'not-a-directory');
+    writeFileSync(filePath, 'content');
+
+    expect(() => discoverPrsFiles(filePath, true)).toThrow();
   });
 });
 
@@ -341,6 +404,23 @@ describe('validateCommand --fix', () => {
   """
 }
 `
+    );
+
+    await validateCommand({ fix: true });
+
+    expect(console.log).toHaveBeenCalledWith('No syntax version fixes needed.');
+  });
+
+  it('should reject an invalid lockfile before fixing files', async () => {
+    writeFileSync(join(tmpDir, 'promptscript.lock'), 'version: 1');
+
+    await expect(validateCommand({ fix: true })).rejects.toThrow('Invalid lockfile');
+  });
+
+  it('should load a valid lockfile when no files need fixes', async () => {
+    writeFileSync(
+      join(tmpDir, 'promptscript.lock'),
+      JSON.stringify({ version: 1, dependencies: {} })
     );
 
     await validateCommand({ fix: true });

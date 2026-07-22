@@ -110,6 +110,27 @@ describe('collectRegistryReferences', () => {
     expect(Object.keys(result)).toHaveLength(1);
   });
 
+  it('should prefer the most specific registry root for nested caches', async () => {
+    const nestedCachePath = join(cachePath, 'rules');
+    const refPath = join(nestedCachePath, 'references', 'guide.md');
+    writeFileSync(refPath, 'guide');
+    const ast = makeAst([makeSkillsBlock({ mySkill: { references: [refPath] } }, sourceFile)]);
+
+    const result = await collectRegistryReferences(ast, [
+      { repoUrl: 'https://github.com/org/parent', version, cachePath },
+      { repoUrl: 'https://github.com/org/nested', version, cachePath: nestedCachePath },
+    ]);
+
+    expect(
+      result[buildReferenceKey('https://github.com/org/nested', 'references/guide.md', version)]
+    ).toBeDefined();
+    expect(
+      result[
+        buildReferenceKey('https://github.com/org/parent', 'rules/references/guide.md', version)
+      ]
+    ).toBeUndefined();
+  });
+
   it('should preserve lockedAt when the hash is unchanged', async () => {
     const refPath = join(cachePath, 'rules', 'references', 'guide.md');
     writeFileSync(refPath, 'guide');

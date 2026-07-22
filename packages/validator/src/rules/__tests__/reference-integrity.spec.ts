@@ -152,6 +152,20 @@ describe('PS031: reference-integrity', () => {
     expect(messages).toHaveLength(0);
   });
 
+  it('skips path-mapped references when the block has no source file', () => {
+    const ref = './references/patterns.md';
+    const block: Block = {
+      ...makeSkillsBlock({ mySkill: { references: [ref] } }),
+      loc: { line: 1, column: 1 } as Block['loc'],
+    };
+    const lockfile = { version: LOCKFILE_VERSION, dependencies: {}, references: {} };
+    const registryReferencePaths = new Map([['test.prs', new Map([[ref, 'unused-key']])]]);
+
+    const messages = validate(makeAst([block]), { lockfile, registryReferencePaths });
+
+    expect(messages).toHaveLength(0);
+  });
+
   it('does not accept the same relative path from another repository', () => {
     const ref = './patterns.md';
     const expectedKey = 'https://github.com/org/repo-a\0rules/patterns.md\0v1.0.0';
