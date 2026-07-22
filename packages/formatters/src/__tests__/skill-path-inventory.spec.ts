@@ -24,7 +24,7 @@ const EXPECTED_SKILL_PATHS: Record<string, { basePath: string | null; fileName: 
   cortex: { basePath: '.cortex/skills', fileName: 'SKILL.md' },
   crush: { basePath: '.crush/skills', fileName: 'SKILL.md' },
   factory: { basePath: '.factory/skills', fileName: 'SKILL.md' },
-  gemini: { basePath: '.agents/skills', fileName: 'skill.md' },
+  gemini: { basePath: '.gemini/skills', fileName: 'skill.md' },
   goose: { basePath: '.goose/skills', fileName: 'SKILL.md' },
   iflow: { basePath: '.iflow/skills', fileName: 'SKILL.md' },
   junie: { basePath: '.junie/skills', fileName: 'SKILL.md' },
