@@ -4,13 +4,27 @@ import { findConfigFile } from '../../config/loader.js';
 import { readFile } from 'fs/promises';
 import { parse as parseYaml } from 'yaml';
 import type { PromptScriptConfig } from '@promptscript/core';
+import type { RegistryListOptions } from '../../types.js';
 
 /**
  * Show merged registry alias mappings from all config levels.
  * Project config overrides user (global) config — last write wins.
  */
-export async function registryListCommand(): Promise<void> {
+export async function registryListCommand(options: RegistryListOptions = {}): Promise<void> {
   try {
+    const source = options.source ?? 'all';
+    const format = options.format ?? 'text';
+    if (!['all', 'global', 'project'].includes(source)) {
+      ConsoleOutput.error(`Invalid source: ${source}. Expected all, global, or project.`);
+      process.exitCode = 1;
+      return;
+    }
+    if (!['text', 'json'].includes(format)) {
+      ConsoleOutput.error(`Invalid format: ${format}. Expected text or json.`);
+      process.exitCode = 1;
+      return;
+    }
+
     const userConfig = await loadUserConfig();
 
     // Collect user-level aliases
@@ -51,7 +65,27 @@ export async function registryListCommand(): Promise<void> {
       merged.push({ alias, url, source: 'project' });
     }
 
-    if (merged.length === 0) {
+    const filtered =
+      source === 'global'
+        ? Object.entries(userAliases).map(([alias, url]) => ({
+            alias,
+            url,
+            source: 'global' as const,
+          }))
+        : source === 'project'
+          ? Object.entries(projectAliases).map(([alias, url]) => ({
+              alias,
+              url,
+              source: 'project' as const,
+            }))
+          : merged;
+
+    if (format === 'json') {
+      console.log(JSON.stringify(filtered, null, 2));
+      return;
+    }
+
+    if (filtered.length === 0) {
       ConsoleOutput.muted('No registry aliases configured.');
       ConsoleOutput.muted('Add one with: prs registry add @name <url>');
       return;
@@ -60,11 +94,11 @@ export async function registryListCommand(): Promise<void> {
     ConsoleOutput.newline();
 
     // Align columns: find longest alias for padding
-    const maxAlias = Math.max(...merged.map((e) => e.alias.length));
+    const maxAlias = Math.max(...filtered.map((e) => e.alias.length));
 
-    for (const { alias, url, source } of merged) {
+    for (const { alias, url, source: entrySource } of filtered) {
       const paddedAlias = alias.padEnd(maxAlias);
-      console.log(`  ${paddedAlias}  →  ${url}  (${source})`);
+      console.log(`  ${paddedAlias}  →  ${url}  (${entrySource})`);
     }
 
     ConsoleOutput.newline();

@@ -100,6 +100,13 @@ catalog:
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('"valid": true'));
   });
 
+  it('should reject unsupported output formats', async () => {
+    await registryValidateCommand('.', { format: 'yaml' as 'text' }, mockServices);
+
+    expect(mockFs.readFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should exit with code 1 in strict mode with warnings', async () => {
     // Add an orphaned file to trigger a warning
     mockFs.readdir.mockResolvedValue(['base.prs', 'orphan.prs']);

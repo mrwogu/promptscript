@@ -40,7 +40,9 @@ export function registerRegistryCommands(registry: Command): void {
   registry
     .command('list')
     .description('Show merged registry alias mappings from all config levels')
-    .action(() => registryListCommand());
+    .option('--source <source>', 'Filter by source (all, global, project)', 'all')
+    .option('--format <format>', 'Output format (text, json)', 'text')
+    .action((opts) => registryListCommand(opts));
 
   registry
     .command('add <alias> <url>')

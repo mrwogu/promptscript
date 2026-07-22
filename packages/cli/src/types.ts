@@ -189,6 +189,16 @@ export interface RegistryPublishOptions {
 }
 
 /**
+ * Options for the registry list command.
+ */
+export interface RegistryListOptions {
+  /** Filter aliases by configuration source */
+  source?: 'all' | 'global' | 'project';
+  /** Output format */
+  format?: 'text' | 'json';
+}
+
+/**
  * Options for the registry add command.
  */
 export interface RegistryAddOptions {
