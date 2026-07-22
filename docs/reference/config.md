@@ -870,6 +870,23 @@ watch:
 | `debounce`    | number   | `300`          | Debounce delay (ms) |
 | `clearScreen` | boolean  | `true`         | Clear on rebuild    |
 
+### output
+
+Configures global output behavior.
+
+```yaml
+output:
+  baseDir: '.'
+  header: Managed by the platform team.
+  overwrite: false
+```
+
+| Field       | Type    | Default | Description                                                          |
+| ----------- | ------- | ------- | -------------------------------------------------------------------- |
+| `baseDir`   | string  | `.`     | Base directory for generated output                                  |
+| `header`    | string  | -       | Header added to Markdown after PromptScript metadata and frontmatter |
+| `overwrite` | boolean | `false` | Overwrite conflicting user files without prompting, like `--force`   |
+
 ### formatting
 
 Configures output formatting to match your project's Prettier configuration.

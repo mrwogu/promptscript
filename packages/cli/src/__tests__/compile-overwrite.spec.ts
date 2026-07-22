@@ -461,6 +461,34 @@ describe('compile command - overwrite protection', () => {
         expect(mockWriteFile).toHaveBeenCalled();
         expect(process.exitCode).toBeUndefined();
       });
+
+      it('should honor output.overwrite from configuration', async () => {
+        mockIsTTY.mockReturnValue(false);
+        mockLoadConfig.mockResolvedValue({
+          ...defaultConfig,
+          output: { overwrite: true },
+        });
+        mockExistsSync.mockImplementation(
+          (path: string) => path.includes('project.prs') || path.endsWith('CLAUDE.md')
+        );
+        mockReadFile.mockResolvedValue('user content');
+        mockCompile.mockResolvedValue({
+          success: true,
+          outputs: new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'generated content')]]),
+          stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+          warnings: [],
+          errors: [],
+        });
+
+        await compileCommand({}, mockServices);
+
+        expect(mockWriteFile).toHaveBeenCalledWith(
+          resolve('CLAUDE.md'),
+          'generated content',
+          'utf-8'
+        );
+        expect(process.exitCode).toBeUndefined();
+      });
     });
   });
 
@@ -1471,12 +1499,13 @@ describe('compile command - overwrite protection', () => {
 
       await compileCommand({ watch: true }, mockServices);
 
-      // Should start chokidar watcher (path is resolved to absolute from projectRoot)
+      // Chokidar 5 watches the project directory and filters events itself.
       expect(mockChokidarWatch).toHaveBeenCalledWith(
-        expect.stringContaining('.promptscript/**/*.prs'),
+        process.cwd(),
         expect.objectContaining({
           persistent: true,
           ignoreInitial: true,
+          ignored: expect.any(Function),
         })
       );
 
@@ -1522,6 +1551,7 @@ describe('compile command - overwrite protection', () => {
     });
 
     it('should handle file add event', async () => {
+      vi.useFakeTimers();
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
 
       mockCompile.mockResolvedValue({
@@ -1554,11 +1584,15 @@ describe('compile command - overwrite protection', () => {
       // Trigger add event
       if (addHandler) {
         addHandler('test.prs');
+        await vi.advanceTimersByTimeAsync(350);
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('File added'));
+        expect(mockCompile).toHaveBeenCalledTimes(2);
       }
+      vi.useRealTimers();
     });
 
     it('should handle file unlink event', async () => {
+      vi.useFakeTimers();
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'content')]]);
 
       mockCompile.mockResolvedValue({
@@ -1589,8 +1623,11 @@ describe('compile command - overwrite protection', () => {
       expect(unlinkHandler).toBeDefined();
       if (unlinkHandler) {
         unlinkHandler('test.prs');
+        await vi.advanceTimersByTimeAsync(350);
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('File removed'));
+        expect(mockCompile).toHaveBeenCalledTimes(2);
       }
+      vi.useRealTimers();
     });
 
     it('should handle watcher error event', async () => {
@@ -1700,12 +1737,116 @@ describe('compile command - overwrite protection', () => {
         changeHandler('file2.prs');
         changeHandler('file3.prs');
 
-        // Advance timer past debounce period (100ms)
-        await vi.advanceTimersByTimeAsync(150);
+        // Advance timer past the default debounce period.
+        await vi.advanceTimersByTimeAsync(350);
 
         // Should show file changed message after debounce
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('File changed'));
+        expect(mockCompile).toHaveBeenCalledTimes(1);
       }
+
+      vi.useRealTimers();
+    });
+
+    it('should honor configured include, exclude, debounce, and clearScreen settings', async () => {
+      vi.useFakeTimers();
+      const clearSpy = vi.spyOn(console, 'clear').mockImplementation(() => {});
+      mockLoadConfig.mockResolvedValue({
+        ...defaultConfig,
+        watch: {
+          include: ['.promptscript/**/*.prs'],
+          exclude: ['**/*.test.prs'],
+          debounce: 25,
+          clearScreen: false,
+        },
+      });
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs: new Map(),
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      let changeHandler: ((filename: string) => void) | undefined;
+      mockWatcherOn.mockImplementation((event: string, handler: (filename: string) => void) => {
+        if (event === 'change') changeHandler = handler;
+        return { on: mockWatcherOn };
+      });
+
+      await compileCommand({ watch: true }, mockServices);
+      changeHandler?.(resolve('.promptscript/ignored.test.prs'));
+      await vi.advanceTimersByTimeAsync(30);
+      expect(mockCompile).toHaveBeenCalledTimes(1);
+
+      changeHandler?.(resolve('.promptscript/project.prs'));
+      await vi.advanceTimersByTimeAsync(30);
+      expect(mockCompile).toHaveBeenCalledTimes(2);
+      expect(clearSpy).not.toHaveBeenCalled();
+
+      clearSpy.mockRestore();
+      vi.useRealTimers();
+    });
+
+    it('should serialize recompilation when changes arrive during a build', async () => {
+      vi.useFakeTimers();
+      mockLoadConfig.mockResolvedValue({
+        ...defaultConfig,
+        watch: { debounce: 10, clearScreen: false },
+      });
+      let finishRecompile: (() => void) | undefined;
+      mockCompile
+        .mockResolvedValueOnce({
+          success: true,
+          outputs: new Map(),
+          stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+          warnings: [],
+          errors: [],
+        })
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolvePromise) => {
+              finishRecompile = () =>
+                resolvePromise({
+                  success: true,
+                  outputs: new Map(),
+                  stats: {
+                    totalTime: 100,
+                    resolveTime: 50,
+                    validateTime: 25,
+                    formatTime: 25,
+                  },
+                  warnings: [],
+                  errors: [],
+                });
+            })
+        )
+        .mockResolvedValue({
+          success: true,
+          outputs: new Map(),
+          stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+          warnings: [],
+          errors: [],
+        });
+
+      let changeHandler: ((filename: string) => void) | undefined;
+      mockWatcherOn.mockImplementation((event: string, handler: (filename: string) => void) => {
+        if (event === 'change') changeHandler = handler;
+        return { on: mockWatcherOn };
+      });
+
+      await compileCommand({ watch: true }, mockServices);
+      changeHandler?.(resolve('.promptscript/first.prs'));
+      await vi.advanceTimersByTimeAsync(15);
+      expect(mockCompile).toHaveBeenCalledTimes(2);
+
+      changeHandler?.(resolve('.promptscript/second.prs'));
+      await vi.advanceTimersByTimeAsync(15);
+      expect(mockCompile).toHaveBeenCalledTimes(2);
+
+      finishRecompile?.();
+      await vi.runAllTimersAsync();
+      expect(mockCompile).toHaveBeenCalledTimes(3);
 
       vi.useRealTimers();
     });

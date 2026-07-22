@@ -241,7 +241,11 @@ prs compile [options]
 | `--verbose`             | Show detailed compilation progress                      |
 | `--debug`               | Show debug information (includes verbose)               |
 
-`--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, aggregating errors per profile.
+`--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, reports failures per profile, and uses one watcher for the full build set when combined with `--watch`.
+
+Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
+
+The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
 
 **Examples:**
 
@@ -331,9 +335,9 @@ builds:
 prs build logstrip-factory
 ```
 
-The command accepts the same compile options as `prs compile`, including
+The command accepts the applicable compile options from `prs compile`, including
 `--target`, `--format`, `--output`, `--dry-run`, `--config`, `--force`,
-`--strict`, `--ignore-hashes`, and `--cwd`.
+`--strict`, `--ignore-hashes`, `--registry`, `--watch`, and `--cwd`.
 
 ---
 

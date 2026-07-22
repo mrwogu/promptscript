@@ -106,7 +106,7 @@ program
   .option('--all-builds', 'Compile all named build profiles in deterministic order')
   .option('-t, --target <target>', 'Specific target (github, claude, cursor)')
   .option('-f, --format <format>', 'Output format (alias for --target)')
-  .option('-a, --all', 'All configured targets', true)
+  .option('-a, --all', 'All configured targets')
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
   .option('--dry-run', 'Preview changes')
