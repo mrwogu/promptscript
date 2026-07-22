@@ -309,7 +309,7 @@ describe('version-check', () => {
       expect(result.info?.updateAvailable).toBe(true);
     });
 
-    it('should handle versions with different segment counts', async () => {
+    it('should reject versions with extra numeric segments', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ version: '1.0.0.1' }),
@@ -319,7 +319,7 @@ describe('version-check', () => {
       const { forceCheckForUpdates } = await import('../utils/version-check.js');
       const result = await forceCheckForUpdates('1.0.0');
 
-      expect(result.info?.updateAvailable).toBe(true);
+      expect(result).toEqual({ info: null, error: true });
     });
 
     it('should handle prerelease to stable upgrade', async () => {
@@ -335,7 +335,7 @@ describe('version-check', () => {
       expect(result.info?.updateAvailable).toBe(true);
     });
 
-    it('should handle same version different prerelease', async () => {
+    it('should compare prerelease identifiers', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ version: '1.0.0-beta.1' }),
@@ -345,8 +345,20 @@ describe('version-check', () => {
       const { forceCheckForUpdates } = await import('../utils/version-check.js');
       const result = await forceCheckForUpdates('1.0.0-alpha.1');
 
-      // Both are prereleases, base versions are equal, no upgrade
-      expect(result.info?.updateAvailable).toBe(false);
+      expect(result.info?.updateAvailable).toBe(true);
+    });
+
+    it('should compare numeric prerelease identifiers numerically', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: '1.0.0-beta.10' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { forceCheckForUpdates } = await import('../utils/version-check.js');
+      const result = await forceCheckForUpdates('1.0.0-beta.2');
+
+      expect(result.info?.updateAvailable).toBe(true);
     });
   });
 
@@ -363,6 +375,19 @@ describe('version-check', () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ name: '@promptscript/cli' }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      const { fetchLatestVersion } = await import('../utils/version-check.js');
+      const result = await fetchLatestVersion();
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when version field is not valid semver', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ version: 42 }),
       });
       vi.stubGlobal('fetch', mockFetch);
 

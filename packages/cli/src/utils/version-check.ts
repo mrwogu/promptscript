@@ -6,6 +6,8 @@ import { ConsoleOutput, isQuiet, isVerbose } from '../output/console.js';
 const NPM_REGISTRY_URL = 'https://registry.npmjs.org/@promptscript/cli/latest';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const FETCH_TIMEOUT_MS = 3000;
+const SEMVER_PATTERN =
+  /^(?:v)?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
 /**
  * Cached version check data.
@@ -23,6 +25,62 @@ export interface UpdateInfo {
   currentVersion: string;
   latestVersion: string;
   updateAvailable: boolean;
+}
+
+interface ParsedVersion {
+  major: number;
+  minor: number;
+  patch: number;
+  prerelease: string[];
+}
+
+function parseVersion(version: string): ParsedVersion | null {
+  const match = SEMVER_PATTERN.exec(version);
+  if (!match) return null;
+
+  const prerelease = match[4]?.split('.') ?? [];
+  if (prerelease.some((part) => /^\d+$/.test(part) && part.length > 1 && part.startsWith('0'))) {
+    return null;
+  }
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const patch = Number(match[3]);
+  if (![major, minor, patch].every(Number.isSafeInteger)) return null;
+
+  return {
+    major,
+    minor,
+    patch,
+    prerelease,
+  };
+}
+
+function comparePrerelease(current: string[], latest: string[]): number {
+  if (current.length === 0) return latest.length === 0 ? 0 : -1;
+  if (latest.length === 0) return 1;
+
+  for (let index = 0; index < Math.max(current.length, latest.length); index++) {
+    const currentPart = current[index];
+    const latestPart = latest[index];
+    if (currentPart === undefined) return 1;
+    if (latestPart === undefined) return -1;
+    if (currentPart === latestPart) continue;
+
+    const currentNumeric = /^\d+$/.test(currentPart);
+    const latestNumeric = /^\d+$/.test(latestPart);
+    if (currentNumeric && latestNumeric) {
+      if (latestPart.length !== currentPart.length) {
+        return latestPart.length > currentPart.length ? 1 : -1;
+      }
+      return latestPart > currentPart ? 1 : -1;
+    }
+    if (currentNumeric !== latestNumeric) {
+      return latestNumeric ? -1 : 1;
+    }
+    return latestPart > currentPart ? 1 : -1;
+  }
+
+  return 0;
 }
 
 /**
@@ -87,18 +145,16 @@ function isCacheValid(cache: VersionCache): boolean {
  * Returns null on any network error.
  */
 export async function fetchLatestVersion(): Promise<string | null> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
+  try {
     const response = await fetch(NPM_REGISTRY_URL, {
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
       },
     });
-
-    clearTimeout(timeout);
 
     if (!response.ok) {
       if (isVerbose()) {
@@ -107,8 +163,17 @@ export async function fetchLatestVersion(): Promise<string | null> {
       return null;
     }
 
-    const data = (await response.json()) as { version?: string };
-    return data.version ?? null;
+    const data: unknown = await response.json();
+    if (
+      typeof data !== 'object' ||
+      data === null ||
+      !('version' in data) ||
+      typeof data.version !== 'string' ||
+      !parseVersion(data.version)
+    ) {
+      return null;
+    }
+    return data.version;
   } catch (error) {
     if (isVerbose()) {
       const code = (error as NodeJS.ErrnoException).code;
@@ -116,6 +181,8 @@ export async function fetchLatestVersion(): Promise<string | null> {
       ConsoleOutput.verbose(`Could not check for updates: ${code ?? message}`);
     }
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -124,33 +191,16 @@ export async function fetchLatestVersion(): Promise<string | null> {
  * Returns true if latestVersion is greater than currentVersion.
  */
 function isNewerVersion(currentVersion: string, latestVersion: string): boolean {
-  // Remove 'v' prefix if present
-  const cleanCurrent = currentVersion.replace(/^v/, '');
-  const cleanLatest = latestVersion.replace(/^v/, '');
+  const current = parseVersion(currentVersion);
+  const latest = parseVersion(latestVersion);
+  if (!current || !latest) return false;
 
-  // Split into base version and prerelease
-  const [currentBase, currentPrerelease] = cleanCurrent.split('-');
-  const [latestBase, latestPrerelease] = cleanLatest.split('-');
-
-  // Compare base versions (e.g., 1.0.0)
-  const currentParts = (currentBase ?? '').split('.').map((p) => parseInt(p, 10) || 0);
-  const latestParts = (latestBase ?? '').split('.').map((p) => parseInt(p, 10) || 0);
-
-  for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
-    const c = currentParts[i] ?? 0;
-    const l = latestParts[i] ?? 0;
-    if (l > c) return true;
-    if (l < c) return false;
+  for (const field of ['major', 'minor', 'patch'] as const) {
+    if (latest[field] > current[field]) return true;
+    if (latest[field] < current[field]) return false;
   }
 
-  // Base versions are equal - check prerelease
-  // A version without prerelease is newer than one with prerelease
-  // e.g., 1.0.0 > 1.0.0-alpha.1
-  if (currentPrerelease && !latestPrerelease) {
-    return true;
-  }
-
-  return false;
+  return comparePrerelease(current.prerelease, latest.prerelease) > 0;
 }
 
 /**
