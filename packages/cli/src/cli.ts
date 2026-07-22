@@ -221,7 +221,7 @@ program
 
 program
   .command('upgrade')
-  .description('Upgrade .prs files to the latest syntax version')
+  .description('Upgrade .prs files under .promptscript to the latest syntax version')
   .option('--dry-run', 'Show what would be changed without writing')
   .action(upgradeCommand);
 

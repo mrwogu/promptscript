@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync } from 'fs';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, symlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { fixSyntaxVersion, discoverPrsFiles, validateCommand } from '../validate.js';
@@ -71,6 +71,21 @@ describe('fixSyntaxVersion', () => {
     expect(result).toContain('syntax: "1.1.0"');
     expect(result).toContain('id: "test-{project}"');
   });
+
+  it('should ignore comment braces and escaped backslashes', () => {
+    const content = `@meta # { ignored
+{
+  id: "test\\\\"
+  # } ignored
+  syntax: "1.0.0"
+}
+`;
+
+    const result = fixSyntaxVersion(content, '1.0.0', '1.1.0', 0);
+
+    expect(result).toContain('id: "test\\\\"');
+    expect(result).toContain('syntax: "1.1.0"');
+  });
 });
 
 describe('discoverPrsFiles', () => {
@@ -113,6 +128,16 @@ describe('discoverPrsFiles', () => {
     writeFileSync(join(tmpDir, 'readme.md'), '# Readme');
 
     const files = discoverPrsFiles(tmpDir);
+    expect(files).toHaveLength(0);
+  });
+
+  it('should not discover symbolic links by default', () => {
+    const outsidePath = join(tmpDir, 'outside.txt');
+    writeFileSync(outsidePath, '@meta { id: "outside" syntax: "1.0.0" }');
+    symlinkSync(outsidePath, join(tmpDir, 'linked.prs'));
+
+    const files = discoverPrsFiles(tmpDir);
+
     expect(files).toHaveLength(0);
   });
 });

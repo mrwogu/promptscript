@@ -41,6 +41,31 @@ interface ValidationJsonOutput {
 
 type ValidationResult = Pick<CompileResult, 'errors' | 'warnings'>;
 
+function isEscaped(content: string, index: number): boolean {
+  let backslashes = 0;
+  for (let cursor = index - 1; cursor >= 0 && content[cursor] === '\\'; cursor--) {
+    backslashes++;
+  }
+  return backslashes % 2 === 1;
+}
+
+function findMetaBrace(content: string, metaStart: number): number {
+  let inComment = false;
+  for (let index = metaStart + '@meta'.length; index < content.length; index++) {
+    const ch = content[index];
+    if (inComment) {
+      if (ch === '\n' || ch === '\r') inComment = false;
+      continue;
+    }
+    if (ch === '#') {
+      inComment = true;
+      continue;
+    }
+    if (ch === '{') return index;
+  }
+  return -1;
+}
+
 /**
  * Print validation errors.
  */
@@ -159,57 +184,115 @@ function toJsonOutput(result: ValidationResult, success: boolean): ValidationJso
 export function fixSyntaxVersion(
   content: string,
   currentVersion: string,
-  targetVersion: string
+  targetVersion: string,
+  metaOffset?: number
 ): string | null {
   if (compareVersions(targetVersion, currentVersion) <= 0) return null;
 
-  const metaStart = content.indexOf('@meta');
-  if (metaStart === -1) return null;
+  const metaStart = metaOffset ?? content.indexOf('@meta');
+  if (metaStart < 0 || !content.startsWith('@meta', metaStart)) return null;
 
-  const braceStart = content.indexOf('{', metaStart);
+  const braceStart = findMetaBrace(content, metaStart);
   if (braceStart === -1) return null;
 
   let depth = 1;
-  let braceEnd = braceStart + 1;
   let inString = false;
-  while (braceEnd < content.length && depth > 0) {
-    const ch = content[braceEnd];
-    if (ch === '"' && content[braceEnd - 1] !== '\\') {
-      inString = !inString;
-    } else if (!inString) {
-      if (ch === '{') depth++;
-      else if (ch === '}') depth--;
+  let inTextBlock = false;
+  let inComment = false;
+
+  for (let index = braceStart + 1; index < content.length && depth > 0; index++) {
+    const ch = content[index];
+
+    if (inComment) {
+      if (ch === '\n' || ch === '\r') inComment = false;
+      continue;
     }
-    braceEnd++;
+    if (inTextBlock) {
+      if (content.startsWith('"""', index)) {
+        inTextBlock = false;
+        index += 2;
+      }
+      continue;
+    }
+    if (inString) {
+      if (ch === '"' && !isEscaped(content, index)) inString = false;
+      continue;
+    }
+    if (ch === '#') {
+      inComment = true;
+      continue;
+    }
+    if (content.startsWith('"""', index)) {
+      inTextBlock = true;
+      index += 2;
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+    if (ch === '{') {
+      depth++;
+      continue;
+    }
+    if (ch === '}') {
+      depth--;
+      continue;
+    }
+    if (depth !== 1 || !content.startsWith('syntax', index)) continue;
+
+    const previous = content[index - 1];
+    const next = content[index + 'syntax'.length];
+    if (
+      (previous !== undefined && /[\w-]/.test(previous)) ||
+      (next !== undefined && /[\w-]/.test(next))
+    ) {
+      continue;
+    }
+
+    let valueStart = index + 'syntax'.length;
+    while (/\s/.test(content[valueStart] ?? '')) valueStart++;
+    if (content[valueStart] !== ':') continue;
+    valueStart++;
+    while (/\s/.test(content[valueStart] ?? '')) valueStart++;
+    if (content[valueStart] !== '"') continue;
+
+    const valueEnd = content.indexOf('"', valueStart + 1);
+    if (valueEnd === -1 || content.slice(valueStart + 1, valueEnd) !== currentVersion) {
+      continue;
+    }
+
+    return content.slice(0, valueStart + 1) + targetVersion + content.slice(valueEnd);
   }
 
-  const before = content.slice(0, braceStart);
-  const metaBody = content.slice(braceStart, braceEnd);
-  const after = content.slice(braceEnd);
-
-  const updatedMeta = metaBody.replace(/syntax:\s*"[^"]*"/, `syntax: "${targetVersion}"`);
-  if (updatedMeta === metaBody) return null;
-
-  return before + updatedMeta + after;
+  return null;
 }
 
 /**
  * Recursively discover all .prs files in a directory.
  */
-export function discoverPrsFiles(dir: string): string[] {
+export function discoverPrsFiles(
+  dir: string,
+  strict: boolean = false,
+  includeSymbolicLinks: boolean = false
+): string[] {
   const results: string[] = [];
   try {
     const entries = readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
-        results.push(...discoverPrsFiles(fullPath));
-      } else if (entry.name.endsWith('.prs')) {
+        results.push(...discoverPrsFiles(fullPath, strict, includeSymbolicLinks));
+      } else if (
+        entry.name.endsWith('.prs') &&
+        (entry.isFile() || (includeSymbolicLinks && entry.isSymbolicLink()))
+      ) {
         results.push(fullPath);
       }
     }
-  } catch {
-    // Directory doesn't exist
+  } catch (error) {
+    const code = error instanceof Error ? (error as NodeJS.ErrnoException).code : undefined;
+    if (strict && code !== 'ENOENT') throw error;
   }
   return results;
 }
@@ -407,7 +490,12 @@ async function runFix(requestedFiles?: string[]): Promise<void> {
       }
     }
 
-    const fixed = fixSyntaxVersion(content, declaredVersion, minRequired);
+    const fixed = fixSyntaxVersion(
+      content,
+      declaredVersion,
+      minRequired,
+      parseResult.ast.meta.loc.offset
+    );
     if (fixed) {
       writeFileSync(filePath, fixed, 'utf-8');
       console.log(`Fixed: ${filePath} syntax "${declaredVersion}" \u2192 "${minRequired}"`);
