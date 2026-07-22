@@ -112,6 +112,72 @@ describe('registryListCommand', () => {
     consoleSpy.mockRestore();
   });
 
+  it('should filter aliases by source', async () => {
+    mockLoadUserConfig.mockResolvedValue({
+      version: '1',
+      registries: {
+        '@global': 'github.com/company/global',
+        '@shared': 'github.com/company/global-shared',
+      },
+    });
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        registries: {
+          '@project': 'github.com/company/project',
+          '@shared': 'github.com/company/project-shared',
+        },
+      })
+    );
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
+
+    await registryListCommand({ source: 'project' });
+
+    const calls = consoleSpy.mock.calls.map((call) => call[0] as string);
+    expect(calls.some((line) => line.includes('@project'))).toBe(true);
+    expect(calls.some((line) => line.includes('@global'))).toBe(false);
+    consoleSpy.mockRestore();
+
+    const globalSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
+    await registryListCommand({ source: 'global' });
+    const globalCalls = globalSpy.mock.calls.map((call) => call[0] as string);
+    expect(globalCalls.some((line) => line.includes('global-shared'))).toBe(true);
+    globalSpy.mockRestore();
+  });
+
+  it('should output merged aliases as JSON', async () => {
+    mockLoadUserConfig.mockResolvedValue({
+      version: '1',
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockFindConfigFile.mockReturnValue(null);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(mockConsoleLog);
+
+    await registryListCommand({ format: 'json' });
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('"source": "global"'));
+    consoleSpy.mockRestore();
+  });
+
+  it('should reject unsupported list options', async () => {
+    await registryListCommand({
+      source: 'invalid' as 'all',
+      format: 'yaml' as 'text',
+    });
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Invalid source'));
+    expect(mockLoadUserConfig).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject unsupported output formats', async () => {
+    await registryListCommand({ format: 'yaml' as 'text' });
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(expect.stringContaining('Invalid format'));
+    expect(mockLoadUserConfig).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should handle exception during registry listing', async () => {
     mockLoadUserConfig.mockRejectedValue(new Error('config error'));
 

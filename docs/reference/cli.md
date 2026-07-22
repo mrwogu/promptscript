@@ -638,6 +638,7 @@ prs registry init [directory] [options]
 | `-y, --yes`                | Non-interactive mode with defaults      |
 | `-o, --output <dir>`       | Output directory                        |
 | `--no-seed`                | Skip seed configurations                |
+| `-f, --force`              | Overwrite existing registry files       |
 
 **Examples:**
 
@@ -725,9 +726,12 @@ prs registry publish --tag v1.0.0
 prs registry publish --force
 ```
 
+The registry path must be the root of its Git repository. Dry runs do not modify the manifest
+or Git working tree.
+
 #### prs registry list
 
-List all configured registry alias mappings, showing the merged result from project, user, and system sources.
+List configured registry alias mappings, showing the merged project and global user result.
 
 ```bash
 prs registry list [options]
@@ -735,10 +739,10 @@ prs registry list [options]
 
 **Options:**
 
-| Option              | Description                                           |
-| ------------------- | ----------------------------------------------------- |
-| `--source <source>` | Show only aliases from `project`, `user`, or `system` |
-| `--format <format>` | Output format (text, json)                            |
+| Option              | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `--source <source>` | Show aliases from `all`, `project`, or `global`   |
+| `--format <format>` | Output format (`text` or `json`, default: `text`) |
 
 **Examples:**
 
@@ -756,11 +760,9 @@ prs registry list --format json
 **Example output:**
 
 ```
-Registry aliases (merged: project > user > system)
-
-  @company  github.com/acme/promptscript-base   [project]
-  @team     github.com/acme/team-frontend        [project]
-  @shared   github.com/acme/shared-libs          [user]
+  @company  →  github.com/acme/promptscript-base  (project)
+  @team     →  github.com/acme/team-frontend      (project)
+  @shared   →  github.com/acme/shared-libs        (global)
 ```
 
 #### prs registry add

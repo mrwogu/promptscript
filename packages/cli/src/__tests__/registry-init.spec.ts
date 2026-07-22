@@ -146,6 +146,17 @@ describe('commands/registry/init', () => {
     });
   });
 
+  it('should reject unsafe namespace names before writing files', async () => {
+    await registryInitCommand(
+      'test-registry',
+      { yes: true, namespaces: ['@core', '../../outside'] },
+      mockServices
+    );
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
   it('should run interactive prompts when --yes is not set', async () => {
     mockPrompts.input
       .mockResolvedValueOnce('Interactive Registry') // name

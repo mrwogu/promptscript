@@ -66,6 +66,19 @@ export async function registryInitCommand(
           : false;
     }
 
+    namespaces = [...new Set(namespaces)];
+    const invalidNamespace = namespaces.find(
+      (namespace) => !/^@[a-z0-9][a-z0-9-]*$/.test(namespace)
+    );
+    if (invalidNamespace) {
+      throw new Error(
+        `Invalid namespace "${invalidNamespace}": expected @ followed by lowercase letters, numbers, or hyphens`
+      );
+    }
+    if (namespaces.length === 0) {
+      throw new Error('At least one namespace is required');
+    }
+
     // Resolve target directory AFTER collecting name
     const targetDir = await resolveTargetDirectory(
       {

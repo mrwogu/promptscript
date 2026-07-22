@@ -37,7 +37,77 @@ export async function registryPublishCommand(
       );
     }
 
-    // 2. Update lastUpdated in manifest
+    // 2. Dry run check
+    if (options.dryRun) {
+      ConsoleOutput.newline();
+      console.log('Dry run - would perform:');
+      ConsoleOutput.muted('  1. Stage all changes');
+      ConsoleOutput.muted(`  2. Commit: ${options.message ?? 'chore: publish registry updates'}`);
+      ConsoleOutput.muted('  3. Push to remote');
+      if (options.tag) {
+        ConsoleOutput.muted(`  4. Tag: ${options.tag}`);
+      }
+      return;
+    }
+
+    // 3. Git operations (using execFileSync to prevent shell injection)
+    const spinner = createSpinner('Publishing registry...').start();
+
+    const git = (...args: string[]): string => {
+      return execFileSync('git', args, { cwd: registryPath, encoding: 'utf-8' }).trim();
+    };
+
+    // Check if git repo
+    let gitRoot: string;
+    try {
+      git('rev-parse', '--is-inside-work-tree');
+      gitRoot = resolve(git('rev-parse', '--show-toplevel'));
+    } catch {
+      spinner.fail('Not a git repository');
+      ConsoleOutput.muted('Initialize with: git init');
+      process.exitCode = 1;
+      return;
+    }
+    if (gitRoot !== registryPath) {
+      spinner.fail('Registry path is not the Git repository root');
+      ConsoleOutput.muted(`Git root: ${gitRoot}`);
+      process.exitCode = 1;
+      return;
+    }
+
+    if (options.tag) {
+      const tagRef = `refs/tags/${options.tag}`;
+      try {
+        git('check-ref-format', tagRef);
+      } catch {
+        spinner.fail(`Invalid tag name: ${options.tag}`);
+        process.exitCode = 1;
+        return;
+      }
+      try {
+        git('show-ref', '--verify', '--quiet', tagRef);
+        spinner.fail(`Tag already exists: ${options.tag}`);
+        process.exitCode = 1;
+        return;
+      } catch {
+        // A missing local tag is the expected result.
+      }
+      let remoteTag: string;
+      try {
+        remoteTag = git('ls-remote', '--tags', 'origin', tagRef);
+      } catch {
+        spinner.fail('Failed to check remote tags');
+        process.exitCode = 1;
+        return;
+      }
+      if (remoteTag) {
+        spinner.fail(`Tag already exists on origin: ${options.tag}`);
+        process.exitCode = 1;
+        return;
+      }
+    }
+
+    // 4. Update lastUpdated in manifest
     const manifestPath = join(registryPath, 'registry-manifest.yaml');
     if (services.fs.existsSync(manifestPath)) {
       const content = await services.fs.readFile(manifestPath, 'utf-8');
@@ -51,45 +121,15 @@ export async function registryPublishCommand(
       }
     }
 
-    // 3. Dry run check
-    if (options.dryRun) {
-      ConsoleOutput.newline();
-      console.log('Dry run - would perform:');
-      ConsoleOutput.muted('  1. Stage all changes');
-      ConsoleOutput.muted(`  2. Commit: ${options.message ?? 'chore: publish registry updates'}`);
-      ConsoleOutput.muted('  3. Push to remote');
-      if (options.tag) {
-        ConsoleOutput.muted(`  4. Tag: ${options.tag}`);
-      }
-      return;
-    }
-
-    // 4. Git operations (using execFileSync to prevent shell injection)
-    const spinner = createSpinner('Publishing registry...').start();
-
-    const git = (...args: string[]): string => {
-      return execFileSync('git', args, { cwd: registryPath, encoding: 'utf-8' }).trim();
-    };
-
-    // Check if git repo
-    try {
-      git('rev-parse', '--is-inside-work-tree');
-    } catch {
-      spinner.fail('Not a git repository');
-      ConsoleOutput.muted('Initialize with: git init');
-      process.exitCode = 1;
-      return;
-    }
-
-    // Stage, commit, push
-    git('add', '-A');
+    // 5. Stage, commit, push
+    git('add', '-A', '--', '.');
 
     const commitMessage = options.message ?? 'chore: publish registry updates';
-    try {
+    const hasChanges = git('status', '--porcelain', '--', '.').length > 0;
+    if (hasChanges) {
       git('commit', '-m', commitMessage);
-    } catch {
+    } else {
       spinner.warn('No changes to commit');
-      return;
     }
 
     // Push
@@ -103,14 +143,28 @@ export async function registryPublishCommand(
 
     // Tag if requested
     if (options.tag) {
-      git('tag', options.tag);
-      git('push', 'origin', options.tag);
+      const tagRef = `refs/tags/${options.tag}`;
+      git('tag', '--', options.tag);
+      try {
+        git('push', 'origin', tagRef);
+      } catch {
+        try {
+          git('tag', '-d', '--', options.tag);
+        } catch {
+          // Keep the remote push failure as the primary outcome.
+        }
+        spinner.fail('Tag push failed');
+        process.exitCode = 1;
+        return;
+      }
     }
 
     spinner.succeed('Registry published');
 
     ConsoleOutput.newline();
-    ConsoleOutput.muted(`Commit: ${commitMessage}`);
+    if (hasChanges) {
+      ConsoleOutput.muted(`Commit: ${commitMessage}`);
+    }
     if (options.tag) {
       ConsoleOutput.muted(`Tag: ${options.tag}`);
     }

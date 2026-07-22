@@ -12,6 +12,12 @@ export async function registryValidateCommand(
   options: RegistryValidateOptions,
   services: CliServices = createDefaultServices()
 ): Promise<void> {
+  if (options.format && !['text', 'json'].includes(options.format)) {
+    ConsoleOutput.error(`Invalid format: ${options.format}. Expected text or json.`);
+    process.exitCode = 1;
+    return;
+  }
+
   const registryPath = resolve(path ?? '.');
 
   const spinner = createSpinner('Validating registry...').start();

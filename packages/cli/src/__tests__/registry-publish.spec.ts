@@ -82,7 +82,15 @@ catalog:
       cwd: '/test',
     };
 
-    mockExecFileSync.mockReturnValue('' as unknown as ReturnType<typeof execFileSync>);
+    mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'show-ref') {
+        throw new Error('missing ref');
+      }
+      if (Array.isArray(args) && args[0] === 'status') {
+        return 'M registry-manifest.yaml' as unknown as ReturnType<typeof execFileSync>;
+      }
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
   });
 
   afterEach(() => {
@@ -99,6 +107,7 @@ catalog:
       expect.arrayContaining(['commit']),
       expect.any(Object)
     );
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
   });
 
   it('should skip validation when --force is used', async () => {
@@ -127,17 +136,15 @@ catalog:
   });
 
   it('should update lastUpdated in manifest', async () => {
-    await registryPublishCommand('.', { dryRun: true }, mockServices);
+    await registryPublishCommand('.', { force: true }, mockServices);
 
-    // Check that writeFile was called with updated date
     const writeCall = mockFs.writeFile.mock.calls.find(
       (call: unknown[]) =>
         typeof call[0] === 'string' && (call[0] as string).includes('registry-manifest.yaml')
     );
-    if (writeCall) {
-      const today = new Date().toISOString().split('T')[0];
-      expect(writeCall[1]).toContain(today);
-    }
+    expect(writeCall).toBeDefined();
+    const today = new Date().toISOString().split('T')[0];
+    expect(writeCall?.[1]).toContain(today);
   });
 
   it('should use custom commit message', async () => {
@@ -163,11 +170,24 @@ catalog:
     await registryPublishCommand('.', { force: true }, mockServices);
 
     expect(process.exitCode).toBe(1);
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+  });
+
+  it('should reject a registry path below the Git repository root', async () => {
+    mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'rev-parse' && args[1] === '--show-toplevel') {
+        return '/parent' as unknown as ReturnType<typeof execFileSync>;
+      }
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
+
+    await registryPublishCommand('.', { force: true }, mockServices);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
   });
 
   it('should succeed with full git publish flow', async () => {
-    mockExecFileSync.mockReturnValue('' as unknown as ReturnType<typeof execFileSync>);
-
     await registryPublishCommand('.', { force: true }, mockServices);
 
     // Should call git add, commit, push
@@ -176,7 +196,11 @@ catalog:
       ['rev-parse', '--is-inside-work-tree'],
       expect.any(Object)
     );
-    expect(mockExecFileSync).toHaveBeenCalledWith('git', ['add', '-A'], expect.any(Object));
+    expect(mockExecFileSync).toHaveBeenCalledWith(
+      'git',
+      ['add', '-A', '--', '.'],
+      expect.any(Object)
+    );
     expect(mockExecFileSync).toHaveBeenCalledWith(
       'git',
       ['commit', '-m', 'chore: publish registry updates'],
@@ -185,18 +209,37 @@ catalog:
     expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push'], expect.any(Object));
   });
 
-  it('should warn when no changes to commit', async () => {
+  it('should push without committing when the working tree is clean', async () => {
+    mockExecFileSync.mockImplementation((_cmd: unknown, _args: unknown) => {
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
+
+    await registryPublishCommand('.', { force: true }, mockServices);
+
+    expect(mockExecFileSync).not.toHaveBeenCalledWith(
+      'git',
+      expect.arrayContaining(['commit']),
+      expect.any(Object)
+    );
+    expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push'], expect.any(Object));
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('should fail when commit creation fails', async () => {
     mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'status') {
+        return 'M registry-manifest.yaml' as unknown as ReturnType<typeof execFileSync>;
+      }
       if (Array.isArray(args) && args[0] === 'commit') {
-        throw new Error('nothing to commit');
+        throw new Error('commit hook rejected');
       }
       return '' as unknown as ReturnType<typeof execFileSync>;
     });
 
     await registryPublishCommand('.', { force: true }, mockServices);
 
-    // Should not exit with error - just warn
-    expect(process.exitCode).toBeUndefined();
+    expect(mockExecFileSync).not.toHaveBeenCalledWith('git', ['push'], expect.any(Object));
+    expect(process.exitCode).toBe(1);
   });
 
   it('should fail when push fails', async () => {
@@ -213,21 +256,100 @@ catalog:
   });
 
   it('should create and push tag when --tag is provided', async () => {
-    mockExecFileSync.mockReturnValue('' as unknown as ReturnType<typeof execFileSync>);
-
     await registryPublishCommand('.', { force: true, tag: 'v1.0.0' }, mockServices);
 
-    expect(mockExecFileSync).toHaveBeenCalledWith('git', ['tag', 'v1.0.0'], expect.any(Object));
     expect(mockExecFileSync).toHaveBeenCalledWith(
       'git',
-      ['push', 'origin', 'v1.0.0'],
+      ['tag', '--', 'v1.0.0'],
+      expect.any(Object)
+    );
+    expect(mockExecFileSync).toHaveBeenCalledWith(
+      'git',
+      ['push', 'origin', 'refs/tags/v1.0.0'],
       expect.any(Object)
     );
   });
 
-  it('should use custom commit message in git operations', async () => {
-    mockExecFileSync.mockReturnValue('' as unknown as ReturnType<typeof execFileSync>);
+  it('should validate a tag before mutating the repository', async () => {
+    mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'check-ref-format') {
+        throw new Error('invalid ref');
+      }
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
 
+    await registryPublishCommand('.', { force: true, tag: 'bad tag' }, mockServices);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(mockExecFileSync).not.toHaveBeenCalledWith(
+      'git',
+      ['add', '-A', '--', '.'],
+      expect.any(Object)
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject an existing local tag before mutating the repository', async () => {
+    mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'show-ref') {
+        return '' as unknown as ReturnType<typeof execFileSync>;
+      }
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
+
+    await registryPublishCommand('.', { force: true, tag: 'v1.0.0' }, mockServices);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(mockExecFileSync).not.toHaveBeenCalledWith(
+      'git',
+      ['add', '-A', '--', '.'],
+      expect.any(Object)
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should fail before mutation when remote tags cannot be checked', async () => {
+    mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'show-ref') {
+        throw new Error('missing ref');
+      }
+      if (Array.isArray(args) && args[0] === 'ls-remote') {
+        throw new Error('network unavailable');
+      }
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
+
+    await registryPublishCommand('.', { force: true, tag: 'v1.0.0' }, mockServices);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should remove a local tag when tag push fails', async () => {
+    mockExecFileSync.mockImplementation((_cmd: unknown, args: unknown) => {
+      if (Array.isArray(args) && args[0] === 'show-ref') {
+        throw new Error('missing ref');
+      }
+      if (Array.isArray(args) && args[0] === 'status') {
+        return 'M registry-manifest.yaml' as unknown as ReturnType<typeof execFileSync>;
+      }
+      if (Array.isArray(args) && args[0] === 'push' && args[1] === 'origin') {
+        throw new Error('tag rejected');
+      }
+      return '' as unknown as ReturnType<typeof execFileSync>;
+    });
+
+    await registryPublishCommand('.', { force: true, tag: 'v1.0.0' }, mockServices);
+
+    expect(mockExecFileSync).toHaveBeenCalledWith(
+      'git',
+      ['tag', '-d', '--', 'v1.0.0'],
+      expect.any(Object)
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should use custom commit message in git operations', async () => {
     await registryPublishCommand('.', { force: true, message: 'release: v2.0' }, mockServices);
 
     expect(mockExecFileSync).toHaveBeenCalledWith(
