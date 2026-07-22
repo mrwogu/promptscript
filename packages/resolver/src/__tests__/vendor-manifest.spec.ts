@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'child_process';
-import { mkdtemp, mkdir, rename, rm, symlink, writeFile } from 'fs/promises';
+import { chmod, mkdtemp, mkdir, rename, rm, symlink, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { promisify } from 'util';
@@ -128,6 +128,22 @@ describe('vendor manifest', () => {
       'contents do not match commit'
     );
   });
+
+  it.skipIf(process.platform === 'win32')(
+    'rejects executable mode changes in vendored repositories',
+    async () => {
+      const repositoryDir = await createTempDirectory();
+      const scriptPath = join(repositoryDir, 'run.sh');
+      await writeFile(scriptPath, '#!/bin/sh\n');
+      await chmod(scriptPath, 0o755);
+      const commit = await initializeVendoredGitRepository(repositoryDir);
+      await chmod(scriptPath, 0o644);
+
+      await expect(verifyVendoredGitRepository(repositoryDir, commit)).rejects.toThrow(
+        'executable modes do not match'
+      );
+    }
+  );
 
   it('rejects stale and missing manifest entries', async () => {
     const vendorDir = await createTempDirectory();
