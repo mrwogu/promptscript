@@ -14,9 +14,7 @@ const {
   mockChokidarWatch,
 } = vi.hoisted(() => {
   const mockCompile = vi.fn();
-  const mockCompilerConstructor = vi.fn().mockImplementation(() => ({
-    compile: mockCompile,
-  }));
+  const mockCompilerConstructor = vi.fn();
   const mockWriteFile = vi.fn();
   const mockMkdir = vi.fn();
   const mockReadFile = vi.fn();
@@ -40,7 +38,12 @@ const {
 });
 
 vi.mock('@promptscript/compiler', () => ({
-  Compiler: mockCompilerConstructor,
+  Compiler: class {
+    constructor(options: unknown) {
+      mockCompilerConstructor(options);
+    }
+    compile = mockCompile;
+  },
 }));
 
 // Mock the config loader - include BOTH loadConfig and loadEffectiveConfig
@@ -60,6 +63,11 @@ vi.mock('fs/promises', () => ({
   mkdir: (...args: unknown[]) => mockMkdir(...args),
   readFile: (...args: unknown[]) => mockReadFile(...args),
   readdir: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock('fs', () => ({
+  existsSync: (...args: unknown[]) => mockExistsSync(...args),
+  readFileSync: vi.fn().mockReturnValue(''),
 }));
 
 vi.mock('../prettier/loader.js', () => ({
@@ -140,7 +148,7 @@ describe('compile config/target - Issues 2 and 3', () => {
     vi.clearAllMocks();
 
     // Default mocks
-    mockExistsSync.mockReturnValue(true); // entry file exists
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('promptscript.lock'));
     mockReadFile.mockResolvedValue('');
     mockWriteFile.mockResolvedValue(undefined);
     mockMkdir.mockResolvedValue(undefined);

@@ -64,7 +64,7 @@ const publishPkg = {
   types: pkg.types,
   bin: pkg.bin,
   engines: {
-    node: '>=18',
+    node: '>=20',
   },
   dependencies,
 };

@@ -175,7 +175,8 @@ describe('compile command - createCliLogger warn path', () => {
 
     mockExistsSync.mockImplementation((path: string) => {
       // Entry file exists; skill candidates do not
-      return String(path).includes('project.prs');
+      const value = String(path);
+      return value.includes('project.prs') || value.endsWith('promptscript.yaml');
     });
 
     mockWriteFile.mockResolvedValue(undefined);
@@ -289,7 +290,10 @@ describe('compile command - createCliLogger warn path', () => {
         },
       },
     });
-    mockExistsSync.mockImplementation((path: string) => String(path).endsWith('logstrip.prs'));
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return value.endsWith('logstrip.prs') || value.endsWith('promptscript.yaml');
+    });
     mockCompile.mockResolvedValue({
       success: true,
       outputs: new Map([['AGENTS.md', { path: 'AGENTS.md', content: '# Agents\n' }]]),
@@ -325,7 +329,10 @@ describe('compile command - createCliLogger warn path', () => {
         },
       },
     });
-    mockExistsSync.mockImplementation((path: string) => String(path).endsWith('logstrip.prs'));
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return value.endsWith('logstrip.prs') || value.endsWith('promptscript.yaml');
+    });
     mockCompile.mockResolvedValue({
       success: true,
       outputs: new Map([['AGENTS.md', { path: 'AGENTS.md', content: '# Agents\n' }]]),
@@ -340,6 +347,52 @@ describe('compile command - createCliLogger warn path', () => {
     );
 
     expect(mockWriteFile).toHaveBeenCalledWith('/tmp/prs-build/AGENTS.md', '# Agents\n', 'utf-8');
+  });
+
+  it('should add the configured header without breaking generated markers or frontmatter', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      output: { header: 'Managed by the platform team.' },
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          'CLAUDE.md',
+          {
+            path: 'CLAUDE.md',
+            content:
+              '# CLAUDE.md\n\n<!-- PromptScript 2026-01-01T00:00:00.000Z | source: project.prs | target: claude - do not edit -->\n\nBody\n',
+          },
+        ],
+        [
+          'SKILL.md',
+          {
+            path: 'SKILL.md',
+            content:
+              '---\n# promptscript-generated: 2026-01-01T00:00:00.000Z | source: project.prs | target: claude\nname: test\n---\n\nBody\n',
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      '/mock/project/CLAUDE.md',
+      expect.stringContaining(
+        'target: claude - do not edit -->\n\nManaged by the platform team.\n\nBody'
+      ),
+      'utf-8'
+    );
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      '/mock/project/SKILL.md',
+      expect.stringContaining('name: test\n---\n\nManaged by the platform team.\n\nBody'),
+      'utf-8'
+    );
   });
 
   it('should preserve executable output modes', async () => {
@@ -372,7 +425,11 @@ describe('compile command - createCliLogger warn path', () => {
     const content = '#!/bin/sh\necho report\n';
     mockExistsSync.mockImplementation((path: string) => {
       const value = String(path);
-      return value.includes('project.prs') || value.endsWith('report.sh');
+      return (
+        value.includes('project.prs') ||
+        value.endsWith('report.sh') ||
+        value.endsWith('promptscript.yaml')
+      );
     });
     mockReadFile.mockResolvedValue(content);
     mockCompile.mockResolvedValue({
@@ -433,6 +490,15 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockError).toHaveBeenCalledWith('Cannot use --build with --all-builds');
   });
 
+  it('should reject conflicting target aliases', async () => {
+    await compileCommand({ target: 'claude', format: 'github' }, mockServices);
+
+    expect(mockCompile).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      'Cannot use --target and --format with different values'
+    );
+  });
+
   it('should compile all build profiles with --all-builds', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: { claude: {}, factory: {} },
@@ -462,7 +528,10 @@ describe('compile command - createCliLogger warn path', () => {
         beta: { entry: '.promptscript/beta.prs', targets: ['claude'] },
       },
     });
-    mockExistsSync.mockImplementation((path: string) => String(path).endsWith('.prs'));
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return value.endsWith('.prs') || value.endsWith('promptscript.yaml');
+    });
     mockCompile
       .mockResolvedValueOnce({
         success: false,
@@ -521,6 +590,64 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockLoadConfig).toHaveBeenCalledWith('/repo/custom.yaml');
     expect(mockCompile).not.toHaveBeenCalled();
     expect(mockWarning).toHaveBeenCalledWith('No named build profiles found in config.builds');
+  });
+
+  it('should resolve a relative config path from --cwd', async () => {
+    await compileCommand({ cwd: '/repo/promptscript', config: 'config/custom.yaml' }, mockServices);
+
+    expect(mockLoadConfig).toHaveBeenCalledWith('/repo/promptscript/config/custom.yaml');
+  });
+
+  it('should resolve PROMPTSCRIPT_CONFIG from --cwd', async () => {
+    const previousConfig = process.env['PROMPTSCRIPT_CONFIG'];
+    process.env['PROMPTSCRIPT_CONFIG'] = 'config/environment.yaml';
+    try {
+      await compileCommand({ cwd: '/repo/promptscript' }, mockServices);
+    } finally {
+      if (previousConfig === undefined) {
+        delete process.env['PROMPTSCRIPT_CONFIG'];
+      } else {
+        process.env['PROMPTSCRIPT_CONFIG'] = previousConfig;
+      }
+    }
+
+    expect(mockLoadConfig).toHaveBeenCalledWith('/repo/promptscript/config/environment.yaml');
+  });
+
+  it('should fail closed when --cwd has no configuration', async () => {
+    mockExistsSync.mockReturnValue(false);
+    const previousConfig = process.env['PROMPTSCRIPT_CONFIG'];
+    delete process.env['PROMPTSCRIPT_CONFIG'];
+
+    try {
+      await compileCommand({ cwd: '/repo/missing' }, mockServices);
+    } finally {
+      if (previousConfig !== undefined) {
+        process.env['PROMPTSCRIPT_CONFIG'] = previousConfig;
+      }
+    }
+
+    expect(mockLoadConfig).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      'No PromptScript configuration found in /repo/missing. Run: prs init'
+    );
+  });
+
+  it('should resolve a relative registry override from --cwd', async () => {
+    await compileCommand({ cwd: '/repo/promptscript', registry: 'registry' }, mockServices);
+
+    expect(capturedCompilerOptions?.['resolver']).toEqual(
+      expect.objectContaining({ registryPath: '/repo/promptscript/registry' })
+    );
+  });
+
+  it('should report all-build configuration errors without a stack trace', async () => {
+    mockLoadConfig.mockRejectedValue(new Error('Invalid build configuration'));
+
+    await compileCommand({ allBuilds: true, config: '/repo/invalid.yaml' }, mockServices);
+
+    expect(mockError).toHaveBeenCalledWith('Invalid build configuration');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should continue after build setup throws', async () => {
