@@ -36,7 +36,10 @@ interface RequestedDependency {
  * Existing pins are preserved unless --update is used.
  */
 export async function lockCommand(options: LockOptions): Promise<void> {
-  const spinner = createSpinner('Generating lockfile...').start();
+  const isUpdateCommand = options.command === 'update';
+  const spinner = createSpinner(
+    isUpdateCommand ? 'Updating lockfile...' : 'Generating lockfile...'
+  ).start();
 
   try {
     const configFile = findConfigFile();
@@ -107,13 +110,21 @@ export async function lockCommand(options: LockOptions): Promise<void> {
       requestedDependencies.set(imp.repoUrl, requested);
     }
 
+    const updatePackage = options.updatePackage;
+    const matchingRepos = updatePackage
+      ? [...requestedDependencies.keys()].filter((repoUrl) => repoUrl.includes(updatePackage))
+      : [...requestedDependencies.keys()];
+    if (updatePackage && matchingRepos.length === 0) {
+      throw new Error(`No dependency matched: ${updatePackage}`);
+    }
+
     const dependencies: Record<string, LockfileDependency> = {};
     for (const [repoUrl, requested] of requestedDependencies) {
       dependencies[repoUrl] = await resolveDependency(
         repoUrl,
         [...requested.versions],
         existing.dependencies[repoUrl],
-        options.update === true,
+        options.update === true && matchingRepos.includes(repoUrl),
         requested.fallbackUrl
       );
     }
@@ -144,13 +155,15 @@ export async function lockCommand(options: LockOptions): Promise<void> {
 
     await writeFile(LOCKFILE_PATH, stringifyYaml(lockfile), 'utf-8');
 
-    spinner.succeed('Lockfile generated');
+    spinner.succeed(isUpdateCommand ? 'Lockfile updated' : 'Lockfile generated');
     ConsoleOutput.success(LOCKFILE_PATH);
     ConsoleOutput.newline();
     ConsoleOutput.muted(`${Object.keys(dependencies).length} dependenc(y/ies) locked`);
-    ConsoleOutput.muted('Run "prs update" to re-resolve versions against the remote');
+    if (!isUpdateCommand) {
+      ConsoleOutput.muted('Run "prs update" to re-resolve versions against the remote');
+    }
   } catch (error) {
-    spinner.fail('Failed to generate lockfile');
+    spinner.fail(isUpdateCommand ? 'Failed to update lockfile' : 'Failed to generate lockfile');
     ConsoleOutput.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   }
