@@ -64,6 +64,13 @@ describe('hookCommand', () => {
       expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('malformed'));
     });
 
+    it('exits 1 when stdin JSON is not an object payload', async () => {
+      await callHook('pre-edit', '[]');
+
+      expect(process.exitCode).toBe(1);
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('JSON object'));
+    });
+
     it('exits 0 when no file path is extracted', async () => {
       mockExtractFilePath.mockReturnValue(null);
       await callHook('pre-edit', '{}');
@@ -99,6 +106,16 @@ describe('hookCommand', () => {
       await callHook('pre-edit', '{"tool_input":{"file_path":"/out/CLAUDE.md"}}');
       expect(process.exitCode).toBe(2);
       expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('prs compile'));
+    });
+
+    it('exits 1 when generated-file detection fails', async () => {
+      mockExtractFilePath.mockReturnValue('/out/CLAUDE.md');
+      mockDetectMarker.mockRejectedValue(new Error('permission denied'));
+
+      await callHook('pre-edit', '{"tool_input":{"file_path":"/out/CLAUDE.md"}}');
+
+      expect(process.exitCode).toBe(1);
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('permission denied'));
     });
   });
 
@@ -151,7 +168,7 @@ describe('hookCommand', () => {
       expect(mockReleaseLock).not.toHaveBeenCalled();
     });
 
-    it('exits 0 and reports error on stderr when compile fails, and releases lock', async () => {
+    it('exits 1 and reports error on stderr when compile fails, and releases lock', async () => {
       mockExtractFilePath.mockReturnValue('/project/.promptscript/project.prs');
       mockAcquireLock.mockReturnValue(true);
       mockCompileCommand.mockRejectedValue(new Error('compile boom'));
@@ -161,7 +178,7 @@ describe('hookCommand', () => {
         '{"tool_input":{"file_path":"/project/.promptscript/project.prs"},"cwd":"/project"}'
       );
 
-      expect(process.exitCode).toBeUndefined();
+      expect(process.exitCode).toBe(1);
       expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('compile boom'));
       expect(mockReleaseLock).toHaveBeenCalledWith('/project');
     });
