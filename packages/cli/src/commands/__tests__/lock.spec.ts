@@ -190,7 +190,7 @@ describe('lockCommand', () => {
       })
     );
 
-    await lockCommand({ update: true });
+    await lockCommand({ command: 'update', update: true });
 
     const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
     const parsed = JSON.parse(written) as {
@@ -200,6 +200,65 @@ describe('lockCommand', () => {
       '1234567890abcdef1234567890abcdef12345678'
     );
     expect(mockValidateRemoteAccess).toHaveBeenCalled();
+    expect(mockSucceed).toHaveBeenCalledWith('Lockfile updated');
+  });
+
+  it('should refresh only the dependency matching updatePackage', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: {
+        '@alpha': 'github.com/alpha/base',
+        '@beta': 'github.com/beta/base',
+      },
+    });
+    mockExistsSync.mockReturnValue(true);
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/alpha/base': {
+            version: 'latest',
+            commit: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            integrity: 'sha256-alpha',
+          },
+          'github.com/beta/base': {
+            version: 'latest',
+            commit: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+            integrity: 'sha256-beta',
+          },
+        },
+      })
+    );
+
+    await lockCommand({ update: true, updatePackage: 'alpha' });
+
+    const written = (mockWriteFile.mock.calls[0] as unknown[])[1] as string;
+    const parsed = JSON.parse(written) as {
+      dependencies: Record<string, { commit: string }>;
+    };
+    expect(parsed.dependencies['github.com/alpha/base']?.commit).toBe(
+      '1234567890abcdef1234567890abcdef12345678'
+    );
+    expect(parsed.dependencies['github.com/beta/base']?.commit).toBe(
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    );
+    expect(mockValidateRemoteAccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fail when updatePackage matches no dependency', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockExistsSync.mockReturnValue(false);
+
+    await lockCommand({ update: true, updatePackage: 'missing' });
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockFail).toHaveBeenCalledWith('Failed to generate lockfile');
+    expect(process.exitCode).toBe(1);
   });
 
   it('should fail when a remote dependency cannot be resolved', async () => {

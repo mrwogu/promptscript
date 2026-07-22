@@ -204,6 +204,10 @@ export interface LockOptions {
   dryRun?: boolean;
   /** Re-resolve remote commits even when pins exist */
   update?: boolean;
+  /** Limit forced resolution to matching dependency URLs */
+  updatePackage?: string;
+  /** Internal command context for user-facing output */
+  command?: 'lock' | 'update';
 }
 
 /**
