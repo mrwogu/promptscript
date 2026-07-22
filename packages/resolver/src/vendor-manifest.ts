@@ -178,7 +178,7 @@ export async function verifyGitRepositoryCheckout(
   const tree = await execFileAsync('git', [...commonArgs, 'ls-tree', '-r', '-z', expectedCommit], {
     env: environment,
   });
-  const trackedFiles = new Map<string, string>();
+  const trackedFiles = new Map<string, { objectId: string; executable: boolean }>();
   for (const row of tree.stdout.split('\0').filter(Boolean)) {
     const separator = row.indexOf('\t');
     const metadata = row.slice(0, separator).split(' ');
@@ -186,7 +186,14 @@ export async function verifyGitRepositoryCheckout(
     if (separator < 0 || metadata.length !== 3 || metadata[1] !== 'blob') {
       throw new Error(`Unsupported Git tree entry in vendored repository: ${path}`);
     }
-    trackedFiles.set(path, metadata[2]!);
+    const mode = metadata[0];
+    if (mode !== '100644' && mode !== '100755') {
+      throw new Error(`Unsupported Git tree mode in vendored repository: ${path}`);
+    }
+    trackedFiles.set(path, {
+      objectId: metadata[2]!,
+      executable: mode === '100755',
+    });
   }
 
   const worktreeFiles: string[] = [];
@@ -205,6 +212,15 @@ export async function verifyGitRepositoryCheckout(
         await collectFiles(entryPath, relativePath);
       } else if (entry.isFile()) {
         if (!allowedUntrackedFiles.has(relativePath)) {
+          const tracked = trackedFiles.get(relativePath);
+          if (tracked && process.platform !== 'win32') {
+            const metadata = await lstat(entryPath);
+            if (Boolean(metadata.mode & 0o111) !== tracked.executable) {
+              throw new Error(
+                `Vendored repository executable modes do not match commit ${expectedCommit}`
+              );
+            }
+          }
           worktreeFiles.push(relativePath);
         }
       } else {
@@ -220,14 +236,20 @@ export async function verifyGitRepositoryCheckout(
   ) {
     throw new Error(`Vendored repository contents do not match commit ${expectedCommit}`);
   }
-  for (const [path, objectId] of trackedFiles) {
-    const filePath = join(directory, ...path.split('/'));
-    const object = await execFileAsync(
+  const batchSize = 100;
+  for (let index = 0; index < worktreeFiles.length; index += batchSize) {
+    const paths = worktreeFiles.slice(index, index + batchSize);
+    const filePaths = paths.map((path) => join(directory, ...path.split('/')));
+    const objects = await execFileAsync(
       'git',
-      [...commonArgs, 'hash-object', '--no-filters', '--', filePath],
+      [...commonArgs, 'hash-object', '--no-filters', '--', ...filePaths],
       { env: environment }
     );
-    if (object.stdout.trim() !== objectId) {
+    const objectIds = objects.stdout.trim().split(/\r?\n/);
+    if (
+      objectIds.length !== paths.length ||
+      paths.some((path, offset) => objectIds[offset] !== trackedFiles.get(path)?.objectId)
+    ) {
       throw new Error(`Vendored repository contents do not match commit ${expectedCommit}`);
     }
   }
