@@ -184,13 +184,17 @@ generated prompt to stdout for shell pipelines.
 
 ### prs upgrade
 
-Upgrade `.prs` files to the latest supported syntax version.
+Upgrade `.prs` files under `.promptscript/` to the latest supported syntax
+version. The command parses every discovered file before writing, so parse
+errors, malformed versions, and versions newer than the installed CLI abort the
+upgrade before any file changes. Symbolic links are skipped.
 
 ```bash
 prs upgrade [--dry-run]
 ```
 
-Use `--dry-run` to preview changes without writing files.
+Use `--dry-run` to preview changes without writing files. Normal upgrades use
+atomic replacement and preserve file permissions.
 
 ### prs hooks
 
