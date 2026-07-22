@@ -127,6 +127,12 @@ export async function initCommand(
 
 async function runInitCommand(options: InitOptions, services: CliServices): Promise<void> {
   const { fs } = services;
+  if (options.interactive && options.yes) {
+    ConsoleOutput.error('Cannot use --interactive with --yes');
+    process.exitCode = 1;
+    return;
+  }
+
   const envConfigPath = process.env['PROMPTSCRIPT_CONFIG'];
   const existingConfigPath =
     envConfigPath && fs.existsSync(envConfigPath)
@@ -195,6 +201,7 @@ async function runInitCommand(options: InitOptions, services: CliServices): Prom
     );
     config.targets = Array.from(new Set(config.targets));
     validateTargets(config.targets);
+    validateProjectMetadata(config);
     validateDirectives(config);
 
     const writes: PlannedWrite[] = [
@@ -282,27 +289,31 @@ async function runInitCommand(options: InitOptions, services: CliServices): Prom
     // (undefined, true) keeps the default behaviour of installing hooks.
     const installedHookTargets: AIToolTarget[] = [];
     if (options.hooks !== false) {
-      const previousExitCode = process.exitCode;
       for (const target of config.targets) {
         const hookName = TARGET_TO_HOOK_NAME[target] ?? target;
         if (!getToolConfig(hookName)) {
           // No hook config registered for this target — silently skip
           continue;
         }
+        const previousExitCode = process.exitCode;
+        process.exitCode = undefined;
         try {
           await hooksCommand('install', hookName);
-          installedHookTargets.push(target);
+          if (process.exitCode === undefined || process.exitCode === 0) {
+            installedHookTargets.push(target);
+          } else {
+            ConsoleOutput.warn(`Failed to install ${target} hooks`);
+          }
         } catch (error) {
           ConsoleOutput.warn(
             `Failed to install ${target} hooks: ${
               error instanceof Error ? error.message : String(error)
             }`
           );
+        } finally {
+          process.exitCode = previousExitCode;
         }
       }
-      // hooksCommand sets process.exitCode on its own validation errors,
-      // but we guarded against unknown tools above, so restore the prior code.
-      process.exitCode = previousExitCode;
     }
 
     spinner.succeed('PromptScript initialized');
@@ -319,6 +330,9 @@ async function runInitCommand(options: InitOptions, services: CliServices): Prom
     ConsoleOutput.newline();
     ConsoleOutput.stats('Configuration:');
     ConsoleOutput.muted(`  Project: ${config.projectId}`);
+    if (config.team) {
+      ConsoleOutput.muted(`  Team: ${config.team}`);
+    }
     ConsoleOutput.muted(`  Targets: ${config.targets.join(', ')}`);
     if (config.inherit) {
       ConsoleOutput.muted(`  Inherit: ${config.inherit}`);
@@ -924,6 +938,18 @@ function validateTargets(targets: AIToolTarget[]): void {
   }
 }
 
+function validateProjectMetadata(config: ResolvedConfig): void {
+  if (config.projectId.trim().length === 0 || /[\r\n]/.test(config.projectId)) {
+    throw new Error('Project name must be a non-empty single line');
+  }
+  if (
+    config.team !== undefined &&
+    (config.team.trim().length === 0 || /[\r\n]/.test(config.team))
+  ) {
+    throw new Error('Team namespace must be a non-empty single line');
+  }
+}
+
 function validateDirectives(config: ResolvedConfig): void {
   const directives = [
     ...(config.inherit ? [['inherit', config.inherit] as const] : []),
@@ -1068,9 +1094,14 @@ function generateProjectPs(config: ResolvedConfig, projectInfo: ProjectInfo): st
     contextLines.push(`  frameworks: ${JSON.stringify(projectInfo.frameworks)}`);
   }
 
+  const metadataLines = [
+    `  id: ${JSON.stringify(config.projectId)}`,
+    `  syntax: ${JSON.stringify(syntaxVersion)}`,
+    ...(config.team ? [`  team: ${JSON.stringify(config.team)}`] : []),
+  ];
+
   return `@meta {
-  id: ${JSON.stringify(config.projectId)}
-  syntax: ${JSON.stringify(syntaxVersion)}
+${metadataLines.join('\n')}
 }
 ${directives.length > 0 ? `\n${directives.join('\n')}\n` : ''}
 @identity {
