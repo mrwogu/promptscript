@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, relative } from 'path';
 import type { PullOptions } from '../types.js';
 import { loadConfig } from '../config/loader.js';
 import { createSpinner, ConsoleOutput } from '../output/console.js';
@@ -22,6 +22,14 @@ export async function pullCommand(options: PullOptions): Promise<void> {
   const spinner = createSpinner('Loading configuration...').start();
 
   try {
+    const selectedRefs = [options.branch, options.tag, options.commit].filter(Boolean);
+    if (selectedRefs.length > 1) {
+      spinner.fail('Git ref options are mutually exclusive');
+      ConsoleOutput.error('Use only one of --branch, --tag, or --commit');
+      process.exitCode = 1;
+      return;
+    }
+
     const config = await loadConfig();
 
     // Check if inherit is configured
@@ -38,6 +46,27 @@ export async function pullCommand(options: PullOptions): Promise<void> {
 
     // Parse inherit path (e.g., "@team/project" -> "team/project.prs")
     const inheritPath = parseInheritPath(config.inherit);
+    const destinationRoot = resolve('./.promptscript/.inherited');
+    const destPath = resolve(destinationRoot, inheritPath);
+    const destinationRelativePath = relative(destinationRoot, destPath);
+    if (
+      destinationRelativePath.startsWith('..') ||
+      resolve(destPath) === resolve(destinationRoot)
+    ) {
+      throw new Error(`Invalid inheritance path: ${config.inherit}`);
+    }
+
+    // Dry run mode does not fetch registry content or write files.
+    if (options.dryRun) {
+      spinner.succeed('Dry run completed');
+      ConsoleOutput.newline();
+      ConsoleOutput.dryRun(`Would fetch: ${config.inherit}`);
+      ConsoleOutput.dryRun(`       to: ${destPath}`);
+      if (existsSync(destPath)) {
+        ConsoleOutput.dryRun('(would overwrite existing file)');
+      }
+      return;
+    }
 
     // Check if file exists in registry
     spinner.text = `Checking ${inheritPath}...`;
@@ -51,31 +80,16 @@ export async function pullCommand(options: PullOptions): Promise<void> {
       return;
     }
 
-    // Fetch the file content
-    spinner.text = `Fetching ${inheritPath}...`;
-    const content = await registry.fetch(inheritPath);
-
-    // Destination in local .promptscript folder
-    const destPath = resolve('./.promptscript/.inherited', inheritPath);
-
     // Check if destination exists and force flag
-    if (existsSync(destPath) && !options.force && !options.dryRun) {
+    if (existsSync(destPath) && !options.force) {
       spinner.warn('File already exists (use --force to overwrite)');
       ConsoleOutput.muted(destPath);
       return;
     }
 
-    // Dry run mode - just show what would happen
-    if (options.dryRun) {
-      spinner.succeed('Dry run completed');
-      ConsoleOutput.newline();
-      ConsoleOutput.dryRun(`Would fetch: ${config.inherit}`);
-      ConsoleOutput.dryRun(`       to: ${destPath}`);
-      if (existsSync(destPath)) {
-        ConsoleOutput.dryRun('(would overwrite existing file)');
-      }
-      return;
-    }
+    // Fetch the file content
+    spinner.text = `Fetching ${inheritPath}...`;
+    const content = await registry.fetch(inheritPath);
 
     // Create directory and write file
     await mkdir(dirname(destPath), { recursive: true });
@@ -97,8 +111,9 @@ async function createRegistry(
   options: PullOptions,
   spinner: ReturnType<typeof createSpinner>
 ): Promise<Registry> {
-  // Determine Git ref from CLI options (priority: commit > tag > branch > config)
-  const gitRef = options.commit ?? options.tag ?? options.branch;
+  // Determine Git ref (priority: CLI option > inherit version > config)
+  const gitRef =
+    options.commit ?? options.tag ?? options.branch ?? parseInheritVersion(config.inherit ?? '');
 
   // Priority 1: Git registry
   if (config.registry?.git) {
@@ -150,6 +165,14 @@ async function createRegistry(
   return createFileSystemRegistry(resolve(registryPath));
 }
 
+function parseInheritVersion(inheritPath: string): string | undefined {
+  const versionIndex = inheritPath.lastIndexOf('@');
+  const leadingAtIndex = inheritPath.indexOf('@');
+  return versionIndex > leadingAtIndex
+    ? inheritPath.slice(versionIndex + 1) || undefined
+    : undefined;
+}
+
 /**
  * Parse an inherit path to a file path.
  * @example "@team/project" -> "team/project.prs"
@@ -169,6 +192,13 @@ function parseInheritPath(inheritPath: string): string {
 
   // Remove leading @
   let path = pathWithoutVersion.startsWith('@') ? pathWithoutVersion.slice(1) : pathWithoutVersion;
+  const segments = path.split('/');
+  if (
+    segments.some((segment) => segment === '' || segment === '.' || segment === '..') ||
+    path.includes('\\')
+  ) {
+    throw new Error(`Invalid inheritance path: ${inheritPath}`);
+  }
 
   // Add .prs extension if not present
   if (!path.endsWith('.prs')) {

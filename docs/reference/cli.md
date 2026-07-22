@@ -491,7 +491,8 @@ prs pull --refresh
 ```
 
 !!! note "Git Registry Options"
-The `--branch`, `--tag`, `--commit`, and `--refresh` options only apply to Git registries.
+The `--branch`, `--tag`, and `--commit` options are mutually exclusive. These options and
+`--refresh` only apply to Git registries.
 For local or HTTP registries, these options are ignored.
 
 ---
