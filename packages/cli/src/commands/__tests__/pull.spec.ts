@@ -82,6 +82,7 @@ vi.mock('fs/promises', () => ({
 
 import { pullCommand } from '../pull.js';
 import { ConsoleOutput } from '../../output/console.js';
+import { createGitRegistry } from '@promptscript/resolver';
 
 describe('pullCommand', () => {
   beforeEach(() => {
@@ -144,7 +145,45 @@ describe('pullCommand', () => {
 
     expect(mockSucceed).toHaveBeenCalledWith('Dry run completed');
     expect(ConsoleOutput.dryRun).toHaveBeenCalledWith(expect.stringContaining('Would fetch'));
+    expect(mockExists).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
     expect(mockWriteFile).not.toHaveBeenCalled();
+  });
+
+  it('should reject inheritance paths that contain traversal segments', async () => {
+    mockLoadConfig.mockResolvedValue({
+      inherit: '@team/../../outside',
+      registry: { path: './registry' },
+      targets: [],
+    });
+    mockExistsSync.mockReturnValue(true);
+
+    await pullCommand({});
+
+    expect(mockFail).toHaveBeenCalledWith('Error');
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should reject multiple Git ref options', async () => {
+    await pullCommand({ branch: 'main', tag: 'v1.0.0' });
+
+    expect(mockFail).toHaveBeenCalledWith('Git ref options are mutually exclusive');
+    expect(mockLoadConfig).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should use the inherit version as the Git ref', async () => {
+    mockLoadConfig.mockResolvedValue({
+      inherit: '@team/base@v2.0.0',
+      registry: { git: { url: 'https://github.com/team/registry.git', ref: 'main' } },
+      targets: [],
+    });
+
+    await pullCommand({ dryRun: true });
+
+    expect(createGitRegistry).toHaveBeenCalledWith(expect.objectContaining({ ref: 'v2.0.0' }));
   });
 
   it('should fail when inheritance source is not found in registry', async () => {
