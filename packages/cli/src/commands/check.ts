@@ -1,8 +1,18 @@
 import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { resolve } from 'path';
+import { parse as parseYaml } from 'yaml';
+import { Compiler } from '@promptscript/compiler';
+import {
+  isKnownSyntaxVersion,
+  isKnownTarget,
+  isValidLockfile,
+  type Lockfile,
+} from '@promptscript/core';
 import type { CheckOptions } from '../types.js';
-import { findConfigFile, loadConfig, CONFIG_FILES } from '../config/loader.js';
+import { findConfigFile, loadEffectiveConfig, CONFIG_FILES } from '../config/loader.js';
 import { createSpinner, ConsoleOutput, isVerbose } from '../output/console.js';
+import { resolveRegistryPath } from '../utils/registry-resolver.js';
 
 /**
  * Check result for a single item.
@@ -18,8 +28,8 @@ interface CheckResult {
  * Verifies:
  * - Config file exists and is valid
  * - Entry file exists
- * - Registry path exists (if configured)
- * - Inherit paths are resolvable (if configured)
+ * - Registry and lockfile are usable
+ * - PromptScript syntax, imports, and inheritance resolve
  */
 export async function checkCommand(_options: CheckOptions): Promise<void> {
   const spinner = createSpinner('Checking project health...').start();
@@ -54,7 +64,7 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
     // Check 2: Config is valid YAML
     let config;
     try {
-      config = await loadConfig();
+      config = await loadEffectiveConfig(configFile);
       results.push({
         name: 'Configuration syntax',
         status: 'ok',
@@ -73,7 +83,36 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       return;
     }
 
-    // Check 3: Syntax version field
+    // Check 3: Project identifier
+    const legacyProject =
+      'project' in config && typeof config.project === 'object' && config.project !== null
+        ? config.project
+        : undefined;
+    const projectId =
+      typeof config.id === 'string' && config.id.trim()
+        ? config.id
+        : legacyProject &&
+            'id' in legacyProject &&
+            typeof legacyProject.id === 'string' &&
+            legacyProject.id.trim()
+          ? legacyProject.id
+          : undefined;
+    if (projectId) {
+      results.push({
+        name: 'Project identifier',
+        status: 'ok',
+        message: projectId,
+      });
+    } else {
+      results.push({
+        name: 'Project identifier',
+        status: 'error',
+        message: 'Missing non-empty "id" field',
+      });
+      hasErrors = true;
+    }
+
+    // Check 4: Syntax version field
     if (!config.syntax) {
       results.push({
         name: 'Syntax version',
@@ -81,6 +120,13 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
         message: 'Missing "syntax" field. Add syntax: "<version>" to config',
       });
       hasWarnings = true;
+    } else if (!isKnownSyntaxVersion(config.syntax)) {
+      results.push({
+        name: 'Syntax version',
+        status: 'error',
+        message: `Unsupported version: ${config.syntax}`,
+      });
+      hasErrors = true;
     } else {
       results.push({
         name: 'Syntax version',
@@ -89,13 +135,13 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       });
     }
 
-    // Check 4: Entry file exists
-    const entryPath = config.input?.entry ?? '.promptscript/project.prs';
+    // Check 5: Entry file exists
+    const entryPath = resolve(config.input?.entry ?? '.promptscript/project.prs');
     if (existsSync(entryPath)) {
       results.push({
         name: 'Entry file',
         status: 'ok',
-        message: entryPath,
+        message: config.input?.entry ?? '.promptscript/project.prs',
       });
     } else {
       results.push({
@@ -106,8 +152,15 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       hasErrors = true;
     }
 
-    // Check 5: Registry path (if configured)
-    if (config.registry?.path) {
+    // Check 6: Local registry path (if configured)
+    if (config.registry?.url && !config.registry.git) {
+      results.push({
+        name: 'Registry URL',
+        status: 'warning',
+        message: 'HTTP registry verification is not supported',
+      });
+      hasWarnings = true;
+    } else if (config.registry?.path && !config.registry.git) {
       const registryPath = resolve(config.registry.path);
       if (existsSync(registryPath)) {
         results.push({
@@ -118,20 +171,14 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       } else {
         results.push({
           name: 'Registry path',
-          status: 'warning',
+          status: 'error',
           message: `Registry path not found: ${config.registry.path}`,
         });
-        hasWarnings = true;
+        hasErrors = true;
       }
-    } else if (config.registry?.url) {
-      results.push({
-        name: 'Registry URL',
-        status: 'ok',
-        message: config.registry.url,
-      });
     }
 
-    // Check 6: Targets configured
+    // Check 7: Targets configured
     if (!config.targets || config.targets.length === 0) {
       results.push({
         name: 'Targets',
@@ -140,21 +187,100 @@ export async function checkCommand(_options: CheckOptions): Promise<void> {
       });
       hasWarnings = true;
     } else {
-      results.push({
-        name: 'Targets',
-        status: 'ok',
-        message: `${config.targets.length} target(s) configured`,
+      const targetNames = config.targets.flatMap((target) => {
+        if (typeof target === 'string') return [target];
+        if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+          return ['<invalid>'];
+        }
+        return Object.keys(target);
       });
+      const invalidTargets = targetNames.filter((target) => !isKnownTarget(target));
+      if (invalidTargets.length > 0 || targetNames.length === 0) {
+        results.push({
+          name: 'Targets',
+          status: 'error',
+          message:
+            invalidTargets.length > 0
+              ? `Unknown target(s): ${invalidTargets.join(', ')}`
+              : 'Target entries must not be empty',
+        });
+        hasErrors = true;
+      } else {
+        results.push({
+          name: 'Targets',
+          status: 'ok',
+          message: `${targetNames.length} target(s) configured`,
+        });
+      }
     }
 
-    // Check 7: Inherit path (if configured in config)
-    if (config.inherit) {
-      // For now, just note it - full resolution would require the resolver
-      results.push({
-        name: 'Inheritance',
-        status: 'ok',
-        message: config.inherit,
-      });
+    // Check 8: Lockfile, registry, imports, inheritance, and validation
+    if (existsSync(entryPath)) {
+      try {
+        const lockfilePath = resolve('promptscript.lock');
+        let lockfile: Lockfile | undefined;
+        if (existsSync(lockfilePath)) {
+          const parsed: unknown = parseYaml(await readFile(lockfilePath, 'utf-8'), {
+            maxAliasCount: 100,
+          });
+          if (!isValidLockfile(parsed)) {
+            throw new Error(`Invalid lockfile: ${lockfilePath}`);
+          }
+          lockfile = parsed;
+          results.push({
+            name: 'Lockfile',
+            status: 'ok',
+            message: 'promptscript.lock',
+          });
+        }
+
+        const vendorDir = resolve('.promptscript/vendor');
+        const registry = await resolveRegistryPath(config, { vendorDir, lockfile });
+        const compiler = new Compiler({
+          resolver: {
+            registryPath: resolve(registry.path),
+            localPath: resolve('.promptscript'),
+            vendorDir,
+            lockfile,
+            registries: config.registries,
+          },
+          validator: {
+            ...config.validation,
+            policies: config.policies,
+          },
+          formatters: [],
+        });
+        const result = await compiler.compile(entryPath);
+
+        if (result.errors.length > 0) {
+          results.push({
+            name: 'Project resolution',
+            status: 'error',
+            message: result.errors.map((error) => error.message).join('; '),
+          });
+          hasErrors = true;
+        } else if (result.warnings.length > 0) {
+          results.push({
+            name: 'Project resolution',
+            status: 'warning',
+            message: `${result.warnings.length} validation warning(s)`,
+          });
+          hasWarnings = true;
+        } else {
+          results.push({
+            name: 'Project resolution',
+            status: 'ok',
+            message: 'Syntax, imports, and inheritance are valid',
+          });
+        }
+      } catch (error) {
+        results.push({
+          name: 'Project resolution',
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown resolution error',
+        });
+        hasErrors = true;
+      }
     }
 
     // Print results

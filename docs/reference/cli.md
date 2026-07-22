@@ -510,7 +510,10 @@ For local or HTTP registries, these options are ignored.
 
 ### prs check
 
-Check configuration and dependencies.
+Check the effective configuration, entry file, lockfile, registry, imports,
+inheritance, and PromptScript validation without generating output. Configuration
+and validation warnings do not fail the command, while health-check errors exit
+with status 1.
 
 ```bash
 prs check [options]
@@ -1115,7 +1118,9 @@ prs resolve @company/security --format json
 
 ### prs update-check
 
-Check for CLI updates.
+Check npm for CLI updates, bypassing the automatic check's 24-hour cache. Network
+errors and malformed registry responses exit with status 1. Set
+`PROMPTSCRIPT_NO_UPDATE_CHECK` to disable the request.
 
 ```bash
 prs update-check
