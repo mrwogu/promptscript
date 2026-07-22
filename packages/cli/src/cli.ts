@@ -253,7 +253,8 @@ vendor
 
 program
   .command('resolve <import>')
-  .description('Show full resolution chain for an import path (debug)')
+  .description('Show the lock pin and local source for an import path')
+  .option('--format <format>', 'Output format: text or json', 'text')
   .action((importPath, opts) => resolveCommand(importPath, opts));
 
 program

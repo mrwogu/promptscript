@@ -5,26 +5,43 @@ const {
   mockFindConfigFile,
   mockLoadUserConfig,
   mockExistsSync,
+  mockReadFileSync,
+  mockStatSync,
+  mockLockfileExists,
   mockExpandAlias,
   mockValidateAlias,
+  mockLoadVendorManifest,
+  mockResolveVendoredRepository,
+  mockCacheHas,
+  mockVerifyGitRepository,
 } = vi.hoisted(() => {
   const mockLoadConfig = vi.fn();
   const mockFindConfigFile = vi.fn();
   const mockLoadUserConfig = vi.fn();
   const mockExistsSync = vi.fn().mockReturnValue(false);
+  const mockReadFileSync = vi.fn();
+  const mockStatSync = vi.fn().mockReturnValue({ isDirectory: () => false });
+  const mockLockfileExists = vi.fn().mockReturnValue(false);
   const mockExpandAlias = vi.fn();
-  const mockValidateAlias = vi.fn((alias: string) => {
-    if (!/^@[a-z0-9][a-z0-9-]*$/.test(alias)) {
-      throw new Error(`Invalid alias: ${alias}`);
-    }
-  });
+  const mockValidateAlias = vi.fn((alias: string) => /^@[a-z0-9][a-z0-9-]*$/.test(alias));
+  const mockLoadVendorManifest = vi.fn().mockResolvedValue(null);
+  const mockResolveVendoredRepository = vi.fn();
+  const mockCacheHas = vi.fn().mockResolvedValue(false);
+  const mockVerifyGitRepository = vi.fn().mockResolvedValue(undefined);
   return {
     mockLoadConfig,
     mockFindConfigFile,
     mockLoadUserConfig,
     mockExistsSync,
+    mockReadFileSync,
+    mockStatSync,
+    mockLockfileExists,
     mockExpandAlias,
     mockValidateAlias,
+    mockLoadVendorManifest,
+    mockResolveVendoredRepository,
+    mockCacheHas,
+    mockVerifyGitRepository,
   };
 });
 
@@ -42,11 +59,50 @@ vi.mock('../../config/user-config.js', () => ({
 }));
 
 vi.mock('@promptscript/resolver', () => ({
-  expandAlias: mockExpandAlias,
+  FileLoader: class {
+    resolveRef(reference: { raw: string; version?: string }): string {
+      if (reference.raw.startsWith('@')) {
+        return `__test_registry__${JSON.stringify(mockExpandAlias(reference.raw))}`;
+      }
+      if (reference.raw.split('/')[0]?.includes('.') && reference.raw.split('/').length >= 3) {
+        const rawPath =
+          reference.version && reference.raw.endsWith(`@${reference.version}`)
+            ? reference.raw.slice(0, -reference.version.length - 1)
+            : reference.raw;
+        const segments = rawPath.split('/');
+        return `__test_registry__${JSON.stringify({
+          repoUrl: `https://${segments.slice(0, 3).join('/')}`,
+          path: segments.slice(3).join('/'),
+          version: reference.version ?? '',
+        })}`;
+      }
+      return reference.raw;
+    }
+  },
+  RegistryCache: class {
+    getCachePath(repoUrl: string, version: string): string {
+      return `/cache/${repoUrl}/${version}`;
+    }
+    has = mockCacheHas;
+  },
+  isInsideCachePath: vi.fn().mockReturnValue(true),
+  isRealPathInside: vi.fn().mockResolvedValue(true),
+  parseRegistryMarker: (value: string) =>
+    value.startsWith('__test_registry__')
+      ? JSON.parse(value.slice('__test_registry__'.length))
+      : null,
+  loadVendorManifest: mockLoadVendorManifest,
+  resolveVendoredRepository: mockResolveVendoredRepository,
+  verifyGitRepositoryCheckout: mockVerifyGitRepository,
   validateAlias: mockValidateAlias,
 }));
 
-vi.mock('fs', () => ({ existsSync: mockExistsSync }));
+vi.mock('fs', () => ({
+  existsSync: (path: string) =>
+    path.endsWith('promptscript.lock') ? mockLockfileExists() : mockExistsSync(path),
+  readFileSync: mockReadFileSync,
+  statSync: mockStatSync,
+}));
 
 import { resolveCommand } from '../resolve-cmd.js';
 import { ConsoleOutput } from '../../output/console.js';
@@ -54,6 +110,11 @@ import { ConsoleOutput } from '../../output/console.js';
 describe('resolveCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLoadVendorManifest.mockResolvedValue(null);
+    mockStatSync.mockReturnValue({ isDirectory: () => false });
+    mockLockfileExists.mockReturnValue(false);
+    mockCacheHas.mockResolvedValue(false);
+    mockVerifyGitRepository.mockResolvedValue(undefined);
     process.exitCode = undefined;
   });
 
@@ -161,7 +222,6 @@ describe('resolveCommand', () => {
 
     const output = consoleSpy.mock.calls.map((c) => c[0] as string).join('\n');
     expect(output).toContain('not cached');
-    expect(output).toContain('unknown');
 
     consoleSpy.mockRestore();
   });
@@ -183,7 +243,9 @@ describe('resolveCommand', () => {
 
     await resolveCommand('@company/security', {});
 
-    expect(ConsoleOutput.error).toHaveBeenCalledWith('No registries configured.');
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('No registries configured.')
+    );
     expect(process.exitCode).toBe(1);
   });
 
@@ -199,8 +261,8 @@ describe('resolveCommand', () => {
       path: 'security',
       version: 'v1.3.0',
     });
-    // existsSync returns true for both cacheDir and cachedFile
-    mockExistsSync.mockReturnValue(true);
+    mockExistsSync.mockImplementation((path: string) => !path.endsWith('.promptscript/vendor'));
+    mockCacheHas.mockResolvedValue(true);
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -224,20 +286,178 @@ describe('resolveCommand', () => {
       path: 'security',
       version: 'v1.3.0',
     });
-    // First call (cacheDir) returns true, second call (cachedFile) returns false
-    let callCount = 0;
-    mockExistsSync.mockImplementation(() => {
-      callCount++;
-      return callCount === 1; // only cacheDir exists
-    });
+    mockExistsSync.mockReturnValue(false);
+    mockCacheHas.mockResolvedValue(true);
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
     await resolveCommand('@company/security@v1.3.0', {});
 
     const output = consoleSpy.mock.calls.map((c) => c[0] as string).join('\n');
-    expect(output).toContain('not found in cache');
+    expect(output).toContain('not found');
 
     consoleSpy.mockRestore();
+  });
+
+  it('should resolve direct URL imports and emit JSON', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExistsSync.mockReturnValue(false);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('github.com/company/base/security', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      success: true,
+      kind: 'registry',
+      repoUrl: 'https://github.com/company/base',
+      path: 'security',
+      source: 'missing',
+    });
+    consoleSpy.mockRestore();
+  });
+
+  it('should preserve scoped paths in direct URL imports', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExistsSync.mockReturnValue(false);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('github.com/company/base/@org/security', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      repoUrl: 'https://github.com/company/base',
+      path: '@org/security',
+    });
+    expect(output).not.toHaveProperty('requestedVersion');
+    consoleSpy.mockRestore();
+  });
+
+  it('should parse versions after scoped direct URL paths', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExistsSync.mockReturnValue(false);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('github.com/company/base/@org/security@1.2.0', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      path: '@org/security',
+      requestedVersion: '1.2.0',
+    });
+    consoleSpy.mockRestore();
+  });
+
+  it('should parse Git refs containing slashes', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({ targets: [] });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExistsSync.mockReturnValue(false);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('github.com/company/base/security@feature/branch', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      path: 'security',
+      requestedVersion: 'feature/branch',
+    });
+    consoleSpy.mockRestore();
+  });
+
+  it('should report the exact lockfile version and commit', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExpandAlias.mockReturnValue({
+      repoUrl: 'github.com/company/base',
+      path: 'security',
+      version: undefined,
+    });
+    mockLockfileExists.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'v2.0.0',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-test',
+          },
+        },
+      })
+    );
+    mockExistsSync.mockReturnValue(false);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('@company/security', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      lockedVersion: 'v2.0.0',
+      commit: 'a'.repeat(40),
+      source: 'missing',
+    });
+    consoleSpy.mockRestore();
+  });
+
+  it('should report vendored resolution without network access', async () => {
+    mockFindConfigFile.mockReturnValue('promptscript.yaml');
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      registries: { '@company': 'github.com/company/base' },
+    });
+    mockLoadUserConfig.mockResolvedValue({ version: '1' });
+    mockExpandAlias.mockReturnValue({
+      repoUrl: 'github.com/company/base',
+      path: 'security',
+      version: undefined,
+    });
+    mockLockfileExists.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        version: 1,
+        dependencies: {
+          'github.com/company/base': {
+            version: 'v1.0.0',
+            commit: 'a'.repeat(40),
+            integrity: 'sha256-test',
+          },
+        },
+      })
+    );
+    mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
+    mockResolveVendoredRepository.mockResolvedValue('/project/.promptscript/vendor/repository');
+    mockExistsSync.mockReturnValue(true);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await resolveCommand('@company/security', { format: 'json' });
+
+    const output = JSON.parse(consoleSpy.mock.calls[0]?.[0] as string) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      source: 'vendor',
+      location: '/project/.promptscript/vendor/repository/security.prs',
+      exists: true,
+    });
+    expect(mockResolveVendoredRepository).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
+
+  it('should reject unsupported output formats', async () => {
+    await resolveCommand('@company/security', { format: 'xml' });
+
+    expect(ConsoleOutput.error).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid output format')
+    );
+    expect(process.exitCode).toBe(1);
   });
 });

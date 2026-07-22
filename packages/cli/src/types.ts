@@ -245,8 +245,10 @@ export interface VendorCheckOptions {}
 /**
  * Options for the resolve command.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface ResolveCommandOptions {}
+export interface ResolveCommandOptions {
+  /** Output format for tooling or humans */
+  format?: string;
+}
 
 /**
  * Options for the hook command.
