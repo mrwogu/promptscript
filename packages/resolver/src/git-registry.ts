@@ -716,6 +716,13 @@ export class GitRegistry implements Registry {
 
     const git = simpleGit(options);
 
+    // Prevent interactive credential prompts from hanging indefinitely.
+    // Without these, git may invoke a GUI credential helper (e.g., GCM on
+    // Windows) or wait on stdin, blocking the process forever in a
+    // non-interactive CLI context. See issue #320.
+    git.env('GIT_TERMINAL_PROMPT', '0');
+    git.env('GCM_INTERACTIVE', 'never');
+
     if (this.auth?.type === 'token') {
       const token = this.resolveToken();
       if (token) {
@@ -1015,13 +1022,15 @@ export async function validateRemoteAccess(
   repoUrl: string,
   ref?: string
 ): Promise<RemoteValidation> {
-  const git = simpleGit();
+  const git = simpleGit().env('GIT_TERMINAL_PROMPT', '0').env('GCM_INTERACTIVE', 'never');
   try {
     const isCommit = ref !== undefined && /^[0-9a-f]{40}$/i.test(ref);
     if (isCommit) {
       const probeDir = await fs.mkdtemp(join(tmpdir(), 'promptscript-ref-'));
       try {
-        const probe = simpleGit(probeDir);
+        const probe = simpleGit(probeDir)
+          .env('GIT_TERMINAL_PROMPT', '0')
+          .env('GCM_INTERACTIVE', 'never');
         await probe.init();
         await probe.addRemote('origin', repoUrl);
         await probe.fetch(['origin', ref, '--depth=1']);

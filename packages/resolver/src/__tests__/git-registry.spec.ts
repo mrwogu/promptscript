@@ -385,6 +385,18 @@ describe('GitRegistry', () => {
         expect.stringContaining('StrictHostKeyChecking=no')
       );
     });
+
+    it('should disable interactive credential prompts to prevent hangs', async () => {
+      const registry = new GitRegistry({
+        url: 'https://github.com/org/repo.git',
+        cacheDir: testCacheDir,
+      });
+
+      await registry.fetch('@company/base');
+
+      expect(mockGit.env).toHaveBeenCalledWith('GIT_TERMINAL_PROMPT', '0');
+      expect(mockGit.env).toHaveBeenCalledWith('GCM_INTERACTIVE', 'never');
+    });
   });
 
   describe('error handling', () => {
