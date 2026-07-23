@@ -2245,6 +2245,18 @@
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/extractReservedParams/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/filterBlocks/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/filterSkillsBlock/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/findFallbackUrl/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
@@ -2417,6 +2429,10 @@
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/BlockFilterOptions/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/CacheEntry/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
@@ -2493,6 +2509,10 @@
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/ReservedParamsResult/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/ResolveOptions/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
@@ -2502,6 +2522,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/ResolverOptions/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/interfaces/SkillFilterOptions/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
