@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-05-30T23:22:42.939Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-07-23T16:03:31.154Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -90,6 +90,8 @@ The project is organized as a monorepo with these packages:
 - Framework: Vitest
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
+- When refactoring formatter section methods (e.g. splitting context() into project() + techStack() + architecture()), add a test verifying that ALL input block content still appears in the output — not just the newly extracted subsections
+- Golden files are snapshots of correct behavior, not correct by definition — before regenerating golden files, verify the diff represents an intentional change, not a regression that golden files would lock in
 
 ### syntax-highlighting
 
@@ -179,6 +181,7 @@ After completing ANY code changes, run ALL steps in order:
 - Don't consider work complete until all CI checks pass (use `gh pr checks --watch`)
 - Don't commit directly to main - always use feature branches
 - Don't edit CHANGELOG.md manually - it is managed by release-please. Manual edits break release state tracking, preventing tag creation and GitHub releases.
+- Don't regenerate golden files without reviewing the diff — golden files lock in whatever behavior produced them, including regressions
 
 ## diagrams
 
