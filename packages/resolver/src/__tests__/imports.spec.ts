@@ -18,6 +18,7 @@ import {
   IMPORT_MARKER_PREFIX,
   extractReservedParams,
   filterBlocks,
+  filterSkillsBlock,
 } from '../imports.js';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
@@ -1207,5 +1208,227 @@ describe('filterBlocks', () => {
     const result = filterBlocks(blocks, { exclude: ['agents'] });
 
     expect(result).toHaveLength(2);
+  });
+});
+
+// ============================================================
+// extractReservedParams — includes/excludes
+// ============================================================
+
+describe('extractReservedParams (includes/excludes)', () => {
+  const param = (name: string, value: unknown): ParamArgument => ({
+    type: 'ParamArgument',
+    name,
+    value: value as Value,
+    loc: createLoc(),
+  });
+
+  it('should extract includes when value is an array', () => {
+    const result = extractReservedParams([param('includes', ['skill1', 'skill2'])]);
+    expect(result.includes).toEqual(['skill1', 'skill2']);
+    expect(result.remaining).toHaveLength(0);
+  });
+
+  it('should extract excludes when value is an array', () => {
+    const result = extractReservedParams([param('excludes', ['skill1'])]);
+    expect(result.excludes).toEqual(['skill1']);
+    expect(result.remaining).toHaveLength(0);
+  });
+
+  it('should leave non-array includes in remaining', () => {
+    const result = extractReservedParams([param('includes', 'skill1')]);
+    expect(result.includes).toBeUndefined();
+    expect(result.remaining).toHaveLength(1);
+    expect(result.remaining[0]!.name).toBe('includes');
+  });
+
+  it('should leave non-array excludes in remaining', () => {
+    const result = extractReservedParams([param('excludes', 42)]);
+    expect(result.excludes).toBeUndefined();
+    expect(result.remaining).toHaveLength(1);
+  });
+
+  it('should filter non-string elements from includes array', () => {
+    const result = extractReservedParams([param('includes', ['skill1', 42, 'skill2', true])]);
+    expect(result.includes).toEqual(['skill1', 'skill2']);
+  });
+
+  it('should coexist with only/exclude and template params', () => {
+    const result = extractReservedParams([
+      param('only', ['skills']),
+      param('includes', ['skill1']),
+      param('mode', 'strict'),
+    ]);
+    expect(result.only).toEqual(['skills']);
+    expect(result.includes).toEqual(['skill1']);
+    expect(result.remaining).toHaveLength(1);
+    expect(result.remaining[0]!.name).toBe('mode');
+  });
+
+  it('should return empty reserved when no filter params present', () => {
+    const result = extractReservedParams([param('mode', 'strict')]);
+    expect(result.only).toBeUndefined();
+    expect(result.exclude).toBeUndefined();
+    expect(result.includes).toBeUndefined();
+    expect(result.excludes).toBeUndefined();
+    expect(result.remaining).toHaveLength(1);
+  });
+});
+
+// ============================================================
+// filterSkillsBlock
+// ============================================================
+
+describe('filterSkillsBlock', () => {
+  function makeSkillsProgram(skills: Record<string, Value>): Program {
+    return createProgram({
+      blocks: [
+        createBlock('context', createTextContent('context content')),
+        createBlock('skills', createObjectContent(skills)),
+        createBlock('knowledge', createTextContent('knowledge content')),
+      ],
+    });
+  }
+
+  const threeSkills = {
+    'skill-a': { description: 'A' },
+    'skill-b': { description: 'B' },
+    'skill-c': { description: 'C' },
+  };
+
+  it('should keep only specified skills with includes filter', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { includes: ['skill-a', 'skill-c'] });
+
+    const skillsBlock = result.blocks.find((b) => b.name === 'skills')!;
+    expect(skillsBlock.content.type).toBe('ObjectContent');
+    const props = (skillsBlock.content as ObjectContent).properties;
+    expect(Object.keys(props)).toEqual(['skill-a', 'skill-c']);
+  });
+
+  it('should remove specified skills with excludes filter', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { excludes: ['skill-b'] });
+
+    const skillsBlock = result.blocks.find((b) => b.name === 'skills')!;
+    const props = (skillsBlock.content as ObjectContent).properties;
+    expect(Object.keys(props)).toEqual(['skill-a', 'skill-c']);
+  });
+
+  it('should return program unchanged when no filter is specified', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, {});
+
+    expect(result).toBe(program);
+  });
+
+  it('should preserve block order', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { includes: ['skill-c', 'skill-a'] });
+
+    const blockNames = result.blocks.map((b) => b.name);
+    expect(blockNames).toEqual(['context', 'skills', 'knowledge']);
+
+    const skillsBlock = result.blocks.find((b) => b.name === 'skills')!;
+    const props = (skillsBlock.content as ObjectContent).properties;
+    // Original property order should be preserved
+    expect(Object.keys(props)).toEqual(['skill-a', 'skill-c']);
+  });
+
+  it('should handle unknown skill names gracefully with includes', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { includes: ['skill-a', 'nonexistent'] });
+
+    const skillsBlock = result.blocks.find((b) => b.name === 'skills')!;
+    const props = (skillsBlock.content as ObjectContent).properties;
+    expect(Object.keys(props)).toEqual(['skill-a']);
+  });
+
+  it('should return all skills when excludes matches nothing', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { excludes: ['nonexistent'] });
+
+    const skillsBlock = result.blocks.find((b) => b.name === 'skills')!;
+    const props = (skillsBlock.content as ObjectContent).properties;
+    expect(Object.keys(props)).toHaveLength(3);
+  });
+
+  it('should return program unchanged when all skills match includes', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { includes: ['skill-a', 'skill-b', 'skill-c'] });
+
+    expect(result).toBe(program);
+  });
+
+  it('should return program unchanged when excludes matches nothing', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { excludes: ['nonexistent'] });
+
+    expect(result).toBe(program);
+  });
+
+  it('should return empty skills block when includes matches nothing', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { includes: ['nonexistent'] });
+
+    const skillsBlock = result.blocks.find((b) => b.name === 'skills')!;
+    const props = (skillsBlock.content as ObjectContent).properties;
+    expect(Object.keys(props)).toHaveLength(0);
+  });
+
+  it('should not mutate the original program', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const originalProps = (program.blocks[1]!.content as ObjectContent).properties;
+    const originalKeys = Object.keys(originalProps);
+
+    filterSkillsBlock(program, { includes: ['skill-a'] });
+
+    // Original should be unchanged
+    expect(Object.keys(originalProps)).toEqual(originalKeys);
+    expect(originalProps).toHaveProperty('skill-a');
+    expect(originalProps).toHaveProperty('skill-b');
+    expect(originalProps).toHaveProperty('skill-c');
+  });
+
+  it('should deep-clone skill values (no shared references)', () => {
+    const program = makeSkillsProgram({
+      'skill-a': { description: 'A', nested: { deep: true } },
+      'skill-b': { description: 'B' },
+    });
+    const result = filterSkillsBlock(program, { includes: ['skill-a'] });
+
+    const originalProps = (program.blocks[1]!.content as ObjectContent).properties;
+    const resultProps = (result.blocks[1]!.content as ObjectContent).properties;
+
+    expect(resultProps['skill-a']).not.toBe(originalProps['skill-a']);
+    expect(resultProps['skill-a']).toEqual(originalProps['skill-a']);
+  });
+
+  it('should return program unchanged when no @skills block exists', () => {
+    const program = createProgram({
+      blocks: [createBlock('context', createTextContent('content'))],
+    });
+    const result = filterSkillsBlock(program, { includes: ['skill-a'] });
+
+    expect(result).toBe(program);
+  });
+
+  it('should return program unchanged when @skills block is not ObjectContent', () => {
+    const program = createProgram({
+      blocks: [createBlock('skills', createTextContent('text content'))],
+    });
+    const result = filterSkillsBlock(program, { includes: ['skill-a'] });
+
+    expect(result).toBe(program);
+  });
+
+  it('should leave other blocks untouched', () => {
+    const program = makeSkillsProgram(threeSkills);
+    const result = filterSkillsBlock(program, { includes: ['skill-a'] });
+
+    const contextBlock = result.blocks.find((b) => b.name === 'context')!;
+    expect(contextBlock).toBeDefined();
+    const knowledgeBlock = result.blocks.find((b) => b.name === 'knowledge')!;
+    expect(knowledgeBlock).toBeDefined();
   });
 });

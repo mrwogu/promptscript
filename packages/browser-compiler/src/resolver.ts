@@ -38,20 +38,22 @@ import type {
 } from '@promptscript/core';
 
 /**
- * Result of separating reserved (`only`/`exclude`) `@use` parameters
- * from regular template parameters.
+ * Result of separating reserved (`only`/`exclude`/`includes`/`excludes`) `@use`
+ * parameters from regular template parameters.
  */
 interface ReservedParamsResult {
   only?: string[];
   exclude?: string[];
+  includes?: string[];
+  excludes?: string[];
   remaining: ParamArgument[];
 }
 
 /**
- * Extract reserved `only`/`exclude` parameters from a `@use` argument list,
- * returning them separately from the remaining template parameters. Mirrors
- * the logic in `@promptscript/resolver` so the playground produces the same
- * output as the CLI for block-filtered imports.
+ * Extract reserved `only`/`exclude`/`includes`/`excludes` parameters from a
+ * `@use` argument list, returning them separately from the remaining template
+ * parameters. Mirrors the logic in `@promptscript/resolver` so the playground
+ * produces the same output as the CLI for filtered imports.
  */
 function extractReservedParams(params: ParamArgument[] | undefined): ReservedParamsResult {
   if (!params || params.length === 0) {
@@ -61,18 +63,24 @@ function extractReservedParams(params: ParamArgument[] | undefined): ReservedPar
   const remaining: ParamArgument[] = [];
   let only: string[] | undefined;
   let exclude: string[] | undefined;
+  let includes: string[] | undefined;
+  let excludes: string[] | undefined;
 
   for (const param of params) {
     if (param.name === 'only' && Array.isArray(param.value)) {
       only = param.value.filter((v): v is string => typeof v === 'string');
     } else if (param.name === 'exclude' && Array.isArray(param.value)) {
       exclude = param.value.filter((v): v is string => typeof v === 'string');
+    } else if (param.name === 'includes' && Array.isArray(param.value)) {
+      includes = param.value.filter((v): v is string => typeof v === 'string');
+    } else if (param.name === 'excludes' && Array.isArray(param.value)) {
+      excludes = param.value.filter((v): v is string => typeof v === 'string');
     } else {
       remaining.push(param);
     }
   }
 
-  return { only, exclude, remaining };
+  return { only, exclude, includes, excludes, remaining };
 }
 
 /**
@@ -90,6 +98,60 @@ function filterBlocksBy(
   }
   const denySet = new Set(options.exclude);
   return blocks.filter((b) => !denySet.has(b.name));
+}
+
+/**
+ * Filter the @skills block within a program by `includes`/`excludes` lists.
+ * Operates on the ObjectContent properties of the @skills block. Other blocks
+ * are left untouched. Returns a new Program; does not mutate the input.
+ */
+function filterSkillsBy(
+  program: Program,
+  options: { includes?: string[]; excludes?: string[] }
+): Program {
+  if (!options.includes && !options.excludes) {
+    return program;
+  }
+
+  const skillsBlock = program.blocks.find((b) => b.name === 'skills');
+  if (!skillsBlock || skillsBlock.content.type !== 'ObjectContent') {
+    return program;
+  }
+
+  const props = skillsBlock.content.properties;
+  const skillNames = Object.keys(props);
+
+  let filteredNames: string[];
+  if (options.includes) {
+    const allowSet = new Set(options.includes);
+    filteredNames = skillNames.filter((name) => allowSet.has(name));
+  } else {
+    const denySet = new Set(options.excludes!);
+    filteredNames = skillNames.filter((name) => !denySet.has(name));
+  }
+
+  if (filteredNames.length === skillNames.length) {
+    return program;
+  }
+
+  const filteredProps: Record<string, Value> = {};
+  for (const name of filteredNames) {
+    filteredProps[name] = deepClone(props[name]!);
+  }
+
+  const newSkillsBlock: Block = {
+    ...deepClone(skillsBlock),
+    content: {
+      type: 'ObjectContent',
+      properties: filteredProps,
+      loc: skillsBlock.content.loc,
+    } as ObjectContent,
+  };
+
+  return {
+    ...program,
+    blocks: program.blocks.map((b) => (b.name === 'skills' ? newSkillsBlock : b)),
+  };
 }
 
 /**
@@ -531,8 +593,10 @@ export class BrowserResolver {
           // Handle parameterized imports (template interpolation)
           let resolvedImport = imported.ast;
 
-          // Extract reserved params (only/exclude) before they reach bindParams
-          const { only, exclude, remaining } = extractReservedParams(use.params);
+          // Extract reserved params (only/exclude/includes/excludes) before they reach bindParams
+          const { only, exclude, includes, excludes, remaining } = extractReservedParams(
+            use.params
+          );
 
           if (imported.ast.meta?.params || remaining.length > 0) {
             this.logger.debug(`Binding template parameters for ${importPath}`);
@@ -567,6 +631,13 @@ export class BrowserResolver {
               ...resolvedImport,
               blocks: filterBlocksBy(resolvedImport.blocks, { only, exclude }),
             };
+          }
+          // Apply skill filtering (post-interpolation, post-block-filter)
+          if (includes || excludes) {
+            this.logger.debug(
+              `Filtering skills: ${includes ? `includes=[${includes.join(',')}]` : `excludes=[${excludes!.join(',')}]`}`
+            );
+            resolvedImport = filterSkillsBy(resolvedImport, { includes, excludes });
           }
 
           this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);
