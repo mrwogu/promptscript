@@ -104,15 +104,13 @@ function filterBlocksBy(
  * Filter the @skills block within a program by `includes`/`excludes` lists.
  * Operates on the ObjectContent properties of the @skills block. Other blocks
  * are left untouched. Returns a new Program; does not mutate the input.
+ *
+ * Caller must gate on `includes || excludes` before calling.
  */
 function filterSkillsBy(
   program: Program,
   options: { includes?: string[]; excludes?: string[] }
 ): Program {
-  if (!options.includes && !options.excludes) {
-    return program;
-  }
-
   const skillsBlock = program.blocks.find((b) => b.name === 'skills');
   if (!skillsBlock || skillsBlock.content.type !== 'ObjectContent') {
     return program;

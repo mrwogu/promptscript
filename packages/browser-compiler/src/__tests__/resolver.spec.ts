@@ -2975,6 +2975,21 @@ describe('BrowserResolver', () => {
         expect(names).toEqual(['alpha']);
       }
     });
+
+    it('should handle includes filter gracefully when source has no @skills block', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(includes: ["alpha"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@standards { code: { language: "TypeScript" } }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+      expect(result.errors).toEqual([]);
+      // Source has no @skills block — filter is a no-op, standards still imported
+      const blockNames = result.ast?.blocks.map((b) => b.name) ?? [];
+      expect(blockNames).toContain('standards');
+    });
   });
 
   describe('mergeExtendValue TextContent concatenation', () => {
