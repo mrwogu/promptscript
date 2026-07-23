@@ -314,6 +314,9 @@ When importing from a repository or directory that contains multiple skills, con
 # Import all skills except specific ones
 @use github.com/owner/repo/skills(excludes: ["legacy-support"])
 
+# Combine with version pinning (version comes before params)
+@use github.com/owner/repo/skills@2.10.0(includes: ["code-review"])
+
 # Combine with block-level filtering
 @use github.com/owner/repo/skills(only: ["skills"], includes: ["code-review"])
 ```
@@ -325,6 +328,7 @@ When importing from a repository or directory that contains multiple skills, con
 - If neither is specified, all skills are imported (current behavior)
 - Skill filtering applies to imports that produce a `@skills` block (directory imports, remote repo imports)
 - Can be combined with `only`/`exclude` block filters — they operate at different levels (blocks vs skills within a block)
+- When combining with version pinning, the version must come before the params: `@use github.com/owner/repo@2.10.0(includes: [...])`, not after
 - If an excluded skill is a dependency of an included skill, resolution will fail — this is expected user error
 
 ## Content Blocks

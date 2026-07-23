@@ -515,6 +515,75 @@ export const EXAMPLES: Example[] = [
     ],
   },
   {
+    id: 'with-skill-filtering',
+    name: 'Skill Filtering',
+    description: 'Selective skill imports with includes/excludes',
+    complexity: 'intermediate',
+    files: [
+      {
+        path: 'project.prs',
+        content: `@meta {
+  id: "skill-filtered-imports"
+  syntax: "1.2.0"
+}
+
+# Import only specific skills from a shared skill library
+@use ./skill-library(includes: ["code-review", "testing"])
+
+# Import all skills except legacy ones
+# @use ./skill-library(excludes: ["legacy-support"])
+
+# Combine with version pinning (version before params)
+# @use github.com/owner/skills@2.10.0(includes: ["code-review"])
+
+@identity {
+  """
+  You are a development assistant with curated skills.
+  """
+}
+`,
+      },
+      {
+        path: 'skill-library.prs',
+        content: `@meta {
+  id: "skill-library"
+  syntax: "1.2.0"
+}
+
+@skills {
+  code-review: {
+    description: "Review code for bugs and improvements"
+    content: """
+    Check for bugs, edge cases, and code quality issues.
+    """
+  }
+
+  testing: {
+    description: "Write and run tests"
+    content: """
+    Generate test cases following AAA pattern.
+    """
+  }
+
+  legacy-support: {
+    description: "Support legacy code patterns"
+    content: """
+    This skill will NOT be imported (filtered out by includes).
+    """
+  }
+
+  deployment: {
+    description: "Deploy services"
+    content: """
+    This skill will NOT be imported (filtered out by includes).
+    """
+  }
+}
+`,
+      },
+    ],
+  },
+  {
     id: 'regular-field-replacement',
     name: 'Regular Field Replacement',
     description: 'Replace previous field values explicitly with the field! modifier',
@@ -1617,7 +1686,7 @@ export function ExampleGallery() {
             commands
           </span>
         )}
-        {example.files.some((f) => /only=|exclude=/.test(f.content)) && (
+        {example.files.some((f) => /only:|exclude:|includes:|excludes:/.test(f.content)) && (
           <span className="text-xs px-2 py-0.5 bg-violet-500/20 text-violet-400 rounded">
             filtering
           </span>
