@@ -642,6 +642,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     this.addSection(sections, this.project(ast, renderer));
     this.addSection(sections, this.techStack(ast, renderer));
     this.addSection(sections, this.architecture(ast, renderer));
+    this.addSection(sections, this.context(ast, renderer));
     this.addSection(sections, this.codeStandards(ast, renderer));
     this.addSection(sections, this.gitCommits(ast, renderer));
     this.addSection(sections, this.configFiles(ast, renderer));
@@ -764,6 +765,37 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     const content = archMatch.replace('## Architecture', '');
     const normalizedContent = this.normalizeMarkdownForPrettier(content);
     return renderer.renderSection('Architecture', normalizedContent.trim()) + '\n';
+  }
+
+  /**
+   * Render @context block text content as a "## Context" section.
+   *
+   * The "## Architecture" subsection (with code block) is stripped because
+   * it is already rendered separately by {@link architecture}. Remaining
+   * "## " headings are downgraded to "### " to avoid clashing with the
+   * formatter's own h2 section headings. When no @identity block exists,
+   * the project() fallback already consumes the full @context text, so
+   * this method returns null to avoid duplication.
+   */
+  protected context(ast: Program, renderer: ConventionRenderer): string | null {
+    const identity = this.findBlock(ast, 'identity');
+    if (!identity) return null; // project() fallback handles @context text
+
+    const contextBlock = this.findBlock(ast, 'context');
+    if (!contextBlock) return null;
+
+    const text = this.extractText(contextBlock.content);
+    if (!text) return null;
+
+    // Remove the "## Architecture" section with code block (rendered by architecture())
+    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+    if (!remainingText) return null;
+
+    // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
+    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+    const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
+    return renderer.renderSection('Context', normalizedContent.trim()) + '\n';
   }
 
   protected codeStandards(ast: Program, renderer: ConventionRenderer): string | null {

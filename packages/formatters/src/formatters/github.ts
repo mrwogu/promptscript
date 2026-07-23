@@ -988,6 +988,9 @@ export class GitHubFormatter extends BaseFormatter {
     const architecture = this.architecture(ast, renderer);
     if (architecture) sections.push(architecture);
 
+    const contextSection = this.contextSection(ast, renderer);
+    if (contextSection) sections.push(contextSection);
+
     const codeStandards = this.codeStandards(ast, renderer);
     if (codeStandards) sections.push(codeStandards);
 
@@ -1134,6 +1137,26 @@ export class GitHubFormatter extends BaseFormatter {
     const content = archMatch.replace('## Architecture', '').trim();
     // Apply stripAllIndent to normalize content for Prettier compatibility
     return renderer.renderSection('architecture', this.stripAllIndent(content));
+  }
+
+  private contextSection(ast: Program, renderer: ConventionRenderer): string | null {
+    const identity = this.findBlock(ast, 'identity');
+    if (!identity) return null; // project() fallback handles @context text
+
+    const contextBlock = this.findBlock(ast, 'context');
+    if (!contextBlock) return null;
+
+    const text = this.extractText(contextBlock.content);
+    if (!text) return null;
+
+    // Remove the "## Architecture" section with code block (rendered by architecture())
+    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+    if (!remainingText) return null;
+
+    // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
+    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+    return renderer.renderSection('Context', this.stripAllIndent(downgradedText));
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {

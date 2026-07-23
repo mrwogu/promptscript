@@ -5,6 +5,22 @@
 You are a frontend developer on the Frontend team.
 You build modern, accessible web applications.
 
+## Context
+
+### Tech Stack
+
+  - React 18 with TypeScript
+  - Vite for development and building
+  - TailwindCSS for styling
+  - React Query for server state
+  - Vitest + Testing Library for tests
+
+  ### Architecture
+
+  - Feature-based folder structure
+  - Shared component library (@company/ui)
+  - API client generation from OpenAPI specs
+
 ## Code Style
 
 - Use TypeScript for all code
