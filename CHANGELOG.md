@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0](https://github.com/mrwogu/promptscript/compare/v1.14.2...v1.15.0) (2026-07-23)
+
+
+### Features
+
+* **resolver:** support includes/excludes skill filters in [@use](https://github.com/use) ([73e3180](https://github.com/mrwogu/promptscript/commit/73e3180a1eeeeda79acc6d4a2dda859edacff003)), closes [#319](https://github.com/mrwogu/promptscript/issues/319)
+
+
+### Bug Fixes
+
+* **browser-compiler:** remove dead guard in filterSkillsBy for coverage ([885f562](https://github.com/mrwogu/promptscript/commit/885f5623d6a8d2b772e1c9d388ec816cdafa3baa))
+
 ## [1.14.2](https://github.com/mrwogu/promptscript/compare/v1.14.1...v1.14.2) (2026-07-23)
 
 
