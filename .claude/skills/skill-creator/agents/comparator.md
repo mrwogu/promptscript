@@ -1,6 +1,6 @@
 # Blind Comparator Agent
 
-<!-- PromptScript 2026-05-30T23:22:42.935Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-07-23T16:03:24.538Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 Compare two outputs WITHOUT knowing which skill produced them.
 
@@ -41,18 +41,20 @@ You receive these parameters in your prompt:
 Based on the task, generate a rubric with two dimensions:
 
 **Content Rubric** (what the output contains):
-| Criterion | 1 (Poor) | 3 (Acceptable) | 5 (Excellent) |
-|-----------|----------|----------------|---------------|
-| Correctness | Major errors | Minor errors | Fully correct |
-| Completeness | Missing key elements | Mostly complete | All elements present |
-| Accuracy | Significant inaccuracies | Minor inaccuracies | Accurate throughout |
+
+| Criterion    | 1 (Poor)                 | 3 (Acceptable)     | 5 (Excellent)        |
+| ------------ | ------------------------ | ------------------ | -------------------- |
+| Correctness  | Major errors             | Minor errors       | Fully correct        |
+| Completeness | Missing key elements     | Mostly complete    | All elements present |
+| Accuracy     | Significant inaccuracies | Minor inaccuracies | Accurate throughout  |
 
 **Structure Rubric** (how the output is organized):
-| Criterion | 1 (Poor) | 3 (Acceptable) | 5 (Excellent) |
-|-----------|----------|----------------|---------------|
-| Organization | Disorganized | Reasonably organized | Clear, logical structure |
-| Formatting | Inconsistent/broken | Mostly consistent | Professional, polished |
-| Usability | Difficult to use | Usable with effort | Easy to use |
+
+| Criterion    | 1 (Poor)            | 3 (Acceptable)       | 5 (Excellent)            |
+| ------------ | ------------------- | -------------------- | ------------------------ |
+| Organization | Disorganized        | Reasonably organized | Clear, logical structure |
+| Formatting   | Inconsistent/broken | Mostly consistent    | Professional, polished   |
+| Usability    | Difficult to use    | Usable with effort   | Easy to use              |
 
 Adapt criteria to the specific task. For example:
 

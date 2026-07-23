@@ -231,6 +231,113 @@ describe('MarkdownInstructionFormatter', () => {
       expect(result.content).toContain('Node.js 20');
     });
 
+    it('should render context section from @context text when @identity exists', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are an expert developer.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'MixedContent',
+              text: {
+                type: 'TextContent',
+                value:
+                  '## Architecture\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\n## Key Libraries\n\n- Parser: Chevrotain\n- Testing: Vitest',
+                loc: createLoc(),
+              },
+              properties: { languages: ['TypeScript'] },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // Context section should contain remaining text after Architecture extraction
+      expect(result.content).toContain('## Context');
+      expect(result.content).toContain('Key Libraries');
+      expect(result.content).toContain('Chevrotain');
+      // Architecture should still be rendered separately
+      expect(result.content).toContain('flowchart');
+      // ## headings in context text should be downgraded to ###
+      expect(result.content).toContain('### Key Libraries');
+    });
+
+    it('should not render context section when @identity is absent', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'MixedContent',
+              text: {
+                type: 'TextContent',
+                value:
+                  '## Architecture\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\n## Notes\n\nExtra info.',
+                loc: createLoc(),
+              },
+              properties: { languages: ['Go'] },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // Architecture should still be extracted
+      expect(result.content).toContain('flowchart');
+      // Should not have a Context section heading (project fallback handles the text)
+      expect(result.content).not.toMatch(/## Context/);
+    });
+
+    it('should not render context section when @context has no text', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are an expert developer.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: { languages: ['TypeScript'], runtime: 'Node.js 20' },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      // Should have tech stack but not a Context section
+      expect(result.content).toContain('Tech Stack');
+      expect(result.content).not.toMatch(/## Context/);
+    });
+
     it('should extract restrictions from ArrayContent', () => {
       const ast: Program = {
         ...createMinimalProgram(),

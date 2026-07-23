@@ -291,12 +291,13 @@ describe('@context → Context section (text content with @identity)', () => {
     )
   );
 
-  // Claude, GitHub, Factory should render @context text as a Context section
+  // Claude, GitHub, Factory, Antigravity should render @context text as a Context section
   // (excluding the Architecture section which is rendered separately)
   for (const { name, fmt } of [
     { name: 'claude', fmt: claude },
     { name: 'github', fmt: github },
     { name: 'factory', fmt: factory },
+    { name: 'antigravity', fmt: antigravity },
   ]) {
     it(`${name}: renders context section with remaining text after Architecture extraction`, () => {
       const result = fmt.format(ast);
@@ -325,6 +326,7 @@ describe('@context → Context section skipped when no @identity', () => {
     { name: 'claude', fmt: claude },
     { name: 'github', fmt: github },
     { name: 'factory', fmt: factory },
+    { name: 'antigravity', fmt: antigravity },
   ]) {
     it(`${name}: does not render Context section when @identity is absent (project fallback handles it)`, () => {
       const result = fmt.format(ast);

@@ -31,7 +31,9 @@
     "Follow AAA (Arrange, Act, Assert) pattern",
     "Framework: Vitest",
     "Target >90% coverage for libraries",
-    "Use fixtures for parser tests"
+    "Use fixtures for parser tests",
+    "When refactoring formatter section methods (e.g. splitting context() into project() + techStack() + architecture()), add a test verifying that ALL input block content still appears in the output — not just the newly extracted subsections",
+    "Golden files are snapshots of correct behavior, not correct by definition — before regenerating golden files, verify the diff represents an intentional change, not a regression that golden files would lock in"
   ]
 
   git: {

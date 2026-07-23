@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-05-30T23:22:42.934Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-07-23T16:03:31.147Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -74,6 +74,8 @@ flowchart TB
 - Framework: Vitest
 - Target >90% coverage for libraries
 - Use fixtures for parser tests
+- When refactoring formatter section methods (e.g. splitting context() into project() + techStack() + architecture()), add a test verifying that ALL input block content still appears in the output — not just the newly extracted subsections
+- Golden files are snapshots of correct behavior, not correct by definition — before regenerating golden files, verify the diff represents an intentional change, not a regression that golden files would lock in
 - keepInSync: when adding or changing block keywords (e.g. @knowledge, @guards), always update ALL THREE syntax highlighters: (1) Pygments lexer: docs_extensions/promptscript_lexer.py, (2) VS Code TextMate grammar: apps/vscode/syntaxes/promptscript.tmLanguage.json, (3) Playground Monaco language: packages/playground/src/utils/prs-language.ts
 - branchStrategy: gitflow
 - newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
@@ -192,3 +194,4 @@ that file scanning cannot.
 - Don't consider work complete until all CI checks pass (use `gh pr checks --watch`)
 - Don't commit directly to main - always use feature branches
 - Don't edit CHANGELOG.md manually - it is managed by release-please. Manual edits break release state tracking, preventing tag creation and GitHub releases.
+- Don't regenerate golden files without reviewing the diff — golden files lock in whatever behavior produced them, including regressions
