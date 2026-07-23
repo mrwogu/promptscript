@@ -303,6 +303,30 @@ Control which blocks are imported using the reserved `only` and `exclude` parame
 - Unknown block names produce a warning (for forward compatibility)
 - Block filtering does not apply to `@inherit` directives
 
+### Skill Filtering
+
+When importing from a repository or directory that contains multiple skills, control which individual skills are imported using the reserved `includes` and `excludes` parameters:
+
+```promptscript
+# Import only specific skills from a remote repo
+@use github.com/owner/repo/skills(includes: ["code-review", "testing"])
+
+# Import all skills except specific ones
+@use github.com/owner/repo/skills(excludes: ["legacy-support"])
+
+# Combine with block-level filtering
+@use github.com/owner/repo/skills(only: ["skills"], includes: ["code-review"])
+```
+
+**Rules:**
+
+- `includes` and `excludes` are mutually exclusive — using both is a validation error (PS021)
+- Values are skill names (the keys inside the `@skills` block, matching the skill's frontmatter `name`)
+- If neither is specified, all skills are imported (current behavior)
+- Skill filtering applies to imports that produce a `@skills` block (directory imports, remote repo imports)
+- Can be combined with `only`/`exclude` block filters — they operate at different levels (blocks vs skills within a block)
+- If an excluded skill is a dependency of an included skill, resolution will fail — this is expected user error
+
 ## Content Blocks
 
 ### @identity

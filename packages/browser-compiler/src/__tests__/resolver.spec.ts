@@ -2892,6 +2892,91 @@ describe('BrowserResolver', () => {
     });
   });
 
+  describe('@use skill filtering with includes/excludes', () => {
+    it('should keep only specified skills with includes filter', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(includes: ["alpha", "gamma"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@skills {
+  alpha: { description: "Alpha" }
+  beta: { description: "Beta" }
+  gamma: { description: "Gamma" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+      expect(result.errors).toEqual([]);
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        const names = Object.keys(skillsBlock.content.properties);
+        expect(names).toContain('alpha');
+        expect(names).toContain('gamma');
+        expect(names).not.toContain('beta');
+      }
+    });
+
+    it('should remove specified skills with excludes filter', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(excludes: ["beta"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@skills {
+  alpha: { description: "Alpha" }
+  beta: { description: "Beta" }
+  gamma: { description: "Gamma" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+      expect(result.errors).toEqual([]);
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        const names = Object.keys(skillsBlock.content.properties);
+        expect(names).toContain('alpha');
+        expect(names).toContain('gamma');
+        expect(names).not.toContain('beta');
+      }
+    });
+
+    it('should not pass includes/excludes into bindParams as template params', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(includes: ["alpha"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@skills { alpha: { description: "Alpha" } }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+      expect(result.errors).toEqual([]);
+      expect(result.ast).not.toBeNull();
+    });
+
+    it('should work combined with only filter (block + skill level)', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(only: ["skills"], includes: ["alpha"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@knowledge { """Should be filtered out""" }
+@skills {
+  alpha: { description: "Alpha" }
+  beta: { description: "Beta" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+      expect(result.errors).toEqual([]);
+      const blockNames = result.ast?.blocks.map((b) => b.name) ?? [];
+      expect(blockNames).toContain('skills');
+      expect(blockNames).not.toContain('knowledge');
+      const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+      if (skillsBlock?.content.type === 'ObjectContent') {
+        const names = Object.keys(skillsBlock.content.properties);
+        expect(names).toEqual(['alpha']);
+      }
+    });
+  });
+
   describe('mergeExtendValue TextContent concatenation', () => {
     it('should concatenate TextContent property values via dot-path extend', async () => {
       // Covers resolver.ts line 1221: isTextContent(existing) && extContent.type === 'TextContent'

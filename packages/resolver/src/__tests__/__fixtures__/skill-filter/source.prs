@@ -1,0 +1,27 @@
+@meta {
+  id: "skill-source"
+  syntax: "1.1.0"
+}
+
+@skills {
+  alpha: {
+    description: "Alpha skill"
+    content: """
+    Alpha instructions.
+    """
+  }
+
+  beta: {
+    description: "Beta skill"
+    content: """
+    Beta instructions.
+    """
+  }
+
+  gamma: {
+    description: "Gamma skill"
+    content: """
+    Gamma instructions.
+    """
+  }
+}

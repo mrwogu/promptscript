@@ -163,4 +163,92 @@ describe('PS021: use-block-filter', () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('foobar');
   });
+
+  // ============================================================
+  // includes / excludes (skill-level filters)
+  // ============================================================
+
+  it('should report error when includes and excludes are both present', () => {
+    const ast = makeAST([
+      makeUse('./foo', [param('includes', ['skill1']), param('excludes', ['skill2'])]),
+    ]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.severity).toBe('error');
+    expect(messages[0]!.message).toContain('mutually exclusive');
+  });
+
+  it('should report error when includes is not an array', () => {
+    const ast = makeAST([makeUse('./foo', [param('includes', 'skill1')])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.severity).toBe('error');
+    expect(messages[0]!.message).toContain('expects an array');
+  });
+
+  it('should report error when excludes is not an array', () => {
+    const ast = makeAST([makeUse('./foo', [param('excludes', 42)])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.severity).toBe('error');
+    expect(messages[0]!.message).toContain('expects an array');
+  });
+
+  it('should report warning for empty includes array', () => {
+    const ast = makeAST([makeUse('./foo', [param('includes', [])])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.severity).toBe('warning');
+    expect(messages[0]!.message).toContain('imports nothing');
+  });
+
+  it('should report warning for empty excludes array', () => {
+    const ast = makeAST([makeUse('./foo', [param('excludes', [])])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.severity).toBe('warning');
+    expect(messages[0]!.message).toContain('no effect');
+  });
+
+  it('should not report for valid includes usage', () => {
+    const ast = makeAST([makeUse('./foo', [param('includes', ['skill1', 'skill2'])])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should not report for valid excludes usage', () => {
+    const ast = makeAST([makeUse('./foo', [param('excludes', ['skill1'])])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should not report unknown skill names (dynamic, only known after resolution)', () => {
+    const ast = makeAST([makeUse('./foo', [param('includes', ['nonexistent-skill'])])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should allow includes/excludes alongside only/exclude (different levels)', () => {
+    const ast = makeAST([
+      makeUse('./foo', [param('only', ['skills']), param('includes', ['skill1'])]),
+    ]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should not report for @use without includes/excludes', () => {
+    const ast = makeAST([makeUse('./foo', [param('mode', 'strict')])]);
+    const messages = runRule(ast);
+
+    expect(messages).toHaveLength(0);
+  });
 });

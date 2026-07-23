@@ -23,7 +23,7 @@ import {
   parseRegistryMarker,
 } from './loader.js';
 import { resolveInheritance } from './inheritance.js';
-import { resolveUses, extractReservedParams, filterBlocks } from './imports.js';
+import { resolveUses, extractReservedParams, filterBlocks, filterSkillsBlock } from './imports.js';
 import { applyExtends } from './extensions.js';
 import {
   resolveNativeSkills,
@@ -507,8 +507,10 @@ export class Resolver {
         if (imported.ast) {
           let resolvedImport = imported.ast;
 
-          // Extract reserved params (only/exclude) before they reach bindParams
-          const { only, exclude, remaining } = extractReservedParams(use.params);
+          // Extract reserved params (only/exclude/includes/excludes) before they reach bindParams
+          const { only, exclude, includes, excludes, remaining } = extractReservedParams(
+            use.params
+          );
 
           // Handle template parameter interpolation with remaining (non-reserved) params
           if (imported.ast.meta?.params || remaining.length > 0) {
@@ -543,6 +545,14 @@ export class Resolver {
               ...resolvedImport,
               blocks: filterBlocks(resolvedImport.blocks, { only, exclude }),
             };
+          }
+
+          // Apply skill filtering (post-interpolation, post-block-filter)
+          if (includes || excludes) {
+            this.logger.debug(
+              `Filtering skills: ${includes ? `includes=[${includes.join(',')}]` : `excludes=[${excludes!.join(',')}]`}`
+            );
+            resolvedImport = filterSkillsBlock(resolvedImport, { includes, excludes });
           }
 
           // If no inline `into "<path>"` was given, fall back to the

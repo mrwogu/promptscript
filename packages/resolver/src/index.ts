@@ -103,6 +103,12 @@ export {
   getImportAlias,
   getOriginalBlockName,
   IMPORT_MARKER_PREFIX,
+  filterBlocks,
+  filterSkillsBlock,
+  extractReservedParams,
+  type BlockFilterOptions,
+  type SkillFilterOptions,
+  type ReservedParamsResult,
 } from './imports.js';
 
 // Block alias normalization
