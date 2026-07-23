@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.2](https://github.com/mrwogu/promptscript/compare/v1.14.1...v1.14.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **formatters:** render [@context](https://github.com/context) text as Context section ([c2b741c](https://github.com/mrwogu/promptscript/commit/c2b741ce95c43b18c856289a1e280291e7ccef78)), closes [#317](https://github.com/mrwogu/promptscript/issues/317)
+* **resolver:** disable interactive git credential prompts ([b70e4eb](https://github.com/mrwogu/promptscript/commit/b70e4eba30d3b74b807860160de6adb8afbaa301)), closes [#320](https://github.com/mrwogu/promptscript/issues/320)
+
 ## [1.14.1](https://github.com/mrwogu/promptscript/compare/v1.14.0...v1.14.1) (2026-07-22)
 
 
