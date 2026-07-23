@@ -44,6 +44,15 @@ flowchart TB
   formatters --> core
 \`\`\`
 
+## Context
+
+### Key Libraries
+
+- Parser: Chevrotain
+- CLI: Commander.js
+- Testing: Vitest
+- Linting: ESLint + Prettier
+
 ## Code Style
 
 - strictMode
@@ -337,6 +346,15 @@ flowchart TB
   validator --> core
   formatters --> core
 \`\`\`
+
+## Context
+
+### Key Libraries
+
+- Parser: Chevrotain
+- CLI: Commander.js
+- Testing: Vitest
+- Linting: ESLint + Prettier
 
 ## code-standards
 

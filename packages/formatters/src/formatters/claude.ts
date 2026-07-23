@@ -1016,6 +1016,7 @@ export class ClaudeFormatter extends BaseFormatter {
     this.addSection(sections, this.project(ast, renderer));
     this.addSection(sections, this.techStack(ast, renderer));
     this.addSection(sections, this.architecture(ast, renderer));
+    this.addSection(sections, this.contextSection(ast, renderer));
     this.addSection(sections, this.codeStandards(ast, renderer));
     this.addSection(sections, this.gitCommits(ast, renderer));
     this.addSection(sections, this.configFiles(ast, renderer));
@@ -1139,6 +1140,27 @@ export class ClaudeFormatter extends BaseFormatter {
     // Normalize for Prettier compatibility (strip code block indentation, etc.)
     const normalizedContent = this.normalizeMarkdownForPrettier(content);
     return renderer.renderSection('Architecture', normalizedContent.trim()) + '\n';
+  }
+
+  private contextSection(ast: Program, renderer: ConventionRenderer): string | null {
+    const identity = this.findBlock(ast, 'identity');
+    if (!identity) return null; // project() fallback handles @context text
+
+    const contextBlock = this.findBlock(ast, 'context');
+    if (!contextBlock) return null;
+
+    const text = this.extractText(contextBlock.content);
+    if (!text) return null;
+
+    // Remove the "## Architecture" section with code block (rendered by architecture())
+    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+    if (!remainingText) return null;
+
+    // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
+    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+    const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
+    return renderer.renderSection('Context', normalizedContent.trim()) + '\n';
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {

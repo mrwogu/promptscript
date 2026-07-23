@@ -46,6 +46,15 @@ flowchart TB
   formatters --> core
 ```
 
+## Context
+
+### Key Libraries
+
+- Parser: Chevrotain
+- CLI: Commander.js
+- Testing: Vitest
+- Linting: ESLint + Prettier
+
 ## Code Style
 
 - Strict mode enabled

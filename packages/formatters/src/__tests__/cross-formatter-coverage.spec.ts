@@ -52,6 +52,13 @@ const arr = (elements: Value[]): Block['content'] => ({
   loc: loc(),
 });
 
+const mixed = (textValue: string, properties: Record<string, Value>): Block['content'] => ({
+  type: 'MixedContent',
+  text: { type: 'TextContent', value: textValue, loc: loc() },
+  properties,
+  loc: loc(),
+});
+
 // ============================================================
 // Formatter instances
 // ============================================================
@@ -157,7 +164,7 @@ describe('@context MixedContent — @identity takes precedence over @context tex
     block('identity', text('You are an expert developer.')),
     block('context', {
       type: 'MixedContent',
-      text: { type: 'TextContent', value: 'This should NOT appear as project.', loc: loc() },
+      text: { type: 'TextContent', value: 'Context text for the project.', loc: loc() },
       properties: { languages: ['Go'] },
       loc: loc(),
     } as Block['content'])
@@ -167,7 +174,16 @@ describe('@context MixedContent — @identity takes precedence over @context tex
     it(`${name}: uses @identity not @context text when both exist`, () => {
       const result = fmt.format(ast);
       expect(result.content).toContain('expert developer');
-      expect(result.content).not.toContain('should NOT appear');
+      // @identity text should be in the Project section, not @context text
+      const projectMatch = result.content.match(/## [Pp]roject\n\n([\s\S]*?)(?=\n## |$)/);
+      if (projectMatch) {
+        expect(projectMatch[1]).toContain('expert developer');
+        expect(projectMatch[1]).not.toContain('Context text for the project');
+      } else {
+        // Formatters without a "## Project" heading (e.g. cursor, antigravity)
+        // embed identity text directly — just verify it is present
+        expect(result.content).toContain('expert developer');
+      }
     });
   }
 });
@@ -257,6 +273,66 @@ describe('@context → Architecture section', () => {
     it(`${name}: extracts architecture from @context text`, () => {
       const result = fmt.format(ast);
       expect(result.content, `${name} missing architecture`).toContain('flowchart');
+    });
+  }
+});
+
+describe('@context → Context section (text content with @identity)', () => {
+  const ast = program(
+    block('identity', text('You are an expert developer.')),
+    block(
+      'context',
+      mixed(
+        '## Architecture\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\n## Key Libraries\n\n- Parser: Chevrotain\n- Testing: Vitest',
+        {
+          languages: ['TypeScript'],
+        }
+      )
+    )
+  );
+
+  // Claude, GitHub, Factory should render @context text as a Context section
+  // (excluding the Architecture section which is rendered separately)
+  for (const { name, fmt } of [
+    { name: 'claude', fmt: claude },
+    { name: 'github', fmt: github },
+    { name: 'factory', fmt: factory },
+  ]) {
+    it(`${name}: renders context section with remaining text after Architecture extraction`, () => {
+      const result = fmt.format(ast);
+      expect(result.content, `${name} missing Context section`).toContain('Key Libraries');
+      expect(result.content, `${name} missing context item`).toContain('Chevrotain');
+      // Architecture should still be rendered separately
+      expect(result.content, `${name} missing Architecture`).toContain('flowchart');
+    });
+  }
+});
+
+describe('@context → Context section skipped when no @identity', () => {
+  const ast = program(
+    block(
+      'context',
+      mixed(
+        '## Architecture\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\n## Notes\n\nExtra info.',
+        {
+          languages: ['Go'],
+        }
+      )
+    )
+  );
+
+  for (const { name, fmt } of [
+    { name: 'claude', fmt: claude },
+    { name: 'github', fmt: github },
+    { name: 'factory', fmt: factory },
+  ]) {
+    it(`${name}: does not render Context section when @identity is absent (project fallback handles it)`, () => {
+      const result = fmt.format(ast);
+      // Architecture should still be extracted
+      expect(result.content).toContain('flowchart');
+      // "Notes" section should NOT appear as a separate Context section
+      // (it may appear in the project fallback for some formatters)
+      expect(result.content).not.toMatch(/## Context\n\n## Notes/);
     });
   }
 });

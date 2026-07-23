@@ -710,6 +710,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     this.addSection(sections, this.project(ast, renderer));
     this.addSection(sections, this.techStack(ast, renderer));
     this.addSection(sections, this.architecture(ast, renderer));
+    this.addSection(sections, this.context(ast, renderer));
     this.addSection(sections, this.commands(ast, renderer));
     this.addSection(sections, this.postWork(ast, renderer));
   }

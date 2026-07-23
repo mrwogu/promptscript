@@ -5,6 +5,10 @@
 You are a helpful coding assistant for this project.
 Focus on clean, readable code.
 
+## Context
+
+This is a TypeScript project using modern best practices.
+
 ## code-standards
 
 ### code
