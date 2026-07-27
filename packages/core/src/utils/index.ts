@@ -4,3 +4,4 @@ export * from './package.js';
 export * from './path.js';
 export * from './version.js';
 export * from './levenshtein.js';
+export * from './markers.js';
