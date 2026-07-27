@@ -862,7 +862,7 @@ describe('compile command - overwrite protection', () => {
   });
 
   describe('--force with unchanged files', () => {
-    it('should rewrite PromptScript-generated files even when content is unchanged', async () => {
+    it('should not rewrite PromptScript-generated files when only the marker differs', async () => {
       const newContent = `${PROMPTSCRIPT_HTML_MARKER}\n\n# Title\n\nSame content`;
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', newContent)]]);
 
@@ -886,12 +886,12 @@ describe('compile command - overwrite protection', () => {
 
       await compileCommand({ force: true }, mockServices);
 
-      // --force should rewrite the file even though body content is unchanged
-      expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), newContent, 'utf-8');
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('✓'));
+      // --force skips prompts, it must not bump the marker timestamp alone
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('○'));
     });
 
-    it('should rewrite non-marker files even when content matches', async () => {
+    it('should not rewrite non-marker files when content matches', async () => {
       const resourceContent = 'import os\nprint("hello")\n';
       const outputs = new Map([
         ['skills/myskill/helper.py', createMockOutput('skills/myskill/helper.py', resourceContent)],
@@ -916,13 +916,34 @@ describe('compile command - overwrite protection', () => {
 
       await compileCommand({ force: true }, mockServices);
 
-      // --force should rewrite the file even though content is identical
-      expect(mockWriteFile).toHaveBeenCalledWith(
-        resolve('skills/myskill/helper.py'),
-        resourceContent,
-        'utf-8'
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('✓'));
+      // Identical content means there is nothing to write, even with --force
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('○'));
+    });
+
+    it('should still overwrite user files that differ', async () => {
+      const newContent = `${PROMPTSCRIPT_HTML_MARKER}\n\n# Title\n\nGenerated content`;
+      const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', newContent)]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockImplementation((path: string) => {
+        if (path.includes('project.prs')) return true;
+        if (path.includes('CLAUDE.md')) return true;
+        return false;
+      });
+
+      mockReadFile.mockResolvedValue('# Hand written instructions');
+
+      await compileCommand({ force: true }, mockServices);
+
+      expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), newContent, 'utf-8');
     });
   });
 
