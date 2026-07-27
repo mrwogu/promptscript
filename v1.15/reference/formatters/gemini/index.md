@@ -1,0 +1,80 @@
+# Gemini CLI Formatter
+
+| Property          | Value                                  |
+| ----------------- | -------------------------------------- |
+| **Tier**          | Custom                                 |
+| **Main output**   | `GEMINI.md`                            |
+| **Dot directory** | `.gemini/`                             |
+| **Skills**        | Yes (`.agents/skills/<name>/skill.md`) |
+| **Agents**        | No                                     |
+| **Commands**      | Yes (`.gemini/commands/<name>.toml`)   |
+| **Local files**   | No                                     |
+
+## Output Files
+
+| File              | Path                             | Purpose                    |
+| ----------------- | -------------------------------- | -------------------------- |
+| Main instructions | `GEMINI.md`                      | Primary rule file          |
+| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions |
+| Commands          | `.gemini/commands/<name>.toml`   | Slash commands             |
+
+## Supported Features
+
+| Feature                    | Supported |
+| -------------------------- | --------- |
+| Markdown Output            | Yes       |
+| MDC Format                 | No        |
+| Code Blocks                | Yes       |
+| Mermaid Diagrams           | Yes       |
+| Single File Output         | Yes       |
+| Multiple Rule Files        | Yes       |
+| Workflow Files             | No        |
+| Nested Directory Structure | No        |
+| YAML Frontmatter           | Yes       |
+| Description in Frontmatter | Yes       |
+| Globs in Frontmatter       | No        |
+| Activation Type            | No        |
+| Glob Pattern Targeting     | No        |
+| Always Apply Rules         | Yes       |
+| Manual Activation          | No        |
+| Auto/Model Activation      | No        |
+| Structured Examples        | Yes       |
+| Character Limit Validation | No        |
+| Content Section Splitting  | Yes       |
+| Guard Dependencies         | Yes       |
+| Context File Inclusion     | No        |
+| @-Mentions                 | No        |
+| Tool Integration           | No        |
+| Path-Specific Rules        | No        |
+| Prompt Files               | No        |
+| Slash Commands             | Yes       |
+| Skills                     | Yes       |
+| Agent Instructions         | No        |
+| Local Memory               | No        |
+| Nested Memory              | Planned   |
+
+## Limitations & Quirks
+
+- Main file is `GEMINI.md` at project root
+- Commands use TOML format (`.gemini/commands/<name>.toml`), not markdown
+- Skills use lowercase `skill.md` (not `SKILL.md`) at `.agents/skills/<name>/skill.md`
+- Does not support agents
+- Three output modes: `simple`, `multifile`, `full`
+
+## Example Output
+
+```text
+project-root/
+├── GEMINI.md                          # Main instructions
+├── .gemini/
+│   └── commands/
+│       └── review.toml                # Command (TOML format)
+└── .agents/
+    └── skills/
+        └── my-skill/
+            └── skill.md               # Skill definition
+```
+
+## Official Documentation
+
+- [Gemini CLI](https://github.com/google-gemini/gemini-cli)
