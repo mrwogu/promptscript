@@ -1,6 +1,11 @@
 import { readFile, readdir, access, lstat, realpath } from 'fs/promises';
 import { basename, resolve, dirname, relative, normalize, isAbsolute, sep } from 'path';
-import { ResolveError } from '@promptscript/core';
+import {
+  isGeneratedByPromptScript,
+  ResolveError,
+  stripFrontmatterMarkerLines,
+  stripLeadingHtmlMarker,
+} from '@promptscript/core';
 import type {
   Logger,
   Program,
@@ -80,7 +85,12 @@ export function parseSkillMd(content: string): ParsedSkillMd {
   let bodyContent: string;
 
   if (frontmatterStart >= 0 && frontmatterEnd > frontmatterStart) {
-    const frontmatterLines = lines.slice(frontmatterStart + 1, frontmatterEnd);
+    // A SKILL.md that PromptScript generated carries a marker line in its
+    // frontmatter. Drop it so re-ingesting the file does not carry a stale
+    // marker (and its timestamp) into the next compilation output.
+    const frontmatterLines = stripFrontmatterMarkerLines(
+      lines.slice(frontmatterStart + 1, frontmatterEnd).join('\n')
+    ).split('\n');
     const parsed = parseFrontmatterFields(frontmatterLines);
     name = parsed.name;
     description = parsed.description;
@@ -92,12 +102,9 @@ export function parseSkillMd(content: string): ParsedSkillMd {
     license = parsed.license;
     rawFrontmatter = frontmatterLines.join('\n');
 
-    bodyContent = lines
-      .slice(frontmatterEnd + 1)
-      .join('\n')
-      .trim();
+    bodyContent = stripLeadingHtmlMarker(lines.slice(frontmatterEnd + 1).join('\n')).trim();
   } else {
-    bodyContent = content.trim();
+    bodyContent = stripLeadingHtmlMarker(content).trim();
   }
 
   return {
@@ -1072,6 +1079,25 @@ export interface NativeSkillOptions {
 }
 
 /**
+ * Check whether a file is PromptScript compilation output.
+ *
+ * A universal directory such as `.agents/` doubles as a compile target, so
+ * files found there may be output from an earlier run. Such files are never
+ * valid sources: re-ingesting them would let generated formatting overwrite
+ * the original definition.
+ *
+ * @param filePath - Absolute path to a candidate source file
+ * @returns True when the file carries a PromptScript generation marker
+ */
+async function isGeneratedOutput(filePath: string): Promise<boolean> {
+  try {
+    return isGeneratedByPromptScript(await readFile(filePath, 'utf-8'));
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Discover skill directories in a given base path, recursively.
  * Each subdirectory containing a SKILL.md is considered a skill.
  * The skill name is the immediate parent directory of SKILL.md.
@@ -1103,7 +1129,7 @@ async function discoverSkillDirs(basePath: string): Promise<Map<string, string>>
 
       const subDir = resolve(dir, entry.name);
       const skillMd = resolve(subDir, 'SKILL.md');
-      if (await fileExists(skillMd)) {
+      if ((await fileExists(skillMd)) && !(await isGeneratedOutput(skillMd))) {
         // Shallower skills win — only set if not already discovered
         if (!result.has(entry.name)) {
           result.set(entry.name, subDir);
@@ -1251,6 +1277,12 @@ export async function resolveNativeSkills(
     if (skillMdPath && (await fileExists(skillMdPath))) {
       try {
         const rawContent = await readFile(skillMdPath, 'utf-8');
+
+        if (isGeneratedByPromptScript(rawContent)) {
+          logger.verbose(`Ignoring generated SKILL.md for skill '${skillName}': ${skillMdPath}`);
+          continue;
+        }
+
         const parsed = parseSkillMd(rawContent);
 
         // Update skill with native content
@@ -1438,6 +1470,10 @@ async function discoverCommandFiles(
           logger.verbose(`Skipping binary command file: ${entry.name}`);
           continue;
         }
+        if (isGeneratedByPromptScript(content)) {
+          logger.verbose(`Skipping generated command file: ${entry.name}`);
+          continue;
+        }
 
         commands[cmdName] = {
           type: 'TextContent',
@@ -1575,8 +1611,8 @@ function parseAgentFrontmatter(
   }
   if (endIdx === -1) return null;
 
-  const yamlStr = trimmed.slice(3, endIdx).trim();
-  const body = trimmed.slice(endIdx + 3).trim();
+  const yamlStr = stripFrontmatterMarkerLines(trimmed.slice(3, endIdx)).trim();
+  const body = stripLeadingHtmlMarker(trimmed.slice(endIdx + 3)).trim();
 
   // Simple YAML key-value parser for agent frontmatter
   const frontmatter: Record<string, unknown> = {};
@@ -1632,6 +1668,10 @@ async function discoverAgentFiles(
         const fileContent = await readFile(fullPath, 'utf-8');
         if (fileContent.includes('\0')) {
           logger.verbose(`Skipping binary agent file: ${entry.name}`);
+          continue;
+        }
+        if (isGeneratedByPromptScript(fileContent)) {
+          logger.verbose(`Skipping generated agent file: ${entry.name}`);
           continue;
         }
 

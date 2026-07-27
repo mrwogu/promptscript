@@ -172,6 +172,23 @@ You are an expert planning specialist.`
     expect(helper['model']).toBe('haiku');
   });
 
+  it('should skip agent files that PromptScript generated', async () => {
+    const universalDir = join(tempDir, '.agents', 'agents');
+    await mkdir(universalDir, { recursive: true });
+    await writeFile(
+      join(universalDir, 'generated.md'),
+      '<!-- PromptScript 2026-07-27T16:59:01.673Z | source: project.prs | target: claude - do not edit -->\n\n---\nname: generated\ndescription: Emitted by a previous compilation\n---\nBody.'
+    );
+
+    const ast = emptyAst(join(localPath, 'project.prs'));
+    const result = await resolveNativeAgents(ast, ast.loc.file, localPath, {
+      universalDir: '.agents',
+    });
+
+    const agentsBlock = result.blocks.find((b) => b.name === 'agents');
+    expect(agentsBlock).toBeUndefined();
+  });
+
   it('should prefer local over universal for same agent name', async () => {
     // Local
     const localAgents = join(localPath, 'agents');

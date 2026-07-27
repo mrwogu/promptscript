@@ -793,6 +793,46 @@ Universal skill content.
       expect(resources[0]!.relativePath).toBe('data.csv');
     });
 
+    it('should ignore a SKILL.md that PromptScript generated', async () => {
+      const localPath = join(testDir, '.promptscript');
+      const agentsSkillDir = join(testDir, '.agents', 'skills', 'generated-skill');
+      await mkdir(localPath, { recursive: true });
+      await mkdir(agentsSkillDir, { recursive: true });
+
+      await writeFile(
+        join(agentsSkillDir, 'SKILL.md'),
+        `---
+# promptscript-generated: 2026-07-27T16:59:01.673Z | source: project.prs | target: codex
+name: generated-skill
+description: Emitted by a previous compilation
+---
+
+Generated skill content.
+`
+      );
+
+      const ast = createProgram([
+        createSkillsBlock({
+          'generated-skill': { content: 'Authored content.' },
+        }),
+      ]);
+
+      const result = await resolveNativeSkills(
+        ast,
+        registryPath,
+        join(localPath, 'test.prs'),
+        localPath,
+        { universalDir: '.agents' }
+      );
+
+      const skillsBlock = result.blocks.find((b) => b.name === 'skills');
+      const skillsContent = skillsBlock!.content as ObjectContent;
+      const skill = skillsContent.properties['generated-skill'] as Record<string, unknown>;
+
+      expect(skill['content']).toBe('Authored content.');
+      expect(skill['__rawFrontmatter']).toBeUndefined();
+    });
+
     it('should prefer .promptscript/skills/ over .agents/skills/', async () => {
       const localPath = join(testDir, '.promptscript');
       const localSkillDir = join(localPath, 'skills', 'my-skill');
@@ -1679,6 +1719,24 @@ describe('resolveNativeCommands', () => {
     expect(props['/review']).toBeDefined();
   });
 
+  it('should skip command files that PromptScript generated', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const commandsDir = join(testDir, '.agents', 'commands');
+    await mkdir(localPath, { recursive: true });
+    await mkdir(commandsDir, { recursive: true });
+    await writeFile(
+      join(commandsDir, 'stale.md'),
+      '<!-- PromptScript 2026-07-27T16:59:01.673Z | source: project.prs | target: claude - do not edit -->\n\nStale command.'
+    );
+
+    const ast = createProgram([]);
+    const result = await resolveNativeCommands(ast, join(localPath, 'test.prs'), localPath, {
+      universalDir: '.agents',
+    });
+
+    expect(result.blocks.find((b) => b.name === 'shortcuts')).toBeUndefined();
+  });
+
   it('should prefer local commands over universal', async () => {
     const localPath = join(testDir, '.promptscript');
     const localCmds = join(localPath, 'commands');
@@ -2476,6 +2534,37 @@ Just plain content.
       const result = parseSkillMd(input);
 
       expect(result.rawFrontmatter).toBeUndefined();
+    });
+
+    it('should drop the PromptScript marker from a previously generated SKILL.md', () => {
+      const input = `---
+# promptscript-generated: 2026-07-27T16:59:01.673Z | source: project.prs | target: codex
+name: demo
+description: Does something
+---
+
+Skill body content.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.rawFrontmatter).toBe('name: demo\ndescription: Does something');
+      expect(result.content).toBe('Skill body content.');
+    });
+
+    it('should drop a leading HTML marker from the body', () => {
+      const input = `---
+name: demo
+---
+
+<!-- PromptScript 2026-07-27T16:59:01.673Z | source: project.prs | target: claude - do not edit -->
+
+Skill body content.
+`;
+
+      const result = parseSkillMd(input);
+
+      expect(result.content).toBe('Skill body content.');
     });
 
     it('should set rawFrontmatter to undefined when only opening --- exists', () => {
