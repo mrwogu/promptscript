@@ -76,6 +76,8 @@ flowchart TB
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
 - Example: `feat(parser): add support for multiline strings`
+- Reference: https://www.conventionalcommits.org/
+- Max Subject Length: 70
 
 ## Config Files
 

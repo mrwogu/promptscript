@@ -169,6 +169,18 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Convert a camelCase/kebab-case key into a human-readable label.
+   */
+  protected humanizeLabel(value: string): string {
+    return value
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .split(/[-_\s]+/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  /**
    * Safe extraction of a section that contains a header + content + code block + content
    * Avoids ReDoS by using string search instead of backtracking regex.
    * Matches pattern: Header ... ``` ... ```
