@@ -32,6 +32,22 @@ const createStandardsProgram = (properties: Record<string, Value>): Program => (
   ],
 });
 
+const createTextStandardsProgram = (text: string): Program => ({
+  ...createMinimalProgram(),
+  blocks: [
+    {
+      type: 'Block',
+      name: 'standards',
+      content: {
+        type: 'TextContent',
+        value: text,
+        loc: createLoc(),
+      },
+      loc: createLoc(),
+    },
+  ],
+});
+
 describe('FactoryFormatter', () => {
   let formatter: FactoryFormatter;
 
@@ -344,6 +360,53 @@ describe('FactoryFormatter', () => {
         expect(content).toContain('### Testing\n\n- Use Vitest');
       }
       expect(new Set(contents).size).toBe(1);
+    });
+
+    it('should render free-form text standards in monolith mode', () => {
+      const ast = createTextStandardsProgram(
+        '- Strict mode enabled\n- No any type\n- Never log secrets'
+      );
+
+      const versions = ['simple', 'multifile', 'full'] as const;
+      const contents = versions.map((version) => formatter.format(ast, { version }).content);
+
+      for (const content of contents) {
+        expect(content).toContain('## Conventions & Patterns');
+        expect(content).toContain('- Strict mode enabled');
+        expect(content).toContain('- No any type');
+        expect(content).toContain('- Never log secrets');
+      }
+      expect(new Set(contents).size).toBe(1);
+    });
+
+    it('should downgrade h2 headings in free-form text standards', () => {
+      const ast = createTextStandardsProgram('## Security\n\n- Validate all inputs');
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content).toContain('## Conventions & Patterns');
+      expect(result.content).toContain('### Security');
+      expect(result.content).toContain('- Validate all inputs');
+    });
+
+    it('should emit a single standards rule file for free-form text standards in split mode', () => {
+      const ast = createTextStandardsProgram('- Strict mode enabled\n- Never log secrets');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const ruleFiles = (result.additionalFiles ?? []).filter((file) =>
+        file.path.startsWith('.factory/rules/')
+      );
+      expect(ruleFiles.map((file) => file.path)).toEqual(['.factory/rules/standards.md']);
+      expect(ruleFiles[0]?.content).toContain('# Standards');
+      expect(ruleFiles[0]?.content).toContain('- Strict mode enabled');
+      expect(ruleFiles[0]?.content).toContain('- Never log secrets');
+
+      expect(result.content).toContain('## Rules');
+      expect(result.content).toContain('- [Standards](.factory/rules/standards.md)');
     });
   });
 

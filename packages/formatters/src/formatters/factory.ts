@@ -189,7 +189,18 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       subsections.push(renderer.renderSection(entry.title, renderer.renderList(entry.items), 2));
     }
 
-    if (subsections.length === 0) return null;
+    if (subsections.length === 0) {
+      // Fallback: @standards with free-form text content has no properties to group
+      const text = this.extractText(standards.content);
+      if (!text) return null;
+
+      const downgradedText = text.replace(/^(\s*)## /gm, '$1### ');
+      const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
+      return (
+        renderer.renderSection(this.getSectionName('codeStandards'), normalizedContent.trim()) +
+        '\n'
+      );
+    }
 
     return (
       renderer.renderSection(this.getSectionName('codeStandards'), subsections.join('\n\n')) + '\n'
@@ -632,6 +643,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     const standards = this.findBlock(ast, 'standards');
 
     if (standards) {
+      const filesBeforeStandards = files.length;
       const usedSlugs = new Set<string>();
       for (const [topic, value] of Object.entries(this.getProps(standards.content))) {
         const items = this.extractRuleItems(value);
@@ -644,6 +656,18 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
           `.factory/rules/standards/${this.createStableRuleSlug(topic, usedSlugs)}.md`;
         const content = `# ${label}\n\n${renderer.renderList(items)}\n`;
         files.push({ label, path, content });
+      }
+
+      // Fallback: @standards with free-form text content has no topics to split
+      if (files.length === filesBeforeStandards) {
+        const text = this.extractText(standards.content);
+        if (text) {
+          files.push({
+            label: 'Standards',
+            path: '.factory/rules/standards.md',
+            content: `# Standards\n\n${text}\n`,
+          });
+        }
       }
     }
 
