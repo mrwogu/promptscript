@@ -831,9 +831,33 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (g['scope']) items.push(`Scope: ${this.valueToString(g['scope'])}`);
     if (g['example']) items.push(`Example: \`${this.valueToString(g['example'])}\``);
 
+    this.appendGenericStandardItems(items, g, new Set(['format', 'types', 'scope', 'example']));
+
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection(this.getSectionName('gitCommits'), content) + '\n';
+  }
+
+  /**
+   * Append generic `Label: value` items for standards keys not handled by
+   * the known-key rendering above. Keeps custom @standards.git/config/diagrams
+   * keys visible in monolith output.
+   */
+  private appendGenericStandardItems(
+    items: string[],
+    props: Record<string, Value>,
+    knownKeys: ReadonlySet<string>
+  ): void {
+    for (const [key, value] of Object.entries(props)) {
+      if (knownKeys.has(key)) continue;
+      if (value === null || value === undefined || value === false) continue;
+      if (value === true) {
+        items.push(this.humanizeLabel(key));
+        continue;
+      }
+      const rendered = this.standardsExtractor.stringify(value);
+      if (rendered) items.push(`${this.humanizeLabel(key)}: ${rendered}`);
+    }
   }
 
   protected configFiles(ast: Program, renderer: ConventionRenderer): string | null {
@@ -848,6 +872,8 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     if (c['eslint']) items.push(`ESLint: ${this.valueToString(c['eslint'])}`);
     if (c['viteRoot']) items.push(`Vite root: ${this.valueToString(c['viteRoot'])}`);
+
+    this.appendGenericStandardItems(items, c, new Set(['eslint', 'viteRoot']));
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
@@ -931,6 +957,8 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (d['types'] && Array.isArray(d['types'])) {
       items.push(`Types: ${d['types'].map(String).join(', ')}`);
     }
+
+    this.appendGenericStandardItems(items, d, new Set(['format', 'types']));
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);

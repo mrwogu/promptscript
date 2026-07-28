@@ -345,6 +345,58 @@ describe('FactoryFormatter', () => {
       }
       expect(new Set(contents).size).toBe(1);
     });
+
+    it('should render custom @standards.git keys in monolith mode', () => {
+      const ast = createStandardsProgram({
+        git: {
+          model: 'Open-source fork model, land changes via a Merge Request',
+          branch: '(feat|fix)/{project}/{issue-id}',
+          mergeRequest: {
+            title: 'the merge commit message (short feat/fix summary)',
+            description: 'states purpose and links the Jira issue',
+          },
+          requireReview: true,
+          legacy: false,
+          draft: null,
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content).toContain('## Git Workflows');
+      expect(result.content).toContain(
+        '- Model: Open-source fork model, land changes via a Merge Request'
+      );
+      expect(result.content).toContain('- Branch: (feat|fix)/{project}/{issue-id}');
+      expect(result.content).toContain(
+        '- Merge Request: title: the merge commit message (short feat/fix summary), description: states purpose and links the Jira issue'
+      );
+      expect(result.content).toContain('- Require Review');
+      expect(result.content).not.toContain('Legacy');
+      expect(result.content).not.toContain('Draft');
+    });
+
+    it('should render custom @standards.config and @standards.diagrams keys in monolith mode', () => {
+      const ast = createStandardsProgram({
+        config: {
+          eslint: 'inherit from eslint.base.config.cjs',
+          prettier: 'proseWrap: preserve',
+        },
+        diagrams: {
+          format: 'Mermaid',
+          layout: 'flowchart TB',
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content).toContain('## Configuration');
+      expect(result.content).toContain('- ESLint: inherit from eslint.base.config.cjs');
+      expect(result.content).toContain('- Prettier: proseWrap: preserve');
+      expect(result.content).toContain('## Diagrams');
+      expect(result.content).toContain('Use Mermaid for diagrams');
+      expect(result.content).toContain('- Layout: flowchart TB');
+    });
   });
 
   describe('multifile version', () => {
