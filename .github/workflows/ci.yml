@@ -230,7 +230,8 @@ jobs:
             validate-types: {
               event: "post-tool-use"
               matcher: "Edit|Write"
-              command: ["pnpm", "run", "typecheck"]
+              command: ["python3", ".promptscript/scripts/validate.py"]
+              cwd: "project"
             }
           }
 
@@ -292,8 +293,8 @@ jobs:
           test ! -x .factory/skills/security-review/scripts/report.sh
           grep -q "issue-tracker" .factory/mcp.json
           grep -q "engineering" .factory/plugins.json
-          node -e "const h=require('./.factory/hooks.json');if(!h.hooks.PostToolUse)process.exit(1)"
-          node -e "const h=require('./.github/hooks/promptscript.json');const x=h.hooks.postToolUse?.[0];if(h.version!==1||!x?.bash||!x?.powershell)process.exit(1)"
+          node -e 'const h=require("./.factory/hooks.json");const x=h.hooks.PostToolUse?.[0]?.hooks?.[0];if(!x?.command?.startsWith("cd \"$FACTORY_PROJECT_DIR\" && python3"))process.exit(1)'
+          node -e "const h=require('./.github/hooks/promptscript.json');const x=h.hooks.postToolUse?.[0];if(h.version!==1||!x?.bash||!x?.powershell||x.cwd!=='.')process.exit(1)"
 
           chmod -x .factory/skills/security-review/scripts/check.sh
           chmod +x .factory/skills/security-review/scripts/report.sh

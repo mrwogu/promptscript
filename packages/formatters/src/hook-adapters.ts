@@ -26,6 +26,8 @@ export interface HookDefinition {
   matcher?: string;
   /** Command arguments (non-empty array). */
   command: string[];
+  /** Project-root or project-relative working directory. */
+  cwd?: string;
   /** Timeout in milliseconds. */
   timeoutMs?: number;
   /** Status message shown during execution. */
@@ -47,6 +49,10 @@ function quotePowerShellArgument(argument: string): string {
   return `'${argument.replace(/'/g, "''")}'`;
 }
 
+function serializePosixCommand(hook: HookDefinition, prefix = ''): string {
+  return `${prefix}${hook.command.map(quotePosixArgument).join(' ')}`;
+}
+
 function serializeOwnedCommand(
   hook: HookDefinition,
   quoteArgument: (argument: string) => string = quotePosixArgument,
@@ -54,6 +60,14 @@ function serializeOwnedCommand(
 ): string {
   const safeId = hook.id.replace(/[^A-Za-z0-9._-]/g, '-');
   return `${prefix}${hook.command.map(quoteArgument).join(' ')} ${HOOK_OWNERSHIP_MARKER}:${safeId}`;
+}
+
+function projectCwdPrefix(hook: HookDefinition, target: 'claude' | 'factory'): string {
+  if (!hook.cwd) return '';
+
+  const root = target === 'claude' ? '"${CLAUDE_PROJECT_DIR}"' : '"$FACTORY_PROJECT_DIR"';
+  const directory = hook.cwd === 'project' ? root : `${root}/${quotePosixArgument(hook.cwd)}`;
+  return `cd ${directory} && `;
 }
 
 /**
@@ -90,6 +104,9 @@ export function extractHooks(hooksBlock: {
 
     const matcher = obj['matcher'];
     if (typeof matcher === 'string') hook.matcher = matcher;
+
+    const cwd = obj['cwd'];
+    if (typeof cwd === 'string') hook.cwd = cwd;
 
     const timeoutMs = obj['timeoutMs'];
     if (typeof timeoutMs === 'number') hook.timeoutMs = timeoutMs;
@@ -219,7 +236,7 @@ export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unk
       hooks: [
         {
           type: 'command',
-          command: hook.command.join(' '),
+          command: serializePosixCommand(hook, projectCwdPrefix(hook, 'claude')),
           timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'claude') : 10,
         },
       ],
@@ -252,7 +269,7 @@ export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unk
 
     result[nativeEvent].push({
       matcher: hook.matcher ?? '.*',
-      command: hook.command.join(' '),
+      command: serializePosixCommand(hook),
       timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'cursor') : 10,
       ...(hook.statusMessage ? { statusMessage: hook.statusMessage } : {}),
       ...(hook.continueOnFailure !== undefined
@@ -283,7 +300,11 @@ export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, un
       hooks: [
         {
           type: 'command',
-          command: serializeOwnedCommand(hook),
+          command: serializeOwnedCommand(
+            hook,
+            quotePosixArgument,
+            projectCwdPrefix(hook, 'factory')
+          ),
           ...(hook.timeoutMs ? { timeout: convertTimeout(hook.timeoutMs, 'factory') } : {}),
         },
       ],
@@ -302,7 +323,7 @@ const GITHUB_MATCHER_EVENTS = new Set([
 
 export function getHookCompatibilityWarnings(
   hooks: HookDefinition[],
-  target: 'factory' | 'github'
+  target: 'claude' | 'cursor' | 'codex' | 'factory' | 'github'
 ): FormatterWarning[] {
   const warnings: FormatterWarning[] = [];
 
@@ -334,14 +355,22 @@ export function getHookCompatibilityWarnings(
       });
     }
 
-    if (hook.statusMessage) {
+    if (hook.cwd && (target === 'cursor' || target === 'codex')) {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" requests cwd "${hook.cwd}", which ${target} cannot guarantee and will ignore.`,
+        suggestion: `Review the generated ${target} hook because it will use the agent session working directory.`,
+      });
+    }
+
+    if (hook.statusMessage && (target === 'factory' || target === 'github')) {
       warnings.push({
         code: 'PS4002',
         message: `Hook "${hook.id}" uses statusMessage, which ${target} cannot represent and will omit.`,
       });
     }
 
-    if (hook.continueOnFailure !== undefined) {
+    if (hook.continueOnFailure !== undefined && (target === 'factory' || target === 'github')) {
       warnings.push({
         code: 'PS4002',
         message: `Hook "${hook.id}" uses continueOnFailure, which ${target} cannot represent and will omit.`,
@@ -369,6 +398,7 @@ export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unk
       type: 'command',
       bash: serializeOwnedCommand(hook),
       powershell: serializeOwnedCommand(hook, quotePowerShellArgument, '& '),
+      ...(hook.cwd ? { cwd: hook.cwd === 'project' ? '.' : hook.cwd } : {}),
       ...(hook.matcher && GITHUB_MATCHER_EVENTS.has(hook.event) ? { matcher: hook.matcher } : {}),
       ...(hook.timeoutMs ? { timeoutSec: convertTimeout(hook.timeoutMs, 'github') } : {}),
     });

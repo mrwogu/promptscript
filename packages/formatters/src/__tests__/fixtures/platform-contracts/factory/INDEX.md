@@ -1,14 +1,14 @@
 # Factory AI Contracts
 
 Source: https://docs.factory.ai/cli/configuration/agents-md,
-https://docs.factory.ai/harness/hooks
+https://docs.factory.ai/reference/hooks-reference
 
 ## Fixture index
 
 | File          | Source URL                                          | Version     | Retrieved  | Expected path                       | Scope           |
 | ------------- | --------------------------------------------------- | ----------- | ---------- | ----------------------------------- | --------------- |
 | agents-md.md  | https://docs.factory.ai/cli/configuration/agents-md | Factory CLI | 2026-07-17 | `AGENTS.md` (repo root, nested)     | formatter-scope |
-| hooks.json    | https://docs.factory.ai/harness/hooks               | Factory CLI | 2026-07-30 | `.factory/hooks.json`               | formatter-scope |
+| hooks.json    | https://docs.factory.ai/reference/hooks-reference   | Factory CLI | 2026-07-30 | `.factory/hooks.json`               | formatter-scope |
 | user-level.md | https://docs.factory.ai/cli/configuration/agents-md | Factory CLI | 2026-07-17 | `~/.factory/AGENTS.md` (user-level) | out-of-scope    |
 
 ## Scope notes

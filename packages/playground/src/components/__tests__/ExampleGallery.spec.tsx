@@ -46,13 +46,23 @@ describe('ExampleGallery — gallery examples compile', () => {
 
     expect(result.success).toBe(true);
     expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toMatchObject({
-      hooks: { PostToolUse: expect.any(Array) },
+      hooks: {
+        PostToolUse: [
+          {
+            hooks: [
+              {
+                command: expect.stringContaining('cd "$FACTORY_PROJECT_DIR" && python3'),
+              },
+            ],
+          },
+        ],
+      },
     });
     expect(
       JSON.parse(result.outputs.get('.github/hooks/promptscript.json')!.content)
     ).toMatchObject({
       version: 1,
-      hooks: { postToolUse: expect.any(Array) },
+      hooks: { postToolUse: [{ cwd: '.' }] },
     });
   });
 });

@@ -1399,6 +1399,7 @@ describe('CursorFormatter', () => {
                 'my-hook': {
                   event: 'pre-tool-use',
                   command: ['echo', 'hello'],
+                  cwd: 'project',
                 },
               },
               loc: createLoc(),
@@ -1412,6 +1413,16 @@ describe('CursorFormatter', () => {
       expect(hooksFile).toBeDefined();
       const parsed = JSON.parse(hooksFile!.content) as Record<string, unknown>;
       expect(parsed).toHaveProperty('preEdit');
+      expect(result.warnings).toEqual([
+        {
+          code: 'PS4002',
+          message:
+            'Hook "my-hook" requests cwd "project", which cursor cannot guarantee and will ignore.',
+          suggestion:
+            'Review the generated cursor hook because it will use the agent session working directory.',
+          location: createLoc(),
+        },
+      ]);
     });
 
     it('should emit mcp.json when @mcpServers block present', () => {

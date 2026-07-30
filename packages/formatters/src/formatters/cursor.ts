@@ -2,7 +2,11 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import { GlobCategorizer } from '../extractors/glob-categorizer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
-import { extractHooks, generateCursorHooks } from '../hook-adapters.js';
+import {
+  extractHooks,
+  generateCursorHooks,
+  getHookCompatibilityWarnings,
+} from '../hook-adapters.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -453,9 +457,14 @@ export class CursorFormatter extends BaseFormatter {
 
     // Generate hooks (.cursor/hooks.json) from @hooks block
     const hooksBlock = this.findBlock(ast, 'hooks');
+    let hookWarnings: FormatterOutput['warnings'];
     if (hooksBlock) {
       const hooks = extractHooks(hooksBlock);
       if (hooks.length > 0) {
+        hookWarnings = getHookCompatibilityWarnings(hooks, 'cursor').map((warning) => ({
+          ...warning,
+          location: hooksBlock.loc,
+        }));
         const cursorHooks = generateCursorHooks(hooks);
         if (Object.keys(cursorHooks).length > 0) {
           additionalFiles.push({
@@ -493,6 +502,9 @@ export class CursorFormatter extends BaseFormatter {
     return {
       ...result,
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+      ...(hookWarnings && hookWarnings.length > 0
+        ? { warnings: [...(result.warnings ?? []), ...hookWarnings] }
+        : {}),
     };
   }
 

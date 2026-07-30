@@ -680,6 +680,7 @@ describe('CodexFormatter', () => {
                 'my-hook': {
                   event: 'pre-tool-use',
                   command: ['echo', 'hello'],
+                  cwd: 'project',
                 },
               },
               loc: createLoc(),
@@ -697,6 +698,16 @@ describe('CodexFormatter', () => {
       );
       expect(configFile).toBeDefined();
       expect(configFile!.content).toContain('pre_tool_use');
+      expect(result.warnings).toEqual([
+        {
+          code: 'PS4002',
+          message:
+            'Hook "my-hook" requests cwd "project", which codex cannot guarantee and will ignore.',
+          suggestion:
+            'Review the generated codex hook because it will use the agent session working directory.',
+          location: createLoc(),
+        },
+      ]);
     });
 
     it('should skip agents with invalid names', () => {

@@ -22,7 +22,8 @@ The `@hooks` block requires syntax `1.4.0`:
   validate-types: {
     event: "post-tool-use"
     matcher: "Edit|Write"
-    command: ["pnpm", "run", "typecheck"]
+    command: ["python3", ".promptscript/scripts/validate.py", "--strict"]
+    cwd: "project"
     timeoutMs: 120000
     statusMessage: "Checking TypeScript"
     continueOnFailure: false
@@ -68,13 +69,62 @@ user hook files remain untouched.
 Hook commands are arrays in PromptScript source:
 
 ```promptscript
-command: ["node", "./tools/validate-output.mjs", "--strict"]
+command: ["python3", ".promptscript/scripts/validate.py", "--strict"]
+cwd: "project"
 ```
 
-Shell interpolation is rejected in source. Factory shell-quotes command
-arguments, while GitHub emits separate `bash` and `powershell` commands.
-Commit hook programs to the repository and review inherited hooks as
-executable policy.
+`cwd: "project"` makes the project-root requirement explicit. A value such as
+`cwd: "tools/hooks"` resolves from project root. The location of the generated
+hook configuration does not determine command working directory.
+
+Shell interpolation is rejected in source. Target adapters preserve source
+argument boundaries when a platform requires one command string. Factory
+shell-quotes command arguments, while GitHub emits separate `bash` and
+`powershell` commands. Commit shared hook programs under
+`.promptscript/scripts/`, rather than duplicating them under target
+directories, and review inherited hooks as executable policy.
+
+### Project-Root Strategy by Target
+
+| Target         | Native project root              | Native `cwd` entry | Payload `cwd`  | PromptScript behavior                           |
+| -------------- | -------------------------------- | ------------------ | -------------- | ----------------------------------------------- |
+| Claude Code    | `CLAUDE_PROJECT_DIR` placeholder | No                 | Yes            | Emits a safely quoted `cd` wrapper              |
+| Factory Droid  | `FACTORY_PROJECT_DIR`            | No                 | Event-specific | Emits a safely quoted `cd` wrapper              |
+| GitHub Copilot | Repository root                  | Yes                | Yes            | Emits `cwd: "."` or the requested relative path |
+| Cursor         | No stable portable primitive     | No                 | Event-specific | Emits `PS4002` and uses the session directory   |
+| Codex          | No project-root variable         | No                 | Session `cwd`  | Emits `PS4002` and uses the session directory   |
+
+Payload `cwd` describes where an event occurred. It does not configure the
+working directory of the hook command. `GITHUB_WORKSPACE` belongs to GitHub
+Actions and is not a portable GitHub Copilot hook variable.
+
+Contract references:
+
+- [Claude Code hooks](https://code.claude.com/docs/en/hooks)
+- [Factory Droid hooks](https://docs.factory.ai/reference/hooks-reference)
+- [GitHub Copilot hooks](https://docs.github.com/en/copilot/reference/hooks-reference)
+- [Cursor hooks](https://cursor.com/docs/hooks)
+- [Codex hooks](https://developers.openai.com/codex/hooks)
+
+For example, the portable hook above generates this Factory command:
+
+```json
+{
+  "type": "command",
+  "command": "cd \"$FACTORY_PROJECT_DIR\" && python3 .promptscript/scripts/validate.py --strict # promptscript-generated:validate-types"
+}
+```
+
+The GitHub repository hook uses its native working-directory field:
+
+```json
+{
+  "type": "command",
+  "bash": "python3 .promptscript/scripts/validate.py --strict # promptscript-generated:validate-types",
+  "powershell": "& 'python3' '.promptscript/scripts/validate.py' '--strict' # promptscript-generated:validate-types",
+  "cwd": "."
+}
+```
 
 ## Workflows
 

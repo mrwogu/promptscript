@@ -149,4 +149,4 @@ project-root/
 ## Official Documentation
 
 - [Factory AI Documentation](https://docs.factory.ai/)
-- [Factory Hooks Reference](https://docs.factory.ai/harness/hooks)
+- [Factory Hooks Reference](https://docs.factory.ai/reference/hooks-reference)

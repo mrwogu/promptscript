@@ -55,6 +55,7 @@ describe('PS034: valid-hooks', () => {
           event: 'pre-tool-use',
           matcher: 'Edit|Write',
           command: ['prs', 'hook', 'pre-edit'],
+          cwd: 'project',
           timeoutMs: 5000,
           statusMessage: 'Checking generated files',
           continueOnFailure: false,
@@ -63,6 +64,59 @@ describe('PS034: valid-hooks', () => {
       })
     );
     expect(messages).toHaveLength(0);
+  });
+
+  it('should accept a project-relative working directory', () => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'post-tool-use',
+          command: ['python3', 'check.py'],
+          cwd: 'tools/hook scripts',
+        },
+      })
+    );
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it.each([
+    ['', 'empty'],
+    ['.', 'dot'],
+    ['../outside', 'parent traversal'],
+    ['tools/../outside', 'nested parent traversal'],
+    ['/tmp/hooks', 'absolute POSIX'],
+    ['C:\\hooks', 'absolute Windows'],
+    ['C:/hooks', 'forward-slash Windows absolute'],
+    ['tools\\hooks', 'backslash'],
+  ])('should reject %s as a %s working directory', (cwd) => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'post-tool-use',
+          command: ['python3', 'check.py'],
+          cwd,
+        },
+      })
+    );
+
+    expect(messages.some((message) => message.message.includes('cwd must be "project"'))).toBe(
+      true
+    );
+  });
+
+  it('should reject a non-string working directory', () => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'post-tool-use',
+          command: ['python3', 'check.py'],
+          cwd: 42,
+        },
+      })
+    );
+
+    expect(messages.some((message) => message.message.includes('cwd must be a string'))).toBe(true);
   });
 
   it('should reject missing event field', () => {

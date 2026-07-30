@@ -23,6 +23,7 @@ const MAX_TIMEOUT_MS = 600_000; // 10 minutes
  * - Hook IDs must be stable (from object keys, non-empty)
  * - `event` must be a valid portable event
  * - `command` must be a non-empty string array (no shell interpolation)
+ * - `cwd` must be "project" or a portable relative path
  * - `timeoutMs` must be in valid range
  * - `matcher` must be a string if present
  * - `statusMessage` must be a string if present
@@ -126,6 +127,25 @@ export const validHooks: ValidationRule = {
         }
       }
 
+      // Validate cwd
+      const cwd = hook['cwd'];
+      if (cwd !== undefined) {
+        if (typeof cwd !== 'string') {
+          ctx.report({
+            message: `Hook "${hookId}": cwd must be a string`,
+            location: hooksBlock.loc,
+            severity: 'error',
+          });
+        } else if (cwd !== 'project' && !isPortableRelativePath(cwd)) {
+          ctx.report({
+            message: `Hook "${hookId}": cwd must be "project" or a portable path relative to the project root`,
+            location: hooksBlock.loc,
+            suggestion: 'Use "project" or forward-slash path segments without "." or ".."',
+            severity: 'error',
+          });
+        }
+      }
+
       // Validate timeoutMs
       const timeoutMs = hook['timeoutMs'];
       if (timeoutMs !== undefined) {
@@ -186,3 +206,16 @@ export const validHooks: ValidationRule = {
     }
   },
 };
+
+function isPortableRelativePath(path: string): boolean {
+  if (!path || path.startsWith('/') || path.startsWith('\\') || path.includes('\\')) return false;
+  if (
+    /^[A-Za-z]:/.test(path) ||
+    path.includes('\0') ||
+    path.includes('\n') ||
+    path.includes('\r')
+  ) {
+    return false;
+  }
+  return path.split('/').every((segment) => segment !== '' && segment !== '.' && segment !== '..');
+}

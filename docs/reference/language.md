@@ -1217,6 +1217,7 @@ target's native event system and configuration format.
     event: "pre-tool-use"
     matcher: "Edit|Write"
     command: ["prs", "hook", "pre-edit"]
+    cwd: "project"
     timeoutMs: 5000
     statusMessage: "Checking generated files"
     continueOnFailure: false
@@ -1239,20 +1240,26 @@ Portable events:
 
 Each hook entry is an object with:
 
-| Field               | Required | Type     | Description                                 |
-| ------------------- | -------- | -------- | ------------------------------------------- |
-| `event`             | Yes      | string   | Portable event name (see above)             |
-| `command`           | Yes      | string[] | Non-empty source argument array             |
-| `matcher`           | No       | string   | Target-native tool name matcher pattern     |
-| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                  |
-| `statusMessage`     | No       | string   | Status message shown during execution       |
-| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails           |
-| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true) |
+| Field               | Required | Type     | Description                                                  |
+| ------------------- | -------- | -------- | ------------------------------------------------------------ |
+| `event`             | Yes      | string   | Portable event name (see above)                              |
+| `command`           | Yes      | string[] | Non-empty source argument array                              |
+| `cwd`               | No       | string   | `"project"` or a forward-slash path relative to project root |
+| `matcher`           | No       | string   | Target-native tool name matcher pattern                      |
+| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                                   |
+| `statusMessage`     | No       | string   | Status message shown during execution                        |
+| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                            |
+| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)                  |
 
 Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command arguments, and `command`
 must contain at least one argument - PS034 rejects empty arrays and hooks without an executable
-command are omitted from target output. Target adapters may serialize the array as one native
-command string, so verify argument quoting in generated hook configuration.
+command are omitted from target output. Target adapters preserve argument boundaries when they
+serialize the array as a native command string.
+
+`cwd: "project"` requests execution from the resolved PromptScript project root. Other `cwd` values
+must be portable relative paths and resolve from that root. Absolute paths, backslashes, empty path
+segments, `.` segments, and `..` traversal are rejected. Hook configuration location does not set
+the command working directory.
 
 `matcher` filters by tool name using the target's own vocabulary: Factory matches names like
 `Execute` or `Read`, GitHub Copilot matches its own tool names (and only on `preToolUse`,

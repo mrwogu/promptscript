@@ -4,7 +4,11 @@ import {
   type MarkdownAgentConfig,
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
-import { extractHooks, generateCodexHooks } from '../hook-adapters.js';
+import {
+  extractHooks,
+  generateCodexHooks,
+  getHookCompatibilityWarnings,
+} from '../hook-adapters.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -331,7 +335,14 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     // Emit .codex/config.toml when project config options or hooks are set
     const targetConfig = options?.targetConfig;
     const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
-    const hooksToml = hooksBlock ? generateCodexHooks(extractHooks(hooksBlock)) : '';
+    const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
+    const hooksToml = generateCodexHooks(hooks);
+    const hookWarnings = hooksBlock
+      ? getHookCompatibilityWarnings(hooks, 'codex').map((warning) => ({
+          ...warning,
+          location: hooksBlock.loc,
+        }))
+      : [];
 
     if (
       (targetConfig &&
@@ -412,11 +423,19 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
       );
       return {
         ...result,
+        ...(hookWarnings.length > 0
+          ? { warnings: [...(result.warnings ?? []), ...hookWarnings] }
+          : {}),
         additionalFiles: [...additionalFiles, ...extraFiles],
         managedOutputDirectories: [...(result.managedOutputDirectories ?? []), ...managedDirs],
       };
     }
 
-    return result;
+    return {
+      ...result,
+      ...(hookWarnings.length > 0
+        ? { warnings: [...(result.warnings ?? []), ...hookWarnings] }
+        : {}),
+    };
   }
 }

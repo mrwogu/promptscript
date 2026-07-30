@@ -1114,7 +1114,8 @@ export const EXAMPLES: Example[] = [
   validate-changes: {
     event: "post-tool-use"
     matcher: "Edit|Write"
-    command: ["pnpm", "run", "typecheck"]
+    command: ["python3", ".promptscript/scripts/validate.py"]
+    cwd: "project"
     timeoutMs: 120000
     statusMessage: "Checking TypeScript"
   }

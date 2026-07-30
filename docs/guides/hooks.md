@@ -26,6 +26,11 @@ Notes for compiled `@hooks` output:
 - **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in
   it carries the PromptScript ownership marker, and prunes managed directories left empty (such as
   `.github/hooks/`).
+- **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the
+  language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file
+  location does not set command working directory. See
+  [Hooks and Workflows](../features/automation.md#project-root-strategy-by-target) for target
+  behavior and generated Factory and GitHub examples.
 
 There are two complementary behaviours:
 

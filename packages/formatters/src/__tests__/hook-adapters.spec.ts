@@ -34,6 +34,7 @@ describe('hook-adapters', () => {
           event: 'pre-tool-use',
           matcher: 'Edit|Write',
           command: ['prs', 'hook', 'pre-edit'],
+          cwd: 'project',
           timeoutMs: 5000,
           statusMessage: 'Checking generated files',
           continueOnFailure: false,
@@ -46,6 +47,7 @@ describe('hook-adapters', () => {
       expect(hooks[0]!.event).toBe('pre-tool-use');
       expect(hooks[0]!.matcher).toBe('Edit|Write');
       expect(hooks[0]!.command).toEqual(['prs', 'hook', 'pre-edit']);
+      expect(hooks[0]!.cwd).toBe('project');
       expect(hooks[0]!.timeoutMs).toBe(5000);
       expect(hooks[0]!.statusMessage).toBe('Checking generated files');
       expect(hooks[0]!.continueOnFailure).toBe(false);
@@ -181,12 +183,12 @@ describe('hook-adapters', () => {
       expect(Object.keys(result)).toHaveLength(0);
     });
 
-    it('should join command arguments with spaces', () => {
+    it('should preserve command argument boundaries', () => {
       const hooks = extractHooks(
         makeHooksBlock({
           test: {
             event: 'pre-tool-use',
-            command: ['prs', 'hook', 'pre-edit'],
+            command: ['python3', 'scripts/check file.py', '--label=hello world'],
           },
         })
       );
@@ -195,7 +197,26 @@ describe('hook-adapters', () => {
       expect(preToolUse).toBeDefined();
       const entry = preToolUse![0] as Record<string, unknown>;
       const hookArr = entry['hooks'] as Record<string, unknown>[];
-      expect(hookArr[0]!['command']).toBe('prs hook pre-edit');
+      expect(hookArr[0]!['command']).toBe("python3 'scripts/check file.py' '--label=hello world'");
+    });
+
+    it('should execute project-relative hooks from the Claude project root', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          test: {
+            event: 'pre-tool-use',
+            command: ['python3', '.promptscript/scripts/check.py'],
+            cwd: 'tools/hook scripts',
+          },
+        })
+      );
+      const result = generateClaudeHooks(hooks);
+      const entry = (result['PreToolUse'] as Record<string, unknown>[])[0]!;
+      const hook = (entry['hooks'] as Record<string, unknown>[])[0]!;
+
+      expect(hook['command']).toBe(
+        'cd "${CLAUDE_PROJECT_DIR}"/\'tools/hook scripts\' && python3 .promptscript/scripts/check.py'
+      );
     });
   });
 
@@ -233,6 +254,21 @@ describe('hook-adapters', () => {
       expect(toml.trim()).toBe('');
     });
 
+    it('should preserve command argument boundaries for Codex', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'post-tool-use',
+            command: ['python3', 'scripts/check file.py', '--label=hello world'],
+          },
+        })
+      );
+
+      expect(generateCodexHooks(hooks)).toContain(
+        'command = ["python3", "scripts/check file.py", "--label=hello world"]'
+      );
+    });
+
     it('should include statusMessage in Claude hooks', () => {
       const hooks = extractHooks(
         makeHooksBlock({
@@ -259,7 +295,7 @@ describe('hook-adapters', () => {
           active: {
             event: 'pre-tool-use',
             matcher: 'Edit|Write',
-            command: ['prs', 'hook', 'pre-edit'],
+            command: ['python3', 'scripts/check file.py', '--label=hello world'],
             timeoutMs: 5000,
             statusMessage: 'Checking files',
             continueOnFailure: true,
@@ -276,7 +312,7 @@ describe('hook-adapters', () => {
         preEdit: [
           {
             matcher: 'Edit|Write',
-            command: 'prs hook pre-edit',
+            command: "python3 'scripts/check file.py' '--label=hello world'",
             timeout: 5,
             statusMessage: 'Checking files',
             continueOnFailure: true,
@@ -345,6 +381,33 @@ describe('hook-adapters', () => {
         ],
       });
     });
+
+    it('should execute Factory hooks from a project-relative working directory', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          rooted: {
+            event: 'pre-tool-use',
+            command: ['python3', '.promptscript/scripts/check.py'],
+            cwd: 'tools/hook scripts',
+          },
+        })
+      );
+
+      expect(generateFactoryHooks(hooks)).toEqual({
+        PreToolUse: [
+          {
+            matcher: '.*',
+            hooks: [
+              {
+                type: 'command',
+                command:
+                  'cd "$FACTORY_PROJECT_DIR"/\'tools/hook scripts\' && python3 .promptscript/scripts/check.py # promptscript-generated:rooted',
+              },
+            ],
+          },
+        ],
+      });
+    });
   });
 
   describe('generateGitHubHooks', () => {
@@ -355,6 +418,7 @@ describe('hook-adapters', () => {
             event: 'pre-tool-use',
             matcher: 'edit|create',
             command: ['prs', 'hook', 'pre-edit'],
+            cwd: 'project',
             timeoutMs: 5000,
           },
           stopped: {
@@ -376,6 +440,7 @@ describe('hook-adapters', () => {
             type: 'command',
             bash: 'prs hook pre-edit # promptscript-generated:active',
             powershell: "& 'prs' 'hook' 'pre-edit' # promptscript-generated:active",
+            cwd: '.',
             matcher: 'edit|create',
             timeoutSec: 5,
           },
@@ -407,6 +472,30 @@ describe('hook-adapters', () => {
             bash: "python3 'scripts/check file.py' 'it'\"'\"'s safe; echo' --% @name # promptscript-generated:quoted",
             powershell:
               "& 'python3' 'scripts/check file.py' 'it''s safe; echo' '--%' '@name' # promptscript-generated:quoted",
+          },
+        ],
+      });
+    });
+
+    it('should emit a project-relative GitHub working directory', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          rooted: {
+            event: 'pre-tool-use',
+            command: ['python3', '.promptscript/scripts/check.py'],
+            cwd: 'tools/hook scripts',
+          },
+        })
+      );
+
+      expect(generateGitHubHooks(hooks)).toEqual({
+        preToolUse: [
+          {
+            type: 'command',
+            bash: 'python3 .promptscript/scripts/check.py # promptscript-generated:rooted',
+            powershell:
+              "& 'python3' '.promptscript/scripts/check.py' # promptscript-generated:rooted",
+            cwd: 'tools/hook scripts',
           },
         ],
       });
@@ -468,5 +557,30 @@ describe('hook-adapters', () => {
         },
       ]);
     });
+
+    it.each(['cursor', 'codex'] as const)(
+      'warns when %s cannot guarantee a requested working directory',
+      (target) => {
+        const hooks = extractHooks(
+          makeHooksBlock({
+            rooted: {
+              event: 'post-tool-use',
+              command: ['python3', '.promptscript/scripts/check.py'],
+              cwd: 'project',
+              statusMessage: 'Checking',
+              continueOnFailure: true,
+            },
+          })
+        );
+
+        expect(getHookCompatibilityWarnings(hooks, target)).toEqual([
+          {
+            code: 'PS4002',
+            message: `Hook "rooted" requests cwd "project", which ${target} cannot guarantee and will ignore.`,
+            suggestion: `Review the generated ${target} hook because it will use the agent session working directory.`,
+          },
+        ]);
+      }
+    );
   });
 });
