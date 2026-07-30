@@ -83,6 +83,7 @@ description: PromptScript output format for Factory AI
 - Three output modes: `simple`, `multifile`, `full`
 - Always-on rules default to the byte-compatible `monolith` mode
 - In `monolith` mode, `@standards` render as grouped `###` subsections (one per topic) under `Conventions & Patterns`, preserving the source topic structure
+- Free-form text `@standards` (triple-quoted string) renders under `Conventions & Patterns` in `monolith` mode, or as `.factory/rules/standards.md` in split rules mode; embedded headings are downgraded to nest under the surrounding section
 - Split rules require the `multifile` or `full` output version
 
 ## Split Rules
@@ -103,6 +104,10 @@ Split mode emits one file for each non-empty `@standards` topic, plus semantic
 files for git workflows, configuration, documentation, diagrams, remaining
 knowledge, restrictions, and examples when those sections exist. `AGENTS.md`
 contains a readable index of only the emitted files.
+
+When `@standards` contains free-form text instead of topics, split mode emits
+a single `.factory/rules/standards.md` file with the text normalized (common
+indentation stripped, headings downgraded below the `# Standards` title).
 
 When a custom `outputPath` is configured for the target, the rule files still
 live in `.factory/rules/` at the project root and the index links are rewritten
