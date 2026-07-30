@@ -208,7 +208,7 @@ export const validHooks: ValidationRule = {
 };
 
 function isPortableRelativePath(path: string): boolean {
-  if (!path || path.startsWith('/') || path.startsWith('\\') || path.includes('\\')) return false;
+  if (!path || path.startsWith('/') || path.includes('\\')) return false;
   if (
     /^[A-Za-z]:/.test(path) ||
     path.includes('\0') ||
