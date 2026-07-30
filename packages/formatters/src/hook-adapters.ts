@@ -49,6 +49,10 @@ export interface HookScriptDefinition {
   args: string[];
 }
 
+// Ownership marker contract: the marker must remain the final token of every
+// emitted hook command. The ownership regexes in
+// packages/cli/src/utils/managed-output-cleanup.ts anchor it at end-of-command
+// (/# promptscript-generated:[A-Za-z0-9._-]+\s*$/); keep both sides in sync.
 const HOOK_OWNERSHIP_MARKER = '# promptscript-generated';
 const SHELL_SAFE_ARGUMENT = /^[A-Za-z0-9_@%+=:,./-]+$/;
 type HookTarget =
@@ -165,7 +169,11 @@ function serializePowerShellScriptCommand(
   owned = false
 ): string | null {
   if (!hook.script) {
-    return `& ${getCommandArguments(hook).map(quotePowerShellArgument).join(' ')}`;
+    // Defensive: callers gate on hook.script, but an owned command must never
+    // lose its ownership marker (see HOOK_OWNERSHIP_MARKER contract above).
+    return owned
+      ? serializeOwnedCommand(hook, quotePowerShellArgument, '& ')
+      : `& ${getCommandArguments(hook).map(quotePowerShellArgument).join(' ')}`;
   }
 
   const interpreter = getWindowsInterpreter(hook.script.interpreter);
