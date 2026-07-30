@@ -232,7 +232,8 @@ PromptScript emits `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+
 | Crush          | `.crush/mcp.json`                | -                                 | -                       |
 
 Hook files require `multifile` or `full` mode. In `simple` mode, formatters
-preserve single-file output and report a compatibility warning.
+preserve single-file output and report a compatibility warning. Cursor emits
+hook files only in `full` mode and reports `PS4002` in its other modes.
 
 Agent-level `mcpServers` references are emitted by Claude Code, Cursor, and Factory Droid.
 

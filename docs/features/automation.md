@@ -57,9 +57,10 @@ target set.
 | Codex          | `.codex/config.toml`              | Codex-native events and milliseconds |
 
 Hook files require `multifile` or `full` mode. `simple` mode reports `PS4002`
-because it cannot emit additional files. Target adapters also report `PS4002`
-when an event, matcher, `statusMessage`, or `continueOnFailure` value has no
-native equivalent.
+because it cannot emit additional files. Cursor emits hook files only in
+`full` mode; its other modes report `PS4002` and omit hooks. Target adapters
+also report `PS4002` when an event, matcher, `statusMessage`, or
+`continueOnFailure` value has no native equivalent.
 
 Factory and GitHub generated commands include a trailing
 `# promptscript-generated:<hook-id>` shell comment. PromptScript uses this
@@ -97,6 +98,21 @@ directories, and review inherited hooks as executable policy.
 Payload `cwd` describes where an event occurred. It does not configure the
 working directory of the hook command. `GITHUB_WORKSPACE` belongs to GitHub
 Actions and is not a portable GitHub Copilot hook variable.
+
+### Shell and Failure Behavior
+
+The `cd` wrapper emitted for Claude Code and Factory Droid targets a POSIX
+shell. Claude Code and Factory Droid hook payloads assume a POSIX environment.
+For Windows coverage, prefer the GitHub Copilot target: its native `cwd` field
+and separate `bash` and `powershell` payloads are cross-shell.
+
+`CLAUDE_PROJECT_DIR` and `FACTORY_PROJECT_DIR` are set by the respective tool
+when it runs the hook. If the variable is unset, the wrapper normally fails
+with a non-zero exit and the hook reports an error. On some shells, such as
+macOS `/bin/sh`, `cd ""` is a no-op instead: the command then runs in the
+session working directory, where a same-named script could execute in the
+wrong location. Rely on the tool setting the variable, and treat a missing
+variable as a hook error rather than a fallback to another directory.
 
 Contract references:
 
