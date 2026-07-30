@@ -1,0 +1,12 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on the project.
+
+Code style:
+- Use strict TypeScript with no any types
+- Prefer interfaces over type aliases
+- Use Vitest for unit tests
+- Follow AAA pattern (Arrange, Act, Assert)
