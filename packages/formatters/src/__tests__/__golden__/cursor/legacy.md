@@ -100,6 +100,8 @@ pnpm run test       # Run all tests
 ```
 
 Documentation:
+- verifyBefore
+- verifyAfter
 - keep accurate
 
 Diagrams:

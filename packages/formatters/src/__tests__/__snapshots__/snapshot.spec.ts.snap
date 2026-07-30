@@ -82,6 +82,8 @@ flowchart TB
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
 - Example: \`feat(parser): add support for multiline strings\`
+- Reference: https://www.conventionalcommits.org/
+- Max Subject Length: 70
 
 ## Config Files
 
@@ -128,6 +130,10 @@ pnpm run test       # Run all tests
 
 - Use Mermaid for diagrams
 - Types: flowchart, sequence, class, state, ER, gantt, pie
+- Example: \`\`\`mermaid
+flowchart LR
+  A[Input] --> B[Process] --> C[Output]
+\`\`\`
 
 ## Configuration Notes
 
@@ -274,6 +280,10 @@ Documentation:
 Diagrams:
 - Use Mermaid
 - Types: flowchart, sequence, class, state, ER, gantt, pie
+- example: \`\`\`mermaid
+flowchart LR
+  A[Input] --> B[Process] --> C[Output]
+\`\`\`
 
 ## Configuration Notes
 

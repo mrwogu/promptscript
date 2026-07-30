@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { ClaudeFormatter, CLAUDE_VERSIONS } from '../formatters/claude.js';
 
 const createLoc = (): SourceLocation => ({
@@ -14,6 +14,22 @@ const createMinimalProgram = (): Program => ({
   blocks: [],
   extends: [],
   loc: createLoc(),
+});
+
+const createStandardsProgram = (properties: Record<string, Value>): Program => ({
+  ...createMinimalProgram(),
+  blocks: [
+    {
+      type: 'Block',
+      name: 'standards',
+      content: {
+        type: 'ObjectContent',
+        properties,
+        loc: createLoc(),
+      },
+      loc: createLoc(),
+    },
+  ],
 });
 
 describe('ClaudeFormatter', () => {
@@ -2011,6 +2027,89 @@ describe('ClaudeFormatter', () => {
         type: 'http',
         url: 'https://mcp.linear.app/mcp',
       });
+    });
+  });
+
+  describe('custom standards keys', () => {
+    it('should render custom @standards.git keys', () => {
+      const ast = createStandardsProgram({
+        git: {
+          format: 'Conventional Commits',
+          model: 'Open-source fork model, land changes via a Merge Request',
+          branch: '(feat|fix)/{project}/{issue-id}',
+          mergeRequest: {
+            title: 'the merge commit message (short feat/fix summary)',
+            description: 'states purpose and links the Jira issue',
+          },
+          requireReview: true,
+          legacy: false,
+          draft: null,
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('## Git Commits');
+      expect(result.content).toContain('- Format: Conventional Commits');
+      expect(result.content).toContain(
+        '- Model: Open-source fork model, land changes via a Merge Request'
+      );
+      expect(result.content).toContain('- Branch: (feat|fix)/{project}/{issue-id}');
+      expect(result.content).toContain(
+        '- Merge Request: title: the merge commit message (short feat/fix summary), description: states purpose and links the Jira issue'
+      );
+      expect(result.content).toContain('- Require Review');
+      expect(result.content).not.toContain('Legacy');
+      expect(result.content).not.toContain('Draft');
+    });
+
+    it('should render custom @standards.config keys', () => {
+      const ast = createStandardsProgram({
+        config: {
+          eslint: 'inherit from eslint.base.config.cjs',
+          prettier: 'proseWrap: preserve',
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('## Config Files');
+      expect(result.content).toContain('- ESLint: inherit from eslint.base.config.cjs');
+      expect(result.content).toContain('- Prettier: proseWrap: preserve');
+    });
+
+    it('should render custom @standards.documentation keys', () => {
+      const ast = createStandardsProgram({
+        documentation: {
+          verifyBefore: true,
+          styleGuide: 'Use Diataxis structure',
+          deprecated: false,
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('## Documentation');
+      expect(result.content).toContain('- Review docs before changes');
+      expect(result.content).toContain('- Style Guide: Use Diataxis structure');
+      expect(result.content).not.toContain('Deprecated');
+    });
+
+    it('should render custom @standards.diagrams keys', () => {
+      const ast = createStandardsProgram({
+        diagrams: {
+          format: 'Mermaid',
+          layout: 'flowchart TB',
+          renderPng: true,
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('## Diagrams');
+      expect(result.content).toContain('- Use Mermaid for diagrams');
+      expect(result.content).toContain('- Layout: flowchart TB');
+      expect(result.content).toContain('- Render Png');
     });
   });
 
