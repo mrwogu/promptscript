@@ -13,6 +13,7 @@ export type {
   FormatterClass,
   FormatterFactory,
   FormatterOutput,
+  FormatterWarning,
   FormatterVersionInfo,
   FormatterVersionMap,
   FormatOptions,

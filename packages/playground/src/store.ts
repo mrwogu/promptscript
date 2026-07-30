@@ -429,6 +429,7 @@ export const selectOutputsForFormatter = (
       /\.github\/prompts\/.*\.prompt\.md$/,
       /\.github\/skills\/.*\/SKILL\.md$/,
       /\.github\/agents\/.*\.md$/,
+      /\.github\/hooks\/.*\.json$/,
       /^AGENTS\.md$/,
     ],
     cursor: [/\.cursor\/rules\/.*\.mdc$/, /\.cursorrules$/],
@@ -438,6 +439,7 @@ export const selectOutputsForFormatter = (
       /\.factory\/rules\/.*\.md$/,
       /\.factory\/skills\/.*\/SKILL\.md$/,
       /\.factory\/droids\/.*\.md$/,
+      /\.factory\/hooks\.json$/,
     ],
     opencode: [
       /^OPENCODE\.md$/,

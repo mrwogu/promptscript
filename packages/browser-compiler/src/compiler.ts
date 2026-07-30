@@ -259,6 +259,7 @@ export class BrowserCompiler {
     const outputs = new Map<string, FormatterOutput>();
     const outputOwners = new Map<string, string>();
     const formatErrors: CompileError[] = [];
+    const formatWarnings: ValidationMessage[] = [];
 
     for (const { formatter, config } of this.loadedFormatters) {
       const formatterStart = Date.now();
@@ -272,6 +273,17 @@ export class BrowserCompiler {
         const formatterTime = Date.now() - formatterStart;
 
         this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
+
+        for (const warning of output.warnings ?? []) {
+          formatWarnings.push({
+            ruleId: warning.code,
+            ruleName: 'target-hook-compatibility',
+            severity: 'warning',
+            message: warning.message,
+            ...(warning.suggestion ? { suggestion: warning.suggestion } : {}),
+            ...(warning.location ? { location: warning.location } : {}),
+          });
+        }
 
         // Detect output path collision — warn instead of silently overwriting
         if (outputs.has(output.path)) {
@@ -319,7 +331,7 @@ export class BrowserCompiler {
         outputs,
         outputOwners,
         errors: formatErrors,
-        warnings: validation.warnings,
+        warnings: [...validation.warnings, ...formatWarnings],
         stats,
       };
     }
@@ -329,7 +341,7 @@ export class BrowserCompiler {
       outputs,
       outputOwners,
       errors: [],
-      warnings: validation.warnings,
+      warnings: [...validation.warnings, ...formatWarnings],
       stats,
     };
   }

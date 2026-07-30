@@ -1,12 +1,14 @@
 # Factory AI Contracts
 
-Source: https://docs.factory.ai/cli/configuration/agents-md
+Source: https://docs.factory.ai/cli/configuration/agents-md,
+https://docs.factory.ai/harness/hooks
 
 ## Fixture index
 
 | File          | Source URL                                          | Version     | Retrieved  | Expected path                       | Scope           |
 | ------------- | --------------------------------------------------- | ----------- | ---------- | ----------------------------------- | --------------- |
 | agents-md.md  | https://docs.factory.ai/cli/configuration/agents-md | Factory CLI | 2026-07-17 | `AGENTS.md` (repo root, nested)     | formatter-scope |
+| hooks.json    | https://docs.factory.ai/harness/hooks               | Factory CLI | 2026-07-30 | `.factory/hooks.json`               | formatter-scope |
 | user-level.md | https://docs.factory.ai/cli/configuration/agents-md | Factory CLI | 2026-07-17 | `~/.factory/AGENTS.md` (user-level) | out-of-scope    |
 
 ## Scope notes
@@ -45,3 +47,10 @@ user-level files. Keep `~/.factory/` outside compiler output.
 ### Custom droids
 
 `.factory/droids/<name>.md` are GA and already supported via `@agents`.
+
+### Project hooks
+
+Project hooks use `.factory/hooks.json` with PascalCase event names. Factory
+still reads the `hooks` key from `.factory/settings.json` when `hooks.json` is
+absent, but PromptScript formatter output uses the preferred dedicated file.
+Timeouts use seconds.

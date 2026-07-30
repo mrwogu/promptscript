@@ -480,26 +480,30 @@ platform families and [Supported Formatters](formatters/index.md) for the full c
 
 The `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) are emitted to target-native config files. Not all targets support all features.
 
-| Target        | MCP Config File                  | Hooks Config             | Plugins Config          |
-| ------------- | -------------------------------- | ------------------------ | ----------------------- |
-| `claude`      | `.mcp.json`                      | `.claude/settings.json`  | -                       |
-| `cursor`      | `.cursor/mcp.json`               | `.cursor/hooks.json`     | `.cursor/plugins.json`  |
-| `factory`     | `.factory/mcp.json`              | `.factory/settings.json` | `.factory/plugins.json` |
-| `codex`       | `.codex/mcp.json`                | `.codex/config.toml`     | `.codex/plugins.json`   |
-| `grok`        | `.mcp.json` (via Claude)         | `.claude/settings.json`  | `.grok/plugins.json`    |
-| `github`      | `.vscode/mcp.json`               | -                        | -                       |
-| `antigravity` | `.agents/mcp_config.json`        | -                        | -                       |
-| `gemini`      | `.gemini/mcp_config.json`        | -                        | -                       |
-| `windsurf`    | `.windsurf/mcp_config.json`      | -                        | -                       |
-| `cline`       | `.cline/cline_mcp_settings.json` | -                        | -                       |
-| `roo`         | `.roo/mcp_settings.json`         | -                        | -                       |
-| `continue`    | `.continue/config.json`          | -                        | -                       |
-| `goose`       | `.goose/mcp_config.json`         | -                        | -                       |
-| `kilo`        | `.kilocode/mcp_settings.json`    | -                        | -                       |
-| `openhands`   | `.openhands/mcp_config.toml`     | -                        | -                       |
-| `qwen-code`   | `.qwen/mcp.json`                 | -                        | -                       |
-| `zed`         | `.zed/settings.json`             | -                        | -                       |
-| `crush`       | `.crush/mcp.json`                | -                        | -                       |
+| Target        | MCP Config File                  | Hooks Config                      | Plugins Config          |
+| ------------- | -------------------------------- | --------------------------------- | ----------------------- |
+| `claude`      | `.mcp.json`                      | `.claude/settings.json`           | -                       |
+| `cursor`      | `.cursor/mcp.json`               | `.cursor/hooks.json`              | `.cursor/plugins.json`  |
+| `factory`     | `.factory/mcp.json`              | `.factory/hooks.json`             | `.factory/plugins.json` |
+| `codex`       | `.codex/mcp.json`                | `.codex/config.toml`              | `.codex/plugins.json`   |
+| `grok`        | `.mcp.json` (via Claude)         | `.claude/settings.json`           | `.grok/plugins.json`    |
+| `github`      | `.vscode/mcp.json`               | `.github/hooks/promptscript.json` | -                       |
+| `antigravity` | `.agents/mcp_config.json`        | -                                 | -                       |
+| `gemini`      | `.gemini/mcp_config.json`        | -                                 | -                       |
+| `windsurf`    | `.windsurf/mcp_config.json`      | -                                 | -                       |
+| `cline`       | `.cline/cline_mcp_settings.json` | -                                 | -                       |
+| `roo`         | `.roo/mcp_settings.json`         | -                                 | -                       |
+| `continue`    | `.continue/config.json`          | -                                 | -                       |
+| `goose`       | `.goose/mcp_config.json`         | -                                 | -                       |
+| `kilo`        | `.kilocode/mcp_settings.json`    | -                                 | -                       |
+| `openhands`   | `.openhands/mcp_config.toml`     | -                                 | -                       |
+| `qwen-code`   | `.qwen/mcp.json`                 | -                                 | -                       |
+| `zed`         | `.zed/settings.json`             | -                                 | -                       |
+| `crush`       | `.crush/mcp.json`                | -                                 | -                       |
+
+Hook files are emitted in `multifile` and `full` target modes. `simple` keeps
+its single-file contract and reports a compatibility warning when `@hooks` is
+present.
 
 **Cursor Versions:**
 

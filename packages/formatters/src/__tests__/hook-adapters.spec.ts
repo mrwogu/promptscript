@@ -5,6 +5,8 @@ import {
   generateCodexHooks,
   generateCursorHooks,
   generateFactoryHooks,
+  generateGitHubHooks,
+  getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
 } from '../hook-adapters.js';
@@ -95,8 +97,16 @@ describe('hook-adapters', () => {
       expect(mapEvent('pre-tool-use', 'cursor')).toBe('preEdit');
     });
 
-    it('should map post-tool-use to Factory postToolUse', () => {
-      expect(mapEvent('post-tool-use', 'factory')).toBe('postToolUse');
+    it('should map post-tool-use to Factory PostToolUse', () => {
+      expect(mapEvent('post-tool-use', 'factory')).toBe('PostToolUse');
+    });
+
+    it('should reject unsupported Factory subagent-start', () => {
+      expect(mapEvent('subagent-start', 'factory')).toBeNull();
+    });
+
+    it('should map stop to GitHub agentStop', () => {
+      expect(mapEvent('stop', 'github')).toBe('agentStop');
     });
   });
 
@@ -115,6 +125,11 @@ describe('hook-adapters', () => {
 
     it('should convert ms to seconds for Factory', () => {
       expect(convertTimeout(15000, 'factory')).toBe(15);
+    });
+
+    it('should round sub-second timeouts up to one second', () => {
+      expect(convertTimeout(100, 'factory')).toBe(1);
+      expect(convertTimeout(100, 'github')).toBe(1);
     });
   });
 
@@ -273,20 +288,168 @@ describe('hook-adapters', () => {
       );
 
       expect(generateFactoryHooks(hooks)).toEqual({
-        preToolUse: [
+        PreToolUse: [
           {
             matcher: '.*',
             hooks: [
               {
                 type: 'command',
-                command: 'prs hook pre-edit',
+                command: 'prs hook pre-edit # promptscript-generated:active',
                 timeout: 5,
-                statusMessage: 'Checking files',
               },
             ],
           },
         ],
       });
+    });
+
+    it('should quote Factory command arguments for the shell', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          quoted: {
+            event: 'pre-tool-use',
+            command: ['python3', 'scripts/check file.py', "it's safe; echo"],
+          },
+        })
+      );
+
+      expect(generateFactoryHooks(hooks)).toEqual({
+        PreToolUse: [
+          {
+            matcher: '.*',
+            hooks: [
+              {
+                type: 'command',
+                command:
+                  "python3 'scripts/check file.py' 'it'\"'\"'s safe; echo' # promptscript-generated:quoted",
+              },
+            ],
+          },
+        ],
+      });
+    });
+  });
+
+  describe('generateGitHubHooks', () => {
+    it('should generate current versioned repository hook entries', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          active: {
+            event: 'pre-tool-use',
+            matcher: 'edit|create',
+            command: ['prs', 'hook', 'pre-edit'],
+            timeoutMs: 5000,
+          },
+          stopped: {
+            event: 'stop',
+            matcher: 'ignored',
+            command: ['prs', 'hook', 'stop'],
+          },
+          disabled: {
+            event: 'post-tool-use',
+            command: ['prs', 'hook'],
+            enabled: false,
+          },
+        })
+      );
+
+      expect(generateGitHubHooks(hooks)).toEqual({
+        preToolUse: [
+          {
+            type: 'command',
+            bash: 'prs hook pre-edit # promptscript-generated:active',
+            powershell: "& 'prs' 'hook' 'pre-edit' # promptscript-generated:active",
+            matcher: 'edit|create',
+            timeoutSec: 5,
+          },
+        ],
+        agentStop: [
+          {
+            type: 'command',
+            bash: 'prs hook stop # promptscript-generated:stopped',
+            powershell: "& 'prs' 'hook' 'stop' # promptscript-generated:stopped",
+          },
+        ],
+      });
+    });
+
+    it('should quote GitHub command arguments for each shell', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          quoted: {
+            event: 'pre-tool-use',
+            command: ['python3', 'scripts/check file.py', "it's safe; echo", '--%', '@name'],
+          },
+        })
+      );
+
+      expect(generateGitHubHooks(hooks)).toEqual({
+        preToolUse: [
+          {
+            type: 'command',
+            bash: "python3 'scripts/check file.py' 'it'\"'\"'s safe; echo' --% @name # promptscript-generated:quoted",
+            powershell:
+              "& 'python3' 'scripts/check file.py' 'it''s safe; echo' '--%' '@name' # promptscript-generated:quoted",
+          },
+        ],
+      });
+    });
+  });
+
+  describe('getHookCompatibilityWarnings', () => {
+    it('warns when Factory cannot represent an event or field', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          agent: {
+            event: 'subagent-start',
+            command: ['echo', 'agent'],
+          },
+          status: {
+            event: 'stop',
+            command: ['echo', 'done'],
+            statusMessage: 'Stopping',
+            continueOnFailure: true,
+          },
+        })
+      );
+
+      expect(
+        getHookCompatibilityWarnings(hooks, 'factory').map((warning) => warning.message)
+      ).toEqual([
+        'Hook "agent" uses event "subagent-start", which factory cannot represent and will omit.',
+        'Hook "status" uses statusMessage, which factory cannot represent and will omit.',
+        'Hook "status" uses continueOnFailure, which factory cannot represent and will omit.',
+      ]);
+    });
+
+    it('warns for GitHub matcher and cloud-agent limitations', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          stop: {
+            event: 'stop',
+            matcher: 'agent',
+            command: ['echo', 'done'],
+          },
+          notify: {
+            event: 'notification',
+            command: ['echo', 'notice'],
+          },
+        })
+      );
+
+      expect(getHookCompatibilityWarnings(hooks, 'github')).toEqual([
+        {
+          code: 'PS4002',
+          message: 'Hook "stop" uses matcher with "stop", which GitHub ignores.',
+          suggestion: 'Remove matcher or use a GitHub event that supports matcher filtering.',
+        },
+        {
+          code: 'PS4002',
+          message:
+            'Hook "notify" uses notification, which Copilot CLI supports but GitHub Copilot cloud agent does not fire.',
+          suggestion: 'Use notification hooks only when Copilot CLI coverage is sufficient.',
+        },
+      ]);
     });
   });
 });

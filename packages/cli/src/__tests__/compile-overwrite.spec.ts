@@ -267,6 +267,80 @@ describe('compile command - overwrite protection', () => {
       expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), 'new content', 'utf-8');
       expect(mockPrompts.select).not.toHaveBeenCalled();
     });
+
+    it('should overwrite a fully owned generated hook file', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+                powershell: "& 'echo' 'old' # promptscript-generated:owned",
+              },
+            ],
+          },
+        })
+      );
+
+      await compileCommand({}, mockServices);
+
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        resolve(path),
+        '{"version":1,"hooks":{}}',
+        'utf-8'
+      );
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+    });
+
+    it('should protect a hook file containing an unmanaged command', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+              },
+              {
+                type: 'command',
+                bash: 'echo user-owned',
+              },
+            ],
+          },
+        })
+      );
+      mockPrompts.select.mockResolvedValue('no');
+
+      await compileCommand({}, mockServices);
+
+      expect(mockPrompts.select).toHaveBeenCalledTimes(1);
+      expect(mockWriteFile).not.toHaveBeenCalled();
+    });
   });
 
   describe('when file exists without PromptScript marker', () => {

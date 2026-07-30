@@ -43,8 +43,27 @@ The `@hooks` block requires syntax `1.4.0`:
 | `notification`   | React to target notifications        |
 | `stop`           | Run final checks when an agent stops |
 
-Formatters map portable event names to target-native hook systems. Claude, Cursor, Codex, Factory,
-and Grok provide hook output in the current target set.
+Formatters map portable event names to target-native hook systems. Claude,
+Cursor, Codex, Factory, GitHub, and Grok provide hook output in the current
+target set.
+
+| Target         | Generated hook file               | Notes                                |
+| -------------- | --------------------------------- | ------------------------------------ |
+| Factory Droid  | `.factory/hooks.json`             | PascalCase events, seconds           |
+| GitHub Copilot | `.github/hooks/promptscript.json` | Version 1, lower camelCase, seconds  |
+| Claude Code    | `.claude/settings.json`           | PascalCase events, seconds           |
+| Cursor         | `.cursor/hooks.json`              | Cursor-native events                 |
+| Codex          | `.codex/config.toml`              | Codex-native events and milliseconds |
+
+Hook files require `multifile` or `full` mode. `simple` mode reports `PS4002`
+because it cannot emit additional files. Target adapters also report `PS4002`
+when an event, matcher, `statusMessage`, or `continueOnFailure` value has no
+native equivalent.
+
+Factory and GitHub generated commands include a trailing
+`# promptscript-generated:<hook-id>` shell comment. PromptScript uses this
+marker only to update or remove its dedicated generated hook file. Unmarked
+user hook files remain untouched.
 
 Hook commands are arrays in PromptScript source:
 
@@ -52,9 +71,10 @@ Hook commands are arrays in PromptScript source:
 command: ["node", "./tools/validate-output.mjs", "--strict"]
 ```
 
-Shell interpolation is rejected in source. Some target adapters serialize the array as one native
-command string, so verify quoting in generated files. Commit hook programs to the repository and
-review inherited hooks as executable policy.
+Shell interpolation is rejected in source. Factory shell-quotes command
+arguments, while GitHub emits separate `bash` and `powershell` commands.
+Commit hook programs to the repository and review inherited hooks as
+executable policy.
 
 ## Workflows
 
@@ -98,6 +118,10 @@ Installed hooks:
 - Redirect agents to the source `.prs` file.
 
 This CLI feature is separate from the language-level `@hooks` block.
+For Copilot, `.vscode/hooks.json` configures VS Code integration; it is not the
+GitHub repository hook file generated from `@hooks`. Factory CLI installation
+uses the supported `settings.json` fallback so auto-compilation hooks remain
+separate from project lifecycle hooks.
 
 ## Commands and Workflows
 

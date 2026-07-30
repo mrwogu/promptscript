@@ -9,6 +9,11 @@ import {
   extractMcpServers,
   serializeMcpServersToYamlInline,
 } from '../mcp-helpers.js';
+import {
+  extractHooks,
+  generateGitHubHooks,
+  getHookCompatibilityWarnings,
+} from '../hook-adapters.js';
 
 /**
  * GitHub formatter version information.
@@ -234,16 +239,50 @@ export class GitHubFormatter extends BaseFormatter {
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
+    let output: FormatterOutput;
 
     if (version === 'full') {
-      return this.formatFull(ast, options);
+      output = this.formatFull(ast, options);
+    } else if (version === 'multifile') {
+      output = this.formatMultifile(ast, options);
+    } else {
+      output = this.formatSimple(ast, options);
     }
 
-    if (version === 'multifile') {
-      return this.formatMultifile(ast, options);
+    const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
+    const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
+    const hookWarnings =
+      hooksBlock && hooks.some((hook) => hook.enabled !== false)
+        ? (version === 'simple'
+            ? [
+                {
+                  code: 'PS4002',
+                  message: 'GitHub simple mode cannot emit @hooks and will omit them.',
+                  suggestion: "Use GitHub version 'multifile' or 'full'.",
+                },
+              ]
+            : getHookCompatibilityWarnings(hooks, 'github')
+          ).map((warning) => ({ ...warning, location: hooksBlock.loc }))
+        : [];
+    const hooksFile = version === 'simple' ? undefined : this.generateHooksFile(ast);
+    if (!hooksFile) {
+      return {
+        ...output,
+        ...(hookWarnings.length > 0
+          ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
+          : {}),
+        managedOutputFiles: ['.github/hooks/promptscript.json'],
+      };
     }
 
-    return this.formatSimple(ast, options);
+    return {
+      ...output,
+      ...(hookWarnings.length > 0
+        ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
+        : {}),
+      additionalFiles: [...(output.additionalFiles ?? []), hooksFile],
+      managedOutputFiles: ['.github/hooks/promptscript.json'],
+    };
   }
 
   /**
@@ -383,6 +422,22 @@ export class GitHubFormatter extends BaseFormatter {
       path: this.getOutputPath(options),
       content: sections.join('\n\n') + '\n',
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+    };
+  }
+
+  /**
+   * Generate repository hooks shared by Copilot CLI and cloud agent.
+   */
+  private generateHooksFile(ast: Program): FormatterOutput | undefined {
+    const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
+    if (!hooksBlock) return undefined;
+
+    const hooks = generateGitHubHooks(extractHooks(hooksBlock));
+    if (Object.keys(hooks).length === 0) return undefined;
+
+    return {
+      path: '.github/hooks/promptscript.json',
+      content: JSON.stringify({ version: 1, hooks }, null, 2) + '\n',
     };
   }
 

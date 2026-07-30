@@ -75,6 +75,7 @@ describe('Agent platform integration', () => {
     matcher: "Edit|Write"
     command: ["pnpm", "run", "typecheck"]
     timeoutMs: 120000
+    statusMessage: "Checking TypeScript"
   }
 }
 
@@ -103,6 +104,7 @@ describe('Agent platform integration', () => {
         { name: 'claude', config: { version: 'full' } },
         { name: 'cursor', config: { version: 'full' } },
         { name: 'factory', config: { version: 'full' } },
+        { name: 'github', config: { version: 'multifile' } },
       ],
     });
 
@@ -110,7 +112,10 @@ describe('Agent platform integration', () => {
 
     expect(result.success).toBe(true);
     expect(result.errors).toEqual([]);
-    expect(result.warnings).toEqual([]);
+    expect(result.warnings.map((warning) => warning.message)).toEqual([
+      'Hook "validate-types" uses statusMessage, which factory cannot represent and will omit.',
+      'Hook "validate-types" uses statusMessage, which github cannot represent and will omit.',
+    ]);
     expect(requireOutput(result, 'CLAUDE.md')).toContain('platform engineering assistant');
     expect(requireOutput(result, '.claude/skills/security-review/SKILL.md')).toContain(
       'Inspect changes for security risks.'
@@ -127,7 +132,13 @@ describe('Agent platform integration', () => {
         PostToolUse: [
           {
             matcher: 'Edit|Write',
-            hooks: [{ type: 'command', command: 'pnpm run typecheck', timeout: 120 }],
+            hooks: [
+              {
+                type: 'command',
+                command: 'pnpm run typecheck',
+                timeout: 120,
+              },
+            ],
           },
         ],
       },
@@ -185,12 +196,18 @@ describe('Agent platform integration', () => {
     expect(factoryAgent).toContain('model: inherit');
     expect(factoryAgent).toContain('tools: ["Read", "Grep"]');
     expect(factoryAgent).toContain('mcpServers: ["issue-tracker"]');
-    expect(JSON.parse(requireOutput(result, '.factory/settings.json'))).toMatchObject({
+    expect(JSON.parse(requireOutput(result, '.factory/hooks.json'))).toMatchObject({
       hooks: {
-        postToolUse: [
+        PostToolUse: [
           {
             matcher: 'Edit|Write',
-            hooks: [{ type: 'command', command: 'pnpm run typecheck', timeout: 120 }],
+            hooks: [
+              {
+                type: 'command',
+                command: 'pnpm run typecheck # promptscript-generated:validate-types',
+                timeout: 120,
+              },
+            ],
           },
         ],
       },
@@ -213,6 +230,21 @@ describe('Agent platform integration', () => {
           hooks: ['validate-types'],
           mcpServers: ['issue-tracker'],
         },
+      },
+    });
+
+    expect(JSON.parse(requireOutput(result, '.github/hooks/promptscript.json'))).toEqual({
+      version: 1,
+      hooks: {
+        postToolUse: [
+          {
+            type: 'command',
+            bash: 'pnpm run typecheck # promptscript-generated:validate-types',
+            powershell: "& 'pnpm' 'run' 'typecheck' # promptscript-generated:validate-types",
+            matcher: 'Edit|Write',
+            timeoutSec: 120,
+          },
+        ],
       },
     });
   });

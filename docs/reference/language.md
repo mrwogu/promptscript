@@ -1253,6 +1253,23 @@ Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command argumen
 may serialize the array as one native command string, so verify argument quoting in generated hook
 configuration.
 
+`multifile` and `full` modes emit target-native hook files. `simple` mode
+preserves its single-file contract and reports a compatibility warning.
+
+| Target         | Output                            | Event naming    | Timeout field |
+| -------------- | --------------------------------- | --------------- | ------------- |
+| Factory Droid  | `.factory/hooks.json`             | PascalCase      | `timeout`     |
+| GitHub Copilot | `.github/hooks/promptscript.json` | lower camelCase | `timeoutSec`  |
+| Claude Code    | `.claude/settings.json`           | PascalCase      | `timeout`     |
+| Cursor         | `.cursor/hooks.json`              | target-native   | `timeout`     |
+| Codex          | `.codex/config.toml`              | snake_case      | `timeout_ms`  |
+
+GitHub output uses the version 1 repository-hook schema shared by Copilot CLI
+and cloud agent. Factory output uses the preferred dedicated project hook file;
+Factory still accepts `hooks` inside `.factory/settings.json` only as a
+fallback. Formatters report `PS4002` when a target cannot represent an event or
+optional field instead of silently dropping it.
+
 ### @mcpServers
 
 Defines project-local MCP (Model Context Protocol) server configurations. Requires syntax `1.4.0`. Servers are mapped to target-native MCP config files.

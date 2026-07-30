@@ -1,7 +1,7 @@
 import { constants } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { lstat, open, readFile, readdir, unlink, type FileHandle } from 'node:fs/promises';
-import { isAbsolute, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, relative, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
 
@@ -80,6 +80,7 @@ export async function cleanupManagedOutputs(
 ): Promise<ManagedOutputCleanupResult> {
   const outputRoot = resolve(options.outputRoot);
   const managedDirectories = collectManagedDirectories(outputs, outputRoot);
+  const managedFiles = collectManagedFiles(outputs, outputRoot);
   const desiredFiles = collectDesiredFiles(outputs, outputRoot);
   const removed: string[] = [];
 
@@ -97,6 +98,11 @@ export async function cleanupManagedOutputs(
     } finally {
       await closeDirectoryGuards(ancestorGuards);
     }
+  }
+
+  for (const file of managedFiles) {
+    if (desiredFiles.has(file)) continue;
+    await removeManagedFile(file, outputRoot, options.dryRun === true, removed);
   }
 
   return { removed };
@@ -132,6 +138,53 @@ function collectDesiredFiles(
     if (isWithin(outputRoot, absolutePath)) files.add(absolutePath);
   }
   return files;
+}
+
+function collectManagedFiles(outputs: Map<string, FormatterOutput>, outputRoot: string): string[] {
+  const files = new Set<string>();
+
+  for (const output of outputs.values()) {
+    for (const file of output.managedOutputFiles ?? []) {
+      const normalized = file.replace(/\\/g, '/');
+      if (!normalized || isAbsolute(normalized)) continue;
+      if (normalized.split('/').some((segment) => segment === '..')) continue;
+
+      const absolutePath = resolve(outputRoot, normalized);
+      if (isWithin(outputRoot, absolutePath)) files.add(absolutePath);
+    }
+  }
+
+  return [...files].sort();
+}
+
+async function removeManagedFile(
+  file: string,
+  outputRoot: string,
+  dryRun: boolean,
+  removed: string[]
+): Promise<void> {
+  const fileStat = await safeLstat(file);
+  if (!fileStat?.isFile() || fileStat.isSymbolicLink()) return;
+  if (!(await isPromptScriptGenerated(file, true))) return;
+
+  const guards = await openAncestorDirectories(outputRoot, file);
+  if (!guards) return;
+  try {
+    if (!(await directoryGuardsMatch(guards))) return;
+    if (dryRun) {
+      removed.push(file);
+      return;
+    }
+
+    const directory = dirname(file);
+    const directoryStat = await safeLstat(directory);
+    if (!directoryStat?.isDirectory() || directoryStat.isSymbolicLink()) return;
+    if (await guardedUnlink(directory, basename(file), directoryStat, fileStat)) {
+      removed.push(file);
+    }
+  } finally {
+    await closeDirectoryGuards(guards);
+  }
 }
 
 async function visitDirectory(
@@ -328,7 +381,7 @@ async function safeLstat(path: string): Promise<Awaited<ReturnType<typeof lstat>
   }
 }
 
-async function isPromptScriptGenerated(path: string): Promise<boolean> {
+async function isPromptScriptGenerated(path: string, allowInlineMarker = false): Promise<boolean> {
   try {
     const content = await readFile(path, 'utf-8');
     const lines = content
@@ -339,14 +392,67 @@ async function isPromptScriptGenerated(path: string): Promise<boolean> {
       lines[0] === '---'
         ? [lines[1]]
         : [lines[0], ...(lines[0]?.startsWith('# ') && lines[1] === '' ? [lines[2]] : [])];
-    return candidateLines.some(
+    const hasStandardMarker = candidateLines.some(
       (line) =>
         line !== undefined && PROMPTSCRIPT_MARKER_PATTERNS.some((pattern) => pattern.test(line))
     );
+    return hasStandardMarker || (allowInlineMarker && hasOnlyOwnedHookCommands(content));
   } catch (error: unknown) {
     if (isNodeError(error) && error.code === 'ENOENT') return false;
     throw error;
   }
+}
+
+interface HookOwnershipScan {
+  found: boolean;
+  valid: boolean;
+}
+
+export function hasOnlyOwnedHookCommands(content: string): boolean {
+  try {
+    const parsed: unknown = JSON.parse(content);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return false;
+    const hooks = (parsed as Record<string, unknown>)['hooks'];
+    const scan = scanHookOwnership(hooks);
+    return scan.found && scan.valid;
+  } catch {
+    return false;
+  }
+}
+
+function scanHookOwnership(value: unknown): HookOwnershipScan {
+  if (Array.isArray(value)) {
+    return value.reduce<HookOwnershipScan>(
+      (result, item) => {
+        const itemScan = scanHookOwnership(item);
+        return {
+          found: result.found || itemScan.found,
+          valid: result.valid && itemScan.valid,
+        };
+      },
+      { found: false, valid: true }
+    );
+  }
+
+  if (typeof value !== 'object' || value === null) {
+    return { found: false, valid: true };
+  }
+
+  const object = value as Record<string, unknown>;
+  if (typeof object['type'] === 'string') {
+    if (object['type'] !== 'command') return { found: true, valid: false };
+    const commands = ['command', 'bash', 'powershell']
+      .map((field) => object[field])
+      .filter((command): command is string => typeof command === 'string');
+    return {
+      found: true,
+      valid:
+        commands.length > 0 &&
+        commands.every((command) => /# promptscript-generated:[A-Za-z0-9._-]+\s*$/.test(command)),
+    };
+  }
+
+  return scanHookOwnership(Object.values(object));
 }
 
 function isWithin(root: string, candidate: string): boolean {

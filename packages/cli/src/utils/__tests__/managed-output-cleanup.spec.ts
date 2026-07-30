@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { FormatterOutput } from '@promptscript/compiler';
 import { cleanupManagedOutputs, removeIfUnchanged } from '../managed-output-cleanup.js';
@@ -103,6 +103,98 @@ describe('cleanupManagedOutputs', () => {
 
     expect(result.removed).toEqual([staleFile]);
     await expect(readFile(staleFile, 'utf-8')).resolves.toContain('# Stale');
+  });
+
+  it('should remove only obsolete owned managed JSON files', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-json-');
+    const factoryDirectory = join(project, '.factory');
+    const generatedFile = join(factoryDirectory, 'hooks.json');
+    const userFile = join(project, '.github', 'hooks', 'promptscript.json');
+    await mkdir(factoryDirectory, { recursive: true });
+    await mkdir(join(project, '.github', 'hooks'), { recursive: true });
+    await writeFile(
+      generatedFile,
+      '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:test"}]}]}}\n'
+    );
+    await writeFile(userFile, '{"version":1,"hooks":{}}\n');
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputFiles: ['.factory/hooks.json', '.github/hooks/promptscript.json'],
+        },
+      ],
+    ]);
+
+    const result = await cleanupManagedOutputs(outputs, { outputRoot: project });
+
+    expect(result.removed).toEqual([generatedFile]);
+    await expect(readFile(generatedFile, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
+    await expect(readFile(userFile, 'utf-8')).resolves.toContain('"version":1');
+  });
+
+  it('should preserve desired managed JSON files', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-json-current-');
+    const generatedFile = join(project, '.factory', 'hooks.json');
+    await mkdir(dirname(generatedFile), { recursive: true });
+    const content =
+      '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:test"}]}]}}\n';
+    await writeFile(generatedFile, content);
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputFiles: ['.factory/hooks.json'],
+        },
+      ],
+      ['.factory/hooks.json', { path: '.factory/hooks.json', content }],
+    ]);
+
+    await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
+      removed: [],
+    });
+    await expect(readFile(generatedFile, 'utf-8')).resolves.toBe(content);
+  });
+
+  it('should preserve managed JSON with marker-like or mixed user commands', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-json-user-');
+    const file = join(project, '.github', 'hooks', 'promptscript.json');
+    await mkdir(dirname(file), { recursive: true });
+    const content = JSON.stringify({
+      version: 1,
+      hooks: {
+        preToolUse: [
+          {
+            type: 'command',
+            command: 'echo "# promptscript-generated:example" then continue',
+          },
+          {
+            type: 'command',
+            command: 'echo generated # promptscript-generated:owned',
+          },
+        ],
+      },
+    });
+    await writeFile(file, content);
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputFiles: ['.github/hooks/promptscript.json'],
+        },
+      ],
+    ]);
+
+    await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
+      removed: [],
+    });
+    await expect(readFile(file, 'utf-8')).resolves.toBe(content);
   });
 
   it('should support a project-root managed directory without deleting desired output', async () => {

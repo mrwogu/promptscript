@@ -311,6 +311,36 @@ describe('BrowserCompiler advanced', () => {
     );
   });
 
+  it('should preserve hook compatibility warnings from formatters', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "github-hooks" syntax: "1.4.0" }
+        @hooks {
+          validate: {
+            event: "pre-tool-use"
+            command: ["pnpm", "run", "typecheck"]
+          }
+        }
+      `,
+    });
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'github', config: { version: 'simple' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleId: 'PS4002',
+          message: 'GitHub simple mode cannot emit @hooks and will omit them.',
+        }),
+      ])
+    );
+  });
+
   it('should throw for unknown formatter name', () => {
     const fs = new VirtualFileSystem({});
 

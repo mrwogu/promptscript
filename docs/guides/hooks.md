@@ -7,6 +7,13 @@ description: Auto-compile .prs files and protect generated outputs using native 
 
 PromptScript hooks integrate directly with supported AI coding tool event systems.
 
+This guide covers `prs hooks install`, which installs PromptScript
+auto-compilation and generated-file protection. Language-level `@hooks` are
+compiled separately to project lifecycle policy files. Factory `@hooks` use
+`.factory/hooks.json`; GitHub `@hooks` use
+`.github/hooks/promptscript.json`. Copilot `.vscode/hooks.json` below is the VS
+Code installer contract, not the GitHub repository hook contract.
+
 There are two complementary behaviours:
 
 - **Auto-compilation** - when the AI tool writes a `.prs` file, `post-edit` runs `prs compile`.

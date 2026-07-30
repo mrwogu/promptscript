@@ -540,6 +540,10 @@ describe('PlaygroundStore', () => {
           { path: '.github/skills/review/SKILL.md', content: 'skill' },
         ],
         ['.github/agents/coder.md', { path: '.github/agents/coder.md', content: 'agent' }],
+        [
+          '.github/hooks/promptscript.json',
+          { path: '.github/hooks/promptscript.json', content: '{"version":1}' },
+        ],
         ['AGENTS.md', { path: 'AGENTS.md', content: 'agents index' }],
         ['CLAUDE.md', { path: 'CLAUDE.md', content: 'claude' }],
       ]);
@@ -552,11 +556,12 @@ describe('PlaygroundStore', () => {
       });
 
       const outputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'github');
-      expect(outputs).toHaveLength(5);
+      expect(outputs).toHaveLength(6);
       expect(outputs[0].path).toBe('.github/copilot-instructions.md'); // main file first
       expect(outputs.map((o) => o.path)).toContain('.github/prompts/review.prompt.md');
       expect(outputs.map((o) => o.path)).toContain('.github/skills/review/SKILL.md');
       expect(outputs.map((o) => o.path)).toContain('.github/agents/coder.md');
+      expect(outputs.map((o) => o.path)).toContain('.github/hooks/promptscript.json');
       expect(outputs.map((o) => o.path)).toContain('AGENTS.md');
     });
 
@@ -597,6 +602,7 @@ describe('PlaygroundStore', () => {
           '.factory/rules/standards/security.md',
           { path: '.factory/rules/standards/security.md', content: 'factory rule' },
         ],
+        ['.factory/hooks.json', { path: '.factory/hooks.json', content: '{"hooks":{}}' }],
         ['CLAUDE.md', { path: 'CLAUDE.md', content: 'claude' }],
       ]);
       setCompileResult({
@@ -608,12 +614,13 @@ describe('PlaygroundStore', () => {
       });
 
       const outputs = selectOutputsForFormatter(usePlaygroundStore.getState(), 'factory');
-      expect(outputs).toHaveLength(3);
+      expect(outputs).toHaveLength(4);
       expect(outputs[0].path).toBe('AGENTS.md');
       expect(outputs.map((output) => output.path)).toContain(
         '.factory/rules/standards/security.md'
       );
       expect(outputs.map((output) => output.path)).toContain('.factory/skills/review/SKILL.md');
+      expect(outputs.map((output) => output.path)).toContain('.factory/hooks.json');
     });
 
     it('selectOutputsForFormatter should match Cursor output files', () => {

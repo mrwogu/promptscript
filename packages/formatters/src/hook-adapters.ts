@@ -1,4 +1,5 @@
 import type { Value } from '@promptscript/core';
+import type { FormatterWarning } from './types.js';
 
 /**
  * Portable hook event names (kebab-case).
@@ -33,6 +34,26 @@ export interface HookDefinition {
   continueOnFailure?: boolean;
   /** Whether the hook is enabled. */
   enabled?: boolean;
+}
+
+const HOOK_OWNERSHIP_MARKER = '# promptscript-generated';
+const SHELL_SAFE_ARGUMENT = /^[A-Za-z0-9_@%+=:,./-]+$/;
+
+function quotePosixArgument(argument: string): string {
+  return SHELL_SAFE_ARGUMENT.test(argument) ? argument : `'${argument.replace(/'/g, `'"'"'`)}'`;
+}
+
+function quotePowerShellArgument(argument: string): string {
+  return `'${argument.replace(/'/g, "''")}'`;
+}
+
+function serializeOwnedCommand(
+  hook: HookDefinition,
+  quoteArgument: (argument: string) => string = quotePosixArgument,
+  prefix = ''
+): string {
+  const safeId = hook.id.replace(/[^A-Za-z0-9._-]/g, '-');
+  return `${prefix}${hook.command.map(quoteArgument).join(' ')} ${HOOK_OWNERSHIP_MARKER}:${safeId}`;
 }
 
 /**
@@ -119,16 +140,28 @@ const CODEX_EVENT_MAP: Record<PortableHookEvent, string> = {
 
 /**
  * Factory Droid hook event names.
- * Factory uses camelCase event names similar to Claude.
+ * Factory uses PascalCase event names.
  */
-const FACTORY_EVENT_MAP: Record<PortableHookEvent, string> = {
+const FACTORY_EVENT_MAP: Partial<Record<PortableHookEvent, string>> = {
+  'pre-tool-use': 'PreToolUse',
+  'post-tool-use': 'PostToolUse',
+  'session-start': 'SessionStart',
+  setup: 'SessionStart',
+  notification: 'Notification',
+  stop: 'Stop',
+};
+
+/**
+ * GitHub Copilot hook event names.
+ */
+const GITHUB_EVENT_MAP: Record<PortableHookEvent, string> = {
   'pre-tool-use': 'preToolUse',
   'post-tool-use': 'postToolUse',
   'session-start': 'sessionStart',
   setup: 'sessionStart',
   'subagent-start': 'subagentStart',
   notification: 'notification',
-  stop: 'stop',
+  stop: 'agentStop',
 };
 
 /**
@@ -136,7 +169,7 @@ const FACTORY_EVENT_MAP: Record<PortableHookEvent, string> = {
  */
 export function mapEvent(
   event: PortableHookEvent,
-  target: 'claude' | 'cursor' | 'codex' | 'factory'
+  target: 'claude' | 'cursor' | 'codex' | 'factory' | 'github'
 ): string | null {
   const map =
     target === 'claude'
@@ -145,7 +178,9 @@ export function mapEvent(
         ? CURSOR_EVENT_MAP
         : target === 'factory'
           ? FACTORY_EVENT_MAP
-          : CODEX_EVENT_MAP;
+          : target === 'github'
+            ? GITHUB_EVENT_MAP
+            : CODEX_EVENT_MAP;
   return map[event] ?? null;
 }
 
@@ -154,10 +189,10 @@ export function mapEvent(
  */
 export function convertTimeout(
   timeoutMs: number,
-  target: 'claude' | 'cursor' | 'codex' | 'factory'
+  target: 'claude' | 'cursor' | 'codex' | 'factory' | 'github'
 ): number {
-  if (target === 'claude' || target === 'cursor' || target === 'factory')
-    return Math.floor(timeoutMs / 1000);
+  if (target === 'claude' || target === 'cursor' || target === 'factory' || target === 'github')
+    return Math.ceil(timeoutMs / 1000);
   return timeoutMs;
 }
 
@@ -225,7 +260,7 @@ export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unk
 }
 
 /**
- * Generate Factory Droid hooks for .factory/settings.json.
+ * Generate Factory Droid hooks for .factory/hooks.json.
  * Factory uses a structure similar to Claude (event -> array of entries).
  */
 export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
@@ -243,11 +278,94 @@ export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, un
       hooks: [
         {
           type: 'command',
-          command: hook.command.join(' '),
-          timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'factory') : 10,
-          ...(hook.statusMessage ? { statusMessage: hook.statusMessage } : {}),
+          command: serializeOwnedCommand(hook),
+          ...(hook.timeoutMs ? { timeout: convertTimeout(hook.timeoutMs, 'factory') } : {}),
         },
       ],
+    });
+  }
+
+  return result;
+}
+
+const GITHUB_MATCHER_EVENTS = new Set([
+  'pre-tool-use',
+  'post-tool-use',
+  'subagent-start',
+  'notification',
+]);
+
+export function getHookCompatibilityWarnings(
+  hooks: HookDefinition[],
+  target: 'factory' | 'github'
+): FormatterWarning[] {
+  const warnings: FormatterWarning[] = [];
+
+  for (const hook of hooks) {
+    if (hook.enabled === false) continue;
+
+    if (!mapEvent(hook.event, target)) {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" uses event "${hook.event}", which ${target} cannot represent and will omit.`,
+        suggestion: `Use an event supported by the ${target} hook contract.`,
+      });
+      continue;
+    }
+
+    if (target === 'github' && hook.matcher && !GITHUB_MATCHER_EVENTS.has(hook.event)) {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" uses matcher with "${hook.event}", which GitHub ignores.`,
+        suggestion: 'Remove matcher or use a GitHub event that supports matcher filtering.',
+      });
+    }
+
+    if (target === 'github' && hook.event === 'notification') {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" uses notification, which Copilot CLI supports but GitHub Copilot cloud agent does not fire.`,
+        suggestion: 'Use notification hooks only when Copilot CLI coverage is sufficient.',
+      });
+    }
+
+    if (hook.statusMessage) {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" uses statusMessage, which ${target} cannot represent and will omit.`,
+      });
+    }
+
+    if (hook.continueOnFailure !== undefined) {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" uses continueOnFailure, which ${target} cannot represent and will omit.`,
+      });
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Generate GitHub Copilot repository hook entries.
+ */
+export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
+  const result: Record<string, unknown[]> = {};
+
+  for (const hook of hooks) {
+    if (hook.enabled === false) continue;
+    const nativeEvent = mapEvent(hook.event, 'github');
+    if (!nativeEvent) continue;
+
+    if (!result[nativeEvent]) result[nativeEvent] = [];
+
+    result[nativeEvent].push({
+      type: 'command',
+      bash: serializeOwnedCommand(hook),
+      powershell: serializeOwnedCommand(hook, quotePowerShellArgument, '& '),
+      ...(hook.matcher && GITHUB_MATCHER_EVENTS.has(hook.event) ? { matcher: hook.matcher } : {}),
+      ...(hook.timeoutMs ? { timeoutSec: convertTimeout(hook.timeoutMs, 'github') } : {}),
     });
   }
 

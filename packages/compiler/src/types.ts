@@ -4,6 +4,7 @@ import type {
   OutputConvention,
   PrettierMarkdownOptions,
   Program,
+  SourceLocation,
 } from '@promptscript/core';
 import type { ResolverOptions } from '@promptscript/resolver';
 import type { ValidatorConfig, ValidationMessage } from '@promptscript/validator';
@@ -20,6 +21,13 @@ export interface FormatterOutput {
   mode?: number;
   /** Structured merge plan for JSON/TOML settings files */
   merge?: import('@promptscript/formatters').StructuredMergePlan;
+  /** Target compatibility warnings produced during formatting */
+  warnings?: Array<{
+    code: string;
+    message: string;
+    suggestion?: string;
+    location?: SourceLocation;
+  }>;
   /** Additional files to generate (e.g., .cursor/commands/, .github/prompts/) */
   additionalFiles?: FormatterOutput[];
   /**
@@ -28,6 +36,12 @@ export interface FormatterOutput {
    * directories, but must preserve unmarked files and symlinks.
    */
   managedOutputDirectories?: string[];
+  /**
+   * Relative files exclusively managed by this output.
+   * Writers may remove an obsolete file only when it carries a PromptScript
+   * ownership marker.
+   */
+  managedOutputFiles?: string[];
 }
 
 /**

@@ -20,6 +20,11 @@ prs hooks <action> [tool] [options]
 - **Auto-compilation** - supported AI tool writes to `.prs` files trigger `prs compile`.
 - **Output protection** — writes to generated files are blocked with an actionable error.
 
+This command does not compile language-level `@hooks`. Those definitions use
+target formatter output such as `.factory/hooks.json` and
+`.github/hooks/promptscript.json`. The Copilot installer path
+`.vscode/hooks.json` configures VS Code hooks only.
+
 ## Actions
 
 ### install

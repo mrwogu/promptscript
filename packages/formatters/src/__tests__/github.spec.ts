@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { GitHubFormatter, GITHUB_VERSIONS } from '../formatters/github.js';
 
 const createLoc = (): SourceLocation => ({
@@ -34,6 +34,97 @@ describe('GitHubFormatter', () => {
     expect(formatter.outputPath).toBe('.github/copilot-instructions.md');
     expect(formatter.description).toBe('GitHub Copilot instructions (Markdown)');
     expect(formatter.defaultConvention).toBe('markdown');
+  });
+
+  describe('hooks support', () => {
+    it.each(['multifile', 'full'] as const)(
+      'emits versioned repository hooks in %s mode',
+      (version) => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'hooks',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  validate: {
+                    event: 'post-tool-use',
+                    matcher: 'edit|create',
+                    command: ['pnpm', 'run', 'typecheck'],
+                    timeoutMs: 120000,
+                  } as unknown as Value,
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version });
+        const hooksFile = result.additionalFiles?.find(
+          (file) => file.path === '.github/hooks/promptscript.json'
+        );
+
+        expect(hooksFile).toBeDefined();
+        expect(JSON.parse(hooksFile!.content)).toEqual({
+          version: 1,
+          hooks: {
+            postToolUse: [
+              {
+                type: 'command',
+                bash: 'pnpm run typecheck # promptscript-generated:validate',
+                powershell: "& 'pnpm' 'run' 'typecheck' # promptscript-generated:validate",
+                matcher: 'edit|create',
+                timeoutSec: 120,
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    it('preserves single-file output in simple mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                validate: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'simple' });
+      expect(result.additionalFiles).toBeUndefined();
+      expect(result.warnings).toEqual([
+        expect.objectContaining({
+          code: 'PS4002',
+          message: 'GitHub simple mode cannot emit @hooks and will omit them.',
+          location: expect.any(Object),
+        }),
+      ]);
+
+      const hooksBlock = ast.blocks[0]!;
+      if (hooksBlock.content.type === 'ObjectContent') {
+        const hook = hooksBlock.content.properties['validate'] as Record<string, Value>;
+        hook['enabled'] = false;
+      }
+      expect(formatter.format(ast, { version: 'simple' }).warnings).toBeUndefined();
+    });
   });
 
   describe('format with default Markdown convention', () => {
