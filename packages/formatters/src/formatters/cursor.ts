@@ -179,6 +179,8 @@ export class CursorFormatter extends BaseFormatter {
       const hooksBlock = this.findBlock(ast, 'hooks');
       const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
       if (hooksBlock && hooks.some((hook) => hook.enabled !== false)) {
+        // The Cursor-specific PS4002 below already reports the omission, so
+        // skip the generic capability warning to avoid a duplicate.
         return {
           ...output,
           warnings: [
@@ -189,6 +191,9 @@ export class CursorFormatter extends BaseFormatter {
               suggestion: "Use Cursor version 'full'.",
               location: hooksBlock.loc,
             },
+          ],
+          managedOutputFiles: [
+            ...new Set([...(output.managedOutputFiles ?? []), '.cursor/hooks.json']),
           ],
         };
       }
