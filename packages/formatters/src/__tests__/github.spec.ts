@@ -86,6 +86,34 @@ describe('GitHubFormatter', () => {
       }
     );
 
+    it('declares the hooks directory and file as managed outputs', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                validate: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.managedOutputDirectories).toEqual(['.github/hooks']);
+      expect(result.managedOutputFiles).toEqual(['.github/hooks/promptscript.json']);
+    });
+
     it('preserves single-file output in simple mode', () => {
       const ast: Program = {
         ...createMinimalProgram(),

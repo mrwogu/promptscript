@@ -759,6 +759,13 @@ async function compileCommandWithResult(
         ConsoleOutput.muted(`Removed obsolete generated file: ${removedPath}`);
       }
     }
+    for (const removedDirectory of cleanupResult.removedDirectories) {
+      if (options.dryRun) {
+        ConsoleOutput.dryRun(`Would remove empty managed directory: ${removedDirectory}`);
+      } else {
+        ConsoleOutput.muted(`Removed empty managed directory: ${removedDirectory}`);
+      }
+    }
     if (writeResult.unchanged.length > 0) {
       ConsoleOutput.muted(`Unchanged ${writeResult.unchanged.length} file(s)`);
     }

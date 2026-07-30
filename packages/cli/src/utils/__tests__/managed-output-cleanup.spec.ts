@@ -160,6 +160,7 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     await expect(readFile(generatedFile, 'utf-8')).resolves.toBe(content);
   });
@@ -197,6 +198,7 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     await expect(readFile(file, 'utf-8')).resolves.toBe(content);
   });
@@ -229,7 +231,7 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(
       cleanupManagedOutputs(outputs, { outputRoot: project, dryRun: true })
-    ).resolves.toEqual({ removed: [file] });
+    ).resolves.toEqual({ removed: [file], removedDirectories: [] });
     await expect(readFile(file, 'utf-8')).resolves.toBe(content);
   });
 
@@ -254,6 +256,7 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     await expect(readFile(outsideFile, 'utf-8')).resolves.toBe(content);
   });
@@ -307,7 +310,7 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(
       cleanupManagedOutputs(createMonolithOutputs(), { outputRoot: project })
-    ).resolves.toEqual({ removed: [] });
+    ).resolves.toEqual({ removed: [], removedDirectories: [] });
   });
 
   it('should never follow managed directory or nested symlinks', async () => {
@@ -399,6 +402,126 @@ describe('cleanupManagedOutputs', () => {
 
     await expect(readFile(staleFile, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
     await expect(readFile(keptFile, 'utf-8')).resolves.toBe('# Team-owned rules\n');
+  });
+
+  it('should prune a managed hooks directory emptied by obsolete file removal', async () => {
+    // Arrange
+    const project = await createTemporaryDirectory('promptscript-cleanup-prune-hooks-');
+    const hooksDirectory = join(project, '.github', 'hooks');
+    const obsoleteFile = join(hooksDirectory, 'promptscript.json');
+    await mkdir(hooksDirectory, { recursive: true });
+    await writeFile(
+      obsoleteFile,
+      '{"version":1,"hooks":{"preToolUse":[{"type":"command","bash":"echo ok # promptscript-generated:test"}]}}\n'
+    );
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputDirectories: ['.github/hooks'],
+          managedOutputFiles: ['.github/hooks/promptscript.json'],
+        },
+      ],
+    ]);
+
+    // Act
+    const result = await cleanupManagedOutputs(outputs, { outputRoot: project });
+
+    // Assert
+    expect(result.removed).toEqual([obsoleteFile]);
+    expect(result.removedDirectories).toEqual([hooksDirectory]);
+    await expect(lstat(hooksDirectory)).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('should keep a managed directory that still contains user files', async () => {
+    // Arrange
+    const project = await createTemporaryDirectory('promptscript-cleanup-keep-hooks-');
+    const hooksDirectory = join(project, '.github', 'hooks');
+    const obsoleteFile = join(hooksDirectory, 'promptscript.json');
+    await mkdir(hooksDirectory, { recursive: true });
+    await writeFile(
+      obsoleteFile,
+      '{"version":1,"hooks":{"preToolUse":[{"type":"command","bash":"echo ok # promptscript-generated:test"}]}}\n'
+    );
+    await writeFile(join(hooksDirectory, 'team.json'), '{"version":1,"hooks":{}}\n');
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputDirectories: ['.github/hooks'],
+          managedOutputFiles: ['.github/hooks/promptscript.json'],
+        },
+      ],
+    ]);
+
+    // Act
+    const result = await cleanupManagedOutputs(outputs, { outputRoot: project });
+
+    // Assert
+    expect(result.removed).toEqual([obsoleteFile]);
+    expect(result.removedDirectories).toEqual([]);
+    await expect(lstat(hooksDirectory)).resolves.toBeDefined();
+  });
+
+  it('should report prunable directories in dry-run mode without removing them', async () => {
+    // Arrange
+    const project = await createTemporaryDirectory('promptscript-cleanup-prune-dry-');
+    const hooksDirectory = join(project, '.github', 'hooks');
+    const obsoleteFile = join(hooksDirectory, 'promptscript.json');
+    await mkdir(hooksDirectory, { recursive: true });
+    await writeFile(
+      obsoleteFile,
+      '{"version":1,"hooks":{"preToolUse":[{"type":"command","bash":"echo ok # promptscript-generated:test"}]}}\n'
+    );
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputDirectories: ['.github/hooks'],
+          managedOutputFiles: ['.github/hooks/promptscript.json'],
+        },
+      ],
+    ]);
+
+    // Act
+    const result = await cleanupManagedOutputs(outputs, { outputRoot: project, dryRun: true });
+
+    // Assert
+    expect(result.removed).toEqual([obsoleteFile]);
+    expect(result.removedDirectories).toEqual([hooksDirectory]);
+    await expect(readFile(obsoleteFile, 'utf-8')).resolves.toContain('promptscript-generated');
+    await expect(lstat(hooksDirectory)).resolves.toBeDefined();
+  });
+
+  it('should never prune the output root itself', async () => {
+    // Arrange
+    const project = await createTemporaryDirectory('promptscript-cleanup-prune-root-');
+    const staleFile = join(project, 'stale.md');
+    await writeFile(staleFile, `${GENERATED_MARKER}\n\n# Stale\n`);
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# AGENTS.md\n',
+          managedOutputDirectories: ['.'],
+        },
+      ],
+    ]);
+
+    // Act
+    const result = await cleanupManagedOutputs(outputs, { outputRoot: project });
+
+    // Assert
+    expect(result.removed).toEqual([staleFile]);
+    expect(result.removedDirectories).toEqual([]);
+    await expect(lstat(project)).resolves.toBeDefined();
   });
 
   describe('removeIfUnchanged fallback', () => {

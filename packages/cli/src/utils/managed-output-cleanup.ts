@@ -1,6 +1,6 @@
 import { constants } from 'node:fs';
 import { execFile } from 'node:child_process';
-import { lstat, open, readFile, readdir, unlink, type FileHandle } from 'node:fs/promises';
+import { lstat, open, readFile, readdir, rmdir, unlink, type FileHandle } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, relative, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
@@ -49,6 +49,8 @@ process.stdout.write('removed');
 export interface ManagedOutputCleanupResult {
   /** Obsolete files removed, or that would be removed in dry-run mode */
   removed: string[];
+  /** Managed directories pruned because they became empty */
+  removedDirectories: string[];
 }
 
 export interface ManagedOutputCleanupOptions {
@@ -83,6 +85,7 @@ export async function cleanupManagedOutputs(
   const managedFiles = collectManagedFiles(outputs, outputRoot);
   const desiredFiles = collectDesiredFiles(outputs, outputRoot);
   const removed: string[] = [];
+  const removedDirectories: string[] = [];
 
   for (const directory of managedDirectories) {
     const ancestorGuards = await openAncestorDirectories(outputRoot, directory);
@@ -105,7 +108,76 @@ export async function cleanupManagedOutputs(
     await removeManagedFile(file, outputRoot, options.dryRun === true, removed);
   }
 
-  return { removed };
+  // Prune managed directories left empty by the removals (e.g. .github/hooks
+  // after the obsolete promptscript.json is deleted). Deepest first so a
+  // parent can be pruned right after its last child directory disappears.
+  // Skipped entirely when nothing was removed so read-only runs never touch
+  // directories the cleanup did not empty itself.
+  if (removed.length > 0) {
+    const prunable = [...managedDirectories].sort((a, b) => b.length - a.length);
+    for (const directory of prunable) {
+      await pruneEmptyDirectory(directory, outputRoot, options.dryRun === true, {
+        removed,
+        removedDirectories,
+      });
+    }
+  }
+
+  return { removed, removedDirectories };
+}
+
+interface PruneTracker {
+  removed: string[];
+  removedDirectories: string[];
+}
+
+/**
+ * Remove a directory when every entry inside it is gone (or, in dry-run mode,
+ * would be gone). Returns true when the directory is (or would be) removed.
+ * Never removes the output root itself or follows symlinks.
+ */
+async function pruneEmptyDirectory(
+  directory: string,
+  outputRoot: string,
+  dryRun: boolean,
+  tracker: PruneTracker
+): Promise<boolean> {
+  if (resolve(directory) === outputRoot) return false;
+  const directoryStat = await safeLstat(directory);
+  if (!directoryStat?.isDirectory() || directoryStat.isSymbolicLink()) return false;
+
+  const entries = await readdir(directory, { withFileTypes: true });
+  let empty = true;
+  for (const entry of entries) {
+    const entryPath = resolve(directory, entry.name);
+    if (entry.isDirectory()) {
+      if (!(await pruneEmptyDirectory(entryPath, outputRoot, dryRun, tracker))) {
+        empty = false;
+      }
+      continue;
+    }
+    if (!(dryRun && tracker.removed.includes(entryPath))) {
+      empty = false;
+    }
+  }
+  if (!empty) return false;
+
+  if (dryRun) {
+    tracker.removedDirectories.push(directory);
+    return true;
+  }
+
+  try {
+    await rmdir(directory);
+    tracker.removedDirectories.push(directory);
+    return true;
+  } catch (error: unknown) {
+    // Lost a race with an external writer or the directory is already gone.
+    if (isNodeError(error) && (error.code === 'ENOTEMPTY' || error.code === 'ENOENT')) {
+      return false;
+    }
+    throw error;
+  }
 }
 
 function collectManagedDirectories(

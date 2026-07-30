@@ -72,6 +72,7 @@ describe('cleanupManagedOutputs race handling', () => {
 
     await expect(cleanupManagedOutputs(createOutputs(), { outputRoot: root })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     expect(mockReaddir).not.toHaveBeenCalled();
   });
@@ -81,6 +82,7 @@ describe('cleanupManagedOutputs race handling', () => {
 
     await expect(cleanupManagedOutputs(createOutputs(), { outputRoot: root })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     expect(mockReaddir).not.toHaveBeenCalled();
   });
@@ -90,6 +92,7 @@ describe('cleanupManagedOutputs race handling', () => {
 
     await expect(cleanupManagedOutputs(createOutputs(), { outputRoot: root })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     expect(mockReadFile).not.toHaveBeenCalled();
   });
@@ -101,6 +104,7 @@ describe('cleanupManagedOutputs race handling', () => {
 
     await expect(cleanupManagedOutputs(createOutputs(), { outputRoot: root })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     expect(mockReadFile).toHaveBeenCalledWith(staleFile, 'utf-8');
   });
@@ -115,6 +119,7 @@ describe('cleanupManagedOutputs race handling', () => {
 
     await expect(cleanupManagedOutputs(createOutputs(), { outputRoot: root })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
   });
 
@@ -138,6 +143,7 @@ describe('cleanupManagedOutputs race handling', () => {
 
     await expect(cleanupManagedOutputs(createOutputs(), { outputRoot: root })).resolves.toEqual({
       removed: [],
+      removedDirectories: [],
     });
     expect(fileStatCalls).toBe(2);
   });
@@ -161,6 +167,7 @@ describe('cleanupManagedOutputs race handling', () => {
     await expect(cleanupManagedOutputs(createHookOutputs(), { outputRoot: root })).resolves.toEqual(
       {
         removed: [],
+        removedDirectories: [],
       }
     );
   });
@@ -182,6 +189,7 @@ describe('cleanupManagedOutputs race handling', () => {
     await expect(cleanupManagedOutputs(createHookOutputs(), { outputRoot: root })).resolves.toEqual(
       {
         removed: [],
+        removedDirectories: [],
       }
     );
   });

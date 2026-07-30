@@ -271,6 +271,7 @@ export class GitHubFormatter extends BaseFormatter {
         ...(hookWarnings.length > 0
           ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
           : {}),
+        managedOutputDirectories: ['.github/hooks'],
         managedOutputFiles: ['.github/hooks/promptscript.json'],
       };
     }
@@ -281,6 +282,7 @@ export class GitHubFormatter extends BaseFormatter {
         ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
         : {}),
       additionalFiles: [...(output.additionalFiles ?? []), hooksFile],
+      managedOutputDirectories: ['.github/hooks'],
       managedOutputFiles: ['.github/hooks/promptscript.json'],
     };
   }

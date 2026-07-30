@@ -194,7 +194,7 @@ describe('compile command - createCliLogger warn path', () => {
     mockChmod.mockResolvedValue(undefined);
     mockMkdir.mockResolvedValue(undefined);
     mockReadFile.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
-    mockCleanupManagedOutputs.mockResolvedValue({ removed: [] });
+    mockCleanupManagedOutputs.mockResolvedValue({ removed: [], removedDirectories: [] });
 
     mockCompile.mockResolvedValue({
       success: true,
@@ -277,7 +277,10 @@ describe('compile command - createCliLogger warn path', () => {
 
   it('should report obsolete generated files removed after compilation', async () => {
     const obsoleteFile = '/mock/project/.factory/rules/obsolete.md';
-    mockCleanupManagedOutputs.mockResolvedValue({ removed: [obsoleteFile] });
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [obsoleteFile],
+      removedDirectories: [],
+    });
 
     await compileCommand({ cwd: '/mock/project' }, mockServices);
 
@@ -290,7 +293,10 @@ describe('compile command - createCliLogger warn path', () => {
 
   it('should preview obsolete generated file removal in dry-run mode', async () => {
     const obsoleteFile = '/mock/project/.factory/rules/obsolete.md';
-    mockCleanupManagedOutputs.mockResolvedValue({ removed: [obsoleteFile] });
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [obsoleteFile],
+      removedDirectories: [],
+    });
 
     await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
 
@@ -301,6 +307,18 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockDryRun).toHaveBeenCalledWith(
       `Would remove obsolete generated file: ${obsoleteFile}`
     );
+  });
+
+  it('should report managed directories pruned after compilation', async () => {
+    const prunedDirectory = '/mock/project/.github/hooks';
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [prunedDirectory],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockMuted).toHaveBeenCalledWith(`Removed empty managed directory: ${prunedDirectory}`);
   });
 
   it('should apply a named build profile entry, output, and targets', async () => {
