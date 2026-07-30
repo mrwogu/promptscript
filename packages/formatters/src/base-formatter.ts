@@ -169,6 +169,29 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Append generic `Label: value` items for standards keys not handled by
+   * the known-key rendering in a section method. Keeps custom @standards
+   * keys (git/config/documentation/diagrams) visible in monolith output.
+   * Skips null/undefined/false; renders bare labels for true.
+   */
+  protected appendGenericStandardItems(
+    items: string[],
+    props: Record<string, Value>,
+    knownKeys: ReadonlySet<string>
+  ): void {
+    for (const [key, value] of Object.entries(props)) {
+      if (knownKeys.has(key)) continue;
+      if (value === null || value === undefined || value === false) continue;
+      if (value === true) {
+        items.push(this.humanizeLabel(key));
+        continue;
+      }
+      const rendered = this.standardsExtractor.stringify(value);
+      if (rendered) items.push(`${this.humanizeLabel(key)}: ${rendered}`);
+    }
+  }
+
+  /**
    * Convert a camelCase/kebab-case key into a human-readable label.
    */
   protected humanizeLabel(value: string): string {

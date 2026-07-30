@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { CursorFormatter, CURSOR_VERSIONS } from '../formatters/cursor.js';
 
 const createLoc = (): SourceLocation => ({
@@ -1544,6 +1544,101 @@ describe('CursorFormatter', () => {
 
       expect(agentFile).toBeDefined();
       expect(agentFile!.content).toContain('mcpServers: ["scanner", "linear"]');
+    });
+  });
+
+  describe('custom standards keys', () => {
+    const createStandardsProgram = (properties: Record<string, Value>): Program => ({
+      ...createMinimalProgram(),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'standards',
+          content: {
+            type: 'ObjectContent',
+            properties,
+            loc: createLoc(),
+          },
+          loc: createLoc(),
+        },
+      ],
+    });
+
+    it('should render nested objects and booleans in @standards.git', () => {
+      const ast = createStandardsProgram({
+        git: {
+          format: 'Conventional Commits',
+          mergeRequest: {
+            title: 'merge commit summary',
+            description: 'purpose and Jira link',
+          },
+          requireReview: true,
+          legacy: false,
+          draft: null,
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('Git Commits:');
+      expect(result.content).toContain('- format: Conventional Commits');
+      expect(result.content).toContain(
+        '- mergeRequest: title: merge commit summary, description: purpose and Jira link'
+      );
+      expect(result.content).toContain('- requireReview');
+      expect(result.content).not.toContain('legacy');
+      expect(result.content).not.toContain('draft');
+    });
+
+    it('should render non-string values in @standards.config', () => {
+      const ast = createStandardsProgram({
+        config: {
+          eslint: 'inherit from eslint.base.config.cjs',
+          tabWidth: 2,
+          plugins: ['import', 'promise'],
+          strict: true,
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('Config:');
+      expect(result.content).toContain('- eslint: inherit from eslint.base.config.cjs');
+      expect(result.content).toContain('- tabWidth: 2');
+      expect(result.content).toContain('- plugins: import, promise');
+      expect(result.content).toContain('- strict');
+    });
+
+    it('should render boolean values in @standards.documentation', () => {
+      const ast = createStandardsProgram({
+        documentation: {
+          verifyBefore: true,
+          styleGuide: 'Use Diataxis structure',
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('Documentation:');
+      expect(result.content).toContain('- verifyBefore');
+      expect(result.content).toContain('- Use Diataxis structure');
+    });
+
+    it('should render custom keys in @standards.diagrams', () => {
+      const ast = createStandardsProgram({
+        diagrams: {
+          format: 'Mermaid',
+          layout: 'flowchart TB',
+          renderPng: true,
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('Diagrams:');
+      expect(result.content).toContain('- Use Mermaid');
+      expect(result.content).toContain('- layout: flowchart TB');
+      expect(result.content).toContain('- renderPng');
     });
   });
 });

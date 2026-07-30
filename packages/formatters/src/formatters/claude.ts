@@ -1198,6 +1198,8 @@ export class ClaudeFormatter extends BaseFormatter {
     if (g['scope']) items.push(`Scope: ${this.valueToString(g['scope'])}`);
     if (g['example']) items.push(`Example: \`${this.valueToString(g['example'])}\``);
 
+    this.appendGenericStandardItems(items, g, new Set(['format', 'types', 'scope', 'example']));
+
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection('Git Commits', content) + '\n';
@@ -1215,6 +1217,8 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (c['eslint']) items.push(`ESLint: ${this.valueToString(c['eslint'])}`);
     if (c['viteRoot']) items.push(`Vite root: ${this.valueToString(c['viteRoot'])}`);
+
+    this.appendGenericStandardItems(items, c, new Set(['eslint', 'viteRoot']));
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
@@ -1284,6 +1288,12 @@ export class ClaudeFormatter extends BaseFormatter {
     if (d['verifyAfter']) items.push('Update docs after changes');
     if (d['codeExamples']) items.push('Keep code examples accurate');
 
+    this.appendGenericStandardItems(
+      items,
+      d,
+      new Set(['verifyBefore', 'verifyAfter', 'codeExamples'])
+    );
+
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection('Documentation', content) + '\n';
@@ -1303,6 +1313,8 @@ export class ClaudeFormatter extends BaseFormatter {
     if (d['types'] && Array.isArray(d['types'])) {
       items.push(`Types: ${d['types'].map(String).join(', ')}`);
     }
+
+    this.appendGenericStandardItems(items, d, new Set(['format', 'types']));
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);

@@ -899,16 +899,24 @@ export class CursorFormatter extends BaseFormatter {
   private extractGitItems(obj: Record<string, Value>): string[] {
     const items: string[] = [];
     for (const [key, value] of Object.entries(obj)) {
-      if (key === 'types' && Array.isArray(value)) {
-        const types = value.map((v) => this.valueToString(v)).join(', ');
-        items.push(`types: ${types}`);
-      } else if (typeof value === 'string') {
-        items.push(`${key}: ${value}`);
-      } else if (typeof value === 'number') {
-        items.push(`${key}: ${value}`);
-      }
+      this.pushGenericStandardEntry(items, key, value);
     }
     return items;
+  }
+
+  /**
+   * Append a `key: value` entry for a standards value, keeping cursor's
+   * raw-key style. Surfaces booleans (bare key for true), arrays, and
+   * nested objects via the shared standards stringify. Skips null/false.
+   */
+  private pushGenericStandardEntry(items: string[], key: string, value: Value): void {
+    if (value === null || value === undefined || value === false) return;
+    if (value === true) {
+      items.push(key);
+      return;
+    }
+    const rendered = this.standardsExtractor.stringify(value);
+    if (rendered) items.push(`${key}: ${rendered}`);
   }
 
   private configFiles(ast: Program): string | null {
@@ -940,9 +948,7 @@ export class CursorFormatter extends BaseFormatter {
     if (!config || typeof config !== 'object' || Array.isArray(config)) return [];
     const items: string[] = [];
     for (const [key, value] of Object.entries(config as Record<string, Value>)) {
-      if (typeof value === 'string') {
-        items.push(`${key}: ${value}`);
-      }
+      this.pushGenericStandardEntry(items, key, value);
     }
     return items;
   }
@@ -1036,8 +1042,13 @@ export class CursorFormatter extends BaseFormatter {
   private extractStringValuesFromObject(obj: Value | undefined): string[] {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return [];
     const items: string[] = [];
-    for (const value of Object.values(obj as Record<string, Value>)) {
-      if (typeof value === 'string') items.push(value);
+    for (const [key, value] of Object.entries(obj as Record<string, Value>)) {
+      // Strings render as bare values (existing behavior); other types use key: value
+      if (typeof value === 'string') {
+        items.push(value);
+      } else {
+        this.pushGenericStandardEntry(items, key, value);
+      }
     }
     return items;
   }
@@ -1074,6 +1085,10 @@ export class CursorFormatter extends BaseFormatter {
     if (diagObj[formatKey]) items.push(`Use ${this.valueToString(diagObj[formatKey])}`);
     if (diagObj['types'] && Array.isArray(diagObj['types'])) {
       items.push(`Types: ${diagObj['types'].map((t) => this.valueToString(t)).join(', ')}`);
+    }
+    for (const [key, value] of Object.entries(diagObj)) {
+      if (key === formatKey || key === 'types') continue;
+      this.pushGenericStandardEntry(items, key, value);
     }
     return items;
   }

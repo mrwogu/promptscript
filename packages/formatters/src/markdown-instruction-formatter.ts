@@ -838,28 +838,6 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     return renderer.renderSection(this.getSectionName('gitCommits'), content) + '\n';
   }
 
-  /**
-   * Append generic `Label: value` items for standards keys not handled by
-   * the known-key rendering above. Keeps custom @standards.git/config/diagrams
-   * keys visible in monolith output.
-   */
-  private appendGenericStandardItems(
-    items: string[],
-    props: Record<string, Value>,
-    knownKeys: ReadonlySet<string>
-  ): void {
-    for (const [key, value] of Object.entries(props)) {
-      if (knownKeys.has(key)) continue;
-      if (value === null || value === undefined || value === false) continue;
-      if (value === true) {
-        items.push(this.humanizeLabel(key));
-        continue;
-      }
-      const rendered = this.standardsExtractor.stringify(value);
-      if (rendered) items.push(`${this.humanizeLabel(key)}: ${rendered}`);
-    }
-  }
-
   protected configFiles(ast: Program, renderer: ConventionRenderer): string | null {
     const standards = this.findBlock(ast, 'standards');
     if (!standards) return null;
@@ -937,6 +915,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (d['verifyBefore']) items.push('Review docs before changes');
     if (d['verifyAfter']) items.push('Update docs after changes');
     if (d['codeExamples']) items.push('Keep code examples accurate');
+
+    this.appendGenericStandardItems(
+      items,
+      d,
+      new Set(['verifyBefore', 'verifyAfter', 'codeExamples'])
+    );
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
