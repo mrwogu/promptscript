@@ -1,7 +1,16 @@
 import { constants } from 'node:fs';
 import { execFile, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { lstat, mkdir, open, readFile, readdir, rmdir, unlink, type FileHandle } from 'node:fs/promises';
+import {
+  lstat,
+  mkdir,
+  open,
+  readFile,
+  readdir,
+  rmdir,
+  unlink,
+  type FileHandle,
+} from 'node:fs/promises';
 import { basename, dirname, isAbsolute, relative, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import type { FormatterOutput } from '@promptscript/compiler';
