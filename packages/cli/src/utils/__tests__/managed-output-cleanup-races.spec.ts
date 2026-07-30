@@ -31,6 +31,7 @@ describe('cleanupManagedOutputs race handling', () => {
   const factoryDirectory = join(root, '.factory');
   const rulesDirectory = join(factoryDirectory, 'rules');
   const staleFile = join(rulesDirectory, 'stale.md');
+  const hooksFile = join(factoryDirectory, 'hooks.json');
   const pathStats = new Map<string, MockStat>();
   const handleStats = new Map<string, MockStat>();
 
@@ -140,6 +141,50 @@ describe('cleanupManagedOutputs race handling', () => {
     });
     expect(fileStatCalls).toBe(2);
   });
+
+  it('should stop exact-file cleanup when an ancestor changes after opening', async () => {
+    pathStats.set(hooksFile, createStat(1, 4, 'file'));
+    mockReadFile.mockResolvedValue(ownedHooksJson());
+    let factoryStatCalls = 0;
+    mockLstat.mockImplementation(async (path: string) => {
+      if (path === factoryDirectory) {
+        factoryStatCalls += 1;
+        return factoryStatCalls === 1
+          ? pathStats.get(factoryDirectory)!
+          : createStat(2, 2, 'directory');
+      }
+      const stat = pathStats.get(path);
+      if (!stat) throw createNodeError('ENOENT');
+      return stat;
+    });
+
+    await expect(cleanupManagedOutputs(createHookOutputs(), { outputRoot: root })).resolves.toEqual(
+      {
+        removed: [],
+      }
+    );
+  });
+
+  it('should stop exact-file cleanup when its parent is no longer a directory', async () => {
+    pathStats.set(hooksFile, createStat(1, 4, 'file'));
+    mockReadFile.mockResolvedValue(ownedHooksJson());
+    let factoryStatCalls = 0;
+    mockLstat.mockImplementation(async (path: string) => {
+      if (path === factoryDirectory) {
+        factoryStatCalls += 1;
+        return factoryStatCalls <= 2 ? pathStats.get(factoryDirectory)! : createStat(1, 2, 'file');
+      }
+      const stat = pathStats.get(path);
+      if (!stat) throw createNodeError('ENOENT');
+      return stat;
+    });
+
+    await expect(cleanupManagedOutputs(createHookOutputs(), { outputRoot: root })).resolves.toEqual(
+      {
+        removed: [],
+      }
+    );
+  });
 });
 
 function createOutputs(): Map<string, FormatterOutput> {
@@ -153,6 +198,23 @@ function createOutputs(): Map<string, FormatterOutput> {
       },
     ],
   ]);
+}
+
+function createHookOutputs(): Map<string, FormatterOutput> {
+  return new Map([
+    [
+      'AGENTS.md',
+      {
+        path: 'AGENTS.md',
+        content: '# AGENTS.md\n',
+        managedOutputFiles: ['.factory/hooks.json'],
+      },
+    ],
+  ]);
+}
+
+function ownedHooksJson(): string {
+  return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:test"}]}]}}';
 }
 
 function createStat(dev: number, ino: number, type: 'directory' | 'file'): MockStat {

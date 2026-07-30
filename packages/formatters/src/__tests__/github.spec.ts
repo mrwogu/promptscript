@@ -124,6 +124,12 @@ describe('GitHubFormatter', () => {
         hook['enabled'] = false;
       }
       expect(formatter.format(ast, { version: 'simple' }).warnings).toBeUndefined();
+      const multifileResult = formatter.format(ast, { version: 'multifile' });
+      expect(
+        multifileResult.additionalFiles?.some(
+          (file) => file.path === '.github/hooks/promptscript.json'
+        )
+      ).not.toBe(true);
     });
   });
 

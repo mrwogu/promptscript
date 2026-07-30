@@ -3,7 +3,11 @@ import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { FormatterOutput } from '@promptscript/compiler';
-import { cleanupManagedOutputs, removeIfUnchanged } from '../managed-output-cleanup.js';
+import {
+  cleanupManagedOutputs,
+  hasOnlyOwnedHookCommands,
+  removeIfUnchanged,
+} from '../managed-output-cleanup.js';
 
 const GENERATED_MARKER =
   '<!-- PromptScript 2026-07-15T00:00:00.000Z | source: project.prs | target: factory - do not edit -->';
@@ -197,6 +201,63 @@ describe('cleanupManagedOutputs', () => {
     await expect(readFile(file, 'utf-8')).resolves.toBe(content);
   });
 
+  it('should reject malformed or non-command hook ownership structures', () => {
+    expect(hasOnlyOwnedHookCommands('{')).toBe(false);
+    expect(hasOnlyOwnedHookCommands('[]')).toBe(false);
+    expect(hasOnlyOwnedHookCommands('{"hooks":"invalid"}')).toBe(false);
+    expect(hasOnlyOwnedHookCommands('{"hooks":{"event":[{"type":"prompt"}]}}')).toBe(false);
+    expect(hasOnlyOwnedHookCommands('{"hooks":{"event":[{"type":"command"}]}}')).toBe(false);
+  });
+
+  it('should report an obsolete owned JSON file in dry-run mode', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-json-dry-run-');
+    const file = join(project, '.factory', 'hooks.json');
+    const content =
+      '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:test"}]}]}}\n';
+    await mkdir(dirname(file), { recursive: true });
+    await writeFile(file, content);
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputFiles: ['.factory/hooks.json'],
+        },
+      ],
+    ]);
+
+    await expect(
+      cleanupManagedOutputs(outputs, { outputRoot: project, dryRun: true })
+    ).resolves.toEqual({ removed: [file] });
+    await expect(readFile(file, 'utf-8')).resolves.toBe(content);
+  });
+
+  it('should ignore missing managed files and managed files behind directory symlinks', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-json-symlink-');
+    const outside = await createTemporaryDirectory('promptscript-cleanup-json-symlink-outside-');
+    const outsideFile = join(outside, 'hooks.json');
+    const content =
+      '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:test"}]}]}}\n';
+    await writeFile(outsideFile, content);
+    await symlink(outside, join(project, '.factory'), 'dir');
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputFiles: ['missing.json', '.factory/hooks.json'],
+        },
+      ],
+    ]);
+
+    await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
+      removed: [],
+    });
+    await expect(readFile(outsideFile, 'utf-8')).resolves.toBe(content);
+  });
+
   it('should support a project-root managed directory without deleting desired output', async () => {
     const project = await createTemporaryDirectory('promptscript-cleanup-root-');
     const staleFile = join(project, 'stale.md');
@@ -276,7 +337,7 @@ describe('cleanupManagedOutputs', () => {
     await expect(readFile(outsideFile, 'utf-8')).resolves.toContain('# Outside');
   });
 
-  it('should ignore unsafe managed directory declarations', async () => {
+  it('should ignore unsafe managed directory and file declarations', async () => {
     const project = await createTemporaryDirectory('promptscript-cleanup-unsafe-project-');
     const outside = await createTemporaryDirectory('promptscript-cleanup-unsafe-outside-');
     const outsideFile = join(outside, 'outside.md');
@@ -292,6 +353,12 @@ describe('cleanupManagedOutputs', () => {
             '..\\promptscript-cleanup-unsafe-outside-',
             '../promptscript-cleanup-unsafe-outside-',
             outside,
+          ],
+          managedOutputFiles: [
+            '',
+            '..\\promptscript-cleanup-unsafe-outside-\\outside.md',
+            '../promptscript-cleanup-unsafe-outside-/outside.md',
+            outsideFile,
           ],
         },
       ],
