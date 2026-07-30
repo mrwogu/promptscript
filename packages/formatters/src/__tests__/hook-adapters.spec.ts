@@ -70,6 +70,23 @@ describe('hook-adapters', () => {
       const block = { content: { type: 'TextContent' } };
       expect(extractHooks(block as never)).toHaveLength(0);
     });
+
+    it('should skip entries with an empty command array', () => {
+      const block = makeHooksBlock({
+        empty: { event: 'pre-tool-use', command: [] },
+        valid: { event: 'pre-tool-use', command: ['prs', 'hook', 'pre-edit'] },
+      });
+      const hooks = extractHooks(block);
+      expect(hooks).toHaveLength(1);
+      expect(hooks[0]!.id).toBe('valid');
+    });
+
+    it('should skip entries whose command filters down to no string arguments', () => {
+      const block = makeHooksBlock({
+        'non-strings': { event: 'pre-tool-use', command: [1, null] as unknown as Value },
+      });
+      expect(extractHooks(block)).toHaveLength(0);
+    });
   });
 
   describe('mapEvent', () => {

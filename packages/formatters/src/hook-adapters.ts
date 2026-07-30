@@ -77,10 +77,15 @@ export function extractHooks(hooksBlock: {
     const command = obj['command'];
     if (!Array.isArray(command)) continue;
 
+    const args = command.filter((c): c is string => typeof c === 'string');
+    // Skip hooks whose command filters to nothing - they would emit a bare
+    // ownership marker with no executable command. PS034 already rejects them.
+    if (args.length === 0) continue;
+
     const hook: HookDefinition = {
       id,
       event: event as PortableHookEvent,
-      command: command.filter((c): c is string => typeof c === 'string'),
+      command: args,
     };
 
     const matcher = obj['matcher'];
