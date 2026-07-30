@@ -1243,15 +1243,22 @@ Each hook entry is an object with:
 | ------------------- | -------- | -------- | ------------------------------------------- |
 | `event`             | Yes      | string   | Portable event name (see above)             |
 | `command`           | Yes      | string[] | Non-empty source argument array             |
-| `matcher`           | No       | string   | Tool name matcher pattern                   |
+| `matcher`           | No       | string   | Target-native tool name matcher pattern     |
 | `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                  |
 | `statusMessage`     | No       | string   | Status message shown during execution       |
 | `continueOnFailure` | No       | boolean  | Whether to continue if hook fails           |
 | `enabled`           | No       | boolean  | Whether the hook is enabled (default: true) |
 
-Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command arguments. Target adapters
-may serialize the array as one native command string, so verify argument quoting in generated hook
-configuration.
+Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command arguments, and `command`
+must contain at least one argument - PS034 rejects empty arrays and hooks without an executable
+command are omitted from target output. Target adapters may serialize the array as one native
+command string, so verify argument quoting in generated hook configuration.
+
+`matcher` filters by tool name using the target's own vocabulary: Factory matches names like
+`Execute` or `Read`, GitHub Copilot matches its own tool names (and only on `preToolUse`,
+`postToolUse`, `subagentStart`, and `notification`), and Claude Code matches names like
+`Edit|Write`. A matcher written for one target can match nothing on another, so review generated
+hook files per target.
 
 `multifile` and `full` modes emit target-native hook files. `simple` mode
 preserves its single-file contract and reports a compatibility warning.
@@ -1267,8 +1274,15 @@ preserves its single-file contract and reports a compatibility warning.
 GitHub output uses the version 1 repository-hook schema shared by Copilot CLI
 and cloud agent. Factory output uses the preferred dedicated project hook file;
 Factory still accepts `hooks` inside `.factory/settings.json` only as a
-fallback. Formatters report `PS4002` when a target cannot represent an event or
+fallback - `prs compile` reports `PS4002` when that fallback file still carries
+a non-PromptScript-owned `hooks` key so you can remove the stale section.
+Formatters report `PS4002` when a target cannot represent an event or
 optional field instead of silently dropping it.
+
+When `@hooks` is removed or stops emitting, the CLI deletes the obsolete hook
+file (`.factory/hooks.json`, `.github/hooks/promptscript.json`) only when every
+command in it carries the PromptScript ownership marker, and prunes managed
+directories (such as `.github/hooks/`) that the removal leaves empty.
 
 ### @mcpServers
 

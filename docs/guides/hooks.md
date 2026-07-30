@@ -14,6 +14,18 @@ compiled separately to project lifecycle policy files. Factory `@hooks` use
 `.github/hooks/promptscript.json`. Copilot `.vscode/hooks.json` below is the VS
 Code installer contract, not the GitHub repository hook contract.
 
+Notes for compiled `@hooks` output:
+
+- **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`.
+  `prs compile` warns (`PS4002`) while that file still contains a non-PromptScript-owned `hooks`
+  key; remove the stale section so it cannot reactivate when `.factory/hooks.json` is absent.
+- **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`,
+  GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match
+  nothing on another. See [@hooks](../reference/language.md#hooks).
+- **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in
+  it carries the PromptScript ownership marker, and prunes managed directories left empty (such as
+  `.github/hooks/`).
+
 There are two complementary behaviours:
 
 - **Auto-compilation** - when the AI tool writes a `.prs` file, `post-edit` runs `prs compile`.

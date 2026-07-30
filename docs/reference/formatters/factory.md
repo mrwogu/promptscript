@@ -82,7 +82,9 @@ description: PromptScript output format for Factory AI
 - Skills go to `.factory/skills/<name>/SKILL.md`
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
 - `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
+- Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
 - `.factory/settings.json` remains a Factory fallback and is used separately by `prs hooks install`
+- When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.factory/hooks.json`; directories emptied by cleanup (`.factory/rules` and its subdirectories) are pruned as well
 - Three output modes: `simple`, `multifile`, `full`
 - Always-on rules default to the byte-compatible `monolith` mode
 - In `monolith` mode, `@standards` render as grouped `###` subsections (one per topic) under `Conventions & Patterns`, preserving the source topic structure
@@ -92,7 +94,11 @@ PromptScript versions before 1.16 could place language-level hooks in
 `.factory/settings.json`. PromptScript does not remove that unmarked file
 because it may also contain user settings or `prs hooks install` entries.
 After compiling `.factory/hooks.json`, review the old `hooks` object and remove
-only duplicated lifecycle entries.
+only duplicated lifecycle entries. To help with this migration, `prs compile`
+reports a `PS4002` warning whenever a factory target runs and
+`.factory/settings.json` still contains a non-PromptScript-owned `hooks` key -
+stale entries there reactivate when `.factory/hooks.json` is absent because
+Factory falls back to `settings.json`.
 
 ## Split Rules
 

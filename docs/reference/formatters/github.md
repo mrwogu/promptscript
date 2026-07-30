@@ -86,8 +86,10 @@ description: PromptScript output format for GitHub Copilot
 - `@shortcuts` with `prompt: true` become prompt files; without `prompt` they become instruction files
 - `@hooks` uses `.github/hooks/promptscript.json` for Copilot CLI and cloud agent in `multifile` and `full` modes
 - Hook commands use GitHub's shell-specific `bash` and `powershell` fields
+- Hook `matcher` values match GitHub Copilot tool names and are emitted only for `preToolUse`, `postToolUse`, `subagentStart`, and `notification`; other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
 - `notification` hooks run in Copilot CLI but do not fire in Copilot cloud agent; PromptScript reports `PS4002`
 - `.vscode/hooks.json` belongs to VS Code integration installed by `prs hooks install copilot`
+- When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.github/hooks/promptscript.json` and prunes the now-empty `.github/hooks/` directory
 
 ## Example Output
 
