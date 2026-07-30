@@ -163,6 +163,16 @@ vi.mock('../../utils/managed-output-cleanup.js', async (importOriginal) => {
   return {
     ...actual,
     cleanupManagedOutputs: (...args: unknown[]) => mockCleanupManagedOutputs(...args),
+    isHookOutputPath: vi.fn().mockReturnValue(false),
+    isPromptScriptOwnedHookOutput: vi.fn().mockReturnValue(false),
+    mergePromptScriptCodexConfig: vi.fn().mockReturnValue(undefined),
+    mergePromptScriptHookOutput: vi.fn().mockReturnValue(undefined),
+    removePromptScriptOwnedCodexHooks: vi.fn().mockReturnValue(undefined),
+    rewriteHookOutputIfUnchanged: vi.fn().mockResolvedValue(true),
+    createHookOutputSafely: vi.fn(async (path: string, _root: string, content: string) => {
+      await mockWriteFile(path, content, 'utf-8');
+      return true;
+    }),
   };
 });
 

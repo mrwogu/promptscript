@@ -3355,7 +3355,7 @@ describe('FactoryFormatter', () => {
       expect(result.warnings).toEqual([
         expect.objectContaining({
           code: 'PS4002',
-          message: 'Factory simple mode cannot emit @hooks and will omit them.',
+          message: 'Target "factory" version "simple" cannot emit @hooks and will omit them.',
           location: expect.any(Object),
         }),
       ]);

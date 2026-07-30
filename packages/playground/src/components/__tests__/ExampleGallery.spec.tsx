@@ -51,7 +51,9 @@ describe('ExampleGallery — gallery examples compile', () => {
           {
             hooks: [
               {
-                command: expect.stringContaining('cd "$FACTORY_PROJECT_DIR" && python3'),
+                command: expect.stringContaining(
+                  'node "$FACTORY_PROJECT_DIR"/.promptscript/scripts/validate.mjs --strict'
+                ),
               },
             ],
           },

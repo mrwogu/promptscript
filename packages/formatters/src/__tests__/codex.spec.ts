@@ -667,7 +667,7 @@ describe('CodexFormatter', () => {
       expect(result.content.length).toBeLessThanOrEqual(32768);
     });
 
-    it('should include hooks in config.toml when @hooks block present', () => {
+    it('should emit dedicated hooks.json when @hooks block present', () => {
       const program: Program = {
         type: 'Program',
         blocks: [
@@ -693,11 +693,21 @@ describe('CodexFormatter', () => {
         loc: createLoc(),
       };
       const result = formatter.format(program, { version: 'multifile' });
-      const configFile = (result.additionalFiles ?? []).find(
-        (f) => f.path === '.codex/config.toml'
-      );
-      expect(configFile).toBeDefined();
-      expect(configFile!.content).toContain('pre_tool_use');
+      const hooksFile = (result.additionalFiles ?? []).find((f) => f.path === '.codex/hooks.json');
+      expect(hooksFile).toBeDefined();
+      expect(JSON.parse(hooksFile!.content)).toMatchObject({
+        hooks: {
+          PreToolUse: [
+            {
+              hooks: [
+                {
+                  command: 'echo hello # promptscript-generated:my-hook',
+                },
+              ],
+            },
+          ],
+        },
+      });
       expect(result.warnings).toEqual([
         {
           code: 'PS4002',

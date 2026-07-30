@@ -245,17 +245,11 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
     const hookWarnings =
-      hooksBlock && hooks.some((hook) => hook.enabled !== false)
-        ? (version === 'simple'
-            ? [
-                {
-                  code: 'PS4002',
-                  message: 'Factory simple mode cannot emit @hooks and will omit them.',
-                  suggestion: "Use Factory version 'multifile' or 'full'.",
-                },
-              ]
-            : getHookCompatibilityWarnings(hooks, 'factory')
-          ).map((warning) => ({ ...warning, location: hooksBlock.loc }))
+      hooksBlock && version !== 'simple' && hooks.some((hook) => hook.enabled !== false)
+        ? getHookCompatibilityWarnings(hooks, 'factory').map((warning) => ({
+            ...warning,
+            location: hooksBlock.loc,
+          }))
         : [];
 
     return {

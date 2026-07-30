@@ -22,7 +22,11 @@ The `@hooks` block requires syntax `1.4.0`:
   validate-types: {
     event: "post-tool-use"
     matcher: "Edit|Write"
-    command: ["python3", ".promptscript/scripts/validate.py", "--strict"]
+    script: {
+      path: ".promptscript/scripts/validate.py"
+      interpreter: "python3"
+      args: ["--strict"]
+    }
     cwd: "project"
     timeoutMs: 120000
     statusMessage: "Checking TypeScript"
@@ -44,17 +48,19 @@ The `@hooks` block requires syntax `1.4.0`:
 | `notification`   | React to target notifications        |
 | `stop`           | Run final checks when an agent stops |
 
-Formatters map portable event names to target-native hook systems. Claude,
-Cursor, Codex, Factory, GitHub, and Grok provide hook output in the current
-target set.
+Formatters map portable event names to target-native hook systems. Eight
+built-in targets currently emit project-level lifecycle hooks.
 
-| Target         | Generated hook file               | Notes                                |
-| -------------- | --------------------------------- | ------------------------------------ |
-| Factory Droid  | `.factory/hooks.json`             | PascalCase events, seconds           |
-| GitHub Copilot | `.github/hooks/promptscript.json` | Version 1, lower camelCase, seconds  |
-| Claude Code    | `.claude/settings.json`           | PascalCase events, seconds           |
-| Cursor         | `.cursor/hooks.json`              | Cursor-native events                 |
-| Codex          | `.codex/config.toml`              | Codex-native events and milliseconds |
+| Target         | Generated hook file               | Notes                                      |
+| -------------- | --------------------------------- | ------------------------------------------ |
+| Factory Droid  | `.factory/hooks.json`             | PascalCase events, seconds                 |
+| GitHub Copilot | `.github/hooks/promptscript.json` | Version 1, lower camelCase, seconds        |
+| Claude Code    | `.claude/settings.json`           | PascalCase events, seconds                 |
+| Cursor         | `.cursor/hooks.json`              | Version 1, lower camelCase, seconds        |
+| Codex          | `.codex/hooks.json`               | PascalCase events, seconds                 |
+| Gemini CLI     | `.gemini/settings.json`           | PascalCase events, milliseconds            |
+| Windsurf       | `.windsurf/hooks.json`            | Event-specific entries, native working dir |
+| Grok Build     | `.grok/hooks/promptscript.json`   | PascalCase events, seconds                 |
 
 Hook files require `multifile` or `full` mode. `simple` mode reports `PS4002`
 because it cannot emit additional files. Cursor emits hook files only in
@@ -62,15 +68,62 @@ because it cannot emit additional files. Cursor emits hook files only in
 also report `PS4002` when an event, matcher, `statusMessage`, or
 `continueOnFailure` value has no native equivalent.
 
-Factory and GitHub generated commands include a trailing
-`# promptscript-generated:<hook-id>` shell comment. PromptScript uses this
-marker only to update or remove its dedicated generated hook file. Unmarked
-user hook files remain untouched.
+Every native adapter adds a trailing
+`# promptscript-generated:<hook-id>` shell comment to generated commands.
+PromptScript uses this marker to replace or remove only its entries when a
+native JSON hook file also contains user settings or hooks. Unmarked entries
+and top-level user settings remain untouched.
 
-Hook commands are arrays in PromptScript source:
+### Portable Repository Scripts
+
+Use `script` when one checked-in program should run across every native target:
+
+```promptscript
+script: {
+  path: ".promptscript/scripts/validate.py"
+  interpreter: "python3"
+  args: ["--strict"]
+}
+cwd: "project"
+```
+
+Each hook requires exactly one of `command` or `script`. A portable script:
+
+- Must be under `.promptscript/scripts/` and use forward slashes.
+- Must exist as a regular file when compiled.
+- Cannot escape the scripts directory through `..` traversal or a symlink.
+- Uses an explicit interpreter: `python3`, `python`, `node`, `deno`, `bun`,
+  `ruby`, `php`, `perl`, `bash`, `sh`, `zsh`, `pwsh`, or `powershell`.
+- Preserves every value in `args` as one argument, including spaces and shell
+  metacharacters.
+
+The Node compiler validates the real filesystem. The browser compiler performs
+the equivalent check against its virtual filesystem. For entries outside
+`.promptscript/` at a custom depth, pass the explicit `projectRoot` compiler
+option.
+
+Existing command arrays remain supported:
 
 ```promptscript
 command: ["python3", ".promptscript/scripts/validate.py", "--strict"]
+cwd: "project"
+```
+
+To migrate a target-specific command, remove project-root variables and shell
+wrappers from source:
+
+```text
+# Before: target-specific and rejected by current interpolation checks
+command: ["python3", "${FACTORY_PROJECT_DIR}/.promptscript/scripts/validate.py", "--strict"]
+```
+
+```promptscript
+# After: one portable resource for every native target
+script: {
+  path: ".promptscript/scripts/validate.py"
+  interpreter: "python3"
+  args: ["--strict"]
+}
 cwd: "project"
 ```
 
@@ -83,17 +136,25 @@ argument boundaries when a platform requires one command string. Factory
 shell-quotes command arguments, while GitHub emits separate `bash` and
 `powershell` commands. Commit shared hook programs under
 `.promptscript/scripts/`, rather than duplicating them under target
-directories, and review inherited hooks as executable policy.
+directories, and review inherited hooks as executable policy. Prefer `script`
+for repository-local programs because target adapters can resolve the script
+path independently from the agent session directory.
 
 ### Project-Root Strategy by Target
 
-| Target         | Native project root              | Native `cwd` entry | Payload `cwd`  | PromptScript behavior                           |
-| -------------- | -------------------------------- | ------------------ | -------------- | ----------------------------------------------- |
-| Claude Code    | `CLAUDE_PROJECT_DIR` placeholder | No                 | Yes            | Emits a safely quoted `cd` wrapper              |
-| Factory Droid  | `FACTORY_PROJECT_DIR`            | No                 | Event-specific | Emits a safely quoted `cd` wrapper              |
-| GitHub Copilot | Repository root                  | Yes                | Yes            | Emits `cwd: "."` or the requested relative path |
-| Cursor         | No stable portable primitive     | No                 | Event-specific | Emits `PS4002` and uses the session directory   |
-| Codex          | No project-root variable         | No                 | Session `cwd`  | Emits `PS4002` and uses the session directory   |
+| Target         | Root source                     | PromptScript `script` behavior                         |
+| -------------- | ------------------------------- | ------------------------------------------------------ |
+| Claude Code    | `CLAUDE_PROJECT_DIR`            | Quotes the root and script path                        |
+| Factory Droid  | `FACTORY_PROJECT_DIR`           | Quotes the root and script path                        |
+| GitHub Copilot | Native `cwd`                    | Emits `cwd` plus separate Bash and PowerShell commands |
+| Cursor         | `git rev-parse --show-toplevel` | Resolves a stable repository path on Unix              |
+| Codex          | `git rev-parse --show-toplevel` | Emits Unix and Windows root-resolving commands         |
+| Gemini CLI     | `GEMINI_PROJECT_DIR`            | Quotes the root and script path                        |
+| Windsurf       | Native `working_directory`      | Emits Unix and Windows commands relative to that cwd   |
+| Grok Build     | `GROK_WORKSPACE_ROOT`           | Quotes the root and script path                        |
+
+Cursor and Codex require the project to be a Git worktree because their native
+hook contracts do not expose a stable project-root variable.
 
 Payload `cwd` describes where an event occurred. It does not configure the
 working directory of the hook command. `GITHUB_WORKSPACE` belongs to GitHub
@@ -114,6 +175,77 @@ session working directory, where a same-named script could execute in the
 wrong location. Rely on the tool setting the variable, and treat a missing
 variable as a hook error rather than a fallback to another directory.
 
+For legacy `command` arrays, Cursor and Codex retain the agent session working
+directory and report `PS4002` when `cwd` was requested. Migrate repository-local
+commands to `script` to enable deterministic root handling.
+
+On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The
+`python3` interpreter maps to `py -3`. Unix-only shell interpreters (`bash`,
+`sh`, and `zsh`) cause an actionable compatibility warning instead of a
+silently incomplete Windows command.
+
+### Hook Capability Matrix
+
+All 48 built-in targets have an explicit lifecycle-hook classification. `All`
+means all seven portable events; `watch` means `prs compile --watch`.
+
+| Target         | Status       | Config path                       | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |
+| -------------- | ------------ | --------------------------------- | ------------------------------------------------ | ------------------------------ | ------------- | -------------------------- | ------------------------- |
+| `github`       | Native       | `.github/hooks/promptscript.json` | All                                              | JSON with Bash and PowerShell  | seconds       | Native `cwd`               | Use `multifile` or `full` |
+| `claude`       | Native       | `.claude/settings.json`           | All                                              | Nested command hooks           | seconds       | Environment                | Use `full`                |
+| `cursor`       | Native       | `.cursor/hooks.json`              | Pre/post tool, session/setup, subagent, stop     | Versioned JSON commands        | seconds       | Git root                   | Use `full`                |
+| `antigravity`  | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `factory`      | Native       | `.factory/hooks.json`             | Pre/post tool, session/setup, notification, stop | Nested command hooks           | seconds       | Environment                | Use `multifile` or `full` |
+| `opencode`     | Plugin-only  | -                                 | -                                                | JavaScript/TypeScript plugin   | -             | -                          | Plugin or watch           |
+| `gemini`       | Native       | `.gemini/settings.json`           | Pre/post tool, session/setup, stop               | Nested command hooks           | milliseconds  | Environment                | Use `multifile` or `full` |
+| `windsurf`     | Native       | `.windsurf/hooks.json`            | Pre/post tool, stop                              | Unix and PowerShell entries    | -             | Native `working_directory` | Use `multifile` or `full` |
+| `cline`        | Plugin-only  | -                                 | -                                                | SDK plugin                     | -             | -                          | Plugin or watch           |
+| `roo`          | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `codex`        | Native       | `.codex/hooks.json`               | Pre/post tool, session/setup, subagent, stop     | JSON Unix and Windows commands | seconds       | Git root                   | Use `multifile` or `full` |
+| `continue`     | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `augment`      | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `goose`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `kilo`         | Plugin-only  | -                                 | -                                                | CLI plugin                     | -             | -                          | Plugin or watch           |
+| `amp`          | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `trae`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `junie`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `kiro`         | Agent-scoped | `.kiro/agents/*.json`             | Custom-agent events                              | Agent hook object              | target-native | Agent workspace            | Custom agent or watch     |
+| `cortex`       | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `crush`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `command-code` | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `kode`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `mcpjam`       | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `mistral-vibe` | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `mux`          | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `openhands`    | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `pi`           | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `qoder`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `qwen-code`    | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `zencoder`     | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `neovate`      | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `pochi`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `adal`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `iflow`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `openclaw`     | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `codebuddy`    | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `aider`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `amazon-q`     | Agent-scoped | Custom agent file                 | Custom-agent events                              | Agent hook object              | target-native | Agent workspace            | Custom agent or watch     |
+| `warp`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `zed`          | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `jules`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `devin`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `grok`         | Native       | `.grok/hooks/promptscript.json`   | All                                              | Nested command hooks           | seconds       | Environment                | Use `full`                |
+| `kimi`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `mimo`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `deep-agents`  | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+| `forgecode`    | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
+
+Plugin-only and custom-agent APIs are not emitted as universal project hooks
+because they require runtime plugin code or selecting a non-default agent.
+Every non-native target and every unsupported output mode reports `PS4002` with
+the target-specific fallback. PromptScript never silently omits an enabled
+`@hooks` block.
+
 Contract references:
 
 - [Claude Code hooks](https://code.claude.com/docs/en/hooks)
@@ -121,13 +253,16 @@ Contract references:
 - [GitHub Copilot hooks](https://docs.github.com/en/copilot/reference/hooks-reference)
 - [Cursor hooks](https://cursor.com/docs/hooks)
 - [Codex hooks](https://developers.openai.com/codex/hooks)
+- [Gemini CLI hooks](https://geminicli.com/docs/hooks/reference/)
+- [Windsurf hooks](https://docs.windsurf.com/windsurf/cascade/hooks)
+- [Grok Build hooks](https://docs.x.ai/build/features/hooks)
 
 For example, the portable hook above generates this Factory command:
 
 ```json
 {
   "type": "command",
-  "command": "cd \"$FACTORY_PROJECT_DIR\" && python3 .promptscript/scripts/validate.py --strict # promptscript-generated:validate-types"
+  "command": "cd \"$FACTORY_PROJECT_DIR\" && python3 \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/validate.py --strict # promptscript-generated:validate-types"
 }
 ```
 

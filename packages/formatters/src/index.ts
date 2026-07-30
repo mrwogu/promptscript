@@ -131,10 +131,21 @@ export {
   extractHooks,
   generateClaudeHooks,
   generateCodexHooks,
+  generateCursorHooks,
+  generateFactoryHooks,
+  generateGeminiHooks,
+  generateGitHubHooks,
+  generateGrokHooks,
+  generateWindsurfHooks,
+  getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
 } from './hook-adapters.js';
-export type { HookDefinition, PortableHookEvent } from './hook-adapters.js';
+export type { HookDefinition, HookScriptDefinition, PortableHookEvent } from './hook-adapters.js';
+export {
+  appendTargetHookCapabilityWarnings,
+  getTargetHookCapabilityWarnings,
+} from './hook-capability-warnings.js';
 
 // Register built-in formatters by iterating the exhaustive formatter map
 import { FormatterRegistry } from './registry.js';

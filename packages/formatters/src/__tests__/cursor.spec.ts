@@ -1412,7 +1412,8 @@ describe('CursorFormatter', () => {
       const hooksFile = result.additionalFiles?.find((f) => f.path === '.cursor/hooks.json');
       expect(hooksFile).toBeDefined();
       const parsed = JSON.parse(hooksFile!.content) as Record<string, unknown>;
-      expect(parsed).toHaveProperty('preEdit');
+      expect(parsed).toHaveProperty('version', 1);
+      expect(parsed).toHaveProperty('hooks.preToolUse');
       expect(result.warnings).toEqual([
         {
           code: 'PS4002',
@@ -1492,6 +1493,40 @@ describe('CursorFormatter', () => {
       };
       const result = formatter.format(ast);
       expect(result.warnings).toBeUndefined();
+    });
+
+    it('should omit hooks.json when every hook is disabled', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                disabled: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                  enabled: false,
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(
+        result.additionalFiles?.find((file) => file.path === '.cursor/hooks.json')
+      ).toBeUndefined();
+      expect(result.managedOutputFiles).toContain('.cursor/hooks.json');
     });
 
     it('should emit mcp.json when @mcpServers block present', () => {

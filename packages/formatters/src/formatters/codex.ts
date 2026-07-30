@@ -6,9 +6,10 @@ import {
 import type { FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
 import {
   extractHooks,
-  generateCodexHooks,
+  generateCodexHookConfig,
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
+import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -316,7 +317,22 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
 
     // For simple mode, just emit AGENTS.md
     if (version === 'simple') {
-      return this.formatSimple(ast, options);
+      const output = appendTargetHookCapabilityWarnings(
+        this.formatSimple(ast, options),
+        ast,
+        this.name,
+        version
+      );
+      return {
+        ...output,
+        managedOutputFiles: [
+          ...new Set([
+            ...(output.managedOutputFiles ?? []),
+            '.codex/hooks.json',
+            '.codex/config.toml',
+          ]),
+        ],
+      };
     }
 
     // For multifile and full, emit AGENTS.md + agent TOMLs + skills
@@ -332,11 +348,11 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     const extraFiles: FormatterOutput[] = [];
     const managedDirs: string[] = [];
 
-    // Emit .codex/config.toml when project config options or hooks are set
+    // Emit project config and hooks through their dedicated native files.
     const targetConfig = options?.targetConfig;
     const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
-    const hooksToml = generateCodexHooks(hooks);
+    const hookConfig = generateCodexHookConfig(hooks);
     const hookWarnings = hooksBlock
       ? getHookCompatibilityWarnings(hooks, 'codex').map((warning) => ({
           ...warning,
@@ -345,9 +361,8 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
       : [];
 
     if (
-      (targetConfig &&
-        (targetConfig.maxThreads || targetConfig.maxDepth || targetConfig.agentsFile)) ||
-      hooksToml
+      targetConfig &&
+      (targetConfig.maxThreads || targetConfig.maxDepth || targetConfig.agentsFile)
     ) {
       const configLines: string[] = [];
       if (typeof targetConfig?.maxThreads === 'number' && targetConfig.maxThreads > 0) {
@@ -359,9 +374,6 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
       if (typeof targetConfig?.agentsFile === 'string' && targetConfig.agentsFile.length > 0) {
         configLines.push(`agents_file = "${escapeTomlString(targetConfig.agentsFile)}"`);
       }
-      if (hooksToml) {
-        configLines.push(hooksToml);
-      }
       if (configLines.length > 0) {
         extraFiles.push({
           path: '.codex/config.toml',
@@ -369,6 +381,14 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
         });
         managedDirs.push('.codex');
       }
+    }
+
+    if (Object.keys(hookConfig).length > 0) {
+      extraFiles.push({
+        path: '.codex/hooks.json',
+        content: JSON.stringify({ hooks: hookConfig }, null, 2) + '\n',
+      });
+      if (!managedDirs.includes('.codex')) managedDirs.push('.codex');
     }
 
     // Generate .codex/mcp.json from top-level @mcpServers block
@@ -419,7 +439,10 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     if (extraFiles.length > 0) {
       // Replace any base-generated agent files with native TOML
       const additionalFiles = (result.additionalFiles ?? []).filter(
-        (f) => !f.path.startsWith('.codex/agents/') && f.path !== '.codex/config.toml'
+        (f) =>
+          !f.path.startsWith('.codex/agents/') &&
+          f.path !== '.codex/config.toml' &&
+          f.path !== '.codex/hooks.json'
       );
       return {
         ...result,
@@ -428,6 +451,13 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
           : {}),
         additionalFiles: [...additionalFiles, ...extraFiles],
         managedOutputDirectories: [...(result.managedOutputDirectories ?? []), ...managedDirs],
+        managedOutputFiles: [
+          ...new Set([
+            ...(result.managedOutputFiles ?? []),
+            '.codex/hooks.json',
+            '.codex/config.toml',
+          ]),
+        ],
       };
     }
 
@@ -436,6 +466,13 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
       ...(hookWarnings.length > 0
         ? { warnings: [...(result.warnings ?? []), ...hookWarnings] }
         : {}),
+      managedOutputFiles: [
+        ...new Set([
+          ...(result.managedOutputFiles ?? []),
+          '.codex/hooks.json',
+          '.codex/config.toml',
+        ]),
+      ],
     };
   }
 }

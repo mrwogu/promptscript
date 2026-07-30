@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "AfterTool": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$GEMINI_PROJECT_DIR\"/.promptscript/scripts/check.mjs",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
+  }
+}

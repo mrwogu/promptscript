@@ -24,6 +24,7 @@ import {
 import { Validator, type ValidatorConfig, type ValidationMessage } from '@promptscript/validator';
 import { BrowserResolver, type ResolvedAST } from './resolver.js';
 import { VirtualFileSystem } from './virtual-fs.js';
+import { validateBrowserHookScriptResources } from './hook-script-validator.js';
 
 /**
  * Configuration for a single target.
@@ -66,6 +67,8 @@ export interface BrowserCompilerOptions {
   logger?: Logger;
   /** Whether to cache resolved ASTs. Defaults to true. */
   cache?: boolean;
+  /** Virtual project root containing .promptscript/scripts. */
+  projectRoot?: string;
   /**
    * Simulated environment variables for interpolation.
    * When provided, ${VAR} and ${VAR:-default} syntax in source files
@@ -147,11 +150,15 @@ export class BrowserCompiler {
   private readonly validator: Validator;
   private readonly loadedFormatters: LoadedFormatter[];
   private readonly logger: Logger;
+  private readonly fs: VirtualFileSystem;
+  private readonly projectRoot?: string;
   private readonly customConventions?: Record<string, OutputConvention>;
   private readonly prettierOptions?: PrettierMarkdownOptions;
 
   constructor(options: BrowserCompilerOptions) {
     this.logger = options.logger ?? noopLogger;
+    this.fs = options.fs;
+    this.projectRoot = options.projectRoot;
     this.customConventions = options.customConventions;
     this.prettierOptions = options.prettier;
 
@@ -236,11 +243,11 @@ export class BrowserCompiler {
     this.logger.verbose('=== Stage 2: Validate ===');
     const startValidate = Date.now();
     const validation = this.validator.validate(resolved.ast);
-    stats.validateTime = Date.now() - startValidate;
-    this.logger.verbose(`Validate completed (${stats.validateTime}ms)`);
 
     // Check for validation errors
     if (!validation.valid) {
+      stats.validateTime = Date.now() - startValidate;
+      this.logger.verbose(`Validate completed (${stats.validateTime}ms)`);
       stats.totalTime = Date.now() - startTotal;
 
       return {
@@ -248,6 +255,26 @@ export class BrowserCompiler {
         outputs: new Map(),
         outputOwners: new Map(),
         errors: validation.errors.map((e) => this.validationToCompileError(e)),
+        warnings: validation.warnings,
+        stats,
+      };
+    }
+
+    const hookScriptErrors = validateBrowserHookScriptResources(
+      resolved.ast,
+      this.fs,
+      entryPath,
+      this.projectRoot
+    );
+    stats.validateTime = Date.now() - startValidate;
+    this.logger.verbose(`Validate completed (${stats.validateTime}ms)`);
+    if (hookScriptErrors.length > 0) {
+      stats.totalTime = Date.now() - startTotal;
+      return {
+        success: false,
+        outputs: new Map(),
+        outputOwners: new Map(),
+        errors: hookScriptErrors,
         warnings: validation.warnings,
         stats,
       };

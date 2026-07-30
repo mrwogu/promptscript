@@ -125,6 +125,23 @@ vi.mock('../output/pager.js', () => ({
   isTTY: () => mockIsTTY(),
 }));
 
+vi.mock('../utils/managed-output-cleanup.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../utils/managed-output-cleanup.js')>();
+  return {
+    ...actual,
+    createHookOutputSafely: vi.fn(async (path: string, _outputRoot: string, content: string) => {
+      await mockWriteFile(path, content, 'utf-8');
+      return true;
+    }),
+    rewriteHookOutputIfUnchanged: vi.fn(
+      async (path: string, _outputRoot: string, _expectedContent: string, content: string) => {
+        await mockWriteFile(path, content, 'utf-8');
+        return true;
+      }
+    ),
+  };
+});
+
 // Mock chokidar for watch mode
 vi.mock('chokidar', () => ({
   default: {
@@ -305,7 +322,7 @@ describe('compile command - overwrite protection', () => {
       expect(mockPrompts.select).not.toHaveBeenCalled();
     });
 
-    it('should protect a hook file containing an unmanaged command', async () => {
+    it('should preserve unmanaged commands while replacing owned hooks', async () => {
       const path = '.github/hooks/promptscript.json';
       const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
 
@@ -334,12 +351,56 @@ describe('compile command - overwrite protection', () => {
           },
         })
       );
-      mockPrompts.select.mockResolvedValue('no');
+      await compileCommand({}, mockServices);
+
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+      const written = mockWriteFile.mock.calls[0]?.[1] as string;
+      expect(JSON.parse(written)).toEqual({
+        version: 1,
+        hooks: {
+          preToolUse: [
+            {
+              type: 'command',
+              bash: 'echo user-owned',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should migrate owned Codex TOML hooks without a prompt', async () => {
+      const path = '.codex/config.toml';
+      const outputs = new Map([[path, createMockOutput(path, 'max_threads = 8\n')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: {
+          totalTime: 100,
+          resolveTime: 50,
+          validateTime: 25,
+          formatTime: 25,
+        },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(`max_threads = 8
+model = "gpt-5"
+
+[[hooks.PreToolUse]]
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo old # promptscript-generated:owned"
+`);
 
       await compileCommand({}, mockServices);
 
-      expect(mockPrompts.select).toHaveBeenCalledTimes(1);
-      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        resolve(path),
+        'max_threads = 8\n\nmodel = "gpt-5"\n',
+        'utf-8'
+      );
     });
   });
 

@@ -1,16 +1,18 @@
 # Gemini CLI Contracts
 
 Source: https://geminicli.com/docs/cli/skills/,
-https://geminicli.com/docs/cli/gemini-md/
+https://geminicli.com/docs/cli/gemini-md/,
+https://geminicli.com/docs/hooks/reference/
 
 ## Fixture index
 
-| File                | Source URL                                | Version    | Retrieved  | Expected path                                                        | Scope           |
-| ------------------- | ----------------------------------------- | ---------- | ---------- | -------------------------------------------------------------------- | --------------- |
-| skill.md            | https://geminicli.com/docs/cli/skills/    | Gemini CLI | 2026-07-17 | `.agents/skills/<name>/SKILL.md` or `.gemini/skills/<name>/SKILL.md` | formatter-scope |
-| gemini-md.md        | https://geminicli.com/docs/cli/gemini-md/ | Gemini CLI | 2026-07-17 | `GEMINI.md` (workspace local)                                        | formatter-scope |
-| agents-skills.md    | https://geminicli.com/docs/cli/skills/    | Gemini CLI | 2026-07-17 | alias precedence doc                                                 | formatter-scope |
-| runtime-commands.md | https://geminicli.com/docs/cli/skills/    | Gemini CLI | 2026-07-17 | none (runtime)                                                       | out-of-scope    |
+| File                | Source URL                                  | Version    | Retrieved  | Expected path                                                        | Scope           |
+| ------------------- | ------------------------------------------- | ---------- | ---------- | -------------------------------------------------------------------- | --------------- |
+| skill.md            | https://geminicli.com/docs/cli/skills/      | Gemini CLI | 2026-07-17 | `.agents/skills/<name>/SKILL.md` or `.gemini/skills/<name>/SKILL.md` | formatter-scope |
+| gemini-md.md        | https://geminicli.com/docs/cli/gemini-md/   | Gemini CLI | 2026-07-17 | `GEMINI.md` (workspace local)                                        | formatter-scope |
+| agents-skills.md    | https://geminicli.com/docs/cli/skills/      | Gemini CLI | 2026-07-17 | alias precedence doc                                                 | formatter-scope |
+| runtime-commands.md | https://geminicli.com/docs/cli/skills/      | Gemini CLI | 2026-07-17 | none (runtime)                                                       | out-of-scope    |
+| settings-hooks.json | https://geminicli.com/docs/hooks/reference/ | Gemini CLI | 2026-07-30 | `.gemini/settings.json`                                              | formatter-scope |
 
 ## Scope notes
 

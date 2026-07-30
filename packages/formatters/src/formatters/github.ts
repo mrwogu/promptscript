@@ -14,6 +14,7 @@ import {
   generateGitHubHooks,
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
+import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 
 /**
  * GitHub formatter version information.
@@ -248,21 +249,16 @@ export class GitHubFormatter extends BaseFormatter {
     } else {
       output = this.formatSimple(ast, options);
     }
+    output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
 
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
     const hookWarnings =
-      hooksBlock && hooks.some((hook) => hook.enabled !== false)
-        ? (version === 'simple'
-            ? [
-                {
-                  code: 'PS4002',
-                  message: 'GitHub simple mode cannot emit @hooks and will omit them.',
-                  suggestion: "Use GitHub version 'multifile' or 'full'.",
-                },
-              ]
-            : getHookCompatibilityWarnings(hooks, 'github')
-          ).map((warning) => ({ ...warning, location: hooksBlock.loc }))
+      hooksBlock && version !== 'simple' && hooks.some((hook) => hook.enabled !== false)
+        ? getHookCompatibilityWarnings(hooks, 'github').map((warning) => ({
+            ...warning,
+            location: hooksBlock.loc,
+          }))
         : [];
     const hooksFile = version === 'simple' ? undefined : this.generateHooksFile(ast);
     if (!hooksFile) {

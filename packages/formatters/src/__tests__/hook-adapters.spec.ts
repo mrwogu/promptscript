@@ -5,12 +5,15 @@ import {
   generateCodexHooks,
   generateCursorHooks,
   generateFactoryHooks,
+  generateGeminiHooks,
   generateGitHubHooks,
+  generateGrokHooks,
+  generateWindsurfHooks,
   getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
 } from '../hook-adapters.js';
-import type { Value } from '@promptscript/core';
+import { HOOK_CAPABILITIES, type Value } from '@promptscript/core';
 
 function makeLoc() {
   return { file: 'test.prs', line: 1, column: 0 };
@@ -68,6 +71,28 @@ describe('hook-adapters', () => {
       expect(extractHooks(block)).toHaveLength(0);
     });
 
+    it('should extract a portable script definition', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'post-tool-use',
+            script: {
+              path: '.promptscript/scripts/check file.py',
+              interpreter: 'python3',
+              args: ['--strict'],
+            },
+          },
+        })
+      );
+
+      expect(hooks[0]!.script).toEqual({
+        path: '.promptscript/scripts/check file.py',
+        interpreter: 'python3',
+        args: ['--strict'],
+      });
+      expect(hooks[0]!.command).toBeUndefined();
+    });
+
     it('should return empty for non-object content', () => {
       const block = { content: { type: 'TextContent' } };
       expect(extractHooks(block as never)).toHaveLength(0);
@@ -104,16 +129,16 @@ describe('hook-adapters', () => {
       expect(mapEvent('session-start', 'claude')).toBe('SessionStart');
     });
 
-    it('should map setup to Claude SessionStart', () => {
-      expect(mapEvent('setup', 'claude')).toBe('SessionStart');
+    it('should map setup to Claude Setup', () => {
+      expect(mapEvent('setup', 'claude')).toBe('Setup');
     });
 
-    it('should map pre-tool-use to Codex pre_tool_use', () => {
-      expect(mapEvent('pre-tool-use', 'codex')).toBe('pre_tool_use');
+    it('should map pre-tool-use to Codex PreToolUse', () => {
+      expect(mapEvent('pre-tool-use', 'codex')).toBe('PreToolUse');
     });
 
-    it('should map pre-tool-use to Cursor preEdit', () => {
-      expect(mapEvent('pre-tool-use', 'cursor')).toBe('preEdit');
+    it('should map pre-tool-use to Cursor preToolUse', () => {
+      expect(mapEvent('pre-tool-use', 'cursor')).toBe('preToolUse');
     });
 
     it('should map post-tool-use to Factory PostToolUse', () => {
@@ -138,8 +163,8 @@ describe('hook-adapters', () => {
       expect(convertTimeout(15000, 'cursor')).toBe(15);
     });
 
-    it('should keep ms for Codex', () => {
-      expect(convertTimeout(5000, 'codex')).toBe(5000);
+    it('should convert ms to seconds for Codex', () => {
+      expect(convertTimeout(5000, 'codex')).toBe(5);
     });
 
     it('should convert ms to seconds for Factory', () => {
@@ -197,7 +222,9 @@ describe('hook-adapters', () => {
       expect(preToolUse).toBeDefined();
       const entry = preToolUse![0] as Record<string, unknown>;
       const hookArr = entry['hooks'] as Record<string, unknown>[];
-      expect(hookArr[0]!['command']).toBe("python3 'scripts/check file.py' '--label=hello world'");
+      expect(hookArr[0]!['command']).toBe(
+        "python3 'scripts/check file.py' '--label=hello world' # promptscript-generated:test"
+      );
     });
 
     it('should execute project-relative hooks from the Claude project root', () => {
@@ -215,7 +242,7 @@ describe('hook-adapters', () => {
       const hook = (entry['hooks'] as Record<string, unknown>[])[0]!;
 
       expect(hook['command']).toBe(
-        'cd "${CLAUDE_PROJECT_DIR}"/\'tools/hook scripts\' && python3 .promptscript/scripts/check.py'
+        'cd "${CLAUDE_PROJECT_DIR}"/\'tools/hook scripts\' && python3 .promptscript/scripts/check.py # promptscript-generated:test'
       );
     });
   });
@@ -233,11 +260,15 @@ describe('hook-adapters', () => {
         })
       );
       const toml = generateCodexHooks(hooks);
-      expect(toml).toContain('[[hooks.pre_tool_use]]');
-      expect(toml).toContain('id = "protect"');
-      expect(toml).toContain('command = ["prs", "hook", "pre-edit"]');
+      expect(toml).toContain('[[hooks.PreToolUse]]');
+      expect(toml).toContain('[[hooks.PreToolUse.hooks]]');
+      expect(toml).toContain('type = "command"');
+      expect(toml).toContain('command = "prs hook pre-edit # promptscript-generated:protect"');
+      expect(toml).toContain(
+        "command_windows = \"& 'prs' 'hook' 'pre-edit' # promptscript-generated:protect\""
+      );
       expect(toml).toContain('matcher = "Edit|Write"');
-      expect(toml).toContain('timeout_ms = 5000');
+      expect(toml).toContain('timeout = 5');
     });
 
     it('should skip disabled hooks', () => {
@@ -265,7 +296,7 @@ describe('hook-adapters', () => {
       );
 
       expect(generateCodexHooks(hooks)).toContain(
-        'command = ["python3", "scripts/check file.py", "--label=hello world"]'
+        "command = \"python3 'scripts/check file.py' '--label=hello world' # promptscript-generated:check\""
       );
     });
 
@@ -309,15 +340,17 @@ describe('hook-adapters', () => {
       );
 
       expect(generateCursorHooks(hooks)).toEqual({
-        preEdit: [
-          {
-            matcher: 'Edit|Write',
-            command: "python3 'scripts/check file.py' '--label=hello world'",
-            timeout: 5,
-            statusMessage: 'Checking files',
-            continueOnFailure: true,
-          },
-        ],
+        version: 1,
+        hooks: {
+          preToolUse: [
+            {
+              matcher: 'Edit|Write',
+              command:
+                "python3 'scripts/check file.py' '--label=hello world' # promptscript-generated:active",
+              timeout: 5,
+            },
+          ],
+        },
       });
     });
   });
@@ -502,6 +535,194 @@ describe('hook-adapters', () => {
     });
   });
 
+  describe('portable repository-local scripts', () => {
+    const hooks = extractHooks(
+      makeHooksBlock({
+        validate: {
+          event: 'post-tool-use',
+          matcher: 'Edit|Write',
+          script: {
+            path: '.promptscript/scripts/check file.py',
+            interpreter: 'python3',
+            args: ['--label=hello world'],
+          },
+          cwd: 'tools/hook scripts',
+          timeoutMs: 1501,
+        },
+      })
+    );
+
+    it('generates a Claude project-root invocation', () => {
+      const entry = (generateClaudeHooks(hooks)['PostToolUse'] as Record<string, unknown>[])[0]!;
+      const handler = (entry['hooks'] as Record<string, unknown>[])[0]!;
+
+      expect(handler).toEqual({
+        type: 'command',
+        command:
+          "cd \"${CLAUDE_PROJECT_DIR}\"/'tools/hook scripts' && python3 \"${CLAUDE_PROJECT_DIR}\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        timeout: 2,
+      });
+    });
+
+    it('generates current Cursor versioned hooks', () => {
+      const result = generateCursorHooks(hooks) as {
+        hooks: Record<string, Record<string, unknown>[]>;
+      };
+
+      expect(result.hooks['postToolUse']![0]).toEqual({
+        matcher: 'Edit|Write',
+        command:
+          'PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel)" && cd "$PROMPTSCRIPT_PROJECT_ROOT"/\'tools/hook scripts\' && python3 "$PROMPTSCRIPT_PROJECT_ROOT"/\'.promptscript/scripts/check file.py\' \'--label=hello world\' # promptscript-generated:validate',
+        timeout: 2,
+      });
+    });
+
+    it('generates a Factory project-root invocation', () => {
+      const entry = generateFactoryHooks(hooks)['PostToolUse']![0] as Record<string, unknown>;
+      const handler = (entry['hooks'] as Record<string, unknown>[])[0]!;
+
+      expect(handler['command']).toBe(
+        "cd \"$FACTORY_PROJECT_DIR\"/'tools/hook scripts' && python3 \"$FACTORY_PROJECT_DIR\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate"
+      );
+      expect(handler['timeout']).toBe(2);
+    });
+
+    it('generates GitHub Unix and Windows commands with native cwd', () => {
+      expect(generateGitHubHooks(hooks)['postToolUse']![0]).toEqual({
+        type: 'command',
+        bash: "python3 '../../.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        powershell:
+          "& 'py' '-3' '../../.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        cwd: 'tools/hook scripts',
+        matcher: 'Edit|Write',
+        timeoutSec: 2,
+      });
+    });
+
+    it('generates current Codex nested TOML with Windows override', () => {
+      const toml = generateCodexHooks(hooks);
+
+      expect(toml).toContain('[[hooks.PostToolUse]]');
+      expect(toml).toContain('[[hooks.PostToolUse.hooks]]');
+      expect(toml).toContain('timeout = 2');
+      expect(toml).toContain('command_windows = ');
+      expect(toml).toContain('git rev-parse --show-toplevel');
+      expect(toml).toContain('.promptscript/scripts/check file.py');
+    });
+
+    it('generates Gemini project-root hooks', () => {
+      const entry = generateGeminiHooks(hooks)['AfterTool']![0] as Record<string, unknown>;
+      const handler = (entry['hooks'] as Record<string, unknown>[])[0]!;
+
+      expect(handler).toEqual({
+        type: 'command',
+        command:
+          "cd \"$GEMINI_PROJECT_DIR\"/'tools/hook scripts' && python3 \"$GEMINI_PROJECT_DIR\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        timeout: 1501,
+      });
+    });
+
+    it('generates each equivalent Windsurf tool event', () => {
+      const result = generateWindsurfHooks(hooks);
+
+      expect(Object.keys(result)).toEqual([
+        'post_read_code',
+        'post_write_code',
+        'post_run_command',
+        'post_mcp_tool_use',
+      ]);
+      expect(result['post_write_code']![0]).toEqual({
+        command:
+          "python3 '../../.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        powershell:
+          "& 'py' '-3' '../../.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        working_directory: 'tools/hook scripts',
+      });
+    });
+
+    it('generates native Grok project hooks', () => {
+      const entry = generateGrokHooks(hooks)['PostToolUse']![0] as Record<string, unknown>;
+      const handler = (entry['hooks'] as Record<string, unknown>[])[0]!;
+
+      expect(handler).toEqual({
+        type: 'command',
+        command:
+          "cd \"$GROK_WORKSPACE_ROOT\"/'tools/hook scripts' && python3 \"$GROK_WORKSPACE_ROOT\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        timeout: 2,
+      });
+    });
+
+    it('quotes script paths and metacharacter arguments for Unix and Windows', () => {
+      const special = extractHooks(
+        makeHooksBlock({
+          safe: {
+            event: 'pre-tool-use',
+            script: {
+              path: '.promptscript/scripts/check file.mjs',
+              interpreter: 'node',
+              args: ["it's $safe; & echo"],
+            },
+          },
+        })
+      );
+
+      expect(generateGitHubHooks(special)['preToolUse']![0]).toEqual({
+        type: 'command',
+        bash: `node '.promptscript/scripts/check file.mjs' 'it'"'"'s $safe; & echo' # promptscript-generated:safe`,
+        powershell:
+          "& 'node' '.promptscript/scripts/check file.mjs' 'it''s $safe; & echo' # promptscript-generated:safe",
+        cwd: '.',
+      });
+    });
+
+    it('uses the Deno run subcommand on Unix and Windows', () => {
+      const deno = extractHooks(
+        makeHooksBlock({
+          deno: {
+            event: 'pre-tool-use',
+            script: {
+              path: '.promptscript/scripts/check.ts',
+              interpreter: 'deno',
+            },
+          },
+        })
+      );
+
+      expect(generateGitHubHooks(deno)['preToolUse']![0]).toMatchObject({
+        bash: 'deno run .promptscript/scripts/check.ts # promptscript-generated:deno',
+        powershell: "& 'deno' 'run' '.promptscript/scripts/check.ts' # promptscript-generated:deno",
+      });
+    });
+  });
+
+  it('keeps native capability event metadata aligned with adapters', () => {
+    const targets = [
+      'claude',
+      'cursor',
+      'codex',
+      'factory',
+      'github',
+      'gemini',
+      'windsurf',
+      'grok',
+    ] as const;
+    const events = [
+      'pre-tool-use',
+      'post-tool-use',
+      'session-start',
+      'setup',
+      'subagent-start',
+      'notification',
+      'stop',
+    ] as const;
+
+    for (const target of targets) {
+      expect(HOOK_CAPABILITIES[target].events).toEqual(
+        events.filter((event) => mapEvent(event, target) !== null)
+      );
+    }
+  });
+
   describe('getHookCompatibilityWarnings', () => {
     it('warns when Factory cannot represent an event or field', () => {
       const hooks = extractHooks(
@@ -573,14 +794,59 @@ describe('hook-adapters', () => {
           })
         );
 
-        expect(getHookCompatibilityWarnings(hooks, target)).toEqual([
-          {
-            code: 'PS4002',
-            message: `Hook "rooted" requests cwd "project", which ${target} cannot guarantee and will ignore.`,
-            suggestion: `Review the generated ${target} hook because it will use the agent session working directory.`,
-          },
-        ]);
+        expect(
+          getHookCompatibilityWarnings(hooks, target).map((warning) => warning.message)
+        ).toEqual(
+          target === 'cursor'
+            ? [
+                'Hook "rooted" requests cwd "project", which cursor cannot guarantee and will ignore.',
+                'Hook "rooted" uses statusMessage, which cursor cannot represent and will omit.',
+                'Hook "rooted" uses continueOnFailure, which cursor cannot represent and will omit.',
+              ]
+            : [
+                'Hook "rooted" requests cwd "project", which codex cannot guarantee and will ignore.',
+                'Hook "rooted" uses continueOnFailure, which codex cannot represent and will omit.',
+              ]
+        );
       }
     );
+
+    it('warns when a Windows-capable target cannot invoke a shell interpreter', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          shell: {
+            event: 'post-tool-use',
+            script: {
+              path: '.promptscript/scripts/check.sh',
+              interpreter: 'bash',
+            },
+          },
+        })
+      );
+
+      expect(
+        getHookCompatibilityWarnings(hooks, 'github').map((warning) => warning.message)
+      ).toContain(
+        'Hook "shell" uses interpreter "bash", which github cannot invoke natively on Windows.'
+      );
+    });
+
+    it('warns when Windsurf cannot represent timeoutMs', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          timed: {
+            event: 'post-tool-use',
+            command: ['node', 'check.mjs'],
+            timeoutMs: 5000,
+          },
+        })
+      );
+
+      expect(getHookCompatibilityWarnings(hooks, 'windsurf')).toContainEqual({
+        code: 'PS4002',
+        message: 'Hook "timed" uses timeoutMs, which Windsurf cannot represent and will omit.',
+        suggestion: 'Enforce a timeout inside the hook script when required.',
+      });
+    });
   });
 });

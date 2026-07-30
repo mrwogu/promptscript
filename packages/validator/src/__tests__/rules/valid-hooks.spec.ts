@@ -80,6 +80,24 @@ describe('PS034: valid-hooks', () => {
     expect(messages).toHaveLength(0);
   });
 
+  it('should accept a portable repository-local script', () => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'post-tool-use',
+          script: {
+            path: '.promptscript/scripts/validate changes.py',
+            interpreter: 'python3',
+            args: ['--strict', 'value with spaces'],
+          },
+          cwd: 'project',
+        },
+      })
+    );
+
+    expect(messages).toHaveLength(0);
+  });
+
   it.each([
     ['', 'empty'],
     ['.', 'dot'],
@@ -89,6 +107,9 @@ describe('PS034: valid-hooks', () => {
     ['C:\\hooks', 'absolute Windows'],
     ['C:/hooks', 'forward-slash Windows absolute'],
     ['tools\\hooks', 'backslash'],
+    ['tools/CON', 'reserved Windows name'],
+    ['tools/bad:name', 'Windows-invalid character'],
+    ['tools/trailing.', 'trailing dot'],
   ])('should reject %s as a %s working directory', (cwd) => {
     const messages = validate(
       makeAst({
@@ -144,7 +165,7 @@ describe('PS034: valid-hooks', () => {
     expect(messages[0]!.message).toContain('invalid event');
   });
 
-  it('should reject missing command field', () => {
+  it('should reject missing command and script fields', () => {
     const messages = validate(
       makeAst({
         'no-command': {
@@ -153,7 +174,134 @@ describe('PS034: valid-hooks', () => {
       })
     );
     expect(messages.length).toBeGreaterThan(0);
-    expect(messages[0]!.message).toContain('missing required field "command"');
+    expect(messages[0]!.message).toContain('exactly one of "command" or "script"');
+  });
+
+  it('should reject command and script together', () => {
+    const messages = validate(
+      makeAst({
+        duplicate: {
+          event: 'pre-tool-use',
+          command: ['node', 'check.mjs'],
+          script: {
+            path: '.promptscript/scripts/check.mjs',
+            interpreter: 'node',
+          },
+        },
+      })
+    );
+
+    expect(messages.some((message) => message.message.includes('mutually exclusive'))).toBe(true);
+  });
+
+  it.each([
+    ['scripts/check.mjs', 'outside the shared directory'],
+    ['.promptscript/scripts/../check.mjs', 'parent traversal'],
+    ['/tmp/check.mjs', 'absolute path'],
+    ['.promptscript\\scripts\\check.mjs', 'backslashes'],
+    ['.promptscript/scripts/CON.py', 'reserved Windows name'],
+    ['.promptscript/scripts/bad:name.py', 'Windows-invalid character'],
+    ['.promptscript/scripts/trailing.', 'trailing dot'],
+  ])('should reject script path %s with %s', (path) => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'pre-tool-use',
+          script: {
+            path,
+            interpreter: 'node',
+          },
+        },
+      })
+    );
+
+    expect(messages.some((message) => message.message.includes('script path'))).toBe(true);
+  });
+
+  it('should reject an unsupported or missing script interpreter', () => {
+    const messages = validate(
+      makeAst({
+        unsupported: {
+          event: 'pre-tool-use',
+          script: {
+            path: '.promptscript/scripts/check.mjs',
+            interpreter: 'custom-runtime',
+          },
+        },
+        missing: {
+          event: 'post-tool-use',
+          script: {
+            path: '.promptscript/scripts/check.mjs',
+          },
+        },
+      })
+    );
+
+    expect(messages.filter((message) => message.message.includes('interpreter'))).toHaveLength(2);
+  });
+
+  it('should reject non-string script arguments', () => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'pre-tool-use',
+          script: {
+            path: '.promptscript/scripts/check.mjs',
+            interpreter: 'node',
+            args: ['valid', 42],
+          },
+        },
+      })
+    );
+
+    expect(messages.some((message) => message.message.includes('script args'))).toBe(true);
+  });
+
+  it('should reject unknown hook and script fields', () => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'pre-tool-use',
+          script: {
+            path: '.promptscript/scripts/check.mjs',
+            interpreter: 'node',
+            argument: '--strict',
+          },
+          enabeld: false,
+        },
+      })
+    );
+
+    expect(messages.map((message) => message.message)).toEqual(
+      expect.arrayContaining([
+        'Hook "check": unknown field "enabeld"',
+        'Hook "check": unknown script field "argument"',
+      ])
+    );
+  });
+
+  it('should reject a non-object hooks block', () => {
+    const ast: Program = {
+      type: 'Program',
+      blocks: [
+        {
+          type: 'Block',
+          name: 'hooks',
+          content: { type: 'TextContent', value: 'echo unsafe', loc },
+          loc,
+        },
+      ],
+      uses: [],
+      extends: [],
+      loc,
+    };
+
+    expect(validate(ast)).toEqual([
+      expect.objectContaining({
+        message: '@hooks must contain named hook objects',
+        severity: 'error',
+      }),
+    ]);
   });
 
   it('should reject empty command array', () => {
@@ -167,6 +315,23 @@ describe('PS034: valid-hooks', () => {
     );
     expect(messages.length).toBeGreaterThan(0);
     expect(messages[0]!.message).toContain('command must not be empty');
+  });
+
+  it('should reject a whitespace-only command executable', () => {
+    const messages = validate(
+      makeAst({
+        'empty-executable': {
+          event: 'pre-tool-use',
+          command: ['  ', 'argument'],
+        },
+      })
+    );
+
+    expect(messages).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('command executable must not be empty'),
+      }),
+    ]);
   });
 
   it('should reject non-string command arguments', () => {

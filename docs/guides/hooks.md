@@ -9,10 +9,10 @@ PromptScript hooks integrate directly with supported AI coding tool event system
 
 This guide covers `prs hooks install`, which installs PromptScript
 auto-compilation and generated-file protection. Language-level `@hooks` are
-compiled separately to project lifecycle policy files. Factory `@hooks` use
-`.factory/hooks.json`; GitHub `@hooks` use
-`.github/hooks/promptscript.json`. Copilot `.vscode/hooks.json` below is the VS
-Code installer contract, not the GitHub repository hook contract.
+compiled separately to project lifecycle policy files for Claude, Codex,
+Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Copilot
+`.vscode/hooks.json` below is the VS Code installer contract, not the GitHub
+repository hook contract.
 
 Notes for compiled `@hooks` output:
 
@@ -30,7 +30,26 @@ Notes for compiled `@hooks` output:
   language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file
   location does not set command working directory. See
   [Hooks and Workflows](../features/automation.md#project-root-strategy-by-target) for target
-  behavior and generated Factory and GitHub examples.
+  behavior, generated Factory and GitHub examples, and the complete capability matrix.
+
+```promptscript
+@hooks {
+  validate: {
+    event: "post-tool-use"
+    script: {
+      path: ".promptscript/scripts/validate.mjs"
+      interpreter: "node"
+      args: ["--strict"]
+    }
+    cwd: "project"
+  }
+}
+```
+
+Compilation fails if the script is missing, is not a regular file, or escapes
+`.promptscript/scripts/` through traversal or a symlink. Targets and output
+modes without native project hooks report `PS4002` and an actionable fallback
+instead of silently omitting the hook.
 
 There are two complementary behaviours:
 

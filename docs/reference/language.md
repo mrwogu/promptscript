@@ -1216,7 +1216,11 @@ target's native event system and configuration format.
   protect-generated-files: {
     event: "pre-tool-use"
     matcher: "Edit|Write"
-    command: ["prs", "hook", "pre-edit"]
+    script: {
+      path: ".promptscript/scripts/protect.mjs"
+      interpreter: "node"
+      args: ["--strict"]
+    }
     cwd: "project"
     timeoutMs: 5000
     statusMessage: "Checking generated files"
@@ -1243,7 +1247,8 @@ Each hook entry is an object with:
 | Field               | Required | Type     | Description                                                  |
 | ------------------- | -------- | -------- | ------------------------------------------------------------ |
 | `event`             | Yes      | string   | Portable event name (see above)                              |
-| `command`           | Yes      | string[] | Non-empty source argument array                              |
+| `command`           | One of   | string[] | Non-empty source argument array                              |
+| `script`            | One of   | object   | Repository-local script descriptor                           |
 | `cwd`               | No       | string   | `"project"` or a forward-slash path relative to project root |
 | `matcher`           | No       | string   | Target-native tool name matcher pattern                      |
 | `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                                   |
@@ -1251,10 +1256,26 @@ Each hook entry is an object with:
 | `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                            |
 | `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)                  |
 
-Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command arguments, and `command`
-must contain at least one argument - PS034 rejects empty arrays and hooks without an executable
-command are omitted from target output. Target adapters preserve argument boundaries when they
-serialize the array as a native command string.
+Exactly one of `command` or `script` is required. A `script` object contains:
+
+| Field         | Required | Type     | Description                                                |
+| ------------- | -------- | -------- | ---------------------------------------------------------- |
+| `path`        | Yes      | string   | File under `.promptscript/scripts/` using forward slashes  |
+| `interpreter` | Yes      | string   | Whitelisted executable name                                |
+| `args`        | No       | string[] | Additional arguments, preserved without shell re-splitting |
+
+Supported interpreters are `python3`, `python`, `node`, `deno`, `bun`, `ruby`,
+`php`, `perl`, `bash`, `sh`, `zsh`, `pwsh`, and `powershell`. The compiler
+requires the path to exist as a regular file and rejects traversal and symlink
+escapes from `.promptscript/scripts/`. Browser compilation applies the same
+location checks to the virtual filesystem.
+
+Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command
+arguments, and `command` must contain at least one argument - PS034 rejects
+empty arrays and hooks without an executable command are omitted from target
+output. Target adapters preserve argument boundaries when they serialize an
+array or script descriptor as a native command string. Script paths and
+arguments are shell-quoted as data.
 
 `cwd: "project"` requests execution from the resolved PromptScript project root. Other `cwd` values
 must be portable relative paths and resolve from that root. Absolute paths, backslashes, empty path
@@ -1275,8 +1296,11 @@ preserves its single-file contract and reports a compatibility warning.
 | Factory Droid  | `.factory/hooks.json`             | PascalCase      | `timeout`     |
 | GitHub Copilot | `.github/hooks/promptscript.json` | lower camelCase | `timeoutSec`  |
 | Claude Code    | `.claude/settings.json`           | PascalCase      | `timeout`     |
-| Cursor         | `.cursor/hooks.json`              | target-native   | `timeout`     |
-| Codex          | `.codex/config.toml`              | snake_case      | `timeout_ms`  |
+| Cursor         | `.cursor/hooks.json`              | lower camelCase | `timeout`     |
+| Codex          | `.codex/hooks.json`               | PascalCase      | `timeout`     |
+| Gemini CLI     | `.gemini/settings.json`           | PascalCase      | `timeout`     |
+| Windsurf       | `.windsurf/hooks.json`            | snake_case      | -             |
+| Grok Build     | `.grok/hooks/promptscript.json`   | PascalCase      | `timeout`     |
 
 GitHub output uses the version 1 repository-hook schema shared by Copilot CLI
 and cloud agent. Factory output uses the preferred dedicated project hook file;
@@ -1290,6 +1314,12 @@ When `@hooks` is removed or stops emitting, the CLI deletes the obsolete hook
 file (`.factory/hooks.json`, `.github/hooks/promptscript.json`) only when every
 command in it carries the PromptScript ownership marker, and prunes managed
 directories (such as `.github/hooks/`) that the removal leaves empty.
+
+Every built-in target has an explicit hook capability classification. Targets
+without native project hooks and modes that cannot emit additional files
+report `PS4002` with a fallback such as `prs compile --watch`. See
+[Hooks and Workflows](../features/automation.md#hook-capability-matrix) for the
+complete 48-target matrix and project-root behavior.
 
 ### @mcpServers
 

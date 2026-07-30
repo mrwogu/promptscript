@@ -485,7 +485,7 @@ The `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) are emitted t
 | `claude`      | `.mcp.json`                      | `.claude/settings.json`           | -                       |
 | `cursor`      | `.cursor/mcp.json`               | `.cursor/hooks.json`              | `.cursor/plugins.json`  |
 | `factory`     | `.factory/mcp.json`              | `.factory/hooks.json`             | `.factory/plugins.json` |
-| `codex`       | `.codex/mcp.json`                | `.codex/config.toml`              | `.codex/plugins.json`   |
+| `codex`       | `.codex/mcp.json`                | `.codex/hooks.json`               | `.codex/plugins.json`   |
 | `grok`        | `.mcp.json` (via Claude)         | `.claude/settings.json`           | `.grok/plugins.json`    |
 | `github`      | `.vscode/mcp.json`               | `.github/hooks/promptscript.json` | -                       |
 | `antigravity` | `.agents/mcp_config.json`        | -                                 | -                       |
@@ -713,7 +713,8 @@ The `codex` target emits native Codex agent TOML files in addition to `AGENTS.md
 ```
 AGENTS.md                          # Root instructions
 .codex/agents/<name>.toml          # Agent definitions (TOML)
-.codex/config.toml                 # Project config (maxThreads, maxDepth, agentsFile, hooks)
+.codex/config.toml                 # Project config (maxThreads, maxDepth, agentsFile)
+.codex/hooks.json                  # Project hooks
 .agents/skills/<name>/SKILL.md     # Skills (interoperable path)
 ```
 

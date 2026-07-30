@@ -113,6 +113,7 @@ describe('Agent platform integration', () => {
     expect(result.success).toBe(true);
     expect(result.errors).toEqual([]);
     expect(result.warnings.map((warning) => warning.message)).toEqual([
+      'Hook "validate-types" uses statusMessage, which cursor cannot represent and will omit.',
       'Hook "validate-types" uses statusMessage, which factory cannot represent and will omit.',
       'Hook "validate-types" uses statusMessage, which github cannot represent and will omit.',
     ]);
@@ -135,7 +136,7 @@ describe('Agent platform integration', () => {
             hooks: [
               {
                 type: 'command',
-                command: 'pnpm run typecheck',
+                command: 'pnpm run typecheck # promptscript-generated:validate-types',
                 timeout: 120,
               },
             ],
@@ -161,13 +162,16 @@ describe('Agent platform integration', () => {
     expect(cursorAgent).toContain('model: inherit');
     expect(cursorAgent).toContain('mcpServers: ["issue-tracker"]');
     expect(JSON.parse(requireOutput(result, '.cursor/hooks.json'))).toMatchObject({
-      postEdit: [
-        {
-          matcher: 'Edit|Write',
-          command: 'pnpm run typecheck',
-          timeout: 120,
-        },
-      ],
+      version: 1,
+      hooks: {
+        postToolUse: [
+          {
+            matcher: 'Edit|Write',
+            command: 'pnpm run typecheck # promptscript-generated:validate-types',
+            timeout: 120,
+          },
+        ],
+      },
     });
     expect(JSON.parse(requireOutput(result, '.cursor/mcp.json'))).toMatchObject({
       mcpServers: {

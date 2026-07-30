@@ -5,8 +5,15 @@ import { tmpdir } from 'node:os';
 import type { FormatterOutput } from '@promptscript/compiler';
 import {
   cleanupManagedOutputs,
+  createHookOutputSafely,
   hasOnlyOwnedHookCommands,
+  isPromptScriptOwnedHookOutput,
+  mergePromptScriptCodexConfig,
+  mergePromptScriptHookOutput,
+  removePromptScriptOwnedCodexHooks,
+  removePromptScriptOwnedHooks,
   removeIfUnchanged,
+  rewriteHookOutputIfUnchanged,
 } from '../managed-output-cleanup.js';
 
 const GENERATED_MARKER =
@@ -200,7 +207,17 @@ describe('cleanupManagedOutputs', () => {
       removed: [],
       removedDirectories: [],
     });
-    await expect(readFile(file, 'utf-8')).resolves.toBe(content);
+    await expect(readFile(file, 'utf-8').then((value) => JSON.parse(value))).resolves.toEqual({
+      version: 1,
+      hooks: {
+        preToolUse: [
+          {
+            type: 'command',
+            command: 'echo "# promptscript-generated:example" then continue',
+          },
+        ],
+      },
+    });
   });
 
   it('should reject malformed or non-command hook ownership structures', () => {
@@ -209,6 +226,234 @@ describe('cleanupManagedOutputs', () => {
     expect(hasOnlyOwnedHookCommands('{"hooks":"invalid"}')).toBe(false);
     expect(hasOnlyOwnedHookCommands('{"hooks":{"event":[{"type":"prompt"}]}}')).toBe(false);
     expect(hasOnlyOwnedHookCommands('{"hooks":{"event":[{"type":"command"}]}}')).toBe(false);
+  });
+
+  it('should recognize owned direct-command hook contracts', () => {
+    const content =
+      '{"version":1,"hooks":{"postToolUse":[{"command":"echo ok # promptscript-generated:test"}]}}';
+
+    expect(isPromptScriptOwnedHookOutput('.cursor/hooks.json', content)).toBe(true);
+    expect(
+      isPromptScriptOwnedHookOutput(
+        '.claude/settings.json',
+        '{"autoMode":"acceptEdits","hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:test"}]}]}}'
+      )
+    ).toBe(false);
+    expect(
+      isPromptScriptOwnedHookOutput(
+        '.cursor/hooks.json',
+        '{"version":1,"hooks":{"postToolUse":[{"command":"echo ok # promptscript-generated:test","commandWindows":"echo user"}]}}'
+      )
+    ).toBe(false);
+    expect(isPromptScriptOwnedHookOutput('.windsurf/hooks.json', content)).toBe(false);
+    expect(
+      isPromptScriptOwnedHookOutput(
+        '.cursor/hooks.json',
+        '{"version":1,"userSetting":true,"hooks":{"postToolUse":[{"command":"echo ok # promptscript-generated:test"}]}}'
+      )
+    ).toBe(false);
+  });
+
+  it('should merge generated hooks without replacing user settings', () => {
+    const existing = JSON.stringify({
+      permissions: { allow: ['Read'] },
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Bash',
+            hooks: [
+              {
+                type: 'command',
+                command: 'echo old # promptscript-generated:old',
+              },
+              { type: 'command', command: 'echo user' },
+            ],
+          },
+        ],
+      },
+    });
+    const generated = JSON.stringify({
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Edit',
+            hooks: [
+              {
+                type: 'command',
+                command: 'echo generated # promptscript-generated:check',
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    const merged = JSON.parse(
+      mergePromptScriptHookOutput('.claude/settings.json', existing, generated)!
+    ) as {
+      permissions: unknown;
+      hooks: { PreToolUse: unknown[] };
+    };
+    expect(merged.permissions).toEqual({ allow: ['Read'] });
+    expect(merged.hooks.PreToolUse).toHaveLength(2);
+    expect(merged.hooks.PreToolUse[0]).toEqual({
+      matcher: 'Bash',
+      hooks: [{ type: 'command', command: 'echo user' }],
+    });
+  });
+
+  it('should merge Claude autoMode without replacing user settings', () => {
+    const merged = mergePromptScriptHookOutput(
+      '.claude/settings.json',
+      '{"permissions":{"allow":["Read"]},"autoMode":"disabled"}',
+      '{"autoMode":"acceptEdits"}'
+    );
+
+    expect(JSON.parse(merged!)).toEqual({
+      permissions: { allow: ['Read'] },
+      autoMode: 'acceptEdits',
+    });
+  });
+
+  it('should remove owned entries while preserving user hooks and settings', () => {
+    const content = JSON.stringify({
+      theme: 'dark',
+      hooks: {
+        AfterTool: [
+          {
+            hooks: [
+              {
+                type: 'command',
+                command: 'echo generated # promptscript-generated:check',
+              },
+            ],
+          },
+          {
+            hooks: [{ type: 'command', command: 'echo user' }],
+          },
+        ],
+      },
+    });
+
+    const result = removePromptScriptOwnedHooks('.gemini/settings.json', content);
+
+    expect(result?.empty).toBe(false);
+    expect(JSON.parse(result!.content)).toEqual({
+      theme: 'dark',
+      hooks: {
+        AfterTool: [
+          {
+            hooks: [{ type: 'command', command: 'echo user' }],
+          },
+        ],
+      },
+    });
+  });
+
+  it('should prune legacy owned Codex TOML hook groups', () => {
+    const ownedContent = `[[hooks.PreToolUse]]
+matcher = "Edit"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo owned # promptscript-generated:owned"
+command_windows = "& 'echo' 'owned' # promptscript-generated:owned"
+`;
+    const content = `max_threads = 8
+
+${ownedContent}
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = "echo user"
+`;
+
+    const result = removePromptScriptOwnedCodexHooks('.codex/config.toml', content);
+
+    expect(result?.empty).toBe(false);
+    expect(result?.content).toContain('max_threads = 8');
+    expect(result?.content).toContain('command = "echo user"');
+    expect(result?.content).not.toContain('promptscript-generated:owned');
+    expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', ownedContent)?.empty).toBe(true);
+  });
+
+  it('should merge generated Codex settings with user TOML', () => {
+    expect(
+      mergePromptScriptCodexConfig(
+        '"max_threads" = 4\nmodel = "gpt-5"\n\n[features]\nhooks = true\n',
+        'max_threads = 8\nmax_depth = 2\n'
+      )
+    ).toBe('max_threads = 8\nmax_depth = 2\n\nmodel = "gpt-5"\n\n[features]\nhooks = true\n');
+  });
+  it('should atomically rewrite only unchanged regular hook files', async () => {
+    const project = await createTemporaryDirectory('promptscript-rewrite-hooks-');
+    const file = join(project, '.claude', 'settings.json');
+    await mkdir(dirname(file), { recursive: true });
+    await writeFile(file, 'old');
+
+    await expect(rewriteHookOutputIfUnchanged(file, project, 'different', 'new')).resolves.toBe(
+      false
+    );
+    await expect(readFile(file, 'utf-8')).resolves.toBe('old');
+    await expect(rewriteHookOutputIfUnchanged(file, project, 'old', 'new')).resolves.toBe(true);
+    await expect(readFile(file, 'utf-8')).resolves.toBe('new');
+  });
+
+  it('should refuse hook rewrites through a parent symlink', async () => {
+    const project = await createTemporaryDirectory('promptscript-rewrite-root-');
+    const outside = await createTemporaryDirectory('promptscript-rewrite-outside-');
+    const file = join(outside, 'settings.json');
+    await writeFile(file, 'old');
+    await symlink(outside, join(project, '.claude'));
+
+    await expect(
+      rewriteHookOutputIfUnchanged(join(project, '.claude', 'settings.json'), project, 'old', 'new')
+    ).resolves.toBe(false);
+    await expect(readFile(file, 'utf-8')).resolves.toBe('old');
+  });
+
+  it('should atomically create hook files without following parent symlinks', async () => {
+    const project = await createTemporaryDirectory('promptscript-create-root-');
+    const file = join(project, '.factory', 'hooks.json');
+
+    await expect(createHookOutputSafely(file, project, 'created')).resolves.toBe(true);
+    await expect(readFile(file, 'utf-8')).resolves.toBe('created');
+
+    const outside = await createTemporaryDirectory('promptscript-create-outside-');
+    await symlink(outside, join(project, '.grok'));
+    await expect(
+      createHookOutputSafely(
+        join(project, '.grok', 'hooks', 'promptscript.json'),
+        project,
+        'escaped'
+      )
+    ).resolves.toBe(false);
+    await expect(
+      readFile(join(outside, 'hooks', 'promptscript.json'), 'utf-8')
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('should remove obsolete owned Windsurf hooks', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-windsurf-hooks-');
+    const file = join(project, '.windsurf', 'hooks.json');
+    const content =
+      '{"hooks":{"post_write_code":[{"command":"echo ok # promptscript-generated:test"}]}}\n';
+    await mkdir(dirname(file), { recursive: true });
+    await writeFile(file, content);
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        '.windsurf/rules/project.md',
+        {
+          path: '.windsurf/rules/project.md',
+          content: '# Current\n',
+          managedOutputFiles: ['.windsurf/hooks.json'],
+        },
+      ],
+    ]);
+
+    await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
+      removed: [file],
+    });
+    await expect(readFile(file, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
   it('should report an obsolete owned JSON file in dry-run mode', async () => {

@@ -7,6 +7,7 @@ import {
   generateCursorHooks,
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
+import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -193,7 +194,13 @@ export class CursorFormatter extends BaseFormatter {
       }
     }
 
-    return output;
+    output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    return {
+      ...output,
+      managedOutputFiles: [
+        ...new Set([...(output.managedOutputFiles ?? []), '.cursor/hooks.json']),
+      ],
+    };
   }
 
   /**
@@ -483,7 +490,13 @@ export class CursorFormatter extends BaseFormatter {
           location: hooksBlock.loc,
         }));
         const cursorHooks = generateCursorHooks(hooks);
-        if (Object.keys(cursorHooks).length > 0) {
+        const hookEvents = cursorHooks['hooks'];
+        if (
+          typeof hookEvents === 'object' &&
+          hookEvents !== null &&
+          !Array.isArray(hookEvents) &&
+          Object.keys(hookEvents).length > 0
+        ) {
           additionalFiles.push({
             path: '.cursor/hooks.json',
             content: JSON.stringify(cursorHooks, null, 2) + '\n',
@@ -522,6 +535,7 @@ export class CursorFormatter extends BaseFormatter {
       ...(hookWarnings && hookWarnings.length > 0
         ? { warnings: [...(result.warnings ?? []), ...hookWarnings] }
         : {}),
+      managedOutputFiles: [...(result.managedOutputFiles ?? []), '.cursor/hooks.json'],
     };
   }
 

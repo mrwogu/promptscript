@@ -30,6 +30,7 @@ platform-contracts/
 ├── antigravity/         # Antigravity AGENTS.md, AgentKit, workflows
 ├── codex/               # Codex skills, agent TOML, hooks, plugins, nesting
 ├── gemini/              # Gemini CLI skills alias, nested GEMINI.md
+├── windsurf/            # Windsurf lifecycle hook schema
 ├── grok/                # Grok Build AGENTS.md + Claude compatibility
 ├── agents-md-spec/      # AGENTS.md open spec + v1.1 proposal status
 ├── skill-md-spec/       # SKILL.md open standard (agentskills.io)

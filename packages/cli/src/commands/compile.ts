@@ -29,7 +29,13 @@ import { stripMarkers } from '../utils/markers.js';
 import { detectOutputConflicts } from '../utils/conflict-detector.js';
 import {
   cleanupManagedOutputs,
-  hasOnlyOwnedHookCommands,
+  createHookOutputSafely,
+  isHookOutputPath,
+  isPromptScriptOwnedHookOutput,
+  mergePromptScriptCodexConfig,
+  mergePromptScriptHookOutput,
+  removePromptScriptOwnedCodexHooks,
+  rewriteHookOutputIfUnchanged,
 } from '../utils/managed-output-cleanup.js';
 import { detectLegacyFactorySettingsHooks } from '../utils/legacy-factory-hooks.js';
 
@@ -237,8 +243,8 @@ function hasPromptScriptMarker(content: string): boolean {
 }
 
 function isPromptScriptOwnedOutput(path: string, content: string): boolean {
-  if (path === '.factory/hooks.json' || path === '.github/hooks/promptscript.json') {
-    return hasOnlyOwnedHookCommands(content);
+  if (isHookOutputPath(path)) {
+    return isPromptScriptOwnedHookOutput(path, content);
   }
   return hasPromptScriptMarker(content);
 }
@@ -385,19 +391,82 @@ async function writeOutputs(
     }
   }
 
+  async function safeOverwrite(
+    output: FormatterOutput,
+    outputPath: string,
+    existingContent: string | undefined,
+    content: string
+  ): Promise<boolean> {
+    if (!isHookOutputPath(output.path)) {
+      return safeWrite(outputPath, content, output.mode);
+    }
+
+    const outputRoot = options.output ? resolve(options.output) : process.cwd();
+    const rewritten =
+      existingContent !== undefined &&
+      (await rewriteHookOutputIfUnchanged(outputPath, outputRoot, existingContent, content));
+    if (rewritten && output.mode !== undefined) {
+      await chmod(outputPath, output.mode);
+    }
+    if (!rewritten) {
+      const msg = `Skipped '${outputPath}' because it changed while PromptScript was writing hooks.`;
+      targetErrors.push(msg);
+      ConsoleOutput.error(msg);
+    }
+    return rewritten;
+  }
+
+  async function safeCreate(
+    output: FormatterOutput,
+    outputPath: string,
+    content: string
+  ): Promise<boolean> {
+    if (!isHookOutputPath(output.path)) {
+      return safeWrite(outputPath, content, output.mode);
+    }
+
+    const outputRoot = options.output ? resolve(options.output) : process.cwd();
+    const created = await createHookOutputSafely(outputPath, outputRoot, content, output.mode);
+    if (!created) {
+      const msg = `Skipped '${outputPath}' because its hook path was not safe to create.`;
+      targetErrors.push(msg);
+      ConsoleOutput.error(msg);
+    }
+    return created;
+  }
+
   for (const output of outputs.values()) {
     const outputPath = options.output ? resolve(options.output, output.path) : resolve(output.path);
 
     // Check if file exists
     const fileExists = existsSync(outputPath);
     const existingContent = fileExists ? await readFileOrUndefined(outputPath) : undefined;
+    const existingHookOutputOwned =
+      existingContent !== undefined && isPromptScriptOwnedHookOutput(output.path, existingContent);
+    const prunedCodexConfig =
+      existingContent === undefined
+        ? undefined
+        : removePromptScriptOwnedCodexHooks(output.path, existingContent);
+    const migratedCodexContent =
+      prunedCodexConfig === undefined
+        ? undefined
+        : prunedCodexConfig.empty
+          ? output.content
+          : mergePromptScriptCodexConfig(prunedCodexConfig.content, output.content);
+    const mergedHookContent =
+      existingContent === undefined || existingHookOutputOwned
+        ? undefined
+        : (mergePromptScriptHookOutput(output.path, existingContent, output.content) ??
+          migratedCodexContent);
+    const desiredContent =
+      existingContent === undefined ? output.content : (mergedHookContent ?? output.content);
 
     // A file is up to date when it differs from the new output only by the
     // generation marker. Rewriting such a file would change nothing but the
     // marker timestamp, so it is skipped in every mode, including --force.
     const contentMatches =
       existingContent !== undefined &&
-      stripMarkers(existingContent) === stripMarkers(output.content);
+      stripMarkers(existingContent) === stripMarkers(desiredContent);
 
     if (options.dryRun) {
       // In dry-run mode, show what would happen
@@ -409,7 +478,7 @@ async function writeOutputs(
         result.unchanged.push(outputPath);
       } else if (
         existingContent !== undefined &&
-        isPromptScriptOwnedOutput(output.path, existingContent)
+        (mergedHookContent !== undefined || isPromptScriptOwnedOutput(output.path, existingContent))
       ) {
         ConsoleOutput.dryRun(`Would overwrite: ${outputPath}`);
         result.written.push(outputPath);
@@ -422,7 +491,7 @@ async function writeOutputs(
 
     // File doesn't exist - write normally
     if (!fileExists) {
-      if (await safeWrite(outputPath, output.content, output.mode)) {
+      if (await safeCreate(output, outputPath, desiredContent)) {
         ConsoleOutput.success(outputPath);
         result.written.push(outputPath);
       }
@@ -439,10 +508,18 @@ async function writeOutputs(
       continue;
     }
 
+    if (mergedHookContent !== undefined) {
+      if (await safeOverwrite(output, outputPath, existingContent, desiredContent)) {
+        ConsoleOutput.success(outputPath);
+        result.written.push(outputPath);
+      }
+      continue;
+    }
+
     // File exists - check if it was generated by PromptScript
     if (existingContent !== undefined && isPromptScriptOwnedOutput(output.path, existingContent)) {
       // Content changed - write with new marker
-      if (await safeWrite(outputPath, output.content, output.mode)) {
+      if (await safeOverwrite(output, outputPath, existingContent, desiredContent)) {
         ConsoleOutput.success(outputPath);
         result.written.push(outputPath);
       }
@@ -452,7 +529,7 @@ async function writeOutputs(
     // Content differs or can't be read — could be a resource file we wrote before
     // or a user-created file (needs protection). Check for --force flag or overwriteAll.
     if (options.force || overwriteAll) {
-      if (await safeWrite(outputPath, output.content, output.mode)) {
+      if (await safeOverwrite(output, outputPath, existingContent, desiredContent)) {
         ConsoleOutput.success(outputPath);
         result.written.push(outputPath);
       }
@@ -471,7 +548,7 @@ async function writeOutputs(
 
     switch (response) {
       case 'yes':
-        if (await safeWrite(outputPath, output.content, output.mode)) {
+        if (await safeOverwrite(output, outputPath, existingContent, desiredContent)) {
           ConsoleOutput.success(outputPath);
           result.written.push(outputPath);
         }
@@ -482,7 +559,7 @@ async function writeOutputs(
         break;
       case 'all':
         overwriteAll = true;
-        if (await safeWrite(outputPath, output.content, output.mode)) {
+        if (await safeOverwrite(output, outputPath, existingContent, desiredContent)) {
           ConsoleOutput.success(outputPath);
           result.written.push(outputPath);
         }

@@ -645,6 +645,38 @@ describe('PlaygroundStore', () => {
       expect(outputs).toHaveLength(2);
     });
 
+    it('selectOutputsForFormatter should expose native hook files', () => {
+      const cases = [
+        ['claude', '.claude/settings.json'],
+        ['cursor', '.cursor/hooks.json'],
+        ['codex', '.codex/hooks.json'],
+        ['gemini', '.gemini/settings.json'],
+        ['windsurf', '.windsurf/hooks.json'],
+        ['grok', '.grok/hooks/promptscript.json'],
+      ] as const;
+
+      for (const [formatter, path] of cases) {
+        usePlaygroundStore.getState().setCompileResult({
+          success: true,
+          outputs: new Map([[path, { path, content: '{"hooks":{}}' }]]),
+          errors: [],
+          warnings: [],
+          stats: {
+            resolveTime: 0,
+            validateTime: 0,
+            formatTime: 0,
+            totalTime: 0,
+          },
+        });
+
+        expect(
+          selectOutputsForFormatter(usePlaygroundStore.getState(), formatter).map(
+            (output) => output.path
+          )
+        ).toContain(path);
+      }
+    });
+
     it('selectOutputForFormatter should return first output (legacy selector)', () => {
       const { setCompileResult } = usePlaygroundStore.getState();
       const outputMap = new Map([

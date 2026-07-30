@@ -10,6 +10,7 @@ import { Validator, type ValidatorConfig, type ValidationMessage } from '@prompt
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for upcoming formatter integration
 import { verifyReferenceIntegrity } from './reference-verifier.js';
+import { inferProjectRoot, validateHookScriptResources } from './hook-script-validator.js';
 import type {
   CompilerOptions,
   CompileResult,
@@ -381,17 +382,38 @@ export class Compiler {
     this.logger.verbose('=== Stage 2: Validate ===');
     const startValidate = Date.now();
     const validation = this.validator.validate(resolved.ast);
-    stats.validateTime = Date.now() - startValidate;
-    this.logger.verbose(`Validate completed (${stats.validateTime}ms)`);
 
     // Check for validation errors
     if (!validation.valid) {
+      stats.validateTime = Date.now() - startValidate;
+      this.logger.verbose(`Validate completed (${stats.validateTime}ms)`);
       stats.totalTime = Date.now() - startTotal;
 
       return {
         success: false,
         outputs: new Map(),
         errors: validation.errors.map((e) => this.validationToCompileError(e)),
+        warnings: validation.warnings,
+        stats,
+      };
+    }
+
+    const hookScriptErrors = await validateHookScriptResources(
+      resolved.ast,
+      inferProjectRoot(
+        this.options.resolver.localPath,
+        this.options.resolver.projectRoot,
+        entryPath
+      )
+    );
+    stats.validateTime = Date.now() - startValidate;
+    this.logger.verbose(`Validate completed (${stats.validateTime}ms)`);
+    if (hookScriptErrors.length > 0) {
+      stats.totalTime = Date.now() - startTotal;
+      return {
+        success: false,
+        outputs: new Map(),
+        errors: hookScriptErrors,
         warnings: validation.warnings,
         stats,
       };
@@ -857,6 +879,8 @@ export interface CompileOptions {
     registryPath?: string;
     /** Base path for local/relative file resolution. Defaults to cwd. */
     localPath?: string;
+    /** Project root containing .promptscript/scripts. */
+    projectRoot?: string;
     /** Whether to cache resolved ASTs. Defaults to true. */
     cache?: boolean;
   };
@@ -924,6 +948,7 @@ export async function compile(
   const resolverOptions = {
     registryPath: options.resolver?.registryPath ?? process.cwd(),
     localPath: options.resolver?.localPath,
+    projectRoot: options.resolver?.projectRoot,
     cache: options.resolver?.cache,
   };
 

@@ -14,9 +14,14 @@ afterEach(() => {
 });
 
 describe('Hook target smoke tests', () => {
-  it('compiles one portable hook to current Factory and GitHub contracts', async () => {
+  it('compiles one portable script to every native hook contract', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'promptscript-hooks-targets-'));
     directories.push(directory);
+    mkdirSync(join(directory, '.promptscript', 'scripts'), { recursive: true });
+    writeFileSync(
+      join(directory, '.promptscript', 'scripts', 'validate script.py'),
+      'raise SystemExit(0)\n'
+    );
     const entryPath = join(directory, 'project.prs');
     writeFileSync(
       entryPath,
@@ -29,7 +34,11 @@ describe('Hook target smoke tests', () => {
   validate: {
     event: "pre-tool-use"
     matcher: "Edit|Write"
-    command: ["python3", ".promptscript/scripts/validate.py"]
+    script: {
+      path: ".promptscript/scripts/validate script.py"
+      interpreter: "python3"
+      args: ["--strict"]
+    }
     cwd: "project"
     timeoutMs: 30000
   }
@@ -40,8 +49,14 @@ describe('Hook target smoke tests', () => {
     const compiler = new Compiler({
       resolver: { registryPath: directory, projectRoot: directory },
       formatters: [
+        { name: 'claude', config: { version: 'full' } },
+        { name: 'cursor', config: { version: 'full' } },
+        { name: 'codex', config: { version: 'full' } },
         { name: 'factory', config: { version: 'full' } },
+        { name: 'gemini', config: { version: 'full' } },
         { name: 'github', config: { version: 'full' } },
+        { name: 'grok', config: { version: 'full' } },
+        { name: 'windsurf', config: { version: 'full' } },
       ],
     });
 
@@ -57,7 +72,7 @@ describe('Hook target smoke tests', () => {
               {
                 type: 'command',
                 command:
-                  'cd "$FACTORY_PROJECT_DIR" && python3 .promptscript/scripts/validate.py # promptscript-generated:validate',
+                  'cd "$FACTORY_PROJECT_DIR" && python3 "$FACTORY_PROJECT_DIR"/\'.promptscript/scripts/validate script.py\' --strict # promptscript-generated:validate',
                 timeout: 30,
               },
             ],
@@ -71,9 +86,9 @@ describe('Hook target smoke tests', () => {
         preToolUse: [
           {
             type: 'command',
-            bash: 'python3 .promptscript/scripts/validate.py # promptscript-generated:validate',
+            bash: "python3 '.promptscript/scripts/validate script.py' --strict # promptscript-generated:validate",
             powershell:
-              "& 'python3' '.promptscript/scripts/validate.py' # promptscript-generated:validate",
+              "& 'py' '-3' '.promptscript/scripts/validate script.py' '--strict' # promptscript-generated:validate",
             cwd: '.',
             matcher: 'Edit|Write',
             timeoutSec: 30,
@@ -81,6 +96,12 @@ describe('Hook target smoke tests', () => {
         ],
       },
     });
+    expect(result.outputs.has('.claude/settings.json')).toBe(true);
+    expect(result.outputs.has('.cursor/hooks.json')).toBe(true);
+    expect(result.outputs.get('.codex/hooks.json')!.content).toContain('"PreToolUse"');
+    expect(result.outputs.has('.gemini/settings.json')).toBe(true);
+    expect(result.outputs.has('.grok/hooks/promptscript.json')).toBe(true);
+    expect(result.outputs.has('.windsurf/hooks.json')).toBe(true);
   });
 
   it('runs a repository-local script from project root when invoked from a nested directory', async () => {
@@ -104,7 +125,10 @@ describe('Hook target smoke tests', () => {
 @hooks {
   record-cwd: {
     event: "session-start"
-    command: ["sh", ".promptscript/scripts/record-cwd.sh"]
+    script: {
+      path: ".promptscript/scripts/record-cwd.sh"
+      interpreter: "sh"
+    }
     cwd: "project"
   }
 }
@@ -169,16 +193,16 @@ describe('Hook target smoke tests', () => {
       hooks: { PostToolUse: Array<{ hooks: Array<{ command: string }> }> };
     };
     expect(claude.hooks.PostToolUse[0]!.hooks[0]!.command).toBe(
-      "cd \"${CLAUDE_PROJECT_DIR}\" && python3 '.promptscript/scripts/check file.py' '--label=hello world'"
+      "cd \"${CLAUDE_PROJECT_DIR}\" && python3 '.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate"
     );
     const cursor = JSON.parse(result.outputs.get('.cursor/hooks.json')!.content) as {
-      postEdit: Array<{ command: string }>;
+      hooks: { postToolUse: Array<{ command: string }> };
     };
-    expect(cursor.postEdit[0]!.command).toBe(
-      "python3 '.promptscript/scripts/check file.py' '--label=hello world'"
+    expect(cursor.hooks.postToolUse[0]!.command).toBe(
+      "python3 '.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate"
     );
-    expect(result.outputs.get('.codex/config.toml')!.content).toContain(
-      'command = ["python3", ".promptscript/scripts/check file.py", "--label=hello world"]'
+    expect(result.outputs.get('.codex/hooks.json')!.content).toContain(
+      "python3 '.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate"
     );
   });
 });
