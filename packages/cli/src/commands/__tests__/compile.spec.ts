@@ -346,6 +346,29 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('legacy "hooks"'));
   });
 
+  it('should not warn about legacy settings hooks when .factory/hooks.json exists', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"old-cmd"}]}]}}';
+      }
+      if (String(path).endsWith('.factory/hooks.json')) {
+        return '{"hooks":{}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+  });
+
   it('should not warn when .factory/settings.json has no hooks key', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({

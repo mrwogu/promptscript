@@ -95,10 +95,10 @@ PromptScript versions before 1.16 could place language-level hooks in
 because it may also contain user settings or `prs hooks install` entries.
 After compiling `.factory/hooks.json`, review the old `hooks` object and remove
 only duplicated lifecycle entries. To help with this migration, `prs compile`
-reports a `PS4002` warning whenever a factory target runs and
-`.factory/settings.json` still contains a non-PromptScript-owned `hooks` key -
-stale entries there reactivate when `.factory/hooks.json` is absent because
-Factory falls back to `settings.json`.
+reports a `PS4002` warning when a factory target runs, `.factory/hooks.json`
+is absent, and `.factory/settings.json` still contains a non-PromptScript-owned
+`hooks` key - stale entries there reactivate because Factory falls back to
+`settings.json` when `hooks.json` is missing.
 
 ## Split Rules
 
