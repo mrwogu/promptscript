@@ -1195,6 +1195,8 @@ function isOwnedCodexHookGroup(lines: string[], event: string): boolean {
     }
 
     const command = trimmed.match(/^(?:command|command_windows)\s*=\s*"(.*)"\s*$/);
+    // Ownership contract: hook-adapters.ts (HOOK_OWNERSHIP_MARKER) appends the
+    // marker as the final token of every emitted command; keep both in sync.
     if (!command || !/# promptscript-generated:[A-Za-z0-9._-]+$/.test(command[1]!)) {
       return false;
     }
@@ -1233,6 +1235,8 @@ function scanHookOwnership(value: unknown): HookOwnershipScan {
       found: true,
       valid:
         commands.length > 0 &&
+        // Ownership contract: the marker must be the final token of the command
+        // (see HOOK_OWNERSHIP_MARKER in packages/formatters/src/hook-adapters.ts).
         commands.every((command) => /# promptscript-generated:[A-Za-z0-9._-]+\s*$/.test(command)),
     };
   }

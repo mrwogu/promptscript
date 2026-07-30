@@ -1089,6 +1089,35 @@ command = "echo old # promptscript-generated:owned"
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('○'));
     });
 
+    it('should report an accurate error when a hook output file cannot be read', async () => {
+      // Arrange: a hook output that exists on disk but fails to read
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockRejectedValue(new Error('Permission denied'));
+
+      // Act
+      await compileCommand({ force: true }, mockServices);
+
+      // Assert: the failure names the unreadable file, not a mid-write race
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('exists but could not be read')
+      );
+      expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('changed while PromptScript was writing hooks')
+      );
+    });
+
     it('should still overwrite user files that differ', async () => {
       const newContent = `${PROMPTSCRIPT_HTML_MARKER}\n\n# Title\n\nGenerated content`;
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', newContent)]]);

@@ -409,7 +409,10 @@ async function writeOutputs(
       await chmod(outputPath, output.mode);
     }
     if (!rewritten) {
-      const msg = `Skipped '${outputPath}' because it changed while PromptScript was writing hooks.`;
+      const msg =
+        existingContent === undefined
+          ? `Skipped '${outputPath}' because it exists but could not be read.`
+          : `Skipped '${outputPath}' because it changed while PromptScript was writing hooks.`;
       targetErrors.push(msg);
       ConsoleOutput.error(msg);
     }
