@@ -31,6 +31,7 @@ import {
   cleanupManagedOutputs,
   hasOnlyOwnedHookCommands,
 } from '../utils/managed-output-cleanup.js';
+import { detectLegacyFactorySettingsHooks } from '../utils/legacy-factory-hooks.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -802,6 +803,24 @@ async function compileCommandWithResult(
     if (writeResult.skipped.length > 0) {
       ConsoleOutput.muted(`Skipped ${writeResult.skipped.length} file(s)`);
     }
+
+    // One-time migration aid: a legacy .factory/settings.json with a "hooks"
+    // key reactivates stale hooks when .factory/hooks.json is absent.
+    if (targets.some((target) => target.name === 'factory')) {
+      const legacySettingsPath = await detectLegacyFactorySettingsHooks(effectiveOptions.output);
+      if (legacySettingsPath) {
+        result.warnings.push({
+          ruleId: 'PS4002',
+          ruleName: 'hook-compatibility',
+          severity: 'warning',
+          message:
+            `${legacySettingsPath} contains a legacy "hooks" section. ` +
+            'Factory falls back to it when .factory/hooks.json is absent, which can reactivate stale hooks. ' +
+            'Remove the "hooks" key from .factory/settings.json.',
+        });
+      }
+    }
+
     printStats(result.stats);
     printWarnings(result.warnings);
 

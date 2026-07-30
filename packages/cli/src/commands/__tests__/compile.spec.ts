@@ -158,9 +158,13 @@ vi.mock('../../utils/registry-resolver.js', () => ({
   resolveRegistryPath: vi.fn().mockResolvedValue({ path: '/mock/registry', isRemote: false }),
 }));
 
-vi.mock('../../utils/managed-output-cleanup.js', () => ({
-  cleanupManagedOutputs: (...args: unknown[]) => mockCleanupManagedOutputs(...args),
-}));
+vi.mock('../../utils/managed-output-cleanup.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../utils/managed-output-cleanup.js')>();
+  return {
+    ...actual,
+    cleanupManagedOutputs: (...args: unknown[]) => mockCleanupManagedOutputs(...args),
+  };
+});
 
 import { compileCommand } from '../compile.js';
 
@@ -319,6 +323,87 @@ describe('compile command - createCliLogger warn path', () => {
     await compileCommand({ cwd: '/mock/project' }, mockServices);
 
     expect(mockMuted).toHaveBeenCalledWith(`Removed empty managed directory: ${prunedDirectory}`);
+  });
+
+  it('should warn about legacy hooks in .factory/settings.json for factory targets', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"old-cmd"}]}]}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+    expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('legacy "hooks"'));
+  });
+
+  it('should not warn when .factory/settings.json has no hooks key', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"$schema":"https://docs.factory.ai/schema.json"}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+  });
+
+  it('should not warn when legacy settings hooks are fully PromptScript-owned', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:legacy"}]}]}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+  });
+
+  it('should not check for legacy settings hooks without a factory target', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"old-cmd"}]}]}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
   });
 
   it('should apply a named build profile entry, output, and targets', async () => {
