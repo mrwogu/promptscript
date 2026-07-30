@@ -417,6 +417,37 @@ describe('FactoryFormatter', () => {
       expect(standardsFile?.content).toBe('# Standards\n\n## Security\n\n- Validate all inputs\n');
     });
 
+    it('should keep h2 headings at h2 in free-form text standards in split mode', () => {
+      const ast = createTextStandardsProgram('## Security\n\n- Validate all inputs');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const standardsFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toBe('# Standards\n\n## Security\n\n- Validate all inputs\n');
+      expect(standardsFile?.content).not.toContain('### Security');
+    });
+
+    it('should cap shifted headings at h6 in split mode', () => {
+      const ast = createTextStandardsProgram('# Security\n\n###### Deep\n\n- Validate all inputs');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const standardsFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toContain('## Security');
+      expect(standardsFile?.content).toContain('###### Deep');
+      expect(standardsFile?.content).not.toContain('#######');
+    });
+
     it('should emit a single standards rule file for free-form text standards in split mode', () => {
       const ast = createTextStandardsProgram('- Strict mode enabled\n- Never log secrets');
 
