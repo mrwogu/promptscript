@@ -220,6 +220,39 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     return this.normalizeMarkdownForPrettier(downgradedText).trim();
   }
 
+  /**
+   * Normalize free-form @standards text for a split rules file under the
+   * "# Standards" title. Unlike the monolith fallback, headings shift relative
+   * to the shallowest level present so source heading depth is preserved.
+   */
+  private normalizeFreeformStandardsTextForSplit(text: string): string {
+    const dedentedText = this.dedent(text);
+    const shiftedText = this.shiftHeadingsToMinLevel(dedentedText, 2);
+    return this.normalizeMarkdownForPrettier(shiftedText).trim();
+  }
+
+  /**
+   * Shift all ATX headings by the same amount so the shallowest heading lands
+   * at targetLevel. Levels clamp to h1-h6. Uses the same plain-regex approach
+   * as the other heading rewrites here, so code fences are not special-cased.
+   */
+  private shiftHeadingsToMinLevel(text: string, targetLevel: number): string {
+    const headingPattern = /^(\s*)(#{1,6}) /gm;
+    let minLevel = Infinity;
+    for (const match of text.matchAll(headingPattern)) {
+      const hashes = match[2];
+      if (!hashes) continue;
+      minLevel = Math.min(minLevel, hashes.length);
+    }
+    if (minLevel === Infinity) return text;
+    const delta = targetLevel - minLevel;
+    if (delta === 0) return text;
+    return text.replace(headingPattern, (_match, indent: string, hashes: string) => {
+      const level = Math.max(1, Math.min(6, hashes.length + delta));
+      return `${indent}${'#'.repeat(level)} `;
+    });
+  }
+
   override format(ast: Program, options?: FormatOptions): FormatterOutput {
     if (
       options?.version !== undefined &&
@@ -690,11 +723,8 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       if (files.length === filesBeforeStandards) {
         const text = this.extractText(standards.content);
         if (text) {
-          // Downgrade h1 headings to h2 so they nest under the "# Standards" title
-          const normalized = this.normalizeFreeformStandardsText(text).replace(
-            /^(\s*)# /gm,
-            '$1## '
-          );
+          // Shift headings so the shallowest nests as h2 under the "# Standards" title
+          const normalized = this.normalizeFreeformStandardsTextForSplit(text);
           files.push({
             label: 'Standards',
             path: '.factory/rules/standards.md',
