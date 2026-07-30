@@ -429,6 +429,40 @@ Standards are organized by category with each category containing an array of hu
 !!! note "Backwards Compatibility"
 The `errors` key is automatically mapped to `error-handling` in the output for backwards compatibility.
 
+#### Structured Keys: git, config, documentation, diagrams
+
+Four keys render as dedicated sections instead of code-standard subsections: `git` (commit conventions), `config` (tool configuration), `documentation` (doc standards), and `diagrams` (diagram preferences). Each known field gets specialized rendering (e.g. `git.format`, `git.types`, `diagrams.format`).
+
+**Custom fields are kept.** Any extra key inside these objects renders as a generic `Label: value` list item - `true` renders as a bare label, `false`/`null` are dropped, nested objects render inline as `key: value` pairs:
+
+```promptscript
+@standards {
+  git: {
+    format: "Conventional Commits"
+    branch: "(feat|fix)/{project}/{issue-id}"
+    mergeRequest: {
+      title: "merge commit summary"
+      description: "purpose and issue link"
+    }
+    requireReview: true
+  }
+}
+```
+
+Renders on Markdown instruction targets (e.g. Claude Code, Factory AI) as:
+
+```markdown
+## Git Commits
+
+- Format: Conventional Commits
+- Branch: (feat|fix)/{project}/{issue-id}
+- Merge Request: title: merge commit summary, description: purpose and issue link
+- Require Review
+```
+
+!!! note "Cursor target"
+Cursor uses its compact `key: value` style instead of humanized labels (`- branch: (feat|fix)/{project}/{issue-id}`, `- requireReview`).
+
 ### @restrictions
 
 Things the AI should never do:
