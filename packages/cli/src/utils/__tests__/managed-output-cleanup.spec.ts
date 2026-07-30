@@ -452,6 +452,7 @@ command = "echo user"
 
     await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
       removed: [file],
+      removedDirectories: [],
     });
     await expect(readFile(file, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
   });
