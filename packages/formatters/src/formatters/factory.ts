@@ -199,17 +199,25 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       const text = this.extractText(standards.content);
       if (!text) return null;
 
-      const downgradedText = text.replace(/^(\s*)## /gm, '$1### ');
-      const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
-      return (
-        renderer.renderSection(this.getSectionName('codeStandards'), normalizedContent.trim()) +
-        '\n'
-      );
+      const normalizedContent = this.normalizeFreeformStandardsText(text);
+      return renderer.renderSection(this.getSectionName('codeStandards'), normalizedContent) + '\n';
     }
 
     return (
       renderer.renderSection(this.getSectionName('codeStandards'), subsections.join('\n\n')) + '\n'
     );
+  }
+
+  /**
+   * Normalize free-form @standards text for embedding under a section heading.
+   * Dedents authoring indentation from triple-quoted text so the first line
+   * (already trimmed by extractText) does not leave later lines nested,
+   * downgrades h2 headings to h3, and normalizes markdown for Prettier.
+   */
+  private normalizeFreeformStandardsText(text: string): string {
+    const dedentedText = this.dedent(text);
+    const downgradedText = dedentedText.replace(/^(\s*)## /gm, '$1### ');
+    return this.normalizeMarkdownForPrettier(downgradedText).trim();
   }
 
   override format(ast: Program, options?: FormatOptions): FormatterOutput {
@@ -682,10 +690,15 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       if (files.length === filesBeforeStandards) {
         const text = this.extractText(standards.content);
         if (text) {
+          // Downgrade h1 headings to h2 so they nest under the "# Standards" title
+          const normalized = this.normalizeFreeformStandardsText(text).replace(
+            /^(\s*)# /gm,
+            '$1## '
+          );
           files.push({
             label: 'Standards',
             path: '.factory/rules/standards.md',
-            content: `# Standards\n\n${text}\n`,
+            content: `# Standards\n\n${normalized}\n`,
           });
         }
       }

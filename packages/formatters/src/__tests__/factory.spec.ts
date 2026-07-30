@@ -389,6 +389,34 @@ describe('FactoryFormatter', () => {
       expect(result.content).toContain('- Validate all inputs');
     });
 
+    it('should dedent indented free-form text standards in monolith mode', () => {
+      // Triple-quoted text keeps authoring indentation after the trimmed first line
+      const ast = createTextStandardsProgram(
+        '\n  - Strict mode enabled\n  - No any type\n  - Never log secrets\n  '
+      );
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content).toContain(
+        '## Conventions & Patterns\n\n- Strict mode enabled\n- No any type\n- Never log secrets'
+      );
+      expect(result.content).not.toContain('  - No any type');
+    });
+
+    it('should dedent and downgrade headings in free-form text standards in split mode', () => {
+      const ast = createTextStandardsProgram('\n  # Security\n\n  - Validate all inputs\n  ');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const standardsFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toBe('# Standards\n\n## Security\n\n- Validate all inputs\n');
+    });
+
     it('should emit a single standards rule file for free-form text standards in split mode', () => {
       const ast = createTextStandardsProgram('- Strict mode enabled\n- Never log secrets');
 
