@@ -638,7 +638,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
         if (items.length === 0) continue;
 
         const semantic = this.getSemanticRuleInfo(topic);
-        const label = semantic?.label ?? this.humanizeRuleLabel(topic);
+        const label = semantic?.label ?? this.humanizeLabel(topic);
         const path =
           semantic?.path ??
           `.factory/rules/standards/${this.createStableRuleSlug(topic, usedSlugs)}.md`;
@@ -734,7 +734,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       const items: string[] = [];
       for (const [key, nestedValue] of Object.entries(value as Record<string, Value>)) {
         if (nestedValue === null || nestedValue === undefined || nestedValue === false) continue;
-        const label = this.humanizeRuleLabel(key);
+        const label = this.humanizeLabel(key);
         if (nestedValue === true) {
           items.push(label);
           continue;
@@ -765,14 +765,10 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     return Object.entries(value as Record<string, Value>)
       .map(([key, nestedValue]) => {
         const rendered = this.ruleValueToString(nestedValue);
-        return rendered ? `${this.humanizeRuleLabel(key)}: ${rendered}` : '';
+        return rendered ? `${this.humanizeLabel(key)}: ${rendered}` : '';
       })
       .filter((item) => item.length > 0)
       .join(', ');
-  }
-
-  private humanizeRuleLabel(value: string): string {
-    return this.humanizeLabel(value);
   }
 
   private createStableRuleSlug(topic: string, usedSlugs: Set<string>): string {
