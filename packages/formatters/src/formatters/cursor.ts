@@ -160,23 +160,40 @@ export class CursorFormatter extends BaseFormatter {
 
     const version = this.resolveVersion(options?.version);
 
+    let output: FormatterOutput;
     if (version === 'legacy') {
-      return this.formatLegacy(ast, options);
+      output = this.formatLegacy(ast, options);
+    } else if (version === 'multifile') {
+      output = this.formatMultifile(ast, options);
+    } else if (version === 'agents-md') {
+      output = this.formatAgentsMd(ast, options);
+    } else if (version === 'full') {
+      // Full mode emits hooks and reports per-hook compatibility warnings.
+      output = this.formatFull(ast, options);
+    } else {
+      output = this.formatModern(ast, options);
     }
 
-    if (version === 'multifile') {
-      return this.formatMultifile(ast, options);
+    if (version !== 'full') {
+      const hooksBlock = this.findBlock(ast, 'hooks');
+      const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
+      if (hooksBlock && hooks.some((hook) => hook.enabled !== false)) {
+        return {
+          ...output,
+          warnings: [
+            ...(output.warnings ?? []),
+            {
+              code: 'PS4002',
+              message: `Cursor ${version} mode cannot emit @hooks and will omit them.`,
+              suggestion: "Use Cursor version 'full'.",
+              location: hooksBlock.loc,
+            },
+          ],
+        };
+      }
     }
 
-    if (version === 'agents-md') {
-      return this.formatAgentsMd(ast, options);
-    }
-
-    if (version === 'full') {
-      return this.formatFull(ast, options);
-    }
-
-    return this.formatModern(ast, options);
+    return output;
   }
 
   /**

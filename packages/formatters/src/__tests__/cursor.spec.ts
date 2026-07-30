@@ -1425,6 +1425,75 @@ describe('CursorFormatter', () => {
       ]);
     });
 
+    it.each([undefined, 'modern', 'multifile', 'legacy', 'agents-md'])(
+      'should report PS4002 and omit hooks when @hooks block present in %s mode',
+      (version) => {
+        const ast: Program = {
+          type: 'Program',
+          uses: [],
+          extends: [],
+          loc: createLoc(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'hooks',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'my-hook': {
+                    event: 'pre-tool-use',
+                    command: ['echo', 'hello'],
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+        const result = formatter.format(ast, version ? { version } : undefined);
+        const hooksFile = result.additionalFiles?.find((f) => f.path === '.cursor/hooks.json');
+        expect(hooksFile).toBeUndefined();
+        expect(result.warnings).toEqual([
+          {
+            code: 'PS4002',
+            message: `Cursor ${version ?? 'modern'} mode cannot emit @hooks and will omit them.`,
+            suggestion: "Use Cursor version 'full'.",
+            location: createLoc(),
+          },
+        ]);
+      }
+    );
+
+    it('should not warn when all hooks are disabled in non-full mode', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'my-hook': {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                  enabled: false,
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+      const result = formatter.format(ast);
+      expect(result.warnings).toBeUndefined();
+    });
+
     it('should emit mcp.json when @mcpServers block present', () => {
       const ast: Program = {
         type: 'Program',
