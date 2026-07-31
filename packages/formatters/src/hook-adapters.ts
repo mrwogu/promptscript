@@ -97,12 +97,7 @@ function getPosixInterpreter(interpreter: PortableHookInterpreter): string[] {
 
 function getCommandArguments(hook: HookDefinition): string[] {
   if (hook.command) return hook.command;
-  if (!hook.script) return [];
-  return [...getPosixInterpreter(hook.script.interpreter), hook.script.path, ...hook.script.args];
-}
-
-function serializePosixCommand(hook: HookDefinition, prefix = ''): string {
-  return `${prefix}${getCommandArguments(hook).map(quotePosixArgument).join(' ')}`;
+  return [];
 }
 
 function serializeOwnedCommand(
@@ -140,7 +135,9 @@ function serializeProjectScriptCommand(
   if (!hook.script) {
     return owned
       ? serializeOwnedCommand(hook, quotePosixArgument, projectCwdPrefix(hook, target))
-      : serializePosixCommand(hook, projectCwdPrefix(hook, target));
+      : `${projectCwdPrefix(hook, target)}${getCommandArguments(hook)
+          .map(quotePosixArgument)
+          .join(' ')}`;
   }
 
   const root = projectRootExpression(target);
@@ -156,7 +153,11 @@ function serializeProjectScriptCommand(
 }
 
 function serializeGitRootScriptCommand(hook: HookDefinition, owned = false): string {
-  if (!hook.script) return serializePosixCommand(hook);
+  if (!hook.script) {
+    return owned
+      ? serializeOwnedCommand(hook)
+      : getCommandArguments(hook).map(quotePosixArgument).join(' ');
+  }
 
   const root = '"$PROMPTSCRIPT_PROJECT_ROOT"';
   const cwd =
@@ -238,7 +239,7 @@ function serializeNativeCwdScriptCommand(
     return shell === 'posix'
       ? owned
         ? serializeOwnedCommand(hook)
-        : serializePosixCommand(hook)
+        : getCommandArguments(hook).map(quotePosixArgument).join(' ')
       : serializePowerShellScriptCommand(hook, false, owned);
   }
 
@@ -497,10 +498,8 @@ export function mapEvent(event: PortableHookEvent, target: HookTarget): string |
   return map[event] || null;
 }
 
-function mapEvents(event: PortableHookEvent, target: HookTarget): readonly string[] {
-  if (target === 'windsurf') return WINDSURF_EVENT_MAP[event];
-  const mapped = mapEvent(event, target);
-  return mapped ? [mapped] : [];
+function mapEvents(event: PortableHookEvent): readonly string[] {
+  return WINDSURF_EVENT_MAP[event];
 }
 
 /**
@@ -573,9 +572,7 @@ export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unk
 
     result[nativeEvent].push({
       matcher: hook.matcher ?? '.*',
-      command: hook.script
-        ? serializeGitRootScriptCommand(hook, true)
-        : serializeOwnedCommand(hook),
+      command: serializeGitRootScriptCommand(hook, true),
       timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'cursor') : 10,
     });
   }
@@ -744,12 +741,8 @@ export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unk
 
     if (!result[nativeEvent]) result[nativeEvent] = [];
 
-    const bash = hook.script
-      ? serializeNativeCwdScriptCommand(hook, 'posix', true)
-      : serializeOwnedCommand(hook);
-    const powershell = hook.script
-      ? serializeNativeCwdScriptCommand(hook, 'powershell', true)
-      : serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
+    const bash = serializeNativeCwdScriptCommand(hook, 'posix', true);
+    const powershell = serializeNativeCwdScriptCommand(hook, 'powershell', true);
 
     result[nativeEvent].push({
       type: 'command',
@@ -783,12 +776,8 @@ export function generateVSCodeHooks(hooks: HookDefinition[]): Record<string, unk
     if (!nativeEvent) continue;
 
     if (!result[nativeEvent]) result[nativeEvent] = [];
-    const command = hook.script
-      ? serializeNativeCwdScriptCommand(hook, 'posix', true)
-      : serializeOwnedCommand(hook);
-    const windows = hook.script
-      ? serializeNativeCwdScriptCommand(hook, 'powershell', true)
-      : serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
+    const command = serializeNativeCwdScriptCommand(hook, 'posix', true);
+    const windows = serializeNativeCwdScriptCommand(hook, 'powershell', true);
 
     result[nativeEvent].push({
       type: 'command',
@@ -840,15 +829,11 @@ export function generateWindsurfHooks(hooks: HookDefinition[]): Record<string, u
 
   for (const hook of applyHookTargetOverrides(hooks, 'windsurf')) {
     if (hook.enabled === false) continue;
-    for (const nativeEvent of mapEvents(hook.event, 'windsurf')) {
+    for (const nativeEvent of mapEvents(hook.event)) {
       if (!result[nativeEvent]) result[nativeEvent] = [];
 
-      const command = hook.script
-        ? serializeNativeCwdScriptCommand(hook, 'posix', true)
-        : serializeOwnedCommand(hook);
-      const powershell = hook.script
-        ? serializeNativeCwdScriptCommand(hook, 'powershell', true)
-        : serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
+      const command = serializeNativeCwdScriptCommand(hook, 'posix', true);
+      const powershell = serializeNativeCwdScriptCommand(hook, 'powershell', true);
       result[nativeEvent].push({
         command,
         ...(powershell ? { powershell } : {}),
