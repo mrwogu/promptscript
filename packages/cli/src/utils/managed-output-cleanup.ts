@@ -1239,8 +1239,8 @@ function isOwnedCodexHookGroup(lines: string[], event: string): boolean {
       trimmed.length === 0 ||
       trimmed === `[[hooks.${event}]]` ||
       trimmed === `[[hooks.${event}.hooks]]` ||
-      /^matcher\s*=\s*"(?:\\.|[^"])*"\s*$/.test(trimmed) ||
-      /^statusMessage\s*=\s*"(?:\\.|[^"])*"\s*$/.test(trimmed) ||
+      isTomlStringAssignment(trimmed, 'matcher') ||
+      isTomlStringAssignment(trimmed, 'statusMessage') ||
       /^timeout\s*=\s*\d+\s*$/.test(trimmed) ||
       /^type\s*=\s*"command"\s*$/.test(trimmed)
     ) {
@@ -1256,6 +1256,24 @@ function isOwnedCodexHookGroup(lines: string[], event: string): boolean {
     commandCount += 1;
   }
   return commandCount > 0;
+}
+
+function isTomlStringAssignment(line: string, field: string): boolean {
+  if (!line.startsWith(field)) return false;
+  let index = field.length;
+  while (index < line.length && /\s/.test(line[index]!)) index++;
+  if (line[index] !== '=') return false;
+  index++;
+  while (index < line.length && /\s/.test(line[index]!)) index++;
+  if (line[index] !== '"' || line.at(-1) !== '"' || index === line.length - 1) {
+    return false;
+  }
+
+  for (let valueIndex = index + 1; valueIndex < line.length - 1; valueIndex++) {
+    if (line[valueIndex] === '\\') valueIndex++;
+    else if (line[valueIndex] === '"') return false;
+  }
+  return true;
 }
 
 function scanHookOwnership(value: unknown): HookOwnershipScan {
