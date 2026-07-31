@@ -112,6 +112,40 @@ describe('CodexFormatter', () => {
       expect(agentToml).toBeDefined();
     });
 
+    it('should emit native hooks in config.toml', () => {
+      const program: Program = {
+        ...createProgramWithAgent(),
+        blocks: [
+          ...createProgramWithAgent().blocks,
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                check: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'check'],
+                  matcher: 'Edit',
+                  timeoutMs: 5000,
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(program, { version: 'multifile' });
+      const configFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.codex/hooks.json'
+      );
+
+      expect(configFile?.content).toContain('"PreToolUse"');
+      expect(configFile?.content).toContain('echo check # promptscript-generated:check');
+    });
+
     it('should map content to developer_instructions', () => {
       const result = formatter.format(createProgramWithAgent(), { version: 'multifile' });
       const agentToml = (result.additionalFiles ?? []).find(

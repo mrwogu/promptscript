@@ -447,6 +447,30 @@ describe('New Agent Formatters', () => {
         );
       });
 
+      it.skipIf(name !== 'windsurf')('should attach Windsurf hook warnings', () => {
+        const ast = createProgramWithHooks();
+        const hooksBlock = ast.blocks[0]!;
+        if (hooksBlock.content.type === 'ObjectContent') {
+          hooksBlock.content.properties['timed'] = {
+            event: 'post-tool-use',
+            matcher: 'Execute',
+            command: ['echo', 'timed'],
+            timeoutMs: 5000,
+          };
+        }
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.warnings).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining('Windsurf cannot represent'),
+              location: expect.any(Object),
+            }),
+          ])
+        );
+      });
+
       it.skipIf(!hasSkills)('should generate skill files in full mode', () => {
         const ast: Program = {
           ...createMinimalProgram(),

@@ -281,6 +281,21 @@ describe('hooksCommand', () => {
       });
     });
 
+    it('ignores legacy Factory settings without a hooks section', async () => {
+      const legacyPath = `${process.cwd()}/.factory/settings.json`;
+      mockExistsSync.mockImplementation((p: string) => p === legacyPath);
+      mockReadFile.mockResolvedValue(JSON.stringify({ permissions: { allow: ['Bash'] } }));
+
+      await hooksCommand('install', 'factory', {});
+
+      expect(mockConsole.error).not.toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        expect.stringContaining('.factory/hooks.json'),
+        expect.any(String),
+        'utf-8'
+      );
+    });
+
     it('refuses ambiguous legacy Factory hooks during installation', async () => {
       const legacyPath = `${process.cwd()}/.factory/settings.json`;
       mockExistsSync.mockImplementation((p: string) => p === legacyPath);

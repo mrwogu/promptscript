@@ -215,6 +215,26 @@ describe('migrateLegacyFactoryHooks', () => {
     expect(result.changed).toBe(false);
     expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
   });
+
+  it('refuses entries with unsupported fields', () => {
+    const result = migrateLegacyFactoryHooks(
+      {
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: 'Execute',
+              hooks: [{ type: 'command', command: 'echo custom' }],
+              metadata: 'user-defined',
+            },
+          ],
+        },
+      },
+      {}
+    );
+
+    expect(result.changed).toBe(false);
+    expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
+  });
 });
 
 describe('detectLegacyFactorySettingsHooks', () => {

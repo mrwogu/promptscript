@@ -484,6 +484,35 @@ command = "echo owned # promptscript-generated:owned"
 
     expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', malformed)).toBeUndefined();
   });
+
+  it('should accept escaped TOML strings and reject unescaped quotes', () => {
+    const escaped = `[[hooks.PreToolUse]]
+matcher = "Edit\\"Write"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo owned # promptscript-generated:owned"
+`;
+    expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', escaped)?.empty).toBe(true);
+
+    const unescaped = `[[hooks.PreToolUse]]
+matcher = "Edit"Write"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo owned # promptscript-generated:owned"
+`;
+    expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', unescaped)).toBeUndefined();
+  });
+
+  it('should reject malformed existing hook JSON and unsupported paths', () => {
+    expect(
+      mergePromptScriptHookOutput('.claude/settings.json', '{"hooks":[]}', '{}')
+    ).toBeUndefined();
+    expect(removePromptScriptOwnedHooks('.unknown/hooks.json', '{}')).toBeUndefined();
+    expect(
+      removePromptScriptOwnedHooks('.claude/settings.json', '{"hooks":"invalid"}')
+    ).toBeUndefined();
+  });
+
   it('should atomically rewrite only unchanged regular hook files', async () => {
     const project = await createTemporaryDirectory('promptscript-rewrite-hooks-');
     const file = join(project, '.claude', 'settings.json');
@@ -530,6 +559,40 @@ command = "echo owned # promptscript-generated:owned"
     await expect(
       readFile(join(outside, 'hooks', 'promptscript.json'), 'utf-8')
     ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('should return false when guarded child processes cannot start', async () => {
+    const project = await createTemporaryDirectory('promptscript-hook-child-');
+    const file = join(project, 'settings.json');
+    await writeFile(file, 'old');
+    const originalExecPath = process.execPath;
+    process.execPath = join(project, 'missing-node');
+    try {
+      await expect(rewriteHookOutputIfUnchanged(file, project, 'old', 'new')).resolves.toBe(false);
+      await expect(
+        createHookOutputSafely(join(project, 'hooks.json'), project, 'new')
+      ).resolves.toBe(false);
+      await expect(
+        createHookOutputSafely(join(project, 'nested', 'hooks.json'), project, 'new')
+      ).resolves.toBe(false);
+    } finally {
+      process.execPath = originalExecPath;
+    }
+  });
+
+  it('should reject hook rewrites and creations outside the output root', async () => {
+    const project = await createTemporaryDirectory('promptscript-hook-root-');
+    const outside = await createTemporaryDirectory('promptscript-hook-outside-');
+    const outsideFile = join(outside, 'hooks.json');
+    await writeFile(outsideFile, 'old');
+
+    await expect(rewriteHookOutputIfUnchanged(outsideFile, project, 'old', 'new')).resolves.toBe(
+      false
+    );
+    await expect(createHookOutputSafely(join(outside, 'new.json'), project, 'new')).resolves.toBe(
+      false
+    );
+    await expect(readFile(outsideFile, 'utf-8')).resolves.toBe('old');
   });
 
   it('should remove obsolete owned Windsurf hooks', async () => {
@@ -801,6 +864,61 @@ command = "echo owned # promptscript-generated:owned"
     await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
       removed: [obsoleteFile],
       removedDirectories: [nestedDirectory, dirname(nestedDirectory)],
+    });
+  });
+
+  it('should keep managed directories containing unmanaged nested directories', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-prune-unmanaged-');
+    const hooksDirectory = join(project, '.github', 'hooks');
+    const obsoleteFile = join(hooksDirectory, 'promptscript.json');
+    await mkdir(join(hooksDirectory, 'team'), { recursive: true });
+    await writeFile(obsoleteFile, `${GENERATED_MARKER}\n`);
+    await writeFile(join(hooksDirectory, 'team', 'rules.json'), '{}\n');
+
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputDirectories: ['.github/hooks'],
+          managedOutputFiles: ['.github/hooks/promptscript.json'],
+        },
+      ],
+    ]);
+
+    await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
+      removed: [obsoleteFile],
+      removedDirectories: [],
+    });
+    await expect(readFile(join(hooksDirectory, 'team', 'rules.json'), 'utf-8')).resolves.toBe(
+      '{}\n'
+    );
+  });
+
+  it('should keep a parent when a managed child directory is not empty', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-prune-child-user-');
+    const nestedDirectory = join(project, '.github', 'hooks', 'team');
+    const obsoleteFile = join(project, '.github', 'hooks', 'promptscript.json');
+    await mkdir(nestedDirectory, { recursive: true });
+    await writeFile(obsoleteFile, `${GENERATED_MARKER}\n`);
+    await writeFile(join(nestedDirectory, 'rules.json'), '{}\n');
+
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputDirectories: ['.github/hooks', '.github/hooks/team'],
+          managedOutputFiles: ['.github/hooks/promptscript.json'],
+        },
+      ],
+    ]);
+
+    await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
+      removed: [obsoleteFile],
+      removedDirectories: [],
     });
   });
 

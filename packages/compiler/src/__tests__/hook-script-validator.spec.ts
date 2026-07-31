@@ -49,6 +49,18 @@ describe('hook script resource validation', () => {
     await rm(projectRoot, { recursive: true, force: true });
   });
 
+  it('ignores programs without a hooks block', async () => {
+    const program: Program = {
+      type: 'Program',
+      blocks: [],
+      uses: [],
+      extends: [],
+      loc,
+    };
+
+    await expect(validateHookScriptResources(program, projectRoot)).resolves.toEqual([]);
+  });
+
   it('accepts a repository-local script with spaces', async () => {
     await writeFile(
       join(projectRoot, '.promptscript', 'scripts', 'check file.mjs'),

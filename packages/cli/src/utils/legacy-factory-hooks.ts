@@ -182,12 +182,10 @@ export function migrateLegacyFactoryHooks(
       continue;
     }
 
-    const remainingEntries: unknown[] = [];
     for (const [index, entry] of entries.entries()) {
       const migration = splitLegacyEntry(entry);
       if (migration.ambiguous) {
         ambiguous.push(`hooks.${eventName}[${index}]`);
-        remainingEntries.push(entry);
         continue;
       }
       if (migration.userEntry !== undefined) {
@@ -197,7 +195,6 @@ export function migrateLegacyFactoryHooks(
         migrated++;
       }
     }
-    if (remainingEntries.length > 0) remainingLegacyHooks[eventName] = remainingEntries;
   }
 
   if (ambiguous.length > 0) {
@@ -207,15 +204,8 @@ export function migrateLegacyFactoryHooks(
   const mergedHooks: Record<string, unknown> = { ...canonicalHooks };
   for (const [eventName, entries] of Object.entries(migratedByEvent)) {
     const existingValue = mergedHooks[eventName];
-    if (existingValue !== undefined && !Array.isArray(existingValue)) {
-      ambiguous.push(`canonical.hooks.${eventName}`);
-      continue;
-    }
-    const existing = existingValue ?? [];
+    const existing = Array.isArray(existingValue) ? existingValue : [];
     mergedHooks[eventName] = appendUnique(existing, entries);
-  }
-  if (ambiguous.length > 0) {
-    return { canonical, legacy, migrated: 0, ambiguous, changed: false };
   }
 
   const nextLegacy = { ...legacy };

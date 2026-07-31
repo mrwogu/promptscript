@@ -3,6 +3,7 @@ import {
   extractHooks,
   generateClaudeHooks,
   generateCodexHooks,
+  generateCodexHookConfig,
   generateCursorHooks,
   generateFactoryHooks,
   generateGeminiHooks,
@@ -137,6 +138,28 @@ describe('hook-adapters', () => {
       });
       expect(extractHooks(block)).toHaveLength(0);
     });
+
+    it('should ignore malformed script and target override values', () => {
+      const block = makeHooksBlock({
+        malformedScript: {
+          event: 'pre-tool-use',
+          script: { path: 42, interpreter: null } as unknown as Value,
+        },
+        malformedTargets: {
+          event: 'pre-tool-use',
+          command: ['echo', 'check'],
+          targets: {
+            vscode: null,
+            cursor: [],
+            claude: { matcher: 42, timeoutMs: 'slow' },
+          } as unknown as Value,
+        },
+      });
+
+      const hooks = extractHooks(block);
+      expect(hooks).toHaveLength(1);
+      expect(hooks[0]!.targets).toEqual({ claude: {} });
+    });
   });
 
   describe('mapEvent', () => {
@@ -209,6 +232,11 @@ describe('hook-adapters', () => {
 
     it('should preserve timeout units for unknown targets', () => {
       expect(convertTimeout(1500, 'unknown' as HookTarget)).toBe(1500);
+    });
+
+    it('should preserve milliseconds for Gemini and Windsurf', () => {
+      expect(convertTimeout(1500, 'gemini')).toBe(1500);
+      expect(convertTimeout(1500, 'windsurf')).toBe(1500);
     });
   });
 
@@ -476,6 +504,15 @@ describe('hook-adapters', () => {
         ],
       });
     });
+
+    it('should omit disabled and unsupported Factory hooks', () => {
+      expect(
+        generateFactoryHooks([
+          { id: 'unsupported', event: 'subagent-start', command: ['echo', 'agent'] },
+          { id: 'disabled', event: 'pre-tool-use', command: ['echo', 'disabled'], enabled: false },
+        ])
+      ).toEqual({});
+    });
   });
 
   describe('generateVSCodeHooks', () => {
@@ -538,6 +575,15 @@ describe('hook-adapters', () => {
         },
       });
     });
+
+    it('should omit disabled and unsupported VS Code hooks', () => {
+      expect(
+        generateVSCodeHooks([
+          { id: 'unsupported', event: 'notification', command: ['echo', 'notice'] },
+          { id: 'disabled', event: 'pre-tool-use', command: ['echo', 'disabled'], enabled: false },
+        ])
+      ).toEqual({});
+    });
   });
 
   describe('generateGitHubHooks', () => {
@@ -582,6 +628,26 @@ describe('hook-adapters', () => {
             powershell: "& 'prs' 'hook' 'stop' # promptscript-generated:stopped",
           },
         ],
+      });
+    });
+
+    it('should omit the PowerShell command for Unix-only script interpreters', () => {
+      const result = generateGitHubHooks([
+        {
+          id: 'shell',
+          event: 'pre-tool-use',
+          script: {
+            path: '.promptscript/scripts/check.sh',
+            interpreter: 'bash',
+            args: [],
+          },
+        },
+      ]);
+
+      expect(result['preToolUse']![0]).toEqual({
+        type: 'command',
+        bash: 'bash .promptscript/scripts/check.sh # promptscript-generated:shell',
+        cwd: '.',
       });
     });
 
@@ -750,6 +816,16 @@ describe('hook-adapters', () => {
       expect(generateWindsurfHooks(hooks)).toEqual({});
     });
 
+    it('omits disabled Windsurf and Gemini hooks', () => {
+      const hooks: HookDefinition[] = [
+        { id: 'disabled', event: 'post-tool-use', command: ['echo', 'disabled'], enabled: false },
+        { id: 'unsupported-gemini', event: 'subagent-start', command: ['echo', 'agent'] },
+      ];
+
+      expect(generateWindsurfHooks(hooks)).toEqual({});
+      expect(generateGeminiHooks(hooks)).toEqual({});
+    });
+
     it('generates Codex status messages', () => {
       const hooks = extractHooks(
         makeHooksBlock({
@@ -774,6 +850,33 @@ describe('hook-adapters', () => {
           "cd \"$GROK_WORKSPACE_ROOT\"/'tools/hook scripts' && python3 \"$GROK_WORKSPACE_ROOT\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
         timeout: 2,
       });
+    });
+
+    it('escapes special characters in Codex TOML hook fields', () => {
+      const special = extractHooks(
+        makeHooksBlock({
+          escaped: {
+            event: 'pre-tool-use',
+            matcher: 'Edit"Write',
+            command: ['echo', 'value'],
+            statusMessage: 'line one\nline two',
+          },
+        })
+      );
+
+      const toml = generateCodexHooks(special);
+      expect(toml).toContain('matcher = "Edit\\"Write"');
+      expect(toml).toContain('statusMessage = "line one\\nline two"');
+    });
+
+    it('omits unsupported and disabled Codex hooks', () => {
+      const hooks: HookDefinition[] = [
+        { id: 'unsupported', event: 'notification', command: ['echo', 'notice'] },
+        { id: 'disabled', event: 'pre-tool-use', command: ['echo', 'disabled'], enabled: false },
+      ];
+
+      expect(generateCodexHooks(hooks)).toBe('');
+      expect(generateCodexHookConfig(hooks)).toEqual({});
     });
 
     it('quotes script paths and metacharacter arguments for Unix and Windows', () => {

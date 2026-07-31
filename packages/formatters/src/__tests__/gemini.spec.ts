@@ -118,6 +118,29 @@ describe('GeminiFormatter', () => {
       ]);
     });
 
+    it('should attach hook compatibility warnings to generated settings', () => {
+      const ast = createHooksProgram();
+      const hooksBlock = ast.blocks[0]!;
+      if (hooksBlock.content.type === 'ObjectContent') {
+        hooksBlock.content.properties['stop'] = {
+          event: 'stop',
+          matcher: 'agent',
+          command: ['echo', 'done'],
+        };
+      }
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: expect.stringContaining('which gemini ignores'),
+            location: createLoc(),
+          }),
+        ])
+      );
+    });
+
     it('should include tech stack from context block', () => {
       const ast: Program = {
         ...createMinimalProgram(),
