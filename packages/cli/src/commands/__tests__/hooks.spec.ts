@@ -281,6 +281,25 @@ describe('hooksCommand', () => {
       });
     });
 
+    it('refuses ambiguous legacy Factory hooks during installation', async () => {
+      const legacyPath = `${process.cwd()}/.factory/settings.json`;
+      mockExistsSync.mockImplementation((p: string) => p === legacyPath);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          hooks: {
+            unknownEvent: [{ hooks: [{ type: 'command', command: 'custom' }] }],
+          },
+        })
+      );
+
+      await hooksCommand('install', 'factory', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Cannot migrate legacy Factory hooks safely')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
     it('migrates legacy Factory hooks before uninstalling them', async () => {
       const files = new Map<string, string>();
       const legacyPath = `${process.cwd()}/.factory/settings.json`;
@@ -368,6 +387,18 @@ describe('hooksCommand', () => {
         0o755
       );
       expect(mockConsole.success).toHaveBeenCalledWith(expect.stringContaining('cline'));
+    });
+
+    it('refuses to overwrite unowned Cline scripts during installation', async () => {
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => false });
+      mockReadFile.mockResolvedValue('#!/bin/bash\necho custom');
+
+      await hooksCommand('install', 'cline', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to overwrite unowned Cline hook script')
+      );
+      expect(process.exitCode).toBe(1);
     });
 
     it('errors for unknown tool name', async () => {
@@ -554,6 +585,31 @@ describe('hooksCommand', () => {
       expect(mockConsole.warning).toHaveBeenCalledWith(
         expect.stringContaining('preserving unowned')
       );
+    });
+
+    it('rejects symlinked Cline scripts during uninstall', async () => {
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => true });
+
+      await hooksCommand('uninstall', 'cline', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to access symlink')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('reports unreadable Cline scripts during uninstall', async () => {
+      const permissionError = new Error('permission denied') as NodeJS.ErrnoException;
+      permissionError.code = 'EACCES';
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => false });
+      mockReadFile.mockRejectedValue(permissionError);
+
+      await hooksCommand('uninstall', 'cline', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to uninstall hooks')
+      );
+      expect(process.exitCode).toBe(1);
     });
   });
 
