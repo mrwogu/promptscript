@@ -32,6 +32,22 @@ const createStandardsProgram = (properties: Record<string, Value>): Program => (
   ],
 });
 
+const createTextStandardsProgram = (text: string): Program => ({
+  ...createMinimalProgram(),
+  blocks: [
+    {
+      type: 'Block',
+      name: 'standards',
+      content: {
+        type: 'TextContent',
+        value: text,
+        loc: createLoc(),
+      },
+      loc: createLoc(),
+    },
+  ],
+});
+
 describe('FactoryFormatter', () => {
   let formatter: FactoryFormatter;
 
@@ -344,6 +360,133 @@ describe('FactoryFormatter', () => {
         expect(content).toContain('### Testing\n\n- Use Vitest');
       }
       expect(new Set(contents).size).toBe(1);
+    });
+
+    it('should render free-form text standards in monolith mode', () => {
+      const ast = createTextStandardsProgram(
+        '- Strict mode enabled\n- No any type\n- Never log secrets'
+      );
+
+      const versions = ['simple', 'multifile', 'full'] as const;
+      const contents = versions.map((version) => formatter.format(ast, { version }).content);
+
+      for (const content of contents) {
+        expect(content).toContain('## Conventions & Patterns');
+        expect(content).toContain('- Strict mode enabled');
+        expect(content).toContain('- No any type');
+        expect(content).toContain('- Never log secrets');
+      }
+      expect(new Set(contents).size).toBe(1);
+    });
+
+    it('should downgrade h2 headings in free-form text standards', () => {
+      const ast = createTextStandardsProgram('## Security\n\n- Validate all inputs');
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content).toContain('## Conventions & Patterns');
+      expect(result.content).toContain('### Security');
+      expect(result.content).toContain('- Validate all inputs');
+    });
+
+    it('should preserve headings inside free-form standards code fences', () => {
+      const text = '# Security\n\n```markdown\n# Example\n## Nested\n```\n';
+      const ast = createTextStandardsProgram(text);
+
+      const monolith = formatter.format(ast, { version: 'simple' });
+      expect(monolith.content).toContain('### Security');
+      expect(monolith.content).toContain('# Example');
+      expect(monolith.content).toContain('## Nested');
+
+      const split = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+      const standardsFile = (split.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toContain('## Security');
+      expect(standardsFile?.content).toContain('# Example');
+      expect(standardsFile?.content).toContain('## Nested');
+    });
+
+    it('should dedent indented free-form text standards in monolith mode', () => {
+      // Triple-quoted text keeps authoring indentation after the trimmed first line
+      const ast = createTextStandardsProgram(
+        '\n  - Strict mode enabled\n  - No any type\n  - Never log secrets\n  '
+      );
+
+      const result = formatter.format(ast, { version: 'simple' });
+
+      expect(result.content).toContain(
+        '## Conventions & Patterns\n\n- Strict mode enabled\n- No any type\n- Never log secrets'
+      );
+      expect(result.content).not.toContain('  - No any type');
+    });
+
+    it('should dedent and downgrade headings in free-form text standards in split mode', () => {
+      const ast = createTextStandardsProgram('\n  # Security\n\n  - Validate all inputs\n  ');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const standardsFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toBe('# Standards\n\n## Security\n\n- Validate all inputs\n');
+    });
+
+    it('should keep h2 headings at h2 in free-form text standards in split mode', () => {
+      const ast = createTextStandardsProgram('## Security\n\n- Validate all inputs');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const standardsFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toBe('# Standards\n\n## Security\n\n- Validate all inputs\n');
+      expect(standardsFile?.content).not.toContain('### Security');
+    });
+
+    it('should cap shifted headings at h6 in split mode', () => {
+      const ast = createTextStandardsProgram('# Security\n\n###### Deep\n\n- Validate all inputs');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const standardsFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toContain('## Security');
+      expect(standardsFile?.content).toContain('###### Deep');
+      expect(standardsFile?.content).not.toContain('#######');
+    });
+
+    it('should emit a single standards rule file for free-form text standards in split mode', () => {
+      const ast = createTextStandardsProgram('- Strict mode enabled\n- Never log secrets');
+
+      const result = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+
+      const ruleFiles = (result.additionalFiles ?? []).filter((file) =>
+        file.path.startsWith('.factory/rules/')
+      );
+      expect(ruleFiles.map((file) => file.path)).toEqual(['.factory/rules/standards.md']);
+      expect(ruleFiles[0]?.content).toContain('# Standards');
+      expect(ruleFiles[0]?.content).toContain('- Strict mode enabled');
+      expect(ruleFiles[0]?.content).toContain('- Never log secrets');
+
+      expect(result.content).toContain('## Rules');
+      expect(result.content).toContain('- [Standards](.factory/rules/standards.md)');
     });
   });
 
