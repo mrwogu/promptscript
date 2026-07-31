@@ -5,6 +5,7 @@ export interface ToolHookConfig {
   timeoutUnit: 'seconds' | 'milliseconds' | 'n/a';
   generatePreEditHook(prsPath: string): Record<string, unknown>;
   generatePostEditHook(prsPath: string): Record<string, unknown>;
+  isOwnedScript?(content: string, action: 'pre-edit' | 'post-edit'): boolean;
   mergeIntoSettings(existing: Record<string, unknown>, prsPath: string): Record<string, unknown>;
   removeFromSettings(existing: Record<string, unknown>): Record<string, unknown>;
 }

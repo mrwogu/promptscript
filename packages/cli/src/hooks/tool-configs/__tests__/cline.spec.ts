@@ -32,7 +32,7 @@ describe('hooks/tool-configs/clineConfig', () => {
     // Assert
     expect(result).toEqual({
       scriptPath: '.clinerules/hooks/prs-pre-edit.sh',
-      content: `#!/bin/bash\n${prsPath} hook pre-edit`,
+      content: `#!/bin/bash\n# promptscript-generated:cline-pre-edit\n${prsPath} hook pre-edit`,
     });
   });
 
@@ -48,7 +48,7 @@ describe('hooks/tool-configs/clineConfig', () => {
     // Assert
     expect(result).toEqual({
       scriptPath: '.clinerules/hooks/prs-post-edit.sh',
-      content: `#!/bin/bash\n${prsPath} hook post-edit`,
+      content: `#!/bin/bash\n# promptscript-generated:cline-post-edit\n${prsPath} hook post-edit`,
     });
   });
 
@@ -65,6 +65,28 @@ describe('hooks/tool-configs/clineConfig', () => {
     // Assert
     expect(result).toEqual(existing);
     expect(result).toBe(existing);
+  });
+
+  it('recognizes only exact owned script contents', () => {
+    expect(
+      clineConfig.isOwnedScript?.(
+        '#!/bin/bash\n# promptscript-generated:cline-pre-edit\nprs hook pre-edit',
+        'pre-edit'
+      )
+    ).toBe(true);
+    expect(clineConfig.isOwnedScript?.('#!/bin/bash\nprs hook pre-edit', 'pre-edit')).toBe(true);
+    expect(
+      clineConfig.isOwnedScript?.(
+        '#!/bin/bash\n# promptscript-generated:cline-pre-edit\nprintf custom\nprs hook pre-edit',
+        'pre-edit'
+      )
+    ).toBe(false);
+    expect(
+      clineConfig.isOwnedScript?.(
+        '#!/bin/bash\n# promptscript-generated:cline-pre-edit\nprs hook pre-edit\nrm -rf /',
+        'pre-edit'
+      )
+    ).toBe(false);
   });
 
   // --- removeFromSettings (no-op) ---

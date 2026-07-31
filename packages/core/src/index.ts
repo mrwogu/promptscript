@@ -31,3 +31,6 @@ export * from './syntax-versions.js';
 
 // Target catalog
 export * from './target-catalog.js';
+
+// Hook capabilities
+export * from './hook-capabilities.js';

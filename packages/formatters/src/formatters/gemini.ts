@@ -5,6 +5,11 @@ import {
   type MarkdownVersion,
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
+import {
+  extractHooks,
+  generateGeminiHooks,
+  getHookCompatibilityWarnings,
+} from '../hook-adapters.js';
 
 /**
  * Supported Gemini format versions.
@@ -93,11 +98,57 @@ export class GeminiFormatter extends MarkdownInstructionFormatter {
     return '.gemini/skills';
   }
 
+  override format(ast: Program, options?: FormatOptions): FormatterOutput {
+    const output = super.format(ast, options);
+    return {
+      ...output,
+      managedOutputFiles: [
+        ...new Set([...(output.managedOutputFiles ?? []), '.gemini/settings.json']),
+      ],
+    };
+  }
+
   /**
    * Gemini treats full mode as multifile (no agents).
    */
   protected override formatFull(ast: Program, options?: FormatOptions): FormatterOutput {
     return this.formatMultifile(ast, options);
+  }
+
+  protected override formatMultifile(ast: Program, options?: FormatOptions): FormatterOutput {
+    const output = super.formatMultifile(ast, options);
+    const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
+    if (!hooksBlock) {
+      return {
+        ...output,
+        managedOutputFiles: [...(output.managedOutputFiles ?? []), '.gemini/settings.json'],
+      };
+    }
+
+    const hooks = extractHooks(hooksBlock);
+    const geminiHooks = generateGeminiHooks(hooks);
+    const warnings = getHookCompatibilityWarnings(hooks, 'gemini').map((warning) => ({
+      ...warning,
+      location: hooksBlock.loc,
+    }));
+    const hooksFile =
+      Object.keys(geminiHooks).length > 0
+        ? [
+            {
+              path: '.gemini/settings.json',
+              content: JSON.stringify({ hooks: geminiHooks }, null, 2) + '\n',
+            },
+          ]
+        : [];
+
+    return {
+      ...output,
+      ...(hooksFile.length > 0
+        ? { additionalFiles: [...(output.additionalFiles ?? []), ...hooksFile] }
+        : {}),
+      ...(warnings.length > 0 ? { warnings: [...(output.warnings ?? []), ...warnings] } : {}),
+      managedOutputFiles: [...(output.managedOutputFiles ?? []), '.gemini/settings.json'],
+    };
   }
 
   /**

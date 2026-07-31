@@ -683,6 +683,48 @@ describe('Compiler', () => {
 
       expect(formatter.format).not.toHaveBeenCalled();
     });
+
+    it('should return errors for missing hook scripts', async () => {
+      const ast = createTestProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                check: {
+                  event: 'post-tool-use',
+                  script: {
+                    path: '.promptscript/scripts/missing.mjs',
+                    interpreter: 'node',
+                  },
+                },
+              },
+              loc: { file: 'test.prs', line: 1, column: 1 },
+            },
+            loc: { file: 'test.prs', line: 1, column: 1 },
+          },
+        ],
+      });
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(false);
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          code: 'PS2001',
+          message: expect.stringContaining('script not found'),
+        }),
+      ]);
+    });
   });
 
   describe('compile - formatter errors', () => {
@@ -734,6 +776,44 @@ describe('Compiler', () => {
   });
 
   describe('compile - output path collision warning', () => {
+    it('should preserve formatter compatibility warnings', async () => {
+      const ast = createTestProgram();
+      const formatter = createMockFormatter('github', '.github/copilot-instructions.md');
+      vi.mocked(formatter.format).mockReturnValue({
+        path: '.github/copilot-instructions.md',
+        content: '# GitHub output',
+        warnings: [
+          {
+            code: 'PS4002',
+            message: 'Hook event "beforeRead" is not supported by target "github".',
+            location: { file: 'test.prs', line: 4, column: 1 },
+          },
+        ],
+      });
+
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            ruleId: 'PS4002',
+            ruleName: 'target-hook-compatibility',
+            message: 'Hook event "beforeRead" is not supported by target "github".',
+            location: { file: 'test.prs', line: 4, column: 1 },
+          }),
+        ])
+      );
+    });
+
     it('should warn when multiple formatters target the same output path (PS4001)', async () => {
       const ast = createTestProgram();
       const formatter1 = createMockFormatter('codex', 'AGENTS.md');
@@ -742,6 +822,7 @@ describe('Compiler', () => {
         path: 'AGENTS.md',
         content: '# Codex output',
         managedOutputDirectories: ['.factory/rules'],
+        managedOutputFiles: ['.factory/hooks.json'],
       });
 
       mockResolve.mockResolvedValue(createResolveSuccess(ast));
@@ -765,6 +846,7 @@ describe('Compiler', () => {
       expect(collisionWarning?.message).toContain('codex');
       expect(collisionWarning?.message).toContain('amp');
       expect(result.outputs.get('AGENTS.md')?.managedOutputDirectories).toEqual(['.factory/rules']);
+      expect(result.outputs.get('AGENTS.md')?.managedOutputFiles).toEqual(['.factory/hooks.json']);
     });
 
     it('should warn and skip when additional file collides with existing output (PS4001)', async () => {

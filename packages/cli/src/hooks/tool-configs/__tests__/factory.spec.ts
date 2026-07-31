@@ -9,7 +9,7 @@ describe('hooks/tool-configs/factoryConfig', () => {
   });
 
   it('has correct settingsPath', () => {
-    expect(factoryConfig.settingsPath).toBe('.factory/settings.json');
+    expect(factoryConfig.settingsPath).toBe('.factory/hooks.json');
   });
 
   it('has correct timeoutUnit', () => {

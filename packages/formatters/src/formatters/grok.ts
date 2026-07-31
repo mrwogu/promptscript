@@ -3,6 +3,8 @@ import { BaseFormatter } from '../base-formatter.js';
 import { ClaudeFormatter } from './claude.js';
 import type { FormatOptions, FormatterOutput, FormatterVersionMap } from '../types.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
+import { extractHooks, generateGrokHooks, getHookCompatibilityWarnings } from '../hook-adapters.js';
+import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 
 /**
  * Supported Grok Build output format versions.
@@ -74,16 +76,26 @@ export class GrokFormatter extends BaseFormatter {
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = (options?.version ?? 'simple') as GrokVersion;
+    let output: FormatterOutput;
 
     if (version === 'simple') {
-      return this.formatSimple(ast, options);
+      output = this.formatSimple(ast, options);
+    } else if (version === 'multifile') {
+      output = this.formatMultifile(ast, options);
+    } else {
+      output = this.formatFull(ast, options);
     }
 
-    if (version === 'multifile') {
-      return this.formatMultifile(ast, options);
-    }
-
-    return this.formatFull(ast, options);
+    output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    return {
+      ...output,
+      managedOutputFiles: [
+        ...new Set([
+          ...(output.managedOutputFiles ?? []).filter((file) => file !== '.claude/settings.json'),
+          '.grok/hooks/promptscript.json',
+        ]),
+      ],
+    };
   }
 
   private formatSimple(ast: Program, options?: FormatOptions): FormatterOutput {
@@ -93,7 +105,9 @@ export class GrokFormatter extends BaseFormatter {
       version: 'simple',
       outputPath: 'AGENTS.md',
     });
-    return claudeResult;
+    const result = { ...claudeResult };
+    delete result.warnings;
+    return result;
   }
 
   private formatMultifile(ast: Program, options?: FormatOptions): FormatterOutput {
@@ -148,7 +162,26 @@ export class GrokFormatter extends BaseFormatter {
       additionalFiles.push(claudeFull);
     }
     if (claudeFull.additionalFiles) {
-      additionalFiles.push(...claudeFull.additionalFiles);
+      additionalFiles.push(
+        ...claudeFull.additionalFiles.filter((file) => file.path !== '.claude/settings.json')
+      );
+    }
+
+    const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
+    let hookWarnings: FormatterOutput['warnings'];
+    if (hooksBlock) {
+      const hooks = extractHooks(hooksBlock);
+      const grokHooks = generateGrokHooks(hooks);
+      if (Object.keys(grokHooks).length > 0) {
+        additionalFiles.push({
+          path: '.grok/hooks/promptscript.json',
+          content: JSON.stringify({ hooks: grokHooks }, null, 2) + '\n',
+        });
+      }
+      hookWarnings = getHookCompatibilityWarnings(hooks, 'grok').map((warning) => ({
+        ...warning,
+        location: hooksBlock.loc,
+      }));
     }
 
     // Generate .grok/plugins.json from @plugins block
@@ -167,7 +200,9 @@ export class GrokFormatter extends BaseFormatter {
       path: 'AGENTS.md',
       content: agentsMd.content,
       additionalFiles,
-      managedOutputDirectories: claudeFull.managedOutputDirectories,
+      ...(hookWarnings && hookWarnings.length > 0 ? { warnings: hookWarnings } : {}),
+      managedOutputDirectories: [...(claudeFull.managedOutputDirectories ?? []), '.grok/hooks'],
+      managedOutputFiles: ['.grok/hooks/promptscript.json'],
     };
   }
 }

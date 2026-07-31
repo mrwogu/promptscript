@@ -2,6 +2,7 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
+import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -236,14 +237,19 @@ export class AntigravityFormatter extends BaseFormatter {
 
     // If there are additional files, return multi-file output
     if (allAdditional.length > 0) {
-      return {
-        path: mainOutput.path,
-        content: mainOutput.content,
-        additionalFiles: allAdditional,
-      };
+      return appendTargetHookCapabilityWarnings(
+        {
+          path: mainOutput.path,
+          content: mainOutput.content,
+          additionalFiles: allAdditional,
+        },
+        ast,
+        this.name,
+        version
+      );
     }
 
-    return mainOutput;
+    return appendTargetHookCapabilityWarnings(mainOutput, ast, this.name, version);
   }
 
   /**

@@ -451,6 +451,15 @@ function generateOutputFiles(f: FormatterInfo): string {
     lines.push(
       `| Always-on rules | \`.factory/rules/**/*.md\` | Split rule files when \`rulesMode: split\` |`
     );
+    lines.push(
+      `| Lifecycle hooks | \`.factory/hooks.json\` | Project hooks in multifile and full modes |`
+    );
+  }
+
+  if (f.name === 'github') {
+    lines.push(
+      `| Lifecycle hooks | \`.github/hooks/promptscript.json\` | Copilot CLI and cloud agent hooks in multifile and full modes |`
+    );
   }
 
   if (f.hasLocal) {

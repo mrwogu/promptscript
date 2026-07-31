@@ -31,6 +31,42 @@ describe('ExampleGallery — gallery examples compile', () => {
       expect(result.outputs.size).toBeGreaterThan(0);
     });
   }
+
+  it('shows current Factory and GitHub hook outputs for agent platform example', async () => {
+    const example = EXAMPLES.find((candidate) => candidate.id === 'agent-platform');
+    expect(example).toBeDefined();
+    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+
+    const result = await compile(files, example!.files[0]!.path, {
+      formatters: [
+        { name: 'factory', config: { version: 'full' } },
+        { name: 'github', config: { version: 'multifile' } },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toMatchObject({
+      hooks: {
+        PostToolUse: [
+          {
+            hooks: [
+              {
+                command: expect.stringContaining(
+                  'node "$FACTORY_PROJECT_DIR"/.promptscript/scripts/validate.mjs --strict'
+                ),
+              },
+            ],
+          },
+        ],
+      },
+    });
+    expect(
+      JSON.parse(result.outputs.get('.github/hooks/promptscript.json')!.content)
+    ).toMatchObject({
+      version: 1,
+      hooks: { postToolUse: [{ cwd: '.' }] },
+    });
+  });
 });
 
 describe('ExampleGallery — rendering', () => {

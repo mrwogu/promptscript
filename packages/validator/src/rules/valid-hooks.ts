@@ -1,5 +1,12 @@
-import type { ValidationRule } from '../types.js';
-import type { Value } from '@promptscript/core';
+import type { RuleContext, ValidationRule } from '../types.js';
+import {
+  isPortableHookInterpreter,
+  isPortableHookScriptPath,
+  isPortablePathSegment,
+  KNOWN_TARGETS,
+  type SourceLocation,
+  type Value,
+} from '@promptscript/core';
 
 /** Portable hook events (PascalCase superset per architecture decision). */
 const VALID_HOOK_EVENTS = new Set([
@@ -15,6 +22,29 @@ const VALID_HOOK_EVENTS = new Set([
 /** Minimum and maximum timeout in milliseconds. */
 const MIN_TIMEOUT_MS = 100;
 const MAX_TIMEOUT_MS = 600_000; // 10 minutes
+const HOOK_FIELDS = new Set([
+  'event',
+  'command',
+  'script',
+  'cwd',
+  'matcher',
+  'timeoutMs',
+  'statusMessage',
+  'continueOnFailure',
+  'enabled',
+  'targets',
+]);
+const SCRIPT_FIELDS = new Set(['path', 'interpreter', 'args']);
+const TARGET_OVERRIDE_FIELDS = new Set([
+  'event',
+  'matcher',
+  'timeoutMs',
+  'statusMessage',
+  'continueOnFailure',
+  'enabled',
+  'cwd',
+]);
+const VALID_HOOK_TARGETS = new Set([...KNOWN_TARGETS, 'vscode']);
 
 /**
  * PS034: Valid hooks block.
@@ -22,7 +52,10 @@ const MAX_TIMEOUT_MS = 600_000; // 10 minutes
  * Validates the @hooks block structure and fields:
  * - Hook IDs must be stable (from object keys, non-empty)
  * - `event` must be a valid portable event
+ * - Exactly one of `command` or `script` must be configured
  * - `command` must be a non-empty string array (no shell interpolation)
+ * - `script` must reference a supported repository-local script
+ * - `cwd` must be "project" or a portable relative path
  * - `timeoutMs` must be in valid range
  * - `matcher` must be a string if present
  * - `statusMessage` must be a string if present
@@ -37,7 +70,15 @@ export const validHooks: ValidationRule = {
   defaultSeverity: 'warning',
   validate: (ctx) => {
     const hooksBlock = ctx.ast.blocks.find((b) => b.name === 'hooks');
-    if (!hooksBlock || hooksBlock.content.type !== 'ObjectContent') return;
+    if (!hooksBlock) return;
+    if (hooksBlock.content.type !== 'ObjectContent') {
+      ctx.report({
+        message: '@hooks must contain named hook objects',
+        location: hooksBlock.loc,
+        severity: 'error',
+      });
+      return;
+    }
 
     for (const [hookId, hookValue] of Object.entries(hooksBlock.content.properties)) {
       // Hook ID must be non-empty
@@ -60,6 +101,15 @@ export const validHooks: ValidationRule = {
       }
 
       const hook = hookValue as Record<string, Value>;
+      for (const field of Object.keys(hook)) {
+        if (!HOOK_FIELDS.has(field)) {
+          ctx.report({
+            message: `Hook "${hookId}": unknown field "${field}"`,
+            location: hooksBlock.loc,
+            severity: 'error',
+          });
+        }
+      }
 
       // Validate event (required)
       const event = hook['event'];
@@ -84,52 +134,94 @@ export const validHooks: ValidationRule = {
         });
       }
 
-      // Validate command (required, non-empty string array, no interpolation)
+      // Validate command or script
       const command = hook['command'];
-      if (command === undefined) {
+      const script = hook['script'];
+      if (command === undefined && script === undefined) {
         ctx.report({
-          message: `Hook "${hookId}": missing required field "command"`,
+          message: `Hook "${hookId}": exactly one of "command" or "script" is required`,
           location: hooksBlock.loc,
           severity: 'error',
         });
-      } else if (!Array.isArray(command)) {
+      } else if (command !== undefined && script !== undefined) {
         ctx.report({
-          message: `Hook "${hookId}": command must be an array`,
+          message: `Hook "${hookId}": "command" and "script" are mutually exclusive`,
           location: hooksBlock.loc,
           severity: 'error',
         });
-      } else if (command.length === 0) {
+      } else if (command !== undefined) {
+        if (!Array.isArray(command)) {
+          ctx.report({
+            message: `Hook "${hookId}": command must be an array`,
+            location: hooksBlock.loc,
+            severity: 'error',
+          });
+        } else if (command.length === 0) {
+          ctx.report({
+            message: `Hook "${hookId}": command must not be empty`,
+            location: hooksBlock.loc,
+            severity: 'error',
+          });
+        } else {
+          if (typeof command[0] === 'string' && command[0].trim().length === 0) {
+            ctx.report({
+              message: `Hook "${hookId}": command executable must not be empty`,
+              location: hooksBlock.loc,
+              severity: 'error',
+            });
+          }
+          for (const arg of command) {
+            if (typeof arg !== 'string') {
+              ctx.report({
+                message: `Hook "${hookId}": command arguments must be strings`,
+                location: hooksBlock.loc,
+                severity: 'error',
+              });
+              break;
+            }
+            if (arg.includes('$(') || arg.includes('`') || arg.includes('${')) {
+              ctx.report({
+                message: `Hook "${hookId}": shell interpolation is forbidden in command arguments`,
+                location: hooksBlock.loc,
+                suggestion: 'Use explicit argument passing instead of shell interpolation',
+                severity: 'error',
+              });
+            }
+          }
+        }
+      } else if (typeof script !== 'object' || script === null || Array.isArray(script)) {
         ctx.report({
-          message: `Hook "${hookId}": command must not be empty`,
+          message: `Hook "${hookId}": script must be an object`,
           location: hooksBlock.loc,
           severity: 'error',
         });
       } else {
-        for (const arg of command) {
-          if (typeof arg !== 'string') {
-            ctx.report({
-              message: `Hook "${hookId}": command arguments must be strings`,
-              location: hooksBlock.loc,
-              severity: 'error',
-            });
-            break;
-          }
-          // Forbid shell interpolation patterns
-          if (arg.includes('$(') || arg.includes('`') || arg.includes('${')) {
-            ctx.report({
-              message: `Hook "${hookId}": shell interpolation is forbidden in command arguments`,
-              location: hooksBlock.loc,
-              suggestion: 'Use explicit argument passing instead of shell interpolation',
-              severity: 'error',
-            });
-          }
+        validateScript(hookId, script as Record<string, Value>, hooksBlock.loc, ctx.report);
+      }
+
+      // Validate cwd
+      const cwd = hook['cwd'];
+      if (cwd !== undefined) {
+        if (typeof cwd !== 'string') {
+          ctx.report({
+            message: `Hook "${hookId}": cwd must be a string`,
+            location: hooksBlock.loc,
+            severity: 'error',
+          });
+        } else if (cwd !== 'project' && !isPortableRelativePath(cwd)) {
+          ctx.report({
+            message: `Hook "${hookId}": cwd must be "project" or a portable path relative to the project root`,
+            location: hooksBlock.loc,
+            suggestion: 'Use "project" or forward-slash path segments without "." or ".."',
+            severity: 'error',
+          });
         }
       }
 
       // Validate timeoutMs
       const timeoutMs = hook['timeoutMs'];
       if (timeoutMs !== undefined) {
-        if (typeof timeoutMs !== 'number') {
+        if (typeof timeoutMs !== 'number' || !Number.isFinite(timeoutMs)) {
           ctx.report({
             message: `Hook "${hookId}": timeoutMs must be a number`,
             location: hooksBlock.loc,
@@ -183,6 +275,195 @@ export const validHooks: ValidationRule = {
           severity: 'error',
         });
       }
+
+      const targets = hook['targets'];
+      if (targets !== undefined) {
+        if (typeof targets !== 'object' || targets === null || Array.isArray(targets)) {
+          ctx.report({
+            message: `Hook "${hookId}": targets must be an object`,
+            location: hooksBlock.loc,
+            severity: 'error',
+          });
+        } else {
+          validateTargetOverrides(
+            hookId,
+            targets as Record<string, Value>,
+            hooksBlock.loc,
+            ctx.report
+          );
+        }
+      }
     }
   },
 };
+
+function validateTargetOverrides(
+  hookId: string,
+  targets: Record<string, Value>,
+  location: SourceLocation,
+  report: RuleContext['report']
+): void {
+  for (const [target, value] of Object.entries(targets)) {
+    if (!VALID_HOOK_TARGETS.has(target)) {
+      report({
+        message: `Hook "${hookId}": unknown target override "${target}"`,
+        location,
+        suggestion: `Valid targets: ${[...VALID_HOOK_TARGETS].join(', ')}`,
+        severity: 'error',
+      });
+    }
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" must be an object`,
+        location,
+        severity: 'error',
+      });
+      continue;
+    }
+
+    const override = value as Record<string, Value>;
+    for (const field of Object.keys(override)) {
+      if (!TARGET_OVERRIDE_FIELDS.has(field)) {
+        report({
+          message: `Hook "${hookId}": unknown target override field "${field}"`,
+          location,
+          severity: 'error',
+        });
+      }
+    }
+
+    const event = override['event'];
+    if (event !== undefined && (typeof event !== 'string' || !VALID_HOOK_EVENTS.has(event))) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" has an invalid event`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const matcher = override['matcher'];
+    if (matcher !== undefined && typeof matcher !== 'string') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" matcher must be a string`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const timeoutMs = override['timeoutMs'];
+    if (timeoutMs !== undefined && typeof timeoutMs !== 'number') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" timeoutMs must be a number`,
+        location,
+        severity: 'error',
+      });
+    } else if (
+      timeoutMs !== undefined &&
+      (!Number.isFinite(timeoutMs) || timeoutMs < MIN_TIMEOUT_MS || timeoutMs > MAX_TIMEOUT_MS)
+    ) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" timeoutMs must be between ${MIN_TIMEOUT_MS} and ${MAX_TIMEOUT_MS}`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const statusMessage = override['statusMessage'];
+    if (statusMessage !== undefined && typeof statusMessage !== 'string') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" statusMessage must be a string`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const continueOnFailure = override['continueOnFailure'];
+    if (continueOnFailure !== undefined && typeof continueOnFailure !== 'boolean') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" continueOnFailure must be a boolean`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const enabled = override['enabled'];
+    if (enabled !== undefined && typeof enabled !== 'boolean') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" enabled must be a boolean`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const cwd = override['cwd'];
+    if (
+      cwd !== undefined &&
+      (typeof cwd !== 'string' || (cwd !== 'project' && !isPortableRelativePath(cwd)))
+    ) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" cwd must be "project" or a portable relative path`,
+        location,
+        severity: 'error',
+      });
+    }
+  }
+}
+
+function validateScript(
+  hookId: string,
+  script: Record<string, Value>,
+  location: SourceLocation,
+  report: RuleContext['report']
+): void {
+  for (const field of Object.keys(script)) {
+    if (!SCRIPT_FIELDS.has(field)) {
+      report({
+        message: `Hook "${hookId}": unknown script field "${field}"`,
+        location,
+        severity: 'error',
+      });
+    }
+  }
+
+  const path = script['path'];
+  if (typeof path !== 'string' || !isPortableHookScriptPath(path)) {
+    report({
+      message: `Hook "${hookId}": script path must be a safe file under ".promptscript/scripts/"`,
+      location,
+      severity: 'error',
+    });
+  }
+
+  const interpreter = script['interpreter'];
+  if (typeof interpreter !== 'string' || !isPortableHookInterpreter(interpreter)) {
+    report({
+      message: `Hook "${hookId}": script interpreter is required and must be portable`,
+      location,
+      suggestion:
+        'Use python3, python, node, deno, bun, ruby, php, perl, bash, sh, zsh, pwsh, or powershell',
+      severity: 'error',
+    });
+  }
+
+  const args = script['args'];
+  if (args !== undefined && (!Array.isArray(args) || args.some((arg) => typeof arg !== 'string'))) {
+    report({
+      message: `Hook "${hookId}": script args must be an array of strings`,
+      location,
+      severity: 'error',
+    });
+  }
+}
+
+function isPortableRelativePath(path: string): boolean {
+  if (!path || path.startsWith('/') || path.includes('\\')) return false;
+  if (
+    /^[A-Za-z]:/.test(path) ||
+    path.includes('\0') ||
+    path.includes('\n') ||
+    path.includes('\r')
+  ) {
+    return false;
+  }
+  return path.split('/').every(isPortablePathSegment);
+}

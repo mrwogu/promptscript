@@ -29,6 +29,16 @@ describe('hooks/extractFilePath', () => {
     expect(extractFilePath(payload)).toBe('/src/main.ts');
   });
 
+  // VS Code Copilot Agent Hooks - tool_input.filePath
+  it('extracts filePath from VS Code Copilot payload', () => {
+    const payload = {
+      hook_event_name: 'PostToolUse',
+      tool_name: 'replace_string_in_file',
+      tool_input: { filePath: '/src/main.ts' },
+    };
+    expect(extractFilePath(payload)).toBe('/src/main.ts');
+  });
+
   // Gemini CLI AfterTool — write_file, arguments.file_path
   it('extracts file_path from Gemini CLI write_file payload', () => {
     const payload = {

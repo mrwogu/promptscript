@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "python3 .promptscript/scripts/validate.py",
+        "powershell": "& 'python3' '.promptscript/scripts/validate.py'",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

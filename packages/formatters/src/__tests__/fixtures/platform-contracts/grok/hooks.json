@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$GROK_WORKSPACE_ROOT\"/.promptscript/scripts/check.mjs",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

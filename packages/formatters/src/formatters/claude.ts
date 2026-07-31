@@ -2,7 +2,12 @@ import type { Block, ClaudeVersion, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
-import { extractHooks, generateClaudeHooks } from '../hook-adapters.js';
+import {
+  extractHooks,
+  generateClaudeHooks,
+  getHookCompatibilityWarnings,
+} from '../hook-adapters.js';
+import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -189,16 +194,32 @@ export class ClaudeFormatter extends BaseFormatter {
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
+    let output: FormatterOutput;
 
     if (version === 'full') {
-      return this.formatFull(ast, options);
+      output = this.formatFull(ast, options);
+    } else if (version === 'multifile') {
+      output = this.formatMultifile(ast, options);
+    } else {
+      output = this.formatSimple(ast, options);
     }
 
-    if (version === 'multifile') {
-      return this.formatMultifile(ast, options);
-    }
+    output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    output = {
+      ...output,
+      managedOutputFiles: [
+        ...new Set([...(output.managedOutputFiles ?? []), '.claude/settings.json']),
+      ],
+    };
+    const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
+    if (!hooksBlock || version !== 'full') return output;
 
-    return this.formatSimple(ast, options);
+    const warnings = getHookCompatibilityWarnings(extractHooks(hooksBlock), 'claude').map(
+      (warning) => ({ ...warning, location: hooksBlock.loc })
+    );
+    return warnings.length > 0
+      ? { ...output, warnings: [...(output.warnings ?? []), ...warnings] }
+      : output;
   }
 
   /**

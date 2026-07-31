@@ -1,5 +1,5 @@
 import type { ToolHookConfig } from './types.js';
-import { isPrsHookEntry } from './claude.js';
+import { isPrsHookEntry, removePromptScriptHooks } from './claude.js';
 
 function getHooksSection(existing: Record<string, unknown>): Record<string, unknown> {
   const hooks = existing['hooks'];
@@ -17,7 +17,7 @@ function getHookArray(hooksSection: Record<string, unknown>, key: string): unkno
 export const factoryConfig: ToolHookConfig = {
   name: 'factory',
   detectPaths: ['.factory'],
-  settingsPath: '.factory/settings.json',
+  settingsPath: '.factory/hooks.json',
   timeoutUnit: 'seconds',
 
   generatePreEditHook(prsPath: string): Record<string, unknown> {
@@ -80,8 +80,14 @@ export const factoryConfig: ToolHookConfig = {
       ...existing,
       hooks: {
         ...hooksSection,
-        PreToolUse: preToolUse.filter((e) => !isPrsHookEntry(e)),
-        PostToolUse: postToolUse.filter((e) => !isPrsHookEntry(e)),
+        PreToolUse: preToolUse.flatMap((entry) => {
+          const cleaned = removePromptScriptHooks(entry);
+          return cleaned === undefined ? [] : [cleaned];
+        }),
+        PostToolUse: postToolUse.flatMap((entry) => {
+          const cleaned = removePromptScriptHooks(entry);
+          return cleaned === undefined ? [] : [cleaned];
+        }),
       },
     };
   },

@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "post_write_code": [
+      {
+        "command": "node .promptscript/scripts/check.mjs",
+        "powershell": "& 'node' '.promptscript/scripts/check.mjs'",
+        "working_directory": "."
+      }
+    ]
+  }
+}
