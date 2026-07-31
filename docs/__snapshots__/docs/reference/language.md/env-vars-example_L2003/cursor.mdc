@@ -1,7 +1,0 @@
----
-description: "Project-specific rules"
-alwaysApply: true
----
-
-Running in ${NODE_ENV:-development} mode.
-API Key: ${API_KEY}
