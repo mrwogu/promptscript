@@ -212,12 +212,12 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
    * Normalize free-form @standards text for embedding under a section heading.
    * Dedents authoring indentation from triple-quoted text so the first line
    * (already trimmed by extractText) does not leave later lines nested,
-   * downgrades h2 headings to h3, and normalizes markdown for Prettier.
+   * shifts the shallowest heading to h3, and normalizes markdown for Prettier.
    */
   private normalizeFreeformStandardsText(text: string): string {
     const dedentedText = this.dedent(text);
-    const downgradedText = dedentedText.replace(/^(\s*)## /gm, '$1### ');
-    return this.normalizeMarkdownForPrettier(downgradedText).trim();
+    const shiftedText = this.shiftHeadingsToMinLevel(dedentedText, 3);
+    return this.normalizeMarkdownForPrettier(shiftedText).trim();
   }
 
   /**
@@ -233,24 +233,39 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
 
   /**
    * Shift all ATX headings by the same amount so the shallowest heading lands
-   * at targetLevel. Levels clamp to h1-h6. Uses the same plain-regex approach
-   * as the other heading rewrites here, so code fences are not special-cased.
+   * at targetLevel. Levels clamp to h1-h6 and fenced code blocks are ignored.
    */
   private shiftHeadingsToMinLevel(text: string, targetLevel: number): string {
-    const headingPattern = /^(\s*)(#{1,6}) /gm;
+    const headingPattern = /^(\s*)(#{1,6}) /;
     let minLevel = Infinity;
-    for (const match of text.matchAll(headingPattern)) {
-      const hashes = match[2];
-      if (!hashes) continue;
-      minLevel = Math.min(minLevel, hashes.length);
-    }
+    this.mapHeadingsOutsideCodeFences(text, (line) => {
+      const match = line.match(headingPattern);
+      if (match?.[2]) minLevel = Math.min(minLevel, match[2].length);
+      return line;
+    });
     if (minLevel === Infinity) return text;
     const delta = targetLevel - minLevel;
     if (delta === 0) return text;
-    return text.replace(headingPattern, (_match, indent: string, hashes: string) => {
-      const level = Math.max(1, Math.min(6, hashes.length + delta));
-      return `${indent}${'#'.repeat(level)} `;
+    return this.mapHeadingsOutsideCodeFences(text, (line) => {
+      return line.replace(headingPattern, (_match, indent: string, hashes: string) => {
+        const level = Math.max(1, Math.min(6, hashes.length + delta));
+        return `${indent}${'#'.repeat(level)} `;
+      });
     });
+  }
+
+  private mapHeadingsOutsideCodeFences(text: string, mapLine: (line: string) => string): string {
+    let inFence = false;
+    return text
+      .split('\n')
+      .map((line) => {
+        if (/^\s*(`{3,}|~{3,})/.test(line)) {
+          inFence = !inFence;
+          return line;
+        }
+        return inFence ? line : mapLine(line);
+      })
+      .join('\n');
   }
 
   override format(ast: Program, options?: FormatOptions): FormatterOutput {

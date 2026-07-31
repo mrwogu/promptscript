@@ -389,6 +389,27 @@ describe('FactoryFormatter', () => {
       expect(result.content).toContain('- Validate all inputs');
     });
 
+    it('should preserve headings inside free-form standards code fences', () => {
+      const text = '# Security\n\n```markdown\n# Example\n## Nested\n```\n';
+      const ast = createTextStandardsProgram(text);
+
+      const monolith = formatter.format(ast, { version: 'simple' });
+      expect(monolith.content).toContain('### Security');
+      expect(monolith.content).toContain('# Example');
+      expect(monolith.content).toContain('## Nested');
+
+      const split = formatter.format(ast, {
+        version: 'multifile',
+        targetConfig: { rulesMode: 'split' },
+      });
+      const standardsFile = (split.additionalFiles ?? []).find(
+        (file) => file.path === '.factory/rules/standards.md'
+      );
+      expect(standardsFile?.content).toContain('## Security');
+      expect(standardsFile?.content).toContain('# Example');
+      expect(standardsFile?.content).toContain('## Nested');
+    });
+
     it('should dedent indented free-form text standards in monolith mode', () => {
       // Triple-quoted text keeps authoring indentation after the trimmed first line
       const ast = createTextStandardsProgram(
