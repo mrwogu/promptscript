@@ -15,6 +15,8 @@ prs hooks <action> [tool] [options]
 - **Auto-compilation** - supported AI tool writes to `.prs` files trigger `prs compile`.
 - **Output protection** — writes to generated files are blocked with an actionable error.
 
+This command does not compile language-level `@hooks`. Those definitions use target formatter output such as `.factory/hooks.json` and `.github/hooks/promptscript.json`. The Copilot installer path `.github/hooks/promptscript-vscode.json` configures VS Code Agent Hooks only.
+
 ## Actions
 
 ### install
@@ -45,15 +47,15 @@ Writes hook configuration for the specified tool, or for all auto-detected tools
 
 When no tool name is given, `prs hooks install` checks the project root for files associated with each tool:
 
-| Tool        | Detected by presence of                         |
-| ----------- | ----------------------------------------------- |
-| Claude Code | `.claude/`                                      |
-| Factory AI  | `.factory/`                                     |
-| Cursor      | `.cursor/`                                      |
-| Windsurf    | `.windsurf/`                                    |
-| Cline       | `.clinerules`                                   |
-| Copilot     | `.vscode/` or `.github/copilot-instructions.md` |
-| Gemini CLI  | `.gemini/`                                      |
+| Tool        | Detected by presence of                               |
+| ----------- | ----------------------------------------------------- |
+| Claude Code | `.claude/`                                            |
+| Factory AI  | `.factory/`                                           |
+| Cursor      | `.cursor/`                                            |
+| Windsurf    | `.windsurf/`                                          |
+| Cline       | `.clinerules`                                         |
+| Copilot     | `.github/hooks/` or `.github/copilot-instructions.md` |
+| Gemini CLI  | `.gemini/`                                            |
 
 If none are found, the command reports an error and exits with code 1. Specify a tool name to install its integration explicitly.
 
@@ -62,14 +64,16 @@ If none are found, the command reports an error and exits with code 1. Specify a
 | Tool        | Config file                                |
 | ----------- | ------------------------------------------ |
 | Claude Code | `.claude/settings.json`                    |
-| Factory AI  | `.factory/settings.json`                   |
+| Factory AI  | `.factory/hooks.json`                      |
 | Cursor      | `.cursor/hooks.json`                       |
 | Windsurf    | `.windsurf/hooks.json`                     |
 | Cline       | `.clinerules/hooks/prs-{pre,post}-edit.sh` |
-| Copilot     | `.vscode/hooks.json`                       |
+| Copilot     | `.github/hooks/promptscript-vscode.json`   |
 | Gemini CLI  | `.gemini/settings.json`                    |
 
 If a config file already exists, the command merges the hook entries rather than overwriting the whole file.
+
+`prs hooks install factory` also migrates unambiguous hook entries from the legacy `.factory/settings.json` `hooks` section. Unrelated settings are preserved. The command refuses partial migrations when it finds unknown event names or ambiguous entries, so those entries can be reviewed manually.
 
 ______________________________________________________________________
 
@@ -87,7 +91,7 @@ Removes PromptScript hook entries from the config file of the specified tool, or
 | -------- | ----------------------------------------------------------- |
 | `[tool]` | Tool name to uninstall for. Omit to uninstall all detected. |
 
-For JSON integrations, uninstall removes PromptScript entries and preserves the settings file. Cline hook scripts are deleted.
+For JSON integrations, uninstall removes PromptScript entries and preserves the settings file. Cline hook scripts are removed only when they match PromptScript's ownership marker or legacy installer content; unowned scripts are preserved.
 
 ## Options
 

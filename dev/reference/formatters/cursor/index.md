@@ -62,6 +62,7 @@
 - `@shortcuts` with multi-line content become command files
 - The `.cursorrules` file (`legacy` mode) is deprecated; `.cursor/rules/*.mdc` is preferred
 - `full` mode adds commands, `.agents/skills/<name>/SKILL.md`, and `.cursor/agents/<name>.md`
+- `@hooks` emits `.cursor/hooks.json` only in `full` mode; other modes report `PS4002` and omit hooks
 - Supports `@file` and `@folder` context references in rules
 - Nested directory rules are supported
 
