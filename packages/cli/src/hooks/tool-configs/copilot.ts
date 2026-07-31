@@ -1,5 +1,5 @@
 import type { ToolHookConfig } from './types.js';
-import { isPrsHookEntry } from './claude.js';
+import { isPrsHookEntry, removePromptScriptHooks } from './claude.js';
 
 function getHooksSection(existing: Record<string, unknown>): Record<string, unknown> {
   const hooks = existing['hooks'];
@@ -16,13 +16,13 @@ function getHookArray(hooksSection: Record<string, unknown>, key: string): unkno
 
 export const copilotConfig: ToolHookConfig = {
   name: 'copilot',
-  detectPaths: ['.vscode', '.github/copilot-instructions.md'],
-  settingsPath: '.vscode/hooks.json',
+  detectPaths: ['.github/hooks', '.github/copilot-instructions.md'],
+  settingsPath: '.github/hooks/promptscript-vscode.json',
   timeoutUnit: 'seconds',
 
   generatePreEditHook(prsPath: string): Record<string, unknown> {
     return {
-      matcher: 'Edit|Write',
+      matcher: '.*',
       hooks: [
         {
           type: 'command',
@@ -36,7 +36,7 @@ export const copilotConfig: ToolHookConfig = {
 
   generatePostEditHook(prsPath: string): Record<string, unknown> {
     return {
-      matcher: 'Edit|Write',
+      matcher: '.*',
       hooks: [
         {
           type: 'command',
@@ -80,8 +80,14 @@ export const copilotConfig: ToolHookConfig = {
       ...existing,
       hooks: {
         ...hooksSection,
-        PreToolUse: preToolUse.filter((e) => !isPrsHookEntry(e)),
-        PostToolUse: postToolUse.filter((e) => !isPrsHookEntry(e)),
+        PreToolUse: preToolUse.flatMap((entry) => {
+          const cleaned = removePromptScriptHooks(entry);
+          return cleaned === undefined ? [] : [cleaned];
+        }),
+        PostToolUse: postToolUse.flatMap((entry) => {
+          const cleaned = removePromptScriptHooks(entry);
+          return cleaned === undefined ? [] : [cleaned];
+        }),
       },
     };
   },

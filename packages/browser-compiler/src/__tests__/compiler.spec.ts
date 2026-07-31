@@ -36,6 +36,113 @@ describe('compile', () => {
     expect(claudeOutput?.content).toContain('helpful assistant');
   });
 
+  it('should compile a virtual portable script to every native hook target', async () => {
+    const files = {
+      'project.prs': `@meta {
+  id: "portable-script"
+  syntax: "1.4.0"
+}
+@hooks {
+  check: {
+    event: "post-tool-use"
+    script: {
+      path: ".promptscript/scripts/check.mjs"
+      interpreter: "node"
+      args: ["--strict"]
+    }
+    cwd: "project"
+  }
+}
+`,
+      '.promptscript/scripts/check.mjs': 'process.exit(0);\n',
+    };
+
+    const result = await compile(files, 'project.prs', {
+      formatters: [
+        { name: 'claude', config: { version: 'full' } },
+        { name: 'cursor', config: { version: 'full' } },
+        { name: 'codex', config: { version: 'full' } },
+        { name: 'factory', config: { version: 'full' } },
+        { name: 'gemini', config: { version: 'full' } },
+        { name: 'github', config: { version: 'full' } },
+        { name: 'grok', config: { version: 'full' } },
+        { name: 'windsurf', config: { version: 'full' } },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    expect([...result.outputs.keys()]).toEqual(
+      expect.arrayContaining([
+        '.claude/settings.json',
+        '.cursor/hooks.json',
+        '.codex/hooks.json',
+        '.factory/hooks.json',
+        '.gemini/settings.json',
+        '.github/hooks/promptscript.json',
+        '.grok/hooks/promptscript.json',
+        '.windsurf/hooks.json',
+      ])
+    );
+  });
+
+  it('should report missing virtual hook scripts during compilation', async () => {
+    const result = await compile(
+      {
+        'project.prs': `@meta {
+  id: "missing-script"
+  syntax: "1.4.0"
+}
+@hooks {
+  check: {
+    event: "post-tool-use"
+    script: {
+      path: ".promptscript/scripts/missing.mjs"
+      interpreter: "node"
+    }
+  }
+}
+`,
+      },
+      'project.prs'
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        code: 'PS2001',
+        message: expect.stringContaining('script not found'),
+      }),
+    ]);
+  });
+
+  it('should compile hook scripts from an explicit virtual project root', async () => {
+    const files = {
+      'workspace/config/project.prs': `@meta {
+  id: "custom-layout"
+  syntax: "1.4.0"
+}
+@hooks {
+  check: {
+    event: "post-tool-use"
+    script: {
+      path: ".promptscript/scripts/check.mjs"
+      interpreter: "node"
+    }
+  }
+}
+`,
+      'workspace/.promptscript/scripts/check.mjs': 'process.exit(0);\n',
+    };
+
+    const result = await compile(files, 'workspace/config/project.prs', {
+      projectRoot: 'workspace',
+      formatters: [{ name: 'factory', config: { version: 'full' } }],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.has('.factory/hooks.json')).toBe(true);
+  });
+
   it('should return errors for invalid syntax', async () => {
     const files = {
       'project.prs': `
@@ -308,6 +415,36 @@ describe('BrowserCompiler advanced', () => {
     expect(result.success).toBe(false);
     expect(result.errors[0]?.message).toContain(
       "Factory rulesMode 'split' requires version 'multifile' or 'full'"
+    );
+  });
+
+  it('should preserve hook compatibility warnings from formatters', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "github-hooks" syntax: "1.4.0" }
+        @hooks {
+          validate: {
+            event: "pre-tool-use"
+            command: ["pnpm", "run", "typecheck"]
+          }
+        }
+      `,
+    });
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [{ name: 'github', config: { version: 'simple' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleId: 'PS4002',
+          message: 'Target "github" version "simple" cannot emit @hooks and will omit them.',
+        }),
+      ])
     );
   });
 

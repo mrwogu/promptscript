@@ -3276,7 +3276,56 @@ describe('FactoryFormatter', () => {
   });
 
   describe('hooks support', () => {
-    it('should emit .factory/settings.json when @hooks block present', () => {
+    it.each(['multifile', 'full'] as const)(
+      'should emit current .factory/hooks.json in %s mode',
+      (version) => {
+        const ast: Program = {
+          type: 'Program',
+          uses: [],
+          extends: [],
+          loc: createLoc(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'hooks',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  'my-hook': {
+                    event: 'pre-tool-use',
+                    command: ['echo', 'hello'],
+                    statusMessage: 'Checking generated files',
+                  } as unknown as Value,
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+        const formatter = new FactoryFormatter();
+        const result = formatter.format(ast, { version });
+        const hooksFile = result.additionalFiles?.find((f) => f.path === '.factory/hooks.json');
+        expect(hooksFile).toBeDefined();
+        expect(JSON.parse(hooksFile!.content)).toEqual({
+          hooks: {
+            PreToolUse: [
+              {
+                matcher: '.*',
+                hooks: [
+                  {
+                    type: 'command',
+                    command: 'echo hello # promptscript-generated:my-hook',
+                  },
+                ],
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    it('should preserve single-file output in simple mode', () => {
       const ast: Program = {
         type: 'Program',
         uses: [],
@@ -3289,7 +3338,7 @@ describe('FactoryFormatter', () => {
             content: {
               type: 'ObjectContent',
               properties: {
-                'my-hook': {
+                hook: {
                   event: 'pre-tool-use',
                   command: ['echo', 'hello'],
                 } as unknown as Value,
@@ -3300,12 +3349,58 @@ describe('FactoryFormatter', () => {
           },
         ],
       };
+
       const formatter = new FactoryFormatter();
-      const result = formatter.format(ast, { version: 'full' });
-      const settingsFile = result.additionalFiles?.find((f) => f.path === '.factory/settings.json');
-      expect(settingsFile).toBeDefined();
-      const parsed = JSON.parse(settingsFile!.content) as { hooks: Record<string, unknown> };
-      expect(parsed.hooks).toBeDefined();
+      const result = formatter.format(ast, { version: 'simple' });
+      expect(result.additionalFiles).toBeUndefined();
+      expect(result.warnings).toEqual([
+        expect.objectContaining({
+          code: 'PS4002',
+          message: 'Target "factory" version "simple" cannot emit @hooks and will omit them.',
+          location: expect.any(Object),
+        }),
+      ]);
+
+      const hooksBlock = ast.blocks[0]!;
+      if (hooksBlock.content.type === 'ObjectContent') {
+        const hook = hooksBlock.content.properties['hook'] as Record<string, Value>;
+        hook['enabled'] = false;
+      }
+      expect(formatter.format(ast, { version: 'simple' }).warnings).toBeUndefined();
+    });
+
+    it('should apply Factory enabled overrides before compatibility warnings', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                disabled: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                  statusMessage: 'checking',
+                  targets: {
+                    factory: { enabled: false },
+                  },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = new FactoryFormatter().format(ast, { version: 'full' });
+
+      expect(result.warnings).toBeUndefined();
     });
   });
 

@@ -4,18 +4,29 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 /* Hoisted mocks                                                      */
 /* ------------------------------------------------------------------ */
 
-const { mockExistsSync, mockReadFile, mockWriteFile, mockMkdir, mockChmod, mockUnlink } =
-  vi.hoisted(() => ({
-    mockExistsSync: vi.fn(),
-    mockReadFile: vi.fn(),
-    mockWriteFile: vi.fn(),
-    mockMkdir: vi.fn(),
-    mockChmod: vi.fn(),
-    mockUnlink: vi.fn(),
-  }));
+const {
+  mockExistsSync,
+  mockReadFile,
+  mockWriteFile,
+  mockMkdir,
+  mockChmod,
+  mockUnlink,
+  mockLstat,
+  mockOpen,
+} = vi.hoisted(() => ({
+  mockExistsSync: vi.fn(),
+  mockReadFile: vi.fn(),
+  mockWriteFile: vi.fn(),
+  mockMkdir: vi.fn(),
+  mockChmod: vi.fn(),
+  mockUnlink: vi.fn(),
+  mockLstat: vi.fn(),
+  mockOpen: vi.fn(),
+}));
 
 vi.mock('node:fs', () => ({
   existsSync: mockExistsSync,
+  constants: { O_WRONLY: 1, O_CREAT: 2, O_TRUNC: 4, O_NOFOLLOW: 8 },
 }));
 
 vi.mock('node:fs/promises', () => ({
@@ -24,6 +35,8 @@ vi.mock('node:fs/promises', () => ({
   mkdir: mockMkdir,
   chmod: mockChmod,
   unlink: mockUnlink,
+  lstat: mockLstat,
+  open: mockOpen,
 }));
 
 /* Mock ConsoleOutput */
@@ -66,6 +79,12 @@ function setupDefaults(): void {
   mockMkdir.mockResolvedValue(undefined);
   mockChmod.mockResolvedValue(undefined);
   mockUnlink.mockResolvedValue(undefined);
+  mockLstat.mockResolvedValue({ isSymbolicLink: () => false });
+  mockOpen.mockResolvedValue({
+    writeFile: vi.fn().mockResolvedValue(undefined),
+    chmod: vi.fn().mockResolvedValue(undefined),
+    close: vi.fn().mockResolvedValue(undefined),
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -210,6 +229,126 @@ describe('hooksCommand', () => {
       expect(process.exitCode).toBe(1);
     });
 
+    it('refuses to write through a settings symlink', async () => {
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => true });
+
+      await hooksCommand('install', 'claude', {});
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to write through symlink')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('migrates legacy Factory hooks before installing canonical hooks', async () => {
+      const files = new Map<string, string>();
+      const legacyPath = `${process.cwd()}/.factory/settings.json`;
+      files.set(
+        legacyPath,
+        JSON.stringify({
+          permissions: { allow: ['Bash'] },
+          hooks: {
+            preToolUse: [
+              {
+                matcher: 'Execute',
+                hooks: [{ type: 'command', command: 'audit' }],
+              },
+            ],
+          },
+        })
+      );
+      const enoentError = new Error('ENOENT') as NodeJS.ErrnoException;
+      enoentError.code = 'ENOENT';
+      mockExistsSync.mockImplementation((p: string) => files.has(p));
+      mockReadFile.mockImplementation(async (p: string) => {
+        const content = files.get(p);
+        if (content === undefined) throw enoentError;
+        return content;
+      });
+      mockWriteFile.mockImplementation(async (p: string, content: string) => {
+        files.set(p, content);
+      });
+
+      await hooksCommand('install', 'factory', {});
+
+      const canonical = JSON.parse(files.get(`${process.cwd()}/.factory/hooks.json`)!) as {
+        hooks: Record<string, unknown[]>;
+      };
+      expect(canonical.hooks['PreToolUse']).toHaveLength(2);
+      expect(JSON.parse(files.get(legacyPath)!)).toEqual({
+        permissions: { allow: ['Bash'] },
+      });
+    });
+
+    it('ignores legacy Factory settings without a hooks section', async () => {
+      const legacyPath = `${process.cwd()}/.factory/settings.json`;
+      mockExistsSync.mockImplementation((p: string) => p === legacyPath);
+      mockReadFile.mockResolvedValue(JSON.stringify({ permissions: { allow: ['Bash'] } }));
+
+      await hooksCommand('install', 'factory', {});
+
+      expect(mockConsole.error).not.toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        expect.stringContaining('.factory/hooks.json'),
+        expect.any(String),
+        'utf-8'
+      );
+    });
+
+    it('refuses ambiguous legacy Factory hooks during installation', async () => {
+      const legacyPath = `${process.cwd()}/.factory/settings.json`;
+      mockExistsSync.mockImplementation((p: string) => p === legacyPath);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          hooks: {
+            unknownEvent: [{ hooks: [{ type: 'command', command: 'custom' }] }],
+          },
+        })
+      );
+
+      await hooksCommand('install', 'factory', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Cannot migrate legacy Factory hooks safely')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('migrates legacy Factory hooks before uninstalling them', async () => {
+      const files = new Map<string, string>();
+      const legacyPath = `${process.cwd()}/.factory/settings.json`;
+      files.set(
+        legacyPath,
+        JSON.stringify({
+          hooks: {
+            PreToolUse: [
+              {
+                matcher: 'Execute',
+                hooks: [{ type: 'command', command: 'prs hook pre-edit' }],
+              },
+            ],
+          },
+        })
+      );
+      const enoentError = new Error('ENOENT') as NodeJS.ErrnoException;
+      enoentError.code = 'ENOENT';
+      mockExistsSync.mockImplementation((p: string) => files.has(p));
+      mockReadFile.mockImplementation(async (p: string) => {
+        const content = files.get(p);
+        if (content === undefined) throw enoentError;
+        return content;
+      });
+      mockWriteFile.mockImplementation(async (p: string, content: string) => {
+        files.set(p, content);
+      });
+
+      await hooksCommand('uninstall', 'factory', {});
+
+      expect(JSON.parse(files.get(legacyPath)!)).toEqual({});
+      expect(files.has(`${process.cwd()}/.factory/hooks.json`)).toBe(true);
+    });
+
     it('errors when no tools detected and no tool specified', async () => {
       // No detect paths match
       mockExistsSync.mockReturnValue(false);
@@ -249,21 +388,32 @@ describe('hooksCommand', () => {
     it('handles Cline by writing script files', async () => {
       await hooksCommand('install', 'cline', {});
 
-      // Should write pre-edit and post-edit script files
-      expect(mockWriteFile).toHaveBeenCalledWith(
+      expect(mockOpen).toHaveBeenCalledTimes(2);
+      expect(mockOpen).toHaveBeenNthCalledWith(
+        1,
         expect.stringContaining('prs-pre-edit.sh'),
-        expect.stringContaining('prs hook pre-edit'),
-        'utf-8'
+        expect.any(Number),
+        0o755
       );
-      expect(mockWriteFile).toHaveBeenCalledWith(
+      expect(mockOpen).toHaveBeenNthCalledWith(
+        2,
         expect.stringContaining('prs-post-edit.sh'),
-        expect.stringContaining('prs hook post-edit'),
-        'utf-8'
+        expect.any(Number),
+        0o755
       );
-      // Should chmod +x the scripts
-      expect(mockChmod).toHaveBeenCalledWith(expect.stringContaining('prs-pre-edit.sh'), 0o755);
-      expect(mockChmod).toHaveBeenCalledWith(expect.stringContaining('prs-post-edit.sh'), 0o755);
       expect(mockConsole.success).toHaveBeenCalledWith(expect.stringContaining('cline'));
+    });
+
+    it('refuses to overwrite unowned Cline scripts during installation', async () => {
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => false });
+      mockReadFile.mockResolvedValue('#!/bin/bash\necho custom');
+
+      await hooksCommand('install', 'cline', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to overwrite unowned Cline hook script')
+      );
+      expect(process.exitCode).toBe(1);
     });
 
     it('errors for unknown tool name', async () => {
@@ -426,16 +576,55 @@ describe('hooksCommand', () => {
     });
 
     it('handles Cline by deleting script files', async () => {
-      // Make scripts "exist" for cline
-      mockExistsSync.mockImplementation((p: string) => {
-        return typeof p === 'string' && p.includes('prs-');
-      });
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => false });
+      mockReadFile.mockImplementation(async (p: string) =>
+        p.includes('prs-pre-edit')
+          ? '#!/bin/bash\nprs hook pre-edit'
+          : '#!/bin/bash\nprs hook post-edit'
+      );
 
       await hooksCommand('uninstall', 'cline', {});
 
       expect(mockUnlink).toHaveBeenCalledWith(expect.stringContaining('prs-pre-edit.sh'));
       expect(mockUnlink).toHaveBeenCalledWith(expect.stringContaining('prs-post-edit.sh'));
       expect(mockConsole.success).toHaveBeenCalledWith(expect.stringContaining('cline'));
+    });
+
+    it('preserves unowned Cline scripts during uninstall', async () => {
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => false });
+      mockReadFile.mockResolvedValue('#!/bin/bash\necho custom');
+
+      await hooksCommand('uninstall', 'cline', {});
+
+      expect(mockUnlink).not.toHaveBeenCalled();
+      expect(mockConsole.warning).toHaveBeenCalledWith(
+        expect.stringContaining('preserving unowned')
+      );
+    });
+
+    it('rejects symlinked Cline scripts during uninstall', async () => {
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => true });
+
+      await hooksCommand('uninstall', 'cline', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to access symlink')
+      );
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('reports unreadable Cline scripts during uninstall', async () => {
+      const permissionError = new Error('permission denied') as NodeJS.ErrnoException;
+      permissionError.code = 'EACCES';
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => false });
+      mockReadFile.mockRejectedValue(permissionError);
+
+      await hooksCommand('uninstall', 'cline', {});
+
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to uninstall hooks')
+      );
+      expect(process.exitCode).toBe(1);
     });
   });
 

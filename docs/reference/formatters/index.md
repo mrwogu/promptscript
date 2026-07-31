@@ -210,26 +210,30 @@ Hand-crafted output logic for agents with unique file formats, skills, agents, a
 
 PromptScript emits `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) to target-native config files. The table below shows which formatters support each feature.
 
-| Formatter      | MCP Servers                      | Hooks                    | Plugins                 |
-| -------------- | -------------------------------- | ------------------------ | ----------------------- |
-| Claude Code    | `.mcp.json`                      | `.claude/settings.json`  | -                       |
-| Cursor         | `.cursor/mcp.json`               | `.cursor/hooks.json`     | `.cursor/plugins.json`  |
-| Factory Droid  | `.factory/mcp.json`              | `.factory/settings.json` | `.factory/plugins.json` |
-| Codex          | `.codex/mcp.json`                | `.codex/config.toml`     | `.codex/plugins.json`   |
-| Grok Build     | `.mcp.json` (via Claude)         | `.claude/settings.json`  | `.grok/plugins.json`    |
-| GitHub Copilot | `.vscode/mcp.json`               | -                        | -                       |
-| Antigravity    | `.agents/mcp_config.json`        | -                        | -                       |
-| Gemini CLI     | `.gemini/mcp_config.json`        | -                        | -                       |
-| Windsurf       | `.windsurf/mcp_config.json`      | -                        | -                       |
-| Cline          | `.cline/cline_mcp_settings.json` | -                        | -                       |
-| Roo Code       | `.roo/mcp_settings.json`         | -                        | -                       |
-| Continue       | `.continue/config.json`          | -                        | -                       |
-| Goose          | `.goose/mcp_config.json`         | -                        | -                       |
-| Kilo Code      | `.kilocode/mcp_settings.json`    | -                        | -                       |
-| OpenHands      | `.openhands/mcp_config.toml`     | -                        | -                       |
-| Qwen Code      | `.qwen/mcp.json`                 | -                        | -                       |
-| Zed            | `.zed/settings.json`             | -                        | -                       |
-| Crush          | `.crush/mcp.json`                | -                        | -                       |
+| Formatter      | MCP Servers                      | Hooks                             | Plugins                 |
+| -------------- | -------------------------------- | --------------------------------- | ----------------------- |
+| Claude Code    | `.mcp.json`                      | `.claude/settings.json`           | -                       |
+| Cursor         | `.cursor/mcp.json`               | `.cursor/hooks.json`              | `.cursor/plugins.json`  |
+| Factory Droid  | `.factory/mcp.json`              | `.factory/hooks.json`             | `.factory/plugins.json` |
+| Codex          | `.codex/mcp.json`                | `.codex/hooks.json`               | `.codex/plugins.json`   |
+| Grok Build     | `.mcp.json` (via Claude)         | `.grok/hooks/promptscript.json`   | `.grok/plugins.json`    |
+| GitHub Copilot | `.vscode/mcp.json`               | `.github/hooks/promptscript.json` | -                       |
+| Antigravity    | `.agents/mcp_config.json`        | -                                 | -                       |
+| Gemini CLI     | `.gemini/mcp_config.json`        | `.gemini/settings.json`           | -                       |
+| Windsurf       | `.windsurf/mcp_config.json`      | `.windsurf/hooks.json`            | -                       |
+| Cline          | `.cline/cline_mcp_settings.json` | -                                 | -                       |
+| Roo Code       | `.roo/mcp_settings.json`         | -                                 | -                       |
+| Continue       | `.continue/config.json`          | -                                 | -                       |
+| Goose          | `.goose/mcp_config.json`         | -                                 | -                       |
+| Kilo Code      | `.kilocode/mcp_settings.json`    | -                                 | -                       |
+| OpenHands      | `.openhands/mcp_config.toml`     | -                                 | -                       |
+| Qwen Code      | `.qwen/mcp.json`                 | -                                 | -                       |
+| Zed            | `.zed/settings.json`             | -                                 | -                       |
+| Crush          | `.crush/mcp.json`                | -                                 | -                       |
+
+Hook files require `multifile` or `full` mode. In `simple` mode, formatters
+preserve single-file output and report a compatibility warning. Cursor emits
+hook files only in `full` mode and reports `PS4002` in its other modes.
 
 Agent-level `mcpServers` references are emitted by Claude Code, Cursor, and Factory Droid.
 

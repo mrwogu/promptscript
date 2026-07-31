@@ -185,10 +185,17 @@ Portable PromptScript source does not force every platform into one schema. Inst
 1. Shared concepts remain platform-neutral.
 2. Validators check field shape and target options.
 3. Formatters emit native files for supported capabilities.
-4. Unsupported target-specific behavior remains absent from generated native configuration.
+4. Unsupported target-specific behavior reports an actionable compatibility warning.
 5. Main instruction output remains available across all targets.
 
-Review generated output when adopting a new target or target version.
+Lifecycle hooks have an exhaustive 48-target capability registry. Native
+project hooks are currently emitted for Claude, Codex, Cursor, Factory, Gemini,
+GitHub, Grok, and Windsurf. Plugin-only, custom-agent-scoped, unsupported, and
+incompatible output modes report `PS4002` rather than silently omitting enabled
+hooks. See the [hook capability matrix](automation.md#hook-capability-matrix).
+
+Review generated output and compatibility warnings when adopting a new target
+or target version.
 
 ## Related Documentation
 

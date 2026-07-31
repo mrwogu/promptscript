@@ -2,7 +2,8 @@
 
 Source: https://docs.x.ai/build/overview,
 https://docs.x.ai/build/features/project-rules,
-https://docs.x.ai/build/features/skills-plugins-marketplaces
+https://docs.x.ai/build/features/skills-plugins-marketplaces,
+https://docs.x.ai/build/features/hooks
 
 ## Fixture index
 
@@ -12,7 +13,8 @@ https://docs.x.ai/build/features/skills-plugins-marketplaces
 | claude-compat.md | https://docs.x.ai/build/features/skills-plugins-marketplaces | Grok Build | 2026-07-17 | delegated to Claude formatter                       | formatter-scope |
 | skills.md        | https://docs.x.ai/build/features/skills-plugins-marketplaces | Grok Build | 2026-07-17 | `.grok/skills/<name>/SKILL.md` or `.claude/skills/` | formatter-scope |
 | plugins.md       | https://docs.x.ai/build/features/skills-plugins-marketplaces | Grok Build | 2026-07-17 | `.grok/plugins/` or `.claude/plugins/`              | out-of-scope    |
-| hooks.md         | https://docs.x.ai/build/features/skills-plugins-marketplaces | Grok Build | 2026-07-17 | `.grok/hooks/` or `.claude/hooks/`                  | out-of-scope    |
+| hooks.md         | https://docs.x.ai/build/features/skills-plugins-marketplaces | Grok Build | 2026-07-17 | `.grok/hooks/` or `.claude/hooks/`                  | formatter-scope |
+| hooks.json       | https://docs.x.ai/build/features/hooks                       | Grok Build | 2026-07-30 | `.grok/hooks/promptscript.json`                     | formatter-scope |
 
 ## Scope notes
 
@@ -85,15 +87,16 @@ extra paths, and `--plugin-dir`. Plugin hooks receive `GROK_PLUGIN_ROOT` and
 PromptScript `@plugins` (Task 26) is blocked on project MCP definitions
 (Task 25). Grok plugin output deferred until then.
 
-### Hooks (out-of-scope until Task 15)
+### Hooks (formatter-scope)
 
 Hooks run scripts on tool and session lifecycle events. Discovered from
 `~/.grok/hooks/`, project `.grok/hooks/` (requires `/hooks-trust`), and
 enabled plugins. See https://docs.x.ai/build/features/hooks for events,
 JSON format, and the script contract.
 
-PromptScript emits Grok hooks through Claude formatter delegation once
-`@hooks` lands (Task 15). Do not claim hooks output before then.
+PromptScript emits native project hooks to
+`.grok/hooks/promptscript.json`. Commands resolve portable scripts through
+`GROK_WORKSPACE_ROOT`; users must trust project hooks through `/hooks-trust`.
 
 ### Subagents (runtime)
 

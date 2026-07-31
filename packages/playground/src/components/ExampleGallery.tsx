@@ -1114,9 +1114,22 @@ export const EXAMPLES: Example[] = [
   validate-changes: {
     event: "post-tool-use"
     matcher: "Edit|Write"
-    command: ["pnpm", "run", "typecheck"]
+    script: {
+      path: ".promptscript/scripts/validate.mjs"
+      interpreter: "node"
+      args: ["--strict"]
+    }
+    cwd: "project"
     timeoutMs: 120000
     statusMessage: "Checking TypeScript"
+    targets: {
+      factory: {
+        matcher: "Execute"
+      }
+      vscode: {
+        matcher: "run_in_terminal"
+      }
+    }
   }
 }
 
@@ -1141,6 +1154,16 @@ export const EXAMPLES: Example[] = [
     mcpServers: ["issue-tracker"]
   }
 }
+`,
+      },
+      {
+        path: '.promptscript/scripts/validate.mjs',
+        content: `const strict = process.argv.includes('--strict');
+if (!strict) {
+  console.error('Expected --strict');
+  process.exit(1);
+}
+console.log('Validation complete');
 `,
       },
     ],

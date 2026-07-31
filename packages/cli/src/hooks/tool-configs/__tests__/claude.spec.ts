@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { claudeConfig, isPrsHookEntry } from '../claude.js';
+import { claudeConfig, isPrsHookEntry, removePromptScriptHooks } from '../claude.js';
 
 describe('hooks/tool-configs/claudeConfig', () => {
   // --- metadata ---
@@ -184,6 +184,40 @@ describe('hooks/tool-configs/claudeConfig', () => {
     const typed = result as Record<string, unknown>;
     expect(typed['permissions']).toEqual({ allow: ['Bash'] });
   });
+
+  it('preserves user handlers in a mixed hook entry during uninstall', () => {
+    const prsPath = '/usr/local/bin/prs';
+    const userHandler = { type: 'command', command: 'echo user' };
+    const existing = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Edit|Write',
+            hooks: [
+              (
+                claudeConfig.generatePreEditHook(prsPath)['hooks'] as Array<Record<string, unknown>>
+              )[0],
+              userHandler,
+            ],
+          },
+        ],
+      },
+    };
+
+    const result = claudeConfig.removeFromSettings(existing);
+
+    expect(result).toEqual({
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Edit|Write',
+            hooks: [userHandler],
+          },
+        ],
+        PostToolUse: [],
+      },
+    });
+  });
 });
 
 describe('isPrsHookEntry', () => {
@@ -205,5 +239,23 @@ describe('isPrsHookEntry', () => {
 
   it('returns true when hooks contain prs hook command', () => {
     expect(isPrsHookEntry({ hooks: [{ command: '/usr/bin/prs hook pre-edit' }] })).toBe(true);
+  });
+
+  it('returns false for unrelated commands that mention prs hook', () => {
+    expect(isPrsHookEntry({ hooks: [{ command: 'echo "prs hook pre-edit"' }] })).toBe(false);
+  });
+
+  it('ignores malformed nested handlers', () => {
+    expect(
+      isPrsHookEntry({
+        hooks: [null, [], { command: 123 }],
+      })
+    ).toBe(false);
+  });
+
+  it('handles direct hook commands during uninstall', () => {
+    expect(removePromptScriptHooks(null)).toBeNull();
+    expect(removePromptScriptHooks({ command: 'prs hook pre-edit' })).toBeUndefined();
+    expect(removePromptScriptHooks({ command: 'echo user' })).toEqual({ command: 'echo user' });
   });
 });

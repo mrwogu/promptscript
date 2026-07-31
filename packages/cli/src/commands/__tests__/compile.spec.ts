@@ -158,9 +158,23 @@ vi.mock('../../utils/registry-resolver.js', () => ({
   resolveRegistryPath: vi.fn().mockResolvedValue({ path: '/mock/registry', isRemote: false }),
 }));
 
-vi.mock('../../utils/managed-output-cleanup.js', () => ({
-  cleanupManagedOutputs: (...args: unknown[]) => mockCleanupManagedOutputs(...args),
-}));
+vi.mock('../../utils/managed-output-cleanup.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../utils/managed-output-cleanup.js')>();
+  return {
+    ...actual,
+    cleanupManagedOutputs: (...args: unknown[]) => mockCleanupManagedOutputs(...args),
+    isHookOutputPath: vi.fn().mockReturnValue(false),
+    isPromptScriptOwnedHookOutput: vi.fn().mockReturnValue(false),
+    mergePromptScriptCodexConfig: vi.fn().mockReturnValue(undefined),
+    mergePromptScriptHookOutput: vi.fn().mockReturnValue(undefined),
+    removePromptScriptOwnedCodexHooks: vi.fn().mockReturnValue(undefined),
+    rewriteHookOutputIfUnchanged: vi.fn().mockResolvedValue(true),
+    createHookOutputSafely: vi.fn(async (path: string, _root: string, content: string) => {
+      await mockWriteFile(path, content, 'utf-8');
+      return true;
+    }),
+  };
+});
 
 import { compileCommand } from '../compile.js';
 
@@ -194,7 +208,7 @@ describe('compile command - createCliLogger warn path', () => {
     mockChmod.mockResolvedValue(undefined);
     mockMkdir.mockResolvedValue(undefined);
     mockReadFile.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
-    mockCleanupManagedOutputs.mockResolvedValue({ removed: [] });
+    mockCleanupManagedOutputs.mockResolvedValue({ removed: [], removedDirectories: [] });
 
     mockCompile.mockResolvedValue({
       success: true,
@@ -277,7 +291,10 @@ describe('compile command - createCliLogger warn path', () => {
 
   it('should report obsolete generated files removed after compilation', async () => {
     const obsoleteFile = '/mock/project/.factory/rules/obsolete.md';
-    mockCleanupManagedOutputs.mockResolvedValue({ removed: [obsoleteFile] });
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [obsoleteFile],
+      removedDirectories: [],
+    });
 
     await compileCommand({ cwd: '/mock/project' }, mockServices);
 
@@ -290,7 +307,10 @@ describe('compile command - createCliLogger warn path', () => {
 
   it('should preview obsolete generated file removal in dry-run mode', async () => {
     const obsoleteFile = '/mock/project/.factory/rules/obsolete.md';
-    mockCleanupManagedOutputs.mockResolvedValue({ removed: [obsoleteFile] });
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [obsoleteFile],
+      removedDirectories: [],
+    });
 
     await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
 
@@ -301,6 +321,136 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockDryRun).toHaveBeenCalledWith(
       `Would remove obsolete generated file: ${obsoleteFile}`
     );
+  });
+
+  it('should report managed directories pruned after compilation', async () => {
+    const prunedDirectory = '/mock/project/.github/hooks';
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [prunedDirectory],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockMuted).toHaveBeenCalledWith(`Removed empty managed directory: ${prunedDirectory}`);
+  });
+
+  it('should preview managed directories pruned in dry-run mode', async () => {
+    const prunedDirectory = '/mock/project/.github/hooks';
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [prunedDirectory],
+    });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockDryRun).toHaveBeenCalledWith(
+      `Would remove empty managed directory: ${prunedDirectory}`
+    );
+  });
+
+  it('should warn about legacy hooks in .factory/settings.json for factory targets', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"old-cmd"}]}]}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+    expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('legacy "hooks"'));
+  });
+
+  it('should not warn about legacy settings hooks when .factory/hooks.json exists', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"old-cmd"}]}]}}';
+      }
+      if (String(path).endsWith('.factory/hooks.json')) {
+        return '{"hooks":{}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+  });
+
+  it('should not warn when .factory/settings.json has no hooks key', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"$schema":"https://docs.factory.ai/schema.json"}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+  });
+
+  it('should not warn when legacy settings hooks are fully PromptScript-owned', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"echo ok # promptscript-generated:legacy"}]}]}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+  });
+
+  it('should not check for legacy settings hooks without a factory target', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: ['claude'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"old-cmd"}]}]}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    // Act
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    // Assert
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
   });
 
   it('should apply a named build profile entry, output, and targets', async () => {

@@ -1,8 +1,15 @@
 import type { ToolHookConfig } from './types.js';
 
+const PROMPTSCRIPT_HOOK_COMMAND =
+  /^(?:[A-Za-z0-9._~:/\\-]+[\\/])?prs(?:\.cmd)? hook (?:pre-edit|post-edit)(?:\s+# promptscript-generated:[A-Za-z0-9._-]+)?$/;
+
+export function isPromptScriptHookCommand(command: string): boolean {
+  return PROMPTSCRIPT_HOOK_COMMAND.test(command.trim());
+}
+
 /**
- * Returns true if the given hook array entry contains a `prs hook` command,
- * indicating it was installed by PromptScript.
+ * Returns true if the given hook array entry contains a PromptScript hook
+ * command, indicating it was installed by PromptScript.
  */
 export function isPrsHookEntry(entry: unknown): boolean {
   if (typeof entry !== 'object' || entry === null) {
@@ -16,8 +23,31 @@ export function isPrsHookEntry(entry: unknown): boolean {
   return hooks.some((h: unknown) => {
     if (typeof h !== 'object' || h === null) return false;
     const hook = h as Record<string, unknown>;
-    return typeof hook['command'] === 'string' && hook['command'].includes('prs hook');
+    return typeof hook['command'] === 'string' && isPromptScriptHookCommand(hook['command']);
   });
+}
+
+export function removePromptScriptHooks(entry: unknown): unknown | undefined {
+  if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+    return entry;
+  }
+
+  const object = entry as Record<string, unknown>;
+  const hooks = object['hooks'];
+  if (!Array.isArray(hooks)) {
+    return typeof object['command'] === 'string' && isPromptScriptHookCommand(object['command'])
+      ? undefined
+      : entry;
+  }
+
+  const remaining = hooks.filter((hook) => {
+    if (typeof hook !== 'object' || hook === null || Array.isArray(hook)) return true;
+    const command = (hook as Record<string, unknown>)['command'];
+    return typeof command !== 'string' || !isPromptScriptHookCommand(command);
+  });
+  if (remaining.length === hooks.length) return entry;
+  if (remaining.length === 0) return undefined;
+  return { ...object, hooks: remaining };
 }
 
 function getHooksSection(existing: Record<string, unknown>): Record<string, unknown> {
@@ -102,8 +132,14 @@ export const claudeConfig: ToolHookConfig = {
       ...existing,
       hooks: {
         ...hooksSection,
-        PreToolUse: preToolUse.filter((e) => !isPrsHookEntry(e)),
-        PostToolUse: postToolUse.filter((e) => !isPrsHookEntry(e)),
+        PreToolUse: preToolUse.flatMap((entry) => {
+          const cleaned = removePromptScriptHooks(entry);
+          return cleaned === undefined ? [] : [cleaned];
+        }),
+        PostToolUse: postToolUse.flatMap((entry) => {
+          const cleaned = removePromptScriptHooks(entry);
+          return cleaned === undefined ? [] : [cleaned];
+        }),
       },
     };
   },

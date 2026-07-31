@@ -70,6 +70,27 @@ const createProgramWithIdentity = (): Program => ({
   ],
 });
 
+const createProgramWithHooks = (): Program => ({
+  ...createMinimalProgram(),
+  blocks: [
+    {
+      type: 'Block',
+      name: 'hooks',
+      content: {
+        type: 'ObjectContent',
+        properties: {
+          check: {
+            event: 'post-tool-use',
+            command: ['echo', 'check'],
+          },
+        },
+        loc: createLoc(),
+      },
+      loc: createLoc(),
+    },
+  ],
+});
+
 /**
  * All new formatters with their expected configuration.
  */
@@ -413,6 +434,41 @@ describe('New Agent Formatters', () => {
         expect(result.path).toBe(outputPath);
         expect(result.content).toContain(mainHeader);
         expect(result.content).toContain('You are an expert developer.');
+      });
+
+      it.skipIf(name !== 'windsurf')('should emit Windsurf hook output', () => {
+        const result = formatter.format(createProgramWithHooks(), { version: 'multifile' });
+
+        expect(result.additionalFiles).toContainEqual(
+          expect.objectContaining({
+            path: '.windsurf/hooks.json',
+            content: expect.stringContaining('"post_write_code"'),
+          })
+        );
+      });
+
+      it.skipIf(name !== 'windsurf')('should attach Windsurf hook warnings', () => {
+        const ast = createProgramWithHooks();
+        const hooksBlock = ast.blocks[0]!;
+        if (hooksBlock.content.type === 'ObjectContent') {
+          hooksBlock.content.properties['timed'] = {
+            event: 'post-tool-use',
+            matcher: 'Execute',
+            command: ['echo', 'timed'],
+            timeoutMs: 5000,
+          };
+        }
+
+        const result = formatter.format(ast, { version: 'multifile' });
+
+        expect(result.warnings).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining('Windsurf cannot represent'),
+              location: expect.any(Object),
+            }),
+          ])
+        );
       });
 
       it.skipIf(!hasSkills)('should generate skill files in full mode', () => {
