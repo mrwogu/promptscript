@@ -102,6 +102,14 @@ export class StandardsExtractor {
   }
 
   /**
+   * Convert any standards value to a display string, including nested objects.
+   * Public variant used by formatters for generic fallback rendering.
+   */
+  stringify(value: Value): string {
+    return this.valueToString(value);
+  }
+
+  /**
    * Extract a single standards entry from a key-value pair.
    */
   private extractEntry(key: string, value: Value): StandardsEntry | null {

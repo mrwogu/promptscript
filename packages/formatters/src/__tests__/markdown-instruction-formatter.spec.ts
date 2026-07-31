@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { MarkdownInstructionFormatter } from '../markdown-instruction-formatter.js';
 import type { MarkdownFormatterConfig } from '../markdown-instruction-formatter.js';
 
@@ -1381,6 +1381,47 @@ describe('MarkdownInstructionFormatter', () => {
       const cmdFile = result.additionalFiles?.find((f) => f.path === '.test/commands/deploy.md');
       expect(cmdFile).toBeDefined();
       expect(cmdFile?.content).toContain('Step one');
+    });
+  });
+
+  describe('custom standards keys', () => {
+    const createStandardsProgram = (properties: Record<string, Value>): Program => ({
+      ...createMinimalProgram(),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'standards',
+          content: {
+            type: 'ObjectContent',
+            properties,
+            loc: createLoc(),
+          },
+          loc: createLoc(),
+        },
+      ],
+    });
+
+    it('should render custom @standards.documentation keys', () => {
+      const ast = createStandardsProgram({
+        documentation: {
+          verifyBefore: true,
+          styleGuide: 'Use Diataxis structure',
+          reviewChecklist: { author: 'self-review', reviewer: 'docs-owner' },
+          deprecated: false,
+          draft: null,
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('## Documentation');
+      expect(result.content).toContain('- Review docs before changes');
+      expect(result.content).toContain('- Style Guide: Use Diataxis structure');
+      expect(result.content).toContain(
+        '- Review Checklist: author: self-review, reviewer: docs-owner'
+      );
+      expect(result.content).not.toContain('Deprecated');
+      expect(result.content).not.toContain('Draft');
     });
   });
 });
