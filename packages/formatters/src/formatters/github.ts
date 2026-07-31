@@ -12,6 +12,7 @@ import {
 import {
   extractHooks,
   generateGitHubHooks,
+  generateVSCodeHooks,
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
@@ -254,21 +255,29 @@ export class GitHubFormatter extends BaseFormatter {
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
     const hookWarnings =
-      hooksBlock && version !== 'simple' && hooks.some((hook) => hook.enabled !== false)
-        ? getHookCompatibilityWarnings(hooks, 'github').map((warning) => ({
+      hooksBlock && version !== 'simple'
+        ? [
+            ...getHookCompatibilityWarnings(hooks, 'github'),
+            ...(hooks.some((hook) => hook.targets?.['vscode'] !== undefined)
+              ? getHookCompatibilityWarnings(hooks, 'vscode')
+              : []),
+          ].map((warning) => ({
             ...warning,
             location: hooksBlock.loc,
           }))
         : [];
-    const hooksFile = version === 'simple' ? undefined : this.generateHooksFile(ast);
-    if (!hooksFile) {
+    const hooksFiles = version === 'simple' ? [] : this.generateHooksFiles(ast);
+    if (hooksFiles.length === 0) {
       return {
         ...output,
         ...(hookWarnings.length > 0
           ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
           : {}),
         managedOutputDirectories: ['.github/hooks'],
-        managedOutputFiles: ['.github/hooks/promptscript.json'],
+        managedOutputFiles: [
+          '.github/hooks/promptscript.json',
+          '.github/hooks/promptscript-vscode.json',
+        ],
       };
     }
 
@@ -277,9 +286,12 @@ export class GitHubFormatter extends BaseFormatter {
       ...(hookWarnings.length > 0
         ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
         : {}),
-      additionalFiles: [...(output.additionalFiles ?? []), hooksFile],
+      additionalFiles: [...(output.additionalFiles ?? []), ...hooksFiles],
       managedOutputDirectories: ['.github/hooks'],
-      managedOutputFiles: ['.github/hooks/promptscript.json'],
+      managedOutputFiles: [
+        '.github/hooks/promptscript.json',
+        '.github/hooks/promptscript-vscode.json',
+      ],
     };
   }
 
@@ -426,17 +438,32 @@ export class GitHubFormatter extends BaseFormatter {
   /**
    * Generate repository hooks shared by Copilot CLI and cloud agent.
    */
-  private generateHooksFile(ast: Program): FormatterOutput | undefined {
+  private generateHooksFiles(ast: Program): FormatterOutput[] {
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
-    if (!hooksBlock) return undefined;
+    if (!hooksBlock) return [];
 
-    const hooks = generateGitHubHooks(extractHooks(hooksBlock));
-    if (Object.keys(hooks).length === 0) return undefined;
+    const hooks = extractHooks(hooksBlock);
+    const files: FormatterOutput[] = [];
+    const githubHooks = generateGitHubHooks(hooks);
+    if (Object.keys(githubHooks).length > 0) {
+      files.push({
+        path: '.github/hooks/promptscript.json',
+        content: JSON.stringify({ version: 1, hooks: githubHooks }, null, 2) + '\n',
+      });
+    }
 
-    return {
-      path: '.github/hooks/promptscript.json',
-      content: JSON.stringify({ version: 1, hooks }, null, 2) + '\n',
-    };
+    const hasVscodeOverride = hooks.some((hook) => hook.targets?.['vscode'] !== undefined);
+    if (hasVscodeOverride) {
+      const vscodeHooks = generateVSCodeHooks(hooks);
+      if (Object.keys(vscodeHooks).length > 0) {
+        files.push({
+          path: '.github/hooks/promptscript-vscode.json',
+          content: JSON.stringify({ hooks: vscodeHooks }, null, 2) + '\n',
+        });
+      }
+    }
+
+    return files;
   }
 
   // ============================================================

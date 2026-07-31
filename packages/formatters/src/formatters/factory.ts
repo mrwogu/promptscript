@@ -9,6 +9,7 @@ import {
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
 import {
+  applyHookTargetOverrides,
   extractHooks,
   generateFactoryHooks,
   getHookCompatibilityWarnings,
@@ -244,8 +245,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     const output = super.format(ast, options);
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
+    const effectiveHooks = applyHookTargetOverrides(hooks, 'factory');
     const hookWarnings =
-      hooksBlock && version !== 'simple' && hooks.some((hook) => hook.enabled !== false)
+      hooksBlock && version !== 'simple' && effectiveHooks.some((hook) => hook.enabled !== false)
         ? getHookCompatibilityWarnings(hooks, 'factory').map((warning) => ({
             ...warning,
             location: hooksBlock.loc,

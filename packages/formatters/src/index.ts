@@ -135,13 +135,21 @@ export {
   generateFactoryHooks,
   generateGeminiHooks,
   generateGitHubHooks,
+  generateVSCodeHooks,
   generateGrokHooks,
+  applyHookTargetOverrides,
   generateWindsurfHooks,
   getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
 } from './hook-adapters.js';
-export type { HookDefinition, HookScriptDefinition, PortableHookEvent } from './hook-adapters.js';
+export type {
+  HookDefinition,
+  HookScriptDefinition,
+  HookTarget,
+  HookTargetOverride,
+  PortableHookEvent,
+} from './hook-adapters.js';
 export {
   appendTargetHookCapabilityWarnings,
   getTargetHookCapabilityWarnings,

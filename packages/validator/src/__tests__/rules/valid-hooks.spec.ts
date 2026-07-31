@@ -490,6 +490,22 @@ describe('PS034: valid-hooks', () => {
     expect(messages.some((m) => m.message.includes('timeoutMs must be a number'))).toBe(true);
   });
 
+  it('should reject non-finite timeoutMs', () => {
+    const messages = validate(
+      makeAst({
+        'bad-timeout': {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+          timeoutMs: Number.NaN,
+          targets: {
+            factory: { timeoutMs: Number.POSITIVE_INFINITY },
+          },
+        },
+      })
+    );
+    expect(messages.filter((m) => m.message.includes('timeoutMs')).length).toBe(2);
+  });
+
   it('should reject non-string matcher', () => {
     const messages = validate(
       makeAst({
@@ -549,5 +565,44 @@ describe('PS034: valid-hooks', () => {
       })
     );
     expect(messages.some((m) => m.message.includes('event must be a string'))).toBe(true);
+  });
+
+  it('should accept target-specific overrides', () => {
+    const messages = validate(
+      makeAst({
+        terminal: {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+          targets: {
+            factory: { matcher: 'Execute' },
+            vscode: { matcher: 'run_in_terminal', timeoutMs: 15000 },
+          },
+        },
+      })
+    );
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should reject unknown target override fields and targets', () => {
+    const messages = validate(
+      makeAst({
+        terminal: {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+          targets: {
+            unknown: { matcher: 'Execute' },
+            factory: { tool: 'Execute' },
+          },
+        },
+      })
+    );
+
+    expect(messages.map((message) => message.message)).toEqual(
+      expect.arrayContaining([
+        'Hook "terminal": unknown target override "unknown"',
+        'Hook "terminal": unknown target override field "tool"',
+      ])
+    );
   });
 });

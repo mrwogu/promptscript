@@ -16,6 +16,14 @@ export type HookProjectRootStrategy =
   | 'workspace-cwd'
   | 'none';
 
+export type HookTerminalGuarantee = 'guaranteed' | 'best-effort' | 'not-guaranteed';
+
+export interface HookTerminalCapability {
+  guarantee: HookTerminalGuarantee;
+  toolNames: readonly string[];
+  notes: string;
+}
+
 export interface HookCapability {
   status: HookSupportStatus;
   configPath: string | null;
@@ -27,7 +35,10 @@ export interface HookCapability {
   nativeVersions?: readonly string[];
   fallback: string;
   documentationUrl: string;
+  terminal?: HookTerminalCapability;
 }
+
+export type HookRuntimeTarget = KnownTarget | 'vscode';
 
 const PORTABLE_EVENTS = [
   'pre-tool-use',
@@ -70,6 +81,12 @@ export const HOOK_CAPABILITIES = {
     nativeVersions: ['multifile', 'full'],
     fallback: "Use GitHub version 'multifile' or 'full'.",
     documentationUrl: 'https://docs.github.com/en/copilot/reference/hooks-reference',
+    terminal: {
+      guarantee: 'not-guaranteed',
+      toolNames: [],
+      notes:
+        'Copilot CLI and cloud-agent tool names and coverage differ, so one repository hook cannot guarantee every terminal command.',
+    },
   },
   claude: {
     status: 'native',
@@ -82,6 +99,11 @@ export const HOOK_CAPABILITIES = {
     nativeVersions: ['full'],
     fallback: "Use Claude version 'full'.",
     documentationUrl: 'https://code.claude.com/docs/en/hooks',
+    terminal: {
+      guarantee: 'guaranteed',
+      toolNames: ['Bash'],
+      notes: 'PreToolUse and PostToolUse match Bash shell commands.',
+    },
   },
   cursor: {
     status: 'native',
@@ -94,6 +116,11 @@ export const HOOK_CAPABILITIES = {
     nativeVersions: ['full'],
     fallback: "Use Cursor version 'full'.",
     documentationUrl: 'https://cursor.com/docs/hooks',
+    terminal: {
+      guarantee: 'best-effort',
+      toolNames: ['run_terminal_cmd'],
+      notes: 'Terminal tool names can vary by Cursor execution mode.',
+    },
   },
   antigravity: UNSUPPORTED_CAPABILITY,
   factory: {
@@ -107,6 +134,11 @@ export const HOOK_CAPABILITIES = {
     nativeVersions: ['multifile', 'full'],
     fallback: "Use Factory version 'multifile' or 'full'.",
     documentationUrl: 'https://docs.factory.ai/reference/hooks-reference',
+    terminal: {
+      guarantee: 'guaranteed',
+      toolNames: ['Execute'],
+      notes: 'PreToolUse and PostToolUse can match Factory Execute calls.',
+    },
   },
   opencode: {
     ...UNSUPPORTED_CAPABILITY,
@@ -126,6 +158,11 @@ export const HOOK_CAPABILITIES = {
     nativeVersions: ['multifile', 'full'],
     fallback: "Use Gemini version 'multifile' or 'full'.",
     documentationUrl: 'https://geminicli.com/docs/hooks/reference/',
+    terminal: {
+      guarantee: 'best-effort',
+      toolNames: ['run_shell_command'],
+      notes: 'The shell tool name is version-specific and should be verified by payload.',
+    },
   },
   windsurf: {
     status: 'native',
@@ -138,6 +175,11 @@ export const HOOK_CAPABILITIES = {
     nativeVersions: ['multifile', 'full'],
     fallback: "Use Windsurf version 'multifile' or 'full'.",
     documentationUrl: 'https://docs.windsurf.com/windsurf/cascade/hooks',
+    terminal: {
+      guarantee: 'guaranteed',
+      toolNames: ['pre_run_command', 'post_run_command'],
+      notes: 'Windsurf provides dedicated pre-run and post-run command events.',
+    },
   },
   cline: {
     ...UNSUPPORTED_CAPABILITY,
@@ -158,6 +200,11 @@ export const HOOK_CAPABILITIES = {
     nativeVersions: ['multifile', 'full'],
     fallback: "Use Codex version 'multifile' or 'full'.",
     documentationUrl: 'https://developers.openai.com/codex/hooks',
+    terminal: {
+      guarantee: 'guaranteed',
+      toolNames: ['Bash'],
+      notes: 'PreToolUse and PostToolUse match Bash, including unified exec calls.',
+    },
   },
   continue: UNSUPPORTED_CAPABILITY,
   augment: UNSUPPORTED_CAPABILITY,
@@ -227,6 +274,30 @@ export const HOOK_CAPABILITIES = {
   'deep-agents': UNSUPPORTED_CAPABILITY,
   forgecode: UNSUPPORTED_CAPABILITY,
 } as const satisfies Record<KnownTarget, HookCapability>;
+
+export const VSCODE_HOOK_CAPABILITY: HookCapability = {
+  status: 'compatible',
+  configPath: '.github/hooks/promptscript-vscode.json',
+  events: ['pre-tool-use', 'post-tool-use', 'session-start', 'setup', 'subagent-start', 'stop'],
+  commandFormat: 'Claude-compatible PascalCase JSON command hooks',
+  timeoutUnit: 'seconds',
+  projectRootStrategy: 'workspace-cwd',
+  platforms: ['unix', 'windows'],
+  nativeVersions: ['workspace'],
+  fallback: 'Filter VS Code tool input explicitly inside the hook command.',
+  documentationUrl: 'https://code.visualstudio.com/docs/copilot/customization/hooks',
+  terminal: {
+    guarantee: 'best-effort',
+    toolNames: ['run_in_terminal'],
+    notes:
+      'VS Code currently ignores matcher values, so filter tool_name and tool_input in the command.',
+  },
+};
+
+export const HOOK_RUNTIME_CAPABILITIES = {
+  ...HOOK_CAPABILITIES,
+  vscode: VSCODE_HOOK_CAPABILITY,
+} as const satisfies Record<HookRuntimeTarget, HookCapability>;
 
 export const PORTABLE_HOOK_INTERPRETERS = [
   'python3',

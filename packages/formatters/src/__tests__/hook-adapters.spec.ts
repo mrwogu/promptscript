@@ -8,6 +8,7 @@ import {
   generateGeminiHooks,
   generateGitHubHooks,
   generateGrokHooks,
+  generateVSCodeHooks,
   generateWindsurfHooks,
   getHookCompatibilityWarnings,
   mapEvent,
@@ -42,6 +43,12 @@ describe('hook-adapters', () => {
           statusMessage: 'Checking generated files',
           continueOnFailure: false,
           enabled: true,
+          targets: {
+            vscode: {
+              matcher: 'run_in_terminal',
+              enabled: false,
+            },
+          },
         },
       });
       const hooks = extractHooks(block);
@@ -55,6 +62,10 @@ describe('hook-adapters', () => {
       expect(hooks[0]!.statusMessage).toBe('Checking generated files');
       expect(hooks[0]!.continueOnFailure).toBe(false);
       expect(hooks[0]!.enabled).toBe(true);
+      expect(hooks[0]!.targets?.vscode).toEqual({
+        matcher: 'run_in_terminal',
+        enabled: false,
+      });
     });
 
     it('should skip entries without event', () => {
@@ -152,6 +163,10 @@ describe('hook-adapters', () => {
     it('should map stop to GitHub agentStop', () => {
       expect(mapEvent('stop', 'github')).toBe('agentStop');
     });
+
+    it('should map pre-tool-use to VS Code PreToolUse', () => {
+      expect(mapEvent('pre-tool-use', 'vscode')).toBe('PreToolUse');
+    });
   });
 
   describe('convertTimeout', () => {
@@ -174,6 +189,10 @@ describe('hook-adapters', () => {
     it('should round sub-second timeouts up to one second', () => {
       expect(convertTimeout(100, 'factory')).toBe(1);
       expect(convertTimeout(100, 'github')).toBe(1);
+    });
+
+    it('should convert milliseconds to seconds for VS Code', () => {
+      expect(convertTimeout(15000, 'vscode')).toBe(15);
     });
   });
 
@@ -437,6 +456,39 @@ describe('hook-adapters', () => {
                   'cd "$FACTORY_PROJECT_DIR"/\'tools/hook scripts\' && python3 .promptscript/scripts/check.py # promptscript-generated:rooted',
               },
             ],
+          },
+        ],
+      });
+    });
+  });
+
+  describe('generateVSCodeHooks', () => {
+    it('should apply target overrides and emit the VS Code contract', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          terminal: {
+            event: 'pre-tool-use',
+            matcher: 'Execute',
+            command: ['prs', 'hook', 'pre-edit'],
+            timeoutMs: 5000,
+            targets: {
+              vscode: {
+                matcher: 'run_in_terminal',
+                timeoutMs: 15000,
+              },
+            },
+          },
+        })
+      );
+
+      expect(generateVSCodeHooks(hooks)).toEqual({
+        PreToolUse: [
+          {
+            type: 'command',
+            command: 'prs hook pre-edit # promptscript-generated:terminal',
+            windows: "& 'prs' 'hook' 'pre-edit' # promptscript-generated:terminal",
+            matcher: 'run_in_terminal',
+            timeout: 15,
           },
         ],
       });

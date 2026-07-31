@@ -1122,6 +1122,14 @@ export const EXAMPLES: Example[] = [
     cwd: "project"
     timeoutMs: 120000
     statusMessage: "Checking TypeScript"
+    targets: {
+      factory: {
+        matcher: "Execute"
+      }
+      vscode: {
+        matcher: "run_in_terminal"
+      }
+    }
   }
 }
 

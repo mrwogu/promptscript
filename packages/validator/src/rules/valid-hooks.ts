@@ -3,6 +3,7 @@ import {
   isPortableHookInterpreter,
   isPortableHookScriptPath,
   isPortablePathSegment,
+  KNOWN_TARGETS,
   type SourceLocation,
   type Value,
 } from '@promptscript/core';
@@ -31,8 +32,19 @@ const HOOK_FIELDS = new Set([
   'statusMessage',
   'continueOnFailure',
   'enabled',
+  'targets',
 ]);
 const SCRIPT_FIELDS = new Set(['path', 'interpreter', 'args']);
+const TARGET_OVERRIDE_FIELDS = new Set([
+  'event',
+  'matcher',
+  'timeoutMs',
+  'statusMessage',
+  'continueOnFailure',
+  'enabled',
+  'cwd',
+]);
+const VALID_HOOK_TARGETS = new Set([...KNOWN_TARGETS, 'vscode']);
 
 /**
  * PS034: Valid hooks block.
@@ -209,7 +221,7 @@ export const validHooks: ValidationRule = {
       // Validate timeoutMs
       const timeoutMs = hook['timeoutMs'];
       if (timeoutMs !== undefined) {
-        if (typeof timeoutMs !== 'number') {
+        if (typeof timeoutMs !== 'number' || !Number.isFinite(timeoutMs)) {
           ctx.report({
             message: `Hook "${hookId}": timeoutMs must be a number`,
             location: hooksBlock.loc,
@@ -263,9 +275,139 @@ export const validHooks: ValidationRule = {
           severity: 'error',
         });
       }
+
+      const targets = hook['targets'];
+      if (targets !== undefined) {
+        if (typeof targets !== 'object' || targets === null || Array.isArray(targets)) {
+          ctx.report({
+            message: `Hook "${hookId}": targets must be an object`,
+            location: hooksBlock.loc,
+            severity: 'error',
+          });
+        } else {
+          validateTargetOverrides(
+            hookId,
+            targets as Record<string, Value>,
+            hooksBlock.loc,
+            ctx.report
+          );
+        }
+      }
     }
   },
 };
+
+function validateTargetOverrides(
+  hookId: string,
+  targets: Record<string, Value>,
+  location: SourceLocation,
+  report: RuleContext['report']
+): void {
+  for (const [target, value] of Object.entries(targets)) {
+    if (!VALID_HOOK_TARGETS.has(target)) {
+      report({
+        message: `Hook "${hookId}": unknown target override "${target}"`,
+        location,
+        suggestion: `Valid targets: ${[...VALID_HOOK_TARGETS].join(', ')}`,
+        severity: 'error',
+      });
+    }
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" must be an object`,
+        location,
+        severity: 'error',
+      });
+      continue;
+    }
+
+    const override = value as Record<string, Value>;
+    for (const field of Object.keys(override)) {
+      if (!TARGET_OVERRIDE_FIELDS.has(field)) {
+        report({
+          message: `Hook "${hookId}": unknown target override field "${field}"`,
+          location,
+          severity: 'error',
+        });
+      }
+    }
+
+    const event = override['event'];
+    if (event !== undefined && (typeof event !== 'string' || !VALID_HOOK_EVENTS.has(event))) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" has an invalid event`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const matcher = override['matcher'];
+    if (matcher !== undefined && typeof matcher !== 'string') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" matcher must be a string`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const timeoutMs = override['timeoutMs'];
+    if (timeoutMs !== undefined && typeof timeoutMs !== 'number') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" timeoutMs must be a number`,
+        location,
+        severity: 'error',
+      });
+    } else if (
+      timeoutMs !== undefined &&
+      (!Number.isFinite(timeoutMs) || timeoutMs < MIN_TIMEOUT_MS || timeoutMs > MAX_TIMEOUT_MS)
+    ) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" timeoutMs must be between ${MIN_TIMEOUT_MS} and ${MAX_TIMEOUT_MS}`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const statusMessage = override['statusMessage'];
+    if (statusMessage !== undefined && typeof statusMessage !== 'string') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" statusMessage must be a string`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const continueOnFailure = override['continueOnFailure'];
+    if (continueOnFailure !== undefined && typeof continueOnFailure !== 'boolean') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" continueOnFailure must be a boolean`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const enabled = override['enabled'];
+    if (enabled !== undefined && typeof enabled !== 'boolean') {
+      report({
+        message: `Hook "${hookId}": target override "${target}" enabled must be a boolean`,
+        location,
+        severity: 'error',
+      });
+    }
+
+    const cwd = override['cwd'];
+    if (
+      cwd !== undefined &&
+      (typeof cwd !== 'string' || (cwd !== 'project' && !isPortableRelativePath(cwd)))
+    ) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" cwd must be "project" or a portable relative path`,
+        location,
+        severity: 'error',
+      });
+    }
+  }
+}
 
 function validateScript(
   hookId: string,

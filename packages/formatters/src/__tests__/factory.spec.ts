@@ -3367,6 +3367,40 @@ describe('FactoryFormatter', () => {
       }
       expect(formatter.format(ast, { version: 'simple' }).warnings).toBeUndefined();
     });
+
+    it('should apply Factory enabled overrides before compatibility warnings', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                disabled: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                  statusMessage: 'checking',
+                  targets: {
+                    factory: { enabled: false },
+                  },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = new FactoryFormatter().format(ast, { version: 'full' });
+
+      expect(result.warnings).toBeUndefined();
+    });
   });
 
   describe('plugins support', () => {

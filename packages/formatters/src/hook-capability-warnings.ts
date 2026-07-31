@@ -5,6 +5,7 @@ import {
   type Program,
 } from '@promptscript/core';
 import { extractHooks } from './hook-adapters.js';
+import type { HookTarget } from './hook-adapters.js';
 import type { FormatterWarning } from './types.js';
 
 export function getTargetHookCapabilityWarnings(
@@ -15,7 +16,9 @@ export function getTargetHookCapabilityWarnings(
   const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
   if (!hooksBlock || !isKnownTarget(target)) return [];
 
-  const enabledHooks = extractHooks(hooksBlock).filter((hook) => hook.enabled !== false);
+  const enabledHooks = extractHooks(hooksBlock).filter(
+    (hook) => (hook.targets?.[target as HookTarget]?.enabled ?? hook.enabled) !== false
+  );
   if (enabledHooks.length === 0) return [];
 
   const capability: HookCapability = HOOK_CAPABILITIES[target];

@@ -1495,6 +1495,47 @@ describe('CursorFormatter', () => {
       expect(result.warnings).toBeUndefined();
     });
 
+    it('should honor a Cursor enabled override in non-full mode', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        loc: createLoc(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                overridden: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                  enabled: false,
+                  targets: {
+                    cursor: { enabled: true },
+                  },
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.warnings).toEqual([
+        {
+          code: 'PS4002',
+          message: 'Cursor modern mode cannot emit @hooks and will omit them.',
+          suggestion: "Use Cursor version 'full'.",
+          location: createLoc(),
+        },
+      ]);
+    });
+
     it('should omit hooks.json when every hook is disabled', () => {
       const ast: Program = {
         type: 'Program',

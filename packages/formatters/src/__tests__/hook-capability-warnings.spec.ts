@@ -6,6 +6,7 @@ import {
   type HookCapability,
   type Program,
   type SourceLocation,
+  type Value,
 } from '@promptscript/core';
 import { getTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { BUILTIN_FORMATTERS } from '../builtin-formatters.js';
@@ -92,6 +93,38 @@ describe('target hook capability warnings', () => {
         []
       );
     }
+  });
+
+  it('applies target overrides before checking capability warnings', () => {
+    const makeTargetAst = (hook: Record<string, unknown>): Program => ({
+      ...ast,
+      blocks: [
+        {
+          ...ast.blocks[0]!,
+          content: {
+            type: 'ObjectContent',
+            properties: { check: hook as Value },
+            loc,
+          },
+        },
+      ],
+    });
+    const disabledForTarget = makeTargetAst({
+      event: 'post-tool-use',
+      command: ['echo', 'check'],
+      targets: { opencode: { enabled: false } },
+    });
+    expect(getTargetHookCapabilityWarnings(disabledForTarget, 'opencode', 'full')).toEqual([]);
+
+    const enabledForTarget = makeTargetAst({
+      event: 'post-tool-use',
+      command: ['echo', 'check'],
+      enabled: false,
+      targets: { opencode: { enabled: true } },
+    });
+    expect(getTargetHookCapabilityWarnings(enabledForTarget, 'opencode', 'full')).toEqual([
+      expect.objectContaining({ code: 'PS4002' }),
+    ]);
   });
 
   it('registers native hook files for cleanup in unsupported modes', () => {

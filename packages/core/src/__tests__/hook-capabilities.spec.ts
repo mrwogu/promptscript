@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   HOOK_CAPABILITIES,
+  HOOK_RUNTIME_CAPABILITIES,
   KNOWN_TARGETS,
   isPortableHookInterpreter,
   isPortableHookScriptPath,
@@ -40,5 +41,15 @@ describe('hook capabilities', () => {
     expect(isPortableHookScriptPath('scripts/check.py')).toBe(false);
     expect(isPortableHookInterpreter('python3')).toBe(true);
     expect(isPortableHookInterpreter('custom-runtime')).toBe(false);
+  });
+
+  it('describes terminal interception semantics for native hosts', () => {
+    expect(HOOK_CAPABILITIES.factory.terminal).toEqual({
+      guarantee: 'guaranteed',
+      toolNames: ['Execute'],
+      notes: expect.stringContaining('Factory Execute'),
+    });
+    expect(HOOK_CAPABILITIES.github.terminal?.guarantee).toBe('not-guaranteed');
+    expect(HOOK_RUNTIME_CAPABILITIES.vscode.terminal?.toolNames).toEqual(['run_in_terminal']);
   });
 });

@@ -1,4 +1,8 @@
-import { HOOK_CAPABILITIES, type PortableHookInterpreter, type Value } from '@promptscript/core';
+import {
+  HOOK_RUNTIME_CAPABILITIES,
+  type PortableHookInterpreter,
+  type Value,
+} from '@promptscript/core';
 import type { FormatterWarning } from './types.js';
 
 /**
@@ -13,6 +17,27 @@ export type PortableHookEvent =
   | 'subagent-start'
   | 'notification'
   | 'stop';
+
+export type HookTarget =
+  | 'claude'
+  | 'cursor'
+  | 'codex'
+  | 'factory'
+  | 'github'
+  | 'vscode'
+  | 'gemini'
+  | 'windsurf'
+  | 'grok';
+
+export interface HookTargetOverride {
+  event?: PortableHookEvent;
+  matcher?: string;
+  timeoutMs?: number;
+  statusMessage?: string;
+  continueOnFailure?: boolean;
+  enabled?: boolean;
+  cwd?: string;
+}
 
 /**
  * A parsed hook definition from the @hooks block.
@@ -38,6 +63,8 @@ export interface HookDefinition {
   continueOnFailure?: boolean;
   /** Whether the hook is enabled. */
   enabled?: boolean;
+  /** Target-specific overrides merged on top of the portable definition. */
+  targets?: Partial<Record<HookTarget, HookTargetOverride>>;
 }
 
 export interface HookScriptDefinition {
@@ -55,15 +82,6 @@ export interface HookScriptDefinition {
 // (/# promptscript-generated:[A-Za-z0-9._-]+\s*$/); keep both sides in sync.
 const HOOK_OWNERSHIP_MARKER = '# promptscript-generated';
 const SHELL_SAFE_ARGUMENT = /^[A-Za-z0-9_@%+=:,./-]+$/;
-type HookTarget =
-  | 'claude'
-  | 'cursor'
-  | 'codex'
-  | 'factory'
-  | 'github'
-  | 'gemini'
-  | 'windsurf'
-  | 'grok';
 
 function quotePosixArgument(argument: string): string {
   return SHELL_SAFE_ARGUMENT.test(argument) ? argument : `'${argument.replace(/'/g, `'"'"'`)}'`;
@@ -311,10 +329,48 @@ export function extractHooks(hooksBlock: {
     const enabled = obj['enabled'];
     if (typeof enabled === 'boolean') hook.enabled = enabled;
 
+    const targets = obj['targets'];
+    if (typeof targets === 'object' && targets !== null && !Array.isArray(targets)) {
+      const overrides: Partial<Record<HookTarget, HookTargetOverride>> = {};
+      for (const [target, value] of Object.entries(targets)) {
+        if (typeof value !== 'object' || value === null || Array.isArray(value)) continue;
+        const override = value as Record<string, Value>;
+        const targetOverride: HookTargetOverride = {};
+        if (typeof override['event'] === 'string') {
+          targetOverride.event = override['event'] as PortableHookEvent;
+        }
+        if (typeof override['matcher'] === 'string') targetOverride.matcher = override['matcher'];
+        if (typeof override['timeoutMs'] === 'number') {
+          targetOverride.timeoutMs = override['timeoutMs'];
+        }
+        if (typeof override['statusMessage'] === 'string') {
+          targetOverride.statusMessage = override['statusMessage'];
+        }
+        if (typeof override['continueOnFailure'] === 'boolean') {
+          targetOverride.continueOnFailure = override['continueOnFailure'];
+        }
+        if (typeof override['enabled'] === 'boolean') targetOverride.enabled = override['enabled'];
+        if (typeof override['cwd'] === 'string') targetOverride.cwd = override['cwd'];
+        overrides[target as HookTarget] = targetOverride;
+      }
+      if (Object.keys(overrides).length > 0) hook.targets = overrides;
+    }
+
     hooks.push(hook);
   }
 
   return hooks;
+}
+
+export function applyHookTargetOverrides(
+  hooks: HookDefinition[],
+  target: HookTarget
+): HookDefinition[] {
+  return hooks.map((hook) => {
+    const override = hook.targets?.[target];
+    if (!override) return hook;
+    return { ...hook, ...override, targets: hook.targets };
+  });
 }
 
 /**
@@ -407,6 +463,16 @@ const WINDSURF_EVENT_MAP: Record<PortableHookEvent, readonly string[]> = {
   stop: ['post_cascade_response'],
 };
 
+const VSCODE_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-tool-use': 'PreToolUse',
+  'post-tool-use': 'PostToolUse',
+  'session-start': 'SessionStart',
+  setup: 'SessionStart',
+  'subagent-start': 'SubagentStart',
+  notification: '',
+  stop: 'Stop',
+};
+
 /**
  * Get the target-native event name for a portable event.
  */
@@ -425,7 +491,9 @@ export function mapEvent(event: PortableHookEvent, target: HookTarget): string |
               ? GEMINI_EVENT_MAP
               : target === 'grok'
                 ? GROK_EVENT_MAP
-                : CODEX_EVENT_MAP;
+                : target === 'vscode'
+                  ? VSCODE_EVENT_MAP
+                  : CODEX_EVENT_MAP;
   return map[event] || null;
 }
 
@@ -447,6 +515,7 @@ export function convertTimeout(timeoutMs: number, target: HookTarget): number {
     target === 'codex' ||
     target === 'factory' ||
     target === 'github' ||
+    target === 'vscode' ||
     target === 'grok'
   )
     return Math.ceil(timeoutMs / 1000);
@@ -459,7 +528,7 @@ export function convertTimeout(timeoutMs: number, target: HookTarget): number {
 export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unknown> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'claude')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'claude');
     if (!nativeEvent) continue;
@@ -495,7 +564,7 @@ export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unk
 export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unknown> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'cursor')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'cursor');
     if (!nativeEvent) continue;
@@ -521,7 +590,7 @@ export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unk
 export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'factory')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'factory');
     if (!nativeEvent) continue;
@@ -556,7 +625,7 @@ export function getHookCompatibilityWarnings(
 ): FormatterWarning[] {
   const warnings: FormatterWarning[] = [];
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, target)) {
     if (hook.enabled === false) continue;
 
     if (!mapEvent(hook.event, target)) {
@@ -581,6 +650,14 @@ export function getHookCompatibilityWarnings(
         code: 'PS4002',
         message: `Hook "${hook.id}" uses notification, which Copilot CLI supports but GitHub Copilot cloud agent does not fire.`,
         suggestion: 'Use notification hooks only when Copilot CLI coverage is sufficient.',
+      });
+    }
+
+    if (target === 'vscode' && hook.matcher) {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" uses matcher, which VS Code currently parses but ignores.`,
+        suggestion: 'Filter tool_name and tool_input inside the hook command for exact matching.',
       });
     }
 
@@ -637,7 +714,7 @@ export function getHookCompatibilityWarnings(
       });
     }
 
-    const capability = HOOK_CAPABILITIES[target];
+    const capability = HOOK_RUNTIME_CAPABILITIES[target];
     if (
       hook.script &&
       (capability.platforms as readonly string[]).includes('windows') &&
@@ -660,7 +737,7 @@ export function getHookCompatibilityWarnings(
 export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'github')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'github');
     if (!nativeEvent) continue;
@@ -690,12 +767,49 @@ export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unk
 }
 
 /**
+ * Generate VS Code Copilot Agent hook entries.
+ *
+ * VS Code uses the Claude-compatible PascalCase event schema, but its
+ * workspace hook loader currently ignores matcher values. The matcher is
+ * retained for readability and the compatibility warning directs users to
+ * filter tool input inside the command when exact filtering matters.
+ */
+export function generateVSCodeHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
+  const result: Record<string, unknown[]> = {};
+
+  for (const hook of applyHookTargetOverrides(hooks, 'vscode')) {
+    if (hook.enabled === false) continue;
+    const nativeEvent = mapEvent(hook.event, 'vscode');
+    if (!nativeEvent) continue;
+
+    if (!result[nativeEvent]) result[nativeEvent] = [];
+    const command = hook.script
+      ? serializeNativeCwdScriptCommand(hook, 'posix', true)
+      : serializeOwnedCommand(hook);
+    const windows = hook.script
+      ? serializeNativeCwdScriptCommand(hook, 'powershell', true)
+      : serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
+
+    result[nativeEvent].push({
+      type: 'command',
+      command,
+      ...(windows ? { windows } : {}),
+      ...(hook.matcher ? { matcher: hook.matcher } : {}),
+      ...(hook.cwd ? { cwd: hook.cwd === 'project' ? '.' : hook.cwd } : {}),
+      ...(hook.timeoutMs ? { timeout: convertTimeout(hook.timeoutMs, 'vscode') } : {}),
+    });
+  }
+
+  return result;
+}
+
+/**
  * Generate Gemini CLI settings.json hook entries.
  */
 export function generateGeminiHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'gemini')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'gemini');
     if (!nativeEvent) continue;
@@ -724,7 +838,7 @@ export function generateGeminiHooks(hooks: HookDefinition[]): Record<string, unk
 export function generateWindsurfHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'windsurf')) {
     if (hook.enabled === false) continue;
     for (const nativeEvent of mapEvents(hook.event, 'windsurf')) {
       if (!result[nativeEvent]) result[nativeEvent] = [];
@@ -754,7 +868,7 @@ export function generateWindsurfHooks(hooks: HookDefinition[]): Record<string, u
 export function generateGrokHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'grok')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'grok');
     if (!nativeEvent) continue;
@@ -783,7 +897,7 @@ export function generateGrokHooks(hooks: HookDefinition[]): Record<string, unkno
 export function generateCodexHooks(hooks: HookDefinition[]): string {
   const lines: string[] = [];
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'codex')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'codex');
     if (!nativeEvent) continue;
@@ -818,7 +932,7 @@ export function generateCodexHooks(hooks: HookDefinition[]): string {
 export function generateCodexHookConfig(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
 
-  for (const hook of hooks) {
+  for (const hook of applyHookTargetOverrides(hooks, 'codex')) {
     if (hook.enabled === false) continue;
     const nativeEvent = mapEvent(hook.event, 'codex');
     if (!nativeEvent) continue;

@@ -3,6 +3,7 @@ import { BaseFormatter } from '../base-formatter.js';
 import { GlobCategorizer } from '../extractors/glob-categorizer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
 import {
+  applyHookTargetOverrides,
   extractHooks,
   generateCursorHooks,
   getHookCompatibilityWarnings,
@@ -178,7 +179,8 @@ export class CursorFormatter extends BaseFormatter {
     if (version !== 'full') {
       const hooksBlock = this.findBlock(ast, 'hooks');
       const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
-      if (hooksBlock && hooks.some((hook) => hook.enabled !== false)) {
+      const effectiveHooks = applyHookTargetOverrides(hooks, 'cursor');
+      if (hooksBlock && effectiveHooks.some((hook) => hook.enabled !== false)) {
         // The Cursor-specific PS4002 below already reports the omission, so
         // skip the generic capability warning to avoid a duplicate.
         return {

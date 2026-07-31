@@ -86,6 +86,59 @@ describe('GitHubFormatter', () => {
       }
     );
 
+    it('emits a separate VS Code hook file for a vscode override', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                terminal: {
+                  event: 'pre-tool-use',
+                  command: ['node', 'check.mjs'],
+                  targets: {
+                    vscode: { matcher: 'run_in_terminal', timeoutMs: 15000 },
+                  },
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const vscodeFile = result.additionalFiles?.find(
+        (file) => file.path === '.github/hooks/promptscript-vscode.json'
+      );
+
+      expect(vscodeFile).toBeDefined();
+      expect(JSON.parse(vscodeFile!.content)).toEqual({
+        hooks: {
+          PreToolUse: [
+            {
+              type: 'command',
+              command: 'node check.mjs # promptscript-generated:terminal',
+              windows: "& 'node' 'check.mjs' # promptscript-generated:terminal",
+              matcher: 'run_in_terminal',
+              timeout: 15,
+            },
+          ],
+        },
+      });
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: expect.stringContaining('VS Code currently parses but ignores'),
+          }),
+        ])
+      );
+    });
+
     it('declares the hooks directory and file as managed outputs', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -111,7 +164,10 @@ describe('GitHubFormatter', () => {
       const result = formatter.format(ast, { version: 'full' });
 
       expect(result.managedOutputDirectories).toEqual(['.github/hooks']);
-      expect(result.managedOutputFiles).toEqual(['.github/hooks/promptscript.json']);
+      expect(result.managedOutputFiles).toEqual([
+        '.github/hooks/promptscript.json',
+        '.github/hooks/promptscript-vscode.json',
+      ]);
     });
 
     it('preserves single-file output in simple mode', () => {
