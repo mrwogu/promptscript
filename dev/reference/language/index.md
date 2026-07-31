@@ -371,6 +371,23 @@ Backwards Compatibility
 
 The `errors` key is automatically mapped to `error-handling` in the output for backwards compatibility.
 
+Free-form text is also supported via a triple-quoted string:
+
+```
+@standards {
+  """
+  ## Security
+
+  - Validate all inputs
+  - Never log secrets
+  """
+}
+```
+
+Per-target support
+
+Free-form text `@standards` currently renders only for the Factory target. Other targets render property-style `@standards` content only.
+
 ### [@restrictions](https://github.com/restrictions "GitHub User: restrictions")
 
 Things the AI should never do:
