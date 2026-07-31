@@ -212,6 +212,8 @@ These keys are handled specially (not included in code standards section):
 | `documentation` | Doc standards       | `DocumentationStandards` |
 | `diagrams`      | Diagram preferences | `DiagramStandards`       |
 
+Known fields inside these objects get specialized rendering (e.g. `git.format`, `diagrams.types`). Custom fields are not dropped by `MarkdownInstructionFormatter`-based targets or Claude: they append them via the shared `BaseFormatter.appendGenericStandardItems()` helper as generic `Label: value` items (`true` renders as a bare label, `false`/`null` are skipped, nested objects render inline as `key: value` pairs). Cursor keeps its compact raw-key style (`key: value`) via the same stringify path. GitHub and Antigravity still render only their known fields.
+
 ## Testing Architecture
 
 ### Test Layers
