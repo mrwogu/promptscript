@@ -7,10 +7,12 @@ const {
   mockCompile,
   MockCompiler,
   mockWriteFile,
+  mockChmod,
   mockMkdir,
   mockReadFile,
   mockExistsSync,
   mockIsTTY,
+  mockCreateHookOutputSafely,
   mockLoadConfig,
   mockChokidarWatch,
   mockWatcherOn,
@@ -19,10 +21,12 @@ const {
 } = vi.hoisted(() => {
   const mockCompile = vi.fn();
   const mockWriteFile = vi.fn();
+  const mockChmod = vi.fn();
   const mockMkdir = vi.fn();
   const mockReadFile = vi.fn();
   const mockExistsSync = vi.fn();
   const mockIsTTY = vi.fn();
+  const mockCreateHookOutputSafely = vi.fn();
   const mockLoadConfig = vi.fn();
   const mockWatcherOn = vi.fn().mockReturnThis();
   const mockChokidarWatch = vi.fn().mockReturnValue({
@@ -36,10 +40,12 @@ const {
       compile = mockCompile;
     },
     mockWriteFile,
+    mockChmod,
     mockMkdir,
     mockReadFile,
     mockExistsSync,
     mockIsTTY,
+    mockCreateHookOutputSafely,
     mockLoadConfig,
     mockChokidarWatch,
     mockWatcherOn,
@@ -67,6 +73,7 @@ vi.mock('../config/loader.js', () => ({
 // Mock fs/promises
 vi.mock('fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
+  chmod: (...args: unknown[]) => mockChmod(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
   readFile: (...args: unknown[]) => mockReadFile(...args),
   readdir: vi.fn().mockResolvedValue([]),
@@ -124,6 +131,25 @@ vi.mock('fs', () => ({
 vi.mock('../output/pager.js', () => ({
   isTTY: () => mockIsTTY(),
 }));
+
+vi.mock('../utils/managed-output-cleanup.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../utils/managed-output-cleanup.js')>();
+  return {
+    ...actual,
+    createHookOutputSafely: mockCreateHookOutputSafely.mockImplementation(
+      async (path: string, _outputRoot: string, content: string) => {
+        await mockWriteFile(path, content, 'utf-8');
+        return true;
+      }
+    ),
+    rewriteHookOutputIfUnchanged: vi.fn(
+      async (path: string, _outputRoot: string, _expectedContent: string, content: string) => {
+        await mockWriteFile(path, content, 'utf-8');
+        return true;
+      }
+    ),
+  };
+});
 
 // Mock chokidar for watch mode
 vi.mock('chokidar', () => ({
@@ -241,6 +267,47 @@ describe('compile command - overwrite protection', () => {
   });
 
   describe('when file exists with PromptScript marker', () => {
+    it('should allow owned hook files in non-interactive mode', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([
+        [
+          path,
+          {
+            ...createMockOutput(path, '{"version":1,"hooks":{}}'),
+            mode: 0o644,
+          },
+        ],
+      ]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockIsTTY.mockReturnValue(false);
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+              },
+            ],
+          },
+        })
+      );
+
+      await compileCommand({}, mockServices);
+
+      expect(mockChmod).toHaveBeenCalledWith(resolve(path), 0o644);
+      expect(process.exitCode).toBeUndefined();
+    });
+
     it('should overwrite silently without prompting', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'new content')]]);
 
@@ -266,6 +333,124 @@ describe('compile command - overwrite protection', () => {
 
       expect(mockWriteFile).toHaveBeenCalledWith(resolve('CLAUDE.md'), 'new content', 'utf-8');
       expect(mockPrompts.select).not.toHaveBeenCalled();
+    });
+
+    it('should overwrite a fully owned generated hook file', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+                powershell: "& 'echo' 'old' # promptscript-generated:owned",
+              },
+            ],
+          },
+        })
+      );
+
+      await compileCommand({}, mockServices);
+
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        resolve(path),
+        '{"version":1,"hooks":{}}',
+        'utf-8'
+      );
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+    });
+
+    it('should preserve unmanaged commands while replacing owned hooks', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+              },
+              {
+                type: 'command',
+                bash: 'echo user-owned',
+              },
+            ],
+          },
+        })
+      );
+      await compileCommand({}, mockServices);
+
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+      const written = mockWriteFile.mock.calls[0]?.[1] as string;
+      expect(JSON.parse(written)).toEqual({
+        version: 1,
+        hooks: {
+          preToolUse: [
+            {
+              type: 'command',
+              bash: 'echo user-owned',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should migrate owned Codex TOML hooks without a prompt', async () => {
+      const path = '.codex/config.toml';
+      const outputs = new Map([[path, createMockOutput(path, 'max_threads = 8\n')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: {
+          totalTime: 100,
+          resolveTime: 50,
+          validateTime: 25,
+          formatTime: 25,
+        },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(`max_threads = 8
+model = "gpt-5"
+
+[[hooks.PreToolUse]]
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo old # promptscript-generated:owned"
+`);
+
+      await compileCommand({}, mockServices);
+
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        resolve(path),
+        'max_threads = 8\n\nmodel = "gpt-5"\n',
+        'utf-8'
+      );
     });
   });
 
@@ -423,6 +608,39 @@ describe('compile command - overwrite protection', () => {
         );
         expect(mockPrompts.select).not.toHaveBeenCalled();
       });
+
+      it('should not write any file when a later output conflicts', async () => {
+        // Arrange: the first output would be written, the second is user-owned
+        const outputs = new Map([
+          ['NEW.md', createMockOutput('NEW.md', 'new content')],
+          ['CLAUDE.md', createMockOutput('CLAUDE.md', 'other content')],
+        ]);
+
+        mockCompile.mockResolvedValue({
+          success: true,
+          outputs,
+          stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+          warnings: [],
+          errors: [],
+        });
+
+        mockExistsSync.mockImplementation((path: string) => {
+          if (path.includes('project.prs')) return true;
+          if (path.includes('CLAUDE.md')) return true;
+          return false; // NEW.md does not exist yet
+        });
+
+        // Act
+        await compileCommand({}, mockServices);
+
+        // Assert: pre-flight refusal prevents even the conflict-free write
+        expect(process.exitCode).toBe(1);
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Cannot overwrite files not generated by PromptScript')
+        );
+        expect(mockWriteFile).not.toHaveBeenCalled();
+        expect(mockPrompts.select).not.toHaveBeenCalled();
+      });
     });
 
     describe('with --force flag', () => {
@@ -490,6 +708,26 @@ describe('compile command - overwrite protection', () => {
         expect(process.exitCode).toBeUndefined();
       });
     });
+  });
+
+  it('should report when a hook output cannot be created safely', async () => {
+    const path = '.github/hooks/promptscript.json';
+    const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs,
+      stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+      warnings: [],
+      errors: [],
+    });
+    mockExistsSync.mockImplementation((value: string) => value.includes('project.prs'));
+    mockCreateHookOutputSafely.mockImplementationOnce(async () => false);
+
+    await compileCommand({}, mockServices);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
   });
 
   describe('with --dry-run flag', () => {
@@ -919,6 +1157,35 @@ describe('compile command - overwrite protection', () => {
       // Identical content means there is nothing to write, even with --force
       expect(mockWriteFile).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('○'));
+    });
+
+    it('should report an accurate error when a hook output file cannot be read', async () => {
+      // Arrange: a hook output that exists on disk but fails to read
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockRejectedValue(new Error('Permission denied'));
+
+      // Act
+      await compileCommand({ force: true }, mockServices);
+
+      // Assert: the failure names the unreadable file, not a mid-write race
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('exists but could not be read')
+      );
+      expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('changed while PromptScript was writing hooks')
+      );
     });
 
     it('should still overwrite user files that differ', async () => {

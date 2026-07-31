@@ -7,6 +7,50 @@ description: Auto-compile .prs files and protect generated outputs using native 
 
 PromptScript hooks integrate directly with supported AI coding tool event systems.
 
+This guide covers `prs hooks install`, which installs PromptScript
+auto-compilation and generated-file protection. Language-level `@hooks` are
+compiled separately to project lifecycle policy files for Claude, Codex,
+Cursor, Factory, Gemini, GitHub, Grok, and Windsurf. Copilot
+`.github/hooks/promptscript-vscode.json` below is the VS Code Agent installer
+contract, not the GitHub repository hook contract.
+
+Notes for compiled `@hooks` output:
+
+- **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`.
+  `prs compile` warns (`PS4002`) when `.factory/hooks.json` is absent and that file still
+  contains a non-PromptScript-owned `hooks` key, because only then does the stale section
+  reactivate via Factory's fallback to `settings.json`.
+- **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`,
+  GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match
+  nothing on another. See [@hooks](../reference/language.md#hooks).
+- **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in
+  it carries the PromptScript ownership marker, and prunes managed directories left empty (such as
+  `.github/hooks/`).
+- **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the
+  language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file
+  location does not set command working directory. See
+  [Hooks and Workflows](../features/automation.md#project-root-strategy-by-target) for target
+  behavior, generated Factory and GitHub examples, and the complete capability matrix.
+
+```promptscript
+@hooks {
+  validate: {
+    event: "post-tool-use"
+    script: {
+      path: ".promptscript/scripts/validate.mjs"
+      interpreter: "node"
+      args: ["--strict"]
+    }
+    cwd: "project"
+  }
+}
+```
+
+Compilation fails if the script is missing, is not a regular file, or escapes
+`.promptscript/scripts/` through traversal or a symlink. Targets and output
+modes without native project hooks report `PS4002` and an actionable fallback
+instead of silently omitting the hook.
+
 There are two complementary behaviours:
 
 - **Auto-compilation** - when the AI tool writes a `.prs` file, `post-edit` runs `prs compile`.
@@ -51,14 +95,20 @@ If a tool is not detected, specify its name explicitly.
 | Tool        | Hook event (pre-edit) | Hook event (post-edit) | Config path                                | Timeout unit |
 | ----------- | --------------------- | ---------------------- | ------------------------------------------ | ------------ |
 | Claude Code | `PreToolUse`          | `PostToolUse`          | `.claude/settings.json`                    | seconds      |
-| Factory AI  | `PreToolUse`          | `PostToolUse`          | `.factory/settings.json`                   | seconds      |
+| Factory AI  | `PreToolUse`          | `PostToolUse`          | `.factory/hooks.json`                      | seconds      |
 | Cursor      | `beforeFileEdit`      | `afterFileEdit`        | `.cursor/hooks.json`                       | milliseconds |
 | Windsurf    | `pre_write_code`      | `post_write_code`      | `.windsurf/hooks.json`                     | milliseconds |
 | Cline       | pre-edit script       | post-edit script       | `.clinerules/hooks/prs-{pre,post}-edit.sh` | n/a          |
-| Copilot     | `PreToolUse`          | `PostToolUse`          | `.vscode/hooks.json`                       | seconds      |
+| Copilot     | `PreToolUse`          | `PostToolUse`          | `.github/hooks/promptscript-vscode.json`   | seconds      |
 | Gemini CLI  | `BeforeTool`          | `AfterTool`            | `.gemini/settings.json`                    | milliseconds |
 
-Tools without a native hook system can use `prs compile --watch` as a fallback — see [Fallback: watch mode](#fallback-watch-mode).
+Tools without a native hook system can use `prs compile --watch` as a fallback - see [Fallback: watch mode](#fallback-watch-mode).
+
+VS Code Copilot Agent Hooks are distinct from GitHub Copilot CLI and cloud
+agent hooks. They use the same `.github/hooks/` workspace location but a
+separate file, PascalCase events, camelCase tool input fields, and currently
+ignore matcher values. Use a `vscode` target override and filter `tool_name`
+inside the command when exact tool matching is required.
 
 ## How It Works
 

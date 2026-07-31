@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   ALL_TOOL_CONFIGS,
   getToolConfig,
+  getToolHookCapability,
   claudeConfig,
   factoryConfig,
   cursorConfig,
@@ -50,5 +51,21 @@ describe('hooks/tool-configs/index', () => {
   it('getToolConfig returns undefined for unknown tool name', () => {
     expect(getToolConfig('unknown-tool')).toBeUndefined();
     expect(getToolConfig('')).toBeUndefined();
+  });
+
+  it('shares language-level hook capability contracts with installers', () => {
+    expect(getToolHookCapability('claude')).toMatchObject({
+      status: 'native',
+      configPath: '.claude/settings.json',
+      timeoutUnit: 'seconds',
+    });
+    expect(getToolHookCapability('copilot')).toMatchObject({
+      status: 'native',
+      configPath: '.github/hooks/promptscript.json',
+    });
+    expect(getToolHookCapability('cline')).toMatchObject({
+      status: 'plugin-only',
+    });
+    expect(getToolHookCapability('unknown-tool')).toBeUndefined();
   });
 });

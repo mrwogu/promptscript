@@ -1,5 +1,21 @@
-import type { OutputConvention, PrettierMarkdownOptions, Program } from '@promptscript/core';
+import type {
+  OutputConvention,
+  PrettierMarkdownOptions,
+  Program,
+  SourceLocation,
+} from '@promptscript/core';
 import type { StructuredMergePlan } from './structured-output.js';
+
+export interface FormatterWarning {
+  /** Stable warning code */
+  code: string;
+  /** Actionable compatibility message */
+  message: string;
+  /** Optional remediation */
+  suggestion?: string;
+  /** Source location that caused the compatibility warning */
+  location?: SourceLocation;
+}
 
 /**
  * Output from a formatter.
@@ -13,6 +29,8 @@ export interface FormatterOutput {
   mode?: number;
   /** Structured merge plan for JSON/TOML settings files */
   merge?: StructuredMergePlan;
+  /** Target compatibility warnings produced during formatting */
+  warnings?: FormatterWarning[];
   /** Additional files to generate (e.g., workflows) */
   additionalFiles?: FormatterOutput[];
   /**
@@ -21,6 +39,12 @@ export interface FormatterOutput {
    * directories, but must preserve unmarked files and symlinks.
    */
   managedOutputDirectories?: string[];
+  /**
+   * Relative files exclusively managed by this output.
+   * Writers may remove an obsolete file only when it carries a PromptScript
+   * ownership marker.
+   */
+  managedOutputFiles?: string[];
 }
 
 /**

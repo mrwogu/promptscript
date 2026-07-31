@@ -8,7 +8,12 @@ import {
   type MarkdownSkillConfig,
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
-import { extractHooks, generateFactoryHooks } from '../hook-adapters.js';
+import {
+  applyHookTargetOverrides,
+  extractHooks,
+  generateFactoryHooks,
+  getHookCompatibilityWarnings,
+} from '../hook-adapters.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -305,9 +310,24 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
 
     const output = super.format(ast, options);
+    const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
+    const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
+    const effectiveHooks = applyHookTargetOverrides(hooks, 'factory');
+    const hookWarnings =
+      hooksBlock && version !== 'simple' && effectiveHooks.some((hook) => hook.enabled !== false)
+        ? getHookCompatibilityWarnings(hooks, 'factory').map((warning) => ({
+            ...warning,
+            location: hooksBlock.loc,
+          }))
+        : [];
+
     return {
       ...output,
+      ...(hookWarnings.length > 0
+        ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
+        : {}),
       managedOutputDirectories: ['.factory/rules'],
+      managedOutputFiles: ['.factory/hooks.json'],
     };
   }
 
@@ -1028,7 +1048,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       }
     }
 
-    // Generate .factory/settings.json from @hooks block
+    // Generate .factory/hooks.json from @hooks block
     const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
     if (hooksBlock) {
       const hooks = extractHooks(hooksBlock);
@@ -1036,7 +1056,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
         const factoryHooks = generateFactoryHooks(hooks);
         if (Object.keys(factoryHooks).length > 0) {
           files.push({
-            path: '.factory/settings.json',
+            path: '.factory/hooks.json',
             content: JSON.stringify({ hooks: factoryHooks }, null, 2) + '\n',
           });
         }

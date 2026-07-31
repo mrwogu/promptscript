@@ -1,7 +1,8 @@
 # GitHub Copilot Contracts
 
 Source: https://docs.github.com/en/copilot/reference/custom-agents-configuration,
-https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/create-custom-agents
+https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/create-custom-agents,
+https://docs.github.com/en/copilot/reference/hooks-reference
 
 ## Fixture index
 
@@ -10,6 +11,7 @@ https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/c
 | agent.md           | https://docs.github.com/en/copilot/reference/custom-agents-configuration | public preview 2026-07 | 2026-07-17 | `.github/agents/<name>.md` | formatter-scope |
 | agent-with-mcp.md  | https://docs.github.com/en/copilot/reference/custom-agents-configuration | public preview 2026-07 | 2026-07-17 | `.github/agents/<name>.md` | formatter-scope |
 | character-limit.md | https://docs.github.com/features/copilot/whats-new                       | removed June 2026      | 2026-07-17 | n/a (matrix correction)    | matrix-update   |
+| hooks.json         | https://docs.github.com/en/copilot/reference/hooks-reference             | version 1              | 2026-07-30 | `.github/hooks/*.json`     | formatter-scope |
 
 ## Scope notes
 
@@ -59,9 +61,17 @@ Repository custom instructions character limit was removed June 2026. The
 feature matrix entry `github.character-limit` moves from `planned` to
 `not-supported`.
 
+### Repository hooks
+
+Copilot CLI and cloud agent load versioned JSON files from
+`.github/hooks/*.json`. Command hooks sit directly under lower camel-case
+event arrays. PromptScript emits shell-specific `bash` and `powershell`
+commands; GitHub also accepts `command` as a cross-platform fallback. Timeouts
+use `timeoutSec`, and matcher support depends on the event. Cloud agent
+supports a documented subset of runtime behavior.
+
 ### Out of scope
 
 - GitHub organization code review runner controls (runtime config, not
   instructions).
-- Copilot CLI runtime behavior (no project-local instruction contract beyond
-  `.github/copilot-instructions.md` and `.github/agents/`).
+- User-level Copilot CLI hooks under `~/.copilot/hooks/`.

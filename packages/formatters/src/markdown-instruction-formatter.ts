@@ -2,6 +2,7 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from './base-formatter.js';
 import type { ConventionRenderer } from './convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from './types.js';
+import { appendTargetHookCapabilityWarnings } from './hook-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -176,16 +177,17 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
+    let output: FormatterOutput;
 
     if (version === 'full') {
-      return this.formatFull(ast, options);
+      output = this.formatFull(ast, options);
+    } else if (version === 'multifile') {
+      output = this.formatMultifile(ast, options);
+    } else {
+      output = this.formatSimple(ast, options);
     }
 
-    if (version === 'multifile') {
-      return this.formatMultifile(ast, options);
-    }
-
-    return this.formatSimple(ast, options);
+    return appendTargetHookCapabilityWarnings(output, ast, this.name, version);
   }
 
   // ============================================================

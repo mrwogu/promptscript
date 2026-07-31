@@ -16,6 +16,27 @@ const createMinimalProgram = (): Program => ({
   loc: createLoc(),
 });
 
+const createHooksProgram = (): Program => ({
+  ...createMinimalProgram(),
+  blocks: [
+    {
+      type: 'Block',
+      name: 'hooks',
+      content: {
+        type: 'ObjectContent',
+        properties: {
+          check: {
+            event: 'post-tool-use',
+            command: ['echo', 'check'],
+          },
+        },
+        loc: createLoc(),
+      },
+      loc: createLoc(),
+    } as Program['blocks'][number],
+  ],
+});
+
 describe('GeminiFormatter', () => {
   let formatter: GeminiFormatter;
 
@@ -84,6 +105,40 @@ describe('GeminiFormatter', () => {
       const result = formatter.format(ast);
       expect(result.content).toContain('## Project');
       expect(result.content).toContain('You are a TypeScript developer.');
+    });
+
+    it('should emit native hooks as an additional settings file', () => {
+      const result = formatter.format(createHooksProgram(), { version: 'multifile' });
+
+      expect(result.additionalFiles).toEqual([
+        expect.objectContaining({
+          path: '.gemini/settings.json',
+          content: expect.stringContaining('"AfterTool"'),
+        }),
+      ]);
+    });
+
+    it('should attach hook compatibility warnings to generated settings', () => {
+      const ast = createHooksProgram();
+      const hooksBlock = ast.blocks[0]!;
+      if (hooksBlock.content.type === 'ObjectContent') {
+        hooksBlock.content.properties['stop'] = {
+          event: 'stop',
+          matcher: 'agent',
+          command: ['echo', 'done'],
+        };
+      }
+
+      const result = formatter.format(ast, { version: 'multifile' });
+
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: expect.stringContaining('which gemini ignores'),
+            location: createLoc(),
+          }),
+        ])
+      );
     });
 
     it('should include tech stack from context block', () => {

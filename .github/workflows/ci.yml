@@ -166,6 +166,7 @@ jobs:
 
       - name: Smoke test - agent platform and build profiles
         run: |
+          mkdir -p "/tmp/test-agent-platform/.promptscript/scripts"
           mkdir -p /tmp/test-agent-platform/.promptscript/skills/security-review/references
           mkdir -p /tmp/test-agent-platform/.promptscript/skills/security-review/bin
           cd /tmp/test-agent-platform
@@ -181,7 +182,17 @@ jobs:
                 version: full
             - cursor:
                 version: full
+            - codex:
+                version: full
             - factory:
+                version: full
+            - gemini:
+                version: full
+            - github:
+                version: multifile
+            - grok:
+                version: full
+            - windsurf:
                 version: full
           builds:
             factory-package:
@@ -228,7 +239,12 @@ jobs:
             validate-types: {
               event: "post-tool-use"
               matcher: "Edit|Write"
-              command: ["pnpm", "run", "typecheck"]
+              script: {
+                path: ".promptscript/scripts/validate script.mjs"
+                interpreter: "node"
+                args: ["--strict"]
+              }
+              cwd: "project"
             }
           }
 
@@ -248,6 +264,11 @@ jobs:
               mcpServers: ["issue-tracker"]
             }
           }
+          EOF
+          cat > ".promptscript/scripts/validate script.mjs" << 'EOF'
+          import { writeFileSync } from 'node:fs';
+          if (!process.argv.includes('--strict')) process.exit(2);
+          writeFileSync('.promptscript/hook-cwd.txt', process.cwd());
           EOF
 
           cat > .promptscript/skills/security-review/SKILL.md << 'EOF'
@@ -280,15 +301,25 @@ jobs:
           test -f .cursor/hooks.json
           test -f .cursor/mcp.json
           test -f .cursor/plugins.json
+          test -f .codex/hooks.json
           test -f .factory/droids/reviewer.md
           test -f .factory/mcp.json
-          test -f .factory/settings.json
+          test -f .factory/hooks.json
           test -f .factory/plugins.json
+          test -f .github/hooks/promptscript.json
+          test -f .gemini/settings.json
+          test -f .grok/hooks/promptscript.json
+          test -f .windsurf/hooks.json
           test -f .factory/skills/security-review/references/checklist.md
           test -x .factory/skills/security-review/scripts/check.sh
           test ! -x .factory/skills/security-review/scripts/report.sh
           grep -q "issue-tracker" .factory/mcp.json
           grep -q "engineering" .factory/plugins.json
+          node -e 'const h=require("./.factory/hooks.json");const x=h.hooks.PostToolUse?.[0]?.hooks?.[0];if(!x?.command?.includes("node \"$FACTORY_PROJECT_DIR\"/"))process.exit(1)'
+          node -e "const h=require('./.github/hooks/promptscript.json');const x=h.hooks.postToolUse?.[0];if(h.version!==1||!x?.bash||!x?.powershell||x.cwd!=='.')process.exit(1)"
+          mkdir -p packages/nested
+          node -e 'const{spawnSync}=require("node:child_process");const h=require("./.factory/hooks.json");const c=h.hooks.PostToolUse[0].hooks[0].command;const r=spawnSync("/bin/sh",["-c",c],{cwd:"packages/nested",env:{...process.env,FACTORY_PROJECT_DIR:process.cwd()},stdio:"inherit"});process.exit(r.status??1)'
+          test "$(cat .promptscript/hook-cwd.txt)" = "$(pwd)"
 
           chmod -x .factory/skills/security-review/scripts/check.sh
           chmod +x .factory/skills/security-review/scripts/report.sh
@@ -300,7 +331,7 @@ jobs:
           test -f build-output/AGENTS.md
           test -f build-output/.factory/droids/reviewer.md
           test -f build-output/.factory/mcp.json
-          test -f build-output/.factory/settings.json
+          test -f build-output/.factory/hooks.json
           test -f build-output/.factory/plugins.json
           test -f build-output/.factory/skills/security-review/references/checklist.md
           test -x build-output/.factory/skills/security-review/scripts/check.sh

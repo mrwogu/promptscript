@@ -98,6 +98,8 @@ export interface CompileOptions {
    * Prettier formatting options for markdown output.
    */
   prettier?: BrowserCompilerOptions['prettier'];
+  /** Virtual project root containing .promptscript/scripts. */
+  projectRoot?: string;
   /**
    * Simulated environment variables for interpolation.
    * When provided, ${VAR} and ${VAR:-default} syntax in source files
@@ -159,6 +161,7 @@ export async function compile(
     customConventions: options.customConventions,
     prettier: options.prettier,
     envVars: options.envVars,
+    projectRoot: options.projectRoot,
   });
 
   // Compile

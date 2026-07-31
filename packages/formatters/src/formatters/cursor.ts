@@ -2,7 +2,13 @@ import type { Block, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import { GlobCategorizer } from '../extractors/glob-categorizer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
-import { extractHooks, generateCursorHooks } from '../hook-adapters.js';
+import {
+  applyHookTargetOverrides,
+  extractHooks,
+  generateCursorHooks,
+  getHookCompatibilityWarnings,
+} from '../hook-adapters.js';
+import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
@@ -156,23 +162,52 @@ export class CursorFormatter extends BaseFormatter {
 
     const version = this.resolveVersion(options?.version);
 
+    let output: FormatterOutput;
     if (version === 'legacy') {
-      return this.formatLegacy(ast, options);
+      output = this.formatLegacy(ast, options);
+    } else if (version === 'multifile') {
+      output = this.formatMultifile(ast, options);
+    } else if (version === 'agents-md') {
+      output = this.formatAgentsMd(ast, options);
+    } else if (version === 'full') {
+      // Full mode emits hooks and reports per-hook compatibility warnings.
+      output = this.formatFull(ast, options);
+    } else {
+      output = this.formatModern(ast, options);
     }
 
-    if (version === 'multifile') {
-      return this.formatMultifile(ast, options);
+    if (version !== 'full') {
+      const hooksBlock = this.findBlock(ast, 'hooks');
+      const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
+      const effectiveHooks = applyHookTargetOverrides(hooks, 'cursor');
+      if (hooksBlock && effectiveHooks.some((hook) => hook.enabled !== false)) {
+        // The Cursor-specific PS4002 below already reports the omission, so
+        // skip the generic capability warning to avoid a duplicate.
+        return {
+          ...output,
+          warnings: [
+            ...(output.warnings ?? []),
+            {
+              code: 'PS4002',
+              message: `Cursor ${version} mode cannot emit @hooks and will omit them.`,
+              suggestion: "Use Cursor version 'full'.",
+              location: hooksBlock.loc,
+            },
+          ],
+          managedOutputFiles: [
+            ...new Set([...(output.managedOutputFiles ?? []), '.cursor/hooks.json']),
+          ],
+        };
+      }
     }
 
-    if (version === 'agents-md') {
-      return this.formatAgentsMd(ast, options);
-    }
-
-    if (version === 'full') {
-      return this.formatFull(ast, options);
-    }
-
-    return this.formatModern(ast, options);
+    output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
+    return {
+      ...output,
+      managedOutputFiles: [
+        ...new Set([...(output.managedOutputFiles ?? []), '.cursor/hooks.json']),
+      ],
+    };
   }
 
   /**
@@ -453,11 +488,22 @@ export class CursorFormatter extends BaseFormatter {
 
     // Generate hooks (.cursor/hooks.json) from @hooks block
     const hooksBlock = this.findBlock(ast, 'hooks');
+    let hookWarnings: FormatterOutput['warnings'];
     if (hooksBlock) {
       const hooks = extractHooks(hooksBlock);
       if (hooks.length > 0) {
+        hookWarnings = getHookCompatibilityWarnings(hooks, 'cursor').map((warning) => ({
+          ...warning,
+          location: hooksBlock.loc,
+        }));
         const cursorHooks = generateCursorHooks(hooks);
-        if (Object.keys(cursorHooks).length > 0) {
+        const hookEvents = cursorHooks['hooks'];
+        if (
+          typeof hookEvents === 'object' &&
+          hookEvents !== null &&
+          !Array.isArray(hookEvents) &&
+          Object.keys(hookEvents).length > 0
+        ) {
           additionalFiles.push({
             path: '.cursor/hooks.json',
             content: JSON.stringify(cursorHooks, null, 2) + '\n',
@@ -493,6 +539,10 @@ export class CursorFormatter extends BaseFormatter {
     return {
       ...result,
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+      ...(hookWarnings && hookWarnings.length > 0
+        ? { warnings: [...(result.warnings ?? []), ...hookWarnings] }
+        : {}),
+      managedOutputFiles: [...(result.managedOutputFiles ?? []), '.cursor/hooks.json'],
     };
   }
 

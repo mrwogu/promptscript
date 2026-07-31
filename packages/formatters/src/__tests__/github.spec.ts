@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { GitHubFormatter, GITHUB_VERSIONS } from '../formatters/github.js';
 
 const createLoc = (): SourceLocation => ({
@@ -34,6 +34,187 @@ describe('GitHubFormatter', () => {
     expect(formatter.outputPath).toBe('.github/copilot-instructions.md');
     expect(formatter.description).toBe('GitHub Copilot instructions (Markdown)');
     expect(formatter.defaultConvention).toBe('markdown');
+  });
+
+  describe('hooks support', () => {
+    it.each(['multifile', 'full'] as const)(
+      'emits versioned repository hooks in %s mode',
+      (version) => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'hooks',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  validate: {
+                    event: 'post-tool-use',
+                    matcher: 'edit|create',
+                    command: ['pnpm', 'run', 'typecheck'],
+                    timeoutMs: 120000,
+                  } as unknown as Value,
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version });
+        const hooksFile = result.additionalFiles?.find(
+          (file) => file.path === '.github/hooks/promptscript.json'
+        );
+
+        expect(hooksFile).toBeDefined();
+        expect(JSON.parse(hooksFile!.content)).toEqual({
+          version: 1,
+          hooks: {
+            postToolUse: [
+              {
+                type: 'command',
+                bash: 'pnpm run typecheck # promptscript-generated:validate',
+                powershell: "& 'pnpm' 'run' 'typecheck' # promptscript-generated:validate",
+                matcher: 'edit|create',
+                timeoutSec: 120,
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    it('emits a separate VS Code hook file for a vscode override', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                terminal: {
+                  event: 'pre-tool-use',
+                  command: ['node', 'check.mjs'],
+                  targets: {
+                    vscode: { matcher: 'run_in_terminal', timeoutMs: 15000 },
+                  },
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const vscodeFile = result.additionalFiles?.find(
+        (file) => file.path === '.github/hooks/promptscript-vscode.json'
+      );
+
+      expect(vscodeFile).toBeDefined();
+      expect(JSON.parse(vscodeFile!.content)).toEqual({
+        hooks: {
+          PreToolUse: [
+            {
+              type: 'command',
+              command: 'node check.mjs # promptscript-generated:terminal',
+              windows: "& 'node' 'check.mjs' # promptscript-generated:terminal",
+              matcher: 'run_in_terminal',
+              timeout: 15,
+            },
+          ],
+        },
+      });
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: expect.stringContaining('VS Code currently parses but ignores'),
+          }),
+        ])
+      );
+    });
+
+    it('declares the hooks directory and file as managed outputs', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                validate: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+
+      expect(result.managedOutputDirectories).toEqual(['.github/hooks']);
+      expect(result.managedOutputFiles).toEqual([
+        '.github/hooks/promptscript.json',
+        '.github/hooks/promptscript-vscode.json',
+      ]);
+    });
+
+    it('preserves single-file output in simple mode', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                validate: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'hello'],
+                } as unknown as Value,
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'simple' });
+      expect(result.additionalFiles).toBeUndefined();
+      expect(result.warnings).toEqual([
+        expect.objectContaining({
+          code: 'PS4002',
+          message: 'Target "github" version "simple" cannot emit @hooks and will omit them.',
+          location: expect.any(Object),
+        }),
+      ]);
+
+      const hooksBlock = ast.blocks[0]!;
+      if (hooksBlock.content.type === 'ObjectContent') {
+        const hook = hooksBlock.content.properties['validate'] as Record<string, Value>;
+        hook['enabled'] = false;
+      }
+      expect(formatter.format(ast, { version: 'simple' }).warnings).toBeUndefined();
+      const multifileResult = formatter.format(ast, { version: 'multifile' });
+      expect(
+        multifileResult.additionalFiles?.some(
+          (file) => file.path === '.github/hooks/promptscript.json'
+        )
+      ).not.toBe(true);
+    });
   });
 
   describe('format with default Markdown convention', () => {

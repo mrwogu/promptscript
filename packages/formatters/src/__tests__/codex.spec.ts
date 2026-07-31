@@ -112,6 +112,40 @@ describe('CodexFormatter', () => {
       expect(agentToml).toBeDefined();
     });
 
+    it('should emit native hooks in config.toml', () => {
+      const program: Program = {
+        ...createProgramWithAgent(),
+        blocks: [
+          ...createProgramWithAgent().blocks,
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                check: {
+                  event: 'pre-tool-use',
+                  command: ['echo', 'check'],
+                  matcher: 'Edit',
+                  timeoutMs: 5000,
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(program, { version: 'multifile' });
+      const configFile = (result.additionalFiles ?? []).find(
+        (file) => file.path === '.codex/hooks.json'
+      );
+
+      expect(configFile?.content).toContain('"PreToolUse"');
+      expect(configFile?.content).toContain('echo check # promptscript-generated:check');
+    });
+
     it('should map content to developer_instructions', () => {
       const result = formatter.format(createProgramWithAgent(), { version: 'multifile' });
       const agentToml = (result.additionalFiles ?? []).find(
@@ -667,7 +701,7 @@ describe('CodexFormatter', () => {
       expect(result.content.length).toBeLessThanOrEqual(32768);
     });
 
-    it('should include hooks in config.toml when @hooks block present', () => {
+    it('should emit dedicated hooks.json when @hooks block present', () => {
       const program: Program = {
         type: 'Program',
         blocks: [
@@ -680,6 +714,7 @@ describe('CodexFormatter', () => {
                 'my-hook': {
                   event: 'pre-tool-use',
                   command: ['echo', 'hello'],
+                  cwd: 'project',
                 },
               },
               loc: createLoc(),
@@ -692,11 +727,31 @@ describe('CodexFormatter', () => {
         loc: createLoc(),
       };
       const result = formatter.format(program, { version: 'multifile' });
-      const configFile = (result.additionalFiles ?? []).find(
-        (f) => f.path === '.codex/config.toml'
-      );
-      expect(configFile).toBeDefined();
-      expect(configFile!.content).toContain('pre_tool_use');
+      const hooksFile = (result.additionalFiles ?? []).find((f) => f.path === '.codex/hooks.json');
+      expect(hooksFile).toBeDefined();
+      expect(JSON.parse(hooksFile!.content)).toMatchObject({
+        hooks: {
+          PreToolUse: [
+            {
+              hooks: [
+                {
+                  command: 'echo hello # promptscript-generated:my-hook',
+                },
+              ],
+            },
+          ],
+        },
+      });
+      expect(result.warnings).toEqual([
+        {
+          code: 'PS4002',
+          message:
+            'Hook "my-hook" requests cwd "project", which codex cannot guarantee and will ignore.',
+          suggestion:
+            'Review the generated codex hook because it will use the agent session working directory.',
+          location: createLoc(),
+        },
+      ]);
     });
 
     it('should skip agents with invalid names', () => {
