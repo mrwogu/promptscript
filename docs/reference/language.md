@@ -1244,17 +1244,18 @@ Portable events:
 
 Each hook entry is an object with:
 
-| Field               | Required | Type     | Description                                                  |
-| ------------------- | -------- | -------- | ------------------------------------------------------------ |
-| `event`             | Yes      | string   | Portable event name (see above)                              |
-| `command`           | One of   | string[] | Non-empty source argument array                              |
-| `script`            | One of   | object   | Repository-local script descriptor                           |
-| `cwd`               | No       | string   | `"project"` or a forward-slash path relative to project root |
-| `matcher`           | No       | string   | Target-native tool name matcher pattern                      |
-| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                                   |
-| `statusMessage`     | No       | string   | Status message shown during execution                        |
-| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                            |
-| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)                  |
+| Field               | Required | Type     | Description                                                                                              |
+| ------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `event`             | Yes      | string   | Portable event name (see above)                                                                          |
+| `command`           | One of   | string[] | Non-empty source argument array                                                                          |
+| `script`            | One of   | object   | Repository-local script descriptor                                                                       |
+| `cwd`               | No       | string   | `"project"` or a forward-slash path relative to project root                                             |
+| `matcher`           | No       | string   | Target-native tool name matcher pattern                                                                  |
+| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                                                                               |
+| `statusMessage`     | No       | string   | Status message shown during execution                                                                    |
+| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                                                                        |
+| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)                                                              |
+| `targets`           | No       | object   | Target-specific overrides for event, matcher, timeout, statusMessage, continueOnFailure, cwd, or enabled |
 
 Exactly one of `command` or `script` is required. A `script` object contains:
 
@@ -1288,32 +1289,52 @@ the command working directory.
 `Edit|Write`. A matcher written for one target can match nothing on another, so review generated
 hook files per target.
 
+Target overrides use the target name as the key:
+
+```promptscript
+targets: {
+  factory: { matcher: "Execute" }
+  vscode: { matcher: "run_in_terminal" }
+  github: { enabled: false }
+}
+```
+
+VS Code Copilot Agent Hooks are emitted separately at
+`.github/hooks/promptscript-vscode.json` when a `vscode` override is present.
+They use PascalCase events, camelCase tool input fields, and currently ignore
+matcher values. GitHub Copilot CLI and cloud-agent hooks remain in
+`.github/hooks/promptscript.json` and use lower camelCase events.
+
 `multifile` and `full` modes emit target-native hook files. `simple` mode
 preserves its single-file contract and reports a compatibility warning.
 
-| Target         | Output                            | Event naming    | Timeout field |
-| -------------- | --------------------------------- | --------------- | ------------- |
-| Factory Droid  | `.factory/hooks.json`             | PascalCase      | `timeout`     |
-| GitHub Copilot | `.github/hooks/promptscript.json` | lower camelCase | `timeoutSec`  |
-| Claude Code    | `.claude/settings.json`           | PascalCase      | `timeout`     |
-| Cursor         | `.cursor/hooks.json`              | lower camelCase | `timeout`     |
-| Codex          | `.codex/hooks.json`               | PascalCase      | `timeout`     |
-| Gemini CLI     | `.gemini/settings.json`           | PascalCase      | `timeout`     |
-| Windsurf       | `.windsurf/hooks.json`            | snake_case      | -             |
-| Grok Build     | `.grok/hooks/promptscript.json`   | PascalCase      | `timeout`     |
+| Target         | Output                                   | Event naming    | Timeout field |
+| -------------- | ---------------------------------------- | --------------- | ------------- |
+| Factory Droid  | `.factory/hooks.json`                    | PascalCase      | `timeout`     |
+| GitHub Copilot | `.github/hooks/promptscript.json`        | lower camelCase | `timeoutSec`  |
+| Claude Code    | `.claude/settings.json`                  | PascalCase      | `timeout`     |
+| Cursor         | `.cursor/hooks.json`                     | lower camelCase | `timeout`     |
+| Codex          | `.codex/hooks.json`                      | PascalCase      | `timeout`     |
+| Gemini CLI     | `.gemini/settings.json`                  | PascalCase      | `timeout`     |
+| Windsurf       | `.windsurf/hooks.json`                   | snake_case      | -             |
+| Grok Build     | `.grok/hooks/promptscript.json`          | PascalCase      | `timeout`     |
+| VS Code Agent  | `.github/hooks/promptscript-vscode.json` | PascalCase      | `timeout`     |
 
 GitHub output uses the version 1 repository-hook schema shared by Copilot CLI
-and cloud agent. Factory output uses the preferred dedicated project hook file;
+and cloud agent. Factory output uses the preferred dedicated project hook file.
 Factory still accepts `hooks` inside `.factory/settings.json` only as a
-fallback - `prs compile` reports `PS4002` when that fallback file still carries
-a non-PromptScript-owned `hooks` key so you can remove the stale section.
+fallback. `prs compile` reports `PS4002` when that fallback file still carries
+a non-PromptScript-owned `hooks` key. `prs hooks install factory` migrates
+unambiguous legacy entries, preserves unrelated settings, and refuses partial
+migrations when event names or entries are ambiguous.
 Formatters report `PS4002` when a target cannot represent an event or
 optional field instead of silently dropping it.
 
 When `@hooks` is removed or stops emitting, the CLI deletes the obsolete hook
-file (`.factory/hooks.json`, `.github/hooks/promptscript.json`) only when every
-command in it carries the PromptScript ownership marker, and prunes managed
-directories (such as `.github/hooks/`) that the removal leaves empty.
+file (`.factory/hooks.json`, `.github/hooks/promptscript.json`, or
+`.github/hooks/promptscript-vscode.json`) only when every command in it carries
+the PromptScript ownership marker, and prunes managed directories (such as
+`.github/hooks/`) that the removal leaves empty.
 
 Every built-in target has an explicit hook capability classification. Targets
 without native project hooks and modes that cannot emit additional files

@@ -36,6 +36,37 @@ The `@hooks` block requires syntax `1.4.0`:
 }
 ```
 
+### Target-specific behavior
+
+Keep the portable event and command as the default, then override only the
+fields that differ on a host:
+
+```promptscript
+@hooks {
+  terminal-policy: {
+    event: "pre-tool-use"
+    command: ["node", ".promptscript/scripts/check-terminal.mjs"]
+    matcher: "Bash"
+    targets: {
+      factory: {
+        matcher: "Execute"
+      }
+      vscode: {
+        matcher: "run_in_terminal"
+      }
+      github: {
+        enabled: false
+      }
+    }
+  }
+}
+```
+
+Supported override fields are `event`, `matcher`, `timeoutMs`,
+`statusMessage`, `continueOnFailure`, `enabled`, and `cwd`. Overrides are
+validated against known target names and do not change the portable source
+definition used by other targets.
+
 ### Portable Events
 
 | Event            | Purpose                              |
@@ -49,18 +80,20 @@ The `@hooks` block requires syntax `1.4.0`:
 | `stop`           | Run final checks when an agent stops |
 
 Formatters map portable event names to target-native hook systems. Eight
-built-in targets currently emit project-level lifecycle hooks.
+built-in targets emit project-level lifecycle hooks, with a separate compatible
+VS Code Agent output when requested.
 
-| Target         | Generated hook file               | Notes                                      |
-| -------------- | --------------------------------- | ------------------------------------------ |
-| Factory Droid  | `.factory/hooks.json`             | PascalCase events, seconds                 |
-| GitHub Copilot | `.github/hooks/promptscript.json` | Version 1, lower camelCase, seconds        |
-| Claude Code    | `.claude/settings.json`           | PascalCase events, seconds                 |
-| Cursor         | `.cursor/hooks.json`              | Version 1, lower camelCase, seconds        |
-| Codex          | `.codex/hooks.json`               | PascalCase events, seconds                 |
-| Gemini CLI     | `.gemini/settings.json`           | PascalCase events, milliseconds            |
-| Windsurf       | `.windsurf/hooks.json`            | Event-specific entries, native working dir |
-| Grok Build     | `.grok/hooks/promptscript.json`   | PascalCase events, seconds                 |
+| Target         | Generated hook file                      | Notes                                      |
+| -------------- | ---------------------------------------- | ------------------------------------------ |
+| Factory Droid  | `.factory/hooks.json`                    | PascalCase events, seconds                 |
+| GitHub Copilot | `.github/hooks/promptscript.json`        | Version 1, lower camelCase, seconds        |
+| Claude Code    | `.claude/settings.json`                  | PascalCase events, seconds                 |
+| Cursor         | `.cursor/hooks.json`                     | Version 1, lower camelCase, seconds        |
+| Codex          | `.codex/hooks.json`                      | PascalCase events, seconds                 |
+| Gemini CLI     | `.gemini/settings.json`                  | PascalCase events, milliseconds            |
+| Windsurf       | `.windsurf/hooks.json`                   | Event-specific entries, native working dir |
+| Grok Build     | `.grok/hooks/promptscript.json`          | PascalCase events, seconds                 |
+| VS Code Agent  | `.github/hooks/promptscript-vscode.json` | PascalCase events, matcher ignored         |
 
 Hook files require `multifile` or `full` mode. `simple` mode reports `PS4002`
 because it cannot emit additional files. Cursor emits hook files only in
@@ -73,6 +106,13 @@ Every native adapter adds a trailing
 PromptScript uses this marker to replace or remove only its entries when a
 native JSON hook file also contains user settings or hooks. Unmarked entries
 and top-level user settings remain untouched.
+
+VS Code Agent Hooks are separate from GitHub Copilot CLI and cloud-agent hooks.
+PromptScript emits the VS Code file only when a hook contains a `vscode`
+target override. VS Code uses PascalCase events and currently ignores matcher
+values, so commands that need exact tool filtering must inspect `tool_name` and
+`tool_input` themselves. VS Code uses camelCase fields such as
+`tool_input.filePath`, unlike Claude Code's `tool_input.file_path`.
 
 ### Portable Repository Scripts
 
@@ -246,6 +286,25 @@ Every non-native target and every unsupported output mode reports `PS4002` with
 the target-specific fallback. PromptScript never silently omits an enabled
 `@hooks` block.
 
+### Terminal command semantics
+
+`pre-tool-use` is not a universal terminal interception guarantee. Use the
+target override syntax and native tool name when terminal coverage matters:
+
+| Host                     | Terminal coverage                | Native tool or event                           |
+| ------------------------ | -------------------------------- | ---------------------------------------------- |
+| Claude Code              | Guaranteed                       | `Bash`                                         |
+| Factory Droid            | Guaranteed                       | `Execute`                                      |
+| Codex                    | Guaranteed                       | `Bash`                                         |
+| Windsurf                 | Guaranteed                       | `pre_run_command` / `post_run_command`         |
+| VS Code Agent            | Best effort                      | `run_in_terminal`, filtered inside the command |
+| GitHub Copilot CLI/cloud | Not guaranteed across both hosts | Tool coverage differs                          |
+
+If a host does not guarantee the desired terminal path, use `prs compile
+--watch` for regeneration or filter the hook payload inside a script. A hook
+that matches file edits is not equivalent to a hook that observes every
+terminal command.
+
 Contract references:
 
 - [Claude Code hooks](https://code.claude.com/docs/en/hooks)
@@ -256,6 +315,7 @@ Contract references:
 - [Gemini CLI hooks](https://geminicli.com/docs/hooks/reference/)
 - [Windsurf hooks](https://docs.windsurf.com/windsurf/cascade/hooks)
 - [Grok Build hooks](https://docs.x.ai/build/features/hooks)
+- [VS Code Copilot Agent Hooks](https://code.visualstudio.com/docs/copilot/customization/hooks)
 
 For example, the portable hook above generates this Factory command:
 
@@ -319,10 +379,10 @@ Installed hooks:
 - Redirect agents to the source `.prs` file.
 
 This CLI feature is separate from the language-level `@hooks` block.
-For Copilot, `.vscode/hooks.json` configures VS Code integration; it is not the
-GitHub repository hook file generated from `@hooks`. Factory CLI installation
-uses the supported `settings.json` fallback so auto-compilation hooks remain
-separate from project lifecycle hooks.
+For Copilot, `.github/hooks/promptscript-vscode.json` configures VS Code Agent
+Hooks; it is not the GitHub repository hook file generated from `@hooks`.
+Factory CLI installation uses `.factory/hooks.json` and migrates unambiguous
+legacy entries from `.factory/settings.json`.
 
 ## Commands and Workflows
 

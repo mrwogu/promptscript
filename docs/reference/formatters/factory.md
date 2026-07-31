@@ -83,7 +83,7 @@ description: PromptScript output format for Factory AI
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
 - `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
 - Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
-- `.factory/settings.json` remains a Factory fallback and is used separately by `prs hooks install`
+- `.factory/settings.json` remains a Factory fallback; `prs hooks install factory` migrates its unambiguous hooks
 - When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.factory/hooks.json`; directories emptied by cleanup (`.factory/rules` and its subdirectories) are pruned as well
 - Three output modes: `simple`, `multifile`, `full`
 - Always-on rules default to the byte-compatible `monolith` mode
@@ -91,14 +91,11 @@ description: PromptScript output format for Factory AI
 - Split rules require the `multifile` or `full` output version
 
 PromptScript versions before 1.16 could place language-level hooks in
-`.factory/settings.json`. PromptScript does not remove that unmarked file
-because it may also contain user settings or `prs hooks install` entries.
-After compiling `.factory/hooks.json`, review the old `hooks` object and remove
-only duplicated lifecycle entries. To help with this migration, `prs compile`
-reports a `PS4002` warning when a factory target runs, `.factory/hooks.json`
-is absent, and `.factory/settings.json` still contains a non-PromptScript-owned
-`hooks` key - stale entries there reactivate because Factory falls back to
-`settings.json` when `hooks.json` is missing.
+`.factory/settings.json`. `prs hooks install factory` copies unambiguous legacy
+entries into `.factory/hooks.json`, preserves unrelated settings, and refuses
+partial migrations when event names or entries are ambiguous. `prs compile`
+reports a `PS4002` warning while the fallback file still contains a
+non-PromptScript-owned `hooks` key and `.factory/hooks.json` is absent.
 
 ## Split Rules
 
