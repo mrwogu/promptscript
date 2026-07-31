@@ -879,6 +879,76 @@ describe('hook-adapters', () => {
       expect(generateCodexHookConfig(hooks)).toEqual({});
     });
 
+    it('generates Codex JSON config for project and root script hooks', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          project: {
+            event: 'pre-tool-use',
+            matcher: 'Edit',
+            script: {
+              path: 'scripts/project hook.js',
+              interpreter: 'node',
+              args: ['--check'],
+            },
+            cwd: 'project',
+            timeoutMs: 2500,
+            statusMessage: 'Checking project',
+          },
+          root: {
+            event: 'post-tool-use',
+            script: {
+              path: 'scripts/root.py',
+              interpreter: 'python3',
+              args: [],
+            },
+          },
+          shell: {
+            event: 'session-start',
+            script: {
+              path: 'scripts/start.sh',
+              interpreter: 'bash',
+              args: [],
+            },
+          },
+        })
+      );
+
+      const config = generateCodexHookConfig(hooks);
+      expect(config['PreToolUse']![0]).toMatchObject({
+        matcher: 'Edit',
+        hooks: [
+          {
+            type: 'command',
+            command: expect.stringContaining('scripts/project hook.js'),
+            commandWindows: expect.stringContaining('Set-Location $promptscriptProjectRoot'),
+            timeout: 3,
+            statusMessage: 'Checking project',
+          },
+        ],
+      });
+      expect(config['PostToolUse']![0]).toMatchObject({
+        hooks: [
+          {
+            type: 'command',
+            command: expect.stringContaining('scripts/root.py'),
+            commandWindows: expect.stringContaining('git rev-parse --show-toplevel'),
+          },
+        ],
+      });
+      expect(config['SessionStart']![0]).toMatchObject({
+        hooks: [
+          {
+            type: 'command',
+            command: expect.stringContaining('scripts/start.sh'),
+          },
+        ],
+      });
+      const sessionStart = config['SessionStart']![0] as {
+        hooks: Record<string, unknown>[];
+      };
+      expect(sessionStart.hooks[0]).not.toHaveProperty('commandWindows');
+    });
+
     it('quotes script paths and metacharacter arguments for Unix and Windows', () => {
       const special = extractHooks(
         makeHooksBlock({

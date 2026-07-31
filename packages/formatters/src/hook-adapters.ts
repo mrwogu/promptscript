@@ -129,15 +129,10 @@ function projectCwdPrefix(
 
 function serializeProjectScriptCommand(
   hook: HookDefinition,
-  target: 'claude' | 'factory' | 'gemini' | 'grok',
-  owned = false
+  target: 'claude' | 'factory' | 'gemini' | 'grok'
 ): string {
   if (!hook.script) {
-    return owned
-      ? serializeOwnedCommand(hook, quotePosixArgument, projectCwdPrefix(hook, target))
-      : `${projectCwdPrefix(hook, target)}${getCommandArguments(hook)
-          .map(quotePosixArgument)
-          .join(' ')}`;
+    return serializeOwnedCommand(hook, quotePosixArgument, projectCwdPrefix(hook, target));
   }
 
   const root = projectRootExpression(target);
@@ -146,17 +141,13 @@ function serializeProjectScriptCommand(
     `${root}/${quotePosixArgument(hook.script.path)}`,
     ...hook.script.args.map(quotePosixArgument),
   ].join(' ');
-  const marker = owned
-    ? ` ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`
-    : '';
+  const marker = ` ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`;
   return `${projectCwdPrefix(hook, target)}${invocation}${marker}`;
 }
 
-function serializeGitRootScriptCommand(hook: HookDefinition, owned = false): string {
+function serializeGitRootScriptCommand(hook: HookDefinition): string {
   if (!hook.script) {
-    return owned
-      ? serializeOwnedCommand(hook)
-      : getCommandArguments(hook).map(quotePosixArgument).join(' ');
+    return serializeOwnedCommand(hook);
   }
 
   const root = '"$PROMPTSCRIPT_PROJECT_ROOT"';
@@ -169,9 +160,7 @@ function serializeGitRootScriptCommand(hook: HookDefinition, owned = false): str
     `${root}/${quotePosixArgument(hook.script.path)}`,
     ...hook.script.args.map(quotePosixArgument),
   ].join(' ');
-  const marker = owned
-    ? ` ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`
-    : '';
+  const marker = ` ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`;
   return `PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel)" && ${cwd}${invocation}${marker}`;
 }
 
@@ -182,35 +171,22 @@ function getWindowsInterpreter(interpreter: PortableHookInterpreter): string[] |
   return [interpreter];
 }
 
-function serializePowerShellScriptCommand(
-  hook: HookDefinition,
-  useGitRoot: boolean,
-  owned = false
-): string | null {
+function serializePowerShellScriptCommand(hook: HookDefinition): string | null {
   if (!hook.script) {
-    // Defensive: callers gate on hook.script, but an owned command must never
-    // lose its ownership marker (see HOOK_OWNERSHIP_MARKER contract above).
-    return owned
-      ? serializeOwnedCommand(hook, quotePowerShellArgument, '& ')
-      : `& ${getCommandArguments(hook).map(quotePowerShellArgument).join(' ')}`;
+    return serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
   }
 
   const interpreter = getWindowsInterpreter(hook.script.interpreter);
   if (!interpreter) return null;
 
-  const scriptPath = useGitRoot
-    ? `(Join-Path $promptscriptProjectRoot ${quotePowerShellArgument(hook.script.path)})`
-    : quotePowerShellArgument(hook.script.path);
+  const scriptPath = `(Join-Path $promptscriptProjectRoot ${quotePowerShellArgument(hook.script.path)})`;
   const invocation = [
     '&',
     ...interpreter.map(quotePowerShellArgument),
     scriptPath,
     ...hook.script.args.map(quotePowerShellArgument),
   ].join(' ');
-  const marker = owned
-    ? ` ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`
-    : '';
-  if (!useGitRoot) return `${invocation}${marker}`;
+  const marker = ` ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`;
 
   const cwd =
     hook.cwd === undefined
@@ -232,15 +208,12 @@ function getScriptPathFromNativeCwd(hook: HookDefinition): string {
 
 function serializeNativeCwdScriptCommand(
   hook: HookDefinition,
-  shell: 'posix' | 'powershell',
-  owned = false
+  shell: 'posix' | 'powershell'
 ): string | null {
   if (!hook.script) {
     return shell === 'posix'
-      ? owned
-        ? serializeOwnedCommand(hook)
-        : getCommandArguments(hook).map(quotePosixArgument).join(' ')
-      : serializePowerShellScriptCommand(hook, false, owned);
+      ? serializeOwnedCommand(hook)
+      : serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
   }
 
   const scriptPath = getScriptPathFromNativeCwd(hook);
@@ -257,8 +230,6 @@ function serializeNativeCwdScriptCommand(
     quote(scriptPath),
     ...hook.script.args.map(quote),
   ].join(' ');
-  if (!owned) return invocation;
-
   return `${invocation} ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`;
 }
 
@@ -539,7 +510,7 @@ export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unk
       hooks: [
         {
           type: 'command',
-          command: serializeProjectScriptCommand(hook, 'claude', true),
+          command: serializeProjectScriptCommand(hook, 'claude'),
           timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'claude') : 10,
         },
       ],
@@ -572,7 +543,7 @@ export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unk
 
     result[nativeEvent].push({
       matcher: hook.matcher ?? '.*',
-      command: serializeGitRootScriptCommand(hook, true),
+      command: serializeGitRootScriptCommand(hook),
       timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'cursor') : 10,
     });
   }
@@ -599,7 +570,7 @@ export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, un
       hooks: [
         {
           type: 'command',
-          command: serializeProjectScriptCommand(hook, 'factory', true),
+          command: serializeProjectScriptCommand(hook, 'factory'),
           ...(hook.timeoutMs ? { timeout: convertTimeout(hook.timeoutMs, 'factory') } : {}),
         },
       ],
@@ -741,8 +712,8 @@ export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unk
 
     if (!result[nativeEvent]) result[nativeEvent] = [];
 
-    const bash = serializeNativeCwdScriptCommand(hook, 'posix', true);
-    const powershell = serializeNativeCwdScriptCommand(hook, 'powershell', true);
+    const bash = serializeNativeCwdScriptCommand(hook, 'posix');
+    const powershell = serializeNativeCwdScriptCommand(hook, 'powershell');
 
     result[nativeEvent].push({
       type: 'command',
@@ -776,8 +747,8 @@ export function generateVSCodeHooks(hooks: HookDefinition[]): Record<string, unk
     if (!nativeEvent) continue;
 
     if (!result[nativeEvent]) result[nativeEvent] = [];
-    const command = serializeNativeCwdScriptCommand(hook, 'posix', true);
-    const windows = serializeNativeCwdScriptCommand(hook, 'powershell', true);
+    const command = serializeNativeCwdScriptCommand(hook, 'posix');
+    const windows = serializeNativeCwdScriptCommand(hook, 'powershell');
 
     result[nativeEvent].push({
       type: 'command',
@@ -810,7 +781,7 @@ export function generateGeminiHooks(hooks: HookDefinition[]): Record<string, unk
         {
           type: 'command',
           command: hook.script
-            ? serializeProjectScriptCommand(hook, 'gemini', true)
+            ? serializeProjectScriptCommand(hook, 'gemini')
             : serializeOwnedCommand(hook, quotePosixArgument, projectCwdPrefix(hook, 'gemini')),
           ...(hook.timeoutMs ? { timeout: convertTimeout(hook.timeoutMs, 'gemini') } : {}),
         },
@@ -832,8 +803,8 @@ export function generateWindsurfHooks(hooks: HookDefinition[]): Record<string, u
     for (const nativeEvent of mapEvents(hook.event)) {
       if (!result[nativeEvent]) result[nativeEvent] = [];
 
-      const command = serializeNativeCwdScriptCommand(hook, 'posix', true);
-      const powershell = serializeNativeCwdScriptCommand(hook, 'powershell', true);
+      const command = serializeNativeCwdScriptCommand(hook, 'posix');
+      const powershell = serializeNativeCwdScriptCommand(hook, 'powershell');
       result[nativeEvent].push({
         command,
         ...(powershell ? { powershell } : {}),
@@ -865,7 +836,7 @@ export function generateGrokHooks(hooks: HookDefinition[]): Record<string, unkno
         {
           type: 'command',
           command: hook.script
-            ? serializeProjectScriptCommand(hook, 'grok', true)
+            ? serializeProjectScriptCommand(hook, 'grok')
             : serializeOwnedCommand(hook, quotePosixArgument, projectCwdPrefix(hook, 'grok')),
           ...(hook.timeoutMs ? { timeout: convertTimeout(hook.timeoutMs, 'grok') } : {}),
         },
@@ -891,12 +862,10 @@ export function generateCodexHooks(hooks: HookDefinition[]): string {
     if (hook.matcher) lines.push(`matcher = "${escapeTomlHookString(hook.matcher)}"`);
     lines.push(`[[hooks.${nativeEvent}.hooks]]`);
     lines.push('type = "command"');
-    const command = hook.script
-      ? serializeGitRootScriptCommand(hook, true)
-      : serializeOwnedCommand(hook);
+    const command = hook.script ? serializeGitRootScriptCommand(hook) : serializeOwnedCommand(hook);
     lines.push(`command = "${escapeTomlHookString(command)}"`);
     const commandWindows = hook.script
-      ? serializePowerShellScriptCommand(hook, true, true)
+      ? serializePowerShellScriptCommand(hook)
       : serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
     if (commandWindows) {
       lines.push(`command_windows = "${escapeTomlHookString(commandWindows)}"`);
@@ -922,11 +891,9 @@ export function generateCodexHookConfig(hooks: HookDefinition[]): Record<string,
     const nativeEvent = mapEvent(hook.event, 'codex');
     if (!nativeEvent) continue;
 
-    const command = hook.script
-      ? serializeGitRootScriptCommand(hook, true)
-      : serializeOwnedCommand(hook);
+    const command = hook.script ? serializeGitRootScriptCommand(hook) : serializeOwnedCommand(hook);
     const commandWindows = hook.script
-      ? serializePowerShellScriptCommand(hook, true, true)
+      ? serializePowerShellScriptCommand(hook)
       : serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
     const handler = {
       type: 'command',
