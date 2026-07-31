@@ -9,7 +9,7 @@ describe('hooks/tool-configs/copilotConfig', () => {
   });
 
   it('has correct settingsPath', () => {
-    expect(copilotConfig.settingsPath).toBe('.vscode/hooks.json');
+    expect(copilotConfig.settingsPath).toBe('.github/hooks/promptscript-vscode.json');
   });
 
   it('has correct timeoutUnit', () => {
@@ -17,7 +17,7 @@ describe('hooks/tool-configs/copilotConfig', () => {
   });
 
   it('has correct detectPaths', () => {
-    expect(copilotConfig.detectPaths).toEqual(['.vscode', '.github/copilot-instructions.md']);
+    expect(copilotConfig.detectPaths).toEqual(['.github/hooks', '.github/copilot-instructions.md']);
   });
 
   // --- generatePreEditHook ---
@@ -31,7 +31,7 @@ describe('hooks/tool-configs/copilotConfig', () => {
 
     // Assert
     expect(result).toEqual({
-      matcher: 'Edit|Write',
+      matcher: '.*',
       hooks: [
         {
           type: 'command',
@@ -54,7 +54,7 @@ describe('hooks/tool-configs/copilotConfig', () => {
 
     // Assert
     expect(result).toEqual({
-      matcher: 'Edit|Write',
+      matcher: '.*',
       hooks: [
         {
           type: 'command',

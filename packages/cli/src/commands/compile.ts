@@ -872,6 +872,9 @@ async function compileCommandWithResult(
         ConsoleOutput.muted(`Removed empty managed directory: ${removedDirectory}`);
       }
     }
+    const legacySettingsPath = targets.some((target) => target.name === 'factory')
+      ? await detectLegacyFactorySettingsHooks(effectiveOptions.output)
+      : undefined;
 
     // Report success only after every output and cleanup step completed, so a
     // write-phase failure never follows a "Compilation successful" line.
@@ -884,21 +887,16 @@ async function compileCommandWithResult(
       ConsoleOutput.muted(`Skipped ${writeResult.skipped.length} file(s)`);
     }
 
-    // One-time migration aid: a legacy .factory/settings.json with a "hooks"
-    // key reactivates stale hooks when .factory/hooks.json is absent.
-    if (targets.some((target) => target.name === 'factory')) {
-      const legacySettingsPath = await detectLegacyFactorySettingsHooks(effectiveOptions.output);
-      if (legacySettingsPath) {
-        result.warnings.push({
-          ruleId: 'PS4002',
-          ruleName: 'hook-compatibility',
-          severity: 'warning',
-          message:
-            `${legacySettingsPath} contains a legacy "hooks" section. ` +
-            'Factory falls back to it when .factory/hooks.json is absent, which can reactivate stale hooks. ' +
-            'Remove the "hooks" key from .factory/settings.json.',
-        });
-      }
+    if (legacySettingsPath) {
+      result.warnings.push({
+        ruleId: 'PS4002',
+        ruleName: 'hook-compatibility',
+        severity: 'warning',
+        message:
+          `${legacySettingsPath} contains a legacy "hooks" section. ` +
+          'Run "prs hooks install factory" to migrate unambiguous hooks to .factory/hooks.json, ' +
+          'or remove the "hooks" key manually after reviewing ambiguous entries.',
+      });
     }
 
     printStats(result.stats);

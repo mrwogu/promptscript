@@ -1,9 +1,12 @@
 import { existsSync } from 'node:fs';
-import { readFile, writeFile, mkdir, chmod, unlink } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { readFile, writeFile, mkdir, unlink, lstat, open } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { ConsoleOutput } from '../output/console.js';
 import { ALL_TOOL_CONFIGS, getToolConfig } from '../hooks/tool-configs/index.js';
 import type { ToolHookConfig } from '../hooks/tool-configs/index.js';
+import { isPromptScriptHookCommand } from '../hooks/tool-configs/claude.js';
+import { migrateLegacyFactoryHooks } from '../utils/legacy-factory-hooks.js';
 
 /**
  * Options for the hooks command.
@@ -67,8 +70,36 @@ export async function readSettingsFile(path: string): Promise<Record<string, unk
  * Write a JSON settings file with 2-space indentation.
  */
 async function writeSettingsFile(path: string, data: Record<string, unknown>): Promise<void> {
+  await assertNoSymlinkAncestors(path, 'write through');
   await mkdir(dirname(path), { recursive: true });
+  await assertNoSymlinkAncestors(path, 'write through');
   await writeFile(path, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+}
+
+async function migrateFactorySettings(cwd: string): Promise<void> {
+  const legacyPath = resolve(cwd, '.factory/settings.json');
+  const canonicalPath = resolve(cwd, '.factory/hooks.json');
+
+  if (!existsSync(legacyPath)) return;
+  const legacy = await readSettingsFile(legacyPath);
+
+  if (!Object.prototype.hasOwnProperty.call(legacy, 'hooks')) return;
+
+  const canonical = await readSettingsFile(canonicalPath);
+  const migration = migrateLegacyFactoryHooks(legacy, canonical);
+  if (migration.ambiguous.length > 0) {
+    throw new Error(
+      `Cannot migrate legacy Factory hooks safely. Review these entries in ${legacyPath}: ` +
+        migration.ambiguous.join(', ')
+    );
+  }
+  if (!migration.changed) return;
+
+  await writeSettingsFile(canonicalPath, migration.canonical);
+  await writeSettingsFile(legacyPath, migration.legacy);
+  ConsoleOutput.success(
+    `factory: migrated ${migration.migrated} legacy hook(s) to .factory/hooks.json`
+  );
 }
 
 /**
@@ -84,7 +115,7 @@ function settingsUnchanged(
 
 function countPromptScriptHooks(value: unknown): number {
   if (typeof value === 'string') {
-    return value.includes('prs hook') ? 1 : 0;
+    return isPromptScriptHookCommand(value) ? 1 : 0;
   }
   if (Array.isArray(value)) {
     return value.reduce((count, item) => count + countPromptScriptHooks(item), 0);
@@ -102,6 +133,10 @@ function countPromptScriptHooks(value: unknown): number {
 async function installForTool(config: ToolHookConfig, prsPath: string): Promise<void> {
   const cwd = process.cwd();
   const settingsPath = resolve(cwd, config.settingsPath);
+
+  if (config.name === 'factory') {
+    await migrateFactorySettings(cwd);
+  }
 
   if (config.name === 'cline') {
     await installCline(config, prsPath, cwd);
@@ -130,11 +165,20 @@ async function installCline(config: ToolHookConfig, prsPath: string, cwd: string
     content: string;
   };
 
-  for (const hook of [preHook, postHook]) {
+  for (const [hook, action] of [
+    [preHook, 'pre-edit'],
+    [postHook, 'post-edit'],
+  ] as const) {
     const fullPath = resolve(cwd, hook.scriptPath);
+    const existing = await readExistingHookScript(fullPath);
+    if (existing !== undefined) {
+      if (!config.isOwnedScript?.(existing, action)) {
+        throw new Error(`Refusing to overwrite unowned Cline hook script ${fullPath}`);
+      }
+    }
     await mkdir(dirname(fullPath), { recursive: true });
-    await writeFile(fullPath, hook.content, 'utf-8');
-    await chmod(fullPath, 0o755);
+    await assertNoSymlinkAncestors(fullPath);
+    await writeClineHookScript(fullPath, hook.content);
   }
 
   ConsoleOutput.success(`${config.name}: hooks installed`);
@@ -147,6 +191,10 @@ async function installCline(config: ToolHookConfig, prsPath: string, cwd: string
 async function uninstallForTool(config: ToolHookConfig): Promise<void> {
   const cwd = process.cwd();
   const settingsPath = resolve(cwd, config.settingsPath);
+
+  if (config.name === 'factory') {
+    await migrateFactorySettings(cwd);
+  }
 
   if (config.name === 'cline') {
     await uninstallCline(config, cwd);
@@ -201,14 +249,68 @@ async function uninstallCline(config: ToolHookConfig, cwd: string): Promise<void
     content: string;
   };
 
-  for (const hook of [preHook, postHook]) {
+  for (const [hook, action] of [
+    [preHook, 'pre-edit'],
+    [postHook, 'post-edit'],
+  ] as const) {
     const fullPath = resolve(cwd, hook.scriptPath);
-    if (existsSync(fullPath)) {
-      await unlink(fullPath);
+    const content = await readExistingHookScript(fullPath);
+    if (content !== undefined) {
+      if (config.isOwnedScript?.(content, action)) {
+        await unlink(fullPath);
+      } else {
+        ConsoleOutput.warning(`cline: preserving unowned hook script ${fullPath}`);
+      }
     }
   }
 
   ConsoleOutput.success(`${config.name}: hooks uninstalled`);
+}
+
+async function readExistingHookScript(path: string): Promise<string | undefined> {
+  await assertNoSymlinkAncestors(path);
+  try {
+    if ((await lstat(path)).isSymbolicLink()) {
+      throw new Error(`Refusing to access symlink ${path}`);
+    }
+    return await readFile(path, 'utf-8');
+  } catch (error: unknown) {
+    const nodeError = error as NodeJS.ErrnoException;
+    if (nodeError.code === 'ENOENT') return undefined;
+    throw error;
+  }
+}
+
+async function writeClineHookScript(path: string, content: string): Promise<void> {
+  const handle = await open(
+    path,
+    constants.O_WRONLY | constants.O_CREAT | constants.O_TRUNC | constants.O_NOFOLLOW,
+    0o755
+  );
+  try {
+    await handle.writeFile(content, 'utf-8');
+    await handle.chmod(0o755);
+  } finally {
+    await handle.close();
+  }
+}
+
+async function assertNoSymlinkAncestors(path: string, action = 'access'): Promise<void> {
+  let current = resolve(path);
+  while (true) {
+    try {
+      if ((await lstat(current)).isSymbolicLink()) {
+        throw new Error(`Refusing to ${action} symlink ${current}`);
+      }
+    } catch (error: unknown) {
+      const nodeError = error as NodeJS.ErrnoException;
+      if (nodeError.code !== 'ENOENT') throw error;
+    }
+
+    const parent = dirname(current);
+    if (parent === current) return;
+    current = parent;
+  }
 }
 
 /* ------------------------------------------------------------------ */

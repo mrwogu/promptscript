@@ -184,6 +184,40 @@ describe('hooks/tool-configs/claudeConfig', () => {
     const typed = result as Record<string, unknown>;
     expect(typed['permissions']).toEqual({ allow: ['Bash'] });
   });
+
+  it('preserves user handlers in a mixed hook entry during uninstall', () => {
+    const prsPath = '/usr/local/bin/prs';
+    const userHandler = { type: 'command', command: 'echo user' };
+    const existing = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Edit|Write',
+            hooks: [
+              (
+                claudeConfig.generatePreEditHook(prsPath)['hooks'] as Array<Record<string, unknown>>
+              )[0],
+              userHandler,
+            ],
+          },
+        ],
+      },
+    };
+
+    const result = claudeConfig.removeFromSettings(existing);
+
+    expect(result).toEqual({
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Edit|Write',
+            hooks: [userHandler],
+          },
+        ],
+        PostToolUse: [],
+      },
+    });
+  });
 });
 
 describe('isPrsHookEntry', () => {
@@ -205,5 +239,9 @@ describe('isPrsHookEntry', () => {
 
   it('returns true when hooks contain prs hook command', () => {
     expect(isPrsHookEntry({ hooks: [{ command: '/usr/bin/prs hook pre-edit' }] })).toBe(true);
+  });
+
+  it('returns false for unrelated commands that mention prs hook', () => {
+    expect(isPrsHookEntry({ hooks: [{ command: 'echo "prs hook pre-edit"' }] })).toBe(false);
   });
 });
