@@ -335,6 +335,20 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockMuted).toHaveBeenCalledWith(`Removed empty managed directory: ${prunedDirectory}`);
   });
 
+  it('should preview managed directories pruned in dry-run mode', async () => {
+    const prunedDirectory = '/mock/project/.github/hooks';
+    mockCleanupManagedOutputs.mockResolvedValue({
+      removed: [],
+      removedDirectories: [prunedDirectory],
+    });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockDryRun).toHaveBeenCalledWith(
+      `Would remove empty managed directory: ${prunedDirectory}`
+    );
+  });
+
   it('should warn about legacy hooks in .factory/settings.json for factory targets', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({

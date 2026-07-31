@@ -555,6 +555,49 @@ describe('PS034: valid-hooks', () => {
     expect(messages.some((m) => m.message.includes('must be an object'))).toBe(true);
   });
 
+  it('should reject malformed script and target override fields', () => {
+    const messages = validate(
+      makeAst({
+        malformed: {
+          event: 'pre-tool-use',
+          script: 'not-an-object' as unknown as Record<string, Value>,
+          targets: [] as unknown as Record<string, Value>,
+        },
+        invalid: {
+          event: 'pre-tool-use',
+          command: ['prs', 'hook'],
+          targets: {
+            cursor: [] as unknown as Value,
+            factory: {
+              event: 'invalid-event',
+              matcher: 123,
+              timeoutMs: 'fast',
+              statusMessage: 123,
+              continueOnFailure: 'yes',
+              enabled: 'yes',
+              cwd: '../outside',
+            },
+          },
+        },
+      })
+    );
+
+    expect(messages.map((message) => message.message)).toEqual(
+      expect.arrayContaining([
+        'Hook "malformed": script must be an object',
+        'Hook "malformed": targets must be an object',
+        'Hook "invalid": target override "cursor" must be an object',
+        'Hook "invalid": target override "factory" has an invalid event',
+        'Hook "invalid": target override "factory" matcher must be a string',
+        'Hook "invalid": target override "factory" timeoutMs must be a number',
+        'Hook "invalid": target override "factory" statusMessage must be a string',
+        'Hook "invalid": target override "factory" continueOnFailure must be a boolean',
+        'Hook "invalid": target override "factory" enabled must be a boolean',
+        'Hook "invalid": target override "factory" cwd must be "project" or a portable relative path',
+      ])
+    );
+  });
+
   it('should reject non-string event', () => {
     const messages = validate(
       makeAst({

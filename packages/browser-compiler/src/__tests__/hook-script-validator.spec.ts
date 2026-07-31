@@ -91,4 +91,15 @@ describe('browser hook script resource validation', () => {
       )
     ).toEqual([]);
   });
+
+  it.each(['.promptscript/project.prs', 'project.prs'])(
+    'resolves script paths for a %s entry',
+    (entryPath) => {
+      const fs = new VirtualFileSystem({
+        '.promptscript/scripts/check.mjs': 'process.exit(0);\n',
+      });
+
+      expect(validateBrowserHookScriptResources(makeProgram(), fs, entryPath)).toEqual([]);
+    }
+  );
 });

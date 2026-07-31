@@ -3294,6 +3294,7 @@ describe('FactoryFormatter', () => {
                   'my-hook': {
                     event: 'pre-tool-use',
                     command: ['echo', 'hello'],
+                    statusMessage: 'Checking generated files',
                   } as unknown as Value,
                 },
                 loc: createLoc(),

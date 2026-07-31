@@ -683,6 +683,48 @@ describe('Compiler', () => {
 
       expect(formatter.format).not.toHaveBeenCalled();
     });
+
+    it('should return errors for missing hook scripts', async () => {
+      const ast = createTestProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'hooks',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                check: {
+                  event: 'post-tool-use',
+                  script: {
+                    path: '.promptscript/scripts/missing.mjs',
+                    interpreter: 'node',
+                  },
+                },
+              },
+              loc: { file: 'test.prs', line: 1, column: 1 },
+            },
+            loc: { file: 'test.prs', line: 1, column: 1 },
+          },
+        ],
+      });
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(false);
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          code: 'PS2001',
+          message: expect.stringContaining('script not found'),
+        }),
+      ]);
+    });
   });
 
   describe('compile - formatter errors', () => {

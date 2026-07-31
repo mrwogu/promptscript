@@ -75,6 +75,20 @@ describe('hook script resource validation', () => {
     ]);
   });
 
+  it('falls back when the project root cannot be resolved', async () => {
+    const errors = await validateHookScriptResources(
+      makeProgram('.promptscript/scripts/missing.mjs'),
+      join(projectRoot, 'missing-project')
+    );
+
+    expect(errors).toEqual([
+      expect.objectContaining({
+        code: 'PS2001',
+        message: expect.stringContaining('script not found'),
+      }),
+    ]);
+  });
+
   it('ignores a missing script for a disabled hook', async () => {
     await expect(
       validateHookScriptResources(

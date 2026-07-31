@@ -7,10 +7,12 @@ const {
   mockCompile,
   MockCompiler,
   mockWriteFile,
+  mockChmod,
   mockMkdir,
   mockReadFile,
   mockExistsSync,
   mockIsTTY,
+  mockCreateHookOutputSafely,
   mockLoadConfig,
   mockChokidarWatch,
   mockWatcherOn,
@@ -19,10 +21,12 @@ const {
 } = vi.hoisted(() => {
   const mockCompile = vi.fn();
   const mockWriteFile = vi.fn();
+  const mockChmod = vi.fn();
   const mockMkdir = vi.fn();
   const mockReadFile = vi.fn();
   const mockExistsSync = vi.fn();
   const mockIsTTY = vi.fn();
+  const mockCreateHookOutputSafely = vi.fn();
   const mockLoadConfig = vi.fn();
   const mockWatcherOn = vi.fn().mockReturnThis();
   const mockChokidarWatch = vi.fn().mockReturnValue({
@@ -36,10 +40,12 @@ const {
       compile = mockCompile;
     },
     mockWriteFile,
+    mockChmod,
     mockMkdir,
     mockReadFile,
     mockExistsSync,
     mockIsTTY,
+    mockCreateHookOutputSafely,
     mockLoadConfig,
     mockChokidarWatch,
     mockWatcherOn,
@@ -67,6 +73,7 @@ vi.mock('../config/loader.js', () => ({
 // Mock fs/promises
 vi.mock('fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
+  chmod: (...args: unknown[]) => mockChmod(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
   readFile: (...args: unknown[]) => mockReadFile(...args),
   readdir: vi.fn().mockResolvedValue([]),
@@ -129,10 +136,12 @@ vi.mock('../utils/managed-output-cleanup.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../utils/managed-output-cleanup.js')>();
   return {
     ...actual,
-    createHookOutputSafely: vi.fn(async (path: string, _outputRoot: string, content: string) => {
-      await mockWriteFile(path, content, 'utf-8');
-      return true;
-    }),
+    createHookOutputSafely: mockCreateHookOutputSafely.mockImplementation(
+      async (path: string, _outputRoot: string, content: string) => {
+        await mockWriteFile(path, content, 'utf-8');
+        return true;
+      }
+    ),
     rewriteHookOutputIfUnchanged: vi.fn(
       async (path: string, _outputRoot: string, _expectedContent: string, content: string) => {
         await mockWriteFile(path, content, 'utf-8');
@@ -258,6 +267,47 @@ describe('compile command - overwrite protection', () => {
   });
 
   describe('when file exists with PromptScript marker', () => {
+    it('should allow owned hook files in non-interactive mode', async () => {
+      const path = '.github/hooks/promptscript.json';
+      const outputs = new Map([
+        [
+          path,
+          {
+            ...createMockOutput(path, '{"version":1,"hooks":{}}'),
+            mode: 0o644,
+          },
+        ],
+      ]);
+
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+        warnings: [],
+        errors: [],
+      });
+      mockIsTTY.mockReturnValue(false);
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          version: 1,
+          hooks: {
+            preToolUse: [
+              {
+                type: 'command',
+                bash: 'echo old # promptscript-generated:owned',
+              },
+            ],
+          },
+        })
+      );
+
+      await compileCommand({}, mockServices);
+
+      expect(mockChmod).toHaveBeenCalledWith(resolve(path), 0o644);
+      expect(process.exitCode).toBeUndefined();
+    });
+
     it('should overwrite silently without prompting', async () => {
       const outputs = new Map([['CLAUDE.md', createMockOutput('CLAUDE.md', 'new content')]]);
 
@@ -658,6 +708,26 @@ command = "echo old # promptscript-generated:owned"
         expect(process.exitCode).toBeUndefined();
       });
     });
+  });
+
+  it('should report when a hook output cannot be created safely', async () => {
+    const path = '.github/hooks/promptscript.json';
+    const outputs = new Map([[path, createMockOutput(path, '{"version":1,"hooks":{}}')]]);
+
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs,
+      stats: { totalTime: 100, resolveTime: 50, validateTime: 25, formatTime: 25 },
+      warnings: [],
+      errors: [],
+    });
+    mockExistsSync.mockImplementation((value: string) => value.includes('project.prs'));
+    mockCreateHookOutputSafely.mockImplementationOnce(async () => false);
+
+    await compileCommand({}, mockServices);
+
+    expect(process.exitCode).toBe(1);
+    expect(mockWriteFile).not.toHaveBeenCalled();
   });
 
   describe('with --dry-run flag', () => {

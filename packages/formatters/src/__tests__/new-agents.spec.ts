@@ -70,6 +70,27 @@ const createProgramWithIdentity = (): Program => ({
   ],
 });
 
+const createProgramWithHooks = (): Program => ({
+  ...createMinimalProgram(),
+  blocks: [
+    {
+      type: 'Block',
+      name: 'hooks',
+      content: {
+        type: 'ObjectContent',
+        properties: {
+          check: {
+            event: 'post-tool-use',
+            command: ['echo', 'check'],
+          },
+        },
+        loc: createLoc(),
+      },
+      loc: createLoc(),
+    },
+  ],
+});
+
 /**
  * All new formatters with their expected configuration.
  */
@@ -413,6 +434,17 @@ describe('New Agent Formatters', () => {
         expect(result.path).toBe(outputPath);
         expect(result.content).toContain(mainHeader);
         expect(result.content).toContain('You are an expert developer.');
+      });
+
+      it.skipIf(name !== 'windsurf')('should emit Windsurf hook output', () => {
+        const result = formatter.format(createProgramWithHooks(), { version: 'multifile' });
+
+        expect(result.additionalFiles).toContainEqual(
+          expect.objectContaining({
+            path: '.windsurf/hooks.json',
+            content: expect.stringContaining('"post_write_code"'),
+          })
+        );
       });
 
       it.skipIf(!hasSkills)('should generate skill files in full mode', () => {

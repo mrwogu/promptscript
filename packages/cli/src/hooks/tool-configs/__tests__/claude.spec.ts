@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { claudeConfig, isPrsHookEntry } from '../claude.js';
+import { claudeConfig, isPrsHookEntry, removePromptScriptHooks } from '../claude.js';
 
 describe('hooks/tool-configs/claudeConfig', () => {
   // --- metadata ---
@@ -243,5 +243,19 @@ describe('isPrsHookEntry', () => {
 
   it('returns false for unrelated commands that mention prs hook', () => {
     expect(isPrsHookEntry({ hooks: [{ command: 'echo "prs hook pre-edit"' }] })).toBe(false);
+  });
+
+  it('ignores malformed nested handlers', () => {
+    expect(
+      isPrsHookEntry({
+        hooks: [null, [], { command: 123 }],
+      })
+    ).toBe(false);
+  });
+
+  it('handles direct hook commands during uninstall', () => {
+    expect(removePromptScriptHooks(null)).toBeNull();
+    expect(removePromptScriptHooks({ command: 'prs hook pre-edit' })).toBeUndefined();
+    expect(removePromptScriptHooks({ command: 'echo user' })).toEqual({ command: 'echo user' });
   });
 });

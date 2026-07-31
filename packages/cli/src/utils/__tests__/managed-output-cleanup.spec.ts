@@ -7,6 +7,7 @@ import {
   cleanupManagedOutputs,
   createHookOutputSafely,
   hasOnlyOwnedHookCommands,
+  isHookOutputPath,
   isPromptScriptOwnedHookOutput,
   mergePromptScriptCodexConfig,
   mergePromptScriptHookOutput,
@@ -340,6 +341,40 @@ describe('cleanupManagedOutputs', () => {
     });
   });
 
+  it('should reject malformed hook output contracts', () => {
+    expect(isHookOutputPath('.github/hooks/promptscript.json')).toBe(true);
+    expect(isHookOutputPath('.codex/config.toml')).toBe(true);
+    expect(isHookOutputPath('.unknown/hooks.json')).toBe(false);
+    expect(isPromptScriptOwnedHookOutput('.github/hooks/promptscript.json', '{')).toBe(false);
+    expect(isPromptScriptOwnedHookOutput('.github/hooks/promptscript.json', '[]')).toBe(false);
+    expect(
+      isPromptScriptOwnedHookOutput(
+        '.github/hooks/promptscript.json',
+        '{"version":1,"extra":true,"hooks":{"postToolUse":[]}}'
+      )
+    ).toBe(false);
+  });
+
+  it('should reject unsupported hook merges', () => {
+    expect(
+      mergePromptScriptHookOutput('.github/hooks/promptscript.json', '{}', '{')
+    ).toBeUndefined();
+    expect(
+      mergePromptScriptHookOutput(
+        '.github/hooks/promptscript.json',
+        '{}',
+        '{"autoMode":"acceptEdits"}'
+      )
+    ).toBeUndefined();
+    expect(
+      mergePromptScriptHookOutput(
+        '.claude/settings.json',
+        '{}',
+        '{"autoMode":"acceptEdits","other":true}'
+      )
+    ).toBeUndefined();
+  });
+
   it('should remove owned entries while preserving user hooks and settings', () => {
     const content = JSON.stringify({
       theme: 'dark',
@@ -375,6 +410,33 @@ describe('cleanupManagedOutputs', () => {
     });
   });
 
+  it('should preserve malformed and unowned hook events during merge and removal', () => {
+    const existing = JSON.stringify({
+      hooks: {
+        malformed: 'preserve',
+        PreToolUse: [{ type: 'command', command: 'echo user' }],
+      },
+    });
+    const generated = JSON.stringify({
+      hooks: {
+        malformed: 'replace',
+        PostToolUse: [{ type: 'command', command: 'echo generated' }],
+      },
+    });
+
+    const merged = JSON.parse(
+      mergePromptScriptHookOutput('.claude/settings.json', existing, generated)!
+    ) as { hooks: Record<string, unknown> };
+    expect(merged.hooks['malformed']).toBe('replace');
+    expect(merged.hooks['PreToolUse']).toEqual([{ type: 'command', command: 'echo user' }]);
+    expect(
+      removePromptScriptOwnedHooks(
+        '.claude/settings.json',
+        JSON.stringify({ hooks: { malformed: 'preserve' } })
+      )
+    ).toBeUndefined();
+  });
+
   it('should prune legacy owned Codex TOML hook groups', () => {
     const ownedContent = `[[hooks.PreToolUse]]
 matcher = "Edit"
@@ -408,6 +470,19 @@ command = "echo user"
         'max_threads = 8\nmax_depth = 2\n'
       )
     ).toBe('max_threads = 8\nmax_depth = 2\n\nmodel = "gpt-5"\n\n[features]\nhooks = true\n');
+    expect(mergePromptScriptCodexConfig('max_threads = 4\n', '')).toBeUndefined();
+    expect(mergePromptScriptCodexConfig('max_threads = 4\n', 'model = "gpt-5"\n')).toBeUndefined();
+  });
+
+  it('should reject Codex groups with malformed string assignments', () => {
+    const malformed = `[[hooks.PreToolUse]]
+matcher = "unterminated
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo owned # promptscript-generated:owned"
+`;
+
+    expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', malformed)).toBeUndefined();
   });
   it('should atomically rewrite only unchanged regular hook files', async () => {
     const project = await createTemporaryDirectory('promptscript-rewrite-hooks-');
@@ -704,6 +779,29 @@ command = "echo user"
     expect(result.removed).toEqual([obsoleteFile]);
     expect(result.removedDirectories).toEqual([hooksDirectory]);
     await expect(lstat(hooksDirectory)).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('should prune nested managed directories deepest first', async () => {
+    const project = await createTemporaryDirectory('promptscript-cleanup-prune-nested-');
+    const nestedDirectory = join(project, '.github', 'hooks', 'generated');
+    const obsoleteFile = join(nestedDirectory, 'stale.md');
+    await mkdir(nestedDirectory, { recursive: true });
+    await writeFile(obsoleteFile, `${GENERATED_MARKER}\n\n# Stale\n`);
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        'AGENTS.md',
+        {
+          path: 'AGENTS.md',
+          content: '# Current\n',
+          managedOutputDirectories: ['.github/hooks', '.github/hooks/generated'],
+        },
+      ],
+    ]);
+
+    await expect(cleanupManagedOutputs(outputs, { outputRoot: project })).resolves.toEqual({
+      removed: [obsoleteFile],
+      removedDirectories: [nestedDirectory, dirname(nestedDirectory)],
+    });
   });
 
   it('should keep a managed directory that still contains user files', async () => {

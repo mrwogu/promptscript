@@ -1,7 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { migrateLegacyFactoryHooks } from '../legacy-factory-hooks.js';
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+  detectLegacyFactorySettingsHooks,
+  migrateLegacyFactoryHooks,
+} from '../legacy-factory-hooks.js';
 
 describe('migrateLegacyFactoryHooks', () => {
+  it('returns unchanged when no legacy hooks exist', () => {
+    expect(migrateLegacyFactoryHooks({}, {})).toEqual({
+      canonical: {},
+      legacy: {},
+      migrated: 0,
+      ambiguous: [],
+      changed: false,
+    });
+  });
+
   it('migrates legacy event names and preserves unrelated settings', () => {
     const result = migrateLegacyFactoryHooks(
       {
@@ -131,6 +147,7 @@ describe('migrateLegacyFactoryHooks', () => {
 
   it.each([
     [{ hooks: 'not-an-object' }, {}, ['hooks']],
+    [{ hooks: {} }, { hooks: [] }, ['canonical.hooks']],
     [
       { hooks: { PreToolUse: [] } },
       { hooks: { PreToolUse: 'not-an-array' } },
@@ -142,6 +159,25 @@ describe('migrateLegacyFactoryHooks', () => {
     expect(result.migrated).toBe(0);
     expect(result.changed).toBe(false);
     expect(result.ambiguous).toEqual(ambiguous);
+  });
+
+  it('refuses null and malformed nested handlers', () => {
+    const result = migrateLegacyFactoryHooks(
+      {
+        hooks: {
+          PreToolUse: [
+            null,
+            {
+              hooks: [{ type: 'prompt', command: 'custom' }, { type: 'prompt' }],
+            },
+          ],
+        },
+      },
+      {}
+    );
+
+    expect(result.changed).toBe(false);
+    expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]', 'hooks.PreToolUse[1]']);
   });
 
   it('does not treat an unrelated command mentioning prs hook as owned', () => {
@@ -178,5 +214,44 @@ describe('migrateLegacyFactoryHooks', () => {
     expect(result.migrated).toBe(0);
     expect(result.changed).toBe(false);
     expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
+  });
+});
+
+describe('detectLegacyFactorySettingsHooks', () => {
+  it('ignores malformed and fully owned legacy settings', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'promptscript-legacy-detect-'));
+    const settingsPath = join(root, '.factory', 'settings.json');
+    const hooksPath = join(root, '.factory', 'hooks.json');
+    await mkdir(join(root, '.factory'), { recursive: true });
+
+    try {
+      await writeFile(settingsPath, '{');
+      await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBeUndefined();
+
+      await writeFile(settingsPath, '[]');
+      await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBeUndefined();
+
+      await writeFile(settingsPath, JSON.stringify({ hooks: { PreToolUse: [null] } }));
+      await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBe(settingsPath);
+
+      await writeFile(
+        settingsPath,
+        JSON.stringify({
+          hooks: {
+            PreToolUse: [
+              {
+                hooks: [{ type: 'command', command: 'prs hook pre-edit' }],
+              },
+            ],
+          },
+        })
+      );
+      await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBeUndefined();
+
+      await writeFile(hooksPath, '{}');
+      await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBeUndefined();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

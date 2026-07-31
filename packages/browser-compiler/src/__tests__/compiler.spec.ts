@@ -85,6 +85,36 @@ describe('compile', () => {
     );
   });
 
+  it('should report missing virtual hook scripts during compilation', async () => {
+    const result = await compile(
+      {
+        'project.prs': `@meta {
+  id: "missing-script"
+  syntax: "1.4.0"
+}
+@hooks {
+  check: {
+    event: "post-tool-use"
+    script: {
+      path: ".promptscript/scripts/missing.mjs"
+      interpreter: "node"
+    }
+  }
+}
+`,
+      },
+      'project.prs'
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        code: 'PS2001',
+        message: expect.stringContaining('script not found'),
+      }),
+    ]);
+  });
+
   it('should compile hook scripts from an explicit virtual project root', async () => {
     const files = {
       'workspace/config/project.prs': `@meta {

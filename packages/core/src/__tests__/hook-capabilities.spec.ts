@@ -38,6 +38,7 @@ describe('hook capabilities', () => {
     expect(isPortableHookScriptPath('.promptscript/scripts/../check.py')).toBe(false);
     expect(isPortableHookScriptPath('.promptscript/scripts/CON.py')).toBe(false);
     expect(isPortableHookScriptPath('.promptscript/scripts/bad:name.py')).toBe(false);
+    expect(isPortableHookScriptPath('.promptscript/scripts/bad\nname.py')).toBe(false);
     expect(isPortableHookScriptPath('scripts/check.py')).toBe(false);
     expect(isPortableHookInterpreter('python3')).toBe(true);
     expect(isPortableHookInterpreter('custom-runtime')).toBe(false);

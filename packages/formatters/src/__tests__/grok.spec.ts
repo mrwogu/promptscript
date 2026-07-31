@@ -29,6 +29,30 @@ function createTestProgram(): Program {
   };
 }
 
+function createHookProgram(): Program {
+  return {
+    ...createTestProgram(),
+    blocks: [
+      ...createTestProgram().blocks,
+      {
+        type: 'Block',
+        name: 'hooks',
+        content: {
+          type: 'ObjectContent',
+          properties: {
+            check: {
+              event: 'post-tool-use',
+              command: ['echo', 'check'],
+            },
+          },
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      } as Program['blocks'][number],
+    ],
+  };
+}
+
 describe('GrokFormatter', () => {
   let formatter: GrokFormatter;
   let claudeFormatter: ClaudeFormatter;
@@ -138,6 +162,17 @@ describe('GrokFormatter', () => {
       const result = formatter.format(createTestProgram(), { version: 'full' });
       expect(result.additionalFiles).toBeDefined();
       expect(result.additionalFiles!.length).toBeGreaterThan(0);
+    });
+
+    it('should emit native hooks as an additional file', () => {
+      const result = formatter.format(createHookProgram(), { version: 'full' });
+
+      expect(result.additionalFiles).toContainEqual(
+        expect.objectContaining({
+          path: '.grok/hooks/promptscript.json',
+          content: expect.stringContaining('"PostToolUse"'),
+        })
+      );
     });
 
     it('should emit Grok plugin config in full mode', () => {

@@ -13,6 +13,8 @@ import {
   getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
+  type HookDefinition,
+  type HookTarget,
 } from '../hook-adapters.js';
 import { HOOK_CAPABILITIES, type Value } from '@promptscript/core';
 
@@ -46,6 +48,11 @@ describe('hook-adapters', () => {
           targets: {
             vscode: {
               matcher: 'run_in_terminal',
+              event: 'post-tool-use',
+              timeoutMs: 15000,
+              statusMessage: 'Running terminal hook',
+              continueOnFailure: true,
+              cwd: 'scripts',
               enabled: false,
             },
           },
@@ -64,6 +71,11 @@ describe('hook-adapters', () => {
       expect(hooks[0]!.enabled).toBe(true);
       expect(hooks[0]!.targets?.vscode).toEqual({
         matcher: 'run_in_terminal',
+        event: 'post-tool-use',
+        timeoutMs: 15000,
+        statusMessage: 'Running terminal hook',
+        continueOnFailure: true,
+        cwd: 'scripts',
         enabled: false,
       });
     });
@@ -193,6 +205,10 @@ describe('hook-adapters', () => {
 
     it('should convert milliseconds to seconds for VS Code', () => {
       expect(convertTimeout(15000, 'vscode')).toBe(15);
+    });
+
+    it('should preserve timeout units for unknown targets', () => {
+      expect(convertTimeout(1500, 'unknown' as HookTarget)).toBe(1500);
     });
   });
 
@@ -493,6 +509,35 @@ describe('hook-adapters', () => {
         ],
       });
     });
+
+    it('handles a defensive commandless hook entry', () => {
+      const hook: HookDefinition = {
+        id: 'commandless',
+        event: 'pre-tool-use',
+      };
+
+      expect(generateVSCodeHooks([hook])).toEqual({
+        PreToolUse: [
+          {
+            type: 'command',
+            command: ' # promptscript-generated:commandless',
+            windows: '&  # promptscript-generated:commandless',
+          },
+        ],
+      });
+      expect(generateCursorHooks([hook])).toEqual({
+        version: 1,
+        hooks: {
+          preToolUse: [
+            {
+              matcher: '.*',
+              command: ' # promptscript-generated:commandless',
+              timeout: 10,
+            },
+          ],
+        },
+      });
+    });
   });
 
   describe('generateGitHubHooks', () => {
@@ -692,6 +737,33 @@ describe('hook-adapters', () => {
       });
     });
 
+    it('omits unsupported Windsurf events', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          startup: {
+            event: 'session-start',
+            command: ['echo', 'startup'],
+          },
+        })
+      );
+
+      expect(generateWindsurfHooks(hooks)).toEqual({});
+    });
+
+    it('generates Codex status messages', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          status: {
+            event: 'post-tool-use',
+            command: ['echo', 'status'],
+            statusMessage: 'Running status hook',
+          },
+        })
+      );
+
+      expect(generateCodexHooks(hooks)).toContain('statusMessage = "Running status hook"');
+    });
+
     it('generates native Grok project hooks', () => {
       const entry = generateGrokHooks(hooks)['PostToolUse']![0] as Record<string, unknown>;
       const handler = (entry['hooks'] as Record<string, unknown>[])[0]!;
@@ -888,6 +960,7 @@ describe('hook-adapters', () => {
         makeHooksBlock({
           timed: {
             event: 'post-tool-use',
+            matcher: 'Execute',
             command: ['node', 'check.mjs'],
             timeoutMs: 5000,
           },
@@ -899,6 +972,29 @@ describe('hook-adapters', () => {
         message: 'Hook "timed" uses timeoutMs, which Windsurf cannot represent and will omit.',
         suggestion: 'Enforce a timeout inside the hook script when required.',
       });
+      expect(getHookCompatibilityWarnings(hooks, 'windsurf')).toContainEqual({
+        code: 'PS4002',
+        message: 'Hook "timed" uses matcher, which Windsurf cannot represent and will ignore.',
+        suggestion: 'Filter the received hook payload inside the script.',
+      });
+    });
+
+    it('warns when cloud targets ignore matchers for unsupported events', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          stop: {
+            event: 'stop',
+            matcher: 'agent',
+            command: ['echo', 'done'],
+          },
+        })
+      );
+
+      expect(getHookCompatibilityWarnings(hooks, 'gemini')).toContainEqual(
+        expect.objectContaining({
+          message: 'Hook "stop" uses matcher with "stop", which gemini ignores.',
+        })
+      );
     });
   });
 });
