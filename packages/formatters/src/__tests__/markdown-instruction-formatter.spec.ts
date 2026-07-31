@@ -275,6 +275,46 @@ describe('MarkdownInstructionFormatter', () => {
       expect(result.content).toContain('### Key Libraries');
     });
 
+    it('should dedent indented @context text so list items stay flat', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'You are an expert developer.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'MixedContent',
+              text: {
+                type: 'TextContent',
+                // Triple-quoted text keeps authoring indentation after the trimmed first line
+                value: '\n  ## Key Libraries\n\n  - Parser: Chevrotain\n  - Testing: Vitest\n  ',
+                loc: createLoc(),
+              },
+              properties: { languages: ['TypeScript'] },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain(
+        '## Context\n\n### Key Libraries\n\n- Parser: Chevrotain\n- Testing: Vitest'
+      );
+      expect(result.content).not.toContain('  - Testing: Vitest');
+    });
+
     it('should not render context section when @identity is absent', () => {
       const ast: Program = {
         ...createMinimalProgram(),

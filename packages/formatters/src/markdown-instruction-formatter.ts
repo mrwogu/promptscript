@@ -791,7 +791,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     // Remove the "## Architecture" section with code block (rendered by architecture())
     const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+    const strippedText = archMatch ? text.replace(archMatch, '') : text;
+    // Dedent so trimmed first line does not leave later lines nested
+    const remainingText = this.dedent(strippedText);
     if (!remainingText) return null;
 
     // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections

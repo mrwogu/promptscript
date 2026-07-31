@@ -463,6 +463,22 @@ Renders on Markdown instruction targets (e.g. Claude Code, Factory AI) as:
 !!! note "Cursor target"
 Cursor uses its compact `key: value` style instead of humanized labels (`- branch: (feat|fix)/{project}/{issue-id}`, `- requireReview`).
 
+Free-form text is also supported via a triple-quoted string:
+
+```promptscript
+@standards {
+  """
+  ## Security
+
+  - Validate all inputs
+  - Never log secrets
+  """
+}
+```
+
+!!! note "Per-target support"
+Free-form text `@standards` currently renders only for the Factory target. Other targets render property-style `@standards` content only.
+
 ### @restrictions
 
 Things the AI should never do:

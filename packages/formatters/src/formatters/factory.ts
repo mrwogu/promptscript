@@ -194,11 +194,78 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       subsections.push(renderer.renderSection(entry.title, renderer.renderList(entry.items), 2));
     }
 
-    if (subsections.length === 0) return null;
+    if (subsections.length === 0) {
+      // Fallback: @standards with free-form text content has no properties to group
+      const text = this.extractText(standards.content);
+      if (!text) return null;
+
+      const normalizedContent = this.normalizeFreeformStandardsText(text);
+      return renderer.renderSection(this.getSectionName('codeStandards'), normalizedContent) + '\n';
+    }
 
     return (
       renderer.renderSection(this.getSectionName('codeStandards'), subsections.join('\n\n')) + '\n'
     );
+  }
+
+  /**
+   * Normalize free-form @standards text for embedding under a section heading.
+   * Dedents authoring indentation from triple-quoted text so the first line
+   * (already trimmed by extractText) does not leave later lines nested,
+   * shifts the shallowest heading to h3, and normalizes markdown for Prettier.
+   */
+  private normalizeFreeformStandardsText(text: string): string {
+    const dedentedText = this.dedent(text);
+    const shiftedText = this.shiftHeadingsToMinLevel(dedentedText, 3);
+    return this.normalizeMarkdownForPrettier(shiftedText).trim();
+  }
+
+  /**
+   * Normalize free-form @standards text for a split rules file under the
+   * "# Standards" title. Unlike the monolith fallback, headings shift relative
+   * to the shallowest level present so source heading depth is preserved.
+   */
+  private normalizeFreeformStandardsTextForSplit(text: string): string {
+    const dedentedText = this.dedent(text);
+    const shiftedText = this.shiftHeadingsToMinLevel(dedentedText, 2);
+    return this.normalizeMarkdownForPrettier(shiftedText).trim();
+  }
+
+  /**
+   * Shift all ATX headings by the same amount so the shallowest heading lands
+   * at targetLevel. Levels clamp to h1-h6 and fenced code blocks are ignored.
+   */
+  private shiftHeadingsToMinLevel(text: string, targetLevel: number): string {
+    const headingPattern = /^(\s*)(#{1,6}) /;
+    let minLevel = Infinity;
+    this.mapHeadingsOutsideCodeFences(text, (line) => {
+      const match = line.match(headingPattern);
+      if (match?.[2]) minLevel = Math.min(minLevel, match[2].length);
+      return line;
+    });
+    if (minLevel === Infinity) return text;
+    const delta = targetLevel - minLevel;
+    if (delta === 0) return text;
+    return this.mapHeadingsOutsideCodeFences(text, (line) => {
+      return line.replace(headingPattern, (_match, indent: string, hashes: string) => {
+        const level = Math.max(1, Math.min(6, hashes.length + delta));
+        return `${indent}${'#'.repeat(level)} `;
+      });
+    });
+  }
+
+  private mapHeadingsOutsideCodeFences(text: string, mapLine: (line: string) => string): string {
+    let inFence = false;
+    return text
+      .split('\n')
+      .map((line) => {
+        if (/^\s*(`{3,}|~{3,})/.test(line)) {
+          inFence = !inFence;
+          return line;
+        }
+        return inFence ? line : mapLine(line);
+      })
+      .join('\n');
   }
 
   override format(ast: Program, options?: FormatOptions): FormatterOutput {
@@ -652,6 +719,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     const standards = this.findBlock(ast, 'standards');
 
     if (standards) {
+      const filesBeforeStandards = files.length;
       const usedSlugs = new Set<string>();
       for (const [topic, value] of Object.entries(this.getProps(standards.content))) {
         const items = this.extractRuleItems(value);
@@ -664,6 +732,20 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
           `.factory/rules/standards/${this.createStableRuleSlug(topic, usedSlugs)}.md`;
         const content = `# ${label}\n\n${renderer.renderList(items)}\n`;
         files.push({ label, path, content });
+      }
+
+      // Fallback: @standards with free-form text content has no topics to split
+      if (files.length === filesBeforeStandards) {
+        const text = this.extractText(standards.content);
+        if (text) {
+          // Shift headings so the shallowest nests as h2 under the "# Standards" title
+          const normalized = this.normalizeFreeformStandardsTextForSplit(text);
+          files.push({
+            label: 'Standards',
+            path: '.factory/rules/standards.md',
+            content: `# Standards\n\n${normalized}\n`,
+          });
+        }
       }
     }
 
