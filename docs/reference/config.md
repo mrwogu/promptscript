@@ -486,11 +486,11 @@ The `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) are emitted t
 | `cursor`      | `.cursor/mcp.json`               | `.cursor/hooks.json`              | `.cursor/plugins.json`  |
 | `factory`     | `.factory/mcp.json`              | `.factory/hooks.json`             | `.factory/plugins.json` |
 | `codex`       | `.codex/mcp.json`                | `.codex/hooks.json`               | `.codex/plugins.json`   |
-| `grok`        | `.mcp.json` (via Claude)         | `.claude/settings.json`           | `.grok/plugins.json`    |
+| `grok`        | `.mcp.json` (via Claude)         | `.grok/hooks/promptscript.json`   | `.grok/plugins.json`    |
 | `github`      | `.vscode/mcp.json`               | `.github/hooks/promptscript.json` | -                       |
 | `antigravity` | `.agents/mcp_config.json`        | -                                 | -                       |
-| `gemini`      | `.gemini/mcp_config.json`        | -                                 | -                       |
-| `windsurf`    | `.windsurf/mcp_config.json`      | -                                 | -                       |
+| `gemini`      | `.gemini/mcp_config.json`        | `.gemini/settings.json`           | -                       |
+| `windsurf`    | `.windsurf/mcp_config.json`      | `.windsurf/hooks.json`            | -                       |
 | `cline`       | `.cline/cline_mcp_settings.json` | -                                 | -                       |
 | `roo`         | `.roo/mcp_settings.json`         | -                                 | -                       |
 | `continue`    | `.continue/config.json`          | -                                 | -                       |
