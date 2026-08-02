@@ -22,6 +22,27 @@ function getProjectPrefix(entryPath: string, configuredProjectRoot?: string): st
   return slashIndex >= 0 ? normalized.slice(0, slashIndex) : '';
 }
 
+function isSafeHookScriptPath(scriptPath: string, projectPrefix: string): boolean {
+  const normalizedScriptPath = scriptPath.replaceAll('\\', '/');
+  if (
+    normalizedScriptPath.startsWith('/') ||
+    /^[A-Za-z]:\//.test(normalizedScriptPath) ||
+    normalizedScriptPath.startsWith('//')
+  ) {
+    return false;
+  }
+
+  if (normalizedScriptPath.split('/').includes('..')) return false;
+
+  const resolvedPath = (
+    projectPrefix ? `${projectPrefix}/${normalizedScriptPath}` : normalizedScriptPath
+  ).replaceAll(/\/+/g, '/');
+  const scriptsRoot = (
+    projectPrefix ? `${projectPrefix}/.promptscript/scripts` : '.promptscript/scripts'
+  ).replaceAll(/\/+/g, '/');
+  return resolvedPath === scriptsRoot || resolvedPath.startsWith(`${scriptsRoot}/`);
+}
+
 export function validateBrowserHookScriptResources(
   ast: Program,
   fs: VirtualFileSystem,
@@ -35,6 +56,15 @@ export function validateBrowserHookScriptResources(
   const errors: BrowserHookScriptError[] = [];
   for (const hook of extractHooks(hooksBlock)) {
     if (hook.enabled === false || !hook.script) continue;
+    if (!isSafeHookScriptPath(hook.script.path, projectPrefix)) {
+      errors.push({
+        name: 'ResolveError',
+        code: 'PS1003',
+        message: `Hook "${hook.id}" script resolves outside ".promptscript/scripts/": ${hook.script.path}`,
+        location: hooksBlock.loc,
+      });
+      continue;
+    }
     const scriptPath = projectPrefix ? `${projectPrefix}/${hook.script.path}` : hook.script.path;
     if (!fs.exists(scriptPath)) {
       errors.push({
