@@ -4,7 +4,7 @@ import { validateBrowserHookScriptResources } from '../hook-script-validator.js'
 import { VirtualFileSystem } from '../virtual-fs.js';
 
 const loc: SourceLocation = { file: 'workspace/.promptscript/project.prs', line: 1, column: 1 };
-function makeProgram(enabled = true): Program {
+function makeProgram(enabled = true, scriptPath = '.promptscript/scripts/check.mjs'): Program {
   return {
     type: 'Program',
     blocks: [
@@ -17,7 +17,7 @@ function makeProgram(enabled = true): Program {
             check: {
               event: 'post-tool-use',
               script: {
-                path: '.promptscript/scripts/check.mjs',
+                path: scriptPath,
                 interpreter: 'node',
               },
               enabled,
@@ -58,6 +58,27 @@ describe('browser hook script resource validation', () => {
         code: 'PS2001',
         message: 'Hook "check" script not found: .promptscript/scripts/check.mjs',
         location: loc,
+      }),
+    ]);
+  });
+
+  it('rejects traversal to an existing script outside the project scripts directory', () => {
+    const fs = new VirtualFileSystem({
+      'workspace/.promptscript/project.prs': '',
+      'workspace/outside.mjs': 'process.exit(0);\n',
+    });
+
+    expect(
+      validateBrowserHookScriptResources(
+        makeProgram(true, '../outside.mjs'),
+        fs,
+        'workspace/.promptscript/project.prs'
+      )
+    ).toEqual([
+      expect.objectContaining({
+        name: 'ResolveError',
+        code: 'PS1003',
+        message: 'Hook "check" script resolves outside ".promptscript/scripts/": ../outside.mjs',
       }),
     ]);
   });
