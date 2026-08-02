@@ -91,7 +91,8 @@ export class GrokFormatter extends BaseFormatter {
       ...output,
       managedOutputFiles: [
         ...new Set([
-          ...(output.managedOutputFiles ?? []).filter((file) => file !== '.claude/settings.json'),
+          ...(output.managedOutputFiles ?? []),
+          '.claude/settings.json',
           '.grok/hooks/promptscript.json',
         ]),
       ],
