@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FEATURE_MATRIX, type ToolName } from '@promptscript/formatters';
-import { TARGET_DEFINITIONS } from '@promptscript/core';
+import { HOOK_CAPABILITIES, TARGET_DEFINITIONS } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,6 +37,8 @@ interface FormatterInfo {
   hasLocal: boolean;
   skillFileName: string;
   hasDedicatedPage: boolean;
+  hookConfigPath: string | null;
+  hookVersions: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -192,6 +194,14 @@ const DEDICATED_PAGES = new Set([
   'gemini',
 ]);
 
+function getHookMetadata(name: string): Pick<FormatterInfo, 'hookConfigPath' | 'hookVersions'> {
+  const capability = HOOK_CAPABILITIES[name as keyof typeof HOOK_CAPABILITIES];
+  return {
+    hookConfigPath: capability?.configPath ?? null,
+    hookVersions: capability?.nativeVersions ?? [],
+  };
+}
+
 /**
  * Build the full FORMATTERS array by scanning source files.
  */
@@ -215,6 +225,7 @@ function buildFormatterRegistry(): FormatterInfo[] {
     const info = override ?? parsed;
     if (!info) continue; // Skip if neither override nor parseable
 
+    const hookMetadata = getHookMetadata(name);
     const displayName =
       DISPLAY_NAME_OVERRIDES[name] ??
       name
@@ -234,6 +245,7 @@ function buildFormatterRegistry(): FormatterInfo[] {
       hasLocal: info.hasLocal ?? false,
       skillFileName: info.skillFileName ?? 'SKILL.md',
       hasDedicatedPage: DEDICATED_PAGES.has(name),
+      ...hookMetadata,
     });
   }
 
@@ -253,6 +265,7 @@ function buildFormatterRegistry(): FormatterInfo[] {
     const dotDir = skillBasePath?.endsWith('/skills')
       ? skillBasePath.slice(0, -'/skills'.length)
       : (skillBasePath ?? '');
+    const hookMetadata = getHookMetadata(definition.name);
 
     formatters.push({
       name: definition.name,
@@ -266,6 +279,7 @@ function buildFormatterRegistry(): FormatterInfo[] {
       hasLocal: false,
       skillFileName: definition.skillPath.fileName ?? 'SKILL.md',
       hasDedicatedPage: DEDICATED_PAGES.has(definition.name),
+      ...hookMetadata,
     });
   }
 
@@ -460,6 +474,19 @@ function generateOutputFiles(f: FormatterInfo): string {
     lines.push(
       `| Lifecycle hooks | \`.github/hooks/promptscript.json\` | Copilot CLI and cloud agent hooks in multifile and full modes |`
     );
+  }
+
+  if (
+    f.hookConfigPath &&
+    f.hookVersions.length > 0 &&
+    f.name !== 'factory' &&
+    f.name !== 'github'
+  ) {
+    const modeLabel =
+      f.hookVersions.length === 1
+        ? `\`${f.hookVersions[0]}\` mode`
+        : `${f.hookVersions.map((version) => `\`${version}\``).join(' and ')} modes`;
+    lines.push(`| Lifecycle hooks | \`${f.hookConfigPath}\` | Project hooks in ${modeLabel} |`);
   }
 
   if (f.hasLocal) {
