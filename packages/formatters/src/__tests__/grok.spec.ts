@@ -107,6 +107,15 @@ describe('GrokFormatter', () => {
       const result = formatter.format(createTestProgram(), { version: 'simple' });
       expect(result.additionalFiles ?? []).toHaveLength(0);
     });
+
+    it('should manage Claude settings without emitting them', () => {
+      const result = formatter.format(createTestProgram(), { version: 'simple' });
+
+      expect(result.managedOutputFiles).toContain('.claude/settings.json');
+      expect(result.additionalFiles ?? []).not.toContainEqual(
+        expect.objectContaining({ path: '.claude/settings.json' })
+      );
+    });
   });
 
   describe('multifile version', () => {
