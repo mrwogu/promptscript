@@ -83,6 +83,27 @@ describe('browser hook script resource validation', () => {
     ]);
   });
 
+  it('rejects an absolute script path outside the project scripts directory', () => {
+    const fs = new VirtualFileSystem({
+      'workspace/.promptscript/project.prs': '',
+    });
+
+    expect(
+      validateBrowserHookScriptResources(
+        makeProgram(true, '/workspace/.promptscript/scripts/check.mjs'),
+        fs,
+        'workspace/.promptscript/project.prs'
+      )
+    ).toEqual([
+      expect.objectContaining({
+        name: 'ResolveError',
+        code: 'PS1003',
+        message:
+          'Hook "check" script resolves outside ".promptscript/scripts/": /workspace/.promptscript/scripts/check.mjs',
+      }),
+    ]);
+  });
+
   it('ignores a missing virtual script for a disabled hook', () => {
     const fs = new VirtualFileSystem({
       'workspace/.promptscript/project.prs': '',
