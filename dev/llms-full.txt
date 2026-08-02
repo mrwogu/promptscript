@@ -1555,7 +1555,7 @@ Formatters map portable event names to target-native hook systems. Eight built-i
 | Grok Build     | `.grok/hooks/promptscript.json`          | PascalCase events, seconds                 |
 | VS Code Agent  | `.github/hooks/promptscript-vscode.json` | PascalCase events, matcher ignored         |
 
-Hook files require `multifile` or `full` mode. `simple` mode reports `PS4002` because it cannot emit additional files. Cursor emits hook files only in `full` mode; its other modes report `PS4002` and omit hooks. Target adapters also report `PS4002` when an event, matcher, `statusMessage`, or `continueOnFailure` value has no native equivalent.
+Hooks are emitted only in target versions listed by the capability matrix: GitHub, Factory, Gemini, Windsurf, and Codex support `multifile` and `full`; Claude, Cursor, and Grok support only `full`. `simple` mode reports `PS4002` when hooks are enabled because it cannot emit additional files. Target adapters also report `PS4002` when an event, matcher, `statusMessage`, or `continueOnFailure` value has no native equivalent.
 
 Every native adapter adds a trailing `# promptscript-generated:<hook-id>` shell comment to generated commands. PromptScript uses this marker to replace or remove only its entries when a native JSON hook file also contains user settings or hooks. Unmarked entries and top-level user settings remain untouched.
 
@@ -5740,11 +5740,11 @@ The `@mcpServers`, `@hooks`, and `@plugins` blocks (syntax 1.4.0+) are emitted t
 | `cursor`      | `.cursor/mcp.json`               | `.cursor/hooks.json`              | `.cursor/plugins.json`  |
 | `factory`     | `.factory/mcp.json`              | `.factory/hooks.json`             | `.factory/plugins.json` |
 | `codex`       | `.codex/mcp.json`                | `.codex/hooks.json`               | `.codex/plugins.json`   |
-| `grok`        | `.mcp.json` (via Claude)         | `.claude/settings.json`           | `.grok/plugins.json`    |
+| `grok`        | `.mcp.json` (via Claude)         | `.grok/hooks/promptscript.json`   | `.grok/plugins.json`    |
 | `github`      | `.vscode/mcp.json`               | `.github/hooks/promptscript.json` | -                       |
 | `antigravity` | `.agents/mcp_config.json`        | -                                 | -                       |
-| `gemini`      | `.gemini/mcp_config.json`        | -                                 | -                       |
-| `windsurf`    | `.windsurf/mcp_config.json`      | -                                 | -                       |
+| `gemini`      | `.gemini/mcp_config.json`        | `.gemini/settings.json`           | -                       |
+| `windsurf`    | `.windsurf/mcp_config.json`      | `.windsurf/hooks.json`            | -                       |
 | `cline`       | `.cline/cline_mcp_settings.json` | -                                 | -                       |
 | `roo`         | `.roo/mcp_settings.json`         | -                                 | -                       |
 | `continue`    | `.continue/config.json`          | -                                 | -                       |
@@ -6585,6 +6585,7 @@ Shared Markdown targets use `MarkdownInstructionFormatter` for consistent instru
 | File              | Path                             | Purpose                           |
 | ----------------- | -------------------------------- | --------------------------------- |
 | Main instructions | `CLAUDE.md`                      | Primary rule file                 |
+| Lifecycle hooks   | `.claude/settings.json`          | Project hooks in `full` mode      |
 | Local overrides   | `CLAUDE.local.md`                | Private instructions (gitignored) |
 | Skills            | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions        |
 | Commands          | `.claude/commands/<name>.md`     | Slash commands                    |
@@ -6767,12 +6768,13 @@ project-root/
 
 ## Output Files
 
-| File              | Path                             | Purpose                    |
-| ----------------- | -------------------------------- | -------------------------- |
-| Main instructions | `.cursor/rules/project.mdc`      | Primary rule file          |
-| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions |
-| Commands          | `.cursor/commands/<name>.md`     | Slash commands             |
-| Agents            | `.cursor/agents/<name>.md`       | Agent configurations       |
+| File              | Path                             | Purpose                      |
+| ----------------- | -------------------------------- | ---------------------------- |
+| Main instructions | `.cursor/rules/project.mdc`      | Primary rule file            |
+| Lifecycle hooks   | `.cursor/hooks.json`             | Project hooks in `full` mode |
+| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions   |
+| Commands          | `.cursor/commands/<name>.md`     | Slash commands               |
+| Agents            | `.cursor/agents/<name>.md`       | Agent configurations         |
 
 ## Supported Features
 
@@ -7049,11 +7051,12 @@ project-root/
 
 ## Output Files
 
-| File              | Path                             | Purpose                    |
-| ----------------- | -------------------------------- | -------------------------- |
-| Main instructions | `GEMINI.md`                      | Primary rule file          |
-| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions |
-| Commands          | `.gemini/commands/<name>.toml`   | Slash commands             |
+| File              | Path                             | Purpose                                       |
+| ----------------- | -------------------------------- | --------------------------------------------- |
+| Main instructions | `GEMINI.md`                      | Primary rule file                             |
+| Lifecycle hooks   | `.gemini/settings.json`          | Project hooks in `multifile` and `full` modes |
+| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions                    |
+| Commands          | `.gemini/commands/<name>.toml`   | Slash commands                                |
 
 ## Supported Features
 

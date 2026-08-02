@@ -12,11 +12,12 @@
 
 ## Output Files
 
-| File              | Path                             | Purpose                    |
-| ----------------- | -------------------------------- | -------------------------- |
-| Main instructions | `GEMINI.md`                      | Primary rule file          |
-| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions |
-| Commands          | `.gemini/commands/<name>.toml`   | Slash commands             |
+| File              | Path                             | Purpose                                       |
+| ----------------- | -------------------------------- | --------------------------------------------- |
+| Main instructions | `GEMINI.md`                      | Primary rule file                             |
+| Lifecycle hooks   | `.gemini/settings.json`          | Project hooks in `multifile` and `full` modes |
+| Skills            | `.agents/skills/<name>/skill.md` | Reusable skill definitions                    |
+| Commands          | `.gemini/commands/<name>.toml`   | Slash commands                                |
 
 ## Supported Features
 

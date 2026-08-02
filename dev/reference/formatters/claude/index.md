@@ -15,6 +15,7 @@
 | File              | Path                             | Purpose                           |
 | ----------------- | -------------------------------- | --------------------------------- |
 | Main instructions | `CLAUDE.md`                      | Primary rule file                 |
+| Lifecycle hooks   | `.claude/settings.json`          | Project hooks in `full` mode      |
 | Local overrides   | `CLAUDE.local.md`                | Private instructions (gitignored) |
 | Skills            | `.claude/skills/<name>/SKILL.md` | Reusable skill definitions        |
 | Commands          | `.claude/commands/<name>.md`     | Slash commands                    |

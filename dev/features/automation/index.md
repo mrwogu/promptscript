@@ -84,7 +84,7 @@ Formatters map portable event names to target-native hook systems. Eight built-i
 | Grok Build     | `.grok/hooks/promptscript.json`          | PascalCase events, seconds                 |
 | VS Code Agent  | `.github/hooks/promptscript-vscode.json` | PascalCase events, matcher ignored         |
 
-Hook files require `multifile` or `full` mode. `simple` mode reports `PS4002` because it cannot emit additional files. Cursor emits hook files only in `full` mode; its other modes report `PS4002` and omit hooks. Target adapters also report `PS4002` when an event, matcher, `statusMessage`, or `continueOnFailure` value has no native equivalent.
+Hooks are emitted only in target versions listed by the capability matrix: GitHub, Factory, Gemini, Windsurf, and Codex support `multifile` and `full`; Claude, Cursor, and Grok support only `full`. `simple` mode reports `PS4002` when hooks are enabled because it cannot emit additional files. Target adapters also report `PS4002` when an event, matcher, `statusMessage`, or `continueOnFailure` value has no native equivalent.
 
 Every native adapter adds a trailing `# promptscript-generated:<hook-id>` shell comment to generated commands. PromptScript uses this marker to replace or remove only its entries when a native JSON hook file also contains user settings or hooks. Unmarked entries and top-level user settings remain untouched.
 

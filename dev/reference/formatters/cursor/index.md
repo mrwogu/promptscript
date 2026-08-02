@@ -12,12 +12,13 @@
 
 ## Output Files
 
-| File              | Path                             | Purpose                    |
-| ----------------- | -------------------------------- | -------------------------- |
-| Main instructions | `.cursor/rules/project.mdc`      | Primary rule file          |
-| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions |
-| Commands          | `.cursor/commands/<name>.md`     | Slash commands             |
-| Agents            | `.cursor/agents/<name>.md`       | Agent configurations       |
+| File              | Path                             | Purpose                      |
+| ----------------- | -------------------------------- | ---------------------------- |
+| Main instructions | `.cursor/rules/project.mdc`      | Primary rule file            |
+| Lifecycle hooks   | `.cursor/hooks.json`             | Project hooks in `full` mode |
+| Skills            | `.agents/skills/<name>/SKILL.md` | Reusable skill definitions   |
+| Commands          | `.cursor/commands/<name>.md`     | Slash commands               |
+| Agents            | `.cursor/agents/<name>.md`       | Agent configurations         |
 
 ## Supported Features
 
