@@ -113,6 +113,22 @@ describe('browser hook script resource validation', () => {
     ).toEqual([]);
   });
 
+  it('normalizes a relative explicit project root', () => {
+    const fs = new VirtualFileSystem({
+      'workspace/config/project.prs': '',
+      'workspace/.promptscript/scripts/check.mjs': 'process.exit(0);\n',
+    });
+
+    expect(
+      validateBrowserHookScriptResources(
+        makeProgram(),
+        fs,
+        'workspace/config/project.prs',
+        './workspace'
+      )
+    ).toEqual([]);
+  });
+
   it.each(['.promptscript/project.prs', 'project.prs'])(
     'resolves script paths for a %s entry',
     (entryPath) => {

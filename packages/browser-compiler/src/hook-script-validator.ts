@@ -11,7 +11,11 @@ export interface BrowserHookScriptError {
 
 function getProjectPrefix(entryPath: string, configuredProjectRoot?: string): string {
   if (configuredProjectRoot !== undefined) {
-    return configuredProjectRoot.replaceAll('\\', '/').replace(/^\/+|\/+$/g, '');
+    return configuredProjectRoot
+      .replaceAll('\\', '/')
+      .split('/')
+      .filter((segment) => segment !== '' && segment !== '.')
+      .join('/');
   }
   const normalized = entryPath.replaceAll('\\', '/').replace(/^\/+/, '');
   const marker = '/.promptscript/';
