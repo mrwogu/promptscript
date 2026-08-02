@@ -351,6 +351,25 @@ async function writeOutputs(
         existingContent !== undefined &&
         stripMarkers(existingContent) === stripMarkers(output.content);
       if (contentMatches) continue;
+      const existingHookOutputOwned =
+        existingContent !== undefined &&
+        isPromptScriptOwnedHookOutput(output.path, existingContent);
+      const prunedCodexConfig =
+        existingContent === undefined
+          ? undefined
+          : removePromptScriptOwnedCodexHooks(output.path, existingContent);
+      const migratedCodexContent =
+        prunedCodexConfig === undefined
+          ? undefined
+          : prunedCodexConfig.empty
+            ? output.content
+            : mergePromptScriptCodexConfig(prunedCodexConfig.content, output.content);
+      const mergedHookContent =
+        existingContent === undefined || existingHookOutputOwned
+          ? undefined
+          : (mergePromptScriptHookOutput(output.path, existingContent, output.content) ??
+            migratedCodexContent);
+      if (mergedHookContent !== undefined || existingHookOutputOwned) continue;
       if (existingContent !== undefined && isPromptScriptOwnedOutput(output.path, existingContent))
         continue;
       preflightConflicts.push(outputPath);
