@@ -184,6 +184,16 @@ describe('GrokFormatter', () => {
       );
     });
 
+    it('should not retain excluded Claude settings through nested files', () => {
+      const result = formatter.format(createHookProgram(), { version: 'full' });
+      const claudeFile = result.additionalFiles?.find((file) => file.path === 'CLAUDE.md');
+
+      expect(claudeFile?.additionalFiles).toBeUndefined();
+      expect(result.additionalFiles).not.toContainEqual(
+        expect.objectContaining({ path: '.claude/settings.json' })
+      );
+    });
+
     it('should emit Grok plugin config in full mode', () => {
       const program: Program = {
         ...createTestProgram(),

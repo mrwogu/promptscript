@@ -160,7 +160,9 @@ export class GrokFormatter extends BaseFormatter {
     // Collect all Claude output as additional files
     const additionalFiles: FormatterOutput[] = [];
     if (claudeFull.path !== 'AGENTS.md') {
-      additionalFiles.push(claudeFull);
+      // Flatten Claude's additional files below so excluded settings do not
+      // reappear through recursive compiler output collection.
+      additionalFiles.push({ ...claudeFull, additionalFiles: undefined });
     }
     if (claudeFull.additionalFiles) {
       additionalFiles.push(
