@@ -19,6 +19,21 @@ function sourceRank(entry: PresentationEntry): number {
   return entry.source === 'explicit' ? 2 : 1;
 }
 
+function parseLegacyHeading(text: string): { title: string; end: number } | undefined {
+  if (!text.startsWith('##')) return undefined;
+
+  let index = 2;
+  if (text[index] !== ' ' && text[index] !== '\t') return undefined;
+  while (text[index] === ' ' || text[index] === '\t') index++;
+
+  const lineEnd = text.indexOf('\n', index);
+  const end = lineEnd === -1 ? text.length : lineEnd + 1;
+  let titleEnd = lineEnd === -1 ? text.length : lineEnd;
+  if (titleEnd > index && text[titleEnd - 1] === '\r') titleEnd--;
+  const title = text.slice(index, titleEnd).trim();
+  return title ? { title, end } : undefined;
+}
+
 /**
  * Select presentation metadata by source rank and operation precedence.
  */
@@ -89,18 +104,17 @@ export function normalizeLegacyHeadingEntries(
   const textIndex = entries.findIndex((entry) => entry.type === 'TextEntry');
   const textEntry = entries[textIndex];
   if (!textEntry || textEntry.type !== 'TextEntry') return entries;
-  const heading = /^##[ \t]+([^\r\n]+)(?:\r?\n|$)/.exec(textEntry.text);
-  const title = heading?.[1]?.trim();
-  if (!heading || !title) return entries;
+  const heading = parseLegacyHeading(textEntry.text);
+  if (!heading) return entries;
 
   const presentation: PresentationEntry = {
     type: 'PresentationEntry',
-    title,
+    title: heading.title,
     source: 'legacy',
     loc: textEntry.loc,
     titleLoc: textEntry.loc,
   };
-  const remainder = textEntry.text.slice(heading[0].length);
+  const remainder = textEntry.text.slice(heading.end);
   return [
     ...entries.slice(0, textIndex),
     presentation,
