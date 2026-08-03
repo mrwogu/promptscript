@@ -26,6 +26,7 @@ const {
   mockCleanupManagedOutputs,
   mockRewriteHookOutputIfUnchanged,
   mockRemoveHookOutputIfUnchanged,
+  mockIsTTY,
   mockSpinner,
   mockSpinnerStart,
   mockWatch,
@@ -46,6 +47,7 @@ const {
   const mockCleanupManagedOutputs = vi.fn();
   const mockRewriteHookOutputIfUnchanged = vi.fn();
   const mockRemoveHookOutputIfUnchanged = vi.fn();
+  const mockIsTTY = vi.fn();
   const mockSpinnerStart = vi.fn();
   const mockWatch = vi.fn();
   const mockWatcherOn = vi.fn();
@@ -73,6 +75,7 @@ const {
     mockCleanupManagedOutputs,
     mockRewriteHookOutputIfUnchanged,
     mockRemoveHookOutputIfUnchanged,
+    mockIsTTY,
     mockSpinner,
     mockSpinnerStart,
     mockWatch,
@@ -133,6 +136,7 @@ vi.mock('../../output/console.js', () => ({
     stats: vi.fn(),
     dryRun: mockDryRun,
     warn: mockWarn,
+    skipped: vi.fn(),
   },
   isVerbose: vi.fn().mockReturnValue(false),
   isDebug: vi.fn().mockReturnValue(false),
@@ -154,7 +158,7 @@ vi.mock('fs', () => ({
 }));
 
 vi.mock('../../output/pager.js', () => ({
-  isTTY: vi.fn().mockReturnValue(false),
+  isTTY: (...args: unknown[]) => mockIsTTY(...args),
 }));
 
 vi.mock('chokidar', () => ({
@@ -219,6 +223,7 @@ describe('compile command - createCliLogger warn path', () => {
     mockCleanupManagedOutputs.mockResolvedValue({ removed: [], removedDirectories: [] });
     mockRewriteHookOutputIfUnchanged.mockResolvedValue(true);
     mockRemoveHookOutputIfUnchanged.mockResolvedValue(true);
+    mockIsTTY.mockReturnValue(false);
 
     mockCompile.mockResolvedValue({
       success: true,
@@ -496,6 +501,53 @@ describe('compile command - createCliLogger warn path', () => {
 
     expect(mockRemoveHookOutputIfUnchanged).not.toHaveBeenCalled();
     expect(mockError).toHaveBeenCalledWith(expect.stringContaining('partial migration'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should cancel migration when a concurrent canonical file is skipped', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      hooks: {
+        PreToolUse: [
+          {
+            hooks: [{ type: 'command', command: 'audit' }],
+          },
+        ],
+      },
+    });
+    let hooksReads = 0;
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/hooks.json')) {
+        hooksReads++;
+        if (hooksReads === 1) {
+          throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+        }
+        return '{"hooks":{}}';
+      }
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return (
+        value.includes('project.prs') ||
+        value.endsWith('promptscript.yaml') ||
+        value.endsWith('.factory/hooks.json')
+      );
+    });
+    mockIsTTY.mockReturnValue(true);
+    vi.mocked(mockServices.prompts.select).mockResolvedValue('no');
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockRewriteHookOutputIfUnchanged).not.toHaveBeenCalled();
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('migration was cancelled before')
+    );
     expect(process.exitCode).toBe(1);
   });
 

@@ -597,6 +597,19 @@ command = "echo owned # promptscript-generated:owned"
     }
   });
 
+  it('should handle closed child stdin for rejected large writes', async () => {
+    const project = await createTemporaryDirectory('promptscript-hook-stdin-');
+    const file = join(project, 'settings.json');
+    const content = 'x'.repeat(4 * 1024 * 1024);
+    await writeFile(file, 'old');
+
+    await expect(rewriteHookOutputIfUnchanged(file, project, 'different', content)).resolves.toBe(
+      false
+    );
+    await expect(createHookOutputSafely(file, project, content)).resolves.toBe(false);
+    await expect(readFile(file, 'utf-8')).resolves.toBe('old');
+  });
+
   it('should reject hook rewrites and creations outside the output root', async () => {
     const project = await createTemporaryDirectory('promptscript-hook-root-');
     const outside = await createTemporaryDirectory('promptscript-hook-outside-');
