@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
+import {
+  deepClone,
+  normalizeProgram,
+  type BlockBody,
+  type CanonicalProgram,
+  type Program,
+  type SourceLocation,
+} from '@promptscript/core';
 import {
   format,
   getFormatter,
@@ -106,6 +113,45 @@ describe('format (standalone)', () => {
 
     expect(output.content).toBe('changed');
     expect(ast.blocks[0]!.name).toBe('identity');
+  });
+
+  it('should project canonical input for legacy formatters', () => {
+    const ast = normalizeProgram(createTestProgram());
+    let projectedBody: BlockBody | undefined;
+    const mockFormatter = {
+      name: 'legacy-canonical',
+      outputPath: './legacy-canonical.md',
+      description: 'Legacy formatter receiving canonical input',
+      defaultConvention: 'markdown',
+      format: vi.fn((program: Program) => {
+        program.blocks[0]!.name = 'changed';
+        const body = program.blocks[0]!.canonicalBody;
+        if (!body) {
+          throw new Error('Expected projected canonical body');
+        }
+        projectedBody = deepClone(body);
+        const textEntry = body.entries.find((entry) => entry.type === 'TextEntry');
+        if (textEntry) {
+          (textEntry as { text: string }).text = 'Changed body';
+        }
+        return {
+          path: './legacy-canonical.md',
+          content: textEntry?.text ?? '',
+        };
+      }),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+
+    const output = format(ast, { formatter: mockFormatter });
+
+    expect(output.content).toBe('Changed body');
+    expect(projectedBody).toEqual(ast.blocks[0]!.body);
+    expect(ast.blocks[0]!.name).toBe('identity');
+    expect(ast.blocks[0]!.body.entries.find((entry) => entry.type === 'TextEntry')?.text).toBe(
+      'Test project content'
+    );
   });
 
   it('should preserve legacy formatter block order across source layers', () => {
