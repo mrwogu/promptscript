@@ -404,6 +404,39 @@ describe('applyExtends additional coverage', () => {
       });
     });
 
+    it('should merge nested MixedContent text and properties', () => {
+      const existingMixed = createMixedContent(createTextContent('Base'), {
+        existing: 'value',
+      });
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              mixed: existingMixed as unknown as Value,
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock(
+            'config.mixed',
+            createMixedContent(createTextContent('Extension'), { added: 'value' })
+          ),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+      const mixed = content.properties['mixed'] as unknown as MixedContent;
+
+      expect(mixed.type).toBe('MixedContent');
+      expect(mixed.text?.value).toBe('Base\n\nExtension');
+      expect(mixed.properties).toEqual({
+        existing: 'value',
+        added: 'value',
+      });
+    });
+
     it('should extract elements from ArrayContent', () => {
       const ast = createProgram({
         blocks: [createBlock('config', createObjectContent({}))],

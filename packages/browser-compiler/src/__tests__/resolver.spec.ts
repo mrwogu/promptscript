@@ -2582,6 +2582,16 @@ describe('BrowserResolver', () => {
               type: 'ObjectContent',
               properties: {
                 mixed: { existing: 'value' },
+                mergedMixed: {
+                  type: 'MixedContent',
+                  text: {
+                    type: 'TextContent',
+                    value: 'Base',
+                    loc,
+                  },
+                  properties: { existing: 'value' },
+                  loc,
+                } as unknown as Value,
               },
               loc,
             },
@@ -2615,6 +2625,21 @@ describe('BrowserResolver', () => {
             },
             loc,
           },
+          {
+            type: 'ExtendBlock',
+            targetPath: 'config.mergedMixed',
+            content: {
+              type: 'MixedContent',
+              text: {
+                type: 'TextContent',
+                value: 'Extension',
+                loc,
+              },
+              properties: { added: 'value' },
+              loc,
+            },
+            loc,
+          },
         ],
         loc,
       };
@@ -2640,6 +2665,19 @@ describe('BrowserResolver', () => {
           loc,
         },
         properties: { added: 'value' },
+        loc,
+      });
+      expect(config.properties['mergedMixed']).toEqual({
+        type: 'MixedContent',
+        text: {
+          type: 'TextContent',
+          value: 'Base\n\nExtension',
+          loc,
+        },
+        properties: {
+          existing: 'value',
+          added: 'value',
+        },
         loc,
       });
     });
