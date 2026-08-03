@@ -18,7 +18,12 @@ import {
   type HookDefinition,
   type HookTarget,
 } from '../hook-adapters.js';
-import { HOOK_CAPABILITIES, type Value } from '@promptscript/core';
+import {
+  HOOK_CAPABILITIES,
+  HOOK_RUNTIME_CAPABILITIES,
+  type HookCapability,
+  type Value,
+} from '@promptscript/core';
 
 function makeLoc() {
   return { file: 'test.prs', line: 1, column: 0 };
@@ -1294,6 +1299,13 @@ describe('hook-adapters', () => {
       expect(HOOK_CAPABILITIES[target].events).toEqual(
         events.filter((event) => mapEvent(event, target) !== null)
       );
+    }
+
+    for (const target of [...targets, 'vscode'] as const) {
+      if (mapEvent('pre-terminal-command', target)) {
+        const capability: HookCapability = HOOK_RUNTIME_CAPABILITIES[target];
+        expect(capability.terminal).toBeDefined();
+      }
     }
   });
 

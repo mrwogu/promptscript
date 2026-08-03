@@ -667,13 +667,16 @@ export function getHookCompatibilityWarnings(
       continue;
     }
 
-    if (hook.event === 'pre-terminal-command' && capability.terminal?.guarantee !== 'guaranteed') {
+    const terminalCapability = capability.terminal;
+    if (
+      hook.event === 'pre-terminal-command' &&
+      terminalCapability &&
+      terminalCapability.guarantee !== 'guaranteed'
+    ) {
       warnings.push({
         code: 'PS4002',
-        message: `Hook "${hook.id}" maps terminal command interception to ${target} with ${capability.terminal?.guarantee ?? 'unknown'} coverage.`,
-        suggestion:
-          capability.terminal?.notes ??
-          'Inspect the target hook payload and filter terminal commands inside the hook.',
+        message: `Hook "${hook.id}" maps terminal command interception to ${target} with ${terminalCapability.guarantee} coverage.`,
+        suggestion: terminalCapability.notes,
       });
     }
 
