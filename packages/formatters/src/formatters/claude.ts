@@ -711,14 +711,17 @@ export class ClaudeFormatter extends BaseFormatter {
     const props = this.getProps(shortcuts.content);
 
     for (const [name, value] of Object.entries(props)) {
+      const commandName = name.replace(/^\/+/, '');
+      if (!this.isSafeName(commandName)) continue;
+
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         // TextContent from auto-discovered command files or triple-quoted strings
         if ('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent') {
           const content = this.valueToString(value);
           if (content.includes('\n')) {
             commands.push({
-              name: name.replace(/^\/+/, ''),
-              description: name.replace(/^\/+/, ''),
+              name: commandName,
+              description: commandName,
               content,
             });
           }
@@ -730,7 +733,7 @@ export class ClaudeFormatter extends BaseFormatter {
         // Generate command file if it has prompt: true or multiline content
         if (obj['prompt'] === true || obj['content']) {
           commands.push({
-            name: name.replace(/^\/+/, ''),
+            name: commandName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
             content: obj['content'] ? this.valueToString(obj['content']) : '',
           });
@@ -1293,7 +1296,7 @@ export class ClaudeFormatter extends BaseFormatter {
     if (shortcuts) {
       const props = this.getProps(shortcuts.content);
       for (const [cmd, desc] of Object.entries(props)) {
-        const shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
+        const shortDesc = this.shortcutSummary(desc);
         // Trim to avoid trailing spaces when description is empty
         commandLines.push(`${cmd.padEnd(10)} - ${shortDesc}`.trimEnd());
       }

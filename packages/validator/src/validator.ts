@@ -84,7 +84,7 @@ export class Validator {
    * @returns Validation result with all messages
    */
   validate(input: ProgramInput): ValidationResult {
-    const ast = toLegacyProgram(normalizeProgram(input));
+    const ast = toLegacyProgram(normalizeProgram(input), { preserveCanonicalBody: true });
     const messages: ValidationMessage[] = [];
     const activeRules = this.rules.filter(
       (r) => !this.disabledRules.has(r.name) && !this.disabledRules.has(r.id)

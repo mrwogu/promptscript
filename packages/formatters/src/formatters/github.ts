@@ -608,6 +608,9 @@ export class GitHubFormatter extends BaseFormatter {
     const props = this.getProps(shortcuts.content);
 
     for (const [name, value] of Object.entries(props)) {
+      const promptName = name.replace(/^\/+/, '');
+      if (!this.isSafeName(promptName)) continue;
+
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         const obj = value as Record<string, Value>;
 
@@ -615,7 +618,7 @@ export class GitHubFormatter extends BaseFormatter {
         if (obj['prompt'] === true || obj['type'] === 'prompt') {
           const handoffs = this.extractHandoffs(obj['handoffs']);
           prompts.push({
-            name,
+            name: promptName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
             mode: obj['mode'] === 'agent' ? 'agent' : undefined,
             tools:
@@ -666,10 +669,8 @@ export class GitHubFormatter extends BaseFormatter {
       lines.push(normalizedContent);
     }
 
-    // Strip leading slashes from name for clean file paths
-    const cleanName = config.name.replace(/^\/+/, '');
     return {
-      path: `.github/prompts/${cleanName}.prompt.md`,
+      path: `.github/prompts/${config.name}.prompt.md`,
       content: lines.join('\n') + '\n',
     };
   }

@@ -24,6 +24,36 @@ describe('BrowserResolver', () => {
       expect(result.sources).toContain('project.prs');
     });
 
+    it('normalizes and merges commands with shortcuts', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@shortcuts {
+  "/review": "Review code"
+}
+@commands {
+  "/test": { content: """Run tests.""" }
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const shortcuts = result.ast?.blocks.find((block) => block.name === 'shortcuts');
+
+      expect(result.errors).toEqual([]);
+      expect(result.ast?.blocks.filter((block) => block.name === 'shortcuts')).toHaveLength(1);
+      expect(shortcuts?.content).toMatchObject({
+        type: 'ObjectContent',
+        properties: {
+          '/review': 'Review code',
+          '/test': {
+            content: {
+              type: 'TextContent',
+              value: 'Run tests.',
+            },
+          },
+        },
+      });
+    });
+
     it('preserves ordered canonical entries from direct extensions', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@context {
@@ -3091,6 +3121,24 @@ describe('BrowserResolver', () => {
       expect(result.errors).toEqual([]);
       const blockNames = result.ast?.blocks.map((b) => b.name) ?? [];
       expect(blockNames).toContain('standards');
+      expect(blockNames).not.toContain('knowledge');
+    });
+
+    it('should canonicalize aliases in block filters', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "test" syntax: "1.1.0" }
+@use ./shared(only: ["commands"])`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.1.0" }
+@shortcuts { "/test": "Run tests" }
+@knowledge { """Should be filtered out""" }`,
+      });
+
+      const resolver = new BrowserResolver({ fs });
+      const result = await resolver.resolve('project.prs');
+
+      expect(result.errors).toEqual([]);
+      const blockNames = result.ast?.blocks.map((b) => b.name) ?? [];
+      expect(blockNames).toContain('shortcuts');
       expect(blockNames).not.toContain('knowledge');
     });
 

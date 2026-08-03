@@ -30,7 +30,7 @@ targets:
 }
 
 @identity {
-  name: "Factory migration"
+  """Factory migration"""
 }
 
 @hooks {

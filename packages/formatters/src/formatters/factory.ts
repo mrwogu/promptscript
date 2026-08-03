@@ -353,14 +353,17 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     const props = this.getProps(shortcuts.content);
 
     for (const [name, value] of Object.entries(props)) {
+      const commandName = name.replace(/^\/+/, '');
+      if (!this.isSafeName(commandName)) continue;
+
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         // TextContent from auto-discovered command files or triple-quoted strings
         if ('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent') {
           const content = this.valueToString(value);
           if (content.includes('\n')) {
             commands.push({
-              name: name.replace(/^\/+/, ''),
-              description: name.replace(/^\/+/, ''),
+              name: commandName,
+              description: commandName,
               content,
             });
           }
@@ -373,7 +376,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
         if (obj['prompt'] === true || obj['content']) {
           const handoffs = this.extractHandoffs(obj['handoffs']);
           commands.push({
-            name: name.replace(/^\/+/, ''),
+            name: commandName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
             content: obj['content'] ? this.valueToString(obj['content']) : '',
             agent: obj['agent'] ? this.valueToString(obj['agent']) : undefined,

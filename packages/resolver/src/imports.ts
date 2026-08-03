@@ -9,6 +9,7 @@ import type {
 import {
   deepClone,
   ResolveError,
+  getCanonicalBlockName,
   getSyntaxFeatureUsages,
   IMPORT_MERGE_POLICY,
   mergeBlockCollections,
@@ -226,12 +227,12 @@ export interface BlockFilterOptions {
  */
 export function filterBlocks(blocks: Block[], options: BlockFilterOptions): Block[] {
   if (options.only) {
-    const allowSet = new Set(options.only);
+    const allowSet = new Set(options.only.map(getCanonicalBlockName));
     return blocks.filter((b) => allowSet.has(b.name));
   }
 
   if (options.exclude) {
-    const denySet = new Set(options.exclude);
+    const denySet = new Set(options.exclude.map(getCanonicalBlockName));
     return blocks.filter((b) => !denySet.has(b.name));
   }
 

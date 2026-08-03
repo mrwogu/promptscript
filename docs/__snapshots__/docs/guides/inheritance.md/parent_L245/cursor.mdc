@@ -4,3 +4,7 @@ alwaysApply: true
 ---
 
 You are working on the project.
+
+Commands:
+/test - Write unit tests
+/docs - Generate documentation

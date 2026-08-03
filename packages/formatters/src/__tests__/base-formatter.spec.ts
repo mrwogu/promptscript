@@ -72,6 +72,14 @@ class TestFormatter extends BaseFormatter {
     return this.valueToString(value);
   }
 
+  public testShortcutSummary(value: Value, fallback?: string): string {
+    return this.shortcutSummary(value, fallback);
+  }
+
+  public testIsSafeName(name: string): boolean {
+    return this.isSafeName(name);
+  }
+
   public testExtractSectionWithCodeBlock(text: string, header: string): string | null {
     return this.extractSectionWithCodeBlock(text, header);
   }
@@ -537,6 +545,67 @@ describe('BaseFormatter', () => {
     it('should return empty for objects without type property', () => {
       const plainObject = { key: 'value' };
       expect(formatter.testValueToString(plainObject as unknown as Value)).toBe('');
+    });
+  });
+
+  describe('shortcutSummary', () => {
+    it('preserves scalar and multiline compatibility', () => {
+      expect(formatter.testShortcutSummary('Review code')).toBe('Review code');
+      expect(formatter.testShortcutSummary('Run tests\nReport failures')).toBe('Run tests');
+      expect(
+        formatter.testShortcutSummary({
+          type: 'TextContent',
+          value: 'Build project\nReport failures',
+          loc: createLoc(),
+        })
+      ).toBe('Build project');
+    });
+
+    it('prefers object description and falls back to content', () => {
+      expect(
+        formatter.testShortcutSummary({
+          description: 'Run complete tests',
+          content: 'Run tests\nReport failures',
+        })
+      ).toBe('Run complete tests');
+      expect(
+        formatter.testShortcutSummary({
+          content: {
+            type: 'TextContent',
+            value: 'Run tests\nReport failures',
+            loc: createLoc(),
+          },
+        })
+      ).toBe('Run tests');
+      expect(
+        formatter.testShortcutSummary({
+          description: '   ',
+          content: 'Run fallback tests',
+        })
+      ).toBe('Run fallback tests');
+    });
+
+    it('uses the provided fallback for metadata-only objects', () => {
+      expect(formatter.testShortcutSummary({ prompt: true }, 'Command')).toBe('Command');
+    });
+  });
+
+  describe('isSafeName', () => {
+    it('accepts flat generated file names', () => {
+      expect(formatter.testIsSafeName('test-command')).toBe(true);
+    });
+
+    it.each([
+      '',
+      '../escape',
+      'nested/path',
+      'nested\\path',
+      'line\nbreak',
+      'CON',
+      'bad:name',
+      'trailing.',
+    ])('rejects unsafe generated file name %j', (name) => {
+      expect(formatter.testIsSafeName(name)).toBe(false);
     });
   });
 

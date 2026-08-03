@@ -37,6 +37,7 @@ import { validHooks } from './valid-hooks.js';
 import { validMcpServers } from './valid-mcp-servers.js';
 import { validPlugins } from './valid-plugins.js';
 import { validSectionHeaders } from './valid-section-headers.js';
+import { validBlockShape } from './valid-block-shape.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -105,6 +106,7 @@ export { validHooks } from './valid-hooks.js';
 export { validMcpServers } from './valid-mcp-servers.js';
 export { validPlugins } from './valid-plugins.js';
 export { validSectionHeaders } from './valid-section-headers.js';
+export { validBlockShape } from './valid-block-shape.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -173,6 +175,8 @@ export const allRules: ValidationRule[] = [
   validPlugins,
   // Valid section header overrides (PS037)
   validSectionHeaders,
+  // Canonical built-in block shapes (PS038)
+  validBlockShape,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

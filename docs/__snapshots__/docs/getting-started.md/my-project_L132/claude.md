@@ -15,6 +15,6 @@ Tech stack: TypeScript, React 18, Vite
 
 ```
 /review    - Review code for quality and best practices
-/test      -
-/refactor  -
+/test      - Write unit tests
+/refactor  - Suggest refactoring improvements
 ```

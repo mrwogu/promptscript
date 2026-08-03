@@ -103,6 +103,42 @@ describe('normalizeBlockAliases', () => {
     expect(result.blocks[0]?.content).toBe(content);
   });
 
+  it('should merge commands with an existing shortcuts block', () => {
+    const ast = createMinimalProgram([
+      {
+        type: 'Block',
+        name: 'shortcuts',
+        content: {
+          type: 'ObjectContent',
+          properties: { '/review': 'Review code' },
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      },
+      {
+        type: 'Block',
+        name: 'commands',
+        content: {
+          type: 'ObjectContent',
+          properties: { '/test': 'Run tests' },
+          loc: createLoc(),
+        },
+        loc: createLoc(),
+      },
+    ]);
+
+    const result = normalizeBlockAliases(ast);
+
+    expect(result.blocks).toHaveLength(1);
+    expect(result.blocks[0]?.content).toMatchObject({
+      type: 'ObjectContent',
+      properties: {
+        '/review': 'Review code',
+        '/test': 'Run tests',
+      },
+    });
+  });
+
   it('should handle empty blocks array', () => {
     const ast = createMinimalProgram([]);
     const result = normalizeBlockAliases(ast);

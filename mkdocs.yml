@@ -253,6 +253,7 @@ nav:
   - Reference:
       - reference/index.md
       - Language: reference/language.md
+      - Block Shapes: reference/block-shapes.md
       - CLI:
           - Overview: reference/cli.md
           - Hook Management: reference/cli/hooks.md

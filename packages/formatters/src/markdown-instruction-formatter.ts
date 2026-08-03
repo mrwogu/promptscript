@@ -922,7 +922,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (shortcuts) {
       const props = this.getProps(shortcuts.content);
       for (const [cmd, desc] of Object.entries(props)) {
-        const shortDesc = this.valueToString(desc).split('\n')[0] ?? '';
+        const shortDesc = this.shortcutSummary(desc);
         commandLines.push(`${cmd.padEnd(10)} - ${shortDesc}`.trimEnd());
       }
     }

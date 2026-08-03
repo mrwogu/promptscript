@@ -517,6 +517,79 @@ describe('@shortcuts → Commands section', () => {
   }
 });
 
+describe('@shortcuts canonical and compatibility values', () => {
+  const ast = program(
+    block(
+      'shortcuts',
+      obj({
+        '/review': 'Review code quality',
+        '/legacy': {
+          type: 'TextContent',
+          value: 'Run legacy tests\nReport failures',
+          loc: loc(),
+        },
+        '/canonical': {
+          description: 'Run complete test suite',
+          content: {
+            type: 'TextContent',
+            value: 'Run all tests\nReport failures',
+            loc: loc(),
+          },
+        },
+      })
+    )
+  );
+
+  for (const { name, fmt } of [...customFormatters, mifFormatter]) {
+    it(`${name}: preserves scalar, multiline, and explicit content summaries`, () => {
+      const result = fmt.format(ast);
+
+      expect(result.content).toContain('Review code quality');
+      expect(result.content).toContain('/legacy');
+      if (name !== 'github') {
+        expect(result.content).toContain('Run legacy tests');
+      }
+      expect(result.content).toContain('Run complete test suite');
+    });
+  }
+});
+
+describe('@shortcuts generated file safety', () => {
+  const ast = program(
+    block(
+      'shortcuts',
+      obj({
+        '/../escape': {
+          prompt: true,
+          description: 'Unsafe command',
+          steps: ['Run tests'],
+          content: {
+            type: 'TextContent',
+            value: 'Run all tests\nReport failures',
+            loc: loc(),
+          },
+        },
+      })
+    )
+  );
+  const outputs = [
+    { name: 'claude', output: claude.format(ast, { version: 'full' }) },
+    { name: 'github', output: github.format(ast, { version: 'full' }) },
+    { name: 'cursor', output: cursor.format(ast) },
+    { name: 'antigravity', output: antigravity.format(ast) },
+    { name: 'factory', output: factory.format(ast, { version: 'full' }) },
+  ];
+
+  for (const { name, output } of outputs) {
+    it(`${name}: rejects unsafe generated shortcut paths`, () => {
+      const paths = (output.additionalFiles ?? []).map((file) => file.path);
+
+      expect(paths.every((path) => !path.includes('../'))).toBe(true);
+      expect(paths.every((path) => !path.includes('escape'))).toBe(true);
+    });
+  }
+});
+
 // ============================================================
 // @knowledge — remaining content (the knowledgeContent bug)
 // ============================================================

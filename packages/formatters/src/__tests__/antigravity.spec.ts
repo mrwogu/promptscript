@@ -963,6 +963,33 @@ Never leave TODO without issue reference`,
       expect(workflow?.content).toContain('3. Deploy');
     });
 
+    it('should not generate colliding target-normalized workflow paths', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/Foo Bar': { steps: ['First workflow'] },
+                '/foo-bar': { steps: ['Second workflow'] },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.additionalFiles).toHaveLength(1);
+      expect(result.additionalFiles?.[0]?.path).toBe('.agent/workflows/foo-bar.md');
+      expect(result.additionalFiles?.[0]?.content).toContain('First workflow');
+    });
+
     it('should generate workflow files using workflow key', () => {
       const ast: Program = {
         ...createMinimalProgram(),

@@ -6,7 +6,12 @@ import type {
   Program,
   Value,
 } from '@promptscript/core';
-import { DEFAULT_PRETTIER_OPTIONS, reconcileBlockBody, valueNodeToValue } from '@promptscript/core';
+import {
+  DEFAULT_PRETTIER_OPTIONS,
+  isPortablePathSegment,
+  reconcileBlockBody,
+  valueNodeToValue,
+} from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
 import { StandardsExtractor } from './extractors/index.js';
 import type { FormatOptions, Formatter, FormatterOutput } from './types.js';
@@ -206,6 +211,28 @@ export abstract class BaseFormatter implements Formatter {
       }
     }
     return '';
+  }
+
+  /**
+   * Extract a stable one-line summary from any supported shortcut value.
+   */
+  protected shortcutSummary(value: Value, fallback = ''): string {
+    if (
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      !('type' in value && value.type === 'TextContent')
+    ) {
+      const shortcut = value as Record<string, Value>;
+      for (const candidate of [shortcut['description'], shortcut['content']]) {
+        if (candidate === undefined) continue;
+        const summary = this.valueToString(candidate).split('\n')[0]?.trim() ?? '';
+        if (summary.length > 0) return summary;
+      }
+      return fallback;
+    }
+
+    return this.valueToString(value).split('\n')[0] ?? fallback;
   }
 
   /**
@@ -772,7 +799,13 @@ export abstract class BaseFormatter implements Formatter {
    * Rejects path traversal sequences and path separators.
    */
   protected isSafeName(name: string): boolean {
-    return !name.includes('..') && !name.includes('/') && !name.includes('\\');
+    return (
+      !name.includes('..') &&
+      !name.includes('/') &&
+      !name.includes('\\') &&
+      !name.includes('\u007f') &&
+      isPortablePathSegment(name)
+    );
   }
 
   /**
