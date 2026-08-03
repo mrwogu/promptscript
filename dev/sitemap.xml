@@ -485,6 +485,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getBlockShapeContract/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getBlockText/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -494,6 +498,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getBuiltInConvention/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getCanonicalBlockName/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
@@ -526,6 +534,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getMinimumVersionForFeature/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getObservedBlockShape/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
@@ -669,6 +681,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/normalizeBlockAliases/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/normalizeLegacyHeadingEntries/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -786,6 +802,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/BlockOperation/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/BlockShapeContract/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
@@ -1133,6 +1153,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/BlockShape/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/BlockTypeName/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -1266,6 +1290,14 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/ValueNode/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/BLOCK_ALIASES/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/BLOCK_SHAPE_CONTRACTS/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
@@ -2837,10 +2869,6 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
-         <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/normalizeBlockAliases/</loc>
-         <lastmod>2026-08-03</lastmod>
-    </url>
-    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/resolver/src/functions/normalizeGitUrl/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -3433,6 +3461,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/validator/src/variables/validBlockShape/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/validator/src/variables/validParams/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -3650,6 +3682,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/reference/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/block-shapes/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>

@@ -8,6 +8,8 @@ PromptScript supports three automation layers:
 
 These layers solve different problems and can be used together.
 
+Both `@hooks` and `@workflows` use canonical object bodies. See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for their shape diagnostics, merge behavior, and complete examples.
+
 ## Lifecycle Hooks
 
 The `@hooks` block requires syntax `1.4.0`:

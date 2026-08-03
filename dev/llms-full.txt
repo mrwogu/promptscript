@@ -1479,6 +1479,8 @@ PromptScript supports three automation layers:
 
 These layers solve different problems and can be used together.
 
+Both `@hooks` and `@workflows` use canonical object bodies. See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for their shape diagnostics, merge behavior, and complete examples.
+
 ## Lifecycle Hooks
 
 The `@hooks` block requires syntax `1.4.0`:
@@ -3944,6 +3946,10 @@ Replacement executables use the same command interpolation, script path, interpr
 ## Hook Project Root Failure
 
 Environment-root and Git-root wrappers exit non-zero before an interpreter or command runs when they cannot resolve a non-empty project root. Native-cwd and workspace-cwd targets retain host-provided cwd fields and report `PS4002` because PromptScript cannot independently verify the host cwd. No target wrapper falls back to the process working directory.
+
+## Canonical Block Shape Reference
+
+See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for the canonical shape, compatibility forms, merge rules, diagnostics, and formatter behavior of every built-in block.
 
 # CLI Reference
 
@@ -12956,6 +12962,8 @@ This guide explains the internal architecture of PromptScript formatters, focusi
 ## Overview
 
 PromptScript compiles to 48 AI agent targets. Rich native formatters, AGENTS.md targets, and shared Markdown formatters map the same PromptScript source to each platform's instruction and capability contracts. Shared extraction and rendering logic preserves semantic parity where native platforms support equivalent features.
+
+Formatter inputs follow the canonical and compatibility contracts in the [Block Shapes reference](https://getpromptscript.dev/dev/reference/block-shapes/index.md). That reference also identifies content whose output varies by target.
 
 ```
 flowchart TB
