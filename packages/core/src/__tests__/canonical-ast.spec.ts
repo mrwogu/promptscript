@@ -1475,7 +1475,9 @@ describe('canonical AST compatibility', () => {
             ? entry.declaration.path.raw
             : entry.type === 'TextEntry'
               ? entry.text
-              : valueNodeToValue(entry.value)
+              : entry.type === 'ListEntry'
+                ? valueNodeToValue(entry.value)
+                : entry.title
       )
     ).toEqual(['./first', ['runtime', 'node'], 'list item', './second', 'Instructions']);
     expect(reconciled.entries.map((entry) => entry.loc)).toEqual([

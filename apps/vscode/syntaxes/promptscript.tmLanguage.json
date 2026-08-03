@@ -36,7 +36,7 @@
       "name": "entity.name.import.registry.prs"
     },
     "control-directive": {
-      "match": "@(?:meta|inherit|use|extend)\\b",
+      "match": "@(?:meta|inherit|use|extend|header)\\b",
       "name": "keyword.control.directive.prs"
     },
     "block-directive": {

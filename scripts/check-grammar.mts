@@ -11,6 +11,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { BLOCK_TYPES } from '../packages/core/src/types/constants.js';
+import { CONTEXTUAL_DIRECTIVES } from '../packages/core/src/section-registry.js';
 // Uses .js extension per swc-node convention (see validate-docs-examples.mts for reference)
 import { allTokens } from '../packages/parser/src/lexer/tokens.js';
 import {
@@ -263,10 +264,11 @@ for (const token of allTokens) {
 }
 
 const expectedBlockDirectives = BLOCK_TYPES.map((blockType) => `@${blockType}`);
+const expectedContextualDirectives = [...CONTEXTUAL_DIRECTIVES];
 const monacoDirectives = new Set(prsLanguageDefinition.directives as string[]);
-for (const directive of expectedBlockDirectives) {
+for (const directive of [...expectedBlockDirectives, ...expectedContextualDirectives]) {
   if (!monacoDirectives.has(directive)) {
-    syncErrors.push(`Monaco grammar is missing block directive ${directive}`);
+    syncErrors.push(`Monaco grammar is missing directive ${directive}`);
   }
 }
 
@@ -289,6 +291,20 @@ if (!pygmentsBlockMatch) {
   }
 }
 
+const pygmentsContextualMatch = pygmentsSource.match(/CONTEXTUAL_DIRECTIVES = \(([\s\S]*?)\)\n\n/);
+if (!pygmentsContextualMatch) {
+  syncErrors.push('Pygments lexer does not expose CONTEXTUAL_DIRECTIVES');
+} else {
+  const pygmentsContextual = new Set(
+    [...pygmentsContextualMatch[1]!.matchAll(/"([^"]+)"/g)].map((match) => `@${match[1]!}`)
+  );
+  for (const directive of expectedContextualDirectives) {
+    if (!pygmentsContextual.has(directive)) {
+      syncErrors.push(`Pygments lexer is missing contextual directive ${directive}`);
+    }
+  }
+}
+
 const textMateBlockPattern = grammar.repository?.['block-directive']?.match;
 if (!textMateBlockPattern) {
   syncErrors.push('TextMate grammar does not define block-directive.match');
@@ -297,6 +313,18 @@ if (!textMateBlockPattern) {
   for (const directive of expectedBlockDirectives) {
     if (!blockRegex.test(directive)) {
       syncErrors.push(`TextMate grammar does not match block directive ${directive}`);
+    }
+  }
+}
+
+const textMateControlPattern = grammar.repository?.['control-directive']?.match;
+if (!textMateControlPattern) {
+  syncErrors.push('TextMate grammar does not define control-directive.match');
+} else {
+  const controlRegex = new RegExp(`^(?:${textMateControlPattern})$`);
+  for (const directive of expectedContextualDirectives) {
+    if (!controlRegex.test(directive)) {
+      syncErrors.push(`TextMate grammar does not match contextual directive ${directive}`);
     }
   }
 }

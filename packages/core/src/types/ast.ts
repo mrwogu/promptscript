@@ -548,9 +548,22 @@ export interface InlineUseEntry extends CanonicalNode {
 }
 
 /**
+ * Canonical presentation metadata for a generated section title.
+ */
+export interface PresentationEntry extends CanonicalNode {
+  readonly type: 'PresentationEntry';
+  /** Canonical section ID. Omitted for the block's primary section. */
+  readonly sectionId?: string;
+  readonly title: string;
+  readonly source: 'explicit' | 'legacy';
+  readonly sectionLoc?: SourceLocation;
+  readonly titleLoc: SourceLocation;
+}
+
+/**
  * Ordered canonical block entry.
  */
-export type BlockEntry = TextEntry | FieldEntry | ListEntry | InlineUseEntry;
+export type BlockEntry = TextEntry | FieldEntry | ListEntry | InlineUseEntry | PresentationEntry;
 
 /**
  * Uniform canonical body shared by every block type.

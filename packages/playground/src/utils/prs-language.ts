@@ -3,10 +3,10 @@
  */
 
 import type * as Monaco from 'monaco-editor';
-import { BLOCK_TYPES } from '@promptscript/core';
+import { BLOCK_TYPES, CONTEXTUAL_DIRECTIVES } from '@promptscript/core';
 
 export const PRS_LANGUAGE_ID = 'promptscript';
-const CONTROL_DIRECTIVES = ['@meta', '@inherit', '@extend', '@use'];
+const CONTROL_DIRECTIVES = ['@meta', '@inherit', '@extend', '@use', ...CONTEXTUAL_DIRECTIVES];
 const BLOCK_DIRECTIVES = BLOCK_TYPES.map((blockType) => `@${blockType}`);
 
 /**
@@ -284,6 +284,14 @@ export function createPrsCompletionProvider(
           insertText: '@use $1',
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           documentation: 'Import and merge directives from another file',
+          range,
+        },
+        {
+          label: '@header',
+          kind: monaco.languages.CompletionItemKind.Keyword,
+          insertText: '@header "$1"',
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          documentation: 'Override a generated section title inside a block',
           range,
         },
         {

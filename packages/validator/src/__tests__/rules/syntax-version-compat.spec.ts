@@ -25,8 +25,10 @@ function makeAst(syntaxVersion: string, blockNames: string[] = []): Program {
   };
 }
 
-function validate(ast: Program): { message: string; suggestion?: string }[] {
-  const messages: { message: string; suggestion?: string }[] = [];
+function validate(
+  ast: Program
+): { message: string; suggestion?: string; location?: SourceLocation }[] {
+  const messages: { message: string; suggestion?: string; location?: SourceLocation }[] = [];
   syntaxVersionCompat.validate({
     ast,
     report: (msg) => messages.push(msg),
@@ -56,7 +58,7 @@ describe('PS018: syntax-version-compat', () => {
     const messages = validate(makeAst('1.5.7'));
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('Unknown syntax version "1.5.7"');
-    expect(messages[0]!.message).toContain('1.4.0');
+    expect(messages[0]!.message).toContain('1.5.0');
   });
 
   it('should warn when block requires higher version', () => {
@@ -148,5 +150,24 @@ describe('PS018: syntax-version-compat', () => {
     ];
 
     expect(validate(ast)).toHaveLength(0);
+  });
+
+  it('should report section header overrides at their exact usage location', () => {
+    const ast = makeAst('1.4.0');
+    const usageLoc = { file: 'headers.prs', line: 7, column: 5, offset: 82 };
+    ast.syntaxFeatures = [
+      {
+        feature: 'section-header-override',
+        location: usageLoc,
+      },
+    ];
+
+    const messages = validate(ast);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      message: expect.stringContaining('requires syntax >= 1.5.0'),
+      location: usageLoc,
+    });
   });
 });

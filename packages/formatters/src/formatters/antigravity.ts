@@ -8,6 +8,7 @@ import {
   extractMcpServers,
   serializeMcpServersToJsonString,
 } from '../mcp-helpers.js';
+import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
  * Supported Antigravity format versions.
@@ -459,15 +460,17 @@ export class AntigravityFormatter extends BaseFormatter {
       content = this.extractText(identity.content);
     } else {
       const context = this.findBlock(ast, 'context');
-      if (context?.content.type === 'MixedContent' && context.content.text) {
-        content = context.content.text.value.trim();
+      const contextTitle = resolveSourceSectionTitle(ast, 'context');
+      const projectTitle = resolveSourceSectionTitle(ast, 'project');
+      if (!contextTitle && context && (context.content.type === 'MixedContent' || projectTitle)) {
+        content = this.extractText(context.content).trim();
       }
     }
 
     if (!content) return null;
 
     // Apply stripAllIndent to normalize merged identity content for Prettier compatibility
-    return `## Project Identity
+    return `## ${resolveSectionTitle(ast, 'project', { defaultTitle: 'Project Identity' })}
 
 ${this.stripAllIndent(content)}`;
   }
@@ -480,7 +483,7 @@ ${this.stripAllIndent(content)}`;
     if (context) {
       const items = this.extractTechStackFromContext(context);
       if (items.length > 0) {
-        return `## Tech Stack\n\n${items.join('\n')}`;
+        return `## ${resolveSectionTitle(ast, 'tech-stack', { defaultTitle: 'Tech Stack' })}\n\n${items.join('\n')}`;
       }
     }
 
@@ -489,7 +492,7 @@ ${this.stripAllIndent(content)}`;
     if (standards) {
       const items = this.extractTechStackFromStandards(standards);
       if (items.length > 0) {
-        return `## Tech Stack\n\n${items.join(', ')}`;
+        return `## ${resolveSectionTitle(ast, 'tech-stack', { defaultTitle: 'Tech Stack' })}\n\n${items.join(', ')}`;
       }
     }
 
@@ -576,7 +579,7 @@ ${this.stripAllIndent(content)}`;
       if (archMatch) {
         const content = archMatch.replace('## Architecture', '').trim();
         // Apply stripAllIndent to normalize content for Prettier compatibility
-        return `## Architecture
+        return `## ${resolveSectionTitle(ast, 'architecture', { defaultTitle: 'Architecture' })}
 
 ${this.stripAllIndent(content)}`;
       }
@@ -587,7 +590,7 @@ ${this.stripAllIndent(content)}`;
       if (arch) {
         const archText = typeof arch === 'string' ? arch : this.valueToString(arch);
         if (archText.trim()) {
-          return `## Architecture
+          return `## ${resolveSectionTitle(ast, 'architecture', { defaultTitle: 'Architecture' })}
 
 ${this.stripAllIndent(archText.trim())}`;
         }
@@ -599,7 +602,7 @@ ${this.stripAllIndent(archText.trim())}`;
     if (archBlock) {
       const content = this.extractText(archBlock.content);
       if (content) {
-        return `## Architecture
+        return `## ${resolveSectionTitle(ast, 'architecture', { defaultTitle: 'Architecture' })}
 
 ${this.stripAllIndent(content)}`;
       }
@@ -610,7 +613,7 @@ ${this.stripAllIndent(content)}`;
 
   private contextSection(ast: Program, _renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null; // identity() fallback handles @context text
+    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
 
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
@@ -625,7 +628,7 @@ ${this.stripAllIndent(content)}`;
 
     // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
     const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
-    return `## Context
+    return `## ${resolveSectionTitle(ast, 'context', { defaultTitle: 'Context' })}
 
 ${this.stripAllIndent(downgradedText)}`;
   }
@@ -651,7 +654,7 @@ ${this.stripAllIndent(downgradedText)}`;
 
     if (subsections.length === 0) return null;
 
-    return `## Code Standards\n\n${subsections.join('\n\n')}`;
+    return `## ${resolveSectionTitle(ast, 'code-standards', { defaultTitle: 'Code Standards' })}\n\n${subsections.join('\n\n')}`;
   }
 
   /**
@@ -699,7 +702,7 @@ ${this.stripAllIndent(downgradedText)}`;
 
     if (items.length === 0) return null;
 
-    return `## Git Commits
+    return `## ${resolveSectionTitle(ast, 'git-commits', { defaultTitle: 'Git Commits' })}
 
 ${items.map((i) => '- ' + i).join('\n')}`;
   }
@@ -733,7 +736,7 @@ ${items.map((i) => '- ' + i).join('\n')}`;
 
     if (subsections.length === 0) return null;
 
-    return `## Configuration Files
+    return `## ${resolveSectionTitle(ast, 'configuration-files', { defaultTitle: 'Configuration Files' })}
 
 ${subsections.join('\n\n')}`;
   }
@@ -766,7 +769,7 @@ ${subsections.join('\n\n')}`;
     // Only return if there are non-workflow commands
     if (lines.length === 0) return null;
 
-    return `## Commands
+    return `## ${resolveSectionTitle(ast, 'commands', { defaultTitle: 'Commands' })}
 
 ${lines.join('\n')}`;
   }
@@ -784,7 +787,7 @@ ${lines.join('\n')}`;
 
     const content = commandsMatch.replace('## Development Commands', '').trim();
     // Apply stripAllIndent to normalize content for Prettier compatibility
-    return `## Development Commands
+    return `## ${resolveSectionTitle(ast, 'commands', { defaultTitle: 'Development Commands' })}
 
 ${this.stripAllIndent(content)}`;
   }
@@ -804,7 +807,7 @@ ${this.stripAllIndent(content)}`;
       'After completing any code changes, run the following commands to ensure code quality:';
     const content = postMatch.replace('## Post-Work Verification', '').trim();
     // Apply stripAllIndent to normalize content for Prettier compatibility
-    return `## Post-Work Verification
+    return `## ${resolveSectionTitle(ast, 'post-work', { defaultTitle: 'Post-Work Verification' })}
 
 ${intro}
 ${this.stripAllIndent(content)}`;
@@ -842,7 +845,7 @@ ${this.stripAllIndent(content)}`;
 
     if (items.length === 0) return null;
 
-    return `## Documentation
+    return `## ${resolveSectionTitle(ast, 'documentation', { defaultTitle: 'Documentation' })}
 
 ${items.map((i) => '- ' + i).join('\n')}`;
   }
@@ -882,7 +885,7 @@ ${items.map((i) => '- ' + i).join('\n')}`;
 
     if (items.length === 0) return null;
 
-    return `## Diagrams
+    return `## ${resolveSectionTitle(ast, 'diagrams', { defaultTitle: 'Diagrams' })}
 
 ${items.map((i) => '- ' + i).join('\n')}`;
   }
@@ -921,7 +924,9 @@ ${items.map((i) => '- ' + i).join('\n')}`;
     remaining = remaining.trim();
     if (!remaining) return null;
 
-    return this.stripAllIndent(remaining);
+    const content = this.stripAllIndent(remaining);
+    const title = resolveSourceSectionTitle(ast, 'knowledge');
+    return title ? `## ${title}\n\n${content}` : content;
   }
 
   private restrictions(ast: Program, _renderer: ConventionRenderer): string | null {
@@ -931,7 +936,7 @@ ${items.map((i) => '- ' + i).join('\n')}`;
     const items = this.extractRestrictionsItems(block);
     if (items.length === 0) return null;
 
-    return `## Don'ts
+    return `## ${resolveSectionTitle(ast, 'restrictions', { defaultTitle: "Don'ts" })}
 
 ${items.map((i) => '- ' + i).join('\n')}`;
   }

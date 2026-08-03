@@ -40,6 +40,7 @@ import type {
 } from './types/index.js';
 import type { SyntaxFeatureUsage } from './syntax-versions.js';
 import { deepClone } from './utils/index.js';
+import { selectPresentationEntries } from './presentation.js';
 
 type LegacyContentType = BlockContent['type'];
 
@@ -770,6 +771,10 @@ export function reconcileBlockBody(body: BlockBody, content: BlockContent): Bloc
   let emittedText = false;
 
   for (const [index, entry] of body.entries.entries()) {
+    if (entry.type === 'PresentationEntry') {
+      entries.push(deepClone(entry));
+      continue;
+    }
     if (entry.type === 'FieldEntry') {
       if (!Object.hasOwn(properties, entry.name)) continue;
       entries.push(
@@ -900,7 +905,8 @@ export function composeBlockBodies(
   incomingBody: BlockBody | undefined,
   baseContent: BlockContent,
   incomingContent: BlockContent,
-  mergedContent: BlockContent
+  mergedContent: BlockContent,
+  blockName?: string
 ): BlockBody {
   const base = baseBody ?? blockContentToBody(baseContent);
   const incoming = incomingBody ?? blockContentToBody(incomingContent);
@@ -919,32 +925,47 @@ export function composeBlockBodies(
     mergedContent.type === 'ObjectContent' || mergedContent.type === 'MixedContent'
       ? mergedContent.properties
       : {};
+  const presentation = selectPresentationEntries(
+    base.entries,
+    incoming.entries,
+    'incoming',
+    blockName
+  );
+  const selectedBasePresentation = new Set(presentation.base);
+  const selectedIncomingPresentation = new Set(presentation.incoming);
   const baseEntries = base.entries.filter(
-    (entry) => entry.type !== 'FieldEntry' || !incomingFieldNames.has(entry.name)
+    (entry) =>
+      (entry.type !== 'PresentationEntry' || selectedBasePresentation.has(entry)) &&
+      (entry.type !== 'FieldEntry' || !incomingFieldNames.has(entry.name))
   );
   const lastIncomingIndexes = new Map<string, number>();
   for (const [index, entry] of incoming.entries.entries()) {
     if (entry.type === 'FieldEntry') lastIncomingIndexes.set(entry.name, index);
   }
-  const incomingEntries = incoming.entries.map((entry, index) => {
-    const baseField = entry.type === 'FieldEntry' ? baseFields.get(entry.name) : undefined;
-    const mergedValue = entry.type === 'FieldEntry' ? mergedProperties[entry.name] : undefined;
-    return baseField &&
-      entry.type === 'FieldEntry' &&
-      lastIncomingIndexes.get(entry.name) === index &&
-      mergedValue !== undefined
-      ? {
-          ...deepClone(entry),
-          value: mergeValueNodeLocations(
-            baseField.value,
-            entry.value,
-            mergedValue,
-            'incoming',
-            entry.value
-          ),
-        }
-      : deepClone(entry);
-  });
+  const incomingEntries = incoming.entries
+    .map((entry, index) => ({ entry, index }))
+    .filter(
+      ({ entry }) => entry.type !== 'PresentationEntry' || selectedIncomingPresentation.has(entry)
+    )
+    .map(({ entry, index }) => {
+      const baseField = entry.type === 'FieldEntry' ? baseFields.get(entry.name) : undefined;
+      const mergedValue = entry.type === 'FieldEntry' ? mergedProperties[entry.name] : undefined;
+      return baseField &&
+        entry.type === 'FieldEntry' &&
+        lastIncomingIndexes.get(entry.name) === index &&
+        mergedValue !== undefined
+        ? {
+            ...deepClone(entry),
+            value: mergeValueNodeLocations(
+              baseField.value,
+              entry.value,
+              mergedValue,
+              'incoming',
+              entry.value
+            ),
+          }
+        : deepClone(entry);
+    });
   return reconcileBlockBody(
     createBlockBody([...baseEntries.map(deepClone), ...incomingEntries], mergedContent.loc, {
       projection: mergedContent.type,
@@ -1259,12 +1280,13 @@ export function createCanonicalBlock(
 
 export function updateCanonicalBlockBody(block: CanonicalBlock, body: BlockBody): CanonicalBlock {
   const requestedProjection = body.legacyProjection ?? block.body.legacyProjection;
+  const contentEntries = body.entries.filter((entry) => entry.type !== 'PresentationEntry');
   const projection =
     requestedProjection === 'ArrayContent' &&
-    !body.entries.every((entry) => entry.type === 'ListEntry')
+    !contentEntries.every((entry) => entry.type === 'ListEntry')
       ? undefined
       : requestedProjection === 'TextContent' &&
-          !body.entries.every((entry) => entry.type === 'TextEntry')
+          !contentEntries.every((entry) => entry.type === 'TextEntry')
         ? undefined
         : requestedProjection;
   return createCanonicalBlock(

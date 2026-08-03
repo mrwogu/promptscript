@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import { createBlockBody, type Program, type SourceLocation } from '@promptscript/core';
 import { walkText, walkBlocks, walkUses, hasContent, offsetLocation } from '../walker.js';
 
 /**
@@ -149,6 +149,44 @@ describe('walker', () => {
       walkText(ast, (text) => texts.push(text));
 
       expect(texts).toEqual(['Extended content']);
+    });
+
+    it('should walk presentation titles at their exact locations', () => {
+      const visited: Array<{ text: string; loc: SourceLocation }> = [];
+      const titleLoc: SourceLocation = { file: 'test.prs', line: 4, column: 11 };
+      const ast = createTestProgram({
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            loc: defaultLoc,
+            content: {
+              type: 'ObjectContent',
+              properties: {},
+              loc: defaultLoc,
+            },
+            canonicalBody: createBlockBody(
+              [
+                {
+                  type: 'PresentationEntry',
+                  title: 'Security-sensitive title',
+                  source: 'explicit',
+                  loc: defaultLoc,
+                  titleLoc,
+                },
+              ],
+              defaultLoc
+            ),
+          },
+        ],
+      });
+
+      walkText(ast, (text, loc) => visited.push({ text, loc }));
+
+      expect(visited).toContainEqual({
+        text: 'Security-sensitive title',
+        loc: titleLoc,
+      });
     });
 
     it('should walk nested text content', () => {

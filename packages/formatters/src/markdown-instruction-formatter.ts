@@ -9,6 +9,7 @@ import {
   serializeMcpServersToJsonString,
   serializeMcpServersToToml,
 } from './mcp-helpers.js';
+import { resolveSectionTitle, resolveSourceSectionTitle } from './section-title-resolver.js';
 
 /**
  * Configuration for a markdown-based command file.
@@ -72,22 +73,20 @@ export interface MarkdownAgentConfig {
  * Section name keys that can be customized via config.
  */
 export type SectionNameKey =
+  | 'project'
+  | 'techStack'
+  | 'architecture'
+  | 'context'
   | 'codeStandards'
   | 'gitCommits'
   | 'configFiles'
+  | 'commands'
   | 'postWork'
-  | 'restrictions';
-
-/**
- * Default section names used by most markdown formatters.
- */
-const DEFAULT_SECTION_NAMES: Record<SectionNameKey, string> = {
-  codeStandards: 'Code Style',
-  gitCommits: 'Git Commits',
-  configFiles: 'Config Files',
-  postWork: 'Post-Work Verification',
-  restrictions: 'Restrictions',
-};
+  | 'documentation'
+  | 'diagrams'
+  | 'knowledge'
+  | 'restrictions'
+  | 'examples';
 
 /**
  * Configuration for a markdown instruction formatter.
@@ -368,8 +367,24 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
   // Section Name Resolution
   // ============================================================
 
-  protected getSectionName(key: SectionNameKey): string {
-    return this.config.sectionNames?.[key] ?? DEFAULT_SECTION_NAMES[key];
+  protected getSectionName(ast: Program, key: SectionNameKey, defaultTitle?: string): string {
+    return resolveSectionTitle(ast, key, {
+      formatterTitles: this.config.sectionNames,
+      ...(defaultTitle ? { defaultTitle } : {}),
+    });
+  }
+
+  protected getRenderedSectionName(
+    ast: Program,
+    key: SectionNameKey,
+    renderer: ConventionRenderer,
+    defaultTitle?: string
+  ): string {
+    return resolveSectionTitle(ast, key, {
+      formatterTitles: this.config.sectionNames,
+      ...(defaultTitle ? { defaultTitle } : {}),
+      sourceOverrides: renderer.getConvention().name !== 'xml',
+    });
   }
 
   // ============================================================
@@ -672,8 +687,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       text = this.extractText(identity.content);
     } else {
       const context = this.findBlock(ast, 'context');
-      if (context?.content.type === 'MixedContent' && context.content.text) {
-        text = context.content.text.value.trim();
+      const contextTitle = resolveSourceSectionTitle(ast, 'context');
+      const projectTitle = resolveSourceSectionTitle(ast, 'project');
+      if (!contextTitle && context && (context.content.type === 'MixedContent' || projectTitle)) {
+        text = this.extractText(context.content).trim();
       }
     }
 
@@ -691,7 +708,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       .join('\n\n');
 
     const normalizedText = this.normalizeMarkdownForPrettier(cleanText);
-    return renderer.renderSection('Project', normalizedText) + '\n';
+    return (
+      renderer.renderSection(
+        this.getRenderedSectionName(ast, 'project', renderer),
+        normalizedText
+      ) + '\n'
+    );
   }
 
   protected techStack(ast: Program, renderer: ConventionRenderer): string | null {
@@ -699,7 +721,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (context) {
       const items = this.extractTechStackFromContext(context);
       if (items.length > 0) {
-        return renderer.renderSection('Tech Stack', items.join(', ')) + '\n';
+        return (
+          renderer.renderSection(
+            this.getRenderedSectionName(ast, 'techStack', renderer),
+            items.join(', ')
+          ) + '\n'
+        );
       }
     }
 
@@ -707,7 +734,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (standards) {
       const items = this.extractTechStackFromStandards(standards);
       if (items.length > 0) {
-        return renderer.renderSection('Tech Stack', items.join(', ')) + '\n';
+        return (
+          renderer.renderSection(
+            this.getRenderedSectionName(ast, 'techStack', renderer),
+            items.join(', ')
+          ) + '\n'
+        );
       }
     }
 
@@ -766,7 +798,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     const content = archMatch.replace('## Architecture', '');
     const normalizedContent = this.normalizeMarkdownForPrettier(content);
-    return renderer.renderSection('Architecture', normalizedContent.trim()) + '\n';
+    return (
+      renderer.renderSection(
+        this.getRenderedSectionName(ast, 'architecture', renderer),
+        normalizedContent.trim()
+      ) + '\n'
+    );
   }
 
   /**
@@ -781,7 +818,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
    */
   protected context(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null; // project() fallback handles @context text
+    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
 
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
@@ -799,7 +836,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
     const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
     const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
-    return renderer.renderSection('Context', normalizedContent.trim()) + '\n';
+    return (
+      renderer.renderSection(
+        this.getRenderedSectionName(ast, 'context', renderer),
+        normalizedContent.trim()
+      ) + '\n'
+    );
   }
 
   protected codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
@@ -815,7 +857,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection(this.getSectionName('codeStandards'), content) + '\n';
+    return (
+      renderer.renderSection(this.getRenderedSectionName(ast, 'codeStandards', renderer), content) +
+      '\n'
+    );
   }
 
   protected gitCommits(ast: Program, renderer: ConventionRenderer): string | null {
@@ -839,7 +884,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection(this.getSectionName('gitCommits'), content) + '\n';
+    return (
+      renderer.renderSection(this.getRenderedSectionName(ast, 'gitCommits', renderer), content) +
+      '\n'
+    );
   }
 
   protected configFiles(ast: Program, renderer: ConventionRenderer): string | null {
@@ -859,7 +907,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection(this.getSectionName('configFiles'), content) + '\n';
+    return (
+      renderer.renderSection(this.getRenderedSectionName(ast, 'configFiles', renderer), content) +
+      '\n'
+    );
   }
 
   protected commands(ast: Program, renderer: ConventionRenderer): string | null {
@@ -890,7 +941,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       }
     }
 
-    return renderer.renderSection('Commands', content) + '\n';
+    return (
+      renderer.renderSection(this.getRenderedSectionName(ast, 'commands', renderer), content) + '\n'
+    );
   }
 
   protected postWork(ast: Program, renderer: ConventionRenderer): string | null {
@@ -903,7 +956,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     const content = match.replace('## Post-Work Verification', '');
     const normalizedContent = this.normalizeMarkdownForPrettier(content);
-    return renderer.renderSection(this.getSectionName('postWork'), normalizedContent.trim()) + '\n';
+    return (
+      renderer.renderSection(
+        this.getRenderedSectionName(ast, 'postWork', renderer),
+        normalizedContent.trim()
+      ) + '\n'
+    );
   }
 
   protected documentation(ast: Program, renderer: ConventionRenderer): string | null {
@@ -928,7 +986,10 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection('Documentation', content) + '\n';
+    return (
+      renderer.renderSection(this.getRenderedSectionName(ast, 'documentation', renderer), content) +
+      '\n'
+    );
   }
 
   protected diagrams(ast: Program, renderer: ConventionRenderer): string | null {
@@ -950,7 +1011,9 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection('Diagrams', content) + '\n';
+    return (
+      renderer.renderSection(this.getRenderedSectionName(ast, 'diagrams', renderer), content) + '\n'
+    );
   }
 
   /**
@@ -958,7 +1021,11 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
    * Strips "## Development Commands" and "## Post-Work Verification" sub-sections
    * since those are already rendered by commands() and postWork().
    */
-  protected knowledgeContent(ast: Program, _renderer: ConventionRenderer): string | null {
+  protected knowledgeContent(
+    ast: Program,
+    renderer: ConventionRenderer,
+    includeResolvedTitle = true
+  ): string | null {
     const knowledge = this.findBlock(ast, 'knowledge');
     if (!knowledge) return null;
 
@@ -992,7 +1059,13 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     if (!remaining) return null;
 
     const normalizedContent = this.stripAllIndent(remaining);
-    return normalizedContent + '\n';
+    const title =
+      renderer.getConvention().name === 'xml'
+        ? undefined
+        : resolveSourceSectionTitle(ast, 'knowledge');
+    return includeResolvedTitle && title
+      ? renderer.renderSection(title, normalizedContent) + '\n'
+      : normalizedContent + '\n';
   }
 
   protected restrictions(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1002,11 +1075,18 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     const items = this.extractRestrictionsItems(block);
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection(this.getSectionName('restrictions'), content) + '\n';
+    return (
+      renderer.renderSection(this.getRenderedSectionName(ast, 'restrictions', renderer), content) +
+      '\n'
+    );
   }
 
   protected examples(ast: Program, renderer: ConventionRenderer): string | null {
-    return this.renderExamplesSection(ast, renderer);
+    return this.renderExamplesSection(
+      ast,
+      renderer,
+      this.getRenderedSectionName(ast, 'examples', renderer)
+    );
   }
 
   protected extractRestrictionsItems(block: Block): string[] {

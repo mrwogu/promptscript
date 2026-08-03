@@ -6,6 +6,7 @@ import type { Program, SourceLocation } from './types/index.js';
  */
 export const SYNTAX_FEATURES = {
   REGULAR_BLOCK_REPLACE: 'regular-block-replace',
+  SECTION_HEADER_OVERRIDE: 'section-header-override',
 } as const;
 
 export type SyntaxFeature = (typeof SYNTAX_FEATURES)[keyof typeof SYNTAX_FEATURES];
@@ -131,10 +132,33 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
     ],
     features: [SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE],
   },
+  '1.5.0': {
+    blocks: [
+      'identity',
+      'context',
+      'standards',
+      'restrictions',
+      'knowledge',
+      'shortcuts',
+      'commands',
+      'guards',
+      'params',
+      'skills',
+      'local',
+      'agents',
+      'workflows',
+      'hooks',
+      'mcpServers',
+      'plugins',
+      'prompts',
+      'examples',
+    ],
+    features: [SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE],
+  },
 };
 
 /** Latest known syntax version. */
-export const LATEST_SYNTAX_VERSION = '1.4.0';
+export const LATEST_SYNTAX_VERSION = '1.5.0';
 
 /**
  * Get the latest known syntax version.

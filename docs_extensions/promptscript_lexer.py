@@ -39,6 +39,8 @@ BLOCK_DIRECTIVES = (
     "examples",
 )
 
+CONTEXTUAL_DIRECTIVES = ("header",)
+
 ENV_VAR_PATTERN = r"\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}"
 TEMPLATE_VAR_PATTERN = r"(\{\{)([A-Za-z_][A-Za-z0-9_]*)(\}\})"
 IMPORT_PATH_PATTERN = (
@@ -141,6 +143,11 @@ class PromptScriptLexer(RegexLexer):
             (
                 r"(@use)(\s+)(" + IMPORT_PATH_PATTERN + r")",
                 bygroups(Keyword.Namespace, Whitespace, String),
+            ),
+            # Contextual directives are recognized only inside block bodies
+            (
+                r"(@)(" + "|".join(CONTEXTUAL_DIRECTIVES) + r")(?=[^\w-]|$)",
+                bygroups(Punctuation, Keyword.Namespace),
             ),
             # 'as' keyword for inline @use aliases
             (r"(?<![\w-])(as)(?![\w-])", Keyword.Namespace),

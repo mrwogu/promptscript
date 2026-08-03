@@ -183,6 +183,55 @@ describe('compile', () => {
     );
   });
 
+  it('should report and format section header overrides in browser builds', async () => {
+    const files = {
+      'project.prs': `@meta { id: "test" syntax: "1.4.0" }
+@restrictions {
+  @header "Forbidden Practices"
+  - "No unsafe casts"
+}
+`,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleId: 'PS018',
+          message: expect.stringContaining('section-header-override'),
+          location: expect.objectContaining({
+            file: 'project.prs',
+            line: 3,
+            column: 3,
+          }),
+        }),
+      ])
+    );
+    expect(result.outputs.get('CLAUDE.md')?.content).toContain('## Forbidden Practices');
+    expect(result.outputs.get('CLAUDE.md')?.content).toContain('No unsafe casts');
+  });
+
+  it('should consume a registered initial heading once at syntax 1.5.0', async () => {
+    const files = {
+      'project.prs': `@meta { id: "test" syntax: "1.5.0" }
+@identity {
+  """## Localized Project
+  Project details"""
+}
+`,
+    };
+
+    const result = await compile(files, 'project.prs');
+    const content = result.outputs.get('CLAUDE.md')?.content ?? '';
+
+    expect(result.success).toBe(true);
+    expect(content.match(/Localized Project/g)).toHaveLength(1);
+    expect(content).toContain('Project details');
+    expect(content).not.toContain('## Project\n');
+  });
+
   it('should return error for missing entry file', async () => {
     const files = {
       'other.prs': '@meta { id: "other" syntax: "1.0.0" }',

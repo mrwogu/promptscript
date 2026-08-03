@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { InlineUseDeclaration, MixedContent, ObjectContent } from '../types/ast.js';
+import type {
+  InlineUseDeclaration,
+  MixedContent,
+  ObjectContent,
+  PresentationEntry,
+} from '../types/ast.js';
 import {
   IMPORT_MERGE_POLICY,
   INHERITANCE_MERGE_POLICY,
@@ -33,6 +38,21 @@ function inlineUse(raw: string): InlineUseDeclaration {
       loc: LOC,
     },
     loc: LOC,
+  };
+}
+
+function presentation(
+  title: string,
+  source: PresentationEntry['source'] = 'explicit',
+  sectionId?: string
+): PresentationEntry {
+  return {
+    type: 'PresentationEntry',
+    ...(sectionId ? { sectionId } : {}),
+    title,
+    source,
+    loc: LOC,
+    titleLoc: LOC,
   };
 }
 
@@ -80,6 +100,92 @@ describe('block merge policies', () => {
         nested: { left: true, right: true, shared: 'source' },
       },
     });
+  });
+
+  it('merges presentation entries by rank and content precedence', () => {
+    const createBlock = (entries: PresentationEntry[]) =>
+      toLegacyBlock(createCanonicalBlock('standards', createBlockBody(entries, LOC), LOC), {
+        preserveCanonicalBody: true,
+      });
+    const base = createBlock([
+      presentation('Base code style'),
+      presentation('Base commits', 'explicit', 'git-commits'),
+    ]);
+    const incoming = createBlock([
+      presentation('Incoming legacy', 'legacy'),
+      presentation('Incoming commits', 'explicit', 'git-commits'),
+      presentation('Incoming config', 'explicit', 'configuration-files'),
+    ]);
+
+    const inherited = mergeBlockCollections([base], [incoming], {
+      content: INHERITANCE_MERGE_POLICY,
+      outputOrder: 'base',
+    });
+    const imported = mergeBlockCollections([base], [incoming], {
+      content: IMPORT_MERGE_POLICY,
+      outputOrder: 'base',
+    });
+
+    expect(inherited[0]!.canonicalBody?.entries).toMatchObject([
+      { type: 'PresentationEntry', title: 'Base code style', source: 'explicit' },
+      {
+        type: 'PresentationEntry',
+        sectionId: 'git-commits',
+        title: 'Incoming commits',
+      },
+      {
+        type: 'PresentationEntry',
+        sectionId: 'configuration-files',
+        title: 'Incoming config',
+      },
+    ]);
+    expect(imported[0]!.canonicalBody?.entries).toMatchObject([
+      { type: 'PresentationEntry', title: 'Base code style' },
+      {
+        type: 'PresentationEntry',
+        sectionId: 'git-commits',
+        title: 'Base commits',
+      },
+      {
+        type: 'PresentationEntry',
+        sectionId: 'configuration-files',
+        title: 'Incoming config',
+      },
+    ]);
+    expect(inherited[0]!.content).toEqual({
+      type: 'ObjectContent',
+      properties: {},
+      loc: LOC,
+    });
+  });
+
+  it('treats keyless and explicit primary section entries as equivalent', () => {
+    const createBlock = (entries: PresentationEntry[]) =>
+      toLegacyBlock(createCanonicalBlock('standards', createBlockBody(entries, LOC), LOC), {
+        preserveCanonicalBody: true,
+      });
+    const base = createBlock([presentation('Base rules')]);
+    const incoming = createBlock([presentation('Incoming rules', 'explicit', 'code-standards')]);
+
+    const inherited = mergeBlockCollections([base], [incoming], {
+      content: INHERITANCE_MERGE_POLICY,
+      outputOrder: 'base',
+    });
+    const imported = mergeBlockCollections([base], [incoming], {
+      content: IMPORT_MERGE_POLICY,
+      outputOrder: 'base',
+    });
+
+    expect(inherited[0]!.canonicalBody?.entries).toMatchObject([
+      {
+        type: 'PresentationEntry',
+        sectionId: 'code-standards',
+        title: 'Incoming rules',
+      },
+    ]);
+    expect(imported[0]!.canonicalBody?.entries).toMatchObject([
+      { type: 'PresentationEntry', title: 'Base rules' },
+    ]);
   });
 
   it('preserves text order for both policies', () => {

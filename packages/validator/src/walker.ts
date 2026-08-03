@@ -44,11 +44,21 @@ export function walkText(ast: Program, callback: TextCallback, options?: WalkTex
   // Walk blocks
   for (const block of ast.blocks) {
     walkBlockContent(block.content, block.loc, callback, exclude);
+    walkPresentationTitles(block, callback);
   }
 
   // Walk extend blocks
   for (const ext of ast.extends) {
     walkBlockContent(ext.content, ext.loc, callback, exclude);
+    walkPresentationTitles(ext, callback);
+  }
+}
+
+function walkPresentationTitles(block: Block | ExtendBlock, callback: TextCallback): void {
+  for (const entry of block.canonicalBody?.entries ?? []) {
+    if (entry.type === 'PresentationEntry') {
+      callback(entry.title, entry.titleLoc);
+    }
   }
 }
 

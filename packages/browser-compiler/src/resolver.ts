@@ -948,7 +948,8 @@ export class BrowserResolver {
           ext.canonicalBody,
           baseContent,
           extensionContent,
-          content
+          content,
+          block.name
         ),
       };
     }

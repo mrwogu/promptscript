@@ -827,6 +827,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `1.2.0` | Adds `@examples` (few-shot input/output pairs)                                                                          |
 | `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
 | `1.4.0` | Adds `@hooks`, `@mcpServers`, and `@plugins`                                                                            |
+| `1.5.0` | Adds generated section title overrides with contextual `@header`                                                        |
 
 ### Block Version Requirements
 
@@ -841,11 +842,37 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 
 All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
+Generated section title overrides with `@header` require syntax `1.5.0`.
+
+### Generated Section Headers
+
+Use `@header` inside a registered owner block to rename human-readable output
+sections without changing filenames, frontmatter, XML tags, or structured keys:
+
+```promptscript
+@meta { id: "localized" syntax: "1.5.0" }
+
+@standards {
+  @header "Coding Rules"
+  @header git-commits "Commit Rules"
+  code: ["Use strict TypeScript"]
+}
+```
+
+- `@header "Title"` targets the block's primary section.
+- `@header <section-key> "Title"` targets an owned derived section.
+- Titles must be non-empty, single-line strings.
+- Source overrides take precedence over formatter configuration and target defaults.
+- Child inheritance, imported source, and the latest root extension take precedence.
+- An initial `## Heading` in a registered text-only primary owner is a syntax
+  `1.5.0` compatibility fallback. Explicit `@header` metadata wins.
+- Ordinary `header` and `headers` fields remain domain data.
 
 ### Validation Rules
 
 - **PS018 (`syntax-version-compat`)**: warns when resolved blocks or syntax features require a higher version than declared. Requirements from inheritance, imports, and skill composition are included. Suggestion: run `prs validate --fix`.
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
+- **PS037 (`valid-section-headers`)**: rejects invalid titles, unknown or unowned section keys, duplicate overrides, and nested extension overrides.
 - **PS021 (`use-block-filter`)**: errors when `only` and `exclude` are both specified in `@use` parameters.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
 - **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).
