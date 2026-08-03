@@ -340,6 +340,123 @@ describe('template', () => {
       expect(entries[2]).toMatchObject({ text: 'Bye World' });
     });
 
+    it('interpolates canonical list entries, inline uses, and extension bodies', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['name', 'World']]),
+        sourceFile: 'test.prs',
+      };
+      const declaration = {
+        type: 'InlineUseDeclaration' as const,
+        path: {
+          type: 'PathReference' as const,
+          raw: './shared',
+          namespace: undefined,
+          segments: ['shared'],
+          version: undefined,
+          isRelative: true,
+          loc,
+        },
+        loc,
+      };
+      const expression = { type: 'TemplateExpression' as const, name: 'name', loc };
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: { label: expression },
+              listItems: [expression],
+              inlineUses: [declaration],
+              loc,
+            },
+            canonicalBody: createBlockBody(
+              [
+                {
+                  type: 'FieldEntry',
+                  name: 'label',
+                  value: createValueNode(expression, loc),
+                  loc,
+                },
+                {
+                  type: 'ListEntry',
+                  value: createValueNode(expression, loc),
+                  loc,
+                },
+                { type: 'InlineUseEntry', declaration, loc },
+              ],
+              loc
+            ),
+            loc,
+          },
+          {
+            type: 'Block',
+            name: 'identity',
+            content: { type: 'TextContent', value: 'Hello {{name}}', loc },
+            canonicalBody: createBlockBody(
+              [{ type: 'TextEntry', text: 'Hello {{name}}', loc }],
+              loc
+            ),
+            loc,
+          },
+        ],
+        extends: [
+          {
+            type: 'ExtendBlock',
+            targetPath: 'context',
+            content: { type: 'ArrayContent', elements: [expression], loc },
+            canonicalBody: createBlockBody(
+              [
+                {
+                  type: 'ListEntry',
+                  value: createValueNode(expression, loc),
+                  loc,
+                },
+              ],
+              loc,
+              { projection: 'ArrayContent' }
+            ),
+            loc,
+          },
+        ],
+        loc,
+      };
+
+      const result = interpolateAST(ast, ctx);
+      const contextEntries = result.blocks[0]!.canonicalBody!.entries;
+      const extensionEntries = result.extends[0]!.canonicalBody!.entries;
+
+      expect(contextEntries).toMatchObject([
+        { type: 'FieldEntry', value: { type: 'ScalarValueNode', value: 'World' } },
+        { type: 'ListEntry', value: { type: 'ScalarValueNode', value: 'World' } },
+        { type: 'InlineUseEntry', declaration },
+      ]);
+      expect(result.blocks[0]!.content).toMatchObject({
+        type: 'ObjectContent',
+        properties: { label: 'World' },
+        listItems: ['World'],
+        inlineUses: [declaration],
+      });
+      expect(result.blocks[1]!.content).toMatchObject({
+        type: 'TextContent',
+        value: 'Hello World',
+      });
+      expect(result.blocks[1]!.canonicalBody!.entries[0]).toMatchObject({
+        type: 'TextEntry',
+        text: 'Hello World',
+      });
+      expect(result.extends[0]!.content).toMatchObject({
+        type: 'ArrayContent',
+        elements: ['World'],
+      });
+      expect(extensionEntries).toMatchObject([
+        { type: 'ListEntry', value: { type: 'ScalarValueNode', value: 'World' } },
+      ]);
+    });
+
     it('should return same AST if no params', () => {
       const ctx: TemplateContext = {
         params: new Map(),

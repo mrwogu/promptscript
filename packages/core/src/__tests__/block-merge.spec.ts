@@ -123,6 +123,63 @@ describe('block merge policies', () => {
     });
   });
 
+  it('keeps all typed AST property shapes atomic while merging user records', () => {
+    const base = objectContent({
+      objectNode: {
+        type: 'ObjectContent',
+        properties: { base: true },
+        loc: LOC,
+      },
+      mixedNode: {
+        type: 'MixedContent',
+        properties: { base: true },
+        loc: LOC,
+      },
+      arrayNode: { type: 'ArrayContent', elements: ['base'], loc: LOC },
+      templateNode: { type: 'TemplateExpression', name: 'base', loc: LOC },
+      message: { type: 'TextContent', value: 'base', loc: LOC },
+      userRecord: { type: 'Unknown', nested: { base: true }, loc: LOC },
+    });
+    const incoming = objectContent({
+      objectNode: { incoming: true },
+      mixedNode: { incoming: true },
+      arrayNode: { incoming: true },
+      templateNode: { incoming: true },
+      message: { type: 'TextContent', value: 'incoming', loc: LOC },
+      userRecord: { type: 'Unknown', nested: { incoming: true }, loc: LOC },
+    });
+
+    const imported = mergeBlockContent(base, incoming, IMPORT_MERGE_POLICY);
+    const inherited = mergeBlockContent(base, incoming, INHERITANCE_MERGE_POLICY);
+
+    expect(imported).toMatchObject({
+      properties: {
+        objectNode: { type: 'ObjectContent', properties: { base: true } },
+        mixedNode: { type: 'MixedContent', properties: { base: true } },
+        arrayNode: { type: 'ArrayContent', elements: ['base'] },
+        templateNode: { type: 'TemplateExpression', name: 'base' },
+        message: { type: 'TextContent', value: 'base' },
+        userRecord: {
+          type: 'Unknown',
+          nested: { base: true, incoming: true },
+        },
+      },
+    });
+    expect(inherited).toMatchObject({
+      properties: {
+        objectNode: { incoming: true },
+        mixedNode: { incoming: true },
+        arrayNode: { incoming: true },
+        templateNode: { incoming: true },
+        message: { type: 'TextContent', value: 'incoming' },
+        userRecord: {
+          type: 'Unknown',
+          nested: { base: true, incoming: true },
+        },
+      },
+    });
+  });
+
   it('deep-merges user objects that only resemble AST discriminants', () => {
     const base = objectContent({
       config: {
