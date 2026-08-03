@@ -292,6 +292,20 @@ When importing from a repository or directory that contains multiple skills, con
 
 ## Content Blocks
 
+Every block and `@extend` body uses the same ordered content model. A body can interleave properties, free-form text, dash list items, and inline `@use` declarations:
+
+```
+@context {
+  project: "Checkout Service"
+  """Shared context appears at this point in the body."""
+  - "Keep payment data out of logs"
+  @use ./team-context
+  environment: production
+}
+```
+
+The parser preserves this source order. Tools that consume the canonical AST can read the ordered `body.entries` sequence directly. Existing integrations can continue using the mutable `Program`, `Block`, and `BlockContent` interfaces, which remain available as a compatibility projection.
+
 ### [@identity](https://github.com/identity "GitHub User: identity")
 
 Core identity and persona definition:
