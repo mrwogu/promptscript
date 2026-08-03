@@ -343,6 +343,144 @@ describe('block merge policies', () => {
     expect(result.inlineUses?.map((use) => use.path.raw)).toEqual(['./base', './incoming']);
   });
 
+  it('preserves auxiliary collections supplied by only one merge layer', () => {
+    const result = mergeBlockContent(
+      {
+        ...objectContent({ base: true }),
+        listItems: ['base item'],
+      },
+      {
+        ...objectContent({ incoming: true }),
+        inlineUses: [inlineUse('./incoming')],
+      },
+      INHERITANCE_MERGE_POLICY
+    );
+
+    expect(result).toMatchObject({
+      type: 'ObjectContent',
+      properties: { base: true, incoming: true },
+      listItems: ['base item'],
+      inlineUses: [{ path: { raw: './incoming' } }],
+    });
+  });
+
+  it('preserves structured canonical bodies across content mismatches', () => {
+    const mixedThenText = mergeBlockCollections(
+      [
+        {
+          type: 'Block',
+          name: 'context',
+          content: {
+            type: 'MixedContent',
+            text: { type: 'TextContent', value: 'Base', loc: LOC },
+            properties: { runtime: 'node' },
+            listItems: ['base item'],
+            loc: LOC,
+          },
+          loc: LOC,
+        },
+      ],
+      [
+        {
+          type: 'Block',
+          name: 'context',
+          content: { type: 'TextContent', value: 'Incoming', loc: LOC },
+          loc: LOC,
+        },
+      ],
+      { content: INHERITANCE_MERGE_POLICY, outputOrder: 'base' }
+    );
+    const textThenObject = mergeBlockCollections(
+      [
+        {
+          type: 'Block',
+          name: 'identity',
+          content: { type: 'TextContent', value: 'Base', loc: LOC },
+          loc: LOC,
+        },
+      ],
+      [
+        {
+          type: 'Block',
+          name: 'identity',
+          content: {
+            ...objectContent({ runtime: 'node' }),
+            listItems: ['incoming item'],
+          },
+          loc: LOC,
+        },
+      ],
+      { content: INHERITANCE_MERGE_POLICY, outputOrder: 'base' }
+    );
+
+    expect(mixedThenText[0]!.content).toMatchObject({
+      type: 'MixedContent',
+      text: { value: 'Base\n\nIncoming' },
+      properties: { runtime: 'node', items: ['base item'] },
+    });
+    expect(mixedThenText[0]!.canonicalBody?.entries.map((entry) => entry.type)).toEqual([
+      'TextEntry',
+      'FieldEntry',
+      'ListEntry',
+      'TextEntry',
+    ]);
+    expect(textThenObject[0]!.content).toMatchObject({
+      type: 'ObjectContent',
+      properties: { runtime: 'node', items: ['incoming item'] },
+    });
+    expect(textThenObject[0]!.canonicalBody?.entries.map((entry) => entry.type)).toEqual([
+      'FieldEntry',
+      'ListEntry',
+    ]);
+  });
+
+  it('deduplicates canonical list and inline-use entries with base precedence', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 20 };
+    const declaration = inlineUse('./shared');
+    const base = toLegacyBlock(
+      createCanonicalBlock(
+        'context',
+        createBlockBody(
+          [
+            { type: 'ListEntry', value: createValueNode('same', baseLoc), loc: baseLoc },
+            { type: 'InlineUseEntry', declaration, loc: baseLoc },
+          ],
+          baseLoc
+        ),
+        baseLoc
+      ),
+      { preserveCanonicalBody: true }
+    );
+    const incoming = toLegacyBlock(
+      createCanonicalBlock(
+        'context',
+        createBlockBody(
+          [
+            {
+              type: 'ListEntry',
+              value: createValueNode('same', incomingLoc),
+              loc: incomingLoc,
+            },
+            { type: 'InlineUseEntry', declaration, loc: incomingLoc },
+          ],
+          incomingLoc
+        ),
+        incomingLoc
+      ),
+      { preserveCanonicalBody: true }
+    );
+
+    const result = mergeBlockCollections([base], [incoming], {
+      content: IMPORT_MERGE_POLICY,
+      outputOrder: 'incoming',
+    });
+    const entries = result[0]!.canonicalBody!.entries;
+
+    expect(entries.map((entry) => entry.type)).toEqual(['ListEntry', 'InlineUseEntry']);
+    expect(entries.map((entry) => entry.loc)).toEqual([baseLoc, baseLoc]);
+  });
+
   it('merges arrays and cross-shape content without losing its selected shape', () => {
     const array = mergeBlockContent(
       { type: 'ArrayContent', elements: ['base'], loc: LOC },
@@ -592,6 +730,48 @@ describe('block merge policies', () => {
       'Incoming text',
     ]);
     expect(entries[1]!.loc).toEqual(incomingLoc);
+  });
+
+  it('repairs canonical bodies missing every projected entry kind', () => {
+    const declaration = inlineUse('./shared');
+    const base = {
+      type: 'Block' as const,
+      name: 'context',
+      content: {
+        type: 'MixedContent' as const,
+        text: { type: 'TextContent' as const, value: 'Instructions', loc: LOC },
+        properties: { runtime: 'node' },
+        listItems: ['list item'],
+        inlineUses: [declaration],
+        loc: LOC,
+      },
+      canonicalBody: createBlockBody([], LOC),
+      loc: LOC,
+    };
+    const incoming = {
+      type: 'Block' as const,
+      name: 'context',
+      content: objectContent({}),
+      canonicalBody: createBlockBody([], LOC),
+      loc: LOC,
+    };
+
+    const result = mergeBlockCollections([base], [incoming], {
+      content: INHERITANCE_MERGE_POLICY,
+      outputOrder: 'base',
+    });
+
+    expect(result[0]!.canonicalBody!.entries.map((entry) => entry.type)).toEqual([
+      'FieldEntry',
+      'ListEntry',
+      'InlineUseEntry',
+      'TextEntry',
+    ]);
+    expect(blockBodyToContent(result[0]!.canonicalBody!)).toMatchObject({
+      text: { value: 'Instructions' },
+      properties: { runtime: 'node', items: ['list item'] },
+      inlineUses: [declaration],
+    });
   });
 
   it('preserves nested value locations from both merge layers', () => {

@@ -661,6 +661,24 @@ describe('canonical AST compatibility', () => {
     const canonical = createCanonicalProgram({
       operations: [
         {
+          type: 'UseOperation',
+          declaration: {
+            type: 'UseDeclaration',
+            path: {
+              type: 'PathReference',
+              raw: './shared.prs',
+              namespace: undefined,
+              segments: ['shared.prs'],
+              version: undefined,
+              isRelative: true,
+              loc: LOC,
+            },
+            loc: LOC,
+          },
+          sourceLayerId: LOC.file,
+          loc: LOC,
+        },
+        {
           type: 'BlockOperation',
           block,
           sourceLayerId: LOC.file,
@@ -680,6 +698,7 @@ describe('canonical AST compatibility', () => {
       throw new Error('Expected field entry');
     }
     expect(entries[0]!.value.loc).toEqual(fieldLoc);
+    expect(restored.uses[0]!.path.raw).toBe('./shared.prs');
   });
 
   it('reconciles transformed content without losing order or nested locations', () => {
@@ -1113,7 +1132,7 @@ describe('canonical AST compatibility', () => {
       type: 'ObjectContent' as const,
       properties: {
         summary: {
-          type: 'MixedContent',
+          type: 'MixedContent' as const,
           text: { type: 'TextContent', value: 'Base text', loc: baseLoc },
           properties: { audience: 'developers' },
           loc: baseLoc,
@@ -1224,5 +1243,788 @@ describe('canonical AST compatibility', () => {
     expect(restored.extends[0]!.replacements).toEqual([replacement]);
     expect(restored.syntaxFeatures).toEqual(canonical.syntaxFeatures);
     expect(Object.isFrozen(restored.extends[0])).toBe(true);
+  });
+
+  it('projects array and inline-use body shapes directly', () => {
+    const declaration = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './shared',
+        namespace: undefined,
+        segments: ['shared'],
+        version: undefined,
+        isRelative: true,
+        loc: LOC,
+      },
+      loc: LOC,
+    };
+    const array = createBlockBody(
+      [
+        { type: 'ListEntry', value: createValueNode('one', LOC), loc: LOC },
+        { type: 'ListEntry', value: createValueNode('two', LOC), loc: LOC },
+      ],
+      LOC,
+      { projection: 'ArrayContent' }
+    );
+    const mixed = createBlockBody(
+      [
+        { type: 'TextEntry', text: 'Instructions', loc: LOC },
+        { type: 'InlineUseEntry', declaration, loc: LOC },
+      ],
+      LOC
+    );
+    const inlineOnly = createBlockBody([{ type: 'InlineUseEntry', declaration, loc: LOC }], LOC);
+    const mixedSeparateItems = createBlockBody(
+      [
+        { type: 'TextEntry', text: 'Instructions', loc: LOC },
+        {
+          type: 'FieldEntry',
+          name: 'items',
+          value: createValueNode(['field item'], LOC),
+          loc: LOC,
+        },
+        { type: 'ListEntry', value: createValueNode('dash item', LOC), loc: LOC },
+      ],
+      LOC
+    );
+
+    expect(blockBodyToContent(array)).toEqual({
+      type: 'ArrayContent',
+      elements: ['one', 'two'],
+      loc: LOC,
+    });
+    expect(blockBodyToContent(mixed)).toEqual({
+      type: 'MixedContent',
+      text: { type: 'TextContent', value: 'Instructions', loc: LOC },
+      properties: {},
+      inlineUses: [declaration],
+      loc: LOC,
+    });
+    expect(blockBodyToContent(inlineOnly)).toEqual({
+      type: 'ObjectContent',
+      properties: {},
+      inlineUses: [declaration],
+      loc: LOC,
+    });
+    expect(blockBodyToContent(mixedSeparateItems)).toEqual({
+      type: 'MixedContent',
+      text: { type: 'TextContent', value: 'Instructions', loc: LOC },
+      properties: { items: ['field item'] },
+      listItems: ['dash item'],
+      loc: LOC,
+    });
+  });
+
+  it('merges array and scalar locations by precedence and value match', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 12 };
+    const fallbackLoc = { ...LOC, file: 'merged.prs', offset: 20 };
+    const base = createValueNode(['base-only', 'shared'], baseLoc);
+    const incoming = createValueNode(['incoming-only', 'shared'], incomingLoc);
+    const fallback = createValueNode([], fallbackLoc);
+    const value = ['base-only', 'shared', 'incoming-only', 'new'];
+
+    const baseResult = mergeValueNodeLocations(base, incoming, value, 'base', fallback);
+    const incomingResult = mergeValueNodeLocations(base, incoming, value, 'incoming', fallback);
+
+    expect(valueNodeToValue(baseResult)).toEqual(value);
+    expect(valueNodeToValue(incomingResult)).toEqual(value);
+    if (baseResult.type !== 'ArrayValueNode' || incomingResult.type !== 'ArrayValueNode') {
+      throw new Error('Expected array values');
+    }
+    expect(baseResult.elements.map((element) => element.loc)).toEqual([
+      baseLoc,
+      baseLoc,
+      incomingLoc,
+      fallbackLoc,
+    ]);
+    expect(incomingResult.elements.map((element) => element.loc)).toEqual([
+      baseLoc,
+      incomingLoc,
+      incomingLoc,
+      fallbackLoc,
+    ]);
+
+    const baseScalar = createValueNode('same', baseLoc);
+    const incomingScalar = createValueNode('same', incomingLoc);
+    const fallbackScalar = createValueNode('fallback', fallbackLoc);
+    const bothMatch = mergeValueNodeLocations(
+      baseScalar,
+      incomingScalar,
+      'same',
+      'base',
+      fallbackScalar
+    );
+    const neitherMatches = mergeValueNodeLocations(
+      baseScalar,
+      incomingScalar,
+      'changed',
+      'incoming',
+      fallbackScalar
+    );
+
+    expect(valueNodeToValue(bothMatch)).toBe('same');
+    expect(bothMatch.loc).toEqual(baseLoc);
+    expect(valueNodeToValue(neitherMatches)).toBe('changed');
+    expect(neitherMatches.loc).toEqual(fallbackLoc);
+  });
+
+  it('merges object field values and locations by precedence', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 12 };
+    const fallbackLoc = { ...LOC, file: 'merged.prs', offset: 20 };
+    const base = createValueNode({ baseOnly: 'base', shared: 'base' }, baseLoc);
+    const incoming = createValueNode({ incomingOnly: 'incoming', shared: 'incoming' }, incomingLoc);
+    const fallback = createValueNode({}, fallbackLoc);
+    const value = {
+      baseOnly: 'base',
+      incomingOnly: 'incoming',
+      shared: 'incoming',
+      brandNew: true,
+    };
+
+    const incomingResult = mergeValueNodeLocations(base, incoming, value, 'incoming', fallback);
+    const baseResult = mergeValueNodeLocations(
+      base,
+      incoming,
+      { ...value, shared: 'base' },
+      'base',
+      fallback
+    );
+    const removedResult = reconcileValueNode(base, { baseOnly: 'base' });
+
+    expect(valueNodeToValue(incomingResult)).toEqual(value);
+    if (incomingResult.type !== 'ObjectValueNode' || baseResult.type !== 'ObjectValueNode') {
+      throw new Error('Expected object values');
+    }
+    expect(incomingResult.fields.map((field) => field.name)).toEqual([
+      'baseOnly',
+      'incomingOnly',
+      'shared',
+      'brandNew',
+    ]);
+    expect(incomingResult.fields.map((field) => field.loc)).toEqual([
+      baseLoc,
+      incomingLoc,
+      incomingLoc,
+      fallbackLoc,
+    ]);
+    expect(baseResult.fields.find((field) => field.name === 'shared')).toMatchObject({
+      value: { type: 'ScalarValueNode', value: 'base', loc: baseLoc },
+      loc: baseLoc,
+    });
+    expect(valueNodeToValue(removedResult)).toEqual({ baseOnly: 'base' });
+  });
+
+  it('reconciles added entry kinds and changed array items', () => {
+    const useLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const contentLoc = { ...LOC, file: 'incoming.prs', offset: 20 };
+    const textLoc = { ...contentLoc, offset: 24 };
+    const secondUseLoc = { ...contentLoc, offset: 22 };
+    const firstUse = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './first',
+        namespace: undefined,
+        segments: ['first'],
+        version: undefined,
+        isRelative: true,
+        loc: useLoc,
+      },
+      loc: useLoc,
+    };
+    const secondUse = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './second',
+        namespace: undefined,
+        segments: ['second'],
+        version: undefined,
+        isRelative: true,
+        loc: secondUseLoc,
+      },
+      loc: secondUseLoc,
+    };
+    const reconciled = reconcileBlockBody(
+      createBlockBody([{ type: 'InlineUseEntry', declaration: firstUse, loc: useLoc }], useLoc),
+      {
+        type: 'MixedContent',
+        text: { type: 'TextContent', value: 'Instructions', loc: textLoc },
+        properties: { runtime: 'node' },
+        listItems: ['list item'],
+        inlineUses: [firstUse, secondUse],
+        loc: contentLoc,
+      }
+    );
+
+    expect(reconciled.entries.map((entry) => entry.type)).toEqual([
+      'InlineUseEntry',
+      'FieldEntry',
+      'ListEntry',
+      'InlineUseEntry',
+      'TextEntry',
+    ]);
+    expect(
+      reconciled.entries.map((entry) =>
+        entry.type === 'FieldEntry'
+          ? [entry.name, valueNodeToValue(entry.value)]
+          : entry.type === 'InlineUseEntry'
+            ? entry.declaration.path.raw
+            : entry.type === 'TextEntry'
+              ? entry.text
+              : valueNodeToValue(entry.value)
+      )
+    ).toEqual(['./first', ['runtime', 'node'], 'list item', './second', 'Instructions']);
+    expect(reconciled.entries.map((entry) => entry.loc)).toEqual([
+      useLoc,
+      contentLoc,
+      contentLoc,
+      secondUseLoc,
+      textLoc,
+    ]);
+
+    const firstItemLoc = { ...LOC, offset: 4 };
+    const arrayBody = createBlockBody(
+      [{ type: 'ListEntry', value: createValueNode('old', firstItemLoc), loc: firstItemLoc }],
+      LOC,
+      { projection: 'ArrayContent' }
+    );
+    const arrayResult = reconcileBlockBody(arrayBody, {
+      type: 'ArrayContent',
+      elements: ['changed', 'appended'],
+      loc: contentLoc,
+    });
+
+    expect(blockBodyToContent(arrayResult)).toEqual({
+      type: 'ArrayContent',
+      elements: ['changed', 'appended'],
+      loc: LOC,
+    });
+    expect(arrayResult.entries.map((entry) => entry.loc)).toEqual([firstItemLoc, contentLoc]);
+
+    const secondItemLoc = { ...LOC, offset: 8 };
+    const reordered = reconcileBlockBody(
+      createBlockBody(
+        [
+          { type: 'ListEntry', value: createValueNode('first', firstItemLoc), loc: firstItemLoc },
+          {
+            type: 'ListEntry',
+            value: createValueNode('second', secondItemLoc),
+            loc: secondItemLoc,
+          },
+        ],
+        LOC
+      ),
+      {
+        type: 'ObjectContent',
+        properties: { items: ['second', 'first'] },
+        loc: contentLoc,
+      }
+    );
+
+    expect(
+      reordered.entries.map((entry) =>
+        entry.type === 'ListEntry' ? valueNodeToValue(entry.value) : undefined
+      )
+    ).toEqual(['second', 'first']);
+    expect(reordered.entries.map((entry) => entry.loc)).toEqual([secondItemLoc, firstItemLoc]);
+  });
+
+  it('uses compatibility fallbacks for incompatible and absent content', () => {
+    const textBlock = createCanonicalBlock(
+      'identity',
+      createBlockBody([{ type: 'TextEntry', text: 'Original', loc: LOC }], LOC, {
+        projection: 'TextContent',
+      }),
+      LOC
+    );
+    const updated = updateCanonicalBlockBody(
+      textBlock,
+      createBlockBody(
+        [
+          {
+            type: 'FieldEntry',
+            name: 'runtime',
+            value: createValueNode('node', LOC),
+            loc: LOC,
+          },
+        ],
+        LOC
+      )
+    );
+    const extension = createCanonicalExtendBlock(
+      'standards',
+      createBlockBody([], LOC),
+      undefined,
+      LOC
+    );
+
+    expect(updated.content).toEqual({
+      type: 'ObjectContent',
+      properties: { runtime: 'node' },
+      loc: LOC,
+    });
+    expect(extension).not.toHaveProperty('replacements');
+    expect(
+      getBlockProperties({
+        type: 'Block',
+        name: 'identity',
+        content: { type: 'TextContent', value: 'Text', loc: LOC },
+        loc: LOC,
+      })
+    ).toEqual({});
+    expect(
+      getBlockText({
+        type: 'Block',
+        name: 'context',
+        content: { type: 'MixedContent', properties: { runtime: 'node' }, loc: LOC },
+        loc: LOC,
+      })
+    ).toBeUndefined();
+    expect(
+      getBlockItems({
+        type: 'Block',
+        name: 'context',
+        content: { type: 'ObjectContent', properties: { runtime: 'node' }, loc: LOC },
+        loc: LOC,
+      })
+    ).toEqual([]);
+  });
+
+  it('preserves mixed extension substructures and their source locations', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 20 };
+    const baseUse = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './base',
+        segments: ['base'],
+        isRelative: true,
+        loc: baseLoc,
+      },
+      loc: baseLoc,
+    };
+    const incomingUse = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './incoming',
+        segments: ['incoming'],
+        isRelative: true,
+        loc: incomingLoc,
+      },
+      loc: incomingLoc,
+    };
+    const baseSummary = {
+      type: 'MixedContent' as const,
+      text: { type: 'TextContent' as const, value: 'Base', loc: baseLoc },
+      properties: { base: true },
+      listItems: ['base item'],
+      inlineUses: [baseUse],
+      loc: baseLoc,
+    };
+    const incomingSummary = {
+      type: 'MixedContent' as const,
+      text: { type: 'TextContent' as const, value: 'Incoming', loc: incomingLoc },
+      properties: { incoming: true },
+      listItems: ['incoming item'],
+      inlineUses: [incomingUse],
+      loc: incomingLoc,
+    };
+    const mergedSummary = {
+      type: 'MixedContent' as const,
+      text: {
+        type: 'TextContent' as const,
+        value: 'Base\n\nIncoming',
+        loc: incomingLoc,
+      },
+      properties: { base: true, incoming: true },
+      listItems: ['base item', 'incoming item'],
+      inlineUses: [baseUse, incomingUse],
+      loc: incomingLoc,
+    };
+    const baseContent = {
+      type: 'ObjectContent' as const,
+      properties: { summary: baseSummary },
+      loc: baseLoc,
+    };
+    const mergedContent = {
+      type: 'ObjectContent' as const,
+      properties: { summary: mergedSummary },
+      loc: incomingLoc,
+    };
+
+    const reconciled = reconcileBlockBodyAtPath(
+      blockContentToBody(baseContent),
+      blockContentToBody(incomingSummary),
+      baseContent,
+      incomingSummary,
+      mergedContent,
+      ['summary']
+    );
+    const summary = reconciled.entries[0]!;
+
+    expect(blockBodyToContent(reconciled)).toMatchObject({
+      properties: mergedContent.properties,
+    });
+    if (summary.type !== 'FieldEntry' || summary.value.type !== 'ObjectValueNode') {
+      throw new Error('Expected mixed summary field');
+    }
+    const fields = new Map(summary.value.fields.map((field) => [field.name, field]));
+    expect(fields.get('text')?.loc).toEqual(incomingLoc);
+    expect(fields.get('listItems')?.loc).toEqual(incomingLoc);
+    expect(fields.get('inlineUses')?.loc).toEqual(incomingLoc);
+    expect(fields.get('properties')?.value).toMatchObject({
+      type: 'ObjectValueNode',
+      fields: [
+        { name: 'base', loc: baseLoc },
+        { name: 'incoming', loc: incomingLoc },
+      ],
+    });
+  });
+
+  it('preserves array and text provenance at extension paths', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 20 };
+    const baseContent = {
+      type: 'ObjectContent' as const,
+      properties: { rules: ['base'], summary: 'Base' },
+      loc: baseLoc,
+    };
+    const arrayExtension = {
+      type: 'ArrayContent' as const,
+      elements: ['incoming'],
+      loc: incomingLoc,
+    };
+    const arrayMerged = {
+      type: 'ObjectContent' as const,
+      properties: { rules: ['base', 'incoming'], summary: 'Base' },
+      loc: incomingLoc,
+    };
+    const arrayBody = reconcileBlockBodyAtPath(
+      blockContentToBody(baseContent),
+      blockContentToBody(arrayExtension),
+      baseContent,
+      arrayExtension,
+      arrayMerged,
+      ['rules']
+    );
+    const rules = arrayBody.entries.find(
+      (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+        entry.type === 'FieldEntry' && entry.name === 'rules'
+    );
+
+    expect(rules && valueNodeToValue(rules.value)).toEqual(['base', 'incoming']);
+    if (!rules || rules.value.type !== 'ArrayValueNode') {
+      throw new Error('Expected rules array');
+    }
+    expect(rules.value.elements.map((element) => element.loc)).toEqual([baseLoc, incomingLoc]);
+
+    const textExtension = {
+      type: 'TextContent' as const,
+      value: 'Incoming',
+      loc: incomingLoc,
+    };
+    const textMerged = {
+      type: 'ObjectContent' as const,
+      properties: { rules: ['base'], summary: 'Base\n\nIncoming' },
+      loc: incomingLoc,
+    };
+    const textBody = reconcileBlockBodyAtPath(
+      blockContentToBody(baseContent),
+      blockContentToBody(textExtension),
+      baseContent,
+      textExtension,
+      textMerged,
+      ['summary']
+    );
+    const summary = textBody.entries.find(
+      (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+        entry.type === 'FieldEntry' && entry.name === 'summary'
+    );
+
+    expect(summary && valueNodeToValue(summary.value)).toBe('Base\n\nIncoming');
+    expect(summary?.value.loc).toEqual(baseLoc);
+  });
+
+  it('adds missing nested extension paths with incoming provenance', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 20 };
+    const baseContent = {
+      type: 'ObjectContent' as const,
+      properties: { config: { existing: true } },
+      loc: baseLoc,
+    };
+    const incomingContent = {
+      type: 'ObjectContent' as const,
+      properties: { enabled: true },
+      loc: incomingLoc,
+    };
+    const nestedMerged = {
+      type: 'ObjectContent' as const,
+      properties: {
+        config: {
+          existing: true,
+          feature: { enabled: true },
+          sibling: true,
+        },
+      },
+      loc: incomingLoc,
+    };
+    const nested = reconcileBlockBodyAtPath(
+      blockContentToBody(baseContent),
+      blockContentToBody(incomingContent),
+      baseContent,
+      incomingContent,
+      nestedMerged,
+      ['config', 'feature']
+    );
+    const rootMerged = {
+      type: 'ObjectContent' as const,
+      properties: {
+        config: { existing: true },
+        feature: { enabled: true },
+      },
+      loc: incomingLoc,
+    };
+    const root = reconcileBlockBodyAtPath(
+      blockContentToBody(baseContent),
+      blockContentToBody(incomingContent),
+      baseContent,
+      incomingContent,
+      rootMerged,
+      ['feature']
+    );
+
+    expect(blockBodyToContent(nested)).toMatchObject({
+      properties: nestedMerged.properties,
+    });
+    expect(blockBodyToContent(root)).toMatchObject({
+      properties: rootMerged.properties,
+    });
+    const nestedConfig = nested.entries.find(
+      (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+        entry.type === 'FieldEntry' && entry.name === 'config'
+    );
+    if (!nestedConfig || nestedConfig.value.type !== 'ObjectValueNode') {
+      throw new Error('Expected nested config object');
+    }
+    expect(nestedConfig.value.fields.find((field) => field.name === 'feature')?.loc).toEqual(
+      incomingLoc
+    );
+    expect(
+      root.entries.find(
+        (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+          entry.type === 'FieldEntry' && entry.name === 'feature'
+      )?.loc
+    ).toEqual(incomingLoc);
+  });
+
+  it('reconciles mixed and mismatched nested extension values', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 20 };
+    const plainBase = {
+      type: 'ObjectContent' as const,
+      properties: { summary: { audience: 'developers' } },
+      loc: baseLoc,
+    };
+    const textExtension = {
+      type: 'TextContent' as const,
+      value: 'Incoming',
+      loc: incomingLoc,
+    };
+    const mixedMerged = {
+      type: 'ObjectContent' as const,
+      properties: {
+        summary: {
+          type: 'MixedContent',
+          text: textExtension,
+          properties: { audience: 'developers' },
+          loc: incomingLoc,
+        },
+      },
+      loc: incomingLoc,
+    };
+    const mixed = reconcileBlockBodyAtPath(
+      blockContentToBody(plainBase),
+      blockContentToBody(textExtension),
+      plainBase,
+      textExtension,
+      mixedMerged,
+      ['summary']
+    );
+
+    expect(blockBodyToContent(mixed)).toMatchObject({
+      properties: mixedMerged.properties,
+    });
+
+    const objectBase = {
+      type: 'ObjectContent' as const,
+      properties: { config: { existing: true } },
+      loc: baseLoc,
+    };
+    const arrayExtension = {
+      type: 'ArrayContent' as const,
+      elements: ['replacement'],
+      loc: incomingLoc,
+    };
+    const arrayMerged = {
+      type: 'ObjectContent' as const,
+      properties: { config: ['replacement'] },
+      loc: incomingLoc,
+    };
+    const array = reconcileBlockBodyAtPath(
+      blockContentToBody(objectBase),
+      blockContentToBody(arrayExtension),
+      objectBase,
+      arrayExtension,
+      arrayMerged,
+      ['config', 'nested']
+    );
+    const unchanged = reconcileBlockBodyAtPath(
+      blockContentToBody(objectBase),
+      undefined,
+      objectBase,
+      objectBase,
+      objectBase,
+      ['config', 'missing']
+    );
+    const removedMerged = {
+      type: 'ObjectContent' as const,
+      properties: { config: { feature: { enabled: true } } },
+      loc: incomingLoc,
+    };
+    const removed = reconcileBlockBodyAtPath(
+      blockContentToBody(objectBase),
+      blockContentToBody({
+        type: 'ObjectContent',
+        properties: { enabled: true },
+        loc: incomingLoc,
+      }),
+      objectBase,
+      {
+        type: 'ObjectContent',
+        properties: { enabled: true },
+        loc: incomingLoc,
+      },
+      removedMerged,
+      ['config', 'feature']
+    );
+
+    expect(blockBodyToContent(array)).toMatchObject({
+      properties: arrayMerged.properties,
+    });
+    expect(blockBodyToContent(unchanged)).toEqual(objectBase);
+    expect(blockBodyToContent(removed)).toEqual({
+      type: 'ObjectContent',
+      properties: removedMerged.properties,
+      loc: baseLoc,
+    });
+  });
+
+  it('returns reconciled content for empty or inapplicable extension paths', () => {
+    const content = {
+      type: 'ObjectContent' as const,
+      properties: { existing: true },
+      loc: LOC,
+    };
+    const body = blockContentToBody(content);
+    const changed = {
+      type: 'ObjectContent' as const,
+      properties: { existing: true, added: true },
+      loc: LOC,
+    };
+    const text = { type: 'TextContent' as const, value: 'Text', loc: LOC };
+
+    const emptyPath = reconcileBlockBodyAtPath(body, undefined, content, changed, changed, []);
+    const textContent = reconcileBlockBodyAtPath(body, undefined, content, text, text, [
+      'existing',
+    ]);
+    const emptyRoot = reconcileBlockBodyAtPath(body, undefined, content, changed, changed, ['']);
+    const missingRoot = reconcileBlockBodyAtPath(body, undefined, content, changed, changed, [
+      'missing',
+    ]);
+
+    expect(blockBodyToContent(emptyPath)).toEqual(changed);
+    expect(blockBodyToContent(textContent)).toEqual(text);
+    expect(blockBodyToContent(emptyRoot)).toEqual(changed);
+    expect(blockBodyToContent(missingRoot)).toEqual(changed);
+  });
+
+  it('preserves extension bodies and inline-use compatibility projections', () => {
+    const block = createCanonicalBlock(
+      'identity',
+      createBlockBody([{ type: 'TextEntry', text: 'Text', loc: LOC }], LOC, {
+        projection: 'TextContent',
+      }),
+      LOC
+    );
+    const extension = createCanonicalExtendBlock(
+      'context',
+      createBlockBody(
+        [
+          {
+            type: 'FieldEntry',
+            name: 'runtime',
+            value: createValueNode('node', LOC),
+            loc: LOC,
+          },
+        ],
+        LOC
+      ),
+      undefined,
+      LOC
+    );
+    const canonical = createCanonicalProgram({
+      operations: [
+        {
+          type: 'BlockOperation',
+          block,
+          sourceLayerId: LOC.file,
+          loc: LOC,
+        },
+        {
+          type: 'ExtendOperation',
+          extension,
+          sourceLayerId: LOC.file,
+          loc: LOC,
+        },
+      ],
+      meta: { type: 'MetaBlock', fields: { id: 'example' }, loc: LOC },
+      loc: LOC,
+    });
+    const legacy = toLegacyProgram(canonical, { preserveCanonicalBody: true });
+
+    expect(legacy.blocks[0]!.canonicalBody).toEqual(block.body);
+    expect(legacy.extends[0]!.canonicalBody).toEqual(extension.body);
+    expect(legacy.meta).toEqual(canonical.meta);
+    expect(
+      getBlockText({
+        type: 'Block',
+        name: 'context',
+        content: { type: 'ObjectContent', properties: {}, loc: LOC },
+        loc: LOC,
+      })
+    ).toBeUndefined();
+    expect(
+      getBlockItems({
+        type: 'Block',
+        name: 'standards',
+        content: { type: 'ArrayContent', elements: ['one'], loc: LOC },
+        loc: LOC,
+      })
+    ).toEqual(['one']);
+    expect(
+      getInlineUses({
+        type: 'Block',
+        name: 'identity',
+        content: { type: 'TextContent', value: 'Text', loc: LOC },
+        loc: LOC,
+      })
+    ).toEqual([]);
   });
 });

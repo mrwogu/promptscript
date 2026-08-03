@@ -786,13 +786,19 @@ describe('template', () => {
         properties: {
           prop: { type: 'TemplateExpression', name: 'propVar', loc } as TemplateExpression,
         },
+        listItems: [{ type: 'TemplateExpression', name: 'propVar', loc } as TemplateExpression],
         loc,
       };
       const result = interpolateContent(content, ctx);
       expect(result.type).toBe('MixedContent');
-      const mixed = result as { text: TextContent; properties: Record<string, unknown> };
+      const mixed = result as {
+        text: TextContent;
+        properties: Record<string, unknown>;
+        listItems: unknown[];
+      };
       expect(mixed.text.value).toBe('Text: Hello World');
       expect(mixed.properties['prop']).toBe('property value');
+      expect(mixed.listItems).toEqual(['property value']);
     });
 
     it('should handle MixedContent without text', () => {
