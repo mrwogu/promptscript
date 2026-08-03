@@ -209,16 +209,16 @@ path independently from the agent session directory.
 
 ### Project-Root Strategy by Target
 
-| Target         | Root source                     | PromptScript `script` behavior                         |
-| -------------- | ------------------------------- | ------------------------------------------------------ |
-| Claude Code    | `CLAUDE_PROJECT_DIR`            | Quotes the root and script path                        |
-| Factory Droid  | `FACTORY_PROJECT_DIR`           | Quotes the root and script path                        |
-| GitHub Copilot | Native `cwd`                    | Emits `cwd` plus separate Bash and PowerShell commands |
-| Cursor         | `git rev-parse --show-toplevel` | Resolves a stable repository path on Unix              |
-| Codex          | `git rev-parse --show-toplevel` | Emits Unix and Windows root-resolving commands         |
-| Gemini CLI     | `GEMINI_PROJECT_DIR`            | Quotes the root and script path                        |
-| Windsurf       | Native `working_directory`      | Emits Unix and Windows commands relative to that cwd   |
-| Grok Build     | `GROK_WORKSPACE_ROOT`           | Quotes the root and script path                        |
+| Target         | Root source                     | PromptScript `script` behavior                           |
+| -------------- | ------------------------------- | -------------------------------------------------------- |
+| Claude Code    | `CLAUDE_PROJECT_DIR`            | Requires a non-empty root before invoking the script     |
+| Factory Droid  | `FACTORY_PROJECT_DIR`           | Requires a non-empty root before invoking the script     |
+| GitHub Copilot | Native `cwd`                    | Emits `cwd` plus separate Bash and PowerShell commands   |
+| Cursor         | `git rev-parse --show-toplevel` | Requires a non-empty Git worktree root on Unix           |
+| Codex          | `git rev-parse --show-toplevel` | Requires a non-empty Git root in Unix and Windows output |
+| Gemini CLI     | `GEMINI_PROJECT_DIR`            | Requires a non-empty root before invoking the script     |
+| Windsurf       | Native `working_directory`      | Emits Unix and Windows commands relative to that cwd     |
+| Grok Build     | `GROK_WORKSPACE_ROOT`           | Requires a non-empty root before invoking the script     |
 
 Cursor and Codex require the project to be a Git worktree because their native
 hook contracts do not expose a stable project-root variable.
@@ -234,17 +234,46 @@ shell. Claude Code and Factory Droid hook payloads assume a POSIX environment.
 For Windows coverage, prefer the GitHub Copilot target: its native `cwd` field
 and separate `bash` and `powershell` payloads are cross-shell.
 
-`CLAUDE_PROJECT_DIR` and `FACTORY_PROJECT_DIR` are set by the respective tool
-when it runs the hook. If the variable is unset, the wrapper normally fails
-with a non-zero exit and the hook reports an error. On some shells, such as
-macOS `/bin/sh`, `cd ""` is a no-op instead: the command then runs in the
-session working directory, where a same-named script could execute in the
-wrong location. Rely on the tool setting the variable, and treat a missing
-variable as a hook error rather than a fallback to another directory.
+Environment-root wrappers check their required variable before `cd`, the
+interpreter, or a project-relative command can run. An unset or empty variable
+writes a target-specific error to stderr and exits non-zero:
 
-For legacy `command` arrays, Cursor and Codex retain the agent session working
-directory and report `PS4002` when `cwd` was requested. Migrate repository-local
-commands to `script` to enable deterministic root handling.
+```sh
+if [ -z "${FACTORY_PROJECT_DIR:-}" ]; then
+  printf '%s\n' \
+    'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2
+  exit 1
+fi
+```
+
+Cursor and Codex wrappers similarly reject a failed, empty, or whitespace-only
+`git rev-parse --show-toplevel` result. Codex Windows output checks
+`$LASTEXITCODE` and `[string]::IsNullOrWhiteSpace` before `Set-Location` or the
+interpreter:
+
+```powershell
+$promptscriptProjectRoot = git rev-parse --show-toplevel 2>$null
+if (
+  $LASTEXITCODE -ne 0 -or
+  [string]::IsNullOrWhiteSpace($promptscriptProjectRoot)
+) {
+  [Console]::Error.WriteLine(
+    'PromptScript codex hook requires a Git worktree project root.'
+  )
+  exit 1
+}
+```
+
+The same guards apply to a `command` array when it declares `cwd`. A command
+without `cwd` remains target-native and does not perform an unnecessary root
+lookup. No root strategy falls back to `$PWD`, `pwd`, or the process working
+directory.
+
+GitHub Copilot and Windsurf retain their native cwd fields. VS Code retains its
+workspace cwd field. PromptScript reports `PS4002` because it cannot
+independently verify that the host supplied the requested repository cwd. A
+host that cannot supply that cwd must reject or skip the hook, not execute it
+from another directory.
 
 On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The
 `python3` interpreter maps to `py -3`. Unix-only shell interpreters (`bash`,
@@ -360,7 +389,7 @@ For example, the portable hook above generates this Factory command:
 ```json
 {
   "type": "command",
-  "command": "cd \"$FACTORY_PROJECT_DIR\" && python3 \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/validate.py --strict # promptscript-generated:validate-types"
+  "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && python3 \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/validate.py --strict # promptscript-generated:validate-types"
 }
 ```
 
@@ -370,7 +399,7 @@ The GitHub repository hook uses its native working-directory field:
 {
   "type": "command",
   "bash": "python3 .promptscript/scripts/validate.py --strict # promptscript-generated:validate-types",
-  "powershell": "& 'python3' '.promptscript/scripts/validate.py' '--strict' # promptscript-generated:validate-types",
+  "powershell": "& 'py' '-3' '.promptscript/scripts/validate.py' '--strict' # promptscript-generated:validate-types",
   "cwd": "."
 }
 ```

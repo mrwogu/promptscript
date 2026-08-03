@@ -349,7 +349,7 @@ describe('hook-adapters', () => {
       const hook = (entry['hooks'] as Record<string, unknown>[])[0]!;
 
       expect(hook['command']).toBe(
-        'cd "${CLAUDE_PROJECT_DIR}"/\'tools/hook scripts\' && python3 .promptscript/scripts/check.py # promptscript-generated:test'
+        "if [ -z \"${CLAUDE_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript claude hook requires non-empty CLAUDE_PROJECT_DIR.' >&2; exit 1; fi; cd \"${CLAUDE_PROJECT_DIR}\"/'tools/hook scripts' && python3 .promptscript/scripts/check.py # promptscript-generated:test"
       );
     });
   });
@@ -653,7 +653,7 @@ describe('hook-adapters', () => {
               {
                 type: 'command',
                 command:
-                  'cd "$FACTORY_PROJECT_DIR"/\'tools/hook scripts\' && python3 .promptscript/scripts/check.py # promptscript-generated:rooted',
+                  "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\"/'tools/hook scripts' && python3 .promptscript/scripts/check.py # promptscript-generated:rooted",
               },
             ],
           },
@@ -731,6 +731,44 @@ describe('hook-adapters', () => {
             timeout: 15,
           },
         ],
+      });
+    });
+
+    it('pins repository scripts to the VS Code workspace cwd', () => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'script',
+          event: 'pre-tool-use',
+          script: {
+            path: '.promptscript/scripts/check.py',
+            interpreter: 'python3',
+            args: [],
+          },
+        },
+      ];
+
+      expect(generateVSCodeHooks(hooks)['PreToolUse']![0]).toMatchObject({
+        command: 'python3 .promptscript/scripts/check.py # promptscript-generated:script',
+        windows: "& 'py' '-3' '.promptscript/scripts/check.py' # promptscript-generated:script",
+        cwd: '.',
+      });
+    });
+
+    it.each([
+      ['project', '.'],
+      ['tools/hooks', 'tools/hooks'],
+    ])('maps VS Code cwd %s to %s', (cwd, expected) => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'command',
+          event: 'pre-tool-use',
+          command: ['node', 'check.mjs'],
+          cwd,
+        },
+      ];
+
+      expect(generateVSCodeHooks(hooks)['PreToolUse']![0]).toMatchObject({
+        cwd: expected,
       });
     });
 
@@ -980,6 +1018,12 @@ describe('hook-adapters', () => {
   });
 
   describe('portable repository-local scripts', () => {
+    const environmentGuard = (target: string, variable: string): string =>
+      `if [ -z "\${${variable}:-}" ]; then printf '%s\\n' 'PromptScript ${target} hook requires non-empty ${variable}.' >&2; exit 1; fi; `;
+    const gitRootGuard = (target: string): string => {
+      const failure = `printf '%s\\n' 'PromptScript ${target} hook requires a Git worktree project root.' >&2; exit 1`;
+      return `PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { ${failure}; }; case "$PROMPTSCRIPT_PROJECT_ROOT" in *[![:space:]]*) ;; *) ${failure} ;; esac; `;
+    };
     const hooks = extractHooks(
       makeHooksBlock({
         validate: {
@@ -1002,8 +1046,7 @@ describe('hook-adapters', () => {
 
       expect(handler).toEqual({
         type: 'command',
-        command:
-          "cd \"${CLAUDE_PROJECT_DIR}\"/'tools/hook scripts' && python3 \"${CLAUDE_PROJECT_DIR}\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        command: `${environmentGuard('claude', 'CLAUDE_PROJECT_DIR')}cd "\${CLAUDE_PROJECT_DIR}"/'tools/hook scripts' && python3 "\${CLAUDE_PROJECT_DIR}"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`,
         timeout: 2,
       });
     });
@@ -1015,8 +1058,7 @@ describe('hook-adapters', () => {
 
       expect(result.hooks['postToolUse']![0]).toEqual({
         matcher: 'Edit|Write',
-        command:
-          'PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel)" && cd "$PROMPTSCRIPT_PROJECT_ROOT"/\'tools/hook scripts\' && python3 "$PROMPTSCRIPT_PROJECT_ROOT"/\'.promptscript/scripts/check file.py\' \'--label=hello world\' # promptscript-generated:validate',
+        command: `${gitRootGuard('cursor')}cd "$PROMPTSCRIPT_PROJECT_ROOT"/'tools/hook scripts' && python3 "$PROMPTSCRIPT_PROJECT_ROOT"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`,
         timeout: 2,
       });
     });
@@ -1026,7 +1068,7 @@ describe('hook-adapters', () => {
       const handler = (entry['hooks'] as Record<string, unknown>[])[0]!;
 
       expect(handler['command']).toBe(
-        "cd \"$FACTORY_PROJECT_DIR\"/'tools/hook scripts' && python3 \"$FACTORY_PROJECT_DIR\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate"
+        `${environmentGuard('factory', 'FACTORY_PROJECT_DIR')}cd "$FACTORY_PROJECT_DIR"/'tools/hook scripts' && python3 "$FACTORY_PROJECT_DIR"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`
       );
       expect(handler['timeout']).toBe(2);
     });
@@ -1060,8 +1102,7 @@ describe('hook-adapters', () => {
 
       expect(handler).toEqual({
         type: 'command',
-        command:
-          "cd \"$GEMINI_PROJECT_DIR\"/'tools/hook scripts' && python3 \"$GEMINI_PROJECT_DIR\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        command: `${environmentGuard('gemini', 'GEMINI_PROJECT_DIR')}cd "$GEMINI_PROJECT_DIR"/'tools/hook scripts' && python3 "$GEMINI_PROJECT_DIR"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`,
         timeout: 1501,
       });
     });
@@ -1127,8 +1168,7 @@ describe('hook-adapters', () => {
 
       expect(handler).toEqual({
         type: 'command',
-        command:
-          "cd \"$GROK_WORKSPACE_ROOT\"/'tools/hook scripts' && python3 \"$GROK_WORKSPACE_ROOT\"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate",
+        command: `${environmentGuard('grok', 'GROK_WORKSPACE_ROOT')}cd "$GROK_WORKSPACE_ROOT"/'tools/hook scripts' && python3 "$GROK_WORKSPACE_ROOT"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`,
         timeout: 2,
       });
     });
@@ -1201,7 +1241,9 @@ describe('hook-adapters', () => {
           {
             type: 'command',
             command: expect.stringContaining('scripts/project hook.js'),
-            commandWindows: expect.stringContaining('Set-Location $promptscriptProjectRoot'),
+            commandWindows: expect.stringContaining(
+              'Set-Location -LiteralPath $promptscriptProjectRoot -ErrorAction Stop'
+            ),
             timeout: 3,
             statusMessage: 'Checking project',
           },
@@ -1228,6 +1270,77 @@ describe('hook-adapters', () => {
         hooks: Record<string, unknown>[];
       };
       expect(sessionStart.hooks[0]).not.toHaveProperty('commandWindows');
+    });
+
+    it('guards project-relative command resources before command execution', () => {
+      const rooted: HookDefinition[] = [
+        {
+          id: 'rooted',
+          event: 'pre-tool-use',
+          command: ['node', 'check file.mjs'],
+          cwd: 'tools/hook scripts',
+        },
+      ];
+
+      const claudeEntry = generateClaudeHooks(rooted)['PreToolUse'] as Array<{
+        hooks: Array<{ command: string }>;
+      }>;
+      expect(claudeEntry[0]!.hooks[0]!.command).toBe(
+        `${environmentGuard('claude', 'CLAUDE_PROJECT_DIR')}cd "\${CLAUDE_PROJECT_DIR}"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
+      );
+
+      const cursor = generateCursorHooks(rooted) as {
+        hooks: { preToolUse: Array<{ command: string }> };
+      };
+      expect(cursor.hooks.preToolUse[0]!.command).toBe(
+        `${gitRootGuard('cursor')}cd "$PROMPTSCRIPT_PROJECT_ROOT"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
+      );
+
+      const codex = generateCodexHookConfig(rooted)['PreToolUse']![0] as {
+        hooks: Array<{ command: string; commandWindows: string }>;
+      };
+      expect(codex.hooks[0]!.command).toBe(
+        `${gitRootGuard('codex')}cd "$PROMPTSCRIPT_PROJECT_ROOT"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
+      );
+      expect(codex.hooks[0]!.commandWindows).toContain(
+        '$promptscriptProjectRoot = git rev-parse --show-toplevel 2>$null; if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($promptscriptProjectRoot))'
+      );
+      expect(codex.hooks[0]!.commandWindows).toContain(
+        "Set-Location -LiteralPath (Join-Path $promptscriptProjectRoot 'tools/hook scripts') -ErrorAction Stop; & 'node' 'check file.mjs'"
+      );
+      expect(codex.hooks[0]!.commandWindows).toMatch(
+        /exit 1.*Set-Location.*& 'node'.*# promptscript-generated:rooted$/
+      );
+    });
+
+    it('does not resolve a project root for commands without cwd', () => {
+      const unrooted: HookDefinition[] = [
+        {
+          id: 'unrooted',
+          event: 'pre-tool-use',
+          command: ['node', 'check.mjs'],
+        },
+      ];
+
+      const claudeEntry = generateClaudeHooks(unrooted)['PreToolUse'] as Array<{
+        hooks: Array<{ command: string }>;
+      }>;
+      expect(claudeEntry[0]!.hooks[0]!.command).toBe(
+        'node check.mjs # promptscript-generated:unrooted'
+      );
+      const cursor = generateCursorHooks(unrooted) as {
+        hooks: { preToolUse: Array<{ command: string }> };
+      };
+      expect(cursor.hooks.preToolUse[0]!.command).toBe(
+        'node check.mjs # promptscript-generated:unrooted'
+      );
+      const codex = generateCodexHookConfig(unrooted)['PreToolUse']![0] as {
+        hooks: Array<{ command: string; commandWindows: string }>;
+      };
+      expect(codex.hooks[0]).toMatchObject({
+        command: 'node check.mjs # promptscript-generated:unrooted',
+        commandWindows: "& 'node' 'check.mjs' # promptscript-generated:unrooted",
+      });
     });
 
     it('quotes script paths and metacharacter arguments for Unix and Windows', () => {
@@ -1397,7 +1510,7 @@ describe('hook-adapters', () => {
     });
 
     it.each(['cursor', 'codex'] as const)(
-      'warns when %s cannot guarantee a requested working directory',
+      'guards %s command cwd without a project-root warning',
       (target) => {
         const hooks = extractHooks(
           makeHooksBlock({
@@ -1416,17 +1529,51 @@ describe('hook-adapters', () => {
         ).toEqual(
           target === 'cursor'
             ? [
-                'Hook "rooted" requests cwd "project", which cursor cannot guarantee and will ignore.',
                 'Hook "rooted" uses statusMessage, which cursor cannot represent and will omit.',
                 'Hook "rooted" uses continueOnFailure, which cursor cannot represent and will omit.',
               ]
-            : [
-                'Hook "rooted" requests cwd "project", which codex cannot guarantee and will ignore.',
-                'Hook "rooted" uses continueOnFailure, which codex cannot represent and will omit.',
-              ]
+            : ['Hook "rooted" uses continueOnFailure, which codex cannot represent and will omit.']
         );
       }
     );
+
+    it.each(['github', 'windsurf'] as const)('reports the %s native cwd guarantee', (target) => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'rooted',
+          event: 'post-tool-use',
+          script: {
+            path: '.promptscript/scripts/check.py',
+            interpreter: 'python3',
+            args: [],
+          },
+        },
+      ];
+
+      expect(getHookCompatibilityWarnings(hooks, target)).toContainEqual({
+        code: 'PS4002',
+        message: `Hook "rooted" relies on ${target} native cwd, so PromptScript cannot independently guarantee project-root execution.`,
+        suggestion: `Ensure ${target} provides the configured repository cwd before running the hook.`,
+      });
+    });
+
+    it('reports the VS Code workspace cwd guarantee', () => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'rooted',
+          event: 'post-tool-use',
+          cwd: 'project',
+          command: ['node', 'check.mjs'],
+        },
+      ];
+
+      expect(getHookCompatibilityWarnings(hooks, 'vscode')).toContainEqual({
+        code: 'PS4002',
+        message:
+          'Hook "rooted" relies on vscode workspace cwd, so PromptScript cannot independently guarantee project-root execution.',
+        suggestion: 'Ensure vscode provides the configured repository cwd before running the hook.',
+      });
+    });
 
     it('warns when a Windows-capable target cannot invoke a shell interpreter', () => {
       const hooks = extractHooks(

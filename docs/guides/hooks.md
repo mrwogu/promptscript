@@ -34,7 +34,8 @@ Notes for compiled `@hooks` output:
   `.github/hooks/`).
 - **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the
   language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file
-  location does not set command working directory. See
+  location does not set command working directory. Environment and Git-root wrappers exit before
+  resource execution when the required root is unavailable; they never fall back to process cwd. See
   [Hooks and Workflows](../features/automation.md#project-root-strategy-by-target) for target
   behavior, generated Factory and GitHub examples, and the complete capability matrix.
 

@@ -72,4 +72,26 @@ describe('hook capabilities', () => {
       notes: expect.stringContaining('ignores matcher values'),
     });
   });
+
+  it('classifies project-root resolution strategies for native hosts', () => {
+    expect(
+      Object.entries(HOOK_RUNTIME_CAPABILITIES)
+        .filter(([, capability]) => capability.projectRootStrategy === 'environment')
+        .map(([target]) => target)
+        .sort()
+    ).toEqual(['claude', 'factory', 'gemini', 'grok']);
+    expect(
+      Object.entries(HOOK_RUNTIME_CAPABILITIES)
+        .filter(([, capability]) => capability.projectRootStrategy === 'git-root')
+        .map(([target]) => target)
+        .sort()
+    ).toEqual(['codex', 'cursor']);
+    expect(
+      Object.entries(HOOK_RUNTIME_CAPABILITIES)
+        .filter(([, capability]) => capability.projectRootStrategy === 'native-cwd')
+        .map(([target]) => target)
+        .sort()
+    ).toEqual(['github', 'windsurf']);
+    expect(HOOK_RUNTIME_CAPABILITIES.vscode.projectRootStrategy).toBe('workspace-cwd');
+  });
 });

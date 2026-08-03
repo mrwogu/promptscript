@@ -2194,3 +2194,11 @@ VS Code `run_in_terminal`. Set `targets.<name>.matcher` to replace a native tool
 name. Cursor, Gemini, and VS Code emit `PS4002` because their coverage is best
 effort. GitHub Copilot CLI/cloud and Grok omit the event with `PS4002` because
 their repository hook contracts do not guarantee terminal interception.
+
+## Hook Project Root Failure
+
+Environment-root and Git-root wrappers exit non-zero before an interpreter or
+command runs when they cannot resolve a non-empty project root. Native-cwd and
+workspace-cwd targets retain host-provided cwd fields and report `PS4002`
+because PromptScript cannot independently verify the host cwd. No target
+wrapper falls back to the process working directory.
