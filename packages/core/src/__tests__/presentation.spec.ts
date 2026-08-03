@@ -5,6 +5,24 @@ import { normalizeLegacyHeadingEntries } from '../presentation.js';
 const LOC: SourceLocation = { file: 'presentation.prs', line: 3, column: 3, offset: 42 };
 
 describe('presentation metadata', () => {
+  it('preserves legacy headings before syntax 1.5.0', () => {
+    const entries: BlockEntry[] = [
+      {
+        type: 'TextEntry',
+        text: '## Project Rules\nKeep the body.',
+        loc: LOC,
+      },
+    ];
+
+    expect(normalizeLegacyHeadingEntries('identity', entries, '1.4.0')).toBe(entries);
+  });
+
+  it('ignores blocks without text entries', () => {
+    const entries: BlockEntry[] = [];
+
+    expect(normalizeLegacyHeadingEntries('identity', entries, '1.5.0')).toBe(entries);
+  });
+
   it('normalizes tab-separated legacy headings with CRLF endings', () => {
     const entries: BlockEntry[] = [
       {
