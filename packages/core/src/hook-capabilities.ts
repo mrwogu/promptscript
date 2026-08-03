@@ -40,7 +40,7 @@ export interface HookCapability {
 
 export type HookRuntimeTarget = KnownTarget | 'vscode';
 
-const PORTABLE_EVENTS = [
+const PORTABLE_LIFECYCLE_EVENTS = [
   'pre-tool-use',
   'post-tool-use',
   'session-start',
@@ -49,6 +49,8 @@ const PORTABLE_EVENTS = [
   'notification',
   'stop',
 ] as const;
+
+const PORTABLE_EVENTS = ['pre-terminal-command', ...PORTABLE_LIFECYCLE_EVENTS] as const;
 
 const UNSUPPORTED_CAPABILITY = {
   status: 'unsupported',
@@ -73,7 +75,7 @@ export const HOOK_CAPABILITIES = {
   github: {
     status: 'native',
     configPath: '.github/hooks/promptscript.json',
-    events: PORTABLE_EVENTS,
+    events: PORTABLE_LIFECYCLE_EVENTS,
     commandFormat: 'versioned JSON with bash and powershell commands',
     timeoutUnit: 'seconds',
     projectRootStrategy: 'native-cwd',
@@ -108,7 +110,15 @@ export const HOOK_CAPABILITIES = {
   cursor: {
     status: 'native',
     configPath: '.cursor/hooks.json',
-    events: ['pre-tool-use', 'post-tool-use', 'session-start', 'setup', 'subagent-start', 'stop'],
+    events: [
+      'pre-terminal-command',
+      'pre-tool-use',
+      'post-tool-use',
+      'session-start',
+      'setup',
+      'subagent-start',
+      'stop',
+    ],
     commandFormat: 'versioned JSON command hooks',
     timeoutUnit: 'seconds',
     projectRootStrategy: 'git-root',
@@ -126,7 +136,15 @@ export const HOOK_CAPABILITIES = {
   factory: {
     status: 'native',
     configPath: '.factory/hooks.json',
-    events: ['pre-tool-use', 'post-tool-use', 'session-start', 'setup', 'notification', 'stop'],
+    events: [
+      'pre-terminal-command',
+      'pre-tool-use',
+      'post-tool-use',
+      'session-start',
+      'setup',
+      'notification',
+      'stop',
+    ],
     commandFormat: 'nested command hooks',
     timeoutUnit: 'seconds',
     projectRootStrategy: 'environment',
@@ -150,7 +168,14 @@ export const HOOK_CAPABILITIES = {
   gemini: {
     status: 'native',
     configPath: '.gemini/settings.json',
-    events: ['pre-tool-use', 'post-tool-use', 'session-start', 'setup', 'stop'],
+    events: [
+      'pre-terminal-command',
+      'pre-tool-use',
+      'post-tool-use',
+      'session-start',
+      'setup',
+      'stop',
+    ],
     commandFormat: 'nested command hooks',
     timeoutUnit: 'milliseconds',
     projectRootStrategy: 'environment',
@@ -167,7 +192,7 @@ export const HOOK_CAPABILITIES = {
   windsurf: {
     status: 'native',
     configPath: '.windsurf/hooks.json',
-    events: ['pre-tool-use', 'post-tool-use', 'stop'],
+    events: ['pre-terminal-command', 'pre-tool-use', 'post-tool-use', 'stop'],
     commandFormat: 'flat command and powershell entries',
     timeoutUnit: 'none',
     projectRootStrategy: 'native-cwd',
@@ -192,7 +217,15 @@ export const HOOK_CAPABILITIES = {
   codex: {
     status: 'native',
     configPath: '.codex/hooks.json',
-    events: ['pre-tool-use', 'post-tool-use', 'session-start', 'setup', 'subagent-start', 'stop'],
+    events: [
+      'pre-terminal-command',
+      'pre-tool-use',
+      'post-tool-use',
+      'session-start',
+      'setup',
+      'subagent-start',
+      'stop',
+    ],
     commandFormat: 'nested command and commandWindows hooks',
     timeoutUnit: 'seconds',
     projectRootStrategy: 'git-root',
@@ -260,7 +293,7 @@ export const HOOK_CAPABILITIES = {
   grok: {
     status: 'native',
     configPath: '.grok/hooks/promptscript.json',
-    events: PORTABLE_EVENTS,
+    events: PORTABLE_LIFECYCLE_EVENTS,
     commandFormat: 'nested command hooks',
     timeoutUnit: 'seconds',
     projectRootStrategy: 'environment',
@@ -278,7 +311,15 @@ export const HOOK_CAPABILITIES = {
 export const VSCODE_HOOK_CAPABILITY: HookCapability = {
   status: 'compatible',
   configPath: '.github/hooks/promptscript-vscode.json',
-  events: ['pre-tool-use', 'post-tool-use', 'session-start', 'setup', 'subagent-start', 'stop'],
+  events: [
+    'pre-terminal-command',
+    'pre-tool-use',
+    'post-tool-use',
+    'session-start',
+    'setup',
+    'subagent-start',
+    'stop',
+  ],
   commandFormat: 'Claude-compatible PascalCase JSON command hooks',
   timeoutUnit: 'seconds',
   projectRootStrategy: 'workspace-cwd',

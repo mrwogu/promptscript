@@ -496,15 +496,16 @@ Portable lifecycle hooks. Requires syntax `1.4.0`. Each hook needs exactly one o
 
 Portable events:
 
-| Event            | Meaning                  |
-| ---------------- | ------------------------ |
-| `pre-tool-use`   | Before a tool invocation |
-| `post-tool-use`  | After a tool invocation  |
-| `session-start`  | Agent session start      |
-| `setup`          | Session setup            |
-| `subagent-start` | Subagent start           |
-| `notification`   | Agent notification       |
-| `stop`           | Agent stop               |
+| Event                  | Meaning                   |
+| ---------------------- | ------------------------- |
+| `pre-terminal-command` | Before a terminal command |
+| `pre-tool-use`         | Before a tool invocation  |
+| `post-tool-use`        | After a tool invocation   |
+| `session-start`        | Agent session start       |
+| `setup`                | Session setup             |
+| `subagent-start`       | Subagent start            |
+| `notification`         | Agent notification        |
+| `stop`                 | Agent stop                |
 
 `command` is a non-empty string array. Shell interpolation (`$()`, backticks,
 `${...}`) is forbidden. `script` requires:
@@ -520,6 +521,12 @@ Portable events:
 paths relative to project root. Hook config file location does not set command cwd.
 `timeoutMs` range is 100-600000. `matcher` uses target-native tool names, so a
 matcher valid for one target may match nothing on another.
+
+`pre-terminal-command` supplies native defaults: Factory `Execute`, Claude and
+Codex `Bash`, Windsurf `pre_run_command`, Cursor `run_terminal_cmd`, Gemini
+`run_shell_command`, and VS Code `run_in_terminal`. Override a native tool name
+with `targets.<name>.matcher`. Cursor, Gemini, and VS Code report best-effort
+`PS4002` warnings. GitHub and Grok omit the event with `PS4002`.
 
 Target overrides may change `event`, `matcher`, `timeoutMs`, `statusMessage`,
 `continueOnFailure`, `enabled`, or `cwd`. Native hook files are emitted only in

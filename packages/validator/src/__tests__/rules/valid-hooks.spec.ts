@@ -444,6 +444,7 @@ describe('PS034: valid-hooks', () => {
 
   it('should accept all valid portable events', () => {
     const events = [
+      'pre-terminal-command',
       'pre-tool-use',
       'post-tool-use',
       'session-start',

@@ -10,6 +10,7 @@ import {
 
 /** Portable hook events (PascalCase superset per architecture decision). */
 const VALID_HOOK_EVENTS = new Set([
+  'pre-terminal-command',
   'pre-tool-use',
   'post-tool-use',
   'session-start',

@@ -24,6 +24,11 @@ Notes for compiled `@hooks` output:
 - **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`,
   GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match
   nothing on another. See [@hooks](../reference/language.md#hooks).
+- **Terminal commands** - use `pre-terminal-command` instead of a broad
+  `pre-tool-use` matcher. PromptScript supplies audited native tool defaults,
+  allows `targets.<name>.matcher` overrides, and reports `PS4002` for
+  best-effort or unsupported host coverage. See
+  [Terminal command semantics](../features/automation.md#terminal-command-semantics).
 - **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in
   it carries the PromptScript ownership marker, and prunes managed directories left empty (such as
   `.github/hooks/`).

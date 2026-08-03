@@ -50,7 +50,26 @@ describe('hook capabilities', () => {
       toolNames: ['Execute'],
       notes: expect.stringContaining('Factory Execute'),
     });
+    expect(HOOK_CAPABILITIES.claude.terminal).toEqual({
+      guarantee: 'guaranteed',
+      toolNames: ['Bash'],
+      notes: expect.stringContaining('Bash shell commands'),
+    });
+    expect(HOOK_CAPABILITIES.codex.terminal).toEqual({
+      guarantee: 'guaranteed',
+      toolNames: ['Bash'],
+      notes: expect.stringContaining('unified exec calls'),
+    });
+    expect(HOOK_CAPABILITIES.windsurf.terminal).toEqual({
+      guarantee: 'guaranteed',
+      toolNames: ['pre_run_command', 'post_run_command'],
+      notes: expect.stringContaining('dedicated pre-run'),
+    });
     expect(HOOK_CAPABILITIES.github.terminal?.guarantee).toBe('not-guaranteed');
-    expect(HOOK_RUNTIME_CAPABILITIES.vscode.terminal?.toolNames).toEqual(['run_in_terminal']);
+    expect(HOOK_RUNTIME_CAPABILITIES.vscode.terminal).toEqual({
+      guarantee: 'best-effort',
+      toolNames: ['run_in_terminal'],
+      notes: expect.stringContaining('ignores matcher values'),
+    });
   });
 });

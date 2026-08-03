@@ -18,7 +18,12 @@ import {
   type HookDefinition,
   type HookTarget,
 } from '../hook-adapters.js';
-import { HOOK_CAPABILITIES, type Value } from '@promptscript/core';
+import {
+  HOOK_CAPABILITIES,
+  HOOK_RUNTIME_CAPABILITIES,
+  type HookCapability,
+  type Value,
+} from '@promptscript/core';
 
 function makeLoc() {
   return { file: 'test.prs', line: 1, column: 0 };
@@ -203,6 +208,23 @@ describe('hook-adapters', () => {
     it('should map pre-tool-use to VS Code PreToolUse', () => {
       expect(mapEvent('pre-tool-use', 'vscode')).toBe('PreToolUse');
     });
+
+    it.each([
+      ['claude', 'PreToolUse'],
+      ['cursor', 'preToolUse'],
+      ['codex', 'PreToolUse'],
+      ['factory', 'PreToolUse'],
+      ['gemini', 'BeforeTool'],
+      ['windsurf', 'pre_run_command'],
+      ['vscode', 'PreToolUse'],
+      ['github', null],
+      ['grok', null],
+    ] as const)(
+      'should map pre-terminal-command for %s without overstating coverage',
+      (target, event) => {
+        expect(mapEvent('pre-terminal-command', target)).toBe(event);
+      }
+    );
   });
 
   describe('convertTimeout', () => {
@@ -242,6 +264,27 @@ describe('hook-adapters', () => {
   });
 
   describe('generateClaudeHooks', () => {
+    it('should use the native terminal matcher by default and allow an override', () => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'default',
+          event: 'pre-terminal-command',
+          command: ['echo', 'default'],
+        },
+        {
+          id: 'override',
+          event: 'pre-terminal-command',
+          command: ['echo', 'override'],
+          targets: { claude: { matcher: 'CustomShell' } },
+        },
+      ];
+
+      expect(generateClaudeHooks(hooks)['PreToolUse']).toEqual([
+        expect.objectContaining({ matcher: 'Bash' }),
+        expect.objectContaining({ matcher: 'CustomShell' }),
+      ]);
+    });
+
     it('should generate PreToolUse hook entry', () => {
       const hooks = extractHooks(
         makeHooksBlock({
@@ -454,6 +497,27 @@ describe('hook-adapters', () => {
   });
 
   describe('generateFactoryHooks', () => {
+    it('should use Execute for terminal commands and allow a native matcher override', () => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'default',
+          event: 'pre-terminal-command',
+          command: ['echo', 'default'],
+        },
+        {
+          id: 'override',
+          event: 'pre-terminal-command',
+          command: ['echo', 'override'],
+          targets: { factory: { matcher: 'CustomExecute' } },
+        },
+      ];
+
+      expect(generateFactoryHooks(hooks)['PreToolUse']).toEqual([
+        expect.objectContaining({ matcher: 'Execute' }),
+        expect.objectContaining({ matcher: 'CustomExecute' }),
+      ]);
+    });
+
     it('should inherit the base executable when a target does not replace it', () => {
       const hooks = extractHooks(
         makeHooksBlock({
@@ -621,6 +685,21 @@ describe('hook-adapters', () => {
   });
 
   describe('generateVSCodeHooks', () => {
+    it('should emit the best-effort terminal matcher by default', () => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'terminal',
+          event: 'pre-terminal-command',
+          command: ['echo', 'terminal'],
+          targets: { vscode: {} },
+        },
+      ];
+
+      expect(generateVSCodeHooks(hooks)['PreToolUse']![0]).toEqual(
+        expect.objectContaining({ matcher: 'run_in_terminal' })
+      );
+    });
+
     it('should apply target overrides and emit the VS Code contract', () => {
       const hooks = extractHooks(
         makeHooksBlock({
@@ -1206,6 +1285,7 @@ describe('hook-adapters', () => {
       'grok',
     ] as const;
     const events = [
+      'pre-terminal-command',
       'pre-tool-use',
       'post-tool-use',
       'session-start',
@@ -1220,9 +1300,47 @@ describe('hook-adapters', () => {
         events.filter((event) => mapEvent(event, target) !== null)
       );
     }
+
+    for (const target of [...targets, 'vscode'] as const) {
+      if (mapEvent('pre-terminal-command', target)) {
+        const capability: HookCapability = HOOK_RUNTIME_CAPABILITIES[target];
+        expect(capability.terminal).toBeDefined();
+      }
+    }
   });
 
   describe('getHookCompatibilityWarnings', () => {
+    it('reports terminal coverage without warning for guaranteed targets', () => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'terminal',
+          event: 'pre-terminal-command',
+          command: ['echo', 'terminal'],
+          targets: { vscode: {} },
+        },
+      ];
+
+      for (const target of ['claude', 'codex', 'factory', 'windsurf'] as const) {
+        expect(getHookCompatibilityWarnings(hooks, target)).toEqual([]);
+      }
+      for (const target of ['cursor', 'gemini', 'vscode'] as const) {
+        expect(getHookCompatibilityWarnings(hooks, target)).toEqual([
+          expect.objectContaining({
+            code: 'PS4002',
+            message: expect.stringContaining('best-effort coverage'),
+          }),
+        ]);
+      }
+      for (const target of ['github', 'grok'] as const) {
+        expect(getHookCompatibilityWarnings(hooks, target)).toEqual([
+          expect.objectContaining({
+            code: 'PS4002',
+            message: expect.stringContaining('cannot guarantee and will omit'),
+          }),
+        ]);
+      }
+    });
+
     it('warns when Factory cannot represent an event or field', () => {
       const hooks = extractHooks(
         makeHooksBlock({
