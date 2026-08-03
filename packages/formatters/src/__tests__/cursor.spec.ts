@@ -1414,16 +1414,11 @@ describe('CursorFormatter', () => {
       const parsed = JSON.parse(hooksFile!.content) as Record<string, unknown>;
       expect(parsed).toHaveProperty('version', 1);
       expect(parsed).toHaveProperty('hooks.preToolUse');
-      expect(result.warnings).toEqual([
-        {
-          code: 'PS4002',
-          message:
-            'Hook "my-hook" requests cwd "project", which cursor cannot guarantee and will ignore.',
-          suggestion:
-            'Review the generated cursor hook because it will use the agent session working directory.',
-          location: createLoc(),
-        },
-      ]);
+      expect(parsed).toHaveProperty(
+        'hooks.preToolUse.0.command',
+        expect.stringContaining('requires a Git worktree project root')
+      );
+      expect(result.warnings).toBeUndefined();
     });
 
     it.each([undefined, 'modern', 'multifile', 'legacy', 'agents-md'])(

@@ -735,23 +735,19 @@ describe('CodexFormatter', () => {
             {
               hooks: [
                 {
-                  command: 'echo hello # promptscript-generated:my-hook',
+                  command: expect.stringContaining(
+                    'PromptScript codex hook requires a Git worktree project root.'
+                  ),
+                  commandWindows: expect.stringContaining(
+                    '[string]::IsNullOrWhiteSpace($promptscriptProjectRoot)'
+                  ),
                 },
               ],
             },
           ],
         },
       });
-      expect(result.warnings).toEqual([
-        {
-          code: 'PS4002',
-          message:
-            'Hook "my-hook" requests cwd "project", which codex cannot guarantee and will ignore.',
-          suggestion:
-            'Review the generated codex hook because it will use the agent session working directory.',
-          location: createLoc(),
-        },
-      ]);
+      expect(result.warnings).toBeUndefined();
     });
 
     it('should skip agents with invalid names', () => {

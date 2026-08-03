@@ -519,6 +519,9 @@ Portable events:
 
 `cwd: "project"` runs from project root. Other values are portable forward-slash
 paths relative to project root. Hook config file location does not set command cwd.
+Environment-root and Git-root wrappers exit before script or command execution when
+the required root is unavailable. Native-cwd and workspace-cwd targets retain host
+cwd fields and report `PS4002` when PromptScript cannot verify that cwd.
 `timeoutMs` range is 100-600000. `matcher` uses target-native tool names, so a
 matcher valid for one target may match nothing on another.
 
