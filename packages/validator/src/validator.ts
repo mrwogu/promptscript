@@ -1,4 +1,10 @@
-import { noopLogger, type Logger, type Program } from '@promptscript/core';
+import {
+  noopLogger,
+  normalizeProgram,
+  toLegacyProgram,
+  type Logger,
+  type ProgramInput,
+} from '@promptscript/core';
 import type {
   ValidationRule,
   ValidatorConfig,
@@ -77,7 +83,8 @@ export class Validator {
    * @param ast - The resolved AST to validate
    * @returns Validation result with all messages
    */
-  validate(ast: Program): ValidationResult {
+  validate(input: ProgramInput): ValidationResult {
+    const ast = toLegacyProgram(normalizeProgram(input));
     const messages: ValidationMessage[] = [];
     const activeRules = this.rules.filter(
       (r) => !this.disabledRules.has(r.name) && !this.disabledRules.has(r.id)

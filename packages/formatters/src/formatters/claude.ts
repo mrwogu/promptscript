@@ -1385,7 +1385,7 @@ export class ClaudeFormatter extends BaseFormatter {
     const block = this.findBlock(ast, 'restrictions');
     if (!block) return null;
 
-    const items = this.extractDontsItems(block.content);
+    const items = this.extractDontsItems(block);
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection("Don'ts", content) + '\n';
@@ -1395,11 +1395,13 @@ export class ClaudeFormatter extends BaseFormatter {
     return this.renderExamplesSection(ast, renderer);
   }
 
-  private extractDontsItems(content: Block['content']): string[] {
+  private extractDontsItems(block: Block): string[] {
+    const { content } = block;
     const transform = (s: string): string => s.replace(/^Never\s+/i, "Don't ");
 
-    if (content.type === 'ArrayContent') {
-      return content.elements.map((item: Value) => transform(this.valueToString(item)));
+    const listItems = this.getBlockArrayElements(block);
+    if (listItems.length > 0) {
+      return listItems.map((item: Value) => transform(this.valueToString(item)));
     }
 
     if (content.type === 'TextContent') {

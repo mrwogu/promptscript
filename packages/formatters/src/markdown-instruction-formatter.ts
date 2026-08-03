@@ -999,7 +999,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     const block = this.findBlock(ast, 'restrictions');
     if (!block) return null;
 
-    const items = this.extractRestrictionsItems(block.content);
+    const items = this.extractRestrictionsItems(block);
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
     return renderer.renderSection(this.getSectionName('restrictions'), content) + '\n';
@@ -1009,9 +1009,11 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     return this.renderExamplesSection(ast, renderer);
   }
 
-  protected extractRestrictionsItems(content: Block['content']): string[] {
-    if (content.type === 'ArrayContent') {
-      return content.elements.map((item: Value) =>
+  protected extractRestrictionsItems(block: Block): string[] {
+    const { content } = block;
+    const listItems = this.getBlockArrayElements(block);
+    if (listItems.length > 0) {
+      return listItems.map((item: Value) =>
         this.transformRestrictionItem(this.valueToString(item))
       );
     }

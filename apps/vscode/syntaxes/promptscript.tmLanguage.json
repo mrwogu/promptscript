@@ -17,7 +17,7 @@
     { "include": "#range-operator" },
     { "include": "#replace-operator" },
     { "include": "#number" },
-    { "include": "#restriction-dash" },
+    { "include": "#list-item-marker" },
     { "include": "#boolean" },
     { "include": "#null" },
     { "include": "#keyword-as" },
@@ -153,9 +153,9 @@
       "match": "(?<![A-Za-z0-9_-])-?\\d+(?:\\.\\d+)?(?![A-Za-z0-9_-])",
       "name": "constant.numeric.prs"
     },
-    "restriction-dash": {
+    "list-item-marker": {
       "match": "(?<![A-Za-z0-9_-])-(?![A-Za-z0-9_-])",
-      "name": "keyword.operator.restriction.prs"
+      "name": "punctuation.definition.list.begin.prs"
     },
     "boolean": {
       "match": "(?<![A-Za-z0-9_-])(?:true|false)(?![A-Za-z0-9_-])",

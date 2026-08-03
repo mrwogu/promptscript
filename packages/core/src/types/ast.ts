@@ -15,6 +15,17 @@ export interface BaseNode {
   loc: SourceLocation;
 }
 
+/**
+ * Recursive readonly projection used by the canonical AST.
+ */
+export type DeepReadonly<T> = T extends PrimitiveValue
+  ? T
+  : T extends readonly (infer Item)[]
+    ? readonly DeepReadonly<Item>[]
+    : T extends object
+      ? { readonly [Key in keyof T]: DeepReadonly<T[Key]> }
+      : T;
+
 // ============================================================
 // Template Types (Parameterized Inheritance)
 // ============================================================
@@ -273,6 +284,8 @@ export interface Block extends BaseNode {
   name: BlockName;
   /** Block content */
   content: BlockContent;
+  /** Ordered compatibility metadata retained for canonical consumers */
+  canonicalBody?: BlockBody;
 }
 
 /**
@@ -297,6 +310,8 @@ export interface ExtendBlock extends BaseNode {
   targetPath: string;
   /** Content to merge */
   content: BlockContent;
+  /** Ordered compatibility metadata retained for canonical consumers */
+  canonicalBody?: BlockBody;
   /** Fields whose complete prior values must be replaced */
   replacements?: ReplaceModifier[];
 }
@@ -342,6 +357,8 @@ export interface ObjectContent extends BaseNode {
   readonly type: 'ObjectContent';
   /** Properties */
   properties: Record<string, Value>;
+  /** Dash-list entries interleaved with properties */
+  listItems?: Value[];
   /** Inline @use declarations (consumed by resolver, ephemeral) */
   inlineUses?: InlineUseDeclaration[];
 }
@@ -364,6 +381,10 @@ export interface MixedContent extends BaseNode {
   text?: TextContent;
   /** Properties */
   properties: Record<string, Value>;
+  /** Dash-list entries interleaved with text or properties */
+  listItems?: Value[];
+  /** Inline @use declarations (consumed by resolver, ephemeral) */
+  inlineUses?: InlineUseDeclaration[];
 }
 
 // ============================================================
@@ -402,6 +423,233 @@ export interface TypeExpression extends BaseNode {
     options?: Value[];
   };
 }
+
+// ============================================================
+// Canonical AST
+// ============================================================
+
+/**
+ * Base interface for immutable canonical AST nodes.
+ */
+export interface CanonicalNode {
+  readonly type: string;
+  readonly loc: DeepReadonly<SourceLocation>;
+}
+
+/**
+ * Canonical scalar value with its exact source location.
+ */
+export interface ScalarValueNode extends CanonicalNode {
+  readonly type: 'ScalarValueNode';
+  readonly value: PrimitiveValue;
+}
+
+/**
+ * Canonical triple-quoted text value.
+ */
+export interface TextValueNode extends CanonicalNode {
+  readonly type: 'TextValueNode';
+  readonly value: string;
+}
+
+/**
+ * Canonical template expression value.
+ */
+export interface TemplateValueNode extends CanonicalNode {
+  readonly type: 'TemplateValueNode';
+  readonly name: string;
+}
+
+/**
+ * Canonical type expression value.
+ */
+export interface TypeExpressionValueNode extends CanonicalNode {
+  readonly type: 'TypeExpressionValueNode';
+  readonly expression: DeepReadonly<TypeExpression>;
+}
+
+/**
+ * Canonical array element with its own source location.
+ */
+export interface ArrayElementNode extends CanonicalNode {
+  readonly type: 'ArrayElementNode';
+  readonly value: ValueNode;
+}
+
+/**
+ * Canonical array value.
+ */
+export interface ArrayValueNode extends CanonicalNode {
+  readonly type: 'ArrayValueNode';
+  readonly elements: readonly ArrayElementNode[];
+}
+
+/**
+ * Canonical object field with its own source location.
+ */
+export interface ObjectFieldNode extends CanonicalNode {
+  readonly type: 'ObjectFieldNode';
+  readonly name: string;
+  readonly value: ValueNode;
+}
+
+/**
+ * Canonical object value.
+ */
+export interface ObjectValueNode extends CanonicalNode {
+  readonly type: 'ObjectValueNode';
+  readonly fields: readonly ObjectFieldNode[];
+}
+
+/**
+ * Canonical value representation that retains nested source locations.
+ */
+export type ValueNode =
+  | ScalarValueNode
+  | TextValueNode
+  | TemplateValueNode
+  | TypeExpressionValueNode
+  | ArrayValueNode
+  | ObjectValueNode;
+
+/**
+ * Canonical free-form text entry.
+ */
+export interface TextEntry extends CanonicalNode {
+  readonly type: 'TextEntry';
+  readonly text: string;
+}
+
+/**
+ * Canonical key-value entry.
+ */
+export interface FieldEntry extends CanonicalNode {
+  readonly type: 'FieldEntry';
+  readonly name: string;
+  readonly value: ValueNode;
+  readonly optional?: boolean;
+  readonly defaultValue?: ValueNode;
+}
+
+/**
+ * Canonical dash-list entry.
+ */
+export interface ListEntry extends CanonicalNode {
+  readonly type: 'ListEntry';
+  readonly value: ValueNode;
+}
+
+/**
+ * Canonical inline import entry.
+ */
+export interface InlineUseEntry extends CanonicalNode {
+  readonly type: 'InlineUseEntry';
+  readonly declaration: DeepReadonly<InlineUseDeclaration>;
+}
+
+/**
+ * Ordered canonical block entry.
+ */
+export type BlockEntry = TextEntry | FieldEntry | ListEntry | InlineUseEntry;
+
+/**
+ * Uniform canonical body shared by every block type.
+ */
+export interface BlockBody extends CanonicalNode {
+  readonly type: 'BlockBody';
+  readonly shape: 'text' | 'object' | 'array' | 'mixed';
+  readonly entries: readonly BlockEntry[];
+  /** Original legacy projection, retained across immutable updates */
+  readonly legacyProjection?: BlockContent['type'];
+  /** Exact resolved text projection when entries retain multiple source fragments */
+  readonly legacyText?: DeepReadonly<TextContent>;
+}
+
+/**
+ * Immutable canonical block. The legacy content field is a derived projection.
+ */
+export interface CanonicalBlock extends CanonicalNode {
+  readonly type: 'CanonicalBlock';
+  readonly name: BlockName;
+  readonly body: BlockBody;
+  readonly content: DeepReadonly<BlockContent>;
+}
+
+/**
+ * Immutable canonical extension block.
+ */
+export interface CanonicalExtendBlock extends CanonicalNode {
+  readonly type: 'CanonicalExtendBlock';
+  readonly targetPath: string;
+  readonly body: BlockBody;
+  readonly content: DeepReadonly<BlockContent>;
+  readonly replacements?: readonly DeepReadonly<ReplaceModifier>[];
+}
+
+/**
+ * Canonical inheritance operation.
+ */
+export interface InheritOperation extends CanonicalNode {
+  readonly type: 'InheritOperation';
+  readonly declaration: DeepReadonly<InheritDeclaration>;
+  readonly sourceLayerId: string;
+}
+
+/**
+ * Canonical top-level import operation.
+ */
+export interface UseOperation extends CanonicalNode {
+  readonly type: 'UseOperation';
+  readonly declaration: DeepReadonly<UseDeclaration>;
+  readonly sourceLayerId: string;
+}
+
+/**
+ * Canonical block declaration operation.
+ */
+export interface BlockOperation extends CanonicalNode {
+  readonly type: 'BlockOperation';
+  readonly block: CanonicalBlock;
+  readonly sourceLayerId: string;
+}
+
+/**
+ * Canonical extension operation.
+ */
+export interface ExtendOperation extends CanonicalNode {
+  readonly type: 'ExtendOperation';
+  readonly extension: CanonicalExtendBlock;
+  readonly sourceLayerId: string;
+}
+
+/**
+ * Ordered semantic declaration in a canonical program.
+ */
+export type ProgramOperation = InheritOperation | UseOperation | BlockOperation | ExtendOperation;
+
+/**
+ * Immutable canonical program. Legacy collection fields are derived projections.
+ */
+export interface CanonicalProgram extends CanonicalNode {
+  readonly type: 'CanonicalProgram';
+  readonly meta?: DeepReadonly<MetaBlock>;
+  readonly inherit?: DeepReadonly<InheritDeclaration>;
+  readonly uses: readonly DeepReadonly<UseDeclaration>[];
+  readonly blocks: readonly CanonicalBlock[];
+  readonly extends: readonly CanonicalExtendBlock[];
+  readonly syntaxFeatures?: readonly DeepReadonly<SyntaxFeatureUsage>[];
+  readonly operations: readonly ProgramOperation[];
+}
+
+/**
+ * Public input accepted during the legacy-to-canonical transition.
+ */
+export type ProgramInput = Program | CanonicalProgram;
+
+/**
+ * Public block input accepted during the legacy-to-canonical transition.
+ */
+export type BlockInput = Block | CanonicalBlock;
 
 // ============================================================
 // Skill Definition

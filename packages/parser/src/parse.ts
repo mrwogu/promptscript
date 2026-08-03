@@ -2,8 +2,8 @@ import { readFileSync } from 'fs';
 import { PSLexer } from './lexer/lexer.js';
 import { parser } from './grammar/parser.js';
 import { visitor, type EnvProvider } from './grammar/visitor.js';
-import type { Program } from '@promptscript/core';
-import { ParseError } from '@promptscript/core';
+import type { CanonicalProgram, Program } from '@promptscript/core';
+import { ParseError, toLegacyProgram } from '@promptscript/core';
 
 /**
  * Options for parsing PromptScript source code.
@@ -47,15 +47,25 @@ export interface ParseResult {
 }
 
 /**
- * Parse PromptScript source code into an AST.
+ * Result of parsing PromptScript into the immutable canonical AST.
+ */
+export interface CanonicalParseResult {
+  /** The canonical AST, or null if parsing failed with tolerant=false. */
+  ast: CanonicalProgram | null;
+  /** List of errors encountered during parsing. */
+  errors: ParseError[];
+}
+
+/**
+ * Parse PromptScript source code into the immutable canonical AST.
  *
  * @param source - The PromptScript source code to parse
  * @param options - Parsing options
- * @returns ParseResult with AST and any errors
+ * @returns CanonicalParseResult with AST and any errors
  *
  * @example
  * ```typescript
- * const result = parse(`
+ * const result = parseCanonical(`
  *   @meta {
  *     id: "my-project"
  *     syntax: "1.0.0"
@@ -73,7 +83,7 @@ export interface ParseResult {
  * }
  * ```
  */
-export function parse(source: string, options: ParseOptions = {}): ParseResult {
+export function parseCanonical(source: string, options: ParseOptions = {}): CanonicalParseResult {
   const {
     filename = '<unknown>',
     tolerant = false,
@@ -140,7 +150,14 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     } else {
       visitor.resetEnvProvider();
     }
-    const ast = visitor.visit(cst, filename) as Program;
+    visitor.resetDiagnostics();
+    const ast = visitor.visit(cst, filename) as CanonicalProgram;
+    for (const diagnostic of visitor.takeDiagnostics()) {
+      errors.push(new ParseError(diagnostic.message, diagnostic.loc));
+    }
+    if (errors.length > 0 && !isRecoveryMode) {
+      return { ast: null, errors };
+    }
     return { ast, errors };
   } catch (err) {
     errors.push(
@@ -152,6 +169,31 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
     );
     return { ast: null, errors };
   }
+}
+
+/**
+ * Parse PromptScript source code into the mutable legacy AST.
+ *
+ * The returned graph is detached from the canonical parser output so existing
+ * consumers may continue to mutate it during the compatibility window.
+ */
+export function parse(source: string, options: ParseOptions = {}): ParseResult {
+  const result = parseCanonical(source, options);
+  return {
+    ast: result.ast ? toLegacyProgram(result.ast, { preserveCanonicalBody: true }) : null,
+    errors: result.errors,
+  };
+}
+
+/**
+ * Parse PromptScript source code into the canonical AST, throwing on error.
+ */
+export function parseCanonicalOrThrow(source: string, options?: ParseOptions): CanonicalProgram {
+  const result = parseCanonical(source, options);
+  if (!result.ast || result.errors.length > 0) {
+    throw result.errors[0]!;
+  }
+  return result.ast;
 }
 
 /**
@@ -223,6 +265,41 @@ export function parseFile(
 }
 
 /**
+ * Parse a PromptScript file from disk into the canonical AST.
+ */
+export function parseCanonicalFile(
+  filePath: string,
+  options: Omit<ParseOptions, 'filename'> = {}
+): CanonicalParseResult {
+  try {
+    const source = readFileSync(filePath, 'utf-8');
+    return parseCanonical(source, { ...options, filename: filePath });
+  } catch (err) {
+    const error = err as NodeJS.ErrnoException;
+    return {
+      ast: null,
+      errors: [
+        new ParseError(`Failed to read file: ${error.message}`, {
+          file: filePath,
+          line: 1,
+          column: 1,
+        }),
+      ],
+    };
+  }
+}
+
+/**
+ * Compatibility alias for parseCanonicalFile.
+ */
+export function parseFileCanonical(
+  filePath: string,
+  options: Omit<ParseOptions, 'filename'> = {}
+): CanonicalParseResult {
+  return parseCanonicalFile(filePath, options);
+}
+
+/**
  * Parse a PromptScript file from disk, throwing on error.
  *
  * @param filePath - Path to the .prs file
@@ -253,4 +330,28 @@ export function parseFileOrThrow(
   }
 
   return result.ast;
+}
+
+/**
+ * Parse a PromptScript file into the canonical AST, throwing on error.
+ */
+export function parseCanonicalFileOrThrow(
+  filePath: string,
+  options: Omit<ParseOptions, 'filename'> = {}
+): CanonicalProgram {
+  const result = parseCanonicalFile(filePath, options);
+  if (!result.ast || result.errors.length > 0) {
+    throw result.errors[0]!;
+  }
+  return result.ast;
+}
+
+/**
+ * Compatibility alias for parseCanonicalFileOrThrow.
+ */
+export function parseFileCanonicalOrThrow(
+  filePath: string,
+  options: Omit<ParseOptions, 'filename'> = {}
+): CanonicalProgram {
+  return parseCanonicalFileOrThrow(filePath, options);
 }

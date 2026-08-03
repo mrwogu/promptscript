@@ -16,6 +16,9 @@ import {
   isTextContent,
   ResolveError,
   getSyntaxFeatureUsages,
+  composeBlockBodies,
+  prepareBlockContentForMerge,
+  reconcileBlockBodyAtPath,
 } from '@promptscript/core';
 import { IMPORT_MARKER_PREFIX, getOriginalBlockName } from './imports.js';
 
@@ -261,18 +264,44 @@ function mergeExtension(
   logger?: Logger
 ): Block {
   if (path.length === 0) {
+    const baseContent = prepareBlockContentForMerge(block.canonicalBody, block.content);
+    const extensionContent = prepareBlockContentForMerge(ext.canonicalBody, ext.content);
+    const content = skillContext
+      ? mergeSkillsBlockContent(baseContent, extensionContent, logger)
+      : mergeContent(baseContent, extensionContent, replacementKeys);
     return {
       ...block,
-      content: skillContext
-        ? mergeSkillsBlockContent(block.content, ext.content, logger)
-        : mergeContent(block.content, ext.content, replacementKeys),
+      content,
+      canonicalBody: composeBlockBodies(
+        block.canonicalBody,
+        ext.canonicalBody,
+        baseContent,
+        extensionContent,
+        content
+      ),
     };
   }
 
   // Deep path merge - navigate into ObjectContent or MixedContent
+  const content = mergeAtPath(
+    block.content,
+    path,
+    ext.content,
+    replacementKeys,
+    skillContext,
+    logger
+  );
   return {
     ...block,
-    content: mergeAtPath(block.content, path, ext.content, replacementKeys, skillContext, logger),
+    content,
+    canonicalBody: reconcileBlockBodyAtPath(
+      block.canonicalBody,
+      ext.canonicalBody,
+      block.content,
+      ext.content,
+      content,
+      path
+    ),
   };
 }
 
@@ -319,6 +348,7 @@ function mergeSkillsBlockContent(
   return {
     ...target,
     properties,
+    ...mergeAuxiliaryContent(target, ext),
   };
 }
 
@@ -533,8 +563,20 @@ function extractValue(content: BlockContent): Value {
     case 'ArrayContent':
       return deepClone(content.elements);
     case 'MixedContent':
-      return deepClone(content.properties);
+      return content.text || content.listItems || content.inlineUses
+        ? (deepClone(content) as unknown as Value)
+        : deepClone(content.properties);
   }
+}
+
+function isMixedContentValue(value: Value): value is Value & MixedContent {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    (value as Record<string, unknown>)['type'] === 'MixedContent' &&
+    typeof (value as Record<string, unknown>)['properties'] === 'object'
+  );
 }
 
 /**
@@ -561,6 +603,30 @@ function mergeValue(
     return mergeSkillValue(existing, extContent, logger);
   }
 
+  const existingMixed = isMixedContentValue(existing) ? existing : undefined;
+  if (existingMixed && extContent.type === 'ObjectContent') {
+    return {
+      ...(deepClone(existingMixed) as unknown as MixedContent),
+      properties: mergeRegularProperties(
+        existingMixed.properties,
+        extContent.properties,
+        replacementKeys
+      ),
+      ...mergeAuxiliaryContent(existingMixed, extContent),
+    } as unknown as Value;
+  }
+  if (existingMixed && extContent.type === 'TextContent') {
+    return {
+      ...(deepClone(existingMixed) as unknown as MixedContent),
+      text: existingMixed.text
+        ? {
+            ...extContent,
+            value: `${existingMixed.text.value}\n\n${extContent.value}`,
+          }
+        : deepClone(extContent),
+    } as unknown as Value;
+  }
+
   // Array merging
   if (Array.isArray(existing) && extContent.type === 'ArrayContent') {
     return uniqueConcat(existing, extContent.elements);
@@ -578,6 +644,45 @@ function mergeValue(
       extContent.properties,
       replacementKeys
     );
+  }
+
+  if (
+    typeof existing === 'object' &&
+    existing !== null &&
+    !Array.isArray(existing) &&
+    extContent.type === 'MixedContent'
+  ) {
+    const targetProperties = existingMixed
+      ? existingMixed.properties
+      : (existing as Record<string, Value>);
+    const properties = mergeRegularProperties(
+      targetProperties,
+      extContent.properties,
+      replacementKeys
+    );
+    if (!existingMixed && !extContent.text && !extContent.listItems && !extContent.inlineUses) {
+      return properties;
+    }
+    const text =
+      existingMixed?.text && extContent.text
+        ? {
+            ...extContent.text,
+            value: `${existingMixed.text.value}\n\n${extContent.text.value}`,
+          }
+        : (extContent.text ?? existingMixed?.text);
+    return {
+      ...deepClone(extContent),
+      ...(text ? { text } : {}),
+      properties,
+      ...mergeAuxiliaryContent(
+        existingMixed ?? {
+          type: 'ObjectContent',
+          properties: targetProperties,
+          loc: extContent.loc,
+        },
+        extContent
+      ),
+    } as unknown as Value;
   }
 
   // TextContent merging
@@ -720,6 +825,24 @@ function mergeSkillValue(
 /**
  * Merge two BlockContent objects - handles same types.
  */
+function mergeAuxiliaryContent(
+  target: ObjectContent | MixedContent,
+  ext: ObjectContent | MixedContent
+): Pick<ObjectContent, 'listItems' | 'inlineUses'> {
+  const listItems =
+    target.listItems || ext.listItems
+      ? uniqueConcat(target.listItems ?? [], ext.listItems ?? [])
+      : undefined;
+  const inlineUses =
+    target.inlineUses || ext.inlineUses
+      ? uniqueConcat(target.inlineUses ?? [], ext.inlineUses ?? [])
+      : undefined;
+  return {
+    ...(listItems ? { listItems } : {}),
+    ...(inlineUses ? { inlineUses } : {}),
+  };
+}
+
 function mergeSameTypeContent(
   target: BlockContent,
   ext: BlockContent,
@@ -739,6 +862,7 @@ function mergeSameTypeContent(
           ext.properties,
           replacementKeys
         ),
+        ...mergeAuxiliaryContent(target as ObjectContent, ext),
       } as ObjectContent;
     case 'ArrayContent':
       return {
@@ -770,6 +894,7 @@ function mergeMixedContent(
     ...ext,
     text: mergedText,
     properties: mergeRegularProperties(target.properties, ext.properties, replacementKeys),
+    ...mergeAuxiliaryContent(target, ext),
   } as MixedContent;
 }
 
@@ -809,6 +934,11 @@ function mergeContent(
       type: 'MixedContent',
       text: ext,
       properties: (target as ObjectContent).properties,
+      ...mergeAuxiliaryContent(target, {
+        type: 'ObjectContent',
+        properties: {},
+        loc: ext.loc,
+      }),
       loc: ext.loc,
     } as MixedContent;
   }
@@ -818,6 +948,14 @@ function mergeContent(
       type: 'MixedContent',
       text: target,
       properties: ext.properties,
+      ...mergeAuxiliaryContent(
+        {
+          type: 'ObjectContent',
+          properties: {},
+          loc: target.loc,
+        },
+        ext
+      ),
       loc: ext.loc,
     } as MixedContent;
   }
@@ -837,6 +975,7 @@ function mergeContent(
     return {
       ...mixed,
       properties: mergeRegularProperties(mixed.properties, ext.properties, replacementKeys),
+      ...mergeAuxiliaryContent(mixed, ext),
     };
   }
 
@@ -844,6 +983,7 @@ function mergeContent(
     return {
       ...ext,
       properties: mergeRegularProperties(target.properties, ext.properties, replacementKeys),
+      ...mergeAuxiliaryContent(target, ext),
     };
   }
 
@@ -917,15 +1057,15 @@ function deduplicateConcat(a: string[], b: string[]): string[] {
 /**
  * Unique concatenation of arrays.
  */
-function uniqueConcat(parent: Value[], child: Value[]): Value[] {
+function uniqueConcat<T>(parent: readonly T[], child: readonly T[]): T[] {
   const seen = new Set<string>();
-  const result: Value[] = [];
+  const result: T[] = [];
 
   for (const item of [...parent, ...child]) {
     const key = typeof item === 'object' && item !== null ? JSON.stringify(item) : String(item);
     if (!seen.has(key)) {
       seen.add(key);
-      result.push(deepClone(item as Record<string, unknown>) as Value);
+      result.push(deepClone(item));
     }
   }
 

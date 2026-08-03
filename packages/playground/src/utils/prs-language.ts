@@ -81,7 +81,7 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       [/[{}()[\]]/, '@brackets'],
       [/!(?=\s*:)/, 'operator.replace'],
       [/\.\./, 'operator.range'],
-      [/-(?!\d)/, 'operator.restriction'],
+      [/-(?!\d)/, 'delimiter.list-marker'],
       [/[:,.=?]/, 'delimiter'],
 
       // Strings
@@ -195,7 +195,7 @@ export const prsThemeRules: Monaco.editor.ITokenThemeRule[] = [
   { token: 'identifier', foreground: 'f8fafc' },
   { token: 'operator.replace', foreground: 'facc15', fontStyle: 'bold' },
   { token: 'operator.range', foreground: 'facc15' },
-  { token: 'operator.restriction', foreground: 'facc15' },
+  { token: 'delimiter.list-marker', foreground: 'facc15' },
   { token: 'delimiter', foreground: '94a3b8' },
   { token: 'variable.template', foreground: 'f472b6', fontStyle: 'bold' },
   { token: 'variable.name', foreground: 'fb923c' },

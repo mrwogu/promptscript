@@ -26,6 +26,10 @@ export * from './logger.js';
 // Template interpolation
 export * from './template.js';
 
+// Canonical AST compatibility layer
+export * from './canonical-ast.js';
+export * from './block-merge.js';
+
 // Syntax version registry
 export * from './syntax-versions.js';
 

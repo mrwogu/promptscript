@@ -8,7 +8,7 @@ import {
   getBundledRegistryFiles,
 } from '../index.js';
 import type { Formatter } from '@promptscript/formatters';
-import type { OutputConvention } from '@promptscript/core';
+import type { CanonicalProgram, OutputConvention } from '@promptscript/core';
 
 describe('compile', () => {
   it('should compile a simple file', async () => {
@@ -686,6 +686,51 @@ describe('BrowserCompiler advanced', () => {
     expect(result.success).toBe(true);
     expect(result.outputs.has('mock.md')).toBe(true);
     expect(mockFormatter.format).toHaveBeenCalled();
+  });
+
+  it('should invoke canonical formatter capabilities', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @meta { id: "test" syntax: "1.0.0" }
+        @context {
+          first: "one"
+          """Middle."""
+          second: "two"
+        }
+      `,
+    });
+    const formatCanonical = vi.fn((program: CanonicalProgram) => ({
+      path: 'canonical.md',
+      content: program.type,
+    }));
+    const formatter: Formatter & {
+      formatCanonical: typeof formatCanonical;
+    } = {
+      name: 'canonical',
+      outputPath: 'canonical.md',
+      description: 'Canonical formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => {
+        throw new Error('Legacy formatter path should not run');
+      }),
+      formatCanonical,
+    };
+    const compiler = new BrowserCompiler({
+      fs,
+      formatters: [formatter],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.success).toBe(true);
+    expect(formatCanonical).toHaveBeenCalledOnce();
+    expect(result.outputs.get('canonical.md')?.content).toContain('CanonicalProgram');
+    const canonical = formatCanonical.mock.calls[0]![0];
+    expect(canonical.blocks[0]!.body.entries.map((entry) => entry.type)).toEqual([
+      'FieldEntry',
+      'TextEntry',
+      'FieldEntry',
+    ]);
   });
 
   it('should handle formatter that produces additional files', async () => {

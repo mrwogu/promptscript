@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import type { Program } from '@promptscript/core';
+import { normalizeProgram, toLegacyProgram, type ProgramInput } from '@promptscript/core';
 import type { ValidateOptions, ValidationResult } from './types.js';
 import { createValidator } from './validator.js';
 
@@ -144,11 +144,11 @@ export {
 export { parsePolicies, evaluatePolicies } from './policy/index.js';
 export type { ParsedPolicies } from './policy/index.js';
 
-export function validate(ast: Program, options: ValidateOptions = {}): ValidationResult {
+export function validate(ast: ProgramInput, options: ValidateOptions = {}): ValidationResult {
   const { validator, ...config } = options;
 
   if (validator) {
-    return validator.validate(ast);
+    return validator.validate(toLegacyProgram(normalizeProgram(ast)));
   }
 
   const v = createValidator(config);

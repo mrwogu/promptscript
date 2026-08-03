@@ -5,6 +5,8 @@ import type {
   ParamType,
   Value,
   Block,
+  BlockBody,
+  BlockEntry,
   BlockContent,
   TextContent,
   TemplateExpression,
@@ -16,6 +18,7 @@ import {
   ParamTypeMismatchError,
   UndefinedVariableError,
 } from './errors/index.js';
+import { createBlockBody, reconcileValueNode, valueNodeToValue } from './canonical-ast.js';
 
 /**
  * Context for template interpolation.
@@ -290,6 +293,7 @@ export function interpolateContent(content: BlockContent, ctx: TemplateContext):
       return {
         ...content,
         properties: interpolateProperties(content.properties, ctx),
+        listItems: content.listItems?.map((item) => interpolateValue(item, ctx)),
       };
 
     case 'ArrayContent':
@@ -305,6 +309,7 @@ export function interpolateContent(content: BlockContent, ctx: TemplateContext):
           ? { ...content.text, value: interpolateText(content.text.value, ctx) }
           : undefined,
         properties: interpolateProperties(content.properties, ctx),
+        listItems: content.listItems?.map((item) => interpolateValue(item, ctx)),
       };
   }
 }
@@ -327,10 +332,63 @@ function interpolateProperties(
  * Interpolate a block.
  */
 function interpolateBlock(block: Block, ctx: TemplateContext): Block {
+  const content = interpolateContent(block.content, ctx);
   return {
     ...block,
-    content: interpolateContent(block.content, ctx),
+    content,
+    canonicalBody: block.canonicalBody
+      ? interpolateBlockBody(block.canonicalBody, content, ctx)
+      : undefined,
   };
+}
+
+function interpolateBlockBody(
+  body: BlockBody,
+  content: BlockContent,
+  ctx: TemplateContext
+): BlockBody {
+  const entries: BlockEntry[] = body.entries.map((entry) => {
+    if (entry.type === 'TextEntry') {
+      return { ...entry, text: interpolateText(entry.text, ctx) };
+    }
+    if (entry.type === 'FieldEntry') {
+      return {
+        ...entry,
+        value: reconcileValueNode(
+          entry.value,
+          interpolateValue(valueNodeToValue(entry.value), ctx)
+        ),
+        ...(entry.defaultValue
+          ? {
+              defaultValue: reconcileValueNode(
+                entry.defaultValue,
+                interpolateValue(valueNodeToValue(entry.defaultValue), ctx)
+              ),
+            }
+          : {}),
+      };
+    }
+    if (entry.type === 'ListEntry') {
+      return {
+        ...entry,
+        value: reconcileValueNode(
+          entry.value,
+          interpolateValue(valueNodeToValue(entry.value), ctx)
+        ),
+      };
+    }
+    return entry;
+  });
+  const text =
+    content.type === 'TextContent'
+      ? content
+      : content.type === 'MixedContent'
+        ? content.text
+        : undefined;
+  return createBlockBody(entries, body.loc, {
+    projection: content.type,
+    ...(text ? { text } : {}),
+  });
 }
 
 /**
@@ -359,9 +417,15 @@ export function interpolateAST(ast: Program, ctx: TemplateContext): Program {
     // Interpolate blocks
     blocks: ast.blocks.map((b) => interpolateBlock(b, ctx)),
     // Interpolate extend blocks
-    extends: ast.extends.map((e) => ({
-      ...e,
-      content: interpolateContent(e.content, ctx),
-    })),
+    extends: ast.extends.map((extension) => {
+      const content = interpolateContent(extension.content, ctx);
+      return {
+        ...extension,
+        content,
+        canonicalBody: extension.canonicalBody
+          ? interpolateBlockBody(extension.canonicalBody, content, ctx)
+          : undefined,
+      };
+    }),
   };
 }

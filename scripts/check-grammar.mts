@@ -44,7 +44,7 @@ const TOKEN_SCOPE_MAP: Record<string, string> = {
   BooleanType: 'support.type',
   TemplateOpen: 'punctuation.definition.template',
   TemplateClose: 'punctuation.definition.template',
-  Dash: 'keyword.operator',
+  Dash: 'punctuation.definition.list',
   DotDot: 'keyword.operator',
   LBrace: 'punctuation',
   RBrace: 'punctuation',

@@ -6,7 +6,7 @@ import type {
   Program,
   Value,
 } from '@promptscript/core';
-import { DEFAULT_PRETTIER_OPTIONS } from '@promptscript/core';
+import { DEFAULT_PRETTIER_OPTIONS, reconcileBlockBody, valueNodeToValue } from '@promptscript/core';
 import { ConventionRenderer } from './convention-renderer.js';
 import { StandardsExtractor } from './extractors/index.js';
 import type { FormatOptions, Formatter, FormatterOutput } from './types.js';
@@ -145,7 +145,47 @@ export abstract class BaseFormatter implements Formatter {
     if (content.type === 'ArrayContent') {
       return content.elements;
     }
+    if (content.type === 'ObjectContent' || content.type === 'MixedContent') {
+      const fieldItems = content.properties['items'];
+      const textItems =
+        content.type === 'MixedContent' && content.text
+          ? content.text.value
+              .trim()
+              .split('\n')
+              .map((line) => line.trim().replace(/^-\s*/, ''))
+              .filter((line) => line.length > 0)
+          : [];
+      return [
+        ...textItems,
+        ...(Array.isArray(fieldItems) ? fieldItems : []),
+        ...(content.listItems ?? []),
+      ];
+    }
     return [];
+  }
+
+  protected getBlockArrayElements(block: Block): Value[] {
+    if (!block.canonicalBody) return this.getArrayElements(block.content);
+
+    const body = reconcileBlockBody(block.canonicalBody, block.content);
+    const result: Value[] = [];
+    for (const entry of body.entries) {
+      if (entry.type === 'TextEntry') {
+        result.push(
+          ...entry.text
+            .trim()
+            .split('\n')
+            .map((line) => line.trim().replace(/^-\s*/, ''))
+            .filter((line) => line.length > 0)
+        );
+      } else if (entry.type === 'ListEntry') {
+        result.push(valueNodeToValue(entry.value));
+      } else if (entry.type === 'FieldEntry' && entry.name === 'items') {
+        const value = valueNodeToValue(entry.value);
+        if (Array.isArray(value)) result.push(...value);
+      }
+    }
+    return result;
   }
 
   /**

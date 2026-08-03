@@ -815,7 +815,7 @@ export class GitHubFormatter extends BaseFormatter {
     // Add restrictions if available
     const restrictions = this.findBlock(ast, 'restrictions');
     if (restrictions) {
-      const items = this.extractRestrictionItems(restrictions.content);
+      const items = this.extractRestrictionItems(restrictions);
       if (items.length > 0) {
         lines.push('## Restrictions');
         lines.push('');
@@ -835,9 +835,11 @@ export class GitHubFormatter extends BaseFormatter {
   /**
    * Extract restriction items from block content.
    */
-  private extractRestrictionItems(content: Block['content']): string[] {
-    if (content.type === 'ArrayContent') {
-      return content.elements.map((item) => this.valueToString(item));
+  private extractRestrictionItems(block: Block): string[] {
+    const { content } = block;
+    const listItems = this.getBlockArrayElements(block);
+    if (listItems.length > 0) {
+      return listItems.map((item) => this.valueToString(item));
     }
 
     if (content.type === 'TextContent') {
@@ -1434,10 +1436,9 @@ export class GitHubFormatter extends BaseFormatter {
 
     let items: string[] = [];
 
-    if (block.content.type === 'ArrayContent') {
-      items = block.content.elements.map((item) =>
-        this.formatRestriction(this.valueToString(item))
-      );
+    const listItems = this.getBlockArrayElements(block);
+    if (listItems.length > 0) {
+      items = listItems.map((item) => this.formatRestriction(this.valueToString(item)));
     } else if (block.content.type === 'TextContent') {
       items = block.content.value
         .trim()

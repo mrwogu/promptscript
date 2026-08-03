@@ -29,6 +29,8 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | Module                | Description                                                                        |
 | :-------------------- | :--------------------------------------------------------------------------------- |
 | **types/ast**         | AST interfaces (`Program`, `Block`, `Value`, `BlockContent`, etc.)                 |
+| **canonical-ast**     | Immutable canonical AST factories and legacy compatibility projections             |
+| **block-merge**       | Shared inheritance and import block merge policies                                 |
 | **types/config**      | Configuration schema (`PromptScriptConfig`, input/output/registry types)           |
 | **types/constants**   | Shared constants (block names, syntax version)                                     |
 | **types/convention**  | Convention type definitions for formatter output                                   |
@@ -81,6 +83,24 @@ The version string is the key in `SYNTAX_VERSIONS`, not a property of `SyntaxVer
 | :-------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
 | `levenshteinDistance(a, b)`                         | Calculates the Levenshtein edit distance between strings `a` and `b`                                              |
 | `findClosestMatch(input, candidates, maxDistance?)` | Returns the closest candidate to `input` within `maxDistance` edits (default 2), or `undefined` if none qualifies |
+
+### Canonical AST
+
+`CanonicalProgram` is the immutable, source-ordered AST. Its
+`operations` preserve declaration order and each canonical block exposes one
+ordered `body.entries` sequence for properties, text, list items, and inline
+uses.
+
+| Export                                | Description                                                        |
+| :------------------------------------ | :----------------------------------------------------------------- |
+| `createCanonicalProgram(init)`        | Creates and deeply freezes a canonical program                     |
+| `updateCanonicalProgramOperations()`  | Returns a frozen program with a replacement operation sequence     |
+| `updateCanonicalBlockBody()`          | Returns a frozen block with a replacement ordered body             |
+| `normalizeProgram(input)`             | Converts canonical or legacy input to a canonical program          |
+| `toLegacyProgram(program)`            | Creates a detached mutable compatibility projection                |
+| `getCanonicalBlocks(program)`         | Reads blocks from either AST representation                        |
+| `mergeBlockContent(base, next, rule)` | Applies a shared inheritance or import content policy              |
+| `mergeBlockCollections(...)`          | Merges one cross-layer match while retaining same-layer duplicates |
 
 ## Usage (internal)
 

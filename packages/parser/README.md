@@ -20,22 +20,28 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
   |  tokenize  |     |  grammar)      |     |  transform) |
   +------------+     +----------------+     +-------------+
         |                   |                      |
-    Token stream     Concrete Syntax Tree    Program AST
+    Token stream     Concrete Syntax Tree   CanonicalProgram
 ```
 
 The parser uses [Chevrotain](https://chevrotain.io/) for lexing and parsing, then
-transforms the Concrete Syntax Tree (CST) into the PromptScript AST via a visitor.
+transforms the Concrete Syntax Tree (CST) into an immutable, source-ordered
+canonical AST via a visitor. The original mutable AST remains available through
+the legacy parse functions.
 
 ## API
 
 ### Parse Functions
 
-| Function                 | Description                                                       |
-| :----------------------- | :---------------------------------------------------------------- |
-| `parse(input)`           | Parse source text, returns `ParseResult` with AST and diagnostics |
-| `parseOrThrow(input)`    | Parse source text, throws `ParseError` on failure                 |
-| `parseFile(path)`        | Parse a `.prs` file from disk                                     |
-| `parseFileOrThrow(path)` | Parse a `.prs` file, throws on failure                            |
+| Function                          | Description                                                             |
+| :-------------------------------- | :---------------------------------------------------------------------- |
+| `parse(input)`                    | Parse source text to a mutable compatibility AST and diagnostics        |
+| `parseOrThrow(input)`             | Parse source text to a mutable compatibility AST, throwing on failure   |
+| `parseFile(path)`                 | Parse a `.prs` file to a mutable compatibility AST                      |
+| `parseFileOrThrow(path)`          | Parse a `.prs` file to a mutable compatibility AST, throwing on failure |
+| `parseCanonical(input)`           | Parse source text to an immutable, source-ordered canonical AST         |
+| `parseCanonicalOrThrow(input)`    | Parse to a canonical AST, throwing `ParseError` on failure              |
+| `parseCanonicalFile(path)`        | Parse a `.prs` file from disk to a canonical AST                        |
+| `parseCanonicalFileOrThrow(path)` | Parse a `.prs` file from disk to a canonical AST, throwing on failure   |
 
 ### Lexer
 
@@ -55,10 +61,11 @@ transforms the Concrete Syntax Tree (CST) into the PromptScript AST via a visito
 
 ### Types
 
-| Type           | Description                      |
-| :------------- | :------------------------------- |
-| `ParseOptions` | Options for parse functions      |
-| `ParseResult`  | Result containing AST and errors |
+| Type                   | Description                          |
+| :--------------------- | :----------------------------------- |
+| `ParseOptions`         | Options for parse functions          |
+| `ParseResult`          | Mutable compatibility AST and errors |
+| `CanonicalParseResult` | Immutable canonical AST and errors   |
 
 ## Usage (internal)
 
@@ -78,6 +85,9 @@ const ast = parseOrThrow(sourceText);
 // Parse from file
 const fileResult = await parseFile('./project.prs');
 ```
+
+Use `parseCanonical` or `parseCanonicalOrThrow` for new integrations that need
+exact top-level and block-body source order.
 
 ## License
 

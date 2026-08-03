@@ -125,7 +125,7 @@ class PromptScriptLexer(RegexLexer):
             (r"\s+", Whitespace),
             # Triple-quoted strings (multiline content)
             (r'"""', String.Doc, "docstring"),
-            # List item marker (for restrictions)
+            # List item marker in any block body
             (r"(-)(\s+)", bygroups(Punctuation, Whitespace)),
             # Known property names (highlighted as attributes)
             (

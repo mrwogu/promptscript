@@ -59,14 +59,14 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * program
-   *   : metaBlock? inheritDecl? useDecl* (extendBlock | block)*
+   *   : metaBlock? (inheritDecl | useDecl | extendBlock | block)*
    */
   public program = this.RULE('program', () => {
     this.OPTION(() => this.SUBRULE(this.metaBlock));
-    this.OPTION2(() => this.SUBRULE(this.inheritDecl));
-    this.MANY(() => this.SUBRULE(this.useDecl));
-    this.MANY2(() =>
+    this.MANY(() =>
       this.OR([
+        { ALT: () => this.SUBRULE(this.inheritDecl) },
+        { ALT: () => this.SUBRULE(this.useDecl) },
         { ALT: () => this.SUBRULE(this.extendBlock) },
         { ALT: () => this.SUBRULE(this.block) },
       ])
@@ -131,30 +131,15 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * extendBlock
-   *   : '@' 'extend' dotPath '{' extendBlockContent '}'
+   *   : '@' 'extend' dotPath '{' blockContent '}'
    */
   private extendBlock = this.RULE('extendBlock', () => {
     this.CONSUME(At);
     this.CONSUME(Extend);
     this.SUBRULE(this.dotPath);
     this.CONSUME(LBrace);
-    this.SUBRULE(this.extendBlockContent);
+    this.SUBRULE(this.blockContent);
     this.CONSUME(RBrace);
-  });
-
-  /**
-   * extendBlockContent
-   *   : (TextBlock | restrictionItem | inlineUse | extendField)*
-   */
-  private extendBlockContent = this.RULE('extendBlockContent', () => {
-    this.MANY(() =>
-      this.OR([
-        { ALT: () => this.CONSUME(TextBlock) },
-        { ALT: () => this.SUBRULE(this.restrictionItem) },
-        { ALT: () => this.SUBRULE(this.inlineUse), GATE: () => this.isInlineUseAhead() },
-        { ALT: () => this.SUBRULE(this.extendField) },
-      ])
-    );
   });
 
   /**
@@ -204,34 +189,11 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * field
-   *   : (Identifier | StringLiteral | StringType | NumberType | BooleanType) '?'? ':' value ('=' value)?
+   *   : (Identifier | StringLiteral | StringType | NumberType | BooleanType) ('?' | '!')? ':' value ('=' value)?
    *
    * Note: StringType/NumberType/BooleanType are also valid field keys (e.g., { string: "value" })
    */
   private field = this.RULE('field', () => {
-    this.OR([
-      { ALT: () => this.CONSUME(Identifier) },
-      { ALT: () => this.CONSUME(StringLiteral) },
-      { ALT: () => this.CONSUME(StringType) },
-      { ALT: () => this.CONSUME(NumberType) },
-      { ALT: () => this.CONSUME(BooleanType) },
-    ]);
-    this.OPTION(() => this.CONSUME(Question));
-    this.CONSUME(Colon);
-    this.SUBRULE(this.value);
-    this.OPTION2(() => {
-      this.CONSUME(Equals);
-      this.SUBRULE2(this.value);
-    });
-  });
-
-  /**
-   * extendField
-   *   : (Identifier | StringLiteral | StringType | NumberType | BooleanType) ('?' | '!')? ':' value ('=' value)?
-   *
-   * The replace modifier is accepted only for top-level fields inside @extend.
-   */
-  private extendField = this.RULE('extendField', () => {
     this.OR([
       { ALT: () => this.CONSUME(Identifier) },
       { ALT: () => this.CONSUME(StringLiteral) },

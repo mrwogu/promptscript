@@ -1,5 +1,6 @@
-import type { Program } from '@promptscript/core';
+import type { ProgramInput } from '@promptscript/core';
 import { FormatterRegistry } from './registry.js';
+import { formatProgram } from './formatter-adapter.js';
 import type {
   Formatter,
   FormatterClass,
@@ -52,7 +53,7 @@ export interface StandaloneFormatOptions extends FormatOptions {
  * });
  * ```
  */
-export function format(ast: Program, options: StandaloneFormatOptions = {}): FormatterOutput {
+export function format(ast: ProgramInput, options: StandaloneFormatOptions = {}): FormatterOutput {
   const { formatter: formatterOption, ...formatOptions } = options;
 
   let formatter: Formatter;
@@ -74,7 +75,7 @@ export function format(ast: Program, options: StandaloneFormatOptions = {}): For
     formatter = formatterOption;
   }
 
-  return formatter.format(ast, formatOptions);
+  return formatProgram(formatter, ast, formatOptions);
 }
 
 /**

@@ -1,7 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse, parseFile, parseFileOrThrow } from '../parse.js';
+import {
+  parse,
+  parseCanonicalFile,
+  parseCanonicalFileOrThrow,
+  parseCanonicalOrThrow,
+  parseFile,
+  parseFileCanonical,
+  parseFileCanonicalOrThrow,
+  parseFileOrThrow,
+} from '../parse.js';
 import { ParseError } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -117,5 +126,38 @@ describe('parseFileOrThrow', () => {
       expect(err).toBeInstanceOf(ParseError);
       expect((err as ParseError).location?.file).toBe('/non/existent/file.prs');
     }
+  });
+});
+
+describe('canonical file parsing', () => {
+  it('returns canonical programs through both file API names', () => {
+    const filePath = join(fixturesDir, 'minimal.prs');
+
+    const canonical = parseCanonicalFile(filePath);
+    const alias = parseFileCanonical(filePath);
+
+    expect(canonical.errors).toEqual([]);
+    expect(canonical.ast?.type).toBe('CanonicalProgram');
+    expect(Object.isFrozen(canonical.ast)).toBe(true);
+    expect(alias.ast).toEqual(canonical.ast);
+  });
+
+  it('reports file read failures without throwing', () => {
+    const result = parseCanonicalFile('/non/existent/canonical.prs');
+
+    expect(result.ast).toBeNull();
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toBeInstanceOf(ParseError);
+    expect(result.errors[0]?.location?.file).toBe('/non/existent/canonical.prs');
+  });
+
+  it('throws from canonical source and file helpers on invalid input', () => {
+    const filePath = join(fixturesDir, 'minimal.prs');
+
+    expect(parseCanonicalFileOrThrow(filePath).type).toBe('CanonicalProgram');
+    expect(parseFileCanonicalOrThrow(filePath).type).toBe('CanonicalProgram');
+    expect(() => parseCanonicalOrThrow('@meta { id: }')).toThrow(ParseError);
+    expect(() => parseCanonicalFileOrThrow('/non/existent/canonical.prs')).toThrow(ParseError);
+    expect(() => parseFileCanonicalOrThrow('/non/existent/canonical.prs')).toThrow(ParseError);
   });
 });
