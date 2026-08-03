@@ -401,6 +401,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/blockOwnsSection/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/compareVersions/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -533,6 +537,18 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getPrimarySectionForBlock/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getSectionContract/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getSectionsForBlock/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/getSyntaxFeatureUsages/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -653,6 +669,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/normalizeLegacyHeadingEntries/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/normalizeProgram/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -669,6 +689,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/presentationEntryKey/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/reconcileBlockBody/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -682,6 +706,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/resolvePath/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/functions/selectPresentationEntries/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
@@ -925,6 +953,14 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PresentationEntry/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PresentationSelection/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -966,6 +1002,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/ScalarValueNode/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/interfaces/SectionContract/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
@@ -1177,6 +1217,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/PresentationPrecedence/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/type-aliases/PrimitiveValue/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -1233,6 +1277,10 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/CONTEXTUAL_DIRECTIVES/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/DEFAULT_OUTPUT_PATHS/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -1278,6 +1326,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/RESERVED_WORDS/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/core/src/variables/SECTION_REGISTRY/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
@@ -1509,6 +1561,14 @@
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/resolveSectionTitle/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/resolveSourceSectionTitle/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/functions/serializeMerged/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
@@ -1598,6 +1658,10 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/SectionSpec/</loc>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/api-reference/formatters/src/interfaces/SectionTitleOptions/</loc>
          <lastmod>2026-08-03</lastmod>
     </url>
     <url>
