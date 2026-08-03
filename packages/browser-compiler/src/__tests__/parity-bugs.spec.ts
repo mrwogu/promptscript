@@ -14,6 +14,64 @@ import type { ObjectContent, Value, ResolveError } from '@promptscript/core';
 import type { Formatter, FormatterOutput, FormatOptions } from '@promptscript/formatters';
 import type { Program } from '@promptscript/core';
 
+describe('Issue #330: shared block merge engine', () => {
+  it('uses imported scalar values while preserving local-only fields', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `
+        @use ./shared
+        @context {
+          runtime: "local"
+          localOnly: true
+        }
+      `,
+      'shared.prs': `
+        @context {
+          runtime: "imported"
+          importedOnly: true
+        }
+      `,
+    });
+    const resolver = new BrowserResolver({ fs });
+
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.errors).toEqual([]);
+    const context = result.ast?.blocks.find((block) => block.name === 'context');
+    expect(context?.content.type).toBe('ObjectContent');
+    if (context?.content.type !== 'ObjectContent') {
+      throw new Error('expected ObjectContent for context block');
+    }
+    expect(context.content.properties).toMatchObject({
+      runtime: 'imported',
+      localOnly: true,
+      importedOnly: true,
+    });
+  });
+
+  it('keeps explicit items fields separate from extension dash lists', async () => {
+    const fs = new VirtualFileSystem({
+      'project.prs': `@restrictions {
+  items: ["field"]
+}
+@extend restrictions {
+  - "list"
+}`,
+    });
+    const resolver = new BrowserResolver({ fs });
+
+    const result = await resolver.resolve('project.prs');
+    const restrictions = result.ast?.blocks.find((block) => block.name === 'restrictions');
+
+    expect(result.errors).toEqual([]);
+    expect(restrictions?.content.type).toBe('ObjectContent');
+    if (restrictions?.content.type !== 'ObjectContent') {
+      throw new Error('expected ObjectContent for restrictions block');
+    }
+    expect(restrictions.content.properties['items']).toEqual(['field']);
+    expect(restrictions.content.listItems).toEqual(['list']);
+  });
+});
+
 // ============================================================
 // Issue 1: Inline @use declarations (inlineUses) are never
 // processed by the browser resolver.

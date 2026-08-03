@@ -24,6 +24,160 @@ describe('BrowserResolver', () => {
       expect(result.sources).toContain('project.prs');
     });
 
+    it('preserves ordered canonical entries from direct extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@context {
+  before: "base"
+  """Base text"""
+}
+@extend context {
+  """Extension text"""
+  after: "extension"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const body = result.ast?.blocks[0]?.canonicalBody;
+
+      expect(result.errors).toEqual([]);
+      expect(body?.entries.map((entry) => entry.type)).toEqual([
+        'FieldEntry',
+        'TextEntry',
+        'TextEntry',
+        'FieldEntry',
+      ]);
+      expect(
+        body?.entries.filter((entry) => entry.type === 'TextEntry').map((entry) => entry.text)
+      ).toEqual(['Base text', 'Extension text']);
+      expect(body?.entries[2]?.loc.line).toBe(6);
+    });
+
+    it('merges extension list and inline-use side channels', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@restrictions {
+  items: ["base field"]
+  - "base list"
+  @use ./base
+}
+@extend restrictions {
+  items: ["extension field"]
+  - "extension list"
+  @use ./extension
+}`,
+        'base.prs': '@identity { """Base""" }',
+        'extension.prs': '@identity { """Extension""" }',
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const content = result.ast?.blocks.find((block) => block.name === 'restrictions')?.content;
+      if (content?.type !== 'ObjectContent') {
+        throw new Error('Expected object content');
+      }
+
+      expect(result.errors).toEqual([]);
+      expect(content.properties['items']).toEqual(['base field', 'extension field']);
+      expect(content.listItems).toEqual(['base list', 'extension list']);
+      expect(content.inlineUses?.map((use) => use.path.raw)).toEqual(['./base', './extension']);
+    });
+
+    it('merges side channels for root skills extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@skills {
+  review: { description: "Base" }
+  items: { description: "Base item skill" }
+  - "base list"
+  @use ./base
+}
+@extend skills {
+  review: { trigger: "extended" }
+  items: { trigger: "extended item skill" }
+  - "extension list"
+  @use ./extension
+}`,
+        'base.prs': '@identity { """Base""" }',
+        'extension.prs': '@identity { """Extension""" }',
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const content = result.ast?.blocks.find((block) => block.name === 'skills')?.content;
+      if (content?.type !== 'ObjectContent') {
+        throw new Error('Expected object content');
+      }
+
+      expect(result.errors).toEqual([]);
+      expect(content.listItems).toEqual(['base list', 'extension list']);
+      expect(content.inlineUses?.map((use) => use.path.raw)).toEqual(['./extension']);
+    });
+
+    it('preserves nested canonical locations from deep extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@standards {
+  tooling: { baseOnly: "base" }
+}
+@extend standards.tooling {
+  incomingOnly: "extension"
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const entry = result.ast?.blocks[0]?.canonicalBody?.entries[0];
+      if (entry?.type !== 'FieldEntry' || entry.value.type !== 'ObjectValueNode') {
+        throw new Error('Expected tooling object field');
+      }
+      const fields = new Map(entry.value.fields.map((field) => [field.name, field]));
+
+      expect(result.errors).toEqual([]);
+      expect(fields.get('baseOnly')!.loc).toMatchObject({
+        file: 'project.prs',
+        line: 2,
+      });
+      expect(fields.get('incomingOnly')!.loc).toMatchObject({
+        file: 'project.prs',
+        line: 5,
+      });
+    });
+
+    it('preserves text and properties in deep mixed extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@standards {
+  tooling: { baseOnly: "base" }
+}
+@extend standards.tooling {
+  """Extension text"""
+  incomingOnly: "extension"
+}
+@extend standards.tooling {
+  second: "two"
+}
+@extend standards.tooling {
+  """More text"""
+}`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const content = result.ast?.blocks[0]?.content;
+      if (content?.type !== 'ObjectContent') {
+        throw new Error('Expected standards object content');
+      }
+      const tooling = content.properties['tooling'] as Record<string, Value>;
+
+      expect(result.errors).toEqual([]);
+      expect(tooling['type']).toBe('MixedContent');
+      expect(tooling['text']).toMatchObject({
+        value: 'Extension text\n\nMore text',
+      });
+      expect(tooling['properties']).toMatchObject({
+        baseOnly: 'base',
+        incomingOnly: 'extension',
+        second: 'two',
+      });
+    });
+
     it('should normalize paths with backslashes', async () => {
       const fs = new VirtualFileSystem({
         'dir/project.prs': `@meta { id: "test" syntax: "1.0.0" }`,

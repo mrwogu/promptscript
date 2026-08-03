@@ -928,7 +928,7 @@ ${items.map((i) => '- ' + i).join('\n')}`;
     const block = this.findBlock(ast, 'restrictions');
     if (!block) return null;
 
-    const items = this.extractRestrictionsItems(block.content);
+    const items = this.extractRestrictionsItems(block);
     if (items.length === 0) return null;
 
     return `## Don'ts
@@ -939,9 +939,11 @@ ${items.map((i) => '- ' + i).join('\n')}`;
   /**
    * Extract restriction items from block content.
    */
-  private extractRestrictionsItems(content: Block['content']): string[] {
-    if (content.type === 'ArrayContent') {
-      return content.elements.map((item) => this.formatRestriction(this.valueToString(item)));
+  private extractRestrictionsItems(block: Block): string[] {
+    const { content } = block;
+    const listItems = this.getBlockArrayElements(block);
+    if (listItems.length > 0) {
+      return listItems.map((item) => this.formatRestriction(this.valueToString(item)));
     }
 
     if (content.type === 'TextContent') {

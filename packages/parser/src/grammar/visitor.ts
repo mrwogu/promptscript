@@ -1,25 +1,37 @@
 import { CstNode, IToken } from 'chevrotain';
 import { parser } from './parser.js';
 import type {
-  Program,
+  ArrayElementNode,
+  ArrayValueNode,
+  BlockBody,
+  BlockEntry,
+  CanonicalBlock,
+  CanonicalExtendBlock,
+  CanonicalProgram,
+  FieldEntry,
+  ProgramOperation,
   MetaBlock,
   InheritDeclaration,
   UseDeclaration,
   InlineUseDeclaration,
-  Block,
-  ExtendBlock,
   ReplaceModifier,
-  BlockContent,
   PathReference,
   Value,
   TextContent,
-  ObjectContent,
   TypeExpression,
   SourceLocation,
   ParamArgument,
   ParamDefinition,
   ParamType,
   TemplateExpression,
+  ValueNode,
+} from '@promptscript/core';
+import {
+  createBlockBody,
+  createCanonicalBlock,
+  createCanonicalExtendBlock,
+  createCanonicalProgram,
+  createValueNode,
 } from '@promptscript/core';
 
 // ============================================================
@@ -69,13 +81,15 @@ interface InlineUseCstCtx {
 interface BlockCstCtx {
   At: IToken[];
   Identifier: IToken[];
+  LBrace: IToken[];
   blockContent: CstNode[];
 }
 
 interface ExtendBlockCstCtx {
   At: IToken[];
   dotPath: CstNode[];
-  extendBlockContent: CstNode[];
+  LBrace: IToken[];
+  blockContent: CstNode[];
 }
 
 interface BlockContentCstCtx {
@@ -85,14 +99,8 @@ interface BlockContentCstCtx {
   inlineUse?: CstNode[];
 }
 
-interface ExtendBlockContentCstCtx {
-  TextBlock?: IToken[];
-  extendField?: CstNode[];
-  restrictionItem?: CstNode[];
-  inlineUse?: CstNode[];
-}
-
 interface RestrictionItemCstCtx {
+  Dash: IToken[];
   StringLiteral: IToken[];
 }
 
@@ -123,10 +131,12 @@ interface ValueCstCtx {
 }
 
 interface ArrayCstCtx {
+  LBracket: IToken[];
   value?: CstNode[];
 }
 
 interface ObjectCstCtx {
+  LBrace: IToken[];
   field?: CstNode[];
 }
 
@@ -187,6 +197,31 @@ interface TemplateExprCstCtx {
   TemplateOpen: IToken[];
 }
 
+interface ParsedField {
+  name: string;
+  value: Value;
+  valueNode: ValueNode;
+  loc: SourceLocation;
+  optional?: boolean;
+  defaultValue?: Value;
+  defaultValueNode?: ValueNode;
+  isParamsDef?: boolean;
+  paramsDefs?: ParamDefinition[];
+  replace?: boolean;
+  replaceLoc?: SourceLocation;
+}
+
+interface ParsedBlockContent {
+  body: BlockBody;
+  replacements: ReplaceModifier[];
+}
+
+interface ParsedRestrictionItem {
+  value: string;
+  markerLoc: SourceLocation;
+  valueLoc: SourceLocation;
+}
+
 // Get the base visitor class from the parser
 const BaseVisitor = parser.getBaseCstVisitorConstructor();
 
@@ -195,6 +230,11 @@ const BaseVisitor = parser.getBaseCstVisitorConstructor();
  * Returns the value for the given variable name, or undefined if not set.
  */
 export type EnvProvider = (name: string) => string | undefined;
+
+export interface VisitorDiagnostic {
+  readonly message: string;
+  readonly loc: SourceLocation;
+}
 
 /**
  * Default environment provider that uses process.env.
@@ -209,6 +249,9 @@ class PromptScriptVisitor extends BaseVisitor {
   private filename: string = '<unknown>';
   private interpolateEnv: boolean = false;
   private envProvider: EnvProvider = defaultEnvProvider;
+  private diagnostics: VisitorDiagnostic[] = [];
+  private fieldCache = new Map<string, ParsedField>();
+  private directBlockFields = new Set<string>();
 
   constructor() {
     super();
@@ -244,6 +287,16 @@ class PromptScriptVisitor extends BaseVisitor {
     this.envProvider = defaultEnvProvider;
   }
 
+  resetDiagnostics(): void {
+    this.diagnostics = [];
+  }
+
+  takeDiagnostics(): VisitorDiagnostic[] {
+    const diagnostics = this.diagnostics;
+    this.diagnostics = [];
+    return diagnostics;
+  }
+
   /**
    * Create source location from a token.
    */
@@ -257,41 +310,91 @@ class PromptScriptVisitor extends BaseVisitor {
     };
   }
 
+  private fieldKeyToken(ctx: FieldCstCtx): IToken | undefined {
+    return (
+      ctx.Identifier?.[0] ??
+      ctx.StringLiteral?.[0] ??
+      ctx.StringType?.[0] ??
+      ctx.NumberType?.[0] ??
+      ctx.BooleanType?.[0]
+    );
+  }
+
+  private fieldCacheKey(token: IToken): string | undefined {
+    if (!Number.isFinite(token.startOffset) || !Number.isFinite(token.endOffset)) {
+      return undefined;
+    }
+    return `${token.startOffset}:${token.endOffset}`;
+  }
+
   /**
-   * program → Program
+   * program → CanonicalProgram
    */
-  program(ctx: ProgramCstCtx, filename: string = '<unknown>'): Program {
+  program(ctx: ProgramCstCtx, filename: string = '<unknown>'): CanonicalProgram {
     this.filename = filename;
-
-    const program: Program = {
-      type: 'Program',
-      uses: [],
-      blocks: [],
-      extends: [],
-      loc: { file: this.filename, line: 1, column: 1 },
-    };
-
-    if (ctx.metaBlock) {
-      program.meta = this.visit(ctx.metaBlock[0]!);
+    this.fieldCache.clear();
+    this.directBlockFields.clear();
+    const sourceLayerId = filename;
+    const declarations = [
+      ...(ctx.inheritDecl ?? []),
+      ...(ctx.useDecl ?? []),
+      ...(ctx.block ?? []),
+      ...(ctx.extendBlock ?? []),
+    ]
+      .map(
+        (node) =>
+          this.visit(node) as
+            | InheritDeclaration
+            | UseDeclaration
+            | CanonicalBlock
+            | CanonicalExtendBlock
+      )
+      .sort((left, right) => (left.loc.offset ?? 0) - (right.loc.offset ?? 0));
+    const operations: ProgramOperation[] = declarations.map((declaration) => {
+      switch (declaration.type) {
+        case 'InheritDeclaration':
+          return {
+            type: 'InheritOperation',
+            declaration,
+            sourceLayerId,
+            loc: declaration.loc,
+          };
+        case 'UseDeclaration':
+          return {
+            type: 'UseOperation',
+            declaration,
+            sourceLayerId,
+            loc: declaration.loc,
+          };
+        case 'CanonicalBlock':
+          return {
+            type: 'BlockOperation',
+            block: declaration,
+            sourceLayerId,
+            loc: declaration.loc,
+          };
+        case 'CanonicalExtendBlock':
+          return {
+            type: 'ExtendOperation',
+            extension: declaration,
+            sourceLayerId,
+            loc: declaration.loc,
+          };
+      }
+    });
+    const inherited = operations.filter((operation) => operation.type === 'InheritOperation');
+    for (const duplicate of inherited.slice(1)) {
+      this.diagnostics.push({
+        message: 'Only one @inherit declaration is allowed.',
+        loc: duplicate.loc,
+      });
     }
 
-    if (ctx.inheritDecl) {
-      program.inherit = this.visit(ctx.inheritDecl[0]!);
-    }
-
-    if (ctx.useDecl) {
-      program.uses = ctx.useDecl.map((node: CstNode) => this.visit(node));
-    }
-
-    if (ctx.block) {
-      program.blocks = ctx.block.map((node: CstNode) => this.visit(node));
-    }
-
-    if (ctx.extendBlock) {
-      program.extends = ctx.extendBlock.map((node: CstNode) => this.visit(node));
-    }
-
-    return program;
+    return createCanonicalProgram({
+      meta: ctx.metaBlock ? this.visit(ctx.metaBlock[0]!) : undefined,
+      operations,
+      loc: { file: this.filename, line: 1, column: 1, offset: 0 },
+    });
   }
 
   /**
@@ -393,65 +496,72 @@ class PromptScriptVisitor extends BaseVisitor {
   }
 
   /**
-   * block → Block
+   * block → CanonicalBlock
    */
-  block(ctx: BlockCstCtx): Block {
+  block(ctx: BlockCstCtx): CanonicalBlock {
     const name = ctx.Identifier[0]!.image;
-    const content = this.visit(ctx.blockContent[0]!);
-
-    return {
-      type: 'Block',
+    const { body, replacements } = this.visit(ctx.blockContent[0]!) as ParsedBlockContent;
+    for (const replacement of replacements) {
+      this.diagnostics.push({
+        message: "The '!' replace modifier is only valid inside @extend.",
+        loc: replacement.loc,
+      });
+    }
+    return createCanonicalBlock(
       name,
-      content,
-      loc: this.loc(ctx.At[0]!),
-    };
+      createBlockBody(body.entries, this.loc(ctx.LBrace[0]!)),
+      this.loc(ctx.At[0]!)
+    );
   }
 
   /**
-   * extendBlock → ExtendBlock
+   * extendBlock → CanonicalExtendBlock
    */
-  extendBlock(ctx: ExtendBlockCstCtx): ExtendBlock {
+  extendBlock(ctx: ExtendBlockCstCtx): CanonicalExtendBlock {
     const targetPath = this.visit(ctx.dotPath[0]!) as string;
-    const { content, replacements } = this.visit(ctx.extendBlockContent[0]!) as {
-      content: BlockContent;
-      replacements: ReplaceModifier[];
-    };
-
-    const block: ExtendBlock = {
-      type: 'ExtendBlock',
+    const { body, replacements } = this.visit(ctx.blockContent[0]!) as ParsedBlockContent;
+    return createCanonicalExtendBlock(
       targetPath,
-      content,
-      loc: this.loc(ctx.At[0]!),
-    };
+      createBlockBody(body.entries, this.loc(ctx.LBrace[0]!)),
+      replacements,
+      this.loc(ctx.At[0]!)
+    );
+  }
 
-    if (replacements.length > 0) {
-      block.replacements = replacements;
+  /**
+   * blockContent → ordered canonical body and replacement modifiers
+   */
+  blockContent(ctx: BlockContentCstCtx): ParsedBlockContent {
+    const entries: Array<{ offset: number; entry: BlockEntry }> = [];
+    const replacements: ReplaceModifier[] = [];
+    for (const node of ctx.field ?? []) {
+      const token = this.fieldKeyToken(node.children as unknown as FieldCstCtx);
+      const cacheKey = token ? this.fieldCacheKey(token) : undefined;
+      if (cacheKey) this.directBlockFields.add(cacheKey);
     }
 
-    return block;
-  }
+    for (const token of ctx.TextBlock ?? []) {
+      entries.push({
+        offset: token.startOffset,
+        entry: {
+          type: 'TextEntry',
+          text: this.parseTextBlock(token),
+          loc: this.loc(token),
+        },
+      });
+    }
 
-  /**
-   * extendBlockContent → content and explicit replacement modifiers
-   */
-  extendBlockContent(ctx: ExtendBlockContentCstCtx): {
-    content: BlockContent;
-    replacements: ReplaceModifier[];
-  } {
-    const content = this.blockContent({
-      TextBlock: ctx.TextBlock,
-      field: ctx.extendField,
-      restrictionItem: ctx.restrictionItem,
-      inlineUse: ctx.inlineUse,
-    });
-    const replacements: ReplaceModifier[] = [];
-
-    for (const fieldNode of ctx.extendField ?? []) {
-      const field = this.visit(fieldNode) as {
-        name: string;
-        replace?: boolean;
-        replaceLoc?: SourceLocation;
+    for (const node of ctx.field ?? []) {
+      const field = this.visit(node) as ParsedField;
+      const entry: FieldEntry = {
+        type: 'FieldEntry',
+        name: field.name,
+        value: field.valueNode,
+        loc: field.loc,
+        ...(field.optional ? { optional: true } : {}),
+        ...(field.defaultValueNode ? { defaultValue: field.defaultValueNode } : {}),
       };
+      entries.push({ offset: field.loc.offset ?? 0, entry });
       if (field.replace && field.replaceLoc) {
         replacements.push({
           type: 'ReplaceModifier',
@@ -461,150 +571,62 @@ class PromptScriptVisitor extends BaseVisitor {
       }
     }
 
-    return { content, replacements };
-  }
-
-  /**
-   * blockContent → BlockContent
-   */
-  blockContent(ctx: BlockContentCstCtx): BlockContent {
-    const hasText = ctx.TextBlock !== undefined && ctx.TextBlock.length > 0;
-    const hasFields = ctx.field !== undefined && ctx.field.length > 0;
-    const hasRestrictions = ctx.restrictionItem !== undefined && ctx.restrictionItem.length > 0;
-    const hasInlineUses = ctx.inlineUse !== undefined && ctx.inlineUse.length > 0;
-
-    // Collect restrictions (array of strings)
-    if (hasRestrictions) {
-      return this.buildRestrictionContent(ctx);
+    for (const node of ctx.restrictionItem ?? []) {
+      const item = this.visit(node) as ParsedRestrictionItem;
+      entries.push({
+        offset: item.markerLoc.offset ?? 0,
+        entry: {
+          type: 'ListEntry',
+          value: createValueNode(item.value, item.valueLoc),
+          loc: item.markerLoc,
+        },
+      });
     }
 
-    const textContent = hasText ? this.buildTextContent(ctx.TextBlock![0]!) : undefined;
-    const properties = hasFields ? this.buildProperties(ctx.field!) : {};
-
-    const content = this.resolveBlockContent(
-      textContent,
-      properties,
-      hasText,
-      hasFields || hasInlineUses
-    );
-
-    // Attach inline uses to ObjectContent or MixedContent
-    if (hasInlineUses && (content.type === 'ObjectContent' || content.type === 'MixedContent')) {
-      const inlineUses = ctx.inlineUse!.map(
-        (node: CstNode) => this.visit(node) as InlineUseDeclaration
-      );
-      (content as ObjectContent).inlineUses = inlineUses;
+    for (const node of ctx.inlineUse ?? []) {
+      const declaration = this.visit(node) as InlineUseDeclaration;
+      entries.push({
+        offset: declaration.loc.offset ?? 0,
+        entry: {
+          type: 'InlineUseEntry',
+          declaration,
+          loc: declaration.loc,
+        },
+      });
     }
 
-    return content;
-  }
-
-  /**
-   * Build restriction content from context.
-   */
-  private buildRestrictionContent(ctx: BlockContentCstCtx): ObjectContent {
-    const restrictions: string[] = [];
-    for (const restrictionNode of ctx.restrictionItem!) {
-      restrictions.push(this.visit(restrictionNode));
-    }
-    return {
-      type: 'ObjectContent',
-      properties: { items: restrictions },
-      loc: { file: this.filename, line: 1, column: 1 },
+    entries.sort((left, right) => left.offset - right.offset);
+    const firstLoc = entries[0]?.entry.loc ?? {
+      file: this.filename,
+      line: 1,
+      column: 1,
+      offset: 0,
     };
-  }
-
-  /**
-   * Build text content from a TextBlock token.
-   */
-  private buildTextContent(token: IToken): TextContent {
-    const raw = token.image;
-    let value = raw.slice(3, -3).trim();
-
-    // Interpolate environment variables if enabled
-    if (this.interpolateEnv) {
-      value = this.interpolateEnvVars(value);
-    }
-
     return {
-      type: 'TextContent',
-      value,
-      loc: this.loc(token),
+      body: createBlockBody(
+        entries.map(({ entry }) => entry),
+        firstLoc
+      ),
+      replacements,
     };
-  }
-
-  /**
-   * Build properties from field nodes.
-   */
-  private buildProperties(fieldNodes: CstNode[]): Record<string, Value> {
-    const properties: Record<string, Value> = {};
-    for (const fieldNode of fieldNodes) {
-      const { name, value } = this.visit(fieldNode);
-      properties[name] = value;
-    }
-    return properties;
-  }
-
-  /**
-   * Resolve final block content based on presence of text and fields.
-   */
-  private resolveBlockContent(
-    textContent: TextContent | undefined,
-    properties: Record<string, Value>,
-    hasText: boolean,
-    hasFields: boolean
-  ): BlockContent {
-    // Pure text
-    if (hasText && !hasFields) {
-      return textContent as TextContent;
-    }
-
-    // Pure object
-    if (!hasText && hasFields) {
-      return {
-        type: 'ObjectContent',
-        properties,
-        loc: { file: this.filename, line: 1, column: 1 },
-      };
-    }
-
-    // Mixed content
-    if (hasText && hasFields) {
-      return {
-        type: 'MixedContent',
-        text: textContent,
-        properties,
-        loc: { file: this.filename, line: 1, column: 1 },
-      };
-    }
-
-    // Empty object
-    return {
-      type: 'ObjectContent',
-      properties: {},
-      loc: { file: this.filename, line: 1, column: 1 },
-    } as ObjectContent;
   }
 
   /**
    * restrictionItem → string
    */
-  restrictionItem(ctx: RestrictionItemCstCtx): string {
+  restrictionItem(ctx: RestrictionItemCstCtx): ParsedRestrictionItem {
     const token = ctx.StringLiteral[0]!;
-    return this.parseStringLiteral(token.image);
+    return {
+      value: this.parseStringLiteral(token.image),
+      markerLoc: this.loc(ctx.Dash[0]!),
+      valueLoc: this.loc(token),
+    };
   }
 
   /**
    * field → { name, value, optional, defaultValue, isParamsDef?, paramsDefs? }
    */
-  field(ctx: FieldCstCtx): {
-    name: string;
-    value: Value;
-    optional?: boolean;
-    defaultValue?: Value;
-    isParamsDef?: boolean;
-    paramsDefs?: ParamDefinition[];
-  } {
+  field(ctx: FieldCstCtx): ParsedField {
     // Field key can be Identifier, StringLiteral, or type keywords (string, number, boolean)
     let name: string;
     if (ctx.Identifier) {
@@ -620,10 +642,19 @@ class PromptScriptVisitor extends BaseVisitor {
     } else {
       throw new Error('Unknown field key type');
     }
+    const keyToken = this.fieldKeyToken(ctx);
+    if (!keyToken) {
+      throw new Error('Field location is unavailable');
+    }
+    const cacheKey = this.fieldCacheKey(keyToken);
+    const cached = cacheKey ? this.fieldCache.get(cacheKey) : undefined;
+    if (cached) return cached;
+
     const optional = ctx.Question ? true : undefined;
     const values = ctx.value;
     const valueResult = this.visit(values[0]!);
     const defaultValue = values.length > 1 ? this.visit(values[1]!) : undefined;
+    const loc = this.loc(keyToken);
 
     // Special handling for 'params' field in @meta block
     // Check if the value was parsed as a paramDefList (returns ParamDefinition[])
@@ -633,38 +664,50 @@ class PromptScriptVisitor extends BaseVisitor {
       valueResult.length > 0 &&
       valueResult[0]?.type === 'ParamDefinition'
     ) {
-      return { name, value: {}, isParamsDef: true, paramsDefs: valueResult as ParamDefinition[] };
-    }
-
-    return { name, value: valueResult, optional, defaultValue };
-  }
-
-  /**
-   * extendField → field with optional replacement metadata
-   */
-  extendField(ctx: FieldCstCtx): {
-    name: string;
-    value: Value;
-    optional?: boolean;
-    defaultValue?: Value;
-    replace?: boolean;
-    replaceLoc?: SourceLocation;
-  } {
-    const field = this.field(ctx);
-    if (!ctx.Bang) {
+      const field = {
+        name,
+        value: {},
+        valueNode: createValueNode({}, loc),
+        loc,
+        isParamsDef: true,
+        paramsDefs: valueResult as ParamDefinition[],
+      };
+      if (cacheKey) this.fieldCache.set(cacheKey, field);
       return field;
     }
-    if (ctx.value.length > 1) {
-      throw new Error(
-        "The '!' replace modifier cannot be combined with a '= default' value. " +
-          "Remove the default value or the '!' modifier."
-      );
-    }
-    return {
-      ...field,
-      replace: true,
-      replaceLoc: this.loc(ctx.Bang[0]!),
+
+    const field: ParsedField = {
+      name,
+      value: valueResult,
+      valueNode: this.createValueNodeFromCst(values[0]!, valueResult, loc),
+      loc,
     };
+    if (optional) field.optional = true;
+    if (defaultValue !== undefined) {
+      field.defaultValue = defaultValue;
+      field.defaultValueNode = this.createValueNodeFromCst(values[1]!, defaultValue, loc);
+    }
+    if (ctx.Bang) {
+      const replaceLoc = this.loc(ctx.Bang[0]!);
+      if (defaultValue !== undefined) {
+        this.diagnostics.push({
+          message:
+            "The '!' replace modifier cannot be combined with a '= default' value. " +
+            "Remove the default value or the '!' modifier.",
+          loc: replaceLoc,
+        });
+      } else if (!cacheKey || !this.directBlockFields.has(cacheKey)) {
+        this.diagnostics.push({
+          message: "The '!' replace modifier is only valid on direct @extend fields.",
+          loc: replaceLoc,
+        });
+      } else {
+        field.replace = true;
+        field.replaceLoc = replaceLoc;
+      }
+    }
+    if (cacheKey) this.fieldCache.set(cacheKey, field);
+    return field;
   }
 
   /**
@@ -693,17 +736,9 @@ class PromptScriptVisitor extends BaseVisitor {
 
     if (ctx.TextBlock) {
       const token = ctx.TextBlock[0]!;
-      const raw = token.image;
-      let value = raw.slice(3, -3).trim();
-
-      // Interpolate environment variables if enabled
-      if (this.interpolateEnv) {
-        value = this.interpolateEnvVars(value);
-      }
-
       return {
         type: 'TextContent',
-        value,
+        value: this.parseTextBlock(token),
         loc: this.loc(token),
       } as TextContent;
     }
@@ -920,6 +955,80 @@ class PromptScriptVisitor extends BaseVisitor {
   // ============================================================
   // Helper Methods
   // ============================================================
+
+  private createValueNodeFromCst(
+    node: CstNode,
+    value: Value,
+    fallbackLoc: SourceLocation
+  ): ValueNode {
+    const ctx = node.children as unknown as ValueCstCtx;
+
+    if (ctx.array) {
+      const arrayCtx = ctx.array[0]!.children as unknown as ArrayCstCtx;
+      const values = Array.isArray(value) ? value : [];
+      const elements = (arrayCtx.value ?? []).map<ArrayElementNode>((valueCst, index) => {
+        const item = values[index]!;
+        const itemNode = this.createValueNodeFromCst(valueCst, item, fallbackLoc);
+        return {
+          type: 'ArrayElementNode',
+          value: itemNode,
+          loc: itemNode.loc,
+        };
+      });
+      return {
+        type: 'ArrayValueNode',
+        elements,
+        loc: this.loc(arrayCtx.LBracket[0]!),
+      } satisfies ArrayValueNode;
+    }
+
+    if (ctx.object) {
+      const objectCtx = ctx.object[0]!.children as unknown as ObjectCstCtx;
+      const fields = (objectCtx.field ?? []).map((fieldCst) => {
+        const field = this.visit(fieldCst) as ParsedField;
+        return {
+          type: 'ObjectFieldNode' as const,
+          name: field.name,
+          value: field.valueNode,
+          loc: field.loc,
+        };
+      });
+      return {
+        type: 'ObjectValueNode',
+        fields,
+        loc: this.loc(objectCtx.LBrace[0]!),
+      };
+    }
+
+    return createValueNode(value, this.valueCstLocation(ctx, fallbackLoc));
+  }
+
+  private valueCstLocation(ctx: ValueCstCtx, fallbackLoc: SourceLocation): SourceLocation {
+    const token =
+      ctx.StringLiteral?.[0] ??
+      ctx.NumberLiteral?.[0] ??
+      ctx.True?.[0] ??
+      ctx.False?.[0] ??
+      ctx.Null?.[0] ??
+      ctx.TextBlock?.[0] ??
+      ctx.Identifier?.[0];
+    if (token) return this.loc(token);
+
+    const expression = ctx.typeExpr
+      ? (this.visit(ctx.typeExpr[0]!) as TypeExpression)
+      : ctx.templateExpr
+        ? (this.visit(ctx.templateExpr[0]!) as TemplateExpression)
+        : undefined;
+    return expression ? expression.loc : fallbackLoc;
+  }
+
+  private parseTextBlock(token: IToken): string {
+    let value = token.image.slice(3, -3).trim();
+    if (this.interpolateEnv) {
+      value = this.interpolateEnvVars(value);
+    }
+    return value;
+  }
 
   /**
    * Parse a string literal, handling escape sequences.

@@ -10,6 +10,7 @@ import type {
   TextContent,
   Value,
 } from '@promptscript/core';
+import { createBlockBody, createValueNode } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { FormatterOutput } from '../types.js';
 
@@ -61,6 +62,10 @@ class TestFormatter extends BaseFormatter {
 
   public testGetArrayElements(content: BlockContent): Value[] {
     return this.getArrayElements(content);
+  }
+
+  public testGetBlockArrayElements(block: Block): Value[] {
+    return this.getBlockArrayElements(block);
   }
 
   public testValueToString(value: Value): string {
@@ -405,6 +410,77 @@ describe('BaseFormatter', () => {
       };
 
       expect(formatter.testGetArrayElements(content)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('combines items fields with dash-list entries', () => {
+      const content: MixedContent = {
+        type: 'MixedContent',
+        text: {
+          type: 'TextContent',
+          value: 'text item',
+          loc: createLoc(),
+        },
+        properties: { items: ['field item'] },
+        listItems: ['dash item'],
+        loc: createLoc(),
+      };
+
+      expect(formatter.testGetArrayElements(content)).toEqual([
+        'text item',
+        'field item',
+        'dash item',
+      ]);
+    });
+
+    it('reads canonical restriction entries in source order', () => {
+      const block: Block = {
+        type: 'Block',
+        name: 'restrictions',
+        content: {
+          type: 'MixedContent',
+          text: { type: 'TextContent', value: 'text item', loc: createLoc() },
+          properties: { items: ['field item'] },
+          listItems: ['dash item'],
+          loc: createLoc(),
+        },
+        canonicalBody: createBlockBody(
+          [
+            {
+              type: 'ListEntry',
+              value: createValueNode('dash item', createLoc()),
+              loc: createLoc(),
+            },
+            { type: 'TextEntry', text: 'text item', loc: createLoc() },
+            {
+              type: 'FieldEntry',
+              name: 'items',
+              value: createValueNode(['field item'], createLoc()),
+              loc: createLoc(),
+            },
+          ],
+          createLoc()
+        ),
+        loc: createLoc(),
+      };
+
+      expect(formatter.testGetBlockArrayElements(block)).toEqual([
+        'dash item',
+        'text item',
+        'field item',
+      ]);
+
+      if (block.content.type !== 'MixedContent' || !block.content.text) {
+        throw new Error('Expected mixed content');
+      }
+      block.content.text.value = 'changed text';
+      block.content.properties['items'] = ['changed field'];
+      block.content.listItems = ['changed dash'];
+
+      expect(formatter.testGetBlockArrayElements(block)).toEqual([
+        'changed dash',
+        'changed text',
+        'changed field',
+      ]);
     });
 
     it('should return empty for non-ArrayContent', () => {

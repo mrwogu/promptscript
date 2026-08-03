@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
 import type { Formatter, CompilerOptions } from '../types.js';
 import { FormatterRegistry } from '@promptscript/formatters';
 import { join } from 'node:path';
@@ -346,6 +346,41 @@ describe('Compiler', () => {
       expect(output).toBeDefined();
       expect(output?.content).toContain('github output');
       expect(output?.content).toContain('test-project');
+    });
+
+    it('should invoke canonical formatter capabilities', async () => {
+      const ast = createTestProgram();
+      const formatCanonical = vi.fn((program: CanonicalProgram) => ({
+        path: './canonical/output.md',
+        content: program.type,
+      }));
+      const formatter: Formatter & {
+        formatCanonical: typeof formatCanonical;
+      } = {
+        name: 'canonical',
+        outputPath: './canonical/output.md',
+        description: 'Canonical formatter',
+        defaultConvention: 'markdown',
+        format: vi.fn(() => {
+          throw new Error('Legacy formatter path should not run');
+        }),
+        formatCanonical,
+        getSkillBasePath: () => null,
+        getSkillFileName: () => null,
+        referencesMode: () => 'none' as const,
+      };
+      mockResolve.mockResolvedValue(createResolveSuccess(ast));
+      mockValidate.mockReturnValue(createValidationSuccess());
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [formatter],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.success).toBe(true);
+      expect(formatCanonical).toHaveBeenCalledOnce();
+      expect(result.outputs.get('./canonical/output.md')?.content).toContain('CanonicalProgram');
     });
 
     it('should support multiple formatters', async () => {

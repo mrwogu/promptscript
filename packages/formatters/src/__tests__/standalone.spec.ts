@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { CanonicalProgram, Program, SourceLocation } from '@promptscript/core';
 import {
   format,
   getFormatter,
@@ -84,6 +84,87 @@ describe('format (standalone)', () => {
     expect(output.path).toBe('./mock/output.md');
     expect(output.content).toBe('mock content');
     expect(mockFormatter.format).toHaveBeenCalledWith(ast, {});
+  });
+
+  it('should isolate legacy formatter mutations from the input AST', () => {
+    const ast = createTestProgram();
+    const mockFormatter = {
+      name: 'mutating',
+      outputPath: './mutating.md',
+      description: 'Mutating legacy formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn((program: Program) => {
+        program.blocks[0]!.name = 'changed';
+        return { path: './mutating.md', content: program.blocks[0]!.name };
+      }),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+
+    const output = format(ast, { formatter: mockFormatter });
+
+    expect(output.content).toBe('changed');
+    expect(ast.blocks[0]!.name).toBe('identity');
+  });
+
+  it('should preserve legacy formatter block order across source layers', () => {
+    const ast = createTestProgram({
+      blocks: [
+        {
+          ...createTestProgram().blocks[0]!,
+          name: 'context',
+          loc: { file: 'second.prs', line: 1, column: 1, offset: 1 },
+        },
+        {
+          ...createTestProgram().blocks[0]!,
+          name: 'identity',
+          loc: { file: 'first.prs', line: 1, column: 1, offset: 1 },
+        },
+      ],
+    });
+    const mockFormatter = {
+      name: 'ordered',
+      outputPath: './ordered.md',
+      description: 'Ordered legacy formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn((program: Program) => ({
+        path: './ordered.md',
+        content: program.blocks.map((block) => block.name).join(','),
+      })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+
+    const output = format(ast, { formatter: mockFormatter });
+
+    expect(output.content).toBe('context,identity');
+  });
+
+  it('should use the canonical formatter capability when present', () => {
+    const ast = createTestProgram();
+    const formatCanonical = vi.fn((program: CanonicalProgram) => ({
+      path: './canonical.md',
+      content: String(Object.isFrozen(program)),
+    }));
+    const mockFormatter = {
+      name: 'canonical',
+      outputPath: './canonical.md',
+      description: 'Canonical formatter',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({ path: './legacy.md', content: 'legacy' })),
+      formatCanonical,
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+
+    const output = format(ast, { formatter: mockFormatter });
+
+    expect(output.content).toBe('true');
+    expect(formatCanonical).toHaveBeenCalledOnce();
+    expect(mockFormatter.format).not.toHaveBeenCalled();
   });
 
   it('should accept formatter factory function', () => {

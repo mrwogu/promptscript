@@ -370,10 +370,7 @@ describe('applyExtends additional coverage', () => {
       const ast = createProgram({
         blocks: [createBlock('config', createObjectContent({}))],
         extends: [
-          createExtendBlock(
-            'config.mixed',
-            createMixedContent(createTextContent('text'), { key: 'value' })
-          ),
+          createExtendBlock('config.mixed', createMixedContent(undefined, { key: 'value' })),
         ],
       });
 

@@ -24,6 +24,7 @@ import {
   isTemplateExpression,
   type TemplateContext,
 } from '../template.js';
+import { createBlockBody, createValueNode } from '../canonical-ast.js';
 
 // Helper to create a location
 const loc = { file: 'test.prs', line: 1, column: 1 };
@@ -255,9 +256,90 @@ describe('template', () => {
         'interpolated'
       );
     });
+
+    it('interpolates dash-list items independently from items fields', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['rule', 'Use strict types']]),
+        sourceFile: 'test.prs',
+      };
+      const content: ObjectContent = {
+        type: 'ObjectContent',
+        properties: { items: ['field value'] },
+        listItems: [{ type: 'TemplateExpression', name: 'rule', loc }],
+        loc,
+      };
+
+      const result = interpolateContent(content, ctx) as ObjectContent;
+
+      expect(result.properties['items']).toEqual(['field value']);
+      expect(result.listItems).toEqual(['Use strict types']);
+    });
   });
 
   describe('interpolateAST', () => {
+    it('interpolates canonical entries without changing mixed body order', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['name', 'World']]),
+        sourceFile: 'test.prs',
+      };
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'MixedContent',
+              text: {
+                type: 'TextContent',
+                value: 'Hello {{name}}\n\nBye {{name}}',
+                loc,
+              },
+              properties: {
+                middle: {
+                  type: 'TemplateExpression',
+                  name: 'name',
+                  loc,
+                },
+              },
+              loc,
+            },
+            canonicalBody: createBlockBody(
+              [
+                { type: 'TextEntry', text: 'Hello {{name}}', loc },
+                {
+                  type: 'FieldEntry',
+                  name: 'middle',
+                  value: createValueNode({ type: 'TemplateExpression', name: 'name', loc }, loc),
+                  defaultValue: createValueNode(
+                    { type: 'TemplateExpression', name: 'name', loc },
+                    loc
+                  ),
+                  loc,
+                },
+                { type: 'TextEntry', text: 'Bye {{name}}', loc },
+              ],
+              loc
+            ),
+            loc,
+          },
+        ],
+        extends: [],
+        loc,
+      };
+
+      const result = interpolateAST(ast, ctx);
+      const entries = result.blocks[0]!.canonicalBody!.entries;
+
+      expect(entries.map((entry) => entry.type)).toEqual(['TextEntry', 'FieldEntry', 'TextEntry']);
+      expect(entries[0]).toMatchObject({ text: 'Hello World' });
+      expect(entries[1]).toMatchObject({
+        defaultValue: { type: 'ScalarValueNode', value: 'World' },
+      });
+      expect(entries[2]).toMatchObject({ text: 'Bye World' });
+    });
+
     it('should return same AST if no params', () => {
       const ctx: TemplateContext = {
         params: new Map(),

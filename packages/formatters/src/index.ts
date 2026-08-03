@@ -18,6 +18,8 @@ export type {
   FormatterVersionMap,
   FormatOptions,
 } from './types.js';
+export { formatProgram, isCanonicalFormatter } from './formatter-adapter.js';
+export type { CanonicalFormatter } from './formatter-adapter.js';
 
 // Structured output merge types and helpers
 export type { StructuredMergePlan, StructuredMergeOperation } from './structured-output.js';

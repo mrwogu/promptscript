@@ -13,6 +13,7 @@ import type {
 import { applyExtends } from '../extensions.js';
 import { IMPORT_MARKER_PREFIX } from '../imports.js';
 import { Resolver } from '../resolver.js';
+import { parseOrThrow } from '@promptscript/parser';
 
 const createLoc = () => ({ file: '<test>', line: 1, column: 1 });
 
@@ -81,6 +82,162 @@ describe('applyExtends', () => {
       expect(content.value).toBe('original\n\nextended');
     });
 
+    it('preserves ordered canonical entries from direct extensions', () => {
+      const ast = parseOrThrow(
+        `@context {
+  before: "base"
+  """Base text"""
+}
+@extend context {
+  """Extension text"""
+  after: "extension"
+}`,
+        { filename: 'extensions.prs' }
+      );
+
+      const result = applyExtends(ast);
+      const body = result.blocks[0]!.canonicalBody!;
+
+      expect(body.entries.map((entry) => entry.type)).toEqual([
+        'FieldEntry',
+        'TextEntry',
+        'TextEntry',
+        'FieldEntry',
+      ]);
+      expect(
+        body.entries.filter((entry) => entry.type === 'TextEntry').map((entry) => entry.text)
+      ).toEqual(['Base text', 'Extension text']);
+      expect(body.entries[2]!.loc.line).toBe(6);
+    });
+
+    it('preserves base nested locations in direct extensions', () => {
+      const ast = parseOrThrow(
+        `@standards {
+  config: { baseOnly: "base" duplicate: "first" duplicate: "last" }
+}
+@extend standards {
+  config: { firstExtension: true }
+  config: { incomingOnly: "extension" }
+}`,
+        { filename: 'direct-extension.prs' }
+      );
+
+      const result = applyExtends(ast);
+      const entries = result.blocks[0]!.canonicalBody!.entries.filter(
+        (entry) => entry.type === 'FieldEntry' && entry.name === 'config'
+      );
+      if (
+        entries[0]?.type !== 'FieldEntry' ||
+        entries[0].value.type !== 'ObjectValueNode' ||
+        entries[1]?.type !== 'FieldEntry' ||
+        entries[1].value.type !== 'ObjectValueNode'
+      ) {
+        throw new Error('Expected duplicate config object fields');
+      }
+      const firstFields = entries[0].value.fields.map((field) => field.name);
+      const fields = new Map(entries[1].value.fields.map((field) => [field.name, field]));
+
+      expect(firstFields).toEqual(['firstExtension']);
+      expect(fields.get('baseOnly')!.loc.line).toBe(2);
+      expect(fields.get('incomingOnly')!.loc.line).toBe(6);
+      expect(entries[1].value.fields.filter((field) => field.name === 'duplicate')).toHaveLength(2);
+    });
+
+    it('merges list and inline-use side channels', () => {
+      const ast = parseOrThrow(
+        `@restrictions {
+  items: ["base field"]
+  - "base list"
+  @use ./base
+}
+@extend restrictions {
+  items: ["extension field"]
+  - "extension list"
+  @use ./extension
+}`
+      );
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]!.content;
+      if (content.type !== 'ObjectContent') {
+        throw new Error('Expected object content');
+      }
+
+      expect(content.properties['items']).toEqual(['base field', 'extension field']);
+      expect(content.listItems).toEqual(['base list', 'extension list']);
+      expect(content.inlineUses?.map((use) => use.path.raw)).toEqual(['./base', './extension']);
+    });
+
+    it('keeps explicit items fields separate from cross-layer dash lists', () => {
+      const ast = parseOrThrow(
+        `@restrictions {
+  items: ["field"]
+}
+@extend restrictions {
+  - "list"
+}`
+      );
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]!.content;
+      if (content.type !== 'ObjectContent') {
+        throw new Error('Expected object content');
+      }
+
+      expect(content.properties['items']).toEqual(['field']);
+      expect(content.listItems).toEqual(['list']);
+      expect(result.blocks[0]!.canonicalBody!.entries.map((entry) => entry.type)).toEqual([
+        'FieldEntry',
+        'ListEntry',
+      ]);
+    });
+
+    it('keeps surviving list locations after extension deduplication', () => {
+      const ast = parseOrThrow(
+        `@restrictions {
+  - "same"
+}
+@extend restrictions {
+  - "same"
+  - "tail"
+}`,
+        { filename: 'list-provenance.prs' }
+      );
+
+      const result = applyExtends(ast);
+      const listEntries = result.blocks[0]!.canonicalBody!.entries.filter(
+        (entry) => entry.type === 'ListEntry'
+      );
+
+      expect(listEntries.map((entry) => entry.loc.line)).toEqual([2, 6]);
+    });
+
+    it('merges side channels for root skills extensions', () => {
+      const ast = parseOrThrow(
+        `@skills {
+  review: { description: "Base" }
+  items: { description: "Base item skill" }
+  - "base list"
+  @use ./base
+}
+@extend skills {
+  review: { trigger: "extended" }
+  items: { trigger: "extended item skill" }
+  - "extension list"
+  @use ./extension
+}`
+      );
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]!.content;
+      if (content.type !== 'ObjectContent') {
+        throw new Error('Expected object content');
+      }
+
+      expect(content.listItems).toEqual(['base list', 'extension list']);
+      expect(content.inlineUses?.map((use) => use.path.raw)).toEqual(['./base', './extension']);
+    });
+
     it('should extend ObjectContent block', () => {
       const ast = createProgram({
         blocks: [createBlock('standards', createObjectContent({ style: 'clean' }))],
@@ -112,6 +269,151 @@ describe('applyExtends', () => {
   });
 
   describe('deep path extension', () => {
+    it('preserves nested canonical locations from deep extensions', () => {
+      const ast = parseOrThrow(
+        `@standards {
+  tooling: { baseOnly: "base" duplicate: "first" duplicate: "last" }
+}
+@extend standards.tooling {
+  incomingOnly: "extension"
+}`,
+        { filename: 'deep-extension.prs' }
+      );
+
+      const result = applyExtends(ast);
+      const entry = result.blocks[0]!.canonicalBody!.entries[0]!;
+      if (entry.type !== 'FieldEntry' || entry.value.type !== 'ObjectValueNode') {
+        throw new Error('Expected tooling object field');
+      }
+      const fields = new Map(entry.value.fields.map((field) => [field.name, field]));
+
+      expect(entry.loc.line).toBe(2);
+      expect(fields.get('baseOnly')!.loc).toMatchObject({
+        file: 'deep-extension.prs',
+        line: 2,
+      });
+      expect(fields.get('incomingOnly')!.loc).toMatchObject({
+        file: 'deep-extension.prs',
+        line: 5,
+      });
+      expect(entry.value.fields.filter((field) => field.name === 'duplicate')).toHaveLength(2);
+    });
+
+    it('preserves text and properties in deep mixed extensions', () => {
+      const ast = parseOrThrow(
+        `@standards {
+  tooling: { baseOnly: "base" }
+}
+@extend standards.tooling {
+  """Extension text"""
+  incomingOnly: "extension"
+}
+@extend standards.tooling {
+  second: "two"
+}
+@extend standards.tooling {
+  """More text"""
+}`
+      );
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]!.content;
+      if (content.type !== 'ObjectContent') {
+        throw new Error('Expected standards object content');
+      }
+      const tooling = content.properties['tooling'] as Record<string, Value>;
+
+      expect(tooling['type']).toBe('MixedContent');
+      expect(tooling['text']).toMatchObject({
+        value: 'Extension text\n\nMore text',
+      });
+      expect(tooling['properties']).toMatchObject({
+        baseOnly: 'base',
+        incomingOnly: 'extension',
+        second: 'two',
+      });
+      const entry = result.blocks[0]!.canonicalBody!.entries[0]!;
+      if (entry.type !== 'FieldEntry' || entry.value.type !== 'ObjectValueNode') {
+        throw new Error('Expected tooling canonical field');
+      }
+      const propertiesField = entry.value.fields.find((field) => field.name === 'properties');
+      if (propertiesField?.value.type !== 'ObjectValueNode') {
+        throw new Error('Expected mixed properties node');
+      }
+      const locations = new Map(
+        propertiesField.value.fields.map((field) => [field.name, field.loc.line])
+      );
+      expect(locations).toEqual(
+        new Map([
+          ['baseOnly', 2],
+          ['incomingOnly', 6],
+          ['second', 9],
+        ])
+      );
+    });
+
+    it('locates a missing multi-segment root at the extension', () => {
+      const ast = parseOrThrow(
+        `@standards {
+  existing: true
+}
+@extend standards.created.deep {
+  value: "extension"
+}`,
+        { filename: 'created-extension.prs' }
+      );
+
+      const result = applyExtends(ast);
+      const entry = result.blocks[0]!.canonicalBody!.entries.find(
+        (candidate) => candidate.type === 'FieldEntry' && candidate.name === 'created'
+      );
+
+      expect(entry?.loc).toMatchObject({
+        file: 'created-extension.prs',
+        line: 4,
+      });
+      if (entry?.type !== 'FieldEntry' || entry.value.type !== 'ObjectValueNode') {
+        throw new Error('Expected created object field');
+      }
+      const deep = entry.value.fields[0]!;
+      expect(deep.loc).toMatchObject({ file: 'created-extension.prs', line: 4 });
+      if (deep.value.type !== 'ObjectValueNode') {
+        throw new Error('Expected deep object field');
+      }
+      expect(deep.value.fields[0]!.loc).toMatchObject({
+        file: 'created-extension.prs',
+        line: 5,
+      });
+    });
+
+    it('updates only the last duplicate root field', () => {
+      const ast = parseOrThrow(
+        `@standards {
+  config: { first: true }
+  config: { last: true }
+}
+@extend standards.config {
+  added: true
+}`
+      );
+
+      const result = applyExtends(ast);
+      const entries = result.blocks[0]!.canonicalBody!.entries.filter(
+        (entry) => entry.type === 'FieldEntry' && entry.name === 'config'
+      );
+      if (
+        entries[0]?.type !== 'FieldEntry' ||
+        entries[0].value.type !== 'ObjectValueNode' ||
+        entries[1]?.type !== 'FieldEntry' ||
+        entries[1].value.type !== 'ObjectValueNode'
+      ) {
+        throw new Error('Expected duplicate config fields');
+      }
+
+      expect(entries[0].value.fields.map((field) => field.name)).toEqual(['first']);
+      expect(entries[1].value.fields.map((field) => field.name)).toEqual(['last', 'added']);
+    });
+
     it('should extend nested property', () => {
       const ast = createProgram({
         blocks: [

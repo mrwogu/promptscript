@@ -5,6 +5,7 @@ import { parse } from '@promptscript/parser';
 import {
   noopLogger,
   type Logger,
+  type CanonicalProgram,
   type Program,
   type Value,
   type Lockfile,
@@ -14,6 +15,7 @@ import {
   ErrorCode,
   bindParams,
   interpolateAST,
+  normalizeProgram,
   type TemplateContext,
 } from '@promptscript/core';
 import {
@@ -84,6 +86,8 @@ export interface ResolverOptions extends LoaderOptions {
 export interface ResolvedAST {
   /** The resolved AST, or null if resolution failed */
   ast: Program | null;
+  /** Immutable canonical projection of the resolved AST */
+  canonicalAst?: CanonicalProgram | null;
   /** List of all source files involved in resolution */
   sources: string[];
   /** List of errors encountered during resolution */
@@ -236,6 +240,7 @@ export class Resolver {
     this.logger.debug(`Resolved ${sources.length} source file(s)`);
     return {
       ast,
+      canonicalAst: normalizeProgram(ast),
       sources: [...new Set(sources)],
       errors,
     };

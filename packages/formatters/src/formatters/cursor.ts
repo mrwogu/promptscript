@@ -1204,15 +1204,17 @@ export class CursorFormatter extends BaseFormatter {
     const block = this.findBlock(ast, 'restrictions');
     if (!block) return null;
 
-    const items = this.extractNeverItems(block.content);
+    const items = this.extractNeverItems(block);
     if (items.length === 0) return null;
 
     return `Never:\n${items.map((i) => '- ' + i).join('\n')}`;
   }
 
-  private extractNeverItems(content: Block['content']): string[] {
-    if (content.type === 'ArrayContent') {
-      return content.elements.map((item: Value) => this.valueToString(item));
+  private extractNeverItems(block: Block): string[] {
+    const { content } = block;
+    const listItems = this.getBlockArrayElements(block);
+    if (listItems.length > 0) {
+      return listItems.map((item: Value) => this.valueToString(item));
     }
 
     if (content.type === 'TextContent') {

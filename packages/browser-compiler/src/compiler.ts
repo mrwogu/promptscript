@@ -17,6 +17,7 @@ import {
 } from '@promptscript/core';
 import {
   FormatterRegistry,
+  formatProgram,
   type Formatter,
   type FormatterOutput,
   type FormatOptions,
@@ -296,7 +297,7 @@ export class BrowserCompiler {
         const formatOptions = this.getFormatOptionsForTarget(formatter.name, config);
         this.logger.debug(`  Convention: ${formatOptions.convention ?? 'default'}`);
 
-        const output = formatter.format(resolved.ast, formatOptions);
+        const output = formatProgram(formatter, resolved.ast, formatOptions);
         const formatterTime = Date.now() - formatterStart;
 
         this.logger.verbose(`  → ${output.path} (${formatterTime}ms)`);
