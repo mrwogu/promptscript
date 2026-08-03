@@ -89,6 +89,46 @@ function createKnowledgeProgram(): Program {
   };
 }
 
+function createIdentityProgram(): Program {
+  const text = 'Preserve this identity body.';
+  return {
+    type: 'Program',
+    meta: {
+      type: 'MetaBlock',
+      fields: { id: 'headers', syntax: '1.5.0' },
+      loc,
+    },
+    blocks: [
+      {
+        type: 'Block',
+        name: 'identity',
+        content: { type: 'TextContent', value: text, loc },
+        canonicalBody: createBlockBody(
+          [
+            {
+              type: 'PresentationEntry',
+              title: 'Localized Project',
+              source: 'explicit',
+              loc,
+              titleLoc: loc,
+            },
+            {
+              type: 'TextEntry',
+              text,
+              loc,
+            },
+          ],
+          loc
+        ),
+        loc,
+      },
+    ],
+    uses: [],
+    extends: [],
+    loc,
+  };
+}
+
 function createContextProgram(
   source: 'explicit' | 'legacy' = 'explicit',
   sectionId?: string,
@@ -208,4 +248,11 @@ describe('section header overrides across formatters', () => {
       expect(output.content).toContain('Preserve this context body.');
     }
   );
+
+  it.each(formatters)('should title identity content for %s', (_name, formatter) => {
+    const output = formatter.format(createIdentityProgram(), { version: 'simple' });
+
+    expect(output.content).toContain('Localized Project');
+    expect(output.content).toContain('Preserve this identity body.');
+  });
 });
