@@ -110,6 +110,10 @@ program
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
   .option('--dry-run', 'Preview changes')
+  .option(
+    '--no-migrate-factory-hooks',
+    'Warn instead of migrating legacy .factory/settings.json hooks'
+  )
   .option('--registry <path>', 'Registry path (overrides config)')
   .option('-c, --config <path>', 'Path to custom config file')
   .option('--force', 'Force overwrite existing files without prompts')
@@ -126,6 +130,10 @@ program
   .option('-w, --watch', 'Watch mode')
   .option('-o, --output <dir>', 'Output directory')
   .option('--dry-run', 'Preview changes')
+  .option(
+    '--no-migrate-factory-hooks',
+    'Warn instead of migrating legacy .factory/settings.json hooks'
+  )
   .option('--registry <path>', 'Registry path (overrides config)')
   .option('-c, --config <path>', 'Path to custom config file')
   .option('--force', 'Force overwrite existing files without prompts')

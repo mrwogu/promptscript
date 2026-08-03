@@ -17,9 +17,10 @@ contract, not the GitHub repository hook contract.
 Notes for compiled `@hooks` output:
 
 - **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`.
-  `prs compile` warns (`PS4002`) when `.factory/hooks.json` is absent and that file still
-  contains a non-PromptScript-owned `hooks` key, because only then does the stale section
-  reactivate via Factory's fallback to `settings.json`.
+  When `.factory/hooks.json` is absent, `prs compile` moves unambiguous hooks to the canonical
+  file and preserves unrelated settings. Migration is all-or-nothing for unknown events,
+  malformed entries, and mixed ownership. Use `--dry-run` to preview both file changes, or
+  `--no-migrate-factory-hooks` to retain warning-only `PS4002` behavior.
 - **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`,
   GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match
   nothing on another. See [@hooks](../reference/language.md#hooks).

@@ -88,6 +88,12 @@ legacy `.factory/settings.json` `hooks` section. Unrelated settings are
 preserved. The command refuses partial migrations when it finds unknown event
 names or ambiguous entries, so those entries can be reviewed manually.
 
+The Factory compile target performs the same migration automatically when
+`.factory/hooks.json` does not exist. Use `prs compile --dry-run` to preview it
+or `prs compile --no-migrate-factory-hooks` to keep warning-only behavior.
+`prs hooks install factory` remains available for explicit installation and
+migration.
+
 ---
 
 ### uninstall

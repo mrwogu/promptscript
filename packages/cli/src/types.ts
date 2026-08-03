@@ -72,6 +72,8 @@ export interface CompileOptions {
   output?: string;
   /** Preview changes without writing files */
   dryRun?: boolean;
+  /** Migrate unambiguous legacy Factory settings hooks during compilation */
+  migrateFactoryHooks?: boolean;
   /** Registry path or URL (overrides config) */
   registry?: string;
   /** Path to custom config file */

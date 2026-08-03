@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import {
   detectLegacyFactorySettingsHooks,
   migrateLegacyFactoryHooks,
+  planLegacyFactoryHooksMigration,
 } from '../legacy-factory-hooks.js';
 
 describe('migrateLegacyFactoryHooks', () => {
@@ -26,6 +27,7 @@ describe('migrateLegacyFactoryHooks', () => {
           preToolUse: [
             {
               matcher: 'Execute',
+              commandRegex: '^git ',
               hooks: [{ type: 'command', command: 'audit' }],
             },
           ],
@@ -41,7 +43,11 @@ describe('migrateLegacyFactoryHooks', () => {
       hooks: {
         PreToolUse: [
           { matcher: 'Read', hooks: [] },
-          { matcher: 'Execute', hooks: [{ type: 'command', command: 'audit' }] },
+          {
+            matcher: 'Execute',
+            commandRegex: '^git ',
+            hooks: [{ type: 'command', command: 'audit' }],
+          },
         ],
       },
     });
@@ -145,6 +151,43 @@ describe('migrateLegacyFactoryHooks', () => {
     expect(result.canonical).toEqual({ hooks: {} });
   });
 
+  it('preserves installed hooks when compile migration requests it', () => {
+    const installed = {
+      hooks: [{ type: 'command', command: 'prs hook pre-edit' }],
+    };
+    const result = migrateLegacyFactoryHooks(
+      { hooks: { PreToolUse: [installed] } },
+      {},
+      { preserveInstalledHooks: true, rejectMixedOwnership: true }
+    );
+
+    expect(result.ambiguous).toEqual([]);
+    expect(result.legacy).toEqual({});
+    expect(result.canonical).toEqual({ hooks: { PreToolUse: [installed] } });
+  });
+
+  it('rejects mixed ownership for compile migration', () => {
+    const result = migrateLegacyFactoryHooks(
+      {
+        hooks: {
+          PreToolUse: [
+            {
+              hooks: [
+                { type: 'command', command: 'prs hook pre-edit' },
+                { type: 'command', command: 'audit' },
+              ],
+            },
+          ],
+        },
+      },
+      {},
+      { preserveInstalledHooks: true, rejectMixedOwnership: true }
+    );
+
+    expect(result.changed).toBe(false);
+    expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
+  });
+
   it.each([
     [{ hooks: 'not-an-object' }, {}, ['hooks']],
     [{ hooks: {} }, { hooks: [] }, ['canonical.hooks']],
@@ -235,6 +278,57 @@ describe('migrateLegacyFactoryHooks', () => {
     expect(result.changed).toBe(false);
     expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
   });
+
+  it.each([
+    { type: 'prompt', command: 'audit' },
+    { type: 'command', command: 'audit', metadata: true },
+    { type: 'command', command: '' },
+    { type: 'command', command: 'audit', timeout: 'fast' },
+    { type: 'command', command: 'audit', statusMessage: 42 },
+  ])('refuses malformed command handlers: %j', (handler) => {
+    const result = migrateLegacyFactoryHooks({ hooks: { PreToolUse: [{ hooks: [handler] }] } }, {});
+
+    expect(result.changed).toBe(false);
+    expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
+  });
+
+  it('refuses a non-string matcher', () => {
+    const result = migrateLegacyFactoryHooks(
+      {
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: 42,
+              hooks: [{ type: 'command', command: 'audit' }],
+            },
+          ],
+        },
+      },
+      {}
+    );
+
+    expect(result.changed).toBe(false);
+    expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
+  });
+
+  it('refuses a non-string command regex', () => {
+    const result = migrateLegacyFactoryHooks(
+      {
+        hooks: {
+          PreToolUse: [
+            {
+              commandRegex: 42,
+              hooks: [{ type: 'command', command: 'audit' }],
+            },
+          ],
+        },
+      },
+      {}
+    );
+
+    expect(result.changed).toBe(false);
+    expect(result.ambiguous).toEqual(['hooks.PreToolUse[0]']);
+  });
 });
 
 describe('detectLegacyFactorySettingsHooks', () => {
@@ -267,9 +361,109 @@ describe('detectLegacyFactorySettingsHooks', () => {
         })
       );
       await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBeUndefined();
+      await expect(detectLegacyFactorySettingsHooks(root, true)).resolves.toBe(settingsPath);
+
+      await writeFile(
+        settingsPath,
+        JSON.stringify({
+          hooks: {
+            PreToolUse: [
+              {
+                hooks: [
+                  { type: 'command', command: 'prs hook pre-edit' },
+                  { type: 'command', command: 'audit' },
+                ],
+              },
+            ],
+          },
+        })
+      );
+      await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBe(settingsPath);
 
       await writeFile(hooksPath, '{}');
       await expect(detectLegacyFactorySettingsHooks(root)).resolves.toBeUndefined();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('planLegacyFactoryHooksMigration', () => {
+  it('merges legacy hooks with generated canonical hooks', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'promptscript-legacy-plan-'));
+    const settingsPath = join(root, '.factory', 'settings.json');
+    await mkdir(join(root, '.factory'), { recursive: true });
+    await writeFile(
+      settingsPath,
+      JSON.stringify({
+        permissions: { allow: ['Read'] },
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: 'Execute',
+              hooks: [{ type: 'command', command: 'audit' }],
+            },
+          ],
+        },
+      })
+    );
+
+    try {
+      const plan = await planLegacyFactoryHooksMigration(
+        root,
+        JSON.stringify({
+          hooks: {
+            PreToolUse: [
+              {
+                hooks: [
+                  {
+                    type: 'command',
+                    command: 'node check.mjs # promptscript-generated:check',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      );
+
+      expect(plan?.migration).toMatchObject({
+        migrated: 1,
+        ambiguous: [],
+        legacy: { permissions: { allow: ['Read'] } },
+      });
+      const hooks = plan?.migration.canonical['hooks'] as Record<string, unknown[]>;
+      expect(hooks['PreToolUse']).toHaveLength(2);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not plan migration when canonical hooks already exist', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'promptscript-legacy-plan-'));
+    await mkdir(join(root, '.factory'), { recursive: true });
+    await writeFile(
+      join(root, '.factory', 'settings.json'),
+      JSON.stringify({ hooks: { PreToolUse: [] } })
+    );
+    await writeFile(join(root, '.factory', 'hooks.json'), '{}');
+
+    try {
+      await expect(planLegacyFactoryHooksMigration(root)).resolves.toBeUndefined();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects malformed legacy settings JSON', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'promptscript-legacy-plan-'));
+    await mkdir(join(root, '.factory'), { recursive: true });
+    await writeFile(join(root, '.factory', 'settings.json'), '{');
+
+    try {
+      await expect(planLegacyFactoryHooksMigration(root)).rejects.toThrow(
+        'Failed to parse Factory hooks file'
+      );
     } finally {
       await rm(root, { recursive: true, force: true });
     }

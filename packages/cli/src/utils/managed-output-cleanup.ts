@@ -38,8 +38,10 @@ const OWNED_COMMAND_FIELDS = new Set([
   'working_directory',
 ]);
 const GUARDED_UNLINK_SCRIPT = String.raw`
+const crypto = require('node:crypto');
 const fs = require('node:fs');
-const [name, directoryDev, directoryIno, fileDev, fileIno] = process.argv.slice(1);
+const [name, directoryDev, directoryIno, fileDev, fileIno, expectedHash] =
+  process.argv.slice(1);
 const skip = () => process.stdout.write('skipped');
 if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
   skip();
@@ -68,6 +70,14 @@ if (
 ) {
   skip();
   process.exit(0);
+}
+if (expectedHash) {
+  const current = fs.readFileSync(name);
+  const currentHash = crypto.createHash('sha256').update(current).digest('hex');
+  if (currentHash !== expectedHash) {
+    skip();
+    process.exit(0);
+  }
 }
 fs.unlinkSync(name);
 process.stdout.write('removed');
@@ -547,6 +557,31 @@ export async function createHookOutputSafely(
   }
 }
 
+export async function removeHookOutputIfUnchanged(
+  file: string,
+  outputRoot: string,
+  expectedContent: string
+): Promise<boolean> {
+  const root = resolve(outputRoot);
+  const candidate = resolve(file);
+  if (!isWithin(root, candidate)) return false;
+
+  const fileStat = await safeLstat(candidate);
+  if (!fileStat?.isFile() || fileStat.isSymbolicLink()) return false;
+  const guards = await openAncestorDirectories(root, candidate);
+  if (!guards) return false;
+  try {
+    if (!(await directoryGuardsMatch(guards))) return false;
+    const directory = dirname(candidate);
+    const directoryStat = await safeLstat(directory);
+    if (!directoryStat?.isDirectory() || directoryStat.isSymbolicLink()) return false;
+
+    return guardedUnlink(directory, basename(candidate), directoryStat, fileStat, expectedContent);
+  } finally {
+    await closeDirectoryGuards(guards);
+  }
+}
+
 async function guardedRewrite(
   directory: string,
   name: string,
@@ -588,6 +623,9 @@ async function guardedRewrite(
     child.on('close', (code) => {
       resolveResult(code === 0 && stdout === 'rewritten');
     });
+    child.stdin.on('error', () => {
+      resolveResult(false);
+    });
     child.stdin.end(content);
   });
 }
@@ -627,6 +665,9 @@ async function guardedCreate(
     });
     child.on('close', (code) => {
       resolveResult(code === 0 && stdout === 'created');
+    });
+    child.stdin.on('error', () => {
+      resolveResult(false);
     });
     child.stdin.end(content);
   });
@@ -689,8 +730,13 @@ async function guardedUnlink(
   directory: string,
   name: string,
   directoryStat: FileIdentity,
-  fileStat: FileIdentity
+  fileStat: FileIdentity,
+  expectedContent?: string
 ): Promise<boolean> {
+  const expectedHash =
+    expectedContent === undefined
+      ? undefined
+      : createHash('sha256').update(expectedContent).digest('hex');
   try {
     const result = await execFileAsync(
       process.execPath,
@@ -703,6 +749,7 @@ async function guardedUnlink(
         String(directoryStat.ino),
         String(fileStat.dev),
         String(fileStat.ino),
+        ...(expectedHash === undefined ? [] : [expectedHash]),
       ],
       {
         cwd: directory,
@@ -716,6 +763,7 @@ async function guardedUnlink(
     // binaries or restricted spawn environments) fall back to an in-process
     // guarded unlink that re-verifies the file identity immediately before
     // removing it.
+    if (expectedContent !== undefined) return false;
     return removeIfUnchanged(resolve(directory, name), fileStat);
   }
 }

@@ -547,6 +547,11 @@ fully owned generated hook file and prunes directories left empty. `prs hooks in
 migrates unambiguous legacy hooks from `.factory/settings.json`; ambiguous
 entries remain for manual review.
 
+Factory compilation performs the same migration when `.factory/hooks.json` is
+absent. Use `prs compile --dry-run` to preview the changes or
+`--no-migrate-factory-hooks` to keep warning-only behavior. Unknown events,
+malformed entries, and mixed ownership abort without a partial migration.
+
 `@hooks` compilation is separate from `prs hooks install`. The latter installs
 auto-compilation and generated-output protection for supported AI tools. Copilot VS
 Code Agent hooks use `promptscript-vscode.json`; GitHub Copilot repository hooks use

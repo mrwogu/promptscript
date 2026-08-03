@@ -34,10 +34,15 @@ import {
   isPromptScriptOwnedHookOutput,
   mergePromptScriptCodexConfig,
   mergePromptScriptHookOutput,
+  removeHookOutputIfUnchanged,
   removePromptScriptOwnedCodexHooks,
   rewriteHookOutputIfUnchanged,
 } from '../utils/managed-output-cleanup.js';
-import { detectLegacyFactorySettingsHooks } from '../utils/legacy-factory-hooks.js';
+import {
+  detectLegacyFactorySettingsHooks,
+  planLegacyFactoryHooksMigration,
+  type LegacyFactoryMigrationPlan,
+} from '../utils/legacy-factory-hooks.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -304,8 +309,96 @@ function resolveUniversalDir(
  */
 interface WriteResult {
   written: string[];
+  created: string[];
   skipped: string[];
   unchanged: string[];
+}
+
+async function prepareLegacyFactoryMigration(
+  outputs: Map<string, FormatterOutput>,
+  outputRoot: string
+): Promise<LegacyFactoryMigrationPlan | undefined> {
+  const factoryOutput = outputs.get('.factory/hooks.json');
+  const plan = await planLegacyFactoryHooksMigration(outputRoot, factoryOutput?.content);
+  if (!plan) return undefined;
+  if (plan.migration.ambiguous.length > 0) {
+    throw new Error(
+      `Cannot migrate legacy Factory hooks safely. Review these entries in ${plan.settingsPath}: ` +
+        plan.migration.ambiguous.join(', ')
+    );
+  }
+  if (!plan.migration.changed) return undefined;
+
+  const content = JSON.stringify(plan.migration.canonical, null, 2) + '\n';
+  if (factoryOutput) {
+    factoryOutput.content = content;
+  } else {
+    outputs.set('.factory/hooks.json', {
+      path: '.factory/hooks.json',
+      content,
+    });
+  }
+  return plan;
+}
+
+async function finishLegacyFactoryMigration(
+  plan: LegacyFactoryMigrationPlan,
+  outputRoot: string,
+  dryRun: boolean | undefined,
+  canonicalCreated: boolean
+): Promise<void> {
+  const action =
+    plan.migration.migrated > 0
+      ? `migrate ${plan.migration.migrated} legacy Factory hook(s)`
+      : 'remove legacy PromptScript-owned Factory hooks';
+  if (dryRun) {
+    ConsoleOutput.dryRun(`Would ${action} from ${plan.settingsPath} to ${plan.hooksPath}`);
+    return;
+  }
+
+  const content = JSON.stringify(plan.migration.legacy, null, 2) + '\n';
+  const rewritten = await rewriteHookOutputIfUnchanged(
+    plan.settingsPath,
+    outputRoot,
+    plan.expectedSettingsContent,
+    content
+  );
+  if (!rewritten) {
+    const canonicalContent = JSON.stringify(plan.migration.canonical, null, 2) + '\n';
+    const rolledBack =
+      canonicalCreated &&
+      (await removeHookOutputIfUnchanged(plan.hooksPath, outputRoot, canonicalContent));
+    throw new Error(
+      `Legacy Factory settings changed during compilation. ` +
+        (rolledBack
+          ? 'The canonical migration output was rolled back. '
+          : `Review ${plan.hooksPath} for a partial migration. `) +
+        `Review ${plan.settingsPath} and rerun.`
+    );
+  }
+  const canonicalContent = JSON.stringify(plan.migration.canonical, null, 2) + '\n';
+  const canonicalVerified = await rewriteHookOutputIfUnchanged(
+    plan.hooksPath,
+    outputRoot,
+    canonicalContent,
+    canonicalContent
+  );
+  if (!canonicalVerified) {
+    const settingsRestored = await rewriteHookOutputIfUnchanged(
+      plan.settingsPath,
+      outputRoot,
+      content,
+      plan.expectedSettingsContent
+    );
+    throw new Error(
+      `Canonical Factory hooks changed during migration. ` +
+        (settingsRestored
+          ? 'The legacy settings were restored. '
+          : `Review ${plan.settingsPath} for a partial migration. `) +
+        `Review ${plan.hooksPath} and rerun.`
+    );
+  }
+  ConsoleOutput.success(`${action[0]!.toUpperCase()}${action.slice(1)}`);
 }
 
 /**
@@ -330,7 +423,7 @@ async function writeOutputs(
   _config: PromptScriptConfig,
   services: CliServices
 ): Promise<WriteResult> {
-  const result: WriteResult = { written: [], skipped: [], unchanged: [] };
+  const result: WriteResult = { written: [], created: [], skipped: [], unchanged: [] };
   let overwriteAll = false;
   const conflicts: string[] = [];
   const targetErrors: string[] = [];
@@ -516,6 +609,7 @@ async function writeOutputs(
       if (await safeCreate(output, outputPath, desiredContent)) {
         ConsoleOutput.success(outputPath);
         result.written.push(outputPath);
+        result.created.push(outputPath);
       }
       continue;
     }
@@ -872,7 +966,30 @@ async function compileCommandWithResult(
     };
     applyConfiguredHeader(result.outputs, config.output?.header);
     await postFormatWithPrettier(result.outputs, projectRoot, logger);
+    const hasFactoryTarget = targets.some((target) => target.name === 'factory');
+    const migrateFactoryHooks = options.migrateFactoryHooks !== false;
+    const legacyMigration =
+      hasFactoryTarget && migrateFactoryHooks
+        ? await prepareLegacyFactoryMigration(result.outputs, effectiveOptions.output)
+        : undefined;
+    const legacySettingsPath =
+      hasFactoryTarget && !migrateFactoryHooks
+        ? await detectLegacyFactorySettingsHooks(effectiveOptions.output, true)
+        : undefined;
     const writeResult = await writeOutputs(result.outputs, effectiveOptions, config, services);
+    if (legacyMigration) {
+      if (writeResult.skipped.includes(legacyMigration.hooksPath)) {
+        throw new Error(
+          `Legacy Factory migration was cancelled before ${legacyMigration.hooksPath} was written.`
+        );
+      }
+      await finishLegacyFactoryMigration(
+        legacyMigration,
+        effectiveOptions.output,
+        options.dryRun,
+        writeResult.created.includes(legacyMigration.hooksPath)
+      );
+    }
     const cleanupResult = await cleanupManagedOutputs(result.outputs, {
       outputRoot: effectiveOptions.output,
       dryRun: options.dryRun,
@@ -891,10 +1008,6 @@ async function compileCommandWithResult(
         ConsoleOutput.muted(`Removed empty managed directory: ${removedDirectory}`);
       }
     }
-    const legacySettingsPath = targets.some((target) => target.name === 'factory')
-      ? await detectLegacyFactorySettingsHooks(effectiveOptions.output)
-      : undefined;
-
     // Report success only after every output and cleanup step completed, so a
     // write-phase failure never follows a "Compilation successful" line.
     spinner.succeed('Compilation successful');

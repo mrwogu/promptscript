@@ -13,6 +13,7 @@ import {
   mergePromptScriptHookOutput,
   removePromptScriptOwnedCodexHooks,
   removePromptScriptOwnedHooks,
+  removeHookOutputIfUnchanged,
   removeIfUnchanged,
   rewriteHookOutputIfUnchanged,
 } from '../managed-output-cleanup.js';
@@ -537,6 +538,9 @@ command = "echo owned # promptscript-generated:owned"
     await expect(
       rewriteHookOutputIfUnchanged(join(project, '.claude', 'settings.json'), project, 'old', 'new')
     ).resolves.toBe(false);
+    await expect(
+      removeHookOutputIfUnchanged(join(project, '.claude', 'settings.json'), project, 'old')
+    ).resolves.toBe(false);
     await expect(readFile(file, 'utf-8')).resolves.toBe('old');
   });
 
@@ -561,6 +565,18 @@ command = "echo owned # promptscript-generated:owned"
     ).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
+  it('should remove a hook output only when its content is unchanged', async () => {
+    const project = await createTemporaryDirectory('promptscript-remove-hook-output-');
+    const file = join(project, '.factory', 'hooks.json');
+    await mkdir(dirname(file), { recursive: true });
+    await writeFile(file, 'expected');
+
+    await expect(removeHookOutputIfUnchanged(file, project, 'different')).resolves.toBe(false);
+    await expect(readFile(file, 'utf-8')).resolves.toBe('expected');
+    await expect(removeHookOutputIfUnchanged(file, project, 'expected')).resolves.toBe(true);
+    await expect(readFile(file, 'utf-8')).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
   it('should return false when guarded child processes cannot start', async () => {
     const project = await createTemporaryDirectory('promptscript-hook-child-');
     const file = join(project, 'settings.json');
@@ -575,6 +591,7 @@ command = "echo owned # promptscript-generated:owned"
       await expect(
         createHookOutputSafely(join(project, 'nested', 'hooks.json'), project, 'new')
       ).resolves.toBe(false);
+      await expect(removeHookOutputIfUnchanged(file, project, 'old')).resolves.toBe(false);
     } finally {
       process.execPath = originalExecPath;
     }
@@ -589,6 +606,7 @@ command = "echo owned # promptscript-generated:owned"
     await expect(rewriteHookOutputIfUnchanged(outsideFile, project, 'old', 'new')).resolves.toBe(
       false
     );
+    await expect(removeHookOutputIfUnchanged(outsideFile, project, 'old')).resolves.toBe(false);
     await expect(createHookOutputSafely(join(outside, 'new.json'), project, 'new')).resolves.toBe(
       false
     );
