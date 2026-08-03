@@ -16,6 +16,7 @@ import {
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
+import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
  * GitHub formatter version information.
@@ -1111,6 +1112,18 @@ export class GitHubFormatter extends BaseFormatter {
     return `# GitHub Copilot Instructions`;
   }
 
+  private sectionTitle(
+    ast: Program,
+    renderer: ConventionRenderer,
+    sectionId: string,
+    defaultTitle: string
+  ): string {
+    return resolveSectionTitle(ast, sectionId, {
+      defaultTitle,
+      sourceOverrides: renderer.getConvention().name !== 'xml',
+    });
+  }
+
   private project(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
 
@@ -1119,15 +1132,20 @@ export class GitHubFormatter extends BaseFormatter {
       content = this.extractText(identity.content);
     } else {
       const context = this.findBlock(ast, 'context');
-      if (context?.content.type === 'MixedContent' && context.content.text) {
-        content = context.content.text.value.trim();
+      const contextTitle = resolveSourceSectionTitle(ast, 'context');
+      const projectTitle = resolveSourceSectionTitle(ast, 'project');
+      if (!contextTitle && context && (context.content.type === 'MixedContent' || projectTitle)) {
+        content = this.extractText(context.content).trim();
       }
     }
 
     if (!content) return null;
 
     // Apply stripAllIndent to normalize merged identity content for Prettier compatibility
-    return renderer.renderSection('project', this.stripAllIndent(content));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'project', 'project'),
+      this.stripAllIndent(content)
+    );
   }
 
   private techStack(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1136,7 +1154,10 @@ export class GitHubFormatter extends BaseFormatter {
       const items = this.extractTechStackFromContext(context);
       if (items.length > 0) {
         const content = renderer.renderList(items);
-        return renderer.renderSection('tech-stack', content);
+        return renderer.renderSection(
+          this.sectionTitle(ast, renderer, 'tech-stack', 'tech-stack'),
+          content
+        );
       }
     }
 
@@ -1146,7 +1167,10 @@ export class GitHubFormatter extends BaseFormatter {
       const items = this.extractTechStackFromStandards(standards);
       if (items.length > 0) {
         const content = renderer.renderList(items);
-        return renderer.renderSection('tech-stack', content);
+        return renderer.renderSection(
+          this.sectionTitle(ast, renderer, 'tech-stack', 'tech-stack'),
+          content
+        );
       }
     }
 
@@ -1218,12 +1242,15 @@ export class GitHubFormatter extends BaseFormatter {
 
     const content = archMatch.replace('## Architecture', '').trim();
     // Apply stripAllIndent to normalize content for Prettier compatibility
-    return renderer.renderSection('architecture', this.stripAllIndent(content));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'architecture', 'architecture'),
+      this.stripAllIndent(content)
+    );
   }
 
   private contextSection(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null; // project() fallback handles @context text
+    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
 
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
@@ -1238,7 +1265,10 @@ export class GitHubFormatter extends BaseFormatter {
 
     // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
     const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
-    return renderer.renderSection('Context', this.stripAllIndent(downgradedText));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'context', 'Context'),
+      this.stripAllIndent(downgradedText)
+    );
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1260,7 +1290,10 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (subsections.length === 0) return null;
 
-    return renderer.renderSection('code-standards', subsections.join('\n\n'));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'code-standards', 'code-standards'),
+      subsections.join('\n\n')
+    );
   }
 
   /**
@@ -1291,7 +1324,10 @@ export class GitHubFormatter extends BaseFormatter {
     }
 
     if (items.length === 0) return null;
-    return renderer.renderSection('shortcuts', renderer.renderList(items));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'commands', 'shortcuts'),
+      renderer.renderList(items)
+    );
   }
 
   private commands(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1304,7 +1340,10 @@ export class GitHubFormatter extends BaseFormatter {
 
     const content = commandsMatch.replace('## Development Commands', '').trim();
     // Apply stripAllIndent to normalize content for Prettier compatibility
-    return renderer.renderSection('commands', this.stripAllIndent(content));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'commands', 'commands'),
+      this.stripAllIndent(content)
+    );
   }
 
   private gitCommits(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1349,7 +1388,10 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
 
-    return renderer.renderSection('git-commits', renderer.renderList(items));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'git-commits', 'git-commits'),
+      renderer.renderList(items)
+    );
   }
 
   private configFiles(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1377,7 +1419,10 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (subsections.length === 0) return null;
 
-    return renderer.renderSection('configuration-files', subsections.join('\n\n'));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'configuration-files', 'configuration-files'),
+      subsections.join('\n\n')
+    );
   }
 
   private documentation(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1409,7 +1454,10 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
 
-    return renderer.renderSection('documentation-verification', renderer.renderList(items));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'documentation', 'documentation-verification'),
+      renderer.renderList(items)
+    );
   }
 
   private postWork(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1425,7 +1473,7 @@ export class GitHubFormatter extends BaseFormatter {
     const content = postMatch.replace('## Post-Work Verification', '').trim();
     // Apply stripAllIndent to normalize content for Prettier compatibility
     return renderer.renderSection(
-      'post-work-verification',
+      this.sectionTitle(ast, renderer, 'post-work', 'post-work-verification'),
       `${intro}\n${this.stripAllIndent(content)}`
     );
   }
@@ -1456,7 +1504,10 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
 
-    return renderer.renderSection('donts', renderer.renderList(items));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'restrictions', 'donts'),
+      renderer.renderList(items)
+    );
   }
 
   private diagrams(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1489,14 +1540,17 @@ export class GitHubFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
 
-    return renderer.renderSection('diagrams', renderer.renderList(items));
+    return renderer.renderSection(
+      this.sectionTitle(ast, renderer, 'diagrams', 'diagrams'),
+      renderer.renderList(items)
+    );
   }
 
   /**
    * Render remaining @knowledge content not already consumed by
    * commands() (## Development Commands) or postWork() (## Post-Work Verification).
    */
-  private knowledgeContent(ast: Program, _renderer: ConventionRenderer): string | null {
+  private knowledgeContent(ast: Program, renderer: ConventionRenderer): string | null {
     const knowledge = this.findBlock(ast, 'knowledge');
     if (!knowledge) return null;
 
@@ -1528,11 +1582,20 @@ export class GitHubFormatter extends BaseFormatter {
     remaining = remaining.trim();
     if (!remaining) return null;
 
-    return this.stripAllIndent(remaining);
+    const content = this.stripAllIndent(remaining);
+    const title =
+      renderer.getConvention().name === 'xml'
+        ? undefined
+        : resolveSourceSectionTitle(ast, 'knowledge');
+    return title ? renderer.renderSection(title, content) : content;
   }
 
   private examples(ast: Program, renderer: ConventionRenderer): string | null {
-    return this.renderExamplesSection(ast, renderer, 'examples');
+    return this.renderExamplesSection(
+      ast,
+      renderer,
+      this.sectionTitle(ast, renderer, 'examples', 'examples')
+    );
   }
 
   // Helper methods

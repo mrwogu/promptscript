@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse, parseOrThrow } from '../parse.js';
-import { ParseError } from '@promptscript/core';
+import { ParseError, SYNTAX_FEATURES } from '@promptscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -330,6 +330,136 @@ describe('parse', () => {
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]?.message).toContain("'!' replace modifier cannot be combined");
       expect(result.ast).toBeNull();
+    });
+  });
+
+  describe('section header overrides', () => {
+    it('should parse primary and derived headers as ordered presentation entries', () => {
+      const result = parse(
+        `@meta { id: "test" syntax: "1.5.0" }
+@standards {
+  code: ["Use strict TypeScript"]
+  @header "Coding Rules"
+  @header git-commits "Commit Rules"
+}`,
+        { filename: 'headers.prs' }
+      );
+
+      expect(result.errors).toHaveLength(0);
+      const standards = result.ast?.blocks[0];
+      expect(standards?.content).toMatchObject({
+        type: 'ObjectContent',
+        properties: { code: ['Use strict TypeScript'] },
+      });
+      expect(standards?.canonicalBody?.entries).toMatchObject([
+        { type: 'FieldEntry', name: 'code' },
+        {
+          type: 'PresentationEntry',
+          title: 'Coding Rules',
+          source: 'explicit',
+          loc: { file: 'headers.prs', line: 4, column: 3 },
+          titleLoc: { file: 'headers.prs', line: 4, column: 11 },
+        },
+        {
+          type: 'PresentationEntry',
+          sectionId: 'git-commits',
+          title: 'Commit Rules',
+          source: 'explicit',
+          sectionLoc: { file: 'headers.prs', line: 5, column: 11 },
+          titleLoc: { file: 'headers.prs', line: 5, column: 23 },
+        },
+      ]);
+      expect(result.ast?.syntaxFeatures).toEqual([
+        {
+          feature: 'section-header-override',
+          location: expect.objectContaining({ file: 'headers.prs', line: 4, column: 3 }),
+        },
+        {
+          feature: 'section-header-override',
+          location: expect.objectContaining({ file: 'headers.prs', line: 5, column: 3 }),
+        },
+      ]);
+    });
+
+    it('should preserve header fields as domain data', () => {
+      const result = parse(`
+        @standards {
+          header: "domain header"
+          headers: { authorization: "Bearer token" }
+        }
+      `);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.blocks[0]?.content).toMatchObject({
+        type: 'ObjectContent',
+        properties: {
+          header: 'domain header',
+          headers: { authorization: 'Bearer token' },
+        },
+      });
+      expect(result.ast?.blocks[0]?.canonicalBody?.entries).not.toContainEqual(
+        expect.objectContaining({ type: 'PresentationEntry' })
+      );
+    });
+
+    it('should opt registered text blocks into initial heading fallback at syntax 1.5.0', () => {
+      const current = parse(`
+        @meta { id: "current" syntax: "1.5.0" }
+        @identity {
+          """## Localized Project
+          Project details"""
+        }
+      `);
+      const legacy = parse(`
+        @meta { id: "legacy" syntax: "1.4.0" }
+        @identity {
+          """## Localized Project
+          Project details"""
+        }
+      `);
+
+      expect(current.errors).toHaveLength(0);
+      expect(current.ast?.blocks[0]?.canonicalBody?.entries).toMatchObject([
+        {
+          type: 'PresentationEntry',
+          title: 'Localized Project',
+          source: 'legacy',
+        },
+        { type: 'TextEntry', text: '          Project details' },
+      ]);
+      expect(current.ast?.blocks[0]?.content).toMatchObject({
+        type: 'TextContent',
+        value: '          Project details',
+      });
+      expect(current.ast?.syntaxFeatures).toContainEqual(
+        expect.objectContaining({
+          feature: SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
+        })
+      );
+      expect(legacy.ast?.blocks[0]?.canonicalBody?.entries).toMatchObject([
+        {
+          type: 'TextEntry',
+          text: '## Localized Project\n          Project details',
+        },
+      ]);
+    });
+
+    it('should preserve initial headings in unregistered custom blocks', () => {
+      const result = parse(`
+        @meta { id: "custom" syntax: "1.5.0" }
+        @custom {
+          """## Domain Heading
+          Domain details"""
+        }
+      `);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.blocks[0]?.canonicalBody?.entries).toMatchObject([
+        {
+          type: 'TextEntry',
+          text: '## Domain Heading\n          Domain details',
+        },
+      ]);
     });
   });
 

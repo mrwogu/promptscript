@@ -9,6 +9,7 @@ import type {
   CanonicalExtendBlock,
   CanonicalProgram,
   FieldEntry,
+  PresentationEntry,
   ProgramOperation,
   MetaBlock,
   InheritDeclaration,
@@ -20,6 +21,7 @@ import type {
   TextContent,
   TypeExpression,
   SourceLocation,
+  SyntaxFeatureUsage,
   ParamArgument,
   ParamDefinition,
   ParamType,
@@ -32,6 +34,8 @@ import {
   createCanonicalExtendBlock,
   createCanonicalProgram,
   createValueNode,
+  normalizeLegacyHeadingEntries,
+  SYNTAX_FEATURES,
 } from '@promptscript/core';
 
 // ============================================================
@@ -97,6 +101,13 @@ interface BlockContentCstCtx {
   field?: CstNode[];
   restrictionItem?: CstNode[];
   inlineUse?: CstNode[];
+  headerDirective?: CstNode[];
+}
+
+interface HeaderDirectiveCstCtx {
+  At: IToken[];
+  Identifier: IToken[];
+  StringLiteral: IToken[];
 }
 
 interface RestrictionItemCstCtx {
@@ -252,6 +263,8 @@ class PromptScriptVisitor extends BaseVisitor {
   private diagnostics: VisitorDiagnostic[] = [];
   private fieldCache = new Map<string, ParsedField>();
   private directBlockFields = new Set<string>();
+  private syntaxFeatures: SyntaxFeatureUsage[] = [];
+  private syntaxVersion: string | undefined;
 
   constructor() {
     super();
@@ -334,6 +347,10 @@ class PromptScriptVisitor extends BaseVisitor {
     this.filename = filename;
     this.fieldCache.clear();
     this.directBlockFields.clear();
+    this.syntaxFeatures = [];
+    const meta = ctx.metaBlock ? (this.visit(ctx.metaBlock[0]!) as MetaBlock) : undefined;
+    this.syntaxVersion =
+      typeof meta?.fields['syntax'] === 'string' ? meta.fields['syntax'] : undefined;
     const sourceLayerId = filename;
     const declarations = [
       ...(ctx.inheritDecl ?? []),
@@ -391,8 +408,9 @@ class PromptScriptVisitor extends BaseVisitor {
     }
 
     return createCanonicalProgram({
-      meta: ctx.metaBlock ? this.visit(ctx.metaBlock[0]!) : undefined,
+      meta,
       operations,
+      syntaxFeatures: this.syntaxFeatures,
       loc: { file: this.filename, line: 1, column: 1, offset: 0 },
     });
   }
@@ -496,11 +514,58 @@ class PromptScriptVisitor extends BaseVisitor {
   }
 
   /**
+   * headerDirective → PresentationEntry
+   */
+  headerDirective(ctx: HeaderDirectiveCstCtx): PresentationEntry {
+    const directiveLoc = this.loc(ctx.At[0]!);
+    const sectionToken = ctx.Identifier[1];
+    const titleToken = ctx.StringLiteral[0]!;
+    this.syntaxFeatures.push({
+      feature: SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
+      location: directiveLoc,
+    });
+    return {
+      type: 'PresentationEntry',
+      ...(sectionToken
+        ? {
+            sectionId: sectionToken.image,
+            sectionLoc: this.loc(sectionToken),
+          }
+        : {}),
+      title: this.parseStringLiteral(titleToken.image),
+      source: 'explicit',
+      loc: directiveLoc,
+      titleLoc: this.loc(titleToken),
+    };
+  }
+
+  private normalizeLegacyHeading(
+    blockName: string,
+    entries: readonly BlockEntry[]
+  ): readonly BlockEntry[] {
+    const normalized = normalizeLegacyHeadingEntries(blockName, entries, this.syntaxVersion);
+    if (normalized !== entries) {
+      const presentation = normalized.find(
+        (entry): entry is PresentationEntry =>
+          entry.type === 'PresentationEntry' && entry.source === 'legacy'
+      );
+      if (presentation) {
+        this.syntaxFeatures.push({
+          feature: SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
+          location: presentation.loc,
+        });
+      }
+    }
+    return normalized;
+  }
+
+  /**
    * block → CanonicalBlock
    */
   block(ctx: BlockCstCtx): CanonicalBlock {
     const name = ctx.Identifier[0]!.image;
     const { body, replacements } = this.visit(ctx.blockContent[0]!) as ParsedBlockContent;
+    const entries = this.normalizeLegacyHeading(name, body.entries);
     for (const replacement of replacements) {
       this.diagnostics.push({
         message: "The '!' replace modifier is only valid inside @extend.",
@@ -509,7 +574,7 @@ class PromptScriptVisitor extends BaseVisitor {
     }
     return createCanonicalBlock(
       name,
-      createBlockBody(body.entries, this.loc(ctx.LBrace[0]!)),
+      createBlockBody(entries, this.loc(ctx.LBrace[0]!)),
       this.loc(ctx.At[0]!)
     );
   }
@@ -520,9 +585,12 @@ class PromptScriptVisitor extends BaseVisitor {
   extendBlock(ctx: ExtendBlockCstCtx): CanonicalExtendBlock {
     const targetPath = this.visit(ctx.dotPath[0]!) as string;
     const { body, replacements } = this.visit(ctx.blockContent[0]!) as ParsedBlockContent;
+    const entries = targetPath.includes('.')
+      ? body.entries
+      : this.normalizeLegacyHeading(targetPath, body.entries);
     return createCanonicalExtendBlock(
       targetPath,
-      createBlockBody(body.entries, this.loc(ctx.LBrace[0]!)),
+      createBlockBody(entries, this.loc(ctx.LBrace[0]!)),
       replacements,
       this.loc(ctx.At[0]!)
     );
@@ -592,6 +660,14 @@ class PromptScriptVisitor extends BaseVisitor {
           declaration,
           loc: declaration.loc,
         },
+      });
+    }
+
+    for (const node of ctx.headerDirective ?? []) {
+      const entry = this.visit(node) as PresentationEntry;
+      entries.push({
+        offset: entry.loc.offset ?? 0,
+        entry,
       });
     }
 

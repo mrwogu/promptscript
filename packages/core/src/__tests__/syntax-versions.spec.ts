@@ -51,11 +51,25 @@ describe('registry consistency', () => {
       expect(latestBlocks).toContain(blockType);
     }
   });
+
+  it('should keep blocks and syntax features cumulative across versions', () => {
+    const versions = Object.keys(SYNTAX_VERSIONS);
+    for (let index = 1; index < versions.length; index++) {
+      const previous = SYNTAX_VERSIONS[versions[index - 1]!]!;
+      const current = SYNTAX_VERSIONS[versions[index]!]!;
+      for (const block of previous.blocks) {
+        expect(current.blocks).toContain(block);
+      }
+      for (const feature of previous.features) {
+        expect(current.features).toContain(feature);
+      }
+    }
+  });
 });
 
 describe('getLatestSyntaxVersion', () => {
   it('should return the highest known version', () => {
-    expect(getLatestSyntaxVersion()).toBe('1.4.0');
+    expect(getLatestSyntaxVersion()).toBe('1.5.0');
   });
 });
 
@@ -107,11 +121,16 @@ describe('syntax feature capabilities', () => {
   it('should expose cumulative features by syntax version', () => {
     expect(getFeaturesForVersion('1.2.0')).toEqual([]);
     expect(getFeaturesForVersion('1.3.0')).toContain(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE);
+    expect(getFeaturesForVersion('1.5.0')).toEqual([
+      SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+      SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
+    ]);
     expect(getFeaturesForVersion('9.9.9')).toBeUndefined();
   });
 
   it('should return the minimum version for registered features', () => {
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE)).toBe('1.3.0');
+    expect(getMinimumVersionForFeature(SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE)).toBe('1.5.0');
     expect(getMinimumVersionForFeature('unknown-feature' as SyntaxFeature)).toBeUndefined();
   });
 

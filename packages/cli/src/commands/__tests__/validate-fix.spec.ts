@@ -363,6 +363,43 @@ describe('validateCommand --fix', () => {
     expect(content).toContain('syntax: "1.3.0"');
   });
 
+  it('should fix syntax version for direct and inherited section header overrides', async () => {
+    mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'base.prs'),
+      `@meta { id: "base" syntax: "1.4.0" }
+@standards {
+  @header "Shared Rules"
+  code: ["Use strict TypeScript"]
+}
+`
+    );
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'project.prs'),
+      `@meta { id: "project" syntax: "1.4.0" }
+@inherit ./base
+`
+    );
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'direct.prs'),
+      `@meta { id: "direct" syntax: "1.4.0" }
+@restrictions {
+  @header "Forbidden Practices"
+  - "No unsafe casts"
+}
+`
+    );
+
+    await validateCommand({ fix: true });
+
+    expect(readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8')).toContain(
+      'syntax: "1.5.0"'
+    );
+    expect(readFileSync(join(tmpDir, '.promptscript', 'direct.prs'), 'utf-8')).toContain(
+      'syntax: "1.5.0"'
+    );
+  });
+
   it('should report no fixes needed when syntax is correct', async () => {
     mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
     writeFileSync(

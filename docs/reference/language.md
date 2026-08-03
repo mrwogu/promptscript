@@ -124,12 +124,12 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.1.0` | Stable  | All 1.0.0 blocks + `@agents`, `@workflows`; reserves internal `@prompts`                                                                   |
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
-| `1.4.0` | Current | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
+| `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
+| `1.5.0` | Current | All 1.4.0 features + generated section title overrides with contextual `@header`                                                           |
 
 !!! note "Block Availability"
-`@workflows` is user-facing and emits workflow files for targets that support them, such as
-`.claude/workflows/<name>.md`. `@prompts` is reserved for internal prompt output. `@hooks`,
-`@mcpServers`, and `@plugins` require syntax `1.4.0`.
+`@workflows` emits workflow files such as `.claude/workflows/<name>.md`.
+`@prompts` is internal. `@hooks`, `@mcpServers`, and `@plugins` require syntax `1.4.0`.
 
 ### Block Version Requirements
 
@@ -145,7 +145,7 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 
 All other built-in blocks are available from `1.0.0`.
 
-Regular block field replacement with `field!: value` requires syntax `1.3.0`.
+Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` require syntax `1.5.0`.
 
 ### Validation (PS018, PS019)
 
@@ -2104,3 +2104,69 @@ If a variable is not set and no default is provided:
     1. **Always provide defaults** for non-sensitive values
     2. **Never commit secrets** - use environment variables for API keys
     3. **Document required variables** in your project README
+
+## Generated Section Headers
+
+Syntax `1.5.0` lets source files override human-readable section titles without
+forking a formatter. Place contextual `@header` directives directly inside a
+registered owner block:
+
+```promptscript
+@meta {
+  id: "localized-project"
+  syntax: "1.5.0"
+}
+
+@standards {
+  @header "Coding Rules"
+  @header git-commits "Commit Rules"
+  @header documentation "Dokumentacja zespołu"
+
+  code: ["Use strict TypeScript"]
+  git: { format: "conventional" }
+  documentation: { verifyAfter: true }
+}
+```
+
+- `@header "Title"` names the block's primary generated section.
+- `@header <section-key> "Title"` names a derived section.
+- Titles must be non-empty, single-line strings.
+- Canonical section keys use kebab-case.
+- Source overrides take precedence over formatter configuration and target defaults.
+- Overrides change only human-readable titles. Filenames, frontmatter properties,
+  XML tags, and structured JSON, TOML, or YAML keys stay unchanged.
+- Ordinary `header` and `headers` fields remain domain data, including nested HTTP
+  headers in `@mcpServers`.
+
+| Section key           | Primary owner   | Fallback owners           | Keyless `@header` owner   |
+| --------------------- | --------------- | ------------------------- | ------------------------- |
+| `project`             | `@identity`     | `@context`                | `@identity`               |
+| `tech-stack`          | `@context`      | `@standards`              | -                         |
+| `architecture`        | `@context`      | -                         | -                         |
+| `context`             | `@context`      | -                         | `@context`                |
+| `code-standards`      | `@standards`    | -                         | `@standards`              |
+| `git-commits`         | `@standards`    | -                         | -                         |
+| `configuration-files` | `@standards`    | -                         | -                         |
+| `commands`            | `@shortcuts`    | `@commands`, `@knowledge` | `@shortcuts`, `@commands` |
+| `post-work`           | `@knowledge`    | -                         | -                         |
+| `documentation`       | `@standards`    | -                         | -                         |
+| `diagrams`            | `@standards`    | -                         | -                         |
+| `knowledge`           | `@knowledge`    | -                         | `@knowledge`              |
+| `restrictions`        | `@restrictions` | -                         | `@restrictions`           |
+| `examples`            | `@examples`     | -                         | `@examples`               |
+
+For registered text-only primary owners, syntax `1.5.0` also recognizes an
+initial `## Heading` as a compatibility fallback:
+
+```promptscript
+@identity {
+  """
+  ## Project Instructions
+  Follow repository conventions.
+  """
+}
+```
+
+The formatter emits that heading once and preserves the remaining body. Explicit
+`@header` metadata always wins over this fallback. Syntax `1.4.x` and earlier
+keep the heading as ordinary body text, so existing output remains unchanged.

@@ -13,6 +13,7 @@ import {
   extractMcpServers,
   serializeMcpServersToJsonString,
 } from '../mcp-helpers.js';
+import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
  * Claude formatter version information.
@@ -1054,6 +1055,18 @@ export class ClaudeFormatter extends BaseFormatter {
     if (content) sections.push(content);
   }
 
+  private sectionTitle(
+    ast: Program,
+    renderer: ConventionRenderer,
+    sectionId: string,
+    defaultTitle?: string
+  ): string {
+    return resolveSectionTitle(ast, sectionId, {
+      ...(defaultTitle ? { defaultTitle } : {}),
+      sourceOverrides: renderer.getConvention().name !== 'xml',
+    });
+  }
+
   private project(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
 
@@ -1062,8 +1075,10 @@ export class ClaudeFormatter extends BaseFormatter {
       text = this.extractText(identity.content);
     } else {
       const context = this.findBlock(ast, 'context');
-      if (context?.content.type === 'MixedContent' && context.content.text) {
-        text = context.content.text.value.trim();
+      const contextTitle = resolveSourceSectionTitle(ast, 'context');
+      const projectTitle = resolveSourceSectionTitle(ast, 'project');
+      if (!contextTitle && context && (context.content.type === 'MixedContent' || projectTitle)) {
+        text = this.extractText(context.content).trim();
       }
     }
 
@@ -1083,7 +1098,9 @@ export class ClaudeFormatter extends BaseFormatter {
 
     // Normalize for Prettier compatibility (blank lines before lists, etc.)
     const normalizedText = this.normalizeMarkdownForPrettier(cleanText);
-    return renderer.renderSection('Project', normalizedText) + '\n';
+    return (
+      renderer.renderSection(this.sectionTitle(ast, renderer, 'project'), normalizedText) + '\n'
+    );
   }
 
   private techStack(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1091,7 +1108,10 @@ export class ClaudeFormatter extends BaseFormatter {
     if (context) {
       const items = this.extractTechStackFromContext(context);
       if (items.length > 0) {
-        return renderer.renderSection('Tech Stack', items.join(', ')) + '\n';
+        return (
+          renderer.renderSection(this.sectionTitle(ast, renderer, 'tech-stack'), items.join(', ')) +
+          '\n'
+        );
       }
     }
 
@@ -1099,7 +1119,10 @@ export class ClaudeFormatter extends BaseFormatter {
     if (standards) {
       const items = this.extractTechStackFromStandards(standards);
       if (items.length > 0) {
-        return renderer.renderSection('Tech Stack', items.join(', ')) + '\n';
+        return (
+          renderer.renderSection(this.sectionTitle(ast, renderer, 'tech-stack'), items.join(', ')) +
+          '\n'
+        );
       }
     }
 
@@ -1160,12 +1183,17 @@ export class ClaudeFormatter extends BaseFormatter {
     const content = archMatch.replace('## Architecture', '');
     // Normalize for Prettier compatibility (strip code block indentation, etc.)
     const normalizedContent = this.normalizeMarkdownForPrettier(content);
-    return renderer.renderSection('Architecture', normalizedContent.trim()) + '\n';
+    return (
+      renderer.renderSection(
+        this.sectionTitle(ast, renderer, 'architecture'),
+        normalizedContent.trim()
+      ) + '\n'
+    );
   }
 
   private contextSection(ast: Program, renderer: ConventionRenderer): string | null {
     const identity = this.findBlock(ast, 'identity');
-    if (!identity) return null; // project() fallback handles @context text
+    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
 
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
@@ -1181,7 +1209,12 @@ export class ClaudeFormatter extends BaseFormatter {
     // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
     const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
     const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
-    return renderer.renderSection('Context', normalizedContent.trim()) + '\n';
+    return (
+      renderer.renderSection(
+        this.sectionTitle(ast, renderer, 'context'),
+        normalizedContent.trim()
+      ) + '\n'
+    );
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1199,7 +1232,9 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection('Code Style', content) + '\n';
+    return (
+      renderer.renderSection(this.sectionTitle(ast, renderer, 'code-standards'), content) + '\n'
+    );
   }
 
   private gitCommits(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1223,7 +1258,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection('Git Commits', content) + '\n';
+    return renderer.renderSection(this.sectionTitle(ast, renderer, 'git-commits'), content) + '\n';
   }
 
   private configFiles(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1243,7 +1278,10 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection('Config Files', content) + '\n';
+    return (
+      renderer.renderSection(this.sectionTitle(ast, renderer, 'configuration-files'), content) +
+      '\n'
+    );
   }
 
   private commands(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1277,7 +1315,7 @@ export class ClaudeFormatter extends BaseFormatter {
       }
     }
 
-    return renderer.renderSection('Commands', content) + '\n';
+    return renderer.renderSection(this.sectionTitle(ast, renderer, 'commands'), content) + '\n';
   }
 
   private postWork(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1292,7 +1330,12 @@ export class ClaudeFormatter extends BaseFormatter {
     const content = match.replace('## Post-Work Verification', '');
     // Normalize for Prettier compatibility
     const normalizedContent = this.normalizeMarkdownForPrettier(content);
-    return renderer.renderSection('Post-Work Verification', normalizedContent.trim()) + '\n';
+    return (
+      renderer.renderSection(
+        this.sectionTitle(ast, renderer, 'post-work'),
+        normalizedContent.trim()
+      ) + '\n'
+    );
   }
 
   private documentation(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1317,7 +1360,9 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection('Documentation', content) + '\n';
+    return (
+      renderer.renderSection(this.sectionTitle(ast, renderer, 'documentation'), content) + '\n'
+    );
   }
 
   private diagrams(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1339,14 +1384,14 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection('Diagrams', content) + '\n';
+    return renderer.renderSection(this.sectionTitle(ast, renderer, 'diagrams'), content) + '\n';
   }
 
   /**
    * Render remaining @knowledge content not already consumed by
    * commands() (## Development Commands) or postWork() (## Post-Work Verification).
    */
-  private knowledgeContent(ast: Program, _renderer: ConventionRenderer): string | null {
+  private knowledgeContent(ast: Program, renderer: ConventionRenderer): string | null {
     const knowledge = this.findBlock(ast, 'knowledge');
     if (!knowledge) return null;
 
@@ -1378,7 +1423,12 @@ export class ClaudeFormatter extends BaseFormatter {
     remaining = remaining.trim();
     if (!remaining) return null;
 
-    return this.stripAllIndent(remaining) + '\n';
+    const content = this.stripAllIndent(remaining);
+    const title =
+      renderer.getConvention().name === 'xml'
+        ? undefined
+        : resolveSourceSectionTitle(ast, 'knowledge');
+    return title ? renderer.renderSection(title, content) + '\n' : content + '\n';
   }
 
   private donts(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1388,11 +1438,14 @@ export class ClaudeFormatter extends BaseFormatter {
     const items = this.extractDontsItems(block);
     if (items.length === 0) return null;
     const content = renderer.renderList(items);
-    return renderer.renderSection("Don'ts", content) + '\n';
+    return (
+      renderer.renderSection(this.sectionTitle(ast, renderer, 'restrictions', "Don'ts"), content) +
+      '\n'
+    );
   }
 
   private examples(ast: Program, renderer: ConventionRenderer): string | null {
-    return this.renderExamplesSection(ast, renderer);
+    return this.renderExamplesSection(ast, renderer, this.sectionTitle(ast, renderer, 'examples'));
   }
 
   private extractDontsItems(block: Block): string[] {

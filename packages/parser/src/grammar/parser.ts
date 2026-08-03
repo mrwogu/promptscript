@@ -144,7 +144,7 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * blockContent
-   *   : (TextBlock | restrictionItem | inlineUse | field)*
+   *   : (TextBlock | restrictionItem | inlineUse | headerDirective | field)*
    */
   private blockContent = this.RULE('blockContent', () => {
     this.MANY(() =>
@@ -152,6 +152,10 @@ export class PromptScriptParser extends CstParser {
         { ALT: () => this.CONSUME(TextBlock) },
         { ALT: () => this.SUBRULE(this.restrictionItem) },
         { ALT: () => this.SUBRULE(this.inlineUse), GATE: () => this.isInlineUseAhead() },
+        {
+          ALT: () => this.SUBRULE(this.headerDirective),
+          GATE: () => this.isHeaderDirectiveAhead(),
+        },
         { ALT: () => this.SUBRULE(this.field) },
       ])
     );
@@ -176,6 +180,17 @@ export class PromptScriptParser extends CstParser {
       this.CONSUME(Into);
       this.CONSUME(StringLiteral);
     });
+  });
+
+  /**
+   * headerDirective
+   *   : '@' 'header' Identifier? StringLiteral
+   */
+  private headerDirective = this.RULE('headerDirective', () => {
+    this.CONSUME(At);
+    this.CONSUME(Identifier);
+    this.OPTION(() => this.CONSUME2(Identifier));
+    this.CONSUME(StringLiteral);
   });
 
   /**
@@ -246,6 +261,13 @@ export class PromptScriptParser extends CstParser {
     if (!first || first.tokenType?.name !== 'At') return false;
     const second = this.LA(2);
     return second?.tokenType?.name === 'Use';
+  }
+
+  private isHeaderDirectiveAhead(): boolean {
+    const first = this.LA(1);
+    if (!first || first.tokenType?.name !== 'At') return false;
+    const second = this.LA(2);
+    return second?.tokenType?.name === 'Identifier' && second.image === 'header';
   }
 
   /**

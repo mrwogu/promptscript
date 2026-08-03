@@ -54,7 +54,7 @@ export const syntaxVersionCompat: ValidationRule = {
 
       ctx.report({
         message: `Syntax feature "${usage.feature}" requires syntax >= ${minVersion}, but the resolved program declares "${syntax}".`,
-        location: meta.loc ?? ctx.ast.loc,
+        location: usage.location,
         suggestion: 'Use "prs validate --fix" to update the syntax version.',
       });
     }

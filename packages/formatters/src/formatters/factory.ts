@@ -6,6 +6,7 @@ import {
   type MarkdownAgentConfig,
   type MarkdownCommandConfig,
   type MarkdownSkillConfig,
+  type SectionNameKey,
 } from '../markdown-instruction-formatter.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
 import {
@@ -20,6 +21,7 @@ import {
   serializeMcpServersToJsonString,
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
+import { resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
  * Supported Factory AI format versions.
@@ -200,11 +202,19 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       if (!text) return null;
 
       const normalizedContent = this.normalizeFreeformStandardsText(text);
-      return renderer.renderSection(this.getSectionName('codeStandards'), normalizedContent) + '\n';
+      return (
+        renderer.renderSection(
+          this.getRenderedSectionName(ast, 'codeStandards', renderer),
+          normalizedContent
+        ) + '\n'
+      );
     }
 
     return (
-      renderer.renderSection(this.getSectionName('codeStandards'), subsections.join('\n\n')) + '\n'
+      renderer.renderSection(
+        this.getRenderedSectionName(ast, 'codeStandards', renderer),
+        subsections.join('\n\n')
+      ) + '\n'
     );
   }
 
@@ -726,7 +736,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
         if (items.length === 0) continue;
 
         const semantic = this.getSemanticRuleInfo(topic);
-        const label = semantic?.label ?? this.humanizeLabel(topic);
+        const label = semantic
+          ? this.getSectionName(ast, semantic.sectionName, semantic.label)
+          : this.humanizeLabel(topic);
         const path =
           semantic?.path ??
           `.factory/rules/standards/${this.createStableRuleSlug(topic, usedSlugs)}.md`;
@@ -743,18 +755,18 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
           files.push({
             label: 'Standards',
             path: '.factory/rules/standards.md',
-            content: `# Standards\n\n${normalized}\n`,
+            content: `# ${resolveSourceSectionTitle(ast, 'code-standards') ?? 'Standards'}\n\n${normalized}\n`,
           });
         }
       }
     }
 
-    const knowledge = this.knowledgeContent(ast, renderer);
+    const knowledge = this.knowledgeContent(ast, renderer, false);
     if (knowledge) {
       files.push({
         label: 'Knowledge',
         path: '.factory/rules/knowledge.md',
-        content: `# Knowledge\n\n${knowledge.trim()}\n`,
+        content: `# ${this.getSectionName(ast, 'knowledge')}\n\n${knowledge.trim()}\n`,
       });
     }
 
@@ -763,7 +775,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       files.push({
         label: 'Restrictions',
         path: '.factory/rules/restrictions.md',
-        content: this.promoteSectionHeading(restrictions, this.getSectionName('restrictions')),
+        content: this.promoteSectionHeading(restrictions, this.getSectionName(ast, 'restrictions')),
       });
     }
 
@@ -772,7 +784,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       files.push({
         label: 'Examples',
         path: '.factory/rules/examples.md',
-        content: this.promoteSectionHeading(examples, 'Examples'),
+        content: this.promoteSectionHeading(examples, this.getSectionName(ast, 'examples')),
       });
     }
 
@@ -817,12 +829,33 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     this.addSection(sections, this.postWork(ast, renderer));
   }
 
-  private getSemanticRuleInfo(topic: string): { label: string; path: string } | undefined {
-    const semanticRules: Record<string, { label: string; path: string }> = {
-      git: { label: 'Git Workflows', path: '.factory/rules/git-workflows.md' },
-      config: { label: 'Configuration', path: '.factory/rules/configuration.md' },
-      documentation: { label: 'Documentation', path: '.factory/rules/documentation.md' },
-      diagrams: { label: 'Diagrams', path: '.factory/rules/diagrams.md' },
+  private getSemanticRuleInfo(
+    topic: string
+  ): { label: string; path: string; sectionName: SectionNameKey } | undefined {
+    const semanticRules: Record<
+      string,
+      { label: string; path: string; sectionName: SectionNameKey }
+    > = {
+      git: {
+        label: 'Git Workflows',
+        path: '.factory/rules/git-workflows.md',
+        sectionName: 'gitCommits',
+      },
+      config: {
+        label: 'Configuration',
+        path: '.factory/rules/configuration.md',
+        sectionName: 'configFiles',
+      },
+      documentation: {
+        label: 'Documentation',
+        path: '.factory/rules/documentation.md',
+        sectionName: 'documentation',
+      },
+      diagrams: {
+        label: 'Diagrams',
+        path: '.factory/rules/diagrams.md',
+        sectionName: 'diagrams',
+      },
     };
     return semanticRules[topic];
   }

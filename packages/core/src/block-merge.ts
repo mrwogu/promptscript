@@ -19,6 +19,7 @@ import {
   reconcileBlockBody,
   valueNodeToValue,
 } from './canonical-ast.js';
+import { selectPresentationEntries } from './presentation.js';
 
 export interface BlockMergePolicy {
   readonly valuePrecedence: 'base' | 'incoming';
@@ -314,12 +315,21 @@ function mergeCanonicalBodies(
   baseContent: BlockContent,
   incomingContent: BlockContent,
   content: BlockContent,
-  policy: BlockMergePolicy
+  policy: BlockMergePolicy,
+  blockName: string
 ): BlockBody {
   const baseBody = base ? reconcileBlockBody(base, baseContent) : blockContentToBody(baseContent);
   const incomingBody = incoming
     ? reconcileBlockBody(incoming, incomingContent)
     : blockContentToBody(incomingContent);
+  const presentation = selectPresentationEntries(
+    baseBody.entries,
+    incomingBody.entries,
+    policy.valuePrecedence,
+    blockName
+  );
+  const selectedBasePresentation = new Set(presentation.base);
+  const selectedIncomingPresentation = new Set(presentation.incoming);
 
   const taggedEntries = [
     ...baseBody.entries.map((entry) => ({ entry, layer: 'base' as const })),
@@ -424,6 +434,11 @@ function mergeCanonicalBodies(
 
   for (const [index, tagged] of taggedEntries.entries()) {
     const { entry, layer } = tagged;
+    if (entry.type === 'PresentationEntry') {
+      const selected = layer === 'base' ? selectedBasePresentation : selectedIncomingPresentation;
+      if (selected.has(entry)) entries.push(deepClone(entry));
+      continue;
+    }
     if (entry.type === 'FieldEntry') {
       if (!Object.hasOwn(properties, entry.name) || selectedFieldLayers.get(entry.name) !== layer) {
         continue;
@@ -562,7 +577,8 @@ export function mergeBlockCollections(
       baseBlock.content,
       incomingBlock.content,
       mergedContent,
-      policy.content
+      policy.content,
+      baseBlock.name
     );
     result.push({
       ...deepClone(incomingBlock),

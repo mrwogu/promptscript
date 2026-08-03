@@ -84,6 +84,8 @@ export {
   normalizeSectionName,
 } from './section-registry.js';
 export type { SectionInfo } from './section-registry.js';
+export { resolveSectionTitle, resolveSourceSectionTitle } from './section-title-resolver.js';
+export type { SectionTitleOptions } from './section-title-resolver.js';
 
 /** @internal Parity Matrix for formatter consistency testing */
 export {

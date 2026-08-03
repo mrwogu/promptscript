@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import type { Program, SourceLocation, Value } from '@promptscript/core';
+import { createBlockBody, type Program, type SourceLocation, type Value } from '@promptscript/core';
 import { MarkdownInstructionFormatter } from '../markdown-instruction-formatter.js';
 import type { MarkdownFormatterConfig } from '../markdown-instruction-formatter.js';
 
@@ -491,6 +491,84 @@ describe('MarkdownInstructionFormatter', () => {
       const result = customFormatter.format(ast);
       expect(result.content).toContain("## Don'ts");
       expect(result.content).not.toContain('## Restrictions');
+    });
+
+    it('should prefer source section titles without dropping block content', () => {
+      const customFormatter = new TestFormatter({
+        sectionNames: { restrictions: "Don'ts" },
+      });
+      const loc = createLoc();
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ArrayContent',
+              elements: ['No foo', 'No bar'],
+              loc,
+            },
+            canonicalBody: createBlockBody(
+              [
+                {
+                  type: 'PresentationEntry',
+                  title: 'Forbidden Practices',
+                  source: 'explicit',
+                  loc,
+                  titleLoc: loc,
+                },
+              ],
+              loc
+            ),
+            loc,
+          },
+        ],
+      };
+
+      const result = customFormatter.format(ast);
+
+      expect(result.content).toContain('## Forbidden Practices');
+      expect(result.content).toContain('No foo');
+      expect(result.content).toContain('No bar');
+      expect(result.content).not.toContain("## Don'ts");
+    });
+
+    it('should keep XML section keys stable when source titles are overridden', () => {
+      const loc = createLoc();
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'restrictions',
+            content: {
+              type: 'ArrayContent',
+              elements: ['No foo'],
+              loc,
+            },
+            canonicalBody: createBlockBody(
+              [
+                {
+                  type: 'PresentationEntry',
+                  title: 'Forbidden Practices',
+                  source: 'explicit',
+                  loc,
+                  titleLoc: loc,
+                },
+              ],
+              loc
+            ),
+            loc,
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { convention: 'xml' });
+
+      expect(result.content).toContain('<restrictions>');
+      expect(result.content).not.toContain('<forbidden-practices>');
+      expect(result.content).toContain('No foo');
     });
   });
 

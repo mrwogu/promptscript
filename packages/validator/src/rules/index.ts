@@ -36,6 +36,7 @@ import { validAgentConfig } from './valid-agent-config.js';
 import { validHooks } from './valid-hooks.js';
 import { validMcpServers } from './valid-mcp-servers.js';
 import { validPlugins } from './valid-plugins.js';
+import { validSectionHeaders } from './valid-section-headers.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -103,6 +104,7 @@ export { validAgentConfig } from './valid-agent-config.js';
 export { validHooks } from './valid-hooks.js';
 export { validMcpServers } from './valid-mcp-servers.js';
 export { validPlugins } from './valid-plugins.js';
+export { validSectionHeaders } from './valid-section-headers.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -169,6 +171,8 @@ export const allRules: ValidationRule[] = [
   validMcpServers,
   // Valid plugins (PS036)
   validPlugins,
+  // Valid section header overrides (PS037)
+  validSectionHeaders,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,

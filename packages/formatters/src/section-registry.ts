@@ -2,6 +2,9 @@
  * Registry of known sections that formatters can generate.
  * Used for parity testing and documentation.
  */
+import { SECTION_REGISTRY } from '@promptscript/core';
+
+export { SECTION_REGISTRY } from '@promptscript/core';
 
 /**
  * Section metadata for documentation and validation.
@@ -23,85 +26,13 @@ export interface SectionInfo {
  * All known sections that formatters should support.
  * This is the source of truth for section parity.
  */
-export const KNOWN_SECTIONS: SectionInfo[] = [
-  {
-    id: 'project',
-    name: 'Project',
-    description: 'Project identity and purpose',
-    sourceBlocks: ['identity'],
-    required: true,
-  },
-  {
-    id: 'tech-stack',
-    name: 'Tech Stack',
-    description: 'Languages, frameworks, and tools',
-    sourceBlocks: ['context'],
-    required: false,
-  },
-  {
-    id: 'architecture',
-    name: 'Architecture',
-    description: 'System structure and components',
-    sourceBlocks: ['context'],
-    required: false,
-  },
-  {
-    id: 'code-standards',
-    name: 'Code Standards',
-    description: 'TypeScript, naming, error handling standards',
-    sourceBlocks: ['standards'],
-    required: false,
-  },
-  {
-    id: 'commands',
-    name: 'Commands',
-    description: 'Development commands and shortcuts',
-    sourceBlocks: ['shortcuts', 'commands', 'knowledge'],
-    required: false,
-  },
-  {
-    id: 'git-commits',
-    name: 'Git Commits',
-    description: 'Commit message conventions',
-    sourceBlocks: ['standards'],
-    required: false,
-  },
-  {
-    id: 'configuration-files',
-    name: 'Configuration Files',
-    description: 'ESLint, Vite, and other config guidelines',
-    sourceBlocks: ['standards'],
-    required: false,
-  },
-  {
-    id: 'documentation',
-    name: 'Documentation',
-    description: 'Documentation verification guidelines',
-    sourceBlocks: ['standards'],
-    required: false,
-  },
-  {
-    id: 'post-work',
-    name: 'Post-Work Verification',
-    description: 'Commands to run after changes',
-    sourceBlocks: ['knowledge'],
-    required: false,
-  },
-  {
-    id: 'diagrams',
-    name: 'Diagrams',
-    description: 'Diagram format guidelines (Mermaid)',
-    sourceBlocks: ['standards'],
-    required: false,
-  },
-  {
-    id: 'restrictions',
-    name: 'Restrictions',
-    description: "Don'ts and forbidden practices",
-    sourceBlocks: ['restrictions'],
-    required: false,
-  },
-];
+export const KNOWN_SECTIONS: SectionInfo[] = SECTION_REGISTRY.map((section) => ({
+  id: section.id,
+  name: section.defaultTitle,
+  description: section.description,
+  sourceBlocks: [...section.sourceBlocks],
+  required: section.required,
+}));
 
 /**
  * Get section IDs that a formatter should generate given available source blocks.

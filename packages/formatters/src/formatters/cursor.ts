@@ -15,6 +15,7 @@ import {
   serializeMcpServersToJsonString,
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
+import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
  * Supported Cursor format versions.
@@ -695,6 +696,9 @@ export class CursorFormatter extends BaseFormatter {
     const architecture = this.architecture(ast);
     if (architecture) sections.push(architecture);
 
+    const context = this.contextSection(ast);
+    if (context) sections.push(context);
+
     const codeStyle = this.codeStyle(ast);
     if (codeStyle) sections.push(codeStyle);
 
@@ -732,8 +736,13 @@ export class CursorFormatter extends BaseFormatter {
   private intro(ast: Program): string {
     // First check if identity block has rich content that should be used in full
     const identity = this.findBlock(ast, 'identity');
+    const projectTitle = resolveSourceSectionTitle(ast, 'project');
     if (identity) {
       const fullText = this.dedent(this.extractText(identity.content));
+      if (fullText && projectTitle) {
+        return `${resolveSectionTitle(ast, 'project')}:
+${fullText}`;
+      }
       // If identity starts with "You are", use the full content
       if (fullText.toLowerCase().startsWith('you are')) {
         return fullText;
@@ -743,9 +752,12 @@ export class CursorFormatter extends BaseFormatter {
     // Fall back to @context MixedContent text (project description alongside properties)
     if (!identity) {
       const context = this.findBlock(ast, 'context');
-      if (context?.content.type === 'MixedContent' && context.content.text) {
-        const text = this.dedent(context.content.text.value.trim());
-        if (text) return text;
+      const contextTitle = resolveSourceSectionTitle(ast, 'context');
+      if (!contextTitle && context && (context.content.type === 'MixedContent' || projectTitle)) {
+        const text = this.dedent(this.extractText(context.content).trim());
+        if (text) {
+          return projectTitle ? `${resolveSectionTitle(ast, 'project')}:\n${text}` : text;
+        }
       }
     }
 
@@ -823,7 +835,9 @@ export class CursorFormatter extends BaseFormatter {
 
   private techStack(ast: Program): string | null {
     const items = this.extractTechStackItems(ast);
-    return items.length > 0 ? `Tech stack: ${items.join(', ')}` : null;
+    return items.length > 0
+      ? `${resolveSectionTitle(ast, 'tech-stack', { defaultTitle: 'Tech stack' })}: ${items.join(', ')}`
+      : null;
   }
 
   private extractTechStackItems(ast: Program): string[] {
@@ -884,7 +898,9 @@ export class CursorFormatter extends BaseFormatter {
     const arch = this.getProp(context.content, 'architecture');
     if (arch) {
       const text = typeof arch === 'string' ? arch : this.valueToString(arch);
-      if (text.trim()) return `Architecture:\n${text.trim()}`;
+      if (text.trim()) {
+        return `${resolveSectionTitle(ast, 'architecture', { defaultTitle: 'Architecture' })}:\n${text.trim()}`;
+      }
     }
 
     // Fall back to extracting text which may contain architecture info
@@ -896,10 +912,28 @@ export class CursorFormatter extends BaseFormatter {
     return null;
   }
 
+  private contextSection(ast: Program): string | null {
+    if (!resolveSourceSectionTitle(ast, 'context')) return null;
+
+    const context = this.findBlock(ast, 'context');
+    if (!context) return null;
+
+    const text = this.extractText(context.content);
+    if (!text) return null;
+
+    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+    if (!remainingText) return null;
+
+    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+    return `${resolveSectionTitle(ast, 'context', { defaultTitle: 'Context' })}:
+${this.stripAllIndent(downgradedText)}`;
+  }
+
   private codeStyle(ast: Program): string | null {
     const items = this.extractCodeStyleItems(ast);
     if (items.length === 0) return null;
-    return `Code style:\n${items.map((i) => '- ' + i).join('\n')}`;
+    return `${resolveSectionTitle(ast, 'code-standards', { defaultTitle: 'Code style' })}:\n${items.map((i) => '- ' + i).join('\n')}`;
   }
 
   private extractCodeStyleItems(ast: Program): string[] {
@@ -926,7 +960,7 @@ export class CursorFormatter extends BaseFormatter {
       if (git && typeof git === 'object' && !Array.isArray(git)) {
         const items = this.extractGitItems(git as Record<string, Value>);
         if (items.length > 0) {
-          return `Git Commits:\n${items.map((i) => '- ' + i).join('\n')}`;
+          return `${resolveSectionTitle(ast, 'git-commits', { defaultTitle: 'Git Commits' })}:\n${items.map((i) => '- ' + i).join('\n')}`;
         }
       }
     }
@@ -938,7 +972,7 @@ export class CursorFormatter extends BaseFormatter {
       if (commits && typeof commits === 'object' && !Array.isArray(commits)) {
         const items = this.extractGitItems(commits as Record<string, Value>);
         if (items.length > 0) {
-          return `Git Commits:\n${items.map((i) => '- ' + i).join('\n')}`;
+          return `${resolveSectionTitle(ast, 'git-commits', { defaultTitle: 'Git Commits' })}:\n${items.map((i) => '- ' + i).join('\n')}`;
         }
       }
     }
@@ -972,7 +1006,7 @@ export class CursorFormatter extends BaseFormatter {
   private configFiles(ast: Program): string | null {
     const items = this.extractConfigItems(ast);
     if (items.length === 0) return null;
-    return `Config:\n${items.map((i) => '- ' + i).join('\n')}`;
+    return `${resolveSectionTitle(ast, 'configuration-files', { defaultTitle: 'Config' })}:\n${items.map((i) => '- ' + i).join('\n')}`;
   }
 
   private extractConfigItems(ast: Program): string[] {
@@ -1037,7 +1071,9 @@ export class CursorFormatter extends BaseFormatter {
       lines.push(`${cmd} - ${shortDesc}`);
     }
 
-    return lines.length > 0 ? `Commands:\n${lines.join('\n')}` : null;
+    return lines.length > 0
+      ? `${resolveSectionTitle(ast, 'commands', { defaultTitle: 'Commands' })}:\n${lines.join('\n')}`
+      : null;
   }
 
   private devCommands(ast: Program): string | null {
@@ -1049,7 +1085,7 @@ export class CursorFormatter extends BaseFormatter {
     if (!match) return null;
 
     const content = match.replace('## Development Commands', '').trim();
-    return `Development Commands:\n${content}`;
+    return `${resolveSectionTitle(ast, 'commands', { defaultTitle: 'Development Commands' })}:\n${content}`;
   }
 
   private postWork(ast: Program): string | null {
@@ -1061,13 +1097,13 @@ export class CursorFormatter extends BaseFormatter {
     if (!match) return null;
 
     const content = match.replace('## Post-Work Verification', '').trim();
-    return `Post-Work Verification:\n${content}`;
+    return `${resolveSectionTitle(ast, 'post-work', { defaultTitle: 'Post-Work Verification' })}:\n${content}`;
   }
 
   private documentation(ast: Program): string | null {
     const items = this.extractDocItems(ast);
     if (items.length === 0) return null;
-    return `Documentation:\n${items.map((i) => '- ' + i).join('\n')}`;
+    return `${resolveSectionTitle(ast, 'documentation', { defaultTitle: 'Documentation' })}:\n${items.map((i) => '- ' + i).join('\n')}`;
   }
 
   private extractDocItems(ast: Program): string[] {
@@ -1106,7 +1142,7 @@ export class CursorFormatter extends BaseFormatter {
   private diagrams(ast: Program): string | null {
     const items = this.extractDiagramItems(ast);
     if (items.length === 0) return null;
-    return `Diagrams:\n${items.map((i) => '- ' + i).join('\n')}`;
+    return `${resolveSectionTitle(ast, 'diagrams', { defaultTitle: 'Diagrams' })}:\n${items.map((i) => '- ' + i).join('\n')}`;
   }
 
   private extractDiagramItems(ast: Program): string[] {
@@ -1174,14 +1210,18 @@ export class CursorFormatter extends BaseFormatter {
     remaining = remaining.trim();
     if (!remaining) return null;
 
-    return this.stripAllIndent(remaining);
+    const content = this.stripAllIndent(remaining);
+    const title = resolveSourceSectionTitle(ast, 'knowledge');
+    return title ? `${title}:\n${content}` : content;
   }
 
   private examples(ast: Program): string | null {
     const examples = this.extractExamples(ast);
     if (examples.length === 0) return null;
 
-    const parts: string[] = ['Examples:'];
+    const parts: string[] = [
+      `${resolveSectionTitle(ast, 'examples', { defaultTitle: 'Examples' })}:`,
+    ];
 
     for (const example of examples) {
       parts.push(`\n### Example: ${example.name}`);
@@ -1207,7 +1247,7 @@ export class CursorFormatter extends BaseFormatter {
     const items = this.extractNeverItems(block);
     if (items.length === 0) return null;
 
-    return `Never:\n${items.map((i) => '- ' + i).join('\n')}`;
+    return `${resolveSectionTitle(ast, 'restrictions', { defaultTitle: 'Never' })}:\n${items.map((i) => '- ' + i).join('\n')}`;
   }
 
   private extractNeverItems(block: Block): string[] {

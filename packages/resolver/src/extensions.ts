@@ -277,7 +277,8 @@ function mergeExtension(
         ext.canonicalBody,
         baseContent,
         extensionContent,
-        content
+        content,
+        block.name
       ),
     };
   }
