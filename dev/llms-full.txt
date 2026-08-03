@@ -1798,7 +1798,7 @@ Installed hooks:
 - Prevent direct edits to generated instruction files.
 - Redirect agents to the source `.prs` file.
 
-This CLI feature is separate from the language-level `@hooks` block. For Copilot, `.github/hooks/promptscript-vscode.json` configures VS Code Agent Hooks; it is not the GitHub repository hook file generated from `@hooks`. Factory CLI installation uses `.factory/hooks.json` and migrates unambiguous legacy entries from `.factory/settings.json`.
+This CLI feature is separate from the language-level `@hooks` block. For Copilot, `.github/hooks/promptscript-vscode.json` configures VS Code Agent Hooks; it is not the GitHub repository hook file generated from `@hooks`. Factory CLI installation uses `.factory/hooks.json` and migrates unambiguous legacy entries from `.factory/settings.json`. Factory compilation performs the same migration when the canonical file is absent. Use `prs compile --dry-run` to preview the change or `--no-migrate-factory-hooks` to retain warning-only behavior.
 
 ## Commands and Workflows
 
@@ -4108,30 +4108,33 @@ prs compile [options]
 
 **Options:**
 
-| Option                  | Description                                             |
-| ----------------------- | ------------------------------------------------------- |
-| `-b, --build <name>`    | Compile a named build profile from config               |
-| `--all-builds`          | Compile all named build profiles in deterministic order |
-| `-t, --target <target>` | Compile to specific target                              |
-| `-f, --format <format>` | Output format (alias for `--target`)                    |
-| `-a, --all`             | Compile to all configured targets                       |
-| `-w, --watch`           | Watch mode for continuous compilation                   |
-| `-o, --output <dir>`    | Override output directory                               |
-| `--dry-run`             | Preview changes without writing                         |
-| `--registry <path>`     | Override the configured registry path                   |
-| `-c, --config <path>`   | Path to config file                                     |
-| `--force`               | Force overwrite existing files without prompts          |
-| `--strict`              | Treat output path conflicts as errors                   |
-| `--ignore-hashes`       | Skip reference integrity hash verification              |
-| `--cwd <dir>`           | Set the project working directory                       |
-| `--verbose`             | Show detailed compilation progress                      |
-| `--debug`               | Show debug information (includes verbose)               |
+| Option                       | Description                                             |
+| ---------------------------- | ------------------------------------------------------- |
+| `-b, --build <name>`         | Compile a named build profile from config               |
+| `--all-builds`               | Compile all named build profiles in deterministic order |
+| `-t, --target <target>`      | Compile to specific target                              |
+| `-f, --format <format>`      | Output format (alias for `--target`)                    |
+| `-a, --all`                  | Compile to all configured targets                       |
+| `-w, --watch`                | Watch mode for continuous compilation                   |
+| `-o, --output <dir>`         | Override output directory                               |
+| `--dry-run`                  | Preview changes without writing                         |
+| `--no-migrate-factory-hooks` | Warn instead of migrating legacy Factory settings hooks |
+| `--registry <path>`          | Override the configured registry path                   |
+| `-c, --config <path>`        | Path to config file                                     |
+| `--force`                    | Force overwrite existing files without prompts          |
+| `--strict`                   | Treat output path conflicts as errors                   |
+| `--ignore-hashes`            | Skip reference integrity hash verification              |
+| `--cwd <dir>`                | Set the project working directory                       |
+| `--verbose`                  | Show detailed compilation progress                      |
+| `--debug`                    | Show debug information (includes verbose)               |
 
 `--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, reports failures per profile, and uses one watcher for the full build set when combined with `--watch`.
 
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
 The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
+
+When compiling the Factory target and `.factory/hooks.json` is absent, `prs compile` migrates unambiguous hooks from `.factory/settings.json` before writing generated output. `--dry-run` reports the planned canonical and legacy file changes without writing. `--no-migrate-factory-hooks` keeps the legacy file unchanged and reports `PS4002` instead. Unknown events, malformed entries, and mixed ownership abort migration without a partial write.
 
 **Examples:**
 
@@ -5183,6 +5186,8 @@ If none are found, the command reports an error and exits with code 1. Specify a
 If a config file already exists, the command merges the hook entries rather than overwriting the whole file.
 
 `prs hooks install factory` also migrates unambiguous hook entries from the legacy `.factory/settings.json` `hooks` section. Unrelated settings are preserved. The command refuses partial migrations when it finds unknown event names or ambiguous entries, so those entries can be reviewed manually.
+
+The Factory compile target performs the same migration automatically when `.factory/hooks.json` does not exist. Use `prs compile --dry-run` to preview it or `prs compile --no-migrate-factory-hooks` to keep warning-only behavior. `prs hooks install factory` remains available for explicit installation and migration.
 
 ______________________________________________________________________
 
@@ -7089,7 +7094,7 @@ project-root/
 - Free-form text `@standards` (triple-quoted string) renders under `Conventions & Patterns` in `monolith` mode, or as `.factory/rules/standards.md` in split rules mode; embedded headings are adjusted to nest under the surrounding section (h2 downgraded to h3 in monolith, relative shift in split)
 - Split rules require the `multifile` or `full` output version
 
-PromptScript versions before 1.16 could place language-level hooks in `.factory/settings.json`. `prs hooks install factory` copies unambiguous legacy entries into `.factory/hooks.json`, preserves unrelated settings, and refuses partial migrations when event names or entries are ambiguous. `prs compile` reports a `PS4002` warning while the fallback file still contains a non-PromptScript-owned `hooks` key and `.factory/hooks.json` is absent.
+PromptScript versions before 1.16 could place language-level hooks in `.factory/settings.json`. When `.factory/hooks.json` is absent, `prs compile` moves unambiguous legacy entries into the canonical file, preserves unrelated settings, and refuses partial migrations when event names, handlers, or ownership are ambiguous. `--dry-run` previews the migration, while `--no-migrate-factory-hooks` leaves the fallback unchanged and reports `PS4002`. `prs hooks install factory` remains available for explicit migration and hook installation.
 
 ## Split Rules
 
@@ -12642,7 +12647,7 @@ This guide covers `prs hooks install`, which installs PromptScript auto-compilat
 
 Notes for compiled `@hooks` output:
 
-- **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`. `prs compile` warns (`PS4002`) when `.factory/hooks.json` is absent and that file still contains a non-PromptScript-owned `hooks` key, because only then does the stale section reactivate via Factory's fallback to `settings.json`.
+- **Legacy Factory settings** - before 1.16, `@hooks` could land in `.factory/settings.json`. When `.factory/hooks.json` is absent, `prs compile` moves unambiguous hooks to the canonical file and preserves unrelated settings. Migration is all-or-nothing for unknown events, malformed entries, and mixed ownership. Use `--dry-run` to preview both file changes, or `--no-migrate-factory-hooks` to retain warning-only `PS4002` behavior.
 - **Matcher portability** - `matcher` filters by target-native tool names (Factory `Execute`, GitHub Copilot tool names, Claude `Edit|Write`). A matcher that works on one target may match nothing on another. See [@hooks](https://getpromptscript.dev/dev/reference/language/#hooks).
 - **Cleanup** - removing `@hooks` deletes the obsolete generated hook file once every command in it carries the PromptScript ownership marker, and prunes managed directories left empty (such as `.github/hooks/`).
 - **Working directory** - for repository-local lifecycle commands, set `cwd: "project"` in the language-level hook and keep shared scripts under `.promptscript/scripts/`. Generated hook file location does not set command working directory. See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/#project-root-strategy-by-target) for target behavior, generated Factory and GitHub examples, and the complete capability matrix.

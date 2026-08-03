@@ -71,7 +71,7 @@
 - Free-form text `@standards` (triple-quoted string) renders under `Conventions & Patterns` in `monolith` mode, or as `.factory/rules/standards.md` in split rules mode; embedded headings are adjusted to nest under the surrounding section (h2 downgraded to h3 in monolith, relative shift in split)
 - Split rules require the `multifile` or `full` output version
 
-PromptScript versions before 1.16 could place language-level hooks in `.factory/settings.json`. `prs hooks install factory` copies unambiguous legacy entries into `.factory/hooks.json`, preserves unrelated settings, and refuses partial migrations when event names or entries are ambiguous. `prs compile` reports a `PS4002` warning while the fallback file still contains a non-PromptScript-owned `hooks` key and `.factory/hooks.json` is absent.
+PromptScript versions before 1.16 could place language-level hooks in `.factory/settings.json`. When `.factory/hooks.json` is absent, `prs compile` moves unambiguous legacy entries into the canonical file, preserves unrelated settings, and refuses partial migrations when event names, handlers, or ownership are ambiguous. `--dry-run` previews the migration, while `--no-migrate-factory-hooks` leaves the fallback unchanged and reports `PS4002`. `prs hooks install factory` remains available for explicit migration and hook installation.
 
 ## Split Rules
 

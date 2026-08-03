@@ -201,30 +201,33 @@ prs compile [options]
 
 **Options:**
 
-| Option                  | Description                                             |
-| ----------------------- | ------------------------------------------------------- |
-| `-b, --build <name>`    | Compile a named build profile from config               |
-| `--all-builds`          | Compile all named build profiles in deterministic order |
-| `-t, --target <target>` | Compile to specific target                              |
-| `-f, --format <format>` | Output format (alias for `--target`)                    |
-| `-a, --all`             | Compile to all configured targets                       |
-| `-w, --watch`           | Watch mode for continuous compilation                   |
-| `-o, --output <dir>`    | Override output directory                               |
-| `--dry-run`             | Preview changes without writing                         |
-| `--registry <path>`     | Override the configured registry path                   |
-| `-c, --config <path>`   | Path to config file                                     |
-| `--force`               | Force overwrite existing files without prompts          |
-| `--strict`              | Treat output path conflicts as errors                   |
-| `--ignore-hashes`       | Skip reference integrity hash verification              |
-| `--cwd <dir>`           | Set the project working directory                       |
-| `--verbose`             | Show detailed compilation progress                      |
-| `--debug`               | Show debug information (includes verbose)               |
+| Option                       | Description                                             |
+| ---------------------------- | ------------------------------------------------------- |
+| `-b, --build <name>`         | Compile a named build profile from config               |
+| `--all-builds`               | Compile all named build profiles in deterministic order |
+| `-t, --target <target>`      | Compile to specific target                              |
+| `-f, --format <format>`      | Output format (alias for `--target`)                    |
+| `-a, --all`                  | Compile to all configured targets                       |
+| `-w, --watch`                | Watch mode for continuous compilation                   |
+| `-o, --output <dir>`         | Override output directory                               |
+| `--dry-run`                  | Preview changes without writing                         |
+| `--no-migrate-factory-hooks` | Warn instead of migrating legacy Factory settings hooks |
+| `--registry <path>`          | Override the configured registry path                   |
+| `-c, --config <path>`        | Path to config file                                     |
+| `--force`                    | Force overwrite existing files without prompts          |
+| `--strict`                   | Treat output path conflicts as errors                   |
+| `--ignore-hashes`            | Skip reference integrity hash verification              |
+| `--cwd <dir>`                | Set the project working directory                       |
+| `--verbose`                  | Show detailed compilation progress                      |
+| `--debug`                    | Show debug information (includes verbose)               |
 
 `--all-builds` and `--build` are mutually exclusive. `--all-builds` compiles every named profile in `config.builds` in sorted key order, reports failures per profile, and uses one watcher for the full build set when combined with `--watch`.
 
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
 The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
+
+When compiling the Factory target and `.factory/hooks.json` is absent, `prs compile` migrates unambiguous hooks from `.factory/settings.json` before writing generated output. `--dry-run` reports the planned canonical and legacy file changes without writing. `--no-migrate-factory-hooks` keeps the legacy file unchanged and reports `PS4002` instead. Unknown events, malformed entries, and mixed ownership abort migration without a partial write.
 
 **Examples:**
 
