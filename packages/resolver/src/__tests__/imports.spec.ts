@@ -1174,6 +1174,14 @@ describe('filterBlocks', () => {
     expect(result.map((b) => b.name)).toEqual(['skills', 'context']);
   });
 
+  it('should canonicalize aliases in block filters', () => {
+    const shortcutsBlock = createBlock('shortcuts', createTextContent('command content'));
+    const blocks = [shortcutsBlock, knowledgeBlock];
+
+    expect(filterBlocks(blocks, { only: ['commands'] })).toEqual([shortcutsBlock]);
+    expect(filterBlocks(blocks, { exclude: ['commands'] })).toEqual([knowledgeBlock]);
+  });
+
   it('should return all blocks when no filter is specified', () => {
     const blocks = [skillsBlock, knowledgeBlock, contextBlock];
     const result = filterBlocks(blocks, {});

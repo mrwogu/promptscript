@@ -21,8 +21,10 @@ import {
   INHERITANCE_MERGE_POLICY,
   mergeBlockCollections,
   bindParams,
+  getCanonicalBlockName,
   interpolateAST,
   getSyntaxFeatureUsages,
+  normalizeBlockAliases,
   normalizeProgram,
   composeBlockBodies,
   prepareBlockContentForMerge,
@@ -101,10 +103,10 @@ function filterBlocksBy(
   options: { only?: string[]; exclude?: string[] }
 ): Block[] {
   if (options.only) {
-    const allowSet = new Set(options.only);
+    const allowSet = new Set(options.only.map(getCanonicalBlockName));
     return blocks.filter((b) => allowSet.has(b.name));
   }
-  const denySet = new Set(options.exclude);
+  const denySet = new Set(options.exclude?.map(getCanonicalBlockName));
   return blocks.filter((b) => !denySet.has(b.name));
 }
 
@@ -430,7 +432,7 @@ export class BrowserResolver {
       return { ast: null, sources, errors };
     }
 
-    let ast = parseData.ast;
+    let ast = normalizeBlockAliases(parseData.ast);
 
     // Resolve inheritance
     ast = await this.resolveInherit(ast, absPath, sources, errors);

@@ -13,5 +13,5 @@ Preserve transaction integrity and auditability.
 ## Commands
 
 ```
-/review    -
+/review    - Review current changes
 ```

@@ -2202,3 +2202,9 @@ command runs when they cannot resolve a non-empty project root. Native-cwd and
 workspace-cwd targets retain host-provided cwd fields and report `PS4002`
 because PromptScript cannot independently verify the host cwd. No target
 wrapper falls back to the process working directory.
+
+## Canonical Block Shape Reference
+
+See [Block Shapes](block-shapes.md) for the canonical shape, compatibility
+forms, merge rules, diagnostics, and formatter behavior of every built-in
+block.

@@ -4,6 +4,6 @@
 
 ```
 /review    - Review code for quality
-/test      -
-/deploy    -
+/test      - Write unit tests
+/deploy    - Deploy to production
 ```

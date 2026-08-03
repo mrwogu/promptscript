@@ -1,0 +1,41 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are a careful TypeScript maintainer.
+
+Tech stack: Node.js 20+
+
+Code style:
+- Use strict TypeScript
+- Use named exports
+- Use Vitest
+- Follow Arrange, Act, Assert
+
+Commands:
+/review - Review code quality
+/test - Run tests
+/typecheck - Check types
+
+Reference:
+Keep generated instructions aligned with PromptScript source.
+
+Examples:
+
+### Example: rename
+Use a precise name
+
+**Input:**
+```
+const x = loadUsers()
+```
+
+**Output:**
+```
+const users = loadUsers()
+```
+
+Never:
+- Never expose secrets
+- Never skip required validation

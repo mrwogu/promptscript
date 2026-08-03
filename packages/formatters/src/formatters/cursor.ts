@@ -363,37 +363,7 @@ export class CursorFormatter extends BaseFormatter {
     // Main file with alwaysApply: true for core rules
     const mainSections: string[] = [];
     mainSections.push(this.frontmatter(ast));
-    mainSections.push(this.intro(ast));
-
-    const techStack = this.techStack(ast);
-    if (techStack) mainSections.push(techStack);
-
-    const architecture = this.architecture(ast);
-    if (architecture) mainSections.push(architecture);
-
-    const codeStyle = this.codeStyle(ast);
-    if (codeStyle) mainSections.push(codeStyle);
-
-    const gitCommits = this.gitCommits(ast);
-    if (gitCommits) mainSections.push(gitCommits);
-
-    const configFiles = this.configFiles(ast);
-    if (configFiles) mainSections.push(configFiles);
-
-    const postWork = this.postWork(ast);
-    if (postWork) mainSections.push(postWork);
-
-    const documentation = this.documentation(ast);
-    if (documentation) mainSections.push(documentation);
-
-    const diagrams = this.diagrams(ast);
-    if (diagrams) mainSections.push(diagrams);
-
-    const examples = this.examples(ast);
-    if (examples) mainSections.push(examples);
-
-    const never = this.never(ast);
-    if (never) mainSections.push(never);
+    this.addCommonSections(ast, mainSections);
 
     const inlineRefs = this.inlineSkillReferences(ast);
 
@@ -672,7 +642,8 @@ export class CursorFormatter extends BaseFormatter {
       // Only multi-line content becomes a command file
       if (content.includes('\n')) {
         // Remove leading slash from command name
-        const fileName = name.replace(/^\//, '');
+        const fileName = name.replace(/^\/+/, '');
+        if (!this.isSafeName(fileName)) continue;
         commands.push({
           path: `.cursor/commands/${fileName}.md`,
           content: content.trim(),
@@ -1058,16 +1029,7 @@ ${this.stripAllIndent(downgradedText)}`;
 
     const lines: string[] = [];
     for (const [cmd, desc] of Object.entries(props)) {
-      const descObj = desc as Record<string, Value>;
-      const shortDesc =
-        desc &&
-        typeof desc === 'object' &&
-        !Array.isArray(desc) &&
-        !('type' in desc && (desc as Record<string, unknown>)['type'] === 'TextContent')
-          ? descObj['description']
-            ? this.valueToString(descObj['description']!)
-            : ''
-          : (this.valueToString(desc).split('\n')[0] ?? '');
+      const shortDesc = this.shortcutSummary(desc);
       lines.push(`${cmd} - ${shortDesc}`);
     }
 

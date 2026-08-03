@@ -48,6 +48,7 @@ export {
   hasPathTraversal,
   unicodeSecurity,
   duplicateSkills,
+  validBlockShape,
 } from './rules/index.js';
 
 // Security presets
@@ -148,7 +149,9 @@ export function validate(ast: ProgramInput, options: ValidateOptions = {}): Vali
   const { validator, ...config } = options;
 
   if (validator) {
-    return validator.validate(toLegacyProgram(normalizeProgram(ast)));
+    return validator.validate(
+      toLegacyProgram(normalizeProgram(ast), { preserveCanonicalBody: true })
+    );
   }
 
   const v = createValidator(config);

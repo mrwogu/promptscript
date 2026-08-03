@@ -29,6 +29,8 @@ export * from './template.js';
 // Canonical AST compatibility layer
 export * from './canonical-ast.js';
 export * from './block-merge.js';
+export * from './block-shapes.js';
+export * from './block-aliases.js';
 export * from './presentation.js';
 
 // Syntax version registry

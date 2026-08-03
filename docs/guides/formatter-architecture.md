@@ -14,6 +14,10 @@ Markdown formatters map the same PromptScript source to each platform's instruct
 contracts. Shared extraction and rendering logic preserves semantic parity where native platforms
 support equivalent features.
 
+Formatter inputs follow the canonical and compatibility contracts in the
+[Block Shapes reference](../reference/block-shapes.md). That reference also
+identifies content whose output varies by target.
+
 ```mermaid
 flowchart TB
     subgraph Input

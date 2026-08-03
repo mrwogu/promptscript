@@ -364,12 +364,14 @@ export class AntigravityFormatter extends BaseFormatter {
 
     const props = this.getProps(shortcuts.content);
     const workflowsList: FormatterOutput[] = [];
+    const generatedPaths = new Set<string>();
 
     for (const [name, value] of Object.entries(props)) {
       // Check if this shortcut has steps (making it a workflow)
       if (this.isWorkflow(value)) {
         const workflow = this.generateWorkflow(name, value);
-        if (workflow) {
+        if (workflow && !generatedPaths.has(workflow.path)) {
+          generatedPaths.add(workflow.path);
           workflowsList.push(workflow);
         }
       }
@@ -402,7 +404,8 @@ export class AntigravityFormatter extends BaseFormatter {
     const description = obj['description'] ?? obj['desc'] ?? '';
 
     // Extract clean name (remove leading slash if present)
-    const cleanName = name.replace(/^\//, '').replace(/\s+/g, '-').toLowerCase();
+    const cleanName = name.replace(/^\/+/, '').replace(/\s+/g, '-').toLowerCase();
+    if (!this.isSafeName(cleanName)) return null;
 
     const lines: string[] = [
       '---',
@@ -757,7 +760,13 @@ ${subsections.join('\n\n')}`;
       // Skip workflow shortcuts (they get their own files)
       if (this.isWorkflow(value)) continue;
 
-      const valueStr = this.valueToString(value);
+      const valueStr =
+        value &&
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        !('type' in value && value.type === 'TextContent')
+          ? this.shortcutSummary(value)
+          : this.valueToString(value);
       // Avoid trailing space when value is empty
       if (valueStr) {
         lines.push(`- **${key}**: ${valueStr}`);

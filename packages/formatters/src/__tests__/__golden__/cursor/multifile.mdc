@@ -78,6 +78,22 @@ Config:
 - eslint: inherit from eslint.base.config.cjs
 - viteRoot: __dirname (not import.meta.dirname)
 
+Commands:
+/review - Review code for quality, type safety, and best practices
+/test - Write unit tests using:
+/build - Run verification commands:
+/newpkg - Generate new package with Nx: pnpm nx g @nx/js:lib <name> --directory=packages/<name>
+
+Development Commands:
+```bash
+pnpm install              # Install dependencies
+pnpm nx build <pkg>       # Build package
+pnpm nx test <pkg>        # Run tests
+pnpm nx lint <pkg>        # Lint code
+pnpm nx run-many -t test  # Test all packages
+pnpm nx graph             # View dependency graph
+```
+
 Post-Work Verification:
 After completing code changes, always run:
 ```bash
@@ -96,6 +112,19 @@ Documentation:
 Diagrams:
 - Use Mermaid
 - Types: flowchart, sequence, class, state, ER, gantt, pie
+
+## Configuration Notes
+
+### ESLint
+
+- All package configs inherit from `eslint.base.config.cjs`
+- Use `createBaseConfig(\_\_dirname)` from base config
+- Modify base config instead of duplicating rules
+
+### Vite/Vitest
+
+- Use `\_\_dirname` for root option
+- Do NOT use `import.meta.dirname` (causes TS errors)
 
 Never:
 - Never use `any` type - use `unknown` with type guards

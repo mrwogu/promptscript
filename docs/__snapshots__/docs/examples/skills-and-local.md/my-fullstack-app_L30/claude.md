@@ -23,7 +23,7 @@ typescript, Node.js 20+, Nx + pnpm
 /review    - Review code for quality and best practices
 /test      - Write comprehensive unit tests
 /docs      - Generate documentation
-/deploy    -
+/deploy    - Deploy to production
 ```
 
 ## Don'ts

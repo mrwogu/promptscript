@@ -833,6 +833,53 @@ describe('CursorFormatter', () => {
         expect(shortcutsFile).toBeUndefined();
       });
 
+      it.each(['multifile', 'full'] as const)(
+        'should preserve common block content in %s mode',
+        (version) => {
+          const ast: Program = {
+            ...createMinimalProgram(),
+            blocks: [
+              {
+                type: 'Block',
+                name: 'context',
+                content: {
+                  type: 'ObjectContent',
+                  properties: { architecture: 'Layered architecture marker' },
+                  loc: createLoc(),
+                },
+                loc: createLoc(),
+              },
+              {
+                type: 'Block',
+                name: 'shortcuts',
+                content: {
+                  type: 'ObjectContent',
+                  properties: { '/test': 'Shortcut marker' },
+                  loc: createLoc(),
+                },
+                loc: createLoc(),
+              },
+              {
+                type: 'Block',
+                name: 'knowledge',
+                content: {
+                  type: 'TextContent',
+                  value: 'Knowledge marker',
+                  loc: createLoc(),
+                },
+                loc: createLoc(),
+              },
+            ],
+          };
+
+          const result = formatter.format(ast, { version });
+
+          expect(result.content).toContain('Layered architecture marker');
+          expect(result.content).toContain('Shortcut marker');
+          expect(result.content).toContain('Knowledge marker');
+        }
+      );
+
       it('should not generate additional files when no guards or shortcuts', () => {
         const ast = createMinimalProgram();
         const result = formatter.format(ast, { version: 'multifile' });

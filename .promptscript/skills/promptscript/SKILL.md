@@ -1052,6 +1052,7 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 - **PS018 (`syntax-version-compat`)**: warns when resolved blocks or syntax features require a higher version than declared. Requirements from inheritance, imports, and skill composition are included. Suggestion: run `prs validate --fix`.
 - **PS019 (`unknown-block-name`)**: warns when a block name is not a known PromptScript type, with fuzzy-match suggestions for typos.
 - **PS037 (`valid-section-headers`)**: rejects invalid titles, unknown or unowned section keys, duplicate overrides, and nested extension overrides.
+- **PS038 (`valid-block-shape`)**: rejects unsupported built-in block shapes and warns about formatter-sensitive legacy shapes or multiline shortcut scalars.
 - **PS021 (`use-block-filter`)**: errors when `only` and `exclude` are both specified in `@use` parameters.
 - **PS025 (`valid-skill-references`)**: errors when a `references` entry points to a file with a disallowed extension or a path that cannot be resolved.
 - **PS026 (`safe-reference-content`)**: warns when a referenced file contains potentially sensitive content (e.g., secrets, credentials).

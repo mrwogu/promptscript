@@ -9,3 +9,6 @@ Preserve transaction integrity and auditability.
 Code style:
 - Use strict TypeScript
 - Test every business rule
+
+Commands:
+/review - Review current changes

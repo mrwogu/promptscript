@@ -100,7 +100,7 @@ function projectSource(options: { hooks: boolean; revision?: string; vscode?: bo
 }
 
 @identity {
-  name: "Cross-target hooks"
+  """Cross-target hooks"""
 }
 ${hooks}`;
 }
