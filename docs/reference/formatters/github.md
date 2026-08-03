@@ -87,9 +87,10 @@ description: PromptScript output format for GitHub Copilot
 - `@hooks` uses `.github/hooks/promptscript.json` for Copilot CLI and cloud agent in `multifile` and `full` modes
 - Hook commands use GitHub's shell-specific `bash` and `powershell` fields
 - Hook `matcher` values match GitHub Copilot tool names and are emitted only for `preToolUse`, `postToolUse`, `subagentStart`, and `notification`; other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
+- `pre-terminal-command` is omitted from the shared Copilot CLI/cloud file with `PS4002` because those hosts do not provide one guaranteed repository-level terminal contract
 - `notification` hooks run in Copilot CLI but do not fire in Copilot cloud agent; PromptScript reports `PS4002`
 - `.github/hooks/promptscript-vscode.json` belongs to VS Code Agent integration installed by `prs hooks install copilot`
-- A `vscode` target override emits this file separately and uses PascalCase events; VS Code currently ignores matcher values
+- A `vscode` target override emits this file separately and uses PascalCase events; `pre-terminal-command` defaults to `run_in_terminal`, but VS Code currently ignores matcher values and reports best-effort `PS4002`
 - When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.github/hooks/promptscript.json` and prunes the now-empty `.github/hooks/` directory
 
 ## Example Output

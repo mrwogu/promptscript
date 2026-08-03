@@ -1,5 +1,6 @@
 import {
   HOOK_RUNTIME_CAPABILITIES,
+  type HookCapability,
   type PortableHookInterpreter,
   type Value,
 } from '@promptscript/core';
@@ -10,6 +11,7 @@ import type { FormatterWarning } from './types.js';
  * These map to target-native event names per target contract.
  */
 export type PortableHookEvent =
+  | 'pre-terminal-command'
   | 'pre-tool-use'
   | 'post-tool-use'
   | 'session-start'
@@ -379,6 +381,7 @@ export function getEnabledHookScriptResources(hook: HookDefinition): HookScriptD
  * Maps portable events to target-specific event names.
  */
 const CLAUDE_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': 'PreToolUse',
   'pre-tool-use': 'PreToolUse',
   'post-tool-use': 'PostToolUse',
   'session-start': 'SessionStart',
@@ -389,6 +392,7 @@ const CLAUDE_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 const CURSOR_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': 'preToolUse',
   'pre-tool-use': 'preToolUse',
   'post-tool-use': 'postToolUse',
   'session-start': 'sessionStart',
@@ -399,6 +403,7 @@ const CURSOR_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 const CODEX_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': 'PreToolUse',
   'pre-tool-use': 'PreToolUse',
   'post-tool-use': 'PostToolUse',
   'session-start': 'SessionStart',
@@ -413,6 +418,7 @@ const CODEX_EVENT_MAP: Record<PortableHookEvent, string> = {
  * Factory uses PascalCase event names.
  */
 const FACTORY_EVENT_MAP: Partial<Record<PortableHookEvent, string>> = {
+  'pre-terminal-command': 'PreToolUse',
   'pre-tool-use': 'PreToolUse',
   'post-tool-use': 'PostToolUse',
   'session-start': 'SessionStart',
@@ -425,6 +431,7 @@ const FACTORY_EVENT_MAP: Partial<Record<PortableHookEvent, string>> = {
  * GitHub Copilot hook event names.
  */
 const GITHUB_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': '',
   'pre-tool-use': 'preToolUse',
   'post-tool-use': 'postToolUse',
   'session-start': 'sessionStart',
@@ -435,6 +442,7 @@ const GITHUB_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 const GEMINI_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': 'BeforeTool',
   'pre-tool-use': 'BeforeTool',
   'post-tool-use': 'AfterTool',
   'session-start': 'SessionStart',
@@ -445,6 +453,7 @@ const GEMINI_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 const GROK_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': '',
   'pre-tool-use': 'PreToolUse',
   'post-tool-use': 'PostToolUse',
   'session-start': 'SessionStart',
@@ -455,6 +464,7 @@ const GROK_EVENT_MAP: Record<PortableHookEvent, string> = {
 };
 
 const WINDSURF_EVENT_MAP: Record<PortableHookEvent, readonly string[]> = {
+  'pre-terminal-command': ['pre_run_command'],
   'pre-tool-use': ['pre_read_code', 'pre_write_code', 'pre_run_command', 'pre_mcp_tool_use'],
   'post-tool-use': ['post_read_code', 'post_write_code', 'post_run_command', 'post_mcp_tool_use'],
   'session-start': [],
@@ -465,6 +475,7 @@ const WINDSURF_EVENT_MAP: Record<PortableHookEvent, readonly string[]> = {
 };
 
 const VSCODE_EVENT_MAP: Record<PortableHookEvent, string> = {
+  'pre-terminal-command': 'PreToolUse',
   'pre-tool-use': 'PreToolUse',
   'post-tool-use': 'PostToolUse',
   'session-start': 'SessionStart',
@@ -502,6 +513,19 @@ function mapEvents(event: PortableHookEvent): readonly string[] {
   return WINDSURF_EVENT_MAP[event];
 }
 
+function getDefaultTerminalMatcher(
+  event: PortableHookEvent,
+  target: HookTarget
+): string | undefined {
+  if (event !== 'pre-terminal-command' || target === 'windsurf') return undefined;
+  const capability: HookCapability = HOOK_RUNTIME_CAPABILITIES[target];
+  return capability.terminal?.toolNames[0];
+}
+
+function getEffectiveMatcher(hook: HookDefinition, target: HookTarget): string | undefined {
+  return hook.matcher ?? getDefaultTerminalMatcher(hook.event, target);
+}
+
 /**
  * Convert timeout from milliseconds to target units.
  */
@@ -535,7 +559,7 @@ export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unk
     if (!result[nativeEvent]) result[nativeEvent] = [];
 
     const entry: Record<string, unknown> = {
-      matcher: hook.matcher ?? '.*',
+      matcher: getEffectiveMatcher(hook, 'claude') ?? '.*',
       hooks: [
         {
           type: 'command',
@@ -571,7 +595,7 @@ export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unk
     if (!result[nativeEvent]) result[nativeEvent] = [];
 
     result[nativeEvent].push({
-      matcher: hook.matcher ?? '.*',
+      matcher: getEffectiveMatcher(hook, 'cursor') ?? '.*',
       command: serializeGitRootScriptCommand(hook),
       timeout: hook.timeoutMs ? convertTimeout(hook.timeoutMs, 'cursor') : 10,
     });
@@ -595,7 +619,7 @@ export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, un
     if (!result[nativeEvent]) result[nativeEvent] = [];
 
     result[nativeEvent].push({
-      matcher: hook.matcher ?? '.*',
+      matcher: getEffectiveMatcher(hook, 'factory') ?? '.*',
       hooks: [
         {
           type: 'command',
@@ -625,13 +649,32 @@ export function getHookCompatibilityWarnings(
   for (const hook of applyHookTargetOverrides(hooks, target)) {
     if (hook.enabled === false) continue;
 
-    if (!mapEvent(hook.event, target)) {
+    const nativeEvent = mapEvent(hook.event, target);
+    const capability: HookCapability = HOOK_RUNTIME_CAPABILITIES[target];
+    if (!nativeEvent) {
       warnings.push({
         code: 'PS4002',
-        message: `Hook "${hook.id}" uses event "${hook.event}", which ${target} cannot represent and will omit.`,
-        suggestion: `Use an event supported by the ${target} hook contract.`,
+        message:
+          hook.event === 'pre-terminal-command'
+            ? `Hook "${hook.id}" requests terminal command interception, which ${target} cannot guarantee and will omit.`
+            : `Hook "${hook.id}" uses event "${hook.event}", which ${target} cannot represent and will omit.`,
+        suggestion:
+          hook.event === 'pre-terminal-command'
+            ? (capability.terminal?.notes ??
+              `Use an event supported by the ${target} hook contract.`)
+            : `Use an event supported by the ${target} hook contract.`,
       });
       continue;
+    }
+
+    if (hook.event === 'pre-terminal-command' && capability.terminal?.guarantee !== 'guaranteed') {
+      warnings.push({
+        code: 'PS4002',
+        message: `Hook "${hook.id}" maps terminal command interception to ${target} with ${capability.terminal?.guarantee ?? 'unknown'} coverage.`,
+        suggestion:
+          capability.terminal?.notes ??
+          'Inspect the target hook payload and filter terminal commands inside the hook.',
+      });
     }
 
     if (target === 'github' && hook.matcher && !GITHUB_MATCHER_EVENTS.has(hook.event)) {
@@ -650,7 +693,7 @@ export function getHookCompatibilityWarnings(
       });
     }
 
-    if (target === 'vscode' && hook.matcher) {
+    if (target === 'vscode' && hook.matcher && hook.event !== 'pre-terminal-command') {
       warnings.push({
         code: 'PS4002',
         message: `Hook "${hook.id}" uses matcher, which VS Code currently parses but ignores.`,
@@ -711,7 +754,6 @@ export function getHookCompatibilityWarnings(
       });
     }
 
-    const capability = HOOK_RUNTIME_CAPABILITIES[target];
     if (
       hook.script &&
       (capability.platforms as readonly string[]).includes('windows') &&
@@ -778,12 +820,13 @@ export function generateVSCodeHooks(hooks: HookDefinition[]): Record<string, unk
     if (!result[nativeEvent]) result[nativeEvent] = [];
     const command = serializeNativeCwdScriptCommand(hook, 'posix');
     const windows = serializeNativeCwdScriptCommand(hook, 'powershell');
+    const matcher = getEffectiveMatcher(hook, 'vscode');
 
     result[nativeEvent].push({
       type: 'command',
       command,
       ...(windows ? { windows } : {}),
-      ...(hook.matcher ? { matcher: hook.matcher } : {}),
+      ...(matcher ? { matcher } : {}),
       ...(hook.cwd ? { cwd: hook.cwd === 'project' ? '.' : hook.cwd } : {}),
       ...(hook.timeoutMs ? { timeout: convertTimeout(hook.timeoutMs, 'vscode') } : {}),
     });
@@ -804,8 +847,9 @@ export function generateGeminiHooks(hooks: HookDefinition[]): Record<string, unk
     if (!nativeEvent) continue;
 
     if (!result[nativeEvent]) result[nativeEvent] = [];
+    const matcher = getEffectiveMatcher(hook, 'gemini');
     result[nativeEvent].push({
-      ...(hook.matcher ? { matcher: hook.matcher } : {}),
+      ...(matcher ? { matcher } : {}),
       hooks: [
         {
           type: 'command',
@@ -888,7 +932,8 @@ export function generateCodexHooks(hooks: HookDefinition[]): string {
     if (!nativeEvent) continue;
 
     lines.push(`[[hooks.${nativeEvent}]]`);
-    if (hook.matcher) lines.push(`matcher = "${escapeTomlHookString(hook.matcher)}"`);
+    const matcher = getEffectiveMatcher(hook, 'codex');
+    if (matcher) lines.push(`matcher = "${escapeTomlHookString(matcher)}"`);
     lines.push(`[[hooks.${nativeEvent}.hooks]]`);
     lines.push('type = "command"');
     const command = hook.script ? serializeGitRootScriptCommand(hook) : serializeOwnedCommand(hook);
@@ -920,6 +965,7 @@ export function generateCodexHookConfig(hooks: HookDefinition[]): Record<string,
     const nativeEvent = mapEvent(hook.event, 'codex');
     if (!nativeEvent) continue;
 
+    const matcher = getEffectiveMatcher(hook, 'codex');
     const command = hook.script ? serializeGitRootScriptCommand(hook) : serializeOwnedCommand(hook);
     const commandWindows = hook.script
       ? serializePowerShellScriptCommand(hook)
@@ -934,7 +980,7 @@ export function generateCodexHookConfig(hooks: HookDefinition[]): Record<string,
 
     if (!result[nativeEvent]) result[nativeEvent] = [];
     result[nativeEvent].push({
-      ...(hook.matcher ? { matcher: hook.matcher } : {}),
+      ...(matcher ? { matcher } : {}),
       hooks: [handler],
     });
   }

@@ -104,6 +104,80 @@ describe('Hook target smoke tests', () => {
     expect(result.outputs.has('.windsurf/hooks.json')).toBe(true);
   });
 
+  it('compiles terminal command hooks with deterministic native coverage', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'promptscript-terminal-hooks-'));
+    directories.push(directory);
+    const entryPath = join(directory, 'project.prs');
+    writeFileSync(
+      entryPath,
+      `@meta {
+  id: "terminal-hook-smoke"
+  syntax: "1.4.0"
+}
+
+@hooks {
+  terminal-policy: {
+    event: "pre-terminal-command"
+    command: ["node", "check-terminal.mjs"]
+    targets: {
+      vscode: {}
+    }
+  }
+}
+`
+    );
+
+    const compiler = new Compiler({
+      resolver: { registryPath: directory, projectRoot: directory },
+      formatters: [
+        { name: 'claude', config: { version: 'full' } },
+        { name: 'codex', config: { version: 'full' } },
+        { name: 'factory', config: { version: 'full' } },
+        { name: 'github', config: { version: 'full' } },
+        { name: 'windsurf', config: { version: 'full' } },
+      ],
+    });
+
+    const result = await compiler.compile(entryPath);
+
+    expect(result.success).toBe(true);
+
+    const factory = JSON.parse(result.outputs.get('.factory/hooks.json')!.content) as {
+      hooks: { PreToolUse: Array<{ matcher: string }> };
+    };
+    expect(factory.hooks.PreToolUse[0]!.matcher).toBe('Execute');
+
+    const claude = JSON.parse(result.outputs.get('.claude/settings.json')!.content) as {
+      hooks: { PreToolUse: Array<{ matcher: string }> };
+    };
+    expect(claude.hooks.PreToolUse[0]!.matcher).toBe('Bash');
+
+    const codex = JSON.parse(result.outputs.get('.codex/hooks.json')!.content) as {
+      hooks: { PreToolUse: Array<{ matcher: string }> };
+    };
+    expect(codex.hooks.PreToolUse[0]!.matcher).toBe('Bash');
+
+    const windsurf = JSON.parse(result.outputs.get('.windsurf/hooks.json')!.content) as {
+      hooks: Record<string, unknown>;
+    };
+    expect(Object.keys(windsurf.hooks)).toEqual(['pre_run_command']);
+
+    expect(result.outputs.has('.github/hooks/promptscript.json')).toBe(false);
+    const vscode = JSON.parse(
+      result.outputs.get('.github/hooks/promptscript-vscode.json')!.content
+    ) as {
+      hooks: { PreToolUse: Array<{ matcher: string }> };
+    };
+    expect(vscode.hooks.PreToolUse[0]!.matcher).toBe('run_in_terminal');
+
+    expect(result.warnings.map((warning) => warning.message)).toEqual(
+      expect.arrayContaining([
+        'Hook "terminal-policy" requests terminal command interception, which github cannot guarantee and will omit.',
+        'Hook "terminal-policy" maps terminal command interception to vscode with best-effort coverage.',
+      ])
+    );
+  });
+
   it('compiles target executable overrides to each native contract', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'promptscript-hook-overrides-'));
     directories.push(directory);
