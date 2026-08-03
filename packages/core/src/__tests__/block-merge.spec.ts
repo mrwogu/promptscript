@@ -286,6 +286,153 @@ describe('block merge policies', () => {
     expect(result.inlineUses?.map((use) => use.path.raw)).toEqual(['./base', './incoming']);
   });
 
+  it('merges arrays and cross-shape content without losing its selected shape', () => {
+    const array = mergeBlockContent(
+      { type: 'ArrayContent', elements: ['base'], loc: LOC },
+      { type: 'ArrayContent', elements: ['base', 'incoming'], loc: LOC },
+      INHERITANCE_MERGE_POLICY
+    );
+    const mixedThenText = mergeBlockContent(
+      {
+        type: 'MixedContent',
+        text: { type: 'TextContent', value: 'base detail', loc: LOC },
+        properties: {},
+        loc: LOC,
+      },
+      { type: 'TextContent', value: 'base', loc: LOC },
+      INHERITANCE_MERGE_POLICY
+    );
+    const textThenMixed = mergeBlockContent(
+      { type: 'TextContent', value: 'base', loc: LOC },
+      { type: 'MixedContent', properties: { incoming: true }, loc: LOC },
+      INHERITANCE_MERGE_POLICY
+    );
+    const objectThenMixed = mergeBlockContent(
+      objectContent({ base: true }),
+      {
+        type: 'MixedContent',
+        text: { type: 'TextContent', value: 'incoming', loc: LOC },
+        properties: { incoming: true },
+        loc: LOC,
+      },
+      INHERITANCE_MERGE_POLICY
+    );
+    const selectedBase = mergeBlockContent(
+      { type: 'ArrayContent', elements: ['base'], loc: LOC },
+      { type: 'TextContent', value: 'incoming', loc: LOC },
+      { valuePrecedence: 'base', typeMismatchPrecedence: 'base' }
+    );
+
+    expect(array).toMatchObject({
+      type: 'ArrayContent',
+      elements: ['base', 'incoming'],
+    });
+    expect(mixedThenText).toMatchObject({
+      type: 'MixedContent',
+      text: { value: 'base detail' },
+    });
+    expect(textThenMixed).toMatchObject({
+      type: 'MixedContent',
+      text: { value: 'base' },
+      properties: { incoming: true },
+    });
+    expect(objectThenMixed).toMatchObject({
+      type: 'MixedContent',
+      text: { value: 'incoming' },
+      properties: { base: true, incoming: true },
+    });
+    expect(selectedBase).toMatchObject({
+      type: 'ArrayContent',
+      elements: ['base'],
+    });
+  });
+
+  it('repairs mixed projections and preserves canonical array bodies', () => {
+    const arrays = mergeBlockCollections(
+      [
+        {
+          type: 'Block',
+          name: 'restrictions',
+          content: { type: 'ArrayContent', elements: ['base'], loc: LOC },
+          loc: LOC,
+        },
+      ],
+      [
+        {
+          type: 'Block',
+          name: 'restrictions',
+          content: { type: 'ArrayContent', elements: ['incoming'], loc: LOC },
+          loc: LOC,
+        },
+      ],
+      { content: INHERITANCE_MERGE_POLICY, outputOrder: 'base' }
+    );
+    const textProjection = mergeBlockCollections(
+      [
+        {
+          type: 'Block',
+          name: 'identity',
+          content: { type: 'TextContent', value: 'base', loc: LOC },
+          loc: LOC,
+        },
+      ],
+      [
+        {
+          type: 'Block',
+          name: 'identity',
+          content: {
+            type: 'MixedContent',
+            text: { type: 'TextContent', value: 'incoming', loc: LOC },
+            properties: {},
+            loc: LOC,
+          },
+          loc: LOC,
+        },
+      ],
+      { content: INHERITANCE_MERGE_POLICY, outputOrder: 'base' }
+    );
+    const objectProjection = mergeBlockCollections(
+      [
+        {
+          type: 'Block',
+          name: 'context',
+          content: objectContent({ base: true }),
+          loc: LOC,
+        },
+      ],
+      [
+        {
+          type: 'Block',
+          name: 'context',
+          content: {
+            type: 'MixedContent',
+            properties: { incoming: true },
+            loc: LOC,
+          },
+          loc: LOC,
+        },
+      ],
+      { content: INHERITANCE_MERGE_POLICY, outputOrder: 'base' }
+    );
+
+    expect(arrays[0]!.content).toMatchObject({
+      type: 'ArrayContent',
+      elements: ['base', 'incoming'],
+    });
+    expect(arrays[0]!.canonicalBody?.entries.map((entry) => entry.type)).toEqual([
+      'ListEntry',
+      'ListEntry',
+    ]);
+    expect(textProjection[0]!.content).toMatchObject({
+      type: 'MixedContent',
+      text: { value: 'base\n\nincoming' },
+    });
+    expect(objectProjection[0]!.content).toMatchObject({
+      type: 'MixedContent',
+      properties: { base: true, incoming: true },
+    });
+  });
+
   it('preserves ordered canonical metadata while merging fields', () => {
     const baseLoc = { ...LOC, offset: 1 };
     const textLoc = { ...LOC, offset: 2 };

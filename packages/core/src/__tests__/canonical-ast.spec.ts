@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { BlockBody, BlockEntry, Program } from '../types/ast.js';
+import { SYNTAX_FEATURES } from '../syntax-versions.js';
 import {
+  composeBlockBodies,
   createBlockBody,
   createCanonicalBlock,
+  createCanonicalExtendBlock,
   createCanonicalProgram,
   createValueNode,
   blockBodyToContent,
@@ -13,7 +16,10 @@ import {
   getBlockText,
   getInlineUses,
   normalizeProgram,
+  prepareBlockContentForMerge,
+  reconcileBlockBodyAtPath,
   reconcileBlockBody,
+  reconcileValueNode,
   mergeValueNodeLocations,
   toLegacyProgram,
   updateCanonicalProgramOperations,
@@ -880,5 +886,343 @@ describe('canonical AST compatibility', () => {
     expect(object.type).toBe('ObjectValueNode');
     if (object.type !== 'ObjectValueNode') throw new Error('Expected object value');
     expect(Object.isFrozen(object.fields)).toBe(true);
+  });
+
+  it('round-trips and reconciles exact value node variants', () => {
+    const fallbackLoc = { ...LOC, line: 4, column: 5, offset: 8 };
+    const sourceLoc = { ...LOC, file: 'source.prs', line: 7, column: 3, offset: 20 };
+    const text = { type: 'TextContent' as const, value: 'before', loc: sourceLoc };
+    const template = { type: 'TemplateExpression' as const, name: 'before', loc: sourceLoc };
+    const expression = {
+      type: 'TypeExpression' as const,
+      kind: 'string' as const,
+      constraints: { min: 2 },
+      loc: sourceLoc,
+    };
+
+    const textNode = reconcileValueNode(createValueNode(text, fallbackLoc), {
+      ...text,
+      value: 'after',
+    });
+    const templateNode = reconcileValueNode(createValueNode(template, fallbackLoc), {
+      ...template,
+      name: 'after',
+    });
+    const expressionNode = reconcileValueNode(createValueNode(expression, fallbackLoc), {
+      ...expression,
+      constraints: { min: 4 },
+    });
+    const arrayNode = reconcileValueNode(createValueNode(['first'], fallbackLoc), [
+      'updated',
+      text,
+    ]);
+
+    expect(valueNodeToValue(textNode)).toEqual({ ...text, value: 'after' });
+    expect(valueNodeToValue(templateNode)).toEqual({ ...template, name: 'after' });
+    expect(valueNodeToValue(expressionNode)).toEqual({
+      ...expression,
+      constraints: { min: 4 },
+    });
+    expect(valueNodeToValue(arrayNode)).toEqual(['updated', text]);
+    expect(textNode.loc).toEqual(sourceLoc);
+    expect(templateNode.loc).toEqual(sourceLoc);
+    expect(expressionNode.loc).toEqual(sourceLoc);
+    expect(arrayNode.loc).toEqual(fallbackLoc);
+    if (arrayNode.type !== 'ArrayValueNode') throw new Error('Expected array value');
+    expect(arrayNode.elements.map((element) => element.loc)).toEqual([fallbackLoc, sourceLoc]);
+    expect(Object.isFrozen(textNode)).toBe(true);
+    expect(Object.isFrozen(templateNode)).toBe(true);
+    expect(Object.isFrozen(expressionNode)).toBe(true);
+    expect(Object.isFrozen(arrayNode.elements)).toBe(true);
+  });
+
+  it('prepares only synthetic legacy items projections for merging', () => {
+    const listBody = createBlockBody(
+      [{ type: 'ListEntry', value: createValueNode('dash item', LOC), loc: LOC }],
+      LOC
+    );
+    const legacyProjection = {
+      type: 'ObjectContent' as const,
+      properties: { items: ['dash item'] },
+      loc: LOC,
+    };
+    const explicitBody = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: 'items',
+          value: createValueNode(['field item'], LOC),
+          loc: LOC,
+        },
+      ],
+      LOC
+    );
+
+    const prepared = prepareBlockContentForMerge(listBody, legacyProjection);
+    const explicit = prepareBlockContentForMerge(explicitBody, legacyProjection);
+    const detached = prepareBlockContentForMerge(undefined, legacyProjection);
+
+    expect(prepared).toEqual({
+      type: 'ObjectContent',
+      properties: {},
+      listItems: ['dash item'],
+      loc: LOC,
+    });
+    expect(explicit).toEqual(legacyProjection);
+    expect(detached).toEqual(legacyProjection);
+    expect(detached).not.toBe(legacyProjection);
+  });
+
+  it('composes nested fields with incoming provenance and represented entries', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 2 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 12 };
+    const declaration = {
+      type: 'InlineUseDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './shared',
+        namespace: undefined,
+        segments: ['shared'],
+        version: undefined,
+        isRelative: true,
+        loc: baseLoc,
+      },
+      loc: baseLoc,
+    };
+    const baseBody = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: 'config',
+          value: createValueNode({ nested: { base: true } }, baseLoc),
+          loc: baseLoc,
+        },
+        { type: 'TextEntry', text: 'Instructions', loc: baseLoc },
+        { type: 'ListEntry', value: createValueNode('keep', baseLoc), loc: baseLoc },
+        { type: 'InlineUseEntry', declaration, loc: baseLoc },
+      ],
+      baseLoc
+    );
+    const incomingBody = createBlockBody(
+      [
+        {
+          type: 'FieldEntry',
+          name: 'config',
+          value: createValueNode({ nested: { incoming: true } }, incomingLoc),
+          loc: incomingLoc,
+        },
+      ],
+      incomingLoc
+    );
+    const baseContent = blockBodyToContent(baseBody);
+    const incomingContent = blockBodyToContent(incomingBody);
+    const mergedContent = {
+      type: 'MixedContent' as const,
+      text: { type: 'TextContent' as const, value: 'Instructions', loc: baseLoc },
+      properties: { config: { nested: { base: true, incoming: true } } },
+      listItems: ['keep'],
+      inlineUses: [declaration],
+      loc: incomingLoc,
+    };
+
+    const composed = composeBlockBodies(
+      baseBody,
+      incomingBody,
+      baseContent,
+      incomingContent,
+      mergedContent
+    );
+    const config = composed.entries.find(
+      (entry): entry is Extract<BlockEntry, { type: 'FieldEntry' }> =>
+        entry.type === 'FieldEntry' && entry.name === 'config'
+    );
+
+    expect(config && valueNodeToValue(config.value)).toEqual({
+      nested: { base: true, incoming: true },
+    });
+    if (!config || config.value.type !== 'ObjectValueNode') {
+      throw new Error('Expected config object field');
+    }
+    const nested = config.value.fields[0]!.value;
+    if (nested.type !== 'ObjectValueNode') throw new Error('Expected nested object');
+    expect(nested.fields.find((field) => field.name === 'incoming')?.loc).toEqual(incomingLoc);
+    expect(composed.entries.map((entry) => entry.type)).toEqual([
+      'TextEntry',
+      'ListEntry',
+      'InlineUseEntry',
+      'FieldEntry',
+    ]);
+    expect(composed.entries[0]).toMatchObject({ type: 'TextEntry', text: 'Instructions' });
+    expect(composed.entries[1]).toMatchObject({
+      type: 'ListEntry',
+      value: { type: 'ScalarValueNode', value: 'keep' },
+    });
+    expect(composed.entries[2]).toMatchObject({
+      type: 'InlineUseEntry',
+      declaration,
+    });
+  });
+
+  it('reconciles deep extension paths without losing canonical provenance', () => {
+    const baseLoc = { ...LOC, file: 'base.prs', offset: 3 };
+    const incomingLoc = { ...LOC, file: 'incoming.prs', offset: 30 };
+    const baseContent = {
+      type: 'ObjectContent' as const,
+      properties: { config: { nested: { left: 'base', right: 'base' } } },
+      loc: baseLoc,
+    };
+    const incomingContent = {
+      type: 'ObjectContent' as const,
+      properties: { right: 'incoming' },
+      loc: incomingLoc,
+    };
+    const mergedContent = {
+      type: 'ObjectContent' as const,
+      properties: { config: { nested: { left: 'base', right: 'incoming' } } },
+      loc: incomingLoc,
+    };
+    const baseBody = blockContentToBody(baseContent);
+    const incomingBody = blockContentToBody(incomingContent);
+
+    const reconciled = reconcileBlockBodyAtPath(
+      baseBody,
+      incomingBody,
+      baseContent,
+      incomingContent,
+      mergedContent,
+      ['config', 'nested']
+    );
+    const root = reconciled.entries[0]!;
+
+    expect(blockBodyToContent(reconciled)).toMatchObject({
+      properties: mergedContent.properties,
+    });
+    if (root.type !== 'FieldEntry' || root.value.type !== 'ObjectValueNode') {
+      throw new Error('Expected config object field');
+    }
+    const nested = root.value.fields[0]!.value;
+    if (nested.type !== 'ObjectValueNode') throw new Error('Expected nested object');
+    expect(nested.fields.map((field) => valueNodeToValue(field.value))).toEqual([
+      'base',
+      'incoming',
+    ]);
+    expect(nested.fields.map((field) => field.loc)).toEqual([baseLoc, incomingLoc]);
+    expect(root.loc).toEqual(baseLoc);
+
+    const mixedBaseContent = {
+      type: 'ObjectContent' as const,
+      properties: {
+        summary: {
+          type: 'MixedContent',
+          text: { type: 'TextContent', value: 'Base text', loc: baseLoc },
+          properties: { audience: 'developers' },
+          loc: baseLoc,
+        },
+      },
+      loc: baseLoc,
+    };
+    const textExtension = {
+      type: 'TextContent' as const,
+      value: 'Incoming text',
+      loc: incomingLoc,
+    };
+    const mixedMergedContent = {
+      type: 'ObjectContent' as const,
+      properties: {
+        summary: {
+          type: 'MixedContent',
+          text: { type: 'TextContent', value: 'Incoming text', loc: incomingLoc },
+          properties: { audience: 'developers' },
+          loc: incomingLoc,
+        },
+      },
+      loc: incomingLoc,
+    };
+
+    const mixed = reconcileBlockBodyAtPath(
+      blockContentToBody(mixedBaseContent),
+      blockContentToBody(textExtension),
+      mixedBaseContent,
+      textExtension,
+      mixedMergedContent,
+      ['summary']
+    );
+    const summary = mixed.entries[0]!;
+
+    expect(blockBodyToContent(mixed)).toMatchObject({
+      properties: mixedMergedContent.properties,
+    });
+    if (summary.type !== 'FieldEntry' || summary.value.type !== 'ObjectValueNode') {
+      throw new Error('Expected mixed summary field');
+    }
+    expect(summary.value.fields.find((field) => field.name === 'text')?.loc).toEqual(incomingLoc);
+  });
+
+  it('round-trips canonical extensions and program compatibility metadata', () => {
+    const inheritLoc = { ...LOC, offset: 1 };
+    const extensionLoc = { ...LOC, offset: 10 };
+    const replacement = {
+      type: 'ReplaceModifier' as const,
+      property: 'testing',
+      loc: extensionLoc,
+    };
+    const extension = createCanonicalExtendBlock(
+      'standards',
+      createBlockBody(
+        [
+          {
+            type: 'FieldEntry',
+            name: 'testing',
+            value: createValueNode(['Vitest'], extensionLoc),
+            loc: extensionLoc,
+          },
+        ],
+        extensionLoc
+      ),
+      [replacement],
+      extensionLoc
+    );
+    const inherit = {
+      type: 'InheritDeclaration' as const,
+      path: {
+        type: 'PathReference' as const,
+        raw: './base',
+        namespace: undefined,
+        segments: ['base'],
+        version: undefined,
+        isRelative: true,
+        loc: inheritLoc,
+      },
+      loc: inheritLoc,
+    };
+    const canonical = createCanonicalProgram({
+      operations: [
+        {
+          type: 'InheritOperation',
+          declaration: inherit,
+          sourceLayerId: LOC.file,
+          loc: inheritLoc,
+        },
+        {
+          type: 'ExtendOperation',
+          extension,
+          sourceLayerId: LOC.file,
+          loc: extensionLoc,
+        },
+      ],
+      syntaxFeatures: [{ feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: extensionLoc }],
+      loc: LOC,
+    });
+
+    const legacy = toLegacyProgram(canonical);
+    const restored = normalizeProgram(legacy);
+
+    expect(legacy.inherit).toEqual(inherit);
+    expect(legacy.extends[0]!.replacements).toEqual([replacement]);
+    expect(legacy.syntaxFeatures).toEqual(canonical.syntaxFeatures);
+    expect(restored.inherit).toEqual(inherit);
+    expect(restored.extends[0]!.replacements).toEqual([replacement]);
+    expect(restored.syntaxFeatures).toEqual(canonical.syntaxFeatures);
+    expect(Object.isFrozen(restored.extends[0])).toBe(true);
   });
 });
