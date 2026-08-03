@@ -166,6 +166,19 @@ describe('migrateLegacyFactoryHooks', () => {
     expect(result.canonical).toEqual({ hooks: { PreToolUse: [installed] } });
   });
 
+  it('preserves direct installed command entries for compile migration', () => {
+    const installed = { type: 'command', command: 'prs hook pre-edit' };
+    const result = migrateLegacyFactoryHooks(
+      { hooks: { PreToolUse: [installed] } },
+      {},
+      { preserveInstalledHooks: true, rejectMixedOwnership: true }
+    );
+
+    expect(result.ambiguous).toEqual([]);
+    expect(result.legacy).toEqual({});
+    expect(result.canonical).toEqual({ hooks: { PreToolUse: [installed] } });
+  });
+
   it('rejects mixed ownership for compile migration', () => {
     const result = migrateLegacyFactoryHooks(
       {
@@ -464,6 +477,19 @@ describe('planLegacyFactoryHooksMigration', () => {
       await expect(planLegacyFactoryHooksMigration(root)).rejects.toThrow(
         'Failed to parse Factory hooks file'
       );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('propagates legacy settings read failures', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'promptscript-legacy-plan-'));
+    await mkdir(join(root, '.factory', 'settings.json'), { recursive: true });
+
+    try {
+      await expect(planLegacyFactoryHooksMigration(root)).rejects.toMatchObject({
+        code: expect.not.stringMatching(/^ENOENT$/),
+      });
     } finally {
       await rm(root, { recursive: true, force: true });
     }

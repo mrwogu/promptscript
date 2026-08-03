@@ -381,36 +381,20 @@ function isCommandObject(value: unknown): boolean {
 
 function isGeneratedCommandObject(value: unknown): boolean {
   const object = getObject(value);
-  if (!object) return false;
-  if (typeof object['command'] === 'string') {
-    return (
-      isCommandObject(object) &&
-      /# promptscript-generated:[A-Za-z0-9._-]+\s*$/.test(object['command'])
-    );
-  }
-  const handlers = object['hooks'];
   return (
-    Array.isArray(handlers) &&
-    handlers.length > 0 &&
-    handlers.every((handler) => isGeneratedCommandObject(handler))
+    typeof object?.['command'] === 'string' &&
+    isCommandObject(object) &&
+    /# promptscript-generated:[A-Za-z0-9._-]+\s*$/.test(object['command'])
   );
 }
 
 function isInstalledCommandObject(value: unknown): boolean {
   const object = getObject(value);
-  if (!object) return false;
-  if (typeof object['command'] === 'string') {
-    return (
-      isCommandObject(object) &&
-      !isGeneratedCommandObject(object) &&
-      isPromptScriptHookCommand(object['command'])
-    );
-  }
-  const handlers = object['hooks'];
   return (
-    Array.isArray(handlers) &&
-    handlers.length > 0 &&
-    handlers.every((handler) => isInstalledCommandObject(handler))
+    typeof object?.['command'] === 'string' &&
+    isCommandObject(object) &&
+    !isGeneratedCommandObject(object) &&
+    isPromptScriptHookCommand(object['command'])
   );
 }
 
