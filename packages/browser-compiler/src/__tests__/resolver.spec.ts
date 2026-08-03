@@ -2569,6 +2569,80 @@ describe('BrowserResolver', () => {
         expect(config).toHaveProperty('newKey');
       }
     });
+
+    it('should flatten property-only MixedContent and preserve auxiliary shapes', () => {
+      const loc = { file: 'test.prs', line: 1, column: 1 };
+      const ast: Program = {
+        type: 'Program',
+        blocks: [
+          {
+            type: 'Block',
+            name: 'config',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                mixed: { existing: 'value' },
+              },
+              loc,
+            },
+            loc,
+          },
+        ],
+        uses: [],
+        extends: [
+          {
+            type: 'ExtendBlock',
+            targetPath: 'config.mixed',
+            content: {
+              type: 'MixedContent',
+              properties: { added: 'value' },
+              loc,
+            },
+            loc,
+          },
+          {
+            type: 'ExtendBlock',
+            targetPath: 'config.newMixed',
+            content: {
+              type: 'MixedContent',
+              text: {
+                type: 'TextContent',
+                value: 'Instructions',
+                loc,
+              },
+              properties: { added: 'value' },
+              loc,
+            },
+            loc,
+          },
+        ],
+        loc,
+      };
+      const resolver = new BrowserResolver({ fs: new VirtualFileSystem({}) });
+
+      const result = (
+        resolver as unknown as { applyExtends(program: Program): Program }
+      ).applyExtends(ast);
+      const config = result.blocks[0]?.content;
+
+      if (config?.type !== 'ObjectContent') {
+        throw new Error('expected ObjectContent for config block');
+      }
+      expect(config.properties['mixed']).toEqual({
+        existing: 'value',
+        added: 'value',
+      });
+      expect(config.properties['newMixed']).toEqual({
+        type: 'MixedContent',
+        text: {
+          type: 'TextContent',
+          value: 'Instructions',
+          loc,
+        },
+        properties: { added: 'value' },
+        loc,
+      });
+    });
   });
 
   describe('deepCloneValue edge cases', () => {

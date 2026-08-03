@@ -380,6 +380,30 @@ describe('applyExtends additional coverage', () => {
       expect(content.properties['mixed']).toEqual({ key: 'value' });
     });
 
+    it('should merge property-only MixedContent into an ordinary object', () => {
+      const ast = createProgram({
+        blocks: [
+          createBlock(
+            'config',
+            createObjectContent({
+              mixed: { existing: 'value' },
+            })
+          ),
+        ],
+        extends: [
+          createExtendBlock('config.mixed', createMixedContent(undefined, { added: 'value' })),
+        ],
+      });
+
+      const result = applyExtends(ast);
+      const content = result.blocks[0]?.content as ObjectContent;
+
+      expect(content.properties['mixed']).toEqual({
+        existing: 'value',
+        added: 'value',
+      });
+    });
+
     it('should extract elements from ArrayContent', () => {
       const ast = createProgram({
         blocks: [createBlock('config', createObjectContent({}))],
