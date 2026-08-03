@@ -38,8 +38,8 @@ The `@hooks` block requires syntax `1.4.0`:
 
 ### Target-specific behavior
 
-Keep the portable event and command as the default, then override only the
-fields that differ on a host:
+Keep a portable executable as the default, then override only the fields that
+differ on a host. A target can replace the executable with its own `command`:
 
 ```promptscript
 @hooks {
@@ -50,6 +50,7 @@ fields that differ on a host:
     targets: {
       factory: {
         matcher: "Execute"
+        command: ["node", ".promptscript/scripts/check-factory.mjs", "--strict mode"]
       }
       vscode: {
         matcher: "run_in_terminal"
@@ -62,10 +63,13 @@ fields that differ on a host:
 }
 ```
 
-Supported override fields are `event`, `matcher`, `timeoutMs`,
-`statusMessage`, `continueOnFailure`, `enabled`, and `cwd`. Overrides are
-validated against known target names and do not change the portable source
-definition used by other targets.
+Supported override fields are `event`, `command`, `script`, `matcher`,
+`timeoutMs`, `statusMessage`, `continueOnFailure`, `enabled`, and `cwd`.
+Defining one of `command` or `script` replaces the base executable for that
+target only. Defining neither inherits the base executable, while defining both
+is rejected. Target commands and scripts use the same interpolation, path,
+interpreter, and argument validation as the base hook. A disabled target
+override emits no hook.
 
 ### Portable Events
 
@@ -137,6 +141,24 @@ Each hook requires exactly one of `command` or `script`. A portable script:
   `ruby`, `php`, `perl`, `bash`, `sh`, `zsh`, `pwsh`, or `powershell`.
 - Preserves every value in `args` as one argument, including spaces and shell
   metacharacters.
+
+A target override can select a different repository script while retaining the
+base event and other options:
+
+```promptscript
+targets: {
+  github: {
+    script: {
+      path: ".promptscript/scripts/validate-github.py"
+      interpreter: "python3"
+      args: ["--strict mode"]
+    }
+  }
+}
+```
+
+Enabled target-only scripts are checked by both Node and browser compilers.
+Scripts attached only to disabled target overrides are not required or emitted.
 
 The Node compiler validates the real filesystem. The browser compiler performs
 the equivalent check against its virtual filesystem. For entries outside

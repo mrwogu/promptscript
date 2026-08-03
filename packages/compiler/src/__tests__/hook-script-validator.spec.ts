@@ -2,12 +2,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { mkdtemp, mkdir, rm, symlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { inferProjectRoot, validateHookScriptResources } from '../hook-script-validator.js';
 
 const loc: SourceLocation = { file: '.promptscript/project.prs', line: 1, column: 1 };
 
-function makeProgram(scriptPath: string, enabled = true): Program {
+function makeHookProgram(hook: Record<string, Value>): Program {
   return {
     type: 'Program',
     blocks: [
@@ -17,14 +17,7 @@ function makeProgram(scriptPath: string, enabled = true): Program {
         content: {
           type: 'ObjectContent',
           properties: {
-            check: {
-              event: 'post-tool-use',
-              script: {
-                path: scriptPath,
-                interpreter: 'node',
-              },
-              enabled,
-            },
+            check: hook,
           },
           loc,
         },
@@ -35,6 +28,17 @@ function makeProgram(scriptPath: string, enabled = true): Program {
     extends: [],
     loc,
   };
+}
+
+function makeProgram(scriptPath: string, enabled = true): Program {
+  return makeHookProgram({
+    event: 'post-tool-use',
+    script: {
+      path: scriptPath,
+      interpreter: 'node',
+    },
+    enabled,
+  });
 }
 
 describe('hook script resource validation', () => {
@@ -108,6 +112,76 @@ describe('hook script resource validation', () => {
         projectRoot
       )
     ).resolves.toEqual([]);
+  });
+
+  it('reports a missing target-only script', async () => {
+    const errors = await validateHookScriptResources(
+      makeHookProgram({
+        event: 'post-tool-use',
+        command: ['node', 'base.mjs'],
+        targets: {
+          factory: {
+            script: {
+              path: '.promptscript/scripts/missing-target.mjs',
+              interpreter: 'node',
+            },
+          },
+        },
+      }),
+      projectRoot
+    );
+
+    expect(errors).toEqual([
+      expect.objectContaining({
+        code: 'PS2001',
+        message: 'Hook "check" script not found: .promptscript/scripts/missing-target.mjs',
+      }),
+    ]);
+  });
+
+  it('ignores target scripts for disabled overrides', async () => {
+    await expect(
+      validateHookScriptResources(
+        makeHookProgram({
+          event: 'post-tool-use',
+          command: ['node', 'base.mjs'],
+          targets: {
+            factory: {
+              enabled: false,
+              script: {
+                path: '.promptscript/scripts/missing-target.mjs',
+                interpreter: 'node',
+              },
+            },
+          },
+        }),
+        projectRoot
+      )
+    ).resolves.toEqual([]);
+  });
+
+  it('validates inherited scripts for re-enabled targets', async () => {
+    const errors = await validateHookScriptResources(
+      makeHookProgram({
+        event: 'post-tool-use',
+        enabled: false,
+        script: {
+          path: '.promptscript/scripts/missing-inherited.mjs',
+          interpreter: 'node',
+        },
+        targets: {
+          factory: { enabled: true },
+        },
+      }),
+      projectRoot
+    );
+
+    expect(errors).toEqual([
+      expect.objectContaining({
+        code: 'PS2001',
+        message: 'Hook "check" script not found: .promptscript/scripts/missing-inherited.mjs',
+      }),
+    ]);
   });
 
   it('rejects a script symlink that escapes the scripts directory', async () => {

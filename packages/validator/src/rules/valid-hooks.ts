@@ -37,6 +37,8 @@ const HOOK_FIELDS = new Set([
 const SCRIPT_FIELDS = new Set(['path', 'interpreter', 'args']);
 const TARGET_OVERRIDE_FIELDS = new Set([
   'event',
+  'command',
+  'script',
   'matcher',
   'timeoutMs',
   'statusMessage',
@@ -150,45 +152,7 @@ export const validHooks: ValidationRule = {
           severity: 'error',
         });
       } else if (command !== undefined) {
-        if (!Array.isArray(command)) {
-          ctx.report({
-            message: `Hook "${hookId}": command must be an array`,
-            location: hooksBlock.loc,
-            severity: 'error',
-          });
-        } else if (command.length === 0) {
-          ctx.report({
-            message: `Hook "${hookId}": command must not be empty`,
-            location: hooksBlock.loc,
-            severity: 'error',
-          });
-        } else {
-          if (typeof command[0] === 'string' && command[0].trim().length === 0) {
-            ctx.report({
-              message: `Hook "${hookId}": command executable must not be empty`,
-              location: hooksBlock.loc,
-              severity: 'error',
-            });
-          }
-          for (const arg of command) {
-            if (typeof arg !== 'string') {
-              ctx.report({
-                message: `Hook "${hookId}": command arguments must be strings`,
-                location: hooksBlock.loc,
-                severity: 'error',
-              });
-              break;
-            }
-            if (arg.includes('$(') || arg.includes('`') || arg.includes('${')) {
-              ctx.report({
-                message: `Hook "${hookId}": shell interpolation is forbidden in command arguments`,
-                location: hooksBlock.loc,
-                suggestion: 'Use explicit argument passing instead of shell interpolation',
-                severity: 'error',
-              });
-            }
-          }
-        }
+        validateCommand(hookId, command, hooksBlock.loc, ctx.report);
       } else if (typeof script !== 'object' || script === null || Array.isArray(script)) {
         ctx.report({
           message: `Hook "${hookId}": script must be an object`,
@@ -332,6 +296,28 @@ function validateTargetOverrides(
       }
     }
 
+    const command = override['command'];
+    const script = override['script'];
+    if (command !== undefined && script !== undefined) {
+      report({
+        message: `Hook "${hookId}": target override "${target}" command and script are mutually exclusive`,
+        location,
+        severity: 'error',
+      });
+    } else if (command !== undefined) {
+      validateCommand(hookId, command, location, report, target);
+    } else if (script !== undefined) {
+      if (typeof script !== 'object' || script === null || Array.isArray(script)) {
+        report({
+          message: `Hook "${hookId}": target override "${target}" script must be an object`,
+          location,
+          severity: 'error',
+        });
+      } else {
+        validateScript(hookId, script as Record<string, Value>, location, report, target);
+      }
+    }
+
     const event = override['event'];
     if (event !== undefined && (typeof event !== 'string' || !VALID_HOOK_EVENTS.has(event))) {
       report({
@@ -409,16 +395,69 @@ function validateTargetOverrides(
   }
 }
 
+function validateCommand(
+  hookId: string,
+  command: Value,
+  location: SourceLocation,
+  report: RuleContext['report'],
+  target?: string
+): void {
+  const subject = target ? `Hook "${hookId}": target override "${target}"` : `Hook "${hookId}"`;
+  if (!Array.isArray(command)) {
+    report({
+      message: `${subject}: command must be an array`,
+      location,
+      severity: 'error',
+    });
+    return;
+  }
+  if (command.length === 0) {
+    report({
+      message: `${subject}: command must not be empty`,
+      location,
+      severity: 'error',
+    });
+    return;
+  }
+  if (typeof command[0] === 'string' && command[0].trim().length === 0) {
+    report({
+      message: `${subject}: command executable must not be empty`,
+      location,
+      severity: 'error',
+    });
+  }
+  for (const argument of command) {
+    if (typeof argument !== 'string') {
+      report({
+        message: `${subject}: command arguments must be strings`,
+        location,
+        severity: 'error',
+      });
+      break;
+    }
+    if (argument.includes('$(') || argument.includes('`') || argument.includes('${')) {
+      report({
+        message: `${subject}: shell interpolation is forbidden in command arguments`,
+        location,
+        suggestion: 'Use explicit argument passing instead of shell interpolation',
+        severity: 'error',
+      });
+    }
+  }
+}
+
 function validateScript(
   hookId: string,
   script: Record<string, Value>,
   location: SourceLocation,
-  report: RuleContext['report']
+  report: RuleContext['report'],
+  target?: string
 ): void {
+  const subject = target ? `Hook "${hookId}": target override "${target}"` : `Hook "${hookId}"`;
   for (const field of Object.keys(script)) {
     if (!SCRIPT_FIELDS.has(field)) {
       report({
-        message: `Hook "${hookId}": unknown script field "${field}"`,
+        message: `${subject}: unknown script field "${field}"`,
         location,
         severity: 'error',
       });
@@ -428,7 +467,7 @@ function validateScript(
   const path = script['path'];
   if (typeof path !== 'string' || !isPortableHookScriptPath(path)) {
     report({
-      message: `Hook "${hookId}": script path must be a safe file under ".promptscript/scripts/"`,
+      message: `${subject}: script path must be a safe file under ".promptscript/scripts/"`,
       location,
       severity: 'error',
     });
@@ -437,7 +476,7 @@ function validateScript(
   const interpreter = script['interpreter'];
   if (typeof interpreter !== 'string' || !isPortableHookInterpreter(interpreter)) {
     report({
-      message: `Hook "${hookId}": script interpreter is required and must be portable`,
+      message: `${subject}: script interpreter is required and must be portable`,
       location,
       suggestion:
         'Use python3, python, node, deno, bun, ruby, php, perl, bash, sh, zsh, pwsh, or powershell',
@@ -448,7 +487,7 @@ function validateScript(
   const args = script['args'];
   if (args !== undefined && (!Array.isArray(args) || args.some((arg) => typeof arg !== 'string'))) {
     report({
-      message: `Hook "${hookId}": script args must be an array of strings`,
+      message: `${subject}: script args must be an array of strings`,
       location,
       severity: 'error',
     });

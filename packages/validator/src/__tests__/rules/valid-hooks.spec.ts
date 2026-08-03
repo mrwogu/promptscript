@@ -617,14 +617,83 @@ describe('PS034: valid-hooks', () => {
           event: 'pre-tool-use',
           command: ['prs', 'hook'],
           targets: {
-            factory: { matcher: 'Execute' },
-            vscode: { matcher: 'run_in_terminal', timeoutMs: 15000 },
+            factory: {
+              matcher: 'Execute',
+              command: ['node', 'factory hook.mjs', '--strict mode'],
+            },
+            vscode: {
+              matcher: 'run_in_terminal',
+              timeoutMs: 15000,
+              script: {
+                path: '.promptscript/scripts/vscode.py',
+                interpreter: 'python3',
+                args: ['--strict mode'],
+              },
+            },
           },
         },
       })
     );
 
     expect(messages).toHaveLength(0);
+  });
+
+  it('should reject invalid target executable overrides', () => {
+    const messages = validate(
+      makeAst({
+        check: {
+          event: 'pre-tool-use',
+          command: ['node', 'base.mjs'],
+          targets: {
+            factory: {
+              command: ['node', 'factory.mjs'],
+              script: {
+                path: '.promptscript/scripts/factory.mjs',
+                interpreter: 'node',
+              },
+            },
+            vscode: { command: [] },
+            github: { command: ['node', '$(unsafe)'] },
+            gemini: { command: [' '] },
+            windsurf: { command: 'node hook.mjs' as unknown as Value },
+            grok: { script: 'python3 hook.py' as unknown as Value },
+            claude: {
+              script: {
+                path: '../unsafe.py',
+                interpreter: 'python3',
+              },
+            },
+            cursor: {
+              script: {
+                path: '.promptscript/scripts/cursor.py',
+                interpreter: 'custom-runtime',
+              },
+            },
+            codex: {
+              script: {
+                path: '.promptscript/scripts/codex.py',
+                interpreter: 'python3',
+                args: [1],
+              },
+            },
+          },
+        },
+      })
+    );
+
+    expect(messages.map((message) => message.message)).toEqual(
+      expect.arrayContaining([
+        'Hook "check": target override "factory" command and script are mutually exclusive',
+        'Hook "check": target override "vscode": command must not be empty',
+        'Hook "check": target override "github": shell interpolation is forbidden in command arguments',
+        'Hook "check": target override "gemini": command executable must not be empty',
+        'Hook "check": target override "windsurf": command must be an array',
+        'Hook "check": target override "grok" script must be an object',
+        'Hook "check": target override "claude": script path must be a safe file under ".promptscript/scripts/"',
+        'Hook "check": target override "cursor": script interpreter is required and must be portable',
+        'Hook "check": target override "codex": script args must be an array of strings',
+      ])
+    );
   });
 
   it('should reject unknown target override fields and targets', () => {

@@ -11,6 +11,7 @@ import {
   generateGrokHooks,
   generateVSCodeHooks,
   generateWindsurfHooks,
+  getEnabledHookScriptResources,
   getHookCompatibilityWarnings,
   mapEvent,
   convertTimeout,
@@ -416,9 +417,100 @@ describe('hook-adapters', () => {
         },
       });
     });
+
+    it('should extract command and script target overrides', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'post-tool-use',
+            command: ['node', 'base.mjs'],
+            targets: {
+              factory: {
+                command: ['node', 'factory check.mjs', '--strict mode'],
+              },
+              github: {
+                script: {
+                  path: '.promptscript/scripts/github check.py',
+                  interpreter: 'python3',
+                  args: ['--strict mode'],
+                },
+              },
+            },
+          },
+        })
+      );
+
+      expect(hooks[0]!.targets?.factory?.command).toEqual([
+        'node',
+        'factory check.mjs',
+        '--strict mode',
+      ]);
+      expect(hooks[0]!.targets?.github?.script).toEqual({
+        path: '.promptscript/scripts/github check.py',
+        interpreter: 'python3',
+        args: ['--strict mode'],
+      });
+    });
   });
 
   describe('generateFactoryHooks', () => {
+    it('should inherit the base executable when a target does not replace it', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'pre-tool-use',
+            command: ['node', 'base hook.mjs'],
+            targets: {
+              factory: { matcher: 'Edit' },
+            },
+          },
+        })
+      );
+
+      expect(generateFactoryHooks(hooks)['PreToolUse']![0]).toEqual({
+        matcher: 'Edit',
+        hooks: [
+          {
+            type: 'command',
+            command: "node 'base hook.mjs' # promptscript-generated:check",
+          },
+        ],
+      });
+    });
+
+    it('should replace a base script with a target command', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'pre-tool-use',
+            script: {
+              path: '.promptscript/scripts/base.py',
+              interpreter: 'python3',
+            },
+            targets: {
+              factory: {
+                command: ['node', 'factory check.mjs', '--strict mode'],
+              },
+            },
+          },
+        })
+      );
+
+      expect(generateFactoryHooks(hooks)).toEqual({
+        PreToolUse: [
+          {
+            matcher: '.*',
+            hooks: [
+              {
+                type: 'command',
+                command: "node 'factory check.mjs' '--strict mode' # promptscript-generated:check",
+              },
+            ],
+          },
+        ],
+      });
+    });
+
     it('should generate enabled hooks with Factory options', () => {
       const hooks = extractHooks(
         makeHooksBlock({
@@ -513,6 +605,19 @@ describe('hook-adapters', () => {
         ])
       ).toEqual({});
     });
+
+    it('should omit a hook disabled for Factory', () => {
+      expect(
+        generateFactoryHooks([
+          {
+            id: 'disabled',
+            event: 'pre-tool-use',
+            command: ['echo', 'base'],
+            targets: { factory: { command: ['echo', 'factory'], enabled: false } },
+          },
+        ])
+      ).toEqual({});
+    });
   });
 
   describe('generateVSCodeHooks', () => {
@@ -526,6 +631,7 @@ describe('hook-adapters', () => {
             timeoutMs: 5000,
             targets: {
               vscode: {
+                command: ['node', 'VS Code hook.mjs', '--label=hello world'],
                 matcher: 'run_in_terminal',
                 timeoutMs: 15000,
               },
@@ -538,8 +644,10 @@ describe('hook-adapters', () => {
         PreToolUse: [
           {
             type: 'command',
-            command: 'prs hook pre-edit # promptscript-generated:terminal',
-            windows: "& 'prs' 'hook' 'pre-edit' # promptscript-generated:terminal",
+            command:
+              "node 'VS Code hook.mjs' '--label=hello world' # promptscript-generated:terminal",
+            windows:
+              "& 'node' 'VS Code hook.mjs' '--label=hello world' # promptscript-generated:terminal",
             matcher: 'run_in_terminal',
             timeout: 15,
           },
@@ -587,6 +695,38 @@ describe('hook-adapters', () => {
   });
 
   describe('generateGitHubHooks', () => {
+    it('should replace a base command with a target script on Unix and Windows', () => {
+      const hooks = extractHooks(
+        makeHooksBlock({
+          check: {
+            event: 'pre-tool-use',
+            command: ['node', 'base.mjs'],
+            targets: {
+              github: {
+                script: {
+                  path: '.promptscript/scripts/GitHub check.py',
+                  interpreter: 'python3',
+                  args: ['--label=hello world'],
+                },
+              },
+            },
+          },
+        })
+      );
+
+      expect(generateGitHubHooks(hooks)).toEqual({
+        preToolUse: [
+          {
+            type: 'command',
+            bash: "python3 '.promptscript/scripts/GitHub check.py' '--label=hello world' # promptscript-generated:check",
+            powershell:
+              "& 'py' '-3' '.promptscript/scripts/GitHub check.py' '--label=hello world' # promptscript-generated:check",
+            cwd: '.',
+          },
+        ],
+      });
+    });
+
     it('should generate current versioned repository hook entries', () => {
       const hooks = extractHooks(
         makeHooksBlock({
@@ -695,6 +835,68 @@ describe('hook-adapters', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('getEnabledHookScriptResources', () => {
+    it('should include effective base and target scripts without duplicates', () => {
+      const hook: HookDefinition = {
+        id: 'check',
+        event: 'pre-tool-use',
+        script: {
+          path: '.promptscript/scripts/base.mjs',
+          interpreter: 'node',
+          args: [],
+        },
+        targets: {
+          factory: {
+            matcher: 'Edit',
+          },
+          github: {
+            script: {
+              path: '.promptscript/scripts/github.py',
+              interpreter: 'python3',
+              args: [],
+            },
+          },
+          vscode: {
+            command: ['node', 'vscode.mjs'],
+          },
+        },
+      };
+
+      expect(getEnabledHookScriptResources(hook).map((script) => script.path)).toEqual([
+        '.promptscript/scripts/base.mjs',
+        '.promptscript/scripts/github.py',
+      ]);
+    });
+
+    it('should include inherited scripts for re-enabled targets only', () => {
+      const hook: HookDefinition = {
+        id: 'check',
+        event: 'pre-tool-use',
+        enabled: false,
+        script: {
+          path: '.promptscript/scripts/base.mjs',
+          interpreter: 'node',
+          args: [],
+        },
+        targets: {
+          factory: { enabled: true },
+          github: {
+            enabled: false,
+            script: {
+              path: '.promptscript/scripts/disabled.py',
+              interpreter: 'python3',
+              args: [],
+            },
+          },
+        },
+      };
+
+      expect(getEnabledHookScriptResources(hook).map((script) => script.path)).toEqual([
+        '.promptscript/scripts/base.mjs',
+      ]);
     });
   });
 
