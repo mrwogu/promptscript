@@ -25,6 +25,7 @@ Pozwolić target override wybrać własny `command` albo `script`, bez kopiowani
         }
       }
     }
+    cwd: "project"
   }
 }
 ```
@@ -74,13 +75,16 @@ Pozwolić target override wybrać własny `command` albo `script`, bez kopiowani
    - Czytać location z canonical `ObjectFieldNode`/`ValueNode` z #330. Diagnostic wskazuje location pola `targets.<target>.command` albo `targets.<target>.script`, nie tylko location całego `@hooks`.
 
 4. **Compiler filesystem validator**
-   - Rozszerzyć `packages/compiler/src/hook-script-validator.ts`, aby iterował portable script oraz każdy enabled target override script, nie tylko `hook.script`.
+   - Compiler buduje `SelectedHookRuntimeTargets` z loaded formatterów, output versions i nested emission contexts, np. VS Code przez GitHub formatter tylko przy `targets.vscode`.
+   - Rozszerzyć `packages/compiler/src/hook-script-validator.ts`, aby iterował portable script używany przez selected targets oraz każdy enabled selected target override script, nie tylko `hook.script`.
+   - Lexical/schema validator nadal sprawdza wszystkie declared overrides. Filesystem existence/realpath validation nie blokuje compile przez poprawny, lecz unselected target resource.
    - Dla każdego kandydata wykonać `lstat`, `realpath`, file-type check i containment pod real `.promptscript/scripts/`.
    - Symlink escape, missing file i non-file raportują hook ID, target/origin, path i source location.
    - Jeden invalid target override zatrzymuje cały compile przed formatter output. Pozostałe poprawne targety nie maskują błędu.
 
 5. **Browser filesystem validator**
    - Rozszerzyć `packages/browser-compiler/src/hook-script-validator.ts` o ten sam iteration/effective-resource contract.
+   - Browser compiler przekazuje ten sam `SelectedHookRuntimeTargets` derived z requested formatterów/versions; selection semantics muszą być identyczne z Node.
    - Rozszerzyć `VirtualFileSystem` o typed entries `file | directory | symlink`, `lstat`, `realpath` i deterministic symlink resolution z cycle detection. Existing `Map<string, string>` constructor nadal tworzy regular file entries dla compatibility.
    - Rozszerzyć publiczny `BrowserCompileInput`/`compile()` o `Record<string, string | VirtualFileEntry> | Map<string, string | VirtualFileEntry>` oraz convenience builders `file()`, `directory()`, `symlink()`. Existing `Record<string, string>` i `Map<string, string>` pozostają source-compatible.
    - Dodać named exports `VirtualFileEntry`, `VirtualFileKind`, `file`, `directory` i `symlink` z `@promptscript/browser-compiler` package entrypoint. Bez deep importów.
@@ -106,7 +110,8 @@ Pozwolić target override wybrać własny `command` albo `script`, bez kopiowani
 ## Testy i weryfikacja
 
 - AST validator: exactly-one, empty command, shell interpolation, invalid path/interpreter, valid fallback i precise target field location.
-- Node filesystem validator: valid target script, missing file, directory, traversal i symlink escape dla portable oraz każdego override.
+- Node filesystem validator: valid target script, missing file, directory, traversal i symlink escape dla portable oraz każdego selected override.
+- Target selection: invalid filesystem resource w unselected target nie blokuje outputu; wybranie tego targetu failuje przed formatter output.
 - Browser validator: target script VFS containment, regular file, missing path, directory, symlink escape, dangling symlink, cycle i Node parity.
 - Browser convenience API: typed VFS entries przechodzą przez publiczne `compile()`, nie tylko internal validator.
 - Browser input compatibility: typed Record i Map działają identycznie; istniejące string-only Record/Map zachowują wynik.

@@ -48,13 +48,15 @@ Zamknięte #333 i #335 są traktowane jako wdrożoną bazę techniczną. Ich zak
 ### Rozstrzygnięte konflikty
 
 1. **Unified grammar kontra kompatybilność.** #330 nie usuwa legacy syntax w jednym kroku. Parser normalizuje canonical i legacy formy do jednego AST, validator oznacza niejednoznaczne legacy formy, a migration notes opisują ewentualny codemod.
-   - `Block.body` i `Program.operations` są jedynym canonical source of truth.
-   - Parser i resolver zwracają `CanonicalProgram`. Publiczne wejścia nadal akceptują `LegacyProgram`, więc istniejące object literals pozostają type-compatible.
-   - `ProgramInput = LegacyProgram | CanonicalProgram` jest normalizowany dokładnie raz przez `createProgram`. To samo dotyczy `LegacyBlock | CanonicalBlock`.
-   - Cały canonical graph oraz `Block.content`, `Program.blocks`, `Program.uses` i `Program.extends` są deep-readonly i runtime deep-frozen przez factory. Mutacje legacy input pozostają legalne przed normalizacją; canonical outputs aktualizuje się wyłącznie immutable helperami.
+   - `CanonicalBlock.body` i `CanonicalProgram.operations` są jedynym canonical source of truth.
+   - Existing exported `Program` i `Block` pozostają niezmienionymi mutable legacy input/output shapes. Istniejące imports, object literals i consumer mutation typecheckują jak wcześniej.
+   - Separate `CanonicalProgram` i `CanonicalBlock` są deep-readonly i nie rozszerzają mutable legacy interfaces. `ProgramInput = Program | CanonicalProgram` jest normalizowany dokładnie raz.
+   - Existing public parser entry point zachowuje `Program` return przez detached legacy projection. Nowy canonical entry point oraz resolver/compiler internals używają `CanonicalProgram`.
+   - Cały canonical graph oraz `CanonicalBlock.content`, `CanonicalProgram.blocks`, `CanonicalProgram.uses` i `CanonicalProgram.extends` są deep-readonly i runtime deep-frozen przez factory. Mutacje legacy input pozostają legalne przed normalizacją; canonical outputs aktualizuje się wyłącznie immutable helperami.
    - Resolver, validator, compiler, browser compiler, CLI i formattery nie mogą równolegle mutować canonical i compatibility views.
+   - Legacy custom formatter zawsze dostaje fresh detached `Program`; tylko explicit canonical formatter capability otrzymuje frozen `CanonicalProgram`.
    - Inline `@use` jest elementem `BlockBody.entries`, aby zachować pełną kolejność body.
-   - Shared merge engine przyjmuje jawny policy. Inheritance zachowuje child-wins, a `@use` zachowuje obecny import/source-wins.
+   - Shared merge engine przyjmuje jawny policy i `sourceLayerId`. Inheritance zachowuje child-wins, `@use` zachowuje obecny import/source-wins, a duplicate first-match semantics dotyczą dopiero kolejnych declarations w tym samym source layer.
    - Pliki do syntax `1.5.x` bez `@override` wykonują blocks i `@extend` w legacy phase order, mimo że AST zachowuje source order. Syntax `1.6.0` albo presence `@override` włącza sequential operation mode wymagany przez #349. Lower version z override dostaje PS018, ale feature ma nadal jedno deterministic behavior. Upgrade diagnostics wykrywają `@extend` przed deklaracją targetu.
 2. **Nagłówek z przykładu #331 kontra spójność formatterów.** Canonical syntax to contextual `@header`, nie przeciążone domain fields ani formatter-specific parsing Markdown:
 
@@ -66,19 +68,19 @@ Zamknięte #333 i #335 są traktowane jako wdrożoną bazę techniczną. Ich zak
    }
    ```
 
-   Początkowy `## Heading` w text-only block pozostaje kompatybilnym fallbackiem i jest konsumowany dokładnie raz. `@header` ma wyższy priorytet.
+   Początkowy `## Heading` staje się fallbackiem tylko dla syntax `1.5.0+` i registered primary ownera z `legacyHeadingFallback`; custom/unowned block oraz syntax do `1.4.x` zachowują heading jako body text. `@header` ma wyższy priorytet.
    Zwykłe fields `header` i `headers` w built-in/custom blocks oraz nested domain fields, w tym `mcpServers.*.headers`, pozostają nietknięte.
    Istniejący `KNOWN_SECTIONS` zostaje compatibility projection jednego rozszerzonego `SECTION_REGISTRY`, nie drugim registry.
    `@extend` przenosi presentation patch osobno od body; root `@override` używa `BlockReplacement { body, presentation }`.
 
 3. **`@override` kontra sealed skills.** Override nie może zmienić ani usunąć sealed property. Root replacement `@override skills` jest odrzucany, jeśli narusza sealed state.
    Root replacement zastępuje całe `BlockBody` razem z presentation metadata i inline uses. Brak metadata lub inline use w replacement oznacza ich usunięcie.
-4. **Automatyczna migracja Factory.** Compile-time migration działa tylko przy braku user-owned `.factory/hooks.json`, wykonuje się pod compile-wide lockiem i ma tryb warning-only przez flagę `--no-migrate-legacy-hooks`. Staged writes, backups i recovery journal gwarantują przywrócenie poprzednich dokumentów po błędzie lub przerwanym procesie.
+4. **Automatyczna migracja Factory.** Compile-time migration działa tylko wtedy, gdy `.factory/hooks.json` jest całkowicie absent, wykonuje się pod compile-wide lockiem i ma tryb warning-only przez flagę `--no-migrate-legacy-hooks`. Każdy existing canonical file, także PromptScript-owned, wyłącza auto-migration. Staged writes, backups i recovery journal zapewniają rollback po obsłużonym błędzie oraz guarded recovery po przerwaniu. Durable complete journal finalizuje new state; unknown post-crash edits nigdy nie są nadpisywane automatycznie i wymagają manual recovery.
 5. **Brak project root.** Nie ma fallbacku do process/session CWD dla wrapperów wymagających root. Environment-root i Git-root guards obejmują script oraz command resources wymagające `cwd`. `native-cwd` i `workspace-cwd` są osobnymi strategiami capability i generują jawne `PS4002`, gdy host nie gwarantuje repository root.
 6. **Browser parity.** Browser compiler używa tego samego canonical operation engine, merge policies i override validation co Node resolver. Same parity snapshots nie wystarczają.
 7. **Capability ownership.** Publiczne `PORTABLE_HOOK_EVENTS` i `HOOK_RUNTIME_CAPABILITIES` w core są jedynymi rejestrami portable events, statusu, root strategy, native event, terminal matcher i matcher enforcement. Validator i adaptery importują te dane zamiast utrzymywać równoległe listy.
 8. **Hook IR i locations.** Core jest właścicielem raw i validated hook IR, target overrides i lexical validatora. Canonical `ValueNode` zachowuje location każdego nested object field, array elementu i scalar value; raw `Value` pozostaje tylko compatibility projection.
-9. **Filesystem injection.** Locked output lifecycle używa jednego injected filesystem service. Project-wide compile lock jest nabywany raz przez outer command; `--all-builds` przekazuje token do wewnętrznych kompilacji bez ponownego lockowania. Dry-run nie tworzy locka i używa read-only stable snapshot check.
+9. **Filesystem injection.** Locked output lifecycle używa jednego injected filesystem service. PID/start/token są zakodowane w candidate filename, pełne lock metadata trafia do durable candidate, a atomic hard link publikuje candidate jako lock bez okna z pustym plikiem; project-wide lock jest nabywany raz przez outer command, a `--all-builds` przekazuje token do wewnętrznych kompilacji bez ponownego lockowania. Dry-run nie tworzy locka i używa read-only stable snapshot check. Symlink checks odrzucają pre-existing/detected escapes, ale nie obiecują ochrony przed malicious same-privilege ancestor-swap race bez handle-relative OS primitives.
 
 ## Wspólny kontrakt jakości
 

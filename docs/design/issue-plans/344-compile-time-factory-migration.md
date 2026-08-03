@@ -27,6 +27,7 @@ Podczas `prs compile` przenieść jednoznaczne, user-owned legacy Factory hooks 
 - `prs hooks install factory` nadal używa tego samego pure helpera i zachowuje obecny safe behavior.
 - `promptscript.lock` jest dependency lockfile, nie concurrency lock. Migracja wymaga osobnego compile-wide lock.
 - Dwa `rename` nie są prawdziwą filesystem transaction. Gwarancja oznacza: rollback po obsłużonym błędzie oraz recovery journal po przerwaniu procesu.
+- Symlink hardening odrzuca pre-existing escape i wykryte zmiany podczas transaction, ale nie gwarantuje containment przeciw malicious same-privilege processowi ignorującemu compile lock i wykonującemu ancestor swap. Pełna taka gwarancja wymaga handle-relative `openat`/`renameat` primitives, których cross-platform Node API nie udostępnia.
 
 ## Plan implementacji
 
@@ -58,6 +59,9 @@ Podczas `prs compile` przenieść jednoznaczne, user-owned legacy Factory hooks 
    - `compileCommandWithResult` przyjmuje internal `CompileExecutionContext` z acquired tokenem. Nested calls z `--all-builds` używają tego tokenu i nie próbują nabyć locka ponownie.
    - `--all-builds` nabywa jeden lock przed pierwszym profilem i zwalnia po ostatnim success/error report. Inny compile nie może wejść między profile.
    - Lock key obejmuje canonical project root i output root. Profile piszące do różnych output roots nadal należą do jednej outer invocation; lista roots jest sortowana przed acquire, aby uniknąć deadlocku.
+   - Candidate filename koduje validated PID, process start timestamp i random owner token przed `open`, np. `.promptscript-compile.lock.candidate.<pid>.<start>.<token>`. Candidate powstaje przez injected `open(candidate, 'wx')`, otrzymuje kompletne metadata, `FileHandle.sync()` i parent fsync. Dopiero atomic `link(candidate, lockPath)` publikuje lock; `EEXIST` oznacza przegraną bez nadpisania ownera. Po successful link usunąć candidate i fsync parent. `exists` plus `writeFile` na final lock path jest zabronione.
+   - Crash przed metadata write albo `link` może zostawić wyłącznie candidate z owner identity w filename, nigdy pusty final lock. Startup skanuje tylko exact candidate pattern, wymaga regular non-symlink file i usuwa candidate wyłącznie, gdy filename PID nie żyje. Live/PID-reused candidate nie blokuje final lock acquisition i może pozostać do późniejszego cleanup. Malformed candidate name nie jest automatycznie usuwany. Malformed final lock nie jest zgadywany jako stale: compile failuje natychmiast z path i manual recovery guidance zamiast timeoutować bez wyjaśnienia.
+   - Multi-root acquire bierze sorted locks po kolei. Przy konflikcie zwalnia tylko wcześniej nabyte własne tokens i retryuje cały zestaw do timeoutu.
    - Lock file zawiera PID, project root, start time i random owner token. Release usuwa lock tylko przy zgodnym tokenie.
    - Stale recovery sprawdza żywotność procesu, nie tylko arbitralny 30-second age, aby nie przerwać długiego aktywnego compile.
    - Drugi compile czeka z timeoutem albo kończy actionable error. Nie może cicho pominąć kompilacji.
@@ -65,16 +69,17 @@ Podczas `prs compile` przenieść jednoznaczne, user-owned legacy Factory hooks 
    - Dry-run omija mutating lock i używa optimistic snapshot contractu. Normal compile nigdy nie korzysta z tego wyjątku.
 
 4. **Recoverable Factory transaction**
-   - Rozszerzyć `CliFileSystem` o wszystkie potrzebne primitives: `open`, `fsync`/`FileHandle.sync`, `rename`, `rm`, `lstat`, `realpath`, `mkdir`, `readFile`, `writeFile`, `readdir`, `chmod` i `exists`.
-   - Dodać utility zapisujący temp files w tych samych katalogach, sprawdzający każdy symlink ancestor i używający wyłącznie injected filesystem.
+   - Rozszerzyć `CliFileSystem` o wszystkie potrzebne primitives: `open`, `link`, `fsync`/`FileHandle.sync`, `rename`, `rm`, `lstat`, `realpath`, `mkdir`, `readFile`, `writeFile`, `readdir`, `chmod` i `exists`.
+   - Dodać utility zapisujący temp files w tych samych katalogach, sprawdzający każdy symlink ancestor i używający wyłącznie injected filesystem. Pre/post `lstat`/`realpath` oraz exclusive no-follow final open, gdy platforma je wspiera, failują przy wykrytej zmianie. Dokumentować powyższą same-privilege race boundary zamiast obiecywać pełne handle-relative containment.
    - Przed commit utworzyć backups poprzednich plików oraz fsync temp/backup content i parent directories. Jeśli platforma nie wspiera durability primitive, migration kończy się actionable error zamiast obniżać gwarancję po cichu.
    - Zapisać recovery journal z owner token, original paths, original/new content fingerprints, temp paths, backup paths i phase przed pierwszym rename. Journal content i parent directory muszą być durable przed destination rename.
    - Commit order: canonical hooks, legacy settings, journal complete. Po każdym rename fsync odpowiedni parent directory; complete phase także jest durable.
    - Usunąć backups i journal dopiero po obu udanych writes. Po cleanup fsync parent directories.
    - Przy obsłużonym błędzie drugiego rename odtworzyć previous states tylko wtedy, gdy current destination fingerprints odpowiadają phase zapisanej w journalu i backup fingerprints są zgodne. Unknown mismatch blokuje automatyczną mutację.
    - Przy startup pod compile lockiem wykryć incomplete journal. Rollback jest dozwolony wyłącznie dla original/new fingerprints znanych z journalu oraz zweryfikowanych backups.
-   - Completed journal po crashu przed cleanup nie jest rollbackowany automatycznie. Recovery weryfikuje oba new fingerprints: zgodne destinations finalizują cleanup.
-   - Każdy unknown/tampered destination albo backup fingerprint zachowuje wszystkie destinations, backups, temp files i journal bez zmian, kończy compile actionable manual-recovery error i nie nadpisuje możliwych post-crash user edits.
+   - Completed journal po crashu przed cleanup nie jest rollbackowany automatycznie. Recovery weryfikuje oba new fingerprints: zgodne destinations finalizują cleanup idempotentnie.
+   - W completed phase każdy existing backup/temp musi mieć journaled fingerprint przed usunięciem; absent cleanup artifact oznacza już wykonany krok i nie jest tampering. Journal znika dopiero po zweryfikowaniu destinations i usunięciu albo potwierdzeniu absence wszystkich cleanup artifacts.
+   - Każdy unknown/tampered destination albo existing backup/temp fingerprint zachowuje wszystkie pozostałe destinations, backups, temp files i journal bez zmian, kończy compile actionable manual-recovery error i nie nadpisuje możliwych post-crash user edits.
    - Testy oraz docs nazywają to recoverable transaction, nie pojedynczym atomowym rename wielu plików.
    - Nie usuwać legacy file, jeśli po migracji pozostają unknown/ambiguous entries.
 
@@ -99,13 +104,14 @@ Podczas `prs compile` przenieść jednoznaczne, user-owned legacy Factory hooks 
 - Filesystem boundary: injected service przechwytuje każdy output-state read oraz write/rename/remove/chmod/fsync od wejścia w locked output lifecycle; test failuje przy bezpośrednim Node fs callu wewnątrz tej granicy.
 - Recoverable failure: inject failure między renames i assert previous files restored.
 - Crash recovery: zostawić journal po każdej incomplete commit phase, uruchomić kolejny compile i assert guarded rollback przed nowym write. Durable complete phase podlega osobnemu finalize testowi, nie rollback assertion.
-- Completed-journal recovery: crash po durable complete przed cleanup finalizuje zgodne destinations; tampered/missing destination lub backup nie powoduje overwrite, zachowuje evidence i wymaga manual recovery.
+- Completed-journal recovery: crash po durable complete przed każdym cleanup step finalizuje zgodne destinations; już usunięty backup/temp jest akceptowany, existing tampered artifact albo tampered/missing destination zachowuje evidence i wymaga manual recovery.
 - Incomplete-journal safety: known phase fingerprints rollbackują; unknown post-crash edits zatrzymują recovery bez mutacji.
 - Concurrency: dwa direct compile, hook-triggered compile i watch recompile nie zapisują równolegle; drugi proces nie jest cicho pomijany.
 - Multi-build concurrency: jeden outer lock obejmuje wszystkie profiles, bez interleaving i self-deadlocku.
 - Long compile: active lock starszy niż 30 sekund nie jest uznany za stale, jeśli owner process żyje.
 - Lock ownership: proces nie usuwa locka z obcym owner tokenem.
-- Symlink ancestors: staging i backups nie wychodzą poza project/output root.
+- Atomic locking: concurrent creators publikują complete durable candidates przez hard link; dokładnie jeden nabywa key, crash bezpośrednio po candidate open zostawia filename z dead PID i nie tworzy final lock, malformed final metadata daje immediate actionable error, a multi-root conflict zwalnia tylko własne partial locks przed retry.
+- Symlink ancestors: pre-existing escape i injected mid-transaction detected swap failują; docs/test threat boundary nie obiecuje ochrony przed malicious same-privilege race bez handle-relative primitives.
 - Dry-run: no file mutation, planned actions visible.
 - Dry-run concurrency: brak lock file; stable snapshot daje report, concurrent mutation daje retry error, concurrent dry-runs nie blokują się.
 - Opt-out: warning preserved, no migration.

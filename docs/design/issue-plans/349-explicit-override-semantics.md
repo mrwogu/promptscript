@@ -52,7 +52,7 @@ Standalone value wewnątrz body jest nową, celową częścią grammar `@overrid
    - Dodać `overrideBody`, które rozpoznaje regular ordered block entries albo dokładnie jeden standalone `ValueNode`. Dzięki temu `{ ["Use Vitest"] }`, `{ "text" }` i `{ { key: "value" } }` są parseable replacement values, ale nie stają się legalnym regular block body.
    - Root block override normalizuje standalone array/object/string/TextBlock do odpowiedniego `BlockBody`. Standalone number, boolean i null są parseable dla nested paths, ale root block replacement odrzuca je jako `ResolveError` z accepted root shapes i location.
    - Nested override zachowuje exact `ValueNode`, w tym number, boolean i null.
-   - Wspólnie z #330 użyć `Program.operations: ProgramOperation[]`, zachowując `extends` jako read-only API compatibility projection.
+   - Wspólnie z #330 użyć `CanonicalProgram.operations: readonly ProgramOperation[]`, zachowując canonical `extends` jako read-only compatibility projection.
    - Visitor wpisuje `@override` do tego samego ordered array co `@inherit`, top-level `@use`, block i `@extend`, bez sortowania po typie.
    - Zaktualizować Pygments, TextMate i Monaco jako contextual directive pattern, mimo braku dedicated lexer tokenu.
 
@@ -70,7 +70,7 @@ Standalone value wewnątrz body jest nową, celową częścią grammar `@overrid
 3. **Resolver operation engine**
    - Rozszerzyć browser-safe shared `applyOperation` z #330, używane przez Node i browser resolver dla `@extend` i `@override`.
    - Przed operation engine zebrać syntax compatibility issue bez rzucania. Compiler raportuje je razem z późniejszym target existence, traversal lub sealed error, więc PS018 nie jest maskowane.
-   - Resolver wybiera sequential policy dla syntax `1.6.0` albo presence `@override`, następnie wykonuje `Program.operations` sekwencyjnie. `@inherit` ładuje base przed kolejnymi declarations, a top-level `@use` mergeuje source w swojej pozycji z import/source-wins policy z #330.
+   - Resolver wybiera sequential policy dla syntax `1.6.0` albo presence `@override`, następnie wykonuje `CanonicalProgram.operations` sekwencyjnie. `@inherit` ładuje base przed kolejnymi declarations, a top-level `@use` mergeuje source w swojej pozycji z cross-layer composition i import/source-wins policy z #330. First local block mergeuje inherited/imported first match; dopiero następny same-layer block pozostaje duplicate.
    - Najpierw rozwiązać alias/import marker do surviving block, potem zweryfikować cały path.
    - `@override` na root tworzy replacement block body tylko po znalezieniu target block.
    - Nested replacement traversuje wyłącznie istniejące object/mixed nodes; brak segmentu, scalar po drodze lub array path daje actionable `ResolveError`.

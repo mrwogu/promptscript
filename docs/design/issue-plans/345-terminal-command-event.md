@@ -66,9 +66,11 @@ Matrix wynika z obecnego `HOOK_RUNTIME_CAPABILITIES`: Cursor i Gemini już mają
    - Jeśli użytkownik poda matcher w target override, nie dopisywać drugiego default matcher.
    - Windsurf mapuje event bez matcher; VS Code używa `matcherEnforcement: 'payload-filter'`, ponieważ host ignoruje matcher field.
    - Factory, Claude i Codex emitują guaranteed mapping. Cursor, Gemini i VS Code emitują mapping wraz z best-effort diagnostic. GitHub i Grok nie emitują entry.
-   - Dla VS Code formatter emituje owned cross-platform Node helper `.promptscript/generated/vscode-hook-filter.mjs`. Hook entry przekazuje helperowi expected tool name, effective timeout w milliseconds i effective command array jako JSON arguments. Helper buforuje stdin, parsuje payload, sprawdza exact `tool_name`, uruchamia resource bez shell parsing i przekazuje oryginalny payload do child stdin. Non-match kończy się `0` bez uruchomienia user command/script.
+   - Dla VS Code formatter emituje owned cross-platform Node helper `.promptscript/generated/vscode-hook-filter.mjs`. Hook entry przekazuje helperowi expected tool name, child timeout w milliseconds, child cwd i effective command array jako JSON arguments. Helper buforuje stdin, parsuje payload, sprawdza exact `tool_name`, uruchamia resource bez shell parsing i przekazuje oryginalny payload do child stdin. Non-match kończy się `0` bez uruchomienia user command/script.
    - Jeśli payload schema jest malformed albo nie można go odczytać, wrapper failuje closed z non-zero i diagnostic; nie uruchamia user resource.
-   - Effective duration pochodzi z target override, portable `timeoutMs` albo documented VS Code default, w tej kolejności. Helper dostaje integer milliseconds; native VS Code hook dostaje `ceil(milliseconds / 1000)` seconds. Oba reprezentują tę samą duration, nie tę samą wartość liczbową.
+   - Native VS Code `cwd` field ustawia effective workspace/nested cwd dla helpera. Helper dostaje `childCwd: "."`, resolves je względem własnego `process.cwd()` i przekazuje jawnie do child spawn. Script argv używa existing native-CWD relative path adjustment, więc nested cwd nadal wskazuje repository script.
+   - Effective child duration pochodzi z target override, portable `timeoutMs` albo documented VS Code default, w tej kolejności. Helper dostaje integer milliseconds.
+   - Dodać stałe `VSCODE_FILTER_CLEANUP_GRACE_MS`. Native VS Code timeout dostaje `ceil((childTimeoutMs + cleanupGraceMs) / 1000)` seconds, dzięki czemu helper ma czas zakończyć child tree po własnym timerze.
    - Helper jest transparentnym process proxy: child stdout/stderr są dziedziczone, child exit code zostaje exit code helpera, spawn error daje non-zero diagnostic, a effective timeout obejmuje wrapper i child.
    - Helper forwarduje catchable termination signals do child process group i czeka na cleanup. Owned timeout kończy cały child tree, aby sentinel/resource nie został orphaned. Implementacja ma osobne Unix i Windows cleanup branches bez shell parsing.
    - Nie obiecywać cleanup po uncatchable hard kill, host crash ani machine loss. Docs opisują tę granicę; recovery takich procesów należy do hosta/OS.
@@ -107,7 +109,8 @@ Matrix wynika z obecnego `HOOK_RUNTIME_CAPABILITIES`: Cursor i Gemini już mają
 - Assertions for default matcher, override matcher, unsupported omission and best-effort warning.
 - VS Code runtime tests: matching payload uruchamia sentinel raz; non-matching payload nie uruchamia; malformed payload failuje closed; Unix i Windows command variants zachowują ownership marker.
 - VS Code proxy tests: child exit code, stdout, stderr i spawn error są propagowane; catchable SIGTERM i owned timeout usuwają child tree bez orphan process.
-- VS Code timeout tests: override/portable/default precedence, helper milliseconds i native rounded-up seconds.
+- VS Code cwd tests: project, nested i absent cwd; command oraz script sentinel wykonują się w expected directory.
+- VS Code timeout tests: override/portable/default precedence, helper milliseconds, cleanup grace i native rounded-up seconds, także dla exact whole-second child timeout.
 - Registry test: validator accepted events, formatter event type i capability docs są derived z core registries, bez równoległych list.
 - Emission context test: VS Code wskazuje GitHub `multifile/full` plus required override; każdy inny native target wskazuje realny formatter/version.
 - Assertion: target override matcher wygrywa z portable matcher, a portable matcher wygrywa z default.

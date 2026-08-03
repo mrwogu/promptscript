@@ -31,8 +31,9 @@ Canonical form:
 - Canonical public section keys używają kebab-case IDs z `SECTION_REGISTRY`, np. `git-commits`. Existing formatter config keys, np. `gitCommits`, są compatibility aliases mapowanymi jawnie w tym samym registry.
 - `@header` jest contextual presentation entry w ordered body, nie zwykłym property i nie globalnym lexer keywordem.
 - Zwykłe fields `header` i `headers` pozostają domain data w każdym built-in i custom blocku. Nested fields, w tym `mcpServers.<name>.headers`, nigdy nie są presentation metadata.
-- Dla text-only block pierwszy heading `## ...` na początku tekstu pozostaje legacy fallbackiem. Gdy występuje obok `@header`, wygrywa `@header`.
-- Legacy fallback konsumuje dokładnie pierwszy heading line z body i emituje go raz jako resolved title. Pozostały text body zachowuje byte-equivalent content poza usuniętą linią headinga i jednym bezpośrednim newline. Heading poza początkiem body pozostaje zwykłą treścią.
+- Dla syntax `1.5.0+` pierwszy heading `## ...` na początku text-only blocku może działać jako fallback tylko wtedy, gdy block jest registered primary-section owner z `legacyHeadingFallback: true`. Custom i nieuprawnione built-in blocks zachowują heading jako body text. Gdy fallback występuje obok `@header`, wygrywa `@header`.
+- Dla syntax do `1.4.x` heading pozostaje zwykłą body treścią i existing output jest byte-compatible. Nie konsumować go ani nie zmieniać generated default title.
+- W `1.5.0+` fallback konsumuje dokładnie pierwszy heading line z body i emituje go raz jako resolved title. Pozostały text body zachowuje byte-equivalent content poza usuniętą linią headinga i jednym bezpośrednim newline. Heading poza początkiem body pozostaje zwykłą treścią.
 - Priorytet: source override > formatter config `sectionNames` > built-in default.
 
 ## Plan implementacji
@@ -41,18 +42,19 @@ Canonical form:
    - Użyć `BlockPresentation` wprowadzonego w #330; #331 jest właścicielem semantyki i validation tego typu.
    - Dodać canonical `PresentationEntry` do ordered `BlockEntry`: explicit primary, explicit derived albo legacy heading entry, każdy z title i exact location.
    - `PresentationEntry` nie wpływa na `BlockBody.shape`; shape jest wyliczany tylko z text/field/list entries.
-   - `PresentationEntry` w ordered body jest jedynym parsed source. `Block.presentation` i operation `presentationPatch` są mandatory derived, deep-readonly projections regenerowane przez AST factory po każdej transformacji. Konsumenci nie mogą mutować ani niezależnie serializować obu form.
+   - `PresentationEntry` w ordered body jest jedynym parsed source. `CanonicalBlock.presentation` i operation `presentationPatch` są mandatory derived, deep-readonly projections regenerowane przez AST factory po każdej transformacji. Konsumenci nie mogą mutować ani niezależnie serializować obu form.
    - Grammar rozpoznaje `@header` entry wewnątrz dowolnego block body przez contextual identifier gate. Nie dodawać globalnego `Header` tokenu; zwykłe `header`/`headers` fields i custom names pozostają legalne.
    - Przenieść `SectionContract` i `SECTION_REGISTRY` do browser-safe core, ponieważ validator i formatters muszą czytać ten sam owner/key contract. `packages/formatters/src/section-registry.ts` re-exportuje core registry i compatibility helpers.
    - Visitor zachowuje entry, a validator importuje core `SECTION_REGISTRY` i pozwala presentation semantics tylko dla owner blocków. Custom block z `@header` dostaje unknown contextual directive diagnostic.
    - Zachować location dla directive, section key, title i legacy headinga. Diagnostics nie mogą wskazywać całego blocku.
    - Walidować: title musi być niepustym stringiem; optional key musi istnieć w `SECTION_REGISTRY` i należeć do owner blocku.
    - Nie interpretować dowolnych `##` wewnątrz tekstu jako override, aby nie niszczyć treści dokumentu.
-   - Normalizer zastępuje consumed heading line canonical `LegacyPresentationEntry` w tej samej pozycji, a pozostały text zapisuje jako sąsiedni `TextEntry`. Dzięki temu body nie renderuje headinga drugi raz, ale factory nadal może regenerować `Block.presentation.legacyHeader` wyłącznie z canonical entries.
+   - Normalizer tworzy `LegacyPresentationEntry` wyłącznie dla syntax `1.5.0+` i ownera, którego primary registry entry ma `legacyHeadingFallback: true`. Zastępuje consumed heading line w tej samej pozycji, a pozostały text zapisuje jako sąsiedni `TextEntry`.
+   - Dla syntax do `1.4.x` normalizer zachowuje cały heading w `TextEntry` i nie tworzy presentation projection. Dzięki temu stary output pozostaje identyczny.
 
 2. **Syntax versioning**
    - Dodać `SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE` i syntax `1.5.0`.
-   - Parser zapisuje feature usage na exact location contextual `@header`. Legacy początkowy `## Heading` nie wymaga nowej wersji.
+   - Parser zapisuje feature usage na exact location contextual `@header`. Legacy heading fallback aktywuje się dopiero dla deklaracji `1.5.0+`; niższa wersja zachowuje heading jako text i nie emituje PS018 za sam heading.
    - Wydzielić browser-safe `collectSyntaxCompatibilityIssues(ast)` w core. Node i browser resolver uruchamiają collector dla każdego root, inherited, imported i inline-composed AST bezpośrednio po parse i propagują issues w `ResolvedAST`, także gdy późniejsza resolution failuje.
    - PS018 pozostaje jedynym właścicielem message, configured severity/off policy i fix suggestion. Parser nadaje usage stabilne ID. Compiler deduplikuje collected oraz direct-validator issue przez `usage.id`, z compatibility fallback `file + (offset ?? line:column) + feature`.
    - Plik z `@header` i syntax niższym niż `1.5.0` dostaje PS018 na directive location. Warning policy nie zmienia semantics; issue nie może zostać utracone przez późniejszy resolver error.
@@ -63,12 +65,12 @@ Canonical form:
    - Rozszerzyć istniejący contract do jednego core `SECTION_REGISTRY`, używanego przez validator, section parity i title resolution.
    - Zachować formatter `KNOWN_SECTIONS` jako deprecated, generated compatibility projection `SECTION_REGISTRY.map(...)`. Nie utrzymywać drugiej ręcznej listy.
    - Dodać `SectionTitleResolver` w `packages/formatters/src`, przyjmujący AST, section key, formatter config i entry z `SECTION_REGISTRY`.
-   - Registry przechowuje default title, primary owner block, ordered fallback owner blocks, source blocks oraz informację, czy key jest primary czy derived dla danego ownera.
+   - Registry przechowuje default title, primary owner block, ordered fallback owner blocks, source blocks, `legacyHeadingFallback` oraz informację, czy key jest primary czy derived dla danego ownera.
    - Każdy entry ma canonical kebab-case `id` i optional legacy formatter config aliases. Resolver normalizuje aliases do ID przed owner lookup.
    - Ustalić source precedence dla sekcji złożonych:
      - `Project`: `identity`, potem `context`;
      - `Tech Stack`: `context`, potem `standards`;
-     - `Commands`: `shortcuts`, potem derived `knowledge.commands`;
+     - `Commands`: `shortcuts`, potem `commands`, potem derived `knowledge.commands`;
      - `Architecture` i `Context`: `context`;
      - standards subsections: odpowiedni `@header <section-key>` z `standards`.
    - Dla każdego section key pierwszy owner posiadający explicit source override wygrywa. Brak override we wszystkich ownerach przechodzi do formatter config, potem default.
@@ -112,11 +114,11 @@ Canonical form:
 - Syntax: `1.5.0` accepts `@header`; lower version reports exact directive even when later resolution fails; legacy heading remains available.
 - Transitive syntax: lower-version parent, import i inline skill z `@header` raportują własny source location przed composition.
 - Syntax diagnostics: PS018 pojawia się raz, zachowuje configured severity/off policy i pozostaje fixable po resolver error.
-- Legacy heading: consumed raz, brak duplicated heading, remainder body bez utraty treści.
+- Legacy heading: syntax do `1.4.x` zachowuje byte-compatible output; `1.5.0+` registered owner konsumuje fallback raz, bez duplicated heading i utraty remainder body; custom/unowned block zachowuje heading jako text.
 - Scope regression: built-in/custom `header`/`headers` fields i nested `mcpServers.*.headers` pozostają domain data.
 - Validator: unknown/unowned key, empty/non-string title i duplicate key.
 - Formatter: override i default dla każdego common section key.
-- Composite sections: owner precedence dla `Project`, `Tech Stack` i `Commands`, także gdy oba source blocks istnieją.
+- Composite sections: owner precedence dla `Project`, `Tech Stack` i `Commands`; Commands fixture zawiera jednocześnie `shortcuts`, `commands` i `knowledge.commands`.
 - Merge precedence: inheritance child-wins, use source/import-wins, extend last-explicit-wins, root override complete replacement.
 - Presentation rank: explicit zawsze wygrywa z legacy w inheritance/use/extend; same-rank conflicts używają operation policy; root override resetuje rank.
 - Key compatibility: canonical `git-commits` i legacy formatter config alias `gitCommits` rozwiązują ten sam registry entry.
@@ -133,5 +135,5 @@ Canonical form:
 - Contextual metadata nie przechwytuje built-in, custom ani nested domain fields.
 - Każda sekcja złożona ma deterministycznego ownera i fallback precedence.
 - Brak hardcoded title path omijających resolver.
-- Stary `.prs` bez metadata generuje identyczne nagłówki.
+- Stary `.prs` z syntax do `1.4.x` generuje identyczne nagłówki i body. Nowe fallback semantics są opt-in przez syntax `1.5.0+`.
 - `@header` nie zanieczyszcza danych domenowych blocku; zwykłe `header`/`headers` pozostają nietknięte.
