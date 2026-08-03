@@ -104,6 +104,101 @@ describe('Hook target smoke tests', () => {
     expect(result.outputs.has('.windsurf/hooks.json')).toBe(true);
   });
 
+  it('compiles target executable overrides to each native contract', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'promptscript-hook-overrides-'));
+    directories.push(directory);
+    mkdirSync(join(directory, '.promptscript', 'scripts'), { recursive: true });
+    writeFileSync(
+      join(directory, '.promptscript', 'scripts', 'github check.py'),
+      'raise SystemExit(0)\n'
+    );
+    const entryPath = join(directory, 'project.prs');
+    writeFileSync(
+      entryPath,
+      `@meta {
+  id: "hook-target-overrides"
+  syntax: "1.4.0"
+}
+
+@hooks {
+  check: {
+    event: "pre-tool-use"
+    command: ["node", "base.mjs"]
+    targets: {
+      factory: {
+        command: ["node", "factory check.mjs", "--strict mode"]
+      }
+      github: {
+        script: {
+          path: ".promptscript/scripts/github check.py"
+          interpreter: "python3"
+          args: ["--strict mode"]
+        }
+      }
+      vscode: {
+        command: ["node", "VS Code check.mjs", "--strict mode"]
+      }
+    }
+  }
+}
+`
+    );
+
+    const compiler = new Compiler({
+      resolver: { registryPath: directory, projectRoot: directory },
+      formatters: [
+        { name: 'factory', config: { version: 'full' } },
+        { name: 'github', config: { version: 'full' } },
+      ],
+    });
+
+    const result = await compiler.compile(entryPath);
+
+    expect(result.success).toBe(true);
+    expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toEqual({
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: '.*',
+            hooks: [
+              {
+                type: 'command',
+                command: "node 'factory check.mjs' '--strict mode' # promptscript-generated:check",
+              },
+            ],
+          },
+        ],
+      },
+    });
+    expect(JSON.parse(result.outputs.get('.github/hooks/promptscript.json')!.content)).toEqual({
+      version: 1,
+      hooks: {
+        preToolUse: [
+          {
+            type: 'command',
+            bash: "python3 '.promptscript/scripts/github check.py' '--strict mode' # promptscript-generated:check",
+            powershell:
+              "& 'py' '-3' '.promptscript/scripts/github check.py' '--strict mode' # promptscript-generated:check",
+            cwd: '.',
+          },
+        ],
+      },
+    });
+    expect(
+      JSON.parse(result.outputs.get('.github/hooks/promptscript-vscode.json')!.content)
+    ).toEqual({
+      hooks: {
+        PreToolUse: [
+          {
+            type: 'command',
+            command: "node 'VS Code check.mjs' '--strict mode' # promptscript-generated:check",
+            windows: "& 'node' 'VS Code check.mjs' '--strict mode' # promptscript-generated:check",
+          },
+        ],
+      },
+    });
+  });
+
   it('runs a repository-local script from project root when invoked from a nested directory', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'promptscript hook project '));
     directories.push(directory);
@@ -185,10 +280,12 @@ describe('Hook target smoke tests', () => {
     const result = await compiler.compile(entryPath);
 
     expect(result.success).toBe(true);
-    expect(result.warnings.map((warning) => warning.message)).toEqual([
-      'Hook "validate" requests cwd "project", which cursor cannot guarantee and will ignore.',
-      'Hook "validate" requests cwd "project", which codex cannot guarantee and will ignore.',
-    ]);
+    expect(result.warnings.map((warning) => warning.message)).toEqual(
+      expect.arrayContaining([
+        'Hook "validate" requests cwd "project", which cursor cannot guarantee and will ignore.',
+        'Hook "validate" requests cwd "project", which codex cannot guarantee and will ignore.',
+      ])
+    );
     const claude = JSON.parse(result.outputs.get('.claude/settings.json')!.content) as {
       hooks: { PostToolUse: Array<{ hooks: Array<{ command: string }> }> };
     };

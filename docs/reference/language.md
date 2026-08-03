@@ -1313,18 +1313,18 @@ Portable events:
 
 Each hook entry is an object with:
 
-| Field               | Required | Type     | Description                                                                                              |
-| ------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `event`             | Yes      | string   | Portable event name (see above)                                                                          |
-| `command`           | One of   | string[] | Non-empty source argument array                                                                          |
-| `script`            | One of   | object   | Repository-local script descriptor                                                                       |
-| `cwd`               | No       | string   | `"project"` or a forward-slash path relative to project root                                             |
-| `matcher`           | No       | string   | Target-native tool name matcher pattern                                                                  |
-| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                                                                               |
-| `statusMessage`     | No       | string   | Status message shown during execution                                                                    |
-| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                                                                        |
-| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)                                                              |
-| `targets`           | No       | object   | Target-specific overrides for event, matcher, timeout, statusMessage, continueOnFailure, cwd, or enabled |
+| Field               | Required | Type     | Description                                                                        |
+| ------------------- | -------- | -------- | ---------------------------------------------------------------------------------- |
+| `event`             | Yes      | string   | Portable event name (see above)                                                    |
+| `command`           | One of   | string[] | Non-empty source argument array                                                    |
+| `script`            | One of   | object   | Repository-local script descriptor                                                 |
+| `cwd`               | No       | string   | `"project"` or a forward-slash path relative to project root                       |
+| `matcher`           | No       | string   | Target-native tool name matcher pattern                                            |
+| `timeoutMs`         | No       | number   | Timeout in ms (100-600000)                                                         |
+| `statusMessage`     | No       | string   | Status message shown during execution                                              |
+| `continueOnFailure` | No       | boolean  | Whether to continue if hook fails                                                  |
+| `enabled`           | No       | boolean  | Whether the hook is enabled (default: true)                                        |
+| `targets`           | No       | object   | Target-specific overrides, including an optional replacement `command` or `script` |
 
 Exactly one of `command` or `script` is required. A `script` object contains:
 
@@ -1362,8 +1362,8 @@ Target overrides use the target name as the key:
 
 ```promptscript
 targets: {
-  factory: { matcher: "Execute" }
-  vscode: { matcher: "run_in_terminal" }
+  factory: { matcher: "Execute" command: ["node", "check-factory.mjs"] }
+  vscode: { script: { path: ".promptscript/scripts/check.py" interpreter: "python3" } }
   github: { enabled: false }
 }
 ```
@@ -2170,3 +2170,17 @@ initial `## Heading` as a compatibility fallback:
 The formatter emits that heading once and preserves the remaining body. Explicit
 `@header` metadata always wins over this fallback. Syntax `1.4.x` and earlier
 keep the heading as ordinary body text, so existing output remains unchanged.
+
+## Hook Target Executable Overrides
+
+An `@hooks` target override supports `event`, `command`, `script`, `matcher`,
+`timeoutMs`, `statusMessage`, `continueOnFailure`, `enabled`, and `cwd`. A
+target may define either `command` or `script` to replace the base executable
+for that target. It inherits the base executable when neither field is present,
+and PS034 rejects overrides that define both.
+
+Replacement executables use the same command interpolation, script path,
+interpreter, and argument validation as base executables. Enabled target
+scripts are included in Node and browser compiler resource validation.
+Disabled target overrides emit no hook and do not require their script
+resource.

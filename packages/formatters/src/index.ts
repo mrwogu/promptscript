@@ -142,6 +142,7 @@ export {
   generateVSCodeHooks,
   generateGrokHooks,
   applyHookTargetOverrides,
+  getEnabledHookScriptResources,
   generateWindsurfHooks,
   getHookCompatibilityWarnings,
   mapEvent,

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { Program, SourceLocation } from '@promptscript/core';
+import type { Program, SourceLocation, Value } from '@promptscript/core';
 import { validateBrowserHookScriptResources } from '../hook-script-validator.js';
 import { VirtualFileSystem } from '../virtual-fs.js';
 
 const loc: SourceLocation = { file: 'workspace/.promptscript/project.prs', line: 1, column: 1 };
-function makeProgram(enabled = true, scriptPath = '.promptscript/scripts/check.mjs'): Program {
+function makeHookProgram(hook: Record<string, Value>): Program {
   return {
     type: 'Program',
     blocks: [
@@ -14,14 +14,7 @@ function makeProgram(enabled = true, scriptPath = '.promptscript/scripts/check.m
         content: {
           type: 'ObjectContent',
           properties: {
-            check: {
-              event: 'post-tool-use',
-              script: {
-                path: scriptPath,
-                interpreter: 'node',
-              },
-              enabled,
-            },
+            check: hook,
           },
           loc,
         },
@@ -32,6 +25,17 @@ function makeProgram(enabled = true, scriptPath = '.promptscript/scripts/check.m
     extends: [],
     loc,
   };
+}
+
+function makeProgram(enabled = true, scriptPath = '.promptscript/scripts/check.mjs'): Program {
+  return makeHookProgram({
+    event: 'post-tool-use',
+    script: {
+      path: scriptPath,
+      interpreter: 'node',
+    },
+    enabled,
+  });
 }
 
 describe('browser hook script resource validation', () => {
@@ -116,6 +120,91 @@ describe('browser hook script resource validation', () => {
         'workspace/.promptscript/project.prs'
       )
     ).toEqual([]);
+  });
+
+  it('reports a missing target-only virtual script', () => {
+    const fs = new VirtualFileSystem({
+      'workspace/.promptscript/project.prs': '',
+    });
+
+    expect(
+      validateBrowserHookScriptResources(
+        makeHookProgram({
+          event: 'post-tool-use',
+          command: ['node', 'base.mjs'],
+          targets: {
+            factory: {
+              script: {
+                path: '.promptscript/scripts/missing-target.mjs',
+                interpreter: 'node',
+              },
+            },
+          },
+        }),
+        fs,
+        'workspace/.promptscript/project.prs'
+      )
+    ).toEqual([
+      expect.objectContaining({
+        code: 'PS2001',
+        message: 'Hook "check" script not found: .promptscript/scripts/missing-target.mjs',
+      }),
+    ]);
+  });
+
+  it('ignores virtual target scripts for disabled overrides', () => {
+    const fs = new VirtualFileSystem({
+      'workspace/.promptscript/project.prs': '',
+    });
+
+    expect(
+      validateBrowserHookScriptResources(
+        makeHookProgram({
+          event: 'post-tool-use',
+          command: ['node', 'base.mjs'],
+          targets: {
+            factory: {
+              enabled: false,
+              script: {
+                path: '.promptscript/scripts/missing-target.mjs',
+                interpreter: 'node',
+              },
+            },
+          },
+        }),
+        fs,
+        'workspace/.promptscript/project.prs'
+      )
+    ).toEqual([]);
+  });
+
+  it('validates inherited virtual scripts for re-enabled targets', () => {
+    const fs = new VirtualFileSystem({
+      'workspace/.promptscript/project.prs': '',
+    });
+
+    expect(
+      validateBrowserHookScriptResources(
+        makeHookProgram({
+          event: 'post-tool-use',
+          enabled: false,
+          script: {
+            path: '.promptscript/scripts/missing-inherited.mjs',
+            interpreter: 'node',
+          },
+          targets: {
+            factory: { enabled: true },
+          },
+        }),
+        fs,
+        'workspace/.promptscript/project.prs'
+      )
+    ).toEqual([
+      expect.objectContaining({
+        code: 'PS2001',
+        message: 'Hook "check" script not found: .promptscript/scripts/missing-inherited.mjs',
+      }),
+    ]);
   });
 
   it('uses an explicit project root for custom entry layouts', () => {

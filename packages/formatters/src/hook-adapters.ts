@@ -32,6 +32,8 @@ export type HookTarget =
 export interface HookTargetOverride {
   event?: PortableHookEvent;
   matcher?: string;
+  command?: string[];
+  script?: HookScriptDefinition;
   timeoutMs?: number;
   statusMessage?: string;
   continueOnFailure?: boolean;
@@ -233,6 +235,29 @@ function serializeNativeCwdScriptCommand(
   return `${invocation} ${HOOK_OWNERSHIP_MARKER}:${hook.id.replace(/[^A-Za-z0-9._-]/g, '-')}`;
 }
 
+function extractHookCommand(value: Value | undefined): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const command = value.filter((argument): argument is string => typeof argument === 'string');
+  return command.length > 0 ? command : undefined;
+}
+
+function extractHookScript(value: Value | undefined): HookScriptDefinition | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+
+  const script = value as Record<string, Value>;
+  const path = script['path'];
+  const interpreter = script['interpreter'];
+  const args = script['args'];
+  if (typeof path !== 'string' || typeof interpreter !== 'string') return undefined;
+  return {
+    path,
+    interpreter: interpreter as PortableHookInterpreter,
+    args: Array.isArray(args)
+      ? args.filter((argument): argument is string => typeof argument === 'string')
+      : [],
+  };
+}
+
 /**
  * Extract hook definitions from a parsed @hooks block.
  */
@@ -256,30 +281,11 @@ export function extractHooks(hooksBlock: {
       event: event as PortableHookEvent,
     };
 
-    const command = obj['command'];
-    if (Array.isArray(command)) {
-      const args = command.filter((c): c is string => typeof c === 'string');
-      // Ignore command arrays that filter to nothing - they would emit a bare
-      // ownership marker with no executable command. PS034 already rejects them.
-      if (args.length > 0) hook.command = args;
-    }
+    const command = extractHookCommand(obj['command']);
+    if (command) hook.command = command;
 
-    const script = obj['script'];
-    if (typeof script === 'object' && script !== null && !Array.isArray(script)) {
-      const scriptObject = script as Record<string, Value>;
-      const path = scriptObject['path'];
-      const interpreter = scriptObject['interpreter'];
-      const args = scriptObject['args'];
-      if (typeof path === 'string' && typeof interpreter === 'string') {
-        hook.script = {
-          path,
-          interpreter: interpreter as PortableHookInterpreter,
-          args: Array.isArray(args)
-            ? args.filter((arg): arg is string => typeof arg === 'string')
-            : [],
-        };
-      }
-    }
+    const script = extractHookScript(obj['script']);
+    if (script) hook.script = script;
 
     if (!hook.command && !hook.script) continue;
 
@@ -312,6 +318,10 @@ export function extractHooks(hooksBlock: {
           targetOverride.event = override['event'] as PortableHookEvent;
         }
         if (typeof override['matcher'] === 'string') targetOverride.matcher = override['matcher'];
+        const targetCommand = extractHookCommand(override['command']);
+        if (targetCommand) targetOverride.command = targetCommand;
+        const targetScript = extractHookScript(override['script']);
+        if (targetScript) targetOverride.script = targetScript;
         if (typeof override['timeoutMs'] === 'number') {
           targetOverride.timeoutMs = override['timeoutMs'];
         }
@@ -341,8 +351,27 @@ export function applyHookTargetOverrides(
   return hooks.map((hook) => {
     const override = hook.targets?.[target];
     if (!override) return hook;
-    return { ...hook, ...override, targets: hook.targets };
+    const merged = { ...hook, ...override, targets: hook.targets };
+    if (override.command) delete merged.script;
+    if (override.script) delete merged.command;
+    return merged;
   });
+}
+
+export function getEnabledHookScriptResources(hook: HookDefinition): HookScriptDefinition[] {
+  const resources = new Map<string, HookScriptDefinition>();
+  const addScript = (candidate: HookDefinition): void => {
+    if (candidate.enabled !== false && candidate.script) {
+      resources.set(candidate.script.path, candidate.script);
+    }
+  };
+
+  addScript(hook);
+  for (const target of Object.keys(hook.targets ?? {}) as HookTarget[]) {
+    const effectiveHook = applyHookTargetOverrides([hook], target)[0];
+    if (effectiveHook) addScript(effectiveHook);
+  }
+  return [...resources.values()];
 }
 
 /**

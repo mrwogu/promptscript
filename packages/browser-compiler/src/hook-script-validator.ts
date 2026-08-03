@@ -1,5 +1,5 @@
 import type { Program, SourceLocation } from '@promptscript/core';
-import { extractHooks } from '@promptscript/formatters';
+import { extractHooks, getEnabledHookScriptResources } from '@promptscript/formatters';
 import type { VirtualFileSystem } from './virtual-fs.js';
 
 export interface BrowserHookScriptError {
@@ -59,24 +59,25 @@ export function validateBrowserHookScriptResources(
   const projectPrefix = getProjectPrefix(entryPath, projectRoot);
   const errors: BrowserHookScriptError[] = [];
   for (const hook of extractHooks(hooksBlock)) {
-    if (hook.enabled === false || !hook.script) continue;
-    if (!isSafeHookScriptPath(hook.script.path, projectPrefix)) {
-      errors.push({
-        name: 'ResolveError',
-        code: 'PS1003',
-        message: `Hook "${hook.id}" script resolves outside ".promptscript/scripts/": ${hook.script.path}`,
-        location: hooksBlock.loc,
-      });
-      continue;
-    }
-    const scriptPath = projectPrefix ? `${projectPrefix}/${hook.script.path}` : hook.script.path;
-    if (!fs.exists(scriptPath)) {
-      errors.push({
-        name: 'FileNotFoundError',
-        code: 'PS2001',
-        message: `Hook "${hook.id}" script not found: ${hook.script.path}`,
-        location: hooksBlock.loc,
-      });
+    for (const script of getEnabledHookScriptResources(hook)) {
+      if (!isSafeHookScriptPath(script.path, projectPrefix)) {
+        errors.push({
+          name: 'ResolveError',
+          code: 'PS1003',
+          message: `Hook "${hook.id}" script resolves outside ".promptscript/scripts/": ${script.path}`,
+          location: hooksBlock.loc,
+        });
+        continue;
+      }
+      const scriptPath = projectPrefix ? `${projectPrefix}/${script.path}` : script.path;
+      if (!fs.exists(scriptPath)) {
+        errors.push({
+          name: 'FileNotFoundError',
+          code: 'PS2001',
+          message: `Hook "${hook.id}" script not found: ${script.path}`,
+          location: hooksBlock.loc,
+        });
+      }
     }
   }
 
