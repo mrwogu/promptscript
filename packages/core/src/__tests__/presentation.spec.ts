@@ -23,6 +23,12 @@ describe('presentation metadata', () => {
     expect(normalizeLegacyHeadingEntries('identity', entries, '1.5.0')).toBe(entries);
   });
 
+  it.each(['Plain body text.', '##Missing separator'])('ignores non-heading text: %s', (text) => {
+    const entries: BlockEntry[] = [{ type: 'TextEntry', text, loc: LOC }];
+
+    expect(normalizeLegacyHeadingEntries('identity', entries, '1.5.0')).toBe(entries);
+  });
+
   it('normalizes tab-separated legacy headings with CRLF endings', () => {
     const entries: BlockEntry[] = [
       {
