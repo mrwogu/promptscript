@@ -38,16 +38,14 @@ Keep a portable executable as the default, then override only the fields that di
 ```
 @hooks {
   terminal-policy: {
-    event: "pre-tool-use"
+    event: "pre-terminal-command"
     command: ["node", ".promptscript/scripts/check-terminal.mjs"]
-    matcher: "Bash"
     targets: {
       factory: {
-        matcher: "Execute"
         command: ["node", ".promptscript/scripts/check-factory.mjs", "--strict mode"]
       }
       vscode: {
-        matcher: "run_in_terminal"
+        matcher: "custom_terminal_tool"
       }
       github: {
         enabled: false
@@ -61,15 +59,16 @@ Supported override fields are `event`, `command`, `script`, `matcher`, `timeoutM
 
 ### Portable Events
 
-| Event            | Purpose                              |
-| ---------------- | ------------------------------------ |
-| `pre-tool-use`   | Run before a tool invocation         |
-| `post-tool-use`  | Run after a tool invocation          |
-| `session-start`  | Initialize an agent session          |
-| `setup`          | Run setup behavior at session start  |
-| `subagent-start` | Prepare delegated agent work         |
-| `notification`   | React to target notifications        |
-| `stop`           | Run final checks when an agent stops |
+| Event                  | Purpose                              |
+| ---------------------- | ------------------------------------ |
+| `pre-terminal-command` | Run before a terminal command        |
+| `pre-tool-use`         | Run before a tool invocation         |
+| `post-tool-use`        | Run after a tool invocation          |
+| `session-start`        | Initialize an agent session          |
+| `setup`                | Run setup behavior at session start  |
+| `subagent-start`       | Prepare delegated agent work         |
+| `notification`         | React to target notifications        |
+| `stop`                 | Run final checks when an agent stops |
 
 Formatters map portable event names to target-native hook systems. Eight built-in targets emit project-level lifecycle hooks, with a separate compatible VS Code Agent output when requested.
 
@@ -86,6 +85,8 @@ Formatters map portable event names to target-native hook systems. Eight built-i
 | VS Code Agent  | `.github/hooks/promptscript-vscode.json` | PascalCase events, matcher ignored         |
 
 Hooks are emitted only in target versions listed by the capability matrix: GitHub, Factory, Gemini, Windsurf, and Codex support `multifile` and `full`; Claude, Cursor, and Grok support only `full`. `simple` mode reports `PS4002` when hooks are enabled because it cannot emit additional files. Target adapters also report `PS4002` when an event, matcher, `statusMessage`, or `continueOnFailure` value has no native equivalent.
+
+`pre-terminal-command` supplies deterministic native defaults instead of requiring one portable matcher to use several host vocabularies. A target override can replace the default through `matcher` when a host exposes a different terminal tool name.
 
 Every native adapter adds a trailing `# promptscript-generated:<hook-id>` shell comment to generated commands. PromptScript uses this marker to replace or remove only its entries when a native JSON hook file also contains user settings or hooks. Unmarked entries and top-level user settings remain untouched.
 
@@ -187,21 +188,21 @@ On Windows, GitHub, Codex, and Windsurf emit PowerShell-safe commands. The `pyth
 
 ### Hook Capability Matrix
 
-All 48 built-in targets have an explicit lifecycle-hook classification. `All` means all seven portable events; `watch` means `prs compile --watch`.
+All 48 built-in targets have an explicit lifecycle-hook classification. `All` means all eight portable events; `watch` means `prs compile --watch`.
 
 | Target         | Status       | Config path                       | Portable events                                  | Command format                 | Timeout       | Project root               | Fallback                  |
 | -------------- | ------------ | --------------------------------- | ------------------------------------------------ | ------------------------------ | ------------- | -------------------------- | ------------------------- |
-| `github`       | Native       | `.github/hooks/promptscript.json` | All                                              | JSON with Bash and PowerShell  | seconds       | Native `cwd`               | Use `multifile` or `full` |
+| `github`       | Native       | `.github/hooks/promptscript.json` | All except terminal                              | JSON with Bash and PowerShell  | seconds       | Native `cwd`               | Use `multifile` or `full` |
 | `claude`       | Native       | `.claude/settings.json`           | All                                              | Nested command hooks           | seconds       | Environment                | Use `full`                |
-| `cursor`       | Native       | `.cursor/hooks.json`              | Pre/post tool, session/setup, subagent, stop     | Versioned JSON commands        | seconds       | Git root                   | Use `full`                |
+| `cursor`       | Native       | `.cursor/hooks.json`              | Terminal/tool, session/setup, subagent, stop     | Versioned JSON commands        | seconds       | Git root                   | Use `full`                |
 | `antigravity`  | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
-| `factory`      | Native       | `.factory/hooks.json`             | Pre/post tool, session/setup, notification, stop | Nested command hooks           | seconds       | Environment                | Use `multifile` or `full` |
+| `factory`      | Native       | `.factory/hooks.json`             | Terminal/tool, session/setup, notification, stop | Nested command hooks           | seconds       | Environment                | Use `multifile` or `full` |
 | `opencode`     | Plugin-only  | -                                 | -                                                | JavaScript/TypeScript plugin   | -             | -                          | Plugin or watch           |
-| `gemini`       | Native       | `.gemini/settings.json`           | Pre/post tool, session/setup, stop               | Nested command hooks           | milliseconds  | Environment                | Use `multifile` or `full` |
-| `windsurf`     | Native       | `.windsurf/hooks.json`            | Pre/post tool, stop                              | Unix and PowerShell entries    | -             | Native `working_directory` | Use `multifile` or `full` |
+| `gemini`       | Native       | `.gemini/settings.json`           | Terminal/tool, session/setup, stop               | Nested command hooks           | milliseconds  | Environment                | Use `multifile` or `full` |
+| `windsurf`     | Native       | `.windsurf/hooks.json`            | Terminal/tool, stop                              | Unix and PowerShell entries    | -             | Native `working_directory` | Use `multifile` or `full` |
 | `cline`        | Plugin-only  | -                                 | -                                                | SDK plugin                     | -             | -                          | Plugin or watch           |
 | `roo`          | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
-| `codex`        | Native       | `.codex/hooks.json`               | Pre/post tool, session/setup, subagent, stop     | JSON Unix and Windows commands | seconds       | Git root                   | Use `multifile` or `full` |
+| `codex`        | Native       | `.codex/hooks.json`               | Terminal/tool, session/setup, subagent, stop     | JSON Unix and Windows commands | seconds       | Git root                   | Use `multifile` or `full` |
 | `continue`     | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `augment`      | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `goose`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
@@ -234,7 +235,7 @@ All 48 built-in targets have an explicit lifecycle-hook classification. `All` me
 | `zed`          | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `jules`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `devin`        | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
-| `grok`         | Native       | `.grok/hooks/promptscript.json`   | All                                              | Nested command hooks           | seconds       | Environment                | Use `full`                |
+| `grok`         | Native       | `.grok/hooks/promptscript.json`   | All except terminal                              | Nested command hooks           | seconds       | Environment                | Use `full`                |
 | `kimi`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `mimo`         | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
 | `deep-agents`  | Unsupported  | -                                 | -                                                | -                              | -             | -                          | watch                     |
@@ -244,18 +245,23 @@ Plugin-only and custom-agent APIs are not emitted as universal project hooks bec
 
 ### Terminal command semantics
 
-`pre-tool-use` is not a universal terminal interception guarantee. Use the target override syntax and native tool name when terminal coverage matters:
+Use `pre-terminal-command` when the hook intends to observe terminal commands. PromptScript selects a deterministic native matcher or event and reports `PS4002` whenever the host contract is best effort or unsupported:
 
-| Host                     | Terminal coverage                | Native tool or event                           |
-| ------------------------ | -------------------------------- | ---------------------------------------------- |
-| Claude Code              | Guaranteed                       | `Bash`                                         |
-| Factory Droid            | Guaranteed                       | `Execute`                                      |
-| Codex                    | Guaranteed                       | `Bash`                                         |
-| Windsurf                 | Guaranteed                       | `pre_run_command` / `post_run_command`         |
-| VS Code Agent            | Best effort                      | `run_in_terminal`, filtered inside the command |
-| GitHub Copilot CLI/cloud | Not guaranteed across both hosts | Tool coverage differs                          |
+| Host                     | Terminal coverage               | Native tool or event                           |
+| ------------------------ | ------------------------------- | ---------------------------------------------- |
+| Claude Code              | Guaranteed                      | `Bash`                                         |
+| Factory Droid            | Guaranteed                      | `Execute`                                      |
+| Codex                    | Guaranteed                      | `Bash`                                         |
+| Windsurf                 | Guaranteed                      | `pre_run_command`                              |
+| Cursor                   | Best effort (`PS4002`)          | `run_terminal_cmd`                             |
+| Gemini CLI               | Best effort (`PS4002`)          | `run_shell_command`                            |
+| VS Code Agent            | Best effort (`PS4002`)          | `run_in_terminal`, filtered inside the command |
+| GitHub Copilot CLI/cloud | Unsupported (`PS4002`, omitted) | Tool coverage differs                          |
+| Grok Build               | Unsupported (`PS4002`, omitted) | No audited terminal contract                   |
 
-If a host does not guarantee the desired terminal path, use `prs compile --watch` for regeneration or filter the hook payload inside a script. A hook that matches file edits is not equivalent to a hook that observes every terminal command.
+Claude, Factory, Codex, Cursor, Gemini, and VS Code map the event to their pre-tool event with the matcher shown above. Windsurf emits only `pre_run_command`, not all pre-tool events. A target override can set `matcher` to a different native tool name. VS Code retains `run_in_terminal` for readability, but the host currently ignores matcher values, so the command must inspect `tool_name` and `tool_input`.
+
+If a host does not guarantee the desired terminal path, use `prs compile --watch` for regeneration or filter the hook payload inside a script. A `pre-tool-use` hook with a broad matcher does not claim universal terminal coverage.
 
 Contract references:
 

@@ -1104,15 +1104,16 @@ Defines portable lifecycle hooks. Requires syntax `1.4.0`. Formatters map portab
 
 Portable events:
 
-| Event            | Description                       |
-| ---------------- | --------------------------------- |
-| `pre-tool-use`   | Fires before a tool invocation    |
-| `post-tool-use`  | Fires after a tool invocation     |
-| `session-start`  | Fires when a session begins       |
-| `setup`          | Alias for `session-start`         |
-| `subagent-start` | Fires when a subagent is launched |
-| `notification`   | Fires on notification events      |
-| `stop`           | Fires when the agent stops        |
+| Event                  | Description                       |
+| ---------------------- | --------------------------------- |
+| `pre-terminal-command` | Fires before a terminal command   |
+| `pre-tool-use`         | Fires before a tool invocation    |
+| `post-tool-use`        | Fires after a tool invocation     |
+| `session-start`        | Fires when a session begins       |
+| `setup`                | Alias for `session-start`         |
+| `subagent-start`       | Fires when a subagent is launched |
+| `notification`         | Fires on notification events      |
+| `stop`                 | Fires when the agent stops        |
 
 Each hook entry is an object with:
 
@@ -1143,7 +1144,7 @@ Shell interpolation (`$()`, backticks, `${...}`) is forbidden in command argumen
 
 `cwd: "project"` requests execution from the resolved PromptScript project root. Other `cwd` values must be portable relative paths and resolve from that root. Absolute paths, backslashes, empty path segments, `.` segments, and `..` traversal are rejected. Hook configuration location does not set the command working directory.
 
-`matcher` filters by tool name using the target's own vocabulary: Factory matches names like `Execute` or `Read`, GitHub Copilot matches its own tool names (and only on `preToolUse`, `postToolUse`, `subagentStart`, and `notification`), and Claude Code matches names like `Edit|Write`. A matcher written for one target can match nothing on another, so review generated hook files per target.
+`matcher` uses each target's tool vocabulary, such as Factory `Execute` or `Read` and Claude `Edit|Write`. GitHub emits it only for `preToolUse`, `postToolUse`, `subagentStart`, and `notification`. A matcher written for one target can match nothing on another, so review generated hook files per target.
 
 Target overrides use the target name as the key:
 
@@ -1848,3 +1849,7 @@ The formatter emits that heading once and preserves the remaining body. Explicit
 An `@hooks` target override supports `event`, `command`, `script`, `matcher`, `timeoutMs`, `statusMessage`, `continueOnFailure`, `enabled`, and `cwd`. A target may define either `command` or `script` to replace the base executable for that target. It inherits the base executable when neither field is present, and PS034 rejects overrides that define both.
 
 Replacement executables use the same command interpolation, script path, interpreter, and argument validation as base executables. Enabled target scripts are included in Node and browser compiler resource validation. Disabled target overrides emit no hook and do not require their script resource.
+
+## Terminal Command Hook Portability
+
+`pre-terminal-command` supplies deterministic native defaults for terminal policy: Factory `Execute`, Claude and Codex `Bash`, Windsurf `pre_run_command`, Cursor `run_terminal_cmd`, Gemini `run_shell_command`, and VS Code `run_in_terminal`. Set `targets.<name>.matcher` to replace a native tool name. Cursor, Gemini, and VS Code emit `PS4002` because their coverage is best effort. GitHub Copilot CLI/cloud and Grok omit the event with `PS4002` because their repository hook contracts do not guarantee terminal interception.

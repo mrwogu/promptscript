@@ -62,6 +62,7 @@
 - Skills go to `.factory/skills/<name>/SKILL.md`
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
 - `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
+- `pre-terminal-command` maps to `PreToolUse` with the deterministic `Execute` matcher unless `targets.factory.matcher` overrides it
 - Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
 - `.factory/settings.json` remains a Factory fallback; `prs hooks install factory` migrates its unambiguous hooks
 - When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.factory/hooks.json`; directories emptied by cleanup (`.factory/rules` and its subdirectories) are pruned as well
