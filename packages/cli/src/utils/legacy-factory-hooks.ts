@@ -10,6 +10,18 @@ export interface LegacyFactoryMigrationResult {
   changed: boolean;
 }
 
+export interface LegacyFactoryMigrationOptions {
+  preserveInstalledHooks?: boolean;
+  rejectMixedOwnership?: boolean;
+}
+
+export interface LegacyFactoryMigrationPlan {
+  settingsPath: string;
+  hooksPath: string;
+  expectedSettingsContent: string;
+  migration: LegacyFactoryMigrationResult;
+}
+
 const LEGACY_EVENT_NAMES: Readonly<Record<string, string>> = {
   PreToolUse: 'PreToolUse',
   preToolUse: 'PreToolUse',
@@ -27,7 +39,7 @@ const LEGACY_EVENT_NAMES: Readonly<Record<string, string>> = {
   Stop: 'Stop',
   stop: 'Stop',
 };
-const LEGACY_ENTRY_FIELDS = new Set(['matcher', 'hooks']);
+const LEGACY_ENTRY_FIELDS = new Set(['matcher', 'commandRegex', 'hooks']);
 const LEGACY_HANDLER_FIELDS = new Set(['type', 'command', 'timeout', 'statusMessage']);
 
 /**
@@ -45,7 +57,8 @@ const LEGACY_HANDLER_FIELDS = new Set(['type', 'command', 'timeout', 'statusMess
  * actually take effect), or undefined when there is nothing to migrate.
  */
 export async function detectLegacyFactorySettingsHooks(
-  outputRoot: string
+  outputRoot: string,
+  includeOwned = false
 ): Promise<string | undefined> {
   const hooksPath = resolve(outputRoot, '.factory', 'hooks.json');
   try {
@@ -78,7 +91,10 @@ export async function detectLegacyFactorySettingsHooks(
   if (!Object.prototype.hasOwnProperty.call(parsed, 'hooks')) {
     return undefined;
   }
-  if (hasOnlyOwnedLegacyFactoryHooks((parsed as Record<string, unknown>)['hooks'])) {
+  if (
+    !includeOwned &&
+    hasOnlyOwnedLegacyFactoryHooks((parsed as Record<string, unknown>)['hooks'])
+  ) {
     return undefined;
   }
 
@@ -128,7 +144,8 @@ function hasOnlyOwnedLegacyFactoryHooks(value: unknown): boolean {
  */
 export function migrateLegacyFactoryHooks(
   legacy: Record<string, unknown>,
-  canonical: Record<string, unknown>
+  canonical: Record<string, unknown>,
+  options: LegacyFactoryMigrationOptions = {}
 ): LegacyFactoryMigrationResult {
   const legacyHooksValue = legacy['hooks'];
   if (legacyHooksValue === undefined) {
@@ -183,7 +200,7 @@ export function migrateLegacyFactoryHooks(
     }
 
     for (const [index, entry] of entries.entries()) {
-      const migration = splitLegacyEntry(entry);
+      const migration = splitLegacyEntry(entry, options);
       if (migration.ambiguous) {
         ambiguous.push(`hooks.${eventName}[${index}]`);
         continue;
@@ -228,26 +245,95 @@ export function migrateLegacyFactoryHooks(
   };
 }
 
-function splitLegacyEntry(entry: unknown): { userEntry?: unknown; ambiguous: boolean } {
+export async function planLegacyFactoryHooksMigration(
+  outputRoot: string,
+  generatedCanonicalContent?: string
+): Promise<LegacyFactoryMigrationPlan | undefined> {
+  const hooksPath = resolve(outputRoot, '.factory', 'hooks.json');
+  try {
+    await readFile(hooksPath, 'utf-8');
+    return undefined;
+  } catch (error) {
+    if (!isFileNotFound(error)) throw error;
+  }
+
+  const settingsPath = resolve(outputRoot, '.factory', 'settings.json');
+  let expectedSettingsContent: string;
+  try {
+    expectedSettingsContent = await readFile(settingsPath, 'utf-8');
+  } catch (error) {
+    if (isFileNotFound(error)) return undefined;
+    throw error;
+  }
+
+  const legacy = parseJsonObject(expectedSettingsContent, settingsPath);
+  if (!Object.prototype.hasOwnProperty.call(legacy, 'hooks')) return undefined;
+  const canonical =
+    generatedCanonicalContent === undefined
+      ? {}
+      : parseJsonObject(generatedCanonicalContent, 'generated .factory/hooks.json');
+  const migration = migrateLegacyFactoryHooks(legacy, canonical, {
+    preserveInstalledHooks: true,
+    rejectMixedOwnership: true,
+  });
+  return {
+    settingsPath,
+    hooksPath,
+    expectedSettingsContent,
+    migration,
+  };
+}
+
+function splitLegacyEntry(
+  entry: unknown,
+  options: LegacyFactoryMigrationOptions
+): { userEntry?: unknown; ambiguous: boolean } {
   const object = getObject(entry);
   if (!object) return { ambiguous: true };
 
   const handlers = object['hooks'];
   if (!Array.isArray(handlers)) {
-    return isOwnedCommandObject(object) ? { ambiguous: false } : { ambiguous: true };
+    if (isGeneratedCommandObject(object)) return { ambiguous: false };
+    if (options.preserveInstalledHooks && isInstalledCommandObject(object)) {
+      return { userEntry: object, ambiguous: false };
+    }
+    return isInstalledCommandObject(object) ? { ambiguous: false } : { ambiguous: true };
   }
   if (!hasOnlyFields(object, LEGACY_ENTRY_FIELDS)) return { ambiguous: true };
+  if (object['matcher'] !== undefined && typeof object['matcher'] !== 'string') {
+    return { ambiguous: true };
+  }
+  if (object['commandRegex'] !== undefined && typeof object['commandRegex'] !== 'string') {
+    return { ambiguous: true };
+  }
   if (handlers.length === 0) return { ambiguous: true };
 
-  const userHandlers = handlers.filter((handler) => !isOwnedCommandObject(handler));
-  const hasAmbiguousHandler = handlers.some(
-    (handler) => !isOwnedCommandObject(handler) && !isCommandObject(handler)
+  const generatedHandlers = handlers.filter(isGeneratedCommandObject);
+  const installedHandlers = handlers.filter(isInstalledCommandObject);
+  const userHandlers = handlers.filter(
+    (handler) =>
+      !isGeneratedCommandObject(handler) &&
+      !isInstalledCommandObject(handler) &&
+      isCommandObject(handler)
   );
+  const hasAmbiguousHandler = handlers.some((handler) => !isCommandObject(handler));
   if (hasAmbiguousHandler) return { ambiguous: true };
-  if (userHandlers.length === 0) return { ambiguous: false };
+  if (
+    options.rejectMixedOwnership &&
+    ((generatedHandlers.length > 0 && installedHandlers.length + userHandlers.length > 0) ||
+      (installedHandlers.length > 0 && userHandlers.length > 0))
+  ) {
+    return { ambiguous: true };
+  }
+  const migratedHandlers = handlers.filter(
+    (handler) =>
+      userHandlers.includes(handler) ||
+      (options.preserveInstalledHooks && installedHandlers.includes(handler))
+  );
+  if (migratedHandlers.length === 0) return { ambiguous: false };
 
   return {
-    userEntry: { ...object, hooks: userHandlers },
+    userEntry: { ...object, hooks: migratedHandlers },
     ambiguous: false,
   };
 }
@@ -277,26 +363,59 @@ function stableSerialize(value: unknown): string {
 
 function isCommandObject(value: unknown): boolean {
   const object = getObject(value);
-  return object !== undefined && typeof object['command'] === 'string';
+  if (
+    !object ||
+    object['type'] !== 'command' ||
+    typeof object['command'] !== 'string' ||
+    object['command'].trim().length === 0 ||
+    !hasOnlyFields(object, LEGACY_HANDLER_FIELDS)
+  ) {
+    return false;
+  }
+  const timeout = object['timeout'];
+  if (timeout !== undefined && (typeof timeout !== 'number' || !Number.isFinite(timeout))) {
+    return false;
+  }
+  return object['statusMessage'] === undefined || typeof object['statusMessage'] === 'string';
 }
 
-function isOwnedCommandObject(value: unknown): boolean {
+function isGeneratedCommandObject(value: unknown): boolean {
   const object = getObject(value);
-  if (!object) return false;
-  if (typeof object['command'] === 'string') {
-    if (object['type'] !== 'command' || !hasOnlyFields(object, LEGACY_HANDLER_FIELDS)) {
-      return false;
-    }
-    return (
-      /# promptscript-generated:[A-Za-z0-9._-]+\s*$/.test(object['command']) ||
-      isPromptScriptHookCommand(object['command'])
-    );
-  }
-  const handlers = object['hooks'];
   return (
-    Array.isArray(handlers) &&
-    handlers.length > 0 &&
-    handlers.every((handler) => isOwnedCommandObject(handler))
+    typeof object?.['command'] === 'string' &&
+    isCommandObject(object) &&
+    /# promptscript-generated:[A-Za-z0-9._-]+\s*$/.test(object['command'])
+  );
+}
+
+function isInstalledCommandObject(value: unknown): boolean {
+  const object = getObject(value);
+  return (
+    typeof object?.['command'] === 'string' &&
+    isCommandObject(object) &&
+    !isGeneratedCommandObject(object) &&
+    isPromptScriptHookCommand(object['command'])
+  );
+}
+
+function parseJsonObject(content: string, path: string): Record<string, unknown> {
+  try {
+    const parsed: unknown = JSON.parse(content);
+    const object = getObject(parsed);
+    if (!object) throw new Error('expected a JSON object');
+    return object;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse Factory hooks file ${path}: ${message}`, { cause: error });
+  }
+}
+
+function isFileNotFound(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    String(error.code) === 'ENOENT'
   );
 }
 

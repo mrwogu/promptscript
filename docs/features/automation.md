@@ -405,7 +405,10 @@ This CLI feature is separate from the language-level `@hooks` block.
 For Copilot, `.github/hooks/promptscript-vscode.json` configures VS Code Agent
 Hooks; it is not the GitHub repository hook file generated from `@hooks`.
 Factory CLI installation uses `.factory/hooks.json` and migrates unambiguous
-legacy entries from `.factory/settings.json`.
+legacy entries from `.factory/settings.json`. Factory compilation performs the
+same migration when the canonical file is absent. Use `prs compile --dry-run`
+to preview the change or `--no-migrate-factory-hooks` to retain warning-only
+behavior.
 
 ## Commands and Workflows
 

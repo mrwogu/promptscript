@@ -24,6 +24,9 @@ const {
   mockMuted,
   mockDryRun,
   mockCleanupManagedOutputs,
+  mockRewriteHookOutputIfUnchanged,
+  mockRemoveHookOutputIfUnchanged,
+  mockIsTTY,
   mockSpinner,
   mockSpinnerStart,
   mockWatch,
@@ -42,6 +45,9 @@ const {
   const mockMuted = vi.fn();
   const mockDryRun = vi.fn();
   const mockCleanupManagedOutputs = vi.fn();
+  const mockRewriteHookOutputIfUnchanged = vi.fn();
+  const mockRemoveHookOutputIfUnchanged = vi.fn();
+  const mockIsTTY = vi.fn();
   const mockSpinnerStart = vi.fn();
   const mockWatch = vi.fn();
   const mockWatcherOn = vi.fn();
@@ -67,6 +73,9 @@ const {
     mockMuted,
     mockDryRun,
     mockCleanupManagedOutputs,
+    mockRewriteHookOutputIfUnchanged,
+    mockRemoveHookOutputIfUnchanged,
+    mockIsTTY,
     mockSpinner,
     mockSpinnerStart,
     mockWatch,
@@ -116,6 +125,7 @@ vi.mock('../../output/console.js', () => ({
   createSpinner: vi.fn().mockReturnValue(mockSpinner),
   ConsoleOutput: {
     success: vi.fn(),
+    unchanged: vi.fn(),
     error: mockError,
     muted: mockMuted,
     newline: vi.fn(),
@@ -126,6 +136,7 @@ vi.mock('../../output/console.js', () => ({
     stats: vi.fn(),
     dryRun: mockDryRun,
     warn: mockWarn,
+    skipped: vi.fn(),
   },
   isVerbose: vi.fn().mockReturnValue(false),
   isDebug: vi.fn().mockReturnValue(false),
@@ -147,7 +158,7 @@ vi.mock('fs', () => ({
 }));
 
 vi.mock('../../output/pager.js', () => ({
-  isTTY: vi.fn().mockReturnValue(false),
+  isTTY: (...args: unknown[]) => mockIsTTY(...args),
 }));
 
 vi.mock('chokidar', () => ({
@@ -168,7 +179,8 @@ vi.mock('../../utils/managed-output-cleanup.js', async (importOriginal) => {
     mergePromptScriptCodexConfig: vi.fn().mockReturnValue(undefined),
     mergePromptScriptHookOutput: vi.fn().mockReturnValue(undefined),
     removePromptScriptOwnedCodexHooks: vi.fn().mockReturnValue(undefined),
-    rewriteHookOutputIfUnchanged: vi.fn().mockResolvedValue(true),
+    rewriteHookOutputIfUnchanged: (...args: unknown[]) => mockRewriteHookOutputIfUnchanged(...args),
+    removeHookOutputIfUnchanged: (...args: unknown[]) => mockRemoveHookOutputIfUnchanged(...args),
     createHookOutputSafely: vi.fn(async (path: string, _root: string, content: string) => {
       await mockWriteFile(path, content, 'utf-8');
       return true;
@@ -209,6 +221,9 @@ describe('compile command - createCliLogger warn path', () => {
     mockMkdir.mockResolvedValue(undefined);
     mockReadFile.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
     mockCleanupManagedOutputs.mockResolvedValue({ removed: [], removedDirectories: [] });
+    mockRewriteHookOutputIfUnchanged.mockResolvedValue(true);
+    mockRemoveHookOutputIfUnchanged.mockResolvedValue(true);
+    mockIsTTY.mockReturnValue(false);
 
     mockCompile.mockResolvedValue({
       success: true,
@@ -349,7 +364,308 @@ describe('compile command - createCliLogger warn path', () => {
     );
   });
 
-  it('should warn about legacy hooks in .factory/settings.json for factory targets', async () => {
+  it('should migrate legacy Factory hooks into generated canonical output', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      permissions: { allow: ['Read'] },
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Execute',
+            hooks: [{ type: 'command', command: 'audit' }],
+          },
+        ],
+      },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          '.factory/hooks.json',
+          {
+            path: '.factory/hooks.json',
+            content: JSON.stringify({
+              hooks: {
+                PreToolUse: [
+                  {
+                    hooks: [
+                      {
+                        type: 'command',
+                        command: 'node check.mjs # promptscript-generated:check',
+                      },
+                    ],
+                  },
+                ],
+              },
+            }),
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    const canonicalWrite = mockWriteFile.mock.calls.find(([path]) =>
+      String(path).endsWith('.factory/hooks.json')
+    );
+    const canonical = JSON.parse(String(canonicalWrite?.[1])) as {
+      hooks: { PreToolUse: unknown[] };
+    };
+    expect(canonical.hooks.PreToolUse).toHaveLength(2);
+    expect(mockRewriteHookOutputIfUnchanged).toHaveBeenCalledWith(
+      '/mock/project/.factory/settings.json',
+      '/mock/project',
+      legacyContent,
+      JSON.stringify({ permissions: { allow: ['Read'] } }, null, 2) + '\n'
+    );
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+  });
+
+  it('should roll back canonical hooks when legacy settings change before commit', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return JSON.stringify({
+          hooks: {
+            PreToolUse: [
+              {
+                hooks: [{ type: 'command', command: 'audit' }],
+              },
+            ],
+          },
+        });
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockRewriteHookOutputIfUnchanged.mockResolvedValue(false);
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockRemoveHookOutputIfUnchanged).toHaveBeenCalledWith(
+      '/mock/project/.factory/hooks.json',
+      '/mock/project',
+      expect.stringContaining('"command": "audit"')
+    );
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('was rolled back'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should not delete a canonical file created concurrently', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const entry = {
+      hooks: [{ type: 'command', command: 'audit' }],
+    };
+    const canonicalContent = JSON.stringify({ hooks: { PreToolUse: [entry] } }, null, 2) + '\n';
+    let hooksReads = 0;
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/hooks.json')) {
+        hooksReads++;
+        if (hooksReads === 1) {
+          throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+        }
+        return canonicalContent;
+      }
+      if (String(path).endsWith('.factory/settings.json')) {
+        return JSON.stringify({ hooks: { PreToolUse: [entry] } });
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return (
+        value.includes('project.prs') ||
+        value.endsWith('promptscript.yaml') ||
+        value.endsWith('.factory/hooks.json')
+      );
+    });
+    mockRewriteHookOutputIfUnchanged.mockResolvedValue(false);
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockRemoveHookOutputIfUnchanged).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('partial migration'));
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should cancel migration when a concurrent canonical file is skipped', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      hooks: {
+        PreToolUse: [
+          {
+            hooks: [{ type: 'command', command: 'audit' }],
+          },
+        ],
+      },
+    });
+    let hooksReads = 0;
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/hooks.json')) {
+        hooksReads++;
+        if (hooksReads === 1) {
+          throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+        }
+        return '{"hooks":{}}';
+      }
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return (
+        value.includes('project.prs') ||
+        value.endsWith('promptscript.yaml') ||
+        value.endsWith('.factory/hooks.json')
+      );
+    });
+    mockIsTTY.mockReturnValue(true);
+    vi.mocked(mockServices.prompts.select).mockResolvedValue('no');
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockRewriteHookOutputIfUnchanged).not.toHaveBeenCalled();
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('migration was cancelled before')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should restore legacy settings when canonical hooks change during commit', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      hooks: {
+        PreToolUse: [
+          {
+            hooks: [{ type: 'command', command: 'audit' }],
+          },
+        ],
+      },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockRewriteHookOutputIfUnchanged
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockRewriteHookOutputIfUnchanged).toHaveBeenNthCalledWith(
+      3,
+      '/mock/project/.factory/settings.json',
+      '/mock/project',
+      '{}\n',
+      legacyContent
+    );
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('legacy settings were restored')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should preview legacy Factory migration without writing', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return JSON.stringify({
+          hooks: {
+            PreToolUse: [
+              {
+                hooks: [{ type: 'command', command: 'audit' }],
+              },
+            ],
+          },
+        });
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockDryRun).toHaveBeenCalledWith(
+      expect.stringContaining('Would migrate 1 legacy Factory hook(s)')
+    );
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockRewriteHookOutputIfUnchanged).not.toHaveBeenCalled();
+  });
+
+  it('should abort before writing when legacy Factory hooks are ambiguous', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return JSON.stringify({
+          hooks: {
+            unknownEvent: [{ hooks: [{ type: 'command', command: 'audit' }] }],
+          },
+        });
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('Cannot migrate legacy Factory hooks safely')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should abort before writing when legacy Factory settings are malformed', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) return '{';
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockWriteFile).not.toHaveBeenCalled();
+    expect(mockCleanupManagedOutputs).not.toHaveBeenCalled();
+    expect(mockError).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to parse Factory hooks file')
+    );
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should warn about installed legacy hooks when compile migration is disabled', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({
       targets: ['factory'],
@@ -357,13 +673,13 @@ describe('compile command - createCliLogger warn path', () => {
     });
     mockReadFile.mockImplementation(async (path: string) => {
       if (String(path).endsWith('.factory/settings.json')) {
-        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"old-cmd"}]}]}}';
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"prs hook pre-edit"}]}]}}';
       }
       throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
     });
 
     // Act
-    await compileCommand({ cwd: '/mock/project' }, mockServices);
+    await compileCommand({ cwd: '/mock/project', migrateFactoryHooks: false }, mockServices);
 
     // Assert
     expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('PS4002'));
