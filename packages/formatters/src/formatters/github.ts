@@ -498,7 +498,7 @@ export class GitHubFormatter extends BaseFormatter {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         if (!this.isSafeSkillName(key)) continue;
         const obj = value as Record<string, Value>;
-        const applyTo = obj['applyTo'];
+        const applyTo = obj['applyTo'] ?? obj['paths'];
         const excludeAgent = obj['excludeAgent'];
         const description = obj['description'];
         const content = obj['content'];
