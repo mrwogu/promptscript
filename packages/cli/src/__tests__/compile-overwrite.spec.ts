@@ -499,6 +499,41 @@ command = "echo old # promptscript-generated:owned"
       );
     });
 
+    it('should migrate unmarked Codex TOML hooks emitted before 1.16', async () => {
+      const path = '.codex/config.toml';
+      const outputs = new Map([[path, createMockOutput(path, 'max_threads = 8\n')]]);
+      mockCompile.mockResolvedValue({
+        success: true,
+        outputs,
+        stats: {
+          totalTime: 100,
+          resolveTime: 50,
+          validateTime: 25,
+          formatTime: 25,
+        },
+        warnings: [],
+        errors: [],
+      });
+      mockExistsSync.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(`max_threads = 8
+model = "gpt-5"
+
+[[hooks.post_tool_use]]
+id = "fmt"
+command = ["pnpm", "format"]
+matcher = "Edit"
+`);
+
+      await compileCommand({}, mockServices);
+
+      expect(mockPrompts.select).not.toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        resolve(path),
+        'max_threads = 8\n\nmodel = "gpt-5"\n',
+        'utf-8'
+      );
+    });
+
     it('should replace empty Codex config after removing owned hooks', async () => {
       const path = '.codex/config.toml';
       const outputs = new Map([[path, createMockOutput(path, 'max_threads = 8\n')]]);
