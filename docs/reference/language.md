@@ -467,7 +467,7 @@ Project context and environment:
 </a>
 <!-- playground-link-end -->
 
-Supports both key-value properties and text content.
+Supports both key-value properties and text content. `project`, `languages`, `runtime`, `monorepo`, `techStack` and `architecture` get dedicated rendering; every other property renders as a `Label: value` list item under the context section.
 
 ### @standards
 
@@ -510,7 +510,7 @@ The `errors` key is automatically mapped to `error-handling` in the output for b
 
 Four keys render as dedicated sections instead of code-standard subsections: `git` (commit conventions), `config` (tool configuration), `documentation` (doc standards), and `diagrams` (diagram preferences). Each known field gets specialized rendering (e.g. `git.format`, `git.types`, `diagrams.format`).
 
-**Custom fields are kept.** Any extra key inside these objects renders as a generic `Label: value` list item - `true` renders as a bare label, `false`/`null` are dropped, nested objects render inline as `key: value` pairs:
+**Custom fields are kept.** Any extra key inside these objects renders as a generic `Label: value` list item - `true` renders as a bare label, `false`/`null` are dropped, nested objects render inline as `key: value` pairs. Known fields accept the same shapes: `true` emits the built-in wording, while a string replaces it with your own text:
 
 ```promptscript
 @standards {
@@ -952,8 +952,8 @@ For projects with multiple path-specific instruction files, use named entries in
 
 Each named entry generates a separate instruction file per target:
 
-- **GitHub Copilot** (`version: multifile` or `full`): `.github/instructions/<name>.instructions.md` with `applyTo` frontmatter
-- **Factory AI** (`version: multifile` or `full`): `.factory/skills/<name>/SKILL.md` with scope info in the description
+- **Multifile targets** (`version: multifile` or `full`): `.claude/rules/<name>.md`, `.cursor/rules/<name>.mdc`, `.github/instructions/<name>.instructions.md` with `applyTo` frontmatter, and `.factory/skills/<name>/SKILL.md` with scope info in the description
+- **Antigravity** (any version): `.agent/rules/<name>.md` with glob activation
 
 Named entries support three properties:
 

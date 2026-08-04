@@ -73,6 +73,14 @@ jobs:
             exit 1
           fi
 
+      - name: Formatter Docs Drift Check
+        if: matrix.node-version == '25.x'
+        run: |
+          if ! pnpm docs:formatters:check; then
+            echo "::error::Generated formatter docs are out of date. Run 'pnpm docs:formatters' locally and commit the changes."
+            exit 1
+          fi
+
       - name: Validate documentation examples
         if: matrix.node-version == '25.x'
         run: pnpm docs:validate:check
