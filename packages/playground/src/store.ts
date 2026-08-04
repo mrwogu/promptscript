@@ -109,9 +109,9 @@ export interface PlaygroundState {
   setShowFileTree: (show: boolean) => void;
 }
 
-const DEFAULT_FILE = `@meta {
+export const DEFAULT_FILE = `@meta {
   id: "skills-example"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -168,6 +168,8 @@ const DEFAULT_FILE = `@meta {
 }
 
 @standards {
+  @header "Engineering Standards"
+
   code: {
     languages: ["TypeScript"]
     testing: ["Vitest", "Testing Library"]
