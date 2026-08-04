@@ -964,6 +964,131 @@ Never leave TODO without issue reference`,
       expect(workflow?.content).toContain('3. Deploy');
     });
 
+    it('should generate workflow files from the @workflows block', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                release: {
+                  description: 'Cut a release',
+                  content: 'Tag the commit, then publish.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const workflow = result.additionalFiles?.find(
+        (file) => file.path === '.agent/workflows/release.md'
+      );
+
+      expect(workflow?.content).toContain('description: "Cut a release"');
+      expect(workflow?.content).toContain('Tag the commit, then publish.');
+    });
+
+    it('should generate a workflow file from a prompt shortcut', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/deep': {
+                  prompt: true,
+                  description: 'Deep probe',
+                  content: 'Run the deep probe.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const workflow = result.additionalFiles?.find(
+        (file) => file.path === '.agent/workflows/deep.md'
+      );
+
+      expect(workflow?.content).toContain('Run the deep probe.');
+    });
+
+    it('should generate a glob-activated rule file per named guard', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                security: {
+                  paths: ['src/auth/**/*.ts'],
+                  description: 'Security-sensitive code rules',
+                  content: 'All auth code must use bcrypt.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const rule = result.additionalFiles?.find((file) => file.path === '.agent/rules/security.md');
+
+      expect(rule?.content).toContain('activation: "glob"');
+      expect(rule?.content).toContain('globs: ["src/auth/**/*.ts"]');
+      expect(rule?.content).toContain('description: "Security-sensitive code rules"');
+      expect(rule?.content).toContain('All auth code must use bcrypt.');
+    });
+
+    it('should render @examples in the rules file', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'examples',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'scoped-commit': {
+                  description: 'Scopes are mandatory',
+                  input: 'add parser support',
+                  output: 'feat(parser): add support',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('### Example: scoped-commit');
+      expect(result.content).toContain('Scopes are mandatory');
+      expect(result.content).toContain('add parser support');
+      expect(result.content).toContain('feat(parser): add support');
+    });
+
     it('should not generate colliding target-normalized workflow paths', () => {
       const ast: Program = {
         ...createMinimalProgram(),
