@@ -8,10 +8,10 @@ You are working on the project.
 Code style:
 - Test approved, declined, timeout, and retry paths
 - Tokenize payment data
-- Verify webhook signatures
+- Verify {{provider}} webhook signatures
 - Use idempotency keys
-- Bound retries with backoff
+- Bound {{provider}} retries to {{maxRetries}} attempts with backoff
 
 Never:
 - Never log PAN, CVV, access tokens, or raw webhook secrets
-- Never retry a payment without an idempotency key
+- Never exceed {{maxRetries}} {{provider}} payment retries

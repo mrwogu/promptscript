@@ -9,14 +9,14 @@
 ### security
 
 - Tokenize payment data
-- Verify webhook signatures
+- Verify {{provider}} webhook signatures
 
 ### reliability
 
 - Use idempotency keys
-- Bound retries with backoff
+- Bound {{provider}} retries to {{maxRetries}} attempts with backoff
 
 ## donts
 
 - Don't log PAN, CVV, access tokens, or raw webhook secrets
-- Don't retry a payment without an idempotency key
+- Don't exceed {{maxRetries}} {{provider}} payment retries

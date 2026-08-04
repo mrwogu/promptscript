@@ -7,7 +7,7 @@ description: Roll out PromptScript in a production checkout service with shared 
 
 This tutorial follows a platform team adding PromptScript to an existing
 TypeScript checkout service. The repository already contains hand-written
-Factory and GitHub Copilot instructions. The team needs one reviewed source of
+Claude Code and GitHub Copilot instructions. The team needs one reviewed source of
 truth without losing payment rules or silently replacing user-owned files.
 
 Open the [Playground](/playground/) and choose **Real-Life Checkout Service** to
@@ -22,7 +22,7 @@ Its deployment has four requirements:
 2. Payment rules remain reusable by other payment services.
 3. Checkout-specific policy can replace one inherited standard without
    duplicating the full organization policy.
-4. Factory and GitHub Copilot receive native instructions, skills, agents,
+4. Claude Code and GitHub Copilot receive native instructions, skills, agents,
    hooks, and release prompts from the same source.
 
 Acceptance criteria:
@@ -50,12 +50,14 @@ checkout-service/
 │   ├── checkout/
 │   └── webhooks/
 ├── AGENTS.md
+├── CLAUDE.md
 ├── package.json
 └── promptscript.yaml
 ```
 
-`AGENTS.md` and `.github/copilot-instructions.md` represent existing,
-user-owned instructions. Do not delete them to make compilation pass.
+`AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` represent
+existing, user-owned instructions. Do not delete them to make compilation
+pass.
 
 ## Step 1: Add Organization Policy
 
@@ -108,22 +110,31 @@ Create `.promptscript/payment-policy.prs`:
   id: "payment-policy"
   syntax: "1.6.0"
   tags: ["payments", "pci"]
+  params: {
+    provider: enum("Stripe", "Adyen") = "Stripe"
+    maxRetries: number = 3
+  }
 }
 
 @standards {
   testing: ["Test approved, declined, timeout, and retry paths"]
-  security: ["Tokenize payment data", "Verify webhook signatures"]
-  reliability: ["Use idempotency keys", "Bound retries with backoff"]
+  security: ["Tokenize payment data", "Verify {{provider}} webhook signatures"]
+  reliability: [
+    "Use idempotency keys",
+    "Bound {{provider}} retries to {{maxRetries}} attempts with backoff"
+  ]
 }
 
 @restrictions {
   - "Never log PAN, CVV, access tokens, or raw webhook secrets"
-  - "Never retry a payment without an idempotency key"
+  - "Never exceed {{maxRetries}} {{provider}} payment retries"
 }
 ```
 
 The payment policy is composed with `@use`, so another payment service can use
 the same rules without inheriting checkout identity or project metadata.
+`provider` accepts only `Stripe` or `Adyen`. `maxRetries` defaults to `3`, so
+services override it only when their provider contract requires another limit.
 
 ## Step 3: Compose Checkout Policy
 
@@ -137,7 +148,7 @@ Create `.promptscript/project.prs`:
 }
 
 @inherit ./org-base
-@use ./payment-policy
+@use ./payment-policy(provider: "Adyen", maxRetries: 2)
 
 @context {
   service: "checkout"
@@ -197,7 +208,6 @@ Create `.promptscript/project.prs`:
     matcher: "Edit|Write"
     command: ["pnpm", "test", "--", "src/checkout", "src/webhooks"]
     timeoutMs: 120000
-    statusMessage: "Running checkout payment tests"
     targets: {
       github: {
         matcher: "edit|create"
@@ -226,14 +236,16 @@ Declaration order is intentional:
 | Declaration                       | Result                                                |
 | --------------------------------- | ----------------------------------------------------- |
 | `@inherit ./org-base`             | Adds identity, context, standards, and restrictions   |
-| `@use ./payment-policy`           | Adds reusable payment policy                          |
+| Parameterized `@use`              | Adds payment policy for Adyen with two retries        |
 | Local `@context` and `@standards` | Adds checkout ownership and observability             |
 | `@override standards.testing`     | Replaces inherited and imported testing values        |
 | `@extend restrictions`            | Appends one checkout-specific restriction             |
 | Capability blocks                 | Adds native skill, reviewer, hook, and release prompt |
 
 The override removes both `Minimum 80% coverage` and the imported payment test
-list from `standards.testing`. Other organization and payment standards remain.
+list from `standards.testing`. Template parameters resolve before output, so no
+`{{provider}}` or `{{maxRetries}}` placeholders remain. Other organization and
+payment standards remain.
 
 ## Step 4: Configure Native Targets
 
@@ -247,7 +259,7 @@ input:
   entry: .promptscript/project.prs
 
 targets:
-  - factory:
+  - claude:
       version: full
   - github:
       version: full
@@ -283,7 +295,7 @@ printf '%s\n' \
   '/.promptscript-rollback-output-*/' >> .git/info/exclude
 
 mkdir .promptscript-migration-backup
-for path in AGENTS.md .factory .github; do
+for path in AGENTS.md CLAUDE.md .claude .github; do
   if [ -e "$path" ]; then
     cp -R "$path" .promptscript-migration-backup/
   fi
@@ -317,7 +329,8 @@ git add --intent-to-add -- \
   .promptscript \
   promptscript.yaml \
   AGENTS.md \
-  .factory \
+  CLAUDE.md \
+  .claude \
   .github
 git diff -- .
 prs diff --all --full
@@ -336,10 +349,11 @@ including:
 
 ```text
 AGENTS.md
-.factory/commands/release-readiness.md
-.factory/droids/payment-reviewer.md
-.factory/hooks.json
-.factory/skills/payment-security/SKILL.md
+CLAUDE.md
+.claude/agents/payment-reviewer.md
+.claude/commands/release-readiness.md
+.claude/settings.json
+.claude/skills/payment-security/SKILL.md
 .github/copilot-instructions.md
 .github/agents/payment-reviewer.md
 .github/hooks/promptscript.json
@@ -347,12 +361,18 @@ AGENTS.md
 .github/skills/payment-security/SKILL.md
 ```
 
+`CLAUDE.md` is Claude Code's main instruction file. GitHub full mode also
+generates top-level `AGENTS.md` as its agent index. PromptScript can emit its
+built-in skill beside project skills.
+
 Inspect main instructions for these resolved rules:
 
 ```text
 Minimum 95% coverage for payment flows
 Use idempotency keys
-Verify webhook signatures
+Verify Adyen webhook signatures
+Bound Adyen retries to 2 attempts with backoff
+Don't exceed 2 Adyen payment retries
 Don't change retry or idempotency behavior without integration tests
 ```
 
@@ -361,12 +381,13 @@ GitHub normalizes negative restrictions from `Never` to `Don't`. Also verify:
 - `Minimum 80% coverage` is absent.
 - `Test approved, declined, timeout, and retry paths` is absent from the
   replaced testing field.
+- `{{provider}}`, `{{maxRetries}}`, and default provider `Stripe` are absent.
 - Organization Git and operations standards remain.
 - Payment security and reliability standards remain.
 - The payment reviewer references the payment security skill where supported.
-- Factory hook matcher is `Edit|Write`.
+- Claude hook matcher is `Edit|Write`.
 - GitHub hook matcher is `edit|create`.
-- Release readiness is a native Factory command and GitHub prompt file.
+- Release readiness is a native Claude command and GitHub prompt file.
 
 ## Step 8: Add CI Drift Protection
 
@@ -407,7 +428,7 @@ build tools.
 Use a small rollout before organization-wide adoption:
 
 1. Merge the checkout service first.
-2. Ask payment and platform owners to review generated Factory and GitHub files.
+2. Ask payment and platform owners to review generated Claude and GitHub files.
 3. Track compile failures, drift failures, review defects, and developer
    feedback for one release cycle.
 4. Reuse `payment-policy.prs` in one additional payment service.
@@ -431,7 +452,7 @@ pre-adoption target set:
 rollback_dir=".promptscript-rollback-output-$(date +%Y%m%d%H%M%S)"
 mkdir "$rollback_dir"
 
-for path in AGENTS.md .factory .github; do
+for path in AGENTS.md CLAUDE.md .claude .github; do
   if [ -e "$path" ]; then
     mv "$path" "$rollback_dir/"
   fi
@@ -443,7 +464,7 @@ done
 
 This removes newly generated capability files from active target paths while
 preserving them in a timestamped local directory. Confirm no user work was
-added under `.factory/` or `.github/` after the backup before running it.
+added under `.claude/` or `.github/` after the backup before running it.
 
 After the adoption commit, revert that complete commit instead of restoring
 individual generated paths:

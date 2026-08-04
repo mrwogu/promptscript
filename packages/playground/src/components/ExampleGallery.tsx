@@ -1515,7 +1515,7 @@ console.log('Validation complete');
 }
 
 @inherit ./org-base
-@use ./payment-policy
+@use ./payment-policy(provider: "Adyen", maxRetries: 2)
 
 @context {
   service: "checkout"
@@ -1575,7 +1575,6 @@ console.log('Validation complete');
     matcher: "Edit|Write"
     command: ["pnpm", "test", "--", "src/checkout", "src/webhooks"]
     timeoutMs: 120000
-    statusMessage: "Running checkout payment tests"
     targets: {
       github: {
         matcher: "edit|create"
@@ -1641,17 +1640,24 @@ console.log('Validation complete');
   id: "payment-policy"
   syntax: "1.6.0"
   tags: ["payments", "pci"]
+  params: {
+    provider: enum("Stripe", "Adyen") = "Stripe"
+    maxRetries: number = 3
+  }
 }
 
 @standards {
   testing: ["Test approved, declined, timeout, and retry paths"]
-  security: ["Tokenize payment data", "Verify webhook signatures"]
-  reliability: ["Use idempotency keys", "Bound retries with backoff"]
+  security: ["Tokenize payment data", "Verify {{provider}} webhook signatures"]
+  reliability: [
+    "Use idempotency keys",
+    "Bound {{provider}} retries to {{maxRetries}} attempts with backoff"
+  ]
 }
 
 @restrictions {
   - "Never log PAN, CVV, access tokens, or raw webhook secrets"
-  - "Never retry a payment without an idempotency key"
+  - "Never exceed {{maxRetries}} {{provider}} payment retries"
 }
 `,
       },

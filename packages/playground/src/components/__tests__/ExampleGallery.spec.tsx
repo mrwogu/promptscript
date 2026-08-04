@@ -84,12 +84,13 @@ describe('ExampleGallery — gallery examples compile', () => {
 
     const result = await compile(files, example!.files[0]!.path, {
       formatters: [
-        { name: 'factory', config: { version: 'full' } },
+        { name: 'claude', config: { version: 'full' } },
         { name: 'github', config: { version: 'full' } },
       ],
     });
 
     expect(result.success).toBe(true);
+    expect(result.warnings).toEqual([]);
     const github = result.outputs.get('.github/copilot-instructions.md')?.content;
     expect(github).toContain('Minimum 95% coverage for payment flows');
     expect(github).not.toContain('Minimum 80% coverage');
@@ -99,21 +100,27 @@ describe('ExampleGallery — gallery examples compile', () => {
     expect(github).toContain('Require one approving review');
     expect(github).toContain('Document rollback steps');
     expect(github).toContain('Use idempotency keys');
-    expect(github).toContain('Verify webhook signatures');
+    expect(github).toContain('Verify Adyen webhook signatures');
+    expect(github).toContain('Bound Adyen retries to 2 attempts with backoff');
+    expect(github).toContain("Don't exceed 2 Adyen payment retries");
+    expect(github).not.toContain('{{provider}}');
+    expect(github).not.toContain('{{maxRetries}}');
+    expect(github).not.toContain('Stripe');
     expect(github).toContain(
       "Don't change retry or idempotency behavior without integration tests"
     );
-    expect(result.outputs.has('.factory/droids/payment-reviewer.md')).toBe(true);
-    expect(result.outputs.has('.factory/skills/payment-security/SKILL.md')).toBe(true);
-    expect(result.outputs.get('.factory/commands/release-readiness.md')?.content).toContain(
+    expect(result.outputs.has('.claude/agents/payment-reviewer.md')).toBe(true);
+    expect(result.outputs.has('.claude/skills/payment-security/SKILL.md')).toBe(true);
+    expect(result.outputs.get('.claude/commands/release-readiness.md')?.content).toContain(
       'Stop before deployment and request human approval'
     );
+    expect(result.outputs.has('AGENTS.md')).toBe(true);
     expect(result.outputs.has('.github/agents/payment-reviewer.md')).toBe(true);
     expect(result.outputs.has('.github/skills/payment-security/SKILL.md')).toBe(true);
     expect(result.outputs.get('.github/prompts/release-readiness.prompt.md')?.content).toContain(
       'Stop before deployment and request human approval'
     );
-    expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toMatchObject({
+    expect(JSON.parse(result.outputs.get('.claude/settings.json')!.content)).toMatchObject({
       hooks: {
         PostToolUse: [{ matcher: 'Edit|Write' }],
       },
