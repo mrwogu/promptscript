@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 // Mock all command modules to prevent side effects during import
 vi.mock('../commands/init', () => ({ initCommand: vi.fn() }));
@@ -59,6 +59,12 @@ vi.mock('commander', () => {
 });
 
 describe('cli guard run() - Issue 1', () => {
+  // Loading the command graph costs about a second on a cold transform cache,
+  // which competes with the per-test timeout when the suites run in parallel.
+  beforeAll(async () => {
+    await import('../cli.js');
+  });
+
   beforeEach(() => {
     mockParse.mockClear();
   });

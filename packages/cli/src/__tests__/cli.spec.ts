@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 
 // Mock all command modules first
 vi.mock('../commands/init', () => ({
@@ -91,6 +91,12 @@ vi.mock('commander', () => {
 
 describe('cli', () => {
   describe('run', () => {
+    // Loading the command graph costs about a second on a cold transform cache,
+    // which competes with the per-test timeout when the suites run in parallel.
+    beforeAll(async () => {
+      await import('../cli.js');
+    });
+
     it('should create CLI with expected configuration', async () => {
       const { run } = await import('../cli.js');
       run(['node', 'prs', '--help']);
