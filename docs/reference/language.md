@@ -1560,6 +1560,27 @@ Plaintext values are rejected for secret-bearing environment keys. Current targe
 string environment values only, so provide credentials through target-native runtime or secret
 management rather than `.prs` source.
 
+`command` is a single array in source, and each target serializer splits it into
+that target's native shape. JSON hosts receive the executable in `command` and
+the remaining entries in `args`, with `args` omitted when the command takes none:
+
+```json
+{
+  "mcpServers": {
+    "security-scanner": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./tools/security-scanner.mjs"],
+      "env": { "LOG_LEVEL": "info" }
+    }
+  }
+}
+```
+
+VS Code is the exception to the wrapper key: `.vscode/mcp.json` nests servers
+under `servers` instead of `mcpServers`. TOML hosts keep the array form under
+`[mcp_servers.<name>]`.
+
 **Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](config.md#mcp-hooks-plugins-support) for the full list of supported targets and their output paths.
 
 Agents can reference MCP servers by name via the `mcpServers` field in `@agents`:

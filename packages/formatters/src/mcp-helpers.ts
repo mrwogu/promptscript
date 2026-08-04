@@ -133,10 +133,13 @@ export function getMcpServerNames(servers: McpServerDefinition[]): string[] {
  * Serialize MCP servers to standard JSON format (used by most tools).
  * Output: { "mcpServers": { "<name>": { ... } } }
  *
+ * Stdio servers are emitted as an executable string plus an argument array,
+ * which is the shape every JSON-based MCP host parses. A single `command`
+ * array is not launchable.
+ *
  * @param servers - MCP server definitions
  * @param options - Serialization options
  * @param options.omitDisabled - If true, skip disabled servers (default: false)
- * @param options.useArgs - If true, use "args" instead of "command" array for stdio (default: false, use command+args)
  * @param options.envKey - Key for environment variables ("env" default)
  * @param options.urlKey - Key for URL ("url" default, some tools use "serverUrl")
  * @param options.includeType - If true, include "type" field (default: true)
@@ -145,7 +148,6 @@ export function serializeMcpServersToJson(
   servers: McpServerDefinition[],
   options?: {
     omitDisabled?: boolean;
-    useArgs?: boolean;
     envKey?: string;
     urlKey?: string;
     headersKey?: string;
@@ -169,12 +171,9 @@ export function serializeMcpServersToJson(
 
     if (server.transport === 'stdio') {
       if (server.command && server.command.length > 0) {
-        if (options?.useArgs) {
-          entry['command'] = server.command[0];
-          entry['args'] = server.command.slice(1);
-        } else {
-          entry['command'] = server.command;
-        }
+        entry['command'] = server.command[0];
+        const args = server.command.slice(1);
+        if (args.length > 0) entry['args'] = args;
       }
     } else {
       if (server.url) entry[urlKey] = server.url;
@@ -201,7 +200,6 @@ export function serializeMcpServersToJsonString(
   servers: McpServerDefinition[],
   options?: {
     omitDisabled?: boolean;
-    useArgs?: boolean;
     envKey?: string;
     urlKey?: string;
     headersKey?: string;
@@ -333,7 +331,6 @@ export function generateMcpJsonFile(
   path: string,
   options?: {
     omitDisabled?: boolean;
-    useArgs?: boolean;
     envKey?: string;
     urlKey?: string;
     headersKey?: string;
