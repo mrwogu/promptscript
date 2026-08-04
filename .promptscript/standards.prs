@@ -75,9 +75,9 @@
   }
 
   documentation: {
-    verifyBefore: "review README.md and docs/ before changes"
-    verifyAfter: "update docs if behavior changes"
-    codeExamples: "keep accurate"
+    verifyBefore: "Review README.md and the affected pages under docs/ before changing behavior"
+    verifyAfter: "Update README.md and docs/ whenever behavior changes"
+    codeExamples: "Keep documented code examples runnable and in sync with the API"
     syncWithCode: "after modifying any function, verify it is documented - if not, add documentation; if documented, ensure it reflects current behavior"
     noVaporware: "never document features that don't exist or don't work - ideas and future plans go to ROADMAP.md only"
   }
