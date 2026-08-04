@@ -32,6 +32,7 @@ import {
   Identifier,
   PathReference,
   RelativePath,
+  SshPath,
   UrlPath,
 } from '../lexer/tokens.js';
 
@@ -200,6 +201,24 @@ describe('PSLexer', () => {
       expect(result.tokens).toHaveLength(1);
       expect(result.tokens[0]!.tokenType).toBe(RelativePath);
       expect(result.tokens[0]!.image).toBe('../parent/file');
+    });
+  });
+
+  describe('SshPath token', () => {
+    it('should lex an SCP-style Git path', () => {
+      const result = tokenize('git@github.com:acme/private-skills/security');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(SshPath);
+      expect(result.tokens[0]!.image).toBe('git@github.com:acme/private-skills/security');
+    });
+
+    it('should lex an SCP-style Git path with a scope and a version', () => {
+      const result = tokenize('git@github.com:acme/skills/@fragments/security@1.2.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(SshPath);
+      expect(result.tokens[0]!.image).toBe('git@github.com:acme/skills/@fragments/security@1.2.0');
     });
   });
 

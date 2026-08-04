@@ -19,6 +19,7 @@ import {
   PathReference,
   RelativePath,
   UrlPath,
+  SshPath,
   LBrace,
   RBrace,
   LBracket,
@@ -449,13 +450,14 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * pathRef
-   *   : PathReference | RelativePath | UrlPath
+   *   : PathReference | RelativePath | UrlPath | SshPath
    */
   private pathRef = this.RULE('pathRef', () => {
     this.OR([
       { ALT: () => this.CONSUME(PathReference) },
       { ALT: () => this.CONSUME(RelativePath) },
       { ALT: () => this.CONSUME(UrlPath) },
+      { ALT: () => this.CONSUME(SshPath) },
     ]);
   });
 

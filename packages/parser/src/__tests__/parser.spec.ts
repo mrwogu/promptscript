@@ -783,6 +783,37 @@ describe('parse scoped imports', () => {
   });
 });
 
+describe('parse SSH imports', () => {
+  it('should parse an SSH path', () => {
+    const result = parse('@use git@github.com:acme/private-skills/security');
+    expect(result.errors).toHaveLength(0);
+    const path = result.ast!.uses[0]!.path;
+    expect(path.raw).toBe('git@github.com:acme/private-skills/security');
+    expect(path.isRelative).toBe(false);
+    expect(path.version).toBeUndefined();
+  });
+
+  it('should parse an SSH path with a scope and a version', () => {
+    const result = parse('@use git@github.com:acme/private-skills/@fragments/security@1.2.0');
+    expect(result.errors).toHaveLength(0);
+    const path = result.ast!.uses[0]!.path;
+    expect(path.version).toBe('1.2.0');
+    expect(path.segments).toEqual([
+      'git@github.com',
+      'acme',
+      'private-skills',
+      '@fragments',
+      'security',
+    ]);
+  });
+
+  it('should parse @inherit with an SSH path', () => {
+    const result = parse('@inherit git@github.com:acme/base/standards@main');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.inherit!.path.version).toBe('main');
+  });
+});
+
 describe('parse PathReference extended versions', () => {
   it('should parse @use with semver range version', () => {
     const result = parse('@use @acme/security@^1.0.0');

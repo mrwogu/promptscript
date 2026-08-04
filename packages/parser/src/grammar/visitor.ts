@@ -189,6 +189,7 @@ interface PathRefCstCtx {
   PathReference?: IToken[];
   RelativePath?: IToken[];
   UrlPath?: IToken[];
+  SshPath?: IToken[];
 }
 
 interface DotPathCstCtx {
@@ -1031,6 +1032,10 @@ class PromptScriptVisitor extends BaseVisitor {
       return this.parseRelativePath(ctx.RelativePath[0]!);
     }
 
+    if (ctx.SshPath) {
+      return this.parseSshPath(ctx.SshPath[0]!);
+    }
+
     // Must be UrlPath (grammar guarantees one of the four)
     return this.parseUrlPath(ctx.UrlPath![0]!);
   }
@@ -1314,6 +1319,24 @@ class PromptScriptVisitor extends BaseVisitor {
       loc: this.loc(token),
     };
   }
+
+  /**
+   * Parse an SCP-style Git path (git@host:org/repo[/path][@version]).
+   */
+  private parseSshPath(token: IToken): PathReference {
+    const raw = token.image;
+    const { pathPart, version } = splitVersionSuffix(raw);
+    const [host, repoPath = ''] = splitOnce(pathPart, ':');
+
+    return {
+      type: 'PathReference',
+      raw,
+      segments: [host, ...repoPath.split('/')],
+      version,
+      isRelative: false,
+      loc: this.loc(token),
+    };
+  }
 }
 
 /**
@@ -1330,6 +1353,13 @@ function splitVersionSuffix(path: string): { pathPart: string; version?: string 
   if (suffix.length === 0 || suffix.includes('/')) return { pathPart: path };
 
   return { pathPart: path.slice(0, lastAtIndex), version: suffix };
+}
+
+/** Split on the first occurrence of a separator. */
+function splitOnce(value: string, separator: string): [string, string?] {
+  const index = value.indexOf(separator);
+  if (index === -1) return [value];
+  return [value.slice(0, index), value.slice(index + 1)];
 }
 
 /**
