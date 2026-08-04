@@ -1266,6 +1266,149 @@ console.log('Validation complete');
     """
   }
 }
+`}]},{id:`real-life-checkout-service`,name:`Real-Life Checkout Service`,description:`Production rollout with organization policy, payment rules, native capabilities, and explicit replacement`,complexity:`advanced`,files:[{path:`project.prs`,content:`@meta {
+  id: "checkout-service"
+  syntax: "1.6.0"
+  tags: ["checkout", "payments", "production"]
+}
+
+@inherit ./org-base
+@use ./payment-policy(provider: "Adyen", maxRetries: 2)
+
+@context {
+  service: "checkout"
+  framework: "Fastify"
+  database: "PostgreSQL"
+  owns: ["payment authorization", "payment retries", "webhook processing"]
+}
+
+@standards {
+  @header "Checkout Engineering Policy"
+  @header git-commits "Checkout Commit Policy"
+
+  observability: [
+    "Attach checkoutId and paymentAttemptId to structured logs",
+    "Emit latency and failure metrics for each payment provider"
+  ]
+}
+
+@override standards.testing {
+  ["Minimum 95% coverage for payment flows"]
+}
+
+@extend restrictions {
+  - "Never change retry or idempotency behavior without integration tests"
+}
+
+@skills {
+  payment-security: {
+    description: "Review checkout changes for payment and data-handling risk"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: """
+      Review changed checkout and webhook code.
+      Check authorization boundaries, idempotency, secret handling,
+      webhook verification, logs, and failure recovery.
+      Report findings by severity with concrete remediation.
+    """
+  }
+}
+
+@agents {
+  payment-reviewer: {
+    description: "Review checkout changes before merge"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    skills: ["payment-security"]
+    content: """
+      Inspect the diff, affected tests, and operational impact.
+      Reject changes that weaken idempotency, webhook verification,
+      auditability, or rollback safety.
+    """
+  }
+}
+
+@hooks {
+  verify-payment-edits: {
+    event: "post-tool-use"
+    matcher: "Edit|Write"
+    command: ["pnpm", "test", "--", "src/checkout", "src/webhooks"]
+    timeoutMs: 120000
+    targets: {
+      github: {
+        matcher: "edit|create"
+      }
+    }
+  }
+}
+
+@shortcuts {
+  release-readiness: {
+    description: "Prepare a checkout release for human approval"
+    prompt: true
+    content: """
+      1. Review changes to checkout, retries, and webhook processing
+      2. Run unit and integration tests for payment flows
+      3. Verify dashboards, alerts, feature flags, and rollback steps
+      4. Summarize residual risk
+      5. Stop before deployment and request human approval
+    """
+  }
+}
+`},{path:`org-base.prs`,content:`@meta {
+  id: "commerce-org-base"
+  syntax: "1.6.0"
+  tags: ["commerce", "typescript"]
+}
+
+@identity {
+  """
+  You are an engineering assistant for a production commerce platform.
+  Prefer safe, observable, reversible changes.
+  """
+}
+
+@context {
+  language: "TypeScript"
+  runtime: "Node.js 20"
+  packageManager: "pnpm"
+}
+
+@standards {
+  testing: ["Minimum 80% coverage"]
+  git: {
+    format: "Conventional Commits"
+  }
+  review: ["Require one approving review"]
+  operations: ["Add structured logs", "Document rollback steps"]
+}
+
+@restrictions {
+  - "Never commit credentials or production customer data"
+  - "Never bypass required checks on protected branches"
+}
+`},{path:`payment-policy.prs`,content:`@meta {
+  id: "payment-policy"
+  syntax: "1.6.0"
+  tags: ["payments", "pci"]
+  params: {
+    provider: enum("Stripe", "Adyen") = "Stripe"
+    maxRetries: number = 3
+  }
+}
+
+@standards {
+  testing: ["Test approved, declined, timeout, and retry paths"]
+  security: ["Tokenize payment data", "Verify {{provider}} webhook signatures"]
+  reliability: [
+    "Use idempotency keys",
+    "Bound {{provider}} retries to {{maxRetries}} attempts with backoff"
+  ]
+}
+
+@restrictions {
+  - "Never log PAN, CVV, access tokens, or raw webhook secrets"
+  - "Never exceed {{maxRetries}} {{provider}} payment retries"
+}
 `}]},{id:`enterprise`,name:`Enterprise Setup`,description:`Full enterprise config with examples, guards, requires, and more`,complexity:`advanced`,files:[{path:`project.prs`,content:`@meta {
   id: "enterprise-project"
   syntax: "1.6.0"
