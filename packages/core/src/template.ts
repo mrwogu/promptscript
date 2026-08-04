@@ -8,6 +8,8 @@ import type {
   BlockBody,
   BlockEntry,
   BlockContent,
+  OverrideBlock,
+  OverrideReplacement,
   TextContent,
   TemplateExpression,
   SourceLocation,
@@ -18,7 +20,12 @@ import {
   ParamTypeMismatchError,
   UndefinedVariableError,
 } from './errors/index.js';
-import { createBlockBody, reconcileValueNode, valueNodeToValue } from './canonical-ast.js';
+import {
+  blockBodyToContent,
+  createBlockBody,
+  reconcileValueNode,
+  valueNodeToValue,
+} from './canonical-ast.js';
 
 /**
  * Context for template interpolation.
@@ -392,6 +399,39 @@ function interpolateBlockBody(
 }
 
 /**
+ * Interpolate the replacement carried by an @override operation.
+ *
+ * A block replacement has no separate legacy content, so the projection is
+ * derived from the body itself.
+ */
+function interpolateOverrideReplacement(
+  replacement: OverrideReplacement,
+  ctx: TemplateContext
+): OverrideReplacement {
+  if (replacement.type === 'BlockReplacement') {
+    return {
+      ...replacement,
+      body: interpolateBlockBody(replacement.body, blockBodyToContent(replacement.body), ctx),
+    };
+  }
+
+  return {
+    ...replacement,
+    value: reconcileValueNode(
+      replacement.value,
+      interpolateValue(valueNodeToValue(replacement.value), ctx)
+    ),
+  };
+}
+
+function interpolateOverride(override: OverrideBlock, ctx: TemplateContext): OverrideBlock {
+  return {
+    ...override,
+    replacement: interpolateOverrideReplacement(override.replacement, ctx),
+  };
+}
+
+/**
  * Interpolate the entire AST with template parameters.
  *
  * @param ast - The AST to interpolate
@@ -416,6 +456,8 @@ export function interpolateAST(ast: Program, ctx: TemplateContext): Program {
       : undefined,
     // Interpolate blocks
     blocks: ast.blocks.map((b) => interpolateBlock(b, ctx)),
+    // Interpolate override replacements
+    overrides: ast.overrides?.map((override) => interpolateOverride(override, ctx)),
     // Interpolate extend blocks
     extends: ast.extends.map((extension) => {
       const content = interpolateContent(extension.content, ctx);

@@ -553,6 +553,88 @@ describe('template', () => {
       expect(extendBlock).toBeDefined();
       expect((extendBlock!.content as TextContent).value).toBe('Extra: additional info');
     });
+
+    it('should interpolate override block replacement bodies', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['framework', 'Vitest']]),
+        sourceFile: 'test.prs',
+      };
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [],
+        extends: [],
+        overrides: [
+          {
+            type: 'OverrideBlock',
+            targetPath: 'standards',
+            replacement: {
+              type: 'BlockReplacement',
+              body: createBlockBody(
+                [
+                  {
+                    type: 'FieldEntry',
+                    name: 'testing',
+                    value: createValueNode('Use {{framework}}', loc),
+                    loc,
+                  },
+                ],
+                loc
+              ),
+              loc,
+            },
+            loc,
+          },
+        ],
+        loc,
+      };
+
+      const result = interpolateAST(ast, ctx);
+
+      const replacement = result.overrides?.[0]?.replacement;
+      expect(replacement?.type).toBe('BlockReplacement');
+      if (replacement?.type === 'BlockReplacement') {
+        const entry = replacement.body.entries[0];
+        expect(entry?.type).toBe('FieldEntry');
+        if (entry?.type === 'FieldEntry') {
+          expect(entry.value).toMatchObject({ value: 'Use Vitest' });
+        }
+      }
+    });
+
+    it('should interpolate override value replacements', () => {
+      const ctx: TemplateContext = {
+        params: new Map([['level', 'strict']]),
+        sourceFile: 'test.prs',
+      };
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        blocks: [],
+        extends: [],
+        overrides: [
+          {
+            type: 'OverrideBlock',
+            targetPath: 'standards.linting',
+            replacement: {
+              type: 'ValueReplacement',
+              value: createValueNode('Run eslint in {{level}} mode', loc),
+              loc,
+            },
+            loc,
+          },
+        ],
+        loc,
+      };
+
+      const result = interpolateAST(ast, ctx);
+
+      const replacement = result.overrides?.[0]?.replacement;
+      expect(replacement?.type).toBe('ValueReplacement');
+      if (replacement?.type === 'ValueReplacement') {
+        expect(replacement.value).toMatchObject({ value: 'Run eslint in strict mode' });
+      }
+    });
   });
 
   describe('security edge cases', () => {
