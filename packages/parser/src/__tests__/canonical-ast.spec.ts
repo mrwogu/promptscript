@@ -24,6 +24,88 @@ describe('canonical AST', () => {
     expect(ast.extends).toHaveLength(1);
   });
 
+  it('preserves explicit overrides in declaration order and legacy projections', () => {
+    const source = `
+      @meta { id: "override-order" syntax: "1.6.0" }
+      @standards { testing: ["Old"] }
+      @override standards.testing { ["Use Vitest"] }
+      @extend standards.testing { - "Require coverage" }
+    `;
+    const canonical = parseCanonicalOrThrow(source, { filename: 'override.prs' });
+    const legacy = parseOrThrow(source, { filename: 'override.prs' });
+
+    expect(canonical.operations.map((operation) => operation.type)).toEqual([
+      'BlockOperation',
+      'OverrideOperation',
+      'ExtendOperation',
+    ]);
+    expect(canonical.overrides).toHaveLength(1);
+    expect(canonical.overrides?.[0]?.replacement.type).toBe('ValueReplacement');
+    expect(legacy.overrides).toHaveLength(1);
+    expect(legacy.overrides?.[0]?.targetPath).toBe('standards.testing');
+  });
+
+  it('parses regular block bodies and standalone override values', () => {
+    const ast = parseCanonicalOrThrow(`
+      @meta { id: "override-values" syntax: "1.6.0" }
+      @standards { testing: ["Old"] }
+      @override standards { testing: ["New"] }
+      @override standards.testing { { runner: "vitest" } }
+      @override standards.testing.runner { "node" }
+      @override standards.testing.enabled { true }
+      @override standards.testing.retries { 3 }
+      @override standards.testing.optional { null }
+    `);
+
+    expect(ast.overrides?.map((operation) => operation.replacement.type)).toEqual([
+      'BlockReplacement',
+      'ValueReplacement',
+      'ValueReplacement',
+      'ValueReplacement',
+      'ValueReplacement',
+      'ValueReplacement',
+    ]);
+  });
+
+  it('keeps @override without a target as a custom block', () => {
+    const ast = parseCanonicalOrThrow(`
+      @meta { id: "custom-override" syntax: "1.0.0" }
+      @override { mode: "custom" }
+    `);
+
+    expect(ast.blocks.map((block) => block.name)).toEqual(['override']);
+    expect(ast.overrides).toEqual([]);
+    expect(ast.syntaxFeatures).toEqual([]);
+  });
+
+  it('keeps override legal in fields, aliases, parameters, and path segments', () => {
+    const ast = parseCanonicalOrThrow(`
+      @meta { id: "override-identifiers" syntax: "1.6.0" }
+      @params { override: "default" }
+      @use ./shared as override
+      @standards { override: true }
+      @override standards.override { false }
+    `);
+
+    expect(ast.uses[0]?.alias).toBe('override');
+    expect(ast.blocks.map((block) => block.name)).toEqual(['params', 'standards']);
+    expect(ast.overrides?.[0]?.targetPath).toBe('standards.override');
+  });
+
+  it('reports an empty explicit override body', () => {
+    const result = parse('@override standards {}', {
+      recovery: true,
+      filename: 'empty-override.prs',
+    });
+
+    expect(result.ast?.overrides).toHaveLength(1);
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        message: '@override requires a non-empty replacement body.',
+      }),
+    ]);
+  });
+
   it('uses one ordered body for text, fields, lists, and inline imports', () => {
     const ast = parseCanonicalOrThrow(
       `

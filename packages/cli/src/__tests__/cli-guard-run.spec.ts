@@ -24,7 +24,8 @@ vi.mock('../utils/version-check', () => ({
 }));
 
 // Mock core getPackageVersion
-vi.mock('@promptscript/core', () => ({
+vi.mock('@promptscript/core', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@promptscript/core')>()),
   getPackageVersion: vi.fn().mockReturnValue('1.0.0'),
 }));
 

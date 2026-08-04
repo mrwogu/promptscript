@@ -89,7 +89,7 @@ describe('valid-sealed-property (PS029)', () => {
         makeSkillsBlock({
           expert: {
             description: 'test',
-            sealed: ['content', 'description'],
+            sealed: ['content', 'description', 'license'],
           },
         }),
       ],

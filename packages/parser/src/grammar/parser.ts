@@ -59,7 +59,7 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * program
-   *   : metaBlock? (inheritDecl | useDecl | extendBlock | block)*
+   *   : metaBlock? (inheritDecl | useDecl | extendBlock | overrideBlock | block)*
    */
   public program = this.RULE('program', () => {
     this.OPTION(() => this.SUBRULE(this.metaBlock));
@@ -68,6 +68,10 @@ export class PromptScriptParser extends CstParser {
         { ALT: () => this.SUBRULE(this.inheritDecl) },
         { ALT: () => this.SUBRULE(this.useDecl) },
         { ALT: () => this.SUBRULE(this.extendBlock) },
+        {
+          ALT: () => this.SUBRULE(this.overrideBlock),
+          GATE: () => this.isOverrideDirectiveAhead(),
+        },
         { ALT: () => this.SUBRULE(this.block) },
       ])
     );
@@ -140,6 +144,33 @@ export class PromptScriptParser extends CstParser {
     this.CONSUME(LBrace);
     this.SUBRULE(this.blockContent);
     this.CONSUME(RBrace);
+  });
+
+  /**
+   * overrideBlock
+   *   : '@' Identifier dotPath '{' overrideBody '}'
+   */
+  private overrideBlock = this.RULE('overrideBlock', () => {
+    this.CONSUME(At);
+    this.CONSUME(Identifier);
+    this.SUBRULE(this.dotPath);
+    this.CONSUME(LBrace);
+    this.SUBRULE(this.overrideBody);
+    this.CONSUME(RBrace);
+  });
+
+  /**
+   * overrideBody
+   *   : blockContent | value
+   */
+  private overrideBody = this.RULE('overrideBody', () => {
+    this.OR([
+      {
+        ALT: () => this.SUBRULE(this.blockContent),
+        GATE: () => this.isOverrideBlockBodyAhead(),
+      },
+      { ALT: () => this.SUBRULE(this.value) },
+    ]);
   });
 
   /**
@@ -268,6 +299,38 @@ export class PromptScriptParser extends CstParser {
     if (!first || first.tokenType?.name !== 'At') return false;
     const second = this.LA(2);
     return second?.tokenType?.name === 'Identifier' && second.image === 'header';
+  }
+
+  private isOverrideDirectiveAhead(): boolean {
+    const at = this.LA(1);
+    const directive = this.LA(2);
+    const target = this.LA(3);
+    return (
+      at?.tokenType?.name === 'At' &&
+      directive?.tokenType?.name === 'Identifier' &&
+      directive.image === 'override' &&
+      target?.tokenType?.name !== 'LBrace'
+    );
+  }
+
+  private isOverrideBlockBodyAhead(): boolean {
+    const first = this.LA(1);
+    if (!first) return false;
+    const firstType = first.tokenType?.name;
+    if (['RBrace', 'Dash', 'At', 'TextBlock'].includes(firstType ?? '')) {
+      return true;
+    }
+
+    if (
+      ['Identifier', 'StringLiteral', 'StringType', 'NumberType', 'BooleanType'].includes(
+        firstType ?? ''
+      )
+    ) {
+      const secondType = this.LA(2)?.tokenType?.name;
+      return ['Colon', 'Question', 'Bang'].includes(secondType ?? '');
+    }
+
+    return false;
   }
 
   /**

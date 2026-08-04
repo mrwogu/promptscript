@@ -224,12 +224,20 @@ export class Compiler {
     // Check for resolve errors
     if (resolved.errors.length > 0 || !resolved.ast) {
       stats.totalTime = Date.now() - startTotal;
+      const compatibility = resolved.ast ? this.validator.validate(resolved.ast) : undefined;
+      const compatibilityErrors =
+        compatibility?.errors.filter((message) => message.ruleId === 'PS018') ?? [];
+      const compatibilityWarnings =
+        compatibility?.warnings.filter((message) => message.ruleId === 'PS018') ?? [];
 
       return {
         success: false,
         outputs: new Map(),
-        errors: resolved.errors.map((e) => this.toCompileError(e)),
-        warnings: [],
+        errors: [
+          ...resolved.errors.map((error) => this.toCompileError(error)),
+          ...compatibilityErrors.map((message) => this.validationToCompileError(message)),
+        ],
+        warnings: compatibilityWarnings,
         stats,
       };
     }

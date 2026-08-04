@@ -28,13 +28,29 @@ function mergeAliasCollision(base: Block, incoming: Block): Block {
   return mergeBlockCollections([base], [incoming], ALIAS_MERGE_POLICY)[0]!;
 }
 
+export interface NormalizeBlockAliasOptions {
+  readonly preserveDeclarationOrder?: boolean;
+}
+
+function precedes(
+  left: { file: string; line: number; column: number; offset?: number },
+  right: { file: string; line: number; column: number; offset?: number }
+): boolean {
+  if (left.file !== right.file) return false;
+  if (left.offset !== undefined && right.offset !== undefined) return left.offset < right.offset;
+  return left.line < right.line || (left.line === right.line && left.column < right.column);
+}
+
 /**
  * Normalize aliases and merge alias/canonical collisions in source order.
  *
  * Repeated canonical blocks remain distinct for compatibility. A collision is
  * merged only when at least one declaration used an alias.
  */
-export function normalizeBlockAliases(ast: Program): Program {
+export function normalizeBlockAliases(
+  ast: Program,
+  options: NormalizeBlockAliasOptions = {}
+): Program {
   let changed = false;
   const blocks: Block[] = [];
   const aliasNames = new Set<string>();
@@ -43,6 +59,11 @@ export function normalizeBlockAliases(ast: Program): Program {
     const canonicalName = BLOCK_ALIASES[block.name];
     const normalized = canonicalName ? { ...block, name: canonicalName } : block;
     if (canonicalName) changed = true;
+
+    if (options.preserveDeclarationOrder) {
+      blocks.push(normalized);
+      continue;
+    }
 
     const existingIndexes = blocks.flatMap((candidate, index) =>
       candidate.name === normalized.name ? [index] : []
@@ -75,9 +96,16 @@ export function normalizeBlockAliases(ast: Program): Program {
       .map((declaration) => declaration.alias)
       .filter((alias): alias is string => alias !== undefined)
   );
+  const isVisibleUseAlias = (name: string, location: Block['loc']): boolean =>
+    options.preserveDeclarationOrder
+      ? ast.uses.some(
+          (declaration) => declaration.alias === name && precedes(declaration.loc, location)
+        )
+      : useAliases.has(name);
   const extensions = ast.extends.map((extension) => {
     const [root, ...rest] = extension.targetPath.split('.');
-    const canonicalName = root && !useAliases.has(root) ? BLOCK_ALIASES[root] : undefined;
+    const canonicalName =
+      root && !isVisibleUseAlias(root, extension.loc) ? BLOCK_ALIASES[root] : undefined;
     if (!canonicalName) return extension;
     changed = true;
     return {
@@ -85,6 +113,17 @@ export function normalizeBlockAliases(ast: Program): Program {
       targetPath: [canonicalName, ...rest].join('.'),
     };
   });
+  const overrides = (ast.overrides ?? []).map((override) => {
+    const [root, ...rest] = override.targetPath.split('.');
+    const canonicalName =
+      root && !isVisibleUseAlias(root, override.loc) ? BLOCK_ALIASES[root] : undefined;
+    if (!canonicalName) return override;
+    changed = true;
+    return {
+      ...override,
+      targetPath: [canonicalName, ...rest].join('.'),
+    };
+  });
 
-  return changed ? { ...ast, blocks, extends: extensions } : ast;
+  return changed ? { ...ast, blocks, extends: extensions, overrides } : ast;
 }

@@ -7,9 +7,11 @@ import type {
   BlockEntry,
   CanonicalBlock,
   CanonicalExtendBlock,
+  CanonicalOverrideBlock,
   CanonicalProgram,
   FieldEntry,
   PresentationEntry,
+  OverrideReplacement,
   ProgramOperation,
   MetaBlock,
   InheritDeclaration,
@@ -32,6 +34,7 @@ import {
   createBlockBody,
   createCanonicalBlock,
   createCanonicalExtendBlock,
+  createCanonicalOverrideBlock,
   createCanonicalProgram,
   createValueNode,
   normalizeLegacyHeadingEntries,
@@ -53,6 +56,7 @@ interface ProgramCstCtx {
   useDecl?: CstNode[];
   block?: CstNode[];
   extendBlock?: CstNode[];
+  overrideBlock?: CstNode[];
 }
 
 interface MetaBlockCstCtx {
@@ -94,6 +98,18 @@ interface ExtendBlockCstCtx {
   dotPath: CstNode[];
   LBrace: IToken[];
   blockContent: CstNode[];
+}
+
+interface OverrideBlockCstCtx {
+  At: IToken[];
+  dotPath: CstNode[];
+  LBrace: IToken[];
+  overrideBody: CstNode[];
+}
+
+interface OverrideBodyCstCtx {
+  blockContent?: CstNode[];
+  value?: CstNode[];
 }
 
 interface BlockContentCstCtx {
@@ -357,6 +373,7 @@ class PromptScriptVisitor extends BaseVisitor {
       ...(ctx.useDecl ?? []),
       ...(ctx.block ?? []),
       ...(ctx.extendBlock ?? []),
+      ...(ctx.overrideBlock ?? []),
     ]
       .map(
         (node) =>
@@ -365,6 +382,7 @@ class PromptScriptVisitor extends BaseVisitor {
             | UseDeclaration
             | CanonicalBlock
             | CanonicalExtendBlock
+            | CanonicalOverrideBlock
       )
       .sort((left, right) => (left.loc.offset ?? 0) - (right.loc.offset ?? 0));
     const operations: ProgramOperation[] = declarations.map((declaration) => {
@@ -394,6 +412,13 @@ class PromptScriptVisitor extends BaseVisitor {
           return {
             type: 'ExtendOperation',
             extension: declaration,
+            sourceLayerId,
+            loc: declaration.loc,
+          };
+        case 'CanonicalOverrideBlock':
+          return {
+            type: 'OverrideOperation',
+            override: declaration,
             sourceLayerId,
             loc: declaration.loc,
           };
@@ -594,6 +619,64 @@ class PromptScriptVisitor extends BaseVisitor {
       replacements,
       this.loc(ctx.At[0]!)
     );
+  }
+
+  /**
+   * overrideBlock → CanonicalOverrideBlock
+   */
+  overrideBlock(ctx: OverrideBlockCstCtx): CanonicalOverrideBlock {
+    const targetPath = this.visit(ctx.dotPath[0]!) as string;
+    const replacement = this.visit(ctx.overrideBody[0]!) as OverrideReplacement;
+    const directiveLoc = this.loc(ctx.At[0]!);
+    this.syntaxFeatures.push({
+      feature: SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
+      location: directiveLoc,
+    });
+    if (replacement.type === 'BlockReplacement' && replacement.body.entries.length === 0) {
+      this.diagnostics.push({
+        message: '@override requires a non-empty replacement body.',
+        loc: directiveLoc,
+      });
+    }
+    return createCanonicalOverrideBlock(targetPath, replacement, directiveLoc);
+  }
+
+  /**
+   * overrideBody → OverrideReplacement
+   */
+  overrideBody(ctx: OverrideBodyCstCtx): OverrideReplacement {
+    if (ctx.blockContent) {
+      const { body, replacements } = this.visit(ctx.blockContent[0]!) as ParsedBlockContent;
+      for (const replacement of replacements) {
+        this.diagnostics.push({
+          message: "The '!' replace modifier is unnecessary inside @override. Remove the modifier.",
+          loc: replacement.loc,
+        });
+      }
+      return {
+        type: 'BlockReplacement',
+        body,
+        loc: body.loc,
+      };
+    }
+
+    const valueCst = ctx.value?.[0];
+    if (!valueCst) {
+      throw new Error('@override replacement value is unavailable');
+    }
+    const value = this.visit(valueCst) as Value;
+    const fallbackLoc = {
+      file: this.filename,
+      line: 1,
+      column: 1,
+      offset: 0,
+    };
+    const valueNode = this.createValueNodeFromCst(valueCst, value, fallbackLoc);
+    return {
+      type: 'ValueReplacement',
+      value: valueNode,
+      loc: valueNode.loc,
+    };
   }
 
   /**

@@ -5,6 +5,7 @@
   "patterns": [
     { "include": "#comment" },
     { "include": "#registry-import" },
+    { "include": "#override-directive" },
     { "include": "#control-directive" },
     { "include": "#block-directive" },
     { "include": "#url-import" },
@@ -37,6 +38,10 @@
     },
     "control-directive": {
       "match": "@(?:meta|inherit|use|extend|header)\\b",
+      "name": "keyword.control.directive.prs"
+    },
+    "override-directive": {
+      "match": "@override(?=\\s+[a-zA-Z_][\\w-]*(?:\\.[a-zA-Z_][\\w-]*)*\\s*\\{)",
       "name": "keyword.control.directive.prs"
     },
     "block-directive": {

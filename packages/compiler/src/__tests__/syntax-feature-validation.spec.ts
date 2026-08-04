@@ -13,6 +13,112 @@ afterEach(() => {
 });
 
 describe('syntax feature validation after resolution', () => {
+  it('should report explicit overrides declared below syntax 1.6.0', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'promptscript-syntax-feature-'));
+    directories.push(directory);
+    const entryPath = join(directory, 'project.prs');
+    writeFileSync(
+      entryPath,
+      `@meta { id: "test" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards.testing { ["Use Vitest"] }
+`
+    );
+    const compiler = new Compiler({
+      resolver: { registryPath: directory, projectRoot: directory },
+      formatters: [],
+    });
+
+    const result = await compiler.compile(entryPath);
+
+    expect(result.success).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        ruleId: 'PS018',
+        message: expect.stringContaining('explicit-override'),
+        location: expect.objectContaining({ file: entryPath, line: 3, column: 1 }),
+      }),
+    ]);
+  });
+
+  it('should retain syntax diagnostics when override resolution fails', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'promptscript-syntax-feature-'));
+    directories.push(directory);
+    const entryPath = join(directory, 'project.prs');
+    writeFileSync(
+      entryPath,
+      `@meta { id: "test" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards.missing { true }
+`
+    );
+    const compiler = new Compiler({
+      resolver: { registryPath: directory, projectRoot: directory },
+      formatters: [],
+    });
+
+    const result = await compiler.compile(entryPath);
+
+    expect(result.success).toBe(false);
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('does not exist at segment "missing"'),
+      }),
+    ]);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        ruleId: 'PS018',
+        message: expect.stringContaining('explicit-override'),
+      }),
+    ]);
+  });
+
+  it('should honor configured PS018 severity during override failures', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'promptscript-syntax-feature-'));
+    directories.push(directory);
+    const entryPath = join(directory, 'project.prs');
+    writeFileSync(
+      entryPath,
+      `@meta { id: "test" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards.missing { true }
+`
+    );
+    const errorCompiler = new Compiler({
+      resolver: { registryPath: directory, projectRoot: directory, cache: false },
+      validator: { rules: { 'syntax-version-compat': 'error' } },
+      formatters: [],
+    });
+    const offCompiler = new Compiler({
+      resolver: { registryPath: directory, projectRoot: directory, cache: false },
+      validator: { rules: { 'syntax-version-compat': 'off' } },
+      formatters: [],
+    });
+
+    const errorResult = await errorCompiler.compile(entryPath);
+    const offResult = await offCompiler.compile(entryPath);
+
+    expect(errorResult.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining('does not exist at segment "missing"'),
+        }),
+        expect.objectContaining({
+          code: 'PS018',
+          message: expect.stringContaining('explicit-override'),
+        }),
+      ])
+    );
+    expect(errorResult.warnings).toEqual([]);
+    expect(offResult.errors).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('does not exist at segment "missing"'),
+      }),
+    ]);
+    expect(offResult.warnings).toEqual([]);
+  });
+
   it('should report replace modifiers declared with syntax 1.2.0', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'promptscript-syntax-feature-'));
     directories.push(directory);

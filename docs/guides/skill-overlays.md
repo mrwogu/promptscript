@@ -63,11 +63,11 @@ Result: `description` = `"Travel review"` (last replace wins), `references` incl
 
 When `@extend` targets a skill, each property follows a specific merge strategy:
 
-| Strategy          | Properties                                                                                                         | Behavior                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
-| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent` | Extension value wins outright    |
-| **Append**        | `references`, `requires`                                                                                           | Extension entries added to base  |
-| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                      | Extension keys added/overwritten |
+| Strategy          | Properties                                                                                                                    | Behavior                         |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent`, `license` | Extension value wins outright    |
+| **Append**        | `references`, `requires`                                                                                                      | Extension entries added to base  |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                                 | Extension keys added/overwritten |
 
 ### Replace Example
 

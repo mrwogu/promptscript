@@ -6,6 +6,8 @@ import {
   noopLogger,
   type Logger,
   type CanonicalProgram,
+  type ExtendBlock,
+  type OverrideBlock,
   type Program,
   type Value,
   type Lockfile,
@@ -14,8 +16,17 @@ import {
   FileNotFoundError,
   ErrorCode,
   bindParams,
+  applyOverride,
+  blockBodyToContent,
+  consumeInlineUses,
+  deepClone,
+  getSyntaxFeatureUsages,
+  INHERITANCE_MERGE_POLICY,
   interpolateAST,
+  mergeBlockCollections,
   normalizeProgram,
+  toLegacyBlock,
+  usesSequentialOperations,
   type TemplateContext,
 } from '@promptscript/core';
 import {
@@ -25,8 +36,14 @@ import {
   parseRegistryMarker,
 } from './loader.js';
 import { resolveInheritance } from './inheritance.js';
-import { resolveUses, extractReservedParams, filterBlocks, filterSkillsBlock } from './imports.js';
-import { applyExtends } from './extensions.js';
+import {
+  IMPORT_MARKER_PREFIX,
+  resolveUses,
+  extractReservedParams,
+  filterBlocks,
+  filterSkillsBlock,
+} from './imports.js';
+import { applyExtend, applyExtends } from './extensions.js';
 import {
   resolveNativeSkills,
   resolveNativeCommands,
@@ -193,23 +210,33 @@ export class Resolver {
       return { ast: null, sources, errors };
     }
 
-    let ast = normalizeBlockAliases(parseData.ast);
+    let ast = parseData.ast;
+    const sequentialOperations = usesSequentialOperations(ast);
+    ast = normalizeBlockAliases(ast, {
+      preserveDeclarationOrder: sequentialOperations,
+    });
     this.logger.debug(`AST node count: ${this.countNodes(ast)}`);
 
-    // Resolve inheritance
-    ast = await this.resolveInherit(ast, absPath, sources, errors);
+    if (sequentialOperations) {
+      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
+    } else {
+      // Preserve legacy phase ordering through syntax 1.5.x.
+      ast = await this.resolveInherit(ast, absPath, sources, errors);
+      ast = await this.resolveImports(ast, absPath, sources, errors);
+    }
 
-    // Resolve imports
-    ast = await this.resolveImports(ast, absPath, sources, errors);
-
-    // Resolve skill composition (inline @use within @skills blocks)
-    ast = await this.resolveComposition(ast, absPath, sources, errors);
+    // Legacy phase order resolves inline composition after top-level imports.
+    if (!sequentialOperations) {
+      ast = await this.resolveComposition(ast, absPath, sources, errors);
+    }
 
     // Apply extensions
-    if (ast.extends.length > 0) {
+    if (!sequentialOperations && ast.extends.length > 0) {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
-    ast = applyExtends(ast, this.logger);
+    if (!sequentialOperations) {
+      ast = applyExtends(ast, this.logger);
+    }
 
     // Resolve guard requires dependencies
     ast = resolveGuardRequires(ast, {
@@ -246,6 +273,147 @@ export class Resolver {
     };
   }
 
+  private async resolveSequentialOperations(
+    ast: Program,
+    absPath: string,
+    sources: string[],
+    errors: ResolveError[]
+  ): Promise<Program> {
+    const operations = normalizeProgram(ast).operations;
+    const localBlockNames = new Set<string>();
+    let result: Program = {
+      ...ast,
+      inherit: undefined,
+      uses: [],
+      blocks: [],
+      extends: [],
+      overrides: [],
+      syntaxFeatures: getSyntaxFeatureUsages(ast),
+    };
+
+    for (const operation of operations) {
+      switch (operation.type) {
+        case 'InheritOperation':
+          result = await this.resolveInherit(
+            {
+              ...result,
+              inherit: deepClone(operation.declaration) as unknown as NonNullable<
+                Program['inherit']
+              >,
+            },
+            absPath,
+            sources,
+            errors,
+            true
+          );
+          break;
+        case 'UseOperation':
+          result = await this.resolveImports(
+            {
+              ...result,
+              uses: [deepClone(operation.declaration) as unknown as Program['uses'][number]],
+            },
+            absPath,
+            sources,
+            errors
+          );
+          result = { ...result, uses: [] };
+          break;
+        case 'BlockOperation': {
+          const block = toLegacyBlock(operation.block, { preserveCanonicalBody: true });
+          result = {
+            ...result,
+            blocks: localBlockNames.has(block.name)
+              ? [...result.blocks, block]
+              : mergeBlockCollections(result.blocks, [block], {
+                  content: INHERITANCE_MERGE_POLICY,
+                  outputOrder: 'base',
+                }),
+          };
+          localBlockNames.add(block.name);
+          result = await this.resolveComposition(result, absPath, sources, errors);
+          break;
+        }
+        case 'ExtendOperation': {
+          const extension: ExtendBlock = {
+            type: 'ExtendBlock',
+            targetPath: operation.extension.targetPath,
+            content: blockBodyToContent(operation.extension.body),
+            canonicalBody: deepClone(operation.extension.body),
+            ...(operation.extension.replacements
+              ? {
+                  replacements: operation.extension.replacements.map(
+                    (replacement) =>
+                      deepClone(replacement) as unknown as NonNullable<
+                        ExtendBlock['replacements']
+                      >[number]
+                  ),
+                }
+              : {}),
+            loc: deepClone(operation.extension.loc),
+          };
+          try {
+            result = {
+              ...result,
+              blocks: applyExtend(result.blocks, extension, this.logger),
+            };
+            result = await this.resolveComposition(result, absPath, sources, errors);
+          } catch (error) {
+            errors.push(
+              error instanceof ResolveError
+                ? error
+                : new ResolveError(
+                    `Extension resolution failed: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                    extension.loc
+                  )
+            );
+          }
+          break;
+        }
+        case 'OverrideOperation': {
+          const override: OverrideBlock = {
+            type: 'OverrideBlock',
+            targetPath: operation.override.targetPath,
+            replacement: deepClone(
+              operation.override.replacement
+            ) as unknown as OverrideBlock['replacement'],
+            loc: deepClone(operation.override.loc),
+          };
+          try {
+            result = applyOverride(result, override, {
+              importMarkerPrefix: IMPORT_MARKER_PREFIX,
+            });
+            result = await this.resolveComposition(result, absPath, sources, errors);
+          } catch (error) {
+            errors.push(
+              error instanceof ResolveError
+                ? error
+                : new ResolveError(
+                    `Override resolution failed: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                    override.loc
+                  )
+            );
+          }
+          break;
+        }
+      }
+    }
+
+    return {
+      ...result,
+      blocks: result.blocks.filter((block) => !block.name.startsWith(IMPORT_MARKER_PREFIX)),
+      inherit: undefined,
+      uses: [],
+      extends: [],
+      overrides: [],
+      syntaxFeatures: getSyntaxFeatureUsages(result),
+    };
+  }
+
   /**
    * Count nodes in AST for debug output.
    */
@@ -256,6 +424,7 @@ export class Resolver {
     count += ast.uses.length;
     count += ast.blocks.length;
     count += ast.extends.length;
+    count += ast.overrides?.length ?? 0;
     return count;
   }
 
@@ -417,7 +586,8 @@ export class Resolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    parentWins = false
   ): Promise<Program> {
     if (!ast.inherit) {
       return ast;
@@ -464,7 +634,16 @@ export class Resolver {
         }
 
         this.logger.debug(`Merging with parent AST`);
-        return resolveInheritance(resolvedParent, ast);
+        const inherited = resolveInheritance(resolvedParent, ast);
+        return parentWins
+          ? {
+              ...inherited,
+              blocks: mergeBlockCollections(ast.blocks, resolvedParent.blocks, {
+                content: INHERITANCE_MERGE_POLICY,
+                outputOrder: 'base',
+              }),
+            }
+          : inherited;
       }
     } catch (err) {
       if (err instanceof CircularDependencyError) {
@@ -647,6 +826,7 @@ export class Resolver {
           )
         );
       }
+      ast = consumeInlineUses(ast);
     }
 
     return ast;

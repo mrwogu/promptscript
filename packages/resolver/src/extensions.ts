@@ -19,23 +19,14 @@ import {
   composeBlockBodies,
   prepareBlockContentForMerge,
   reconcileBlockBodyAtPath,
+  SKILL_REPLACE_PROPERTY_NAMES,
 } from '@promptscript/core';
 import { IMPORT_MARKER_PREFIX, getOriginalBlockName } from './imports.js';
 
 // ── Skill-aware merge strategy sets ──────────────────────────────────
 
 /** Properties where the extension value replaces the base value. */
-const SKILL_REPLACE_PROPERTIES = new Set([
-  'content',
-  'description',
-  'trigger',
-  'userInvocable',
-  'allowedTools',
-  'disableModelInvocation',
-  'context',
-  'agent',
-  'license',
-]);
+const SKILL_REPLACE_PROPERTIES = new Set<string>(SKILL_REPLACE_PROPERTY_NAMES);
 
 /** Properties where array elements are appended (deduplicated). */
 const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires', 'scripts']);
@@ -162,7 +153,7 @@ export function applyExtends(ast: Program, logger?: Logger): Program {
 /**
  * Apply a single @extend block.
  */
-function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[] {
+export function applyExtend(blocks: Block[], ext: ExtendBlock, logger?: Logger): Block[] {
   const pathParts = ext.targetPath.split('.');
   const rootName = pathParts[0];
 

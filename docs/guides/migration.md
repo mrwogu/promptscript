@@ -860,6 +860,29 @@ Modify inherited blocks at specific paths:
 }
 ```
 
+Choose modification syntax by migration intent:
+
+- Keep `@extend` when old and new values should merge or append.
+- Keep `field!` as a compatibility form for replacing one direct regular
+  field inside `@extend`.
+- Use `@override` with syntax `1.6.0` when one complete existing block or
+  nested value must replace the previous value.
+
+```promptscript
+@meta { id: "migrated-project" syntax: "1.6.0" }
+
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+```
+
+Unlike `field!`, `@override` requires the complete target path to exist. It
+cannot bypass sealed skill properties.
+
 <!-- playground-link-start -->
 <a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9ACMMcGL158AFNRgBzCHCzVZvALS8AJgYyLYF3mGbVe5DLN3VmAV1YWAlAA6rHwAghb2WMy8RAZYQrq8EBaccViyQfxEHL6JyeziJsBB6gEgpeWs6mFWcWwYUNGEaKJxqomVAEowGIwSyQBuMFDMaCQpFMW85WVlrAC+QUF8ALLMVmAmrPAc9oYyFhjUFnAZWZy7WPuHxxQsyRQchvG8RZUO1KQwAO5OANaIUxA-XE2wq6hYgw+uhgAIAnAAGIILVhLXjVXiRXg6QxiXoQNhwXiHD7pViZQjZezYowQPEEl6TcylACqbTAPjprHqvCkaDYKUJbCg6Vm6iZIAAclFGFAVHBTMpVPZefz2CdZnMQHMALoMFLGfBEUjkGBUWggBiQuD41j4ACMWqAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />

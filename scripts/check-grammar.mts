@@ -11,7 +11,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { BLOCK_TYPES } from '../packages/core/src/types/constants.js';
-import { CONTEXTUAL_DIRECTIVES } from '../packages/core/src/section-registry.js';
+import {
+  CONTEXTUAL_DIRECTIVES,
+  CONTEXTUAL_OPERATION_DIRECTIVES,
+} from '../packages/core/src/section-registry.js';
 // Uses .js extension per swc-node convention (see validate-docs-examples.mts for reference)
 import { allTokens } from '../packages/parser/src/lexer/tokens.js';
 import {
@@ -265,10 +268,17 @@ for (const token of allTokens) {
 
 const expectedBlockDirectives = BLOCK_TYPES.map((blockType) => `@${blockType}`);
 const expectedContextualDirectives = [...CONTEXTUAL_DIRECTIVES];
+const expectedContextualOperations = [...CONTEXTUAL_OPERATION_DIRECTIVES];
 const monacoDirectives = new Set(prsLanguageDefinition.directives as string[]);
 for (const directive of [...expectedBlockDirectives, ...expectedContextualDirectives]) {
   if (!monacoDirectives.has(directive)) {
     syncErrors.push(`Monaco grammar is missing directive ${directive}`);
+  }
+}
+const monacoOperations = new Set(prsLanguageDefinition.operationDirectives as string[]);
+for (const directive of expectedContextualOperations) {
+  if (!monacoOperations.has(directive)) {
+    syncErrors.push(`Monaco grammar is missing contextual operation ${directive}`);
   }
 }
 
@@ -291,6 +301,22 @@ if (!pygmentsBlockMatch) {
   }
 }
 
+const pygmentsOperationMatch = pygmentsSource.match(
+  /CONTEXTUAL_OPERATION_DIRECTIVES = \(([\s\S]*?)\)\n\n/
+);
+if (!pygmentsOperationMatch) {
+  syncErrors.push('Pygments lexer does not expose CONTEXTUAL_OPERATION_DIRECTIVES');
+} else {
+  const pygmentsOperations = new Set(
+    [...pygmentsOperationMatch[1]!.matchAll(/"([^"]+)"/g)].map((match) => `@${match[1]!}`)
+  );
+  for (const directive of expectedContextualOperations) {
+    if (!pygmentsOperations.has(directive)) {
+      syncErrors.push(`Pygments lexer is missing contextual operation ${directive}`);
+    }
+  }
+}
+
 const pygmentsContextualMatch = pygmentsSource.match(/CONTEXTUAL_DIRECTIVES = \(([\s\S]*?)\)\n\n/);
 if (!pygmentsContextualMatch) {
   syncErrors.push('Pygments lexer does not expose CONTEXTUAL_DIRECTIVES');
@@ -301,6 +327,18 @@ if (!pygmentsContextualMatch) {
   for (const directive of expectedContextualDirectives) {
     if (!pygmentsContextual.has(directive)) {
       syncErrors.push(`Pygments lexer is missing contextual directive ${directive}`);
+    }
+  }
+}
+
+const textMateOperationPattern = grammar.repository?.['override-directive']?.match;
+if (!textMateOperationPattern) {
+  syncErrors.push('TextMate grammar does not define override-directive.match');
+} else {
+  const operationRegex = new RegExp(`^(?:${textMateOperationPattern})`);
+  for (const directive of expectedContextualOperations) {
+    if (!operationRegex.test(`${directive} standards.testing {`)) {
+      syncErrors.push(`TextMate grammar does not match contextual operation ${directive}`);
     }
   }
 }

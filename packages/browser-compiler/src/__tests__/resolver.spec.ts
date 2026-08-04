@@ -3370,6 +3370,93 @@ describe('BrowserResolver', () => {
     });
   });
 
+  describe('explicit override resolution', () => {
+    it('applies ordered replacements and later extensions', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "override" syntax: "1.6.0" }
+@standards { testing: ["Use Jest"] config: { runner: "jest" coverage: 80 } }
+@override standards.testing { ["Use Vitest"] }
+@extend standards { testing: ["Require coverage"] }
+@override standards.config.runner { "vitest" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+
+      expect(result.errors).toEqual([]);
+      expect(standards?.content).toMatchObject({
+        type: 'ObjectContent',
+        properties: {
+          testing: ['Use Vitest', 'Require coverage'],
+          config: { runner: 'vitest', coverage: 80 },
+        },
+      });
+    });
+
+    it('replaces inherited and aliased imported values', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "child" syntax: "1.6.0" }
+@inherit ./parent
+@use ./shared as shared
+@override context.runtime { "bun" }
+@override shared.standards.testing { ["Use Vitest"] }`,
+        'parent.prs': `@meta { id: "parent" syntax: "1.6.0" }
+@context { runtime: "node" }`,
+        'shared.prs': `@meta { id: "shared" syntax: "1.6.0" }
+@standards { testing: ["Use Jest"] }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const context = result.ast?.blocks.find((block) => block.name === 'context');
+      const standards = result.ast?.blocks.find((block) => block.name === 'standards');
+
+      expect(result.errors).toEqual([]);
+      expect(context?.content).toMatchObject({ properties: { runtime: 'bun' } });
+      expect(standards?.content).toMatchObject({
+        properties: { testing: ['Use Vitest'] },
+      });
+      expect(result.ast?.blocks.some((block) => block.name.startsWith('__import__'))).toBe(false);
+    });
+
+    it('reports missing and sealed targets without partial mutation', async () => {
+      const fs = new VirtualFileSystem({
+        'project.prs': `@meta { id: "invalid" syntax: "1.5.0" }
+@skills {
+  review: {
+    description: "Review code"
+    content: "Critical"
+    sealed: ["content"]
+  }
+}
+@override skills.review.missing { true }
+@override skills.review.content { "Changed" }`,
+      });
+      const resolver = new BrowserResolver({ fs });
+
+      const result = await resolver.resolve('project.prs');
+      const skills = result.ast?.blocks.find((block) => block.name === 'skills');
+
+      expect(result.errors.map((error) => error.message)).toEqual([
+        expect.stringContaining('does not exist at segment "missing"'),
+        expect.stringContaining("Cannot override sealed property 'content'"),
+      ]);
+      expect(skills?.content).toMatchObject({
+        properties: {
+          review: {
+            content: 'Critical',
+          },
+        },
+      });
+      expect(result.ast?.syntaxFeatures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ feature: SYNTAX_FEATURES.EXPLICIT_OVERRIDE }),
+        ])
+      );
+    });
+  });
+
   describe('deepCloneValue array cloning', () => {
     it('should deep clone array values in skill properties during extend', async () => {
       // Covers resolver.ts line 1443: Array.isArray(value) in deepCloneValue

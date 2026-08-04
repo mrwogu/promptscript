@@ -6,6 +6,7 @@ import {
   createBlockBody,
   createCanonicalBlock,
   createCanonicalExtendBlock,
+  createCanonicalOverrideBlock,
   createCanonicalProgram,
   createValueNode,
   blockBodyToContent,
@@ -82,6 +83,38 @@ describe('canonical AST compatibility', () => {
 
     expect(getBlockText(canonical.blocks[0]!)).toBe('Original');
     expect(getBlockText(projection.blocks[0]!)).toBe('Changed');
+  });
+
+  it('projects canonical overrides with the legacy discriminant', () => {
+    const override = createCanonicalOverrideBlock(
+      'standards.testing',
+      {
+        type: 'ValueReplacement',
+        value: createValueNode(['Use Vitest'], LOC),
+        loc: LOC,
+      },
+      LOC
+    );
+    const canonical = createCanonicalProgram({
+      operations: [
+        {
+          type: 'OverrideOperation',
+          override,
+          sourceLayerId: LOC.file,
+          loc: LOC,
+        },
+      ],
+      loc: LOC,
+    });
+
+    const legacy = toLegacyProgram(canonical);
+
+    expect(legacy.overrides).toEqual([
+      expect.objectContaining({
+        type: 'OverrideBlock',
+        targetPath: 'standards.testing',
+      }),
+    ]);
   });
 
   it('creates immutable updates without modifying the original graph', () => {

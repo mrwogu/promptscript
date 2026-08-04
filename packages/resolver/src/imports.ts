@@ -1,126 +1,13 @@
-import type {
-  Program,
-  UseDeclaration,
-  Block,
-  ObjectContent,
-  Value,
-  ParamArgument,
-} from '@promptscript/core';
+import type { Program, Block, ObjectContent, Value, ParamArgument } from '@promptscript/core';
 import {
   deepClone,
-  ResolveError,
   getCanonicalBlockName,
-  getSyntaxFeatureUsages,
-  IMPORT_MERGE_POLICY,
-  mergeBlockCollections,
+  IMPORT_MARKER_PREFIX,
+  resolveUseImport,
 } from '@promptscript/core';
 
-/**
- * Import marker block prefix for storing imported content.
- * Used for @extend access when alias is provided.
- */
-export const IMPORT_MARKER_PREFIX = '__import__';
-
-/**
- * Resolve @use imports by merging blocks into target.
- *
- * New behavior (v0.2.0):
- * - Blocks from source are merged into target (like inheritance)
- * - If alias is provided, blocks are also stored with prefix for @extend access
- *
- * @param target - Target program AST
- * @param use - Use declaration being resolved
- * @param source - Source program AST (imported content)
- * @returns Updated program with merged blocks
- */
-export function resolveUses(target: Program, use: UseDeclaration, source: Program): Program {
-  // If the @use carries an inline output directory, attach it to every skill
-  // brought in by this import. We operate on a clone so cached source ASTs are
-  // never mutated.
-  if (use.outputDir) {
-    source = deepClone(source);
-    const skillsBlock = source.blocks.find((b) => b.name === 'skills');
-    if (skillsBlock?.content.type === 'ObjectContent') {
-      const props = (skillsBlock.content as ObjectContent).properties;
-      for (const [name, value] of Object.entries(props)) {
-        const isObj = typeof value === 'object' && value !== null && !Array.isArray(value);
-        if (isObj) {
-          (value as Record<string, Value>)['__outputDir'] = use.outputDir;
-        } else {
-          props[name] = { __outputDir: use.outputDir } as unknown as Value;
-        }
-      }
-    }
-  }
-
-  // Pre-merge duplicate skill check: detect collisions in @skills block
-  const targetSkillsBlock = target.blocks.find((b) => b.name === 'skills');
-  const sourceSkillsBlock = source.blocks.find((b) => b.name === 'skills');
-
-  if (
-    targetSkillsBlock?.content.type === 'ObjectContent' &&
-    sourceSkillsBlock?.content.type === 'ObjectContent'
-  ) {
-    const targetProps = (targetSkillsBlock.content as ObjectContent).properties;
-    const sourceProps = (sourceSkillsBlock.content as ObjectContent).properties;
-
-    const duplicates = Object.keys(sourceProps).filter(
-      (key) =>
-        key in targetProps && JSON.stringify(sourceProps[key]) !== JSON.stringify(targetProps[key])
-    );
-
-    if (duplicates.length > 0) {
-      throw new ResolveError(
-        `Duplicate skill name(s) detected when importing '${use.path.raw}': ${duplicates.join(', ')}`,
-        use.loc
-      );
-    }
-  }
-
-  // Merge blocks from source into target
-  const mergedBlocks = mergeBlockCollections(source.blocks, target.blocks, {
-    content: IMPORT_MERGE_POLICY,
-    outputOrder: 'incoming',
-  });
-
-  // If alias is provided, also add aliased blocks for @extend access
-  const aliasedBlocks: Block[] = [];
-  if (use.alias) {
-    const alias = use.alias;
-    const markerName = `${IMPORT_MARKER_PREFIX}${alias}`;
-
-    // Create import marker block
-    const marker: Block = {
-      type: 'Block',
-      name: markerName,
-      content: {
-        type: 'ObjectContent',
-        properties: {
-          __source: use.path.raw,
-          __blocks: source.blocks.map((b) => b.name),
-        },
-        loc: use.loc,
-      } as ObjectContent,
-      loc: use.loc,
-    };
-
-    aliasedBlocks.push(marker);
-
-    // Store source blocks with alias prefix for @extend access
-    for (const block of source.blocks) {
-      aliasedBlocks.push({
-        ...block,
-        name: `${IMPORT_MARKER_PREFIX}${alias}.${block.name}`,
-      });
-    }
-  }
-
-  return {
-    ...target,
-    blocks: [...mergedBlocks, ...aliasedBlocks],
-    syntaxFeatures: [...getSyntaxFeatureUsages(target), ...getSyntaxFeatureUsages(source)],
-  };
-}
+export { IMPORT_MARKER_PREFIX };
+export const resolveUses = resolveUseImport;
 
 /**
  * Check if a block name is an import marker.

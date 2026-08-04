@@ -116,6 +116,8 @@ export interface Program extends BaseNode {
   blocks: Block[];
   /** Extension blocks (@extend) */
   extends: ExtendBlock[];
+  /** Explicit replacement blocks (@override) */
+  overrides?: OverrideBlock[];
   /** Versioned syntax features retained after destructive resolution passes */
   syntaxFeatures?: SyntaxFeatureUsage[];
 }
@@ -314,6 +316,35 @@ export interface ExtendBlock extends BaseNode {
   canonicalBody?: BlockBody;
   /** Fields whose complete prior values must be replaced */
   replacements?: ReplaceModifier[];
+}
+
+/**
+ * Complete replacement for a block body.
+ */
+export interface BlockReplacement extends BaseNode {
+  readonly type: 'BlockReplacement';
+  body: BlockBody;
+}
+
+/**
+ * Complete replacement for a nested value.
+ */
+export interface ValueReplacement extends BaseNode {
+  readonly type: 'ValueReplacement';
+  value: ValueNode;
+}
+
+export type OverrideReplacement = BlockReplacement | ValueReplacement;
+
+/**
+ * Explicit replacement of an existing block or nested value.
+ */
+export interface OverrideBlock extends BaseNode {
+  readonly type: 'OverrideBlock';
+  /** Dot-separated path to an existing target */
+  targetPath: string;
+  /** Complete replacement value */
+  replacement: OverrideReplacement;
 }
 
 /**
@@ -600,6 +631,15 @@ export interface CanonicalExtendBlock extends CanonicalNode {
 }
 
 /**
+ * Immutable canonical override block.
+ */
+export interface CanonicalOverrideBlock extends CanonicalNode {
+  readonly type: 'CanonicalOverrideBlock';
+  readonly targetPath: string;
+  readonly replacement: DeepReadonly<OverrideReplacement>;
+}
+
+/**
  * Canonical inheritance operation.
  */
 export interface InheritOperation extends CanonicalNode {
@@ -636,9 +676,23 @@ export interface ExtendOperation extends CanonicalNode {
 }
 
 /**
+ * Canonical explicit replacement operation.
+ */
+export interface OverrideOperation extends CanonicalNode {
+  readonly type: 'OverrideOperation';
+  readonly override: CanonicalOverrideBlock;
+  readonly sourceLayerId: string;
+}
+
+/**
  * Ordered semantic declaration in a canonical program.
  */
-export type ProgramOperation = InheritOperation | UseOperation | BlockOperation | ExtendOperation;
+export type ProgramOperation =
+  | InheritOperation
+  | UseOperation
+  | BlockOperation
+  | ExtendOperation
+  | OverrideOperation;
 
 /**
  * Immutable canonical program. Legacy collection fields are derived projections.
@@ -650,6 +704,7 @@ export interface CanonicalProgram extends CanonicalNode {
   readonly uses: readonly DeepReadonly<UseDeclaration>[];
   readonly blocks: readonly CanonicalBlock[];
   readonly extends: readonly CanonicalExtendBlock[];
+  readonly overrides?: readonly CanonicalOverrideBlock[];
   readonly syntaxFeatures?: readonly DeepReadonly<SyntaxFeatureUsage>[];
   readonly operations: readonly ProgramOperation[];
 }

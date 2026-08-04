@@ -2,6 +2,7 @@
  * Browser-safe contract for a generated human-readable section.
  */
 export const CONTEXTUAL_DIRECTIVES = ['@header'] as const;
+export const CONTEXTUAL_OPERATION_DIRECTIVES = ['@override'] as const;
 
 export interface SectionContract {
   readonly id: string;

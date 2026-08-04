@@ -1,17 +1,9 @@
 import type { ValidationRule } from '../types.js';
 import type { ObjectContent } from '@promptscript/core';
+import { SKILL_REPLACE_PROPERTY_NAMES } from '@promptscript/core';
 
 /** Replace-strategy properties that can be sealed. */
-const REPLACE_PROPERTIES = new Set([
-  'content',
-  'description',
-  'trigger',
-  'userInvocable',
-  'allowedTools',
-  'disableModelInvocation',
-  'context',
-  'agent',
-]);
+const REPLACE_PROPERTIES = new Set<string>(SKILL_REPLACE_PROPERTY_NAMES);
 
 /**
  * PS029: Valid sealed property.

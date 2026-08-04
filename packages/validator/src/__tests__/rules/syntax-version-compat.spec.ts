@@ -58,7 +58,7 @@ describe('PS018: syntax-version-compat', () => {
     const messages = validate(makeAst('1.5.7'));
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('Unknown syntax version "1.5.7"');
-    expect(messages[0]!.message).toContain('1.5.0');
+    expect(messages[0]!.message).toContain('1.6.0');
   });
 
   it('should warn when block requires higher version', () => {
@@ -150,6 +150,26 @@ describe('PS018: syntax-version-compat', () => {
     ];
 
     expect(validate(ast)).toHaveLength(0);
+  });
+
+  it('should report explicit override usage at its directive location', () => {
+    const overrideLoc = { ...loc, line: 4, column: 1, offset: 72 };
+    const ast = makeAst('1.5.0');
+    ast.syntaxFeatures = [
+      {
+        feature: 'explicit-override',
+        location: overrideLoc,
+      },
+    ];
+
+    const messages = validate(ast);
+
+    expect(messages).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('explicit-override'),
+        location: overrideLoc,
+      }),
+    ]);
   });
 
   it('should report section header overrides at their exact usage location', () => {
