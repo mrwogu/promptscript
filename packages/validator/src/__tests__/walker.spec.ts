@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { createBlockBody, type Program, type SourceLocation } from '@promptscript/core';
+import {
+  createBlockBody,
+  createValueNode,
+  type Program,
+  type SourceLocation,
+} from '@promptscript/core';
 import { walkText, walkBlocks, walkUses, hasContent, offsetLocation } from '../walker.js';
 
 /**
@@ -187,6 +192,139 @@ describe('walker', () => {
         text: 'Security-sensitive title',
         loc: titleLoc,
       });
+    });
+
+    it('should walk block replacement content in override blocks', () => {
+      const texts: string[] = [];
+      const ast = createTestProgram({
+        overrides: [
+          {
+            type: 'OverrideBlock',
+            targetPath: 'standards',
+            loc: defaultLoc,
+            replacement: {
+              type: 'BlockReplacement',
+              loc: defaultLoc,
+              body: createBlockBody(
+                [
+                  {
+                    type: 'FieldEntry',
+                    name: 'testing',
+                    value: createValueNode(['Replaced rule'], defaultLoc),
+                    loc: defaultLoc,
+                    nameLoc: defaultLoc,
+                  },
+                ],
+                defaultLoc
+              ),
+            },
+          },
+        ],
+      });
+
+      walkText(ast, (text) => texts.push(text));
+
+      expect(texts).toEqual(['Replaced rule']);
+    });
+
+    it('should walk presentation titles in override replacements', () => {
+      const visited: Array<{ text: string; loc: SourceLocation }> = [];
+      const titleLoc: SourceLocation = { file: 'test.prs', line: 9, column: 13 };
+      const ast = createTestProgram({
+        overrides: [
+          {
+            type: 'OverrideBlock',
+            targetPath: 'standards',
+            loc: defaultLoc,
+            replacement: {
+              type: 'BlockReplacement',
+              loc: defaultLoc,
+              body: createBlockBody(
+                [
+                  {
+                    type: 'PresentationEntry',
+                    title: 'Overridden sensitive title',
+                    source: 'explicit',
+                    loc: defaultLoc,
+                    titleLoc,
+                  },
+                ],
+                defaultLoc
+              ),
+            },
+          },
+        ],
+      });
+
+      walkText(ast, (text, loc) => visited.push({ text, loc }));
+
+      expect(visited).toContainEqual({
+        text: 'Overridden sensitive title',
+        loc: titleLoc,
+      });
+    });
+
+    it('should walk value replacement content in override blocks', () => {
+      const texts: string[] = [];
+      const replacementLoc: SourceLocation = { file: 'test.prs', line: 7, column: 5 };
+      const ast = createTestProgram({
+        overrides: [
+          {
+            type: 'OverrideBlock',
+            targetPath: 'standards.testing',
+            loc: defaultLoc,
+            replacement: {
+              type: 'ValueReplacement',
+              loc: replacementLoc,
+              value: createValueNode(['Replaced item'], replacementLoc),
+            },
+          },
+        ],
+      });
+
+      walkText(ast, (text, loc) => texts.push(`${text}@${loc.line}`));
+
+      expect(texts).toEqual(['Replaced item@7']);
+    });
+
+    it('should respect excludeProperties inside override replacements', () => {
+      const texts: string[] = [];
+      const ast = createTestProgram({
+        overrides: [
+          {
+            type: 'OverrideBlock',
+            targetPath: 'skills.review',
+            loc: defaultLoc,
+            replacement: {
+              type: 'BlockReplacement',
+              loc: defaultLoc,
+              body: createBlockBody(
+                [
+                  {
+                    type: 'FieldEntry',
+                    name: 'description',
+                    value: createValueNode('Visible description', defaultLoc),
+                    loc: defaultLoc,
+                    nameLoc: defaultLoc,
+                  },
+                  {
+                    type: 'FieldEntry',
+                    name: 'resources',
+                    value: createValueNode('Excluded resource', defaultLoc),
+                    loc: defaultLoc,
+                    nameLoc: defaultLoc,
+                  },
+                ],
+                defaultLoc
+              ),
+            },
+          },
+        ],
+      });
+
+      walkText(ast, (text) => texts.push(text), { excludeProperties: ['resources'] });
+
+      expect(texts).toEqual(['Visible description']);
     });
 
     it('should walk nested text content', () => {
