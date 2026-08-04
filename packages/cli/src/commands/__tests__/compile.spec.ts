@@ -429,6 +429,11 @@ describe('compile command - createCliLogger warn path', () => {
       JSON.stringify({ permissions: { allow: ['Read'] } }, null, 2) + '\n'
     );
     expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
+    expect(mockRemoveHookOutputIfUnchanged).not.toHaveBeenCalledWith(
+      '/mock/project/.factory/settings.json',
+      expect.anything(),
+      expect.anything()
+    );
   });
 
   it('should remove legacy Factory settings that only held hooks', async () => {

@@ -399,10 +399,16 @@ async function finishLegacyFactoryMigration(
     );
   }
   // A settings file whose only content was the migrated hooks section carries no
-  // user configuration, so leaving `{}` behind would resurrect the legacy
-  // fallback path with an empty payload.
+  // user configuration, so an empty `{}` would be left behind for good.
   if (Object.keys(plan.migration.legacy).length === 0) {
-    await removeHookOutputIfUnchanged(plan.settingsPath, outputRoot, content);
+    const removed = await removeHookOutputIfUnchanged(plan.settingsPath, outputRoot, content);
+    if (removed) {
+      ConsoleOutput.muted(`Removed empty legacy settings: ${plan.settingsPath}`);
+    } else {
+      ConsoleOutput.warning(
+        `Left an empty ${plan.settingsPath} behind - remove it manually if it is not needed.`
+      );
+    }
   }
   ConsoleOutput.success(`${action[0]!.toUpperCase()}${action.slice(1)}`);
 }
