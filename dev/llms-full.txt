@@ -3217,6 +3217,16 @@ Configurable parameters:
 | `name?: type` | Optional parameter |
 | `= value`     | Default value      |
 
+Available types:
+
+| Type              | Accepts                   |
+| ----------------- | ------------------------- |
+| `string`          | Any string                |
+| `number`          | Any number                |
+| `boolean`         | `true` or `false`         |
+| `range(min..max)` | A number within the range |
+| `enum("a", "b")`  | One of the listed strings |
+
 ### [@guards](https://github.com/guards "GitHub User: guards")
 
 Runtime validation rules and file targeting:
@@ -14722,7 +14732,44 @@ Apply after reviewing both files:
 prs compile
 ```
 
-## 8. Review Portable Hooks
+## 8. Clean Up Codex Hook Configuration
+
+Through 1.15, Codex hooks were emitted as inline `[[hooks.*]]` tables in `.codex/config.toml`. From 1.16 they are written to `.codex/hooks.json`, which matches the schema Codex documents for project hooks.
+
+Codex reads both locations, so a stale `config.toml` group would run alongside the new `hooks.json` and every hook would fire twice. `prs compile` prunes the stale groups for you:
+
+```bash
+prs compile --dry-run
+```
+
+- Hook groups written by 1.15 or earlier are removed from `.codex/config.toml`.
+- Unrelated keys such as `max_threads` and `model` stay in `config.toml`.
+- Hand-written groups in the native Codex schema are preserved untouched.
+- `.codex/config.toml` is deleted when nothing but stale groups remained.
+
+Confirm the result after applying:
+
+```bash
+prs compile
+cat .codex/hooks.json
+```
+
+Hooks that were customized directly in `.codex/config.toml` rather than in `@hooks` are not migrated. Declare them in the source and recompile:
+
+```
+@hooks {
+  format-on-edit: {
+    event: "post-tool-use"
+    matcher: "Edit"
+    command: ["pnpm", "format"]
+    targets: {
+      codex: { enabled: true }
+    }
+  }
+}
+```
+
+## 9. Review Portable Hooks
 
 Repository-local programs should use `script` and explicit project cwd:
 
@@ -14744,7 +14791,7 @@ Repository-local programs should use `script` and explicit project cwd:
 
 Project-root wrappers fail closed when required root discovery fails. Review PS4002 warnings for best-effort and unsupported terminal interception.
 
-## 9. Release Validation
+## 10. Release Validation
 
 ```bash
 prs validate --strict
