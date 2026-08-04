@@ -329,8 +329,8 @@ Environment variables come from your local machine or CI environment. They're re
 ```text
 @context {
   # Safe: comes from your environment
-  apiKey: ${API_KEY}
-  environment: ${NODE_ENV:-development}
+  apiKey: "${API_KEY}"
+  environment: "${NODE_ENV:-development}"
 }
 ```
 
@@ -373,7 +373,7 @@ Never put secrets in template parameters or content:
 
 # ✅ Good: use environment variables for secrets
 @context {
-  apiKey: ${API_KEY}
+  apiKey: "${API_KEY}"
 }
 ```
 
