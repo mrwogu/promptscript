@@ -520,6 +520,28 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   /**
+   * Collect standards items for the given categories as markdown bullets.
+   *
+   * The shared standards extractor understands the canonical array shape
+   * (`typescript: ["Strict mode enabled"]`), which the curated object readers
+   * below cannot see. Without this the rule files come out as bare headings.
+   */
+  private getStandardsRuleContent(ast: Program, categories: string[]): string {
+    const standards = this.findBlock(ast, 'standards');
+    if (!standards) return '';
+
+    const { codeStandards } = this.standardsExtractor.extract(standards.content);
+    const items: string[] = [];
+
+    for (const category of categories) {
+      const entry = codeStandards.get(category);
+      if (entry) items.push(...entry.items);
+    }
+
+    return items.map((item) => `- ${item}`).join('\n');
+  }
+
+  /**
    * Get code style rule content from AST.
    */
   private getCodeStyleRuleContent(ast: Program): string {
@@ -544,7 +566,8 @@ export class ClaudeFormatter extends BaseFormatter {
       if (n['files']) items.push(`- Files: ${this.valueToString(n['files'])}`);
     }
 
-    return items.join('\n');
+    if (items.length > 0) return items.join('\n');
+    return this.getStandardsRuleContent(ast, ['typescript', 'naming']);
   }
 
   /**
@@ -565,7 +588,10 @@ export class ClaudeFormatter extends BaseFormatter {
       if (t['pattern']) items.push(`- Follow ${this.valueToString(t['pattern'])} pattern`);
     }
 
-    return items.length > 0 ? items.join('\n') : 'Follow project testing conventions.';
+    if (items.length > 0) return items.join('\n');
+
+    const extracted = this.getStandardsRuleContent(ast, ['testing']);
+    return extracted.length > 0 ? extracted : 'Follow project testing conventions.';
   }
 
   // ============================================================
