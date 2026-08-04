@@ -7,6 +7,45 @@ description: PromptScript configuration examples
 
 Real-world PromptScript configuration examples.
 
+## Choose by Goal
+
+### Start Here
+
+| Goal                        | Example                                                   |
+| --------------------------- | --------------------------------------------------------- |
+| Compile first project       | [Minimal](minimal.md)                                     |
+| Adopt existing instructions | [Migration Guide](../guides/migration.md)                 |
+| Upgrade PromptScript 1.15   | [Upgrade 1.15 to 1.16](../guides/upgrade-1-15-to-1-16.md) |
+
+### Understand Language
+
+| Goal                                     | Example                                             |
+| ---------------------------------------- | --------------------------------------------------- |
+| Resolve composition step by step         | [Composition and Order](composition-and-order.md)   |
+| Choose additive or replacement operation | [Merge vs Replace](merge-vs-replace.md)             |
+| Fix canonical block shape warnings       | [Fix Block Shape Warnings](fix-block-shapes.md)     |
+| Customize generated section titles       | [Custom Section Headers](custom-section-headers.md) |
+
+### Automate Agents
+
+| Goal                                              | Example                                           |
+| ------------------------------------------------- | ------------------------------------------------- |
+| Define portable lifecycle policy                  | [Portable Hooks](portable-hooks.md)               |
+| Move legacy Factory hooks safely                  | [Migrate Factory Hooks](migrate-factory-hooks.md) |
+| Combine skills, agents, MCP, hooks, and workflows | [Agent Platform](agent-platform.md)               |
+| Define specialized workers                        | [Agents](agents.md)                               |
+
+### Scale Organization
+
+| Goal                                   | Example                                        |
+| -------------------------------------- | ---------------------------------------------- |
+| Share team configuration               | [Team Setup](team-setup.md)                    |
+| Govern organization-wide configuration | [Enterprise](enterprise.md)                    |
+| Pin remote sources                     | [Git Registry](git-registry.md)                |
+| Package reusable capabilities          | [Skills and Local Memory](skills-and-local.md) |
+
+## Complete Examples
+
 <div class="ref-list">
 
 <a href="minimal/" class="ref-item">
@@ -95,7 +134,7 @@ Real-world PromptScript configuration examples.
 ```promptscript
 @meta {
   id: "my-project"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -110,7 +149,7 @@ Real-world PromptScript configuration examples.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO7TOWCFkXC9ckLt-jBAE1mAFdBDGoYcMEcGCg0MBCoQRYpCFYAc3C4OAg4AXYKbz9bB1YnOBxmaixGEKw4LwD5AHpY+PlTEABlKoB3cIA3DGgMACNYFOYSEgxWKThSkDsAXQZXakV8IlJyGCpaEAZBmFoINnwzZaA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoA2CgAZdrAL5ix3aZywQsi4Xrkhd-uKCAJrMAK6CGNQwkYI4MFBoYGFQgixSEKwA5pFwcBBwAuwUvgH2TqwucDjM1FiMYVhwPkHyAPTxifKmIADKNQDukQBuGNAYAEawacwkJBisUnDlIA4Augzu1Ir4RKTkMFS0IAzDMLQQbPhmq0A" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -120,7 +159,7 @@ Real-world PromptScript configuration examples.
 ```promptscript
 @meta {
   id: "react-app"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -152,7 +191,7 @@ Real-world PromptScript configuration examples.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhqMDIywBaDGjTyxEuAE92GQrPkBGCgAZL21gF8xY7tM5YIWPcJ1yQ2n+MEAmswAroIYimGCAEpKKoJEaDDUWIJwiYwQGFAQAF4QrADmkuIkzFJJ4gAqeokAyozUEGgpGuQQjNgQbHAUXr429qyOLOxEKaL+YNSkMADuzNQA1iYgMcoppgAcNhJQGIXBGAUwK9V1DU1YO6nu2YWnGNCz+VIAwrW11xxwrvfeAGpueApADUgkqwPyRQAMhAAEbTah6AYOVjcH77KThKRwTz+FjlWTILwSeQAVTgMEEYGCrBUXVYWUELDIbBcuOeuEEOGYzEWcHkdBJ3jWcQAisEkh4wAtUkkAG5JG7YGB0QQALWCGNYUmpssY2RcguF5Mp4MeUGeOsEwVc2XczL2cEpuJl1BuejuBWuAF0xINHHAeclGLbcRNSSAAPQstBs9jyFavRQqyKsObRWIpWPxq5+SNRnl8xPeZNKDiRUM-Zgkbm8xbXeRR755lYAdUaFZz6fYghbAr8thAth9DBcSPwRFI5BgVFoIAYitoDPwpmHQA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhqMDIywBaDGjTyxEuAE92GQrPkBGCgDYKABm2sAvmLHdpnLBCx7hOuSG1-xQQBNZgBXQQxFCMEAJSUVQSI0GGosQThkxggMKAgALwhWAHNJcRJmKRTxABU9ZIBlRmoINDSNcghGbAg2OAoffztHVmcWdiI00UCwalIYAHdmagBrExA45TTTAA47CSgMYtCMIpg12oamlqw99M9c4vOMaHnCqQBhevrbjjh3R98ADUPPA0gBqQTVUGFEoAGQgACNZtQ9EMnKxuH9DlJIlI4N5AixKrJkD4JPIAKpwGCCMChVgqHqsHKCFhkNhufGvXCCHDMZjLODyOhk3wbBIARVCKS8YCW6RSADcUndsDA6IIAFqhLGsKS0+WMXJuYWiynUyHPKCvPWCULuXKeVkHODU-Fy6h3PQPIq3AC6YmGzjgfNSjHt+Km5JAAHo2WgOex5Gt3oo1dFWAtYvE0vHEzcAtGY3yBcnfKmlBxouG-swSLz+ctbvIY78C2sAOrNKt5zPsQRtoUBewgex+hhuFH4IikcgwKi0EAMZW0Jn4UyjoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -162,7 +201,7 @@ Real-world PromptScript configuration examples.
 ```promptscript
 @meta {
   id: "api-service"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -205,7 +244,7 @@ Real-world PromptScript configuration examples.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKABht7WAXzFju0zlghZDw-XJB7-cUEATWYAV0EMahhIwQAjDEYAa04pQSI0dSx4sOgpCFYAc0EAJQBRAGUAFTAwqEEAQQAFAEk4QQB3TxxBADlmKRgKACs4Cl8A+ydWFxZ2ImzRIOow9gg+cxB+wZH2gCZrewkwalIYDuZqJM2ywhp4OCPBKWwMBLVNpuY4LELoioAigAZJ6XEifagQOAkDBTZysbg-DCsF7UKTtJYSRQQWTIXwSeQAVTUgkJJSBgkwuEEGnUcAgbAKhXkdHxfgAIsxGGE+OxOt1BAB5TKsZotQQAZjsIFZQQJIGJMQAUgB1KqCMCXSJhXDubTYBkzQISAC68IkLwE7xguLZRJJJAgfwNbHamuogjgjBwMBhgm9yMK8BZdoVJKwp1YcESHldGq1JDqHlUHDQgmYmVOsajTzNjnh3GiP0hjGzGN8yj8vRgtI9GW+MQKHGorAw9XU1Eu7SwzH9UAg7kexsElfkDSgHQwhnaGjb0mwMWiAEcwvBsnEBoYnqOtjX1J6e9FKVAMAVlBxCNlMHA4Bc0UOxNMXHAcJcsNysOWgvIAPSpNDME28ibOy8BOuIQisOcjStOkKIAUBw6-o6zrZsBfgAMLRAusSWm8GAOk6WaGk8v4cD86HyCqkIcDB4rkZ+UwgA4JoMO41CGPgRCkOQQw0PQIC1vSbD4BYzFAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgMaCAFo4MagDcIjGPLES4AT3YZCs+QEYKANgoAGPawC+Ysd2mcsELIeH65IHqB4oIAmswAroIY1DDRggBGGIwA1pxSgkRo6liJEdBSEKwA5oIASgCiAMoAKmARUIIAggAKAJJwggDu3jiCAHLMUjAUAFZwFP5Bji6sbizsRLmiIdQR7BB85iCDw2OdAEwOwRJg1KQwXczUKdsVhDTwcI4SUtgYSWrbLcxwWMWxKoARQAMi9BNcSN9qBA4CQMDNXKxuH8MKw3tQpJ0VhJFBBZMh-BJ5ABVNSCEllEGCTC4QQadRwCBsIrFeR0IkBAAizEYET47G6vUEAHlsqxWm1BABmezszmk8kAKQA6jVBGBrtEIrhPNpsMy5idBABdJGvd6fGAEhUgMlxEgQAEGtidTXUQRwRg4GDwwTetHFeDykLEu3krDnVhwZJeV0arUkBpeVQcNAQ7LnOPR8Fm5xI7ixP4wxjZ7H+ZQBfowBkerK-OJFDjUVgYRrqajXTpYZj+qAQTzPY2V+RNKBdDCGToaNvSbBxWIARwi8FyCSGhnBI52NfUnp7sRpUAwRWUHEIuUwcDgV0xQ7EszccBw1ywfKw5ZC8gA9Ok0Mwm3kbYuXgJ1xCEVhLmadpMnRf9AONH9HWdbMgICABhWJ53iN4BCtQRkKzQ1wR-Dg-jQ+QVRhDhoKlMiPxmEAnBNBhPGoQx8CIUhyBGGh6BAWsmTYfALCYoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -217,7 +256,7 @@ Real-world PromptScript configuration examples.
 ```yaml
 # promptscript.yaml
 id: basic-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -231,7 +270,7 @@ targets:
 ```yaml
 # promptscript.yaml
 id: local-registry-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -258,7 +297,7 @@ watch:
 ```yaml
 # promptscript.yaml
 id: git-registry-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs

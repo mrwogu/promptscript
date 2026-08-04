@@ -389,6 +389,12 @@ Example — overlay content and add a reference file without replacing the base 
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MASzIZWATwD0cANbQocXhhUKlK3nwAU1GAHMIcLNSm8AtLwAmxjACNY13mGbVe5DFIPVmg1tYAlAA6rPxEHAG8GlDKFCzWMBb6AG4QMADuvMChvLws7JxYiLzBIGUVrHkAoqw4kowwzqnpWRkQuNGmEIwc7iKMgtQd5ow4MIzycBS5peXzs-pgMPqsjXAlyLN5FDIR1BgWBRyEWBQk1rMAuqEAviC3VwxFZvhEpOQwVLQgDCkrcAgbHwAEYHkA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The overlay's `references` list is appended to the base skill's list. The `content` field replaces
 the base skill's content entirely.
 
@@ -411,6 +417,12 @@ Use the `!` prefix to remove entries added by a lower layer:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAgFc4MASzIZWATwD0cANbQocXhhUKlK3nwAU1GAHMIcLNSm8AtLwAmxjACNY13mGbVe5DFIPVmg1tYAlAA6rPxEHAG8GlDKFCzWMBb6AG4QMADuvMChvLz6YDD6rIzwiLzIuXm8wSAAhAVFnKVwMok0MIzYMNYWmFgc1KxwFCTWtVV5tY3FLTKsmX3Yg8Oj4yBVALpV+gCOghD6cOWVrNU19bAGGIxSFljMzFATZ9W1JMyJQ-ePzxuv21YAF8QEDNgxOKYpPgiKRyDAqLQQAwUkU4BA2PgAIygoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Negation uses normalized path matching — `"!./references/foo.md"` matches `"references/foo.md"`.
 If a negation doesn't match any base entry, a warning is logged during compilation.
 
@@ -432,6 +444,12 @@ The `sealed` property prevents higher layers from replacing specified skill prop
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwlgBMYAWmowAbhBgB3RKIlSpLdpyxaxIE2cm6pAYWoQsERhijClqjcPXNqfMFGbqKHV0zU1MLKTgYJxgZLWQTfQ52EwBdIIBfCXSQdJSGQ2oAT3wiUnIYKloQBmUYWgg2fABGHKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 If an `@extend` block attempts to override a sealed property, compilation fails:
 
@@ -520,21 +538,35 @@ Use `@use` to import and merge fragments (like mixins):
 
 ### Merge Precedence
 
-When the same property exists in multiple sources:
+PromptScript 1.6 applies declarations in source order. Import merge policy and
+later operations are separate decisions:
 
-```
-@inherit @stacks/typescript-lib    # Base values
-@use @core/security                # Overrides @inherit for same keys
-@use @core/quality                 # Overrides earlier @use for same keys
-@standards { ... }                 # Local values override everything
+```promptscript
+@meta { id: "service" syntax: "1.6.0" }
+
+@inherit @stacks/typescript-lib
+@use @core/security
+@use @core/quality
+
+@standards {
+  deployment: ["Require approval"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
 ```
 
-**Rule:** Later sources override earlier sources for the same keys.
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEHBjUAbhEYwZguAE92GQpJkBGCgDYKABjUBfKa2sBiQdwisc8iFgdwBjANZwA9FgaaPCM1BBoWAC0UBAARoKC9gAU1DAA5hCe1BqCkYJimRixsGKCYMzUguQYGmnUzACurGIAlHYODXIOLKl+cowNYYEJyakZWTl5BXBFJWUVVVA1dY3Nbaz23J0w3RUwfgCODRgxw4mCKemZWNm5+YXFMKXlldW19U2t1tyeGM0Y1DEcGE1gSYhg5GYGj47EkyBkACUYEcIKlBBg0DRmAoTjIALrWKw2VjcbHyMLg9QCf6AuAUDieJxpEGsBLwkAAVS6ADU3PAsPjCSALHiGJwbhp8ERSOQYFRaCAGAp5HAIGx8PphUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
-```mermaid
-flowchart LR
-    A["@inherit<br/>(base)"] --> B["@use #1"] --> C["@use #2"] --> D["Local<br/>(wins)"]
-```
+Use [Composition and Precedence](../reference/language/composition.md) as the
+normative source for conflict rules, declaration order, and resolved examples.
+This guide focuses on designing inheritance hierarchies rather than restating
+that matrix.
 
 ### Fragment Files
 
@@ -544,7 +576,7 @@ Create reusable fragments:
 # @fragments/testing.prs
 @meta {
   id: "@fragments/testing"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @standards {
@@ -552,13 +584,19 @@ Create reusable fragments:
 }
 
 @shortcuts {
-  "/test": "Write comprehensive tests"
-  "/coverage": "Check test coverage"
+  "/test": {
+    description: "Write comprehensive tests"
+    content: "Write unit and integration tests for the current change."
+  }
+  "/coverage": {
+    description: "Check test coverage"
+    content: "Run coverage and report untested behavior."
+  }
 }
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAmGoYA5iU5Y4Aeg5wsEViKq0AOq37isGXsDW9eEACaJeKkIOFiJ02fMVm9vOAE92GQibMBGCgAY-DqwAvmpq-HIYrIYY1IZwOo62CiImyGYAqnAwvABuELa8GPEFQqQwAO7M1ADWZnSmIACyGApaCrwAHL4ApLwshtksOTCWMHUNAOrU+dkArqz5hVEG7DAiwvJsvLZwZgC6aiGsYXA4VViMs5IJrPpmMvBYZp4gUzN9zGTUMDiccBDDbaPXYgRz3IYjURjJANADCv0Y1SBcg+w1GgSCICCewYEmoznwRFI5BgynoIDR-zY+C8WKAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAmGoYA5iU5Y4Aeg5wsEViKq0AOq37isGXsDW9eEACaJeKkIOFiJ02fMVm9vOAE92GQibMBGCgDYKAAwOrAC+amr8chishhjUhnA6jrYKIibIZgCqcDC8AG4QtrwYiUVCpDAA7szUANZmdKYgALIYCloKvAAcAQCkvCyGuSx5MJYwDU0A6tSFuQCurIXFMQbsMCLC8my8tnBmALpqYawRcDg1WIzzkkms+mYy8FhmJrr3+rxDcIyzaNusTwgGZzAbMMjUGA4ThwCCjXbPfYgRz6FjrdhAkEcXiLZbRQxrDibbAQHZ7XhgGq7aEDebUSHsAY4aIiGAUYL6E4PEBSEZjUQTJB3T5feC-CD-UmApoAYWhjFqCLkYNG4w5nzRHAxTQASosVfzWSsCZC0Jcces5DACQAjKEYAo1dnIj4nEIgEIHBgSajOfBEUjkNk0eggVWwtj4LweoA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -771,6 +809,12 @@ Define parameters in the `@meta` block using the `params` field:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAnCwZGAazgB6LAE808RtQhosAWigQARlVoAdVvxIxhvYHt68IAE0S8dIQcLGSZcuAqWr1Gu2d5xp7BiENnYAjBQADJE+rOaY1KRwNqax5rw0zABWMIxYAHKkMDZCiqwA5r7m1ACu7BCGxVilZbwAvLYgrMyWMKEAHDFpfk0QuQD8NhrMzLAYrJW8HEIAYgmGAO7M1KI2nNUkABR2AG4QS1h2dB3ZQpcdJMyMOBh2AJRtHafng7wAvnr-eb6DLZXImXysQrJYAgnL5Qq-QFVWpYepFEzAGp1QyIgF6PQOOaWDDUSxwcGpc4Qco2ZB2ACqcBgGPOq0Km22iN4YC2vAwUCgi3gWDgdgAugCQL8xQxOE1pPgiKRyDBtPQQMcYLQIGx8KEpUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Parameter Types
 
 | Type      | Syntax                 | Description             |
@@ -802,11 +846,23 @@ Pass parameters when using `@inherit` or `@use`:
 @inherit @stacks/typescript-lib(projectName: "my-app", runtime: "node20")
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCSBIBPALQY0aHSt5w97DIS06AjBQAMzs6wC+UqdIiscMaggsXmk4BUYAazgAeiw9NHhGQLQsAygIACMACgFhUQA5Uhg7XUNjUxA6XmoAV3YIORLWZnUYACYnHQBKEHcAXQZOLGo9fCJSchhxehAANwC4CDZ8e16gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Or with `@use`:
 
 ```promptscript
 @use ./fragments/testing(framework: "vitest", coverage: 90)
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9GGoYA5iU5Y4IjnCwRWkgBTjSMAO7NqAa0SCAOiABuERVlN1BLMzAmSYRgJwAGAJQgAvgF0GWWoAT3wiUnIYKloQBgdaCDZ8AEZfIA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Template Variables
 
@@ -834,6 +890,12 @@ Use `{{variable}}` syntax to reference parameters in content:
   maintainer: {{author}}
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgOZKNhjyxEuAE92GQrPkBGCgAYTa8YMzVScWaIsSazAFYxGWAHKkYsuFmoQrADm6hKCGACuuMzUvv6BQYIAvHIgACowpOYSAL5ieaxi3NKcWBBYmsKhaiDZggCazBHh1DCCAO4xANYJgmzCwE6u7l58OTkUoWk4EHCW1C5uWJJzJBiBAoEwUoIARpXAwJHR1OOTFjXmBUVDS1UWrN52gwvDnt7joWsb66wwsQNjjgYp9WDkQDkALoMUrUTT4IikcgwKi0EAMABu-zgEDY+AMEKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ### Complete Example
 
@@ -868,6 +930,12 @@ Use `{{variable}}` syntax to reference parameters in content:
     }
     ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAnCwZGAazgB6ajBFYAtBjRoqtADqt+JGMN7B1vXhAAmiXqpCDhYydNkKl5-bzgBPdhkKnzARgoAGf0dWA0xqUjhTPWCDXhpmACsYRiwAOVIYUyFqCFYAcycQ5mosU1YAVxIAIxhqXgBeXgBmPxaC5yxs5NNK5mZYDGCGjrKYJwBfdQnWdX5jTiwILBddJ0cQIIMATWYy3gxpPd4AJRlk3iMYADcYKGY0Gt4AdyLRHNzeNl1gOMTktK0xmMKKt1qDJuoZix2EQsCtoj8kiUvgi-ulAU4LpcAMo1a7ULwgHBYLBoRASCS3RgYKA4ZhCRDAb5FLDo9bRLIQZIAWWYF0iwA5yXRrCmMyEAyM+yMcDhBhYfN4yHMABUXPcsYxsmhYYLYSReTBeJwMJVYEZzABdSYgMYWhjzagufBEUjkGAqeggPFwCBsfDeG1AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 === "Project (Child)"
 
     ```promptscript
@@ -885,6 +953,12 @@ Use `{{variable}}` syntax to reference parameters in content:
       """
     }
     ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAENzAFYxGWKrQA6rAAIkYWDL2BTevCABNEvCUxwiA1swCuWALQY0aHSt5wAnuwyEtOgIwUADJ+usAvlKlpCFY9aggsXmk4BUZ9OAB6ahgMUXNLAAoBYVEAOVIYFxAAYT1Y4wiAQUsdOn5maiwtAA4PFoBKAJkNTixwuyUbaxAfVQBNY1s0EQgMKAgALxg1Vl4YUxYSOWpGJcZSwxNeMChmAHc4CkHh66lfEF8AXQYe6jt8IlJyGHF6EAA3GC0CBsfCue5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 === "Resolved Output"
 
@@ -979,6 +1053,12 @@ Error: Type mismatch for parameter 'mode': expected enum("dev", "prod"), got "st
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhucAYwDWcAPQY0EALRwY1AG4RGMeWIlwAnuwyFZ8gIwUADK-PjBmaqTizRnhIAxIIAcqQwgsxggriRAIIACgCSgvpGJmaBaQbGpuF8skrUEKwA5mIWEoIhABIAKvWJXszUWIJgrbE4kel5kQAUUjBgGACuUFiyAMwucwCUVRJorVOCrGMkAEYGggC8grNzldkhAKKsxtRsfOyCJMzDS-ePMLKcmwPyw4YwUMxoW5YeR0OQgJQYMqlCogUHyGiPMaMLAQNjyeb7ME-P4AoEeCQAXzEBJABIAugxOFhqFZ8ERSOQYFRaLCQL9aKjWPhHKSgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Debugging Inheritance
 

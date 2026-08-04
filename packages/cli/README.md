@@ -87,7 +87,7 @@ CLAUDE.md
 ```promptscript
 @meta {
   id: "checkout-service"
-  syntax: "1.4.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -98,6 +98,7 @@ CLAUDE.md
 }
 
 @standards {
+  @header "Engineering Standards"
   code: ["Use strict TypeScript", "Test every business rule"]
 }
 
@@ -171,7 +172,7 @@ CLAUDE.md
 
 ```yaml
 id: checkout-service
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -261,15 +262,20 @@ Remote imports are recorded in `promptscript.lock` with commit and SHA-256 integ
 @inherit @company/platform
 @use @team/backend
 
+@override standards.testing {
+  ["Use Vitest", "Require 95% coverage"]
+}
+
 @extend standards {
-  testing!: ["Use Vitest", "Require 95% coverage"]
+  testing: ["Run integration tests in CI"]
 }
 ```
 
 - Inherit organization, team, and project layers.
 - Compose local files, Markdown skills, aliases, and direct Git imports.
-- Extend selected paths with deterministic merges, explicit replacement, negation, and sealed
-  properties.
+- Extend selected paths with deterministic merges, negation, and sealed properties.
+- Replace complete existing blocks or nested values with `@override`.
+- Customize generated section titles with `@header`.
 - Pass typed parameters to reusable templates.
 - Enforce layer boundaries, protected properties, and registry allowlists with policies.
 - Inspect skill provenance with `prs inspect <skill>`.
@@ -322,6 +328,11 @@ Static migration deterministically imports detected instruction files. AI-assist
 generates a migration prompt and installs the PromptScript skill. Existing source instructions
 remain untouched, and existing PromptScript configuration is preserved byte-for-byte. Static output is isolated under
 `.promptscript/migrated/`; no detected candidates means no writes.
+
+Projects upgrading from PromptScript 1.15 should preview syntax changes with
+`prs upgrade --dry-run`, then run `prs validate --strict`. Factory targets also
+preview legacy hook migration through `prs compile --dry-run`; use
+`--no-migrate-factory-hooks` only when migration must remain manual.
 
 Preview before writing:
 
@@ -388,6 +399,7 @@ for syntax highlighting, bracket matching, code folding, and file icons.
 - [Language Reference](https://getpromptscript.dev/reference/language/)
 - [Configuration Reference](https://getpromptscript.dev/reference/config/)
 - [Target Matrix](https://getpromptscript.dev/reference/formatters/)
+- [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/)
 - [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)
 - [Playground](https://getpromptscript.dev/playground/)
 

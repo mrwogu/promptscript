@@ -5,19 +5,29 @@ description: Runnable examples for agent integrations, automation, plugins, fiel
 
 # Agent Platform Examples
 
-These examples cover the agent-platform capabilities added after PromptScript 1.13.2. Open the
+These examples cover core agent-platform capabilities. Open the
 [Playground](/playground/) and choose **Complete Agent Platform** or
 **Regular Field Replacement** to compile the same examples in your browser.
 
+PromptScript 1.16 task examples:
+
+| Task                            | Example                                             |
+| ------------------------------- | --------------------------------------------------- |
+| Predict composition results     | [Composition and Order](composition-and-order.md)   |
+| Choose merge or replacement     | [Merge vs Replace](merge-vs-replace.md)             |
+| Fix PS038 shape warnings        | [Fix Block Shape Warnings](fix-block-shapes.md)     |
+| Customize generated titles      | [Custom Section Headers](custom-section-headers.md) |
+| Build portable lifecycle policy | [Portable Hooks](portable-hooks.md)                 |
+
 ## Complete Agent Platform
 
-This syntax 1.4 example connects reusable skills, MCP tools, a specialist agent, lifecycle
+This syntax 1.6 example connects reusable skills, MCP tools, a specialist agent, lifecycle
 automation, a release workflow, and a plugin bundle:
 
 ```promptscript
 @meta {
   id: "checkout-agent-platform"
-  syntax: "1.4.0"
+  syntax: "1.6.0"
   tags: ["payments", "typescript"]
 }
 
@@ -96,7 +106,7 @@ automation, a release workflow, and a plugin bundle:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDAHNOW8tjDNqJeWIlwAnuwyFZ8gIwUALBQAM58YIE64s5HlMKz52OHk6ORAsKzR4RmoINCx5AF0xAF8xMW5pfQgY4Qso8xBigE11QQxqGEEAdxNlCFYdQTZqwWDQrEE4GGoANwhGGApigAVa-qG6rGoMVjgMRiwIDpaOHUTCxalqtSkCjAAjaAKrce9SryzWHLgBVikaqTgi7xYpGAD5AFV+n15iNegAVWIwADKCSSKRAkXkAHUdnN4Fh3sZqIITmo4C14O9qGpYOEQOlWHcHs0oFB3qJvP1GGodlZNLVhjB6rJ6RIJN84DDkutWA4QAAlGAc+pdDAhfSCRg4RZ6DEmPpKZkXQSJODKUnFCQYGnMeowKSg5jMWm-cUwDBSCJRADitTQjvkACEMHAcGkDQq2Bx2KKbt5eYIAJJLOKrA64fKMbDCyIYDQ4EwQABeSbYkUZtXRKeeMrl7EELwEgiVzygLR0V3DEglaBMvUgzzr7xOVnVgwGWr2klYjCghzqLGHBbqtT4Rxz4keMDQcAbvJuZW8d0prF4jDQkIGfdoHwkEDgcDUME08xWygG3P9N+jrdFjyOzC84ZYJBIextrGYb53RACgAHosEtWlQLPC94AoEgACtSXJcM1j4dQsAAWX8QQAGZ3AIzxN0ybId10fQ6WKdkIE5e8T15flBTWNhRQlKUFWrFVsRgTE6j4ag9E-XkIKtHDAlte1gJdJcpKgZgTmAr0fT9MNBBIQCYCgV82FYfghMsalrUEcTGU1GI2UlGj6hU8MSD3A9ZloG0YMva8FhUAYbN5CcgywVjLM5DjlTNANvkiDhHjgIt9mYOIFmY1gjUkMgViwcYNwkLdSO4dNmD1ejBiNaRsCvRVgpwnleUlfRRRbR5r0gzRcRgfS1OwRU6PkABRI4sAAH2RAoWoy7zmB-P9jKCVg0DMeEoiJe45vkGIY0UFQvIkNCYAw7DZEcAAmQiiPDR5sFxTCCXI0UAGE1uaVpBHBOJoUSZIhKy+4d0aahlDAOT6ko7xalgb0fnovl4lehLRQANSKis6kHGglxqRHtU0u1+lanyapKMoRvDZxBDYqygtaeA+haUYfEULpqPUQkMdB-0JH2ihibUcRMV-LA1laSJa3YOtwohDilD1aKfDRcJVIkXD2chNRxsSTNx04imkddVH0ZBwE+AECsMBZwQ3EESEILQbjeK6NQTlrH062qYtagAR0vR5qjQGhmEKqB-XXYoPpycg1B0FpAYkbp9E0Tgw90-tWgfVTGKh4VRQmWUekEWP8QTtpE0wM5a0KHEa2G-0jzxFiomcdwPFa3VoCMkyNRZCypQ2qtLT1G1feKjhNDK8nkP9Oz90PAYxPkFyrxvDzqC8rcQAyVIGH0agrHwIhSHIMYaHoEBK+FfBHGXoA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDAHNOW8tjDNqJeWIlwAnuwyFZ8gIwUAbBQAM58YIE64s5HlMKz52OHk6ORAsKzR4RmoINCx5AF0xAF8xMW5pfQgY4Qso8xBigE11QQxqGEEAdxNlCFYdQTZqwWDQrEE4GGoANwhGGApigAVa-qG6rGoMVjgMRiwIDpaOHUTCxalqtSkCjAAjaAKrce9SryzWHLgBVikaqTgi7xYpGAD5AFV+n15iNegAVWIwADKCSSKRAkXkAHUdnN4Fh3sZqIITmo4C14O9qGpYOEQOlWHcHs0oFB3qJvP1GGodlZNLVhjB6rJ6RIJN84DDkutWA4QAAlGAc+pdDAhfSCRg4RZ6DEmPpKZkXQSJODKUnFCQYGnMeowKSg5jMWm-cUwDBSCJRADitTQjvkACEMHAcGkDQq2Bx2KKbt5eYIAJJLOKrA64fKMbDCyIYDQ4EwQABeSbYkUZtXRKeeMrl7EELwEgiVzygLR0V3DEglaBMvUgzzr7xOVnVgwGWr2klYjCghzqLGHBbqtT4Rxz4keMDQcAbvJuZW8d0prF4jDQkIGfdoHwkEDgcDUME08xWygG3P9N+jrdFjyOzC84ZYJBIextrGYb53RACgAHosEtWlQLPC94AoEgACtSXJcM1j4dQsAAWX8QQAGZ3AIzxN0ybId10fQ6WKdkIE5e8T15flBTWNhRQlKUFWrFVsRgTE6j4ag9E-XkIKtHDAlte1gJdJcpKgZgTmAr0fT9MNBBIQCYCgV82FYfghMsalrUEcTGU1GI2UlGj6hU8MSD3A9ZloG0YMva8FhUAYbN5CcgywVjLM5DjlTNANvkiDhHjgIt9mYOIFmY1gjUkMgViwcYNwkLdSO4dNmD1ejBiNaRsCvRVgpwnleUlfRRRbR5r0gzRcRgfS1OwRU6PkABRI4sAAH2RAoWoy7zmB-P9jKCVg0DMeEoiJe45vkGIY0UFQvIkNCYAw7DZEcAAmQiiPDR5sFxTCCXI0UAGE1uaVpBHBOJoUSZIhKy+4d0aahlDAOT6ko7xalgb0fnovl4lehLRQANSKis6kHGglxqRHtU0u1+lanyapKMoRvDZxBDYqygtaeA+haUYfEULpqPUQkMdB-0JH2ihibUcRMV-LA1laSJa3YOtwohDilD1aKfDRcJVIkXD2chNRxsSTNx04imkddVH0ZBwE+AECsMBZwQABYFYgtBuN4ro1BOWsfTrapi1qABHS9HmqNAaGYQqoH9ddig+nJyDUHQWkBiRun0TRODD3T+1aB9VMYqHhVFCZZR6QRY-xBO2kTTAzlrQocRrYb-SPPEWKiZx3A8VrdWgIyTI1FkLKlDaq0tPUbV94qOE0MryeQ-07P3Q8BjE+QXKvG8POoLytxADJUgYfRqCsfAiFIcgxhoegQEr4V8EcZegA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -111,7 +121,7 @@ Use full target modes to generate native capability files:
 
 ```yaml
 id: checkout-agent-platform
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 targets:
   - claude:
@@ -128,6 +138,9 @@ targets:
 
 Syntax 1.3 introduced `field!: value` inside regular `@extend` blocks. Marked fields replace their
 complete previous value, while unmarked fields retain normal merge behavior:
+
+For new syntax 1.6 projects, prefer `@override` when replacing a complete
+existing target. See [Merge vs Replace](merge-vs-replace.md).
 
 ```promptscript
 @meta {

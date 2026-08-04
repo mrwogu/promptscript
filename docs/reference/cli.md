@@ -193,8 +193,8 @@ upgrade before any file changes. Symbolic links are skipped.
 prs upgrade [--dry-run]
 ```
 
-Use `--dry-run` to preview changes without writing files. Normal upgrades use
-atomic replacement and preserve file permissions.
+Use `--dry-run` to preview changes without writing files. Each normal file
+write uses atomic replacement and preserves file permissions.
 
 ### prs hooks
 
@@ -254,6 +254,14 @@ prs compile [options]
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
 The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
+
+In non-interactive mode without `--force`, `prs compile` preflights every
+planned output for ownership and overwrite conflicts. One conflicting
+user-owned file aborts that complete write set, so earlier outputs are not
+partially updated. Interactive mode processes outputs in order and prompts on
+conflicts, so accepted earlier writes can remain when a later path is skipped.
+Use `--dry-run` to inspect the full plan. Use `--force` or
+`output.overwrite: true` only after reviewing every conflicting path.
 
 When compiling the Factory target and `.factory/hooks.json` is absent,
 `prs compile` migrates unambiguous hooks from `.factory/settings.json` before

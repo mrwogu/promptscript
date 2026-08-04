@@ -6,7 +6,8 @@ description: >-
   creating or editing .prs files, adding blocks like @identity, @standards,
   @restrictions, @shortcuts, @skills, or @agents, configuring
   promptscript.yaml, resolving compilation errors, understanding inheritance
-  (@inherit) and composition (@use, @extend), or migrating AI instructions
+  (@inherit), composition (@use, @extend, @override), contextual @header
+  metadata, or migrating AI instructions
   to PromptScript. Also use when asked about the 48 built-in compilation
   targets, including GitHub Copilot, Claude Code, Cursor, Antigravity,
   Factory AI, and AGENTS.md-based platforms.
@@ -48,7 +49,9 @@ PromptScript is a domain-specific language that compiles `.prs` files into nativ
 
 ## File Structure
 
-A `.prs` file is made of blocks. Order doesn't matter except `@meta` should come first by convention.
+A `.prs` file contains ordered declarations. Syntax `1.6.0` applies `@inherit`,
+`@use`, local blocks, `@extend`, and `@override` in source order. Put `@meta`
+first.
 
 ```
 # Comments start with #
@@ -74,12 +77,16 @@ A `.prs` file is made of blocks. Order doesn't matter except `@meta` should come
 @plugins { ... }        # Capability bundles (syntax 1.4.0+)
 @local { ... }          # Private config (not committed)
 @extend path { ... }    # Modify imported blocks
+@override path { ... }  # Replace one complete existing target (syntax 1.6.0+)
 @custom-name { ... }    # Arbitrary named blocks
 ```
 
+Contextual `@header` entries appear inside supported owner blocks, not at the
+top level.
+
 ## Content Types
 
-PromptScript has three content types inside blocks:
+PromptScript has four canonical content shapes inside blocks:
 
 ### Text Content
 
@@ -664,8 +671,12 @@ Then use the alias as scope prefix:
 Merge rules:
 
 - Text: concatenated with deduplication
-- Objects: deep merged (target wins on conflicts)
+- Objects: deep merged (imported source wins same-shape conflicts)
 - Arrays: unique concatenation
+- Shape mismatch: existing target body wins
+
+Under syntax `1.6.0`, later local blocks, `@extend`, and `@override`
+operations apply to the accumulated import result in declaration order.
 
 ### Block Filtering
 
@@ -975,11 +986,11 @@ policies:
 
 ### Lockfile: `promptscript.lock`
 
-When remote imports are used, `prs compile` automatically generates a lockfile
-recording the exact resolved commit for each dependency. Integrity hashes
-(SHA-256) are included for registry references to detect tampering or drift.
-This enables reproducible builds across machines and CI. Commit `promptscript.lock`
-to version control.
+When remote imports are used, run `prs lock` to generate or update the lockfile
+before compilation. It records the exact resolved commit for each dependency.
+Integrity hashes (SHA-256) are included for registry references to detect
+tampering or drift. This enables reproducible builds across machines and CI.
+Commit `promptscript.lock` to version control.
 
 Use `--ignore-hashes` on `prs compile` or `prs validate` to skip integrity
 hash verification when needed.
@@ -1235,7 +1246,7 @@ The fastest way to convert existing AI instructions to PromptScript:
 ```
 prs import CLAUDE.md                    # Convert a single file
 prs import .github/copilot-instructions.md
-prs import AGENTS.md --output ./imported.prs
+prs import AGENTS.md --output ./imported
 prs import --dry-run CLAUDE.md          # Preview without writing
 ```
 

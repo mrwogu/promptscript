@@ -1,0 +1,17 @@
+# CLAUDE.md
+
+## Service Instructions
+
+You are working on the checkout service.
+
+## Engineering Standards
+
+- Use strict TypeScript
+
+## Commit Policy
+
+- Format: conventional
+
+## Documentation Policy
+
+- Update docs after changes
