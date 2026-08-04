@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PromptScript 2026-08-04T15:31:20.024Z | source: .promptscript/project.prs | target: factory - do not edit -->
+<!-- PromptScript 2026-08-04T16:53:29.253Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 
@@ -172,9 +172,9 @@ pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
 
 ## Documentation
 
-- Review docs before changes
-- Update docs after changes
-- Keep code examples accurate
+- Review README.md and the affected pages under docs/ before changing behavior
+- Update README.md and docs/ whenever behavior changes
+- Keep documented code examples runnable and in sync with the API
 - Sync With Code: after modifying any function, verify it is documented - if not, add documentation; if documented, ensure it reflects current behavior
 - No Vaporware: never document features that don't exist or don't work - ideas and future plans go to ROADMAP.md only
 
