@@ -206,6 +206,14 @@ export class AntigravityFormatter extends BaseFormatter {
     const restrictions = this.restrictions(ast, renderer);
     if (restrictions) sections.push(restrictions);
 
+    // Add examples
+    const examples = this.renderExamplesSection(
+      ast,
+      renderer,
+      resolveSectionTitle(ast, 'examples', { defaultTitle: 'Examples' })
+    );
+    if (examples) sections.push(examples);
+
     const inlineRefs = this.inlineSkillReferences(ast);
     const content = sections.join('\n\n') + '\n' + inlineRefs;
 
@@ -219,7 +227,7 @@ export class AntigravityFormatter extends BaseFormatter {
     };
 
     // Generate workflow outputs if present
-    const workflowOutputs = this.workflows(ast);
+    const workflowOutputs = [...(this.workflows(ast) ?? []), ...this.workflowBlockOutputs(ast)];
 
     // Generate MCP config from @mcpServers block
     const mcpServersBlock = findMcpServersBlock(ast);
@@ -234,7 +242,7 @@ export class AntigravityFormatter extends BaseFormatter {
       }
     }
 
-    const allAdditional = [...(workflowOutputs ?? []), ...mcpOutput];
+    const allAdditional = [...workflowOutputs, ...this.guardRuleOutputs(ast), ...mcpOutput];
 
     // If there are additional files, return multi-file output
     if (allAdditional.length > 0) {
@@ -374,10 +382,113 @@ export class AntigravityFormatter extends BaseFormatter {
           generatedPaths.add(workflow.path);
           workflowsList.push(workflow);
         }
+        continue;
+      }
+
+      // Prompt shortcuts are invoked the same way, so their body becomes a workflow
+      const prompt = this.generatePromptWorkflow(name, value);
+      if (prompt && !generatedPaths.has(prompt.path)) {
+        generatedPaths.add(prompt.path);
+        workflowsList.push(prompt);
       }
     }
 
     return workflowsList.length > 0 ? workflowsList : null;
+  }
+
+  /**
+   * Generate workflow files from the `@workflows` block.
+   *
+   * Antigravity has no separate command surface, so declared workflows land in
+   * the same `.agent/workflows/` directory as shortcut-derived ones.
+   */
+  private workflowBlockOutputs(ast: Program): FormatterOutput[] {
+    const block = this.findBlock(ast, 'workflows');
+    if (!block) return [];
+
+    const outputs: FormatterOutput[] = [];
+    for (const [name, value] of Object.entries(this.getProps(block.content))) {
+      if (!this.isSafeName(name)) continue;
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+
+      const obj = value as Record<string, Value>;
+      const description = obj['description'] ? this.valueToString(obj['description']) : '';
+      const content = obj['content'] ? this.valueToString(obj['content']) : '';
+      if (!description && !content) continue;
+
+      outputs.push({
+        path: `.agent/workflows/${name}.md`,
+        content: this.renderWorkflowDocument(name, description, content),
+      });
+    }
+    return outputs;
+  }
+
+  /**
+   * Turn a prompt shortcut into a workflow document.
+   */
+  private generatePromptWorkflow(name: string, value: Value): FormatterOutput | null {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    if ('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent')
+      return null;
+
+    const obj = value as Record<string, Value>;
+    if (obj['prompt'] !== true && obj['content'] === undefined) return null;
+
+    const content = obj['content'] ? this.valueToString(obj['content']) : '';
+    if (!content.trim()) return null;
+
+    const cleanName = name.replace(/^\/+/, '').replace(/\s+/g, '-').toLowerCase();
+    if (!this.isSafeName(cleanName)) return null;
+
+    const description = obj['description'] ? this.valueToString(obj['description']) : '';
+    return {
+      path: `.agent/workflows/${cleanName}.md`,
+      content: this.renderWorkflowDocument(this.formatWorkflowTitle(name), description, content),
+    };
+  }
+
+  /**
+   * Emit one glob-activated rule file per named `@guards` entry.
+   *
+   * Antigravity activates a rule file through its own frontmatter, so path
+   * scoping is expressed with a dedicated file rather than inline sections.
+   */
+  private guardRuleOutputs(ast: Program): FormatterOutput[] {
+    const guards = this.findBlock(ast, 'guards');
+    if (!guards) return [];
+
+    const outputs: FormatterOutput[] = [];
+    for (const [name, value] of Object.entries(this.getProps(guards.content))) {
+      if (name === 'globs' || name === 'glob' || name === 'files' || name === 'activation')
+        continue;
+      if (!this.isSafeName(name)) continue;
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+
+      const obj = value as Record<string, Value>;
+      const rawPaths = obj['paths'] ?? obj['applyTo'];
+      const paths = Array.isArray(rawPaths) ? rawPaths.map((p) => this.valueToString(p)) : [];
+      const description = obj['description'] ? this.valueToString(obj['description']) : '';
+      const content = obj['content'] ? this.valueToString(obj['content']) : '';
+      if (!content.trim() && !description) continue;
+
+      const lines = ['---', `title: "${this.formatWorkflowTitle(name)}"`];
+      lines.push(`activation: "${paths.length > 0 ? 'glob' : 'always'}"`);
+      if (paths.length > 0) {
+        lines.push(`globs: [${paths.map((p) => `"${p}"`).join(', ')}]`);
+      }
+      lines.push(`description: "${description}"`, '---', '');
+      if (content.trim()) lines.push(this.stripAllIndent(this.dedent(content)));
+
+      outputs.push({ path: `.agent/rules/${name}.md`, content: lines.join('\n') });
+    }
+    return outputs;
+  }
+
+  private renderWorkflowDocument(title: string, description: string, content: string): string {
+    const lines = ['---', `title: "${title}"`, `description: "${description}"`, '---', ''];
+    if (content) lines.push(this.stripAllIndent(this.dedent(content)));
+    return lines.join('\n');
   }
 
   /**
@@ -511,6 +622,13 @@ ${this.stripAllIndent(content)}`;
     const props = this.getProps(context.content);
     const items: string[] = [];
 
+    // Extract explicit tech stack list
+    const techStack = props['techStack'];
+    if (techStack) {
+      const arr = Array.isArray(techStack) ? techStack : [techStack];
+      items.push(`**Stack:** ${arr.map((entry) => this.valueToString(entry)).join(', ')}`);
+    }
+
     // Extract languages
     const languages = props['languages'];
     if (languages) {
@@ -615,25 +733,35 @@ ${this.stripAllIndent(content)}`;
   }
 
   private contextSection(ast: Program, _renderer: ConventionRenderer): string | null {
-    const identity = this.findBlock(ast, 'identity');
-    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
-
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
 
-    const text = this.extractText(contextBlock.content);
-    if (!text) return null;
+    const identity = this.findBlock(ast, 'identity');
+    const textIsConsumedByProject = !identity && !resolveSourceSectionTitle(ast, 'context');
+    const propertyItems = this.contextPropertyItems(ast, ['frameworks']);
 
-    // Remove the "## Architecture" section with code block (rendered by architecture())
-    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
-    if (!remainingText) return null;
+    let body = '';
+    if (!textIsConsumedByProject) {
+      const text = this.extractText(contextBlock.content);
+      // Remove the "## Architecture" section with code block (rendered by architecture())
+      const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+      const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+      if (remainingText) {
+        // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
+        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+        body = this.stripAllIndent(downgradedText);
+      }
+    }
 
-    // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
-    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+    if (propertyItems.length > 0) {
+      const list = propertyItems.map((item) => `- ${item}`).join('\n');
+      body = body ? `${body}\n\n${list}` : list;
+    }
+
+    if (!body) return null;
     return `## ${resolveSectionTitle(ast, 'context', { defaultTitle: 'Context' })}
 
-${this.stripAllIndent(downgradedText)}`;
+${body}`;
   }
 
   /**
@@ -836,19 +964,21 @@ ${this.stripAllIndent(content)}`;
     const docsObj = docs as Record<string, Value>;
     const items: string[] = [];
 
-    if (docsObj['verifyBefore']) {
-      items.push(
-        '**Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior'
-      );
-    }
-    if (docsObj['verifyAfter']) {
-      items.push(
-        '**After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed'
-      );
-    }
-    if (docsObj['codeExamples']) {
-      items.push('Ensure code examples in documentation remain accurate after modifications');
-    }
+    const verifyBefore = this.documentationItem(
+      docsObj['verifyBefore'],
+      '**Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior'
+    );
+    if (verifyBefore) items.push(verifyBefore);
+    const verifyAfter = this.documentationItem(
+      docsObj['verifyAfter'],
+      '**After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed'
+    );
+    if (verifyAfter) items.push(verifyAfter);
+    const codeExamples = this.documentationItem(
+      docsObj['codeExamples'],
+      'Ensure code examples in documentation remain accurate after modifications'
+    );
+    if (codeExamples) items.push(codeExamples);
     items.push('If adding new features, add corresponding documentation in `docs/`');
     items.push('If changing existing behavior, update affected documentation sections');
 
