@@ -1,0 +1,56 @@
+# Few-shot examples for the conventions that agents get wrong most often.
+# Requires syntax 1.2.0 or newer.
+
+@examples {
+  scoped-commit: {
+    description: "Commit subject: package scope is mandatory and drives the release changelog"
+    input: "Added support for primitive type annotations in typed block fields"
+    output: "fix(parser): accept primitive types in typed block fields"
+  }
+
+  unscoped-commit-rejected: {
+    description: "A subject without a scope, rewritten with the scope of the package it touches"
+    input: "feat: add terminal command hook event"
+    output: "feat(formatters): add terminal command hook event"
+  }
+
+  unknown-narrowing: {
+    description: "Narrow `unknown` with a type guard instead of reaching for `any`"
+    input: """
+      function readId(value: any): string {
+        return value.id;
+      }
+    """
+    output: """
+      function isIdentified(value: unknown): value is { id: string } {
+        return (
+          typeof value === 'object' &&
+          value !== null &&
+          'id' in value &&
+          typeof (value as { id: unknown }).id === 'string'
+        );
+      }
+
+      export function readId(value: unknown): string {
+        if (!isIdentified(value)) {
+          throw new PSError('Expected an object with a string id');
+        }
+        return value.id;
+      }
+    """
+  }
+
+  named-export: {
+    description: "Named exports only, with an explicit return type on the public function"
+    input: """
+      export default function compile(ast) {
+        return format(ast);
+      }
+    """
+    output: """
+      export function compile(ast: Program): CompileResult {
+        return format(ast);
+      }
+    """
+  }
+}

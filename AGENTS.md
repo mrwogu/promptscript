@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PromptScript 2026-08-04T15:22:17.808Z | source: .promptscript/project.prs | target: factory - do not edit -->
+<!-- PromptScript 2026-08-04T15:31:20.024Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 
@@ -53,7 +53,7 @@ flowchart TB
 - Testing: Vitest
 - Linting: ESLint + Prettier
 
-## Conventions & Patterns
+## Engineering Standards
 
 ### Graph First
 
@@ -106,9 +106,10 @@ flowchart TB
 
 ### Workflow
 
-- branchStrategy: gitflow
-- newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
+- branchStrategy: gitflow — branch from main, never commit to main
+- newTask: follow the new-task workflow: branch, atomic commits, full verification pipeline, push, PR, watch CI
 - prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
+- verification: follow the verify workflow after any code change - all eight steps, in order
 
 ## Git Workflows
 
@@ -154,9 +155,7 @@ pnpm nx graph             # View dependency graph
 pnpm prs compile          # Compile .prs files (uses local dev version)
 ```
 
-## Build & Test
-
-(MANDATORY)
+## Post-Work Verification (MANDATORY)
 
 After completing ANY code changes, run ALL steps in order:
 
@@ -183,10 +182,6 @@ pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
 
 - Use Mermaid (exception: packages/\*/README.md must use ASCII art because npm does not render Mermaid) for diagrams
 - Types: flowchart, sequence, class, state, ER, gantt, pie
-- Example: `mermaid
-flowchart LR
-  A[Input] --> B[Process] --> C[Output]
-`
 
 ## MCP Tools: code-review-graph
 
@@ -232,3 +227,89 @@ that file scanning cannot.
 - Don't commit directly to main - always use feature branches
 - Don't edit CHANGELOG.md manually - it is managed by release-please. Manual edits break release state tracking, preventing tag creation and GitHub releases.
 - Don't regenerate golden files without reviewing the diff — golden files lock in whatever behavior produced them, including regressions
+
+## Examples
+
+### Example: scoped-commit
+
+Commit subject: package scope is mandatory and drives the release changelog
+
+**Input:**
+
+```
+Added support for primitive type annotations in typed block fields
+```
+
+**Output:**
+
+```
+fix(parser): accept primitive types in typed block fields
+```
+
+### Example: unscoped-commit-rejected
+
+A subject without a scope, rewritten with the scope of the package it touches
+
+**Input:**
+
+```
+feat: add terminal command hook event
+```
+
+**Output:**
+
+```
+feat(formatters): add terminal command hook event
+```
+
+### Example: unknown-narrowing
+
+Narrow `unknown` with a type guard instead of reaching for `any`
+
+**Input:**
+
+```
+function readId(value: any): string {
+  return value.id;
+}
+```
+
+**Output:**
+
+```
+function isIdentified(value: unknown): value is { id: string } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    typeof (value as { id: unknown }).id === 'string'
+  );
+}
+
+export function readId(value: unknown): string {
+  if (!isIdentified(value)) {
+    throw new PSError('Expected an object with a string id');
+  }
+  return value.id;
+}
+```
+
+### Example: named-export
+
+Named exports only, with an explicit return type on the public function
+
+**Input:**
+
+```
+export default function compile(ast) {
+  return format(ast);
+}
+```
+
+**Output:**
+
+```
+export function compile(ast: Program): CompileResult {
+  return format(ast);
+}
+```

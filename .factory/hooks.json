@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph update --skip-flows --repo \"$(pwd)\" || true",
+            "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
             "timeout": 30
           }
         ]
@@ -38,11 +38,11 @@
     ],
     "SessionStart": [
       {
-        "matcher": "",
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph status --repo \"$(pwd)\" || echo 'Not a git repo, skipping'",
+            "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-status.sh # promptscript-generated:graph-status",
             "timeout": 10
           }
         ]

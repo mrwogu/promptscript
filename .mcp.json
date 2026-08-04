@@ -1,9 +1,11 @@
 {
   "mcpServers": {
     "code-review-graph": {
+      "type": "stdio",
       "command": "code-review-graph",
-      "args": ["serve"],
-      "type": "stdio"
+      "args": [
+        "serve"
+      ]
     }
   }
 }

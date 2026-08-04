@@ -62,20 +62,22 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph update --skip-flows --repo \"$(pwd)\" || true",
-            "timeout": 30
+            "command": "if [ -z \"${CLAUDE_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript claude hook requires non-empty CLAUDE_PROJECT_DIR.' >&2; exit 1; fi; cd \"${CLAUDE_PROJECT_DIR}\" && sh \"${CLAUDE_PROJECT_DIR}\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
+            "timeout": 30,
+            "statusMessage": "code-review-graph: refreshing index..."
           }
         ]
       }
     ],
     "SessionStart": [
       {
-        "matcher": "",
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "cat >/dev/null || true; git rev-parse --git-dir >/dev/null 2>&1 && code-review-graph status --repo \"$(pwd)\" || echo 'Not a git repo, skipping'",
-            "timeout": 10
+            "command": "if [ -z \"${CLAUDE_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript claude hook requires non-empty CLAUDE_PROJECT_DIR.' >&2; exit 1; fi; cd \"${CLAUDE_PROJECT_DIR}\" && sh \"${CLAUDE_PROJECT_DIR}\"/.promptscript/scripts/graph-status.sh # promptscript-generated:graph-status",
+            "timeout": 10,
+            "statusMessage": "code-review-graph: reading index status..."
           }
         ]
       }

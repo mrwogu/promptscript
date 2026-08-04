@@ -1,12 +1,22 @@
-version: '1'
+# yaml-language-server: $schema=./schema/config.json
 
-project:
-  id: 'promptscript'
+id: 'promptscript'
+syntax: '1.6.0'
+description: 'Language and toolchain for standardizing AI instructions across enterprise organizations'
 
+input:
+  entry: .promptscript/project.prs
+
+# factory is declared last on purpose. GitHub's full version also emits AGENTS.md,
+# and the target compiled last owns a shared path, so this keeps AGENTS.md in
+# Factory's richer format instead of a duplicate of copilot-instructions.md.
 targets:
-  - claude
-  - factory
-  - github
+  - claude:
+      version: full
+  - github:
+      version: full
+  - factory:
+      version: full
 
 validation:
   rules:

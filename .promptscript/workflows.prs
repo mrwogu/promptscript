@@ -1,0 +1,69 @@
+# Multi-step procedures that agents follow end to end.
+# Requires syntax 1.1.0 or newer.
+#
+# Only Claude has a native workflow file format, so @standards.workflow keeps the
+# short policy statements that every target needs. Detailed step lists live here.
+
+@workflows {
+  new-task: {
+    description: "Take a task from main branch to a green pull request"
+    content: """
+      Never commit to main. Every task starts on its own branch.
+
+      1. Branch from main: `git checkout -b feat/<task-name>` (or `fix/<task-name>`).
+      2. Implement in atomic commits, each one Conventional Commits format with a
+         package or domain scope.
+      3. Run the full verification pipeline. Do not push a branch that fails it.
+      4. Push and set upstream: `git push -u origin <branch-name>`.
+      5. Open the pull request: `gh pr create --fill`.
+      6. Watch CI: `gh pr checks --watch`.
+      7. On failure, fix the cause and push again. Repeat from step 6.
+      8. The task is done only when every check passes.
+    """
+  }
+
+  verify: {
+    description: "Run the mandatory post-work verification pipeline in order"
+    content: """
+      Run all steps, in this order, after any code change. A later step assumes
+      the earlier ones passed.
+
+      ```bash
+      pnpm run format             # 1. Format code with Prettier
+      pnpm run lint              # 2. Check for linting errors
+      pnpm run typecheck         # 3. Verify TypeScript types
+      pnpm run test              # 4. Run all tests
+      pnpm prs validate --strict # 5. Validate .prs files
+      pnpm schema:check          # 6. Verify JSON schemas are current
+      pnpm skill:check           # 7. Verify SKILL.md copies are in sync
+      pnpm grammar:check         # 8. Verify TextMate grammar covers all tokens
+      ```
+
+      `prs compile` output is not Prettier-clean on its own, so step 1 must run
+      after any change to `.promptscript/` that triggers recompilation.
+    """
+  }
+
+  add-block-keyword: {
+    description: "Add or rename a PromptScript block keyword without desynchronizing tooling"
+    content: """
+      A block keyword is referenced in more places than the parser. Update all of
+      them in the same change.
+
+      1. Lexer and grammar: `packages/parser/src/grammar/`.
+      2. Block shape contract: `packages/core/src/block-shapes.ts`.
+      3. Section contract, if the block renders a section:
+         `packages/core/src/section-registry.ts`.
+      4. Syntax version gate, if the keyword is new:
+         `packages/core/src/syntax-versions.ts`.
+      5. Formatters that render the block, plus their golden files.
+      6. All three syntax highlighters: `docs_extensions/promptscript_lexer.py`,
+         `apps/vscode/syntaxes/promptscript.tmLanguage.json`, and
+         `packages/playground/src/utils/prs-language.ts`.
+      7. Reference docs under `docs/reference/`.
+
+      `pnpm grammar:check` catches a missed TextMate grammar entry. Nothing
+      catches a missed Pygments or Monaco entry, so verify those by reading.
+    """
+  }
+}

@@ -188,6 +188,11 @@
 }
 
 @knowledge {
+  # The derived post-work section title carries the mandatory marker. Without
+  # this override the formatter emits its default title and leaves "(MANDATORY)"
+  # behind as a stray paragraph.
+  @header post-work "Post-Work Verification (MANDATORY)"
+
   """
   ## Development Commands
 
@@ -201,7 +206,7 @@
   pnpm prs compile          # Compile .prs files (uses local dev version)
   ```
 
-  ## Post-Work Verification (MANDATORY)
+  ## Post-Work Verification
 
   After completing ANY code changes, run ALL steps in order:
   ```bash
