@@ -122,9 +122,6 @@ function replacementToBlockContent(
         properties: deepClone(value as Record<string, Value>),
         loc: deepClone(location),
       };
-    case 'TemplateValueNode':
-    case 'TypeExpressionValueNode':
-      break;
   }
 
   const observed = value === null ? 'null' : typeof value;
@@ -202,9 +199,6 @@ function valueReplacementToBlockBody(
           { projection: 'TextContent' }
         );
       }
-      break;
-    case 'TemplateValueNode':
-    case 'TypeExpressionValueNode':
       break;
   }
   return blockContentToBody(content);

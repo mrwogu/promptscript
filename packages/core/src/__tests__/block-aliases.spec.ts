@@ -120,6 +120,59 @@ describe('block aliases', () => {
     });
   });
 
+  it('orders alias declarations by line when offsets are unavailable', () => {
+    const first = block('commands', { '/test': 'Run tests' }, 10);
+    const second = block('shortcuts', { '/review': 'Review code' }, 20);
+    first.loc = { file: LOC.file, line: 2, column: 1 };
+    second.loc = { file: LOC.file, line: 3, column: 1 };
+
+    const result = normalizeBlockAliases(program([first, second]), {
+      preserveDeclarationOrder: true,
+    });
+
+    expect(result.blocks.map((candidate) => candidate.name)).toEqual(['shortcuts', 'shortcuts']);
+    expect(result.blocks[0]?.content).toMatchObject({
+      properties: { '/test': 'Run tests' },
+    });
+    expect(result.blocks[1]?.content).toMatchObject({
+      properties: { '/review': 'Review code' },
+    });
+  });
+
+  it('uses line order for import alias visibility without offsets', () => {
+    const ast = program([]);
+    ast.uses = [
+      {
+        type: 'UseDeclaration',
+        path: {
+          type: 'PathReference',
+          raw: './commands',
+          segments: ['commands'],
+          isRelative: true,
+          loc: { file: LOC.file, line: 1, column: 1 },
+        },
+        alias: 'commands',
+        loc: { file: LOC.file, line: 1, column: 1 },
+      },
+    ];
+    ast.overrides = [
+      {
+        type: 'OverrideBlock',
+        targetPath: 'commands.skills',
+        replacement: {
+          type: 'ValueReplacement',
+          value: createValueNode(true, { file: LOC.file, line: 2, column: 1 }),
+          loc: { file: LOC.file, line: 2, column: 1 },
+        },
+        loc: { file: LOC.file, line: 2, column: 1 },
+      },
+    ];
+
+    const result = normalizeBlockAliases(ast, { preserveDeclarationOrder: true });
+
+    expect(result.overrides?.[0]?.targetPath).toBe('commands.skills');
+  });
+
   it('normalizes commands extension targets', () => {
     const ast = program([block('commands', { '/test': 'Run tests' }, 1)]);
     ast.extends = [

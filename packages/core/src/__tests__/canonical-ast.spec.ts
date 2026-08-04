@@ -117,6 +117,35 @@ describe('canonical AST compatibility', () => {
     ]);
   });
 
+  it('normalizes legacy overrides into ordered canonical operations', () => {
+    const canonical = normalizeProgram({
+      type: 'Program',
+      uses: [],
+      blocks: [],
+      extends: [],
+      overrides: [
+        {
+          type: 'OverrideBlock',
+          targetPath: 'standards.testing',
+          replacement: {
+            type: 'ValueReplacement',
+            value: createValueNode(['Use Vitest'], LOC),
+            loc: LOC,
+          },
+          loc: LOC,
+        },
+      ],
+      loc: LOC,
+    });
+
+    expect(canonical.operations).toEqual([
+      expect.objectContaining({
+        type: 'OverrideOperation',
+        override: expect.objectContaining({ targetPath: 'standards.testing' }),
+      }),
+    ]);
+  });
+
   it('creates immutable updates without modifying the original graph', () => {
     const canonical = normalizeProgram({
       type: 'Program',

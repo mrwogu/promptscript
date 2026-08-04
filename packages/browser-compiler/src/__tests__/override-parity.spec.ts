@@ -11,13 +11,19 @@ describe('explicit override browser parity regressions', () => {
 @use ./shared as shared
 @override context.runtime { "bun" }
 @override shared.standards.testing { ["Use Vitest"] }
-@extend standards { testing: ["Require coverage"] }
+@extend standards {
+  testing: ["Require coverage"]
+  linting!: ["Use ESLint"]
+}
 `,
       'parent.prs': `@meta { id: "parent" syntax: "1.6.0" }
 @context { runtime: "node" }
 `,
       'shared.prs': `@meta { id: "shared" syntax: "1.6.0" }
-@standards { testing: ["Use Jest"] }
+@standards {
+  testing: ["Use Jest"]
+  linting: ["Use Biome"]
+}
 `,
     };
 
@@ -30,7 +36,9 @@ describe('explicit override browser parity regressions', () => {
     expect(result.outputs.get('CLAUDE.md')?.content).toContain('bun');
     expect(result.outputs.get('CLAUDE.md')?.content).toContain('Use Vitest');
     expect(result.outputs.get('CLAUDE.md')?.content).toContain('Require coverage');
+    expect(result.outputs.get('CLAUDE.md')?.content).toContain('Use ESLint');
     expect(result.outputs.get('CLAUDE.md')?.content).not.toContain('Use Jest');
+    expect(result.outputs.get('CLAUDE.md')?.content).not.toContain('Use Biome');
   });
 
   it('lets later inherit operations replace earlier block values', async () => {

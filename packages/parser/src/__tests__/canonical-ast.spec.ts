@@ -106,6 +106,21 @@ describe('canonical AST', () => {
     ]);
   });
 
+  it('reports redundant replace modifiers inside explicit overrides', () => {
+    const result = parse('@override standards { testing!: ["Use Vitest"] }', {
+      recovery: true,
+      filename: 'replace-modifier.prs',
+    });
+
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining(
+          "The '!' replace modifier is unnecessary inside @override"
+        ),
+      }),
+    ]);
+  });
+
   it('uses one ordered body for text, fields, lists, and inline imports', () => {
     const ast = parseCanonicalOrThrow(
       `

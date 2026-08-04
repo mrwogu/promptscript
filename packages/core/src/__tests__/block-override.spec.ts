@@ -146,6 +146,70 @@ describe('block override', () => {
     });
   });
 
+  it('converts standalone block bodies for nested replacements', () => {
+    const nested = (
+      entries: Parameters<typeof createBlockBody>[0],
+      projection?: 'ArrayContent'
+    ): OverrideBlock => ({
+      type: 'OverrideBlock',
+      targetPath: 'standards.testing',
+      replacement: {
+        type: 'BlockReplacement',
+        body: createBlockBody(entries, LOC, projection ? { projection } : undefined),
+        loc: LOC,
+      },
+      loc: LOC,
+    });
+    const ast = program([block('standards', { testing: 'Old' })]);
+
+    const textResult = applyOverride(
+      ast,
+      nested([{ type: 'TextEntry', text: 'Use Vitest', loc: LOC }])
+    );
+    const arrayResult = applyOverride(
+      ast,
+      nested(
+        [{ type: 'ListEntry', value: createValueNode('Use Vitest', LOC), loc: LOC }],
+        'ArrayContent'
+      )
+    );
+    const objectResult = applyOverride(
+      ast,
+      nested([
+        {
+          type: 'FieldEntry',
+          name: 'runner',
+          value: createValueNode('vitest', LOC),
+          loc: LOC,
+        },
+      ])
+    );
+
+    expect(textResult.blocks[0]?.content).toMatchObject({
+      properties: { testing: { type: 'TextContent', value: 'Use Vitest' } },
+    });
+    expect(arrayResult.blocks[0]?.content).toMatchObject({
+      properties: { testing: ['Use Vitest'] },
+    });
+    expect(objectResult.blocks[0]?.content).toMatchObject({
+      properties: { testing: { runner: 'vitest' } },
+    });
+    expect(() =>
+      applyOverride(
+        ast,
+        nested([
+          { type: 'TextEntry', text: 'Required', loc: LOC },
+          {
+            type: 'FieldEntry',
+            name: 'runner',
+            value: createValueNode('vitest', LOC),
+            loc: LOC,
+          },
+        ])
+      )
+    ).toThrow(/mixed block content/);
+  });
+
   it('replaces root text, array, and mixed block bodies', () => {
     const textResult = applyOverride(
       program([block('identity', { old: true })]),
@@ -181,6 +245,16 @@ describe('block override', () => {
       },
       loc: LOC,
     });
+    const textNodeResult = applyOverride(program([block('identity', { old: true })]), {
+      type: 'OverrideBlock',
+      targetPath: 'identity',
+      replacement: {
+        type: 'ValueReplacement',
+        value: { type: 'TextValueNode', value: 'Text node identity', loc: LOC },
+        loc: LOC,
+      },
+      loc: LOC,
+    });
 
     expect(textResult.blocks[0]?.content).toMatchObject({
       type: 'TextContent',
@@ -197,6 +271,10 @@ describe('block override', () => {
         testing: ['Use Vitest'],
         items: ['Document failures'],
       },
+    });
+    expect(textNodeResult.blocks[0]?.content).toMatchObject({
+      type: 'TextContent',
+      value: 'Text node identity',
     });
   });
 
@@ -327,6 +405,23 @@ describe('block override', () => {
     expect(() => applyOverride(ast, valueOverride('standards.toString', 'invalid'))).toThrow(
       /does not exist at segment "toString"/
     );
+    const objectAst = program([block('standards', { testing: { runner: 'jest' } })]);
+    expect(() =>
+      applyOverride(objectAst, valueOverride('standards.testing.missing', 'invalid'))
+    ).toThrow(/does not exist at segment "missing"/);
+    expect(() => applyOverride(ast, valueOverride('context.runtime', 'node'))).toThrow(
+      /target "context.runtime" does not exist/
+    );
+
+    const textBlock: Block = {
+      type: 'Block',
+      name: 'identity',
+      content: { type: 'TextContent', value: 'Identity', loc: LOC },
+      loc: LOC,
+    };
+    expect(() =>
+      applyOverride(program([textBlock]), valueOverride('identity.name', 'invalid'))
+    ).toThrow(/root block is not object-shaped/);
   });
 
   it('rejects primitive root block replacements', () => {
@@ -355,6 +450,9 @@ describe('block override', () => {
     expect(() => applyOverride(ast, valueOverride('skills.review.license', 'Apache-2.0'))).toThrow(
       /Cannot override sealed property 'license'/
     );
+    expect(() => applyOverride(ast, valueOverride('skills.review.sealed', false))).toThrow(
+      /Cannot override protected property 'sealed'/
+    );
     expect(() =>
       applyOverride(
         ast,
@@ -365,6 +463,70 @@ describe('block override', () => {
         })
       )
     ).toThrow(/Cannot change sealed property 'content'/);
+
+    const fullySealed = program([
+      block('skills', {
+        review: {
+          description: 'Review code',
+          content: 'Critical instructions',
+          sealed: true,
+        },
+      }),
+    ]);
+    expect(() =>
+      applyOverride(fullySealed, valueOverride('skills.review.description', 'Changed'))
+    ).toThrow(/Cannot override sealed property 'description'/);
+
+    const unsealed = program([
+      block('skills', {
+        review: {
+          description: 'Review code',
+          content: 'Instructions',
+          sealed: false,
+        },
+      }),
+    ]);
+    expect(
+      applyOverride(unsealed, valueOverride('skills.review.description', 'Changed')).blocks[0]
+        ?.content
+    ).toMatchObject({
+      properties: { review: { description: 'Changed' } },
+    });
+  });
+
+  it('rejects replacements that weaken sealed skill contracts', () => {
+    const ast = program([
+      block('skills', {
+        review: {
+          description: 'Review code',
+          content: 'Critical instructions',
+          sealed: ['content'],
+        },
+      }),
+    ]);
+
+    expect(() => applyOverride(ast, valueOverride('skills', 'Invalid'))).toThrow(
+      /Cannot replace @skills with non-object content/
+    );
+    expect(() =>
+      applyOverride(ast, valueOverride('skills', { deploy: { content: 'Deploy' } }))
+    ).toThrow(/Cannot remove skill "review"/);
+    expect(() => applyOverride(ast, valueOverride('skills.missing.content', 'Invalid'))).toThrow(
+      /does not exist at segment "missing"/
+    );
+    expect(() => applyOverride(ast, valueOverride('skills.review', 'Invalid'))).toThrow(
+      /Cannot replace skill "review" with non-object content/
+    );
+    expect(() =>
+      applyOverride(
+        ast,
+        valueOverride('skills.review', {
+          description: 'Review code',
+          content: 'Critical instructions',
+          sealed: ['description'],
+        })
+      )
+    ).toThrow(/Cannot change protected property 'sealed'/);
   });
 
   it('protects sealed declarations during complete skills replacement', () => {

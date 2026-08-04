@@ -37,10 +37,14 @@ describe('explicit override resolution', () => {
       @meta { id: "ordered" syntax: "1.6.0" }
       @standards {
         testing: ["Use Jest"]
+        linting: ["Use Biome"]
         config: { runner: "jest" coverage: 80 }
       }
       @override standards.testing { ["Use Vitest"] }
-      @extend standards { testing: ["Require coverage"] }
+      @extend standards {
+        testing: ["Require coverage"]
+        linting!: ["Use ESLint"]
+      }
       @override standards.config.runner { "vitest" }
     `);
     const resolver = new Resolver({
@@ -54,6 +58,7 @@ describe('explicit override resolution', () => {
 
     expect(result.errors).toEqual([]);
     expect(standards['testing']).toEqual(['Use Vitest', 'Require coverage']);
+    expect(standards['linting']).toEqual(['Use ESLint']);
     expect(standards['config']).toEqual({ runner: 'vitest', coverage: 80 });
     expect(result.ast?.overrides).toEqual([]);
     expect(result.ast?.extends).toEqual([]);

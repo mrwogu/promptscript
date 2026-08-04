@@ -199,10 +199,23 @@ describe('syntax feature capabilities', () => {
           loc,
         },
       ],
+      overrides: [
+        {
+          type: 'OverrideBlock',
+          targetPath: 'standards.testing',
+          replacement: {
+            type: 'ValueReplacement',
+            value: { type: 'ScalarValueNode', value: true, loc },
+            loc,
+          },
+          loc,
+        },
+      ],
     };
 
     expect(getSyntaxFeatureUsages(ast)).toEqual([
       { feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: loc },
+      { feature: SYNTAX_FEATURES.EXPLICIT_OVERRIDE, location: loc },
     ]);
   });
 
