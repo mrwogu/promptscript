@@ -91,6 +91,7 @@ plugins:
         Getting Started:
           - getting-started.md
           - tutorial.md
+          - examples/real-life-checkout-service.md: End-to-end production checkout service rollout
         Agent Platform:
           - features/index.md: Agent platform concepts and complete feature model
           - features/agents.md: Native agents, tools, skills, and MCP access
@@ -140,6 +141,7 @@ plugins:
           - guides/import.md: Import existing agent instructions
           - guides/formatter-architecture.md: Internal architecture of formatters
         Examples:
+          - examples/real-life-checkout-service.md: End-to-end production checkout service rollout
           - examples/minimal.md: Minimal project setup
           - examples/composition-and-order.md: Composition precedence and declaration order
           - examples/merge-vs-replace.md: Extend, field replacement, and override
@@ -236,6 +238,7 @@ nav:
   - Getting Started:
       - getting-started.md
       - tutorial.md
+      - 'Real-Life Tutorial: Checkout Service': examples/real-life-checkout-service.md
   - Agent Platform:
       - Overview: features/index.md
       - Agents: features/agents.md
@@ -303,6 +306,7 @@ nav:
       - Overview: examples/index.md
       - Start Here:
           - Minimal: examples/minimal.md
+          - 'Real-Life Checkout Service': examples/real-life-checkout-service.md
       - Understand Language:
           - Composition and Order: examples/composition-and-order.md
           - Merge vs Replace: examples/merge-vs-replace.md

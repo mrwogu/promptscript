@@ -11,11 +11,12 @@ Real-world PromptScript configuration examples.
 
 ### Start Here
 
-| Goal                        | Example                                                   |
-| --------------------------- | --------------------------------------------------------- |
-| Compile first project       | [Minimal](minimal.md)                                     |
-| Adopt existing instructions | [Migration Guide](../guides/migration.md)                 |
-| Upgrade PromptScript 1.15   | [Upgrade 1.15 to 1.16](../guides/upgrade-1-15-to-1-16.md) |
+| Goal                          | Example                                                     |
+| ----------------------------- | ----------------------------------------------------------- |
+| Compile first project         | [Minimal](minimal.md)                                       |
+| Roll out a production service | [Real-Life Checkout Service](real-life-checkout-service.md) |
+| Adopt existing instructions   | [Migration Guide](../guides/migration.md)                   |
+| Upgrade PromptScript 1.15     | [Upgrade 1.15 to 1.16](../guides/upgrade-1-15-to-1-16.md)   |
 
 ### Understand Language
 
@@ -47,6 +48,17 @@ Real-world PromptScript configuration examples.
 ## Complete Examples
 
 <div class="ref-list">
+
+<a href="real-life-checkout-service/" class="ref-item">
+  <div class="ref-item__icon ref-item__icon--green">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4V2h10v2h3a1 1 0 0 1 1 1v4H3V5a1 1 0 0 1 1-1zm14 7v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8h7v2h4v-2z"/></svg>
+  </div>
+  <div class="ref-item__content">
+    <h3>Real-Life Checkout Service</h3>
+    <p>End-to-end production rollout with composition, native agents, safe takeover, CI drift checks, and rollback.</p>
+  </div>
+  <div class="ref-item__arrow">→</div>
+</a>
 
 <a href="minimal/" class="ref-item">
   <div class="ref-item__icon ref-item__icon--green">
