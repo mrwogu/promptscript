@@ -1250,7 +1250,9 @@ export const FEATURE_MATRIX: FeatureSpec[] = [
       pi: 'not-supported',
       qoder: 'not-supported',
       'qwen-code': 'not-supported',
-      zencoder: 'supported',
+      // Zencoder rules are emitted as a single always-applied file; there is no
+      // glob-scoped rule surface to map path-specific guards onto.
+      zencoder: 'not-supported',
       neovate: 'not-supported',
       pochi: 'not-supported',
       adal: 'not-supported',
