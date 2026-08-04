@@ -108,7 +108,8 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
-| `1.5.0` | Current | All 1.4.0 features + generated section title overrides with contextual `@header`                                                           |
+| `1.5.0` | Stable  | All 1.4.0 features + generated section title overrides with contextual `@header`                                                           |
+| `1.6.0` | Current | All 1.5.0 features + atomic replacement with contextual `@override`                                                                        |
 
 Block Availability
 
@@ -126,9 +127,7 @@ Block Availability
 | `@mcpServers` | `1.4.0`                |
 | `@plugins`    | `1.4.0`                |
 
-All other built-in blocks are available from `1.0.0`.
-
-Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` require syntax `1.5.0`.
+All other built-in blocks are available from `1.0.0`. Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` require syntax `1.5.0`. Atomic target replacement with `@override` requires syntax `1.6.0`.
 
 ### Validation (PS018, PS019)
 
@@ -1302,11 +1301,11 @@ The `!` modifier cannot be combined with a default value: `field!: value = defau
 
 When `@extend` targets a skill definition inside `@skills`, properties follow dedicated merge strategies:
 
-| Strategy          | Properties                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent` |
-| **Append**        | `references`, `requires`                                                                                           |
-| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                      |
+| Strategy          | Properties                                                                                                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent`, `license` |
+| **Append**        | `references`, `requires`                                                                                                      |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                                 |
 
 ### Reference Negation
 
@@ -1861,3 +1860,72 @@ Environment-root and Git-root wrappers exit non-zero before an interpreter or co
 ## Canonical Block Shape Reference
 
 See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for the canonical shape, compatibility forms, merge rules, diagnostics, and formatter behavior of every built-in block.
+
+## Atomic Replacement with [@override](https://github.com/override "GitHub User: override")
+
+Syntax `1.6.0` adds `@override` for replacing a complete existing target:
+
+```text
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+  tooling: { runner: "jest" coverage: 80 }
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+
+@override standards.tooling.runner {
+  "vitest"
+}
+
+@extend standards {
+  testing: ["Require coverage"]
+}
+```
+
+`@override standards.testing` replaces the complete array. The later `@extend` then adds to that replacement. A root override replaces the complete block body:
+
+```text
+@override standards {
+  testing: ["Use Vitest"]
+}
+```
+
+Root replacements accept regular text, object, array, or mixed block bodies. Nested replacements also accept standalone object, string, number, boolean, and `null` values. The complete target path must already exist when the operation runs. Missing targets and traversal through scalar values are errors.
+
+Operations use declaration order in syntax `1.6.0`. This includes `@inherit`, top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used with an older declared syntax also uses declaration order so replacement remains deterministic, while PS018 requests a syntax upgrade.
+
+Use the forms according to intent:
+
+| Form        | Behavior                                                       |
+| ----------- | -------------------------------------------------------------- |
+| `@extend`   | Add or merge content using the target shape's merge policy.    |
+| `field!`    | Compatibility replacement for one direct regular extend field. |
+| `@override` | Replace one complete existing block or nested target value.    |
+
+`@override` cannot change or remove sealed skill properties. `@override { ... }` without a target remains a legal custom block named `override`.
+
+This complete example exercises root and nested replacement shapes:
+
+```
+@meta { id: "override-shapes" syntax: "1.6.0" }
+
+@identity { """Old identity""" }
+@restrictions { - "Old restriction" }
+@standards {
+  testing: ["Use Jest"]
+  config: { enabled: true retries: 1 }
+}
+
+@override identity { "New identity" }
+@override restrictions { ["No unsafe casts"] }
+@override standards {
+  """Required engineering rules."""
+  testing: ["Use Vitest"]
+  config: { enabled: true retries: 1 }
+  - "Document failures"
+}
+@override standards.config.enabled { false }
+@override standards.config.retries { 3 }
+```

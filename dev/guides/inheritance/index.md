@@ -266,11 +266,11 @@ The `@extend` block modifies specific paths:
 
 When `@extend` targets a skill definition, individual skill properties follow dedicated merge strategies rather than the generic block merge rules:
 
-| Strategy          | Properties                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent` |
-| **Append**        | `references`, `examples`, `requires`                                                                               |
-| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                      |
+| Strategy          | Properties                                                                                                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent`, `license` |
+| **Append**        | `references`, `examples`, `requires`                                                                                          |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                                 |
 
 Example — overlay content and add a reference file without replacing the base skill's references:
 
@@ -839,3 +839,22 @@ Warning: Requested @company/base@2.0.0, found 1.5.0
 ```
 
 Update version constraints or registry.
+
+## Replacing Complete Values
+
+Use `@extend` when inherited content should be merged. Use `@override` with syntax `1.6.0` when the complete existing value should be replaced:
+
+```text
+@meta { id: "project" syntax: "1.6.0" }
+@inherit @company/base
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+
+@extend standards {
+  testing: ["Require coverage"]
+}
+```
+
+The target must exist after preceding declarations are applied. Replacement is atomic, and later declarations operate on the replacement. `field!` remains supported for replacing one direct regular field inside `@extend`, but new code should use `@override` when complete replacement is the intended operation. Sealed skill properties cannot be replaced or removed.

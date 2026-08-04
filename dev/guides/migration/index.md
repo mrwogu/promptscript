@@ -700,6 +700,26 @@ Modify inherited blocks at specific paths:
 }
 ```
 
+Choose modification syntax by migration intent:
+
+- Keep `@extend` when old and new values should merge or append.
+- Keep `field!` as a compatibility form for replacing one direct regular field inside `@extend`.
+- Use `@override` with syntax `1.6.0` when one complete existing block or nested value must replace the previous value.
+
+```
+@meta { id: "migrated-project" syntax: "1.6.0" }
+
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+```
+
+Unlike `field!`, `@override` requires the complete target path to exist. It cannot bypass sealed skill properties.
+
 ## Validation Checklist
 
 After migration, verify:
