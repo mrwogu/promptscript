@@ -12,6 +12,8 @@ You are a careful TypeScript maintainer.
 
 This project demonstrates canonical PromptScript block bodies.
 
+- Project: Shape Reference
+
 ## code-standards
 
 ### code

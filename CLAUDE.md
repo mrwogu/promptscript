@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-08-04T16:53:29.245Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-08-04T19:05:28.025Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -52,6 +52,8 @@ flowchart TB
 - CLI: Commander.js
 - Testing: Vitest
 - Linting: ESLint + Prettier
+
+- Project: PromptScript
 
 ## Engineering Standards
 

@@ -240,14 +240,19 @@ export abstract class BaseFormatter implements Formatter {
    * outside this set is generic and must be surfaced by the context section.
    */
   protected static readonly CONTEXT_RENDERED_KEYS: ReadonlySet<string> = new Set([
-    'project',
     'languages',
     'runtime',
-    'monorepo',
     'techStack',
     'tech-stack',
     'architecture',
   ]);
+
+  /**
+   * Escape a value for use inside a double-quoted YAML scalar.
+   */
+  protected yamlQuoted(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
 
   /**
    * Read the `architecture` property of `@context`. Used as a fallback for
@@ -275,6 +280,15 @@ export abstract class BaseFormatter implements Formatter {
     for (const [key, value] of Object.entries(this.getProps(context.content))) {
       if (BaseFormatter.CONTEXT_RENDERED_KEYS.has(key)) continue;
       if (alsoRenderedKeys.includes(key)) continue;
+      // Only an object-shaped `monorepo` reaches the tech-stack subsection; a
+      // scalar has no dedicated surface and would otherwise be dropped.
+      if (
+        key === 'monorepo' &&
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      )
+        continue;
       if (value === null || value === undefined || value === false) continue;
       if (value === true) {
         items.push(this.humanizeLabel(key));

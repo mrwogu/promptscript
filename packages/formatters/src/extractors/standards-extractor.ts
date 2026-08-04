@@ -313,6 +313,11 @@ export class StandardsExtractor {
       if (value.type === 'TextContent' && typeof value.value === 'string') {
         return value.value.trim();
       }
+      // TemplateExpression: an unresolved {{placeholder}}. Rendering the node
+      // itself would leak its AST shape into the output.
+      if (value.type === 'TemplateExpression' && 'name' in value) {
+        return `{{${String(value.name)}}}`;
+      }
       // TypeExpression: { type: 'TypeExpression', kind: 'range'|'enum'|etc, params?: Value[] }
       if (value.type === 'TypeExpression' && 'kind' in value) {
         const kind = value.kind as string;

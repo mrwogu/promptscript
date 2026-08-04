@@ -892,7 +892,15 @@ ${fullText}`;
     const context = this.findBlock(ast, 'context');
     if (!context) return null;
 
-    const propertyItems = this.contextPropertyItems(ast, ['tech-stack']);
+    // The synthesized intro can already carry the project text, in which case
+    // repeating it as a property item would duplicate it.
+    const projectValue = this.getProp(context.content, 'project');
+    const consumedByIntro =
+      typeof projectValue === 'string' && this.intro(ast).includes(projectValue.trim());
+    const propertyItems = this.contextPropertyItems(
+      ast,
+      consumedByIntro ? ['tech-stack', 'project'] : ['tech-stack']
+    );
 
     let body = '';
     if (resolveSourceSectionTitle(ast, 'context')) {

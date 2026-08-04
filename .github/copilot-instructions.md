@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-08-04T16:53:29.250Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-08-04T19:05:28.029Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -54,6 +54,8 @@ The project is organized as a monorepo with these packages:
 - CLI: Commander.js
 - Testing: Vitest
 - Linting: ESLint + Prettier
+
+- Project: PromptScript
 
 ## Engineering Standards
 

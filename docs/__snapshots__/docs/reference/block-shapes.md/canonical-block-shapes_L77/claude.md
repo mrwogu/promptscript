@@ -12,6 +12,8 @@ Node.js 20+
 
 This project demonstrates canonical PromptScript block bodies.
 
+- Project: Shape Reference
+
 ## Code Style
 
 - Use strict TypeScript
