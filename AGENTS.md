@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PromptScript 2026-08-04T16:53:29.253Z | source: .promptscript/project.prs | target: factory - do not edit -->
+<!-- PromptScript 2026-08-04T19:05:28.032Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 
@@ -52,6 +52,8 @@ flowchart TB
 - CLI: Commander.js
 - Testing: Vitest
 - Linting: ESLint + Prettier
+
+- Project: PromptScript
 
 ## Engineering Standards
 

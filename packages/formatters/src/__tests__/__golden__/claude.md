@@ -50,6 +50,8 @@ flowchart TB
 - Testing: Vitest
 - Linting: ESLint + Prettier
 
+- Project: PromptScript
+
 ## Code Style
 
 - Strict mode enabled

@@ -7,6 +7,9 @@ You are a careful TypeScript maintainer.
 
 Tech stack: Node.js 20+
 
+Context:
+- Project: Shape Reference
+
 Code style:
 - Use strict TypeScript
 - Use named exports

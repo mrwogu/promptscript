@@ -6,8 +6,9 @@ alwaysApply: true
 You are a React developer working on {{projectName}}.
 
 Context:
+- Project: {{projectName}}
 - Dev Server: http://localhost:{{port}}
-- Strict Mode: type: TemplateExpression, name: strict, loc: file: example.prs, line: 21, column: 15, offset: 346
+- Strict Mode: {{strict}}
 
 Code style:
 - TypeScript strict mode enabled

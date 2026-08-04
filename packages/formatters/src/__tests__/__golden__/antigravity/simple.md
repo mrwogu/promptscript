@@ -52,6 +52,8 @@ flowchart TB
 - Testing: Vitest
 - Linting: ESLint + Prettier
 
+- Project: PromptScript
+
 ## Code Standards
 
 ### TypeScript

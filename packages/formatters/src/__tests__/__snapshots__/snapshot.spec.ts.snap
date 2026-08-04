@@ -53,6 +53,8 @@ flowchart TB
 - Testing: Vitest
 - Linting: ESLint + Prettier
 
+- Project: PromptScript
+
 ## Code Style
 
 - strictMode
@@ -365,6 +367,8 @@ flowchart TB
 - CLI: Commander.js
 - Testing: Vitest
 - Linting: ESLint + Prettier
+
+- Project: PromptScript
 
 ## code-standards
 
