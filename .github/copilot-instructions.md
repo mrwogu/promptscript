@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-07-23T16:03:31.154Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-08-04T15:22:17.813Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -45,6 +45,15 @@ The project is organized as a monorepo with these packages:
     validator --> core
     formatters --> core
 ```
+
+## Context
+
+### Key Libraries
+
+- Parser: Chevrotain
+- CLI: Commander.js
+- Testing: Vitest
+- Linting: ESLint + Prettier
 
 ## code-standards
 
