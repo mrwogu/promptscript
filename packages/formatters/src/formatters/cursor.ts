@@ -551,14 +551,14 @@ export class CursorFormatter extends BaseFormatter {
       }
     }
 
-    // Handle named entries with applyTo patterns (unchanged)
+    // Handle named entries with applyTo/paths patterns
     for (const [key, value] of Object.entries(props)) {
       if (key === 'globs') continue;
       if (!this.isSafeSkillName(key)) continue;
       if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
 
       const obj = value as Record<string, Value>;
-      const applyTo = obj['applyTo'];
+      const applyTo = obj['applyTo'] ?? obj['paths'];
       if (!applyTo || !Array.isArray(applyTo)) continue;
 
       globs.push({

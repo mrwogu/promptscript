@@ -959,7 +959,7 @@ Named entries support three properties:
 
 | Property      | Required | Description                                             |
 | ------------- | -------- | ------------------------------------------------------- |
-| `applyTo`     | Yes      | Array of glob patterns for file targeting               |
+| `applyTo`     | Yes      | Glob patterns for file targeting (alias: `paths`)       |
 | `description` | No       | Human-readable description (defaults to `<name> rules`) |
 | `content`     | No       | Full instruction content (triple-quoted markdown)       |
 

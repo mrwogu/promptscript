@@ -1688,6 +1688,37 @@ describe('GitHubFormatter', () => {
       expect(securityFile?.content).toContain('All auth code must use bcrypt.');
     });
 
+    it('should accept paths as an alias for applyTo', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                security: {
+                  paths: ['src/auth/**/*.ts'],
+                  description: 'Security-sensitive code rules',
+                  content: 'All auth code must use bcrypt.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const securityFile = result.additionalFiles?.find((f) =>
+        f.path.includes('.github/instructions/security.instructions.md')
+      );
+      expect(securityFile?.content).toContain('"src/auth/**/*.ts"');
+      expect(securityFile?.content).toContain('All auth code must use bcrypt.');
+    });
+
     it('should generate instruction file with excludeAgent', () => {
       const ast: Program = {
         ...createMinimalProgram(),
