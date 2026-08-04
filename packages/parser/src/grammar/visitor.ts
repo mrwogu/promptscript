@@ -1031,7 +1031,7 @@ class PromptScriptVisitor extends BaseVisitor {
       return this.parseRelativePath(ctx.RelativePath[0]!);
     }
 
-    // Must be UrlPath (grammar guarantees one of the three)
+    // Must be UrlPath (grammar guarantees one of the four)
     return this.parseUrlPath(ctx.UrlPath![0]!);
   }
 
@@ -1260,23 +1260,13 @@ class PromptScriptVisitor extends BaseVisitor {
   }
 
   /**
-   * Parse an absolute path reference (@namespace/path@version).
+   * Parse an absolute path reference (@namespace/path[@scope/name][@version]).
    */
   private parsePathReference(token: IToken): PathReference {
     const raw = token.image;
-    // Format: @namespace/path/to/file@version
     const withoutAt = raw.slice(1); // Remove leading @
 
-    let version: string | undefined;
-    let pathPart = withoutAt;
-
-    // Find the LAST @ which separates path from version (semver, range, or branch name)
-    const lastAtIndex = withoutAt.lastIndexOf('@');
-    if (lastAtIndex > 0) {
-      version = withoutAt.slice(lastAtIndex + 1);
-      pathPart = withoutAt.slice(0, lastAtIndex);
-    }
-
+    const { pathPart, version } = splitVersionSuffix(withoutAt);
     const segments = pathPart.split('/');
     const namespace = segments[0];
 
@@ -1308,20 +1298,11 @@ class PromptScriptVisitor extends BaseVisitor {
   }
 
   /**
-   * Parse a URL-style path reference (domain.tld/org/repo/path[@version]).
+   * Parse a URL-style path reference (domain.tld/org/repo/path[@scope/name][@version]).
    */
   private parseUrlPath(token: IToken): PathReference {
     const raw = token.image;
-    // Split version suffix: github.com/org/repo/path@1.2.0
-    // Find the LAST @ that could be a version separator
-    const lastAtIndex = raw.lastIndexOf('@');
-    let pathPart = raw;
-    let version: string | undefined;
-
-    if (lastAtIndex > 0) {
-      pathPart = raw.slice(0, lastAtIndex);
-      version = raw.slice(lastAtIndex + 1);
-    }
+    const { pathPart, version } = splitVersionSuffix(raw);
 
     const segments = pathPart.split('/');
     return {
@@ -1333,6 +1314,22 @@ class PromptScriptVisitor extends BaseVisitor {
       loc: this.loc(token),
     };
   }
+}
+
+/**
+ * Split a path into its body and trailing `@version`.
+ *
+ * A suffix holding a slash is a scope segment such as `@org/base`, not a
+ * version, so it stays part of the path.
+ */
+function splitVersionSuffix(path: string): { pathPart: string; version?: string } {
+  const lastAtIndex = path.lastIndexOf('@');
+  if (lastAtIndex <= 0) return { pathPart: path };
+
+  const suffix = path.slice(lastAtIndex + 1);
+  if (suffix.length === 0 || suffix.includes('/')) return { pathPart: path };
+
+  return { pathPart: path.slice(0, lastAtIndex), version: suffix };
 }
 
 /**
