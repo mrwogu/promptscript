@@ -2134,14 +2134,15 @@ See [Registry Aliases](../guides/registry.md#registry-aliases) for alias configu
 
 Path syntax for imports and inheritance:
 
-| Format     | Example                            | Description         |
-| ---------- | ---------------------------------- | ------------------- |
-| Namespaced | `@company/team`                    | Registry namespace  |
-| Versioned  | `@company/team@1.0.0`              | With version        |
-| Relative   | `./parent`                         | Relative path       |
-| Nested     | `@company/guards/security`         | Nested path         |
-| URL        | `github.com/org/repo/@path`        | Go-style URL import |
-| URL+ver    | `github.com/org/repo/@path@^1.0.0` | URL with version    |
+| Format     | Example                            | Description          |
+| ---------- | ---------------------------------- | -------------------- |
+| Namespaced | `@company/team`                    | Registry namespace   |
+| Versioned  | `@company/team@1.0.0`              | With version         |
+| Relative   | `./parent`                         | Relative path        |
+| Nested     | `@company/guards/security`         | Nested path          |
+| URL        | `github.com/org/repo/@path`        | Go-style URL import  |
+| URL+ver    | `github.com/org/repo/@path@^1.0.0` | URL with version     |
+| SSH        | `git@github.com:org/repo/@path`    | SCP-style Git import |
 
 ## Reserved Words
 
