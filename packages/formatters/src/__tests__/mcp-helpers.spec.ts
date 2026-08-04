@@ -148,24 +148,35 @@ describe('mcp-helpers', () => {
   });
 
   describe('serializeMcpServersToJson', () => {
-    it('should serialize stdio server with command array', () => {
+    it('should split a stdio command into executable and args', () => {
       const servers = extractMcpServers(
         findMcpServersBlock(makeMcpBlock({ fs: { command: ['node', 'fs.mjs'] } }))!
       );
       const json = serializeMcpServersToJson(servers);
       expect(json['fs']).toBeDefined();
       expect(json['fs']!['type']).toBe('stdio');
+      expect(json['fs']!['command']).toBe('node');
+      expect(json['fs']!['args']).toEqual(['fs.mjs']);
     });
 
-    it('should use command+args when useArgs is true', () => {
+    it('should split every argument of a longer stdio command', () => {
       const servers = extractMcpServers(
         findMcpServersBlock(
           makeMcpBlock({ fs: { command: ['node', 'fs.mjs', '--port', '3000'] } })
         )!
       );
-      const json = serializeMcpServersToJson(servers, { useArgs: true });
+      const json = serializeMcpServersToJson(servers);
       expect(json['fs']!['command']).toBe('node');
       expect(json['fs']!['args']).toEqual(['fs.mjs', '--port', '3000']);
+    });
+
+    it('should omit args for a stdio command without arguments', () => {
+      const servers = extractMcpServers(
+        findMcpServersBlock(makeMcpBlock({ fs: { command: ['run'] } }))!
+      );
+      const json = serializeMcpServersToJson(servers);
+      expect(json['fs']!['command']).toBe('run');
+      expect(json['fs']).not.toHaveProperty('args');
     });
 
     it('should use custom urlKey', () => {
@@ -319,7 +330,8 @@ describe('mcp-helpers', () => {
       };
 
       expect(output.path).toBe('.config/mcp.json');
-      expect(parsed.servers['fs']!['command']).toEqual(['node', 'fs.mjs']);
+      expect(parsed.servers['fs']!['command']).toBe('node');
+      expect(parsed.servers['fs']!['args']).toEqual(['fs.mjs']);
     });
   });
 

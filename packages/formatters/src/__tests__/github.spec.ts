@@ -698,12 +698,14 @@ describe('GitHubFormatter', () => {
 
       expect(mcpFile).toBeDefined();
       const parsed = JSON.parse(mcpFile!.content) as {
-        mcpServers: Record<string, unknown>;
+        servers: Record<string, unknown>;
+        mcpServers?: unknown;
       };
-      expect(parsed.mcpServers['filesystem']).toMatchObject({
-        name: 'filesystem',
-        transport: 'stdio',
-        command: ['node', 'filesystem.mjs'],
+      expect(parsed.mcpServers).toBeUndefined();
+      expect(parsed.servers['filesystem']).toEqual({
+        type: 'stdio',
+        command: 'node',
+        args: ['filesystem.mjs'],
       });
     });
 

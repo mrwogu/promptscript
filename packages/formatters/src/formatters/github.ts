@@ -7,6 +7,7 @@ import type { McpServerDefinition } from '../mcp-helpers.js';
 import {
   findMcpServersBlock,
   extractMcpServers,
+  serializeMcpServersToJsonString,
   serializeMcpServersToYamlInline,
 } from '../mcp-helpers.js';
 import {
@@ -397,27 +398,16 @@ export class GitHubFormatter extends BaseFormatter {
       additionalFiles.push(agentsFile);
     }
 
-    // Generate .vscode/mcp.json from @mcpServers block
+    // Generate .vscode/mcp.json from @mcpServers block. VS Code keys workspace
+    // servers under "servers", not "mcpServers", and rejects the internal
+    // definition fields that a raw dump of the parsed block would leak.
     const mcpServersBlock = findMcpServersBlock(ast);
     if (mcpServersBlock) {
       const servers = extractMcpServers(mcpServersBlock);
       if (servers.length > 0) {
         additionalFiles.push({
           path: '.vscode/mcp.json',
-          content:
-            JSON.stringify(
-              {
-                mcpServers: servers.reduce(
-                  (acc, s) => {
-                    acc[s.name] = s;
-                    return acc;
-                  },
-                  {} as Record<string, unknown>
-                ),
-              },
-              null,
-              2
-            ) + '\n',
+          content: serializeMcpServersToJsonString(servers, { wrapperKey: 'servers' }),
         });
       }
     }

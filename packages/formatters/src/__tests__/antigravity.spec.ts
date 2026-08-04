@@ -670,11 +670,12 @@ Never leave TODO without issue reference`,
       expect(result.content).not.toMatch(/^---\n/);
       expect(mcpFile).toBeDefined();
       const parsed = JSON.parse(mcpFile!.content) as {
-        mcpServers: Record<string, { type: string; command: string[] }>;
+        mcpServers: Record<string, { type: string; command: string; args?: string[] }>;
       };
       expect(parsed.mcpServers['filesystem']).toEqual({
         type: 'stdio',
-        command: ['node', 'server.mjs'],
+        command: 'node',
+        args: ['server.mjs'],
       });
     });
   });

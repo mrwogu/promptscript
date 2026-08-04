@@ -148,7 +148,8 @@ describe('Agent platform integration', () => {
       mcpServers: {
         'issue-tracker': {
           type: 'stdio',
-          command: ['node', './tools/issues.mjs'],
+          command: 'node',
+          args: ['./tools/issues.mjs'],
           env: { LOG_LEVEL: 'info' },
         },
       },
@@ -177,7 +178,8 @@ describe('Agent platform integration', () => {
       mcpServers: {
         'issue-tracker': {
           type: 'stdio',
-          command: ['node', './tools/issues.mjs'],
+          command: 'node',
+          args: ['./tools/issues.mjs'],
           env: { LOG_LEVEL: 'info' },
         },
       },
@@ -220,7 +222,8 @@ describe('Agent platform integration', () => {
       mcpServers: {
         'issue-tracker': {
           type: 'stdio',
-          command: ['node', './tools/issues.mjs'],
+          command: 'node',
+          args: ['./tools/issues.mjs'],
           env: { LOG_LEVEL: 'info' },
         },
       },
