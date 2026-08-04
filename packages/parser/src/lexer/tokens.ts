@@ -51,6 +51,17 @@ export const RelativePath = createToken({
   pattern: /\.\/[a-zA-Z0-9_/.-]+|\.\.\/[a-zA-Z0-9_/.-]+/,
 });
 
+/**
+ * SCP-style Git path for private repositories.
+ * Matches: git@host:org/repo[/path][@version]
+ */
+export const SshPath = createToken({
+  name: 'SshPath',
+  pattern: new RegExp(
+    String.raw`git@[a-zA-Z0-9.-]+:[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_/.-]+${SCOPE_SEGMENT}${VERSION_SUFFIX}`
+  ),
+});
+
 // ============================================================
 // Identifier (base for keywords)
 // ============================================================
@@ -283,6 +294,8 @@ export const allTokens: TokenType[] = [
   TextBlock,
 
   // Paths (must be before DotDot to handle ../)
+  // SshPath precedes UrlPath because `git@host:...` also starts with a domain.
+  SshPath,
   PathReference,
   RelativePath,
   UrlPath,
