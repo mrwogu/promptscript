@@ -3,7 +3,8 @@ description: "Project-specific rules"
 alwaysApply: true
 ---
 
-You are working on Apply ACME security standards to all code..
+Apply ACME security standards to all code.
+Security is everyone's responsibility.
 
 Code style:
 - Use OAuth 2.0 / OIDC

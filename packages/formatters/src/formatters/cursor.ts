@@ -714,8 +714,9 @@ export class CursorFormatter extends BaseFormatter {
         return `${resolveSectionTitle(ast, 'project')}:
 ${fullText}`;
       }
-      // If identity starts with "You are", use the full content
-      if (fullText.toLowerCase().startsWith('you are')) {
+      // Authored identity always wins over the synthesized intro, otherwise the
+      // persona would be dropped from the output entirely.
+      if (fullText) {
         return fullText;
       }
     }
