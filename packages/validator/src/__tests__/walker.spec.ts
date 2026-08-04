@@ -212,7 +212,6 @@ describe('walker', () => {
                     name: 'testing',
                     value: createValueNode(['Replaced rule'], defaultLoc),
                     loc: defaultLoc,
-                    nameLoc: defaultLoc,
                   },
                 ],
                 defaultLoc
@@ -305,14 +304,12 @@ describe('walker', () => {
                     name: 'description',
                     value: createValueNode('Visible description', defaultLoc),
                     loc: defaultLoc,
-                    nameLoc: defaultLoc,
                   },
                   {
                     type: 'FieldEntry',
                     name: 'resources',
                     value: createValueNode('Excluded resource', defaultLoc),
                     loc: defaultLoc,
-                    nameLoc: defaultLoc,
                   },
                 ],
                 defaultLoc

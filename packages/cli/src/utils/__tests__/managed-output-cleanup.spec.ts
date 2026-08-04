@@ -464,6 +464,72 @@ command = "echo user"
     expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', ownedContent)?.empty).toBe(true);
   });
 
+  it('should prune unmarked Codex TOML hook groups emitted before 1.16', () => {
+    const legacyContent = `[[hooks.post_tool_use]]
+id = "fmt"
+command = ["pnpm", "format"]
+matcher = "Edit"
+timeout_ms = 5000
+status_message = "Formatting"
+continue_on_failure = false
+`;
+    const content = `max_threads = 8
+
+${legacyContent}
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "echo user"
+`;
+
+    const result = removePromptScriptOwnedCodexHooks('.codex/config.toml', content);
+
+    expect(result?.empty).toBe(false);
+    expect(result?.content).toContain('max_threads = 8');
+    expect(result?.content).toContain('command = "echo user"');
+    expect(result?.content).not.toContain('post_tool_use');
+    expect(result?.content).not.toContain('pnpm');
+    expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', legacyContent)?.empty).toBe(
+      true
+    );
+  });
+
+  it('should preserve user Codex TOML groups that only resemble the legacy shape', () => {
+    // Native schema: nested handler table, so the flat legacy shape never applies.
+    const nestedSnakeCase = `[[hooks.post_tool_use]]
+id = "fmt"
+[[hooks.post_tool_use.hooks]]
+type = "command"
+command = "echo user"
+`;
+    // Unknown event name outside the set the legacy emitter could produce.
+    const unknownEvent = `[[hooks.custom_event]]
+id = "fmt"
+command = ["pnpm", "format"]
+`;
+    // Legacy events never carried extra keys, so an unknown key means user content.
+    const extraField = `[[hooks.post_tool_use]]
+id = "fmt"
+command = ["pnpm", "format"]
+retries = 3
+`;
+    // An array command without an id is not something the legacy emitter wrote.
+    const missingId = `[[hooks.post_tool_use]]
+command = ["pnpm", "format"]
+`;
+    // An id without an array command is likewise outside the legacy shape.
+    const missingCommand = `[[hooks.post_tool_use]]
+id = "fmt"
+matcher = "Edit"
+`;
+
+    for (const content of [nestedSnakeCase, unknownEvent, extraField, missingId, missingCommand]) {
+      expect(removePromptScriptOwnedCodexHooks('.codex/config.toml', content)).toBeUndefined();
+    }
+  });
+
   it('should merge generated Codex settings with user TOML', () => {
     expect(
       mergePromptScriptCodexConfig(

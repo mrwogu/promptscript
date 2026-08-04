@@ -1100,7 +1100,7 @@ export function removePromptScriptOwnedCodexHooks(
   const remaining: string[] = [];
   let removed = false;
   for (let index = 0; index < lines.length; ) {
-    const eventMatch = lines[index]!.match(/^\s*\[\[hooks\.([A-Za-z][A-Za-z0-9]*)\]\]\s*$/);
+    const eventMatch = lines[index]!.match(/^\s*\[\[hooks\.([A-Za-z][A-Za-z0-9_]*)\]\]\s*$/);
     if (!eventMatch) {
       remaining.push(lines[index]!);
       index += 1;
@@ -1122,7 +1122,7 @@ export function removePromptScriptOwnedCodexHooks(
       index += 1;
     }
 
-    if (isOwnedCodexHookGroup(group, event)) {
+    if (isOwnedCodexHookGroup(group, event) || isLegacyOwnedCodexHookGroup(group, event)) {
       removed = true;
     } else {
       remaining.push(...group);
@@ -1304,6 +1304,68 @@ function isOwnedCodexHookGroup(lines: string[], event: string): boolean {
     commandCount += 1;
   }
   return commandCount > 0;
+}
+
+/**
+ * Codex event names emitted by PromptScript through syntax 1.15.x.
+ *
+ * Those releases wrote hooks as inline `[[hooks.<snake_case_event>]]` tables in
+ * `.codex/config.toml` with no ownership marker. Codex still discovers inline
+ * config tables next to `.codex/hooks.json`, so a stale group left behind by an
+ * upgrade would run alongside the current output.
+ */
+const LEGACY_CODEX_EVENTS = new Set([
+  'pre_tool_use',
+  'post_tool_use',
+  'session_start',
+  'subagent_start',
+  'notification',
+  'stop',
+]);
+
+const LEGACY_CODEX_METADATA_FIELDS = ['matcher', 'status_message'] as const;
+
+/**
+ * Detect an unmarked hook group emitted by PromptScript through syntax 1.15.x.
+ *
+ * The legacy shape is unambiguous: native Codex hooks use PascalCase events,
+ * a nested `[[hooks.<Event>.hooks]]` table, a string `command`, and neither
+ * `id` nor the snake_case metadata keys below. A group only counts as owned
+ * when it carries an `id`, an array `command`, no nested table, and nothing
+ * beyond the fields the legacy emitter produced.
+ */
+function isLegacyOwnedCodexHookGroup(lines: string[], event: string): boolean {
+  if (!LEGACY_CODEX_EVENTS.has(event)) return false;
+
+  let hasId = false;
+  let hasArrayCommand = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0 || trimmed === `[[hooks.${event}]]`) continue;
+
+    // A nested handler table means the group follows the native Codex schema.
+    if (trimmed.startsWith('[')) return false;
+
+    if (isTomlStringAssignment(trimmed, 'id')) {
+      if (hasId) return false;
+      hasId = true;
+      continue;
+    }
+    if (/^command\s*=\s*\[.*\]$/.test(trimmed)) {
+      if (hasArrayCommand) return false;
+      hasArrayCommand = true;
+      continue;
+    }
+    if (/^timeout_ms\s*=\s*\d+$/.test(trimmed)) continue;
+    if (/^continue_on_failure\s*=\s*(?:true|false)$/.test(trimmed)) continue;
+    if (LEGACY_CODEX_METADATA_FIELDS.some((field) => isTomlStringAssignment(trimmed, field))) {
+      continue;
+    }
+
+    return false;
+  }
+
+  return hasId && hasArrayCommand;
 }
 
 function isTomlStringAssignment(line: string, field: string): boolean {
