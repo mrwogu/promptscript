@@ -493,6 +493,64 @@ describe('compile command - createCliLogger warn path', () => {
     );
   });
 
+  it('should warn when the emptied legacy Factory settings cannot be removed', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Execute',
+            hooks: [{ type: 'command', command: 'audit' }],
+          },
+        ],
+      },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockRemoveHookOutputIfUnchanged.mockImplementation(
+      async (path: string) => !String(path).endsWith('.factory/settings.json')
+    );
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          '.factory/hooks.json',
+          {
+            path: '.factory/hooks.json',
+            content: JSON.stringify({
+              hooks: {
+                PreToolUse: [
+                  {
+                    hooks: [
+                      {
+                        type: 'command',
+                        command: 'node check.mjs # promptscript-generated:check',
+                      },
+                    ],
+                  },
+                ],
+              },
+            }),
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockWarning).toHaveBeenCalledWith(
+      expect.stringContaining('Left an empty /mock/project/.factory/settings.json behind')
+    );
+  });
+
   it('should roll back canonical hooks when legacy settings change before commit', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: ['factory'],

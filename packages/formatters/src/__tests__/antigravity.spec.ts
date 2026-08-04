@@ -1387,6 +1387,143 @@ Never leave TODO without issue reference`,
     });
   });
 
+  describe('block skipping', () => {
+    it('should skip workflow entries that carry no content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'unsafe/../name': { content: 'Escaped path' },
+                listShaped: ['not', 'an', 'object'],
+                empty: { unrelated: 'value' },
+                kept: { content: 'Real workflow content' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const paths = (result.additionalFiles ?? []).map((f) => f.path);
+
+      expect(paths).toEqual(['.agent/workflows/kept.md']);
+    });
+
+    it('should skip prompt shortcuts that resolve to no content', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/no-prompt': { description: 'Not a prompt and has no content' },
+                '/blank': { prompt: true, content: '   ' },
+                '/unsafe/../escape': { prompt: true, content: 'Escaped path' },
+                '/kept': { prompt: true, content: 'Prompt body' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const paths = (result.additionalFiles ?? []).map((f) => f.path);
+
+      expect(paths).toEqual(['.agent/workflows/kept.md']);
+    });
+
+    it('should skip guards that describe nothing', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: { 'src/**': 'handled by the glob activation path' },
+                'unsafe/../name': { content: 'Escaped path' },
+                listShaped: ['not', 'an', 'object'],
+                empty: { paths: ['src/**/*.ts'] },
+                kept: { paths: ['src/**/*.ts'], content: 'Guard body' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const guardFiles = (result.additionalFiles ?? []).filter((f) =>
+        f.path.startsWith('.agent/rules/')
+      );
+
+      expect(guardFiles.map((f) => f.path)).toEqual(['.agent/rules/kept.md']);
+      expect(guardFiles[0]?.content).toContain('activation: "glob"');
+    });
+
+    it('should render a scalar tech stack', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: { techStack: 'TypeScript' },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('**Stack:** TypeScript');
+    });
+
+    it('should fall back to the built-in documentation wording', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                documentation: { verifyBefore: true, verifyAfter: true },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('**Before** making code changes');
+      expect(result.content).toContain('**After** making code changes');
+    });
+  });
+
   describe('architecture section', () => {
     it('should extract architecture from context block', () => {
       const ast: Program = {

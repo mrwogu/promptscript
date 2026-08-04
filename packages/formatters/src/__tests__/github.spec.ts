@@ -1688,6 +1688,58 @@ describe('GitHubFormatter', () => {
       expect(securityFile?.content).toContain('All auth code must use bcrypt.');
     });
 
+    it('should render object-form context architecture and a scalar tech stack', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                techStack: 'TypeScript',
+                architecture: 'Hexagonal core with thin adapters',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('**Stack:** TypeScript');
+      expect(result.content).toContain('Hexagonal core with thin adapters');
+    });
+
+    it('should fall back to the built-in wording for documentation flags', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                documentation: { verifyBefore: true, verifyAfter: true, codeExamples: true },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('**Before** making code changes');
+      expect(result.content).toContain('**After** making code changes');
+      expect(result.content).toContain('Ensure code examples in documentation remain accurate');
+    });
+
     it('should accept paths as an alias for applyTo', () => {
       const ast: Program = {
         ...createMinimalProgram(),

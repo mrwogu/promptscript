@@ -1317,6 +1317,34 @@ describe('ClaudeFormatter', () => {
       expect(testingRule?.content).toContain('Follow AAA pattern');
     });
 
+    it('should leave rule files empty when no standards are declared', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.spec.ts'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const testingRule = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/rules/testing.md')
+      );
+
+      expect(testingRule).toBeDefined();
+      expect(testingRule?.content.split('---').pop()?.trim()).toBe('# Testing rules and patterns');
+    });
+
     it('should extract rule content from array-shaped standards categories', () => {
       const ast: Program = {
         ...createMinimalProgram(),
