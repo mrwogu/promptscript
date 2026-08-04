@@ -176,14 +176,22 @@ export class FileLoader {
       }
     }
 
+    // SCP-style Git path: git@host:org/repo[/path][@version]
+    if (ref.raw.startsWith('git@')) {
+      const rawPath = stripVersionSuffix(ref.raw, ref.version);
+      const colonIndex = rawPath.indexOf(':');
+      const segments = rawPath.slice(colonIndex + 1).split('/');
+      if (colonIndex !== -1 && segments.length >= 2) {
+        const repoUrl = `${rawPath.slice(0, colonIndex)}:${segments.slice(0, 2).join('/')}`;
+        return buildRegistryMarker(repoUrl, segments.slice(2).join('/'), ref.version ?? '');
+      }
+    }
+
     // URL-like path: first segment contains a dot (e.g., github.com/org/repo/path)
     if (!ref.raw.startsWith('@') && ref.segments.length > 0 && ref.segments[0]?.includes('.')) {
       // Extract repo host + path and sub-path from the URL segments
       // Convention: first 3 segments = host/owner/repo, rest = path within repo
-      const rawPath =
-        ref.version && ref.raw.endsWith(`@${ref.version}`)
-          ? ref.raw.slice(0, -ref.version.length - 1)
-          : ref.raw;
+      const rawPath = stripVersionSuffix(ref.raw, ref.version);
       const segments = rawPath.split('/');
       if (segments.length >= 3) {
         const repoUrl = `https://${segments.slice(0, 3).join('/')}`;
@@ -209,4 +217,9 @@ export class FileLoader {
   getLocalPath(): string {
     return this.localPath;
   }
+}
+
+/** Remove a trailing `@version` from an import path. */
+function stripVersionSuffix(raw: string, version: string | undefined): string {
+  return version && raw.endsWith(`@${version}`) ? raw.slice(0, -version.length - 1) : raw;
 }

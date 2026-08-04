@@ -262,6 +262,62 @@ describe('FileLoader.resolveRef — registry integration', () => {
     });
   });
 
+  it('returns registry marker for SCP-style Git paths', () => {
+    // Arrange
+    const loader = new FileLoader({
+      registryPath: '/registry',
+      localPath: '/local',
+    });
+    const ref = makePathRef('git@github.com:acme/private-skills/@fragments/security@1.2.0');
+    ref.segments = ['git@github.com', 'acme', 'private-skills', '@fragments', 'security'];
+    ref.version = '1.2.0';
+
+    // Act
+    const parsed = parseRegistryMarker(loader.resolveRef(ref, '/local/file.prs'));
+
+    // Assert
+    expect(parsed).toEqual({
+      repoUrl: 'git@github.com:acme/private-skills',
+      path: '@fragments/security',
+      version: '1.2.0',
+    });
+  });
+
+  it('returns registry marker for SCP-style Git paths without a version', () => {
+    const loader = new FileLoader({
+      registryPath: '/registry',
+      localPath: '/local',
+    });
+    const ref = makePathRef('git@gitlab.internal.com:company/monorepo/packages/auth');
+    ref.segments = ['git@gitlab.internal.com', 'company', 'monorepo', 'packages', 'auth'];
+
+    const parsed = parseRegistryMarker(loader.resolveRef(ref, '/local/file.prs'));
+
+    expect(parsed).toEqual({
+      repoUrl: 'git@gitlab.internal.com:company/monorepo',
+      path: 'packages/auth',
+      version: '',
+    });
+  });
+
+  it('keeps a scope segment out of the version for URL-like paths', () => {
+    const loader = new FileLoader({
+      registryPath: '/registry',
+      localPath: '/local',
+    });
+    const ref = makePathRef('github.com/org/repo/@scope/base@^1.0.0');
+    ref.segments = ['github.com', 'org', 'repo', '@scope', 'base'];
+    ref.version = '^1.0.0';
+
+    const parsed = parseRegistryMarker(loader.resolveRef(ref, '/local/file.prs'));
+
+    expect(parsed).toEqual({
+      repoUrl: 'https://github.com/org/repo',
+      path: '@scope/base',
+      version: '^1.0.0',
+    });
+  });
+
   it('still resolves relative paths correctly (regression)', () => {
     // Arrange
     const loader = new FileLoader({
