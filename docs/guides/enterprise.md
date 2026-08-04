@@ -604,6 +604,10 @@ git push origin v1.0.0
 3. Migrate existing instructions
 4. Gather feedback
 
+Advance when all pilot repositories pass `prs validate --strict`, generated
+output drift is zero, at least 95% of pilot CI runs pass for five business
+days, and every reported P0 or P1 migration issue is closed.
+
 ### Phase 2: Team Rollout (4-8 weeks)
 
 1. Create team configurations
@@ -611,12 +615,21 @@ git push origin v1.0.0
 3. Establish governance
 4. Train developers
 
+Advance when every onboarded team has an owner and rollback contact, at least
+90% of in-scope repositories compile from committed sources in CI, and no open
+P0 or P1 incident is attributable to generated instructions.
+
 ### Phase 3: Organization-Wide (Ongoing)
 
 1. Mandate for new projects
 2. Migration support for existing
 3. Continuous improvement
 4. Regular reviews
+
+Review monthly: validation pass rate, output-drift rate, mean time to resolve
+PromptScript incidents, unsupported target warnings, repository adoption, and
+rollback exercises. Pause new onboarding when a P0 remains open or the rolling
+seven-day validation pass rate drops below 95%.
 
 ## Version Support Policy
 
@@ -766,8 +779,15 @@ Commit `promptscript.lock` to every repository that uses remote imports. This en
 
 ```yaml
 # .github/workflows/promptscript.yml
-- name: Check lockfile is up to date
-  run: prs lock --dry-run | grep "No changes"
+- name: Regenerate lockfile
+  run: prs lock
+  env:
+    GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+- name: Check lockfile is current
+  run: |
+    git ls-files --error-unmatch promptscript.lock
+    git diff --exit-code -- promptscript.lock
 
 - name: Compile
   run: prs compile

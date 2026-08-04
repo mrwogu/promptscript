@@ -25,8 +25,8 @@ my-project/
 
 ```promptscript
 @meta {
-  id: "my-project"
-  syntax: "1.0.0"
+  id: "minimal-example"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -57,7 +57,7 @@ my-project/
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSATwC0NZgCsYjLPLES4i9hkKz5ARgoAGK7tYBfMWO7TOWCFkXC9ckLt-jBAE1mAFdBDGoYcMEcGCg0MBCoQRYpCFYAc3C4OAg4AXZBMGZqQVw8wTVNbQpvADFmRhC4QTYU2AxWOkFIjCkMACNYFOYpGFqAv1sHVicWdiIsL0nfVe8AFRwKiqF1xTQYAGVGagg0JaqtJeb0rJJRmGpxAfgL6gxtCEZ4CYkp-xmTnynX61CkLVEAVSMFkyG8fxAAFU4FFEqxPmwMMk1Bl3iQSLdBPlFLB5HR4T4ACKNEJ8QpoEJDL6CACCAAUAJItADu7hwggAUodqYxbBIALpiQGsbhwHAlLBNLAQ7zyAD0sXi8lMIEO8u5gm5OGwgkUoRSnRicTQhr5Yp8asiADcIDBudqfAAlGAut0jMZFEqCACOISx7k8eTgIXg9vVHHyHvkAHVThxBCFWO4yq84NMQHZxQxXNRFPgiKRyOMaPQQE7Hrk2PgzAWgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgSEVhBIYoAWiKlyMeWIlwAnuwyFZ8gIwUAbBQAMe1gF8xY7tM5YIWQ8P1yQPUDxQQBNZgBXQQxqGGjBHBgoNDAIqEEWKSUAc2i4OAg4AXZBMGZqQVxCwRpmACsYRiwKfwAxZkYIuEE2DNgMVjpBWIwpDAAjWAzmKRgWkKDHF1Y3FnYiLD8FwJ3-ABUcauqhPcM0GABlRmoINE3ahqbBLpzBEhmYanFx+HvqDCaEEY8HmEkWwWWbiKAzG1Ck3VEIUyMFkyH8YJAAFU4HFUqxAWw1DVqMxsv8SIpWLkioZYPI6OiAgARDoRPglNARSZAwQAQQACgBJboAd28OEEACkLizGI4JABdMSQ1jcOA4cpYTpYBH+eQAekSyXk5hAFw1IsEIpw2EEhkiGQGCSSaCt4vlAX1sQAbhAYCKTQEAEowX3+6azUrlQQARwiam8vkKcAi8A9Bo4RUD8gA6jcOM9lJtMzqliAnAqGJ5qIZ8FoyJQaPQQN7PgU2PgLOWgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -66,7 +66,7 @@ my-project/
 
 ```yaml
 id: minimal-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -104,89 +104,39 @@ prs validate
 
 ## Generated Output
 
-=== "GitHub Copilot"
+Current configuration emits GitHub output only:
 
-    `.github/copilot-instructions.md`
+`.github/copilot-instructions.md`:
 
-    ```markdown
-    # AI Instructions
+<!-- output:github for="minimal-example" -->
 
-    ## Identity
+```markdown
+# GitHub Copilot Instructions
 
-    You are a helpful coding assistant for this project.
-    Focus on clean, readable code.
+## project
 
-    ## Context
+You are a helpful coding assistant for this project.
+Focus on clean, readable code.
 
-    This is a TypeScript project using modern best practices.
+## Context
 
-    ## Standards
+This is a TypeScript project using modern best practices.
 
-    - Code style: functional
-    - Documentation: JSDoc for public APIs
+## code-standards
 
-    ## Shortcuts
+### code
 
-    - `/help` - Show what you can help with
-    - `/review` - Review code for quality issues
-    - `/test` - Write unit tests
-    ```
+- Use functional programming style
+- Document public APIs with JSDoc
 
-=== "Claude Code"
+## shortcuts
 
-    `CLAUDE.md`
+- /help: Show what you can help with
+- /review: Review code for quality issues
+- /test: Write unit tests
+```
 
-    ```markdown
-    # AI Instructions
-
-    ## Identity
-
-    You are a helpful coding assistant for this project.
-    Focus on clean, readable code.
-
-    ## Context
-
-    This is a TypeScript project using modern best practices.
-
-    ## Standards
-
-    - Code style: functional
-    - Documentation: JSDoc for public APIs
-
-    ## Shortcuts
-
-    - `/help` - Show what you can help with
-    - `/review` - Review code for quality issues
-    - `/test` - Write unit tests
-    ```
-
-=== "Cursor"
-
-    `.cursor/rules/project.mdc`
-
-    ```text
-    # AI Instructions
-
-    ## Identity
-
-    You are a helpful coding assistant for this project.
-    Focus on clean, readable code.
-
-    ## Context
-
-    This is a TypeScript project using modern best practices.
-
-    ## Standards
-
-    - Code style: functional
-    - Documentation: JSDoc for public APIs
-
-    ## Shortcuts
-
-    - /help - Show what you can help with
-    - /review - Review code for quality issues
-    - /test - Write unit tests
-    ```
+<!-- /output -->
 
 ## Adding More Targets
 
@@ -195,7 +145,7 @@ To also generate for Claude and Cursor:
 ```yaml
 # promptscript.yaml
 id: minimal-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs

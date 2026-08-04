@@ -10,6 +10,6 @@
 ## Commands
 
 ```
-/test      - Write tests using:
-/coverage  - Check test coverage and identify gaps
+/test      - Write project tests
+/coverage  - Check test coverage
 ```

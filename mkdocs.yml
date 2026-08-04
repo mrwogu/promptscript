@@ -100,6 +100,14 @@ plugins:
           - features/target-platforms.md: All 48 target platforms and output families
         Reference:
           - reference/language.md: Complete PromptScript language specification
+          - reference/language/file-anatomy.md: Complete PromptScript file structure
+          - reference/language/values-and-block-bodies.md: Canonical block body shapes and PS038
+          - reference/language/composition.md: Inheritance and import precedence
+          - reference/language/execution-order.md: Declaration-order resolution
+          - reference/language/merge-and-replacement.md: Extend and override semantics
+          - reference/language/section-headers.md: Generated section header overrides
+          - reference/language/versions-and-diagnostics.md: Syntax versions and diagnostics
+          - reference/block-shapes.md: Complete built-in block shape matrix
           - reference/cli.md: CLI commands and options
           - reference/cli/hooks.md: AI tool hook installation and removal
           - reference/cli/hook.md: Low-level hook runtime contract
@@ -116,22 +124,35 @@ plugins:
         Composition and Governance:
           - guides/inheritance.md: PromptScript inheritance system
           - guides/multi-file.md: Multi-file organization
+          - guides/building-skills.md: Reusable skill authoring and resources
+          - guides/skill-composition.md: Skill inheritance and composition
+          - guides/skill-contracts.md: Skill contracts and compatibility
+          - guides/skill-overlays.md: Skill overlays and conflict handling
           - guides/registry.md: Building a PromptScript registry
           - guides/policy-engine.md: Organization policy enforcement
           - guides/security.md: Security controls and best practices
           - guides/ci.md: CI/CD integration
           - guides/enterprise.md: Enterprise setup
         Migration and Operations:
+          - guides/upgrade-1-15-to-1-16.md: Upgrade PromptScript 1.15 projects to 1.16
           - guides/migration.md: Migration guide
           - guides/hooks.md: Automatic source compilation hooks
           - guides/import.md: Import existing agent instructions
           - guides/formatter-architecture.md: Internal architecture of formatters
         Examples:
           - examples/minimal.md: Minimal project setup
+          - examples/composition-and-order.md: Composition precedence and declaration order
+          - examples/merge-vs-replace.md: Extend, field replacement, and override
+          - examples/fix-block-shapes.md: PS038 block shape remediation
+          - examples/custom-section-headers.md: Generated section title overrides
+          - examples/portable-hooks.md: Portable lifecycle hook policy
+          - examples/migrate-factory-hooks.md: Legacy Factory hook migration
           - examples/team-setup.md: Team configuration
           - examples/enterprise.md: Enterprise example
           - examples/skills-and-local.md: Skills and local overrides
           - examples/agents.md: Agent configuration
+          - examples/agent-platform.md: Complete agent platform configuration
+          - examples/git-registry.md: Git registry and lockfile workflow
         Optional:
           - guides/faq.md: Frequently asked questions
           - guides/vs-manual.md: Comparison with manual configuration
@@ -252,14 +273,23 @@ nav:
       - OpenCode: reference/formatters/opencode.md
   - Reference:
       - reference/index.md
-      - Language: reference/language.md
-      - Block Shapes: reference/block-shapes.md
+      - Language:
+          - Overview: reference/language.md
+          - File Anatomy: reference/language/file-anatomy.md
+          - Values and Block Bodies: reference/language/values-and-block-bodies.md
+          - Composition and Precedence: reference/language/composition.md
+          - Execution Order: reference/language/execution-order.md
+          - Merge and Replacement: reference/language/merge-and-replacement.md
+          - Section Headers: reference/language/section-headers.md
+          - Versions and Diagnostics: reference/language/versions-and-diagnostics.md
+          - Block Shapes: reference/block-shapes.md
       - CLI:
           - Overview: reference/cli.md
           - Hook Management: reference/cli/hooks.md
           - Hook Runtime: reference/cli/hook.md
       - Configuration: reference/config.md
   - Operations:
+      - Upgrade 1.15 to 1.16: guides/upgrade-1-15-to-1-16.md
       - AI Tool Hooks: guides/hooks.md
       - Docker: guides/docker.md
       - Importing Instructions: guides/import.md
@@ -270,13 +300,24 @@ nav:
       - FAQ: guides/faq.md
       - Comparison: guides/vs-manual.md
   - Examples:
-      - examples/index.md
-      - Minimal: examples/minimal.md
-      - Team Setup: examples/team-setup.md
-      - Enterprise: examples/enterprise.md
-      - Skills & Local: examples/skills-and-local.md
-      - Agent Platform: examples/agent-platform.md
-      - Agents: examples/agents.md
+      - Overview: examples/index.md
+      - Start Here:
+          - Minimal: examples/minimal.md
+      - Understand Language:
+          - Composition and Order: examples/composition-and-order.md
+          - Merge vs Replace: examples/merge-vs-replace.md
+          - Fix Block Shapes: examples/fix-block-shapes.md
+          - Custom Section Headers: examples/custom-section-headers.md
+      - Automate Agents:
+          - Portable Hooks: examples/portable-hooks.md
+          - Migrate Factory Hooks: examples/migrate-factory-hooks.md
+          - Agent Platform: examples/agent-platform.md
+          - Agents: examples/agents.md
+      - Scale Organization:
+          - Team Setup: examples/team-setup.md
+          - Enterprise: examples/enterprise.md
+          - Skills & Local: examples/skills-and-local.md
+          - Git Registry: examples/git-registry.md
   - Developer:
       - API:
           - api-reference/README.md

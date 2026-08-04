@@ -1,0 +1,11 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are working on the project.
+
+Code style:
+- Use Vitest
+- minimum: 95
+- report: text

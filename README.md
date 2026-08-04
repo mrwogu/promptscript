@@ -72,7 +72,7 @@ Or [open the playground](https://getpromptscript.dev/playground/) and compile in
 ```promptscript
 @meta {
   id: "checkout-service"
-  syntax: "1.4.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -83,6 +83,7 @@ Or [open the playground](https://getpromptscript.dev/playground/) and compile in
 }
 
 @standards {
+  @header "Engineering Standards"
   code: ["Use strict TypeScript", "Test every business rule"]
 }
 
@@ -145,11 +146,17 @@ Or [open the playground](https://getpromptscript.dev/playground/) and compile in
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaODGoA3CIxjyxEuAE92GQrPkBGCgDYKABhOsAvmLHdpnLBBY5sKmciAm4eKCAJrqghjUMIIA7szUyhCsAOaCbIK4SYyKKupYgjr6hjAUoQAKiRV6SVjUGKxwGIwBeZkcWdSBwW1S8WpSgRgARtCDNVER7l6sPnACrFIJUnAhUdyKGFK6YQCi2Zkwupk5AMprG9Rb7hIsh7LI8gCqOuUthmUAKuY0DBrowBmgsPI6GF-vAyjAmtRgpM1HBznBttQ1LB5ABdMRLFY4NJYRgabaieYgAD0iQMMGS8lklIkEhozDIWFkLTUxiiEkOcDBEAhEDYthAACUERAGYIydREux5Tg2ll4E9WSx2P4JdL6cl5WlEl1WPA4NCdArBtCOKsLfF1rlga1uqwMFBJGROlgapEJEtCaxuHAMlAoBTQla1AMgpo6bLkszQgL4MLReKwvrE4JMOY+Mqimr4IIwGlykoY4NBANQ3BNRIPVBmMkYFJ-sxmBG3vJpQcoWEAOKJNAD+QAIQwcBweJTRp17AlAEl2sCuqMCuxDNgxaxoRgNMSBgAvHdsS1KRJYB3DXMYfP+QQbASCVXrKBXP2hQPeYMkRhoNcuiIpGUQQBivKaC0nTKLoyb8vkrSriSEqrOMzANkaJAkMMPYgKwzCHGOIAUNSWCdhG1LgXAvJwBQJAAFb1iA+JRD+yzBhg6rsKBEgJgycE7KyT5puCbp6jKcpFtkJaTDAZaJIIfDUOqmHkV2cB4X2UjEcOMCjiA0LyIOzaTMRk7TrOCGhtA3aCO8IDRrG5jxpJjIsXO-6AcBuiafZ8jUZB0EqLoVnCdqHCLlmbkqsWIwvDAtpwjeTrMC6Z7up6EDel0X5sQSv57J2yi8YIegetI2AwJo0nqn5LKsgiuphGgzCrFBFGaKixj+qyOGkoo1ASsc4xYAAPgA6rGPVziw2G4f5IBoKwaAkMRWLLIZYRBGuxTKGFgjsT4qTpGAzbJKViSwFOMDwcJgrpuJYT1PpCRJEI5Ufs+bY1jA106JhEXNb2ajiAAjmoFVBIIWRVQ6NHzSehRvnV+5OjQr2KVdMA3Up-AHNgGB5QGBUcdw5BqFkmSlZwVNmpc2R3ayD1ibuErXKqiQjLT5wMzkjAYJg0wfgEGq9RIIFs2EDguK4mE2eGfkOU5gyuQaB0SMSzAlXhn2VRwNUo2LrHCV5QH6L5eGBdVwWwdQB2BiAHi4gw-hIvgRCkOQ1Q0PQICS2w+B2E7QA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 `promptscript.yaml`:
 
 ```yaml
 id: checkout-service
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -205,14 +212,26 @@ Build organization, team, and project layers with deterministic merge rules:
 @use @team/backend
 @use github.com/acme/agent-skills/database-review@1.3.0
 
+@override standards.testing {
+  ["Use Vitest", "Require 95% coverage"]
+}
+
 @extend standards {
-  testing!: ["Use Vitest", "Require 95% coverage"]
+  testing: ["Run integration tests in CI"]
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAhFY4Y1CFgEsyGVgE8A9OWxhm1Er158AFNRgBzCHCzVZvALS8AJoYwAjWJd4rqvJbL3VmAV1aWAlAA6rHz8XnAwAhyk8rYYjADWnI6avDr6hsamFtZwdg5Oqq5QGO6ePv5BoeG8BrhethRS8nEkMM16nFhmcPHQUHDylth2GOFmugBuEDAA7vwAjBQAzBQADEGVzBOiYpYRRjJD1JZwFBxGQnq8wEEayAEgAKrVAGri8FgPdLwPAEowAEcvBBdLwAJwAVgApLwWNtqBgOg8ALpBAC+G1Y-CIHF8vAOvgwxzg11uvHOWEuiF49xAvx8vCEHA82AgbHJHxJQl4AGEAJIo9EgNHIhidEz4IikcgwKi0EAMeFwNmsfDzYVAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 - `@inherit` creates a single-parent base chain.
 - `@use` composes multiple local, registry, Git, or Markdown resources.
-- `@extend` patches selected paths, replaces regular fields, and supports skill-specific overlays.
+- `@extend` merges selected paths and supports skill-specific overlays.
+- `@override` atomically replaces one existing block or nested value.
+- `@header` customizes generated section titles without changing native schemas.
 - Typed parameters turn shared stacks into reusable templates.
 - Sealed properties, reference negation, and overlay drift warnings keep extension layers safe.
 - `prs inspect <skill>` shows property and layer provenance.
@@ -240,6 +259,12 @@ Import versioned skills without copy-paste:
 ```promptscript
 @use github.com/acme/agent-skills/security-review@^2.0.0
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQBzCLl4AjCixIB6DIxIx5wzlgC0cANbQocWQMa9qYgJ7rqMAG4QYAd24A9AEwUADO5ABfALoM11Kb4RKTkMFS0IAxWMLQQbPgAjN5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ```bash
 prs skills add github.com/acme/agent-skills/security-review@2.1.0
@@ -311,14 +336,15 @@ with `includePromptScriptSkill: false`.
 
 ## Documentation
 
-| Resource                                                                 | Description                                                 |
-| :----------------------------------------------------------------------- | :---------------------------------------------------------- |
-| [Getting Started](https://getpromptscript.dev/getting-started/)          | First project from initialization to native output          |
-| [Agent Platform](https://getpromptscript.dev/features/)                  | Skills, agents, MCP, plugins, hooks, workflows, and targets |
-| [Language Reference](https://getpromptscript.dev/reference/language/)    | Complete PromptScript syntax                                |
-| [CLI Reference](https://getpromptscript.dev/reference/cli/)              | Commands and options                                        |
-| [Configuration Reference](https://getpromptscript.dev/reference/config/) | Targets, registries, builds, policies, and formatting       |
-| [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)       | Organization-wide adoption and governance                   |
+| Resource                                                                         | Description                                                 |
+| :------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| [Getting Started](https://getpromptscript.dev/getting-started/)                  | First project from initialization to native output          |
+| [Agent Platform](https://getpromptscript.dev/features/)                          | Skills, agents, MCP, plugins, hooks, workflows, and targets |
+| [Language Reference](https://getpromptscript.dev/reference/language/)            | Complete PromptScript syntax                                |
+| [CLI Reference](https://getpromptscript.dev/reference/cli/)                      | Commands and options                                        |
+| [Configuration Reference](https://getpromptscript.dev/reference/config/)         | Targets, registries, builds, policies, and formatting       |
+| [Upgrade 1.15 to 1.16](https://getpromptscript.dev/guides/upgrade-1-15-to-1-16/) | Syntax, block shape, and hook migration guide               |
+| [Enterprise Guide](https://getpromptscript.dev/guides/enterprise/)               | Organization-wide adoption and governance                   |
 
 ## Contributing
 

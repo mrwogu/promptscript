@@ -28,6 +28,12 @@ as field values remain part of an `object` body:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gALXxbUIjLBDZwABMAA6rceIC04qSAByMAG4xq4ommZwY4g4z5Y4ymQF8ZM7nCwZWAEwzUnE6bPEsnMROORlAFUDIwEhLHEAFQBPNBgAZRMINCxlOiUQEMNWUhgnHUI9ajNlAF0rEEsyhk4BGPwiUnIYKloQBk1aUVZ8AEYqoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 The first block has an `array` body. The second has an `object` body whose
 `code` field contains an array value.
 
@@ -54,7 +60,7 @@ Ordinary `header` and `headers` fields remain domain properties.
 | `@hooks`        | `object`  | None                              | Each field is a portable lifecycle hook.                                            |
 | `@mcpServers`   | `object`  | None                              | Each field is a named MCP server definition.                                        |
 | `@plugins`      | `object`  | None                              | Each field is a named plugin bundle.                                                |
-| `@prompts`      | `object`  | None                              | Reserved internal prompt registry block. Use `@shortcuts` in project files.         |
+| `@prompts`      | `object`  | None                              | Reserved internal registry. Do not author it in project files.                      |
 | `@examples`     | `object`  | None                              | Each field is a named input/output example.                                         |
 
 Supported compatibility means the parser and current consumers retain defined
@@ -64,8 +70,9 @@ not require a registry entry.
 
 ## Compile-ready Canonical Example
 
-This single source covers every built-in block. Documentation validation parses,
-validates, and compiles it for Claude, GitHub, and Cursor.
+This single source covers every project-authorable built-in block.
+Documentation validation parses, validates, and compiles it for Claude,
+GitHub, and Cursor.
 
 ```promptscript
 @meta {
@@ -191,14 +198,6 @@ validates, and compiles it for Claude, GitHub, and Cursor.
   }
 }
 
-@prompts {
-  internal-review: {
-    content: """
-      Review the current change.
-    """
-  }
-}
-
 @examples {
   rename: {
     description: "Use a precise name"
@@ -207,6 +206,12 @@ validates, and compiles it for Claude, GitHub, and Cursor.
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMMrNhEYYoAWgBGUZowDW6uDgxp48sRLgBPdhkKz5ARgoBWCgAZzrAL5ix3aU4sCCwrYQs5EHMo8UEATWYAV0EMahgUwVU0sESoQQAVK1MAZUZqCDQsQRIMCFs6mGoKCOivX1Z-FnYiKtFYmmYAKxhGLAcQYuNTQQAlGDBGzkYYLwlqRPYIPnGAOWYpGApBuEEAJncAai8WqNuI-JwIE4Hh0cEDkjY4LGpseEzFMpVHkAArUZhkLClcqVQTaXR6OH7CDwZqxVoxdr+b6KKSpKQnPoSFgHWTIeQAVTg6W+5TehRKZQqWHkdEiVPSrFIMCkgiIaGY1CwcHkAF0IhxvnUAOZkynUwQANRC8BZIDZ8gAYswoDoAO6CACC1F+rGlMDZhtGlrg1KFYrEWNY3DStJUwS+4Vi6kiOxgADdGnzCAKFdSyvwRTEJD75H7A9RBHA9BVBGkAI6JCBpXn+tTSbAQNhtPzOvRKPWwKTmr0SDERADEDdm80WrGWpYkAGkYDA0IJzaxGn9eXVaYlRkXWCd89Kh7y9SEcIIwRDKtDmUmktRlmi63dMaXuEZBVhGIlhbXIgB6NL+lF6+TjOb3mAGknpTP50KrG+StWyESEjvPATKVFOz4bII-5RhExJsBw7DjK0sTAbMUG4OkLBkLAHDQaqSZZnhuJpn2p6CGAtRQIkrp7sB9axO0TrcNhNSsASV7yNeoSmIwOAjHoT5XhIBxwGBHqsOMADC-H6NBRRmNGwFdIhYyRChaESDMGH8QUCkbrC2FoNAQaLrgSRVDAJAhMEZoUSZcB0fuGmCExR7Sok+KEhE0o6JocByiAABUQXXkFFDCqykQhWFEVwIQDo+EemC-CQ3mxG6oxDrasimuaAAUziuAAlIIAC8ggAMwRBZaAXgA-LInCJCQ+XyBwhBqhqIDHMWIClRV7U9CWHTOsm0BQOlawBg+gFwSBYkwhJz4zW+mT7Fhxhmop80qUEyF3KhwEAJLTrxVQsCaIxYNlcBsjBbIkeGNEhFYTnqYdEhuaN3A6MCnEHhEHLQbpf1qCBgY6GgfDsEaILHXRDHMRgg6XkBd4Po0c1HaJ4kQZEL4PicH6ZFt5qwUdWDMDqAWCOSIBzBgUhRfIADiaRoIlaF7UhH2-mhhNrXxijmryJMkRz5EYJObAYNo6SQOxMqOfNDFfY6R56oKehgPqU2kbAGDUtjaG40t+PyGCfapOkQhpIb1L8+t3S82rmnaeIeZQAWEkpOxhEkDU5QAF7pPbMBG5tIuoqrgOMRrP04NTej617PswOoPHwCbwEBvtkQ0BnVM6uoiSO0p8GB7igVoKw0MsyA6wdOqkRZ3xAlc65Cf+CQjBoMUjQJvrYMaMXk05xIPyKHAApCuM3xSEWTusdXdPyEoBwNxQ3HU5N1692ghiD40FAkMcnfff45CJNKY5Xl+3uhBPC142w4wAIqeY-YRjxTaHjbqWm9MMZvk7hIJOzAU6BTTniDgmcFJRnFEdA+A9qBD0CiPTOu9EEREvs6IgpByD-HRpwbkz8zbMgtiAYGQhC6MCeJybkTs6h1TUvILo3xBCEHKoIHQTMOS0HysVJ2tULzjA4VUMujQTgVT4VIARcAhG-iYiAbwooGBBGoFYfABCcKHBoPQEAQ8pz4EcKooAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Shortcut Entry Shapes
 
@@ -232,6 +237,12 @@ supported forms:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJw7PUsjAK5Y4AAmAAdVuPEBicQGVhaNAI4ATcXEYYoGauM3MRJTlmwQ24i9QCeMuVJAB6ajABuEGAHcXiOIuAEpePr7iLJow4gCOwvoQWI4gMk4KyqrqgjDasADmGIz24iTCUFjQEKwxdiW+STjiltT5MFgAtNFonNHs4syiaKLpLq4ccJ0FRSmBLvOpsnLiwcKyE2LiGKzaHtlY4mAY0MIecBSjqVdpS4oAwttsEHpQtoQwIpYARrC27A6XcbwLABSTpOTRXTUCBoSpsOYgVbrYFweZLOQsdgWBELcHLJHNFFbHbiPYaQ7HKCneAXdFBa6LOQAXxkTJATIAugw6vgiKRyDAqLQQAxPDBaNZWPgAIzsoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 A multiline scalar can become a native command file on one target and plain
 documentation on another. PS038 warns and suggests an explicit `content`
@@ -280,5 +291,11 @@ replacement. The rule ignores custom block names:
   - "Custom array content remains valid"
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIekC0AE2YkMEVgAJgAHUkT+E6SADCAVzhYREjNWoYAnhJbtOWCdRijxcCQDcMUCIKWyAviFcBdBqer78RKTkMFS0IAy2MLQQbPgAjB5AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Use `prs validate --strict` to include shape warnings in CI.

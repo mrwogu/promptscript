@@ -7,6 +7,21 @@ description: Complete PromptScript language specification
 
 Complete specification of the PromptScript language.
 
+## Choose a Topic
+
+| Goal                                       | Reference                                                        |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| Understand a complete `.prs` file          | [File Anatomy](language/file-anatomy.md)                         |
+| Choose valid block body shapes             | [Values and Block Bodies](language/values-and-block-bodies.md)   |
+| Predict inheritance and import results     | [Composition and Precedence](language/composition.md)            |
+| Understand declaration order               | [Execution Order](language/execution-order.md)                   |
+| Choose `@extend`, `field!`, or `@override` | [Merge and Replacement](language/merge-and-replacement.md)       |
+| Customize generated headings               | [Section Headers](language/section-headers.md)                   |
+| Upgrade syntax and resolve diagnostics     | [Versions and Diagnostics](language/versions-and-diagnostics.md) |
+
+Use this page as the complete block and grammar catalog. Task-oriented pages
+above explain decisions and show resolved results step by step.
+
 ## File Structure
 
 A PromptScript file (`.prs`) consists of:
@@ -25,17 +40,31 @@ A PromptScript file (`.prs`) consists of:
 @shortcuts { ... }
 @params { ... }
 @guards { ... }
+@skills { ... }
+@agents { ... }
+@workflows { ... }
+@hooks { ... }
+@mcpServers { ... }
+@plugins { ... }
 @knowledge { ... }
 @examples { ... }
+@local { ... }
 
 @extend path { ... }    # Block modifications
+@override path { ... }  # Atomic replacement of an existing target
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAwsxIlOWOLzhYM1LLwDuEXL24AdVmoACIqb2C8KB3gF9eps+eW8ASjACOAVwjUYAE0S8AsjCkvsGTRCsODDUirwamEoW5nwA8mhYEGwYUO4AkkEhihisjDCa9nAw4ZE4vMgY4ikQlQC6ZnEJSawp6WTMMnBqAS6iigCeuvqGJtF8guyivABGUMyMANZdrBosk4SyegYUxpqSOb7ULuJbI5rOkqGMiWwnwztGezgdWIz2YkPbuyuY1KR3X0eKwA5vZpMdPmcVgtWMw5LAXMDiqcHt0VkQOKwXLxSpCHjFeAAhOaLXgkZguCCQRjYZoIIy1Biiaj9fBEUjkGBUWggBgANxCcGa+AAjCAjEA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAwsxIlOWOLzhYM1LLwDuEXL24AdVmoACIqb2C8KB3gF9eps+eW8ASjACOAVwjUYAE0S8AsjCkvsGTRCsODDUirwamEoW5nwA8mhYEGwYUO4AkkEhihisjDCa9nAw4ZE4vMgY4ikQlQC6ZnEJSawp6WTMMnBqAS6iigCeuvqGJtF8guyivABGUMyMANZdrBosk4SyegYUxpqSOb7ULuJbI5rOkqGMiWwnwztGezgdWIz2YkPbuyuY1KR3X0eKwA5vZpMdPmcVnAFtAoACoRoMMDRAiHpo5B0FmA5nI0d8NM9mEtIeiViRGGgAMohABuIXxQIiUHswMCjM0C1YzDksBcKNJBKIpHI8EFTLmjBS4u6KyIHFYLl4pXFMV4ACFJQteCRmC4IJApTdWMsNMx6dRQr1ldgyqcHqY+ABBLBCCCMXjOcgYPIidi8ZhgXg5XhECCSQLA3hSagorAgIy1Biiaj9fDCsiUGj0EAWuDNfAARgTQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+Syntax `1.6.0` resolves top-level declarations in source order. Put `@meta`
+first, then imports, local blocks, and modifications in the order they should
+apply. See [Execution Order](language/execution-order.md).
+Contextual `@header` entries live inside supported owner blocks, not at the
+top level.
 
 ## @meta Block (Required)
 
@@ -94,6 +123,12 @@ The `params` field defines parameters for parameterized inheritance:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhucAYwDWcAPRYAnmniNqENFgC0UCACN5YiXC3sMhWfICMFAAzur4wZmqk4sqLeEgDEggBKMACOAK4Q1DBSgkoGrADmPhh+fBzU1hI+1MwAVjCMWABypDCyKRDpYvmhggDyRhBsGFCCAO4QuIJSMGAYMVBYggBuXTEwTYLUMewQfLVYqRkAvHIgrMxDzgAcXvNhbVgdrF2Z2fww1IIAFHuDw6PjdIKMGOLmMIJLIaQViJACU8yG5hiaQA-LJzMxmLAfo1goIwgBRVgxEg3aq5Xr9HBfNgpDD1RJTGbweYcJQAMVuPWY1BUsk4OMe8km-XgWHkn3kpSUAp2JGYjBwGHkoME225vJFIFRBXRggqOL+D18+Pu8zQLKwsmxJC1csEAGY3Nb8gBfMS2kC2gC6DE46y0+CIpHIMCotBADEm9zgl3wzidQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Parameter Types:**
 
@@ -186,7 +221,7 @@ Single inheritance from another PromptScript file:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAYtWYle1GAHMIcLNQCevVqXiZGMADqs+AAQiscMahCy8tLMhlayA9GCHtOAEwC0HUr158AFGMnS5vJ14HKQwAI1gHXjBmal5yDFlxIQBXVgcASg0+ACUYKGwIADcYOOwcDR09AyNeCitMMXYNLN4AdSMcXmLaCDZeFlY-DF0sFsr9Q2NTYUxLGzsONJcYUi0ARgoABi33Lx8pGXlA4LgwiKiYuPzElLT0kABfAF0GTkP8IlJyGCpaEAZunBeqx8GtHkA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAYtWYle1GAHMIcLNQCevVqXiZGMADqs+AAQiscMahCy8tLMhlayA9GCHtOAEwC0HUr158AFGMnS5vJ14HKQwAI1gHXjBmal5yDFlxIQBXVgcASg0+ACUYKGwIADcYOOwcDR09AyNeCitMMXYNLN4AdSMcXmLaCDZeFlY-DF0sFsr9Q2NTYUxLGzsONJcYUi0ARgoABi33Lx8pGXlA4LgwiKiYuPzElLTMzTaO0uolDlpeTzgYEoAFDBeSDA3hAAF4wSIASSqkwsql4oTyzAA7vdxtUptIMIwANZwKxiLFYJwYNBoTw0ZgAKxgjCwADklIheGoQCRZMTSSy6HEYlgmQBmTZC9IgAC+AF0GJxDvgiKRyDAqLQQAxunBeqx8GsxUA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -218,7 +253,7 @@ Import and merge fragments for composition (like mixins):
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvMNWYle1GAHMIcLNQCevALS8ARlGaMA1nF4YZvEjGqyYAE14R2zXowCu1GezHQYAHVZ8AAk5wMLx+LDIA9LJOxlZw4SxkUBAYrIzBvHwAFDLyiirqvFYKGNrWYsK85BjKshJOrFYAlD58gmjCogDuELhGSRiGGtq6BqbmljYAggByACJGAG4Y0CWw5dQhRBwNLSGBwaHCMJHR1LHhQc7UPaoDvJe8GbzZcgpKqhpFcKtlYBVVNTqDWavgEQhE0hgUGwEAW3lYASCvAo4XEGFkZnYcR0snkrFkPl2AFknFAsBByMEIOCsIM+lAxhYynZeMIrOZdoiDmFjooUlYYnEsMo0PBGNc0KIni9cu8Cl8fjY-hsAbVmPUmpz9iEeeEZHkIIxyWw4pcXDdHlkcm98p9iqUlf9oYD1cCfFzkeEdIwMFA1CxWJBZCAAL4AXQYnHe+CIpEpVFoIAYcNoEDY+AAjKGgA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvMNWYle1GAHMIcLNQCevALS8ARlGaMA1nF4YZvEjGqyYAE14R2zXowCu1GezHQYAHVZ8AAk5wMLx+LDIA9LJOxlZw4SxkUBAYrIzBvHwAFDLyiirqvFYKGNrWYsK85BjKshJOrFYAlD58gmjCogDuELhGSRiGGtq6BqbmljYAggByACJGAG4Y0CWw5dQhRBwNLSGBwaHCMJHR1LHhQc7UPaoDvJe8GbzZcgpKqhpFcKtlYBVVNTqDWavgEQhE0hgUGwEAW3lYASCvAo4XEGFkZnYcR0snkrFkPl2AFknFAsBByMEIOCsIM+lAxhYynZeMIrOZdoiDmFjooUlYYnEsMo0PBGNc0KIni9cu8Cl8fjY-hsAbVmPUmpz9iEeeEZHkIIxyWw4pcXDdHlkcm98p9iqUlf9oYD1cCfFzkeEdIwMFA1CxWJACaxdgB1Ho4SrGUgwDi0Z5BYIABWjZjjEAAXmV+KwcOYeik0loocxOiCPSi0RjOLTwhxFHZZJk0WZOsI9IheF4QAsevAsN26I5mHDqOiYJ2AJwABkaRkM9fJ+JAAF8ALoMGsqfBEUiUqi0EAMUdwCBsfAARlXQA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -228,8 +263,13 @@ Import and merge fragments for composition (like mixins):
 When you use `@use`, all blocks from the imported file are merged into your file:
 
 - **TextContent**: Concatenated (source + target), with automatic deduplication of identical content
-- **ObjectContent**: Deep merged (target wins on key conflicts)
+- **ObjectContent**: Deep merged (the imported source wins same-shape key conflicts)
 - **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
+
+For incompatible block shapes, the existing target body wins. Under syntax
+`1.6.0`, later declarations can modify the merged result, so a local block,
+`@extend`, or `@override` placed after `@use` can become the final value. See
+[Composition and Precedence](language/composition.md) for the normative matrix.
 
 ```promptscript
 # Source: @core/guards/security
@@ -296,6 +336,12 @@ Control which blocks are imported using the reserved `only` and `exclude` parame
 @use ./shared-config(only: ["skills"]) as shared
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvNlACevOAGtoUOLwysAJrxbsiogEZRmjGXAA6rAAIBXODF4UA9HBwZqMFQFoNkAOYAKcRMS8yEYgsvLGIHS8wRochFjBALoAlCYmfIJowqIwAG4w1BK4EKyevESMMGiiMqzMAO6wKp4wJhZWNvaOzm4eED7lUOYqMAFBIDX1jc2JKaxpvADCzCTaxdZ1ELi8HGRQ2NaY1KQwHLStltZ2Dk4u7mxe3gNDI4HBEw0u0yAJkSTMwwFgnAsNQIIx4iBZvMlis1rwNlsMFAIBhjGYLh1rt07qwHn5RkC5FAFDMlIosS4QABfH4EdgFfBEUjkGBUWgREB5WgQNj4ACM1KAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 **Rules:**
 
 - `only` and `exclude` are mutually exclusive — using both is a validation error (PS021)
@@ -320,6 +366,12 @@ When importing from a repository or directory that contains multiple skills, con
 # Combine with block-level filtering
 @use github.com/owner/repo/skills(only: ["skills"], includes: ["code-review"])
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAkmWbUsvNlACevOGhiMIkRtIDW0KHF5hqzErwy9qMEsw4GYaZgB1WAAQCucGLwDmEXHYBGFFiQD0zAHdWGGpfQwtfOFUodQAKCFZGKDsAE3hEXmRLJmY0gFpDADcIGADsul5sjjgsBOdsgF0ASmtrPkELET0YlTUNIkZzURk5BQglNnhre0cXNxxPbx1-IJCw82ZI6LiB5LS4DKyQWGcMRgk8uDs0TqxGltY23gBhHQ8EpwD53kKQuAg2Lw0AlWHVeLFfrQAaxeD54LwPDAwMInJhqKQ4A8Zk5XO4vD4VsFQuFNlE+jYAEwUACMAAYKLT4ok9ulMtkWPkiiUyiBmq1WHxXiR3sFeF9cAioMxGMo8rBflBNNAONQ6tMHDj5osCYEiesImSYnBYuIJIdsob1I0KgkkqlWUcOTACjBiqV7iAAL4NBicLDUCT4IikcgwKi0EAMSH-Nj4aleoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 **Rules:**
 
@@ -346,6 +398,12 @@ declarations:
   environment: production
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIvtFYABMAA6rQYJrMAVjEZZEgkSADCOOQGtmAVyEBlGNQBuERjGViJFkMr04M1GABNBfDoSEY0aGA7iDsQVwIfzRmCHZBCKD1QQAjZicATwprC3FBAFolEABpGBg0SQwkkk4hJ2wMQR0hZjBBKGYAczh0iW5tOBhBCgB6DlJMtwFLQU4TajYy9kUpJ215CDYxAF8QVYBdBnLqJPwiUnIYKloQBiNDOGXWfABGDaA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The parser preserves this source order. Tools that consume the canonical AST can
 read the ordered `body.entries` sequence directly. Existing integrations can
@@ -468,6 +526,12 @@ Four keys render as dedicated sections instead of code-standard subsections: `gi
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPEBzCFkSSZcuWGbUS2FVJABhNgDdOWCGwxRxRkiSVx9a9QCNqAxjj0gAFGBjYAD6QhACUAPTANMwAVjCMWAC+kRBwcACuMAC0EIKJTrLqJDDU8jAASjAAjpl8KtKF6uLmWLDexaUw4ix2SuIZdiIAngVNcoLwjNQQaOZs3mjp1GjMcF0CguKpGV1QEKwA1qPq+Y3i1NXpEBeVxhAwAO4qWNSZzqeJIIkAugxm1EN8ERSOQYFRaCAGKZaBZWPgAIxfIA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Renders on Markdown instruction targets (e.g. Claude Code, Factory AI) as:
 
 ```markdown
@@ -494,6 +558,12 @@ Free-form text is also supported via a triple-quoted string:
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJxYasAJhmqC4AAmAAdVuPFSQCpbPEBiVeIDKMRgFdqELAE8ZMuQFpxANQxQIwjuNtRxEVml1Y4Z8ZYByMABuMNTiUMwA5uJwOtQwXj5KioqsAL4gqQC6DJxY1Eb4RKTkMFS0IAzBtBBs+ACMGUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 !!! note "Per-target support"
 Free-form text `@standards` currently renders only for the Factory target. Other targets render property-style `@standards` content only.
@@ -864,6 +934,12 @@ For projects with multiple path-specific instruction files, use named entries in
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEK1IwxAWgDmAVwzUxcRUVLkYMwXACe7DIUkyAjBQAMdwwF8prF9zUatwl4MEZWalAaiixkbJxYcJLAPr5+aOTGACrMksgyGAlwAPQYYiQQrNkAVMUlFJEydNIgmWg5AO4wAEYAbhAwDSVlxRVwMgC6sb5i8IzUEGhYEGyWIACCAapB1IKhaOHsa8xihcpGAqxinv0gw9vsEXMyN6xxggCqcDCCAPKsAAqqcDhrOP7KF6jDiMaZsQRgZirDBQKDbMKsCJwCjneZQBoYYxwURkWB8LbvAAi8Cw1GYxghULWsH8qjQKLucRuZzOjOcjMKrRgtAgYGM0XOdSgyVSgnStSyuTQEG65UqICGjJGYwmUxmrDmAElWFyeXyAFIAZUEhM1212AQO-mOmlO5xYl3Y1xZ5yeLwdcFJqlBVMKACsYKD1YIGhBcKJWAHQYJRixqNgoQz7gAlGDKCCe7l+WGCZqFC3KbGFQS4d1sASFLMkHbLGBJpku1m+dmOECOAYMCLUYz4XS4us0eggXVwdX4KxtoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Each named entry generates a separate instruction file per target:
 
 - **GitHub Copilot** (`version: multifile` or `full`): `.github/instructions/<name>.instructions.md` with `applyTo` frontmatter
@@ -1029,7 +1105,7 @@ Define specialized AI agents for target platforms with native agent support:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEBgDmnLHAC0RUuRgzBcAJ7sMhSTICMFAAzmtAXymtb3eYrjDbgwSzExl1GADcIMADuMNSSwK5ugp5wjNQQaFgQbEYgAEp+AYHOHjCCYMzUggCOAK4YUBBYOoIYrGKCAEbwWII0GIyJjPAyEW5YzMxQcJLIMukYYjJ00iAA4j5oUzOzUMwNSzIAQhhwODIAur2CJMyeUClwbKz8PayR7mwc7Ck9IEduAJrMJTU+NdqcJKFHKCHz+IIhQScOAlOKsOSCHAQOQ4bQCOoYahiOAUWzvQQAdRwnFErF8zAA1jAJPjTIJUiU7nJKlEIGAwIJ+gDcj4uux3Dhago4PiAEwUQQAMWYjBKzjYx1ObIC9UgsBFd3uggAzBLNjBmXcwZlRCQ+GIINgYFAdHjNfd0uDAgKYIwKRU4FhEPjlIIAMKnXIQbKwTE1OqgmATDANWA+qWMjpJVjOWr1XyYy2x+C-XLBKBQZSsUjU+MAOWYURK5AgjCt9Ry8YACtRmGhISFW4VBXUKvCjq9bm4bHZNZ4GiU5ApQi57VF4LF4olkjMACIwCdTiDw7TtxiWj0tfKFTsFVMRjievIYaCw7pvOf9QbDQSjNJRyYgaYyACiFqwGwgNsuyAfMMCLF+yyrOsICHHOFpwOUqzBGIAAqAxDCMMgEnEHAHEcJxnCk27ErhQ6RO21AkMGcDJgAsoGKTtF0CR-pUIoPvccAUtAmGvjIp7UMoPZiH2ciAZeiTwsomBYBw1Apvhc4sOwigvG8nFal8PyYrktRQoQlEtOOk7TruroHhAABe24ItuoIDC0dZynpxY2rROIDhp5EjlYIBWPsDCKNQOj4GoZCUDQ9AgL4IS0Ww+DGP5QA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEBgDmnLHAC0RUuRgzBcAJ7sMhSTICMFUwAYtAXymtb3eYrjDbgwSzExl1GADcIMADuMNSSwK5ugp5wjNQQaFgQbEYgAEp+AYHOHjCCYMzUggCOAK4YUBBYOoIYrGKCAEbwWII0GIyJjPAyEW5YzMxQcJLIMukYYjJ00iAA4j5oUzOzUMwNSzIAQhhwODIAur2CJMyeUClwbKz8PayR7mwc7Ck9IEduAJrMJTU+NdqcJKFHKCHz+IIhQScOAlOKsOSCHAQOQ4bQCOoYahiOAUWzvQQAdRwnFErF8zAA1jAJPjTIJUiU7nJKlEIGAwIJ+gDcj4uux3Dhago4PiAEwUQQAMWYjBKzjYx1ObIC9UgsBFd3uggAzBLNjBmXcwZlRCQ+GIINgYFAdHjNfd0uDAgKYIwKRU4FhEPjlIIAMKnXIQbKwTE1OqgmATDANWA+qWMjpJVjOWr1XyYy2x+C-XLBKBQZSsUjU+MAOWYURK5AgjCt9Ry8YACtRmGhISFW4VBXUKvCjq9bm4bHZNZ4GiU5ApQi57VF4LF4olkjMACIwCdTiDw7TtxiWj0tfKFTsFVMRjievIYaCw7pvOf9QbDQSjNJRyYgaYyACiFqwGwgNsuyAfMMCLF+yyrOsICHHOFpwOUqzBGIAAqAxDCMMgEnEHAHEcJxnCk27ErhQ6RO21AkMGcDJgAsoGKTtF0CR-pUIoPvccAUtAmGvjIp7UMoPZiH2ciAZeiTwsomBYBw1Apvhc4sOwigvG8nFal8PyYrktRQoQlEtOOk7TruroHhAABe24ItuoIDC0dZynpxY2rROIDhp5EjlYIBWPsDCKNQOj4GoZCUDQ9AgL4IS0Ww+DGP5QA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -1180,6 +1256,12 @@ Alias for `@shortcuts`. The `@commands` block is functionally identical to `@sho
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIskkZWAEzgACYAB1Wo0RJAB6ajABuEGAHc5iWSABKKtetEshMUWGbVRARwCuGKBCwBPUYKGiARvCyiaGRiwIRng5KRk5eQ44LC0dAHVqJzNbVidRaKwxdSccUQA1ZJiw1gBfEFKAXQZOLGpnfCJSchgqWhAGZRhaCDZ8AEYKoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### @knowledge
 
 Reference documentation and knowledge:
@@ -1243,6 +1325,12 @@ Structured few-shot examples for AI assistants (requires syntax `1.2.0`):
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFNmJEhCwBaOFgCeseWIlxN7DIVnyAjBQBMFAAy7WAXzFjuRUuXjC9gsDGyqWJRVZUXEJQSl4RmoINCwINlMQADE-LABXahhBQOUsQQB3FRxBOBY0GHtwyVY0dKwkgEEpSKlBdLgYakEMepxOeMZsBPEi3EEAKQB1ABVBLGYAa044KvDmerqGuXA0gApe3ABKWQwWydnVACMMTraOrp6+gYgh+LY1p1ZvEnSoeKgEFYMFUbjIsBC3gkQK2SV0ICh4RYrA0gkIggAvO1OrQKJB-l09ulMQA+doUDCMeIANxgRwoJAwaCJpPJMEZ0COAG5EfC1hINlhYTs+WFqsjUZSaTAAKIcqBwTHYrqrMXVQR46AcagsjFk9IUqkQWlHRHVBlM3X6ijsjCcnlqvkIsJfBwgBwAXQYA2omnwYI8VFoIAYtNoI3wZndQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 | Property      | Required | Description                               |
 | ------------- | -------- | ----------------------------------------- |
 | `input`       | Yes      | The input the AI receives                 |
@@ -1267,6 +1355,12 @@ Defines portable workflow definitions. Available since syntax `1.1.0`. Targets t
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIDuz1ANZgozXnAAEwADqsJE6jFgY4MRFNnz5AE3iNqENFght10kAAVFmRQqUwVMc5q0t2nLGZDPvcrfIAlGAA3CBheCUYcDFYAc3g6CWCMKAhtbBgJTEZBDHi4RJjtLOsMW0VlVQkSGCwMdLqKF3kfZz8AX1l2kHaAXQYPagBPfCJSchgqWhAGYJhaE1Z8AEYeoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Each workflow entry is an object with:
 
@@ -1298,6 +1392,12 @@ target's native event system and configuration format.
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAI7PMBrOAAJgAHVbDhNZh0ZYAtAHNOMathgATBZFhxEoiVKkwAbpywGxIGjAVZ+UBQFc4Ma0eMlsjHGqsgAKKaEFgAPgDq1KHuIJ5ScIzRaJaGksZSmLgBVNTMZFiJyVgA9EUQKXAlMnJYFCQAVnAe6RkQ7Gq2HNQBrMyasfHGGNRK+sLI1goKcFjR8tYAukMAvkOMAO6aATINMAtxrcJYECQwzM5YALLjAKwADI9Ds9iuV-BwGCoBAMJ+jAJ2kphCpWGoNJphLp4C0Mix2O1nDAAPKsABiGGgzmoMAMYAwUDcQ04GAARrBtsdqEjPGtWCsQCtFgwLNQAJ74IikcgwXL0EDmWgQNj4ACMjKAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 Portable events:
 
@@ -1368,6 +1468,12 @@ targets: {
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-lhtQOYwscRAAJgAHVYiRYDIyzNqAT1HARJbIxwxqo8SACihGIwCuHfSJYkNrACajk+1szsx9dEfq0mA1gFpZeUUlChIAKzh9AF0RAF9JaQA3OBY3VRFU6gg0LAzMXD0QKmpmMiFGbNyAeiycoWqfRl8qJUsIdh0aQR0itCVcNgBmSzj4xJE+CFxTACMMzgxZ2AcZDCg4GHHWOJA46IZOLGV8IlJyGBL6ECSdOAg2fABGPaA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 VS Code Copilot Agent Hooks are emitted separately at
 `.github/hooks/promptscript-vscode.json` when a `vscode` override is present.
 They use PascalCase events, camelCase tool input fields, and currently ignore
@@ -1427,6 +1533,12 @@ Defines project-local MCP (Model Context Protocol) server configurations. Requir
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAImNoBlGNQBuwuAAJgAHVYSJcGIwCu1CFgCeAWjiMMrVsMRTZ8+Vmr64aZtSzHpIOFgAmEZo9NmWJEvpfGyI6szC4wjnQSjhQA9FjMzFBwMYoqapo6egbCFCQAVnCOALpe8pwixjJyZvIAMgDyAOIA+rUAogBqbbUOIBCsYB4gpRIAvl7jrKMgo0UMnBYa+ESk5DBUtCAMYrTurPgAjDNAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 | Field       | Required | Type     | Description                           |
 | ----------- | -------- | -------- | ------------------------------------- |
 | `transport` | Yes      | string   | `stdio`, `http`, or `sse`             |
@@ -1452,6 +1564,12 @@ Agents can reference MCP servers by name via the `mcpServers` field in `@agents`
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIYDmnLHAAEwADqthw6jABuEGAHcY1RKIlSpAE3iNqENFghs1YkAGFmO6XIXLqZjZpbtBpkACVbS4S2uMcDFYBOApHSU0SRjQAZRVZFTg1ZDM4GEYAV30sAE8AWjhGINYVMzphMygIEowHEABdJwBfCSaQJvqGQWoc-CJSchgqWhAGBNpjVnwARnagA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### @plugins
 
 Defines portable plugin bundles that group skills, hooks, and MCP servers. Requires syntax `1.4.0`.
@@ -1467,6 +1585,12 @@ Defines portable plugin bundles that group skills, hooks, and MCP servers. Requi
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gALkCuAcwis4AAmAAdVqNFwYjPtQhYAngFo4fZTETipMmQBN4jJWiwQ2uiSADK8xcpWjqMAG4QYAd1FZmzKGEBG30DNxhaS1ZrEABGCgAGRJDpAzgAa2goOF1kGzkFJVU1Vw9vGwBdUJkcf3Sc0TyQGmYORiw1AU4I7BhDNUhYOErq0RJGNHtqcNpc-Ici9ThGDFZWCJHUgF8pLZAtioZOLGoVfCJSchgqWhAGGbgo-Fj9oA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 | Field         | Required | Type     | Description                     |
 | ------------- | -------- | -------- | ------------------------------- |
@@ -1526,6 +1650,12 @@ inside `@extend` to replace its complete prior value:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEDWYArGIywzBcAJ7sMhSTICMFACwUADKoC+U1le4RWOGNQhZBFAPQsyGVuoC0AIww4GCsbIg5WMTUBSIxqMThhK0FBDjgsOwBzAEJJZBkAVWDBADVneBUQAF1kwSg7DNZMvMLigFEAZQAZBpka1nMQcyqGTixqdXwiUnIYKloQBgA3RzgINnw9IaA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 `testing!` replaces the inherited `testing` value. Unmarked `linting` keeps the normal merge
 behavior. Replacement also works after `@use`, with aliased imports, and at nested target paths:
 
@@ -1536,6 +1666,12 @@ behavior. Replacement also works after `@use`, with aliased imports, and at nest
   frameworks!: ["Vue"]
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAICucMAAQUA9HBwZqMACaCMcQeMkyAOqzXciHVrKVTpFOFgw7J0uBSzNmUCKwDmg4GsGCw1UjADuzagGs4AEJEQWQVEAA1XhhwgF01AF8QBNiGTixqAE98IlJyGCpaEAYANxhaCDZ8AEZkoA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 If the field does not exist, replacement sets it. Later overlays operate on the resulting value.
 The modifier applies only to direct fields in regular block extensions. Skill properties retain
@@ -1567,6 +1703,12 @@ Prefix an entry with `!` in an `@extend` block to remove it from the base before
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJEesATAARwA1tChwKLATAC01GADcIMAO5DgAHVZChisDEWtG8REOQ69erSACEBo51NwA9LJoxG2GAIokBWytrW0djF1dFcgxTEk4sf0CQYIBdHQBfEHSUhnjqAE98IlJyGCpaEAYlIzgINnwARiygA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Path matching is normalized (`"!./foo.md"` matches `"foo.md"`). Only works in `@extend` blocks
 on append-strategy properties (`references`, `requires`).
 
@@ -1582,6 +1724,12 @@ Prevent `@extend` from overriding specific replace-strategy properties:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwomhjUsiURKlSW7TguFiQ27RX26dOySrgwMsACaLk2tR3ba6WkJfiNqENFghttAXWVhAF8JYJBg-wYNagBPfCJSchgqWhAGADc5OF9WfABGCKA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 `sealed: true` seals all replace-strategy properties. Attempting to override a sealed
 property is a compilation error. Append-strategy properties are not affected.
@@ -1770,6 +1918,12 @@ Use `{{variable}}` syntax to reference template parameters:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgOZKNhgBaIqXIx5YiXACe7DIVnyAjBQAMVneMGZqpOLNF2JNZgCsYjLADlSGFk4LGoIVgBzXQl7ZmosWVYAVxIAIxhqQQBeQQBmSwLogF8xEtYxbmlOLAgsfWFonRBbCQBNZiTBDGoYQQB3OIBrcIjBNmFgD29fAL4ioopG5uXSsQqWdiIsBrspnwSJvZnA+eipGAA3AGUMi4zTEBwsLDREAHo3qGZGDCgcZhCiGAkziWFOzVYRRARQAugxqtR9PgNEoYFRaCAGHdaBA2PgzNCgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 Template expressions are resolved during inheritance resolution when parameters are bound.
 
 **Valid Variable Names:**
@@ -1792,6 +1946,12 @@ apiUrl: ${API_URL:-https://api.example.com}
 # Template variable - from @inherit params at resolve time
 project: {{projectName}}
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAoqwBuEamxKcsvIRmoQMAI1i8AtLzBiSvOAE84HLdl6ZaMXlggSAOqwxoIAVWpREvACTAAggAUAkgH0HACUAGUQVHCwsNDhEAHo4uwgKIlJyGAoWEgBfGxs+ABUYMihsMxk5RWU1DWYtAAEIVhwYOSkTUjheI2p4ZighMwtrVhpmACsYRixXYGAxyemAOVIYbOyQbIBdBklqHXxUkoyaehBB2gg2fABGTaA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 ## Type Expressions
 
@@ -1859,6 +2019,12 @@ PromptScript supports Go-module-style bare URL imports in `@use` and `@inherit` 
 @use gitlab.com/myorg/prompts/@stacks/python
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIICSZZtSyCw1ZiUFC0AVwAjKAhGQQBxCCwACSDBahg0ZhtufzgYQQBzKJwgihYSAHoMRj5CuBwMBLEFOAFWMSqxOELuTwxMvnYW9MZ-aii5G3snFzcPLx9IrAAZDECUtIzsrCh5-O9C+VdMwuUyLBbuOpKAaxa0OVw2EEsAXQZOLGo5fCJSchgqWhAGADcYLQIDdECAjLcgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Extended Version Syntax
 
 Append a version specifier after the import path with `@`:
@@ -1873,6 +2039,12 @@ Append a version specifier after the import path with `@`:
 # Branch
 @use github.com/acme/shared-standards/@org/base@main
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAosUZZeWDAHMAOqwACAVzgxe4iLjkAjCixIB6DIxIwdcHBmowAJgFo4Y1hbMW4Omc2rid6jIpkBGCgBMFAAM0tJ8AMowJABuMNS81Bis4koAFFDY8CLamFgQ6rC8eYw4AJTS8orKqjgaWsy6+obGpubWtskO1E4ubh5ePgB6-sEhYax8AEJJrKWVCkoqapraegZGJmaWNnbdva7unt4wMiQYEKwgAL4AugycWNQAnvhEpOQwVLQgDHG0EDY+F8NyAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 | Specifier | Meaning                               |
 | --------- | ------------------------------------- |
@@ -1901,6 +2073,12 @@ This means you can import skills from any repository — including projects that
 @use github.com/some-org/claude-skills/skills/tdd-workflow
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdECQCeAWhrMAVjEZYZguHPYZCkmQEYKABjNaAvlNY2AxIIBKMNM0E4McQQGUA0gEkAGUCKEjFBACMAVyxBVjcqWkFIWC9AFAJBDBjmBTEIOBYANxhqGDEbbii4GEEAcwhcKIiKFhIAejhmPgVmalq2xigssRgFOABraCg4DsmoabasMTEFAHde8bAoZlWQSwBdBk4sajl8IlJyGET6EGLaCDZ8Iz2gA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 ### Alias vs URL Import
 
 Registry aliases (configured via `registries` in `promptscript.yaml`) are a shorthand for URL imports. Both resolve to the same Git fetch:
@@ -1912,6 +2090,12 @@ Registry aliases (configured via `registries` in `promptscript.yaml`) are a shor
 # Equivalent full URL import
 @inherit github.com/acme/base/@org/base
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEA6hFy8MUCBji8AFC1aQA5gFdqMACYjJAARZkMrAJ68AtAD5e8oTkUAjCjoD0GRiRj3rEmAEoAOq00RWHBhqIV5tZl0De01mank3D19fPgBRAEdFCAA3UU4sXjBFKCheAFUAJQAZXggyWKxff0Dg0ItcGzsIx2dXdzhXGLiE-pAAXwBdBjzqfXwiUnIYKloQBizguAg2fABGMaA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 See [Registry Aliases](../guides/registry.md#registry-aliases) for alias configuration.
 
@@ -2128,6 +2312,12 @@ registered owner block:
 }
 ```
 
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEgozRhigQAXjCkBaGswBWMRlnliJcAJ7sMhWfICMFAKwUADCdYBfMWO5wBrKQxqKThhU0FuHBgMKRhqORAAYWYpCFYAc0EAJQBXWDh3CUjo2Pj0iCwtFhISCtD5ZJqK7Lz4QoiomLjBKSUcvissCDYEgBFmAGt+zgFGPSENODRmQCFAHPdwlljZZHkAVTgYQT9qCCNBABVzNBgAZUZTtGMQAF1w8qxZYEEwZmoSbC2JhsABuM2GrBU8kEXnEPT6AwEQzYX0EYNOYHMAEEwBxqLIsNQckdYR4QB4XgwZtRzPgiKRyDAqLQQAx0XAIfg7OSgA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
 - `@header "Title"` names the block's primary generated section.
 - `@header <section-key> "Title"` names a derived section.
 - Titles must be non-empty, single-line strings.
@@ -2166,6 +2356,12 @@ initial `## Heading` as a compatibility fallback:
   """
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIQAmnLBCwBPAATAAOqzFjJIeYpliAxCrEAFaswBWMRljEBJVnCzUArgYhs402QDFmUKMwDuY6jDTM4w5tTiLKwAboI2phT2cgqx0gC+IPEAugyCgfhEpOQwVLQgDGG0EfgAjElAA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 The formatter emits that heading once and preserves the remaining body. Explicit
 `@header` metadata always wins over this fallback. Syntax `1.4.x` and earlier
@@ -2285,3 +2481,9 @@ This complete example exercises root and nested replacement shapes:
 @override standards.config.enabled { false }
 @override standards.config.retries { 3 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMEEQAJokEAdEMwBuMatXEwAtHBwY08GYLgBPdhkKSZARgoA2CgAZdAXymsn3FewhZ9w6SBkyA8lBiomKcWB76fr4ggo6s3NTwWMqM4Wxw3qo+gcGJcMkQqRBsDi75GKxiGNRiGcBOgoIc+RCsAOaSyDIAqnAwggBSSTIAug2CLKyQHd6cGABGsBJN1ACu-YkF8JJmsU5xLvKKyqEhYRHeMgByMADuZ+6epfFHSiqCeQVF6d5dIFfMQSrVhwDBgfqMDD5OCjPYvBRvU7lSrVWrCcZRGQAJRgAEdVhBEsFOG1WjBFK02h9VrA4BRMb5WI1muF2p0en1BAA1DzDEBjJkTNjTSQiOaLGDLZLrD78ZTbQS7OKNLIyAAizEYqz47EEYAw0FWeT8rDi3FeJ36yKqNTpk2mFHFS28+qgnLNFve1tRduFEDaFE28rqggAzLEQPYRgwwtR9PgiKRyDAqLQQAwEXBiqx8GZI0A" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->

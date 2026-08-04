@@ -1,12 +1,13 @@
 ---
 title: Tutorial
-description: Step-by-step tutorial for deploying PromptScript infrastructure
+description: Enterprise tutorial for organization, team, and project layers
 ---
 
-# Tutorial: Building Enterprise AI Infrastructure
+# Enterprise Tutorial: Building Layered AI Infrastructure
 
-In this tutorial, you will simulate a PromptOps deployment for a software team.
-You won't just write a prompt - you will build a **hierarchical context system** that scales.
+This tutorial starts after your first successful local compile. You will
+simulate a PromptOps deployment for a software team and build a hierarchical
+context system that scales.
 
 ## Learning Objectives
 
@@ -21,7 +22,8 @@ By the end of this tutorial, you'll have:
 
 - Node.js 20+
 - PromptScript CLI installed (`npm install -g @promptscript/cli`)
-- A project to configure
+- A project that completed [Getting Started](getting-started.md)
+- A successful `prs validate --strict` and `prs compile`
 
 ## Step 1: Create Organization Base
 
@@ -71,7 +73,7 @@ Create `registry/@acme/org.prs`:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0zagHN5YiXACe7DIVnyAjBQAMl7eMHqNJkAEEAwgFkAooJfq067BBsNgC+YmLc0pxYEFh6wjpyINpJtgCazACughjUMNniTgCS2XBwEHAC7IIA7uoA1hCsGtlYgq6e3r7+0WwUCQBizFBQzNWCLGQYrHEsUo3NFVNSOVJw+VKCAEbwrTRK0YzwfbbJIWGs3Iusy9Sr8bazMLLICRLyg8Oj47BT48xSeRojUYEHI8HkdFeiQAIsxGBk+FUMMNBGgMpsoBBGG0AAqFOAQqHyADq1BieQ4FTWYHU2RRjxsEgAuuddDB4WTYs8iSAAGrI6TYPLIqCCDJwGDUSSsNFYQm2N4gAByMAAbpLBDgVo9BBLGLksASUsyxKFWOFchUyYweqw1qJbABaRIq9VSoh+CW44p1GB6Na0vUGtaNP4AxmCZ3yV0aiYkGK6zhlaLqwTLASCLDMQRuspsP7sahDCNR5xQaoYf05gXpvLijWNWVnc0XOA4dRYeGG+6KlR6jKcvTyRwAJTVEBgYx1NKl-cHOYyUFYkowm2gMQnRoS8hUUjhRscAHFOCuOGm4QiogF8zPMzhymGYCEQMEmQwotQ9PgiKQwVRaCADC5oErD4KYL5AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJEhuGRnwD0zagHN5YiXACe7DIVnyAjBQAMl7eMHqNJkAEEAwgFkAooJfq067BBsNgC+YmLc0pxYEFh6wjpyINpJtgCazACughjUMNniTgCS2XBwEHAC7IIA7uoA1hCsGtlYgq6e3r7+0WwUCQBizFBQzNWCLGQYrHEsUo3NFVNSOVJw+VKCAEbwrTRK0YzwfbbJIWGs3Iusy9Sr8bazMLKithI0jYwQ5PCyyAkSEnkg2Go3GsCm42YUjy71Yn2+cHkdH+APkABFmIwMnwqhhhoI0BlNlAIIw2gAFQqIkDI16okAAdWoMTyHAqazA6my+MeNgBggAuglQqwEnAYFjmbFfij5AA1PHSbB5PFQQQZcXUSSsQlYJGykAAORgADcYFqcCtHoJxYxclhqQkhawReFchVmYweqw1i8JABaRLGs1aoh+cUU4p1GB6NZc232taNSHQvmCQPyYPmyEkEgxG2cMrRM2CZYCQRYZiCENlNiQ9jUIZpjPOKDVDCx6uKst5DXZxq6s6ii5wHDqLBYh33QEgFS2jJSvTyRwAJVNEBgY2tnK188X1YyUFY5owm2gMQ3jpOs6kmOpjgA4pwTxxS5jsVEAnWdxWcOUUzAIQgMEAoMFE1B6PgRCkN8VC0DSIA1oErD4KYwFAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -199,7 +201,7 @@ Create `.promptscript/project.prs` in your project:
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkBGCgAZb+1gF8xYgMSCAkuKEk1ULBCakLCCcPxqaHSCRuqCAO7qUFKSrIrUEFiCYNTMJFk57JzJHKSIboLcEKkw6ZncGIx8APTZbBysUpoleYLuABTUMADmEHBY1EaCmoJSoxgARrDJYMzUguQYRkM5ah0AlGLcLIWEmaLi6zkAVkpYFiAAwooq6pkAgrpQEIzYEGwOEik8EY6TQATY9wAopoWCQ+NRGDBBIxnqoNFkoMw4g4DHIQPp8RcACo4UaSOCCXBIlFKNGZHTkb6-NhZVaCN4PACykIA5BSYDDcvDEesoNgVtQSBRcQBpGCTMAwbBqQZwMoXaacvwBTRjGBoZGo17xCAALww1CkuOmAAVNnx2JdmIi4HAqkMTbhBABlcYQNAwa3sqRSVUUgBuGC+UmZrCDAHlLTVQmo4RbJhgOsi2JBJbHcQSHM446x3DbrrddQHGBBIIxQgIOhapHBDkR2skxpmY5aKecJCwgbJ+xJKfAAqwhsPcaPs+GahghjBZAAOACsM9HMAATMvBIMAI5qCCDK0XCTFi8uC4NF1u+bQDJGafn+I-Kd47cUSzst4A0eHsep6yOMaiBhcxbFoccA4KsWCMBofYFiATQ0i8GjyPcAASMBQAacQZDghq0saYCYnEgiYiMjD-vITSYEYDpYJheI4XhnpEb6oJIgxTEpBw2z5oSEh0RgliWEYLHyAASjA4YQDAFGDkiEqCLe8D3o+WCTKMcBga2hJQaw3DKKwWJLEuwjIYWFyuO4bw2h4giQh0aDMFUWCtiWEi2vG3pEoITQ6BAqFGhoqGDNgSLTA8kUcMR6GZGErp-N5UyCDaACqAVBWgIVoXSTSINI6WZWgMbxQVrxBjafk5cFoUkeFxVSKhuTkPw0WCA87WwPFaAqiiGBhNeEh2YIcqTD1ZBsJwnmjelTxNVgADqZrNulnIYFUJrmpa2amFUNRBm8IZhgAYqseTTN6pK6O6TQPlAXyTmpZ0aTV9pzZdkrpVx-pIpCsBMRSHnDNQ+YaoIiZAtQ3qpiQ6aLRaSUI0jsxwBskkXIWhkgI4AC6DBzRM+BEKQHVULQIAMPOtCpfglj40AA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMcMRgGtmAVywBaDGjTyxEuAE92GQrPkBGCgBYKABn2sAvmLEBiQQElxQkmqgsCE1IWEE4fjU0OkEjdUEAd3UoKUlWRWoILEEwamYSHLz2TlSOUkQPQW4IdJhM7O4MRj4Aely2DlYpTTKCwU8ACmoYAHMIOCxqI0FNQSlxjAAjWFSwZmpBcgwjEby1LoBKMW4WYsJs0XFNvIArJSwLEABhRRV1bIBBXSgIRmwINhOCRSeCMTJoIJsR4AUU0LBIfGojBggkYr1UGhyUGYCScBjkIH0hKuABUcONJHBBLgUWilBjsjpyL9-mwcutBB8ngBZaEAcipMDh+URyM2UGwa2oJAo+IA0jBpmAYNg1MM4BUrrNuQEgpoJjA0Kj0e9EhAAF4YahSfGzAAK2z47GuzGRcDgNRGZtwggAypMIGgYLbOVIpOqqQA3DA-KSs1ghgDy1rq4TUCKt0wwXVRbEg0vj+KJTlcCdYnjtt3u+qDjAgkEY4QEXStUjgxyInVSE2zcetVMuEhYINkg4k1PgQVYI1H+PHucjdQwIxgsgAHABWOfjmAAJlXgmGAEc1BBhjarhJS1e3Fcmm6PYtoFkjLPL4k-jOCbuKJZOR8gXHY9T3PWRJjUYMrlLUtjjgHB1iwRgNAHIsQBaOk3g0eRHgACRgKAjQSLIcGNelTTAbEEkEbExkYQD5BaTAjCdLBsIJPCCO9Ej-XBFEmJYtIOF2QtiQkBiMEsSwjDY+QACUYEjCAYCo4cUSlQR73gR9nywaZxjgCD22JGDWG4ZRWBxFYV2EVDiyudxPA+O0vEEaEujQZgaiwdsywke1E19ElBBaHQIHQk0NHQ4ZsBRWYnmijhSMw7IIndAFfJmQQ7QAVSCkK0DCjCGRaRBpEy7K0DjRKiveEM7QCvLQvCsjItKqR0Pych+FiwQnk62BErQNU0QwCJbwkBzBAVaY+rINhOG88bMpeFqsAAdQtVtMu5DAajNS1rVzUwajqEMPjDCMADF1gKWZfXJXRPRaJ8oB+acNIurS6sdBbrulTKeMDFFoVgFiqS80ZqELLVBGTEFqF9dMSEzZarRSpGUfmOAtmkq5i2MkBnAAXQYBapnwIhSC6qhaBABhF1odL8EsQmgA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
@@ -220,10 +222,13 @@ registry:
 
 targets:
   - github:
+      version: full
       output: .github/copilot-instructions.md
   - claude:
+      version: full
       output: CLAUDE.md
   - cursor:
+      version: full
       output: .cursor/rules/project.mdc
 ```
 
@@ -252,6 +257,10 @@ Add reusable capabilities to `.promptscript/project.prs`:
     event: "post-tool-use"
     matcher: "Edit|Write"
     command: ["pnpm", "test"]
+    targets: {
+      github: { enabled: false }
+      cursor: { enabled: false }
+    }
   }
 }
 
@@ -262,6 +271,12 @@ Add reusable capabilities to `.promptscript/project.prs`:
   }
 }
 ```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAJwDW0KHAAEwADqthwxjhiM+zAK5YAtNRgA3CDADuiURKlSAJvEbUIaLBDb6xIAEqbtO6bPlKsbjKwDm8e0MjFnZOLDtHZ11hTABPEjDhOAwwGCxYumENDCgIY2wbVkyOOCw4TJ9jYUU4GGphCDIMRiwKQMlhAF8JbtYJbgx-dhFxDpk5BWU1KJ06-VGjYVM4c0trW2F7Jy1o8Y9lGMUoKGF1AEdFeDL2xf5BOH1kez3J1XUdnXsAXSCpEI52BFti5vH4YFUXp5pMxTMJBhgIKxSjFqMwAFZyLylSoYajGOBtEBBXq9fo4ZjMPgjILZXL5DgqSHKea-YSaMIRNDMUoqLAUqAqGowG5GEjYcbUCIAUWMECwAB8AOoWDgiv7MEhi1jGR72NCsNAkeyZewlLDfVlYXH+MosjqLXxynCKABG8zZrAwLtgOuEYBytS6rL+ilozElog9Xp9+n9QhgQftiakJIk-R04b4YCgzB01I66lgGFqdsWy1WVkKEQACupMOo3BMoYWYMXhUSk-8OZtHIpJLS8gU2Jk4IpNbiIAAvBMWfgVbUomD1mcwIuBhJW+kYQnEnogTpfBhhaixfBEUjkGBUWggBgaOpwQr4ACM+6AA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
 
 See [Agent Platform](features/index.md) for MCP servers, plugins, and target-specific capabilities.
 

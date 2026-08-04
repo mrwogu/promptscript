@@ -7,6 +7,16 @@ description: PromptScript reference documentation
 
 Complete reference documentation for PromptScript.
 
+## Language Paths
+
+| Need                                | Start here                                                       |
+| ----------------------------------- | ---------------------------------------------------------------- |
+| Learn file structure                | [File Anatomy](language/file-anatomy.md)                         |
+| Understand composition              | [Composition and Precedence](language/composition.md)            |
+| Choose merge or replacement         | [Merge and Replacement](language/merge-and-replacement.md)       |
+| Resolve syntax warnings             | [Versions and Diagnostics](language/versions-and-diagnostics.md) |
+| Browse every block and grammar rule | [Complete Language Reference](language.md)                       |
+
 <div class="ref-list">
 
 <a href="../features/" class="ref-item">
