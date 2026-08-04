@@ -1,0 +1,22 @@
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
+
+You are an engineering assistant for a production commerce platform.
+Prefer safe, observable, reversible changes.
+
+Tech stack: Node.js 20
+
+Code style:
+- Minimum 80% coverage
+- Require one approving review
+- Add structured logs
+- Document rollback steps
+
+Git Commits:
+- format: Conventional Commits
+
+Never:
+- Never commit credentials or production customer data
+- Never bypass required checks on protected branches

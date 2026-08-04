@@ -77,6 +77,63 @@ describe('ExampleGallery — gallery examples compile', () => {
     expect(output).toContain('## Commit Policy');
   });
 
+  it('resolves the real-life checkout policy and emits native capabilities', async () => {
+    const example = EXAMPLES.find((candidate) => candidate.id === 'real-life-checkout-service');
+    expect(example).toBeDefined();
+    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+
+    const result = await compile(files, example!.files[0]!.path, {
+      formatters: [
+        { name: 'claude', config: { version: 'full' } },
+        { name: 'github', config: { version: 'full' } },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.warnings).toEqual([]);
+    const github = result.outputs.get('.github/copilot-instructions.md')?.content;
+    expect(github).toContain('Minimum 95% coverage for payment flows');
+    expect(github).not.toContain('Minimum 80% coverage');
+    expect(github).not.toContain('Test approved, declined, timeout, and retry paths');
+    expect(github).toContain('## Checkout Commit Policy');
+    expect(github).toContain('Conventional Commits');
+    expect(github).toContain('Require one approving review');
+    expect(github).toContain('Document rollback steps');
+    expect(github).toContain('Use idempotency keys');
+    expect(github).toContain('Verify Adyen webhook signatures');
+    expect(github).toContain('Bound Adyen retries to 2 attempts with backoff');
+    expect(github).toContain("Don't exceed 2 Adyen payment retries");
+    expect(github).not.toContain('{{provider}}');
+    expect(github).not.toContain('{{maxRetries}}');
+    expect(github).not.toContain('Stripe');
+    expect(github).toContain(
+      "Don't change retry or idempotency behavior without integration tests"
+    );
+    expect(result.outputs.has('.claude/agents/payment-reviewer.md')).toBe(true);
+    expect(result.outputs.has('.claude/skills/payment-security/SKILL.md')).toBe(true);
+    expect(result.outputs.get('.claude/commands/release-readiness.md')?.content).toContain(
+      'Stop before deployment and request human approval'
+    );
+    expect(result.outputs.has('AGENTS.md')).toBe(true);
+    expect(result.outputs.has('.github/agents/payment-reviewer.md')).toBe(true);
+    expect(result.outputs.has('.github/skills/payment-security/SKILL.md')).toBe(true);
+    expect(result.outputs.get('.github/prompts/release-readiness.prompt.md')?.content).toContain(
+      'Stop before deployment and request human approval'
+    );
+    expect(JSON.parse(result.outputs.get('.claude/settings.json')!.content)).toMatchObject({
+      hooks: {
+        PostToolUse: [{ matcher: 'Edit|Write' }],
+      },
+    });
+    expect(
+      JSON.parse(result.outputs.get('.github/hooks/promptscript.json')!.content)
+    ).toMatchObject({
+      hooks: {
+        postToolUse: [{ matcher: 'edit|create' }],
+      },
+    });
+  });
+
   it('shows current Factory and GitHub hook outputs for agent platform example', async () => {
     const example = EXAMPLES.find((candidate) => candidate.id === 'agent-platform');
     expect(example).toBeDefined();
@@ -157,6 +214,7 @@ describe('ExampleGallery — rendering', () => {
     expect(screen.getByText('Composition & Declaration Order')).toBeTruthy();
     expect(screen.getByText('Custom Section Headers')).toBeTruthy();
     expect(screen.getByText('Complete Agent Platform')).toBeTruthy();
+    expect(screen.getByText('Real-Life Checkout Service')).toBeTruthy();
     expect(screen.getAllByText('replacement').length).toBeGreaterThan(0);
     expect(screen.getAllByText('override').length).toBeGreaterThan(0);
     expect(screen.getAllByText('headers').length).toBeGreaterThan(0);
