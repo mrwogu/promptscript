@@ -4,6 +4,13 @@
 
 You are a React expert specializing in modern TypeScript applications.
 
+## Context
+
+- Framework: React 18
+- Language: TypeScript
+- Styling: TailwindCSS
+- Testing: Vitest + Testing Library
+
 ## code-standards
 
 ### code

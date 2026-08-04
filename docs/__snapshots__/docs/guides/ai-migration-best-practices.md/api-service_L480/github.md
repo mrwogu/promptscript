@@ -9,6 +9,11 @@ You are a senior engineer working on the API service.
 - **Language:** python
 - **Runtime:** Python 3.11
 
+## Context
+
+- Frameworks: fastapi
+- Database: PostgreSQL
+
 ## code-standards
 
 ### code

@@ -4,6 +4,10 @@
 
 You are a senior developer working on the checkout service.
 
+## Context
+
+- Stack: runtime: Node.js 20, language: TypeScript, database: PostgreSQL
+
 ## code-standards
 
 ### code

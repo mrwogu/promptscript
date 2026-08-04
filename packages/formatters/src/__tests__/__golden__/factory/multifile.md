@@ -129,7 +129,7 @@ pnpm run test       # Run all tests
 
 - Review docs before changes
 - Update docs after changes
-- Keep code examples accurate
+- keep accurate
 
 ## Diagrams
 

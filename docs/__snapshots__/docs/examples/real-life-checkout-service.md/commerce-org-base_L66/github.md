@@ -9,6 +9,11 @@ Prefer safe, observable, reversible changes.
 
 - **Runtime:** Node.js 20
 
+## Context
+
+- Language: TypeScript
+- Package Manager: pnpm
+
 ## code-standards
 
 ### testing

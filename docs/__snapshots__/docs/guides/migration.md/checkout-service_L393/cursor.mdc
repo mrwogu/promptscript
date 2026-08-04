@@ -5,6 +5,9 @@ alwaysApply: true
 
 You are a senior developer working on the checkout service.
 
+Context:
+- Stack: runtime: Node.js 20, language: TypeScript, database: PostgreSQL
+
 Code style:
 - Use functional programming style
 - Write tests for all code (80% coverage)

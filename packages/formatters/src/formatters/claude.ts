@@ -1160,28 +1160,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
   private extractTechStackFromContext(context: ReturnType<typeof this.findBlock>): string[] {
     if (!context) return [];
-    const props = this.getProps(context.content);
-    const items: string[] = [];
-
-    const languages = props['languages'];
-    if (languages) {
-      items.push(...(Array.isArray(languages) ? languages : [languages]).map(String));
-    }
-
-    const runtime = props['runtime'];
-    if (runtime) items.push(this.valueToString(runtime));
-
-    const monorepo = props['monorepo'];
-    if (monorepo && typeof monorepo === 'object' && !Array.isArray(monorepo)) {
-      const mr = monorepo as Record<string, Value>;
-      if (mr['tool'] && mr['packageManager']) {
-        items.push(
-          `${this.valueToString(mr['tool'])} + ${this.valueToString(mr['packageManager'])}`
-        );
-      }
-    }
-
-    return items;
+    return this.extractContextTechStackItems(this.getProps(context.content));
   }
 
   private extractTechStackFromStandards(standards: ReturnType<typeof this.findBlock>): string[] {
@@ -1206,7 +1185,13 @@ export class ClaudeFormatter extends BaseFormatter {
 
     const text = this.extractText(context.content);
     const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    if (!archMatch) return null;
+    if (!archMatch) {
+      const property = this.contextArchitectureProperty(ast);
+      if (!property) return null;
+      return (
+        renderer.renderSection(this.sectionTitle(ast, renderer, 'architecture'), property) + '\n'
+      );
+    }
 
     // Remove header but keep consistent indentation for normalizeMarkdownForPrettier
     const content = archMatch.replace('## Architecture', '');
@@ -1221,29 +1206,33 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   private contextSection(ast: Program, renderer: ConventionRenderer): string | null {
-    const identity = this.findBlock(ast, 'identity');
-    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
-
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
 
-    const text = this.extractText(contextBlock.content);
-    if (!text) return null;
+    const identity = this.findBlock(ast, 'identity');
+    const textIsConsumedByProject = !identity && !resolveSourceSectionTitle(ast, 'context');
+    const propertyItems = this.contextPropertyItems(ast);
 
-    // Remove the "## Architecture" section with code block (rendered by architecture())
-    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
-    if (!remainingText) return null;
+    let body = '';
+    if (!textIsConsumedByProject) {
+      const text = this.extractText(contextBlock.content);
+      // Remove the "## Architecture" section with code block (rendered by architecture())
+      const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+      const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+      if (remainingText) {
+        // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
+        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+        body = this.normalizeMarkdownForPrettier(downgradedText).trim();
+      }
+    }
 
-    // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
-    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
-    const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
-    return (
-      renderer.renderSection(
-        this.sectionTitle(ast, renderer, 'context'),
-        normalizedContent.trim()
-      ) + '\n'
-    );
+    if (propertyItems.length > 0) {
+      const list = renderer.renderList(propertyItems);
+      body = body ? `${body}\n\n${list}` : list;
+    }
+
+    if (!body) return null;
+    return renderer.renderSection(this.sectionTitle(ast, renderer, 'context'), body) + '\n';
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1377,9 +1366,12 @@ export class ClaudeFormatter extends BaseFormatter {
     const d = docs as Record<string, Value>;
     const items: string[] = [];
 
-    if (d['verifyBefore']) items.push('Review docs before changes');
-    if (d['verifyAfter']) items.push('Update docs after changes');
-    if (d['codeExamples']) items.push('Keep code examples accurate');
+    const verifyBefore = this.documentationItem(d['verifyBefore'], 'Review docs before changes');
+    if (verifyBefore) items.push(verifyBefore);
+    const verifyAfter = this.documentationItem(d['verifyAfter'], 'Update docs after changes');
+    if (verifyAfter) items.push(verifyAfter);
+    const codeExamples = this.documentationItem(d['codeExamples'], 'Keep code examples accurate');
+    if (codeExamples) items.push(codeExamples);
 
     this.appendGenericStandardItems(
       items,

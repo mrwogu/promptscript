@@ -124,7 +124,7 @@ Vite root: \_\_dirname (not import.meta.dirname)
 
 - **Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior
 - **After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed
-- Ensure code examples in documentation remain accurate after modifications
+- keep accurate
 - If adding new features, add corresponding documentation in `docs/`
 - If changing existing behavior, update affected documentation sections
 

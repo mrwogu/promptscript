@@ -1177,6 +1177,12 @@ export class GitHubFormatter extends BaseFormatter {
     const props = this.getProps(context.content);
     const items: string[] = [];
 
+    const techStack = props['techStack'];
+    if (techStack) {
+      const arr = Array.isArray(techStack) ? techStack : [techStack];
+      items.push(`**Stack:** ${this.formatTechItem(arr)}`);
+    }
+
     const languages = props['languages'];
     if (languages) {
       const arr = Array.isArray(languages) ? languages : [languages];
@@ -1229,7 +1235,14 @@ export class GitHubFormatter extends BaseFormatter {
 
     const text = this.extractText(context.content);
     const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    if (!archMatch) return null;
+    if (!archMatch) {
+      const property = this.contextArchitectureProperty(ast);
+      if (!property) return null;
+      return renderer.renderSection(
+        this.sectionTitle(ast, renderer, 'architecture', 'architecture'),
+        property
+      );
+    }
 
     const content = archMatch.replace('## Architecture', '').trim();
     // Apply stripAllIndent to normalize content for Prettier compatibility
@@ -1240,26 +1253,33 @@ export class GitHubFormatter extends BaseFormatter {
   }
 
   private contextSection(ast: Program, renderer: ConventionRenderer): string | null {
-    const identity = this.findBlock(ast, 'identity');
-    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
-
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
 
-    const text = this.extractText(contextBlock.content);
-    if (!text) return null;
+    const identity = this.findBlock(ast, 'identity');
+    const textIsConsumedByProject = !identity && !resolveSourceSectionTitle(ast, 'context');
+    const propertyItems = this.contextPropertyItems(ast);
 
-    // Remove the "## Architecture" section with code block (rendered by architecture())
-    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
-    if (!remainingText) return null;
+    let body = '';
+    if (!textIsConsumedByProject) {
+      const text = this.extractText(contextBlock.content);
+      // Remove the "## Architecture" section with code block (rendered by architecture())
+      const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+      const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+      if (remainingText) {
+        // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
+        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+        body = this.stripAllIndent(downgradedText);
+      }
+    }
 
-    // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
-    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
-    return renderer.renderSection(
-      this.sectionTitle(ast, renderer, 'context', 'Context'),
-      this.stripAllIndent(downgradedText)
-    );
+    if (propertyItems.length > 0) {
+      const list = renderer.renderList(propertyItems);
+      body = body ? `${body}\n\n${list}` : list;
+    }
+
+    if (!body) return null;
+    return renderer.renderSection(this.sectionTitle(ast, renderer, 'context', 'Context'), body);
   }
 
   private codeStandards(ast: Program, renderer: ConventionRenderer): string | null {
@@ -1427,19 +1447,21 @@ export class GitHubFormatter extends BaseFormatter {
     const docsObj = docs as Record<string, Value>;
     const items: string[] = [];
 
-    if (docsObj['verifyBefore']) {
-      items.push(
-        '**Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior'
-      );
-    }
-    if (docsObj['verifyAfter']) {
-      items.push(
-        '**After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed'
-      );
-    }
-    if (docsObj['codeExamples']) {
-      items.push('Ensure code examples in documentation remain accurate after modifications');
-    }
+    const verifyBefore = this.documentationItem(
+      docsObj['verifyBefore'],
+      '**Before** making code changes, review `README.md` and relevant files in `docs/` to understand documented behavior'
+    );
+    if (verifyBefore) items.push(verifyBefore);
+    const verifyAfter = this.documentationItem(
+      docsObj['verifyAfter'],
+      '**After** making code changes, verify consistency with `README.md` and `docs/` - update documentation if needed'
+    );
+    if (verifyAfter) items.push(verifyAfter);
+    const codeExamples = this.documentationItem(
+      docsObj['codeExamples'],
+      'Ensure code examples in documentation remain accurate after modifications'
+    );
+    if (codeExamples) items.push(codeExamples);
     items.push('If adding new features, add corresponding documentation in `docs/`');
     items.push('If changing existing behavior, update affected documentation sections');
 
