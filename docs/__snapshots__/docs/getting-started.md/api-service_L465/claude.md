@@ -8,6 +8,11 @@ You are a Python developer working on a FastAPI service.
 
 python, Python 3.11
 
+## Context
+
+- Frameworks: fastapi
+- Database: PostgreSQL
+
 ## Code Style
 
 - Write type hints for all functions

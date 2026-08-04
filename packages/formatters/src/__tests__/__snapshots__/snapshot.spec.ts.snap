@@ -122,9 +122,9 @@ pnpm run test       # Run all tests
 
 ## Documentation
 
-- Review docs before changes
-- Update docs after changes
-- Keep code examples accurate
+- review README.md and docs/ before changes
+- update docs if behavior changes
+- keep accurate
 
 ## Diagrams
 
@@ -439,9 +439,9 @@ Vite root: \\_\\_dirname (not import.meta.dirname)
 
 ## documentation-verification
 
-- **Before** making code changes, review \`README.md\` and relevant files in \`docs/\` to understand documented behavior
-- **After** making code changes, verify consistency with \`README.md\` and \`docs/\` - update documentation if needed
-- Ensure code examples in documentation remain accurate after modifications
+- review README.md and docs/ before changes
+- update docs if behavior changes
+- keep accurate
 - If adding new features, add corresponding documentation in \`docs/\`
 - If changing existing behavior, update affected documentation sections
 

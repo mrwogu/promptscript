@@ -748,28 +748,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
   protected extractTechStackFromContext(context: ReturnType<typeof this.findBlock>): string[] {
     if (!context) return [];
-    const props = this.getProps(context.content);
-    const items: string[] = [];
-
-    const languages = props['languages'];
-    if (languages) {
-      items.push(...(Array.isArray(languages) ? languages : [languages]).map(String));
-    }
-
-    const runtime = props['runtime'];
-    if (runtime) items.push(this.valueToString(runtime));
-
-    const monorepo = props['monorepo'];
-    if (monorepo && typeof monorepo === 'object' && !Array.isArray(monorepo)) {
-      const mr = monorepo as Record<string, Value>;
-      if (mr['tool'] && mr['packageManager']) {
-        items.push(
-          `${this.valueToString(mr['tool'])} + ${this.valueToString(mr['packageManager'])}`
-        );
-      }
-    }
-
-    return items;
+    return this.extractContextTechStackItems(this.getProps(context.content));
   }
 
   protected extractTechStackFromStandards(standards: ReturnType<typeof this.findBlock>): string[] {
@@ -794,7 +773,16 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
 
     const text = this.extractText(context.content);
     const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    if (!archMatch) return null;
+    if (!archMatch) {
+      const property = this.contextArchitectureProperty(ast);
+      if (!property) return null;
+      return (
+        renderer.renderSection(
+          this.getRenderedSectionName(ast, 'architecture', renderer),
+          property
+        ) + '\n'
+      );
+    }
 
     const content = archMatch.replace('## Architecture', '');
     const normalizedContent = this.normalizeMarkdownForPrettier(content);
@@ -813,34 +801,40 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
    * it is already rendered separately by {@link architecture}. Remaining
    * "## " headings are downgraded to "### " to avoid clashing with the
    * formatter's own h2 section headings. When no @identity block exists,
-   * the project() fallback already consumes the full @context text, so
-   * this method returns null to avoid duplication.
+   * the project() fallback already consumes the full @context text, so only
+   * the generic properties are rendered to avoid duplication.
    */
   protected context(ast: Program, renderer: ConventionRenderer): string | null {
-    const identity = this.findBlock(ast, 'identity');
-    if (!identity && !resolveSourceSectionTitle(ast, 'context')) return null;
-
     const contextBlock = this.findBlock(ast, 'context');
     if (!contextBlock) return null;
 
-    const text = this.extractText(contextBlock.content);
-    if (!text) return null;
+    const identity = this.findBlock(ast, 'identity');
+    const textIsConsumedByProject = !identity && !resolveSourceSectionTitle(ast, 'context');
+    const propertyItems = this.contextPropertyItems(ast);
 
-    // Remove the "## Architecture" section with code block (rendered by architecture())
-    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    const strippedText = archMatch ? text.replace(archMatch, '') : text;
-    // Dedent so trimmed first line does not leave later lines nested
-    const remainingText = this.dedent(strippedText);
-    if (!remainingText) return null;
+    let body = '';
+    if (!textIsConsumedByProject) {
+      const text = this.extractText(contextBlock.content);
+      // Remove the "## Architecture" section with code block (rendered by architecture())
+      const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+      const strippedText = archMatch ? text.replace(archMatch, '') : text;
+      // Dedent so trimmed first line does not leave later lines nested
+      const remainingText = this.dedent(strippedText);
+      if (remainingText) {
+        // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
+        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+        body = this.normalizeMarkdownForPrettier(downgradedText).trim();
+      }
+    }
 
-    // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
-    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
-    const normalizedContent = this.normalizeMarkdownForPrettier(downgradedText);
+    if (propertyItems.length > 0) {
+      const list = renderer.renderList(propertyItems);
+      body = body ? `${body}\n\n${list}` : list;
+    }
+
+    if (!body) return null;
     return (
-      renderer.renderSection(
-        this.getRenderedSectionName(ast, 'context', renderer),
-        normalizedContent.trim()
-      ) + '\n'
+      renderer.renderSection(this.getRenderedSectionName(ast, 'context', renderer), body) + '\n'
     );
   }
 
@@ -974,9 +968,12 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     const d = docs as Record<string, Value>;
     const items: string[] = [];
 
-    if (d['verifyBefore']) items.push('Review docs before changes');
-    if (d['verifyAfter']) items.push('Update docs after changes');
-    if (d['codeExamples']) items.push('Keep code examples accurate');
+    const verifyBefore = this.documentationItem(d['verifyBefore'], 'Review docs before changes');
+    if (verifyBefore) items.push(verifyBefore);
+    const verifyAfter = this.documentationItem(d['verifyAfter'], 'Update docs after changes');
+    if (verifyAfter) items.push(verifyAfter);
+    const codeExamples = this.documentationItem(d['codeExamples'], 'Keep code examples accurate');
+    if (codeExamples) items.push(codeExamples);
 
     this.appendGenericStandardItems(
       items,

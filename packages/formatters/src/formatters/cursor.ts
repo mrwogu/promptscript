@@ -829,7 +829,7 @@ ${fullText}`;
 
   private extractTechFromContext(content: Block['content'], items: string[]): void {
     // Try tech-stack key first
-    const tech = this.getProp(content, 'tech-stack');
+    const tech = this.getProp(content, 'tech-stack') ?? this.getProp(content, 'techStack');
     if (tech) items.push(...this.extractListItems(tech));
 
     // Also check individual fields
@@ -884,21 +884,30 @@ ${fullText}`;
   }
 
   private contextSection(ast: Program): string | null {
-    if (!resolveSourceSectionTitle(ast, 'context')) return null;
-
     const context = this.findBlock(ast, 'context');
     if (!context) return null;
 
-    const text = this.extractText(context.content);
-    if (!text) return null;
+    const propertyItems = this.contextPropertyItems(ast, ['tech-stack']);
 
-    const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
-    const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
-    if (!remainingText) return null;
+    let body = '';
+    if (resolveSourceSectionTitle(ast, 'context')) {
+      const text = this.extractText(context.content);
+      const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
+      const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
+      if (remainingText) {
+        const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+        body = this.stripAllIndent(downgradedText);
+      }
+    }
 
-    const downgradedText = remainingText.replace(/^(\s*)## /gm, '$1### ');
+    if (propertyItems.length > 0) {
+      const list = propertyItems.map((item) => `- ${item}`).join('\n');
+      body = body ? `${body}\n\n${list}` : list;
+    }
+
+    if (!body) return null;
     return `${resolveSectionTitle(ast, 'context', { defaultTitle: 'Context' })}:
-${this.stripAllIndent(downgradedText)}`;
+${body}`;
   }
 
   private codeStyle(ast: Program): string | null {

@@ -171,6 +171,45 @@ describe('ClaudeFormatter', () => {
       expect(result.content).toContain('TypeScript, React 18, TanStack Query, Vitest');
     });
 
+    it('should render every @context property', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: { type: 'TextContent', value: 'You are an engineer.', loc: createLoc() },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                techStack: ['TypeScript', 'Vitest'],
+                architecture: 'Layered pipeline with a thin CLI shell.',
+                deployment: 'Fly.io, two regions',
+                observability: { tracing: 'OpenTelemetry' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('## Tech Stack');
+      expect(result.content).toContain('TypeScript, Vitest');
+      expect(result.content).toContain('## Architecture');
+      expect(result.content).toContain('Layered pipeline with a thin CLI shell.');
+      expect(result.content).toContain('- Deployment: Fly.io, two regions');
+      expect(result.content).toContain('Observability');
+      expect(result.content).toContain('OpenTelemetry');
+    });
+
     it('should generate commands section as code block', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -2142,6 +2181,25 @@ describe('ClaudeFormatter', () => {
       expect(result.content).toContain('- Review docs before changes');
       expect(result.content).toContain('- Style Guide: Use Diataxis structure');
       expect(result.content).not.toContain('Deprecated');
+    });
+
+    it('should prefer authored documentation prose over the default phrasing', () => {
+      const ast = createStandardsProgram({
+        documentation: {
+          verifyBefore: 'read docs/architecture.md before touching the pipeline',
+          verifyAfter: 'refresh docs/reference after any public API change',
+          codeExamples: 'run every snippet before committing',
+        },
+      });
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('- read docs/architecture.md before touching the pipeline');
+      expect(result.content).toContain('- refresh docs/reference after any public API change');
+      expect(result.content).toContain('- run every snippet before committing');
+      expect(result.content).not.toContain('Review docs before changes');
+      expect(result.content).not.toContain('Update docs after changes');
+      expect(result.content).not.toContain('Keep code examples accurate');
     });
 
     it('should render custom @standards.diagrams keys', () => {

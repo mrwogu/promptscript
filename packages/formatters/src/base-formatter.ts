@@ -236,6 +236,109 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * `@context` keys that already have a dedicated rendering path. Anything
+   * outside this set is generic and must be surfaced by the context section.
+   */
+  protected static readonly CONTEXT_RENDERED_KEYS: ReadonlySet<string> = new Set([
+    'project',
+    'languages',
+    'runtime',
+    'monorepo',
+    'techStack',
+    'tech-stack',
+    'architecture',
+  ]);
+
+  /**
+   * Read the `architecture` property of `@context`. Used as a fallback for
+   * sources that declare architecture as a property rather than as an
+   * `## Architecture` heading inside the block text.
+   */
+  protected contextArchitectureProperty(ast: Program): string | null {
+    const context = this.findBlock(ast, 'context');
+    if (!context) return null;
+    const value = this.getProp(context.content, 'architecture');
+    if (value === undefined) return null;
+    const rendered = this.standardsExtractor.stringify(value);
+    return rendered.length > 0 ? rendered : null;
+  }
+
+  /**
+   * Render `@context` properties that no dedicated section consumes as
+   * `Label: value` items, so structured context is never silently dropped.
+   */
+  protected contextPropertyItems(ast: Program, alsoRenderedKeys: readonly string[] = []): string[] {
+    const context = this.findBlock(ast, 'context');
+    if (!context) return [];
+
+    const items: string[] = [];
+    for (const [key, value] of Object.entries(this.getProps(context.content))) {
+      if (BaseFormatter.CONTEXT_RENDERED_KEYS.has(key)) continue;
+      if (alsoRenderedKeys.includes(key)) continue;
+      if (value === null || value === undefined || value === false) continue;
+      if (value === true) {
+        items.push(this.humanizeLabel(key));
+        continue;
+      }
+      const rendered = this.standardsExtractor.stringify(value);
+      if (rendered) items.push(`${this.humanizeLabel(key)}: ${rendered}`);
+    }
+    return items;
+  }
+
+  /**
+   * Collect `@context` tech-stack entries from every supported shape:
+   * an explicit `techStack` list plus the `languages`/`runtime`/`monorepo`
+   * properties.
+   */
+  protected extractContextTechStackItems(props: Record<string, Value>): string[] {
+    const items: string[] = [];
+
+    const techStack = props['techStack'];
+    if (techStack) {
+      items.push(
+        ...(Array.isArray(techStack) ? techStack : [techStack])
+          .map((entry) => this.valueToString(entry))
+          .filter((entry) => entry.length > 0)
+      );
+    }
+
+    const languages = props['languages'];
+    if (languages) {
+      items.push(...(Array.isArray(languages) ? languages : [languages]).map(String));
+    }
+
+    const runtime = props['runtime'];
+    if (runtime) items.push(this.valueToString(runtime));
+
+    const monorepo = props['monorepo'];
+    if (monorepo && typeof monorepo === 'object' && !Array.isArray(monorepo)) {
+      const mr = monorepo as Record<string, Value>;
+      if (mr['tool'] && mr['packageManager']) {
+        items.push(
+          `${this.valueToString(mr['tool'])} + ${this.valueToString(mr['packageManager'])}`
+        );
+      }
+    }
+
+    return items;
+  }
+
+  /**
+   * Resolve a documentation-standard entry that accepts either a boolean flag
+   * or author-supplied prose. A string value is authoritative and replaces the
+   * target's default phrasing, so authored text is never silently discarded.
+   */
+  protected documentationItem(value: Value | undefined, defaultText: string): string | null {
+    if (value === undefined || value === null || value === false) return null;
+    if (typeof value === 'string' || (typeof value === 'object' && 'type' in value)) {
+      const authored = this.valueToString(value).trim();
+      return authored.length > 0 ? authored : null;
+    }
+    return value ? defaultText : null;
+  }
+
+  /**
    * Append generic `Label: value` items for standards keys not handled by
    * the known-key rendering in a section method. Keeps custom @standards
    * keys (git/config/documentation/diagrams) visible in monolith output.

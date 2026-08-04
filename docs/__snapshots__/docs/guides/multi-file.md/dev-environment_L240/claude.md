@@ -8,4 +8,8 @@
 - Debug logging on
 - Mock services available
 
+## Context
+
+- Environment: development
+
 @CLAUDE.local.md

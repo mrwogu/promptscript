@@ -9,6 +9,11 @@ Prefer safe, observable, reversible changes.
 
 Node.js 20
 
+## Context
+
+- Language: TypeScript
+- Package Manager: pnpm
+
 ## Code Style
 
 - Minimum 80% coverage

@@ -8,6 +8,10 @@ Prefer safe, observable, reversible changes.
 
 Tech stack: Node.js 20
 
+Context:
+- Language: TypeScript
+- Package Manager: pnpm
+
 Code style:
 - Minimum 80% coverage
 - Require one approving review

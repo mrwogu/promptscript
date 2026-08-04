@@ -9,6 +9,11 @@ You are a Python developer working on a FastAPI service.
 - **Language:** python
 - **Runtime:** Python 3.11
 
+## Context
+
+- Frameworks: fastapi
+- Database: PostgreSQL
+
 ## code-standards
 
 ### code

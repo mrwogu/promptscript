@@ -8,6 +8,11 @@ You are a senior engineer working on the API service.
 
 python, Python 3.11
 
+## Context
+
+- Frameworks: fastapi
+- Database: PostgreSQL
+
 ## Code Style
 
 - Write type hints for all functions

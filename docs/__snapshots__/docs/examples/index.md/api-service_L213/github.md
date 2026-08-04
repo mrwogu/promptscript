@@ -8,6 +8,12 @@ You are a backend expert building RESTful APIs with Node.js.
 
 - **Runtime:** Node.js 20
 
+## Context
+
+- Framework: Express
+- Database: PostgreSQL
+- Orm: Prisma
+
 ## code-standards
 
 ### api

@@ -5,6 +5,12 @@ alwaysApply: true
 
 You are a React expert specializing in modern TypeScript applications.
 
+Context:
+- Framework: React 18
+- Language: TypeScript
+- Styling: TailwindCSS
+- Testing: Vitest + Testing Library
+
 Code style:
 - Use functional components with hooks
 - React Query for server state, Zustand for client
