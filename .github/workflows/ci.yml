@@ -49,6 +49,10 @@ jobs:
       - name: Test
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t test --coverage
 
+      - name: Compilation Matrix
+        if: matrix.node-version == '25.x'
+        run: pnpm nx test compiler --testNamePattern="Compilation matrix smoke tests"
+
       - name: Golden Files Drift Check
         if: matrix.node-version == '25.x'
         run: |
