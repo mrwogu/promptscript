@@ -39,8 +39,18 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
       // Comments
       [/#.*$/, 'comment'],
 
-      // Registry paths (@scope/path@version)
-      [/@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?:@[a-zA-Z0-9^~./-]+)?/, 'string.url'],
+      // SSH paths (git@host:org/repo[/@scope/name][@version]), before URL paths
+      // because the host part alone also looks like one.
+      [
+        /git@[a-zA-Z0-9.-]+:[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_/.-]+(?:@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?=@))?(?:@[a-zA-Z0-9^~./-]+)?/,
+        'string.url',
+      ],
+
+      // Registry paths (@scope/path[/@scope/name][@version])
+      [
+        /@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?:@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?=@))?(?:@[a-zA-Z0-9^~./-]+)?/,
+        'string.url',
+      ],
 
       // Contextual operations require a target path before the body.
       [/@override(?=\s+[a-zA-Z_][\w-]*(?:\.[a-zA-Z_][\w-]*)*\s*\{)/, 'keyword.directive'],
@@ -56,8 +66,11 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
         },
       ],
 
-      // URL paths (github.com/org/repo/@path@version)
-      [/[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[a-zA-Z0-9_./@^~-]+/, 'string.url'],
+      // URL paths (github.com/org/repo[/@scope/name][@version])
+      [
+        /[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[a-zA-Z0-9_./-]+(?:@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?=@))?(?:@[a-zA-Z0-9^~./-]+)?/,
+        'string.url',
+      ],
 
       // Relative paths
       [/(?:\.\.\/|\.\/)[a-zA-Z0-9_/.-]+/, 'string.url'],

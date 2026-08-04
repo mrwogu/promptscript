@@ -32,6 +32,7 @@ const TOKEN_SCOPE_MAP: Record<string, string> = {
   False: 'constant.language',
   Null: 'constant.language',
   PathReference: 'entity.name.import',
+  SshPath: 'entity.name.import',
   RelativePath: 'entity.name.import',
   UrlPath: 'entity.name.import',
   Meta: 'keyword.control',
@@ -73,6 +74,10 @@ const TOKEN_SAMPLES: Record<string, { source: string; image: string }> = {
   False: { source: 'false', image: 'false' },
   Null: { source: 'null', image: 'null' },
   PathReference: { source: '@scope/path@1.0.0', image: '@scope/path@1.0.0' },
+  SshPath: {
+    source: 'git@github.com:org/repo/path',
+    image: 'git@github.com:org/repo/path',
+  },
   RelativePath: { source: '../path/file.prs', image: '../path/file.prs' },
   UrlPath: { source: 'github.com/org/repo/path@main', image: 'github.com/org/repo/path@main' },
   Meta: { source: '@meta', image: '@meta' },

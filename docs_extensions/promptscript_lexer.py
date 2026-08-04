@@ -44,11 +44,24 @@ CONTEXTUAL_OPERATION_DIRECTIVES = ("override",)
 
 ENV_VAR_PATTERN = r"\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}"
 TEMPLATE_VAR_PATTERN = r"(\{\{)([A-Za-z_][A-Za-z0-9_]*)(\}\})"
+# A scope segment such as the @org/base in @company/@org/base@1.2.0. The
+# lookahead keeps it from swallowing a trailing version.
+SCOPE_SEGMENT_PATTERN = r"(?:@[A-Za-z_][A-Za-z0-9_-]*/[A-Za-z0-9_/.-]*(?=@))?"
+VERSION_SUFFIX_PATTERN = r"(?:@[A-Za-z0-9^~./-]+)?"
 IMPORT_PATH_PATTERN = (
-    r"@[A-Za-z_][A-Za-z0-9_-]*/[A-Za-z0-9_/.-]*(?:@[A-Za-z0-9^~./-]+)?"
-    r"|(?:\./|\.\./)[A-Za-z0-9_/.-]+"
-    r"|[A-Za-z][A-Za-z0-9-]*\.[A-Za-z]{2,}/[A-Za-z0-9_./-]+"
-    r"(?:@[A-Za-z0-9^~./-]+)?"
+    r"git@[A-Za-z0-9.-]+:[A-Za-z0-9_.-]+/[A-Za-z0-9_/.-]+"
+    + SCOPE_SEGMENT_PATTERN
+    + VERSION_SUFFIX_PATTERN
+    + r"|@[A-Za-z_][A-Za-z0-9_-]*/[A-Za-z0-9_/.-]*"
+    + SCOPE_SEGMENT_PATTERN
+    + VERSION_SUFFIX_PATTERN
+    + r"|(?:\./|\.\./)[A-Za-z0-9_/.-]+"
+    + r"|[A-Za-z][A-Za-z0-9-]*\.[A-Za-z]{2,}/[A-Za-z0-9_./-]+"
+    + SCOPE_SEGMENT_PATTERN
+    + VERSION_SUFFIX_PATTERN
+    # Slashless form, as the parser also tokenizes a bare @name after an
+    # import keyword. Documentation uses it for placeholders such as @path.
+    + r"|@[A-Za-z_][A-Za-z0-9_-]*"
 )
 
 
