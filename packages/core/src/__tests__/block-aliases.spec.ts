@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Block, Program } from '../index.js';
-import { getCanonicalBlockName, normalizeBlockAliases } from '../index.js';
+import { createValueNode, getCanonicalBlockName, normalizeBlockAliases } from '../index.js';
 
 const LOC = { file: 'aliases.prs', line: 1, column: 1, offset: 0 };
 
@@ -103,6 +103,76 @@ describe('block aliases', () => {
     });
   });
 
+  it('preserves alias declarations as separate ordered blocks when requested', () => {
+    const ast = program([
+      block('shortcuts', { '/review': 'Review code' }, 10),
+      block('commands', { '/test': 'Run tests' }, 30),
+    ]);
+
+    const result = normalizeBlockAliases(ast, { preserveDeclarationOrder: true });
+
+    expect(result.blocks.map((candidate) => candidate.name)).toEqual(['shortcuts', 'shortcuts']);
+    expect(result.blocks[0]?.content).toMatchObject({
+      properties: { '/review': 'Review code' },
+    });
+    expect(result.blocks[1]?.content).toMatchObject({
+      properties: { '/test': 'Run tests' },
+    });
+  });
+
+  it('orders alias declarations by line when offsets are unavailable', () => {
+    const first = block('commands', { '/test': 'Run tests' }, 10);
+    const second = block('shortcuts', { '/review': 'Review code' }, 20);
+    first.loc = { file: LOC.file, line: 2, column: 1 };
+    second.loc = { file: LOC.file, line: 3, column: 1 };
+
+    const result = normalizeBlockAliases(program([first, second]), {
+      preserveDeclarationOrder: true,
+    });
+
+    expect(result.blocks.map((candidate) => candidate.name)).toEqual(['shortcuts', 'shortcuts']);
+    expect(result.blocks[0]?.content).toMatchObject({
+      properties: { '/test': 'Run tests' },
+    });
+    expect(result.blocks[1]?.content).toMatchObject({
+      properties: { '/review': 'Review code' },
+    });
+  });
+
+  it('uses line order for import alias visibility without offsets', () => {
+    const ast = program([]);
+    ast.uses = [
+      {
+        type: 'UseDeclaration',
+        path: {
+          type: 'PathReference',
+          raw: './commands',
+          segments: ['commands'],
+          isRelative: true,
+          loc: { file: LOC.file, line: 1, column: 1 },
+        },
+        alias: 'commands',
+        loc: { file: LOC.file, line: 1, column: 1 },
+      },
+    ];
+    ast.overrides = [
+      {
+        type: 'OverrideBlock',
+        targetPath: 'commands.skills',
+        replacement: {
+          type: 'ValueReplacement',
+          value: createValueNode(true, { file: LOC.file, line: 2, column: 1 }),
+          loc: { file: LOC.file, line: 2, column: 1 },
+        },
+        loc: { file: LOC.file, line: 2, column: 1 },
+      },
+    ];
+
+    const result = normalizeBlockAliases(ast, { preserveDeclarationOrder: true });
+
+    expect(result.overrides?.[0]?.targetPath).toBe('commands.skills');
+  });
+
   it('normalizes commands extension targets', () => {
     const ast = program([block('commands', { '/test': 'Run tests' }, 1)]);
     ast.extends = [
@@ -121,6 +191,26 @@ describe('block aliases', () => {
     const result = normalizeBlockAliases(ast);
 
     expect(result.extends[0]?.targetPath).toBe('shortcuts.test');
+  });
+
+  it('normalizes commands override targets', () => {
+    const ast = program([block('commands', { '/test': 'Run tests' }, 1)]);
+    ast.overrides = [
+      {
+        type: 'OverrideBlock',
+        targetPath: 'commands.test',
+        replacement: {
+          type: 'ValueReplacement',
+          value: createValueNode('Run complete tests', LOC),
+          loc: LOC,
+        },
+        loc: LOC,
+      },
+    ];
+
+    const result = normalizeBlockAliases(ast);
+
+    expect(result.overrides?.[0]?.targetPath).toBe('shortcuts.test');
   });
 
   it('preserves extension roots that match import aliases', () => {
@@ -156,5 +246,87 @@ describe('block aliases', () => {
 
     expect(result).toBe(ast);
     expect(result.extends[0]?.targetPath).toBe('commands.skills');
+  });
+
+  it('preserves override roots that match import aliases', () => {
+    const ast = program([block('identity', { role: 'Maintainer' }, 1)]);
+    ast.uses = [
+      {
+        type: 'UseDeclaration',
+        path: {
+          type: 'PathReference',
+          raw: './commands.prs',
+          segments: ['commands.prs'],
+          isRelative: true,
+          loc: LOC,
+        },
+        alias: 'commands',
+        loc: LOC,
+      },
+    ];
+    ast.overrides = [
+      {
+        type: 'OverrideBlock',
+        targetPath: 'commands.skills',
+        replacement: {
+          type: 'ValueReplacement',
+          value: createValueNode({ review: true }, LOC),
+          loc: LOC,
+        },
+        loc: LOC,
+      },
+    ];
+
+    const result = normalizeBlockAliases(ast);
+
+    expect(result).toBe(ast);
+    expect(result.overrides?.[0]?.targetPath).toBe('commands.skills');
+  });
+
+  it('resolves import aliases only after their declaration in ordered mode', () => {
+    const ast = program([block('identity', { role: 'Maintainer' }, 20)]);
+    ast.uses = [
+      {
+        type: 'UseDeclaration',
+        path: {
+          type: 'PathReference',
+          raw: './commands.prs',
+          segments: ['commands.prs'],
+          isRelative: true,
+          loc: { ...LOC, offset: 30 },
+        },
+        alias: 'commands',
+        loc: { ...LOC, offset: 30 },
+      },
+    ];
+    ast.overrides = [
+      {
+        type: 'OverrideBlock',
+        targetPath: 'commands.test',
+        replacement: {
+          type: 'ValueReplacement',
+          value: createValueNode('Run complete tests', { ...LOC, offset: 10 }),
+          loc: { ...LOC, offset: 10 },
+        },
+        loc: { ...LOC, offset: 10 },
+      },
+      {
+        type: 'OverrideBlock',
+        targetPath: 'commands.skills',
+        replacement: {
+          type: 'ValueReplacement',
+          value: createValueNode({ review: true }, { ...LOC, offset: 40 }),
+          loc: { ...LOC, offset: 40 },
+        },
+        loc: { ...LOC, offset: 40 },
+      },
+    ];
+
+    const result = normalizeBlockAliases(ast, { preserveDeclarationOrder: true });
+
+    expect(result.overrides?.map((override) => override.targetPath)).toEqual([
+      'shortcuts.test',
+      'commands.skills',
+    ]);
   });
 });

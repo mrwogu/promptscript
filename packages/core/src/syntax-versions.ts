@@ -1,4 +1,4 @@
-import { compareVersions } from './utils/version.js';
+import { compareVersions, isValidVersion } from './utils/version.js';
 import type { Program, SourceLocation } from './types/index.js';
 
 /**
@@ -7,6 +7,7 @@ import type { Program, SourceLocation } from './types/index.js';
 export const SYNTAX_FEATURES = {
   REGULAR_BLOCK_REPLACE: 'regular-block-replace',
   SECTION_HEADER_OVERRIDE: 'section-header-override',
+  EXPLICIT_OVERRIDE: 'explicit-override',
 } as const;
 
 export type SyntaxFeature = (typeof SYNTAX_FEATURES)[keyof typeof SYNTAX_FEATURES];
@@ -155,10 +156,37 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
     ],
     features: [SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE],
   },
+  '1.6.0': {
+    blocks: [
+      'identity',
+      'context',
+      'standards',
+      'restrictions',
+      'knowledge',
+      'shortcuts',
+      'commands',
+      'guards',
+      'params',
+      'skills',
+      'local',
+      'agents',
+      'workflows',
+      'hooks',
+      'mcpServers',
+      'plugins',
+      'prompts',
+      'examples',
+    ],
+    features: [
+      SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
+      SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
+      SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
+    ],
+  },
 };
 
 /** Latest known syntax version. */
-export const LATEST_SYNTAX_VERSION = '1.5.0';
+export const LATEST_SYNTAX_VERSION = '1.6.0';
 
 /**
  * Get the latest known syntax version.
@@ -219,6 +247,22 @@ export function getMinimumVersionForFeature(feature: SyntaxFeature): string | un
 }
 
 /**
+ * Select declaration-ordered resolution for syntax 1.6.0+ or explicit override usage.
+ */
+export function usesSequentialOperations(ast: Program): boolean {
+  if ((ast.overrides?.length ?? 0) > 0) return true;
+
+  const syntaxVersion = ast.meta?.fields['syntax'];
+  const minimumVersion = getMinimumVersionForFeature(SYNTAX_FEATURES.EXPLICIT_OVERRIDE);
+  return (
+    typeof syntaxVersion === 'string' &&
+    isValidVersion(syntaxVersion) &&
+    minimumVersion !== undefined &&
+    compareVersions(syntaxVersion, minimumVersion) >= 0
+  );
+}
+
+/**
  * Find all versioned non-block syntax features used by a parsed program.
  */
 export function getSyntaxFeatureUsages(ast: Program): SyntaxFeatureUsage[] {
@@ -230,6 +274,12 @@ export function getSyntaxFeatureUsages(ast: Program): SyntaxFeatureUsage[] {
         location: modifier.loc,
       });
     }
+  }
+  for (const override of ast.overrides ?? []) {
+    usages.push({
+      feature: SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
+      location: override.loc,
+    });
   }
 
   const seen = new Set<string>();

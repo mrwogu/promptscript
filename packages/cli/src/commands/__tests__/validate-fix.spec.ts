@@ -400,6 +400,23 @@ describe('validateCommand --fix', () => {
     );
   });
 
+  it('should fix syntax version for explicit overrides', async () => {
+    mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.promptscript', 'project.prs'),
+      `@meta { id: "project" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards.testing { ["Use Vitest"] }
+`
+    );
+
+    await validateCommand({ fix: true });
+
+    expect(readFileSync(join(tmpDir, '.promptscript', 'project.prs'), 'utf-8')).toContain(
+      'syntax: "1.6.0"'
+    );
+  });
+
   it('should report no fixes needed when syntax is correct', async () => {
     mkdirSync(join(tmpDir, '.promptscript'), { recursive: true });
     writeFileSync(

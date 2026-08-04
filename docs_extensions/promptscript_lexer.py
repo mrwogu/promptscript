@@ -40,6 +40,7 @@ BLOCK_DIRECTIVES = (
 )
 
 CONTEXTUAL_DIRECTIVES = ("header",)
+CONTEXTUAL_OPERATION_DIRECTIVES = ("override",)
 
 ENV_VAR_PATTERN = r"\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[^}]*)?\}"
 TEMPLATE_VAR_PATTERN = r"(\{\{)([A-Za-z_][A-Za-z0-9_]*)(\}\})"
@@ -83,6 +84,11 @@ class PromptScriptLexer(RegexLexer):
             # Extend statement with a dotted target
             (
                 r"(@extend)(\s+)([A-Za-z_][\w-]*(?:\.[A-Za-z_][\w-]*)*)",
+                bygroups(Keyword.Namespace, Whitespace, String),
+            ),
+            # Override statement with a dotted target
+            (
+                r"(@override)(\s+)([A-Za-z_][\w-]*(?:\.[A-Za-z_][\w-]*)*)",
                 bygroups(Keyword.Namespace, Whitespace, String),
             ),
             # Meta directive

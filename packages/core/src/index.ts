@@ -31,6 +31,9 @@ export * from './canonical-ast.js';
 export * from './block-merge.js';
 export * from './block-shapes.js';
 export * from './block-aliases.js';
+export * from './block-override.js';
+export * from './block-import.js';
+export * from './inline-uses.js';
 export * from './presentation.js';
 
 // Syntax version registry

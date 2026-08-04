@@ -3,7 +3,11 @@
  */
 
 import type * as Monaco from 'monaco-editor';
-import { BLOCK_TYPES, CONTEXTUAL_DIRECTIVES } from '@promptscript/core';
+import {
+  BLOCK_TYPES,
+  CONTEXTUAL_DIRECTIVES,
+  CONTEXTUAL_OPERATION_DIRECTIVES,
+} from '@promptscript/core';
 
 export const PRS_LANGUAGE_ID = 'promptscript';
 const CONTROL_DIRECTIVES = ['@meta', '@inherit', '@extend', '@use', ...CONTEXTUAL_DIRECTIVES];
@@ -20,6 +24,7 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
 
   // Directive names
   directives: [...CONTROL_DIRECTIVES, ...BLOCK_DIRECTIVES],
+  operationDirectives: [...CONTEXTUAL_OPERATION_DIRECTIVES],
 
   // Operators and symbols
   operators: [':', '!'],
@@ -36,6 +41,9 @@ export const prsLanguageDefinition: Monaco.languages.IMonarchLanguage = {
 
       // Registry paths (@scope/path@version)
       [/@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?:@[a-zA-Z0-9^~./-]+)?/, 'string.url'],
+
+      // Contextual operations require a target path before the body.
+      [/@override(?=\s+[a-zA-Z_][\w-]*(?:\.[a-zA-Z_][\w-]*)*\s*\{)/, 'keyword.directive'],
 
       // Directives
       [

@@ -6,6 +6,7 @@ import {
   createBlockBody,
   createCanonicalBlock,
   createCanonicalExtendBlock,
+  createCanonicalOverrideBlock,
   createCanonicalProgram,
   createValueNode,
   blockBodyToContent,
@@ -82,6 +83,67 @@ describe('canonical AST compatibility', () => {
 
     expect(getBlockText(canonical.blocks[0]!)).toBe('Original');
     expect(getBlockText(projection.blocks[0]!)).toBe('Changed');
+  });
+
+  it('projects canonical overrides with the legacy discriminant', () => {
+    const override = createCanonicalOverrideBlock(
+      'standards.testing',
+      {
+        type: 'ValueReplacement',
+        value: createValueNode(['Use Vitest'], LOC),
+        loc: LOC,
+      },
+      LOC
+    );
+    const canonical = createCanonicalProgram({
+      operations: [
+        {
+          type: 'OverrideOperation',
+          override,
+          sourceLayerId: LOC.file,
+          loc: LOC,
+        },
+      ],
+      loc: LOC,
+    });
+
+    const legacy = toLegacyProgram(canonical);
+
+    expect(legacy.overrides).toEqual([
+      expect.objectContaining({
+        type: 'OverrideBlock',
+        targetPath: 'standards.testing',
+      }),
+    ]);
+  });
+
+  it('normalizes legacy overrides into ordered canonical operations', () => {
+    const canonical = normalizeProgram({
+      type: 'Program',
+      uses: [],
+      blocks: [],
+      extends: [],
+      overrides: [
+        {
+          type: 'OverrideBlock',
+          targetPath: 'standards.testing',
+          replacement: {
+            type: 'ValueReplacement',
+            value: createValueNode(['Use Vitest'], LOC),
+            loc: LOC,
+          },
+          loc: LOC,
+        },
+      ],
+      loc: LOC,
+    });
+
+    expect(canonical.operations).toEqual([
+      expect.objectContaining({
+        type: 'OverrideOperation',
+        override: expect.objectContaining({ targetPath: 'standards.testing' }),
+      }),
+    ]);
   });
 
   it('creates immutable updates without modifying the original graph', () => {

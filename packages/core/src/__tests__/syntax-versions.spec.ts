@@ -9,6 +9,7 @@ import {
   getMinimumVersionForFeature,
   getSyntaxFeatureUsages,
   SYNTAX_FEATURES,
+  usesSequentialOperations,
   type SyntaxFeature,
 } from '../syntax-versions.js';
 import type { Program } from '../types/ast.js';
@@ -43,6 +44,52 @@ describe('SYNTAX_VERSIONS', () => {
   });
 });
 
+describe('usesSequentialOperations', () => {
+  const loc = { file: 'ordered.prs', line: 1, column: 1, offset: 0 };
+  const program = (syntax: string): Program => ({
+    type: 'Program',
+    meta: {
+      type: 'MetaBlock',
+      fields: { id: 'ordered', syntax },
+      loc,
+    },
+    uses: [],
+    blocks: [],
+    extends: [],
+    overrides: [],
+    loc,
+  });
+
+  it('enables ordered execution for syntax 1.6.0 and explicit overrides', () => {
+    const legacyWithOverride = program('1.5.0');
+    legacyWithOverride.overrides = [
+      {
+        type: 'OverrideBlock',
+        targetPath: 'standards.testing',
+        replacement: {
+          type: 'ValueReplacement',
+          value: {
+            type: 'ScalarValueNode',
+            value: true,
+            loc,
+          },
+          loc,
+        },
+        loc,
+      },
+    ];
+
+    expect(usesSequentialOperations(program('1.5.0'))).toBe(false);
+    expect(usesSequentialOperations(program('1.6.0'))).toBe(true);
+    expect(usesSequentialOperations(legacyWithOverride)).toBe(true);
+  });
+
+  it('does not treat partial or invalid versions as sequential', () => {
+    expect(usesSequentialOperations(program('1.6'))).toBe(false);
+    expect(usesSequentialOperations(program('invalid'))).toBe(false);
+  });
+});
+
 describe('registry consistency', () => {
   it('latest version should contain ALL block types from BLOCK_TYPES', () => {
     const latest = getLatestSyntaxVersion();
@@ -69,7 +116,7 @@ describe('registry consistency', () => {
 
 describe('getLatestSyntaxVersion', () => {
   it('should return the highest known version', () => {
-    expect(getLatestSyntaxVersion()).toBe('1.5.0');
+    expect(getLatestSyntaxVersion()).toBe('1.6.0');
   });
 });
 
@@ -125,12 +172,14 @@ describe('syntax feature capabilities', () => {
       SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
       SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
     ]);
+    expect(getFeaturesForVersion('1.6.0')).toContain(SYNTAX_FEATURES.EXPLICIT_OVERRIDE);
     expect(getFeaturesForVersion('9.9.9')).toBeUndefined();
   });
 
   it('should return the minimum version for registered features', () => {
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE)).toBe('1.3.0');
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE)).toBe('1.5.0');
+    expect(getMinimumVersionForFeature(SYNTAX_FEATURES.EXPLICIT_OVERRIDE)).toBe('1.6.0');
     expect(getMinimumVersionForFeature('unknown-feature' as SyntaxFeature)).toBeUndefined();
   });
 
@@ -150,10 +199,23 @@ describe('syntax feature capabilities', () => {
           loc,
         },
       ],
+      overrides: [
+        {
+          type: 'OverrideBlock',
+          targetPath: 'standards.testing',
+          replacement: {
+            type: 'ValueReplacement',
+            value: { type: 'ScalarValueNode', value: true, loc },
+            loc,
+          },
+          loc,
+        },
+      ],
     };
 
     expect(getSyntaxFeatureUsages(ast)).toEqual([
       { feature: SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, location: loc },
+      { feature: SYNTAX_FEATURES.EXPLICIT_OVERRIDE, location: loc },
     ]);
   });
 

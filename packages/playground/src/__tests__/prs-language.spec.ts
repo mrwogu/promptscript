@@ -81,8 +81,20 @@ describe('prs-language', () => {
       expect(directives).toContain('@examples');
       expect(directives).toContain('@hooks');
       expect(directives).toContain('@mcpServers');
+      expect(prsLanguageDefinition.operationDirectives).toContain('@override');
       expect(directives).toContain('@plugins');
       expect(BLOCK_TYPES.every((blockType) => directives.includes(`@${blockType}`))).toBe(true);
+    });
+
+    it('should highlight override only when it has a target', () => {
+      expect(resolveRootToken('@override standards.testing {')).toEqual({
+        image: '@override',
+        token: 'keyword.directive',
+      });
+      expect(resolveRootToken('@override {')).toEqual({
+        image: '@override',
+        token: 'identifier.directive',
+      });
     });
 
     it('should have root tokenizer rules', () => {

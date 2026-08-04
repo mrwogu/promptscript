@@ -747,16 +747,38 @@ Replacement works after `@inherit` and `@use`, including aliases and nested targ
 A missing field is set. The modifier is rejected for `@skills`, which retain their dedicated
 merge and sealing semantics.
 
+#### Replacing complete targets with @override
+
+Syntax `1.6.0` adds atomic replacement for an existing block or nested value:
+
+```
+@meta { id: "project" syntax: "1.6.0" }
+
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+```
+
+`@override` requires the complete target path to exist, applies in declaration
+order, and cannot bypass sealed skill properties. Later `@extend` declarations
+merge into the replacement. Use `@extend` for additive changes, `field!` for
+compatibility replacement of one direct regular field, and `@override` for
+intentional complete replacement.
+
 #### Skill-aware @extend semantics
 
 When extending a skill definition via `@extend`, individual skill properties follow specific merge
 strategies rather than the generic block merge rules:
 
-| Strategy          | Properties                                                                                         |
-| ----------------- | -------------------------------------------------------------------------------------------------- |
-| **Replace**       | content, description, trigger, userInvocable, allowedTools, disableModelInvocation, context, agent |
-| **Append**        | references, examples, requires                                                                     |
-| **Shallow merge** | params, inputs, outputs                                                                            |
+| Strategy          | Properties                                                                                                  |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Replace**       | content, description, trigger, userInvocable, allowedTools, disableModelInvocation, context, agent, license |
+| **Append**        | references, examples, requires                                                                              |
+| **Shallow merge** | params, inputs, outputs                                                                                     |
 
 Example — extending a base skill to add references and override content:
 
@@ -1007,6 +1029,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 | `1.3.0` | Adds explicit regular block field replacement in `@extend`                                                              |
 | `1.4.0` | Adds `@hooks`, `@mcpServers`, and `@plugins`                                                                            |
 | `1.5.0` | Adds generated section title overrides with contextual `@header`                                                        |
+| `1.6.0` | Adds atomic block and nested value replacement with contextual `@override`                                              |
 
 ### Block Version Requirements
 
@@ -1022,6 +1045,7 @@ The `syntax` field in `@meta` declares the PromptScript language version (semver
 All other built-in blocks are available from `1.0.0`.
 Regular block field replacement with `field!: value` requires syntax `1.3.0`.
 Generated section title overrides with `@header` require syntax `1.5.0`.
+Atomic replacement with `@override` requires syntax `1.6.0`.
 
 ### Generated Section Headers
 

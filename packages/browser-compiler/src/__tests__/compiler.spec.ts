@@ -183,6 +183,85 @@ describe('compile', () => {
     );
   });
 
+  it('should report explicit overrides declared below syntax 1.6.0', async () => {
+    const files = {
+      'project.prs': `@meta { id: "test" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards.testing { ["Use Vitest"] }
+`,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        ruleId: 'PS018',
+        message: expect.stringContaining('explicit-override'),
+        location: expect.objectContaining({ file: 'project.prs', line: 3, column: 1 }),
+      }),
+    ]);
+  });
+
+  it('should retain syntax warnings when explicit override resolution fails', async () => {
+    const files = {
+      'project.prs': `@meta { id: "test" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards.missing { true }
+`,
+    };
+
+    const result = await compile(files, 'project.prs');
+
+    expect(result.success).toBe(false);
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('does not exist at segment "missing"'),
+      }),
+    ]);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        ruleId: 'PS018',
+        message: expect.stringContaining('explicit-override'),
+      }),
+    ]);
+  });
+
+  it('should honor configured syntax compatibility severity on override errors', async () => {
+    const files = {
+      'project.prs': `@meta { id: "test" syntax: "1.5.0" }
+@standards { testing: ["Use Jest"] }
+@override standards.missing { true }
+`,
+    };
+
+    const errorResult = await compile(files, 'project.prs', {
+      validator: { rules: { 'syntax-version-compat': 'error' } },
+    });
+    const offResult = await compile(files, 'project.prs', {
+      validator: { rules: { 'syntax-version-compat': 'off' } },
+    });
+
+    expect(errorResult.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining('does not exist at segment "missing"'),
+        }),
+        expect.objectContaining({
+          code: 'PS018',
+          message: expect.stringContaining('explicit-override'),
+        }),
+      ])
+    );
+    expect(errorResult.warnings).toEqual([]);
+    expect(offResult.errors).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('does not exist at segment "missing"'),
+      }),
+    ]);
+    expect(offResult.warnings).toEqual([]);
+  });
+
   it('should report and format section header overrides in browser builds', async () => {
     const files = {
       'project.prs': `@meta { id: "test" syntax: "1.4.0" }

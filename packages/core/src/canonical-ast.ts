@@ -9,6 +9,7 @@ import type {
   BlockInput,
   CanonicalBlock,
   CanonicalExtendBlock,
+  CanonicalOverrideBlock,
   CanonicalProgram,
   DeepReadonly,
   ExtendBlock,
@@ -21,6 +22,8 @@ import type {
   ObjectContent,
   ObjectFieldNode,
   ObjectValueNode,
+  OverrideBlock,
+  OverrideReplacement,
   Program,
   ProgramInput,
   ProgramOperation,
@@ -1322,6 +1325,19 @@ export function createCanonicalExtendBlock(
   return deepFreeze(extension);
 }
 
+export function createCanonicalOverrideBlock(
+  targetPath: string,
+  replacement: OverrideReplacement,
+  loc: SourceLocation
+): CanonicalOverrideBlock {
+  return deepFreeze({
+    type: 'CanonicalOverrideBlock',
+    targetPath,
+    replacement: deepClone(replacement),
+    loc: deepClone(loc),
+  });
+}
+
 export function createCanonicalProgram(options: CanonicalProgramOptions): CanonicalProgram {
   const operations = deepClone(options.operations) as ProgramOperation[];
   const inherit = operations.find(
@@ -1336,12 +1352,16 @@ export function createCanonicalProgram(options: CanonicalProgramOptions): Canoni
   const extensions = operations
     .filter((operation) => operation.type === 'ExtendOperation')
     .map((operation) => operation.extension);
+  const overrides = operations
+    .filter((operation) => operation.type === 'OverrideOperation')
+    .map((operation) => operation.override);
 
   const program: CanonicalProgram = {
     type: 'CanonicalProgram',
     uses,
     blocks,
     extends: extensions,
+    overrides,
     operations,
     loc: deepClone(options.loc),
   };
@@ -1392,6 +1412,10 @@ function normalizeExtension(extension: ExtendBlock): CanonicalExtendBlock {
   );
 }
 
+function normalizeOverride(override: OverrideBlock): CanonicalOverrideBlock {
+  return createCanonicalOverrideBlock(override.targetPath, override.replacement, override.loc);
+}
+
 export function normalizeProgram(input: ProgramInput): CanonicalProgram {
   if (isCanonicalProgram(input)) {
     return createCanonicalProgram({
@@ -1433,6 +1457,14 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
       extension: normalizeExtension(extension),
       sourceLayerId: extension.loc.file,
       loc: deepClone(extension.loc),
+    });
+  }
+  for (const override of input.overrides ?? []) {
+    operations.push({
+      type: 'OverrideOperation',
+      override: normalizeOverride(override),
+      sourceLayerId: override.loc.file,
+      loc: deepClone(override.loc),
     });
   }
   for (let start = 0; start < operations.length; ) {
@@ -1498,6 +1530,12 @@ export function toLegacyProgram(
       }
       return result;
     }),
+    overrides: (program.overrides ?? []).map((override) => ({
+      type: 'OverrideBlock',
+      targetPath: override.targetPath,
+      replacement: deepClone(override.replacement) as OverrideReplacement,
+      loc: deepClone(override.loc),
+    })),
     loc: deepClone(program.loc),
   };
   if (program.meta) legacy.meta = deepClone(program.meta) as MetaBlock;

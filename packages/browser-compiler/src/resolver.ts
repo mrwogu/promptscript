@@ -16,8 +16,10 @@ import {
   CircularDependencyError,
   deepMerge,
   deepClone,
+  applyOverride,
+  blockBodyToContent,
+  consumeInlineUses,
   isTextContent,
-  IMPORT_MERGE_POLICY,
   INHERITANCE_MERGE_POLICY,
   mergeBlockCollections,
   bindParams,
@@ -26,9 +28,13 @@ import {
   getSyntaxFeatureUsages,
   normalizeBlockAliases,
   normalizeProgram,
+  toLegacyBlock,
+  usesSequentialOperations,
   composeBlockBodies,
   prepareBlockContentForMerge,
   reconcileBlockBodyAtPath,
+  resolveUseImport,
+  SKILL_REPLACE_PROPERTY_NAMES,
   type TemplateContext,
 } from '@promptscript/core';
 import { VirtualFileSystem } from './virtual-fs.js';
@@ -42,8 +48,8 @@ import type {
   ArrayContent,
   MixedContent,
   Value,
-  UseDeclaration,
   ExtendBlock,
+  OverrideBlock,
   ParamArgument,
 } from '@promptscript/core';
 
@@ -208,17 +214,7 @@ const IMPORT_MARKER_PREFIX = '__import__';
 // `content` instead of letting the overlay replace them.
 
 /** Properties where the extension value replaces the base value. */
-const SKILL_REPLACE_PROPERTIES = new Set([
-  'content',
-  'description',
-  'trigger',
-  'userInvocable',
-  'allowedTools',
-  'disableModelInvocation',
-  'context',
-  'agent',
-  'license',
-]);
+const SKILL_REPLACE_PROPERTIES = new Set<string>(SKILL_REPLACE_PROPERTY_NAMES);
 
 /** Properties where array elements are appended (deduplicated). */
 const SKILL_APPEND_PROPERTIES = new Set(['references', 'examples', 'requires', 'scripts']);
@@ -432,32 +428,41 @@ export class BrowserResolver {
       return { ast: null, sources, errors };
     }
 
-    let ast = normalizeBlockAliases(parseData.ast);
+    let ast = parseData.ast;
+    const sequentialOperations = usesSequentialOperations(ast);
+    ast = normalizeBlockAliases(ast, {
+      preserveDeclarationOrder: sequentialOperations,
+    });
 
-    // Resolve inheritance
-    ast = await this.resolveInherit(ast, absPath, sources, errors);
+    if (sequentialOperations) {
+      ast = await this.resolveSequentialOperations(ast, absPath, sources, errors);
+    } else {
+      ast = await this.resolveInherit(ast, absPath, sources, errors);
+      ast = await this.resolveImports(ast, absPath, sources, errors);
+    }
 
-    // Resolve imports
-    ast = await this.resolveImports(ast, absPath, sources, errors);
-
-    // Resolve skill composition (inline @use within @skills blocks)
-    ast = await this.resolveComposition(ast, absPath, sources, errors);
+    // Legacy phase order resolves inline composition after top-level imports.
+    if (!sequentialOperations) {
+      ast = await this.resolveComposition(ast, absPath, sources, errors);
+    }
 
     // Apply extensions
-    if (ast.extends.length > 0) {
+    if (!sequentialOperations && ast.extends.length > 0) {
       this.logger.debug(`Applying ${ast.extends.length} extension(s)`);
     }
-    try {
-      ast = this.applyExtends(ast);
-    } catch (err) {
-      if (err instanceof ResolveError) {
-        errors.push(err);
-      } else {
-        errors.push(
-          new ResolveError(
-            `Extension resolution failed: ${err instanceof Error ? err.message : String(err)}`
-          )
-        );
+    if (!sequentialOperations) {
+      try {
+        ast = this.applyExtends(ast);
+      } catch (err) {
+        if (err instanceof ResolveError) {
+          errors.push(err);
+        } else {
+          errors.push(
+            new ResolveError(
+              `Extension resolution failed: ${err instanceof Error ? err.message : String(err)}`
+            )
+          );
+        }
       }
     }
 
@@ -470,6 +475,147 @@ export class BrowserResolver {
       canonicalAst: normalizeProgram(ast),
       sources: [...new Set(sources)],
       errors,
+    };
+  }
+
+  private async resolveSequentialOperations(
+    ast: Program,
+    absPath: string,
+    sources: string[],
+    errors: ResolveError[]
+  ): Promise<Program> {
+    const operations = normalizeProgram(ast).operations;
+    const localBlockNames = new Set<string>();
+    let result: Program = {
+      ...ast,
+      inherit: undefined,
+      uses: [],
+      blocks: [],
+      extends: [],
+      overrides: [],
+      syntaxFeatures: getSyntaxFeatureUsages(ast),
+    };
+
+    for (const operation of operations) {
+      switch (operation.type) {
+        case 'InheritOperation':
+          result = await this.resolveInherit(
+            {
+              ...result,
+              inherit: deepClone(operation.declaration) as unknown as NonNullable<
+                Program['inherit']
+              >,
+            },
+            absPath,
+            sources,
+            errors,
+            true
+          );
+          break;
+        case 'UseOperation':
+          result = await this.resolveImports(
+            {
+              ...result,
+              uses: [deepClone(operation.declaration) as unknown as Program['uses'][number]],
+            },
+            absPath,
+            sources,
+            errors
+          );
+          result = { ...result, uses: [] };
+          break;
+        case 'BlockOperation': {
+          const block = toLegacyBlock(operation.block, { preserveCanonicalBody: true });
+          result = {
+            ...result,
+            blocks: localBlockNames.has(block.name)
+              ? [...result.blocks, block]
+              : mergeBlockCollections(result.blocks, [block], {
+                  content: INHERITANCE_MERGE_POLICY,
+                  outputOrder: 'base',
+                }),
+          };
+          localBlockNames.add(block.name);
+          result = await this.resolveComposition(result, absPath, sources, errors);
+          break;
+        }
+        case 'ExtendOperation': {
+          const extension: ExtendBlock = {
+            type: 'ExtendBlock',
+            targetPath: operation.extension.targetPath,
+            content: blockBodyToContent(operation.extension.body),
+            canonicalBody: deepClone(operation.extension.body),
+            ...(operation.extension.replacements
+              ? {
+                  replacements: operation.extension.replacements.map(
+                    (replacement) =>
+                      deepClone(replacement) as unknown as NonNullable<
+                        ExtendBlock['replacements']
+                      >[number]
+                  ),
+                }
+              : {}),
+            loc: deepClone(operation.extension.loc),
+          };
+          try {
+            result = {
+              ...result,
+              blocks: this.applyExtend(result.blocks, extension),
+            };
+            result = await this.resolveComposition(result, absPath, sources, errors);
+          } catch (error) {
+            errors.push(
+              error instanceof ResolveError
+                ? error
+                : new ResolveError(
+                    `Extension resolution failed: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                    extension.loc
+                  )
+            );
+          }
+          break;
+        }
+        case 'OverrideOperation': {
+          const override: OverrideBlock = {
+            type: 'OverrideBlock',
+            targetPath: operation.override.targetPath,
+            replacement: deepClone(
+              operation.override.replacement
+            ) as unknown as OverrideBlock['replacement'],
+            loc: deepClone(operation.override.loc),
+          };
+          try {
+            result = applyOverride(result, override, {
+              importMarkerPrefix: IMPORT_MARKER_PREFIX,
+            });
+            result = await this.resolveComposition(result, absPath, sources, errors);
+          } catch (error) {
+            errors.push(
+              error instanceof ResolveError
+                ? error
+                : new ResolveError(
+                    `Override resolution failed: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                    override.loc
+                  )
+            );
+          }
+          break;
+        }
+      }
+    }
+
+    return {
+      ...result,
+      blocks: result.blocks.filter((block) => !block.name.startsWith(IMPORT_MARKER_PREFIX)),
+      inherit: undefined,
+      uses: [],
+      extends: [],
+      overrides: [],
+      syntaxFeatures: getSyntaxFeatureUsages(result),
     };
   }
 
@@ -521,7 +667,8 @@ export class BrowserResolver {
     ast: Program,
     absPath: string,
     sources: string[],
-    errors: ResolveError[]
+    errors: ResolveError[],
+    parentWins = false
   ): Promise<Program> {
     if (!ast.inherit) {
       return ast;
@@ -563,7 +710,16 @@ export class BrowserResolver {
         }
 
         this.logger.debug(`Merging with parent AST`);
-        return this.resolveInheritance(resolvedParent, ast);
+        const inherited = this.resolveInheritance(resolvedParent, ast);
+        return parentWins
+          ? {
+              ...inherited,
+              blocks: mergeBlockCollections(ast.blocks, resolvedParent.blocks, {
+                content: INHERITANCE_MERGE_POLICY,
+                outputOrder: 'base',
+              }),
+            }
+          : inherited;
       }
     } catch (err) {
       if (err instanceof CircularDependencyError) {
@@ -652,7 +808,7 @@ export class BrowserResolver {
           }
 
           this.logger.debug(`Merging import${use.alias ? ` as "${use.alias}"` : ''}`);
-          result = this.resolveUses(result, use, resolvedImport);
+          result = resolveUseImport(result, use, resolvedImport);
         }
       } catch (err) {
         if (err instanceof CircularDependencyError) {
@@ -725,6 +881,7 @@ export class BrowserResolver {
           )
         );
       }
+      ast = consumeInlineUses(ast);
     }
 
     return ast;
@@ -768,51 +925,6 @@ export class BrowserResolver {
   // ============================================================
   // Import Resolution (ported from @promptscript/resolver)
   // ============================================================
-
-  /**
-   * Resolve @use imports by merging blocks into target.
-   */
-  private resolveUses(target: Program, use: UseDeclaration, source: Program): Program {
-    const mergedBlocks = mergeBlockCollections(source.blocks, target.blocks, {
-      content: IMPORT_MERGE_POLICY,
-      outputOrder: 'incoming',
-    });
-
-    const aliasedBlocks: Block[] = [];
-    if (use.alias) {
-      const alias = use.alias;
-      const markerName = `${IMPORT_MARKER_PREFIX}${alias}`;
-
-      const marker: Block = {
-        type: 'Block',
-        name: markerName,
-        content: {
-          type: 'ObjectContent',
-          properties: {
-            __source: use.path.raw,
-            __blocks: source.blocks.map((b) => b.name),
-          },
-          loc: use.loc,
-        } as ObjectContent,
-        loc: use.loc,
-      };
-
-      aliasedBlocks.push(marker);
-
-      for (const block of source.blocks) {
-        aliasedBlocks.push({
-          ...block,
-          name: `${IMPORT_MARKER_PREFIX}${alias}.${block.name}`,
-        });
-      }
-    }
-
-    return {
-      ...target,
-      blocks: [...mergedBlocks, ...aliasedBlocks],
-      syntaxFeatures: [...getSyntaxFeatureUsages(target), ...getSyntaxFeatureUsages(source)],
-    };
-  }
 
   // ============================================================
   // Extension Resolution (ported from @promptscript/resolver)
