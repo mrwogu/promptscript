@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-<!-- PromptScript 2026-07-23T16:03:31.147Z | source: .promptscript/project.prs | target: claude - do not edit -->
+<!-- PromptScript 2026-08-04T15:22:17.804Z | source: .promptscript/project.prs | target: claude - do not edit -->
 
 ## Project
 
@@ -43,6 +43,15 @@ flowchart TB
   validator --> core
   formatters --> core
 ```
+
+## Context
+
+### Key Libraries
+
+- Parser: Chevrotain
+- CLI: Commander.js
+- Testing: Vitest
+- Linting: ESLint + Prettier
 
 ## Code Style
 
@@ -87,6 +96,8 @@ flowchart TB
 - Types: feat, fix, docs, style, refactor, test, chore
 - Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, server, vscode) or domain scope (ci, docker) — scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
+- Reference: https://www.conventionalcommits.org/
+- Max Subject Length: 70
 
 ## Config Files
 
@@ -97,20 +108,20 @@ flowchart TB
 
 ```
 /review    - Review code for quality, type safety, and best practices
-/test      -
-/test-unit -
-/test-integration -
-/test-coverage -
-/test-e2e  -
-/build     -
-/newpkg    -
-/quality   -
-/refactor  -
-/security-review -
-/threat-model -
-/cli       -
-/export    -
-/type      -
+/test      - Write unit tests using Vitest
+/test-unit - Write unit tests following best practices
+/test-integration - Write integration tests for component boundaries
+/test-coverage - Analyze test coverage and suggest improvements
+/test-e2e  - Write end-to-end tests for critical user journeys
+/build     - Run full verification pipeline
+/newpkg    - Generate new package with Nx
+/quality   - Review code for quality improvements
+/refactor  - Suggest refactoring opportunities
+/security-review - Review code for security vulnerabilities
+/threat-model - Analyze potential security threats
+/cli       - Create CLI command handler
+/export    - Design public API exports
+/type      - Create TypeScript type definitions
 ```
 
 ```bash
@@ -145,11 +156,17 @@ pnpm grammar:check        # 8. Verify TextMate grammar covers all tokens
 - Review docs before changes
 - Update docs after changes
 - Keep code examples accurate
+- Sync With Code: after modifying any function, verify it is documented - if not, add documentation; if documented, ensure it reflects current behavior
+- No Vaporware: never document features that don't exist or don't work - ideas and future plans go to ROADMAP.md only
 
 ## Diagrams
 
 - Use Mermaid (exception: packages/\*/README.md must use ASCII art because npm does not render Mermaid) for diagrams
 - Types: flowchart, sequence, class, state, ER, gantt, pie
+- Example: `mermaid
+flowchart LR
+  A[Input] --> B[Process] --> C[Output]
+`
 
 ## MCP Tools: code-review-graph
 

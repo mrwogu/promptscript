@@ -1,4 +1,5 @@
 ---
+# promptscript-generated: 2026-08-04T15:22:17.805Z | source: .promptscript/project.prs | target: claude
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -522,6 +523,7 @@ Portable events:
 - No traversal, absolute path, invalid segment, or symlink escape.
 - Explicit interpreter: `python3`, `python`, `node`, `deno`, `bun`, `ruby`, `php`,
   `perl`, `bash`, `sh`, `zsh`, `pwsh`, or `powershell`.
+
 - Optional `args` string array; each argument remains one argument.
 
 `cwd: "project"` runs from project root. Other values are portable forward-slash
@@ -830,8 +832,10 @@ The resolver emits warnings during compile when an overlay drifts from its base.
 
 - **Orphaned extend** — `@extend target "X" not found — overlay will be ignored.` Triggered when
   the targeted block doesn't exist (base removed or renamed).
+
 - **Stale skill target** — `@extend creates new skill "X" — base does not define it.` Triggered
   when an `@extend` inside `@skills` would create a new skill instead of extending an existing one.
+
 - **Negation orphan** — `Negation "!path" did not match any base entry — it may be stale.`
   Triggered when a `!entry` in references/requires doesn't match anything in the base.
 
@@ -1080,6 +1084,7 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 - Child inheritance, imported source, and the latest root extension take precedence.
 - An initial `## Heading` in a registered text-only primary owner is a syntax
   `1.5.0` compatibility fallback. Explicit `@header` metadata wins.
+
 - Ordinary `header` and `headers` fields remain domain data.
 
 ### Validation Rules
@@ -1172,15 +1177,15 @@ writes when no candidates are detected.
 | GitHub      | .github/copilot-instructions.md | .github/skills/\*/SKILL.md                         |
 | Claude      | CLAUDE.md                       | .claude/skills/\*/SKILL.md                         |
 | Cursor      | .cursor/rules/project.mdc       | .agents/skills/\*/SKILL.md                         |
-| Antigravity | .agent/rules/project.md         | -                                                  |
+| Antigravity | .agent/rules/project.md         | -------------------------------------------------- |
 | Factory     | AGENTS.md                       | .factory/skills/\*/SKILL.md, .factory/droids/\*.md |
 | OpenCode    | OPENCODE.md                     | .opencode/skills/\*/SKILL.md                       |
 | Gemini      | GEMINI.md                       | .agents/skills/\*/skill.md                         |
 | Windsurf    | .windsurf/rules/project.md      | .windsurf/skills/\*/SKILL.md                       |
-| Cline       | .clinerules                     | -                                                  |
-| Roo Code    | .roorules                       | -                                                  |
+| Cline       | .clinerules                     | -------------------------------------------------- |
+| Roo Code    | .roorules                       | -------------------------------------------------- |
 | Codex       | AGENTS.md                       | .agents/skills/\*/SKILL.md                         |
-| Continue    | .continue/rules/project.md      | -                                                  |
+| Continue    | .continue/rules/project.md      | -------------------------------------------------- |
 | + 36 more   |                                 | See full list in documentation                     |
 
 ### Formatter Documentation
@@ -1234,6 +1239,7 @@ The entry file uses `@use ./context`, `@use ./standards`, etc. to compose them.
    in a parent file that defines `params` in `@meta`, with values passed by the child
    via `@inherit ./parent(key: value)` or `@use ./fragment(key: value)`. They are NOT
    set from `promptscript.yaml` or CLI flags
+
 8. Using `@examples` with `syntax: "1.0.0"` or `"1.1.0"` - `@examples` requires
    syntax version `1.2.0`. Run `prs validate --fix` to auto-upgrade
 
