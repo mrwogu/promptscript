@@ -1,12 +1,15 @@
 import type {
   Program,
   Block,
+  BlockBody,
   ExtendBlock,
   BlockContent,
+  OverrideBlock,
   Value,
   SourceLocation,
   UseDeclaration,
 } from '@promptscript/core';
+import { blockBodyToContent, valueNodeToValue } from '@promptscript/core';
 
 /**
  * Callback function for text content.
@@ -36,7 +39,7 @@ export interface WalkTextOptions {
 
 /**
  * Walk all text content in the AST.
- * Visits text in blocks, extend blocks, and nested content.
+ * Visits text in blocks, extend blocks, override replacements, and nested content.
  */
 export function walkText(ast: Program, callback: TextCallback, options?: WalkTextOptions): void {
   const exclude = options?.excludeProperties ? new Set(options.excludeProperties) : undefined;
@@ -44,18 +47,50 @@ export function walkText(ast: Program, callback: TextCallback, options?: WalkTex
   // Walk blocks
   for (const block of ast.blocks) {
     walkBlockContent(block.content, block.loc, callback, exclude);
-    walkPresentationTitles(block, callback);
+    walkPresentationTitles(block.canonicalBody, callback);
   }
 
   // Walk extend blocks
   for (const ext of ast.extends) {
     walkBlockContent(ext.content, ext.loc, callback, exclude);
-    walkPresentationTitles(ext, callback);
+    walkPresentationTitles(ext.canonicalBody, callback);
+  }
+
+  // Walk override replacements. Their payload lives on `replacement` rather
+  // than `content`, so text rules would otherwise never see it on an
+  // unresolved program.
+  for (const override of ast.overrides ?? []) {
+    walkOverrideReplacement(override, callback, exclude);
   }
 }
 
-function walkPresentationTitles(block: Block | ExtendBlock, callback: TextCallback): void {
-  for (const entry of block.canonicalBody?.entries ?? []) {
+function walkOverrideReplacement(
+  override: OverrideBlock,
+  callback: TextCallback,
+  exclude?: Set<string>
+): void {
+  const { replacement } = override;
+  if (replacement.type === 'BlockReplacement') {
+    walkBlockContent(
+      blockBodyToContent(replacement.body),
+      replacement.loc ?? override.loc,
+      callback,
+      exclude
+    );
+    walkPresentationTitles(replacement.body, callback);
+    return;
+  }
+
+  walkValue(
+    valueNodeToValue(replacement.value),
+    replacement.loc ?? override.loc,
+    callback,
+    exclude
+  );
+}
+
+function walkPresentationTitles(body: BlockBody | undefined, callback: TextCallback): void {
+  for (const entry of body?.entries ?? []) {
     if (entry.type === 'PresentationEntry') {
       callback(entry.title, entry.titleLoc);
     }
