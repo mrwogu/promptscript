@@ -700,6 +700,27 @@ describe('StandardsExtractor', () => {
       expect(result.codeStandards.get('validation')?.items).toEqual(['range(1, 100)']);
     });
 
+    it('should render an unresolved TemplateExpression as its placeholder', () => {
+      const extractor = new StandardsExtractor();
+      const content: BlockContent = {
+        type: 'ObjectContent',
+        properties: {
+          naming: [
+            {
+              type: 'TemplateExpression',
+              name: 'projectName',
+              loc: createLoc(),
+            },
+          ],
+        },
+        loc: createLoc(),
+      };
+
+      const result = extractor.extract(content);
+
+      expect(result.codeStandards.get('naming')?.items).toEqual(['{{projectName}}']);
+    });
+
     it('should handle TypeExpression without params', () => {
       const extractor = new StandardsExtractor();
       const content: BlockContent = {

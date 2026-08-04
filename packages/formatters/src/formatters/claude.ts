@@ -1,4 +1,4 @@
-import type { Block, ClaudeVersion, Program, Value } from '@promptscript/core';
+import type { Block, BlockContent, ClaudeVersion, Program, Value } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
@@ -526,11 +526,8 @@ export class ClaudeFormatter extends BaseFormatter {
    * (`typescript: ["Strict mode enabled"]`), which the curated object readers
    * below cannot see. Without this the rule files come out as bare headings.
    */
-  private getStandardsRuleContent(ast: Program, categories: string[]): string {
-    const standards = this.findBlock(ast, 'standards');
-    if (!standards) return '';
-
-    const { codeStandards } = this.standardsExtractor.extract(standards.content);
+  private getStandardsRuleContent(content: BlockContent, categories: string[]): string {
+    const { codeStandards } = this.standardsExtractor.extract(content);
     const items: string[] = [];
 
     for (const category of categories) {
@@ -567,7 +564,7 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     if (items.length > 0) return items.join('\n');
-    return this.getStandardsRuleContent(ast, ['typescript', 'naming']);
+    return this.getStandardsRuleContent(standards.content, ['typescript', 'naming']);
   }
 
   /**
@@ -590,7 +587,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (items.length > 0) return items.join('\n');
 
-    const extracted = this.getStandardsRuleContent(ast, ['testing']);
+    const extracted = this.getStandardsRuleContent(standards.content, ['testing']);
     return extracted.length > 0 ? extracted : 'Follow project testing conventions.';
   }
 

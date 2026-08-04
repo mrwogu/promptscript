@@ -111,6 +111,22 @@ class TestFormatter extends BaseFormatter {
   public testExtractSkillExamples(skillProps: Record<string, Value>) {
     return this.extractSkillExamples(skillProps);
   }
+
+  public testContextPropertyItems(ast: Program, alsoRenderedKeys?: readonly string[]): string[] {
+    return this.contextPropertyItems(ast, alsoRenderedKeys);
+  }
+
+  public testContextArchitectureProperty(ast: Program): string | null {
+    return this.contextArchitectureProperty(ast);
+  }
+
+  public testDocumentationItem(value: Value | undefined, defaultText: string): string | null {
+    return this.documentationItem(value, defaultText);
+  }
+
+  public testYamlQuoted(value: string): string {
+    return this.yamlQuoted(value);
+  }
 }
 
 describe('BaseFormatter', () => {
@@ -1047,6 +1063,99 @@ describe('BaseFormatter', () => {
       const content = '    ```js\n    code\n    ```';
       const result = formatter.testStripAllIndent(content);
       expect(result).toContain('```js');
+    });
+  });
+  describe('context helpers', () => {
+    const contextProgram = (properties: Record<string, Value>): Program => ({
+      type: 'Program',
+      uses: [],
+      extends: [],
+      blocks: [
+        {
+          type: 'Block',
+          name: 'context',
+          content: { type: 'ObjectContent', properties, loc: createLoc() },
+          loc: createLoc(),
+        },
+      ],
+      loc: createLoc(),
+    });
+
+    it('should render generic properties and skip the ones with a dedicated section', () => {
+      const items = formatter.testContextPropertyItems(
+        contextProgram({
+          techStack: ['TypeScript'],
+          architecture: 'Layered',
+          deployment: 'Fly.io',
+          audited: true,
+          retired: false,
+          missing: null,
+        })
+      );
+
+      expect(items).toEqual(['Deployment: Fly.io', 'Audited']);
+    });
+
+    it('should render a scalar monorepo but leave an object one to the tech stack', () => {
+      expect(formatter.testContextPropertyItems(contextProgram({ monorepo: 'Nx' }))).toEqual([
+        'Monorepo: Nx',
+      ]);
+      expect(
+        formatter.testContextPropertyItems(contextProgram({ monorepo: { tool: 'Nx' } }))
+      ).toEqual([]);
+    });
+
+    it('should honor explicitly rendered keys', () => {
+      const items = formatter.testContextPropertyItems(
+        contextProgram({ project: 'Checkout', team: 'Payments' }),
+        ['project']
+      );
+
+      expect(items).toEqual(['Team: Payments']);
+    });
+
+    it('should return no items without a @context block', () => {
+      const ast: Program = {
+        type: 'Program',
+        uses: [],
+        extends: [],
+        blocks: [],
+        loc: createLoc(),
+      };
+
+      expect(formatter.testContextPropertyItems(ast)).toEqual([]);
+      expect(formatter.testContextArchitectureProperty(ast)).toBeNull();
+    });
+
+    it('should read the architecture property', () => {
+      expect(
+        formatter.testContextArchitectureProperty(contextProgram({ architecture: 'Layered' }))
+      ).toBe('Layered');
+      expect(formatter.testContextArchitectureProperty(contextProgram({ team: 'x' }))).toBeNull();
+      expect(
+        formatter.testContextArchitectureProperty(contextProgram({ architecture: '' }))
+      ).toBeNull();
+    });
+  });
+
+  describe('documentationItem', () => {
+    it('should prefer an authored string over the default text', () => {
+      expect(formatter.testDocumentationItem('read the runbook', 'default')).toBe(
+        'read the runbook'
+      );
+    });
+
+    it('should fall back to the default for true and drop falsy values', () => {
+      expect(formatter.testDocumentationItem(true, 'default')).toBe('default');
+      expect(formatter.testDocumentationItem(false, 'default')).toBeNull();
+      expect(formatter.testDocumentationItem(undefined, 'default')).toBeNull();
+    });
+  });
+
+  describe('yamlQuoted', () => {
+    it('should escape backslashes and quotes', () => {
+      expect(formatter.testYamlQuoted('say "hi"')).toBe('say \\"hi\\"');
+      expect(formatter.testYamlQuoted('C:\\path')).toBe('C:\\\\path');
     });
   });
 });

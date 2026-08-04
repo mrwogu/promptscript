@@ -3599,6 +3599,30 @@ describe('FactoryFormatter', () => {
     });
   });
 
+  describe('context architecture property', () => {
+    it('should render an object-form architecture value', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: { architecture: 'Hexagonal core with thin adapters' },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      expect(result.content).toContain('Hexagonal core with thin adapters');
+    });
+  });
+
   describe('plugins support', () => {
     it('should emit .factory/plugins.json when @plugins block present', () => {
       const ast: Program = {
