@@ -68,8 +68,8 @@ Skills Agents Commands\](https://getpromptscript.dev/dev/features/target-platfor
 | Continue                                                                                 | Tier 1 | `.continue/rules/project.md`      | No     | No     | No    | No       |
 | Roo Code                                                                                 | Tier 1 | `.roorules`                       | No     | No     | No    | No       |
 | Windsurf                                                                                 | Tier 1 | `.windsurf/rules/project.md`      | Yes    | No     | No    | No       |
-| Amp                                                                                      | Tier 2 | `AGENTS.md`                       | Yes    | No     | No    | No       |
-| Augment                                                                                  | Tier 2 | `.augment/rules/project.md`       | No     | No     | No    | No       |
+| Amp                                                                                      | Tier 2 | `AGENTS.md`                       | Yes    | Yes    | No    | No       |
+| Augment                                                                                  | Tier 2 | `.augment/rules/project.md`       | No     | Yes    | No    | No       |
 | Goose                                                                                    | Tier 2 | `.goosehints`                     | Yes    | No     | No    | No       |
 | Junie                                                                                    | Tier 2 | `.junie/guidelines.md`            | Yes    | No     | No    | No       |
 | Kilo Code                                                                                | Tier 2 | `.kilocode/rules/project.md`      | Yes    | No     | No    | No       |
@@ -79,7 +79,7 @@ Skills Agents Commands\](https://getpromptscript.dev/dev/features/target-platfor
 | Aider                                                                                    | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | Amazon Q                                                                                 | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |
 | CodeBuddy                                                                                | Tier 3 | `.codebuddy/rules/project.md`     | Yes    | No     | No    | No       |
-| Command Code                                                                             | Tier 3 | `.commandcode/rules/project.md`   | Yes    | No     | No    | No       |
+| Command Code                                                                             | Tier 3 | `.commandcode/rules/project.md`   | Yes    | No     | No    | Yes      |
 | Cortex                                                                                   | Tier 3 | `.cortex/rules/project.md`        | Yes    | No     | No    | No       |
 | Crush                                                                                    | Tier 3 | `AGENTS.md`                       | Yes    | No     | No    | No       |
 | Deep Agents                                                                              | Tier 3 | `AGENTS.md`                       | No     | No     | No    | No       |

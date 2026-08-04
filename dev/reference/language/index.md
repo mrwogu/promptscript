@@ -377,7 +377,7 @@ Project context and environment:
 }
 ```
 
-Supports both key-value properties and text content.
+Supports both key-value properties and text content. `project`, `languages`, `runtime`, `monorepo`, `techStack` and `architecture` get dedicated rendering; every other property renders as a `Label: value` list item under the context section.
 
 ### [@standards](https://github.com/standards "GitHub User: standards")
 
@@ -415,7 +415,7 @@ The `errors` key is automatically mapped to `error-handling` in the output for b
 
 Four keys render as dedicated sections instead of code-standard subsections: `git` (commit conventions), `config` (tool configuration), `documentation` (doc standards), and `diagrams` (diagram preferences). Each known field gets specialized rendering (e.g. `git.format`, `git.types`, `diagrams.format`).
 
-**Custom fields are kept.** Any extra key inside these objects renders as a generic `Label: value` list item - `true` renders as a bare label, `false`/`null` are dropped, nested objects render inline as `key: value` pairs:
+**Custom fields are kept.** Any extra key inside these objects renders as a generic `Label: value` list item - `true` renders as a bare label, `false`/`null` are dropped, nested objects render inline as `key: value` pairs. Known fields accept the same shapes: `true` emits the built-in wording, while a string replaces it with your own text:
 
 ```
 @standards {
@@ -771,14 +771,14 @@ For projects with multiple path-specific instruction files, use named entries in
 
 Each named entry generates a separate instruction file per target:
 
-- **GitHub Copilot** (`version: multifile` or `full`): `.github/instructions/<name>.instructions.md` with `applyTo` frontmatter
-- **Factory AI** (`version: multifile` or `full`): `.factory/skills/<name>/SKILL.md` with scope info in the description
+- **Multifile targets** (`version: multifile` or `full`): `.claude/rules/<name>.md`, `.cursor/rules/<name>.mdc`, `.github/instructions/<name>.instructions.md` with `applyTo` frontmatter, and `.factory/skills/<name>/SKILL.md` with scope info in the description
+- **Antigravity** (any version): `.agent/rules/<name>.md` with glob activation
 
 Named entries support three properties:
 
 | Property | Required | Description |
 | --- | --- | --- |
-| `applyTo` | Yes | Array of glob patterns for file targeting |
+| `applyTo` | Yes | Glob patterns for file targeting (alias: `paths`) |
 | `description` | No | Human-readable description (defaults to `<name> rules`) |
 | `content` | No | Full instruction content (triple-quoted markdown) |
 
@@ -1237,6 +1237,23 @@ Defines project-local MCP (Model Context Protocol) server configurations. Requir
 | `env`       | No       | object   | Non-secret environment values         |
 
 Plaintext values are rejected for secret-bearing environment keys. Current target serializers emit string environment values only, so provide credentials through target-native runtime or secret management rather than `.prs` source.
+
+`command` is a single array in source, and each target serializer splits it into that target's native shape. JSON hosts receive the executable in `command` and the remaining entries in `args`, with `args` omitted when the command takes none:
+
+```json
+{
+  "mcpServers": {
+    "security-scanner": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./tools/security-scanner.mjs"],
+      "env": { "LOG_LEVEL": "info" }
+    }
+  }
+}
+```
+
+VS Code is the exception to the wrapper key: `.vscode/mcp.json` nests servers under `servers` instead of `mcpServers`. TOML hosts keep the array form under `[mcp_servers.<name>]`.
 
 **Target Support:** The `@mcpServers` block is emitted to target-native MCP config files. See [Configuration Reference](https://getpromptscript.dev/dev/reference/config/#mcp-hooks-plugins-support) for the full list of supported targets and their output paths.
 
