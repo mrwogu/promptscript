@@ -1278,6 +1278,55 @@ describe('ClaudeFormatter', () => {
       expect(testingRule?.content).toContain('Follow AAA pattern');
     });
 
+    it('should extract rule content from array-shaped standards categories', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'standards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                typescript: ['Strict mode enabled', 'Named exports only, no default exports'],
+                naming: ['Files: `kebab-case.ts`'],
+                testing: ['Test files: `*.spec.ts` next to source', 'Framework: Vitest'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                globs: ['**/*.ts', '**/*.spec.ts'],
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const codeStyleRule = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/rules/code-style.md')
+      );
+      const testingRule = result.additionalFiles?.find((f) =>
+        f.path.includes('.claude/rules/testing.md')
+      );
+
+      expect(codeStyleRule?.content).toContain('- Strict mode enabled');
+      expect(codeStyleRule?.content).toContain('- Named exports only, no default exports');
+      expect(codeStyleRule?.content).toContain('- Files: `kebab-case.ts`');
+      expect(testingRule?.content).toContain('- Test files: `*.spec.ts` next to source');
+      expect(testingRule?.content).toContain('- Framework: Vitest');
+      expect(testingRule?.content).not.toContain('Follow project testing conventions.');
+    });
+
     it('should use default testing rule content when no testing standards in rule file', () => {
       const ast: Program = {
         ...createMinimalProgram(),
