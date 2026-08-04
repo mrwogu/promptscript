@@ -1972,7 +1972,7 @@ Template expressions are resolved during inheritance resolution when parameters 
 
 ```promptscript
 # Environment variable - from system at parse time
-apiUrl: ${API_URL:-https://api.example.com}
+apiUrl: "${API_URL:-https://api.example.com}"
 
 # Template variable - from @inherit params at resolve time
 project: {{projectName}}
