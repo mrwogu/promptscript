@@ -85,6 +85,12 @@ jobs:
         if: matrix.node-version == '25.x'
         run: pnpm docs:validate:check
 
+      - name: Documentation Highlighting Check
+        if: matrix.node-version == '25.x'
+        run: |
+          python3 -m pip install --quiet --disable-pip-version-check pygments
+          pnpm docs:highlight:check
+
       - name: Build
         run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t build
 
