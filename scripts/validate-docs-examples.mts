@@ -212,6 +212,21 @@ function findMarkdownFiles(dir: string): string[] {
 }
 
 /**
+ * Check whether a fragment is made up solely of import statements.
+ */
+function isImportOnly(content: string): boolean {
+  const lines = content
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('#'));
+
+  return (
+    lines.length > 0 &&
+    lines.every((line) => /^@(?:use|inherit)\s/.test(line) && !line.includes('{'))
+  );
+}
+
+/**
  * Check if a code block should be skipped for validation.
  * Returns true for fragments, multi-file examples, and intentionally invalid examples.
  */
@@ -251,8 +266,10 @@ function shouldSkipBlock(content: string, markdownContext: string): boolean {
   const hasMetaBlock = content.includes('@meta');
   const hasMainBlocks = /@(identity|standards|context|knowledge|guards)\s*\{/.test(content);
 
-  // If no @meta and no main blocks, it's likely a fragment showing partial syntax
-  if (!hasMetaBlock && !hasMainBlocks) {
+  // If no @meta and no main blocks, it's likely a fragment showing partial
+  // syntax - unless every line is an import, which the parser accepts on its
+  // own and which is where import path syntax is documented.
+  if (!hasMetaBlock && !hasMainBlocks && !isImportOnly(content)) {
     return true;
   }
 
@@ -375,10 +392,42 @@ function extractOutputBlocks(filePath: string): OutputBlock[] {
 // Validation utilities
 
 /**
+ * Parse each import line of a fragment on its own.
+ */
+function parseImportLines(block: CodeBlock): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  block.content.split('\n').forEach((line, index) => {
+    const statement = line.trim();
+    if (statement.length === 0 || statement.startsWith('#')) return;
+
+    const result = parse(statement);
+    if (result.errors.length === 0) return;
+
+    errors.push({
+      file: block.file,
+      line: block.line + index,
+      column: block.column,
+      code: 'PS1000',
+      message: result.errors[0]?.message ?? 'Import statement could not be parsed',
+      context: statement,
+    });
+  });
+
+  return errors;
+}
+
+/**
  * Parse a code block and return errors.
  */
 function parseCodeBlock(block: CodeBlock): ValidationError[] {
   const errors: ValidationError[] = [];
+
+  // An import-only fragment usually lists alternative forms of one directive,
+  // so each line is checked on its own rather than as a single program.
+  if (isImportOnly(block.content)) {
+    return parseImportLines(block);
+  }
 
   try {
     const result: ParseResult = parse(block.content);
