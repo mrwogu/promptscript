@@ -404,12 +404,18 @@ export class PromptScriptParser extends CstParser {
 
   /**
    * typeExpr
-   *   : rangeType | enumType
+   *   : rangeType | enumType | 'string' | 'number' | 'boolean'
+   *
+   * The primitive keywords mirror paramType so a typed field carries the same
+   * annotations whether it is declared in a block body or in a paramDefList.
    */
   private typeExpr = this.RULE('typeExpr', () => {
     this.OR([
       { ALT: () => this.SUBRULE(this.rangeType) },
       { ALT: () => this.SUBRULE(this.enumType) },
+      { ALT: () => this.CONSUME(StringType) },
+      { ALT: () => this.CONSUME(NumberType) },
+      { ALT: () => this.CONSUME(BooleanType) },
     ]);
   });
 

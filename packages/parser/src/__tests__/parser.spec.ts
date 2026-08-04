@@ -191,6 +191,65 @@ describe('parse', () => {
         expect(format).toHaveProperty('kind', 'enum');
       }
     });
+
+    it.each([
+      ['string', 'mode: string', 'mode'],
+      ['number', 'retries: number', 'retries'],
+      ['boolean', 'verbose: boolean', 'verbose'],
+    ])('should parse %s types', (kind, declaration, name) => {
+      const source = `
+        @params {
+          ${declaration}
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const params = result.ast?.blocks.find((b) => b.name === 'params');
+      expect(params?.content.type).toBe('ObjectContent');
+      if (params?.content.type === 'ObjectContent') {
+        expect(params.content.properties[name]).toMatchObject({
+          type: 'TypeExpression',
+          kind,
+        });
+      }
+    });
+
+    it('should parse primitive types with defaults and optional markers', () => {
+      const source = `
+        @params {
+          strictness: range(1..5) = 3
+          format?: enum("json", "text", "markdown") = "text"
+          verbose: boolean = false
+          mode?: string = "fast"
+          retries: number = 3
+        }
+      `;
+      const result = parse(source);
+
+      expect(result.errors).toHaveLength(0);
+      const params = result.ast?.blocks.find((b) => b.name === 'params');
+      const entries = params?.canonicalBody?.entries ?? [];
+      expect(
+        entries.map((entry) => (entry.type === 'FieldEntry' ? entry.name : entry.type))
+      ).toEqual(['strictness', 'format', 'verbose', 'mode', 'retries']);
+
+      const verbose = entries.find(
+        (entry) => entry.type === 'FieldEntry' && entry.name === 'verbose'
+      );
+      expect(verbose).toMatchObject({
+        value: { type: 'TypeExpressionValueNode', expression: { kind: 'boolean' } },
+        defaultValue: { value: false },
+      });
+      expect(verbose && 'optional' in verbose ? verbose.optional : undefined).toBeFalsy();
+
+      const mode = entries.find((entry) => entry.type === 'FieldEntry' && entry.name === 'mode');
+      expect(mode).toMatchObject({
+        optional: true,
+        value: { type: 'TypeExpressionValueNode', expression: { kind: 'string' } },
+        defaultValue: { value: 'fast' },
+      });
+    });
   });
 
   describe('path references', () => {

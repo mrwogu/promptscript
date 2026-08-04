@@ -170,6 +170,9 @@ interface ObjectCstCtx {
 interface TypeExprCstCtx {
   rangeType?: CstNode[];
   enumType?: CstNode[];
+  StringType?: IToken[];
+  NumberType?: IToken[];
+  BooleanType?: IToken[];
 }
 
 interface RangeTypeCstCtx {
@@ -961,13 +964,29 @@ class PromptScriptVisitor extends BaseVisitor {
    * typeExpr → TypeExpression
    */
   typeExpr(ctx: TypeExprCstCtx): TypeExpression {
-    // Grammar ensures only rangeType or enumType can appear here
     if (ctx.rangeType) {
       return this.visit(ctx.rangeType[0]!);
     }
 
-    // Must be enumType (grammar guarantees one of the two)
-    return this.visit(ctx.enumType![0]!);
+    if (ctx.enumType) {
+      return this.visit(ctx.enumType[0]!);
+    }
+
+    for (const [kind, tokens] of [
+      ['string', ctx.StringType],
+      ['number', ctx.NumberType],
+      ['boolean', ctx.BooleanType],
+    ] as const) {
+      if (tokens) {
+        return {
+          type: 'TypeExpression',
+          kind,
+          loc: this.loc(tokens[0]!),
+        };
+      }
+    }
+
+    throw new Error('Unknown type expression');
   }
 
   /**

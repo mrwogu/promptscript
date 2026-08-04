@@ -802,6 +802,16 @@ Configurable parameters:
 | `name?: type` | Optional parameter |
 | `= value`     | Default value      |
 
+Available types:
+
+| Type              | Accepts                   |
+| ----------------- | ------------------------- |
+| `string`          | Any string                |
+| `number`          | Any number                |
+| `boolean`         | `true` or `false`         |
+| `range(min..max)` | A number within the range |
+| `enum("a", "b")`  | One of the listed strings |
+
 ### @guards
 
 Runtime validation rules and file targeting:
