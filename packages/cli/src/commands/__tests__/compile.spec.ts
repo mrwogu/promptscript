@@ -431,6 +431,63 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('PS4002'));
   });
 
+  it('should remove legacy Factory settings that only held hooks', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Execute',
+            hooks: [{ type: 'command', command: 'audit' }],
+          },
+        ],
+      },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          '.factory/hooks.json',
+          {
+            path: '.factory/hooks.json',
+            content: JSON.stringify({
+              hooks: {
+                PreToolUse: [
+                  {
+                    hooks: [
+                      {
+                        type: 'command',
+                        command: 'node check.mjs # promptscript-generated:check',
+                      },
+                    ],
+                  },
+                ],
+              },
+            }),
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    expect(mockRemoveHookOutputIfUnchanged).toHaveBeenCalledWith(
+      '/mock/project/.factory/settings.json',
+      '/mock/project',
+      '{}\n'
+    );
+  });
+
   it('should roll back canonical hooks when legacy settings change before commit', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: ['factory'],

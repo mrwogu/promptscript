@@ -398,6 +398,12 @@ async function finishLegacyFactoryMigration(
         `Review ${plan.hooksPath} and rerun.`
     );
   }
+  // A settings file whose only content was the migrated hooks section carries no
+  // user configuration, so leaving `{}` behind would resurrect the legacy
+  // fallback path with an empty payload.
+  if (Object.keys(plan.migration.legacy).length === 0) {
+    await removeHookOutputIfUnchanged(plan.settingsPath, outputRoot, content);
+  }
   ConsoleOutput.success(`${action[0]!.toUpperCase()}${action.slice(1)}`);
 }
 
