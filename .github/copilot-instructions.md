@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-08-04T15:22:17.813Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-08-04T15:31:20.020Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -55,7 +55,7 @@ The project is organized as a monorepo with these packages:
 - Testing: Vitest
 - Linting: ESLint + Prettier
 
-## code-standards
+## Engineering Standards
 
 ### graph-first
 
@@ -108,9 +108,10 @@ The project is organized as a monorepo with these packages:
 
 ### workflow
 
-- branchStrategy: gitflow
-- newTask: When starting a new task while on main branch: 1. Create feature branch: git checkout -b feat/<task-name> or fix/<task-name> 2. Make changes with atomic commits (Conventional Commits format) 3. Run full verification pipeline before pushing 4. Push branch: git push -u origin <branch-name> 5. Create PR: gh pr create --fill 6. Monitor CI: gh pr checks --watch 7. If checks fail, fix issues and push again 8. Wait for all checks to pass before considering work complete
+- branchStrategy: gitflow — branch from main, never commit to main
+- newTask: follow the new-task workflow: branch, atomic commits, full verification pipeline, push, PR, watch CI
 - prMonitoring: use `gh pr checks --watch` to monitor CI status; do not consider work done until all checks pass
+- verification: follow the verify workflow after any code change - all eight steps, in order
 
 ## shortcuts
 
@@ -155,11 +156,9 @@ Vite root: \_\_dirname (not import.meta.dirname)
 - If adding new features, add corresponding documentation in `docs/`
 - If changing existing behavior, update affected documentation sections
 
-## post-work-verification
+## Post-Work Verification (MANDATORY)
 
 After completing any code changes, run the following commands to ensure code quality:
-(MANDATORY)
-
 After completing ANY code changes, run ALL steps in order:
 
 ```bash
@@ -228,3 +227,89 @@ that file scanning cannot.
 2. Use `detect_changes` for code review.
 3. Use `get_affected_flows` to understand impact.
 4. Use `query_graph` pattern="tests_for" to check coverage.
+
+## examples
+
+### Example: scoped-commit
+
+Commit subject: package scope is mandatory and drives the release changelog
+
+**Input:**
+
+```
+Added support for primitive type annotations in typed block fields
+```
+
+**Output:**
+
+```
+fix(parser): accept primitive types in typed block fields
+```
+
+### Example: unscoped-commit-rejected
+
+A subject without a scope, rewritten with the scope of the package it touches
+
+**Input:**
+
+```
+feat: add terminal command hook event
+```
+
+**Output:**
+
+```
+feat(formatters): add terminal command hook event
+```
+
+### Example: unknown-narrowing
+
+Narrow `unknown` with a type guard instead of reaching for `any`
+
+**Input:**
+
+```
+function readId(value: any): string {
+  return value.id;
+}
+```
+
+**Output:**
+
+```
+function isIdentified(value: unknown): value is { id: string } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    typeof (value as { id: unknown }).id === 'string'
+  );
+}
+
+export function readId(value: unknown): string {
+  if (!isIdentified(value)) {
+    throw new PSError('Expected an object with a string id');
+  }
+  return value.id;
+}
+```
+
+### Example: named-export
+
+Named exports only, with an explicit return type on the public function
+
+**Input:**
+
+```
+export default function compile(ast) {
+  return format(ast);
+}
+```
+
+**Output:**
+
+```
+export function compile(ast: Program): CompileResult {
+  return format(ast);
+}
+```

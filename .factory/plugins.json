@@ -1,0 +1,15 @@
+{
+  "plugins": {
+    "knowledge-graph": {
+      "version": "1.0.0",
+      "description": "Keeps the code-review-graph index current and exposes it to agents",
+      "hooks": [
+        "graph-update",
+        "graph-status"
+      ],
+      "mcpServers": [
+        "code-review-graph"
+      ]
+    }
+  }
+}

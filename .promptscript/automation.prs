@@ -1,0 +1,74 @@
+# Agent automation: lifecycle hooks, MCP servers, and the plugin that bundles them.
+# Requires syntax 1.4.0 or newer.
+
+# === HOOKS ===
+# Hook bodies live in .promptscript/scripts/ so every target invokes identical
+# logic. `cwd: "project"` makes the compiler emit a project-root guard, which is
+# why the scripts can use a relative --repo path.
+#
+# github is disabled: it cannot guarantee project-root execution and cannot
+# invoke `sh` natively on Windows runners. statusMessage is declared per target
+# because only Claude renders it.
+
+@hooks {
+  graph-update: {
+    event: "post-tool-use"
+    script: {
+      path: ".promptscript/scripts/graph-update.sh"
+      interpreter: "sh"
+    }
+    cwd: "project"
+    timeoutMs: 30000
+    targets: {
+      claude: {
+        matcher: "Edit|Write|Bash"
+        statusMessage: "code-review-graph: refreshing index..."
+      }
+      factory: {
+        matcher: "Create|Edit|Execute"
+      }
+      github: {
+        enabled: false
+      }
+    }
+  }
+
+  graph-status: {
+    event: "session-start"
+    script: {
+      path: ".promptscript/scripts/graph-status.sh"
+      interpreter: "sh"
+    }
+    cwd: "project"
+    timeoutMs: 10000
+    targets: {
+      claude: {
+        statusMessage: "code-review-graph: reading index status..."
+      }
+      github: {
+        enabled: false
+      }
+    }
+  }
+}
+
+# === MCP SERVERS ===
+
+@mcpServers {
+  code-review-graph: {
+    description: "Knowledge graph over this repository: structure, callers, dependents, and test coverage"
+    transport: "stdio"
+    command: ["code-review-graph", "serve"]
+  }
+}
+
+# === PLUGINS ===
+
+@plugins {
+  knowledge-graph: {
+    description: "Keeps the code-review-graph index current and exposes it to agents"
+    version: "1.0.0"
+    hooks: ["graph-update", "graph-status"]
+    mcpServers: ["code-review-graph"]
+  }
+}

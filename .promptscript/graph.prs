@@ -1,6 +1,6 @@
 @meta {
   id: "promptscript-graph"
-  syntax: "1.1.0"
+  syntax: "1.6.0"
 }
 
 @standards {

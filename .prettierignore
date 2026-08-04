@@ -16,6 +16,13 @@ docs/getting-started.md
 # PromptScript generated files - managed by prs compile
 CHANGELOG.md
 
+# Compiler-owned JSON that carries no generation marker. Reformatting it makes
+# the next `prs compile` treat the file as user-authored and refuse to overwrite.
+/.mcp.json
+/.vscode/mcp.json
+/.factory/mcp.json
+/.factory/plugins.json
+
 # Vendored third-party skill assets (HTML copied verbatim from upstream)
 **/skills/skill-creator/**/*.html
 
