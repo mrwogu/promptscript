@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { mkdtemp, mkdir, rm } from 'fs/promises';
+import { tmpdir } from 'os';
 import { join } from 'path';
 
 // Define mocks that will be hoisted
@@ -210,6 +212,19 @@ describe('utils/registry-resolver', () => {
   });
 
   describe('resolveRegistryPath', () => {
+    // The subpath check only runs for a directory that exists on disk, so the
+    // vendored repository has to be real rather than borrowed from the cwd.
+    let vendorRepo: string;
+
+    beforeEach(async () => {
+      vendorRepo = await mkdtemp(join(tmpdir(), 'prs-registry-resolver-'));
+      await mkdir(join(vendorRepo, 'src'));
+    });
+
+    afterEach(async () => {
+      await rm(vendorRepo, { recursive: true, force: true });
+    });
+
     it('uses a pinned vendored git registry without cache or network access', async () => {
       mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
       const config: PromptScriptConfig = {
@@ -320,7 +335,7 @@ describe('utils/registry-resolver', () => {
 
     it('rejects a vendored registry subpath whose real path escapes the repository', async () => {
       mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
-      mockResolveVendoredRepository.mockResolvedValue(process.cwd());
+      mockResolveVendoredRepository.mockResolvedValue(vendorRepo);
       mockIsRealPathInside.mockResolvedValue(false);
       const config: PromptScriptConfig = {
         id: 'test',
@@ -337,7 +352,7 @@ describe('utils/registry-resolver', () => {
 
       await expect(
         resolveRegistryPath(config, {
-          vendorDir: process.cwd(),
+          vendorDir: vendorRepo,
           lockfile: {
             version: 1,
             dependencies: {
@@ -350,12 +365,12 @@ describe('utils/registry-resolver', () => {
           },
         })
       ).rejects.toThrow('Registry path escapes its repository');
-      expect(mockIsRealPathInside).toHaveBeenCalledWith(join(process.cwd(), 'src'), process.cwd());
+      expect(mockIsRealPathInside).toHaveBeenCalledWith(join(vendorRepo, 'src'), vendorRepo);
     });
 
     it('accepts a vendored registry subpath contained by its real path', async () => {
       mockLoadVendorManifest.mockResolvedValue({ version: 1, dependencies: {} });
-      mockResolveVendoredRepository.mockResolvedValue(process.cwd());
+      mockResolveVendoredRepository.mockResolvedValue(vendorRepo);
       const config: PromptScriptConfig = {
         id: 'test',
         syntax: '1.0.0',
@@ -370,7 +385,7 @@ describe('utils/registry-resolver', () => {
       };
 
       const result = await resolveRegistryPath(config, {
-        vendorDir: process.cwd(),
+        vendorDir: vendorRepo,
         lockfile: {
           version: 1,
           dependencies: {
@@ -383,8 +398,8 @@ describe('utils/registry-resolver', () => {
         },
       });
 
-      expect(result.path).toBe(join(process.cwd(), 'src'));
-      expect(mockIsRealPathInside).toHaveBeenCalledWith(join(process.cwd(), 'src'), process.cwd());
+      expect(result.path).toBe(join(vendorRepo, 'src'));
+      expect(mockIsRealPathInside).toHaveBeenCalledWith(join(vendorRepo, 'src'), vendorRepo);
     });
 
     it('does not fall back to network when an existing vendor directory lacks a manifest', async () => {
@@ -400,7 +415,7 @@ describe('utils/registry-resolver', () => {
 
       await expect(
         resolveRegistryPath(config, {
-          vendorDir: process.cwd(),
+          vendorDir: vendorRepo,
           lockfile: { version: 1, dependencies: {} },
         })
       ).rejects.toThrow('Vendor manifest is missing');
@@ -446,7 +461,7 @@ describe('utils/registry-resolver', () => {
 
       await expect(
         resolveRegistryPath(config, {
-          vendorDir: process.cwd(),
+          vendorDir: vendorRepo,
         })
       ).rejects.toThrow('Vendored registry is not pinned by the lockfile');
     });
@@ -465,7 +480,7 @@ describe('utils/registry-resolver', () => {
 
       await expect(
         resolveRegistryPath(config, {
-          vendorDir: process.cwd(),
+          vendorDir: vendorRepo,
           lockfile: {
             version: 1,
             dependencies: {
