@@ -8,4 +8,5 @@ export const { Formatter: AmpFormatter, VERSIONS: AMP_VERSIONS } = createSimpleM
   description: 'Amp instructions (Markdown)',
   mainFileHeader: '# AGENTS.md',
   dotDir: '.agents',
+  hasAgents: true,
 });
