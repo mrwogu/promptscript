@@ -1090,6 +1090,37 @@ describe('CursorFormatter', () => {
       expect(testCommand?.content).toBe('Write unit tests using:\n- Vitest\n- AAA pattern');
     });
 
+    it('should generate a command file for a single-line prompt shortcut', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/deep': {
+                  prompt: true,
+                  description: 'Deep probe',
+                  content: 'Run the deep probe.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+
+      const deepCommand = result.additionalFiles?.find(
+        (f) => f.path === '.cursor/commands/deep.md'
+      );
+      expect(deepCommand?.content).toBe('Run the deep probe.');
+    });
+
     it('should not generate command files for single-line shortcuts', () => {
       const ast: Program = {
         ...createMinimalProgram(),

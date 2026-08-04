@@ -623,6 +623,9 @@ export class CursorFormatter extends BaseFormatter {
 
     for (const [name, value] of Object.entries(props)) {
       let content = '';
+      // An object shortcut declares command intent explicitly, so its content
+      // becomes a command file regardless of length.
+      let declaresCommand = false;
 
       // Handle object shortcuts with prompt/content properties (but not TextContent AST nodes)
       if (
@@ -634,13 +637,14 @@ export class CursorFormatter extends BaseFormatter {
         const obj = value as Record<string, Value>;
         if (obj['prompt'] === true || obj['content']) {
           content = obj['content'] ? this.valueToString(obj['content']) : '';
+          declaresCommand = content.trim().length > 0;
         }
       } else {
         content = this.valueToString(value);
       }
 
-      // Only multi-line content becomes a command file
-      if (content.includes('\n')) {
+      // Multi-line string shortcuts also become command files
+      if (declaresCommand || content.includes('\n')) {
         // Remove leading slash from command name
         const fileName = name.replace(/^\/+/, '');
         if (!this.isSafeName(fileName)) continue;

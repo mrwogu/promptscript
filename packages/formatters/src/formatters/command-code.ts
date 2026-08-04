@@ -9,4 +9,5 @@ export const { Formatter: CommandCodeFormatter, VERSIONS: COMMAND_CODE_VERSIONS 
     description: 'Command Code rules (Markdown)',
     mainFileHeader: '# Project Rules',
     dotDir: '.commandcode',
+    hasCommands: true,
   });
