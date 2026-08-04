@@ -157,8 +157,10 @@ const KITCHEN_SINK_SOURCE = `@meta {
  */
 const UNIVERSAL_SENTINELS = [
   'ZZIDENTITY',
+  'ZZCTXPROJECT',
   'ZZCTXSTACK',
   'ZZCTXARCH',
+  'ZZCTXLIB',
   'ZZSTDTS',
   'ZZSTDNAMING',
   'ZZSTDTESTING',
@@ -183,6 +185,17 @@ const FEATURE_SENTINELS: readonly { feature: string; sentinels: readonly string[
   { feature: 'workflows', sentinels: ['ZZWORKFLOWDESC', 'ZZWORKFLOWCONTENT'] },
   { feature: 'path-specific-rules', sentinels: ['ZZGUARDDESC', 'ZZGUARDCONTENT'] },
   { feature: 'slash-commands', sentinels: ['ZZSHORTCUTCONTENT'] },
+];
+
+/**
+ * Integration configs have no feature-matrix entry, so they are checked by
+ * output path instead: whenever a target writes one of these files, the
+ * authored values have to be in it.
+ */
+const CONFIG_FILE_SENTINELS: readonly { match: RegExp; sentinels: readonly string[] }[] = [
+  { match: /mcp[^/]*\.json$|mcp_config\.json$/, sentinels: ['ZZMCPARG', 'ZZMCPENV'] },
+  { match: /hooks[^/]*\.(json|toml)$|hooks\/[^/]+\.json$/, sentinels: ['ZZHOOKCOMMAND'] },
+  { match: /plugins[^/]*\.json$/, sentinels: ['ZZPLUGINDESC'] },
 ];
 
 interface TargetVersion {
@@ -259,6 +272,19 @@ describe('Compilation matrix smoke tests', () => {
 
       for (const sentinel of UNIVERSAL_SENTINELS) {
         expect(blob, `${target} (${version}) dropped ${sentinel}`).toContain(sentinel);
+      }
+    });
+
+    it('fills every integration config it writes', async () => {
+      const result = await compileTo(target, version);
+
+      for (const [path, output] of result.outputs) {
+        for (const { match, sentinels } of CONFIG_FILE_SENTINELS) {
+          if (!match.test(path)) continue;
+          for (const sentinel of sentinels) {
+            expect(output.content, `${path} dropped ${sentinel}`).toContain(sentinel);
+          }
+        }
       }
     });
   });
