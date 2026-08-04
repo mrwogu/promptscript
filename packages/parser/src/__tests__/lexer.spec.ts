@@ -236,6 +236,21 @@ describe('PSLexer', () => {
       expect(result.tokens[0]!.image).toBe('github.com/acme/repo/path@main');
     });
 
+    it('should lex a URL path with a scope segment and a version suffix', () => {
+      const result = tokenize('github.com/acme/repo/@org/base@1.2.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.tokenType).toBe(UrlPath);
+      expect(result.tokens[0]!.image).toBe('github.com/acme/repo/@org/base@1.2.0');
+    });
+
+    it('should lex a URL path with a scope segment and a semver range', () => {
+      const result = tokenize('github.com/acme/repo/@org/base@^1.0.0');
+      expect(result.errors).toHaveLength(0);
+      expect(result.tokens).toHaveLength(1);
+      expect(result.tokens[0]!.image).toBe('github.com/acme/repo/@org/base@^1.0.0');
+    });
+
     it('should not match a plain identifier without a dot', () => {
       const result = tokenize('somepackage');
       expect(result.errors).toHaveLength(0);

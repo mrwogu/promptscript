@@ -31,9 +31,19 @@ export const TextBlock = createToken({
 // PathReference must contain at least one / to distinguish from @keyword
 // ============================================================
 
+/**
+ * A scope segment such as the `@org/base` in `@company/@org/base@1.2.0`.
+ * The lookahead keeps it from swallowing a trailing version, which would
+ * otherwise leave nothing for the version group to match.
+ */
+const SCOPE_SEGMENT = String.raw`(?:@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?=@))?`;
+const VERSION_SUFFIX = String.raw`(?:@[a-zA-Z0-9^~./-]+)?`;
+
 export const PathReference = createToken({
   name: 'PathReference',
-  pattern: /@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?:@[a-zA-Z0-9^~./-]+)?/,
+  pattern: new RegExp(
+    String.raw`@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*${SCOPE_SEGMENT}${VERSION_SUFFIX}`
+  ),
 });
 
 export const RelativePath = createToken({
@@ -57,7 +67,9 @@ export const Identifier = createToken({
  */
 export const UrlPath = createToken({
   name: 'UrlPath',
-  pattern: /[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[a-zA-Z0-9_./-]+(?:@[a-zA-Z0-9^~./-]+)?/,
+  pattern: new RegExp(
+    String.raw`[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,}\/[a-zA-Z0-9_./-]+${SCOPE_SEGMENT}${VERSION_SUFFIX}`
+  ),
   longer_alt: Identifier,
 });
 

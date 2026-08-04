@@ -749,6 +749,40 @@ describe('parse URL imports', () => {
   });
 });
 
+describe('parse scoped imports', () => {
+  it('should keep the version separate from a scoped URL path', () => {
+    const result = parse('@use github.com/acme/shared/@org/base@1.2.0');
+    expect(result.errors).toHaveLength(0);
+    const path = result.ast!.uses[0]!.path;
+    expect(path.raw).toBe('github.com/acme/shared/@org/base@1.2.0');
+    expect(path.version).toBe('1.2.0');
+    expect(path.segments).toEqual(['github.com', 'acme', 'shared', '@org', 'base']);
+  });
+
+  it('should accept a semver range after a scoped URL path', () => {
+    const result = parse('@use github.com/acme/shared/@org/base@^1.0.0');
+    expect(result.errors).toHaveLength(0);
+    expect(result.ast!.uses[0]!.path.version).toBe('^1.0.0');
+  });
+
+  it('should leave a scoped URL path without a version unversioned', () => {
+    const result = parse('@use github.com/acme/shared/@org/base');
+    expect(result.errors).toHaveLength(0);
+    const path = result.ast!.uses[0]!.path;
+    expect(path.version).toBeUndefined();
+    expect(path.segments).toEqual(['github.com', 'acme', 'shared', '@org', 'base']);
+  });
+
+  it('should keep the version separate from a scoped registry path', () => {
+    const result = parse('@use @company/@stacks/react@1.0.0');
+    expect(result.errors).toHaveLength(0);
+    const path = result.ast!.uses[0]!.path;
+    expect(path.namespace).toBe('company');
+    expect(path.version).toBe('1.0.0');
+    expect(path.segments).toEqual(['@stacks', 'react']);
+  });
+});
+
 describe('parse PathReference extended versions', () => {
   it('should parse @use with semver range version', () => {
     const result = parse('@use @acme/security@^1.0.0');
