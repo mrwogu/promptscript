@@ -348,9 +348,11 @@ export class CursorFormatter extends BaseFormatter {
     // Extract globs from @guards block
     const globs = this.extractGlobs(ast);
 
+    const mainOutputPath = options?.outputPath ?? CURSOR_VERSIONS.modern.outputPath;
+
     // Generate glob-specific rule files
     for (const globConfig of globs) {
-      const globFile = this.generateGlobFile(ast, globConfig);
+      const globFile = this.generateGlobFile(ast, globConfig, mainOutputPath);
       if (globFile) {
         additionalFiles.push(globFile);
       }
@@ -395,10 +397,7 @@ export class CursorFormatter extends BaseFormatter {
 
           const skillLines: string[] = ['---'];
           skillLines.push(`name: ${skillName}`);
-          if (description)
-            skillLines.push(
-              `description: "${description.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
-            );
+          if (description) skillLines.push(`description: "${this.yamlQuoted(description)}"`);
           skillLines.push('---');
           skillLines.push('');
           if (content) skillLines.push(this.dedent(content));
@@ -424,10 +423,7 @@ export class CursorFormatter extends BaseFormatter {
 
           const agentLines: string[] = ['---'];
           agentLines.push(`name: ${agentName}`);
-          if (description)
-            agentLines.push(
-              `description: "${description.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
-            );
+          if (description) agentLines.push(`description: "${this.yamlQuoted(description)}"`);
           const model = obj['model'];
           if (typeof model === 'string') agentLines.push(`model: ${model}`);
 
@@ -575,15 +571,19 @@ export class CursorFormatter extends BaseFormatter {
   /**
    * Generate a glob-specific rule file.
    */
-  private generateGlobFile(_ast: Program, config: GlobConfig): FormatterOutput | null {
+  private generateGlobFile(
+    _ast: Program,
+    config: GlobConfig,
+    mainOutputPath: string
+  ): FormatterOutput | null {
     const sections: string[] = [];
 
     // Frontmatter with globs
     const fm = [
       '---',
-      `description: "${config.description}"`,
+      `description: "${this.yamlQuoted(config.description ?? '')}"`,
       `globs:`,
-      ...config.patterns.map((p) => `  - "${p}"`),
+      ...config.patterns.map((p) => `  - "${this.yamlQuoted(p)}"`),
       '---',
     ];
     sections.push(fm.join('\n'));
@@ -597,8 +597,11 @@ export class CursorFormatter extends BaseFormatter {
     // Only return if we have content beyond frontmatter
     if (sections.length <= 1) return null;
 
+    // A guard named after the main rules file would overwrite it, so give the
+    // scoped rules their own file instead of dropping them.
+    const path = `.cursor/rules/${config.name}.mdc`;
     return {
-      path: `.cursor/rules/${config.name}.mdc`,
+      path: path === mainOutputPath ? `.cursor/rules/${config.name}-guards.mdc` : path,
       content: sections.join('\n\n') + '\n',
     };
   }
