@@ -88,7 +88,7 @@ describe('CursorFormatter', () => {
       expect(result.content).toContain('You are working on Checkout Service.');
     });
 
-    it('should generate intro with project from identity fallback', () => {
+    it('should use authored identity text verbatim as the intro', () => {
       const ast: Program = {
         ...createMinimalProgram(),
         blocks: [
@@ -106,7 +106,41 @@ describe('CursorFormatter', () => {
       };
 
       const result = formatter.format(ast);
-      expect(result.content).toContain('You are working on E-commerce platform backend.');
+      expect(result.content).toContain('E-commerce platform backend');
+      expect(result.content).not.toContain('You are working on');
+    });
+
+    it('should keep identity text when @context declares a project name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'identity',
+            content: {
+              type: 'TextContent',
+              value: 'Senior payments engineer. Prefer explicit error handling.',
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'context',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                project: 'Checkout Service',
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      expect(result.content).toContain('Senior payments engineer. Prefer explicit error handling.');
     });
 
     it('should include organization in intro when available', () => {
