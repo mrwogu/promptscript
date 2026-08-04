@@ -189,4 +189,29 @@ describe('explicit override browser parity regressions', () => {
     expect(result.errors.map((error) => error.message).join(' ')).toContain('missing');
     expect((skills?.content as { inlineUses?: unknown }).inlineUses).toBeUndefined();
   });
+
+  it('normalizes unexpected ordered extension failures', async () => {
+    const resolver = new BrowserResolver({
+      fs: new VirtualFileSystem({
+        'project.prs': `@meta { id: "extension-error" syntax: "1.6.0" }
+@extend missing { enabled: true }
+`,
+      }),
+    });
+    (
+      resolver as unknown as {
+        applyExtend: () => never;
+      }
+    ).applyExtend = () => {
+      throw new Error('unexpected failure');
+    };
+
+    const result = await resolver.resolve('project.prs');
+
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        message: 'Extension resolution failed: unexpected failure',
+      }),
+    ]);
+  });
 });

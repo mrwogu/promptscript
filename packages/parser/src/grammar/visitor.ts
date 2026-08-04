@@ -662,6 +662,7 @@ class PromptScriptVisitor extends BaseVisitor {
 
     const valueCst = ctx.value?.[0];
     if (!valueCst) {
+      /* v8 ignore next -- grammar requires one replacement value */
       throw new Error('@override replacement value is unavailable');
     }
     const value = this.visit(valueCst) as Value;

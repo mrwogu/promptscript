@@ -168,39 +168,40 @@ function valueReplacementToBlockBody(
   }
 
   const node = replacement.value;
-  switch (node.type) {
-    case 'ArrayValueNode':
-      return createBlockBody(
-        node.elements.map((element) => ({
-          type: 'ListEntry',
-          value: deepClone(element.value),
-          loc: deepClone(element.loc),
-        })),
-        node.loc,
-        { projection: 'ArrayContent' }
-      );
-    case 'ObjectValueNode':
-      return createBlockBody(
-        node.fields.map((field) => ({
-          type: 'FieldEntry',
-          name: field.name,
-          value: deepClone(field.value),
-          loc: deepClone(field.loc),
-        })),
-        node.loc,
-        { projection: 'ObjectContent' }
-      );
-    case 'ScalarValueNode':
-    case 'TextValueNode':
-      if (typeof node.value === 'string') {
-        return createBlockBody(
-          [{ type: 'TextEntry', text: node.value, loc: deepClone(node.loc) }],
-          node.loc,
-          { projection: 'TextContent' }
-        );
-      }
-      break;
+  if (node.type === 'ArrayValueNode') {
+    return createBlockBody(
+      node.elements.map((element) => ({
+        type: 'ListEntry',
+        value: deepClone(element.value),
+        loc: deepClone(element.loc),
+      })),
+      node.loc,
+      { projection: 'ArrayContent' }
+    );
   }
+  if (node.type === 'ObjectValueNode') {
+    return createBlockBody(
+      node.fields.map((field) => ({
+        type: 'FieldEntry',
+        name: field.name,
+        value: deepClone(field.value),
+        loc: deepClone(field.loc),
+      })),
+      node.loc,
+      { projection: 'ObjectContent' }
+    );
+  }
+  if (
+    (node.type === 'ScalarValueNode' || node.type === 'TextValueNode') &&
+    typeof node.value === 'string'
+  ) {
+    return createBlockBody(
+      [{ type: 'TextEntry', text: node.value, loc: deepClone(node.loc) }],
+      node.loc,
+      { projection: 'TextContent' }
+    );
+  }
+  /* v8 ignore next -- root replacement validation rejects this fallback */
   return blockContentToBody(content);
 }
 
@@ -317,6 +318,7 @@ function createValueNodeFromBlockReplacement(replacement: BlockReplacement): Val
       }),
     };
   }
+  /* v8 ignore next -- block replacements project to text, arrays, or objects */
   return fallback;
 }
 

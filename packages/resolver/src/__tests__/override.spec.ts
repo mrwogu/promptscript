@@ -2,7 +2,13 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { SYNTAX_FEATURES, type Block, type ObjectContent, type Value } from '@promptscript/core';
+import {
+  SYNTAX_FEATURES,
+  type Block,
+  type Logger,
+  type ObjectContent,
+  type Value,
+} from '@promptscript/core';
 import { Resolver } from '../resolver.js';
 
 const testDirectories: string[] = [];
@@ -450,6 +456,34 @@ describe('explicit override resolution', () => {
     expect(result.errors).toHaveLength(2);
     expect(result.errors.map((error) => error.message).join(' ')).toContain('missing');
     expect((skills?.content as ObjectContent).inlineUses).toBeUndefined();
+  });
+
+  it('normalizes unexpected ordered extension failures', async () => {
+    const directory = await createProject(`
+      @meta { id: "extension-error" syntax: "1.6.0" }
+      @extend missing { enabled: true }
+    `);
+    const logger: Logger = {
+      verbose: () => {},
+      debug: () => {},
+      warn: () => {
+        throw new Error('logger failure');
+      },
+    };
+    const resolver = new Resolver({
+      registryPath: directory,
+      localPath: directory,
+      logger,
+      cache: false,
+    });
+
+    const result = await resolver.resolve(join(directory, 'project.prs'));
+
+    expect(result.errors).toEqual([
+      expect.objectContaining({
+        message: 'Extension resolution failed: logger failure',
+      }),
+    ]);
   });
 
   it('returns actionable errors without partially applying invalid overrides', async () => {
