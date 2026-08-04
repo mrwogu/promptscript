@@ -958,6 +958,66 @@ describe('CursorFormatter', () => {
         expect(ruleFile?.content).toContain('Use OnPush change detection.');
       });
 
+      it('should not overwrite the main rules file with a guard of the same name', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  project: {
+                    applyTo: ['src/**/*.ts'],
+                    description: 'Project scoped rules',
+                    content: 'Scoped guard body.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+        const ruleFile = result.additionalFiles?.find((f) => f.path !== result.path);
+
+        expect(result.path).toBe('.cursor/rules/project.mdc');
+        expect(ruleFile?.path).toBe('.cursor/rules/project-guards.mdc');
+        expect(ruleFile?.content).toContain('Scoped guard body.');
+      });
+
+      it('should escape quotes in rule file frontmatter', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'guards',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  quoted: {
+                    applyTo: ['src/**/*.ts'],
+                    description: 'Say "hello" loudly',
+                    content: 'Body.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'multifile' });
+        const ruleFile = result.additionalFiles?.find((f) => f.path.includes('quoted.mdc'));
+
+        expect(ruleFile?.content).toContain('description: "Say \\"hello\\" loudly"');
+      });
+
       it('should handle both globs auto-split and named entries together', () => {
         const ast: Program = {
           ...createMinimalProgram(),

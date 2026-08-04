@@ -226,8 +226,14 @@ export class AntigravityFormatter extends BaseFormatter {
       content,
     };
 
-    // Generate workflow outputs if present
-    const workflowOutputs = [...(this.workflows(ast) ?? []), ...this.workflowBlockOutputs(ast)];
+    // A declared @workflows entry is more explicit than a shortcut that merely
+    // carries steps, so it wins when both normalize to the same file.
+    const blockWorkflows = this.workflowBlockOutputs(ast);
+    const declaredPaths = new Set(blockWorkflows.map((output) => output.path));
+    const workflowOutputs = [
+      ...blockWorkflows,
+      ...(this.workflows(ast) ?? []).filter((output) => !declaredPaths.has(output.path)),
+    ];
 
     // Generate MCP config from @mcpServers block
     const mcpServersBlock = findMcpServersBlock(ast);
@@ -242,7 +248,11 @@ export class AntigravityFormatter extends BaseFormatter {
       }
     }
 
-    const allAdditional = [...workflowOutputs, ...this.guardRuleOutputs(ast), ...mcpOutput];
+    const allAdditional = [
+      ...workflowOutputs,
+      ...this.guardRuleOutputs(ast, outputPath),
+      ...mcpOutput,
+    ];
 
     // If there are additional files, return multi-file output
     if (allAdditional.length > 0) {
@@ -305,7 +315,7 @@ export class AntigravityFormatter extends BaseFormatter {
     const title = this.getMetaField(ast, 'name') ?? 'Project Rules';
     const description = this.extractProjectDescription(ast);
 
-    const lines = ['---', `title: "${title}"`, `activation: "${activation}"`];
+    const lines = ['---', `title: "${this.yamlQuoted(title)}"`, `activation: "${activation}"`];
 
     // Emit globs field when activation is glob — required for Antigravity to match files
     if (activation === 'glob') {
@@ -315,12 +325,12 @@ export class AntigravityFormatter extends BaseFormatter {
         const raw = props['globs'] ?? props['glob'] ?? props['files'];
         const globArray = Array.isArray(raw) ? raw.map(String) : raw ? [String(raw)] : [];
         if (globArray.length > 0) {
-          lines.push(`globs: [${globArray.map((g) => `"${g}"`).join(', ')}]`);
+          lines.push(`globs: [${globArray.map((g) => `"${this.yamlQuoted(g)}"`).join(', ')}]`);
         }
       }
     }
 
-    lines.push(`description: "${description}"`, '---');
+    lines.push(`description: "${this.yamlQuoted(description)}"`, '---');
 
     return lines.join('\n');
   }
@@ -408,7 +418,8 @@ export class AntigravityFormatter extends BaseFormatter {
 
     const outputs: FormatterOutput[] = [];
     for (const [name, value] of Object.entries(this.getProps(block.content))) {
-      if (!this.isSafeName(name)) continue;
+      const fileName = this.workflowFileName(name);
+      if (!this.isSafeName(fileName)) continue;
       if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
 
       const obj = value as Record<string, Value>;
@@ -417,11 +428,20 @@ export class AntigravityFormatter extends BaseFormatter {
       if (!description && !content) continue;
 
       outputs.push({
-        path: `.agent/workflows/${name}.md`,
-        content: this.renderWorkflowDocument(name, description, content),
+        path: `.agent/workflows/${fileName}.md`,
+        content: this.renderWorkflowDocument(this.formatWorkflowTitle(name), description, content),
       });
     }
     return outputs;
+  }
+
+  /**
+   * Normalize a workflow or shortcut key into a portable file name. Shortcut
+   * keys carry a leading slash and both shapes may contain spaces or capitals,
+   * which would otherwise produce two files that differ only by case.
+   */
+  private workflowFileName(name: string): string {
+    return name.replace(/^\/+/, '').replace(/\s+/g, '-').toLowerCase();
   }
 
   /**
@@ -438,7 +458,7 @@ export class AntigravityFormatter extends BaseFormatter {
     const content = obj['content'] ? this.valueToString(obj['content']) : '';
     if (!content.trim()) return null;
 
-    const cleanName = name.replace(/^\/+/, '').replace(/\s+/g, '-').toLowerCase();
+    const cleanName = this.workflowFileName(name);
     if (!this.isSafeName(cleanName)) return null;
 
     const description = obj['description'] ? this.valueToString(obj['description']) : '';
@@ -454,7 +474,7 @@ export class AntigravityFormatter extends BaseFormatter {
    * Antigravity activates a rule file through its own frontmatter, so path
    * scoping is expressed with a dedicated file rather than inline sections.
    */
-  private guardRuleOutputs(ast: Program): FormatterOutput[] {
+  private guardRuleOutputs(ast: Program, mainOutputPath: string): FormatterOutput[] {
     const guards = this.findBlock(ast, 'guards');
     if (!guards) return [];
 
@@ -472,21 +492,33 @@ export class AntigravityFormatter extends BaseFormatter {
       const content = obj['content'] ? this.valueToString(obj['content']) : '';
       if (!content.trim() && !description) continue;
 
-      const lines = ['---', `title: "${this.formatWorkflowTitle(name)}"`];
+      const lines = ['---', `title: "${this.yamlQuoted(this.formatWorkflowTitle(name))}"`];
       lines.push(`activation: "${paths.length > 0 ? 'glob' : 'always'}"`);
       if (paths.length > 0) {
-        lines.push(`globs: [${paths.map((p) => `"${p}"`).join(', ')}]`);
+        lines.push(`globs: [${paths.map((p) => `"${this.yamlQuoted(p)}"`).join(', ')}]`);
       }
-      lines.push(`description: "${description}"`, '---', '');
+      lines.push(`description: "${this.yamlQuoted(description)}"`, '---', '');
       if (content.trim()) lines.push(this.stripAllIndent(this.dedent(content)));
 
-      outputs.push({ path: `.agent/rules/${name}.md`, content: lines.join('\n') });
+      // A guard named after the main rules file would overwrite it, so give the
+      // scoped rules their own file instead of dropping them.
+      const path =
+        `.agent/rules/${name}.md` === mainOutputPath
+          ? `.agent/rules/${name}-guards.md`
+          : `.agent/rules/${name}.md`;
+      outputs.push({ path, content: lines.join('\n') });
     }
     return outputs;
   }
 
   private renderWorkflowDocument(title: string, description: string, content: string): string {
-    const lines = ['---', `title: "${title}"`, `description: "${description}"`, '---', ''];
+    const lines = [
+      '---',
+      `title: "${this.yamlQuoted(title)}"`,
+      `description: "${this.yamlQuoted(description)}"`,
+      '---',
+      '',
+    ];
     if (content) lines.push(this.stripAllIndent(this.dedent(content)));
     return lines.join('\n');
   }
@@ -515,13 +547,13 @@ export class AntigravityFormatter extends BaseFormatter {
     const description = obj['description'] ?? obj['desc'] ?? '';
 
     // Extract clean name (remove leading slash if present)
-    const cleanName = name.replace(/^\/+/, '').replace(/\s+/g, '-').toLowerCase();
+    const cleanName = this.workflowFileName(name);
     if (!this.isSafeName(cleanName)) return null;
 
     const lines: string[] = [
       '---',
-      `title: "${this.formatWorkflowTitle(name)}"`,
-      `description: "${this.valueToString(description)}"`,
+      `title: "${this.yamlQuoted(this.formatWorkflowTitle(name))}"`,
+      `description: "${this.yamlQuoted(this.valueToString(description))}"`,
       '---',
       '',
       '## Steps',

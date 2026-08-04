@@ -995,6 +995,98 @@ Never leave TODO without issue reference`,
       expect(workflow?.content).toContain('Tag the commit, then publish.');
     });
 
+    it('should keep the declared workflow when a shortcut normalizes to the same file', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/release': { description: 'Ship it', steps: ['Tag', 'Publish'] },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                release: { description: 'Cut a release', content: 'Declared workflow body.' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const matching = result.additionalFiles?.filter(
+        (file) => file.path === '.agent/workflows/release.md'
+      );
+
+      expect(matching).toHaveLength(1);
+      expect(matching?.[0]?.content).toContain('Declared workflow body.');
+    });
+
+    it('should normalize workflow names into portable file names', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                'Release Notes': { description: 'Notes', content: 'Write the notes.' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const paths = result.additionalFiles?.map((file) => file.path);
+
+      expect(paths).toContain('.agent/workflows/release-notes.md');
+    });
+
+    it('should escape quotes in workflow frontmatter', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'workflows',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                quoted: { description: 'Say "hello" loudly', content: 'Body.' },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const workflow = result.additionalFiles?.find(
+        (file) => file.path === '.agent/workflows/quoted.md'
+      );
+
+      expect(workflow?.content).toContain('description: "Say \\"hello\\" loudly"');
+    });
+
     it('should generate a workflow file from a prompt shortcut', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -1056,6 +1148,37 @@ Never leave TODO without issue reference`,
       expect(rule?.content).toContain('globs: ["src/auth/**/*.ts"]');
       expect(rule?.content).toContain('description: "Security-sensitive code rules"');
       expect(rule?.content).toContain('All auth code must use bcrypt.');
+    });
+
+    it('should not overwrite the main rules file with a guard of the same name', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'guards',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                project: {
+                  paths: ['src/**/*.ts'],
+                  description: 'Project scoped rules',
+                  content: 'Scoped guard body.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast);
+      const rule = result.additionalFiles?.find((file) => file.path !== result.path);
+
+      expect(result.path).toBe('.agent/rules/project.md');
+      expect(rule?.path).toBe('.agent/rules/project-guards.md');
+      expect(rule?.content).toContain('Scoped guard body.');
     });
 
     it('should render @examples in the rules file', () => {
