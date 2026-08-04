@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { compile } from '@promptscript/browser-compiler';
 import {
   usePlaygroundStore,
   selectFilesAsMap,
@@ -8,6 +9,7 @@ import {
   selectOutputForFormatter,
   selectErrors,
   selectHasErrors,
+  DEFAULT_FILE,
   type PlaygroundConfig,
 } from '../store';
 
@@ -30,6 +32,19 @@ const DEFAULT_CONFIG: PlaygroundConfig = {
 };
 
 describe('PlaygroundStore', () => {
+  it('starts new sessions with a valid current PromptScript example', async () => {
+    expect(DEFAULT_FILE).toContain('syntax: "1.6.0"');
+    expect(DEFAULT_FILE).toContain('@header "Engineering Standards"');
+
+    const result = await compile({ 'project.prs': DEFAULT_FILE }, 'project.prs');
+
+    expect(result.success).toBe(true);
+    expect(result.outputs.size).toBeGreaterThan(0);
+    expect(
+      result.warnings.filter((warning) => ['PS018', 'PS038'].includes(warning.ruleId))
+    ).toEqual([]);
+  });
+
   beforeEach(() => {
     // Reset store to initial state
     usePlaygroundStore.setState({

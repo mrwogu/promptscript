@@ -5,6 +5,14 @@ import { EXAMPLES, ExampleGallery } from '../ExampleGallery';
 import { usePlaygroundStore } from '../../store';
 
 describe('ExampleGallery — gallery examples compile', () => {
+  it('uses current syntax for every PromptScript file', () => {
+    for (const example of EXAMPLES) {
+      for (const file of example.files.filter((candidate) => candidate.path.endsWith('.prs'))) {
+        expect(file.content, `${example.id}:${file.path}`).toContain('syntax: "1.6.0"');
+      }
+    }
+  });
+
   // Each example shipped in the gallery must round-trip through the
   // browser compiler so users never load a broken sample. This guards
   // against syntax drift when new language features are added.
@@ -29,8 +37,45 @@ describe('ExampleGallery — gallery examples compile', () => {
 
       expect(result.success).toBe(true);
       expect(result.outputs.size).toBeGreaterThan(0);
+      expect(
+        result.warnings.filter((warning) => ['PS018', 'PS038'].includes(warning.ruleId))
+      ).toEqual([]);
     });
   }
+
+  it('resolves composition and replacement in declaration order', async () => {
+    const example = EXAMPLES.find((candidate) => candidate.id === 'composition-order');
+    expect(example).toBeDefined();
+    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+
+    const result = await compile(files, example!.files[0]!.path, {
+      formatters: [{ name: 'github', config: { version: 'full' } }],
+    });
+
+    expect(result.success).toBe(true);
+    const output = result.outputs.get('.github/copilot-instructions.md')?.content;
+    expect(output).toContain('### coverage');
+    expect(output).toContain('Minimum 95%');
+    expect(output).not.toContain('Minimum 80%');
+    expect(output).not.toContain('Minimum 90%');
+    expect(output).toContain('Use Jest');
+    expect(output).toContain('Require integration tests');
+  });
+
+  it('renders contextual section headers in generated output', async () => {
+    const example = EXAMPLES.find((candidate) => candidate.id === 'custom-section-headers');
+    expect(example).toBeDefined();
+    const files = Object.fromEntries(example!.files.map((file) => [file.path, file.content]));
+
+    const result = await compile(files, example!.files[0]!.path, {
+      formatters: [{ name: 'github', config: { version: 'full' } }],
+    });
+
+    expect(result.success).toBe(true);
+    const output = result.outputs.get('.github/copilot-instructions.md')?.content;
+    expect(output).toContain('## Engineering Standards');
+    expect(output).toContain('## Commit Policy');
+  });
 
   it('shows current Factory and GitHub hook outputs for agent platform example', async () => {
     const example = EXAMPLES.find((candidate) => candidate.id === 'agent-platform');
@@ -109,8 +154,12 @@ describe('ExampleGallery — rendering', () => {
   it('renders the post-release platform examples with capability badges', () => {
     render(<ExampleGallery />);
     expect(screen.getByText('Regular Field Replacement')).toBeTruthy();
+    expect(screen.getByText('Composition & Declaration Order')).toBeTruthy();
+    expect(screen.getByText('Custom Section Headers')).toBeTruthy();
     expect(screen.getByText('Complete Agent Platform')).toBeTruthy();
     expect(screen.getAllByText('replacement').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('override').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('headers').length).toBeGreaterThan(0);
     expect(screen.getAllByText('mcp').length).toBeGreaterThan(0);
     expect(screen.getAllByText('automation').length).toBeGreaterThan(0);
     expect(screen.getAllByText('plugins').length).toBeGreaterThan(0);
