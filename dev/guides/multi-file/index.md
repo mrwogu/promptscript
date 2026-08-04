@@ -109,7 +109,7 @@ Split by type of concern:
 # .promptscript/fragments/testing.prs
 @meta {
   id: "testing-fragment"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @standards {
@@ -122,13 +122,16 @@ Split by type of concern:
 }
 
 @shortcuts {
-  "/test": """
-    Write tests using:
-    - Vitest as the test runner
-    - Testing Library for DOM testing
-    - MSW for API mocking
-  """
-  "/coverage": "Check test coverage and identify gaps"
+  "/test": {
+    description: "Write project tests"
+    content: """
+      Use Vitest, Testing Library for DOM behavior, and MSW for API mocking.
+    """
+  }
+  "/coverage": {
+    description: "Check test coverage"
+    content: "Report coverage gaps and recommend missing behavioral tests."
+  }
 }
 ```
 
@@ -258,9 +261,11 @@ When you `@use` a file, all blocks from the source are merged into your file:
 | Content Type   | Merge Behavior                                                 |
 | -------------- | -------------------------------------------------------------- |
 | Text content   | Concatenated (source + target), identical content deduplicated |
-| Object content | Deep merged (target wins on key conflicts)                     |
+| Object content | Deep merged (imported source wins same-shape key conflicts)    |
 | Array content  | Unique concatenation (preserves order, dedupes)                |
 | Mixed content  | Text concatenated, properties deep merged                      |
+
+When block shapes conflict, existing target body wins. Under syntax `1.6.0`, later local blocks and modification operations apply after an earlier import.
 
 **Example:**
 
@@ -300,12 +305,12 @@ Without alias, blocks are simply merged. With alias, you get both:
 
 ### Import Order Matters
 
-Imports are processed in order. For same-name blocks, content is merged:
+Imports are processed in order. For same-name object fields, each later imported source wins:
 
 ```
 @use ./fragments/base         # @shortcuts has /test -> "Run unit tests"
 @use ./fragments/advanced     # @shortcuts has /test -> "Run full suite"
-# Result: /test -> "Run unit tests\n\nRun full suite" (concatenated)
+# Result: /test -> "Run full suite"
 ```
 
 For object properties, later imports override:
@@ -313,8 +318,10 @@ For object properties, later imports override:
 ```
 @use ./base     # @standards.coverage = 80
 @use ./strict   # @standards.coverage = 95
-# Result: coverage = 95 (target wins)
+# Result: coverage = 95 (later imported source wins)
 ```
+
+See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix and resolved declaration-order examples.
 
 ## Registry vs Local Fragments
 

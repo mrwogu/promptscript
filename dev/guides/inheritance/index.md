@@ -394,21 +394,25 @@ Use `@use` to import and merge fragments (like mixins):
 
 ### Merge Precedence
 
-When the same property exists in multiple sources:
-
-```text
-@inherit @stacks/typescript-lib    # Base values
-@use @core/security                # Overrides @inherit for same keys
-@use @core/quality                 # Overrides earlier @use for same keys
-@standards { ... }                 # Local values override everything
-```
-
-**Rule:** Later sources override earlier sources for the same keys.
+PromptScript 1.6 applies declarations in source order. Import merge policy and later operations are separate decisions:
 
 ```
-flowchart LR
-    A["@inherit<br/>(base)"] --> B["@use #1"] --> C["@use #2"] --> D["Local<br/>(wins)"]
+@meta { id: "service" syntax: "1.6.0" }
+
+@inherit @stacks/typescript-lib
+@use @core/security
+@use @core/quality
+
+@standards {
+  deployment: ["Require approval"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
 ```
+
+Use [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) as the normative source for conflict rules, declaration order, and resolved examples. This guide focuses on designing inheritance hierarchies rather than restating that matrix.
 
 ### Fragment Files
 
@@ -418,7 +422,7 @@ Create reusable fragments:
 # @fragments/testing.prs
 @meta {
   id: "@fragments/testing"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @standards {
@@ -426,8 +430,14 @@ Create reusable fragments:
 }
 
 @shortcuts {
-  "/test": "Write comprehensive tests"
-  "/coverage": "Check test coverage"
+  "/test": {
+    description: "Write comprehensive tests"
+    content: "Write unit and integration tests for the current change."
+  }
+  "/coverage": {
+    description: "Check test coverage"
+    content: "Run coverage and report untested behavior."
+  }
 }
 ```
 

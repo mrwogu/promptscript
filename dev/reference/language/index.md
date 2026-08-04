@@ -2,6 +2,20 @@
 
 Complete specification of the PromptScript language.
 
+## Choose a Topic
+
+| Goal                                       | Reference                                                                                                        |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Understand a complete `.prs` file          | [File Anatomy](https://getpromptscript.dev/dev/reference/language/file-anatomy/index.md)                         |
+| Choose valid block body shapes             | [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md)   |
+| Predict inheritance and import results     | [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md)            |
+| Understand declaration order               | [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md)                   |
+| Choose `@extend`, `field!`, or `@override` | [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md)       |
+| Customize generated headings               | [Section Headers](https://getpromptscript.dev/dev/reference/language/section-headers/index.md)                   |
+| Upgrade syntax and resolve diagnostics     | [Versions and Diagnostics](https://getpromptscript.dev/dev/reference/language/versions-and-diagnostics/index.md) |
+
+Use this page as the complete block and grammar catalog. Task-oriented pages above explain decisions and show resolved results step by step.
+
 ## File Structure
 
 A PromptScript file (`.prs`) consists of:
@@ -20,11 +34,21 @@ A PromptScript file (`.prs`) consists of:
 @shortcuts { ... }
 @params { ... }
 @guards { ... }
+@skills { ... }
+@agents { ... }
+@workflows { ... }
+@hooks { ... }
+@mcpServers { ... }
+@plugins { ... }
 @knowledge { ... }
 @examples { ... }
+@local { ... }
 
 @extend path { ... }    # Block modifications
+@override path { ... }  # Atomic replacement of an existing target
 ```
+
+Syntax `1.6.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
 
 ## [@meta](https://github.com/meta "GitHub User: meta") Block (Required)
 
@@ -199,8 +223,10 @@ Import and merge fragments for composition (like mixins):
 When you use `@use`, all blocks from the imported file are merged into your file:
 
 - **TextContent**: Concatenated (source + target), with automatic deduplication of identical content
-- **ObjectContent**: Deep merged (target wins on key conflicts)
+- **ObjectContent**: Deep merged (the imported source wins same-shape key conflicts)
 - **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
+
+For incompatible block shapes, the existing target body wins. Under syntax `1.6.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix.
 
 ```
 # Source: @core/guards/security

@@ -304,7 +304,7 @@ acme-promptscript-registry/
 ```
 @meta {
   id: "@frontend/base"
-  syntax: "3.0.0"
+  syntax: "1.6.0"
   team: "Frontend Platform"
 }
 
@@ -425,7 +425,7 @@ acme-promptscript-registry/
 # checkout-app/promptscript/project.prs
 @meta {
   id: "checkout-app"
-  syntax: "2.1.0"
+  syntax: "1.6.0"
 }
 
 # In a multi-file setup, you would inherit from frontend base:

@@ -2,6 +2,21 @@
 
 This guide helps you migrate existing AI instructions to PromptScript.
 
+Upgrading an existing PromptScript project?
+
+This guide converts third-party instruction files into PromptScript. Existing PromptScript 1.15 projects should use [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md).
+
+## Choose a Migration Command
+
+| Need                                      | Command                          |
+| ----------------------------------------- | -------------------------------- |
+| Convert all detected project instructions | `prs migrate --static --dry-run` |
+| Generate an AI-assisted migration prompt  | `prs migrate --llm`              |
+| Convert one known file                    | `prs import <file> --dry-run`    |
+| Upgrade existing `.prs` syntax            | `prs upgrade --dry-run`          |
+
+Prefer `prs migrate` for project adoption. Use `prs import` as a lower-level single-file tool.
+
 ## Overview
 
 PromptScript can consolidate instructions from multiple sources:
@@ -369,19 +384,26 @@ targets:
 
 ### Compile and Compare
 
+Before PromptScript takes ownership of existing instruction files, create a recoverable baseline. Tracked files are recoverable from the migration branch. Back up any untracked or ignored instruction files outside configured output paths, or copy them into a local migration-backup directory that will not be committed.
+
 ```bash
-# Generate new files
+# Confirm every planned output and ownership conflict.
 prs compile --dry-run
 
-# Review changes
-prs diff --all
+# Compare complete planned output with existing files.
+prs diff --all --full
 ```
 
-### Validate
+Review source parity, target-specific omissions, file modes, and every conflict path. Do not delete an existing configured target merely to bypass ownership protection. When all planned outputs and backups are approved, perform one controlled takeover:
 
 ```bash
-prs validate
+prs validate --strict
+prs compile --force
+git diff -- .
+prs diff --all --full
 ```
+
+The final PromptScript diff must be empty. The Git diff must contain only approved generated replacements and migration source or configuration. Restore from version control or backup if the result loses user-owned content.
 
 ## Step 6: Update Git
 
@@ -393,7 +415,7 @@ git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
 
-This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers to generate outputs locally, use one consistent ignored-output workflow instead:
+This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers to generate outputs locally, adopt one consistent ignored-output workflow only after the controlled compile above has created and verified every configured target:
 
 ```bash
 printf '%s\n' \
@@ -404,6 +426,8 @@ git rm --cached .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.
 git add .gitignore .promptscript/ promptscript.yaml
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
+
+`git rm --cached` stops tracking these files but keeps the verified working-tree copies. It is not a workaround for overwrite conflicts and must not run before the takeover review.
 
 ## Migration Patterns
 

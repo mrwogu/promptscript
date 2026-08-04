@@ -14,6 +14,17 @@ targets.
 
 Start treating your AI instructions as managed infrastructure.
 
+## Choose Your Path
+
+| Starting point             | Next step                                                                                                 |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| New repository             | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
+| Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects)                  |
+| PromptScript 1.15 project  | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md)       |
+| Need language semantics    | Open [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md)                    |
+
+New projects should reach a validated compile before adding registries, enterprise policy, or target-specific customization.
+
 ## Installation
 
 Install the CLI toolchain to compile, validate, and manage your PromptScript files.
@@ -48,7 +59,7 @@ promptscript.yaml
 
 ```
 id: my-app
-syntax: "1.4.0"
+syntax: "1.6.0"
 
 targets:
   - github
@@ -65,7 +76,7 @@ validation:
 ```
 @meta {
   id: "my-app"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @inherit @company/react-app
@@ -114,7 +125,7 @@ Open `.promptscript/project.prs` and customize:
 ```
 @meta {
   id: "my-project"
-  syntax: "1.4.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -214,7 +225,7 @@ Transform your universal `.prs` definition into platform-specific optimization f
 prs compile
 ```
 
-By default, this generates:
+Generated paths depend on the targets selected during `prs init` or declared in `promptscript.yaml`. When GitHub, Claude, and Cursor are configured, their default primary outputs are:
 
 - `.github/copilot-instructions.md` (for GitHub Copilot)
 - `CLAUDE.md` (for Claude Code)
@@ -326,40 +337,34 @@ The migration skill guides the AI through a structured process:
 After migration, review the generated `.promptscript/project.prs`:
 
 ```bash
-# Validate syntax
-prs validate
-
-# Preview compiled output without writing files
+# Record a recoverable baseline before replacing existing instructions.
+git status --short
+prs validate --strict
 prs compile --dry-run
-
-# Compile and check diff against existing files
-prs compile && git diff CLAUDE.md
+prs diff --all --full
 ```
 
 ### 5. Compile and Replace
 
-Once satisfied, compile to replace your old files with generated versions:
+Make sure tracked files are committed and untracked or ignored instruction files are backed up. After every conflict path and planned output is approved, perform one controlled takeover:
 
 ```bash
-prs compile
+prs compile --force
+git diff -- .
+prs diff --all --full
 ```
+
+The Git diff must contain only approved source, configuration, and generated replacements. The final PromptScript diff must be empty.
 
 ### 6. Clean Up (Optional)
 
-After verifying the compiled output matches your expectations, you can remove the original source files since PromptScript is now your source of truth:
-
-```bash
-# Backup first if needed
-git add .
-git commit -m "chore: migrate to promptscript"
-
-# Then remove old source files (compiled versions remain)
-# The compiled CLAUDE.md, .cursorrules etc. are regenerated from .prs
-```
+Do not remove files configured as PromptScript target outputs. Archive only obsolete instruction sources that are not configured outputs and whose content is preserved in `.prs` files.
 
 Keep Original Files During Transition
 
 You don't have to delete original files immediately. Run both systems in parallel until you're confident the migration is complete.
+
+See the [Migration Guide](https://getpromptscript.dev/dev/guides/migration/index.md) for backup, takeover, tracking, and rollback details.
 
 ### Migration Example
 
@@ -389,7 +394,7 @@ You are a Python developer working on a FastAPI service.
 ```
 @meta {
   id: "api-service"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -451,7 +456,7 @@ The `promptscript.yaml` file controls compilation:
 
 ```yaml
 id: my-project
-syntax: "1.4.0"
+syntax: "1.6.0"
 
 # Input settings
 input:
@@ -520,6 +525,13 @@ targets:
 
 ## Manage Hooks
 
+PromptScript has two separate hook systems:
+
+| System              | Purpose                                                         |
+| ------------------- | --------------------------------------------------------------- |
+| `@hooks` in `.prs`  | Compile portable lifecycle policy into target-native hook files |
+| `prs hooks install` | Recompile `.prs` after AI edits and protect generated files     |
+
 `prs init` installs hooks for supported detected targets by default. Pass `--no-hooks` during initialization to skip them.
 
 Use the hook command to reinstall hooks, add hooks after initialization, or target one tool:
@@ -539,13 +551,13 @@ Supported tools: Claude Code, Factory AI, Cursor, Windsurf, Cline, Copilot, Gemi
 
 For tools that do not support hooks, use `prs compile --watch` as an alternative.
 
-See the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for a full walkthrough, manual configuration examples, and troubleshooting.
+See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) for lifecycle policy and the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for source recompilation, output protection, and troubleshooting.
 
 ## What's Next?
 
-\[### Tutorial
+\[### Enterprise Tutorial
 
-Follow the complete tutorial for a deeper understanding of PromptScript.
+After your first compile, build an organization, team, and project hierarchy.
 
 →\](https://getpromptscript.dev/dev/tutorial/index.md) \[### Language Reference
 
@@ -561,9 +573,9 @@ Browse real-world configuration examples for various use cases.
 
 →\](https://getpromptscript.dev/dev/examples/index.md)
 
-# Tutorial: Building Enterprise AI Infrastructure
+# Enterprise Tutorial: Building Layered AI Infrastructure
 
-In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt - you will build a **hierarchical context system** that scales.
+This tutorial starts after your first successful local compile. You will simulate a PromptOps deployment for a software team and build a hierarchical context system that scales.
 
 ## Learning Objectives
 
@@ -578,7 +590,8 @@ By the end of this tutorial, you'll have:
 
 - Node.js 20+
 - PromptScript CLI installed (`npm install -g @promptscript/cli`)
-- A project to configure
+- A project that completed [Getting Started](https://getpromptscript.dev/dev/getting-started/index.md)
+- A successful `prs validate --strict` and `prs compile`
 
 ## Step 1: Create Organization Base
 
@@ -759,10 +772,13 @@ registry:
 
 targets:
   - github:
+      version: full
       output: .github/copilot-instructions.md
   - claude:
+      version: full
       output: CLAUDE.md
   - cursor:
+      version: full
       output: .cursor/rules/project.mdc
 ```
 
@@ -791,6 +807,10 @@ Add reusable capabilities to `.promptscript/project.prs`:
     event: "post-tool-use"
     matcher: "Edit|Write"
     command: ["pnpm", "test"]
+    targets: {
+      github: { enabled: false }
+      cursor: { enabled: false }
+    }
   }
 }
 
@@ -2091,6 +2111,20 @@ Review generated output and compatibility warnings when adopting a new target or
 
 Complete specification of the PromptScript language.
 
+## Choose a Topic
+
+| Goal                                       | Reference                                                                                                        |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Understand a complete `.prs` file          | [File Anatomy](https://getpromptscript.dev/dev/reference/language/file-anatomy/index.md)                         |
+| Choose valid block body shapes             | [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md)   |
+| Predict inheritance and import results     | [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md)            |
+| Understand declaration order               | [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md)                   |
+| Choose `@extend`, `field!`, or `@override` | [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md)       |
+| Customize generated headings               | [Section Headers](https://getpromptscript.dev/dev/reference/language/section-headers/index.md)                   |
+| Upgrade syntax and resolve diagnostics     | [Versions and Diagnostics](https://getpromptscript.dev/dev/reference/language/versions-and-diagnostics/index.md) |
+
+Use this page as the complete block and grammar catalog. Task-oriented pages above explain decisions and show resolved results step by step.
+
 ## File Structure
 
 A PromptScript file (`.prs`) consists of:
@@ -2109,11 +2143,21 @@ A PromptScript file (`.prs`) consists of:
 @shortcuts { ... }
 @params { ... }
 @guards { ... }
+@skills { ... }
+@agents { ... }
+@workflows { ... }
+@hooks { ... }
+@mcpServers { ... }
+@plugins { ... }
 @knowledge { ... }
 @examples { ... }
+@local { ... }
 
 @extend path { ... }    # Block modifications
+@override path { ... }  # Atomic replacement of an existing target
 ```
+
+Syntax `1.6.0` resolves top-level declarations in source order. Put `@meta` first, then imports, local blocks, and modifications in the order they should apply. See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md). Contextual `@header` entries live inside supported owner blocks, not at the top level.
 
 ## [@meta](https://github.com/meta "GitHub User: meta") Block (Required)
 
@@ -2288,8 +2332,10 @@ Import and merge fragments for composition (like mixins):
 When you use `@use`, all blocks from the imported file are merged into your file:
 
 - **TextContent**: Concatenated (source + target), with automatic deduplication of identical content
-- **ObjectContent**: Deep merged (target wins on key conflicts)
+- **ObjectContent**: Deep merged (the imported source wins same-shape key conflicts)
 - **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
+
+For incompatible block shapes, the existing target body wins. Under syntax `1.6.0`, later declarations can modify the merged result, so a local block, `@extend`, or `@override` placed after `@use` can become the final value. See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix.
 
 ```
 # Source: @core/guards/security
@@ -4019,6 +4065,700 @@ This complete example exercises root and nested replacement shapes:
 @override standards.config.retries { 3 }
 ```
 
+# File Anatomy
+
+A `.prs` file contains metadata, composition directives, content blocks, and modification operations. Syntax `1.6.0` applies top-level declarations in source order.
+
+## Recommended Structure
+
+```
+@meta {
+  id: "checkout-service"
+  syntax: "1.6.0"
+}
+
+# 1. Establish base layers.
+@inherit @company/service
+@use @team/backend
+
+# 2. Declare local content.
+@identity {
+  """
+  You are working on the checkout service.
+  """
+}
+
+@standards {
+  @header "Engineering Standards"
+  code: ["Use strict TypeScript"]
+  testing: ["Use Vitest"]
+}
+
+@restrictions {
+  - "Never expose payment data"
+}
+
+# 3. Modify values after composition.
+@override standards.testing {
+  ["Use Vitest", "Require integration tests"]
+}
+
+@extend standards {
+  code: ["Use named exports"]
+}
+```
+
+`@meta` should appear first. Imports normally come before local content. `@extend` and `@override` should appear after targets they modify.
+
+## Public Blocks
+
+| Group             | Blocks                                                                         |
+| ----------------- | ------------------------------------------------------------------------------ |
+| Core instructions | `@identity`, `@context`, `@standards`, `@restrictions`, `@knowledge`, `@local` |
+| Interaction       | `@shortcuts`, `@guards`, `@params`, `@examples`                                |
+| Agent platform    | `@skills`, `@agents`, `@workflows`, `@hooks`, `@mcpServers`, `@plugins`        |
+| Composition       | `@inherit`, `@use`, `@extend`, `@override`                                     |
+| Presentation      | Contextual `@header` entries inside supported owner blocks                     |
+
+`@commands` remains a compatibility alias for `@shortcuts`. `@prompts` is reserved for internal compiler use.
+
+## Related Reference
+
+- [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md)
+- [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md)
+- [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md)
+- [Complete Language Reference](https://getpromptscript.dev/dev/reference/language/index.md)
+
+# Values and Block Bodies
+
+PromptScript preserves body entries in source order. Every built-in block has one canonical body shape.
+
+## Four Shapes
+
+| Shape    | Source form                           | Typical blocks                               |
+| -------- | ------------------------------------- | -------------------------------------------- |
+| `text`   | Triple-quoted prose                   | `@identity`, `@knowledge`, `@local`          |
+| `object` | Named fields                          | `@standards`, `@skills`, `@agents`, `@hooks` |
+| `array`  | Dash-list entries                     | `@restrictions`                              |
+| `mixed`  | Properties plus prose or list entries | `@context`                                   |
+
+```
+@meta { id: "body-shapes" syntax: "1.6.0" }
+
+@identity {
+  """
+  You are a careful maintainer.
+  """
+}
+
+@context {
+  runtime: "Node.js 20+"
+
+  """
+  This service processes checkout requests.
+  """
+}
+
+@standards {
+  code: ["Use strict TypeScript", "Use named exports"]
+}
+
+@restrictions {
+  - "Never expose secrets"
+}
+```
+
+An array used as a property value does not make its parent block an array body. `@standards` above remains an object body.
+
+## Compatibility and PS038
+
+Legacy forms remain parseable when current consumers have defined behavior. PS038 warns when a form can lose data or compile differently by target.
+
+Common remediation:
+
+| Warning                                    | Preferred replacement               |
+| ------------------------------------------ | ----------------------------------- |
+| Multiline scalar shortcut                  | Object with explicit `content`      |
+| Structured text-only block                 | Canonical triple-quoted text        |
+| Text used where named entries are required | Canonical object body               |
+| Mixed body with formatter-dependent fields | Separate portable fields from prose |
+
+```
+@meta { id: "canonical-shortcut" syntax: "1.6.0" }
+
+@shortcuts {
+  "/review": {
+    description: "Review current changes"
+    content: """
+      Review correctness, security, and tests.
+    """
+  }
+}
+```
+
+Run strict validation before release:
+
+```bash
+prs validate --strict
+```
+
+See [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md) for the complete built-in matrix and merge behavior.
+
+# Composition and Precedence
+
+Composition uses two layers of rules:
+
+1. Each operation has a merge policy.
+1. Syntax `1.6.0` applies operations in declaration order.
+
+## Normative Precedence
+
+| Operation   | Same-shape field conflict        | Shape mismatch                   |
+| ----------- | -------------------------------- | -------------------------------- |
+| `@inherit`  | Child value wins                 | Child body wins                  |
+| `@use`      | Imported source value wins       | Existing target body wins        |
+| Local block | Applied at its source position   | Applied at its source position   |
+| `@extend`   | Merge using target shape policy  | Invalid incompatible extension   |
+| `@override` | Replace complete existing target | Replace complete existing target |
+
+For multiple `@use` declarations, each later import becomes the new source. Its same-shape values win against the accumulated target.
+
+## Resolved Example
+
+```
+# base.prs
+@meta { id: "base" syntax: "1.6.0" }
+@standards {
+  testing: ["Use Jest"]
+  coverage: 80
+}
+
+# quality.prs
+@meta { id: "quality" syntax: "1.6.0" }
+@standards {
+  coverage: 90
+  review: ["Require approval"]
+}
+
+# project.prs
+@meta { id: "project" syntax: "1.6.0" }
+@inherit ./base
+@use ./quality
+@standards {
+  local: ["Run smoke tests"]
+}
+@override standards.coverage { 95 }
+```
+
+Resolved `@standards`:
+
+```text
+testing: ["Use Jest"]
+coverage: 95
+review: ["Require approval"]
+local: ["Run smoke tests"]
+```
+
+`quality` supplies `coverage: 90` during import. Later `@override` replaces it with `95`.
+
+## Enterprise Guidance
+
+- Keep one linear organizational base in `@inherit`.
+- Use `@use` for optional capabilities and shared fragments.
+- Put local blocks after imports when local policy should apply later.
+- Use `@override` when replacement intent must be explicit.
+- Validate resolved output, not only source files.
+- Pin remote imports and commit `promptscript.lock`.
+
+See [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md) for operation timing and [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md) for modification choices.
+
+# Execution Order
+
+Syntax `1.6.0` preserves top-level operation order. This removes ambiguity when imports, local blocks, extensions, and replacements target the same value.
+
+## Resolution Sequence
+
+```
+flowchart LR
+    A["@meta"] --> B["@inherit"]
+    B --> C["@use"]
+    C --> D["local blocks"]
+    D --> E["@extend"]
+    E --> F["@override"]
+    F --> G["validate"]
+    G --> H["format"]
+```
+
+Diagram shows recommended organization, not a fixed phase reordering. Resolver executes declarations in actual source order after metadata.
+
+## Order Changes Results
+
+```
+@meta { id: "ordered-operations" syntax: "1.6.0" }
+
+@standards {
+  testing: ["Use Jest"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+
+@extend standards {
+  testing: ["Require integration tests"]
+}
+```
+
+Final value:
+
+```text
+testing: ["Use Vitest", "Require integration tests"]
+```
+
+Reversing `@extend` and `@override` discards the extension because replacement runs later.
+
+## Rules
+
+- `@override` target must exist when operation runs.
+- `@extend` target should exist before extension.
+- Local duplicate blocks apply at their source positions.
+- Imported source values use import merge policy before later operations.
+- Sealed skill properties remain protected regardless of operation order.
+- Older syntax using `@override` still resolves deterministically, but PS018 requests syntax `1.6.0`.
+
+## Review Checklist
+
+1. Read declarations from top to bottom.
+1. Record target value after every operation.
+1. Confirm replacement occurs only where intended.
+1. Run `prs validate --strict`.
+1. Inspect generated changes with `prs compile --dry-run` or `prs diff`.
+
+# Merge and Replacement
+
+Choose operation from intent, not convenience.
+
+| Intent                                              | Form                     | Guidance                                     |
+| --------------------------------------------------- | ------------------------ | -------------------------------------------- |
+| Add or merge content                                | `@extend path { ... }`   | Preferred additive operation                 |
+| Replace one direct regular field in an extension    | `field!: value`          | Compatibility form from syntax 1.3           |
+| Replace one complete existing block or nested value | `@override path { ... }` | Preferred explicit replacement in syntax 1.6 |
+
+## Add with `@extend`
+
+```
+@extend standards {
+  testing: ["Require integration tests"]
+}
+```
+
+Arrays deduplicate and append according to block merge policy. Objects merge recursively.
+
+## Compatibility Replacement with `field!`
+
+```
+@extend standards {
+  testing!: ["Use Vitest"]
+}
+```
+
+`field!` replaces one direct regular field. It can create a missing field and does not support every nested target or skill property.
+
+## Atomic Replacement with `@override`
+
+```
+@meta { id: "replacement" syntax: "1.6.0" }
+
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+  coverage: { minimum: 80 report: "text" }
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+
+@override standards.coverage.minimum {
+  95
+}
+```
+
+`@override` requires the complete target path to exist when operation runs. It replaces that target as one atomic value.
+
+## Failure Cases
+
+- Missing target: resolution error.
+- Traversal through scalar value: resolution error.
+- Attempt to change sealed skill property: resolution error.
+- Replacement before target declaration: resolution error.
+- Syntax below 1.6: PS018 upgrade warning.
+
+## Enterprise Guidance
+
+- Prefer `@extend` for additive team customization.
+- Prefer `@override` for auditable replacement intent.
+- Keep `field!` only where compatibility or concise direct replacement matters.
+- Place replacement near rationale and after target declaration.
+- Review generated output for every configured target.
+
+# Section Headers
+
+Syntax `1.5.0` introduced contextual `@header` entries. They change human-readable generated headings without changing filenames, frontmatter, XML tags, or structured JSON, TOML, and YAML keys.
+
+```
+@meta {
+  id: "localized-project"
+  syntax: "1.6.0"
+}
+
+@standards {
+  @header "Engineering Standards"
+  @header git-commits "Commit Policy"
+  @header documentation "Documentation Policy"
+
+  code: ["Use strict TypeScript"]
+  git: { format: "conventional" }
+  documentation: { verifyAfter: true }
+}
+```
+
+## Forms
+
+| Form                          | Meaning                            |
+| ----------------------------- | ---------------------------------- |
+| `@header "Title"`             | Rename owner block primary section |
+| `@header section-key "Title"` | Rename one derived section         |
+
+Titles must be non-empty, single-line strings. Section keys use kebab-case. Only registered owner blocks can set a given section key.
+
+## Precedence
+
+1. Source `@header`.
+1. Formatter configuration.
+1. Target default.
+
+An explicit `@header` wins over compatibility fallback headings. Initial `## Heading` prose remains a syntax 1.5 compatibility fallback for registered text-only owners.
+
+## Portability
+
+Use `@header` only for human-readable presentation. Never depend on it to rename:
+
+- Generated files.
+- YAML frontmatter properties.
+- JSON, TOML, or YAML keys.
+- XML tags.
+- Target-native identifiers.
+
+See [Generated Section Headers](https://getpromptscript.dev/dev/reference/language/#generated-section-headers) for the complete owner and section-key matrix.
+
+# Versions and Diagnostics
+
+`@meta.syntax` declares language syntax, not package, policy, registry, or organization version.
+
+## Syntax Versions
+
+| Version | Added capability                                    |
+| ------- | --------------------------------------------------- |
+| `1.0.0` | Core instruction and composition blocks             |
+| `1.1.0` | Agents and workflows                                |
+| `1.2.0` | Few-shot examples                                   |
+| `1.3.0` | Direct regular field replacement with `field!`      |
+| `1.4.0` | Hooks, MCP servers, and plugins                     |
+| `1.5.0` | Contextual generated section headers                |
+| `1.6.0` | Atomic `@override` and declaration-order operations |
+
+Use the minimum required version for reusable published fragments. Use current syntax for new project entry files.
+
+## Upgrade Commands
+
+```bash
+# Preview all .prs version changes.
+prs upgrade --dry-run
+
+# Upgrade syntax declarations using per-file atomic replacement.
+prs upgrade
+
+# Find compatibility and shape problems.
+prs validate --strict
+
+# Preview generated output and hook migration.
+prs compile --dry-run
+```
+
+`prs upgrade` parses every discovered file before writing, so an initial parse failure aborts the complete plan. Each file then uses atomic replacement and preserves permissions. Multi-file upgrade is not transactional: a write-time failure in a later file does not roll back files already replaced. Symlinks are skipped. Run upgrades on a clean version-control branch.
+
+## Key Diagnostics
+
+| Diagnostic | Meaning                                     | Action                                      |
+| ---------- | ------------------------------------------- | ------------------------------------------- |
+| PS018      | Used feature requires newer syntax          | Run `prs validate --fix` or `prs upgrade`   |
+| PS019      | Unknown built-in block name                 | Correct typo or confirm custom block intent |
+| PS034      | Invalid hook executable or option           | Fix command, script, or target override     |
+| PS037      | Invalid contextual section header           | Fix owner, key, title, or duplicate         |
+| PS038      | Unsupported or risky built-in block shape   | Convert to canonical shape                  |
+| PS4002     | Target cannot preserve requested capability | Use documented target fallback              |
+
+## Release Gate
+
+```bash
+prs validate --strict
+prs compile --dry-run
+prs diff --all
+```
+
+Commit syntax upgrades, lockfile changes, source changes, and reviewed generated outputs together according to repository policy.
+
+See [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md) for release-specific migration steps.
+
+# Block Shapes
+
+Every block uses one ordered body model. The parser classifies that body as one of four canonical shapes:
+
+| Shape    | Source entries                              | Typical use                         |
+| -------- | ------------------------------------------- | ----------------------------------- |
+| `text`   | Triple-quoted free-form text                | Persona, reference, private notes   |
+| `object` | Named fields and inline `@use` declarations | Configuration and named definitions |
+| `array`  | Dash-list entries                           | Restrictions and other flat lists   |
+| `mixed`  | More than one content category              | Structured fields plus prose        |
+
+Dash-list syntax is the surface form of `array`, not a fifth shape. Arrays used as field values remain part of an `object` body:
+
+```
+@restrictions {
+  - "Never expose secrets"
+}
+
+@standards {
+  code: ["Use strict TypeScript", "Use named exports"]
+}
+```
+
+The first block has an `array` body. The second has an `object` body whose `code` field contains an array value.
+
+`@header` entries are presentation metadata and do not change body shape. Ordinary `header` and `headers` fields remain domain properties.
+
+## Built-in Block Matrix
+
+| Block           | Canonical | Supported compatibility           | Output notes                                                                        |
+| --------------- | --------- | --------------------------------- | ----------------------------------------------------------------------------------- |
+| `@identity`     | `text`    | `object`, `mixed`                 | Text becomes the assistant introduction. Structured fields are formatter-sensitive. |
+| `@context`      | `mixed`   | `text`, `object`                  | Formatters consume known metadata and optional prose independently.                 |
+| `@standards`    | `object`  | `mixed`, `text`                   | Category fields render broadly. Free-form text currently renders only on Factory.   |
+| `@restrictions` | `array`   | `text`, `object`, `mixed`         | Dash lists are preferred. Legacy text and `items` arrays remain supported.          |
+| `@knowledge`    | `text`    | `object`, `mixed`                 | Text renders as reference material. Structured fields are formatter-sensitive.      |
+| `@shortcuts`    | `object`  | Scalar and multiline entry values | Explicit `content` removes target-dependent multiline command ambiguity.            |
+| `@commands`     | `object`  | Same as `@shortcuts`              | Backwards-compatible alias. Prefer `@shortcuts` in new files.                       |
+| `@guards`       | `object`  | `mixed`                           | Named fields drive target-native path rules. Free-form text is not portable.        |
+| `@params`       | `object`  | None                              | Fields define typed template parameters.                                            |
+| `@skills`       | `object`  | None                              | Each field is a named skill definition or inline skill import.                      |
+| `@local`        | `text`    | `object`, `mixed`                 | Claude emits text to `CLAUDE.local.md`. Structured fields are not portable.         |
+| `@agents`       | `object`  | None                              | Each field is a named agent definition.                                             |
+| `@workflows`    | `object`  | None                              | Each field is a named workflow definition.                                          |
+| `@hooks`        | `object`  | None                              | Each field is a portable lifecycle hook.                                            |
+| `@mcpServers`   | `object`  | None                              | Each field is a named MCP server definition.                                        |
+| `@plugins`      | `object`  | None                              | Each field is a named plugin bundle.                                                |
+| `@prompts`      | `object`  | None                              | Reserved internal registry. Do not author it in project files.                      |
+| `@examples`     | `object`  | None                              | Each field is a named input/output example.                                         |
+
+Supported compatibility means the parser and current consumers retain defined behavior. PS038 warns when a legacy shape can omit data or vary by formatter. Unsupported built-in shapes are errors. Custom blocks remain open-world and do not require a registry entry.
+
+## Compile-ready Canonical Example
+
+This single source covers every project-authorable built-in block. Documentation validation parses, validates, and compiles it for Claude, GitHub, and Cursor.
+
+```
+@meta {
+  id: "canonical-block-shapes"
+  syntax: "1.5.0"
+}
+
+@identity {
+  """
+  You are a careful TypeScript maintainer.
+  """
+}
+
+@context {
+  project: "Shape Reference"
+  runtime: "Node.js 20+"
+
+  """
+  This project demonstrates canonical PromptScript block bodies.
+  """
+}
+
+@standards {
+  code: ["Use strict TypeScript", "Use named exports"]
+  testing: ["Use Vitest", "Follow Arrange, Act, Assert"]
+}
+
+@restrictions {
+  - "Never expose secrets"
+  - "Never skip required validation"
+}
+
+@knowledge {
+  """
+  ## Reference
+
+  Keep generated instructions aligned with PromptScript source.
+  """
+}
+
+@shortcuts {
+  "/review": "Review code quality"
+  "/test": {
+    description: "Run tests"
+    content: """
+      Run the complete test suite and report failures.
+    """
+  }
+}
+
+@commands {
+  "/typecheck": {
+    description: "Check types"
+    content: """
+      Run the TypeScript compiler without emitting files.
+    """
+  }
+}
+
+@guards {
+  globs: ["**/*.ts", "**/*.tsx"]
+}
+
+@params {
+  strictness: range(1..5) = 3
+  output?: enum("text", "json") = "text"
+}
+
+@skills {
+  review: {
+    description: "Review code changes"
+    content: """
+      Inspect correctness, tests, and security.
+    """
+  }
+}
+
+@local {
+  """
+  Use the local development API.
+  """
+}
+
+@agents {
+  reviewer: {
+    description: "Reviews code changes"
+    tools: ["Read", "Grep"]
+    content: """
+      Review changed code and report actionable findings.
+    """
+  }
+}
+
+@workflows {
+  release: {
+    description: "Prepare a release"
+    content: """
+      Run validation and summarize release changes.
+    """
+  }
+}
+
+@hooks {
+  validate-types: {
+    event: "pre-tool-use"
+    command: ["pnpm", "run", "typecheck"]
+  }
+}
+
+@mcpServers {
+  local-tools: {
+    transport: "stdio"
+    command: ["node", "./tools/mcp-server.mjs"]
+  }
+}
+
+@plugins {
+  quality: {
+    description: "Quality tools"
+    skills: ["review"]
+    hooks: ["validate-types"]
+    mcpServers: ["local-tools"]
+  }
+}
+
+@examples {
+  rename: {
+    description: "Use a precise name"
+    input: "const x = loadUsers()"
+    output: "const users = loadUsers()"
+  }
+}
+```
+
+## Shortcut Entry Shapes
+
+The `@shortcuts` and `@commands` bodies are objects. Their values have three supported forms:
+
+```
+@shortcuts {
+  # Supported scalar documentation entry
+  "/review": "Review code quality"
+
+  # Supported legacy multiline entry with target-dependent output
+  "/test-legacy": """
+    Run tests and report failures.
+  """
+
+  # Canonical executable entry
+  "/test": {
+    description: "Run tests"
+    content: """
+      Run tests and report failures.
+    """
+  }
+}
+```
+
+A multiline scalar can become a native command file on one target and plain documentation on another. PS038 warns and suggests an explicit `content` object. Existing scalar and multiline forms remain compatible. Some targets require extra fields such as GitHub's `prompt: true`; consult the [formatter matrix](https://getpromptscript.dev/dev/reference/formatters/index.md) for target-specific output.
+
+## Merge Behavior
+
+Merge behavior follows shape, then operation policy:
+
+| Shape    | Same-shape merge                                                   |
+| -------- | ------------------------------------------------------------------ |
+| `text`   | Concatenate base and incoming text, removing contained duplicates. |
+| `object` | Deep-merge fields and deduplicate nested arrays.                   |
+| `array`  | Concatenate unique values in source order.                         |
+| `mixed`  | Merge text, fields, and list items independently.                  |
+
+For `@inherit`, the parent is the base and the child wins field conflicts and irreconcilable shape mismatches. For `@use`, imported source values win same-shape field conflicts, while the target body wins an irreconcilable shape mismatch. Text and mixed bodies compose their text, while object and mixed bodies compose their fields instead of selecting one complete body. Later root extensions apply after inheritance and imports. Inline `@use` entries remain in canonical source order until the resolver consumes them.
+
+When shapes differ, do not rely on accidental field conversion. Migrate both layers to the block's canonical shape before composing them.
+
+## Diagnostics
+
+PS038 reports:
+
+- An error when a built-in block uses an unsupported body shape.
+- A warning when a supported legacy shape can change or omit formatter output.
+- A warning when a shortcut uses a multiline scalar instead of explicit `content`.
+- An error when shortcut names collide, cannot form a safe file name, or use an unsupported value, `description`, or `content` type.
+
+Each message includes the observed shape, expected shape, and a minimal replacement. The rule ignores custom block names:
+
+```
+@team-domain {
+  - "Custom array content remains valid"
+}
+```
+
+Use `prs validate --strict` to include shape warnings in CI.
+
 # CLI Reference
 
 Complete reference for the PromptScript command-line interface.
@@ -4190,7 +4930,7 @@ Upgrade `.prs` files under `.promptscript/` to the latest supported syntax versi
 prs upgrade [--dry-run]
 ```
 
-Use `--dry-run` to preview changes without writing files. Normal upgrades use atomic replacement and preserve file permissions.
+Use `--dry-run` to preview changes without writing files. Each normal file write uses atomic replacement and preserves file permissions.
 
 ### prs hooks
 
@@ -4247,6 +4987,8 @@ prs compile [options]
 Paths passed through `--config`, `--registry`, and `--output` are resolved relative to `--cwd` (or the current project directory). Watch mode honors the configured `watch.include`, `watch.exclude`, `watch.debounce`, and `watch.clearScreen` settings. Added, changed, and removed matching files all trigger compilation, and rebuilds are serialized.
 
 The `output.overwrite` setting provides the configuration equivalent of `--force`. A configured `output.header` is added to generated Markdown after PromptScript metadata (and after YAML frontmatter when present) so generated-file detection and frontmatter remain valid.
+
+In non-interactive mode without `--force`, `prs compile` preflights every planned output for ownership and overwrite conflicts. One conflicting user-owned file aborts that complete write set, so earlier outputs are not partially updated. Interactive mode processes outputs in order and prompts on conflicts, so accepted earlier writes can remain when a later path is skipped. Use `--dry-run` to inspect the full plan. Use `--force` or `output.overwrite: true` only after reviewing every conflicting path.
 
 When compiling the Factory target and `.factory/hooks.json` is absent, `prs compile` migrates unambiguous hooks from `.factory/settings.json` before writing generated output. `--dry-run` reports the planned canonical and legacy file changes without writing. `--no-migrate-factory-hooks` keeps the legacy file unchanged and reports `PS4002` instead. Unknown events, malformed entries, and mixed ownership abort migration without a partial write.
 
@@ -7818,21 +8560,25 @@ Use `@use` to import and merge fragments (like mixins):
 
 ### Merge Precedence
 
-When the same property exists in multiple sources:
-
-```text
-@inherit @stacks/typescript-lib    # Base values
-@use @core/security                # Overrides @inherit for same keys
-@use @core/quality                 # Overrides earlier @use for same keys
-@standards { ... }                 # Local values override everything
-```
-
-**Rule:** Later sources override earlier sources for the same keys.
+PromptScript 1.6 applies declarations in source order. Import merge policy and later operations are separate decisions:
 
 ```
-flowchart LR
-    A["@inherit<br/>(base)"] --> B["@use #1"] --> C["@use #2"] --> D["Local<br/>(wins)"]
+@meta { id: "service" syntax: "1.6.0" }
+
+@inherit @stacks/typescript-lib
+@use @core/security
+@use @core/quality
+
+@standards {
+  deployment: ["Require approval"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
 ```
+
+Use [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) as the normative source for conflict rules, declaration order, and resolved examples. This guide focuses on designing inheritance hierarchies rather than restating that matrix.
 
 ### Fragment Files
 
@@ -7842,7 +8588,7 @@ Create reusable fragments:
 # @fragments/testing.prs
 @meta {
   id: "@fragments/testing"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @standards {
@@ -7850,8 +8596,14 @@ Create reusable fragments:
 }
 
 @shortcuts {
-  "/test": "Write comprehensive tests"
-  "/coverage": "Check test coverage"
+  "/test": {
+    description: "Write comprehensive tests"
+    content: "Write unit and integration tests for the current change."
+  }
+  "/coverage": {
+    description: "Check test coverage"
+    content: "Run coverage and report untested behavior."
+  }
 }
 ```
 
@@ -8394,7 +9146,7 @@ Split by type of concern:
 # .promptscript/fragments/testing.prs
 @meta {
   id: "testing-fragment"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @standards {
@@ -8407,13 +9159,16 @@ Split by type of concern:
 }
 
 @shortcuts {
-  "/test": """
-    Write tests using:
-    - Vitest as the test runner
-    - Testing Library for DOM testing
-    - MSW for API mocking
-  """
-  "/coverage": "Check test coverage and identify gaps"
+  "/test": {
+    description: "Write project tests"
+    content: """
+      Use Vitest, Testing Library for DOM behavior, and MSW for API mocking.
+    """
+  }
+  "/coverage": {
+    description: "Check test coverage"
+    content: "Report coverage gaps and recommend missing behavioral tests."
+  }
 }
 ```
 
@@ -8543,9 +9298,11 @@ When you `@use` a file, all blocks from the source are merged into your file:
 | Content Type   | Merge Behavior                                                 |
 | -------------- | -------------------------------------------------------------- |
 | Text content   | Concatenated (source + target), identical content deduplicated |
-| Object content | Deep merged (target wins on key conflicts)                     |
+| Object content | Deep merged (imported source wins same-shape key conflicts)    |
 | Array content  | Unique concatenation (preserves order, dedupes)                |
 | Mixed content  | Text concatenated, properties deep merged                      |
+
+When block shapes conflict, existing target body wins. Under syntax `1.6.0`, later local blocks and modification operations apply after an earlier import.
 
 **Example:**
 
@@ -8585,12 +9342,12 @@ Without alias, blocks are simply merged. With alias, you get both:
 
 ### Import Order Matters
 
-Imports are processed in order. For same-name blocks, content is merged:
+Imports are processed in order. For same-name object fields, each later imported source wins:
 
 ```
 @use ./fragments/base         # @shortcuts has /test -> "Run unit tests"
 @use ./fragments/advanced     # @shortcuts has /test -> "Run full suite"
-# Result: /test -> "Run unit tests\n\nRun full suite" (concatenated)
+# Result: /test -> "Run full suite"
 ```
 
 For object properties, later imports override:
@@ -8598,8 +9355,10 @@ For object properties, later imports override:
 ```
 @use ./base     # @standards.coverage = 80
 @use ./strict   # @standards.coverage = 95
-# Result: coverage = 95 (target wins)
+# Result: coverage = 95 (later imported source wins)
 ```
+
+See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md) for the normative matrix and resolved declaration-order examples.
 
 ## Registry vs Local Fragments
 
@@ -8827,6 +9586,1405 @@ If imports fail:
 - [Inheritance Guide](https://getpromptscript.dev/dev/guides/inheritance/index.md) - Deep dive into inheritance patterns
 - [Enterprise Setup](https://getpromptscript.dev/dev/guides/enterprise/index.md) - Organization-wide registries
 - [Configuration Reference](https://getpromptscript.dev/dev/reference/config/index.md) - Full config options
+
+# Building Skills
+
+Skills are reusable units of AI instructions. Each skill is a directory with a `SKILL.md` file and optional resource files. PromptScript compiles them to all your AI coding agents.
+
+## Minimal Skill
+
+A skill only needs a `SKILL.md` file:
+
+```text
+.promptscript/skills/
+└── my-skill/
+    └── SKILL.md
+```
+
+```markdown
+---
+name: my-skill
+description: Short description of what this skill does
+---
+
+Detailed instructions for the AI assistant.
+Explain what the skill should do, step by step.
+```
+
+Reference it in your `.prs` file:
+
+```
+@skills {
+  my-skill: {
+    description: "Short description of what this skill does"
+  }
+}
+```
+
+That's it. Run `prs compile` and the skill is available in all your AI agents.
+
+## SKILL.md Frontmatter
+
+The YAML frontmatter defines the skill's identity and content:
+
+```markdown
+---
+name: code-review
+description: Security-focused code review
+---
+
+Instructions here...
+```
+
+| Property      | Type     | Default  | Description                                                                                                      |
+| ------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `name`        | string   | required | Skill identifier (matches directory name)                                                                        |
+| `description` | string   | required | What the skill does                                                                                              |
+| `params`      | object   | -        | Parameter definitions for `{{variable}}` templates                                                               |
+| `references`  | string[] | -        | File paths to attach to the skill's context (see below)                                                          |
+| `inputs`      | object   | -        | Runtime input contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md))  |
+| `outputs`     | object   | -        | Runtime output contract (see [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md)) |
+
+## Declaring References
+
+Use `references` in SKILL.md frontmatter to attach files to the skill's context:
+
+```markdown
+---
+name: architecture-review
+description: Review architecture decisions
+references:
+  - references/architecture.md
+  - references/modules.md
+---
+
+Review the architecture using the attached context files.
+```
+
+Formatters emit referenced files alongside `SKILL.md` in the output directory. Allowed types: `.md`, `.json`, `.yaml`, `.yml`, `.txt`, `.csv`. Paths are relative to the `SKILL.md` file.
+
+You can also declare references in your `.prs` file using the `references` property on a skill definition:
+
+```
+@skills {
+  architecture-review: {
+    description: "Review architecture decisions"
+    references: [
+      ./references/architecture.md
+      ./references/modules.md
+    ]
+  }
+}
+```
+
+The validator checks that referenced files use allowed extensions (PS025) and don't contain sensitive content (PS026).
+
+## Behavior Properties (in .prs only)
+
+Properties like `userInvocable`, `disableModelInvocation`, `context`, `agent`, and `allowedTools` control how AI agents handle the skill. These are set in your `.prs` file, not in SKILL.md frontmatter:
+
+```
+@skills {
+  code-review: {
+    description: "Security-focused code review"
+    userInvocable: true
+    context: "fork"
+    agent: "general-purpose"
+    allowedTools: ["Read", "Grep", "Bash"]
+  }
+}
+```
+
+| Property                 | Type     | Default | Supported by                     |
+| ------------------------ | -------- | ------- | -------------------------------- |
+| `userInvocable`          | boolean  | `false` | Claude, Factory                  |
+| `disableModelInvocation` | boolean  | `false` | Claude, GitHub, Factory          |
+| `context`                | string   | -       | Claude (`"fork"` or `"inherit"`) |
+| `agent`                  | string   | -       | Claude                           |
+| `allowedTools`           | string[] | -       | Claude, Factory                  |
+
+## Writing Good Instructions
+
+### Be specific about what and how
+
+```markdown
+---
+name: security-audit
+description: Audit code for OWASP Top 10 vulnerabilities
+---
+
+## What to Check
+
+Scan the provided code for these vulnerability categories:
+
+1. **Injection** - SQL, NoSQL, OS command, LDAP
+2. **Broken Authentication** - weak passwords, session fixation
+3. **Sensitive Data Exposure** - PII in logs, unencrypted storage
+4. **Security Misconfiguration** - debug mode, default credentials
+
+## Output Format
+
+For each finding:
+
+- Severity: Critical / High / Medium / Low
+- Location: file and line
+- Description: what the vulnerability is
+- Fix: how to remediate it
+
+## What NOT to Do
+
+- Don't modify code without explicit approval
+- Don't skip files based on extension
+- Don't report false positives for framework-handled concerns
+```
+
+### Use structured sections
+
+Skills work best when they have clear sections that tell the AI exactly what to do:
+
+- **What to check / What to do** - the task itself
+- **Output format** - expected structure of the response
+- **Constraints** - boundaries and restrictions
+- **Examples** - concrete input/output pairs
+
+## Adding Resource Files
+
+Place files alongside `SKILL.md` to include data, scripts, or templates:
+
+```text
+.promptscript/skills/ui-design/
+├── SKILL.md
+├── data/
+│   ├── colors.csv
+│   ├── typography.csv
+│   └── stacks/
+│       ├── react.csv
+│       └── vue.csv
+└── scripts/
+    └── search.py
+```
+
+All files are copied to every compilation target:
+
+```text
+.claude/skills/ui-design/SKILL.md
+.claude/skills/ui-design/data/colors.csv
+.claude/skills/ui-design/scripts/search.py
+```
+
+Reference resource files in your instructions using the target path. For example, in your `SKILL.md`:
+
+```yaml
+# SKILL.md frontmatter
+name: ui-design
+description: UI design with searchable databases
+```
+
+Then in the body, reference the script with the compilation target path:
+
+```text
+python3 .claude/skills/ui-design/scripts/search.py "query"
+```
+
+And list available data files:
+
+- `data/colors.csv` - Color palettes and accessibility info
+- `data/typography.csv` - Font pairings and sizing scales
+
+### Resource file limits
+
+- Maximum 1 MB per file
+- Maximum 10 MB total per skill
+- Maximum 100 files per skill
+- Binary files (containing null bytes) and symlinks are excluded
+- Path traversal attempts (`../`) are rejected
+- Auto-skipped files: `.env`, lock files (`pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`), config files (`package.json`, `tsconfig.json`, `Dockerfile`), ESLint/Prettier configs, and more (45+ patterns)
+- Auto-skipped directories: `node_modules`, `.git`, `dist`, `build`, `coverage`, `test`, `__tests__`, and more (16+ patterns)
+
+### .skillignore
+
+Add a `.skillignore` file to any skill directory for custom exclusion rules (gitignore syntax):
+
+```text
+# .promptscript/skills/my-skill/.skillignore
+*.log
+tmp/
+draft-*.md
+```
+
+## Parameterized Skills
+
+Make skills reusable across projects with `{{variable}}` templates:
+
+```markdown
+---
+name: test-generator
+description: Generate {{framework}} tests for {{language}} code
+params:
+  language:
+    type: string
+    default: typescript
+  framework:
+    type: enum
+    options: [vitest, jest, mocha, pytest]
+    default: vitest
+  coverage:
+    type: number
+    default: 80
+---
+
+Write comprehensive {{framework}} tests for the provided {{language}} code.
+Target {{coverage}}% code coverage.
+```
+
+Pass values in the `.prs` file:
+
+```
+@skills {
+  test-generator: {
+    language: "python"
+    framework: "pytest"
+    coverage: 90
+  }
+}
+```
+
+### Parameter types
+
+| Type      | Description               | Example                                                  |
+| --------- | ------------------------- | -------------------------------------------------------- |
+| `string`  | Free text                 | `"typescript"`                                           |
+| `number`  | Numeric value             | `90`                                                     |
+| `boolean` | True/false                | `true`                                                   |
+| `enum`    | One of predefined options | `"strict"` (with `options: [relaxed, standard, strict]`) |
+
+## Skill Contracts
+
+Define formal inputs and outputs for skills that interact with external data:
+
+```markdown
+---
+name: security-scan
+description: Scan for vulnerabilities
+inputs:
+  files:
+    description: List of file paths to scan
+    type: string
+  severity:
+    description: Minimum severity level
+    type: enum
+    options: [low, medium, high]
+    default: medium
+outputs:
+  report:
+    description: Scan report in markdown
+    type: string
+  passed:
+    description: Whether scan passed
+    type: boolean
+---
+
+Scan the provided files for security issues.
+Report findings with at least {{severity}} severity.
+```
+
+See [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md) for the full reference.
+
+## Skill Dependencies
+
+Declare that one skill requires another:
+
+```
+@skills {
+  lint-check: {
+    description: "Run linting"
+  }
+
+  full-review: {
+    description: "Complete code review"
+    requires: ["lint-check"]
+  }
+}
+```
+
+PromptScript validates that required skills exist and have no circular dependencies.
+
+## Testing Your Skill
+
+### 1. Compile and inspect output
+
+```bash
+prs compile
+```
+
+Check the generated files:
+
+```bash
+cat .claude/skills/my-skill/SKILL.md
+```
+
+### 2. Validate
+
+```bash
+prs validate --strict
+```
+
+This checks:
+
+- Parameter types are valid (PS015)
+- Required skills exist (PS016)
+- Contract definitions are correct (PS017)
+
+### 3. Try it
+
+Open your AI coding agent and invoke the skill. For user-invocable skills in Claude Code:
+
+```text
+/my-skill
+```
+
+## Publishing Skills
+
+### Share via direct import (v1.8+)
+
+Once your skill is in a public Git repository, others can import it directly using `@use` — no installer needed:
+
+```text
+@use github.com/your-org/your-skills/my-skill@1.0.0
+```
+
+See [Markdown Imports](https://getpromptscript.dev/dev/guides/markdown-imports/index.md) for syntax details, version pinning, and the `prs skills` management commands.
+
+### Share via Git (npx skills)
+
+Push your skill directory to a GitHub repository. Others install it with:
+
+```bash
+npx skills add your-org/your-skills \
+  --skill my-skill \
+  --dir .promptscript/skills
+```
+
+### Share via registry
+
+Add skills to your PromptScript registry as part of a package:
+
+```text
+my-registry/
+└── @company/
+    └── skills/
+        └── security-audit/
+            └── SKILL.md
+```
+
+Teams inherit them with `@use @company/skills`.
+
+See [Build Your Registry](https://getpromptscript.dev/dev/guides/registry/index.md) for details.
+
+## Examples
+
+### Simple commit skill
+
+```text
+.promptscript/skills/commit/
+└── SKILL.md
+```
+
+```markdown
+---
+name: commit
+description: Create well-structured git commits
+---
+
+When creating commits:
+
+1. Use conventional commit format: `type(scope): description`
+2. Types: feat, fix, docs, style, refactor, test, chore
+3. Keep the first line under 72 characters
+4. Add a blank line before the body
+5. Explain why, not what
+```
+
+Reference in `.prs` with behavior properties:
+
+```
+@skills {
+  commit: {
+    description: "Create well-structured git commits"
+    userInvocable: true
+  }
+}
+```
+
+### Review skill with checklist
+
+```text
+.promptscript/skills/review/
+├── SKILL.md
+└── checklist.md
+```
+
+```markdown
+---
+name: review
+description: Code review with checklist
+---
+
+Review the code changes using the checklist in `checklist.md`.
+
+For each item:
+
+- PASS: requirement met
+- FAIL: requirement not met, explain why
+- N/A: not applicable
+
+Summarize findings at the end.
+```
+
+Reference in `.prs` with behavior properties:
+
+```
+@skills {
+  review: {
+    description: "Code review with checklist"
+    userInvocable: true
+    allowedTools: ["Read", "Grep"]
+  }
+}
+```
+
+### Data-driven skill with scripts
+
+```text
+.promptscript/skills/stack-advisor/
+├── SKILL.md
+├── data/
+│   ├── frameworks.csv
+│   └── benchmarks.json
+└── scripts/
+    └── compare.py
+```
+
+```yaml
+# SKILL.md frontmatter
+name: stack-advisor
+description: Technology stack recommendations backed by data
+```
+
+The body references the script and data files:
+
+```text
+## Available Tools
+
+Run comparisons:
+python3 .claude/skills/stack-advisor/scripts/compare.py "react" "vue"
+
+## Data Sources
+- data/frameworks.csv - Framework comparison matrix
+- data/benchmarks.json - Performance benchmarks
+
+## Process
+1. Understand the requirements
+2. Search the data for matching frameworks
+3. Run comparisons if needed
+4. Recommend with data-backed reasoning
+```
+
+## See Also
+
+- [Skill Composition](https://getpromptscript.dev/dev/guides/skill-composition/index.md) - Compose complex skills from multiple sub-skill phases
+- [Markdown Imports](https://getpromptscript.dev/dev/guides/markdown-imports/index.md) - Import skills directly via `@use` without external tools
+- [Using npx skills](https://getpromptscript.dev/dev/guides/npx-skills/index.md) - Install open-source skills from GitHub
+- [Local Skills](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Full reference for skill resolution and resource handling
+- [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md) - Define inputs and outputs
+- [Shared Resources](https://getpromptscript.dev/dev/guides/shared-resources/index.md) - Share files across all skills
+
+# Skill Composition
+
+Skill composition lets you build complex skills from multiple sub-skill files. Each sub-skill is a standard `.prs` file that can be independently tested, compiled, and owned by different teams.
+
+Try it interactively
+
+Open the [PromptScript Playground](https://getpromptscript.dev/playground/) and load the **Skill Composition** example from the gallery (Examples → Advanced) to experiment with the multi-file ops/triage/code-fix layout described below without leaving your browser.
+
+Use `@use` directives inside a `@skills` block to import sub-skills as ordered phases:
+
+```
+@meta {
+  id: "ops"
+  syntax: "1.1.0"
+}
+
+@skills {
+  ops: {
+    description: "Production triage for cloud services"
+    content: """
+      You are a production triage orchestrator. Follow the phases below
+      in order. Switch between manual and cron mode based on context.
+    """
+  }
+  @use ./phases/health-scan
+  @use ./phases/triage(severity: "critical")
+  @use ./phases/code-fix as autofix
+}
+```
+
+The resolver flattens all sub-skills into a single skill with labeled phase sections, unioned `allowedTools`, concatenated references, and `composedFrom` metadata tracking provenance.
+
+## Why Composition?
+
+Without composition, complex enterprise skills live in a single file that grows unwieldy. Composition solves this:
+
+- **Modular phases** — each phase has its own instructions, context, restrictions, and tools
+- **Independent testing** — compile and validate each sub-skill on its own
+- **Team ownership** — different teams own different phases
+- **Reuse** — share phases across multiple parent skills
+- **Security boundaries** — each phase declares only the tools it needs
+
+## Writing Sub-Skills
+
+A sub-skill is a standard `.prs` file with a `@skills` block. It can also include context blocks (`@knowledge`, `@restrictions`, `@standards`) that get composed into the parent.
+
+### Minimal Sub-Skill
+
+```
+# phases/health-scan.prs
+@meta {
+  id: "health-scan"
+  syntax: "1.1.0"
+}
+
+@skills {
+  health-scan: {
+    description: "Run MCP health checks in parallel"
+    allowedTools: ["mcp__monitoring__check_cpu", "mcp__monitoring__check_memory"]
+    content: """
+      Run all health checks in parallel. Report structured findings.
+    """
+  }
+}
+```
+
+### Sub-Skill with Context Blocks
+
+```
+# phases/triage.prs
+@meta {
+  id: "triage"
+  syntax: "1.1.0"
+  params: {
+    severity: string = "all"
+  }
+}
+
+@knowledge {
+  thresholds: {
+    cpu_critical: 90
+    memory_critical: 95
+    error_rate_critical: 10
+  }
+}
+
+@restrictions {
+  - "Never escalate without evidence from at least 2 independent checks"
+  - "Never classify severity higher than {{severity}} threshold"
+}
+
+@skills {
+  triage: {
+    description: "Classify and group health findings by severity"
+    content: """
+      Classify all findings. Group by service, then by severity.
+      Only include findings at or above {{severity}} level.
+    """
+  }
+}
+```
+
+When this sub-skill is composed, its `@knowledge` and `@restrictions` appear under the phase's section header in the flattened output.
+
+## `@use` Syntax Inside Skills
+
+All existing `@use` features work inside skill blocks:
+
+```
+@skills {
+  ops: {
+    description: "Production operations"
+
+    # Relative path
+    @use ./phases/health-scan
+
+    # With parameters
+    @use ./phases/triage(severity: "critical", timeout: 30)
+
+    # With alias (determines phase name)
+    @use ./phases/code-fix as autofix
+
+    # Registry path
+    @use @shared/phases/monitoring
+  }
+}
+```
+
+## How Composition Works
+
+### Phase Ordering
+
+Phases are resolved in declaration order (top to bottom). This order is deterministic and reflected in both the flattened content and the `composedFrom` metadata.
+
+### Content Flattening
+
+The resolver produces a single skill by concatenating:
+
+```text
+[Parent content - orchestration instructions]
+
+---
+
+## Phase 1: health-scan
+
+### Knowledge
+[content from @knowledge block]
+
+### Restrictions
+[items from @restrictions block]
+
+### Instructions
+[content from skill definition]
+
+---
+
+## Phase 2: triage
+...
+
+---
+
+## Phase 3: autofix
+...
+```
+
+Phase names come from the alias (if `@use ... as alias`) or the skill name from the sub-skill file.
+
+### Property Merging
+
+| Property       | Strategy    | Details                                           |
+| -------------- | ----------- | ------------------------------------------------- |
+| `content`      | Append      | Each phase becomes a labeled section              |
+| `description`  | Parent wins | Parent description is authoritative               |
+| `allowedTools` | Union       | Tools from all phases combined, deduplicated      |
+| `references`   | Concat      | All phase references concatenated with parent's   |
+| `requires`     | Concat      | All phase requirements concatenated, deduplicated |
+| `inputs`       | First phase | Phase 1 inputs become parent inputs (entry point) |
+| `outputs`      | Last phase  | Last phase outputs become parent outputs (exit)   |
+| `trigger`      | Parent wins | Only parent defines trigger                       |
+
+### Context Block Extraction
+
+| Block           | Behavior                                       |
+| --------------- | ---------------------------------------------- |
+| `@knowledge`    | Appended under phase section header            |
+| `@restrictions` | Appended under phase section header            |
+| `@standards`    | Appended under phase section header            |
+| `@context`      | Merged into parent `@context`                  |
+| `@identity`     | Ignored — parent defines identity              |
+| `@guards`       | Ignored — guards operate at project level      |
+| `@shortcuts`    | Ignored — shortcuts are UI-level               |
+| `@agents`       | Ignored — agents are separate from composition |
+
+## Sub-Skill Selection
+
+When a sub-skill file contains multiple skill definitions, the resolver picks:
+
+1. **Exact name match** — filename (without extension) matches a skill name
+1. **First skill** — no name match, use the first defined skill
+1. **Error** — empty or missing `@skills` block
+
+## Limits
+
+- **Nesting depth:** maximum 3 levels of composition
+- **Content size:** maximum 256 KB per composed skill
+- **Circular imports:** detected and reported as errors
+
+## Validation
+
+The validator rule **PS027** checks composed skills for:
+
+- Sub-skill references that can't be resolved
+- Missing `@skills` blocks in referenced files
+- Nesting depth violations
+
+Run validation with:
+
+```bash
+prs validate --strict
+```
+
+## Full Example
+
+### Project Structure
+
+```text
+.promptscript/
+  project.prs
+  skills/
+    ops.prs
+    phases/
+      health-scan.prs
+      triage.prs
+      code-fix.prs
+```
+
+### Parent Skill (`ops.prs`)
+
+```
+@meta {
+  id: "ops"
+  syntax: "1.1.0"
+}
+
+@skills {
+  ops: {
+    description: "Production triage for cloud services"
+    userInvocable: true
+    content: """
+      You are a production triage orchestrator.
+
+      Follow the phases below in order:
+      1. Run health checks across all services
+      2. Triage and classify findings
+      3. Apply automated fixes where safe
+
+      Switch between manual (interactive) and cron (unattended) mode
+      based on context.
+    """
+  }
+  @use ./phases/health-scan
+  @use ./phases/triage(severity: "critical")
+  @use ./phases/code-fix as autofix
+}
+```
+
+### Sub-Skills
+
+**`phases/health-scan.prs`** — runs health checks with dedicated MCP tools:
+
+```
+@meta { id: "health-scan" syntax: "1.1.0" }
+
+@knowledge {
+  """
+  Health check endpoints:
+  - /health for HTTP services
+  - /ready for Kubernetes readiness
+  - /metrics for Prometheus scraping
+  """
+}
+
+@skills {
+  health-scan: {
+    description: "Run MCP health checks in parallel"
+    allowedTools: ["mcp__monitoring__check_cpu", "mcp__monitoring__check_memory"]
+    content: """
+      Run all health checks in parallel. Report structured findings
+      with service name, status, and response time.
+    """
+  }
+}
+```
+
+**`phases/triage.prs`** — classifies findings with parameterized severity:
+
+```
+@meta {
+  id: "triage"
+  syntax: "1.1.0"
+  params: { severity: string = "all" }
+}
+
+@restrictions {
+  - "Never escalate without evidence from at least 2 independent checks"
+  - "Never classify severity higher than {{severity}} threshold"
+}
+
+@skills {
+  triage: {
+    description: "Classify and group health findings by severity"
+    content: """
+      Classify all findings. Group by service, then by severity.
+      Only include findings at or above {{severity}} level.
+    """
+  }
+}
+```
+
+**`phases/code-fix.prs`** — applies automated fixes with restricted tools:
+
+```
+@meta { id: "code-fix" syntax: "1.1.0" }
+
+@restrictions {
+  - "Never push directly to main branch"
+  - "Never modify files outside the affected service directory"
+}
+
+@skills {
+  code-fix: {
+    description: "Locate code, create branch, write fix, create PR"
+    allowedTools: ["Read", "Edit", "Bash", "Grep"]
+    content: """
+      For each critical finding:
+      1. Locate the relevant source code
+      2. Create a feature branch
+      3. Apply the fix
+      4. Run tests
+      5. Create a pull request with the finding as context
+    """
+  }
+}
+```
+
+After `prs compile`, the `/ops` skill is available in all your AI agents with all phases flattened, tools unioned, and restrictions preserved per phase.
+
+## See Also
+
+- [Building Skills](https://getpromptscript.dev/dev/guides/building-skills/index.md) — skill basics, parameters, and resource files
+- [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md) — define inputs and outputs for phases
+- [Inheritance](https://getpromptscript.dev/dev/guides/inheritance/index.md) — single inheritance with `@inherit`
+- [Multi-File Organization](https://getpromptscript.dev/dev/guides/multi-file/index.md) — project-level file composition
+
+# Skill Contracts
+
+Skills can declare their expected inputs and produced outputs, creating a clear contract for how they interact with the environment.
+
+## Defining Contracts in SKILL.md
+
+Add `inputs` and `outputs` sections to the YAML frontmatter:
+
+```text
+---
+name: security-scan
+description: Scan for vulnerabilities
+inputs:
+  files:
+    description: List of file paths to scan
+    type: string
+  severity:
+    description: Minimum severity level
+    type: enum
+    options: [low, medium, high]
+    default: medium
+outputs:
+  report:
+    description: Scan report in markdown
+    type: string
+  passed:
+    description: Whether scan passed
+    type: boolean
+---
+
+Scan the provided files for security issues.
+Report findings with at least {{severity}} severity.
+```
+
+## Field Properties
+
+Each input or output field supports:
+
+| Property      | Required  | Description                           |
+| ------------- | --------- | ------------------------------------- |
+| `description` | Yes       | What the field represents             |
+| `type`        | Yes       | `string`, `number`, `boolean`, `enum` |
+| `options`     | Enum only | Valid values for enum type            |
+| `default`     | No        | Default value if not provided         |
+
+## Combining with Parameters
+
+A skill can have `params`, `inputs`, and `outputs` together:
+
+- **params** - Template variables interpolated at compile time (`{{var}}` syntax)
+- **inputs** - Runtime data the skill expects to receive
+- **outputs** - Runtime data the skill produces
+
+```text
+---
+name: code-review
+description: Review {{language}} code
+params:
+  language:
+    type: string
+    default: typescript
+inputs:
+  files:
+    description: Files to review
+    type: string
+outputs:
+  issues:
+    description: List of issues found
+    type: string
+  score:
+    description: Quality score
+    type: number
+---
+
+Review the provided {{language}} files.
+```
+
+## Validation
+
+The PS017 validation rule checks contract definitions:
+
+- Field types must be `string`, `number`, `boolean`, or `enum`
+- Enum fields must include an `options` array
+- Name collisions between `params` and `inputs` are flagged
+
+## See Also
+
+- [Local Skills](https://getpromptscript.dev/dev/guides/local-skills/index.md) - Managing skills in your project
+- [Parameterized Skills](https://getpromptscript.dev/dev/guides/local-skills/#parameterized-skills) - Making skills configurable with `{{var}}` templates
+- [Shared Resources](https://getpromptscript.dev/dev/guides/shared-resources/index.md) - Share files across all skills
+
+# Skill Overlays Guide
+
+Learn how to extend, customize, and govern skills across multiple registry layers using `@extend` with skill-aware merge semantics.
+
+## Overview
+
+In multi-layer architectures (company → product → BU → project), each layer may need to customize skills defined by a lower layer without replacing them entirely. Skill overlays allow higher layers to:
+
+- **Replace** properties like `content` or `description`
+- **Append** to `references` and `requires` lists
+- **Merge** parameter and contract definitions
+- **Negate** specific entries from lower layers
+- **Seal** properties to prevent overrides
+
+## Basic Overlay
+
+Import a base skill and extend it:
+
+```
+@use @company/skills as base
+
+@extend base.skills.code-review {
+  description: "Code review with stricter security checks"
+  content: """
+    Enhanced review workflow for the security team.
+  """
+}
+```
+
+## Resolution Order
+
+When multiple `@use` and `@extend` declarations target the same skill, priority is determined by **declaration order** in the `.prs` file:
+
+- `@use` declarations are processed top-to-bottom — later imports override earlier ones for block name conflicts
+- `@extend` blocks are applied sequentially — later extends override earlier ones for replace-strategy properties, and append to earlier ones for append-strategy properties
+
+```
+@use @bu-retail/skills as retail
+@use @bu-travel/skills as travel
+
+# Applied in order: retail first, travel second
+@extend retail.skills.code-review {
+  description: "Retail review"
+  references: ["retail-patterns.md"]
+}
+
+@extend travel.skills.code-review {
+  description: "Travel review"         # wins (later replace)
+  references: ["travel-patterns.md"]   # appended after retail
+}
+```
+
+Result: `description` = `"Travel review"` (last replace wins), `references` includes both `retail-patterns.md` and `travel-patterns.md` (append accumulates).
+
+**Rule of thumb:** put the highest-priority registry's `@extend` last in the file.
+
+## Merge Strategies
+
+When `@extend` targets a skill, each property follows a specific merge strategy:
+
+| Strategy          | Properties                                                                                                                    | Behavior                         |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **Replace**       | `content`, `description`, `trigger`, `userInvocable`, `allowedTools`, `disableModelInvocation`, `context`, `agent`, `license` | Extension value wins outright    |
+| **Append**        | `references`, `requires`                                                                                                      | Extension entries added to base  |
+| **Shallow merge** | `params`, `inputs`, `outputs`                                                                                                 | Extension keys added/overwritten |
+
+### Replace Example
+
+```
+@extend base.skills.deploy {
+  content: """
+    New deployment workflow replacing the base.
+  """
+  allowedTools: ["Bash", "Read", "Write"]
+}
+```
+
+The overlay's `content` and `allowedTools` completely replace the base values.
+
+### Append Example
+
+```
+@extend base.skills.architecture-review {
+  references: [
+    "references/bu-architecture.md"
+    "references/bu-modules.md"
+  ]
+  requires: ["security-scan"]
+}
+```
+
+The overlay's `references` and `requires` are appended to the base lists (deduplicated).
+
+### Shallow Merge Example
+
+```
+@extend base.skills.code-review {
+  inputs: {
+    severity: {
+      description: "Minimum severity"
+      type: enum
+      options: [low, medium, high]
+    }
+  }
+}
+```
+
+New input fields are added to the base. Existing fields with the same key are overwritten.
+
+## Reference Negation
+
+Use the `!` prefix to remove entries from a lower layer's append-strategy arrays:
+
+```
+@extend base.skills.code-review {
+  references: [
+    "!references/deprecated-patterns.md"
+    "references/new-patterns.md"
+  ]
+  requires: [
+    "!legacy-tool"
+    "modern-tool"
+  ]
+}
+```
+
+### Path Matching
+
+Negation uses normalized path matching — `"!./references/foo.md"` matches `"references/foo.md"`. Paths are compared after stripping `./`, resolving `../`, and collapsing `//`.
+
+### Unmatched Negations
+
+If a negation doesn't match any base entry, a warning is logged during compilation:
+
+```text
+Negation "!references/old.md" did not match any base entry — it may be stale.
+```
+
+This usually means the base skill was updated and the entry you're negating no longer exists. Remove the negation or update it to match the current base.
+
+### Rules
+
+- Negation only works in `@extend` blocks — using `!` in a base skill definition triggers validator warning PS028
+- Only applies to append-strategy properties (`references`, `requires`)
+- Multiple negations in the same array are supported
+
+## Sealed Properties
+
+The `sealed` property prevents higher layers from replacing specified skill properties:
+
+```
+@skills {
+  deploy: {
+    description: "Production deployment workflow"
+    content: """
+      Critical deployment procedure — do not modify.
+    """
+    sealed: ["content", "description"]
+  }
+}
+```
+
+### Boolean Shorthand
+
+`sealed: true` seals all replace-strategy properties at once:
+
+```
+@skills {
+  compliance-check: {
+    description: "Compliance verification"
+    content: """..."""
+    sealed: true
+  }
+}
+```
+
+### Enforcement
+
+If an `@extend` block attempts to override a sealed property, compilation fails:
+
+```text
+ResolveError: Cannot override sealed property 'content' on skill (sealed by base definition)
+```
+
+### Rules
+
+- Only **replace-strategy** properties can be sealed — append-strategy properties (`references`, `requires`) remain extendable even when `sealed: true`
+- Only the **base skill author** can set `sealed` — overlays cannot add or modify it
+- `sealed` is a hard error, not a warning — the overlay must remove the conflicting override
+- Validator PS029 warns when `sealed` contains non-replace-strategy property names
+
+## Multi-Layer Example
+
+A 4-layer enterprise architecture:
+
+```text
+Layer 1: @company     — organization-wide skill definitions
+Layer 2: @product     — product-specific customizations
+Layer 3: @bu          — business unit references and context
+Layer 4: project      — local project overrides
+```
+
+### Layer 1: Company Base
+
+```
+# @company/skills/code-review.prs
+@meta { id: "@company/code-review" syntax: "1.1.0" }
+
+@skills {
+  code-review: {
+    description: "Standard code review"
+    content: """
+      Review code for quality, security, and maintainability.
+    """
+    references: ["references/company-standards.md"]
+    requires: ["lint-check"]
+    sealed: ["content"]
+  }
+}
+```
+
+### Layer 2: Product Overlay
+
+```
+# @product/skills/code-review.prs
+@meta { id: "@product/code-review" syntax: "1.1.0" }
+
+@use @company/skills/code-review as base
+
+@extend base.skills.code-review {
+  description: "Product-specific code review"
+  references: ["references/product-patterns.md"]
+}
+```
+
+Layer 2 replaces `description` (allowed), appends to `references`, but **cannot** replace `content` (sealed by Layer 1).
+
+### Layer 3: BU Overlay
+
+```
+# @bu/skills/code-review.prs
+@meta { id: "@bu/code-review" syntax: "1.1.0" }
+
+@use @product/skills/code-review as base
+
+@extend base.skills.code-review {
+  references: [
+    "!references/product-patterns.md"
+    "references/bu-architecture.md"
+    "references/bu-modules.md"
+  ]
+  requires: ["security-scan"]
+}
+```
+
+Layer 3 removes a Layer 2 reference via negation, adds BU-specific references, and appends a new requirement.
+
+### Composed Result
+
+```text
+description: "Product-specific code review"     ← Layer 2 (replaced)
+content: (Layer 1 original — sealed)             ← Layer 1 (protected)
+references:
+  - references/company-standards.md              ← Layer 1
+  - references/bu-architecture.md                ← Layer 3
+  - references/bu-modules.md                     ← Layer 3
+requires:
+  - lint-check                                   ← Layer 1
+  - security-scan                                ← Layer 3
+```
+
+## Debugging with `prs inspect`
+
+Use `prs inspect` to see how layers compose a skill:
+
+```bash
+# Property-level view (default) — shows each property with source
+prs inspect code-review
+
+# Layer-level view — groups changes by source file
+prs inspect code-review --layers
+
+# JSON output for tooling
+prs inspect code-review --format json
+```
+
+The property view shows each property's current value, merge strategy, and which file contributed it. The layer view shows what each `@extend` changed, using symbols: `+` added, `~` replaced, `-` negated.
+
+## Governance: Managing Multi-Layer Skills
+
+When skills span multiple registry layers, structural changes in a base skill can break overlays that depend on its content. PromptScript provides tooling to detect and prevent problems, but organizational process is equally important.
+
+### Preventing Breakage
+
+**Seal critical properties.** If a base skill's `content` should never be replaced by overlays, seal it:
+
+```
+@skills {
+  code-review: {
+    content: """
+      Critical review workflow — protected from overrides.
+    """
+    sealed: ["content"]
+  }
+}
+```
+
+This ensures no `@extend` can silently replace the core instructions.
+
+**Use references instead of inline content.** Rather than putting all context in `content`, move supplementary information to `references` files. Overlays can then append, negate, or replace individual reference files without touching the sealed content:
+
+```
+@skills {
+  code-review: {
+    content: """
+      Core review workflow (sealed).
+    """
+    references: ["references/patterns.md", "references/standards.md"]
+    sealed: ["content"]
+  }
+}
+```
+
+### Detecting Problems After Base Updates
+
+**Use `prs inspect` after updating a base registry.** When a base skill changes, run inspect on each overlay skill to verify the layer composition still makes sense:
+
+```bash
+# After pulling a registry update
+prs pull
+
+# Check how the overlay composes with the updated base
+prs inspect code-review --layers
+```
+
+Look for:
+
+- Properties that were previously from the base but are now missing
+- Reference files that may no longer match the base skill's context
+- Unexpected changes in the layer count
+
+**Use `prs diff` to see compilation changes.** After pulling updates, compare the compiled output against the previous version:
+
+```bash
+prs diff --target claude
+```
+
+This shows exactly what changed in the final output, making it easy to spot when a base update broke an overlay.
+
+### Organizational Best Practices
+
+**Version your registry skills.** Use a `version` field in skill descriptions to communicate breaking changes:
+
+```
+@skills {
+  code-review: {
+    description: "Code review v2.0 — restructured workflow"
+    content: """..."""
+  }
+}
+```
+
+When you make breaking changes (removing sections, restructuring content, changing property types), bump the version in the description and communicate via your team's changelog.
+
+**Maintain a registry changelog.** Keep a `CHANGELOG.md` at the root of each registry documenting skill changes:
+
+```markdown
+# @company Registry Changelog
+
+## 2026-04-01 — v2.0.0
+
+### Breaking
+
+- code-review: removed "## Legacy Patterns" section
+- code-review: restructured workflow into 3 phases (was 5)
+
+### Added
+
+- code-review: sealed content property
+- deploy: new skill for deployment workflows
+```
+
+**Coordinate between layers.** When Layer 2 maintains a skill that Layer 3 extends:
+
+1. Layer 2 communicates planned breaking changes before deploying
+1. Layer 3 runs `prs inspect --layers` to verify compatibility
+1. Both layers use `prs diff` in CI to detect unexpected changes
+
+**Test overlays in CI.** Add a CI step that compiles the overlay project and verifies the output is valid:
+
+```yaml
+# .github/workflows/validate-overlay.yml
+- run: prs validate --strict
+- run: prs compile --dry-run
+- run: prs inspect code-review --format json | jq '.sealed'
+```
+
+### When Things Break
+
+If an overlay becomes incompatible after a base update:
+
+1. **Run `prs inspect skill-name --layers`** to see the current layer composition
+1. **Check sealed properties** — if the base added `sealed` to a property your overlay was overriding, you'll get a compilation error with a clear message
+1. **Check references** — use negation (`!path`) to remove references that no longer apply, and add new ones that match the updated base
+1. **Review the base changelog** — look for breaking changes that affect your overlay
+1. **Consider using `sealed`** in your overlay to protect properties from further changes by downstream layers
+
+### Overlay Consistency Warnings
+
+The resolver emits warnings during compilation when an overlay becomes structurally inconsistent with its base. These warnings help detect drift after a Layer 2 update. They are always shown — no `--verbose` flag required.
+
+**Orphaned extend** — `@extend` targets a block that doesn't exist:
+
+```text
+@extend target "base.skills.code-review" not found — overlay will be ignored.
+If the base skill was removed or renamed, update or remove this @extend block.
+```
+
+This means the overlay is silently dropped. Either update the path or remove the `@extend`.
+
+**Stale skill target** — `@extend` creates a new skill in `@skills` that the base doesn't define:
+
+```text
+@extend creates new skill "deploy-prod" — base does not define it.
+If this was an overlay targeting an existing skill, verify the base still defines "deploy-prod".
+```
+
+This usually means the base renamed or removed the skill. The overlay accidentally creates a new skill rather than extending an existing one.
+
+**Negation orphan** — see [Unmatched Negations](#unmatched-negations) above.
+
+## Validation Rules
+
+| Rule  | Name                   | Description                                                             |
+| ----- | ---------------------- | ----------------------------------------------------------------------- |
+| PS025 | valid-skill-references | Reference paths must use allowed extensions and exist on disk           |
+| PS026 | safe-reference-content | Reference files must not contain PRS directives (prompt injection risk) |
+| PS028 | valid-append-negation  | `!` prefix is only effective in `@extend` blocks                        |
+| PS029 | valid-sealed-property  | Sealed property names must be replace-strategy properties               |
+
+> **Note:** The overlay consistency warnings above are emitted by the resolver, not the validator. They appear during `prs compile` (always shown, not gated by `--strict`), while validator warnings (`PS0XX`) appear during `prs validate`.
 
 # Build Your Registry
 
@@ -11770,6 +13928,8 @@ git push origin v1.0.0
 1. Migrate existing instructions
 1. Gather feedback
 
+Advance when all pilot repositories pass `prs validate --strict`, generated output drift is zero, at least 95% of pilot CI runs pass for five business days, and every reported P0 or P1 migration issue is closed.
+
 ### Phase 2: Team Rollout (4-8 weeks)
 
 1. Create team configurations
@@ -11777,12 +13937,16 @@ git push origin v1.0.0
 1. Establish governance
 1. Train developers
 
+Advance when every onboarded team has an owner and rollback contact, at least 90% of in-scope repositories compile from committed sources in CI, and no open P0 or P1 incident is attributable to generated instructions.
+
 ### Phase 3: Organization-Wide (Ongoing)
 
 1. Mandate for new projects
 1. Migration support for existing
 1. Continuous improvement
 1. Regular reviews
+
+Review monthly: validation pass rate, output-drift rate, mean time to resolve PromptScript incidents, unsupported target warnings, repository adoption, and rollback exercises. Pause new onboarding when a P0 remains open or the rolling seven-day validation pass rate drops below 95%.
 
 ## Version Support Policy
 
@@ -11929,8 +14093,15 @@ Commit `promptscript.lock` to every repository that uses remote imports. This en
 
 ```yaml
 # .github/workflows/promptscript.yml
-- name: Check lockfile is up to date
-  run: prs lock --dry-run | grep "No changes"
+- name: Regenerate lockfile
+  run: prs lock
+  env:
+    GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+- name: Check lockfile is current
+  run: |
+    git ls-files --error-unmatch promptscript.lock
+    git diff --exit-code -- promptscript.lock
 
 - name: Compile
   run: prs compile
@@ -11961,9 +14132,228 @@ Breaking Changes
 Use major version bumps and provide migration guides for breaking changes.
 # Migration and Operations
 
+# Upgrade 1.15 to 1.16
+
+PromptScript 1.16 adds syntax `1.5.0` section headers, syntax `1.6.0` atomic replacement, canonical block shape diagnostics, expanded portable hooks, and automatic migration of legacy Factory hooks.
+
+Upgrade on a dedicated branch. Keep source instructions and generated outputs under version control before starting.
+
+## 1. Record a Clean 1.15 Baseline
+
+Run the existing 1.15 toolchain before changing dependencies or syntax:
+
+```bash
+git status --short
+prs --version
+prs validate --strict
+prs diff --all --full
+```
+
+Proceed only when the worktree is clean, strict validation exits successfully, and the diff contains no unexplained generated-output drift. Commit or back up any source, configuration, lockfile, and user-owned target output that is not already recoverable.
+
+## 2. Update CLI
+
+```bash
+npm install -g @promptscript/cli@1.16
+prs --version
+```
+
+For repository-local installations, update lockfile through the project's package manager instead.
+
+## 3. Audit Declaration Order and Preview
+
+Syntax `1.6.0` applies `@inherit`, `@use`, local blocks, `@extend`, and `@override` in declaration order. Before changing syntax declarations, locate composition and modification directives:
+
+```bash
+rg -n '^\s*@(inherit|use|extend|override)\b' --glob '*.prs' .
+```
+
+For each match, confirm that `@extend` and `@override` follow creation of their target and that later inheritance, imports, or local blocks intentionally take precedence. Move declarations while the file still uses its original syntax, then validate the behavior before upgrading.
+
+```bash
+prs upgrade --dry-run
+```
+
+Review every file. Then apply:
+
+```bash
+prs upgrade
+```
+
+`prs upgrade` updates `.prs` syntax declarations. If `promptscript.yaml` declares `syntax`, align it with project entry syntax after review.
+
+`prs upgrade` pre-parses all discovered files before writing. Each replacement is atomic, but the multi-file operation is not transactional: a later write-time failure does not roll back files already updated. Keep the worktree clean so version control can restore the baseline.
+
+## 4. Resolve Canonical Shape Diagnostics
+
+```bash
+prs validate --strict
+```
+
+PS038 identifies unsupported or target-dependent legacy block bodies.
+
+Common changes:
+
+```
+# Before: target-dependent multiline shortcut.
+@shortcuts {
+  "/review": """
+    Review current changes.
+  """
+}
+```
+
+```
+# After: explicit portable command shape.
+@shortcuts {
+  "/review": {
+    description: "Review current changes"
+    content: """
+      Review correctness, security, and tests.
+    """
+  }
+}
+```
+
+See [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md) for remediation patterns.
+
+## 5. Review Replacement Intent
+
+Existing `field!` remains supported. Migrate only where atomic target replacement makes intent clearer.
+
+```
+@meta { id: "service" syntax: "1.6.0" }
+
+@standards {
+  testing: ["Use Jest", "Use Mocha"]
+}
+
+@override standards.testing {
+  ["Use Vitest"]
+}
+```
+
+Use `@extend` for additive changes, `field!` for compatible direct field replacement, and `@override` for complete existing targets.
+
+## 6. Add Section Headers Only When Needed
+
+`@header` changes human-readable output titles, not native schemas:
+
+```
+@standards {
+  @header "Engineering Standards"
+  @header git-commits "Commit Policy"
+
+  code: ["Use strict TypeScript"]
+  git: { format: "conventional" }
+}
+```
+
+No migration required when default target headings are acceptable.
+
+## 7. Preview Factory Hook Migration
+
+Projects that previously emitted Factory hooks into `.factory/settings.json` should run:
+
+```bash
+prs compile --dry-run
+```
+
+When `.factory/hooks.json` is absent, PromptScript plans an all-or-nothing migration:
+
+- PromptScript-owned legacy hooks move to `.factory/hooks.json`.
+- Unrelated settings remain in `.factory/settings.json`.
+- Unknown events, malformed entries, or mixed ownership abort migration.
+- `--no-migrate-factory-hooks` keeps warning-only PS4002 behavior.
+
+Apply after reviewing both files:
+
+```bash
+prs compile
+```
+
+## 8. Review Portable Hooks
+
+Repository-local programs should use `script` and explicit project cwd:
+
+```
+@hooks {
+  terminal-policy: {
+    event: "pre-terminal-command"
+    script: {
+      path: ".promptscript/scripts/check-terminal.mjs"
+      interpreter: "node"
+    }
+    cwd: "project"
+    targets: {
+      github: { enabled: false }
+    }
+  }
+}
+```
+
+Project-root wrappers fail closed when required root discovery fails. Review PS4002 warnings for best-effort and unsupported terminal interception.
+
+## 9. Release Validation
+
+```bash
+prs validate --strict
+prs compile --dry-run
+prs diff --all --full
+prs compile
+git diff -- .
+prs diff --all --full
+```
+
+Review:
+
+- `.prs` syntax changes.
+- PS038 remediation.
+- Factory hook file movement.
+- Generated target output.
+- Lockfile or vendor changes.
+- Target-specific PS4002 warnings.
+
+The upgrade passes only when:
+
+- Strict validation exits successfully with no unresolved warning promoted by project policy.
+- Dry-run reports only approved paths and no ownership conflict.
+- The pre-compile PromptScript diff contains only intended generated changes.
+- The Git diff contains only reviewed source, configuration, lockfile, hook, and generated-output changes.
+- The final PromptScript diff is empty after compilation.
+- Every configured hook executes successfully in a representative target runtime, or its documented unsupported-target warning is accepted.
+
+Commit the upgrade as a dedicated change after all gates pass. Do not publish partially reviewed generated output.
+
+## Enterprise Rollback
+
+Prepare rollback before rollout:
+
+1. Pin the previously approved 1.15 CLI version and retain its package lock.
+1. Keep the upgrade source, configuration, lockfile, and generated outputs in one revertible commit or pull request.
+1. Record backups for any user-owned output approved for takeover.
+1. Assign an owner, rollback approver, and maximum recovery time.
+
+If a production issue appears, pause rollout and preserve diagnostics. Revert the upgrade commit with `git revert`, restore any backed-up user-owned output, install the pinned 1.15 toolchain, and rerun strict validation and compilation. Review the complete Git diff before redeploying. Do not use a destructive working-tree reset as an operational rollback.
+
 # Migration Guide
 
 This guide helps you migrate existing AI instructions to PromptScript.
+
+Upgrading an existing PromptScript project?
+
+This guide converts third-party instruction files into PromptScript. Existing PromptScript 1.15 projects should use [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md).
+
+## Choose a Migration Command
+
+| Need                                      | Command                          |
+| ----------------------------------------- | -------------------------------- |
+| Convert all detected project instructions | `prs migrate --static --dry-run` |
+| Generate an AI-assisted migration prompt  | `prs migrate --llm`              |
+| Convert one known file                    | `prs import <file> --dry-run`    |
+| Upgrade existing `.prs` syntax            | `prs upgrade --dry-run`          |
+
+Prefer `prs migrate` for project adoption. Use `prs import` as a lower-level single-file tool.
 
 ## Overview
 
@@ -12332,19 +14722,26 @@ targets:
 
 ### Compile and Compare
 
+Before PromptScript takes ownership of existing instruction files, create a recoverable baseline. Tracked files are recoverable from the migration branch. Back up any untracked or ignored instruction files outside configured output paths, or copy them into a local migration-backup directory that will not be committed.
+
 ```bash
-# Generate new files
+# Confirm every planned output and ownership conflict.
 prs compile --dry-run
 
-# Review changes
-prs diff --all
+# Compare complete planned output with existing files.
+prs diff --all --full
 ```
 
-### Validate
+Review source parity, target-specific omissions, file modes, and every conflict path. Do not delete an existing configured target merely to bypass ownership protection. When all planned outputs and backups are approved, perform one controlled takeover:
 
 ```bash
-prs validate
+prs validate --strict
+prs compile --force
+git diff -- .
+prs diff --all --full
 ```
+
+The final PromptScript diff must be empty. The Git diff must contain only approved generated replacements and migration source or configuration. Restore from version control or backup if the result loses user-owned content.
 
 ## Step 6: Update Git
 
@@ -12356,7 +14753,7 @@ git add .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.mdc
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
 
-This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers to generate outputs locally, use one consistent ignored-output workflow instead:
+This lets CI detect drift between PromptScript sources and generated outputs. If your team prefers to generate outputs locally, adopt one consistent ignored-output workflow only after the controlled compile above has created and verified every configured target:
 
 ```bash
 printf '%s\n' \
@@ -12367,6 +14764,8 @@ git rm --cached .github/copilot-instructions.md CLAUDE.md .cursor/rules/project.
 git add .gitignore .promptscript/ promptscript.yaml
 git commit -m "chore: migrate AI instructions to PromptScript"
 ```
+
+`git rm --cached` stops tracking these files but keeps the verified working-tree copies. It is not a workaround for overwrite conflicts and must not run before the takeover review.
 
 ## Migration Patterns
 
@@ -13407,8 +15806,8 @@ my-project/
 
 ```
 @meta {
-  id: "my-project"
-  syntax: "1.0.0"
+  id: "minimal-example"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -13442,7 +15841,7 @@ my-project/
 
 ```yaml
 id: minimal-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -13480,38 +15879,14 @@ prs validate
 
 ## Generated Output
 
-`.github/copilot-instructions.md`
+Current configuration emits GitHub output only:
+
+`.github/copilot-instructions.md`:
 
 ```markdown
-# AI Instructions
+# GitHub Copilot Instructions
 
-## Identity
-
-You are a helpful coding assistant for this project.
-Focus on clean, readable code.
-
-## Context
-
-This is a TypeScript project using modern best practices.
-
-## Standards
-
-- Code style: functional
-- Documentation: JSDoc for public APIs
-
-## Shortcuts
-
-- `/help` - Show what you can help with
-- `/review` - Review code for quality issues
-- `/test` - Write unit tests
-```
-
-`CLAUDE.md`
-
-```markdown
-# AI Instructions
-
-## Identity
+## project
 
 You are a helpful coding assistant for this project.
 Focus on clean, readable code.
@@ -13520,42 +15895,18 @@ Focus on clean, readable code.
 
 This is a TypeScript project using modern best practices.
 
-## Standards
+## code-standards
 
-- Code style: functional
-- Documentation: JSDoc for public APIs
+### code
 
-## Shortcuts
+- Use functional programming style
+- Document public APIs with JSDoc
 
-- `/help` - Show what you can help with
-- `/review` - Review code for quality issues
-- `/test` - Write unit tests
-```
+## shortcuts
 
-`.cursor/rules/project.mdc`
-
-```text
-# AI Instructions
-
-## Identity
-
-You are a helpful coding assistant for this project.
-Focus on clean, readable code.
-
-## Context
-
-This is a TypeScript project using modern best practices.
-
-## Standards
-
-- Code style: functional
-- Documentation: JSDoc for public APIs
-
-## Shortcuts
-
-- /help - Show what you can help with
-- /review - Review code for quality issues
-- /test - Write unit tests
+- /help: Show what you can help with
+- /review: Review code for quality issues
+- /test: Write unit tests
 ```
 
 ## Adding More Targets
@@ -13565,7 +15916,7 @@ To also generate for Claude and Cursor:
 ```yaml
 # promptscript.yaml
 id: minimal-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -13590,6 +15941,461 @@ prs compile
 - Add more detailed [standards](https://getpromptscript.dev/dev/reference/language/#standards)
 - Add [restrictions](https://getpromptscript.dev/dev/reference/language/#restrictions) for safety
 - Consider [team setup](https://getpromptscript.dev/dev/examples/team-setup/index.md) for multiple projects
+
+# Composition and Order
+
+Goal: predict final values when several layers modify the same block.
+
+## Files
+
+```
+# base.prs
+@meta { id: "base" syntax: "1.6.0" }
+@standards {
+  testing: ["Use Jest"]
+  coverage: 80
+}
+
+# quality.prs
+@meta { id: "quality" syntax: "1.6.0" }
+@standards {
+  coverage: 90
+  review: ["Require approval"]
+}
+
+# project.prs
+@meta { id: "project" syntax: "1.6.0" }
+@inherit ./base
+@use ./quality
+@standards {
+  local: ["Run smoke tests"]
+}
+@override standards.coverage { 95 }
+@extend standards {
+  testing: ["Require integration tests"]
+}
+```
+
+## Resolution
+
+| Step                           | Effect                                                      |
+| ------------------------------ | ----------------------------------------------------------- |
+| `@inherit ./base`              | Adds testing and coverage 80                                |
+| `@use ./quality`               | Imported coverage 90 wins same-shape conflict; review added |
+| Local `@standards`             | Adds local smoke-test rule                                  |
+| `@override standards.coverage` | Replaces coverage with 95                                   |
+| `@extend standards`            | Appends integration-test rule                               |
+
+Final value:
+
+```text
+testing: ["Use Jest", "Require integration tests"]
+coverage: 95
+review: ["Require approval"]
+local: ["Run smoke tests"]
+```
+
+## Verify
+
+```bash
+prs validate --strict
+prs compile --dry-run
+```
+
+Common failure: moving `@override` before target creation. Override targets must exist when operation runs.
+
+See [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md).
+
+# Merge vs Replace
+
+Goal: choose operation matching change intent.
+
+```
+@meta { id: "merge-vs-replace" syntax: "1.6.0" }
+
+@standards {
+  testing: ["Use Jest"]
+  linting: ["Use ESLint"]
+  coverage: { minimum: 80 report: "text" }
+}
+
+# Add one requirement.
+@extend standards {
+  testing: ["Require integration tests"]
+}
+
+# Compatibility replacement for one direct field.
+@extend standards {
+  linting!: ["Use Biome"]
+}
+
+# Atomic replacement for one existing nested value.
+@override standards.coverage.minimum {
+  95
+}
+```
+
+Resolved result:
+
+```text
+testing: ["Use Jest", "Require integration tests"]
+linting: ["Use Biome"]
+coverage: { minimum: 95 report: "text" }
+```
+
+## Decision
+
+| Need                                            | Use         |
+| ----------------------------------------------- | ----------- |
+| Add or merge                                    | `@extend`   |
+| Preserve syntax 1.3 direct-field replacement    | `field!`    |
+| Express complete replacement of existing target | `@override` |
+
+## Verify
+
+```bash
+prs validate --strict
+prs compile --dry-run
+```
+
+Common failure: using `@override` for missing path. Add target in base, import, or local block before replacement.
+
+See [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md).
+
+# Fix Block Shape Warnings
+
+Goal: remove PS038 warnings without changing instruction intent.
+
+## 1. Validate
+
+```bash
+prs validate --strict
+```
+
+PS038 reports observed shape, canonical shape, and suggested replacement.
+
+## 2. Fix Shortcut Shape
+
+**Wrong: target-dependent multiline scalar**
+
+```
+@shortcuts {
+  "/review": """
+    Review current changes.
+  """
+}
+```
+
+**Correct: explicit command object**
+
+```
+@meta { id: "shape-remediation" syntax: "1.6.0" }
+
+@shortcuts {
+  "/review": {
+    description: "Review current changes"
+    content: """
+      Review correctness, security, tests, and operational impact.
+    """
+  }
+}
+```
+
+## 3. Fix Restrictions Shape
+
+**Wrong: structured compatibility form**
+
+```
+@restrictions {
+  items: ["Never expose secrets", "Never skip validation"]
+}
+```
+
+**Correct: canonical array body**
+
+```
+@meta { id: "canonical-restrictions" syntax: "1.6.0" }
+
+@restrictions {
+  - "Never expose secrets"
+  - "Never skip validation"
+}
+```
+
+## 4. Revalidate and Compare
+
+```bash
+prs validate --strict
+prs compile --dry-run
+prs diff --all
+```
+
+Review every target. Compatibility warnings often indicate formatter-dependent behavior, so source-only comparison is insufficient.
+
+See [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md) and [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md).
+
+# Custom Section Headers
+
+Goal: customize human-readable headings while preserving native file contracts.
+
+```
+@meta {
+  id: "localized-service"
+  syntax: "1.6.0"
+}
+
+@identity {
+  @header "Service Instructions"
+
+  """
+  You are working on the checkout service.
+  """
+}
+
+@standards {
+  @header "Engineering Standards"
+  @header git-commits "Commit Policy"
+  @header documentation "Documentation Policy"
+
+  code: ["Use strict TypeScript"]
+  git: { format: "conventional" }
+  documentation: { verifyAfter: true }
+}
+```
+
+## Expected Behavior
+
+- Markdown section titles use supplied labels.
+- Generated file paths remain unchanged.
+- Frontmatter fields remain unchanged.
+- JSON, TOML, and YAML keys remain unchanged.
+- Unsupported owner or section key produces PS037.
+
+## Verify
+
+```bash
+prs validate --strict
+prs compile --dry-run
+```
+
+Inspect every configured target because available human-readable sections vary by formatter.
+
+See [Section Headers](https://getpromptscript.dev/dev/reference/language/section-headers/index.md).
+
+# Portable Hooks
+
+Goal: fail terminal commands while the current Git diff contains whitespace errors. The policy is deterministic and does not depend on target-specific hook payload fields.
+
+## Project Layout
+
+```text
+.promptscript/
+|-- project.prs
+`-- scripts/
+    `-- check-terminal.mjs
+```
+
+## Hook Source
+
+```
+@meta {
+  id: "portable-hooks-example"
+  syntax: "1.6.0"
+}
+
+@hooks {
+  terminal-policy: {
+    event: "pre-terminal-command"
+    script: {
+      path: ".promptscript/scripts/check-terminal.mjs"
+      interpreter: "node"
+      args: ["--strict"]
+    }
+    cwd: "project"
+    timeoutMs: 30000
+    continueOnFailure: false
+    targets: {
+      factory: {
+        statusMessage: "Checking terminal policy"
+      }
+      vscode: {
+        matcher: "run_in_terminal"
+      }
+      github: {
+        enabled: false
+      }
+    }
+  }
+}
+```
+
+## Target Configuration
+
+```yaml
+# promptscript.yaml
+id: portable-hooks-example
+syntax: '1.6.0'
+
+input:
+  entry: .promptscript/project.prs
+
+targets:
+  - factory:
+      version: full
+  - github:
+      version: full
+```
+
+## Script
+
+```javascript
+import { spawnSync } from 'node:child_process';
+
+const strict = process.argv.includes('--strict');
+const result = spawnSync('git', ['diff', '--check'], {
+  encoding: 'utf8',
+  shell: false,
+});
+
+if (result.error) {
+  console.error(`Unable to run git diff --check: ${result.error.message}`);
+  process.exit(strict ? 1 : 0);
+}
+
+if (result.stdout) {
+  process.stdout.write(result.stdout);
+}
+
+if (result.stderr) {
+  process.stderr.write(result.stderr);
+}
+
+process.exit(result.status ?? (strict ? 1 : 0));
+```
+
+Save this file as `.promptscript/scripts/check-terminal.mjs`. The `--strict` argument belongs to this script. Native hook payloads continue through standard input and are intentionally ignored because the policy checks repository state, not command text.
+
+## Behavior
+
+- `script` path must remain under `.promptscript/scripts/`.
+- `cwd: "project"` requires verified project-root execution.
+- Missing project root fails closed before script starts.
+- Factory runs the hook for its terminal tool using a native default matcher.
+- VS Code uses the explicit `run_in_terminal` matcher.
+- Disabled GitHub override emits no hook.
+- Best-effort or unsupported terminal coverage reports PS4002.
+
+## Expected Outputs
+
+| Configured target | Expected hook output                            |
+| ----------------- | ----------------------------------------------- |
+| Factory           | `.factory/hooks.json` with a `PreToolUse` entry |
+| GitHub            | No Copilot CLI or cloud hook for this policy    |
+| VS Code override  | `.github/hooks/promptscript-vscode.json` entry  |
+
+The GitHub target also emits its normal instruction output. The `vscode` override requests the separate VS Code Agent hook file, while `github.enabled: false` omits this unsupported terminal policy from GitHub Copilot hooks.
+
+## Verify the Script
+
+Run the script from the repository root:
+
+```bash
+node .promptscript/scripts/check-terminal.mjs --strict
+```
+
+Exit code `0` means `git diff --check` found no whitespace error. Introduce a temporary trailing-whitespace change in a throwaway branch to confirm a nonzero exit, then remove that test change.
+
+## Verify Compilation
+
+```bash
+prs validate --strict
+prs compile --dry-run
+prs compile
+git diff -- .factory/hooks.json .github/hooks/
+```
+
+Confirm the expected output paths and run the generated hook once in Factory and VS Code before rollout. Never commit executable policy without code review and least-privilege analysis.
+
+See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) for capability matrix and root strategy.
+
+# Migrate Factory Hooks
+
+Goal: move legacy PromptScript-owned hooks without overwriting unrelated Factory settings.
+
+## Before
+
+`.factory/settings.json`:
+
+```json
+{
+  "theme": "dark",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "prs hook pre-edit # promptscript-generated:pre-edit"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Preview
+
+```bash
+prs compile --dry-run
+```
+
+PromptScript plans migration only when `.factory/hooks.json` is absent and legacy ownership is unambiguous.
+
+## After
+
+`.factory/settings.json` keeps unrelated settings:
+
+```json
+{
+  "theme": "dark"
+}
+```
+
+`.factory/hooks.json` receives canonical hooks:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "prs hook pre-edit # promptscript-generated:pre-edit"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Safety Rules
+
+- Unknown events abort migration.
+- Malformed entries abort migration.
+- Mixed PromptScript and user ownership aborts migration.
+- No partial write occurs after failed preflight.
+- `--no-migrate-factory-hooks` leaves legacy file unchanged and reports PS4002.
+
+Apply only after reviewing dry-run:
+
+```bash
+prs compile
+```
+
+See [AI Tool Hooks](https://getpromptscript.dev/dev/guides/hooks/index.md) for installer behavior and cleanup.
 
 # Team Setup Example
 
@@ -14259,7 +17065,7 @@ acme-promptscript-registry/
 ```
 @meta {
   id: "@frontend/base"
-  syntax: "3.0.0"
+  syntax: "1.6.0"
   team: "Frontend Platform"
 }
 
@@ -14380,7 +17186,7 @@ acme-promptscript-registry/
 # checkout-app/promptscript/project.prs
 @meta {
   id: "checkout-app"
-  syntax: "2.1.0"
+  syntax: "1.6.0"
 }
 
 # In a multi-file setup, you would inherit from frontend base:
@@ -15443,6 +18249,908 @@ Project lifecycle hooks are defined separately through `@hooks`. Agents can refe
 - [Skills & Local Example](https://getpromptscript.dev/dev/examples/skills-and-local/index.md)
 - [GitHub Copilot Custom Agents Documentation](https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents)
 - [Claude Code Subagents Documentation](https://code.claude.com/docs/en/sub-agents)
+
+# Agent Platform Examples
+
+These examples cover core agent-platform capabilities. Open the [Playground](/playground/) and choose **Complete Agent Platform** or **Regular Field Replacement** to compile the same examples in your browser.
+
+PromptScript 1.16 task examples:
+
+| Task                            | Example                                                                                            |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Predict composition results     | [Composition and Order](https://getpromptscript.dev/dev/examples/composition-and-order/index.md)   |
+| Choose merge or replacement     | [Merge vs Replace](https://getpromptscript.dev/dev/examples/merge-vs-replace/index.md)             |
+| Fix PS038 shape warnings        | [Fix Block Shape Warnings](https://getpromptscript.dev/dev/examples/fix-block-shapes/index.md)     |
+| Customize generated titles      | [Custom Section Headers](https://getpromptscript.dev/dev/examples/custom-section-headers/index.md) |
+| Build portable lifecycle policy | [Portable Hooks](https://getpromptscript.dev/dev/examples/portable-hooks/index.md)                 |
+
+## Complete Agent Platform
+
+This syntax 1.6 example connects reusable skills, MCP tools, a specialist agent, lifecycle automation, a release workflow, and a plugin bundle:
+
+```
+@meta {
+  id: "checkout-agent-platform"
+  syntax: "1.6.0"
+  tags: ["payments", "typescript"]
+}
+
+@identity {
+  """
+  You are working on a payment service.
+  Preserve transaction integrity and auditability.
+  """
+}
+
+@standards {
+  code: ["Use strict TypeScript", "Write tests for business rules"]
+}
+
+@skills {
+  security-review: {
+    description: "Review payment changes for security risks"
+    allowedTools: ["Read", "Grep", "Bash"]
+    content: """
+      Inspect authentication, authorization, secrets, and payment data handling.
+      Report findings by severity and include concrete remediation steps.
+    """
+  }
+}
+
+@mcpServers {
+  issue-tracker: {
+    transport: "stdio"
+    command: ["node", "./tools/issues.mjs"]
+    timeoutMs: 30000
+  }
+}
+
+@agents {
+  reviewer: {
+    description: "Review changes before merge"
+    tools: ["Read", "Grep", "Glob", "Bash"]
+    model: "sonnet"
+    skills: ["security-review"]
+    mcpServers: ["issue-tracker"]
+    content: "Review changed code, tests, and operational impact."
+  }
+}
+
+@hooks {
+  validate-changes: {
+    event: "post-tool-use"
+    matcher: "Edit|Write"
+    command: ["pnpm", "run", "typecheck"]
+    timeoutMs: 120000
+    statusMessage: "Checking TypeScript"
+  }
+}
+
+@workflows {
+  release: {
+    description: "Validate and prepare a release"
+    content: """
+      1. Review changes since the previous release
+      2. Run formatting, linting, type checks, and tests
+      3. Summarize changes and prepare release metadata
+      4. Stop before publishing and request approval
+    """
+  }
+}
+
+@plugins {
+  payment-engineering: {
+    description: "Payment engineering capability bundle"
+    version: "1.0.0"
+    skills: ["security-review"]
+    hooks: ["validate-changes"]
+    mcpServers: ["issue-tracker"]
+  }
+}
+```
+
+The references between blocks are validated before output is generated:
+
+- The `reviewer` agent preloads `security-review` and receives access to `issue-tracker`.
+- The plugin groups the skill, hook, and MCP server as one capability bundle.
+- Rich target modes emit native agent, skill, MCP, hook, workflow, and plugin files where supported.
+
+Use full target modes to generate native capability files:
+
+```yaml
+id: checkout-agent-platform
+syntax: '1.6.0'
+
+targets:
+  - claude:
+      version: full
+  - cursor:
+      version: full
+  - factory:
+      version: full
+  - codex:
+      version: full
+```
+
+## Regular Field Replacement
+
+Syntax 1.3 introduced `field!: value` inside regular `@extend` blocks. Marked fields replace their complete previous value, while unmarked fields retain normal merge behavior:
+
+For new syntax 1.6 projects, prefer `@override` when replacing a complete existing target. See [Merge vs Replace](https://getpromptscript.dev/dev/examples/merge-vs-replace/index.md).
+
+```
+@meta {
+  id: "field-replacement"
+  syntax: "1.3.0"
+}
+
+@identity {
+  """
+  You are a TypeScript development assistant.
+  """
+}
+
+@standards {
+  testing: ["Use Jest", "Use integration tests"]
+  linting: ["Use ESLint"]
+  deployment: {
+    platform: "Kubernetes"
+    regions: ["us-east-1"]
+  }
+}
+
+@extend standards {
+  testing!: ["Use Vitest", "Follow the AAA pattern"]
+  linting: ["Run lint checks before commits"]
+  deployment!: {
+    platform: "Cloud Run"
+    regions: ["us-central1", "europe-west1"]
+  }
+}
+```
+
+The resolved standards use only the new `testing` and `deployment` values. The `linting` array contains both entries because it was not marked for replacement.
+
+## Portable Skill Resources
+
+Directory skills can bundle supporting references, scripts, assets, contracts, and licenses:
+
+```text
+.promptscript/skills/security-review/
+|-- SKILL.md
+|-- LICENSE
+|-- references/
+|   `-- threat-model.md
+|-- scripts/
+|   `-- scan.sh
+`-- assets/
+    `-- report-template.md
+```
+
+Declare the bundled files and typed contract in `SKILL.md`:
+
+```yaml
+---
+name: security-review
+description: Review code for application security risks
+references:
+  - references/threat-model.md
+scripts:
+  - scripts/scan.sh
+inputs:
+  path:
+    type: string
+    description: Path to review
+outputs:
+  report:
+    type: string
+    description: Review report
+---
+Review selected code and use bundled references when evaluating risk.
+```
+
+PromptScript preserves the directory structure when emitting native skill packages.
+
+## Monorepo Build Profiles
+
+Named builds compile scoped agent configuration for multiple packages from one repository:
+
+```yaml
+builds:
+  api:
+    entry: .promptscript/api.prs
+    output: packages/api
+    targets:
+      - factory:
+          version: full
+      - codex:
+          version: full
+  web:
+    entry: .promptscript/web.prs
+    output: packages/web
+    targets:
+      - cursor:
+          version: full
+```
+
+```bash
+prs compile --build api
+prs compile --all-builds
+```
+
+## Related Documentation
+
+- [Agent Platform](https://getpromptscript.dev/dev/features/index.md)
+- [Agents](https://getpromptscript.dev/dev/features/agents/index.md)
+- [Skills and Resources](https://getpromptscript.dev/dev/features/skills/index.md)
+- [MCP Servers and Plugins](https://getpromptscript.dev/dev/features/integrations/index.md)
+- [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md)
+- [Configuration Reference](https://getpromptscript.dev/dev/reference/config/#builds)
+
+# Git Registry
+
+This example shows how to use a Git repository as a PromptScript registry for sharing configurations across teams.
+
+## Use Cases
+
+- **Central registry** - Share organization-wide standards via Git
+- **Version control** - Pin to specific versions using Git tags
+- **Access control** - Use GitHub/GitLab permissions for registry access
+- **CI/CD integration** - Automatic updates on registry changes
+
+## Basic Setup
+
+### Public Repository
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://github.com/your-org/promptscript-registry.git
+    ref: main
+
+targets:
+  - github
+  - claude
+```
+
+### Private Repository with Token
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://github.com/your-org/private-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000 # 1 hour in milliseconds
+
+targets:
+  - github
+  - claude
+```
+
+### SSH Authentication
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: git@github.com:your-org/private-registry.git
+    ref: main
+    auth:
+      type: ssh
+      sshKeyPath: ~/.ssh/id_ed25519
+
+targets:
+  - github
+  - claude
+```
+
+## Self-Hosted Git Servers
+
+PromptScript works with **any Git server**, not just GitHub. This includes self-hosted GitLab, Gitea, Bitbucket Server, Azure DevOps, and other Git-compatible servers.
+
+### Self-Hosted GitLab
+
+```yaml
+# promptscript.yaml
+id: my-project
+syntax: '1.4.0'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://gitlab.your-company.com/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITLAB_TOKEN # Use any env var name you prefer
+
+targets:
+  - github
+  - claude
+```
+
+```bash
+# Set your GitLab Personal Access Token (requires read_repository scope)
+export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
+prs pull
+```
+
+### Self-Hosted GitLab with SSH
+
+```yaml
+registry:
+  git:
+    url: git@gitlab.your-company.com:org/promptscript-registry.git
+    ref: main
+    auth:
+      type: ssh
+      sshKeyPath: ~/.ssh/id_ed25519
+```
+
+### Gitea / Forgejo
+
+```yaml
+registry:
+  git:
+    url: https://gitea.your-company.com/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITEA_TOKEN
+```
+
+### Bitbucket Server (Self-Hosted)
+
+```yaml
+registry:
+  git:
+    url: https://bitbucket.your-company.com/scm/org/promptscript-registry.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: BITBUCKET_TOKEN
+```
+
+### Azure DevOps Server
+
+```yaml
+registry:
+  git:
+    url: https://dev.your-company.com/org/project/_git/promptscript-registry
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: AZURE_DEVOPS_TOKEN
+```
+
+### Token Types by Provider
+
+| Provider         | Token Type            | Required Scope    |
+| ---------------- | --------------------- | ----------------- |
+| GitLab           | Personal Access Token | `read_repository` |
+| GitLab           | Project Access Token  | `read_repository` |
+| GitLab           | Deploy Token          | `read_repository` |
+| Gitea            | Access Token          | `read:repository` |
+| Bitbucket Server | HTTP Access Token     | Repository read   |
+| Azure DevOps     | Personal Access Token | Code (Read)       |
+
+Environment Variable Naming
+
+The `tokenEnvVar` field accepts any environment variable name. Use a name that makes sense for your organization, such as `REGISTRY_TOKEN`, `GITLAB_TOKEN`, or `GIT_REGISTRY_PAT`.
+
+## Version Pinning
+
+### Pin to Specific Tag
+
+```yaml
+registry:
+  git:
+    url: https://github.com/your-org/promptscript-registry.git
+    ref: v1.2.0 # Pin to release v1.2.0
+```
+
+### Pin in .prs Files
+
+You can also pin specific imports to versions:
+
+```
+@meta {
+  id: "my-project"
+  syntax: "1.0.0"
+}
+
+# Pin to specific version (in a multi-file setup):
+@inherit @company/base@1.0.0
+
+# Use latest from configured ref:
+@use @company/security as sec
+```
+
+## Repository Structure
+
+Recommended structure for a Git registry:
+
+```text
+promptscript-registry/
+├── README.md
+├── CHANGELOG.md
+├── @org/
+│   ├── base.prs           # Organization base
+│   ├── security.prs       # Security policies
+│   └── compliance.prs     # Compliance rules
+├── @teams/
+│   ├── frontend.prs       # Frontend team config
+│   ├── backend.prs        # Backend team config
+│   └── mobile.prs         # Mobile team config
+└── @fragments/
+    ├── testing.prs        # Reusable testing rules
+    └── documentation.prs  # Documentation standards
+```
+
+## CLI Commands
+
+### Pull from Registry
+
+```bash
+# Pull using default branch from config
+prs pull
+
+# Pull from specific branch
+prs pull --branch develop
+
+# Pull from specific tag
+prs pull --tag v1.0.0
+
+# Pull from specific commit
+prs pull --commit abc123def
+
+# Force refresh (ignore cache)
+prs pull --refresh
+
+# Preview without pulling
+prs pull --dry-run
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/promptscript.yml
+name: PromptScript CI
+
+on:
+  push:
+    paths:
+      - '.promptscript/**'
+      - 'promptscript.yaml'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PromptScript
+        run: npm install -g @promptscript/cli
+
+      - name: Pull registry updates
+        run: prs pull
+        env:
+          GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Compile
+        run: prs compile
+
+      - name: Check for changes
+        run: |
+          git diff --exit-code || {
+            echo "::error::Compiled files changed. Run 'prs compile' locally."
+            exit 1
+          }
+```
+
+### GitLab CI
+
+```yaml
+# .gitlab-ci.yml
+promptscript:
+  image: node:20
+  script:
+    - npm install -g @promptscript/cli
+    - prs pull
+    - prs compile
+    - git diff --exit-code
+  variables:
+    # Use GITLAB_TOKEN for GitLab registries, or match your tokenEnvVar config
+    GITLAB_TOKEN: $REGISTRY_TOKEN
+  only:
+    changes:
+      - .promptscript/**/*
+      - promptscript.yaml
+```
+
+Self-Hosted GitLab CI
+
+For self-hosted GitLab, you can use the built-in `CI_JOB_TOKEN` for repositories within the same GitLab instance:
+
+````text
+```yaml
+variables:
+  GITLAB_TOKEN: $CI_JOB_TOKEN
+````
+
+For cross-instance access, use a Project Access Token or Deploy Token stored in CI/CD variables.
+
+```
+
+## Complete Example
+
+### Registry Files
+
+**[org/base.prs](https://github.com/org/base.prs "GitHub Repository: org/base.prs")**
+
+```
+
+@meta { id: "@org/base" syntax: "1.0.0" org: "ACME Corp" }
+
+@identity { """ You are an AI assistant at ACME Corp. Follow our coding standards and best practices. """ }
+
+@standards { code: [ "Code review required for all changes", "Tests required for all code" ] git: [ "Use conventional commits format" ] }
+
+@restrictions {
+
+- "Never commit secrets"
+- "Always follow security policies" }
+
+```
+
+**[teams/frontend.prs](https://github.com/teams/frontend.prs "GitHub Repository: teams/frontend.prs")**
+
+```
+
+@meta { id: "@teams/frontend" syntax: "1.0.0" }
+
+# In a multi-file setup, you would inherit:
+
+@inherit @org/base
+
+@identity { """ You are a frontend development expert. Expertise: React, TypeScript, TailwindCSS """ }
+
+@context { framework: "React 18" language: "TypeScript 5" styling: "TailwindCSS" }
+
+````
+
+### Project Configuration
+
+**promptscript.yaml**
+
+```yaml
+id: customer-portal
+syntax: '1.4.0'
+
+inherit: '@teams/frontend'
+
+input:
+  entry: .promptscript/project.prs
+
+registry:
+  git:
+    url: https://github.com/acme/promptscript-registry.git
+    ref: v1.0.0
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+  cache:
+    enabled: true
+    ttl: 3600000
+
+targets:
+  - github
+  - claude
+  - cursor
+````
+
+**.promptscript/project.prs**
+
+```
+@meta {
+  id: "customer-portal"
+  syntax: "1.0.0"
+}
+
+# In a multi-file setup, you would inherit:
+@inherit @teams/frontend@1.0.0
+
+@context {
+  project: "Customer Portal"
+
+  """
+  Self-service portal for ACME customers.
+  Features: account management, orders, support.
+  """
+}
+
+@shortcuts {
+  "/portal": "Work on portal features"
+}
+```
+
+## Alias-Based Import Workflow
+
+### 1. Configure Aliases
+
+Add aliases to `promptscript.yaml` once:
+
+```yaml
+# promptscript.yaml
+id: customer-portal
+syntax: '1.4.0'
+
+registries:
+  '@company': github.com/acme/promptscript-base
+  '@team': github.com/acme/team-frontend
+
+registry:
+  git:
+    url: https://github.com/acme/promptscript-base.git
+    ref: main
+    auth:
+      type: token
+      tokenEnvVar: GITHUB_TOKEN
+
+targets:
+  - github
+  - claude
+```
+
+### 2. Use Aliases in .prs Files
+
+```
+@meta {
+  id: "customer-portal"
+  syntax: "1.0.0"
+}
+
+# Inherit from company base — resolves to github.com/acme/promptscript-base/base.prs
+@inherit @company/base
+
+# Team-specific standards
+@use @team/stacks/react
+
+# Pin to a specific release
+@use @company/security@2.0.0
+```
+
+### 3. Compile
+
+```bash
+prs compile
+```
+
+PromptScript expands `@company` to `github.com/acme/promptscript-base`, clones (or uses cache), resolves the file path, and compiles.
+
+______________________________________________________________________
+
+## URL Import Example
+
+URL imports work without any alias configuration:
+
+```
+@meta {
+  id: "my-project"
+  syntax: "1.0.0"
+}
+
+# Direct URL import — no alias needed
+@use github.com/acme/shared-standards/fragments/security
+
+# Open-source skill auto-discovered from SKILL.md
+@use github.com/some-org/claude-skills/skills/tdd-workflow
+
+# Versioned URL import
+@use github.com/acme/shared-standards/stacks/typescript@1.0.0
+```
+
+Debug the resolution chain with:
+
+```bash
+prs resolve github.com/acme/shared-standards/@fragments/security
+```
+
+______________________________________________________________________
+
+## Lockfile Workflow
+
+### Initial Setup
+
+```bash
+# 1. Add remote imports to your .prs files, then lock:
+prs lock
+
+# 2. Commit the lockfile
+git add promptscript.lock
+git commit -m "chore: add PromptScript lockfile"
+```
+
+### Checking for Updates
+
+```bash
+# See what would change without updating
+prs update --dry-run
+
+# Update a specific package
+prs update github.com/acme/promptscript-base
+
+# Update all packages and commit
+prs update
+git add promptscript.lock
+git commit -m "chore(deps): update PromptScript dependencies"
+```
+
+### Verifying in CI
+
+```bash
+# Fail if lockfile is not up to date
+prs lock --dry-run
+```
+
+______________________________________________________________________
+
+## CI Pipeline Example with Vendor
+
+This example uses vendor mode so CI never needs network access to the registry.
+
+### Local Setup (run once or on updates)
+
+```bash
+# Sync vendor from the lockfile
+prs vendor sync
+
+# Commit vendor directory and lockfile
+git add .promptscript/vendor promptscript.lock
+git commit -m "chore: vendor PromptScript dependencies"
+```
+
+### GitHub Actions Pipeline
+
+```yaml
+# .github/workflows/promptscript.yml
+name: PromptScript CI
+
+on:
+  push:
+    paths:
+      - '.promptscript/**'
+      - 'promptscript.yaml'
+      - 'promptscript.lock'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PromptScript
+        run: npm install -g @promptscript/cli
+
+      - name: Check vendor is in sync
+        run: prs vendor check
+
+      - name: Validate
+        run: prs validate --strict
+
+      - name: Compile
+        run: prs compile
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || {
+            echo "::error::Compiled files are out of date. Run 'prs compile' locally."
+            exit 1
+          }
+```
+
+### GitLab CI Pipeline
+
+```yaml
+# .gitlab-ci.yml
+promptscript:
+  image: node:20
+  script:
+    - npm install -g @promptscript/cli
+    - prs vendor check
+    - prs validate --strict
+    - prs compile
+    - git diff --exit-code
+  only:
+    changes:
+      - .promptscript/**/*
+      - promptscript.yaml
+      - promptscript.lock
+```
+
+______________________________________________________________________
+
+## Troubleshooting
+
+### Authentication Failed
+
+```text
+Error: Git authentication failed
+```
+
+**Solutions:**
+
+1. Check your token environment variable is set: `echo $GITLAB_TOKEN` (or your configured `tokenEnvVar`)
+1. Verify token has the required scope:
+1. GitHub: `repo` scope
+1. GitLab: `read_repository` scope
+1. Gitea: `read:repository` scope
+1. For SSH, ensure key is added: `ssh-add -l`
+1. For self-hosted servers, verify the URL is correct and accessible from your network
+
+### Ref Not Found
+
+```text
+Error: Git ref not found: v2.0.0
+```
+
+**Solutions:**
+
+1. List available tags: `git ls-remote --tags <url>`
+1. Use existing branch/tag
+1. Check for typos in version
+
+### Cache Issues
+
+```bash
+# Force refresh to bypass cache
+prs pull --refresh
+```
+
+## Best Practices
+
+1. **Version your registry** - Use semantic versioning with Git tags
+1. **Pin production versions** - Don't use `main` in production
+1. **Document changes** - Maintain a CHANGELOG.md
+1. **Test before releasing** - Validate all .prs files before tagging
+1. **Use short TTL in dev** - Faster iteration with `ttl: 60000`
 # Optional
 
 # FAQ & Troubleshooting

@@ -24,7 +24,15 @@ targets.
 
 ## Reference
 
-- [Language](https://getpromptscript.dev/dev/reference/language/index.md): Complete PromptScript language specification
+- [Overview](https://getpromptscript.dev/dev/reference/language/index.md): Complete PromptScript language specification
+- [File Anatomy](https://getpromptscript.dev/dev/reference/language/file-anatomy/index.md): Complete PromptScript file structure
+- [Values and Block Bodies](https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/index.md): Canonical block body shapes and PS038
+- [Composition and Precedence](https://getpromptscript.dev/dev/reference/language/composition/index.md): Inheritance and import precedence
+- [Execution Order](https://getpromptscript.dev/dev/reference/language/execution-order/index.md): Declaration-order resolution
+- [Merge and Replacement](https://getpromptscript.dev/dev/reference/language/merge-and-replacement/index.md): Extend and override semantics
+- [Section Headers](https://getpromptscript.dev/dev/reference/language/section-headers/index.md): Generated section header overrides
+- [Versions and Diagnostics](https://getpromptscript.dev/dev/reference/language/versions-and-diagnostics/index.md): Syntax versions and diagnostics
+- [Block Shapes](https://getpromptscript.dev/dev/reference/block-shapes/index.md): Complete built-in block shape matrix
 - [Overview](https://getpromptscript.dev/dev/reference/cli/index.md): CLI commands and options
 - [Hook Management](https://getpromptscript.dev/dev/reference/cli/hooks/index.md): AI tool hook installation and removal
 - [Hook Runtime](https://getpromptscript.dev/dev/reference/cli/hook/index.md): Low-level hook runtime contract
@@ -45,6 +53,10 @@ targets.
 
 - [Inheritance](https://getpromptscript.dev/dev/guides/inheritance/index.md): PromptScript inheritance system
 - [Multi-File Organization](https://getpromptscript.dev/dev/guides/multi-file/index.md): Multi-file organization
+- [Building Skills](https://getpromptscript.dev/dev/guides/building-skills/index.md): Reusable skill authoring and resources
+- [Skill Composition](https://getpromptscript.dev/dev/guides/skill-composition/index.md): Skill inheritance and composition
+- [Skill Contracts](https://getpromptscript.dev/dev/guides/skill-contracts/index.md): Skill contracts and compatibility
+- [Skill Overlays](https://getpromptscript.dev/dev/guides/skill-overlays/index.md): Skill overlays and conflict handling
 - [Build Your Registry](https://getpromptscript.dev/dev/guides/registry/index.md): Building a PromptScript registry
 - [Policy Engine](https://getpromptscript.dev/dev/guides/policy-engine/index.md): Organization policy enforcement
 - [Security](https://getpromptscript.dev/dev/guides/security/index.md): Security controls and best practices
@@ -53,6 +65,7 @@ targets.
 
 ## Migration and Operations
 
+- [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md): Upgrade PromptScript 1.15 projects to 1.16
 - [Migration](https://getpromptscript.dev/dev/guides/migration/index.md): Migration guide
 - [AI Tool Hooks](https://getpromptscript.dev/dev/guides/hooks/index.md): Automatic source compilation hooks
 - [Importing Instructions](https://getpromptscript.dev/dev/guides/import/index.md): Import existing agent instructions
@@ -61,10 +74,18 @@ targets.
 ## Examples
 
 - [Minimal](https://getpromptscript.dev/dev/examples/minimal/index.md): Minimal project setup
+- [Composition and Order](https://getpromptscript.dev/dev/examples/composition-and-order/index.md): Composition precedence and declaration order
+- [Merge vs Replace](https://getpromptscript.dev/dev/examples/merge-vs-replace/index.md): Extend, field replacement, and override
+- [Fix Block Shapes](https://getpromptscript.dev/dev/examples/fix-block-shapes/index.md): PS038 block shape remediation
+- [Custom Section Headers](https://getpromptscript.dev/dev/examples/custom-section-headers/index.md): Generated section title overrides
+- [Portable Hooks](https://getpromptscript.dev/dev/examples/portable-hooks/index.md): Portable lifecycle hook policy
+- [Migrate Factory Hooks](https://getpromptscript.dev/dev/examples/migrate-factory-hooks/index.md): Legacy Factory hook migration
 - [Team Setup](https://getpromptscript.dev/dev/examples/team-setup/index.md): Team configuration
 - [Enterprise](https://getpromptscript.dev/dev/examples/enterprise/index.md): Enterprise example
 - [Skills & Local](https://getpromptscript.dev/dev/examples/skills-and-local/index.md): Skills and local overrides
 - [Agents](https://getpromptscript.dev/dev/examples/agents/index.md): Agent configuration
+- [Agent Platform](https://getpromptscript.dev/dev/examples/agent-platform/index.md): Complete agent platform configuration
+- [Git Registry](https://getpromptscript.dev/dev/examples/git-registry/index.md): Git registry and lockfile workflow
 
 ## Optional
 

@@ -3585,7 +3585,19 @@
          <lastmod>2026-08-04</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/examples/composition-and-order/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/examples/custom-section-headers/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/examples/enterprise/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/examples/fix-block-shapes/</loc>
          <lastmod>2026-08-04</lastmod>
     </url>
     <url>
@@ -3593,7 +3605,19 @@
          <lastmod>2026-08-04</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/examples/merge-vs-replace/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/examples/migrate-factory-hooks/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/examples/minimal/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/examples/portable-hooks/</loc>
          <lastmod>2026-08-04</lastmod>
     </url>
     <url>
@@ -3729,6 +3753,10 @@
          <lastmod>2026-08-04</lastmod>
     </url>
     <url>
+         <loc>https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
          <loc>https://getpromptscript.dev/dev/guides/user-config/</loc>
          <lastmod>2026-08-04</lastmod>
     </url>
@@ -3798,6 +3826,34 @@
     </url>
     <url>
          <loc>https://getpromptscript.dev/dev/reference/formatters/opencode/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/language/composition/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/language/execution-order/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/language/file-anatomy/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/language/merge-and-replacement/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/language/section-headers/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/language/values-and-block-bodies/</loc>
+         <lastmod>2026-08-04</lastmod>
+    </url>
+    <url>
+         <loc>https://getpromptscript.dev/dev/reference/language/versions-and-diagnostics/</loc>
          <lastmod>2026-08-04</lastmod>
     </url>
     <url>

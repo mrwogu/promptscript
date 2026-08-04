@@ -1,6 +1,6 @@
-# Tutorial: Building Enterprise AI Infrastructure
+# Enterprise Tutorial: Building Layered AI Infrastructure
 
-In this tutorial, you will simulate a PromptOps deployment for a software team. You won't just write a prompt - you will build a **hierarchical context system** that scales.
+This tutorial starts after your first successful local compile. You will simulate a PromptOps deployment for a software team and build a hierarchical context system that scales.
 
 ## Learning Objectives
 
@@ -15,7 +15,8 @@ By the end of this tutorial, you'll have:
 
 - Node.js 20+
 - PromptScript CLI installed (`npm install -g @promptscript/cli`)
-- A project to configure
+- A project that completed [Getting Started](https://getpromptscript.dev/dev/getting-started/index.md)
+- A successful `prs validate --strict` and `prs compile`
 
 ## Step 1: Create Organization Base
 
@@ -196,10 +197,13 @@ registry:
 
 targets:
   - github:
+      version: full
       output: .github/copilot-instructions.md
   - claude:
+      version: full
       output: CLAUDE.md
   - cursor:
+      version: full
       output: .cursor/rules/project.mdc
 ```
 
@@ -228,6 +232,10 @@ Add reusable capabilities to `.promptscript/project.prs`:
     event: "post-tool-use"
     matcher: "Edit|Write"
     command: ["pnpm", "test"]
+    targets: {
+      github: { enabled: false }
+      cursor: { enabled: false }
+    }
   }
 }
 

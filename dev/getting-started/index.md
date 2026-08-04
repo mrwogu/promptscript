@@ -2,6 +2,17 @@
 
 Start treating your AI instructions as managed infrastructure.
 
+## Choose Your Path
+
+| Starting point             | Next step                                                                                                 |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| New repository             | Continue with [Installation](#installation) and [Interactive Initialization](#interactive-initialization) |
+| Existing instruction files | Use [Quick Start: Migrating Existing Projects](#quick-start-migrating-existing-projects)                  |
+| PromptScript 1.15 project  | Follow [Upgrade 1.15 to 1.16](https://getpromptscript.dev/dev/guides/upgrade-1-15-to-1-16/index.md)       |
+| Need language semantics    | Open [Language Reference](https://getpromptscript.dev/dev/reference/language/index.md)                    |
+
+New projects should reach a validated compile before adding registries, enterprise policy, or target-specific customization.
+
 ## Installation
 
 Install the CLI toolchain to compile, validate, and manage your PromptScript files.
@@ -36,7 +47,7 @@ promptscript.yaml
 
 ```
 id: my-app
-syntax: "1.4.0"
+syntax: "1.6.0"
 
 targets:
   - github
@@ -53,7 +64,7 @@ validation:
 ```
 @meta {
   id: "my-app"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @inherit @company/react-app
@@ -102,7 +113,7 @@ Open `.promptscript/project.prs` and customize:
 ```
 @meta {
   id: "my-project"
-  syntax: "1.4.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -202,7 +213,7 @@ Transform your universal `.prs` definition into platform-specific optimization f
 prs compile
 ```
 
-By default, this generates:
+Generated paths depend on the targets selected during `prs init` or declared in `promptscript.yaml`. When GitHub, Claude, and Cursor are configured, their default primary outputs are:
 
 - `.github/copilot-instructions.md` (for GitHub Copilot)
 - `CLAUDE.md` (for Claude Code)
@@ -314,40 +325,34 @@ The migration skill guides the AI through a structured process:
 After migration, review the generated `.promptscript/project.prs`:
 
 ```bash
-# Validate syntax
-prs validate
-
-# Preview compiled output without writing files
+# Record a recoverable baseline before replacing existing instructions.
+git status --short
+prs validate --strict
 prs compile --dry-run
-
-# Compile and check diff against existing files
-prs compile && git diff CLAUDE.md
+prs diff --all --full
 ```
 
 ### 5. Compile and Replace
 
-Once satisfied, compile to replace your old files with generated versions:
+Make sure tracked files are committed and untracked or ignored instruction files are backed up. After every conflict path and planned output is approved, perform one controlled takeover:
 
 ```bash
-prs compile
+prs compile --force
+git diff -- .
+prs diff --all --full
 ```
+
+The Git diff must contain only approved source, configuration, and generated replacements. The final PromptScript diff must be empty.
 
 ### 6. Clean Up (Optional)
 
-After verifying the compiled output matches your expectations, you can remove the original source files since PromptScript is now your source of truth:
-
-```bash
-# Backup first if needed
-git add .
-git commit -m "chore: migrate to promptscript"
-
-# Then remove old source files (compiled versions remain)
-# The compiled CLAUDE.md, .cursorrules etc. are regenerated from .prs
-```
+Do not remove files configured as PromptScript target outputs. Archive only obsolete instruction sources that are not configured outputs and whose content is preserved in `.prs` files.
 
 Keep Original Files During Transition
 
 You don't have to delete original files immediately. Run both systems in parallel until you're confident the migration is complete.
+
+See the [Migration Guide](https://getpromptscript.dev/dev/guides/migration/index.md) for backup, takeover, tracking, and rollback details.
 
 ### Migration Example
 
@@ -377,7 +382,7 @@ You are a Python developer working on a FastAPI service.
 ```
 @meta {
   id: "api-service"
-  syntax: "1.0.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -439,7 +444,7 @@ The `promptscript.yaml` file controls compilation:
 
 ```yaml
 id: my-project
-syntax: "1.4.0"
+syntax: "1.6.0"
 
 # Input settings
 input:
@@ -508,6 +513,13 @@ targets:
 
 ## Manage Hooks
 
+PromptScript has two separate hook systems:
+
+| System              | Purpose                                                         |
+| ------------------- | --------------------------------------------------------------- |
+| `@hooks` in `.prs`  | Compile portable lifecycle policy into target-native hook files |
+| `prs hooks install` | Recompile `.prs` after AI edits and protect generated files     |
+
 `prs init` installs hooks for supported detected targets by default. Pass `--no-hooks` during initialization to skip them.
 
 Use the hook command to reinstall hooks, add hooks after initialization, or target one tool:
@@ -527,13 +539,13 @@ Supported tools: Claude Code, Factory AI, Cursor, Windsurf, Cline, Copilot, Gemi
 
 For tools that do not support hooks, use `prs compile --watch` as an alternative.
 
-See the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for a full walkthrough, manual configuration examples, and troubleshooting.
+See [Hooks and Workflows](https://getpromptscript.dev/dev/features/automation/index.md) for lifecycle policy and the [Hooks Guide](https://getpromptscript.dev/dev/guides/hooks/index.md) for source recompilation, output protection, and troubleshooting.
 
 ## What's Next?
 
-\[### Tutorial
+\[### Enterprise Tutorial
 
-Follow the complete tutorial for a deeper understanding of PromptScript.
+After your first compile, build an organization, team, and project hierarchy.
 
 →\](https://getpromptscript.dev/dev/tutorial/index.md) \[### Language Reference
 

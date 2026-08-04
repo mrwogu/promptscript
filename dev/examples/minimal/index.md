@@ -20,8 +20,8 @@ my-project/
 
 ```
 @meta {
-  id: "my-project"
-  syntax: "1.0.0"
+  id: "minimal-example"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -55,7 +55,7 @@ my-project/
 
 ```yaml
 id: minimal-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
@@ -93,38 +93,14 @@ prs validate
 
 ## Generated Output
 
-`.github/copilot-instructions.md`
+Current configuration emits GitHub output only:
+
+`.github/copilot-instructions.md`:
 
 ```markdown
-# AI Instructions
+# GitHub Copilot Instructions
 
-## Identity
-
-You are a helpful coding assistant for this project.
-Focus on clean, readable code.
-
-## Context
-
-This is a TypeScript project using modern best practices.
-
-## Standards
-
-- Code style: functional
-- Documentation: JSDoc for public APIs
-
-## Shortcuts
-
-- `/help` - Show what you can help with
-- `/review` - Review code for quality issues
-- `/test` - Write unit tests
-```
-
-`CLAUDE.md`
-
-```markdown
-# AI Instructions
-
-## Identity
+## project
 
 You are a helpful coding assistant for this project.
 Focus on clean, readable code.
@@ -133,42 +109,18 @@ Focus on clean, readable code.
 
 This is a TypeScript project using modern best practices.
 
-## Standards
+## code-standards
 
-- Code style: functional
-- Documentation: JSDoc for public APIs
+### code
 
-## Shortcuts
+- Use functional programming style
+- Document public APIs with JSDoc
 
-- `/help` - Show what you can help with
-- `/review` - Review code for quality issues
-- `/test` - Write unit tests
-```
+## shortcuts
 
-`.cursor/rules/project.mdc`
-
-```text
-# AI Instructions
-
-## Identity
-
-You are a helpful coding assistant for this project.
-Focus on clean, readable code.
-
-## Context
-
-This is a TypeScript project using modern best practices.
-
-## Standards
-
-- Code style: functional
-- Documentation: JSDoc for public APIs
-
-## Shortcuts
-
-- /help - Show what you can help with
-- /review - Review code for quality issues
-- /test - Write unit tests
+- /help: Show what you can help with
+- /review: Review code for quality issues
+- /test: Write unit tests
 ```
 
 ## Adding More Targets
@@ -178,7 +130,7 @@ To also generate for Claude and Cursor:
 ```yaml
 # promptscript.yaml
 id: minimal-example
-syntax: '1.4.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
