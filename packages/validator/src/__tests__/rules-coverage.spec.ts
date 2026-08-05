@@ -6,6 +6,7 @@ import type {
   PrimitiveValue,
   TypeExpression,
   Value,
+  ValueNode,
 } from '@promptscript/core';
 import { createBlockBody } from '@promptscript/core';
 import { allRules, getRuleById, getRuleByName } from '../rules/index.js';
@@ -1039,8 +1040,20 @@ describe('valid-params rule (PS009) coverage', () => {
 
   function createTypedFieldProgram(
     expression: TypeExpression,
-    defaultValue: PrimitiveValue
+    defaultValue: PrimitiveValue | readonly PrimitiveValue[]
   ): Program {
+    const defaultNode: ValueNode = Array.isArray(defaultValue)
+      ? {
+          type: 'ArrayValueNode',
+          loc,
+          elements: defaultValue.map((element) => ({
+            type: 'ArrayElementNode',
+            loc,
+            value: { type: 'ScalarValueNode', value: element, loc },
+          })),
+        }
+      : { type: 'ScalarValueNode', value: defaultValue as PrimitiveValue, loc };
+
     return createTestProgram({
       blocks: [
         {
@@ -1055,7 +1068,7 @@ describe('valid-params rule (PS009) coverage', () => {
                 name: 'field',
                 loc,
                 value: { type: 'TypeExpressionValueNode', expression, loc },
-                defaultValue: { type: 'ScalarValueNode', value: defaultValue, loc },
+                defaultValue: defaultNode,
               },
             ],
             loc
@@ -1102,6 +1115,107 @@ describe('valid-params rule (PS009) coverage', () => {
     expect(messages[0]!.message).toContain('at most 10');
   });
 
+  it('should report a non-string default for a string field', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'string', loc }, 7);
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('expected string, got number');
+  });
+
+  it('should report a non-numeric default for a number field', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'number', loc }, 'seven');
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('expected number, got string');
+  });
+
+  it('should pass a string default for a string field', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'string', loc }, 'seven');
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should pass a default listed in the declared enum', () => {
+    const ast = createTypedFieldProgram(
+      { type: 'TypeExpression', kind: 'enum', constraints: { options: ['dev', 'prod'] }, loc },
+      'prod'
+    );
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should report a non-numeric default for a range field', () => {
+    const ast = createTypedFieldProgram(
+      { type: 'TypeExpression', kind: 'range', constraints: { min: 1, max: 10 }, loc },
+      'five'
+    );
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('expected number, got string');
+  });
+
+  it('should accept any number for a range field without bounds', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'range', loc }, 4200);
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should suggest a plain range when the field declares no bounds', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'range', loc }, 'five');
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages[0]!.suggestion).toContain('match range');
+  });
+
+  it('should accept any string for an enum field without options', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'enum', loc }, 'anything');
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should report a scalar default for a list field', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'list', loc }, 'nope');
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('expected a list, got string');
+    expect(messages[0]!.suggestion).toContain('list');
+  });
+
+  it('should pass an array default for a list field', () => {
+    const ast = createTypedFieldProgram({ type: 'TypeExpression', kind: 'list', loc }, ['a', 'b']);
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should name the enum options in the suggestion', () => {
+    const ast = createTypedFieldProgram(
+      { type: 'TypeExpression', kind: 'enum', constraints: { options: ['dev'] }, loc },
+      'prod'
+    );
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages[0]!.suggestion).toContain('enum("dev")');
+  });
+
+  it('should name the range bounds in the suggestion', () => {
+    const ast = createTypedFieldProgram(
+      { type: 'TypeExpression', kind: 'range', constraints: { min: 1, max: 3 }, loc },
+      9
+    );
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages[0]!.suggestion).toContain('range(1, 3)');
+  });
+
   it('should report a block field default below the declared range', () => {
     const ast = createTypedFieldProgram(
       { type: 'TypeExpression', kind: 'range', constraints: { min: 5, max: 10 }, loc },
@@ -1144,6 +1258,50 @@ describe('valid-params rule (PS009) coverage', () => {
     const { ctx, messages } = createRuleContext(ast);
     validParams.validate(ctx);
     expect(messages[0]!.location).toEqual(defaultLoc);
+  });
+
+  it('should ignore block fields that declare no type', () => {
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'context',
+          loc,
+          content: { type: 'ObjectContent', properties: {}, loc },
+          canonicalBody: createBlockBody(
+            [
+              {
+                type: 'FieldEntry',
+                name: 'project',
+                loc,
+                value: { type: 'ScalarValueNode', value: 'demo', loc },
+                defaultValue: { type: 'ScalarValueNode', value: 42, loc },
+              },
+            ],
+            loc
+          ),
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should ignore blocks without a canonical body', () => {
+    const ast = createTestProgram({
+      blocks: [
+        {
+          type: 'Block',
+          name: 'identity',
+          loc,
+          content: { type: 'TextContent', value: 'You are a bot.', loc },
+        },
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    validParams.validate(ctx);
+    expect(messages).toHaveLength(0);
   });
 
   it('should ignore typed block fields without a default', () => {
