@@ -11,44 +11,18 @@ We provide security updates for the latest minor version of the 1.x release line
 
 ## Reporting a Vulnerability
 
-We take the security of PromptScript seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+Do not open a public issue for suspected vulnerabilities.
 
-### How to Report
+Use
+[GitHub Security Advisories](https://github.com/mrwogu/promptscript/security/advisories/new)
+to submit a private report. Include:
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+- Affected version or commit
+- Reproduction steps
+- Expected security impact
+- Suggested mitigation, if known
 
-Instead, please report them via email to:
-
-**github@wogu.pl**
-
-You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
-
-### What to Include
-
-Please include the following information in your report:
-
-- Type of issue (e.g., buffer overflow, command injection, path traversal, etc.)
-- Full paths of source file(s) related to the issue
-- Location of the affected source code (tag/branch/commit or direct URL)
-- Step-by-step instructions to reproduce the issue
-- Proof-of-concept or exploit code (if possible)
-- Impact of the issue, including how an attacker might exploit it
-
-### What to Expect
-
-1. **Acknowledgment**: We will acknowledge receipt of your vulnerability report within 48 hours.
-
-2. **Assessment**: We will assess the vulnerability and determine its severity within 7 days.
-
-3. **Resolution Timeline**:
-   - Critical vulnerabilities: Fix within 7 days
-   - High severity: Fix within 14 days
-   - Medium severity: Fix within 30 days
-   - Low severity: Fix in next scheduled release
-
-4. **Disclosure**: We will coordinate with you on the timing of public disclosure. We aim to disclose vulnerabilities within 90 days of initial report, or sooner if a fix is available.
-
-5. **Credit**: We will credit you in the security advisory (unless you prefer to remain anonymous).
+Do not include real credentials or unrelated private data.
 
 ## Security Best Practices
 
