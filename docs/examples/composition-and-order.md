@@ -11,21 +11,21 @@ Goal: predict final values when several layers modify the same block.
 
 ```promptscript
 # base.prs
-@meta { id: "base" syntax: "1.6.0" }
+@meta { id: "base" syntax: "1.5.0" }
 @standards {
   testing: ["Use Jest"]
   coverage: 80
 }
 
 # quality.prs
-@meta { id: "quality" syntax: "1.6.0" }
+@meta { id: "quality" syntax: "1.5.0" }
 @standards {
   coverage: 90
   review: ["Require approval"]
 }
 
 # project.prs
-@meta { id: "project" syntax: "1.6.0" }
+@meta { id: "project" syntax: "1.5.0" }
 @inherit ./base
 @use ./quality
 @standards {

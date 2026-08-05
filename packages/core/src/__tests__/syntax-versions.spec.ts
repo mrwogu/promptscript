@@ -60,8 +60,8 @@ describe('usesSequentialOperations', () => {
     loc,
   });
 
-  it('enables ordered execution for syntax 1.6.0 and explicit overrides', () => {
-    const legacyWithOverride = program('1.5.0');
+  it('enables ordered execution for syntax 1.5.0 and explicit overrides', () => {
+    const legacyWithOverride = program('1.4.0');
     legacyWithOverride.overrides = [
       {
         type: 'OverrideBlock',
@@ -79,13 +79,13 @@ describe('usesSequentialOperations', () => {
       },
     ];
 
-    expect(usesSequentialOperations(program('1.5.0'))).toBe(false);
-    expect(usesSequentialOperations(program('1.6.0'))).toBe(true);
+    expect(usesSequentialOperations(program('1.4.0'))).toBe(false);
+    expect(usesSequentialOperations(program('1.5.0'))).toBe(true);
     expect(usesSequentialOperations(legacyWithOverride)).toBe(true);
   });
 
   it('does not treat partial or invalid versions as sequential', () => {
-    expect(usesSequentialOperations(program('1.6'))).toBe(false);
+    expect(usesSequentialOperations(program('1.5'))).toBe(false);
     expect(usesSequentialOperations(program('invalid'))).toBe(false);
   });
 });
@@ -116,7 +116,7 @@ describe('registry consistency', () => {
 
 describe('getLatestSyntaxVersion', () => {
   it('should return the highest known version', () => {
-    expect(getLatestSyntaxVersion()).toBe('1.6.0');
+    expect(getLatestSyntaxVersion()).toBe('1.5.0');
   });
 });
 
@@ -168,18 +168,19 @@ describe('syntax feature capabilities', () => {
   it('should expose cumulative features by syntax version', () => {
     expect(getFeaturesForVersion('1.2.0')).toEqual([]);
     expect(getFeaturesForVersion('1.3.0')).toContain(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE);
+    expect(getFeaturesForVersion('1.4.0')).toEqual([SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE]);
     expect(getFeaturesForVersion('1.5.0')).toEqual([
       SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
       SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
+      SYNTAX_FEATURES.EXPLICIT_OVERRIDE,
     ]);
-    expect(getFeaturesForVersion('1.6.0')).toContain(SYNTAX_FEATURES.EXPLICIT_OVERRIDE);
     expect(getFeaturesForVersion('9.9.9')).toBeUndefined();
   });
 
   it('should return the minimum version for registered features', () => {
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE)).toBe('1.3.0');
     expect(getMinimumVersionForFeature(SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE)).toBe('1.5.0');
-    expect(getMinimumVersionForFeature(SYNTAX_FEATURES.EXPLICIT_OVERRIDE)).toBe('1.6.0');
+    expect(getMinimumVersionForFeature(SYNTAX_FEATURES.EXPLICIT_OVERRIDE)).toBe('1.5.0');
     expect(getMinimumVersionForFeature('unknown-feature' as SyntaxFeature)).toBeUndefined();
   });
 

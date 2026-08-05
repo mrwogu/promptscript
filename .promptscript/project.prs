@@ -3,7 +3,7 @@
 
 @meta {
   id: "promptscript"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   org: "PromptScript"
   tags: [typescript, monorepo, nx, parser, compiler]
 }

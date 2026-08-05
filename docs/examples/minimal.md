@@ -26,7 +26,7 @@ my-project/
 ```promptscript
 @meta {
   id: "minimal-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @identity {
@@ -66,7 +66,7 @@ my-project/
 
 ```yaml
 id: minimal-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs
@@ -145,7 +145,7 @@ To also generate for Claude and Cursor:
 ```yaml
 # promptscript.yaml
 id: minimal-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs

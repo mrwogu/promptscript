@@ -79,11 +79,11 @@ describe('section header override resolution', () => {
     await writeFile(
       projectPath,
       `@meta { id: "project" syntax: "1.5.0" }
-@use ./source
 @standards {
   @header "Local Rules"
   testing: ["Local content"]
-}`
+}
+@use ./source`
     );
     const resolver = new Resolver({
       registryPath: directory,

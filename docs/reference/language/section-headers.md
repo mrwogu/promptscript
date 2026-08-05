@@ -12,7 +12,7 @@ XML tags, or structured JSON, TOML, and YAML keys.
 ```promptscript
 @meta {
   id: "localized-project"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @standards {

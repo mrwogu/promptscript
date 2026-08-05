@@ -12,7 +12,7 @@ import { Compiler } from '../compiler.js';
  */
 const KITCHEN_SINK_SOURCE = `@meta {
   id: "compilation-matrix"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
   org: "MatrixOrg"
 }
 

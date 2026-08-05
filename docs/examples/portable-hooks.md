@@ -23,7 +23,7 @@ hook payload fields.
 ```promptscript
 @meta {
   id: "portable-hooks-example"
-  syntax: "1.6.0"
+  syntax: "1.5.0"
 }
 
 @hooks {
@@ -63,7 +63,7 @@ hook payload fields.
 ```yaml
 # promptscript.yaml
 id: portable-hooks-example
-syntax: '1.6.0'
+syntax: '1.5.0'
 
 input:
   entry: .promptscript/project.prs

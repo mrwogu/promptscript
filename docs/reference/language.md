@@ -60,7 +60,7 @@ A PromptScript file (`.prs`) consists of:
 </a>
 <!-- playground-link-end -->
 
-Syntax `1.6.0` resolves top-level declarations in source order. Put `@meta`
+Syntax `1.5.0` resolves top-level declarations in source order. Put `@meta`
 first, then imports, local blocks, and modifications in the order they should
 apply. See [Execution Order](language/execution-order.md).
 Contextual `@header` entries live inside supported owner blocks, not at the
@@ -160,8 +160,7 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `1.2.0` | Stable  | All 1.1.0 blocks + `@examples`                                                                                                             |
 | `1.3.0` | Stable  | All 1.2.0 features + regular block field replacement in `@extend`                                                                          |
 | `1.4.0` | Stable  | All 1.3.0 features + `@hooks`, `@mcpServers`, `@plugins`                                                                                   |
-| `1.5.0` | Stable  | All 1.4.0 features + generated section title overrides with contextual `@header`                                                           |
-| `1.6.0` | Current | All 1.5.0 features + atomic replacement with contextual `@override`                                                                        |
+| `1.5.0` | Current | All 1.4.0 features + `@header` section titles, `@override` replacement, declaration order                                                  |
 
 !!! note "Block Availability"
 `@workflows` emits workflow files such as `.claude/workflows/<name>.md`.
@@ -180,7 +179,7 @@ The `syntax` field in `@meta` declares which version of the PromptScript languag
 | `@plugins`    | `1.4.0`                |
 
 All other built-in blocks are available from `1.0.0`.
-Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` require syntax `1.5.0`. Atomic target replacement with `@override` requires syntax `1.6.0`.
+Regular block field replacement with `field!: value` requires syntax `1.3.0`. Generated section title overrides with `@header` and atomic target replacement with `@override` require syntax `1.5.0`.
 
 ### Validation (PS018, PS019)
 
@@ -267,7 +266,7 @@ When you use `@use`, all blocks from the imported file are merged into your file
 - **ArrayContent**: Unique concatenation (preserves order, removes duplicates)
 
 For incompatible block shapes, the existing target body wins. Under syntax
-`1.6.0`, later declarations can modify the merged result, so a local block,
+`1.5.0`, later declarations can modify the merged result, so a local block,
 `@extend`, or `@override` placed after `@use` can become the final value. See
 [Composition and Precedence](language/composition.md) for the normative matrix.
 
@@ -2439,7 +2438,7 @@ block.
 
 ## Atomic Replacement with @override
 
-Syntax `1.6.0` adds `@override` for replacing a complete existing target:
+Syntax `1.5.0` adds `@override` for replacing a complete existing target:
 
 ```text
 @standards {
@@ -2474,7 +2473,7 @@ Nested replacements also accept standalone object, string, number, boolean, and
 `null` values. The complete target path must already exist when the operation
 runs. Missing targets and traversal through scalar values are errors.
 
-Operations use declaration order in syntax `1.6.0`. This includes `@inherit`,
+Operations use declaration order in syntax `1.5.0`. This includes `@inherit`,
 top-level `@use`, local blocks, `@extend`, and `@override`. An `@override` used
 with an older declared syntax also uses declaration order so replacement remains
 deterministic, while PS018 requests a syntax upgrade.
@@ -2493,7 +2492,7 @@ without a target remains a legal custom block named `override`.
 This complete example exercises root and nested replacement shapes:
 
 ```promptscript
-@meta { id: "override-shapes" syntax: "1.6.0" }
+@meta { id: "override-shapes" syntax: "1.5.0" }
 
 @identity { """Old identity""" }
 @restrictions { - "Old restriction" }

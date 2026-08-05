@@ -154,29 +154,6 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
       'prompts',
       'examples',
     ],
-    features: [SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE, SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE],
-  },
-  '1.6.0': {
-    blocks: [
-      'identity',
-      'context',
-      'standards',
-      'restrictions',
-      'knowledge',
-      'shortcuts',
-      'commands',
-      'guards',
-      'params',
-      'skills',
-      'local',
-      'agents',
-      'workflows',
-      'hooks',
-      'mcpServers',
-      'plugins',
-      'prompts',
-      'examples',
-    ],
     features: [
       SYNTAX_FEATURES.REGULAR_BLOCK_REPLACE,
       SYNTAX_FEATURES.SECTION_HEADER_OVERRIDE,
@@ -186,7 +163,7 @@ export const SYNTAX_VERSIONS: Readonly<Record<string, SyntaxVersionDef>> = {
 };
 
 /** Latest known syntax version. */
-export const LATEST_SYNTAX_VERSION = '1.6.0';
+export const LATEST_SYNTAX_VERSION = '1.5.0';
 
 /**
  * Get the latest known syntax version.
@@ -247,7 +224,7 @@ export function getMinimumVersionForFeature(feature: SyntaxFeature): string | un
 }
 
 /**
- * Select declaration-ordered resolution for syntax 1.6.0+ or explicit override usage.
+ * Select declaration-ordered resolution for syntax 1.5.0+ or explicit override usage.
  */
 export function usesSequentialOperations(ast: Program): boolean {
   if ((ast.overrides?.length ?? 0) > 0) return true;

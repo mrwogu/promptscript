@@ -5,7 +5,7 @@ description: PromptScript 1.6 declaration order and deterministic resolution
 
 # Execution Order
 
-Syntax `1.6.0` preserves top-level operation order. This removes ambiguity when
+Syntax `1.5.0` preserves top-level operation order. This removes ambiguity when
 imports, local blocks, extensions, and replacements target the same value.
 
 ## Resolution Sequence
@@ -27,7 +27,7 @@ Resolver executes declarations in actual source order after metadata.
 ## Order Changes Results
 
 ```promptscript
-@meta { id: "ordered-operations" syntax: "1.6.0" }
+@meta { id: "ordered-operations" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest"]
@@ -65,7 +65,7 @@ runs later.
 - Imported source values use import merge policy before later operations.
 - Sealed skill properties remain protected regardless of operation order.
 - Older syntax using `@override` still resolves deterministically, but PS018
-  requests syntax `1.6.0`.
+  requests syntax `1.5.0`.
 
 ## Review Checklist
 

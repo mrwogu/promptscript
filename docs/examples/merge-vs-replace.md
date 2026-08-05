@@ -8,7 +8,7 @@ description: Runnable comparison of @extend, field replacement, and @override
 Goal: choose operation matching change intent.
 
 ```promptscript
-@meta { id: "merge-vs-replace" syntax: "1.6.0" }
+@meta { id: "merge-vs-replace" syntax: "1.5.0" }
 
 @standards {
   testing: ["Use Jest"]
