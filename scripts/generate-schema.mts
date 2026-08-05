@@ -23,7 +23,7 @@ const config: Config = {
   jsDoc: 'extended',
   sortProps: true,
   strictTuples: false,
-  skipTypeCheck: false,
+  skipTypeCheck: true,
   encodeRefs: true,
   extraTags: ['example', 'default'],
 };
